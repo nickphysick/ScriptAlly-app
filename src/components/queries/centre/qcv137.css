@@ -16,7 +16,8 @@
   /* 0-4-0, to beat `.qc13 .qcv-page.qcw` (qcvWorkspace.css) */
   .qcv-group.qc13 > .qcv-page.qcw {
     grid-row: 3; justify-self: start; box-sizing: border-box; max-width: none;
-    --qc137-w: min(1600px, calc(var(--hsheet-w) - 48px));
+    /* v149.2 A — the list is the Query Centre's capped column (qcv149.css `--qc149-list`), not S − 48 up to 1600 */
+    --qc137-w: var(--qc149-list, min(1600px, calc(var(--hsheet-w) - 48px)));
     width: var(--qc137-w);
     margin: 40px 0 90px calc(50% - var(--qc137-w) / 2);
   }
@@ -64,7 +65,7 @@
   .qc13 .qcw .qcw-list .lt-labels.is-stuck { box-shadow: none; }
 
   .qc13 .qcw .qcw-pill--sum { display: none; background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.55); }
-  .qc13 .qcw .qcw-pill--sum:focus-visible { outline: 2px solid #e0a188; outline-offset: 2px; }
+  .qc13 .qcw .qcw-pill--sum:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
   /* pinned: tighter, and the header's top corners are 16 with the page's colour behind them */
   .qc13 .qcw[data-pinned="true"] .qcw-bar { background: var(--ink-tab, var(--ws-page)); border-radius: 0; }

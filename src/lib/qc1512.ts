@@ -1,0 +1,198 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v151.2 (design-refs/query-centre-v151-2/) — the pure parts: the one colour scheme (status colours), the
+ * group headers' colours, the Next-action groups, the Next column's big number, and the row's one action (the list's
+ * button and Birds-eye's hover button are this one decision).
+ *
+ * ⚠️ COLOUR MEANS STATUS. A status's colour is `statusKind`; nothing else on the page picks a colour for a status.
+ *    Requested and sent share a colour (the StatusDot's glyph tells them apart).
+ * ⚠️ NAVY MEANS "YOURS TO DO" (the Your move tag, the action button, the headers of groups that are yours).
+ */
+import { QueryStatus } from "../types";
+import { STAGE_COLOURS, type Stage } from "./stageColours";
+import { whereItStands, type QcRow, type WhereKey } from "./qcSummary";
+import { QUIET_BAND_HEAD, stateOf, type QueryState } from "./queryState";
+import { nextDoor } from "./queryActions/entry";
+import { nextAction } from "./qcCalView";
+import { daysFrom, isClosedRow } from "./qc151";
+import type { DrawerMode } from "./queryActions/drawerStore";
+
+const DAY = 86_400_000;
+const sod = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+
+/* ── the colour scheme ─────────────────────────────────────────────────────────────────────────────────────────── */
+
+export type StatusKind = "sand" | "pink" | "navy" | "sage" | "grey";
+/** the status's colour family. R&R and Resubmitted are the full's family (a request for, and a send of, a whole
+ *  manuscript); Signed is the offer's. Neither is in the brief's table. */
+export function statusKind(s: QueryStatus | string): StatusKind {
+  switch (s) {
+    case QueryStatus.PARTIAL_REQUESTED: case QueryStatus.PARTIAL_SENT: return "pink";
+    case QueryStatus.FULL_REQUESTED: case QueryStatus.FULL_SENT: case QueryStatus.REVISE_RESUBMIT: case QueryStatus.RESUBMITTED: return "navy";
+    case QueryStatus.OFFER: case QueryStatus.SIGNED: return "sage";
+    case QueryStatus.REJECTED: case QueryStatus.NO_RESPONSE: case QueryStatus.WITHDRAWN: return "grey";
+    default: return "sand";
+  }
+}
+/* v152.1 §1 — Queried is the quietest colour: most queries sit there, so it must sit back (was #e6d9c6) */
+/* Stage colours v1 — the five kinds are the five stages (sand Queried, pink partial, navy full, sage offer, grey closed);
+   their fills are the stage table's, so no stage hex lives here. Band for a fill, Tint for the paler wash. */
+const KIND_STAGE: Record<StatusKind, Stage> = { sand: "queried", pink: "partial", navy: "full", sage: "offer", grey: "closed" };
+export const STATUS_FILL: Record<StatusKind, string> = {
+  sand: STAGE_COLOURS[KIND_STAGE.sand].band, pink: STAGE_COLOURS[KIND_STAGE.pink].band, navy: STAGE_COLOURS[KIND_STAGE.navy].band,
+  sage: STAGE_COLOURS[KIND_STAGE.sage].band, grey: STAGE_COLOURS[KIND_STAGE.grey].band,
+};
+/** Birds-eye's watch-and-wait rows: paler versions (the offer's family has none in the brief, so it keeps its own) */
+export const STATUS_PALE: Record<StatusKind, string> = {
+  sand: STAGE_COLOURS.queried.tint, pink: STAGE_COLOURS.partial.tint, navy: STAGE_COLOURS.full.tint, sage: STAGE_COLOURS.offer.tint, grey: STAGE_COLOURS.closed.tint,
+};
+export const CLOSED_TEXT = "#8a8076";
+
+/* ── group headers ─────────────────────────────────────────────────────────────────────────────────────────────── */
+
+export type HeadTone = "navy" | "blue" | "stone" | "faded" | "quiet" | `st-${StatusKind}`;
+/* v152 §1.3 — Gone quiet is stone fading to white, across the title cell only (the column labels sit on white) */
+export const HEAD_FILL: Record<"navy" | "blue" | "stone" | "faded" | "quiet", string> = { navy: "#2a3a52", blue: "#c5d0dd", stone: "#e3dbcf", faded: "#f1efec", quiet: QUIET_BAND_HEAD };
+const WHO_TONE: Record<WhereKey, HeadTone> = { you: "navy", quiet: "blue", agent: "stone", closed: "faded" };
+/* v152 §1.1 — the six states' header colours: blues are yours, stone is theirs, fading stone is going cold, grey is done */
+export const STATE_TONE: Record<QueryState, HeadTone> = { offer: "navy", materials: "navy", nudge: "blue", agent: "stone", quiet: "quiet", closed: "faded" };
+
+/* the Next-action groups (v151.2 §3): their order, labels and header colours */
+export type Act1512 = "offer" | "full" | "partial" | "revision" | "nudge" | "soon" | "wait" | "close" | "none";
+export const ACTION_1512: readonly { key: Act1512; label: string; tone: HeadTone }[] = [
+  { key: "offer", label: "Answer the offer", tone: "navy" },
+  { key: "full", label: "Send your full", tone: "navy" },
+  { key: "partial", label: "Send your partial", tone: "navy" },
+  /* the app has a revision owed (R&R); the brief's mock has none. It is yours to do, so it is navy, after the partials */
+  { key: "revision", label: "Send your revision", tone: "navy" },
+  { key: "nudge", label: "Nudge", tone: "blue" },
+  { key: "soon", label: "Reply due soon", tone: "stone" },
+  { key: "wait", label: "Waiting to hear", tone: "stone" },
+  /* v152 §1.5 — Gone quiet queries: after Waiting to hear, before Nothing to do */
+  { key: "close", label: "Close it", tone: "quiet" },
+  { key: "none", label: "Nothing to do", tone: "faded" },
+];
+/**
+ * A row's Next-action group. The writer's turn by status; with the agent by the nudge window (`nextAction`): past the
+ * reply date — inside the nudge window or gone quiet alike — is Nudge; the last week before the reply date is "Reply
+ * due soon" (the row lines' own "Reply due" rule, 0–6 days); anything later is "Waiting to hear"; closed is "Nothing
+ * to do".
+ */
+export function actionGroup(r: QcRow, nowMs: number): Act1512 {
+  if (isClosedRow(r) || r.court === "closed" || r.status === QueryStatus.SIGNED) return "none";
+  const a = nextAction(r, nowMs);
+  if (a === "offer" || a === "full" || a === "partial" || a === "revision") return a;
+  /* v152 — a stamped row reads its state: Nudge due → Nudge, Gone quiet → Close it, with the agent → by its reply date */
+  const st = stateOf(r);
+  if (st === "nudge") return "nudge";
+  if (st === "quiet") return "close";
+  if (!st && (a === "nudge" || a === "close")) return "nudge";
+  const reply = st ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
+  const left = reply != null ? daysFrom(reply, nowMs) : null;
+  return left != null && left >= 0 && left <= 6 ? "soon" : "wait";
+}
+export interface Sect<T> { key: string; label: string; rows: T[] }
+/** the Next-action sections, in the brief's order, empty ones dropped; rows keep their sort */
+export function actionSections<T extends QcRow>(rows: readonly T[], nowMs: number): Sect<T>[] {
+  return ACTION_1512.map((g) => ({ key: `na:${g.key}`, label: g.label, rows: rows.filter((r) => actionGroup(r, nowMs) === g.key) }))
+    .filter((s) => s.rows.length > 0);
+}
+
+/** A section header's colour, by the grouping: who (by key), next action (by group), status (its status colour), the
+ *  package grouping and anything ungrouped (stone). */
+export function headTone(group: string, key: string): HeadTone {
+  if (group === "attention" && key in STATE_TONE) return STATE_TONE[key as QueryState];
+  if (group === "attention" && key in WHO_TONE) return WHO_TONE[key as WhereKey];
+  if (key.startsWith("na:")) return ACTION_1512.find((g) => `na:${g.key}` === key)?.tone ?? "stone";
+  if (group === "status") return `st-${statusKind(key)}`;
+  return "stone";
+}
+/** a status group's header is its status colour — except Queried's, which is a step paler than its pill cap (v152.1 §1) */
+export const QUERIED_HEAD = "#f4eee5";
+export const headFill = (t: HeadTone): string => (t === "st-sand" ? QUERIED_HEAD : t.startsWith("st-") ? STATUS_FILL[t.slice(3) as StatusKind] : HEAD_FILL[t as keyof typeof HEAD_FILL]);
+
+/* ── the row's tag ─────────────────────────────────────────────────────────────────────────────────────────────── */
+
+export type RowTag = "you" | "nudge" | "quiet" | null;
+/* v152 §1.5 — "Your move" on Offers and Materials requested, "Nudge due" on Nudge due, "Gone quiet" on Gone quiet */
+export const ROW_TAG_WORDS: Record<Exclude<RowTag, null>, string> = { you: "Your move", nudge: "Nudge due", quiet: "Gone quiet" };
+export const rowTag = (r: QcRow, nowMs: number): RowTag => {
+  const st = stateOf(r);
+  if (st) return st === "offer" || st === "materials" ? "you" : st === "nudge" ? "nudge" : st === "quiet" ? "quiet" : null;
+  const w = whereItStands(r, nowMs); return w === "you" || w === "quiet" ? w : null;
+};
+
+/* ── the Next column: a big number ─────────────────────────────────────────────────────────────────────────────── */
+
+export type NumTone = "late" | "ink" | "faint";
+export type NextNum =
+  | { kind: "num"; n: number; label: [string, string]; tone: NumTone }
+  | { kind: "text"; text: string; tone: NumTone }
+  | { kind: "dash" };
+const unit = (n: number): string => (n === 1 ? "day" : "days");
+
+/**
+ * The Next column (v151.2 §4), on v151.1's date logic: your own date gone → "8 days late"; still to come → "7 days
+ * left" (ink); with the agent, the reply date gone → "37 days overdue" (late); still to come → "36 days to reply"
+ * (faint); gone quiet with no reply date → "120 days no reply" (late; the brief names no label for it); no date at all
+ * → the words alone; closed → "—".
+ */
+export function nextNum(r: QcRow, nowMs: number): NextNum {
+  if (isClosedRow(r) || r.court === "closed") return { kind: "dash" };
+  const st = stateOf(r);
+  /* v152 §1.5 — Gone quiet reads "N days quiet", counted from the reply date, in the late colour */
+  if (st === "quiet") {
+    const n = (r as { quietDays?: number | null }).quietDays;
+    if (n === 0) return { kind: "text", text: "Quiet from today", tone: "late" };
+    if (n != null) return { kind: "num", n, label: [unit(n), "quiet"], tone: "late" };
+  }
+  /* after a nudge the reply is expected at the nudge date plus the quiet window (§1.2) */
+  const due = st && r.court === "agent" ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
+  if (r.court === "agent") {
+    if (due == null) {
+      const inStage = r.stageStartMs != null ? Math.max(0, Math.round((sod(nowMs) - sod(r.stageStartMs)) / DAY)) : null;
+      return whereItStands(r, nowMs) === "quiet" && inStage != null && inStage > 0
+        ? { kind: "num", n: inStage, label: [unit(inStage), "no reply"], tone: "late" }
+        : { kind: "text", text: "No reply date", tone: "faint" };
+    }
+    const d = daysFrom(due, nowMs);
+    /* v152.2 §1.7 — never "0 days": a reply due today says so */
+    return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "overdue"], tone: "late" } : d === 0 ? { kind: "text", text: "Reply due today", tone: "faint" } : { kind: "num", n: d, label: [unit(d), "to reply"], tone: "faint" };
+  }
+  if (due == null) return { kind: "text", text: "No date yet", tone: "faint" };
+  const d = daysFrom(due, nowMs);
+  return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "late"], tone: "late" } : d === 0 ? { kind: "text", text: "Due today", tone: "late" } : { kind: "num", n: d, label: [unit(d), "left"], tone: "ink" };
+}
+
+/* ── the row's one action: the list's button and Birds-eye's hover button ─────────────────────────────────────── */
+
+export type ActTone = "navy" | "nudge" | "plain";
+export interface RowAct { tone: ActTone; label: string; mode: DrawerMode }
+const SEND_WORDS: Partial<Record<string, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "Send your partial", [QueryStatus.FULL_REQUESTED]: "Send your full", [QueryStatus.REVISE_RESUBMIT]: "Send your revision",
+};
+/**
+ * One decision, said in both views. Yours to send or answer → navy, in the Next-action groups' words. Past the reply
+ * date (inside the nudge window, or gone quiet) → "Nudge", outlined, opening the nudge journey. Anything else live →
+ * "Record a response" (Birds-eye draws it; the list draws no button for it). Closed or signed → none.
+ */
+export function rowAct(r: QcRow, nowMs: number): RowAct | null {
+  if (isClosedRow(r) || r.court === "closed") return null;
+  const door = nextDoor(r, nowMs);
+  if (!door) return null;
+  const st = stateOf(r);
+  /* v152 §1.5 — Gone quiet is "Close it", outlined, opening the close form; Nudge due is "Nudge"; with the agent (in
+     the reply time or the quiet window after a nudge) there is nothing to nudge */
+  /* v152.2 §1.6 / §3.2 — the footer's rule: never nudged and under 8 weeks quiet → Nudge; nudged, or 8+ weeks → Close it */
+  if (st === "quiet") return (r as { closeLeads?: boolean }).closeLeads === false
+    ? { tone: "nudge", label: "Nudge", mode: "nudge" } : { tone: "nudge", label: "Close it", mode: "close" };
+  if (st === "nudge") return { tone: "nudge", label: "Nudge", mode: "nudge" };
+  if (st === "agent" && door.mode === "nudge") return { tone: "plain", label: "Record a response", mode: "resp" };
+  const w = st ? null : whereItStands(r, nowMs);
+  if (w === "quiet" || door.mode === "nudge") return { tone: "nudge", label: "Nudge", mode: "nudge" };
+  if (door.mode === "offer") return { tone: "navy", label: "Answer the offer", mode: "offer" };
+  if (door.mode === "sent") return { tone: "navy", label: SEND_WORDS[r.status] ?? door.label, mode: "sent" };
+  return { tone: "plain", label: "Record a response", mode: "resp" };
+}

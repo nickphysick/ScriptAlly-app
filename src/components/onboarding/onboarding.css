@@ -19,7 +19,7 @@
   --sf-ink34: rgba(28, 19, 15, .34);
   --sf-ink14: rgba(28, 19, 15, .14);
   --sf-note: #f4efe9;
-  --sf-rust: #a2452a;
+  --sf-rust: var(--sp-rust);
   --sf-card-shadow: 0 0 0 1px rgba(28, 19, 15, .06), 0 6px 14px -10px rgba(91, 42, 31, .35);
   background: var(--ink-shell);
   color: var(--ink-on-light);
@@ -37,8 +37,6 @@
    this element — not the bar — is what the tab stands in. */
 .sf .sf-tabs { position: relative; flex: 1 1 auto; min-width: 0; align-self: stretch; }
 .sf .sf-tabsin { position: absolute; inset: 0; }
-.sf .sf-ftfl-l { display: none; position: absolute; left: -12px; bottom: 0; width: 13px; height: 12px; fill: var(--ink-tab); }
-.sf--account .sf-ftfl-l { display: block; }
 .sf .sf-exit {
   flex: none; align-self: center; margin-left: 16px;
   background: none; border: 0; padding: 0 0 3px; cursor: pointer;
@@ -139,7 +137,6 @@
   .sf .sf-tabs::-webkit-scrollbar { display: none; }
   .sf .sf-exit { align-self: center; margin: 0 6px 0 12px; }
   .sf .sf-tabsin { position: absolute; inset: 0; }
-.sf .sf-ftfl-l { display: none; }
   .sf .ws-winwrap { display: block; padding: 0 8px 8px; }
   .sf .sf-sheet { display: block; overflow: visible; border-radius: 0 12px 12px 12px; background: var(--ink-sheet); }
   .sf .sf-scroll { overflow: visible; padding: 22px 14px 28px; }
@@ -183,7 +180,7 @@
   position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center;
   background: rgba(242, 238, 232, .72);
 }
-.sf .sf-saving span { font-family: var(--sp-mono); font-size: 11px; letter-spacing: .08em; color: var(--sf-ink58); }
+.sf .sf-saving span { font-family: var(--sp-mono); font-size: 11px; letter-spacing: .08em; color: var(--sp-quiet); }
 
 /* ═══ The parts every screen before the app is made of (onboarding v5, part 1) ═══════════════
    One white card, dashed-rule fields, navy pill buttons, typewriter links. Declared once and worn
@@ -200,7 +197,7 @@
   font-family: var(--sp-type) !important; font-weight: 400; font-size: 27px; line-height: 1.1;
   letter-spacing: 0; color: var(--ink-on-light); margin: 0;
 }
-.sf .sf-lede { font-family: var(--sp-serif); font-size: 17px; line-height: 1.5; color: var(--sf-ink72); margin: 10px 0 0; }
+.sf .sf-lede { font-family: var(--sp-serif); font-size: 17px; line-height: 1.5; color: var(--sp-muted); margin: 10px 0 0; }
 .sf .sf-lede strong { font-weight: 600; color: var(--ink-on-light); }
 
 /* Fields: a mono label over a typewriter value on a dashed rule. */
@@ -208,7 +205,7 @@
 .sf .sf-labrow { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .sf .sf-lab {
   display: block; font-family: var(--sp-mono); font-size: 10px; line-height: 1.4; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--sf-ink58);
+  text-transform: uppercase; color: var(--sp-quiet);
 }
 .sf .sf-labq { text-transform: none; letter-spacing: .04em; }
 .sf .sf-inwrap { position: relative; display: flex; align-items: center; }
@@ -232,7 +229,7 @@
 .sf .sf-err { font-family: var(--sp-serif); font-size: 14px; line-height: 1.4; color: var(--sf-rust); margin: 7px 0 0; }
 .sf .sf-eye {
   position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: grid; place-items: center;
-  width: 32px; height: 32px; padding: 0; background: none; border: 0; cursor: pointer; color: var(--sf-ink58);
+  width: 32px; height: 32px; padding: 0; background: none; border: 0; cursor: pointer; color: var(--sp-quiet);
 }
 .sf .sf-eye svg { width: 18px; height: 18px; }
 .sf .sf-eye:hover { color: var(--ink-on-light); }
@@ -264,7 +261,7 @@
 .sf .sf-google:hover { background: rgba(28, 19, 15, .04); }
 .sf .sf-google:disabled { opacity: .6; cursor: default; }
 .sf .sf-btn:focus-visible, .sf .sf-google:focus-visible, .sf .sf-link:focus-visible, .sf .sf-eye:focus-visible {
-  outline: 2px solid var(--sp-anthracite); outline-offset: 3px;
+  outline: 2px solid var(--sp-anthracite); outline-offset: 2px;
 }
 .sf .sf-spin {
   width: 13px; height: 13px; border-radius: 50%; border: 2px solid rgba(var(--ink-cream-rgb), .35);
@@ -337,11 +334,11 @@
 .sf .sf-authcard .sf-google { margin: 22px 0 0; }
 .sf .sf-or {
   display: flex; align-items: center; gap: 14px; margin: 24px 0 0;
-  font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--sf-ink58);
+  font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--sp-quiet);
 }
 .sf .sf-or::before, .sf .sf-or::after { content: ""; flex: 1; height: 1px; background: var(--sf-ink14); }
 .sf .sf-authcard .sf-btn--full { margin: 26px 0 0; }
-.sf .sf-under { text-align: center; margin: 18px 0 0; font-family: var(--sp-serif); font-size: 15px; line-height: 1.5; color: var(--sf-ink72); }
+.sf .sf-under { text-align: center; margin: 18px 0 0; font-family: var(--sp-serif); font-size: 15px; line-height: 1.5; color: var(--sp-muted); }
 
 @media (max-width: 899.98px) {
   .sf .sf-pair { grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 0; }
@@ -365,10 +362,10 @@
   font-size: clamp(30px, 3.1vw, 44px); line-height: 1.08; letter-spacing: -.005em;
   color: var(--ink-on-light); margin: 0; max-width: 26ch; text-wrap: balance;
 }
-.sf .sf-sub { font-family: var(--sp-serif); font-size: 19px; line-height: 1.5; color: var(--sf-ink72); margin: 10px 0 0; max-width: 34em; }
+.sf .sf-sub { font-family: var(--sp-serif); font-size: 19px; line-height: 1.5; color: var(--sp-muted); margin: 10px 0 0; max-width: 34em; }
 .sf .sf-qlab {
   font-family: var(--sp-mono); font-size: 10px; line-height: 1.4; letter-spacing: .2em; text-transform: uppercase;
-  color: var(--sf-ink58); margin: 0 0 12px;
+  color: var(--sp-quiet); margin: 0 0 12px;
 }
 .sf .sf-opts { display: grid; gap: 10px; }
 .sf .sf-opt {
@@ -379,7 +376,7 @@
 }
 .sf .sf-opt:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .4); }
 .sf .sf-opt.is-on { box-shadow: inset 0 0 0 2px var(--sp-anthracite); }
-.sf .sf-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .sf-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .sf .sf-optdot {
   flex: none; width: 18px; height: 18px; margin-top: 3px; border-radius: 50%; box-sizing: border-box;
   display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .45); color: var(--ink-cream);
@@ -387,7 +384,7 @@
 .sf .sf-opt.is-on .sf-optdot { box-shadow: none; background: var(--sp-anthracite); }
 .sf .sf-opttx { min-width: 0; display: block; }
 .sf .sf-optt { display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 17.5px; line-height: 1.3; color: var(--ink-on-light); }
-.sf .sf-optd { display: block; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.4; color: rgba(28, 19, 15, .68); margin-top: 1px; }
+.sf .sf-optd { display: block; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.4; color: var(--sp-muted); margin-top: 1px; }
 .sf .sf-footr { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
 .sf .sf-err--card { margin: 18px 0 0; }
 
@@ -443,23 +440,22 @@
   font-family: var(--sp-type) !important; font-weight: 400; font-size: 22px; line-height: 1.2;
   color: var(--ink-on-light); margin: 6px 0 0;
 }
-.sf .sf-tilep { font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.5; color: rgba(28, 19, 15, .76); margin: 8px 0 0; }
+.sf .sf-tilep { font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.5; color: var(--sp-muted); margin: 8px 0 0; }
 .sf .sf-tileacts { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 16px 0 0; }
 .sf .sf-fact {
   font-family: var(--sp-mono); font-size: 9px; line-height: 1.5; letter-spacing: .18em; text-transform: uppercase;
-  color: rgba(28, 19, 15, .5); margin: 14px 0 0;
+  color: var(--sp-quiet); margin: 14px 0 0;
 }
 .sf .sf-drop {
   margin-top: auto; border: 1.5px dashed var(--sf-ink34); border-radius: 11px; padding: 18px 14px 16px;
   text-align: center; cursor: pointer; transition: border-color .14s ease, background .14s ease;
 }
 .sf .sf-drop:hover, .sf .sf-drop.is-over { border-color: var(--sp-anthracite); background: rgba(42, 58, 82, .04); }
-.sf .sf-drop:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .sf-drop:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .sf .sf-droplead { font-family: var(--sp-serif); font-size: 16px; line-height: 1.4; color: rgba(28, 19, 15, .82); margin: 0; }
 .sf .sf-dropuline { text-decoration: underline; text-underline-offset: 3px; font-family: inherit; }
-.sf .sf-droptypes { font-family: var(--sp-mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: rgba(28, 19, 15, .5); margin: 8px 0 0; }
+.sf .sf-droptypes { font-family: var(--sp-mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--sp-quiet); margin: 8px 0 0; }
 .sf .sf-under-tiles { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 26px 0 0; }
-.sf .sf-escape { font-family: var(--sp-serif); font-size: 15px; line-height: 1.5; color: var(--sf-ink72); margin: 22px 0 0; }
 @media (max-width: 1079.98px) { .sf .sf-tiles { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── The confirm: the file row ── */
@@ -474,7 +470,7 @@
 }
 .sf .sf-filetx { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .sf .sf-filename { font-family: var(--sp-type); font-weight: 600; font-size: 17px; line-height: 1.3; color: var(--ink-on-light); overflow-wrap: anywhere; }
-.sf .sf-filesize { font-family: var(--sp-mono); font-size: 11px; color: var(--sf-ink58); }
+.sf .sf-filesize { font-family: var(--sp-mono); font-size: 11px; color: var(--sp-quiet); }
 .sf .sf-lede--confirm { margin-top: 20px; max-width: 34em; }
 
 /* ── The dead ends: one card, 480 at most, under the tab; no open title ── */
@@ -482,7 +478,7 @@
 .sf .sf-chip {
   display: inline-block; margin: 0 0 14px; padding: 5px 10px 4px; border-radius: 10px;
   font-family: var(--sp-mono); font-size: 9.5px; line-height: 1.4; letter-spacing: .14em; text-transform: uppercase;
-  background: var(--sf-note); color: rgba(28, 19, 15, .66);
+  background: var(--sf-note); color: var(--sp-muted);
 }
 /* Blush for the two that report a failure. Not a verdict on the writer: a fact about the file. */
 .sf .sf-chip--fail { background: #f3ddd2; color: #5b2a1f; }
@@ -491,9 +487,152 @@
   color: var(--ink-on-light); margin: 0;
 }
 .sf .sf-deadtx { margin: 10px 0 0; }
-.sf .sf-deadtx p { font-family: var(--sp-serif); font-size: 16.5px; line-height: 1.5; color: var(--sf-ink72); margin: 0 0 10px; }
+.sf .sf-deadtx p { font-family: var(--sp-serif); font-size: 16.5px; line-height: 1.5; color: var(--sp-muted); margin: 0 0 10px; }
 .sf .sf-deadtx p:last-child { margin-bottom: 0; }
 .sf .sf-deadtx strong { font-weight: 600; color: var(--ink-on-light); }
-.sf .sf-deadtx .sf-deadquiet { font-size: 15px; color: var(--sf-ink58); }
+.sf .sf-deadtx .sf-deadquiet { font-size: 15px; color: var(--sp-quiet); }
 .sf .sf-deaderrs { margin-top: 12px; }
 .sf .sf-deaderrs p { font-size: 14.5px; margin: 0 0 6px; color: rgba(28, 19, 15, .82); }
+
+/* ═══ Public pages on phones v1 (29 Oct; ref design-refs/public-phone-polish-v1/) ═══════════════
+   The ACCOUNT frame only (sign in, sign up, reset) below 768px — `.sf--account`, never `.sf`, because
+   the set-up screens share `.sf-lab` and they are the signed-in app. Same specificity as the rules
+   overridden (`.sf .x`), later in the file, so no `!important`.
+   ⚠️ `.sf .ws-ftg` IS THE PHONE TAB'S OWN RULE ABOVE (the shell's tab sheet is desktop only). */
+@media (max-width: 767.98px) {
+  .sf--account .sf-eyebrow {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 14px; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+  }
+  .sf--account .sf-lab {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 14.5px; font-weight: 600;
+    line-height: 1.35; letter-spacing: 0; text-transform: none; color: var(--ink-on-light);
+  }
+  .sf--account .ws-ftg {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 12.5px;
+    letter-spacing: 0; text-transform: none;
+  }
+  /* Two the brief did not list, found by the census: "or with email" (9.5px capitals) and the BETA
+     chip (8px). The chip's word is written in capitals, so it keeps them and only grows to 12px. */
+  .sf--account .sf-or {
+    font-family: "Source Sans 3", "Helvetica Neue", Arial, sans-serif; font-size: 13px;
+    letter-spacing: 0; text-transform: none;
+  }
+  .sf--account .ws-beta { font-size: 12px; letter-spacing: .06em; padding: 1px 6px; }
+}
+/* B1: below 400px the tab's small "Your account" label goes, so the active tab's full name
+   ("Create account" or "Sign in") fits beside "Back to site". */
+@media (max-width: 399.98px) {
+  .sf--account .ws-ftg { display: none; }
+}
+
+/* C: 44px hit areas in the account frame (public pages on phones v1). An empty `::after` on each small
+   control, so nothing visible moves. "Forgot?" reaches UP from its baseline and the eye's area sits
+   low, so the two (stacked at the field's right edge) never overlap. The recessed sibling tab grows
+   up to the tab row's full 44px. */
+@media (max-width: 767.98px) {
+  .sf--account .sf-exit, .sf--account .sf-link, .sf--account .ws-ftsib { position: relative; }
+  .sf--account .sf-exit::after, .sf--account .sf-link::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+  }
+  .sf--account .sf-link--quiet::after { top: auto; bottom: 0; transform: translateX(-50%); }
+  .sf--account .sf-eye::after { content: ""; position: absolute; inset: -4px -6px -8px; }
+  .sf--account .ws-ftsib::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 44px; }
+}
+/* ⚠️ AFTER THE BLOCK ABOVE, BECAUSE IT OVERRIDES IT AT EQUAL SPECIFICITY. Below 400px the recessed
+   sibling tab shows only a sliver (29px at 360) before the row clips it, so its tap area reaches 16px
+   left, over the active tab's end, which is not a control; `z-index` puts that area above the tab. */
+@media (max-width: 399.98px) {
+  .sf--account .ws-ftsib { z-index: 1; }
+  .sf--account .ws-ftsib::after { left: -16px; }
+}
+
+/* ═══ Set-up on phones v1 (30 Oct; ref design-refs/setup-import-phone-v1/, board 1) ═══════════════
+   Below 768px only. Last in the file and at the overridden rules' own specificity (`.sf .x` or
+   `.sf--setup .x`), so no `!important`.
+   1B — on set-up screens the folder tabs give way to a navy progress band (drawn by `SetupFrame`):
+   "Step n of N", the step's name in the typewriter face, one 5px segment per step. The steps are the
+   frame's own `spineFor`/`spineIndex`, or a review's own steps (`useSetupBand`).
+   6B — each step's foot is pinned to the bottom of the screen (`StepFoot` portals it into the frame's
+   foot host; a spacer of its measured height keeps the last content clear of it).
+   2B — every small-capital label is sentence case in Source Sans 3, weight 600, at least 13px. The
+   BETA chip keeps its capitals. */
+/* Set-up on phones v1: the pinned foot's height, published by SetupFrame while the foot shows. */
+.sf { --sf-foot-h: 0px; }
+@media (max-width: 767.98px) {
+  .sf--setup .sf-tabs { display: none; }
+  .sf--setup .sf-bar { flex-wrap: nowrap; align-items: center; justify-content: space-between; padding: 0 12px 0 8px; }
+  .sf--setup .sf-barbrand { flex: 1 1 auto; width: auto; min-width: 0; }
+  .sf--setup .sf-exit { flex: none; min-height: 44px; margin: 0 0 0 12px; color: #fff; }
+  .sf .sf-pband { padding: 2px 18px 16px; color: #fff; }
+  .sf .sf-pband .sf-pbstep { display: block; font: 600 13px/1.2 var(--font-sans); color: rgba(255, 255, 255, .72); }
+  .sf .sf-pband .sf-pbname {
+    display: block; margin: 2px 0 10px; font-family: var(--sp-type); font-weight: 400; font-size: 22px; line-height: 1.3; color: #fff;
+  }
+  .sf .sf-pbsegs { display: flex; gap: 6px; }
+  .sf .sf-pbsegs i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .18); }
+  .sf .sf-pbsegs i.on { background: #e8c8bc; }
+  .sf--setup .sf-sheet { border-top-left-radius: 20px; border-top-right-radius: 20px; }
+
+  .sf .sf-foothost {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; box-sizing: border-box; background: #fff;
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -10px 20px -16px rgba(0, 0, 0, .35);
+  }
+  .sf .sf-foothost:empty { display: none; }
+  .sf .sf-foothost .sf-cfoot { margin: 0; flex-wrap: nowrap; gap: 14px; }
+  .sf .sf-foothost .sf-footr { flex: 1 1 auto; display: flex; justify-content: flex-end; align-items: center; gap: 10px; min-width: 0; }
+  .sf .sf-foothost .sf-btn { flex: 1 1 auto; height: 50px; border-radius: 25px; white-space: normal; text-align: center; }
+  .sf .sf-cfootspace { height: calc(var(--sf-foot-h, 0px) + 12px); }
+
+  .sf .sf-lab {
+    font-family: var(--font-sans); font-size: 14.5px; font-weight: 600;
+    line-height: 1.35; letter-spacing: 0; text-transform: none; color: var(--ink-on-light);
+  }
+  .sf .sf-eyebrow, .sf .sf-qlab {
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+  }
+  .sf .sf-or, .sf .sf-fact, .sf .sf-droptypes, .sf .sf-chip {
+    font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+  }
+}
+/* The overview's and the review's buttons, pinned the same way (`PhonePin`): Back or Cancel on the
+   left as text links, the primary filling the rest. */
+@media (max-width: 767.98px) {
+  .sf .sf-foothost .im-nextgo, .sf .sf-foothost .o9-bargo {
+    display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-start; gap: 14px; width: auto; margin: 0;
+  }
+  .sf .sf-foothost .sf-link { flex: none; white-space: nowrap; }
+}
+
+/* ═══ Phone last screens v1 (30 Oct; ref design-refs/phone-last-screens-v1/, 1B) ═══════════════════
+   The ACCOUNT frame below 768px shows ONE folder tab — the current screen's. The sibling tab and the
+   small "Your account" label go; the in-card link ("New to QueryHawk? Create an account" and its
+   reverse) is the way between the two. Hidden, not unmounted: `FolderTab` still measures them. */
+@media (max-width: 767.98px) {
+  .sf--account .ws-ftg, .sf--account .ws-ftsibs { display: none; }
+}
+/* Phone last screens v1 — the colour law (white on navy): below 768px the frame's navy buttons carry white,
+   not the desktop's cream (PLS1 L10 found cream on the account screens and the dead ends). */
+@media (max-width: 767.98px) {
+  .sf .sf-btn:not(.sf-btn--line) { color: #fff; }
+}
+
+/* Consistency roll-out v2, Phase 5 (rulings v3, ruling 7): on sign-in, sign-up and import the text fields take the
+   app's standard field (shell/primitives.css --sp-fld-*): 44 high, radius 10, white, a 1px ink edge, Source Serif 4 16;
+   at focus a 1.5px navy edge; a field in error has a 1.5px rust edge. A field with an icon inside keeps the padding
+   that makes room for it (the eye, the select's chevron: those rules outrank this one). The typewriter pill buttons
+   and Google's button are unchanged. Desktop only: the phone keeps its own field (mobileShell.css). */
+@media (min-width: 768px) {
+  .sf .sf-in:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"])),
+  .sf .sf-card .sa-dd > .sa-field {
+    height: var(--sp-fld-h); padding: var(--sp-fld-pad); border: 0; border-radius: var(--sp-fld-r);
+    background: #fff; box-shadow: var(--sp-fld-edge); font: var(--sp-fld-font); color: var(--ink-on-light);
+  }
+  .sf .sf-in:focus, .sf .sf-card .sa-dd.open > .sa-field, .sf .sf-card .sa-dd > .sa-field:focus-visible { border: 0; box-shadow: var(--sp-fld-focus); }
+  .sf .sf-card .sa-dd > .sa-field:hover { border: 0; }
+  .sf .sf-field.is-bad .sf-in { border: 0; box-shadow: inset 0 0 0 1.5px var(--sf-rust); }
+}

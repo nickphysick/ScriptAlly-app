@@ -1,0 +1,293 @@
+{
+ "fit": {
+  "sh": 654,
+  "ch": 654
+ },
+ "kinds": [
+  "send",
+  "offer",
+  "rr",
+  "nudge",
+  "quiet",
+  "batch",
+  "fix:reply",
+  "fix:wishlist",
+  "own"
+ ],
+ "out": {
+  "send": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "mats",
+     "gap": 0
+    },
+    {
+     "step": "ver",
+     "gap": 0
+    },
+    {
+     "step": "date",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "Your query moves to Full sent"
+     },
+     {
+      "at": "2027-01-31",
+      "what": "Marcus’s reply is expected"
+     },
+     {
+      "at": "2027-02-08",
+      "what": "If nothing’s come, “Nudge Marcus” comes onto your list"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "offer": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "ans",
+     "gap": 0
+    },
+    {
+     "step": "withdraw",
+     "gap": 0
+    },
+    {
+     "step": "date",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "Tom becomes your agent for this book"
+     },
+     {
+      "at": "2026-11-08",
+      "what": "1 other query closes as withdrawn, with a “Tell them you’ve signed” task for that agent"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "rr": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "mats",
+     "gap": 0
+    },
+    {
+     "step": "ver",
+     "gap": 0
+    },
+    {
+     "step": "date",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "Your query moves to Resubmitted"
+     },
+     {
+      "at": "2027-01-31",
+      "what": "Iris’s reply is expected"
+     },
+     {
+      "at": "2027-02-08",
+      "what": "If nothing’s come, “Nudge Iris” comes onto your list"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "nudge": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "sent",
+     "gap": 0
+    },
+    {
+     "step": "date",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "Your nudge to Marcus is logged"
+     },
+     {
+      "at": "2026-12-07",
+      "what": "If Marcus still hasn’t replied, I’ll suggest closing it"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "quiet": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "act",
+     "gap": 0
+    },
+    {
+     "step": "sent",
+     "gap": 0
+    },
+    {
+     "step": "date",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "Your nudge is logged, and the query goes back to waiting on Rosalind"
+     },
+     {
+      "at": "2026-12-07",
+      "what": "If there’s still nothing, it comes back to you"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "batch": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "mats",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "What you sent is saved on your query to Ottoline"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "fix:reply": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "wk",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "Saved to Edda’s card"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "fix:wishlist": {
+   "end": "check",
+   "steps": [
+    {
+     "step": "wish",
+     "gap": 0
+    },
+    {
+     "step": "check",
+     "gap": 0
+    }
+   ],
+   "check": {
+    "head": "Check it, then log it",
+    "mb": "14px",
+    "points": [
+     {
+      "at": "2026-11-08",
+      "what": "Eleanor’s wishlist is saved to their card"
+     }
+    ],
+    "hawk": false,
+    "primary": "Log it"
+   }
+  },
+  "own": {
+   "end": "none",
+   "steps": [
+    {
+     "step": "none",
+     "gap": 0
+    }
+   ],
+   "check": null
+  }
+ }
+}

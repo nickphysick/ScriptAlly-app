@@ -1,0 +1,77 @@
+[
+ {
+  "where": "nudge: no field starts with prose",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "nudge: mailto carries the address only",
+  "ok": true,
+  "detail": "[\"mailto:q152-ag-nudge@example.test\"]"
+ },
+ {
+  "where": "agent: no field starts with prose",
+  "ok": true,
+  "detail": "[\"\"]"
+ },
+ {
+  "where": "agent: mailto carries the address only",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "agent: no field starts with prose",
+  "ok": true,
+  "detail": "[\"\",\"\"]"
+ },
+ {
+  "where": "agent: mailto carries the address only",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "offer: no field starts with prose",
+  "ok": true,
+  "detail": "[\"\"]"
+ },
+ {
+  "where": "offer: mailto carries the address only",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "agent: no field starts with prose",
+  "ok": true,
+  "detail": "[\"\"]"
+ },
+ {
+  "where": "agent: mailto carries the address only",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "population: fields read",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "no 'Dear' in the Query Centre's source",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "population: the bundle",
+  "ok": true,
+  "detail": "8695108"
+ },
+ {
+  "where": "no 'I hope' in the bundle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no 'following up on my query' in the bundle",
+  "ok": true,
+  "detail": ""
+ }
+]

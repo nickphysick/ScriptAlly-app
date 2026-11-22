@@ -1,0 +1,96 @@
+{
+ "green": [
+  {
+   "where": "population: the fixture has a draft",
+   "ok": true,
+   "detail": "pk40-draft"
+  },
+  {
+   "where": "the draft is not offered",
+   "ok": true,
+   "detail": "[\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+  },
+  {
+   "where": "every package with a version and a letter is",
+   "ok": true,
+   "detail": "[\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+  },
+  {
+   "where": "the current one is marked",
+   "ok": true,
+   "detail": "[\"pk40-std\"]"
+  },
+  {
+   "where": "the rule beneath",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "where": "choosing moves the flag",
+   "ok": true,
+   "detail": "pk40-std2"
+  },
+  {
+   "where": "…the header block",
+   "ok": true,
+   "detail": "Standard 2"
+  },
+  {
+   "where": "…and the bar",
+   "ok": true,
+   "detail": "Standard 2"
+  },
+  {
+   "where": "the menu closed, focus on Change",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "where": "Undo restores the flag",
+   "ok": true,
+   "detail": "pk40-std"
+  },
+  {
+   "where": "…the header block",
+   "ok": true,
+   "detail": "Standard"
+  },
+  {
+   "where": "…and the bar",
+   "ok": true,
+   "detail": "Standard"
+  },
+  {
+   "where": "Esc closes it; focus returns to Change",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "red": [
+  {
+   "where": "population: the fixture has a draft",
+   "ok": true,
+   "detail": "pk40-draft"
+  },
+  {
+   "where": "the draft is not offered",
+   "ok": false,
+   "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+  },
+  {
+   "where": "every package with a version and a letter is",
+   "ok": false,
+   "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+  },
+  {
+   "where": "the current one is marked",
+   "ok": true,
+   "detail": "[\"pk40-std\"]"
+  },
+  {
+   "where": "the rule beneath",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

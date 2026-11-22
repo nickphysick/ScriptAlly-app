@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "pop",
+  "where": "a Queried query with the agent",
+  "ok": true,
+  "detail": "probe-dangling-pkg"
+ },
+ {
+  "lock": "L10",
+  "where": "after recording a partial request, the celebration shows",
+  "ok": true,
+  "detail": "true partial"
+ },
+ {
+  "lock": "L10",
+  "where": "Undo is on top of the celebration",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L2",
+  "where": "the celebration: colour rules",
+  "ok": true,
+  "detail": "pink 3"
+ },
+ {
+  "lock": "L11",
+  "where": "the celebration: no image twice",
+  "ok": true,
+  "detail": "[\"/images/qc/qc-inkwell.png\"]"
+ },
+ {
+  "lock": "L11",
+  "where": "the celebration: no image twice",
+  "ok": true,
+  "detail": "[\"/images/query-centre/desk-hawk.webp\"]"
+ },
+ {
+  "lock": "L10",
+  "where": "its button opens the mark-as-sent journey",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L10",
+  "where": "after recording a pass, no celebration",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -13,7 +13,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Plus, X, Calendar } from "lucide-react";
-import type { Note, NoteColour } from "../../types";
+import type { Note, DeskNoteColour } from "../../types";
 import { FONT_MONO, burgundy, parchment, buttonPinkBorder } from "../../lib/designTokens";
 import { FONT_CAVEAT, NOTE_THEMES, NOTE_COLOURS } from "./notesTheme";
 import { PostIt } from "./PostIt";
@@ -26,8 +26,8 @@ import "./notes.css";
 
 export interface NotesDeskProps {
   notes: Note[];
-  onAdd: (fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
-  onSave: (id: string, fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
+  onAdd: (fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) => void;
+  onSave: (id: string, fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) => void;
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -54,7 +54,7 @@ const BEHIND_SLOTS = [
 ];
 
 /** Colour-picker fan — pink front, yellow/sage behind (spread out on hover to be hittable). */
-const PICKER_SIDES: { colour: NoteColour; x: number; spreadX: number; rot: number; z: number }[] = [
+const PICKER_SIDES: { colour: DeskNoteColour; x: number; spreadX: number; rot: number; z: number }[] = [
   { colour: "yellow", x: -38, spreadX: -66, rot: -11, z: 1 },
   { colour: "sage", x: 38, spreadX: 66, rot: 11, z: 2 },
 ];
@@ -67,12 +67,12 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const [deskHover, setDeskHover] = useState(false);
 
   // Compose-in-place state
-  const [composeColour, setComposeColour] = useState<NoteColour | null>(null);
+  const [composeColour, setComposeColour] = useState<DeskNoteColour | null>(null);
   const [composeText, setComposeText] = useState("");
   const [composeDue, setComposeDue] = useState<string | null>(null);
   const [dateOpen, setDateOpen] = useState(false);
   const [pickerHover, setPickerHover] = useState(false);
-  const [hoverColour, setHoverColour] = useState<NoteColour | null>(null);
+  const [hoverColour, setHoverColour] = useState<DeskNoteColour | null>(null);
 
   // Floating date calendar: anchored to the compose sticky by MEASURED position and portalled to
   // <body>, so it overlays the cards below the hero without growing/clipping the hero — and isn't
@@ -118,7 +118,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const front = top[0];
   const sides = top.slice(1).map((note, i) => ({ note, ...SIDE_SLOTS[i] }));
   const isEmpty = active.length === 0;
-  const lastUsedColour: NoteColour = front?.colour ?? "pink";
+  const lastUsedColour: DeskNoteColour = front?.colour ?? "pink";
 
   const composing = composeColour !== null;
   // The full grab-a-colour picker is for the true empty state ONLY; "+" on a populated desk goes
@@ -126,7 +126,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const showPicker = !composing && isEmpty;
   const showFan = !composing && !isEmpty;
 
-  const grabColour = (c: NoteColour) => {
+  const grabColour = (c: DeskNoteColour) => {
     setComposeColour(c);
     setComposeText("");
     setComposeDue(null);

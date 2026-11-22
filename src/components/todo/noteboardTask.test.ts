@@ -81,13 +81,7 @@ describe("⚠️ ONE document, ONE row — the whole point of the collapse", () 
         const src = decls(readFileSync(p, "utf8"));
         if (src.includes("setUserTaskColour(")) {
           writers++;
-          /* ⚠️ RETARGETED, LAW UNCHANGED (To-do list v5.1 §F): the desk's compose card pins a NOTE to the Corkboard as
-             the Corkboard does — a plain create, then the paper's own write. It is allowed only because it papers a
-             DATELESS note, so "dated ∧ papered" still means Corkboard-made; the guard is asserted below. */
-          if (p.endsWith("v5/TodoTray.tsx")) {
-            expect(src, "the desk may paper a note only — never a dated task").toMatch(/if \(!isTask && d\.paper !== "yellow"\) await setUserTaskColour\(/);
-            expect(src.match(/setUserTaskColour\(/g)?.length, "one colour write on the desk").toBe(1);
-          } else if (!p.endsWith("TodoNoteboardPage.tsx") && !p.endsWith("db.tsx")) offenders.push(p);
+          if (!p.endsWith("TodoNoteboardPage.tsx") && !p.endsWith("db.tsx")) offenders.push(p);
         }
       }
     };
@@ -105,7 +99,7 @@ describe("⚠️ the conversion and its inverse are ONE FIELD each way", () => {
     expect(page.indexOf("const makeTask")).toBeGreaterThan(-1);
     const body = fn.slice(0, fn.indexOf("\n  };"));
     const stampAt = body.indexOf("setUserTaskColour");
-    const dateAt = body.indexOf("dueDate: dateDraft");
+    const dateAt = body.indexOf("dueDate: due"); // RE-POINTED (Corkboard v2): the panel hands the date in
     expect(stampAt).toBeGreaterThan(-1);
     expect(dateAt).toBeGreaterThan(-1);
     expect(stampAt).toBeLessThan(dateAt);
@@ -121,7 +115,7 @@ describe("⚠️ the conversion and its inverse are ONE FIELD each way", () => {
     /* the un-dated document is a note again, still papered, still on the board */
     const detached: UserTask = { ...DATED, dueDate: undefined };
     expect(sortNotes([detached]).map((n) => n.id)).toEqual([NOTE.id]);
-    expect(noteColour(detached)).toBe("yellow");
+    expect(noteColour(detached)).toBe("butter"); // Corkboard v2: the old yellow reads as butter
   });
 
   it("the badge derives from the note's OWN date — no second document to consult", () => {
@@ -137,8 +131,10 @@ describe("⚠️ the projection is GONE, not shadowed", () => {
       expect(page, dead).not.toContain(dead);
     }
     /* the popover keeps its verbatim copy and loses its Task field — one object, one text */
-    expect(page).toContain("Turn into a task");
-    expect(page).toContain("The task appears on your to-do list and calendar. The note stays here, unchanged.");
+    /* RE-POINTED (Corkboard v2): the panel is CbTurnTask, opened by the menu's make-task */
+    expect(readFileSync(join(here, "corkboard/CbTaskDialogs.tsx"), "utf8")).toContain("Turn into a task");
+    expect(page).toContain("<CbTurnTask");
+    /* RE-POINTED (Corkboard v2): the panel's sentence is v13's (Part E); v4's mentioned the retired calendar */
     expect(page).not.toContain("nb-task-title");
   });
 
@@ -147,6 +143,11 @@ describe("⚠️ the projection is GONE, not shadowed", () => {
     expect(flat.map((l) => l.label)).toContain("Turn into a task…");
     const attached = noteMenu(true).flatMap((g) => g.entries) as MenuLeaf[];
     expect(attached.map((l) => l.label)).toContain("Detach from tasks");
-    expect(page).toContain("noteMenu(!!menu.note.dueDate)");
+    /* RE-POINTED (Corkboard v2): the Corkboard's own menu forks on the same fact — "Turn into a task…" or "Take off
+       your to-do list" (CbMenu). noteMenu above is the To-do board's and is unchanged. */
+    expect(page).toContain("onTodo={!!menu.note.dueDate}");
+    const menu = readFileSync(join(here, "corkboard/CbMenu.tsx"), "utf8");
+    expect(menu).toContain("Turn into a task…");
+    expect(menu).toContain("Take off your to-do list");
   });
 });

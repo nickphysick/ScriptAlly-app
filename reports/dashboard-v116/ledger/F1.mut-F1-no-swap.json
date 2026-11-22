@@ -1,0 +1,260 @@
+[
+ {
+  "lock": "F1",
+  "where": "fledgling: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "fledgling: tilted −1.8° at rest",
+  "ok": true,
+  "detail": "-1.8deg"
+ },
+ {
+  "lock": "F1",
+  "where": "fledgling: the rest line",
+  "ok": true,
+  "detail": "FOUNDING WRITER · No. 023 (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "fledgling: straight on hover",
+  "ok": true,
+  "detail": "0deg"
+ },
+ {
+  "lock": "F1",
+  "where": "fledgling: the header swaps",
+  "ok": false,
+  "detail": "1 CONTRIBUTION · 2 TO ARCHIVIST (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "fledgling: one line, the name whole, the ⓘ unmoved",
+  "ok": true,
+  "detail": "{\"x\":326,\"y\":17} → {\"x\":326,\"y\":17} swap1 true name1 true"
+ },
+ {
+  "lock": "F1",
+  "where": "fledgling: no callout or pop-up",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "fledgling: and back",
+  "ok": true,
+  "detail": "-1.8deg 1/0"
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: tilted −1.8° at rest",
+  "ok": true,
+  "detail": "-1.8deg"
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: the rest line",
+  "ok": true,
+  "detail": "FOUNDING WRITER · No. 023 (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: straight on hover",
+  "ok": true,
+  "detail": "0deg"
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: the header swaps",
+  "ok": false,
+  "detail": "16 CONTRIBUTIONS · 9 TO QUERYHAWK (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: one line, the name whole, the ⓘ unmoved",
+  "ok": true,
+  "detail": "{\"x\":326,\"y\":17} → {\"x\":326,\"y\":17} swap1 true name1 true"
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: no callout or pop-up",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "mentor: and back",
+  "ok": true,
+  "detail": "-1.8deg 1/0"
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: tilted −1.8° at rest",
+  "ok": true,
+  "detail": "-1.8deg"
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: the rest line",
+  "ok": true,
+  "detail": "FOUNDING WRITER · No. 023 (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: straight on hover",
+  "ok": true,
+  "detail": "0deg"
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: the header swaps",
+  "ok": false,
+  "detail": "25 CONTRIBUTIONS · TOP RANK (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: one line, the name whole, the ⓘ unmoved",
+  "ok": true,
+  "detail": "{\"x\":326,\"y\":17} → {\"x\":326,\"y\":17} swap1 true name1 true"
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: no callout or pop-up",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "queryhawk: and back",
+  "ok": true,
+  "detail": "-1.8deg 1/0"
+ },
+ {
+  "lock": "F1",
+  "where": "egg: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "egg: tilted −1.8° at rest",
+  "ok": true,
+  "detail": "-1.8deg"
+ },
+ {
+  "lock": "F1",
+  "where": "egg: the rest line",
+  "ok": true,
+  "detail": "FOUNDING WRITER · No. 023 (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "egg: straight on hover",
+  "ok": true,
+  "detail": "0deg"
+ },
+ {
+  "lock": "F1",
+  "where": "egg: the header swaps",
+  "ok": false,
+  "detail": "NO CONTRIBUTIONS YET (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "egg: one line, the name whole, the ⓘ unmoved",
+  "ok": true,
+  "detail": "{\"x\":326,\"y\":17} → {\"x\":326,\"y\":17} swap1 true name1 true"
+ },
+ {
+  "lock": "F1",
+  "where": "egg: no callout or pop-up",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "egg: and back",
+  "ok": true,
+  "detail": "-1.8deg 1/0"
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: tilted −1.8° at rest",
+  "ok": true,
+  "detail": "-1.8deg"
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: the rest line",
+  "ok": true,
+  "detail": "FOUNDING WRITER (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: straight on hover",
+  "ok": true,
+  "detail": "0deg"
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: the header swaps",
+  "ok": false,
+  "detail": "NO CONTRIBUTIONS YET (1/0)"
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: one line, the name whole, the ⓘ unmoved",
+  "ok": true,
+  "detail": "{\"x\":326,\"y\":17} → {\"x\":326,\"y\":17} swap1 true name1 true"
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: no callout or pop-up",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "nonumber: and back",
+  "ok": true,
+  "detail": "-1.8deg 1/0"
+ },
+ {
+  "lock": "F1",
+  "where": "focus-within: straight, and swapped",
+  "ok": false,
+  "detail": "0deg 0"
+ },
+ {
+  "lock": "F1",
+  "where": "reduced motion: no rotation",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "F1",
+  "where": "the tilted card is cut by no clipping ancestor",
+  "ok": true,
+  "detail": ""
+ }
+]

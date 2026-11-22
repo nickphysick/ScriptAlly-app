@@ -157,7 +157,18 @@ describe("A2 · the editor still writes only Open or Closed", () => {
     expect(cardPatch(unknown, base, { ...base, door: "open" }, "2026-10-11T00:00:00.000Z").submissionStatus).toBe(SubmissionStatus.OPEN);
     expect(cardPatch(unknown, base, { ...base, door: "closed" }, "2026-10-11T00:00:00.000Z").submissionStatus).toBe(SubmissionStatus.CLOSED);
   });
-  it("the editor's door control offers Open and Closed, and no third choice", () => {
-    expect(src("src/components/agents/card/AgentCardEditor.tsx")).toMatch(/options=\{\[\["open", "Open"\], \["closed", "Closed"\]\]\}/);
+  /* re-pointed (Contact list v25.2 C2): the edit mode draws "Not known" beside Open and Closed, as the pack asks — but
+     only as the state an unknown agent is IN: it is disabled whenever a door is known, so the editor still WRITES only
+     Open or Closed (the patch half is asserted above). */
+  /* re-pointed (Add agent v1 Phase 5): the door is DoorPills (agentPills) in the add journey and on the card. Its two
+     pills are Open and Closed; pressing the chosen one again empties it (not known), and an empty door is never
+     WRITTEN — cardPatch writes a door only when one is chosen (asserted above) */
+  it("the door control offers Open and Closed only, and an emptied door writes nothing", () => {
+    const em = src("src/components/agents/card/agentPills.tsx");
+    expect(em).toMatch(/data=\{\{ "data-door": "open" \}\}/);
+    expect(em).toMatch(/data=\{\{ "data-door": "closed" \}\}/);
+    expect(em).not.toMatch(/"data-door": "unknown"/);
+    const base = draftOf(unknown);
+    expect(cardPatch(unknown, base, { ...base, door: null }, "2026-10-11T00:00:00.000Z").submissionStatus).toBeUndefined();
   });
 });

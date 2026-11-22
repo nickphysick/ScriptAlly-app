@@ -54,20 +54,31 @@ const RIGHT_W = (w: number) => (w === 1920 ? 370 : 332);
 
 type PageMap = { key: string; route: string; header: string; eyebrow: string; title: string; byline: string; acts: string; art?: string; right?: string; rightTokenW?: boolean; content: string; init?: string };
 const PAGES: PageMap[] = [
-  { key: "contacts", route: "/agents", header: "[data-cl17='header']", eyebrow: "[data-cl17='eyebrow']", title: "[data-cl17='title']", byline: "[data-cl17='byline']", acts: "[data-cl17='acts']", art: "[data-cl182='archivist']", right: "[data-cl17='card']", content: "[data-cl19='toolbar']" },
-  { key: "queries", route: "/queries", header: "[data-qc138='header']", eyebrow: "[data-qc138='eyebrow']", title: "[data-qc138='title']", byline: "[data-qc138='byline']", acts: "[data-qc138='acts']", art: "[data-qc138='hawk']", right: "[data-qc138='chart-col']", rightTokenW: true, content: ".qcv-group > .qcv-page" },
+  /* RETIRED FOR THE CONTACT LIST (Contact list v24 Part A): its open hero is gone — the page opens on the shared
+     PageHeaderCard, as the Query Centre's did in v149, held to the Query Centre's boxes by CL24-A1. HR1-1 (the Contact
+     list against its oracle) therefore has no subject, and the contacts/discover pair (HR1-7) goes with it. */
+  /* RE-POINTED (Contact list v20 §A): the Contact list's content now opens on its title row (the count, the Cards / List
+     pill, Full screen), which sits where the toolbar did; the toolbar follows 54 lower */
+  /* RETIRED FOR THE QUERY CENTRE (v149, QC149 L13): its open header is gone — the page opens on the shared PageHeaderCard
+     (Part A), held to the Versions card by QC149-L1 and to the view row's edges by QC149-L2. Its pinned layout is still
+     HR1-8's ("queries pinned"), untouched. */
   { key: "analytics", route: "/queries/analytics", header: "[data-a21='header']", eyebrow: "[data-a21='eyebrow']", title: "[data-a21='title']", byline: "[data-a21='byline']", acts: "[data-a21='acts']", right: "[data-a21='card']", rightTokenW: true, content: ".a21-desk" },
   { key: "responses", route: "/queries/responses", header: "[data-rsp='header']", eyebrow: "[data-rsp='eyebrow']", title: ".rsp-hd h1", byline: "[data-rsp='byline']", acts: "[data-rsp='acts']", right: "[data-rsp='card']", content: ".rsp-pos" },
   { key: "discover", route: "/agents/discover", header: "[data-dv1='header']", eyebrow: "[data-dv1='header'] [data-dv1='eyebrow']", title: ".dv1-hd h1", byline: "[data-dv1='byline']", acts: "[data-dv1='header'] [data-dv1='acts']", right: "[data-dv1='header'] .dv1-card", rightTokenW: true, content: ".dv1-hd + *", init: "live" },
-  { key: "packages", route: "/manuscripts/packages", header: "[data-pk4='header']", eyebrow: ".pk4-hd .pk4-ey", title: ".pk4-hd h1", byline: ".pk4-hd .pk4-by", acts: ".pk4-hd .pk4-acts", right: "[data-pk4='summary']", content: ".pk4-hd .pk4-fr" },
-  { key: "todo", route: "/todo", header: "[data-td5='header']", eyebrow: ".td5-hd .td5-ey", title: ".td5-hd h1", byline: ".td5-hd .td5-by", acts: ".td5-hd .td5-acts", right: "[data-td5='card']", content: ".td5-hd .td5-fr" },
+  /* RETIRED FOR SUBMISSION PACKAGES (v26, 25 Oct): its hero is the ref's own navy card, 92 in from the sheet's edges,
+     held by PK26-W (tests/e2e/pk26.measure.ts) rather than by the shared hero geometry. */
+  /* RETIRED FOR THE TO-DO LIST (To-do list v51, 6 Nov): its hero is gone — the desktop page opens on the task workspace's
+     slim navy header, which is not the shared hero, held by tests/e2e/todoWs.measure.ts ("the workspace at …"). */
 ];
 
 const MUTATIONS: Record<string, string> = {
   "HR1-1": `:root, .ws-app, .ws-app.sheet-wide { --hero-top: 42px !important; }`,
   "HR1-3": `.rsp-hd .rsp-left { margin-left: 0 !important; }`,
   "HR1-4": `.qc138-hd .qc138-hawk { height: calc(var(--hero-art-h) + 20px) !important; }`,
-  "HR1-5": `.pk4-hd .pk4-tr { margin-right: 0 !important; }`,
+  /* RE-POINTED (Submission packages v26), and again (To-do list v51): the To-do hero it broke is gone; Analytics' card is
+     the right item on the shared width token, so breaking its width is the same law */
+  /* RETIRED with HR1-1…7 (Workspace headers v1, 14 Nov): `.a21-lh`, `.a21-card` and `.dv1-hd` are gone */
+  "HR1-5": `.a21-lh .a21-card { width: 200px !important; }`,
   "HR1-6": `.a21-desk { margin-top: 54px !important; }`,
   "HR1-7": `.dv1-hd h1.dv1-title { margin-left: 4px !important; }`,
   "HR1-8": `.ms21-hd3, [data-slh='header'] { margin-top: 6px !important; }`,
@@ -132,7 +143,12 @@ const measure = (page: Page, m: PageMap) => page.evaluate((m) => {
 const near = (a: number | undefined, b: number, t: number) => typeof a === "number" && Math.abs(a - b) <= t;
 
 test.describe("Header rules v1.1", () => {
-  test("HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs", async ({ page }) => {
+  /* RETIRED (Workspace headers v1, 14 Nov): every page left in PAGES (Analytics' `[data-a21='header']`, Discover's
+     `[data-dv1='header']`, and Responses, whose open hero was already gone) now opens on the shared navy header, which is
+     held to the Query Centre's header rather than to the v1.1 hero geometry (eyebrow at 36, the H5 text column, the
+     right item's inset). The lock has no subject left. Successor: tests/e2e/wsHeaders.measure.ts H1 + H3 + H4
+     "analytics", "responses", "discover". */
+  test.skip("HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs", async ({ page }) => {
     test.setTimeout(1_500_000);
     flags(`--restore '${JSON.stringify({ seen: true, done: { log: true, find: true, open: true, pin: true, resp: true, birds: true } })}'`);
     const L = Object.fromEntries(["HR1-1", "HR1-2", "HR1-3", "HR1-4", "HR1-5", "HR1-6", "HR1-7"].map((k) => [k, new Ledger(k)])) as Record<string, Ledger>;
@@ -191,7 +207,8 @@ test.describe("Header rules v1.1", () => {
         if (r.content) L["HR1-6"].check(`${w} content − stack bottom = 44`, near(r.content.t - r.stackB!, 44, 1), `${(r.content.t - r.stackB!).toFixed(2)} (content ${r.content.t}, stack ${r.stackB})`);
       }
       /* HR1-7 — the pairs under one folder tab: Contact list / Discover, Query Centre / Analytics */
-      for (const [a, b] of [["contacts", "discover"], ["queries", "analytics"]] as const) {
+      /* v149: the queries/analytics pair went with the QC hero; v24: the contacts/discover pair with the Contact list's */
+      for (const [a, b] of [] as unknown as readonly (readonly [string, string])[]) {
         const A = all[a]?.[vp.width], B = all[b]?.[vp.width];
         const p = L["HR1-7"];
         const w = `${a}/${b} ${vp.width}`;
@@ -211,8 +228,8 @@ test.describe("Header rules v1.1", () => {
     const bad: string[] = [];
     for (const l of Object.values(L)) { l.write(); bad.push(...l.bad()); }
     for (const x of bad.slice(0, 60)) console.log(`  ✗ ${x}`);
-    expect(L["HR1-1"].rows.length, "HR1-1: fewer readings than it claims").toBeGreaterThanOrEqual(28);
-    expect(L["HR1-3"].rows.length, "HR1-3: fewer readings than it claims").toBeGreaterThanOrEqual(56);
+    /* v24: HR1-1's subject (the Contact list's hero) is retired; HR1-3 reads six pages, not seven */
+    expect(L["HR1-3"].rows.length, "HR1-3: fewer readings than it claims").toBeGreaterThanOrEqual(48);
     expect(bad).toEqual([]);
   });
 
@@ -222,14 +239,14 @@ test.describe("Header rules v1.1", () => {
     const L = new Ledger("HR1-8");
     const cases: { name: string; route: string; vp: { width: number; height: number }; sel: string[]; pinned?: string; init?: string }[] = [];
     for (const vp of [SIZES[0], SIZES[2]]) {
-      cases.push({ name: `manuscripts ${vp.width}`, route: "/manuscripts", vp, sel: ["[data-ms21='header']", "[data-ms21='header'] h1", "[data-ms21='header'] [data-probe='actions']"] });
+      /* Manuscripts v27 retired the manuscripts case: the v21 header it held is gone (RETIRED-manuscripts-v27.md) */
       cases.push({ name: `comps ${vp.width}`, route: "/manuscripts/comps", vp, sel: ["[data-slh='header']", "[data-slh='eyebrow']", "[data-slh='header'] h1", "[data-slh='card']"] });
       cases.push({ name: `dashboard ${vp.width}`, route: "/dashboard", vp, sel: ["[data-d58='header']", "[data-d58='eyebrow']", "[data-d58='title']", "[data-d58='buttons']"] });
-      cases.push({ name: `calendar ${vp.width}`, route: "/todo/calendar", vp, sel: ["header[data-probe='page-header']", "header[data-probe='page-header'] h1"] });
       cases.push({ name: `corkboard ${vp.width}`, route: "/todo/corkboard", vp, sel: ["header.hp3", "header.hp3 h1"] });
       cases.push({ name: `discover coming soon ${vp.width}`, route: "/agents/discover", vp, sel: ["[data-dv1='coming-soon']", "[data-dv1='coming-soon'] h1"] });
       cases.push({ name: `queries pinned ${vp.width}`, route: "/queries", vp, pinned: "queries", sel: ["[data-qc140='band']", "[data-qc140='toolbar']", "[data-qc138='headings']"] });
-      cases.push({ name: `contacts pinned ${vp.width}`, route: "/agents", vp, pinned: "agents", sel: ["[data-cl19='head']", "[data-cl19='toolbar']"] });
+      /* RETIRED (navy-bar-address-book v1 B5): "contacts pinned" read the pinned list's head and toolbar; the Contact list
+         is the address book now, whose full screen is NB1-L11's */
     }
     for (const route of ["/queries", "/agents", "/queries/analytics"]) cases.push({ name: `phone ${route}`, route, vp: { width: 390, height: 844 }, sel: ["h1"] });
     const got: Record<string, (number[] | null)[]> = {};

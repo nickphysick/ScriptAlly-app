@@ -6,8 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_TEMPLATE, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "./importPage";
-import { dayMonth } from "./dates";
+import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "./importPage";
 
 const code = (file: string) => readFileSync(resolve(process.cwd(), file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
@@ -16,17 +15,15 @@ describe("W1 · the Import page's words", () => {
     expect(IMPORT_TITLE).toBe("Bring your list across.");
     expect(IMPORT_SUB).toBe("Agents, queries and dates from the spreadsheet you already keep. You check everything before it's saved.");
   });
-  it("the three tiles", () => {
+  it("the two tiles (overnight fixes v1: the template's words went with its last door, the phone's, 14 Nov)", () => {
     expect(TILE_SMART).toEqual({ title: "Smart import.", text: "Any layout, any wording. QueryHawk reads the sheet and shows you everything before anything is saved.", action: "Import a spreadsheet" });
-    expect(TILE_TEMPLATE).toEqual({ title: "Our template.", text: "Set columns, read exactly. Use it as often as you like to add agents and queries in bulk.", download: "Download the template", upload: "Upload my sheet", fact: "Always free · No limit" });
+    expect(code("src/lib/importPage.ts"), "no template tile's words remain").not.toContain("TILE_TEMPLATE");
     expect(TILE_MATCH).toEqual({ title: "Match your own columns.", text: "Keep a sheet with unusual columns? Tell QueryHawk which column is which.", action: "Match columns", fact: "CSV · Always free" });
   });
   it("the Smart import tile's fact line, for each entitlement", () => {
-    expect(smartFactLine({ allowed: true, reason: "free_available" }, dayMonth)).toBe("1 Smart Import available");
-    expect(smartFactLine({ allowed: true, reason: "pro_available" }, dayMonth)).toBe("1 Smart Import available");
-    expect(smartFactLine({ allowed: false, reason: "free_used" }, dayMonth)).toBe("Smart Import already used");
-    expect(smartFactLine({ allowed: false, reason: "pro_month_used", nextAvailable: "2026-11-01" }, dayMonth)).toBe("Available 1 Nov");
-    expect(smartFactLine({ allowed: false, reason: "pro_month_used" }, dayMonth), "no date to give").toBe("Available next month");
+    /* plan rules v1: once per account on every plan — no month, no date */
+    expect(smartFactLine({ allowed: true })).toBe("1 Smart Import available");
+    expect(smartFactLine({ allowed: false })).toBe("Smart Import already used");
   });
   it("the footnote is two sentences, and the second is true of all three tiles", () => {
     expect(IMPORT_FOOTNOTE).toBe("An import adds to what you already have.");
@@ -41,9 +38,13 @@ describe("W1 · the Import page's words", () => {
   });
   it("the page renders these constants and no words of its own for them", () => {
     const page = code("src/components/import/ImportPage.tsx");
-    for (const c of ["{IMPORT_TITLE}", "{IMPORT_SUB}", "{TILE_SMART.title}", "{TILE_SMART.text}", "{TILE_SMART.action}", "{TILE_TEMPLATE.title}", "{TILE_TEMPLATE.text}", "{TILE_TEMPLATE.download}", "{TILE_TEMPLATE.upload}", "{TILE_TEMPLATE.fact}", "{TILE_MATCH.title}", "{TILE_MATCH.text}", "{TILE_MATCH.action}", "{TILE_MATCH.fact}", "smartFactLine(entitlement, dayMonth)"]) {
+    /* RE-POINTED (two-door import v1): the desktop page has no template tile; its download is the fork's
+       quiet line. (TILE_TEMPLATE went with the phone's template group, overnight fixes v1.) */
+    for (const c of ["{IMPORT_TITLE}", "{IMPORT_SUB}", "{TILE_SMART.title}", "{TILE_SMART.text}", "{TILE_SMART.action}", "{TILE_MATCH.title}", "{TILE_MATCH.text}", "{TILE_MATCH.action}", "{TILE_MATCH.fact}", "smartFactLine(entitlement)", "{CAPTURE_QUIET_LINE}", "{CAPTURE_QUIET_LINK}"]) {
       expect(page, c).toContain(c);
     }
+    expect(page).not.toContain("TILE_TEMPLATE");
+    expect(page, "no template upload on the desktop page").not.toContain('data-act="upload"');
     expect(page).not.toMatch(/recommended|Upgrade/i);
   });
 });

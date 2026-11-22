@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the chip is named “Nudge or close”",
+  "ok": true,
+  "got": "seed-query-2"
+ },
+ {
+  "name": "its mode is open (it opens the card)",
+  "ok": false,
+  "got": "close"
+ },
+ {
+  "name": "one click opens the card, and no journey",
+  "ok": false,
+  "got": "{\"open\":true,\"composer\":true,\"drawer\":false}"
+ }
+]

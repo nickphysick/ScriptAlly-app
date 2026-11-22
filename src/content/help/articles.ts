@@ -11,7 +11,11 @@
  * ⚠️ AN ARTICLE A GUIDE ITEM OR THE HELP MENU LINKS TO MUST BE HERE (lock HC1-C5): `lib/helpArticles` builds the live
  *    list from this file, and a link to a slug missing from it falls back to /help.
  * ⚠️ "Add an agent" is the mock's article (design-refs/help-system-v1), with four sentences corrected where the mock
- *    described something the app does not do; the report lists them.
+ *    described something the app does not do; the report lists them. Its steps take design-refs/help-centre-v1's words
+ *    (non-workspace v1, Phase 7), which are those sentences shortened.
+ * ⚠️ PUBLISHED ONLY LEAVE THIS FILE (non-workspace v1, Phase 7). `WRITTEN_ARTICLES` is every article, drafts included;
+ *    `HELP_ARTICLE_LIST` and `articleBySlug` are the published ones, and every surface reads those, so a draft is never
+ *    listed, searched or reachable (its URL shows the not-found screen). Publishing is deleting `draft: true`.
  */
 import type { HelpArticle } from "./model";
 
@@ -19,7 +23,7 @@ const CL = "Contact list";
 const QC = "Query Centre";
 const D = "2026-10-20";
 
-export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
+export const WRITTEN_ARTICLES: readonly HelpArticle[] = [
   /* ═══════════ Queries ═══════════ */
   {
     slug: "log-a-query", area: "queries", title: "Log a query", draft: true, updated: D,
@@ -39,7 +43,7 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     lede: "Search and filter the Query Centre's list until it shows the queries you want.",
     guide: { page: QC, key: "find" },
     body: "Type into `Find an agent or agency` above the list, or press `/` to jump there. It matches the agent's name and the agency recorded on the query.\n\n"
-      + "Press `Filters` for more. `Your move`, `Overdue`, `Waiting to hear back` and `Offers` sit at the top, then every stage under Where it stands, what you sent, and a few more such as due this week. Filters add up, and the button shows how many are on.\n\n"
+      + "Press `Filters` for more. `Your move`, `Past expected`, `Waiting to hear back` and `Offers` sit at the top, then every stage under Where it stands, what you sent, and a few more such as due this week. Filters add up, and the button shows how many are on.\n\n"
       + "The export button downloads the queries the list is showing.",
     related: ["open-a-query", "status-key", "pin-the-list", "birds-eye-view"],
   },
@@ -69,8 +73,8 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     slug: "birds-eye-view", area: "queries", title: "Birds-eye view", draft: true, updated: D,
     lede: "Every live query on one timeline, so you can see what is due and what has gone quiet.",
     guide: { page: QC, key: "birds" },
-    body: "Press the floating `Birds-eye view` tab on the Query Centre, or press `B`. The tab shows how many queries are overdue and how many are coming up.\n\n"
-      + "Queries are grouped by urgency to begin with: overdue, upcoming, watch and wait, and no date. You can group and sort another way, and narrow the view by name, by when, or by stage. Closed queries aren't shown.",
+    body: "Press the floating `Birds-eye view` tab on the Query Centre, or press `B`. The tab shows how many queries are past expected and how many are coming up.\n\n"
+      + "Queries are grouped by urgency to begin with: past expected, upcoming, watch and wait, and no date. You can group and sort another way, and narrow the view by name, by when, or by stage. Closed queries aren't shown.",
     related: ["expected-dates", "find-a-query", "status-key", "open-a-query"],
   },
   {
@@ -95,46 +99,52 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     guide: { page: CL, key: "add" },
     steps: [
       { title: "Open the editor", body: "On the Contact list, press `+ Add an agent` in the header. The editor slides in from the right so your list stays in view." },
-      { title: "Name and agency", body: "A name or an agency is enough to start. Add the country and city if you know them. Each agent sits on their own, even if two share an agency." },
-      { title: "What they're looking for", body: "On `What they want`, pick genres from the list, and paste their wishlist in their own words. Genres tell QueryHawk which agents take your book's genre." },
-      { title: "Response policy", body: "On `How to query`, set how long they take to reply, and choose `No response means no` or `Always replies`. The reply time is how QueryHawk works out when a query has gone past its expected date; the policy decides what your to-do list suggests after that." },
+      { title: "Name and agency", body: "A name or an agency is enough to start. Add the country and city if you know them." },
+      { title: "What they're looking for", body: "On `What they want`, pick genres from the list, and paste their wishlist in their own words." },
+      { title: "Response policy", body: "On `How to query`, set how long they take to reply, and choose `No response means no` or `Always replies`." },
       { title: "Save", body: "Press `Add to your list`. Any gap List health counts shows up there, ready for later." },
     ],
-    figure: "Screenshot slot: the add-agent editor, filled with an example agent",
-    tip: { label: "QUICKER WITH A LIST", text: "Got agents in a spreadsheet already? Bring them in with Smart import: press ⌘K (Ctrl K on Windows), type Import, and open the page." },
+    tip: { label: "Quicker with a list.", text: "Got agents in a spreadsheet already? Bring them in with Smart import: press ⌘K (Ctrl K on Windows), type Import, and open the page." },
     related: ["smart-import", "list-health", "response-policy", "status-key"],
   },
   {
     slug: "find-an-agent", area: "agents", title: "Find an agent", draft: true, updated: D,
-    lede: "Search by name or agency from the box above the list. Results narrow as you type.",
+    lede: "Search by name or agency from the box at the left of the list's navy bar. Results narrow as you type.",
     guide: { page: CL, key: "search" },
-    body: "Type into `Find an agent` above the list, or press `/` to jump there. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
+    body: "Type into `Find an agent or agency`, the first thing in the list's navy bar, or press `/` to jump there. In full screen the box sits under the navy band. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
       + "The list narrows as you type. Clear the box to see everyone again.",
-    related: ["open-an-agent", "pin-the-list", "add-an-agent", "list-health"],
+    related: ["open-an-agent", "go-full-screen", "add-an-agent", "list-health"],
   },
   {
-    slug: "pin-the-list", area: "agents", title: "Pin the list", draft: true, updated: D,
-    lede: "Pinning gives the list the whole page and tucks the header away. Unpin to bring it back.",
-    guide: [{ page: CL, key: "pin" }, { page: QC, key: "pin" }],
-    body: "The Contact list and the Query Centre both pin the same way, and this article is for both.\n\n"
-      + "Press `Pin list` in the list's toolbar, or press `F`. The header folds away and a navy band takes its place, carrying the page's figures and its add button. On the Query Centre the sidebar tucks away too, for more room.\n\n"
-      + "Press `Unpin`, or `F` again, to bring the header back. QueryHawk remembers the pin on this device.",
-    related: ["find-an-agent", "find-a-query", "open-an-agent", "open-a-query"],
+    slug: "go-full-screen", area: "agents", title: "Go full screen", draft: true, updated: D,
+    lede: "Full screen turns the Contact list into an address book: your agents down the left, the one you pick open beside them. Exit full screen brings the page back.",
+    guide: { page: CL, key: "pin" },
+    body: "Press `Full screen` at the right of the list's navy bar, or press `F`. The header folds away and a navy band takes its place, carrying your agents by where they stand, List health and the add button; the sidebar tucks away for more room. Pick an agent on the left, or move with ↑ and ↓, and their card opens wide on the right.\n\n"
+      + "Press `Exit full screen`, or `F` again, to bring the page back. QueryHawk remembers full screen, and whether you chose List or Cards, on this device.",
+    related: ["find-an-agent", "open-an-agent", "add-an-agent"],
+  },
+  {
+    slug: "pin-the-list", area: "queries", title: "Go full screen on the Query Centre", draft: true, updated: D,
+    lede: "Full screen gives the Query Centre's list the whole page and folds the header away. Exit full screen brings it back.",
+    guide: { page: QC, key: "pin" },
+    body: "Press `Full screen` beside the Cards and List switch above the list, or press `F`. The header folds away and a navy band takes its place, carrying the page's figures. The sidebar tucks away too, for more room.\n\n"
+      + "Press `Exit full screen`, or `F` again, to bring the header back. QueryHawk remembers full screen, and whether you chose Cards or List, on this device.",
+    related: ["find-a-query", "open-a-query", "go-full-screen"],
   },
   {
     slug: "open-an-agent", area: "agents", title: "Open an agent's card", draft: true, updated: D,
-    lede: "Click any row to open the agent: wishlist, genres, materials and every exchange you have had.",
+    lede: "Click any agent to open their card: what they're looking for, how to reach them and every query you've sent them.",
     guide: { page: CL, key: "open" },
-    body: "Click a row on the Contact list and the agent opens in a panel on the right. The list stays where it was.\n\n"
-      + "`Profile` shows the genres they're after, their wishlist, how to query them (how to send, how long they take to reply, their response policy), what to send them, and your queries to them. `History` and `Notes` sit beside it.\n\n"
-      + "The `···` menu holds the rest, such as opening their queries in the Query Centre.",
+    body: "Click a row in List, or a card in Cards, and the agent's card slides in on the right. The list stays where it was.\n\n"
+      + "The top of the card shows what they're looking for and whether it fits your book. `Profile` shows how long they take to reply, whether they're open to queries, how to reach them, anyone else you have at the same agency, and your queries to them. `History` and `Notes` sit beside it.\n\n"
+      + "When it's your move, the box at the foot says what's next, with one button to do it. In full screen the same card opens wide beside the list.",
     related: ["edit-an-agent", "find-an-agent", "response-policy", "list-health"],
   },
   {
     slug: "edit-an-agent", area: "agents", title: "Edit an agent", draft: true, updated: D,
     lede: "Change any detail from the agent card. If a change affects your reports, the editor tells you which.",
     guide: { page: CL, key: "edit" },
-    body: "Open the agent, then press `Edit profile` at the foot of the panel. The editor has three tabs: `Details`, `What they want` and `How to query`.\n\n"
+    body: "Open the agent, then press `Edit agent` at the foot of their card. The editor has three tabs: `Details`, `What they want` and `How to query`.\n\n"
       + "When a change reaches something else, the editor says so before you save. A new reply time moves the expected date on queries waiting on that agent, and the editor shows the dates it would move. Changes to their name, their door, their genres or their response policy say what they touch too.\n\n"
       + "Press `Save changes` when you're done, or `Cancel` to leave everything as it was.",
     related: ["open-an-agent", "reply-times", "response-policy", "list-health"],
@@ -145,7 +155,7 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     guide: { page: CL, key: "hk" },
     body: "Each agent can hold five details QueryHawk uses: their reply time, the materials they want, their genres, their wishlist and, for an agent closed to queries, the date they reopen. List health is how many of those your list has, out of all it could have.\n\n"
       + "Reply time counts most, because it is how QueryHawk works out when a query is past its expected date. If an agent doesn't state one, say so in Housekeeping and it stops counting as a gap.\n\n"
-      + "To fill gaps one at a time, press `Fill in the gaps` in the header, press the List health ring, or press `H`. Housekeeping opens beside your list. `Later` hides a gap for 30 days, but it still counts until it is filled.",
+      + "To fill gaps one at a time, press the List health card under At a glance (or the ring in full screen's band), or press `H`. Housekeeping opens beside your list. `Later` hides a gap for 30 days, but it still counts until it is filled.",
     related: ["add-an-agent", "edit-an-agent", "reply-times", "response-policy"],
   },
   {
@@ -219,15 +229,8 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     lede: "Bring in the queries you've already sent from a spreadsheet, and QueryHawk reads the columns for you.",
     body: "Open the Import page: press ⌘K (Ctrl K on Windows) and type Import. Under Smart import, press `Import a spreadsheet` and choose a .csv, .xlsx or .xls file. QueryHawk works out which column is which and shows you what it found before anything is saved.\n\n"
       + "An agent already on your list isn't added twice. A row it can't read, such as one with no agent name or agency, is left out and listed on your Dashboard so you can see what was skipped.\n\n"
-      + "A free account has one Smart import, and Pro has one each month. The template and matching your own columns are always free.",
-    related: ["download-the-template", "add-an-agent", "log-a-query"],
-  },
-  {
-    slug: "download-the-template", area: "setup", title: "Download the template", draft: true, updated: D,
-    lede: "Prefer to fill in a sheet yourself? Use QueryHawk's template and nothing needs matching.",
-    body: "On the Import page, press `Download the template` to get QueryHawk-template.xlsx. Fill in a row for each query, then press `Upload my sheet`.\n\n"
-      + "The template is always free, with no limit on how often you use it.",
-    related: ["smart-import", "log-a-query"],
+      + "A free account has one Smart import, and Pro has one each month. Matching your own columns is always free.",
+    related: ["add-an-agent", "log-a-query"],
   },
   {
     slug: "your-account-and-data", area: "setup", title: "Your account and data", draft: true, updated: D,
@@ -235,7 +238,7 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     body: "Settings has seven sections: Profile, Sign-in & security, Plan & billing, Notifications, Preferences, Tasks and Your data. Your home country is how QueryHawk tells agents at home from agents abroad.\n\n"
       + "Under Your data, `Download a copy` saves everything you've put in as one JSON file.\n\n"
       + "To close your account, type DELETE and press `Schedule deletion`. You have 14 days to change your mind with `Cancel deletion`. During the beta, deletions are completed by hand after that.",
-    related: ["smart-import", "download-the-template"],
+    related: ["smart-import"],
   },
 
   /* ═══════════ Querying basics ═══════════ */
@@ -264,7 +267,17 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
   },
 ];
 
+/** The published articles: the only ones any surface lists, searches or opens. */
+export const HELP_ARTICLE_LIST: readonly HelpArticle[] = WRITTEN_ARTICLES.filter((a) => !a.draft);
+
 const BY_SLUG = new Map(HELP_ARTICLE_LIST.map((a) => [a.slug, a]));
+/** A PUBLISHED article; a draft's slug finds nothing, as an unknown one does. */
 export function articleBySlug(slug: string): HelpArticle | undefined {
   return BY_SLUG.get(slug);
+}
+
+const WRITTEN_BY_SLUG = new Map(WRITTEN_ARTICLES.map((a) => [a.slug, a]));
+/** Any written article, drafts included — for the content's own rules (helpContent.test.ts), never a surface. */
+export function writtenArticleBySlug(slug: string): HelpArticle | undefined {
+  return WRITTEN_BY_SLUG.get(slug);
 }

@@ -1,0 +1,842 @@
+[
+ {
+  "lock": "D1",
+  "where": "population: the three key rows",
+  "ok": true,
+  "detail": "{\"querying\":21,\"closed\":3,\"none\":29}"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying: that status only",
+  "ok": true,
+  "detail": "querying,querying,querying,querying,querying"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying: cards + more = the row's count, at most five",
+  "ok": true,
+  "detail": "5+16 vs 21"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Wren Calloway: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Wren Calloway: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Wren Calloway: a bust, never initials",
+  "ok": true,
+  "detail": "Wren Calloway"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Elinor Hale: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Elinor Hale: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Elinor Hale: a bust, never initials",
+  "ok": true,
+  "detail": "Elinor Hale"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Imogen Vale: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Imogen Vale: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Imogen Vale: a bust, never initials",
+  "ok": true,
+  "detail": "Imogen Vale"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Tobias Hark: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Tobias Hark: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Tobias Hark: a bust, never initials",
+  "ok": true,
+  "detail": "Tobias Hark"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Hester Blaine: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Hester Blaine: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying Hester Blaine: a bust, never initials",
+  "ok": true,
+  "detail": "Hester Blaine"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying card 0 at (14i, 38i)",
+  "ok": true,
+  "detail": "(0.0, 0.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying card 1 at (14i, 38i)",
+  "ok": true,
+  "detail": "(14.0, 38.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying card 2 at (14i, 38i)",
+  "ok": true,
+  "detail": "(28.0, 76.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying card 3 at (14i, 38i)",
+  "ok": true,
+  "detail": "(42.0, 114.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying card 4 at (14i, 38i)",
+  "ok": true,
+  "detail": "(56.0, 152.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying: later cards on top",
+  "ok": true,
+  "detail": "10,11,12,13,14"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying: at most five cards",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "B1",
+  "where": "row querying: +N more 8px under the last card, on its left edge",
+  "ok": true,
+  "detail": "pill 225,56 vs 225,56"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying: anchored at the pointer (18, −14)",
+  "ok": true,
+  "detail": "anchor 848,713 · pointer 830.0,727.4"
+ },
+ {
+  "lock": "D1",
+  "where": "row querying: re-placed on move",
+  "ok": true,
+  "detail": "878 vs 878"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed: that status only",
+  "ok": true,
+  "detail": "closed,closed,closed"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed: cards + more = the row's count, at most five",
+  "ok": true,
+  "detail": "3+0 vs 3"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Imogen Rackham: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(169, 163, 155) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Imogen Rackham: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Imogen Rackham: a bust, never initials",
+  "ok": true,
+  "detail": "Imogen Rackham"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Joan Whitfield: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(169, 163, 155) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Joan Whitfield: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Joan Whitfield: a bust, never initials",
+  "ok": true,
+  "detail": "Joan Whitfield"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Sam Okoro: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(169, 163, 155) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Sam Okoro: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed Sam Okoro: a bust, never initials",
+  "ok": true,
+  "detail": "Sam Okoro"
+ },
+ {
+  "lock": "B1",
+  "where": "row closed card 0 at (14i, 38i)",
+  "ok": true,
+  "detail": "(0.0, 0.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row closed card 1 at (14i, 38i)",
+  "ok": true,
+  "detail": "(14.0, 38.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row closed card 2 at (14i, 38i)",
+  "ok": true,
+  "detail": "(28.0, 76.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row closed: later cards on top",
+  "ok": true,
+  "detail": "10,11,12"
+ },
+ {
+  "lock": "B1",
+  "where": "row closed: at most five cards",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed: anchored at the pointer (18, −14)",
+  "ok": true,
+  "detail": "anchor 848,737 · pointer 830.0,751.3"
+ },
+ {
+  "lock": "D1",
+  "where": "row closed: re-placed on move",
+  "ok": true,
+  "detail": "878 vs 878"
+ },
+ {
+  "lock": "D1",
+  "where": "row none: that status only",
+  "ok": true,
+  "detail": "none,none,none,none,none"
+ },
+ {
+  "lock": "D1",
+  "where": "row none: cards + more = the row's count, at most five",
+  "ok": true,
+  "detail": "5+24 vs 29"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Wren Tallis: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Wren Tallis: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Wren Tallis: a bust, never initials",
+  "ok": true,
+  "detail": "Wren Tallis"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Imogen Vale: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Imogen Vale: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Imogen Vale: a bust, never initials",
+  "ok": true,
+  "detail": "Imogen Vale"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Tomas Keller: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Tomas Keller: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Tomas Keller: a bust, never initials",
+  "ok": true,
+  "detail": "Tomas Keller"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Ingrid Marsh: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Ingrid Marsh: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Ingrid Marsh: a bust, never initials",
+  "ok": true,
+  "detail": "Ingrid Marsh"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Edda Kron: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Edda Kron: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "row none Edda Kron: a bust, never initials",
+  "ok": true,
+  "detail": "Edda Kron"
+ },
+ {
+  "lock": "B1",
+  "where": "row none card 0 at (14i, 38i)",
+  "ok": true,
+  "detail": "(0.0, 0.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row none card 1 at (14i, 38i)",
+  "ok": true,
+  "detail": "(14.0, 38.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row none card 2 at (14i, 38i)",
+  "ok": true,
+  "detail": "(28.0, 76.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row none card 3 at (14i, 38i)",
+  "ok": true,
+  "detail": "(42.0, 114.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row none card 4 at (14i, 38i)",
+  "ok": true,
+  "detail": "(56.0, 152.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "row none: later cards on top",
+  "ok": true,
+  "detail": "10,11,12,13,14"
+ },
+ {
+  "lock": "B1",
+  "where": "row none: at most five cards",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "B1",
+  "where": "row none: +N more 8px under the last card, on its left edge",
+  "ok": true,
+  "detail": "pill 225,56 vs 225,56"
+ },
+ {
+  "lock": "D1",
+  "where": "row none: anchored at the pointer (18, −14)",
+  "ok": true,
+  "detail": "anchor 848,761 · pointer 830.0,775.1"
+ },
+ {
+  "lock": "D1",
+  "where": "row none: re-placed on move",
+  "ok": true,
+  "detail": "878 vs 878"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying: that status only",
+  "ok": true,
+  "detail": "querying,querying,querying,querying,querying"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying: cards + more = the row's count, at most five",
+  "ok": true,
+  "detail": "5+16 vs 21"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Wren Calloway: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Wren Calloway: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Wren Calloway: a bust, never initials",
+  "ok": true,
+  "detail": "Wren Calloway"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Elinor Hale: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Elinor Hale: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Elinor Hale: a bust, never initials",
+  "ok": true,
+  "detail": "Elinor Hale"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Imogen Vale: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Imogen Vale: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Imogen Vale: a bust, never initials",
+  "ok": true,
+  "detail": "Imogen Vale"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Tobias Hark: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Tobias Hark: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Tobias Hark: a bust, never initials",
+  "ok": true,
+  "detail": "Tobias Hark"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Hester Blaine: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Hester Blaine: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice querying Hester Blaine: a bust, never initials",
+  "ok": true,
+  "detail": "Hester Blaine"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying card 0 at (14i, 38i)",
+  "ok": true,
+  "detail": "(0.0, 0.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying card 1 at (14i, 38i)",
+  "ok": true,
+  "detail": "(14.0, 38.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying card 2 at (14i, 38i)",
+  "ok": true,
+  "detail": "(28.0, 76.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying card 3 at (14i, 38i)",
+  "ok": true,
+  "detail": "(42.0, 114.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying card 4 at (14i, 38i)",
+  "ok": true,
+  "detail": "(56.0, 152.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying: later cards on top",
+  "ok": true,
+  "detail": "10,11,12,13,14"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying: at most five cards",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "B1",
+  "where": "slice querying: +N more 8px under the last card, on its left edge",
+  "ok": true,
+  "detail": "pill 225,56 vs 225,56"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed: that status only",
+  "ok": true,
+  "detail": "closed,closed,closed"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed: cards + more = the row's count, at most five",
+  "ok": true,
+  "detail": "3+0 vs 3"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Imogen Rackham: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(169, 163, 155) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Imogen Rackham: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Imogen Rackham: a bust, never initials",
+  "ok": true,
+  "detail": "Imogen Rackham"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Joan Whitfield: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(169, 163, 155) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Joan Whitfield: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Joan Whitfield: a bust, never initials",
+  "ok": true,
+  "detail": "Joan Whitfield"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Sam Okoro: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(169, 163, 155) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Sam Okoro: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice closed Sam Okoro: a bust, never initials",
+  "ok": true,
+  "detail": "Sam Okoro"
+ },
+ {
+  "lock": "B1",
+  "where": "slice closed card 0 at (14i, 38i)",
+  "ok": true,
+  "detail": "(0.0, 0.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice closed card 1 at (14i, 38i)",
+  "ok": true,
+  "detail": "(14.0, 38.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice closed card 2 at (14i, 38i)",
+  "ok": true,
+  "detail": "(28.0, 76.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice closed: later cards on top",
+  "ok": true,
+  "detail": "10,11,12"
+ },
+ {
+  "lock": "B1",
+  "where": "slice closed: at most five cards",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none: that status only",
+  "ok": true,
+  "detail": "none,none,none,none,none"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none: cards + more = the row's count, at most five",
+  "ok": true,
+  "detail": "5+24 vs 29"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Wren Tallis: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Wren Tallis: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Wren Tallis: a bust, never initials",
+  "ok": true,
+  "detail": "Wren Tallis"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Imogen Vale: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Imogen Vale: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Imogen Vale: a bust, never initials",
+  "ok": true,
+  "detail": "Imogen Vale"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Tomas Keller: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Tomas Keller: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Tomas Keller: a bust, never initials",
+  "ok": true,
+  "detail": "Tomas Keller"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Ingrid Marsh: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Ingrid Marsh: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Ingrid Marsh: a bust, never initials",
+  "ok": true,
+  "detail": "Ingrid Marsh"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Edda Kron: the header is the status's colour",
+  "ok": true,
+  "detail": "rgb(223, 230, 238) / rgb(42, 58, 82)"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Edda Kron: the header spans the card",
+  "ok": true,
+  "detail": "212 of 212"
+ },
+ {
+  "lock": "D1",
+  "where": "slice none Edda Kron: a bust, never initials",
+  "ok": true,
+  "detail": "Edda Kron"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none card 0 at (14i, 38i)",
+  "ok": true,
+  "detail": "(0.0, 0.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none card 1 at (14i, 38i)",
+  "ok": true,
+  "detail": "(14.0, 38.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none card 2 at (14i, 38i)",
+  "ok": true,
+  "detail": "(28.0, 76.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none card 3 at (14i, 38i)",
+  "ok": true,
+  "detail": "(42.0, 114.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none card 4 at (14i, 38i)",
+  "ok": true,
+  "detail": "(56.0, 152.0)"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none: later cards on top",
+  "ok": true,
+  "detail": "10,11,12,13,14"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none: at most five cards",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "B1",
+  "where": "slice none: +N more 8px under the last card, on its left edge",
+  "ok": true,
+  "detail": "pill 225,56 vs 225,56"
+ },
+ {
+  "lock": "B1",
+  "where": "population: a stack with +N more",
+  "ok": true,
+  "detail": "4"
+ }
+]

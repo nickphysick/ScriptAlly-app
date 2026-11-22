@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "LP",
+  "where": "the probe task is in the tray",
+  "ok": true,
+  "detail": "zz-td7-pick-mvtiwwux"
+ },
+ {
+  "lock": "LP",
+  "where": "the date opens the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "LP",
+  "where": "\"Pick a date\" is offered",
+  "ok": true,
+  "detail": "Pick a date▾"
+ },
+ {
+  "lock": "LP",
+  "where": "the month is in the popover",
+  "ok": true,
+  "detail": "31"
+ },
+ {
+  "lock": "LP",
+  "where": "today and the past are refused",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "LP",
+  "where": "a pickable day after today",
+  "ok": true,
+  "detail": "2026-10-30"
+ },
+ {
+  "lock": "LP",
+  "where": "the pick moves dueDate to 2026-10-30",
+  "ok": true,
+  "detail": "2026-10-30"
+ },
+ {
+  "lock": "LP",
+  "where": "the toast says it moved",
+  "ok": true,
+  "detail": "Zz td7 pick probe · moved to Fri 30 OctUndo"
+ },
+ {
+  "lock": "LP",
+  "where": "Undo",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "LP",
+  "where": "Undo restores the document byte for byte",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "LP",
+  "where": "no row is draggable",
+  "ok": true,
+  "detail": ""
+ }
+]

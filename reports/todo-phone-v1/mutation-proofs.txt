@@ -1,0 +1,12 @@
+L1 · exit 1 ·   1 failed   1 passed (26.5s)  · Error: the week strip, the when-groups and Up next are gone · Expected: 0
+L2 · exit 1 ·   1 failed   1 passed (27.0s)  · Error: done is doneTabRows' length (the desktop's cleared this week) · Expected: 0
+L3 · exit 1 ·   1 failed   1 passed (26.9s)  · Error: expect(received).toBe(expected) // Object.is equality · Expected: "Answering Tom’s offer from Ellery & Finch"
+L4 · exit 1 ·   1 failed   1 passed (23.2s)  · Error: the desktop's groups, in WS_GROUPS order · - Expected  - 1
+L4b · exit 1 ·   1 failed   1 passed (26.4s)  · Error: the collapse is remembered on this device · Expected: ""
+L5 · exit 1 ·   1 failed   1 passed (1.3m)  · Error: send: the phone asks buildFlow's questions, in order · - Expected  - 0
+L6 · exit 1 ·   1 failed   1 passed (58.6s)  · Error: send: a choice never moves you on (L6) · Expected: true
+L10 · exit 1 ·   1 failed   1 passed (23.4s)  · Error: the task screen opened · Expected: true
+L8 · exit 1 ·   1 failed   1 passed (26.7s)  · Error: the desktop's L10: exactly these three documents, once each · - Expected  -  0
+L9 · exit 1 ·   1 failed   1 passed (23.9s)  · Error: no empty space between the last bubble and the footer · Expected: <= 24
+L9b · exit 1 ·   1 failed   1 passed (23.8s)  · Error: no empty space between the last bubble and the footer · Expected: <= 24
+L7 · exit 1 ·   1 failed   1 passed (50.3s)  · Error: send: the pill is in view and uncovered on every step (L7) · Expected: true

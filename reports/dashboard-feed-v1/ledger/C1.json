@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "C1",
+  "where": "1512x982c population: the card",
+  "ok": true,
+  "detail": "{\"active\":\"true\",\"body\":224,\"agents\":775.9375}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982c Active is pressed on load",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982c the chart area is 224 ±2",
+  "ok": true,
+  "detail": "224"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982c population: the last point and the plot, on screen",
+  "ok": true,
+  "detail": "{\"x0\":404,\"x1\":473,\"y0\":509,\"y1\":629,\"gx\":123,\"gy\":470}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982c the grain: a column past the last point with ≥20% fill and ≥20% card",
+  "ok": true,
+  "detail": "404:88 407:88 410:88 413:88 416:88 419:88 422:88 425:87 428:88 431:86 434:79 437:68 440:68 443:54 446:45 449:37 452:22 455:18 458:13 461:15 464:4 467:1 470:3"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982c Closed: the next card's top moves 0 ±1",
+  "ok": true,
+  "detail": "302 → 302"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982c Closed: the header says closed",
+  "ok": true,
+  "detail": "12 closed"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 population: the card",
+  "ok": true,
+  "detail": "{\"active\":\"true\",\"body\":224,\"agents\":2044.25}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Active is pressed on load",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 the chart area is 224 ±2",
+  "ok": true,
+  "detail": "224"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 population: the last point and the plot, on screen",
+  "ok": true,
+  "detail": "{\"x0\":625,\"x1\":695,\"y0\":418,\"y1\":538,\"gx\":299,\"gy\":379}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 the grain: a column past the last point with ≥20% fill and ≥20% card",
+  "ok": true,
+  "detail": "625:88 628:88 631:88 634:88 637:88 640:88 643:88 646:86 649:86 652:84 655:73 658:71 661:64 664:48 667:43 670:34 673:18 676:8 679:8 682:8 685:1 688:2 691:1 694:1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Closed: the next card's top moves 0 ±1",
+  "ok": true,
+  "detail": "302 → 302"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 Closed: the header says closed",
+  "ok": true,
+  "detail": "12 closed"
+ }
+]

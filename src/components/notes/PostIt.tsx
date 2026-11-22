@@ -8,13 +8,13 @@
  */
 import React from "react";
 import { Calendar } from "lucide-react";
-import type { NoteColour } from "../../types";
+import type { DeskNoteColour } from "../../types";
 import { FONT_MONO } from "../../lib/designTokens";
 import { NOTE_THEMES, FONT_CAVEAT, DUE_CHIP_STAGES, type NoteTheme } from "./notesTheme";
 import { dueStage, dueChipLabel, formatCreatedStamp } from "./notesUtils";
 
 export interface PostItProps {
-  colour: NoteColour;
+  colour: DeskNoteColour;
   /** Optional explicit theme override (e.g. the empty-state pale tints); falls back to NOTE_THEMES. */
   theme?: NoteTheme;
   /** Note body text. Optional when `children` is supplied (e.g. the empty-state copy). */

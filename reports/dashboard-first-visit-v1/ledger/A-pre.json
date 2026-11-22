@@ -1,0 +1,290 @@
+[
+ {
+  "lock": "A1",
+  "where": "1280x800 S1 the first-visit page",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"setup\":true,\"tip\":true,\"group\":\"start\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 S1 Getting started's checklist fits its card",
+  "ok": true,
+  "detail": "overflow 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 S1 the founding card shows everything it shows after the first query",
+  "ok": true,
+  "detail": "missing none · pre 208.9px · after 208.9px"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 S1 the founding card ends above the feed tab",
+  "ok": true,
+  "detail": "card 743.8 · tab 758.0"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 S1 no header buttons; the eyebrow says GETTING READY",
+  "ok": true,
+  "detail": "{\"b\":[],\"e\":\"— GETTING READY —\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 S1 once a query exists, Record a response and QUERYING",
+  "ok": true,
+  "detail": "{\"b\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"e\":\"— QUERYING —\"}"
+ },
+ {
+  "lock": "A4",
+  "where": "1280x800 S1 no scroll",
+  "ok": true,
+  "detail": "{\"sh\":686,\"ch\":686}"
+ },
+ {
+  "lock": "A5",
+  "where": "1280x800 S1 the retired pieces are gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 S2 the first-visit page",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"setup\":true,\"tip\":true,\"group\":\"start\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 S2 Getting started's checklist fits its card",
+  "ok": true,
+  "detail": "overflow 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 S2 the founding card shows everything it shows after the first query",
+  "ok": true,
+  "detail": "missing none · pre 208.9px · after 208.9px"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 S2 the founding card ends above the feed tab",
+  "ok": true,
+  "detail": "card 743.8 · tab 758.0"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 S2 no header buttons; the eyebrow says GETTING READY",
+  "ok": true,
+  "detail": "{\"b\":[],\"e\":\"— GETTING READY —\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 S2 once a query exists, Record a response and QUERYING",
+  "ok": true,
+  "detail": "{\"b\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"e\":\"— QUERYING —\"}"
+ },
+ {
+  "lock": "A4",
+  "where": "1280x800 S2 no scroll",
+  "ok": true,
+  "detail": "{\"sh\":686,\"ch\":686}"
+ },
+ {
+  "lock": "A5",
+  "where": "1280x800 S2 the retired pieces are gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 S1 the first-visit page",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"setup\":true,\"tip\":true,\"group\":\"start\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 S1 Getting started's checklist fits its card",
+  "ok": true,
+  "detail": "overflow 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 S1 the founding card shows everything it shows after the first query",
+  "ok": true,
+  "detail": "missing none · pre 290.0px · after 290.0px"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 S1 the founding card ends above the feed tab",
+  "ok": true,
+  "detail": "card 843.8 · tab 858.0"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x900 S1 no header buttons; the eyebrow says GETTING READY",
+  "ok": true,
+  "detail": "{\"b\":[],\"e\":\"— GETTING READY —\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x900 S1 once a query exists, Record a response and QUERYING",
+  "ok": true,
+  "detail": "{\"b\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"e\":\"— QUERYING —\"}"
+ },
+ {
+  "lock": "A4",
+  "where": "1512x900 S1 no scroll",
+  "ok": true,
+  "detail": "{\"sh\":786,\"ch\":786}"
+ },
+ {
+  "lock": "A5",
+  "where": "1512x900 S1 the retired pieces are gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 S2 the first-visit page",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"setup\":true,\"tip\":true,\"group\":\"start\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 S2 Getting started's checklist fits its card",
+  "ok": true,
+  "detail": "overflow 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 S2 the founding card shows everything it shows after the first query",
+  "ok": true,
+  "detail": "missing none · pre 290.0px · after 290.0px"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x900 S2 the founding card ends above the feed tab",
+  "ok": true,
+  "detail": "card 843.8 · tab 858.0"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x900 S2 no header buttons; the eyebrow says GETTING READY",
+  "ok": true,
+  "detail": "{\"b\":[],\"e\":\"— GETTING READY —\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x900 S2 once a query exists, Record a response and QUERYING",
+  "ok": true,
+  "detail": "{\"b\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"e\":\"— QUERYING —\"}"
+ },
+ {
+  "lock": "A4",
+  "where": "1512x900 S2 no scroll",
+  "ok": true,
+  "detail": "{\"sh\":786,\"ch\":786}"
+ },
+ {
+  "lock": "A5",
+  "where": "1512x900 S2 the retired pieces are gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1920x1080 S1 the first-visit page",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"setup\":true,\"tip\":true,\"group\":\"start\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1920x1080 S1 Getting started's checklist fits its card",
+  "ok": true,
+  "detail": "overflow 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1920x1080 S1 the founding card shows everything it shows after the first query",
+  "ok": true,
+  "detail": "missing none · pre 303.0px · after 371.6px"
+ },
+ {
+  "lock": "A2",
+  "where": "1920x1080 S1 the founding card ends above the feed tab",
+  "ok": true,
+  "detail": "card 889.9 · tab 1038.0"
+ },
+ {
+  "lock": "A3",
+  "where": "1920x1080 S1 no header buttons; the eyebrow says GETTING READY",
+  "ok": true,
+  "detail": "{\"b\":[],\"e\":\"— GETTING READY —\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "1920x1080 S1 once a query exists, Record a response and QUERYING",
+  "ok": true,
+  "detail": "{\"b\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"e\":\"— QUERYING —\"}"
+ },
+ {
+  "lock": "A4",
+  "where": "1920x1080 S1 no scroll",
+  "ok": true,
+  "detail": "{\"sh\":966,\"ch\":966}"
+ },
+ {
+  "lock": "A5",
+  "where": "1920x1080 S1 the retired pieces are gone",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "1920x1080 S2 the first-visit page",
+  "ok": true,
+  "detail": "{\"mode\":\"pre\",\"setup\":true,\"tip\":true,\"group\":\"start\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1920x1080 S2 Getting started's checklist fits its card",
+  "ok": true,
+  "detail": "overflow 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1920x1080 S2 the founding card shows everything it shows after the first query",
+  "ok": true,
+  "detail": "missing none · pre 303.0px · after 371.6px"
+ },
+ {
+  "lock": "A2",
+  "where": "1920x1080 S2 the founding card ends above the feed tab",
+  "ok": true,
+  "detail": "card 889.9 · tab 1038.0"
+ },
+ {
+  "lock": "A3",
+  "where": "1920x1080 S2 no header buttons; the eyebrow says GETTING READY",
+  "ok": true,
+  "detail": "{\"b\":[],\"e\":\"— GETTING READY —\"}"
+ },
+ {
+  "lock": "A3",
+  "where": "1920x1080 S2 once a query exists, Record a response and QUERYING",
+  "ok": true,
+  "detail": "{\"b\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"e\":\"— QUERYING —\"}"
+ },
+ {
+  "lock": "A4",
+  "where": "1920x1080 S2 no scroll",
+  "ok": true,
+  "detail": "{\"sh\":966,\"ch\":966}"
+ },
+ {
+  "lock": "A5",
+  "where": "1920x1080 S2 the retired pieces are gone",
+  "ok": true,
+  "detail": ""
+ }
+]

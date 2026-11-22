@@ -1,0 +1,47 @@
+[
+ {
+  "name": "population: the save landed (toast)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "save: exactly one pop, at most one press, and no other scale animation on the frame",
+  "ok": true,
+  "got": "[{\"uid\":3,\"id\":\"qc1611-press\",\"props\":[\"scale\"],\"dur\":120,\"peak\":1,\"low\":0.985,\"play\":\"running\"},{\"uid\":4,\"id\":\"qc160-bump\",\"props\":[\"scale\"],\"dur\":620,\"peak\":1.03,\"low\":0.985,\"play\":\"running\"}]"
+ },
+ {
+  "name": "save: they animate scale only, never transform",
+  "ok": true,
+  "got": "[[\"scale\"],[\"scale\"]]"
+ },
+ {
+  "name": "save: the bump is 620ms (v163)",
+  "ok": true,
+  "got": "620"
+ },
+ {
+  "name": "save: the pop peaks at 1.03 (v163)",
+  "ok": true,
+  "got": "1.03"
+ },
+ {
+  "name": "save: population — frames with the bump running",
+  "ok": true,
+  "got": "37"
+ },
+ {
+  "name": "save: the frame's rotate is unchanged during it (frames where the lean's own return is not running)",
+  "ok": true,
+  "got": "37 frames: [\"1.6deg\"]"
+ },
+ {
+  "name": "save: the frame's translate is unchanged during it",
+  "ok": true,
+  "got": "[\"none\"]"
+ },
+ {
+  "name": "save: transform is never set on the frame",
+  "ok": true,
+  "got": "[\"none\"]"
+ }
+]

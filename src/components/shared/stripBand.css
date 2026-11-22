@@ -1,0 +1,29 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE STRIPED BAND'S CONSTRUCTION, lifted from Dashboard v2.2's founding writer band (dash2Founding.css) by Responses v15
+ * so its grey "A word on rejections" band is the same build, not a rebuild: a white rim, a striped top strip, and a
+ * bordered body with a wash from its top-left corner. Each band names its tone; everything else (the strip's contents,
+ * the body's grid, the fold) stays with the band that uses it.
+ *
+ *   .sband               the rim          (padding 7, radius 22, white, the lifted shadow)
+ *   .sband-top           the strip        (radius 15 15 0 0; 15 all round when the band is folded)
+ *   .sband-body          the body         (1px edge, no top edge, radius 0 0 15 15, the corner wash)
+ *   .sband--rose / --grey  the two tones  (the founding band's values; the grey band's from design-refs/responses-v15 `.gb`)
+ *
+ * ⚠️ THE FOUNDING BAND'S VALUES ARE UNCHANGED: these declarations moved here byte for byte; dash2Founding.css keeps the
+ *    rest. Its own selectors (.d58.d2 .d22-*) still win wherever both speak.
+ */
+.sband {
+  box-sizing: border-box; padding: 7px; border-radius: 22px; background: #fff;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
+}
+.sband-top { border-radius: 15px 15px 0 0; background: repeating-linear-gradient(-45deg, var(--sband-s1) 0 12px, var(--sband-s2) 12px 24px); }
+.sband.is-folded .sband-top { border-radius: 15px; }
+.sband-body {
+  border: 1px solid var(--sband-edge); border-top: 0; border-radius: 0 0 15px 15px;
+  background: radial-gradient(90% 160% at 0% 0%, var(--sband-wash) 0%, #fff var(--sband-wash-to));
+}
+.sband--rose { --sband-s1: #f1d7cb; --sband-s2: #ebcdbf; --sband-edge: #e6cfc4; --sband-wash: #fcefe8; --sband-wash-to: 46%; }
+.sband--grey { --sband-s1: #e9e6e1; --sband-s2: #e1ded8; --sband-edge: #dcd8d1; --sband-wash: #f3f1ed; --sband-wash-to: 50%; }

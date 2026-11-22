@@ -521,9 +521,13 @@ const latest = (...vs: (string | undefined)[]): number => {
 export function waitAnchorMs(bucket: Bucket, taskType: string | undefined, q: AnchorInput): number {
   switch (bucket) {
     case "send":
-      /* the date the agent asked for the material — the specific request, not the query */
-      if (taskType === "partial_requested") return ms(q.partialRequestedDate);
-      if (taskType === "full_requested") return ms(q.fullRequestedDate);
+      /* the date the agent asked for the material — the specific request, not the query.
+         ⚠️ To-do list v55 (D7): A REQUEST WITH NO REQUEST DATE IS COUNTED FROM WHEN ITS STATUS MOVED. A query written
+         straight to Partial/Full Requested (seeded, imported, or set by hand) never gets the derived request date, and
+         the card only exists while the status IS that request, so the status's last move IS when the agent asked — the
+         same reading an R&R has always had. Still NaN when neither is stored: never today, never the query's creation. */
+      if (taskType === "partial_requested") return Number.isFinite(ms(q.partialRequestedDate)) ? ms(q.partialRequestedDate) : ms(q.statusMovedAt);
+      if (taskType === "full_requested") return Number.isFinite(ms(q.fullRequestedDate)) ? ms(q.fullRequestedDate) : ms(q.statusMovedAt);
       /* an R&R has no request date of its own; the status change IS when it was asked for */
       return ms(q.statusMovedAt);
 

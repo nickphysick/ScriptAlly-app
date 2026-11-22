@@ -1,117 +1,76 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Plan rules v1 — Smart Import is ONCE PER ACCOUNT, on every plan. The client's rule (this module) and the server's
+ * (functions/src/entitlementCore `smartImportUsed`, read by smartImportMap) are run over the same cases.
  */
 import { describe, it, expect } from "vitest";
-import { UserPlan, SmartImportUsage } from "../types";
+import { readFileSync } from "node:fs";
+import type { SmartImportUsage } from "../types";
 import {
-  getSmartImportEntitlement, utcMonth, firstOfNextMonth, smartImportLine, SmartImportReason,
+  getSmartImportEntitlement, smartImportLine, smartImportUsed, isUsedRefusal, type SmartImportReason,
 } from "./smartImportEntitlement";
+import { smartImportUsed as serverUsed } from "../../functions/src/entitlementCore";
 
-const NOW = new Date(Date.UTC(2026, 5, 15)); // 2026-06-15 (UTC) → month "2026-06"
+const CASES: { name: string; usage: SmartImportUsage | null; used: boolean }[] = [
+  { name: "never imported (no doc)", usage: null, used: false },
+  { name: "never imported (a doc with only the founding flag)", usage: { founding: true }, used: false },
+  { name: "used the old free-once", usage: { smartImportFreeUsed: true }, used: true },
+  { name: "used a Pro month under the old rule", usage: { smartImportLastUsedMonth: "2026-06" }, used: true },
+  { name: "used both — more than one under the old rule; none left, nothing deleted", usage: { smartImportFreeUsed: true, smartImportLastUsedMonth: "2026-09" }, used: true },
+];
 
-describe("month helpers", () => {
-  it("utcMonth formats YYYY-MM in UTC", () => {
-    expect(utcMonth(NOW)).toBe("2026-06");
-    expect(utcMonth(new Date(Date.UTC(2026, 11, 1)))).toBe("2026-12");
+describe("once per account, any plan — client and server agree", () => {
+  for (const c of CASES) {
+    it(c.name, () => {
+      expect(smartImportUsed(c.usage)).toBe(c.used);
+      expect(serverUsed(c.usage)).toBe(c.used);
+      expect(getSmartImportEntitlement(c.usage)).toEqual(c.used ? { allowed: false, reason: "used" } : { allowed: true, reason: "available" });
+    });
+  }
+
+  it("the plan does not enter into it: the entitlement takes usage alone", () => {
+    expect(getSmartImportEntitlement.length).toBe(1);
   });
-  it("firstOfNextMonth rolls to the first of the next month (incl. year boundary)", () => {
-    expect(firstOfNextMonth("2026-06")).toBe("2026-07-01");
-    expect(firstOfNextMonth("2026-12")).toBe("2027-01-01");
+
+  it("every refusal word the callable has sent means used", () => {
+    for (const r of ["used", "free_used", "pro_month_used"]) expect(isUsedRefusal(r), r).toBe(true);
+    for (const r of ["in_progress", undefined, "rate_limited"]) expect(isUsedRefusal(r), String(r)).toBe(false);
   });
 });
 
-const usage = (over: SmartImportUsage = {}): SmartImportUsage => ({ ...over });
-
-describe("getSmartImportEntitlement — Free tier", () => {
-  it("free + unused → free_available", () => {
-    expect(getSmartImportEntitlement(UserPlan.FREE, usage(), NOW)).toEqual({
-      allowed: true, tier: "free", reason: "free_available",
-    });
+describe("the server refuses the second call, on every plan", () => {
+  const src = readFileSync(new URL("../../functions/src/smartImport.ts", import.meta.url), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  it("the claim reads the one rule, never the plan or the month", () => {
+    expect(src).toContain('if (smartImportUsed(usage)) return "used" as const;');
+    expect(src).not.toMatch(/get\("plan"\)|PRO_PLAN|utcMonth|smartImportLastUsedMonth: month|pro_month_used/);
   });
-  it("free + used → free_used (blocked, no nextAvailable)", () => {
-    expect(getSmartImportEntitlement(UserPlan.FREE, usage({ smartImportFreeUsed: true }), NOW)).toEqual({
-      allowed: false, tier: "free", reason: "free_used",
-    });
-  });
-  it("undefined plan + null usage defaults to free + available", () => {
-    expect(getSmartImportEntitlement(undefined, null, NOW).reason).toBe("free_available");
-  });
-});
-
-describe("getSmartImportEntitlement — Pro tier", () => {
-  it("pro + no import this month → pro_available", () => {
-    expect(getSmartImportEntitlement(UserPlan.PRO, null, NOW)).toEqual({
-      allowed: true, tier: "pro", reason: "pro_available",
-    });
-  });
-  it("pro + used a PREVIOUS month → pro_available (month reset)", () => {
-    expect(getSmartImportEntitlement(UserPlan.PRO, usage({ smartImportLastUsedMonth: "2026-05" }), NOW).reason)
-      .toBe("pro_available");
-  });
-  it("pro + used THIS month → pro_month_used with next-available date", () => {
-    expect(getSmartImportEntitlement(UserPlan.PRO, usage({ smartImportLastUsedMonth: "2026-06" }), NOW)).toEqual({
-      allowed: false, tier: "pro", reason: "pro_month_used", nextAvailable: "2026-07-01",
-    });
-  });
-  it("pro allowance ignores the free-once flag (upgrade unlocks immediately)", () => {
-    // A free user who spent their free import then upgraded: free flag set, but Pro this-month unused.
-    expect(getSmartImportEntitlement(UserPlan.PRO, usage({ smartImportFreeUsed: true }), NOW).allowed).toBe(true);
+  it("a usable result spends the one import, and the refusal says used", () => {
+    expect(src).toContain("smartImportFreeUsed: true,");
+    expect(src).toContain('reason: "used"');
   });
 });
 
 describe("smartImportLine — the plan card's allowance row", () => {
-  /* A fixed formatter, so the assertions are about the SENTENCE and not about the machine's locale. */
-  const fmt = (iso: string) => `[${iso}]`;
-  const line = (plan: UserPlan | undefined, usage: SmartImportUsage | null, now = new Date("2026-09-07T10:00:00Z")) =>
-    smartImportLine(getSmartImportEntitlement(plan, usage, now), fmt);
-
-  it("free, unused: available, and it does not mention a next one", () => {
-    const l = line(UserPlan.FREE, null);
+  it("available, and it does not mention a next one", () => {
+    const l = smartImportLine({ allowed: true, reason: "available" });
     expect(l.tag).toBe("1 available");
-    expect(l.note).not.toMatch(/next/i);
+    expect(l.note).not.toMatch(/next|month/i);
   });
 
-  /**
-   * ⚠️ IT DOES NOT SELL. "You've used yours — upgrade for one a month" is a true sentence and an
-   * advertisement in a settings row, on a card that already carries one honest CTA.
-   */
-  it("⚠️ free, used: states the fact and does not upsell", () => {
-    const l = line(UserPlan.FREE, { smartImportFreeUsed: true } as SmartImportUsage);
+  /** ⚠️ IT DOES NOT SELL. */
+  it("⚠️ used: states the fact and does not upsell", () => {
+    const l = smartImportLine({ allowed: false, reason: "used" });
     expect(l.tag).toBe("Used");
-    expect(l.note.toLowerCase()).not.toMatch(/upgrade|pro plan|only £|unlock/);
+    expect(l.note.toLowerCase()).not.toMatch(/upgrade|pro plan|only £|unlock|month/);
   });
 
-  it("pro, unused this month: available, and no date — there is nothing to wait for", () => {
-    const l = line(UserPlan.PRO, null);
-    expect(l.tag).toBe("1 available");
-    expect(l.note).not.toContain("[");
-  });
-
-  /**
-   * ⚠️ THE DATE IS THE WHOLE POINT OF THIS BRANCH. "Used" on its own tells a Pro subscriber they
-   * have lost something; with the reset date it tells them when it comes back.
-   */
-  it("pro, used this month: names the reset date, formatted by the caller", () => {
-    const l = line(UserPlan.PRO, { smartImportLastUsedMonth: "2026-09" } as SmartImportUsage);
-    expect(l.tag).toBe("Used");
-    expect(l.note).toContain("[2026-10-01]");
-  });
-
-  /* ⚠️ AND IT SURVIVES A MISSING DATE RATHER THAN PRINTING ONE. `nextAvailable` is optional on the
-     type, so the branch that needs it must not assume it — "arrives on undefined" is the shape this
-     forecloses. */
-  it("⚠️ says something true when the reset date is missing", () => {
-    const l = smartImportLine({ allowed: false, tier: "pro", reason: "pro_month_used" }, fmt);
-    expect(l.note).not.toMatch(/undefined|NaN|\[/);
-    expect(l.note).toMatch(/next month/i);
-  });
-
-  /* Every reason the policy can return has words — asserted over the union, not a hand-typed list. */
   it("⚠️ every reason the policy produces has a tag and a sentence", () => {
-    const REASONS: SmartImportReason[] = ["free_available", "free_used", "pro_available", "pro_month_used"];
+    const REASONS: SmartImportReason[] = ["available", "used"];
     for (const reason of REASONS) {
-      const l = smartImportLine({ allowed: true, tier: "free", reason }, fmt);
+      const l = smartImportLine({ allowed: reason === "available", reason });
       expect(l.tag, reason).not.toBe("");
       expect(l.note, reason).not.toBe("");
     }

@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L5-L6",
+  "where": "head to head has two cards",
+  "ok": true,
+  "detail": "[\"Ready one Standard 2 Standard 40% asked for more 2 of 5 sent Sent 5 Replied 3 Asked for more 2 Full request 1\",\"Ready one Standard 2 Standard 1 of 4 asked for more Too early for a % Sent 4 Replied 2 Asked for more 1 Full request 0\"]"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "A is Standard at 40%, 2 of 5 sent",
+  "ok": true,
+  "detail": "Ready one Standard 2 Standard 40% asked for more 2 of 5 sent Sent 5 Replied 3 Asked for more 2 Full request 1"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "…its funnel: Sent 5 · Replied 3 · Asked for more 2 · Full request 1",
+  "ok": true,
+  "detail": "Ready one Standard 2 Standard 40% asked for more 2 of 5 sent Sent 5 Replied 3 Asked for more 2 Full request 1"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "B is Standard 2, 1 of 4, too early for a %",
+  "ok": true,
+  "detail": "Ready one Standard 2 Standard 1 of 4 asked for more Too early for a % Sent 4 Replied 2 Asked for more 1 Full request 0"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "the verdict: only the letter differs, too early",
+  "ok": true,
+  "detail": "Only the letter differs. Too early to call: 5 and 4 sent. Each needs 5 before it counts."
+ },
+ {
+  "lock": "L5-L6",
+  "where": "the scoreboard ranks Standard and shows Standard 2 unranked as early",
+  "ok": true,
+  "detail": "[\"1 Standard 5 sent 40%\",\"· Standard 2 4 sent early\"]"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "the summary: 9 sent with a package (withdrawn out), 33%, 1 of 3 to compare",
+  "ok": true,
+  "detail": "9 queries sent with a package 33% asked for more, across all of them 1 of 3 packages with enough to compare"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "Tests lists exactly Standard 2",
+  "ok": true,
+  "detail": "[\"pk40-std2\"]"
+ },
+ {
+  "lock": "L5-L6",
+  "where": "…Running, testing the letter",
+  "ok": true,
+  "detail": "Running Testing the letter Letter: Hook-first → Comps-forward Standard 5 sent 40% → Standard 2 4 sent 1 of 4 Each side needs 5 sent. 1 to go."
+ },
+ {
+  "lock": "L5-L6",
+  "where": "…footer: 1 to go",
+  "ok": true,
+  "detail": "Running Testing the letter Letter: Hook-first → Comps-forward Standard 5 sent 40% → Standard 2 4 sent 1 of 4 Each side needs 5 sent. 1 to go."
+ }
+]

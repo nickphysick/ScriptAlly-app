@@ -1,0 +1,37 @@
+{
+ "tracking (header)": [
+  "div.qc152-agent > div.qc152-who > div.qc152-ag · 10.5px · \"STATE & WINDOW\"",
+  "div.qc152-ms[book] > div > small · 10px · \"QUERYING\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Adult\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Literary Fiction\"",
+  "div > div.qc152-bkc > span · 9.5px · \"92,000 words\""
+ ],
+ "tracking": [
+  "div.qc152-r2 > span.qc152-chs[chips] > button.qc152-ch[chip] · 8.5px · \"Covering letter\"",
+  "div.qc152-r2 > span.qc152-chs[chips] > button.qc152-ch[chip] · 8.5px · \"Query letter\"",
+  "div.qc152-r2 > span.qc152-chs[chips] > button.qc152-ch[chip] · 8.5px · \"Synopsis\"",
+  "div.qc152-r2 > span.qc152-chs[chips] > button.qc152-ch[chip] · 8.5px · \"10 pages\"",
+  "div.qc152-r2 > span.qc152-chs[chips] > button.qc152-ch[chip] · 8.5px · \"Full manuscript\""
+ ],
+ "agent (header)": [
+  "div.qc152-agent > div.qc152-who > div.qc152-ag · 10.5px · \"STATE & WINDOW\"",
+  "div.qc152-ms[book] > div > small · 10px · \"QUERYING\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Adult\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Literary Fiction\"",
+  "div > div.qc152-bkc > span · 9.5px · \"92,000 words\""
+ ],
+ "materials (header)": [
+  "div.qc152-agent > div.qc152-who > div.qc152-ag · 10.5px · \"STATE & WINDOW\"",
+  "div.qc152-ms[book] > div > small · 10px · \"QUERYING\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Adult\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Literary Fiction\"",
+  "div > div.qc152-bkc > span · 9.5px · \"92,000 words\""
+ ],
+ "notes (header)": [
+  "div.qc152-agent > div.qc152-who > div.qc152-ag · 10.5px · \"STATE & WINDOW\"",
+  "div.qc152-ms[book] > div > small · 10px · \"QUERYING\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Adult\"",
+  "div > div.qc152-bkc > span · 9.5px · \"Literary Fiction\"",
+  "div > div.qc152-bkc > span · 9.5px · \"92,000 words\""
+ ]
+}

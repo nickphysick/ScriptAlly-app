@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the seeded query is listed",
+  "ok": true,
+  "detail": "qc1491-q1 not in the list"
+ },
+ {
+  "where": "the book tile with its icon",
+  "ok": true,
+  "detail": "{\"tile\":true,\"chips\":[\"Adult\",\"Book club\",\"0 words\"],\"pkg\":\"No package\"}"
+ },
+ {
+  "where": "age category and genre (the manuscript's)",
+  "ok": true,
+  "detail": "[\"Adult\",\"Book club\",\"0 words\"]"
+ },
+ {
+  "where": "word count 0 is no chip — absent, not blank",
+  "ok": false,
+  "detail": "[\"Adult\",\"Book club\",\"0 words\"]"
+ },
+ {
+  "where": "the package chip reads No package",
+  "ok": true,
+  "detail": "No package"
+ },
+ {
+  "where": "population: a manuscript with a word count",
+  "ok": true,
+  "detail": "{\"tile\":true,\"chips\":[\"Adult\",\"Literary Fiction\",\"92,000 words\"],\"pkg\":\"No package\"}"
+ },
+ {
+  "where": "…its word count chip reads '92,000 words'",
+  "ok": true,
+  "detail": "[\"Adult\",\"Literary Fiction\",\"92,000 words\"]"
+ }
+]

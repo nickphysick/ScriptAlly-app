@@ -1,0 +1,221 @@
+/*
+ * Sidebar rail v1 (5 Nov) — the 80px labelled rail. Values are the normative ref's
+ * (design-refs/shell/sidebar-rail-v1.css), ported with its always-on modifiers flattened in:
+ * qr-sections qr-pill qr-rules f-serif qr-heavy qr-ground qr-quiet. The ref's rejected options
+ * (the hover peek, the page-name line, the dots, the top-bar feedback button) are not ported.
+ *
+ * Desktop only: the phone keeps its own bar.
+ *
+ * ⚠️ EVERY LABEL STATES ITS FONT FAMILY. brand.tsx names the body sans on every bare `span`, so a label
+ * that inherited its button's serif would render in Source Sans (it did, in the mock). A class beats the
+ * element selector, which is all it takes.
+ */
+@media (min-width: 768px) {
+  .wsr {
+    position: absolute; top: 0; left: 0; bottom: 0; width: 80px;
+    box-sizing: border-box; display: flex; flex-direction: column;
+    padding: 16px 6px 12px;
+    transition: opacity 0.16s ease 0.1s;
+  }
+  .wsr * { box-sizing: border-box; }
+  .wsr button { margin: 0; font: inherit; line-height: normal; appearance: none; -webkit-appearance: none; text-transform: none; letter-spacing: normal; }
+
+  /* ── the hawk, and the expand control that takes its place on hover ── */
+  /* ⚠️ THE LOGO SHARES THE BAR'S CENTRE LINE (shell tabs v2): `top: -4px` lifts the mark (and its toggle) onto the
+     search field's centre, measured 4.0px low before. Relative, so nothing under it moves. ST2-A3. */
+  .wsr-lgo { flex: none; height: 34px; display: flex; justify-content: center; position: relative; top: -4px; }
+  .wsr-home {
+    display: grid; place-items: center; width: 40px; height: 40px; margin-top: -3px; padding: 0;
+    border: 0; border-radius: 10px; background: transparent; cursor: pointer; transition: background-color 0.14s ease;
+  }
+  .wsr-home:hover { background: rgba(var(--ink-cream-rgb), 0.06); }
+  .wsr-home img { width: 34px; height: 34px; transition: opacity 0.16s ease; }
+  .wsr-tog {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 34px; height: 34px; padding: 0;
+    border: 0; border-radius: 9px; display: grid; place-items: center;
+    background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); cursor: pointer;
+    opacity: 0; pointer-events: none; transition: opacity 0.14s ease;
+  }
+  .wsr-tog svg { width: 16px; height: 16px; }
+  .wsr-lgo:hover .wsr-tog, .wsr-tog:focus-visible { opacity: 1; pointer-events: auto; }
+  .wsr-lgo:hover .wsr-home img, .wsr-lgo:has(.wsr-tog:focus-visible) .wsr-home img { opacity: 0; }
+
+  /* ── the full sidebar picker's initials tile (the rail's own tile is retired: manuscript spine v1) ── */
+  .wsr-init {
+    width: 30px; height: 40px; border-radius: 3px; display: grid; place-items: center; position: relative;
+    background: var(--ink-cream); color: var(--sp-anthracite, #2a3a52);
+    font: 600 13px/1 var(--sp-serif); letter-spacing: 0.02em;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(42, 58, 82, 0.08);
+  }
+  .wsr-init::after { content: ""; position: absolute; left: 7px; right: 7px; bottom: 7px; height: 1px; background: rgba(42, 58, 82, 0.25); }
+  .wsr-init svg { width: 16px; height: 16px; }
+
+  /* ── the nav ── */
+  /* ⚠️ MANUSCRIPT SPINE v1: THE NAV STARTS WHERE THE MANUSCRIPT TILE'S SLOT DID — 12px under the hawk (8 on a short
+     window), the slot's own margin — now that the book stands at the rail's foot. The nav is its content's height and
+     shrinks (then scrolls) only when the spine's slot below it is at its floor (manuscriptSpine.css); the slot
+     takes the free height. */
+  .wsr-nav, .wsr-setnav {
+    flex: 0 1 auto; min-height: 0; overflow-y: auto; margin: 12px -6px 0; padding: 0 6px;
+    display: flex; flex-direction: column; scrollbar-width: none;
+  }
+  .wsr-nav::-webkit-scrollbar, .wsr-setnav::-webkit-scrollbar { display: none; }
+  .wsr-setnav { display: none; }
+  .wsr-settings .wsr-nav { display: none; }
+  .wsr-settings .wsr-setnav { display: flex; }
+
+  .wsr-sep { flex: none; height: 19px; position: relative; }
+  .wsr-sep::after {
+    content: ""; position: absolute; left: 50%; top: 9px; width: 28px; height: 1px; margin-left: -14px;
+    background: rgba(var(--ink-cream-rgb), 0.14);
+  }
+
+  .wsr-ni {
+    position: relative; flex: none; width: 100%; height: 58px; margin-bottom: 4px; padding: 0 2px;
+    border: 0; border-radius: 9px; background: transparent; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    color: var(--ink-cream-66);
+    transition: background-color 0.14s ease, color 0.14s ease;
+  }
+  .wsr-setnav .wsr-ni { height: 54px; margin-bottom: 2px; }
+  /* non-workspace v1.1 (4b): "Preferences" (66.8px bold at 11.5px) had 0.6px clear in a 68px item. The settings
+     items take the rail's own 4px on each side (76px, inside the unchanged 80px rail); the label keeps its size and
+     the other labels' letter-spacing. Measured in tests/e2e/nw11.measure.ts. */
+  .wsr-setnav .wsr-ni { width: calc(100% + 8px); margin-left: -4px; margin-right: -4px; padding: 0; }
+
+  .wsr-ic {
+    display: grid; place-items: center; width: 48px; height: 30px; border-radius: 15px; opacity: 0.6;
+    transition: background-color 0.14s ease, opacity 0.12s ease;
+  }
+  .wsr-ic svg { width: 20px; height: 20px; transition: stroke-width 0.18s ease; }
+  .wsr-lbl {
+    font: 400 12px/1.15 var(--sp-serif); font-optical-sizing: auto; letter-spacing: -0.005em; white-space: nowrap;
+    color: rgba(var(--ink-cream-rgb), 0.74);
+  }
+
+  /* quieter inactive rows; hover brings them up */
+  .wsr-ni:not(.wsr-on) .wsr-lbl { color: rgba(var(--ink-cream-rgb), 0.58); }
+  .wsr-ni:not(.wsr-on) .wsr-ic { opacity: 0.5; }
+  .wsr-ni:not(.wsr-on):hover .wsr-lbl { color: rgba(var(--ink-cream-rgb), 0.9); }
+  .wsr-ni:not(.wsr-on):hover .wsr-ic { opacity: 0.9; background: rgba(var(--ink-cream-rgb), 0.07); }
+  .wsr-ni:not(.wsr-on):active .wsr-ic { background: rgba(var(--ink-cream-rgb), 0.12); }
+
+  /* the current section: the pill behind its icon, terracotta at a heavier stroke, a bright label */
+  .wsr-ni.wsr-on { color: var(--ink-bright); }
+  .wsr-ni.wsr-on .wsr-ic { opacity: 1; color: var(--ink-terra); background: rgba(var(--ink-terra-rgb), 0.2); }
+  .wsr-ni.wsr-on .wsr-ic svg { stroke-width: 2.6; }
+  .wsr-ni.wsr-on .wsr-lbl { color: var(--ink-bright); font-weight: 600; }
+  .wsr-back .wsr-lbl { color: var(--ink-cream-66); }
+
+  /* the count: a corner badge on the icon; absolute, so its arrival moves nothing */
+  .wsr-ct {
+    position: absolute; left: calc(50% + 9px); top: 3px; min-width: 16px; height: 15px; padding: 0 4px; border-radius: 8px;
+    background: var(--ink-terra); color: var(--ink-shell);
+    font: 600 9px/15px var(--font-mono, "JetBrains Mono", monospace); text-align: center;
+    box-shadow: 0 0 0 2px var(--ink-shell);
+  }
+
+  /* ── the foot: Feedback, then the avatar ── */
+  .wsr-fb {
+    flex: none; margin: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    border: 0; background: transparent; cursor: pointer; padding: 0;
+  }
+  .wsr-fbi {
+    position: relative; width: 42px; height: 34px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--ink-terra);
+    color: var(--ink-terra); display: grid; place-items: center; transition: background-color 0.14s ease;
+  }
+  .wsr-fb:hover .wsr-fbi { background: rgba(var(--ink-terra-rgb), 0.1); }
+  .wsr-fbi svg { width: 17px; height: 17px; }
+  .wsr-fbi i { position: absolute; right: -3px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink-terra); box-shadow: 0 0 0 2px var(--ink-shell); }
+  .wsr-t { font: 600 12px/normal var(--sp-serif); color: var(--ink-terra); }
+  .wsr-foot { flex: none; padding-top: 12px; display: flex; justify-content: center; }
+  .wsr .wsr-av {
+    width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 0; display: grid; place-items: center;
+    background: rgba(var(--ink-cream-rgb), 0.1); color: var(--ink-cream);
+    font: 600 12px/1 "Inter", system-ui, sans-serif; cursor: pointer;
+  }
+  .wsr .wsr-av:hover { background: rgba(var(--ink-cream-rgb), 0.16); }
+
+  /* keyboard focus: one terracotta ring everywhere in the rail */
+  .wsr :focus-visible { outline: 2px solid #f4eee5 !important; outline-offset: 2px; border-radius: 10px; }
+  .wsr .wsr-ni:focus-visible { outline-offset: -2px; }
+
+  /* ── short windows: rows keep their height, the icons and rules tighten, the nav scrolls ── */
+  @media (max-height: 919px) {
+    .wsr-ic { height: 24px !important; }
+    .wsr-sep { height: 8px !important; }
+    .wsr-sep::after { content: none !important; }
+    .wsr-nav, .wsr-setnav { margin-top: 8px; }
+  }
+
+  /* ── touch screens: no hover, so the expand control sits permanently under the hawk ── */
+  @media (hover: none) {
+    .wsr-lgo { height: auto; flex-direction: column; align-items: center; gap: 6px; }
+    .wsr-tog { position: static; transform: none; opacity: 1; pointer-events: auto; width: 34px; height: 26px; background: rgba(var(--ink-cream-rgb), 0.06); }
+    .wsr-lgo:hover .wsr-home img { opacity: 1; }
+  }
+}
+
+/* ── THE FULL SIDEBAR (248px) — today's layout and look, with the rail's grammar ────────────────────
+   Scoped under `.ws-panel .ws-pin` so these outrank inkShell.css's row rules by specificity, not order.
+   Values: the ref's `.qw-*`. */
+@media (min-width: 768px) {
+  .ws-panel > .ws-pin { padding: 16px 12px 12px; }
+  /* ⚠️ THE SETTINGS MODE SHOWS ITS LAYER WITH `.set-mode .ws-pin { opacity: 1 }` (inkShell.css); on the rail
+     the full layer must stay hidden there too, or it shows through over the rail's settings rows */
+  .set-mode .ws-panel:not(.sr-wide) > .ws-pin { opacity: 0; pointer-events: none; }
+  /* the shadow belongs to the floating sidebar only; pinned, it sits flat beside the page */
+  .ws-panel.sr-float { box-shadow: 14px 0 34px rgba(0, 0, 0, 0.3); }
+  .ws-panel.sr-wide:not(.sr-float) { box-shadow: none; }
+  /* the pinned sidebar's logo row onto the same centre line (ST2-A3): it sat 1px low, not 4 like the rail's (measured
+     74.8 against the search field's 73.8); `.ws-logo` is already relative */
+  .ws-panel .ws-pin .ws-logo { padding: 0 0 0 4px; gap: 6px; top: -1px; }
+  .ws-panel .ws-pin .ws-logo .ws-bwm { font-size: 17.5px; }
+  .ws-acts { display: inline-flex; gap: 2px; flex: none; margin-left: auto; }
+  .ws-panel .ws-acts .sb-toggle, .ws-pinbtn {
+    flex: none; width: 30px; height: 30px; min-width: 0; margin: 0; padding: 0; border: 0; border-radius: 8px;
+    display: grid; place-items: center; background: transparent; color: var(--ink-cream-66); cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+  }
+  .ws-panel .ws-acts .sb-toggle:hover, .ws-pinbtn:hover:not(:disabled) { background: rgba(var(--ink-cream-rgb), 0.08); color: var(--ink-cream-92); }
+  .ws-pinbtn svg { width: 15px; height: 15px; transition: transform 0.2s ease; }
+  .ws-pinbtn[aria-pressed="true"] { color: var(--ink-terra); }
+  .ws-pinbtn[aria-pressed="true"] svg { transform: rotate(45deg); fill: rgba(217, 150, 122, 0.25); }
+  .ws-pinbtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* the rows: quieter at rest; the current page is the rail's terracotta wash and heavier icon */
+  .ws-panel .ws-pin .ws-nav > .ws-ni:first-child { margin-top: 14px; }
+  .ws-panel .ws-pin .ws-lbl { font-family: var(--sp-serif); }
+  /* sidebar materials v1: a Pro section's tag after its heading (the row tag's look, beside the words rather than
+     pushed to the row's end). The heading is a flex row in the ink shell. */
+  .ws-panel .ws-pin .ws-glabel { display: flex; align-items: center; }
+  /* ⚠️ SIDEBAR MATERIALS v1 SPACING (6 Nov): headings 13 above and 5 below, rows 32 tall (they were 22/5 and 33; the
+     heading under Dashboard was 14). Six groups and thirteen rows must fit with the full feedback card at 1512×982,
+     no nav scroll (Nick, 25 Oct): the e2e lock SR5 measures it. The rail's own rows are untouched. */
+  .ws-panel .ws-pin .ws-glabel, .ws-panel .ws-pin .ws-nav > .ws-ni:first-child + .ws-glabel { margin: 13px 10px 5px; }
+  .ws-panel .ws-pin .ws-ni { height: 32px; }
+  .ws-panel .ws-pin .ws-ni { color: rgba(var(--ink-cream-rgb), 0.58); }
+  .ws-panel .ws-pin .ws-ni .ws-ic { opacity: 0.5; transition: opacity 0.12s ease; }
+  .ws-panel .ws-pin .ws-ni .ws-ic svg { transition: stroke-width 0.18s ease; }
+  .ws-panel .ws-pin .ws-ni:not(.on):hover { background: rgba(var(--ink-cream-rgb), 0.06); color: rgba(var(--ink-cream-rgb), 0.92); }
+  .ws-panel .ws-pin .ws-ni:hover .ws-ic { opacity: 0.9; }
+  .ws-panel .ws-pin .ws-ni.att { color: var(--ink-bright); font-weight: 600; }
+  .ws-panel .ws-pin .ws-ni.on { background: rgba(var(--ink-terra-rgb), 0.16); color: var(--ink-bright); font-weight: 600; }
+  .ws-panel .ws-pin .ws-ni.on::before { content: none; }
+  .ws-panel .ws-pin .ws-ni.on .ws-ic { opacity: 1; color: var(--ink-terra); }
+  .ws-panel .ws-pin .ws-ni.on .ws-ic svg { stroke-width: 2.6; }
+  /* ⚠️ NO SIDEBAR LABEL IN THE BODY SANS (sidebar rail v1). The settings strip's plan card sets the sans
+     in its own sheet, and the plan line's dot is a bare span brand.tsx reaches; inside the sidebar both
+     take the serif. */
+  .ws-panel .set-plank, .ws-panel .set-plannote, .ws-panel .set-planlink, .ws-panel .set-planlink span,
+  .ws-panel .ws-pldot { font-family: var(--sp-serif); }
+  /* the picker's initials tile sits where the cover did */
+  .ws-ms--side .ws-ms-btn .wsr-init { flex: none; }
+}
+
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .wsr, .wsr *, .wsr *::before, .wsr *::after { transition: none !important; animation: none !important; }
+}
+@media (max-width: 767px) {
+  .wsr { display: none; }
+}

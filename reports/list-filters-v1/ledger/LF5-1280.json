@@ -1,0 +1,32 @@
+[
+ {
+  "name": "the seed has Partial queries",
+  "ok": true,
+  "got": "14"
+ },
+ {
+  "name": "the list shows only Partial's statuses",
+  "ok": true,
+  "got": "[\"Partial Requested\",\"Partial Sent\"]"
+ },
+ {
+  "name": "the list shows the label's count",
+  "ok": true,
+  "got": "14 vs 14"
+ },
+ {
+  "name": "the applied row has one chip, \"Partial\", on the Partial band",
+  "ok": true,
+  "got": "[{\"k\":\"stage:partial\",\"t\":\"Partial\",\"stage\":\"partial\"}]"
+ },
+ {
+  "name": "the label reads on",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "pressed again: cleared, the whole list back, no applied row",
+  "ok": true,
+  "got": "88 of 88"
+ }
+]

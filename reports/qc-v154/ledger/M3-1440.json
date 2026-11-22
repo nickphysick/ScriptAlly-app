@@ -1,0 +1,52 @@
+[
+ {
+  "name": "action hidden at rest",
+  "ok": true,
+  "got": "opacity"
+ },
+ {
+  "name": "hovered: the action shows",
+  "ok": true,
+  "got": "Answer the offer →"
+ },
+ {
+  "name": "track hovered: the action hides (fading, under 0.01)",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "track hovered: the draw runs",
+  "ok": true,
+  "got": "qc154-pop,qc154-draw,qc154-pop,qc154-draw,qc154-pop,qc154-draw,qc154-pop"
+ },
+ {
+  "name": "track hovered: the label waits for the draw",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "exactly one label, under the current step",
+  "ok": true,
+  "got": "[{\"t\":\"Offer\",\"inCur\":true}]"
+ },
+ {
+  "name": "the label is inside the card",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "a last-step label stays inside the frame",
+  "ok": true,
+  "got": "{\"ok\":true,\"l\":719.65625,\"i\":728.65625}"
+ },
+ {
+  "name": "reduced motion: no animation",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "reduced motion: the label shows at once",
+  "ok": true,
+  "got": "1"
+ }
+]

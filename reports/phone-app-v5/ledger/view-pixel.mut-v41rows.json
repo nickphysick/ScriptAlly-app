@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "PA5-9",
+  "where": "block: each bar drawn from its row's date (population 8)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-8",
+  "where": "(kept) groups over five fold (population overdue 42, upcoming 19, watch 3, nodate 6)",
+  "ok": true,
+  "detail": "[{\"k\":\"overdue\",\"n\":42,\"shown\":5,\"more\":\"Show 37 more\"},{\"k\":\"upcoming\",\"n\":19,\"shown\":5,\"more\":\"Show 14 more\"},{\"k\":\"nodate\",\"n\":6,\"shown\":5,\"more\":\"Show 1 more\"}]"
+ },
+ {
+  "lock": "PA5-8",
+  "where": "390x844 · rows fully visible with the header scrolled away (population 70)",
+  "ok": false,
+  "detail": "{\"full\":14,\"top\":92,\"dockTop\":844,\"tucked\":\"1\",\"rowH\":49,\"total\":70}"
+ },
+ {
+  "lock": "PA5-8",
+  "where": "390x844 · rows are 28px edge to edge",
+  "ok": false,
+  "detail": "49"
+ },
+ {
+  "lock": "PA5-8",
+  "where": "a 120px drag moves the track, and the name column does not move",
+  "ok": true,
+  "detail": "{\"nl\":0,\"nr\":116,\"x\":-2840,\"page\":725} → {\"nl\":0,\"nr\":116,\"x\":-2720,\"page\":725}"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "view: rows past their date (population 42, 12 on screen)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-6",
+  "where": "view: the deeper segment runs from the notch to today",
+  "ok": true,
+  "detail": "[{\"notch\":141.360107421875,\"dl\":141.360107421875,\"dr\":400.391357421875,\"lx\":400.391357421875},{\"notch\":154.500732421875,\"dl\":154.500732421875,\"dr\":400.391357421875,\"lx\":400.391357421875},{\"notch\":162.110107421875,\"dl\":162.110107421875,\"dr\":400.391357421875,\"lx\":400.391357421875}]"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "view: no ring on a bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "PA5-9",
+  "where": "view: open queries (population 70 phone, 70 desktop)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-9",
+  "where": "view: every current bar's start and end, and every earlier stage, equal the desktop's",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-9",
+  "where": "block: open queries (population 24 phone, 70 desktop)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-9",
+  "where": "block: every current bar's start and end, and every earlier stage, equal the desktop's",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-8",
+  "where": "844x390 is the desktop layout (no dock, no phone Today)",
+  "ok": true,
+  "detail": "{\"dock\":false,\"today\":false,\"mobile\":false}"
+ },
+ {
+  "lock": "PA5-8",
+  "where": "740x360 · landscape: 184px names, no dock",
+  "ok": true,
+  "detail": "{\"land\":true,\"dock\":\"none\",\"names\":184}"
+ }
+]

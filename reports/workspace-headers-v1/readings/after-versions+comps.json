@@ -1,0 +1,66 @@
+{
+ "comps-H8": {
+  "820": {
+   "scroller": 396,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": [
+    "div.cp30-vw → 396px",
+    "button. → 392px",
+    "svg.[object.SVGAnimatedString] → 380px"
+   ]
+  },
+  "1024": {
+   "scroller": 192,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": [
+    "div.cp30-vw → 192px",
+    "button. → 188px",
+    "svg.[object.SVGAnimatedString] → 176px"
+   ]
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": []
+  }
+ },
+ "versions-H8": {
+  "820": {
+   "scroller": 141,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": [
+    "svg.[object.SVGAnimatedString] → 184px",
+    "div.tr-col → 178px",
+    "span.tr-gh → 178px"
+   ]
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": []
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": []
+  }
+ }
+}

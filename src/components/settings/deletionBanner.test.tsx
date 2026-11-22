@@ -108,7 +108,7 @@ describe("⚠️ THE COPY AUDIT — nothing promises a deletion nothing performs
    * flow honest; without it the fortnight and the date read as an automatic process.
    */
   it("the settings card states that completion is by hand", () => {
-    expect(read("../AccountSettings.tsx")).toContain("Deletion isn't automatic yet");
+    expect(read("../AccountSettings.tsx")).toContain("We complete deletions by hand"); // re-pointed to the settings-v2 ref's words
   });
 
   /** Scope is named rather than reassured about — vague comfort is not consent to lose your work. */

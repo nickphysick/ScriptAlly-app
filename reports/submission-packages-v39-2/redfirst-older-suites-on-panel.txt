@@ -1,0 +1,49 @@
+# The older suites on the panel build before the picker fix (Phase 2–3, 29 Oct) — the natural reds
+  ✗ PK26-W-1512 · build left — 60.0 (want 28)
+  ✗ PK26-W-1512 · build right — 60.0 (want 28)
+  ✘   3 [measure] › tests/e2e/pk26.measure.ts:109:3 › PK26-W the three insets at 1512 (6.8s)
+  ✗ L8 · pk40-ms · the material drawer opened — drawer
+  ✘  20 [measure] › tests/e2e/pk38.measure.ts:287:1 › L8 no visible element on the page or its layers is mono AND uppercase, but v39's and v39.1's named labels (22.7s)
+  ✘  26 [measure] › tests/e2e/pk39.measure.ts:128:1 › L2 a colour picked reaches the label, both headers, the showcase card and the list tile; no field reads Harbour (4.0m)
+  ✗ L1-1280 · the labels row: measured — null
+  ✗ L1-1280 · the labels row: left = the card's (±1) — undefined vs 272
+  ✗ L1-1280 · the labels row: right = the card's (±1) — undefined vs 1248
+  ✗ L1-1280 · the builder: measured — null
+  ✗ L1-1280 · the builder: left = the card's (±1) — undefined vs 272
+  ✗ L1-1280 · the builder: right = the card's (±1) — undefined vs 1248
+  ✘  36 [measure] › tests/e2e/pk391.measure.ts:90:3 › L1 every block shares the header card's edges, which are the Contact list's, at 1280 (13.9s)
+  ✗ L1-1512 · the labels row: measured — null
+  ✗ L1-1512 · the labels row: left = the card's (±1) — undefined vs 276
+  ✗ L1-1512 · the labels row: right = the card's (±1) — undefined vs 1476
+  ✗ L1-1512 · the builder: measured — null
+  ✗ L1-1512 · the builder: left = the card's (±1) — undefined vs 276
+  ✗ L1-1512 · the builder: right = the card's (±1) — undefined vs 1476
+  ✘  37 [measure] › tests/e2e/pk391.measure.ts:90:3 › L1 every block shares the header card's edges, which are the Contact list's, at 1512 (13.9s)
+  ✗ L1-1920 · the labels row: measured — null
+  ✗ L1-1920 · the labels row: left = the card's (±1) — undefined vs 480
+  ✗ L1-1920 · the labels row: right = the card's (±1) — undefined vs 1680
+  ✗ L1-1920 · the builder: measured — null
+  ✗ L1-1920 · the builder: left = the card's (±1) — undefined vs 480
+  ✗ L1-1920 · the builder: right = the card's (±1) — undefined vs 1680
+  ✘  38 [measure] › tests/e2e/pk391.measure.ts:90:3 › L1 every block shares the header card's edges, which are the Contact list's, at 1920 (14.7s)
+  ✗ L4 · explainer → labels 48 (±1) — null
+  ✗ L4 · builder → navy band 96 (±1) — null
+  ✘  40 [measure] › tests/e2e/pk391.measure.ts:166:1 › L4 explainer → labels 48, BUILD label → cards 24, builder → band 96, top three → list panel 96 (8.5s)
+  7 failed
+  24 passed (10.3m)
+
+## pk39 L2's click log
+  3) [measure] › tests/e2e/pk39.measure.ts:128:1 › L2 a colour picked reaches the label, both headers, the showcase card and the list tile; no field reads Harbour 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-pk39="picker"] [data-col="plum"]')
+        - locator resolved to <button title="Plum" type="button" data-col="plum" aria-label="Plum" aria-pressed="false"></button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - element is outside of the viewport

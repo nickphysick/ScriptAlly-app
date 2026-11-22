@@ -1,0 +1,37 @@
+[
+ {
+  "name": "population: the save landed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "on Undo: some frame shows the leaving toast with opacity strictly between 0 and 1",
+  "ok": false,
+  "got": "[1,1,1,1,1,1,1,1,1,1,1]"
+ },
+ {
+  "name": "on Undo: it is invisible by 400ms, and the live toast gone",
+  "ok": false,
+  "got": "ghost from 0ms; []"
+ },
+ {
+  "name": "on Undo: the leaving copy is removed by 1s",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the second save landed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "timed out: some frame shows it leaving, opacity strictly between 0 and 1",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "timed out: the live toast is gone",
+  "ok": true,
+  "got": "undefined"
+ }
+]

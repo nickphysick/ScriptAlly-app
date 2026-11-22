@@ -27,7 +27,7 @@ const DAY = 86_400_000;
 
 export type BvdWhen = "overdue" | "upcoming" | "watch" | "nodate";
 export const BVD_WHEN: readonly { key: BvdWhen; label: string }[] = [
-  { key: "overdue", label: "Overdue" },
+  { key: "overdue", label: "Past expected" },
   { key: "upcoming", label: "Upcoming" },
   { key: "watch", label: "Watch and wait" },
   { key: "nodate", label: "No date" },

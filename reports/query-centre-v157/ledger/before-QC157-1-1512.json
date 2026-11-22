@@ -1,0 +1,57 @@
+[
+ {
+  "name": "Offer: band rgb(142, 167, 198)",
+  "ok": false,
+  "got": "seed-query-12 rgb(231, 214, 220)"
+ },
+ {
+  "name": "Partial Requested: band rgb(228, 235, 242)",
+  "ok": false,
+  "got": "seed-query-7 rgb(236, 214, 210)"
+ },
+ {
+  "name": "Revise & Resubmit: band rgb(183, 201, 222)",
+  "ok": false,
+  "got": "seed-query-11 rgb(217, 225, 234)"
+ },
+ {
+  "name": "Full Requested: band rgb(183, 201, 222)",
+  "ok": false,
+  "got": "seed-query-9 rgb(217, 225, 234)"
+ },
+ {
+  "name": "Queried: band rgb(239, 230, 214)",
+  "ok": false,
+  "got": "seed-query-2 rgb(239, 231, 218)"
+ },
+ {
+  "name": "Partial Sent: band rgb(228, 235, 242)",
+  "ok": false,
+  "got": "thin-q-gap-solo rgb(236, 214, 210)"
+ },
+ {
+  "name": "Full Sent: band rgb(183, 201, 222)",
+  "ok": false,
+  "got": "qc150l9-q rgb(217, 225, 234)"
+ },
+ {
+  "name": "Rejected: band rgb(236, 234, 230)",
+  "ok": false,
+  "got": "seed-pkgq-8 rgb(239, 231, 218)"
+ },
+ {
+  "name": "No Response: band rgb(236, 234, 230)",
+  "ok": false,
+  "got": "msv12-q-8 rgb(239, 231, 218)"
+ },
+ {
+  "name": "Withdrawn: band rgb(236, 234, 230)",
+  "ok": false,
+  "got": "seed-query-17 rgb(239, 231, 218)"
+ },
+ {
+  "name": "a Rejected card is #eceae6",
+  "ok": false,
+  "got": "rgb(239, 231, 218)"
+ }
+]

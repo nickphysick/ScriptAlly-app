@@ -1,0 +1,52 @@
+[
+ {
+  "where": "full screen on",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "header hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "At a glance hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Your queries hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the switch in the toolbar",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Birds-eye in full screen",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "today's line on the TODAY tag",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "full screen off",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the switch under Your queries",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "still Birds-eye",
+  "ok": false,
+  "detail": ""
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "D1",
+  "where": "mock sizes by the cut rule",
+  "ok": true,
+  "detail": "[9,9,9]"
+ },
+ {
+  "lock": "D1",
+  "where": "mock sum = dated",
+  "ok": true,
+  "detail": "27 vs 27"
+ },
+ {
+  "lock": "D1",
+  "where": "mock asked = model",
+  "ok": true,
+  "detail": "[1,4,2]"
+ },
+ {
+  "lock": "D1",
+  "where": "mock asked = its asked marks",
+  "ok": true,
+  "detail": "[[1,1],[4,4],[2,2]]"
+ },
+ {
+  "lock": "D1",
+  "where": "mock asked = sample",
+  "ok": true,
+  "detail": "[1,4,2]"
+ },
+ {
+  "lock": "D1",
+  "where": "mock waiting = sample",
+  "ok": true,
+  "detail": "[\"2 still waiting\",\"4 still waiting\",\"7 still waiting\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "nine sizes by the cut rule",
+  "ok": true,
+  "detail": "[3,3,3]"
+ },
+ {
+  "lock": "D1",
+  "where": "nine sum = dated",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "lock": "D1",
+  "where": "nine asked = model",
+  "ok": true,
+  "detail": "[2,2,0]"
+ },
+ {
+  "lock": "D1",
+  "where": "nine asked = its asked marks",
+  "ok": true,
+  "detail": "[[2,2],[2,2],[0,0]]"
+ },
+ {
+  "lock": "D1",
+  "where": "eight: population is Everyday",
+  "ok": true,
+  "detail": "everyday"
+ },
+ {
+  "lock": "D1",
+  "where": "eight: no rounds under 9 dated",
+  "ok": true,
+  "detail": "0 tiles"
+ }
+]

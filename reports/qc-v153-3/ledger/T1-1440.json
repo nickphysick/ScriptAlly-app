@@ -1,0 +1,542 @@
+[
+ {
+  "name": "population: tabs on screen",
+  "ok": true,
+  "got": "27"
+ },
+ {
+  "name": "more than one stage's tab measured",
+  "ok": true,
+  "got": "heather,rose,blue,sand"
+ },
+ {
+  "name": "seed-query-12 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "seed-query-12 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "seed-query-12 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "seed-query-12 heather accent and resting ink",
+  "ok": true,
+  "got": "rgb(212, 183, 194) · rgb(129, 98, 116)"
+ },
+ {
+  "name": "seed-query-12 named \"N materials\"",
+  "ok": true,
+  "got": "2 materials"
+ },
+ {
+  "name": "cv25-q-08 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "cv25-q-08 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "cv25-q-08 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "cv25-q-08 heather accent and resting ink",
+  "ok": true,
+  "got": "rgb(212, 183, 194) · rgb(129, 98, 116)"
+ },
+ {
+  "name": "cv25-q-08 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "seed-query-7 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "seed-query-7 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "seed-query-7 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "seed-query-7 rose accent and resting ink",
+  "ok": true,
+  "got": "rgb(221, 185, 177) · rgb(124, 101, 96)"
+ },
+ {
+  "name": "seed-query-7 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "seed-query-11 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "seed-query-11 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "seed-query-11 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "seed-query-11 blue accent and resting ink",
+  "ok": true,
+  "got": "rgb(188, 203, 220) · rgb(84, 105, 128)"
+ },
+ {
+  "name": "seed-query-11 named \"N materials\"",
+  "ok": true,
+  "got": "2 materials"
+ },
+ {
+  "name": "seed-query-9 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "seed-query-9 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "seed-query-9 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "seed-query-9 blue accent and resting ink",
+  "ok": true,
+  "got": "rgb(188, 203, 220) · rgb(84, 105, 128)"
+ },
+ {
+  "name": "seed-query-9 named \"N materials\"",
+  "ok": true,
+  "got": "2 materials"
+ },
+ {
+  "name": "cv25-q-06 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "cv25-q-06 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "cv25-q-06 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "cv25-q-06 rose accent and resting ink",
+  "ok": true,
+  "got": "rgb(221, 185, 177) · rgb(124, 101, 96)"
+ },
+ {
+  "name": "cv25-q-06 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "seed-query-20 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "seed-query-20 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "seed-query-20 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "seed-query-20 rose accent and resting ink",
+  "ok": true,
+  "got": "rgb(221, 185, 177) · rgb(124, 101, 96)"
+ },
+ {
+  "name": "seed-query-20 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "msv12-q-3 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "msv12-q-3 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "msv12-q-3 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "msv12-q-3 rose accent and resting ink",
+  "ok": true,
+  "got": "rgb(221, 185, 177) · rgb(124, 101, 96)"
+ },
+ {
+  "name": "msv12-q-3 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "rj-send tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "rj-send centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "rj-send 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "rj-send blue accent and resting ink",
+  "ok": true,
+  "got": "rgb(188, 203, 220) · rgb(84, 105, 128)"
+ },
+ {
+  "name": "rj-send named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "cv25-q-09 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "cv25-q-09 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "cv25-q-09 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "cv25-q-09 blue accent and resting ink",
+  "ok": true,
+  "got": "rgb(188, 203, 220) · rgb(84, 105, 128)"
+ },
+ {
+  "name": "cv25-q-09 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "cor-move-a tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "cor-move-a centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "cor-move-a 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "cor-move-a rose accent and resting ink",
+  "ok": true,
+  "got": "rgb(221, 185, 177) · rgb(124, 101, 96)"
+ },
+ {
+  "name": "cor-move-a named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "cv25-q-07 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "cv25-q-07 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "cv25-q-07 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "cv25-q-07 rose accent and resting ink",
+  "ok": true,
+  "got": "rgb(221, 185, 177) · rgb(124, 101, 96)"
+ },
+ {
+  "name": "cv25-q-07 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "seed-pkgq-3 tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "seed-pkgq-3 centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "seed-pkgq-3 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "seed-pkgq-3 blue accent and resting ink",
+  "ok": true,
+  "got": "rgb(188, 203, 220) · rgb(84, 105, 128)"
+ },
+ {
+  "name": "seed-pkgq-3 named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "seed-cal-passed865-q tab 34 tall",
+  "ok": true,
+  "got": "34"
+ },
+ {
+  "name": "seed-cal-passed865-q centred on the seal",
+  "ok": true,
+  "got": "0.00px"
+ },
+ {
+  "name": "seed-cal-passed865-q 16px from the longer line",
+  "ok": true,
+  "got": "box 16.0 · ink 16.0"
+ },
+ {
+  "name": "seed-cal-passed865-q blue accent and resting ink",
+  "ok": true,
+  "got": "rgb(188, 203, 220) · rgb(84, 105, 128)"
+ },
+ {
+  "name": "seed-cal-passed865-q named \"N materials\"",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "hover keeps the fill and the ink (no darker)",
+  "ok": true,
+  "got": "rgb(129, 98, 116) → rgb(129, 98, 116) · rgb(212, 183, 194) → rgb(212, 183, 194)"
+ },
+ {
+  "name": "hover lifts the tab 1px (against its own slip, which lifts too)",
+  "ok": true,
+  "got": "1.00"
+ },
+ {
+  "name": "hover: icon stroke 1.8, number stroke .25",
+  "ok": true,
+  "got": "1.8px · 0.25px"
+ },
+ {
+  "name": "hover deepens the shadow",
+  "ok": true,
+  "got": "rgba(255, 255, 255, 0.85) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.1) 0px -1px 0px 0px inset, rgba(28, 19, 15, 0.16) 0px 2px 4px 0px, rgba(28, 19, 15, 0.4) 0px 8px 16px -8px"
+ },
+ {
+  "name": "top: the tab sits near the top",
+  "ok": true,
+  "got": "198 of 900"
+ },
+ {
+  "name": "top: the pop-up is wholly on screen",
+  "ok": true,
+  "got": "241–333 of 900"
+ },
+ {
+  "name": "top: it opens below (room below 668)",
+  "ok": true,
+  "got": "up false"
+ },
+ {
+  "name": "top: left-aligned to the tab",
+  "ok": true,
+  "got": "0.00"
+ },
+ {
+  "name": "top: nothing paints over it (facts, the next slip)",
+  "ok": true,
+  "got": "36/36"
+ },
+ {
+  "name": "top: no ancestor clips it",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "top: the slip is raised while it is open",
+  "ok": true,
+  "got": "40"
+ },
+ {
+  "name": "top: its text is ink, not the accent",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "top: groups in order",
+  "ok": true,
+  "got": "Asked 12 Sep"
+ },
+ {
+  "name": "mid: the tab sits mid-screen",
+  "ok": true,
+  "got": "448 of 900"
+ },
+ {
+  "name": "mid: the pop-up is wholly on screen",
+  "ok": true,
+  "got": "491–653 of 900"
+ },
+ {
+  "name": "mid: it opens below (room below 418)",
+  "ok": true,
+  "got": "up false"
+ },
+ {
+  "name": "mid: left-aligned to the tab",
+  "ok": true,
+  "got": "0.00"
+ },
+ {
+  "name": "mid: nothing paints over it (facts, the next slip)",
+  "ok": true,
+  "got": "30/30"
+ },
+ {
+  "name": "mid: no ancestor clips it",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "mid: the slip is raised while it is open",
+  "ok": true,
+  "got": "40"
+ },
+ {
+  "name": "mid: its text is ink, not the accent",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "mid: groups in order",
+  "ok": true,
+  "got": "With the query | Asked 20 Jun"
+ },
+ {
+  "name": "bottom: the tab sits near the foot",
+  "ok": true,
+  "got": "828 of 900"
+ },
+ {
+  "name": "bottom: the pop-up is wholly on screen",
+  "ok": true,
+  "got": "669–821 of 900"
+ },
+ {
+  "name": "bottom: it opens upwards (room below 38)",
+  "ok": true,
+  "got": "up true"
+ },
+ {
+  "name": "bottom: left-aligned to the tab",
+  "ok": true,
+  "got": "0.00"
+ },
+ {
+  "name": "bottom: nothing paints over it (facts, the next slip)",
+  "ok": true,
+  "got": "36/36"
+ },
+ {
+  "name": "bottom: no ancestor clips it",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "bottom: the slip is raised while it is open",
+  "ok": true,
+  "got": "40"
+ },
+ {
+  "name": "bottom: its text is ink, not the accent",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "bottom: groups in order",
+  "ok": true,
+  "got": "Sent 24 Jun | Sent 22 Jul"
+ },
+ {
+  "name": "the tab takes focus",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "Enter opens the pop-up",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "Escape closes it",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Space opens it",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "a click on the tab does not open the card",
+  "ok": true,
+  "got": "0 panels"
+ }
+]

@@ -1,0 +1,383 @@
+
+Running 39 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+  ✓   2 [measure] › tests/e2e/dashFeedV1.measure.ts:94:1 › DF1-A1 · three columns at 1512, 417 / 511 / 417, no header band (5.6s)
+  ✓   3 [measure] › tests/e2e/dashFeedV1.measure.ts:113:1 › DF1-A2 · the feed column is pinned; the cards scroll; the feed scrolls inside itself (11.8s)
+  ✓   4 [measure] › tests/e2e/dashFeedV1.measure.ts:141:1 › DF1-A3 · two columns at 1280 and 1512 expanded, the feed in column 2, the cards in order (9.8s)
+  ✗ B1 · 1512x982c population: card and sheet — {"book":283.9375,"goal":null,"ring":null}
+  ✗ B1 · 1512x982c the sheet's top is the card's bottom ±1 — 283.9375 / null
+  ✗ B1 · 1512x982c the ring says the goals code's count of its target — null vs 0/8
+  ✗ B1 · 1280x800 population: card and sheet — {"book":283.9375,"goal":null,"ring":null}
+  ✗ B1 · 1280x800 the sheet's top is the card's bottom ±1 — 283.9375 / null
+  ✗ B1 · 1280x800 the ring says the goals code's count of its target — null vs 0/8
+  ✗ B1 · no goal: Set a weekly goal shows — null
+  ✗ B1 · no goal: the tiles and the streak still render — {"set":null,"sent":false,"added":false,"streak":false}
+  ✘   5 [measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles (24.2s)
+  ✓   6 [measure] › tests/e2e/dashFeedV1.measure.ts:197:1 › DF1-C1 · Active on load, a 224px body, the switch moves nothing, the grain spills toward the hawk (12.5s)
+  ✓   7 [measure] › tests/e2e/dashFeedV1.measure.ts:253:1 › DF1-C2 · the founding card is last in the left column, its line, nothing clipped (9.5s)
+  ✓   8 [measure] › tests/e2e/dashFeedV1.measure.ts:278:1 › DF1-D1 · the switch, a full request's big card, a query sent's mini row (20.3s)
+  ✓   9 [measure] › tests/e2e/dashFeedV1.measure.ts:326:1 › DF1-D2 · no floating feed tab and no feed drawer on the dashboard (9.5s)
+  ✓  10 [measure] › tests/e2e/dashFeedV1.measure.ts:337:1 › DF1-E1 · the tick box goes where Do this task goes, and completes nothing (23.0s)
+  ✓  11 [measure] › tests/e2e/dashFeedV1.measure.ts:373:1 › DF1-E2 · the tip: its art inside the card, one height, a 7s turn that holds on hover, › restarts, reduced motion still (1.2m)
+  ✓  12 [measure] › tests/e2e/dashFeedV1.measure.ts:435:1 › DF1-E3 · the Scout: a soft pink band, an example nothing can focus, a request that survives a reload (16.9s)
+  ✓  13 [measure] › tests/e2e/dashFeedV1.measure.ts:462:1 › DF1-F1 · every footer link renders its page, and Give feedback opens the dock (16.7s)
+  ✓  14 [measure] › tests/e2e/dashFirstVisit.measure.ts:105:3 › first visit › DFV-A — the pre-query page at three sizes, and the founding card as it is after the first query (52.0s)
+  ✓  15 [measure] › tests/e2e/dashFirstVisit.measure.ts:144:3 › first visit › DFV-A — a first visit's loading page is the first-visit skeleton (5.5s)
+  ✓  16 [measure] › tests/e2e/dashFirstVisit.measure.ts:155:1 › DFV-C · DFV-D — the pager at every size, no wrap-round, and no zeros on the page (36.9s)
+  -  17 [measure] › tests/e2e/dashMobileV1.measure.ts:40:1 › DM1-A1 · the phone top bar
+  -  18 [measure] › tests/e2e/dashMobileV1.measure.ts:192:1 › DM1-B1 · stat cards first
+  -  19 [measure] › tests/e2e/dashMobileV1.measure.ts:304:1 › DM1-C1 · Up next
+  -  20 [measure] › tests/e2e/dashMobileV1.measure.ts:387:1 › DM1-D1 · the founding writer row and Recent
+  ✓  21 [measure] › tests/e2e/dashMobileV1.measure.ts:458:1 › DM1-E1 · the desktop furniture is gone on phones, and stays on the desktop (25.6s)
+  ✓  22 [measure] › tests/e2e/dashMobileV1.measure.ts:484:1 › DM1-F1 · no sideways scroll, and every tap target is at least 40px (14.3s)
+  -  23 [measure] › tests/e2e/dashMobileV1.measure.ts:514:1 › DM1-A2 · the search sheet
+  ✘  24 [measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px (10.0m)
+[HS1-A2] 6/6 green
+  ✓  25 [measure] › tests/e2e/helpSystemV1.measure.ts:168:1 › HS1-A2 · one open: opening the Help menu while the checklist is open leaves only the menu (18.0s)
+  ✗ HS1-B1 · @1512 the three articles are the page's — ["Add an agent2 min","What List health measures1 min","Go full screen on the Query Centre30 sec"]
+  ✗ HS1-B1 · @1280 the three articles are the page's — ["Add an agent2 min","What List health measures1 min","Go full screen on the Query Centre30 sec"]
+[HS1-B1] 10/12 green
+  ✘  26 [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order (14.2s)
+[HS1-B2] 8/8 green
+  ✓  27 [measure] › tests/e2e/helpSystemV1.measure.ts:242:1 › HS1-B2 · Continue closes the menu and spotlights the next undone item's target (13.7s)
+  ✗ HS1-B3 · @1512 Esc closes it — 
+  ✗ HS1-B3 · @1512 …and focuses the ? — 
+  ✗ HS1-B3 · @1280 Esc closes it — 
+  ✗ HS1-B3 · @1280 …and focuses the ? — 
+[HS1-B3] 6/10 green
+  ✘  28 [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? (10.5s)
+  ✘  29 [measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage (5.0m)
+  ✘  30 [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's (19.7s)
+  ✗ HS1-C3 · @1512 an agent to open (precondition) — 
+  ✗ HS1-C3 · @1512 the agent panel is open (precondition) — 
+  ✗ HS1-C3 · @1512 the checklist did not open — 
+  ✗ HS1-C3 · @1280 an agent to open (precondition) — 
+  ✗ HS1-C3 · @1280 the agent panel is open (precondition) — 
+  ✗ HS1-C3 · @1280 the checklist did not open — 
+[HS1-C3] 2/8 green
+  ✘  31 [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself (1.1m)
+  ✘  32 [measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s (6.7m)
+  ✘  33 [measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s (5.0m)
+  ✘  34 [measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick (5.0m)
+  ✘  35 [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms (20.4s)
+  ✘  36 [measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens) (5.0m)
+  ✗ HS1-D3 · @1512 status cells to read (precondition) — 0
+  ✗ HS1-D3 · @1280 status cells to read (precondition) — 0
+[HS1-D3] 2/4 green
+  ✘  37 [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot (8.9s)
+[HS1-E1] 6/6 green
+  ✓  38 [measure] › tests/e2e/helpSystemV1.measure.ts:603:1 › HS1-E1 · four radio tiles and no select; An idea asks what would make QueryHawk better (8.6s)
+[HS1-E2] 8/8 green
+  ✓  39 [measure] › tests/e2e/helpSystemV1.measure.ts:621:1 › HS1-E2 · the draft: kept through a close and a reopen; a send clears it (10.2s)
+
+
+  1) [measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   "B1 · 1512x982c population: card and sheet — {\"book\":283.9375,\"goal\":null,\"ring\":null}",
+    +   "B1 · 1512x982c the sheet's top is the card's bottom ±1 — 283.9375 / null",
+    +   "B1 · 1512x982c the ring says the goals code's count of its target — null vs 0/8",
+    +   "B1 · 1280x800 population: card and sheet — {\"book\":283.9375,\"goal\":null,\"ring\":null}",
+    +   "B1 · 1280x800 the sheet's top is the card's bottom ±1 — 283.9375 / null",
+    +   "B1 · 1280x800 the ring says the goals code's count of its target — null vs 0/8",
+    +   "B1 · no goal: Set a weekly goal shows — null",
+    +   "B1 · no goal: the tiles and the streak still render — {\"set\":null,\"sent\":false,\"added\":false,\"streak\":false}",
+    + ]
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 41 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      42 |   }
+      43 | }
+      44 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFeedV1.measure.ts:41:95)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/dashFeedV1.measure.ts:194:5
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--22567--goal-still-shows-the-tiles-measure/error-context.md
+
+  2) [measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px 
+
+    Test timeout of 600000ms exceeded.
+
+    Error: locator.getAttribute: Test timeout of 600000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl19=\'pin\']').filter({ visible: true }).first()
+
+
+      139 |         if (where === "contacts-pinned") {
+      140 |           const pin = vis(page, "[data-cl19='pin']");
+    > 141 |           if ((await pin.getAttribute("aria-pressed")) !== "true") await pin.click();
+          |                          ^
+      142 |           await page.waitForTimeout(800);
+      143 |           L.check(`${w} pinned (precondition)`, (await pin.getAttribute("aria-pressed")) === "true", "");
+      144 |         }
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:141:26
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-f76bd-ove-the-page-scrolled-400px-measure/error-context.md
+
+  3) [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "@1512 the three articles are the page's — [\"Add an agent2 min\",\"What List health measures1 min\",\"Go full screen on the Query Centre30 sec\"]",
+    +   "@1280 the three articles are the page's — [\"Add an agent2 min\",\"What List health measures1 min\",\"Go full screen on the Query Centre30 sec\"]",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:239:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-9507e-r-links-the-switch-in-order-measure/error-context.md
+
+  4) [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "@1512 Esc closes it — ",
+    +   "@1512 …and focuses the ? — ",
+    +   "@1280 Esc closes it — ",
+    +   "@1280 …and focuses the ? — ",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:289:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-1e4ed--switch-Esc-returns-to-the--measure/error-context.md
+
+  5) [measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl19=\'find-wrap\'], [data-cl19=\'find\']').filter({ visible: true }).first()
+
+
+      296 |   const input = page.locator("input[aria-label='Find an agent']");
+      297 |   const shown = async () => (await input.evaluateAll((els) => els.some((e) => e.getBoundingClientRect().width > 4)));
+    > 298 |   if (!(await shown())) await vis(page, "[data-cl19='find-wrap'], [data-cl19='find']").click();
+          |                                                                                        ^
+      299 |   await vis(page, "input[aria-label='Find an agent']").fill(s, { timeout: 15_000 });
+      300 | };
+      301 |
+        at typeFind (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:298:88)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:320:7
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-76bce--of-N-no-bars-finished-sage-measure/error-context.md
+
+  6) [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's 
+
+    TimeoutError: locator.click: Timeout 8000ms exceeded.
+    Call log:
+      - waiting for locator('#ws-sidebar').getByText('Query Centre', { exact: true }).first()
+
+
+      353 |       await page.keyboard.press("Escape"); await page.waitForTimeout(600);
+      354 |       /* an in-app route change (the sidebar), so the browser session is the same one */
+    > 355 |       await page.locator("#ws-sidebar").getByText("Query Centre", { exact: true }).first().click({ timeout: 8000 });
+          |                                                                                            ^
+      356 |       await page.waitForURL(/\/queries/);
+      357 |       await pillReady(page);
+      358 |       await page.waitForTimeout(4000);
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:355:92
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-19af9-y-pulses-the-Query-Centre-s-measure/error-context.md
+
+  7) [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "@1512 an agent to open (precondition) — ",
+    +   "@1512 the agent panel is open (precondition) — ",
+    +   "@1512 the checklist did not open — ",
+    +   "@1280 an agent to open (precondition) — ",
+    +   "@1280 the agent panel is open (precondition) — ",
+    +   "@1280 the checklist did not open — ",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:394:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-35960-pen-nothing-opens-by-itself-measure/error-context.md
+
+  8) [measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s 
+
+    Test timeout of 400000ms exceeded.
+
+    Error: locator.click: Test timeout of 400000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl19=\'find-wrap\'], [data-cl19=\'find\']').filter({ visible: true }).first()
+
+
+      296 |   const input = page.locator("input[aria-label='Find an agent']");
+      297 |   const shown = async () => (await input.evaluateAll((els) => els.some((e) => e.getBoundingClientRect().width > 4)));
+    > 298 |   if (!(await shown())) await vis(page, "[data-cl19='find-wrap'], [data-cl19='find']").click();
+          |                                                                                        ^
+      299 |   await vis(page, "input[aria-label='Find an agent']").fill(s, { timeout: 15_000 });
+      300 | };
+      301 |
+        at typeFind (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:298:88)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:429:7
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-11d94--1s-to-8s-still-there-at-8s-measure/error-context.md
+
+  9) [measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl19=\'find-wrap\'], [data-cl19=\'find\']').filter({ visible: true }).first()
+
+
+      296 |   const input = page.locator("input[aria-label='Find an agent']");
+      297 |   const shown = async () => (await input.evaluateAll((els) => els.some((e) => e.getBoundingClientRect().width > 4)));
+    > 298 |   if (!(await shown())) await vis(page, "[data-cl19='find-wrap'], [data-cl19='find']").click();
+          |                                                                                        ^
+      299 |   await vis(page, "input[aria-label='Find an agent']").fill(s, { timeout: 15_000 });
+      300 | };
+      301 |
+        at typeFind (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:298:88)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:474:7
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-4c511-sage-and-still-there-at-15s-measure/error-context.md
+
+  10) [measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl19=\'find-wrap\'], [data-cl19=\'find\']').filter({ visible: true }).first()
+
+
+      296 |   const input = page.locator("input[aria-label='Find an agent']");
+      297 |   const shown = async () => (await input.evaluateAll((els) => els.some((e) => e.getBoundingClientRect().width > 4)));
+    > 298 |   if (!(await shown())) await vis(page, "[data-cl19='find-wrap'], [data-cl19='find']").click();
+          |                                                                                        ^
+      299 |   await vis(page, "input[aria-label='Find an agent']").fill(s, { timeout: 15_000 });
+      300 | };
+      301 |
+        at typeFind (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:298:88)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:516:7
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-0d84f-r-a-skip-shows-a-plain-tick-measure/error-context.md
+
+  11) [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms 
+
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-term=\'listHealth\']').filter({ visible: true }).first() to be visible
+
+
+      534 |     await page.mouse.move(5, 600);
+      535 |     const term = vis(page, "[data-term='listHealth']");
+    > 536 |     await term.waitFor({ timeout: 15_000 });
+          |                ^
+      537 |     await term.hover();
+      538 |     await page.waitForTimeout(200);
+      539 |     L.check(`${w} no card at 200ms`, await page.locator("[data-term-card='listHealth']").count() === 0, "");
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:536:16
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-ff01b-e-card-with-a-link-at-400ms-measure/error-context.md
+
+  12) [measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens) 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.boundingBox: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-term=\'listHealth\']').filter({ visible: true }).first()
+
+
+      559 |     await open(page, "/agents", vp, "HS1-D2");
+      560 |     await page.mouse.move(5, 600);
+    > 561 |     const t = await vis(page, "[data-term='listHealth']").boundingBox();
+          |                                                           ^
+      562 |     L.check(`${w} the words are on screen (precondition)`, !!t, "");
+      563 |     const hit = t ? await page.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y) as HTMLElement | null; return { term: !!e?.closest(".qh-term"), ring: !!e?.closest("button[data-cl17='health']") }; }, [t.x + t.width / 2, t.y + t.height / 2]) : null;
+      564 |     L.check(`${w} the press lands on the term, inside the ring's button (precondition)`, !!hit?.term && !!hit?.ring, JSON.stringify(hit));
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:561:59
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-79b39-g-s-job-Housekeeping-opens--measure/error-context.md
+
+  13) [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot 
+
+    Error: HS1-D3: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 6
+    Received:    4
+
+      45 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      49 |   }
+      50 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:47:77)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:597:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-21ce3-card-draws-a-real-StatusDot-measure/error-context.md
+
+  13 failed
+    [measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens) 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot 
+  5 skipped
+  21 passed (47.0m)

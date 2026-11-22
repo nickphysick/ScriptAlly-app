@@ -110,21 +110,13 @@ describe("the card over a campaign's life", () => {
     /* what still depends on the dates: the line and its end marker stop at the last visible point */
     expect(code).toMatch(/\{last && <circle className="os-aclast" cx=\{last\[0\]\} cy=\{last\[1\]\}/);
   });
-  it("⚠️ none: no chart and NO MENTOR — the Courier, what the card will become, and the one thing to do", () => {
-    const html = chart({ queries: [], activeCount: 0, empty: true });
-    expect(html).toContain('data-probe-text="chart-title">No active queries</h3>');
-    expect(html).toContain('data-probe="chart-empty"');
-    expect(html).toContain("/images/dash/courier.png");
-    expect(html).toContain("No active queries right now");
-    expect(html).toContain("As soon as one’s live, this becomes your campaign chart.");
-    expect(html.match(/<button/g)?.length, "exactly one control, and it is the ink pill").toBe(1);
-    expect(html).toMatch(/<button type="button" class="os-inkpill os-ce-cta">Log a query<\/button>/);
-    expect(html).not.toContain("mentor");
-    expect(html).not.toContain('data-probe="plot-box"');
-  });
-  it("a single day on the record says how the line begins, and draws no plot", () => {
+  /* ⚠️ RETIRED (Dashboard first visit v1, Part E): the "none" case — `OneScreenChartEmpty` could never render once the
+     page had loaded (the pre-query page draws the set-up card instead), and is deleted. */
+  it("DFV-D: a single day on the record draws the first point — never a blank plot — and no line", () => {
     const html = chart({ queries: [q(QueryStatus.QUERIED, ago(0))], activeCount: 1 });
-    expect(html).toContain("The line begins once there are two days on the record.");
+    expect(html).not.toContain("The line begins once there are two days on the record.");
+    expect(html).toContain('data-fv1="chart-first"');
+    expect(html).toContain("Your first query is out.");
     expect(html).not.toContain('data-probe="plot"');
   });
 });

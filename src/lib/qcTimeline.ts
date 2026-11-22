@@ -247,7 +247,7 @@ export function currentWords(row: QcRow, nowMs: number): string {
    * longer than the bars they sat in and were cut mid-word by an ellipsis; one short form fits the
    * bar far more often and states the one fact the reader needs. A running stage keeps its verb.
    */
-  if (row.expectedMs < startOfDay(nowMs)) return `${name} · overdue since ${when}`;
+  if (row.expectedMs < startOfDay(nowMs)) return `${name} · past expected since ${when}`;
   if (row.status === QueryStatus.OFFER) return `${name} · your decision by ${when}`;
   if (court === "you") return `${name} · send by ${when}`;
   return `${name} · reply by ${when}`;
@@ -341,7 +341,7 @@ export function tlRow(row: QcRow, nowMs: number): TlRow {
   const nudge = overdueDays > 0 && tileCourt(row.status) === "agent"
     ? {
       days: overdueDays,
-      text: `${overdueDays} ${overdueDays === 1 ? "day" : "days"} overdue · ${overdueDays > CLOSE_OVER_DAYS ? "nudge or close" : "nudge"}`,
+      text: `${overdueDays} ${overdueDays === 1 ? "day" : "days"} past expected · ${overdueDays > CLOSE_OVER_DAYS ? "nudge or close" : "nudge"}`,
       yourMove: true,
     }
     : null;

@@ -1,0 +1,18 @@
+✓ 4070 modules transformed.
+✓ built in 14.19s
+[emu-guard] 31.0 GB free. Debug logs: /dev/null.
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.5s)
+QC1612-1 ✓ population: the drawer is "What did Rufus say?" — What did Rufus say?
+QC1612-1 ✓ population: frames sampled over the 6s — 360
+QC1612-1 ✗ the frame's scale passes above 1.008 at least twice — 0 peaks
+QC1612-1 ✗ and returns below 1.002 between — 0 dips
+QC1612-1 ✓ it never exceeds 1.011 — 1
+QC1612-1 ✗ it starts 300ms after the drawer's 320ms entrance (no sooner than 600ms after the press) — —ms
+QC1612-1 ✓ one breathing animation at most in any frame — 0
+QC1612-1 ✓ it animates scale only, never transform — []
+QC1612-1 ✓ it is the rim that breathes (the frame's ::before) — 
+QC1612-1 ✓ the frame itself never scales: scale 1 in every frame — [1]
+QC1612-1 ✓ nothing clickable moves: every button in the drawer has one box throughout — 1 distinct
+  ✘  2 [measure] › tests/e2e/qc1612.measure.ts:164:15 › QC1612-1 · it breathes: the drawer open and untouched for 6s (v163: one breath is 3.2s, so two peaks need 6s) (12.3s)
+  1 failed
+  1 passed (31.9s)

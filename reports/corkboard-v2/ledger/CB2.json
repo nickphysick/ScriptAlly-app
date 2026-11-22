@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "CB2",
+  "where": "1512x982",
+  "ok": true,
+  "detail": "both panels found (contact true, corkboard true)"
+ },
+ {
+  "lock": "CB2",
+  "where": "1512x982 background",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) vs the Contact list's rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CB2",
+  "where": "1512x982 radius",
+  "ok": true,
+  "detail": "20px vs 20px"
+ },
+ {
+  "lock": "CB2",
+  "where": "1512x982 left inset",
+  "ok": true,
+  "detail": "144.0 vs 144.0"
+ },
+ {
+  "lock": "CB2",
+  "where": "1512x982 right inset",
+  "ok": true,
+  "detail": "144.0 vs 144.0"
+ },
+ {
+  "lock": "CB2",
+  "where": "1512x982 title",
+  "ok": true,
+  "detail": "title \"Corkboard\""
+ },
+ {
+  "lock": "CB2",
+  "where": "1512x982 sentence",
+  "ok": true,
+  "detail": "\"13 notes on your board. 1 is on your to-do list.\" over 13 notes, 1 dated"
+ },
+ {
+  "lock": "CB2",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "both panels found (contact true, corkboard true)"
+ },
+ {
+  "lock": "CB2",
+  "where": "1280x800 background",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) vs the Contact list's rgb(42, 58, 82)"
+ },
+ {
+  "lock": "CB2",
+  "where": "1280x800 radius",
+  "ok": true,
+  "detail": "20px vs 20px"
+ },
+ {
+  "lock": "CB2",
+  "where": "1280x800 left inset",
+  "ok": true,
+  "detail": "32.0 vs 32.0"
+ },
+ {
+  "lock": "CB2",
+  "where": "1280x800 right inset",
+  "ok": true,
+  "detail": "32.0 vs 32.0"
+ },
+ {
+  "lock": "CB2",
+  "where": "1280x800 title",
+  "ok": true,
+  "detail": "title \"Corkboard\""
+ },
+ {
+  "lock": "CB2",
+  "where": "1280x800 sentence",
+  "ok": true,
+  "detail": "\"13 notes on your board. 1 is on your to-do list.\" over 13 notes, 1 dated"
+ },
+ {
+  "lock": "CB2",
+  "where": "no links fixture",
+  "ok": true,
+  "detail": "0 glance row(s), Pick a colour shown"
+ },
+ {
+  "lock": "CB2",
+  "where": "the count follows the board",
+  "ok": true,
+  "detail": "\"5 notes on your board.\" over 5 notes"
+ }
+]

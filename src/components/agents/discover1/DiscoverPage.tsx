@@ -21,7 +21,7 @@ import { devAid, type DevAid } from "../../../lib/discoverReviewAid";
 import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { AppFooter } from "../../shell/AppFooter";
-import { DvEmptyHeader, DvHeader, type HeaderTitle } from "./DvHeader";
+import { DvEmptyHeader, DvNavyHeader, type HeaderTitle } from "./DvHeader";
 import { DvPicks, type DecideKind, type Leaving } from "./DvPicks";
 import { DvHowModal, DvPassedModal, DvSteps, DvToast, DvTune, type ToastState } from "./DvLayers";
 import { DvCatalogue, DvShareNotice, DvShareSheet } from "./DvShare";
@@ -210,8 +210,8 @@ const LivePage: React.FC<{ aid: DevAid; onNavigate: Nav }> = ({ aid, onNavigate 
     : s.view === "live" ? { kind: "count", n: s.queue.length } : s.view === "done" ? { kind: "done" } : { kind: "none" };
   return (
     <>
-      <DvHeader title={title} msTitle={ms?.title ?? null} tally={s.loading ? null : s.tally}
-        onTune={() => setTune(true)} onShare={() => setShareOpen(true)} onHow={() => setHow({})} onPassed={() => setPassedOpen(true)} />
+      <DvNavyHeader title={title} msTitle={ms?.title ?? null} tally={s.loading ? null : s.tally}
+        onTune={() => setTune(true)} onShare={() => setShareOpen(true)} onHow={() => setHow({})} />
       {s.loading ? null : <DvShareNotice n={s.part.notShared} onShare={() => setShareOpen(true)} />}
       {s.loading ? null : (
         <DvPicks queue={shown} view={leaving ? "live" : s.view} manuscript={ms} prefs={s.prefs} lens={s.lens} skipped={s.skipped}

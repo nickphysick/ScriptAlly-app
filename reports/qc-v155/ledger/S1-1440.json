@@ -1,0 +1,27 @@
+[
+ {
+  "name": "S1 the panel is the list's first child",
+  "ok": true,
+  "got": "panel"
+ },
+ {
+  "name": "S1 heading",
+  "ok": true,
+  "got": "Nothing needs you today."
+ },
+ {
+  "name": "S1 body names the count and a date, or says nothing is out",
+  "ok": true,
+  "got": "10 queries are with agents. The next reply is expected by 14 Nov."
+ },
+ {
+  "name": "S1 no group needing the writer",
+  "ok": true,
+  "got": "[\"Watch and wait\",\"Gone quiet\",\"Closed\"]"
+ },
+ {
+  "name": "S1 the list carries on",
+  "ok": true,
+  "got": "[\"Watch and wait\",\"Gone quiet\",\"Closed\"]"
+ }
+]

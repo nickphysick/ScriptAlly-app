@@ -1,0 +1,81 @@
+# Baseline 2026-11-14T13:18:54Z at d5f5a8015
+## tsc
+functions/src/aiRateLimit.ts(25,32): error TS2307: Cannot find module 'firebase-admin/firestore' or its corresponding type declarations.
+functions/src/aiRateLimit.ts(26,28): error TS2307: Cannot find module 'firebase-functions/v2/https' or its corresponding type declarations.
+functions/src/email.ts(24,30): error TS2307: Cannot find module 'firebase-functions/params' or its corresponding type declarations.
+functions/src/firestore.ts(17,24): error TS2307: Cannot find module 'firebase-admin' or its corresponding type declarations.
+functions/src/firestore.ts(18,30): error TS2307: Cannot find module 'firebase-admin/firestore' or its corresponding type declarations.
+functions/src/reminderEmails.ts(14,28): error TS2307: Cannot find module 'firebase-functions/v2/scheduler' or its corresponding type declarations.
+functions/src/reminderEmails.ts(15,32): error TS2307: Cannot find module 'firebase-admin/firestore' or its corresponding type declarations.
+tsc exit=2
+## build
+19:✓ built in 2.04s
+build exit=0
+## vitest
+   × emulator runs go through the guard > no recipe under tests/ starts an emulator without the guard 177ms
+   × every e2e and script entry point carries the live guard > every file that creates a Firebase app goes through fsTarget, or only ever names a demo- project 9ms
+   × every e2e and script entry point carries the live guard > no file that creates an app reads .env.development itself — only fsTarget does, behind the opt-in 7ms
+   × the 32k ceiling needs the streamed call (locked) > is above what the installed SDK accepts non-streaming, so the call must stay streamed 6ms
+ FAIL  src/lib/queryClock.test.ts [ src/lib/queryClock.test.ts ]
+ FAIL  functions/src/emailSettingsCore.test.ts [ functions/src/emailSettingsCore.test.ts ]
+ FAIL  functions/src/reminderEmails.test.ts [ functions/src/reminderEmails.test.ts ]
+ FAIL  functions/eval/run.test.ts [ functions/eval/run.test.ts ]
+ FAIL  functions/src/email.test.ts [ functions/src/email.test.ts ]
+ FAIL  functions/src/foundingEmails.test.ts [ functions/src/foundingEmails.test.ts ]
+ FAIL  functions/src/smartImportPhotos.test.ts [ functions/src/smartImportPhotos.test.ts ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/test/emuGuard.test.ts > emulator runs go through the guard > no recipe under tests/ starts an emulator without the guard
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > every file that creates a Firebase app goes through fsTarget, or only ever names a demo- project
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > no file that creates an app reads .env.development itself — only fsTarget does, behind the opt-in
+ FAIL  functions/src/smartImportCore.test.ts > the 32k ceiling needs the streamed call (locked) > is above what the installed SDK accepts non-streaming, so the call must stay streamed
+ Test Files  10 failed | 851 passed | 1 skipped (862)
+      Tests  4 failed | 12342 passed | 4 skipped (12350)
+vitest exit=1
+
+# Baseline re-run 2026-11-14T13:24:40Z at d5f5a8015, after linking functions/node_modules to the primary's (the first run above had none, so every functions/ file failed to load)
+## tsc
+0
+tsc errors (count above); exit=0
+## vitest
+   × emulator runs go through the guard > no recipe under tests/ starts an emulator without the guard 185ms
+   × every e2e and script entry point carries the live guard > every file that creates a Firebase app goes through fsTarget, or only ever names a demo- project 10ms
+   × every e2e and script entry point carries the live guard > no file that creates an app reads .env.development itself — only fsTarget does, behind the opt-in 5ms
+   × W1 the fork's words > the heading and subline are the built ones, verbatim 5ms
+   × W1 the fork's words > the tile titles end with a full stop, as the Contact list's tiles do 2ms
+   × W1 the fork's words > each tile states three short lines, and no paragraph 0ms
+   × W1 the fork's words > each tile's buttons carry the table's labels 9ms
+   × W1 the fork's words > the line under the tiles names the Import page 0ms
+   × K1 three tiles, no radio, no ring > draws three tiles and no radio group 2ms
+   × K1 three tiles, no radio, no ring > no tile is ringed on arrival, and each opens on its illustration slot 3ms
+   × K1 three tiles, no radio, no ring > the Smart import tile takes a dropped file itself 1ms
+   × K2 the fact line states cost — one Smart Import per account, on every plan (plan rules v1) > Smart import states the one import 0ms
+   × K2 the fact line states cost — one Smart Import per account, on every plan (plan rules v1) > the other two are always free 1ms
+   × Phase 4 · the hatch that actually sends a new account elsewhere > ⚠️ no onboarding exit chooses the Contact list any more (Dashboard v60) 38ms
+   × Phase 4 · the hatch that actually sends a new account elsewhere > ⚠️ every hatch value is a tab the bridge can resolve — never a path 1ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/test/emuGuard.test.ts > emulator runs go through the guard > no recipe under tests/ starts an emulator without the guard
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > every file that creates a Firebase app goes through fsTarget, or only ever names a demo- project
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > no file that creates an app reads .env.development itself — only fsTarget does, behind the opt-in
+ FAIL  src/lib/landingRoute.test.ts > Phase 4 · the hatch that actually sends a new account elsewhere > ⚠️ no onboarding exit chooses the Contact list any more (Dashboard v60)
+ FAIL  src/lib/landingRoute.test.ts > Phase 4 · the hatch that actually sends a new account elsewhere > ⚠️ every hatch value is a tab the bridge can resolve — never a path
+ FAIL  src/components/onboarding/captureFork.test.tsx > W1 the fork's words > the heading and subline are the built ones, verbatim
+ FAIL  src/components/onboarding/captureFork.test.tsx > W1 the fork's words > the tile titles end with a full stop, as the Contact list's tiles do
+ FAIL  src/components/onboarding/captureFork.test.tsx > W1 the fork's words > each tile states three short lines, and no paragraph
+ FAIL  src/components/onboarding/captureFork.test.tsx > W1 the fork's words > each tile's buttons carry the table's labels
+ FAIL  src/components/onboarding/captureFork.test.tsx > W1 the fork's words > the line under the tiles names the Import page
+ FAIL  src/components/onboarding/captureFork.test.tsx > K1 three tiles, no radio, no ring > draws three tiles and no radio group
+ FAIL  src/components/onboarding/captureFork.test.tsx > K1 three tiles, no radio, no ring > no tile is ringed on arrival, and each opens on its illustration slot
+ FAIL  src/components/onboarding/captureFork.test.tsx > K1 three tiles, no radio, no ring > the Smart import tile takes a dropped file itself
+ FAIL  src/components/onboarding/captureFork.test.tsx > K2 the fact line states cost — one Smart Import per account, on every plan (plan rules v1) > Smart import states the one import
+ FAIL  src/components/onboarding/captureFork.test.tsx > K2 the fact line states cost — one Smart Import per account, on every plan (plan rules v1) > the other two are always free
+ Test Files  4 failed | 857 passed | 1 skipped (862)
+      Tests  15 failed | 12492 passed | 4 skipped (12511)
+vitest exit=1
+
+# Reading the baseline (written after both runs)
+- The re-run started while Phase 1's first edits were already on disk (captureFork.ts, Onboarding.tsx), so its
+  captureFork.test.tsx (11) and landingRoute.test.ts (2) reds are mine, not the base's.
+- The base, at d5f5a8015 with functions/node_modules linked: tsc 0 errors; build clean; Vitest 3 failing tests,
+  all pre-existing and environmental to a worktree:
+  src/test/emuGuard.test.ts (1) and src/test/firestoreTarget.test.ts (2).
+- The gate for every commit: tsc 0, build clean, Vitest no failures beyond those 3.

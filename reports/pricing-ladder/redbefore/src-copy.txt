@@ -1,0 +1,304 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.5s)
+PL-5 @1440 tails ["If your last replies run late, we'll be in touch with options to extend.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  2 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1440: the small print once, the FAQ and tails verbatim, none of the retired words (2.0s)
+PL-5 @1280 tails ["If your last replies run late, we'll be in touch with options to extend.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  3 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1280: the small print once, the FAQ and tails verbatim, none of the retired words (2.0s)
+PL-5 @390 tails ["If your last replies run late, we'll be in touch with options to extend.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  4 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @390: the small print once, the FAQ and tails verbatim, none of the retired words (2.4s)
+PL-5 @375 tails ["If your last replies run late, we'll be in touch with options to extend.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  5 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @375: the small print once, the FAQ and tails verbatim, none of the retired words (2.5s)
+
+
+  1) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1440: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: the eight answers
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -23,11 +23,11 @@
+          "What if my campaign runs longer than planned?",
+          "There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose your data.",
+        ],
+        Array [
+          "What if I sign with an agent before my plan runs out?",
+    -     "Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan runs to the end of the months you've paid for.",
+    +     "Congratulations! Your plan will simply run to the end of its months, and it won't renew automatically. runs to the end of the months you've paid for.",
+        ],
+        Array [
+          "Can I bring across the spreadsheet I already use?",
+          "Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again.",
+        ],
+
+      292 |     const want = PHONE_QAS.map(([q, a]) => [q, flat(CHANGED.includes(q) ? LADDER_COPY[q] : a)]);
+      293 |     expect.soft(CHANGED.every((q) => LADDER_COPY[q]), "the ref states all three changed answers").toBe(true);
+    > 294 |     expect.soft(qa.map(([q, a]) => [q, flat(a)]), "the eight answers").toEqual(want);
+          |                                                                        ^
+      295 |     /* the two tails that run past the plan, from a result that reaches each */
+      296 |     const tails: string[] = [];
+      297 |     const runLate: CampaignAnswers = { stage: "ready", kind: "nonfic", len: null, agents: 65, agentsUnknown: false, pace: "steady" };
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:294:72
+
+    Error: the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "If your last replies run late, your plan simply carries on month by month until you're done.",
+    +   "If your last replies run late, we'll be in touch with options to extend.",
+        "If you're still querying after that, your plan simply carries on month by month.",
+      ]
+
+      314 |     console.log(`PL-5 @${vp.width} tails`, JSON.stringify(tails));
+      315 |     expect.soft(tails, "the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)")
+    > 316 |       .toEqual([LADDER_COPY['"Which plan suits me best?" results that run past the plan'], TAIL_13]);
+          |        ^
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+      319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:316:8
+
+    Error: no /won't renew/i
+
+    expect(received).toBeNull()
+
+    Received: "won't renew"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-6f3a7-m-none-of-the-retired-words-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1280: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: the eight answers
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -23,11 +23,11 @@
+          "What if my campaign runs longer than planned?",
+          "There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose your data.",
+        ],
+        Array [
+          "What if I sign with an agent before my plan runs out?",
+    -     "Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan runs to the end of the months you've paid for.",
+    +     "Congratulations! Your plan will simply run to the end of its months, and it won't renew automatically. runs to the end of the months you've paid for.",
+        ],
+        Array [
+          "Can I bring across the spreadsheet I already use?",
+          "Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again.",
+        ],
+
+      292 |     const want = PHONE_QAS.map(([q, a]) => [q, flat(CHANGED.includes(q) ? LADDER_COPY[q] : a)]);
+      293 |     expect.soft(CHANGED.every((q) => LADDER_COPY[q]), "the ref states all three changed answers").toBe(true);
+    > 294 |     expect.soft(qa.map(([q, a]) => [q, flat(a)]), "the eight answers").toEqual(want);
+          |                                                                        ^
+      295 |     /* the two tails that run past the plan, from a result that reaches each */
+      296 |     const tails: string[] = [];
+      297 |     const runLate: CampaignAnswers = { stage: "ready", kind: "nonfic", len: null, agents: 65, agentsUnknown: false, pace: "steady" };
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:294:72
+
+    Error: the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "If your last replies run late, your plan simply carries on month by month until you're done.",
+    +   "If your last replies run late, we'll be in touch with options to extend.",
+        "If you're still querying after that, your plan simply carries on month by month.",
+      ]
+
+      314 |     console.log(`PL-5 @${vp.width} tails`, JSON.stringify(tails));
+      315 |     expect.soft(tails, "the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)")
+    > 316 |       .toEqual([LADDER_COPY['"Which plan suits me best?" results that run past the plan'], TAIL_13]);
+          |        ^
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+      319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:316:8
+
+    Error: no /won't renew/i
+
+    expect(received).toBeNull()
+
+    Received: "won't renew"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-50777-m-none-of-the-retired-words-measure/error-context.md
+
+  3) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @390: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: the eight answers
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -23,11 +23,11 @@
+          "What if my campaign runs longer than planned?",
+          "There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose your data.",
+        ],
+        Array [
+          "What if I sign with an agent before my plan runs out?",
+    -     "Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan runs to the end of the months you've paid for.",
+    +     "Congratulations! Your plan will simply run to the end of its months, and it won't renew automatically. runs to the end of the months you've paid for.",
+        ],
+        Array [
+          "Can I bring across the spreadsheet I already use?",
+          "Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again.",
+        ],
+
+      292 |     const want = PHONE_QAS.map(([q, a]) => [q, flat(CHANGED.includes(q) ? LADDER_COPY[q] : a)]);
+      293 |     expect.soft(CHANGED.every((q) => LADDER_COPY[q]), "the ref states all three changed answers").toBe(true);
+    > 294 |     expect.soft(qa.map(([q, a]) => [q, flat(a)]), "the eight answers").toEqual(want);
+          |                                                                        ^
+      295 |     /* the two tails that run past the plan, from a result that reaches each */
+      296 |     const tails: string[] = [];
+      297 |     const runLate: CampaignAnswers = { stage: "ready", kind: "nonfic", len: null, agents: 65, agentsUnknown: false, pace: "steady" };
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:294:72
+
+    Error: the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "If your last replies run late, your plan simply carries on month by month until you're done.",
+    +   "If your last replies run late, we'll be in touch with options to extend.",
+        "If you're still querying after that, your plan simply carries on month by month.",
+      ]
+
+      314 |     console.log(`PL-5 @${vp.width} tails`, JSON.stringify(tails));
+      315 |     expect.soft(tails, "the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)")
+    > 316 |       .toEqual([LADDER_COPY['"Which plan suits me best?" results that run past the plan'], TAIL_13]);
+          |        ^
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+      319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:316:8
+
+    Error: no /won't renew/i
+
+    expect(received).toBeNull()
+
+    Received: "won't renew"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-86690-m-none-of-the-retired-words-measure/error-context.md
+
+  4) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @375: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: the eight answers
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -23,11 +23,11 @@
+          "What if my campaign runs longer than planned?",
+          "There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose your data.",
+        ],
+        Array [
+          "What if I sign with an agent before my plan runs out?",
+    -     "Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan runs to the end of the months you've paid for.",
+    +     "Congratulations! Your plan will simply run to the end of its months, and it won't renew automatically. runs to the end of the months you've paid for.",
+        ],
+        Array [
+          "Can I bring across the spreadsheet I already use?",
+          "Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk database, so you don't have to start again.",
+        ],
+
+      292 |     const want = PHONE_QAS.map(([q, a]) => [q, flat(CHANGED.includes(q) ? LADDER_COPY[q] : a)]);
+      293 |     expect.soft(CHANGED.every((q) => LADDER_COPY[q]), "the ref states all three changed answers").toBe(true);
+    > 294 |     expect.soft(qa.map(([q, a]) => [q, flat(a)]), "the eight answers").toEqual(want);
+          |                                                                        ^
+      295 |     /* the two tails that run past the plan, from a result that reaches each */
+      296 |     const tails: string[] = [];
+      297 |     const runLate: CampaignAnswers = { stage: "ready", kind: "nonfic", len: null, agents: 65, agentsUnknown: false, pace: "steady" };
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:294:72
+
+    Error: the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "If your last replies run late, your plan simply carries on month by month until you're done.",
+    +   "If your last replies run late, we'll be in touch with options to extend.",
+        "If you're still querying after that, your plan simply carries on month by month.",
+      ]
+
+      314 |     console.log(`PL-5 @${vp.width} tails`, JSON.stringify(tails));
+      315 |     expect.soft(tails, "the two tails, verbatim (the ladder ref's, and the brief's for over thirteen months)")
+    > 316 |       .toEqual([LADDER_COPY['"Which plan suits me best?" results that run past the plan'], TAIL_13]);
+          |        ^
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+      319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:316:8
+
+    Error: no /won't renew/i
+
+    expect(received).toBeNull()
+
+    Received: "won't renew"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-480f8-m-none-of-the-retired-words-measure/error-context.md
+
+  4 failed
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1440: the small print once, the FAQ and tails verbatim, none of the retired words 
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1280: the small print once, the FAQ and tails verbatim, none of the retired words 
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @390: the small print once, the FAQ and tails verbatim, none of the retired words 
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @375: the small print once, the FAQ and tails verbatim, none of the retired words 
+  1 passed (28.5s)

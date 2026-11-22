@@ -189,6 +189,8 @@ export function drawerDoorForTask(
     : taskType === "nudge_overdue" ? { mode: "nudge", queryId, preset: { nudgeTab: "sent" } }
     : taskType === "no_response_close" ? { mode: "close", queryId, preset: { closeWhy: "noreply" } }
     : taskType === "offer_received" ? { mode: "offer", queryId, preset: { step: 1 } }
+    /* v152.2 §6.1 — the tell-agents card hangs on the offering query itself */
+    : taskType === "offer_tell_all" ? { mode: "offer", queryId, preset: { step: 1 } }
     : taskType === "offer_send_full" ? { mode: "sent", queryId }
     /* the "told" variant of D7 — no entry id: one step, "I've told …" */
     : taskType === "withdraw_tell" || taskType === "signed_tell" ? { mode: "edit", queryId }

@@ -1,0 +1,73 @@
+[
+ {
+  "panel": "todo-desk",
+  "size": "2560×1440",
+  "gap": 22,
+  "panelH": 1166,
+  "footTop": 646.65625,
+  "note": ""
+ },
+ {
+  "panel": "todo-sendfull",
+  "size": "2560×1440",
+  "gap": 22,
+  "panelH": 1166,
+  "footTop": 646.65625,
+  "note": ""
+ },
+ {
+  "panel": "todo-agentcard",
+  "size": "2560×1440",
+  "cardBottom": 1405.75,
+  "lastItemBottom": 590.59375,
+  "gap": 815.15625
+ },
+ {
+  "panel": "todo-addtask",
+  "size": "2560×1440",
+  "gap": null,
+  "panelH": null,
+  "footTop": null,
+  "note": "no .tws-wcol"
+ },
+ {
+  "panel": "qc-panel",
+  "size": "2560×1440",
+  "gap": 21.58056640625,
+  "panelH": 627.7137451171875,
+  "footTop": 888.4739990234375,
+  "note": ""
+ },
+ {
+  "panel": "cl-panel",
+  "size": "2560×1440",
+  "gap": 24.19012451171875,
+  "panelH": 1298.25,
+  "footTop": 879.1555786132812,
+  "note": ""
+ },
+ {
+  "panel": "log-drawer",
+  "size": "2560×1440",
+  "gap": 10.296875,
+  "panelH": 1326.203125,
+  "footTop": 762.28125,
+  "note": ""
+ },
+ {
+  "panel": "cl-add",
+  "size": "2560×1440",
+  "gap": 28.25,
+  "panelH": 1326.203125,
+  "footTop": 1357,
+  "note": ""
+ },
+ {
+  "panel": "housekeeping",
+  "size": "2560×1440",
+  "gap": 4.140625,
+  "panelH": 1424,
+  "footTop": 1388.109375,
+  "note": ""
+ }
+]

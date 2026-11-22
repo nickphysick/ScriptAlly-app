@@ -127,7 +127,7 @@
   font-size: 15px; color: #7d6c5c;
 }
 .tl-wchv:hover { background: #f6f1ea; color: var(--tl-nearblack); }
-.tl-wchv:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-wchv:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* ⚠️ PRESENT ONLY ONCE THE WINDOW HAS MOVED, and gone again on return — a Today link beside a
    board already showing today is a control that does nothing. The same rule the sidebar's
    `Back to today` followed; this is that control, moved and renamed. */
@@ -148,7 +148,7 @@
   background: transparent; font-size: 11.5px; color: #6a5a50;
 }
 .tl-dseg button[data-on="true"] { background: #fff; color: var(--tl-nearblack); box-shadow: 0 1px 2px rgba(58, 28, 20, .08); }
-.tl-dseg button:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-dseg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE VIEWS PILLS AND THE AT-A-GLANCE TILES ARE DELETED WITH THEIR RENDERERS (v64 §E) — every
    `.gpill`, `.sbx`, `.sbh`, `.slbl` and `.st` rule. Both directions checked: nothing renders the
@@ -186,7 +186,7 @@
 /* an OPEN card squares its foot so the options below are the same object */
 .tl-pr.open { border-radius: 10px 10px 0 0; border-bottom-color: transparent; }
 .tl-pr:hover { border-color: #cdbfa8; }
-.tl-pr:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-pr:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tl-prchev { color: #a89880; font-size: 12px; transition: transform .12s; }
 .tl-pr.open .tl-prchev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .tl-prchev { transition: none; } }
@@ -210,7 +210,7 @@
   font-size: 12px; color: #4a3d33;
 }
 .tl-px > button:hover { background: rgba(255, 255, 255, .7); }
-.tl-px > button:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-px > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tl-px > button b {
   margin-left: auto;
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
@@ -419,7 +419,7 @@
      on the GROUND above it — so this is the card's surface, and the marker halo reads it to get
      contrast against exactly the thing a marker is drawn on. */
   --tl-ink: #3a1c14;
-  --tl-muted: #8a7a6c;
+  --tl-muted: var(--sp-quiet);
   /* ⚠️ THE RING'S DOTTED GREY IS THE REF'S OWN `#cdbfa8` and has no other consumer — it is a
      shade lighter than `--tl-btn-line` and darker than `--tl-hair`, and reusing either would put
      the ring on a value chosen for a control's edge. Its ground is the board's, so the dots read
@@ -601,7 +601,7 @@
   --pill-you-bg: #f5e2da;   --pill-you-bd: #e8c8bc;   --pill-you-tx: #1c130f;
   --pill-them-bg: #e9ede6;  --pill-them-bd: #d6ddd2;  --pill-them-tx: #5a6e58;
   --pill-wait-bg: #e3eaf0;  --pill-wait-bd: #cfdbe6;  --pill-wait-tx: #4b5f73;
-  --pill-quiet-bg: #efebe4; --pill-quiet-bd: #e5dfd4; --pill-quiet-tx: #8a7a6c;
+  --pill-quiet-bg: #efebe4; --pill-quiet-bd: #e5dfd4; --pill-quiet-tx: var(--sp-quiet);
   --pill-closed-bd: #ddd0c0;
   /* owed — a passed date, or a writer-held request with none named */
   --owed-bd: #e8c8bc;
@@ -855,7 +855,7 @@
 .tl-gdiv .gp .gico { width: 17px; height: 17px; flex: 0 0 auto; color: var(--tl-nearblack); }
 .tl-gdiv .gp b {
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 7.5px; letter-spacing: .12em;
-  color: #8a7a6c; font-weight: 500; margin-left: 2px;
+  color: var(--sp-quiet); font-weight: 500; margin-left: 2px;
 }
 .tl-gwrap { display: flex; }
 /* ⚠️ THE GUTTER HAS NO FILL. v60 tinted it the section's tone the height of every section, from a
@@ -896,13 +896,13 @@
 .tl-grp[data-sec] .tl-gt .gico { color: var(--gico); }
 /* ⚠️ THE SENTENCE IS WHAT THE HEADING IS FOR. "Needs you soon" is a label a reader has to decode;
    the sentence beneath it is the thing itself. */
-.tl-gt .s { font-size: 11.5px; color: var(--tl-muted); }
+.tl-gt .s { font-size: 11.5px; color: var(--sp-quiet); }
 .tl-gtbtn {
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8.5px; letter-spacing: .1em;
   color: var(--tl-label); cursor: pointer; background: none; border: 0; padding: 0; margin-left: 2px;
 }
 .tl-gtbtn:hover { color: var(--tl-nearblack); }
-.tl-gtbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-gtbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ NO BORDER, NO RADIUS, NO CLIP — THE ROWS HAVE NO CONTAINER OF THEIR OWN.
    The ref draws ONE card, its `.panel`, and says so in its own prose: "Rows are full width to a
@@ -1158,7 +1158,7 @@
   border: 0; background: none; padding: 0 12px; margin: 0; font: inherit; color: inherit;
   text-align: left; cursor: pointer;
 }
-.tl-nmbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-nmbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 .tl-ag {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px; letter-spacing: 0.13em;
@@ -1367,7 +1367,7 @@
 .tl-pill.you    { background: var(--pill-you-bg);   border: 1px solid var(--pill-you-bd);   color: var(--pill-you-tx); }
 .tl-pill.them   { background: var(--pill-them-bg);  border: 1px solid var(--pill-them-bd);  color: var(--pill-them-tx); }
 .tl-pill.wait   { background: var(--pill-wait-bg);  border: 1px solid var(--pill-wait-bd);  color: var(--pill-wait-tx); }
-.tl-pill.quiet  { background: var(--pill-quiet-bg); border: 1px solid var(--pill-quiet-bd); color: var(--pill-quiet-tx); }
+.tl-pill.quiet  { background: var(--pill-quiet-bg); border: 1px solid var(--pill-quiet-bd); color: var(--sp-quiet); }
 .tl-pill.closed { background: transparent;          border: 1px solid var(--pill-closed-bd); color: var(--tl-label, #9c8878); }
 
 /* ⚠️ THE FADE MASK AND ITS `.fits` ESCAPE ARE RETIRED WITH THE MARQUEE (v40). The mask said "there
@@ -1449,7 +1449,7 @@
    the shadow (`.card.hush .frame { box-shadow: none }`) and the closed state. A transparent frame
    was our own invention for "not live work", and on the re-cut it reads as a card that failed to
    render — measured: two rows showing text and a chip with no card behind them. */
-.tl-p.ghost .tl-hl, .tl-p.ghost .tl-cdt { color: var(--pill-quiet-tx); }
+.tl-p.ghost .tl-hl, .tl-p.ghost .tl-cdt { color: var(--sp-quiet); }
 /* ⚠️ HOLLOW IS A STRETCH PAST THE DATE SOMEBODY NAMED, and v39 pins no treatment for it — the ref
    draws `quietc` and `closedc` and nothing between. It takes the one thing quiet and closed have
    in common and nothing else: no shadow, because a run that has outlived its own date has stopped
@@ -1553,7 +1553,7 @@
    20px one — the marker grows and the thing inside it does not. */
 .tl-mk2 svg { display: block; width: calc(var(--mk) * .42); height: calc(var(--mk) * .42); }
 button.tl-mk2 { cursor: pointer; }
-.tl-mk2:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-mk2:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tl-rrow.closed .tl-mk2 { opacity: .6; }
 
 
@@ -1598,7 +1598,7 @@ button.tl-mk2 { cursor: pointer; }
 .tl-tchip.grab { cursor: grab; }
 .tl-tchip.grab:active { cursor: grabbing; }
 button.tl-tchip { cursor: pointer; }
-.tl-tchip:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-tchip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ══ TODAY, THE CROSSHAIR AND THE ONE TOOLTIP ══════════════════════════════════════════════
  *
@@ -1707,7 +1707,7 @@ button.tl-tchip { cursor: pointer; }
   background: #fff; border: 1px dashed #e0d3c2; border-radius: 10px; padding: 26px 22px; text-align: center;
 }
 .tl-sparse h4 { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 500; margin-bottom: 6px; color: var(--tl-ink); }
-.tl-sparse p { font-size: 12.5px; color: var(--tl-muted); max-width: 420px; margin: 0 auto; line-height: 1.55; }
+.tl-sparse p { font-size: 12.5px; color: var(--sp-quiet); max-width: 420px; margin: 0 auto; line-height: 1.55; }
 
 @media (prefers-reduced-motion: reduce) {
   .tl-rrow { transition: none; }
@@ -1773,7 +1773,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-btn:hover { border-color: #d3c4b3; color: #1c130f; }
 .tl-btn.primary { background: #f5e2da; border-color: #e8c8bc; color: #1c130f; }
-.tl-btn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE WORKSPACE'S WHOLE CSS FAMILY IS DELETED (v65 §A) — `.tl-split`, the collapsed day
    column (`.tl-col*`, `.tl-crow`, `.tl-mini`, `.tl-cempty`), the work column (`.tl-ws*`,
@@ -2022,7 +2022,7 @@ button.tl-tchip { cursor: pointer; }
 .tl-ccbody { padding: 10px 12px 12px; }
 .tl-ccl1 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .tl-ccnm { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; line-height: 1.3; }
-.tl-ccag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; color: #8a7a6c; }
+.tl-ccag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; color: var(--sp-quiet); }
 .tl-ccl2 { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; font-size: 12px; flex-wrap: wrap; }
 /* the gauge — the ref's 6px track, #f1e9de, with the today dot 14px ink in a 2px white ring */
 .tl-ccgauge { margin-top: 14px; height: 6px; border-radius: 3px; background: #f1e9de; position: relative; }
@@ -2051,12 +2051,11 @@ button.tl-tchip { cursor: pointer; }
   text-transform: uppercase; color: #a89880;
 }
 .tl-ccnote {
-  margin-top: 10px; font-size: 11.5px; color: #8a7a6c;
+  margin-top: 10px; font-size: 11.5px; color: var(--sp-quiet);
   border-top: 1px solid #f1e9de; padding-top: 8px; font-style: italic;
 }
 .tl-ccact { margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px; align-items: center; }
 .tl-cccv { font-family: Caveat, cursive; font-size: 15px; color: #6f6055; }
-.tl-cccv.od { color: #8c4f4a; }
 .tl-ccbtn {
   padding: 5px 10px; border-radius: 9px; border: 1.5px solid #2a1f17; background: #fff;
   cursor: pointer; color: var(--tl-nearblack);
@@ -2089,7 +2088,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-dwtabs { display: flex; gap: 4px; padding: 10px 18px 0; border-bottom: 1px solid #f1e9de; flex: 0 0 auto; }
 .tl-dwtabs button {
-  padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: #8a7a6c;
+  padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: var(--sp-quiet);
   border: 0; background: transparent; border-bottom: 2px solid transparent;
   cursor: pointer; margin-bottom: -1px; font-family: inherit;
 }
@@ -2101,7 +2100,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-dwb { padding: 18px; overflow: auto; flex: 1; }
 .tl-dwnm { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--tl-nearblack); }
-.tl-dwag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: #8a7a6c; margin-top: 2px; }
+.tl-dwag { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--sp-quiet); margin-top: 2px; }
 /* how the materials were recorded (clean-up pass item 3): the chip under the agency, the box under the send */
 .tl-dwhow { margin-top: 8px; }
 .tl-dwbox { display: block; margin-top: 6px; }
@@ -2121,7 +2120,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-dwnote {
   margin-top: 18px; border: 1px dashed #d3c6b2; border-radius: 10px; padding: 12px;
-  font-size: 12.5px; color: #8a7a6c;
+  font-size: 12.5px; color: var(--sp-quiet);
 }
 .tl-dwar {
   display: flex; align-items: center; gap: 12px; padding: 12px; width: 100%; text-align: left;
@@ -2136,7 +2135,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-dwar.pri .ai { background: #2a1f17; border-color: #2a1f17; color: #fdf9f5; }
 .tl-dwar .at { font-size: 13px; font-weight: 600; color: var(--tl-nearblack); display: block; }
-.tl-dwar .ad { font-size: 11.5px; color: #8a7a6c; margin-top: 2px; display: block; }
+.tl-dwar .ad { font-size: 11.5px; color: var(--sp-quiet); margin-top: 2px; display: block; }
 .tl-dwar .cv { margin-left: auto; font-family: Caveat, cursive; font-size: 15px; color: #8c4f4a; white-space: nowrap; }
 .tl-dwf {
   padding: 12px 18px; border-top: 1px solid #f1e9de; display: flex; justify-content: space-between;
@@ -2285,7 +2284,7 @@ button.tl-tchip { cursor: pointer; }
 /* ⚠️ THE SENTENCE IS INTER, NOT MONO UPPERCASE — the ref's own `.jd` under `data-past="dotted"`.
    It is prose about what happened, and mono uppercase is the board's vocabulary for labels. */
 .tl-jd { font-family: inherit; font-size: 10px; letter-spacing: 0; text-transform: none;
-  color: var(--tl-muted); line-height: 1.2; }
+  color: var(--sp-quiet); line-height: 1.2; }
 
 /* ══ THE IN-CARD TRAIL (v60, the ref's `trailBits`) ══════════════════════════════════════════
  *
@@ -2355,7 +2354,6 @@ button.tl-tchip { cursor: pointer; }
   letter-spacing: 0; text-transform: none; color: #6f6055;
 }
 /* the urgent label is rose — the one place on a card where lateness is stated in colour */
-.tl-act--od .tl-actlab { color: #8c4f4a; }
 
 .tl-actbtn {
   flex: 0 0 auto; cursor: pointer;
@@ -2365,7 +2363,7 @@ button.tl-tchip { cursor: pointer; }
   letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
 }
 .tl-actbtn:hover { background: #faf6ef; }
-.tl-actbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-actbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE URGENT FLAG'S STAGGERED PULSE IS RETIRED WITH THE FLAG (v63, §E). It offset alternate
    rows so a board of late work did not throb in unison; there is no flag to throb — an urgent row
@@ -2478,7 +2476,7 @@ button.tl-tchip { cursor: pointer; }
 .tl-snote {
   flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
   font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; font-weight: 400;
-  color: #8a7a6c;
+  color: var(--sp-quiet);
 }
 .tl-sh {
   margin-left: auto; flex: 0 0 auto;
@@ -2551,7 +2549,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-fag {
   font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; font-weight: 400;
-  color: #8a7a6c; margin-left: 8px; white-space: nowrap; line-height: 1.3;
+  color: var(--sp-quiet); margin-left: 8px; white-space: nowrap; line-height: 1.3;
 }
 /* ⚠️ THE NAME AS A LINK LOOKS EXACTLY LIKE THE NAME. It is a `<button>` for the keyboard and for
    assistive tech — a name that navigates must be reachable by Tab and announceable as an action —
@@ -2574,7 +2572,7 @@ button.tl-tchip { cursor: pointer; }
   text-align: left; text-decoration: none;
 }
 .tl-fnmlink:hover { text-decoration: underline; text-underline-offset: 2px; }
-.tl-fnmlink:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; border-radius: 2px; }
+.tl-fnmlink:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 /* ⚠️ LINE TWO IS A SENTENCE, NOT A LABEL. It was mono 8.5px uppercase with `.1em` tracking — the
    register of a tag — for a line that reads "Due 28 Aug · 15 days overdue". Inter at 12px in the
    card's own ink reads as prose, which is what it is. The `agcy` and `sepd` spans are DELETED, not
@@ -2802,7 +2800,7 @@ button.tl-tchip { cursor: pointer; }
    stuck bar covers everything scrolling beneath it; z 8 let a card's own stacking rise past it.
    The rendered ref: `.gdiv` sticky top 0, z 25, on the split layout. */
 .tl-gdiv { position: sticky; top: 0; z-index: 25; cursor: pointer; }
-.tl-gdiv:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-gdiv:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the chevron states which way the group is — it is the only thing that changes when it collapses */
 .tl-gchev {
   margin-left: 10px; flex: 0 0 auto;
@@ -2899,7 +2897,7 @@ button.tl-tchip { cursor: pointer; }
   font-family: inherit; font-size: 12px; font-weight: 500; color: var(--tl-ch-tx);
   text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #b8a889;
 }
-.tl-axis .backtoday:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-axis .backtoday:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* At a glance — four tiles, two by two */
 
 

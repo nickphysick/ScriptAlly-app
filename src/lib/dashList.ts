@@ -25,7 +25,7 @@ import { agentInitials, agentPrimary } from "./agentDisplay";
 import { elapsedWhole } from "./elapsed";
 import { stateFor, type State } from "./queryCardFacts";
 import { buildQcRows, STAGE_NAME, type QcRow } from "./qcSummary";
-import { GAP_TARGET, hasPassedOn, hkModel, type GapKey, type HkAgentCtx, type HkItem } from "./contactHousekeeping";
+import { GAP_TARGET, hasPassedOn, hkModel, type GapKey, type HkAgentCtx, type HkItem, type HkModel } from "./contactHousekeeping";
 import { contactPrefsOf } from "./contactPrefs";
 import { fitsGenre } from "./contactStrip";
 import { bookGenres } from "./genreMatch";
@@ -34,14 +34,20 @@ import type { AgentCardField, AgentCardTab } from "./agentCardStore";
 import { MONTHS_SHORT } from "./dates";
 import type { GettingStartedRow } from "./dashEmpty";
 
-export type ListGroupKey = "req" | "nudge" | "quiet" | "house" | "ready" | "coming";
+/* ⚠️ "start" IS THE DESKTOP'S GETTING STARTED PAGE (Dashboard first visit v1): ONE item whose body is the
+   checklist. The phone never receives it — its plans come from `startingPlan` and an unchanged `dashList`. */
+export type ListGroupKey = "req" | "nudge" | "quiet" | "start" | "house" | "ready" | "coming";
 
-export const LIST_ORDER: readonly ListGroupKey[] = ["req", "nudge", "quiet", "house", "ready", "coming"];
+/* ⚠️ THE ORDER IS THE LAW (Dashboard first visit v1, Part C): real tasks — the writer's move, nudges due, closes due —
+   always come first; then Getting started, while it is unfinished and not hidden (desktop only); then housekeeping;
+   then the two caught-up groups. */
+export const LIST_ORDER: readonly ListGroupKey[] = ["req", "nudge", "quiet", "start", "house", "ready", "coming"];
 
 export const LIST_LABEL: Record<ListGroupKey, string> = {
   req: "Agents are waiting",
   nudge: "Worth a nudge",
   quiet: "Gone quiet",
+  start: "Getting started",
   house: "Housekeeping",
   ready: "Ready to query",
   coming: "Coming up",
@@ -83,8 +89,10 @@ export interface ListItem {
   /** a query that agents are waiting on shows its stages; everything else shows one sentence */
   stages: ListStage[] | null;
   note: string | null;
-  /** a coming-up item's date tile */
-  date: { dow: string; day: string } | null;
+  /** a coming-up item's date tile; `mon` (first visit v1, D4) so "WED 9" says which month — the phone does not draw it */
+  date: { dow: string; day: string; mon?: string } | null;
+  /** the board card's task type, for a board item (Dashboard v71's task card reads which send it is) */
+  taskType?: string | null;
 }
 
 export interface ListGroup { key: ListGroupKey; label: string; items: ListItem[] }
@@ -114,7 +122,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
  */
 export function listPlan(found: Partial<Record<ListGroupKey, ListItem[]>>): ListPlan {
   const has = (k: ListGroupKey) => (found[k]?.length ?? 0) > 0;
-  const work = (["req", "nudge", "quiet", "house"] as const).filter(has);
+  const work = (["req", "nudge", "quiet", "start", "house"] as const).filter(has);
   const keys: ListGroupKey[] = work.length ? [...work] : has("ready") ? ["ready"] : ["coming"];
   const groups = keys.map((key) => ({ key, label: LIST_LABEL[key], items: found[key] ?? [] }));
   const first = keys[0];
@@ -123,9 +131,23 @@ export function listPlan(found: Partial<Record<ListGroupKey, ListItem[]>>): List
     items: groups.flatMap((g) => g.items),
     thenLabel: first === "ready" || first === "coming" ? "Also" : "Then",
     all: first === "ready" ? { label: "Contact list", tab: "agents" }
-      : first === "coming" ? { label: "Calendar", tab: "todo", sub: "calendar" }
+      : first === "coming" ? { label: "To-do list", tab: "todo" }
       : { label: "All", tab: "todo" },
   };
+}
+
+/**
+ * Dashboard v2.1 · the queries that still need the writer: the ones Next up's "Agents are waiting" group holds (the
+ * board's `req` cards — a partial, full or revision asked for and not yet sent, an offer not yet answered). The feed
+ * opens a big event only while its query is here. ⚠️ READ FROM THE PLAN, NEVER RE-DERIVED: the dashboard's two
+ * surfaces cannot disagree about whose move it is.
+ */
+export function needsYouIds(plan: ListPlan): Set<string> {
+  const ids = new Set<string>();
+  for (const it of plan.items) {
+    if (it.group === "req" && it.action.kind === "drawer" && it.action.request.queryId) ids.add(it.action.request.queryId);
+  }
+  return ids;
 }
 
 /**
@@ -164,6 +186,7 @@ const ACT: Record<string, string> = {
   offer_send_full: "Send your full",
   offer_received: "Offer: next steps",
   offer_tell: "Tell them about your offer",
+  offer_tell_all: "Tell the other agents",
   nudge_overdue: "Record a nudge",
   no_response_close: "Close this query",
 };
@@ -232,6 +255,7 @@ export function boardItems(i: BoardInput): Partial<Record<ListGroupKey, ListItem
       actLabel: ACT[card?.taskType ?? ""] ?? "Open",
       action: { kind: "drawer", request: { ...door } },
       stages, note, date: null,
+      taskType: card?.taskType ?? null,
     });
   }
   return out;
@@ -239,7 +263,7 @@ export function boardItems(i: BoardInput): Partial<Record<ListGroupKey, ListItem
 
 /* ── 4: housekeeping ───────────────────────────────────────────────────────────────────────── */
 
-const GAP_DISC: Record<GapKey, string> = { reply: "RW", materials: "MS", genres: "GE", wishlist: "WL", reopen: "OP" };
+const GAP_DISC: Record<GapKey, string> = { reply: "RW", materials: "MS", genres: "GE", wishlist: "WL", reopen: "OP", agency: "AG" };
 
 const GAP_COPY: Record<GapKey, { one: (n: string) => string; many: (n: number) => [string, string, string?]; why: string; note: string }> = {
   reply: {
@@ -272,6 +296,12 @@ const GAP_COPY: Record<GapKey, { one: (n: string) => string; many: (n: number) =
     why: "So you are reminded when they reopen",
     note: "Pick a date and a reminder goes on your To-do list.",
   },
+  agency: {
+    one: (n) => `Add the agency ${n} is with`,
+    many: (n) => ["Add the agency for ", `${n} agents`],
+    why: "So you don’t query two agents at one agency by mistake",
+    note: "With the agency on file, QueryHawk can tell you when two agents work together.",
+  },
 };
 
 export interface HouseInput {
@@ -289,7 +319,7 @@ export interface HouseInput {
  * is the Contact list's own (`AgentList` builds the same five facts inline; this is that rule,
  * stated here because that file is the Contact list's).
  */
-export function houseItems(i: HouseInput): ListItem[] {
+export function houseModel(i: HouseInput): HkModel {
   const msId = i.manuscript?.id ?? null;
   const book = bookGenres(i.manuscript);
   const reopen = new Set(i.userTasks.filter((t) => t.agentId && !t.done && (t.dueDate ?? "").trim()).map((t) => t.agentId as string));
@@ -300,7 +330,11 @@ export function houseItems(i: HouseInput): ListItem[] {
     passedOn: hasPassedOn(a, i.queries as Query[], msId),
     hasReopenTask: reopen.has(a.id),
   });
-  const model = hkModel(i.agents, ctxOf, contactPrefsOf(i.user, i.now));
+  return hkModel(i.agents, ctxOf, contactPrefsOf(i.user, i.now));
+}
+/** Phone app v4 reads the same model for List health (`houseModel`); this turns it into the list's items */
+export function houseItems(i: HouseInput): ListItem[] {
+  const model = houseModel(i);
   const byGap = new Map<GapKey, HkItem[]>();
   for (const it of model.items) byGap.set(it.gap, [...(byGap.get(it.gap) ?? []), it]);
   return [...byGap.entries()].map(([gap, items]) => {
@@ -388,7 +422,7 @@ export function comingItems(qcRows: readonly QcRow[], nowMs: number): ListItem[]
         action: { kind: "drawer" as const, request: { mode: "resp" as const, queryId: r.id } },
         stages: null,
         note: "The next date from your queries. Nothing needs doing before then.",
-        date: { dow: DOW[d.getDay()], day: String(d.getDate()) },
+        date: { dow: DOW[d.getDay()], day: String(d.getDate()), mon: MONTHS_SHORT[d.getMonth()] },
       };
     });
 }
@@ -410,6 +444,11 @@ export interface DashListInput {
   now: Date;
   /** dev review aid only: groups to leave out, so each state can be seen on a real account */
   drop?: readonly ListGroupKey[];
+  /**
+   * First visit v1 (Part C) — the desktop's Getting started page, placed after the real tasks and before
+   * housekeeping. Absent (the phone, and once it is finished or hidden) → the list is exactly as before.
+   */
+  start?: ListItem | null;
 }
 
 export function dashList(i: DashListInput): ListPlan {
@@ -421,6 +460,7 @@ export function dashList(i: DashListInput): ListPlan {
     house: houseItems({ agents: i.agents, queries: i.queries, qcRowsAll, userTasks: i.userTasks, manuscript: i.manuscript, user: i.user, now: i.now }),
     ready: readyItems({ agents: i.agents, queries: i.queries, manuscript: i.manuscript, now: i.now }),
     coming: comingItems(qcRows, nowMs),
+    ...(i.start ? { start: [i.start] } : {}),
   };
   for (const k of i.drop ?? []) found[k] = [];
   return listPlan(found);
@@ -429,6 +469,29 @@ export function dashList(i: DashListInput): ListPlan {
 /* ── first run ─────────────────────────────────────────────────────────────────────────────── */
 
 export const STARTING_LABEL = "Getting started";
+
+/** The key of the desktop's one Getting started page. */
+export const GS_ITEM_KEY = "start:card";
+
+/**
+ * DASHBOARD FIRST VISIT v1 — the desktop task card's Getting started PAGE: one item, whose body the card draws
+ * as the checklist (fv1/GettingStarted). Its title is what the "Then:" line of the page before it says.
+ */
+export function gettingStartedItem(): ListItem {
+  return {
+    key: GS_ITEM_KEY, group: "start", tone: "house",
+    pre: "Finish getting started", who: "", post: "",
+    initials: "", fact: "", agency: "", status: null, when: "", foot: "",
+    actLabel: "Open", action: { kind: "route", tab: "dashboard" },
+    stages: null, note: null, date: null,
+  };
+}
+
+/** Before the first query the desktop's whole list is the one Getting started page. */
+export function gettingStartedPlan(): ListPlan {
+  const item = gettingStartedItem();
+  return { groups: [{ key: "start", label: STARTING_LABEL, items: [item] }], items: [item], thenLabel: "Then", all: { label: "All", tab: "todo" } };
+}
 
 /**
  * A book with no query yet has nothing on the list, so the column carries the getting-started

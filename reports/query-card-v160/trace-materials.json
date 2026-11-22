@@ -1,0 +1,344 @@
+{
+ "draft": {
+  "text": "You sent Mira your partialFirst 3 chapters · Post-R&R (T. Marsh)18 Nov18 Nov",
+  "cls": "qc152-m me qc1522-draft",
+  "border": "1px dashed rgb(185, 173, 158)"
+ },
+ "toastText": "Partial sent\nUndo",
+ "afterUndoToast": "",
+ "save": {
+  "frameRotate": [
+   {
+    "at": 303,
+    "from": "none",
+    "to": "1.6deg"
+   }
+  ],
+  "bandWord": [
+   {
+    "at": 811,
+    "from": "MATERIALS REQUESTED",
+    "to": "WITH THE AGENT"
+   }
+  ],
+  "pill": [
+   {
+    "at": 811,
+    "from": "Partial requested",
+    "to": "Partial sent"
+   }
+  ],
+  "foot": [
+   {
+    "at": 303,
+    "to": "Send the partialby 25 NovMark partial sent"
+   },
+   {
+    "at": 811,
+    "from": "Send the partialby 25 NovMark partial sent",
+    "to": "Waiting on MiraReply expected by 10 Feb 2027Record a response"
+   }
+  ],
+  "footH": [
+   {
+    "at": 303,
+    "to": 79
+   }
+  ],
+  "footOp": [
+   {
+    "at": 303,
+    "to": "1"
+   },
+   {
+    "at": 1048,
+    "from": "1",
+    "to": "0"
+   },
+   {
+    "at": 1214,
+    "from": "0",
+    "to": "0.0139417"
+   },
+   {
+    "at": 1231,
+    "from": "0.0139417",
+    "to": "0.0831083"
+   },
+   {
+    "at": 1248,
+    "from": "0.0831083",
+    "to": "0.152692"
+   },
+   {
+    "at": 1264,
+    "from": "0.152692",
+    "to": "0.222275"
+   },
+   {
+    "at": 1280,
+    "from": "0.222275",
+    "to": "0.291442"
+   },
+   {
+    "at": 1298,
+    "from": "0.291442",
+    "to": "0.361025"
+   },
+   {
+    "at": 1314,
+    "from": "0.361025",
+    "to": "0.430608"
+   },
+   {
+    "at": 1331,
+    "from": "0.430608",
+    "to": "0.499775"
+   },
+   {
+    "at": 1347,
+    "from": "0.499775",
+    "to": "0.569358"
+   },
+   {
+    "at": 1363,
+    "from": "0.569358",
+    "to": "0.638942"
+   },
+   {
+    "at": 1381,
+    "from": "0.638942",
+    "to": "0.708525"
+   },
+   {
+    "at": 1398,
+    "from": "0.708525",
+    "to": "0.777692"
+   },
+   {
+    "at": 1414,
+    "from": "0.777692",
+    "to": "0.846858"
+   },
+   {
+    "at": 1431,
+    "from": "0.846858",
+    "to": "0.916442"
+   },
+   {
+    "at": 1448,
+    "from": "0.916442",
+    "to": "0.986025"
+   },
+   {
+    "at": 1464,
+    "from": "0.986025",
+    "to": "1"
+   }
+  ],
+  "msgs": [
+   {
+    "at": 303,
+    "from": 3,
+    "to": 2
+   },
+   {
+    "at": 811,
+    "from": 2,
+    "to": 3
+   }
+  ],
+  "lastId": [
+   {
+    "at": 303,
+    "from": 3,
+    "to": 4
+   },
+   {
+    "at": 811,
+    "from": 4,
+    "to": 5
+   }
+  ],
+  "lastCls": [
+   {
+    "at": 303,
+    "from": "qc152-m me qc1522-draft",
+    "to": "qc152-m them"
+   },
+   {
+    "at": 811,
+    "from": "qc152-m them",
+    "to": "qc152-m me"
+   },
+   {
+    "at": 1006,
+    "from": "qc152-m me",
+    "to": "qc152-m me new"
+   }
+  ],
+  "lastTitle": [
+   {
+    "at": 303,
+    "from": "You sent Mira your partial",
+    "to": "Mira asked for a partial"
+   },
+   {
+    "at": 811,
+    "from": "Mira asked for a partial",
+    "to": "You sent Mira your partial"
+   }
+  ],
+  "lastText": [
+   {
+    "at": 303,
+    "from": "You sent Mira your partialFirst 3 chapters · Post-R&R (T. Ma",
+    "to": "MVMira asked for a partialSend by 25 Nov14 Nov14 Nov✎ Edit"
+   },
+   {
+    "at": 811,
+    "from": "MVMira asked for a partialSend by 25 Nov14 Nov14 Nov✎ Edit",
+    "to": "You sent Mira your partialFirst 3 chapters · Post-R&R (T. Ma"
+   }
+  ],
+  "lastBg": [
+   {
+    "at": 303,
+    "from": "rgba(0, 0, 0, 0)",
+    "to": "rgb(228, 235, 242)"
+   },
+   {
+    "at": 811,
+    "from": "rgb(228, 235, 242)",
+    "to": "rgb(246, 243, 238)"
+   }
+  ],
+  "lastBorder": [
+   {
+    "at": 303,
+    "from": "dashed",
+    "to": "solid"
+   }
+  ],
+  "lastH": [
+   {
+    "at": 303,
+    "from": 63,
+    "to": 59
+   },
+   {
+    "at": 811,
+    "from": 59,
+    "to": 61
+   }
+  ],
+  "toast": [
+   {
+    "at": 1006,
+    "to": "Partial sentUndo"
+   }
+  ],
+  "toastOp": [
+   {
+    "at": 1006,
+    "to": "1"
+   }
+  ]
+ },
+ "undo": {
+  "bandWord": [
+   {
+    "at": 731,
+    "from": "WITH THE AGENT",
+    "to": "MATERIALS REQUESTED"
+   }
+  ],
+  "pill": [
+   {
+    "at": 731,
+    "from": "Partial sent",
+    "to": "Partial requested"
+   }
+  ],
+  "foot": [
+   {
+    "at": 731,
+    "from": "Waiting on MiraReply expected by 10 Feb 2027Record a response",
+    "to": "Send the partialby 25 NovMark partial sent"
+   }
+  ],
+  "msgs": [
+   {
+    "at": 731,
+    "from": 3,
+    "to": 2
+   }
+  ],
+  "lastId": [
+   {
+    "at": 731,
+    "from": 5,
+    "to": 4
+   }
+  ],
+  "lastCls": [
+   {
+    "at": 412,
+    "from": "qc152-m me new",
+    "to": "qc152-m me"
+   },
+   {
+    "at": 731,
+    "from": "qc152-m me",
+    "to": "qc152-m them"
+   }
+  ],
+  "lastTitle": [
+   {
+    "at": 731,
+    "from": "You sent Mira your partial",
+    "to": "Mira asked for a partial"
+   }
+  ],
+  "lastText": [
+   {
+    "at": 731,
+    "from": "You sent Mira your partialFirst 3 chapters · Post-R&R (T. Ma",
+    "to": "MVMira asked for a partialSend by 25 Nov14 Nov14 Nov✎ Edit"
+   }
+  ],
+  "lastBg": [
+   {
+    "at": 731,
+    "from": "rgb(246, 243, 238)",
+    "to": "rgb(228, 235, 242)"
+   }
+  ],
+  "lastH": [
+   {
+    "at": 731,
+    "from": 61,
+    "to": 59
+   }
+  ],
+  "toast": [
+   {
+    "at": 364,
+    "from": "Partial sentUndo"
+   }
+  ],
+  "toastOp": [
+   {
+    "at": 364,
+    "from": "1"
+   }
+  ]
+ },
+ "saveFrames": 104,
+ "undoFrames": 149,
+ "saveAnims": [
+  "qc152-pill:transform+opacity",
+  "qc152-rb:transform+opacity"
+ ],
+ "undoAnims": []
+}

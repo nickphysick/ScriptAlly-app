@@ -15,7 +15,7 @@
   font: 400 14px/1.4 var(--mk-f-serif); color: rgba(28, 19, 15, .74);
 }
 .mk-places--line .mk-places-bar { flex: 0 0 92px; height: 6px; border-radius: 9px; background: #f7e8e2; overflow: hidden; }
-.mk-places--line .mk-places-bar i { display: block; height: 100%; background: #a2452a; border-radius: 9px; }
+.mk-places--line .mk-places-bar i { display: block; height: 100%; background: var(--mk-rust); border-radius: 9px; }
 .mk-places--line > span:last-child { font: inherit; margin: 0; letter-spacing: 0; text-transform: none; color: inherit; }
 .mk-places--line.mk-places--wait { visibility: hidden; }
 /* `HeroPlaces variant="hero"` (clarity v1): the bar full width, the words on the right, N bold. */
@@ -130,7 +130,7 @@
 .mk-wl .mk-wl-feat--first h2::after { margin-left: auto; margin-right: auto; }
 .mk-wl-feat { scroll-margin-top: calc(var(--mk-nav-h, 60px) + 4px); }
 .mk-wl-fline { margin: 0 0 18px; font: 400 16.5px/1.55 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
-.mk-strike { text-decoration: line-through; text-decoration-color: #a2452a; text-decoration-thickness: 2px; color: rgba(28, 19, 15, .6); font: inherit; } /* WCAG AA (launch polish, 2 Nov): same hue, darker, ≥4.6:1 */
+.mk-strike { text-decoration: line-through; text-decoration-color: var(--mk-rust); text-decoration-thickness: 2px; color: rgba(28, 19, 15, .6); font: inherit; } /* WCAG AA (launch polish, 2 Nov): same hue, darker, ≥4.6:1 */
 .mk-wl-art img { display: block; width: 112%; max-width: none; height: auto; margin: 0 -6%; }
 .mk-wl-ticks { list-style: none; margin: 0; padding: 0; }
 .mk-wl-ticks li { display: flex; gap: 10px; align-items: flex-start; margin: 6px 0; font: 400 15.5px/1.4 var(--mk-f-serif); color: #1c130f; }
@@ -174,7 +174,7 @@
   opacity: 0; pointer-events: none; transition: opacity .3s;
 }
 .mk-trk-again.mk-on { opacity: 1; pointer-events: auto; }
-.mk-trk-again:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+.mk-trk-again:focus-visible { outline: 2px solid var(--mk-rust); outline-offset: 2px; }
 
 /* ── The mission, on navy: three cream cards you swipe (ref `.why2`, `.vc`, `.vcard`, v16 + the last two) ──
    ⚠️ THE CAROUSEL IS THE ONLY ELEMENT ON THE PAGE WITH SCROLL-SNAP (LW-2). One card fills the content width,
@@ -244,7 +244,7 @@
 .mk-wl-faq details { border-bottom: 1px solid rgba(28, 19, 15, .13); padding: 16px 0; }
 .mk-wl-faq summary { list-style: none; display: flex; justify-content: space-between; gap: 14px; font: 600 17px/1.35 var(--mk-f-serif); cursor: pointer; }
 .mk-wl-faq summary::-webkit-details-marker { display: none; }
-.mk-wl-faq summary::after { content: "+"; font: 400 24px/1 var(--mk-f-sans); color: #a2452a; }
+.mk-wl-faq summary::after { content: "+"; font: 400 24px/1 var(--mk-f-sans); color: var(--mk-rust); }
 .mk-wl-faq details[open] summary::after { content: "−"; }
 .mk-wl-faq details p { margin: 10px 0 0; color: rgba(28, 19, 15, .74); font-size: 15.5px; }
 
@@ -261,15 +261,15 @@
 .mk-jbt { flex: 1; min-width: 0; display: block; }
 .mk-jbt b { display: block; font: 600 15px/1.2 var(--mk-f-serif); color: #fff; }
 .mk-jbt small { display: block; font: 400 12.5px/1.3 var(--mk-f-sans); color: rgba(255, 255, 255, .72); }
-.mk-jbj { display: grid; place-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: #e8b4a3; color: #1c130f; font: 600 15px/1 var(--mk-f-serif); }
-.mk-jbar:focus-visible { outline: 2px solid #e8b4a3; outline-offset: 2px; }
+.mk-jbj { display: grid; place-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: var(--mk-join); color: #1c130f; font: 600 15px/1 var(--mk-f-serif); }
+.mk-jbar:focus-visible { outline: 2px solid var(--mk-join); outline-offset: 2px; }
 @media (min-width: 761px) { .mk-jbar { display: none; } }
 
 /* ── The waiting-list footer (`MarketingFooter waitlist`) ── */
 .mk-foot--wl .mk-footlegal { display: flex; gap: 16px; margin: 0; }
 .mk-foot--wl .mk-footlegal .mk-footmail { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; text-decoration: underline; }
 @media (max-width: 760px) {
-  .mk-foot--wl .mk-footglyphs, .mk-foot--wl .mk-footmade { display: none; }
+  .mk-foot--wl .mk-footmade { display: none; }
 }
 
 /* ═════════════ Desktop (761px and up) ═════════════ */
@@ -303,7 +303,7 @@
   font: inherit; color: inherit; padding: 0;
   background: linear-gradient(transparent 72%, rgba(232, 180, 163, .55) 72%, rgba(232, 180, 163, .55) 92%, transparent 92%);
 }
-.mk-dh-strap { margin: 14px 0 0; font: 600 40px/1.1 var(--mk-f-hand); color: #a2452a; }
+.mk-dh-strap { margin: 14px 0 0; font: 600 40px/1.1 var(--mk-f-hand); color: var(--mk-rust); }
 .mk-dh-sub { margin: 16px 0 28px; max-width: 480px; text-wrap: balance; font: 400 21px/1.6 var(--mk-f-serif); color: rgba(28, 19, 15, .74); }
 .mk-dh-sub b { font-weight: 700; color: #1c130f; white-space: nowrap; }
 /* ── The founding block (waitlist clarity v1, 2 Nov; trimmed 3 Nov): the navy pill, then the places bar.
@@ -362,7 +362,7 @@
 .mk-navpass > em > i { display: block; height: 100%; border-radius: 4px; background: #e8b4a3; }
 
 /* ── The desktop's ticks: a rust check on a blush disc (ref `.qh-ticks`), in the band and under each row ── */
-.mk-dtick { flex: 0 0 22px; width: 22px; height: 22px; box-sizing: border-box; padding: 3px; margin-top: 1px; border-radius: 50%; background: #f7e1d8; color: #a2452a; }
+.mk-dtick { flex: 0 0 22px; width: 22px; height: 22px; box-sizing: border-box; padding: 3px; margin-top: 1px; border-radius: 50%; background: #f7e1d8; color: var(--mk-rust); }
 .mk-beb-ticks li, .mk-fticks li { display: flex; gap: 10px; align-items: flex-start; font: 400 17px/1.45 var(--mk-f-serif); color: #1c130f; }
 /* brand.tsx names bare spans as the app's sans; these take the list's serif. */
 .mk-beb-ticks span, .mk-fticks span { font: inherit; }
@@ -445,7 +445,7 @@
 .mk-bef-gly { display: inline-flex; flex: none; width: 20px; height: 20px; color: #1c130f; }
 .mk-bef-gly svg { width: 20px; height: 20px; display: block; }
 .mk-bef-rw.mk-on { background: #fbf3ee; }
-.mk-bef-rw.mk-on .mk-bef-who { border-left: 3px solid #a2452a; padding-left: 11px; }
+.mk-bef-rw.mk-on .mk-bef-who { border-left: 3px solid var(--mk-rust); padding-left: 11px; }
 .mk-bef-lane { position: relative; height: 100%; }
 .mk-bef-bar {
   position: absolute; top: calc((var(--mk-bef-row) - 22px) / 2); height: 22px; border-radius: 5px;

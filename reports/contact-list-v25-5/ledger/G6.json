@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "G6",
+  "where": "1512 list population",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G6",
+  "where": "1512 list Your move is the ! disc",
+  "ok": true,
+  "detail": "ym true rgb(201, 118, 93) \"!\" 17.0px; 0 stage glyphs"
+ },
+ {
+  "lock": "G6",
+  "where": "1512 single-stage glyphs unchanged",
+  "ok": true,
+  "detail": "14 glyphs over 14 queried rows"
+ },
+ {
+  "lock": "G6",
+  "where": "1512 cards population",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G6",
+  "where": "1512 cards Your move is the ! disc",
+  "ok": true,
+  "detail": "ym true rgb(201, 118, 93) \"!\" 17.0px; 0 stage glyphs"
+ },
+ {
+  "lock": "G6",
+  "where": "1512 full screen band key",
+  "ok": true,
+  "detail": "true true 14.0px swatch none"
+ },
+ {
+  "lock": "G6",
+  "where": "1280 list population",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G6",
+  "where": "1280 list Your move is the ! disc",
+  "ok": true,
+  "detail": "ym true rgb(201, 118, 93) \"!\" 17.0px; 0 stage glyphs"
+ },
+ {
+  "lock": "G6",
+  "where": "1280 single-stage glyphs unchanged",
+  "ok": true,
+  "detail": "14 glyphs over 14 queried rows"
+ },
+ {
+  "lock": "G6",
+  "where": "1280 cards population",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G6",
+  "where": "1280 cards Your move is the ! disc",
+  "ok": true,
+  "detail": "ym true rgb(201, 118, 93) \"!\" 17.0px; 0 stage glyphs"
+ },
+ {
+  "lock": "G6",
+  "where": "1280 full screen band key",
+  "ok": true,
+  "detail": "true true 14.0px swatch none"
+ }
+]

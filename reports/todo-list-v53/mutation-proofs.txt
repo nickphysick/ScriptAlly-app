@@ -1,0 +1,14 @@
+L1 · red · L1 \+ L2 .*\(1440\) · Error: L1 · the page's scrollHeight equals its clientHeight
+L2 · red · L1 \+ L2 .*\(1440\) · Error: L2 · send at mats: the footer's bottom on the desk's
+L3 · red · L3 .*\(1440\) · Error: L3 · the same step is open a second after the choice
+L4 · red · L1 \+ L2 .*\(1440\) · Error: L4 · send ends on the check step
+L5 · red · L4 \+ L5 .*\(1440\) · Error: L5 · the future card is the saved card
+L6 · red · L6 .*\(1440\) · Error: L6 · no dashed bubble anywhere
+L7 · red · L7 .*\(1440\) · Error: L7 · the snackbar appears
+L8 · red · L8 .*\(1440\) · Error: L8 · the milestone shows when Your tasks empties
+L9 · red · L9 .*\(1440\) · Error: L9 · quiet: the page did not scroll
+L10 · red · L10 .*\(1440\) · Error: L10 · no Start here card
+L11 · red · L10 \+ L11 .*\(1440\) · Error: L11 · no 'No date'
+L12 · red · L1 \+ L2 .*\(1440\) · Error: L12 · send: no he/she
+L13 · red · L13  · Error: L13 · “Query sent | 25 Jun” is on the To-do's card in the same words, with the same stamp
+L14 · red · L14  · Error: L14 · no v53 desk parts on the phone

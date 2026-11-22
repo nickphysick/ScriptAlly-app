@@ -25,7 +25,7 @@ test("the drawer opens from the Query Centre's own Log button", async ({ page })
 test("the Submission packages page loads", async ({ page }) => {
   test.setTimeout(180_000);
   await ensureSignedIn(page);
-  await openRoute(page, "/manuscripts/packages", { width: 1440, height: 900 });
+  await openRoute(page, "/queries/packages", { width: 1440, height: 900 });
   await expect(page.locator("body")).not.toContainText("Something went wrong", { timeout: 15_000 });
   await expect(page.getByText(/package/i).first()).toBeVisible({ timeout: 20_000 });
   await page.screenshot({ path: "reports/query-actions-v1/shots/dev-packages.png" });

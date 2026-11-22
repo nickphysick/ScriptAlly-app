@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "L5",
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "landing true · QC true"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · the mat's padding",
+  "ok": true,
+  "detail": "QC 7px · landing 7px"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · the inner border",
+  "ok": true,
+  "detail": "QC 1px rgb(217, 200, 186) r14px · landing 1px rgb(217, 200, 186) r14px"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · the band's font",
+  "ok": true,
+  "detail": "QC 400 11px/11px JetBrains Mono 1.87px uppercase · landing 400 11px/11px JetBrains Mono 1.87px uppercase"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · the agent's name font",
+  "ok": true,
+  "detail": "QC 700 22px Source Serif 4 · landing 700 22px Source Serif 4"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · population: cards tallied",
+  "ok": true,
+  "detail": "{\"words\":{\"quiet\":32,\"you\":27,\"agent\":11,\"closed\":17},\"hero\":{\"you\":27,\"agent\":11,\"quiet\":32,\"closed\":17},\"agree\":87,\"disagree\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · each band says its set",
+  "ok": true,
+  "detail": "87 agree · 0 disagree"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · you: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 27 · hero 27"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · agent: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 11 · hero 11"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · quiet: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 32 · hero 32"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · closed: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 17 · hero 17"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · population",
+  "ok": true,
+  "detail": "landing true · QC true"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · the mat's padding",
+  "ok": true,
+  "detail": "QC 7px · landing 7px"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · the inner border",
+  "ok": true,
+  "detail": "QC 1px rgb(217, 200, 186) r14px · landing 1px rgb(217, 200, 186) r14px"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · the band's font",
+  "ok": true,
+  "detail": "QC 400 11px/11px JetBrains Mono 1.87px uppercase · landing 400 11px/11px JetBrains Mono 1.87px uppercase"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · the agent's name font",
+  "ok": true,
+  "detail": "QC 700 22px Source Serif 4 · landing 700 22px Source Serif 4"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · population: cards tallied",
+  "ok": true,
+  "detail": "{\"words\":{\"quiet\":32,\"you\":27,\"agent\":11,\"closed\":17},\"hero\":{\"you\":27,\"agent\":11,\"quiet\":32,\"closed\":17},\"agree\":87,\"disagree\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · each band says its set",
+  "ok": true,
+  "detail": "87 agree · 0 disagree"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · you: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 27 · hero 27"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · agent: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 11 · hero 11"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · quiet: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 32 · hero 32"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · closed: cards = the hero's count",
+  "ok": true,
+  "detail": "cards 17 · hero 17"
+ }
+]

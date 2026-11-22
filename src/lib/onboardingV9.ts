@@ -150,15 +150,16 @@ export function searchGenreList(list: readonly { id: string; label: string }[], 
 
 /**
  * What each age category means. Keyed by the shared list's own labels (lib/manuscripts
- * `AGE_CATEGORIES`): the mock's "Chapter book" is the stored "Early Reader". Titles are `em` runs.
+ * `AGE_CATEGORIES`): the mock's "Chapter book" is "Young fiction" (it was the stored "Early Reader" until v28 Part E,
+ * which renamed the list to UK labels in sentence case). Titles are `em` runs.
  */
 const t = (text: string): Run => ({ text, em: true });
 export const AGE_NOTES: Record<string, Run[]> = {
-  "Picture Book": [{ text: "Read aloud to children up to about 7, told as much through pictures as words, usually under 1,000 words. Think " }, t("The Very Hungry Caterpillar"), { text: ", " }, t("The Gruffalo"), { text: ", " }, t("Where the Wild Things Are"), { text: "." }],
-  "Early Reader": [{ text: "Children starting to read on their own, roughly 6 to 9. Short chapters, simple sentences, some illustration. Think " }, t("Horrid Henry"), { text: ", " }, t("The Worst Witch"), { text: ", " }, t("Mr Gum"), { text: "." }],
-  "Middle Grade": [{ text: "Readers roughly 8 to 12. Protagonists of that age, adventure and friendship at the heart, nothing too dark on the page. Think " }, t("Holes"), { text: ", " }, t("Wonder"), { text: ", " }, t("The Lion, the Witch and the Wardrobe"), { text: "." }],
-  "Young Adult": [{ text: "Readers roughly 12 to 18. Teenage protagonists, first experiences, questions of identity, often told close and in the moment. Think " }, t("The Hunger Games"), { text: ", " }, t("The Hate U Give"), { text: ", " }, t("Noughts & Crosses"), { text: "." }],
-  "New Adult": [{ text: "Protagonists roughly 18 to 25, leaving home and finding their feet: first jobs, university, first serious relationships. Think " }, t("Fourth Wing"), { text: ", " }, t("A Court of Thorns and Roses"), { text: ", " }, t("It Ends with Us"), { text: "." }],
+  "Picture book": [{ text: "Read aloud to children up to about 7, told as much through pictures as words, usually under 1,000 words. Think " }, t("The Very Hungry Caterpillar"), { text: ", " }, t("The Gruffalo"), { text: ", " }, t("Where the Wild Things Are"), { text: "." }],
+  "Young fiction": [{ text: "Children starting to read on their own, roughly 6 to 9. Short chapters, simple sentences, some illustration. Think " }, t("Horrid Henry"), { text: ", " }, t("The Worst Witch"), { text: ", " }, t("Mr Gum"), { text: "." }],
+  "Middle grade": [{ text: "Readers roughly 8 to 12. Protagonists of that age, adventure and friendship at the heart, nothing too dark on the page. Think " }, t("Holes"), { text: ", " }, t("Wonder"), { text: ", " }, t("The Lion, the Witch and the Wardrobe"), { text: "." }],
+  "Young adult": [{ text: "Readers roughly 12 to 18. Teenage protagonists, first experiences, questions of identity, often told close and in the moment. Think " }, t("The Hunger Games"), { text: ", " }, t("The Hate U Give"), { text: ", " }, t("Noughts & Crosses"), { text: "." }],
+  "New adult": [{ text: "Protagonists roughly 18 to 25, leaving home and finding their feet: first jobs, university, first serious relationships. Think " }, t("Fourth Wing"), { text: ", " }, t("A Court of Thorns and Roses"), { text: ", " }, t("It Ends with Us"), { text: "." }],
   Adult: [{ text: "Written for grown-up readers: any age of protagonist, any theme, no limits on content. It's the largest market, and the one most agents list first. Think " }, t("Gone Girl"), { text: ", " }, t("The Thursday Murder Club"), { text: ", " }, t("Normal People"), { text: "." }],
 };
 export const ageNoteEyebrow = (category: string): string => `${category} · what this means`;

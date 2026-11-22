@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PK26-N-1512",
+  "where": "both rows are on screen",
+  "ok": true,
+  "detail": "[{\"h\":47.6875,\"tagR\":231,\"tagL\":197.296875,\"lblR\":197.296875,\"lines\":1,\"text\":\"Submission packagesletters · synopses · packages\"},{\"h\":33,\"tagR\":224,\"tagL\":190.296875,\"lblR\":110.90625,\"lines\":0,\"text\":\"Versions\"}]"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "same height as Versions (±1)",
+  "ok": false,
+  "detail": "47.6875 vs 33"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "PRO tag's right edge where Versions' is (±1)",
+  "ok": false,
+  "detail": "231 vs 224"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "no second line",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "the label is \"Submission packages\"",
+  "ok": false,
+  "detail": "Submission packagesletters · synopses · packages"
+ },
+ {
+  "lock": "PK26-N-1512",
+  "where": "the label stops before its tag",
+  "ok": true,
+  "detail": "197.296875 vs 197.296875"
+ }
+]

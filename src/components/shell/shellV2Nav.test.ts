@@ -31,15 +31,17 @@ describe("shellV2Nav — the accordion model", () => {
 
   it("files Packages under Querying (product grammar, not URL tree) — and To-do is no longer there", () => {
     const querying = SHELL_SECTIONS.find((s) => s.key === "querying")!;
-    expect(querying.pages.map((p) => p.path)).toEqual(["/queries", "/manuscripts/packages"]);
+    expect(querying.pages.map((p) => p.path)).toEqual(["/queries", "/queries/packages"]); /* packages moved under Queries (25 Oct) */
+    expect(querying.pages.map((p) => p.label)).toEqual(["Query Centre", "Packages"]); /* never "Queries Hub" */
   });
 
-  it("⚠️ Tasks is a WORKSPACE of THREE pages, and the list is the default at /todo itself", () => {
+  it("⚠️ Tasks is a WORKSPACE of TWO pages, and the list is the default at /todo itself", () => {
     /* Three since 9 Aug (tasks-consolidation P1) — Today is retired. The nav reads its rows from
        TODO_ROUTES, so this and the palette cannot drift apart: one definition, three consumers. */
     const todo = SHELL_SECTIONS.find((s) => s.key === "todo")!;
-    expect(todo.pages.map((p) => p.label)).toEqual(["To-do list", "Calendar", "Corkboard"]);
-    expect(todo.pages.map((p) => p.path)).toEqual(["/todo", "/todo/calendar", "/todo/corkboard"]);
+    /* Two since 29 Oct: the Calendar page is retired, and its path redirects to /todo. */
+    expect(todo.pages.map((p) => p.label)).toEqual(["To-do list", "Corkboard"]);
+    expect(todo.pages.map((p) => p.path)).toEqual(["/todo", "/todo/corkboard"]);
     // The default page keeps the BARE path, so every existing link and the rail's
     // section-select land on it with no redirect.
     expect(todo.pages[0].path).toBe("/todo");
@@ -70,7 +72,7 @@ describe("shellV2Nav — the accordion model", () => {
 
 describe("shellV2Nav — path matching", () => {
   it("matches exactly (packages beats the manuscripts prefix); dashboard maps flat", () => {
-    expect(shellPageForPath("/manuscripts/packages")?.section?.key).toBe("querying");
+    expect(shellPageForPath("/queries/packages")?.section?.key).toBe("querying");
     expect(shellPageForPath("/manuscripts")?.section?.key).toBe("shelf");
     expect(shellPageForPath("/dashboard")?.section).toBeNull();
   });
@@ -78,7 +80,6 @@ describe("shellV2Nav — path matching", () => {
   it("lights the owning rib per route (Import lights Shelf via its crumb extra)", () => {
     expect(shellSectionKeyForPath("/dashboard")).toBe("dashboard");
     expect(shellSectionKeyForPath("/todo")).toBe("todo");
-    expect(shellSectionKeyForPath("/todo/calendar")).toBe("todo");
     expect(shellSectionKeyForPath("/todo/corkboard")).toBe("todo");
     expect(shellSectionKeyForPath("/agents/discover")).toBe("agents");
     expect(shellSectionKeyForPath("/manuscripts/comps")).toBe("shelf");

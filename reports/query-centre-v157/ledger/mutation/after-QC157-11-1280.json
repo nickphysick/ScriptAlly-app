@@ -1,0 +1,12 @@
+[
+ {
+  "name": "the same cards",
+  "ok": true,
+  "got": "88 vs 88"
+ },
+ {
+  "name": "every card, band, fact box and track node within 0.5px of the baseline",
+  "ok": false,
+  "got": "worst 1.00; seed-query-12 node0[1] 438.92→437.92 | seed-query-12 node1[1] 438.92→437.92 | seed-query-12 node2[1] 438.92→437.92 | seed-query-12 node3[1] 432.42→431.42 | cv25-q-08 node0[1] 438.92→437.92 | cv25-q-08 node1[1] 438.92→437.92 | cv25-q-08 node2[1] 438.92→437.92 | cv25-q-08 node3[1] 432.42→431.42 | seed-query-7 node0[1] 704.22→703.22 | seed-query-7 node1[1] 697.72→696.72"
+ }
+]

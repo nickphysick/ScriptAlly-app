@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PK26-RT",
+  "where": "the builder does not show the retired package",
+  "ok": true,
+  "detail": "[\"Drag target\",\"Sent one\"]"
+ },
+ {
+  "lock": "PK26-RT",
+  "where": "Results lists it",
+  "ok": true,
+  "detail": "[\"Retired one\",\"Sent one\",\"Drag target\"]"
+ },
+ {
+  "lock": "PK26-RT",
+  "where": "…last",
+  "ok": false,
+  "detail": "[\"Retired one\",\"Sent one\",\"Drag target\"]"
+ },
+ {
+  "lock": "PK26-RT",
+  "where": "…reading Retired",
+  "ok": false,
+  "detail": "[{\"name\":\"Retired one\",\"label\":\"Too early\",\"on\":true},{\"name\":\"Sent one\",\"label\":\"Too early\",\"on\":false},{\"name\":\"Drag target\",\"label\":\"Not sent\",\"on\":false}]"
+ },
+ {
+  "lock": "PK26-RT",
+  "where": "…not the one shown in detail, nor named in the lead",
+  "ok": false,
+  "detail": "{\"builder\":[\"Drag target\",\"Sent one\"],\"rows\":[{\"name\":\"Retired one\",\"label\":\"Too early\",\"on\":true},{\"name\":\"Sent one\",\"label\":\"Too early\",\"on\":false},{\"name\":\"Drag target\",\"label\":\"Not sent\",\"on\":false}],\"lead\":\"Nothing has had 4 answers yet, so it's too early to compare packages.\"}"
+ },
+ {
+  "lock": "PK26-RT",
+  "where": "every other row is a builder package",
+  "ok": true,
+  "detail": "{\"names\":[\"Retired one\",\"Sent one\",\"Drag target\"],\"builder\":[\"Drag target\",\"Sent one\"]}"
+ }
+]

@@ -1,0 +1,37 @@
+/* ══ DASHBOARD v77 — big screens, and the founding writer card rebuilt around feedback ════════════════
+   Ref: design-refs/dashboard-v77/dashboard-v77.html ("Fixed shape" is normative) and founding-card-v76.html.
+   Loaded LAST (Dash58 imports it after dash71.css), so equal-specificity rules here win ties. */
+
+/* ── A1 · the width cap, both modes, every height ──────────────────────────────────────────────────
+   The header panel and the body are 1440px wide at most, centred; from a 2200px window, 1680px. The page's
+   own side gutters sit outside the cap (`.d58-page` pays them as padding), so nothing changes at laptop
+   widths, where the content is narrower than the cap. */
+.d58 .d58-page { max-width: calc(1440px + 2 * var(--d58-gutter)); }
+@media (min-width: 2200px) { .d58 .d58-page { max-width: calc(1680px + 2 * var(--d58-gutter)); } }
+
+/* ── A2 · the Fixed shape: a window ≥901px tall and ≥1100px wide, while querying ─────────────────────
+   The body stops filling the window; the page ends where its content ends and the spare height sits below
+   in the sheet. Left: the chart's row is clamp(300px, 31vw, 540px) over the hoops at their natural height
+   (v71's 200px floor is lifted here, as the ref's hoop row is 172px). ⚠️ 31% OF THE WINDOW, NOT THE BODY:
+   the ref writes `31cqw` in a grid with no size container above it, so it resolves to the viewport — measured
+   in the ref, 540 at 1920 and 2560, 521 at 1680. The pack's "31% of the body" gave 446 at 1920 and left the
+   founding card 273px tall where the ref has 366. `vw` says what the ref renders. Right: the task card at
+   its natural height (its items stacked in one cell, Dash71Task), and the founding card takes the rest of
+   the column, never under 194px. The two columns are one grid row, so their bottoms line up.
+   ⚠️ KEEP THE QUERY IN STEP WITH `FIXED_SHAPE_QUERY` in v71/Dash71Task.tsx. Below 901px tall: v71 exactly. */
+@media (min-height: 901px) and (min-width: 1100px) {
+  .d58:is([data-mode="q"], [data-mode="pre"]) { height: auto; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d58-page { flex: none; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d58-body { flex: none; align-items: stretch; }
+  .d58[data-mode="q"] .d58-left { grid-template-rows: clamp(300px, 31vw, 540px) auto; }
+  .d58[data-mode="q"] .d60-hoops { min-height: 0; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-right { grid-template-rows: auto minmax(194px, 1fr); }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-taskslot > .d71-task { flex: none; }
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-task .d71-tb { flex: none; padding: 18px 22px 16px; }
+  /* the stack: every item in one cell; the inactive ones are hidden, inert and aria-hidden (Dash71Task) */
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-tbstack { display: grid; }
+  /* each item from the top of the cell, as the ref's: a short item does not float in the tallest one's room */
+  .d58:is([data-mode="q"], [data-mode="pre"]) .d71-tbstack > .d71-tb { grid-area: 1 / 1; justify-content: flex-start; }
+}
+
+/* ── C · the founding writer card: RETIRED by Dashboard v93, whose card v105 replaced (v105/Dash105Founding.tsx, v105/dash105.css). ── */

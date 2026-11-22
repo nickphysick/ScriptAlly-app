@@ -1,0 +1,163 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Agent card v2.1 (design-refs/agent-card-v2-1/) — the agent card's own additions over acv2.css: the head's contact line
+ * and flag (Phase 1). Values are the reference's (`agent-card-v2-1.html`: `.ag-contact`, `.ag-mail`, `.ag-copy`,
+ * `.ag-web`, `.ag-addc`, `.ag-flag`).
+ *
+ * ⚠️ IT PORTALS TO <body>, so no page token reaches it: colours are literals.
+ * ⚠️ Fonts carry !important where the app's brand rules reach the element (brand.tsx names bare spans as sans).
+ */
+
+/* ── Phase 1 · the head: the place line with its flag, and the contact line under it ── */
+.acv2 .ag-head { position: relative; }
+.acv2 .ag-nmrow { display: flex; align-items: center; min-width: 0; }
+.acv2 .ag-loc { display: flex; align-items: center; gap: 7px; }
+.acv2 .ag-loc > span:not(.ag-flag) { font: inherit !important; color: inherit; }
+/* the app's flag (flag-icons, never an emoji): 18 × 13.5, a 2px radius, a hairline so white flags read on white */
+.acv2 .ag-flag.fi { flex: none; width: 18px; height: 13.5px; line-height: 13.5px; border-radius: 2px; background-size: cover; box-shadow: 0 0 0 0.5px rgba(28, 19, 15, 0.18); }
+.acv2 .ag-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 20px; min-height: 32px; margin: -2px 14px 8px 20px; border-radius: 8px; }
+.acv2 .ag-mail, .acv2 .ag-web { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }
+.acv2 .ag-mail > span, .acv2 .ag-web > span { font: inherit !important; color: inherit; }
+.acv2 .ag-mail > svg, .acv2 .ag-web > svg { flex: none; color: #7a7066; }
+.acv2 .ag-web { text-decoration: none; cursor: pointer; }
+.acv2 .ag-web span { text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.25); text-underline-offset: 3px; }
+.acv2 .ag-web:hover span { text-decoration-color: #1c130f; }
+.acv2 .ag-web:focus-visible, .acv2 .ag-copy:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 6px; }
+/* the quiet copy button: 28px, the glyph in #9a948b, no fill until hover */
+.acv2 .ag-copy { all: unset; box-sizing: border-box; cursor: pointer; display: inline-grid; place-items: center; width: 28px; height: 28px; margin-left: -4px; border-radius: 8px; color: #9a948b; background: transparent; }
+.acv2 .ag-copy:hover { background: #f4f0eb; color: #2a3a52; }
+.acv2 .ag-addc {
+  all: unset; cursor: pointer; min-height: 30px; display: inline-flex; align-items: center; font: 400 15px var(--sp-serif) !important; color: #2a3a52;
+  text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 3px;
+}
+.acv2 .ag-addc:hover { text-decoration-color: #2a3a52; }
+.acv2 .ag-addc:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 4px; }
+
+/* ── Phase 2 · editing by section, in place ── */
+/* each section's pencil: 28px, shown on hover and on keyboard focus within the section (the name's, within the head) */
+.acv2 .cl262-pen.ag-pen { width: 28px; height: 28px; border-radius: 8px; flex: none; }
+.acv2 .ag-sec:hover .cl262-pen, .acv2 .ag-sec:focus-within .cl262-pen,
+.acv2 .ag-head:hover .cl262-pen, .acv2 .ag-head:focus-within .cl262-pen, .acv2 .cl262-pen:focus-visible { opacity: 1; }
+.acv2 .cl262-pen.ag-pen:hover { background: #e6edf6; }
+.acv2 .cl262-pen.ag-pen:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.acv2 .ag-nmrow .cl262-pen { margin-left: 6px; }
+.acv2 .acv2-sec h4 .cl262-pen { align-self: center; }
+/* the value itself opens its section: a faint edge on hover */
+.acv2 [data-door] { cursor: pointer; }
+.acv2 .nx-boxes[data-door]:hover .nx-box, .acv2 .nx-list[data-door]:hover, .acv2 .nx-chips[data-door]:hover .nx-chip.no { box-shadow: inset 0 0 0 1px #c9bfb1; }
+.acv2 .nx-chips[data-door]:hover .nx-chip:not(.no) { box-shadow: inset 0 0 0 1px #c9bfb1; }
+.acv2 .nx-quote[data-door]:hover { background: #f6f2ea; }
+
+/* an open section looks like itself: a 1.5px navy outline 9px outside it, and nothing else (no tint, no header bar) */
+.acv2 .ag-sec { position: relative; margin: 0; }
+.acv2 .ag-sec.live { outline: 1.5px solid #2a3a52; outline-offset: 9px; border-radius: 4px; }
+/* the space the outline needs below it (never above: the open section's heading does not move) */
+.acv2 .ag-sec.live + * { margin-top: 7px; }
+.acv2 .ag-sec.live > h4 { min-height: 24px; }
+.acv2 .ag-sx { margin: -6px 0 -6px auto; display: inline-flex; align-items: center; gap: 8px; align-self: center; }
+.acv2 .ag-sx button { all: unset; box-sizing: border-box; cursor: pointer; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; }
+.acv2 .ag-sx .ag-no { color: #55504a; box-shadow: inset 0 0 0 1px #cfc7bc; background: #fff; }
+.acv2 .ag-sx .ag-no:hover { box-shadow: inset 0 0 0 1.5px var(--sp-rust); color: var(--sp-rust); }
+.acv2 .ag-sx .ag-ok { background: #2a3a52; color: #fff; }
+.acv2 .ag-sx .ag-ok:hover { background: #1f2c40; }
+.acv2 .ag-sx .ag-ok:disabled { opacity: 0.55; cursor: default; }
+.acv2 .ag-sx button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.acv2 .acv21-err { margin: 0 0 8px; font: 400 14px/1.35 var(--sp-serif) !important; color: var(--sp-rust); }
+.acv2 .ag-ctl { margin-top: 14px; }
+.acv2 .acv21-body .aap-f:first-child { margin-top: 0; }
+
+/* the wishlist open: the same quote, typeable, same italic and size, a navy left edge, no quote marks, growing with the text */
+.acv2 .qc152 textarea.nx-quote.acv21-wish {
+  display: block; width: 100%; box-sizing: border-box; resize: none; overflow: hidden; border: 0; border-left: 3px solid #2a3a52; outline: 0;
+  min-height: 64px; field-sizing: content;
+}
+.acv2 .qc152 textarea.acv21-wish::placeholder { color: #9a948b; }
+
+/* what they ask for, open: the same list, each row a tick */
+.acv2 .qc152 .nx-list.ag-mlist li { display: block; padding: 0; min-height: 0; }
+.acv2 .ag-mrow { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 10px 0 0; }
+.acv2 .ag-mrow > button[role="checkbox"] {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 12px;
+  font: 400 15.5px var(--sp-serif) !important; color: #1c130f;
+}
+.acv2 .ag-mrow > button[role="checkbox"] > span { font: inherit !important; }
+.acv2 .ag-mrow > button[aria-checked="false"] { color: #7a7066; }
+.acv2 .ag-mrow > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 8px; }
+.acv2 .ag-mrow > button > svg { flex: none; }
+.acv2 .ag-mrow .r { flex: none; font: italic 400 13.5px var(--sp-serif) !important; color: #7a7066; padding-right: 4px; }
+.acv2 .ag-msub { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 0 10px 12px 42px; }
+.acv2 .ag-step { flex: none; display: inline-flex; align-items: center; height: 34px; border-radius: 17px; background: #fff; box-shadow: inset 0 0 0 1.2px rgba(42, 58, 82, 0.35); }
+.acv2 .ag-step button { all: unset; cursor: pointer; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 400 18px/1 var(--sp-serif) !important; color: #2a3a52; }
+.acv2 .ag-step button:hover:not(:disabled) { background: #eef1f6; }
+.acv2 .ag-step button:disabled { color: rgba(28, 19, 15, 0.25); cursor: default; }
+.acv2 .ag-step button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.acv2 .ag-step b { min-width: 86px; text-align: center; font: 400 14.5px var(--sp-type) !important; color: #1c130f; }
+.acv2 .ag-useg { display: inline-flex; padding: 3px; border-radius: 19px; background: #eef1f6; }
+.acv2 .ag-useg button { all: unset; cursor: pointer; height: 28px; padding: 0 11px; border-radius: 14px; font: 400 13.5px/28px var(--sp-serif) !important; color: #2a3a52; }
+.acv2 .ag-useg button.on { background: #2a3a52; color: #f4eee5; }
+.acv2 .ag-useg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.acv2 .ag-oth { flex: 0 0 200px; height: 30px; border: 0; outline: 0; background: transparent; border-bottom: 1.2px solid rgba(42, 58, 82, 0.3); font: 400 15px var(--sp-serif) !important; color: #1c130f; }
+.acv2 .ag-oth:focus { border-bottom-color: #2a3a52; }
+.acv2 .ag-oth::placeholder { font-style: italic; color: rgba(28, 19, 15, 0.4); }
+.acv2 .ag-msub .aap-hint { flex-basis: 100%; }
+
+/* Based in: two lines at every card width, never a width-dependent wrap (ruling, 21 Nov). Line 1 is the country
+   control: the pills, and Elsewhere's search on the same line when Elsewhere is chosen. Line 2 is the city, full width.
+   The city offer eases in under line 2 (240ms) */
+.acv2 .acv21-geo { display: grid; grid-template-columns: max-content minmax(0, 1fr); column-gap: 8px; row-gap: 10px; align-items: center; }
+.acv2 .acv21-geo > .aap-pills { grid-row: 1; grid-column: 1; flex-wrap: nowrap; }
+.acv2 .acv21-geo > .aap-cty { grid-row: 1; grid-column: 2; min-width: 0; padding: 0; background: none; box-shadow: none; }
+.acv2 .acv21-geo > input[data-ae="city"] { grid-row: 2; grid-column: 1 / -1; width: 100%; min-width: 0; }
+/* line 1 leaves Elsewhere's search what the pills don't take (112px in the 580 card, 72px in the 540): the placeholder
+   ends in an ellipsis, and the open list runs from the row's right edge leftwards over the pills, at a usable width */
+.acv2 .acv21-geo > .aap-cty .sa-cc-ph,
+.acv2 .acv21-geo > .aap-cty .sa-cc-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acv2 .acv21-geo > .aap-cty .sa-cc-menu { left: auto; right: 0; width: 280px; max-width: none; }
+.acv2 .acv21-geooffer { margin-top: 10px; animation: acv21-offer-in 240ms ease-out; }
+.acv2 .acv21-geooffer .co-ask { margin-top: 8px; }
+@keyframes acv21-offer-in { from { opacity: 0; translate: 0 -4px; } to { opacity: 1; translate: 0 0; } }
+
+/* the rust bar: "Unsaved changes", the sections named beneath, Keep editing, Discard, Save all */
+.acv2 .acv21-guard { gap: 14px; }
+.acv2 .acv21-guard .cl262-sv i { font: italic 400 13.5px var(--sp-serif) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .acv2 .acv21-geooffer { animation: none; }
+}
+
+/* ── Phase 3 · the genre editor: one field, the chosen genres inside it; the matches beneath; a labelled Suggested row ── */
+.acv2 .aap-gp.ag-gfield {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 52px; padding: 8px 10px; box-sizing: border-box;
+  border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; cursor: text;
+}
+.acv2 .aap-gp.ag-gfield:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.acv2 .aap-gp.ag-gfield input { flex: 1 1 140px; min-width: 120px; height: 34px; border: 0; outline: 0; background: transparent; padding: 0; font: 400 16px var(--sp-serif) !important; color: #1c130f; box-shadow: none; }
+.acv2 .aap-gp.ag-gfield input::placeholder { font-style: italic; color: #9a948b; }
+.acv2 .aap-chip.ag-gchip {
+  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 6px 0 10px; box-sizing: border-box; border-radius: 17px;
+  background: #f6f3ee; font: 400 15px var(--sp-serif) !important; color: #1c130f;
+}
+.acv2 .aap-chip.ag-gchip .ag-gtick { display: inline-grid; place-items: center; }
+.acv2 .aap-chip.ag-gchip button { all: unset; cursor: pointer; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font: 400 16px/1 var(--sp-serif) !important; color: #6c675f; }
+.acv2 .aap-chip.ag-gchip button:hover { background: rgba(28, 19, 15, 0.09); color: #1c130f; }
+.acv2 .aap-chip.ag-gchip button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.acv2 .aap-glist.ag-glist { position: static; display: flex; flex-direction: column; margin-top: 8px; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px #e3dbcf, 0 10px 22px -14px rgba(28, 19, 15, 0.4); }
+.acv2 .aap-glist.ag-glist button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: baseline; gap: 8px; min-height: 38px; padding: 8px 10px; border-radius: 8px; font: 400 15.5px var(--sp-serif) !important; color: #1c130f; }
+.acv2 .aap-glist.ag-glist button.hi, .acv2 .aap-glist.ag-glist button:hover, .acv2 .aap-glist.ag-glist button:focus-visible { background: #f6f3ee; }
+.acv2 .aap-glist.ag-glist small { font: italic 400 13px var(--sp-serif) !important; color: #7a7066; }
+.acv2 .ag-sug { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.acv2 .ag-sug > span { font: 400 14px var(--sp-serif) !important; color: #7a7066; }
+.acv2 .ag-sug > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.acv2 .qc152 .ag-sug .nx-btn { height: 36px; border-radius: 18px; }
+.acv2 .ag-sug .nx-btn em { font: italic 400 13px var(--sp-serif) !important; color: #7a7066; margin-left: 2px; }
+
+/* ── Phase 4 · the frame draws its paper and shadow with ::before (as qcv152card.css's frame does), so the breath can swell
+   the rim while nothing inside moves; its look at rest is unchanged. The rim layer (v163's, qcv152card.css) sits over the
+   10px mat. ── */
+.cl262-card.acv2 { --qc163-rim-w: 10px; --qc163-rim-r: 22px; position: relative; isolation: isolate; background: transparent; box-shadow: none; }
+.cl262-card.acv2::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: 22px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 40px 70px -30px rgba(28, 19, 15, .55), 0 12px 24px -16px rgba(28, 19, 15, .35);
+}

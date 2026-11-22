@@ -21,7 +21,7 @@ import { Mark } from "../QueryCard";
 import type { SubmissionPackage } from "../../../types";
 import type { GroupBy, ListGroup } from "../../../lib/qcCalView";
 import type { QcRow } from "../../../lib/qcSummary";
-import { STAGE_NAME, tileCourt } from "../../../lib/qcSummary";
+import { STAGE_NAME, tileCourt, whereItStands } from "../../../lib/qcSummary";
 import type { ComingUp } from "../../../lib/qcComingUp";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { nextLine, sentCell } from "../../../lib/qcRowLines";
@@ -29,10 +29,9 @@ import { peekSummary, peekTone, YOUR_MOVE_STATUSES, type PeekEvent } from "../..
 import { TL4, TL4_FONTS, tl4Layout, tl4Stops, type Tl4Kind, type Tl4Measure } from "../../../lib/qcTl4";
 import { StageGlyph } from "./StageGlyph";
 import { bandArtOf } from "../../../lib/qcBandArt";
-import { BandMark, JumpMark, TONE_ART, TONE_ICON } from "./bandMarks";
-import { QcToolbar140, type Qc140Jump, type Qc140JumpMode, type Qc140Pop } from "./QcToolbar140";
+import { BandMark, TONE_ICON } from "./bandMarks";
+import { QcToolbar140, type Qc140Pop } from "./QcToolbar140";
 import type { PopoverState } from "../../shell/ListPills";
-import { JUMP_COLUMN_LABEL, jumpColumn, jumpLabel, monthJumps } from "../../../lib/qc140";
 import { DIAL, DIAL_C, HEADINGS, TRACK_STOPS, dialOf, dueOf, sentenceCase, stageDetail, startOfDay, trackLevel, type Qc138Sort, type Qc138SortKey } from "../../../lib/qc138";
 import { isYourMoveRow } from "../../../lib/queryCentreGroups";
 import { AgentDisc } from "../../shared/AgentDisc";
@@ -40,6 +39,8 @@ import { useTip } from "./QcList132";
 import type { QcDensity } from "../../../lib/qcListMemory";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import "./qcvList138.css";
+import "./qcv142.css"; /* v149 — the toolbar heights and the filter strip (the Cards view that also imported it is gone) */
+import "./qcv144.css";
 
 const MON = MONTHS_SHORT;
 const DAY_MS = 86_400_000;
@@ -91,7 +92,7 @@ function useStuckBands(box: React.RefObject<HTMLElement | null>, sig: string): v
     let raf = 0;
     const read = () => {
       raf = 0;
-      root.querySelectorAll<HTMLElement>(".qc138-band").forEach((b) => {
+      root.querySelectorAll<HTMLElement>(".qc138-band, .qc142-rh").forEach((b) => {
         const top = parseFloat(getComputedStyle(b).top) || 0;
         const r = b.getBoundingClientRect();
         const grp = b.parentElement?.getBoundingClientRect();
@@ -192,7 +193,23 @@ const Peek: React.FC<{ events: readonly PeekEvent[] | null; due: number | null; 
     ro.observe(el);
     return () => { live = false; ro.disconnect(); };
   }, []);
-  const S = events ? tl4Stops(events, { due, now: nowMs, closed, yours }) : null;
+  /* v149.1 B3 — NOTHING DATED: the steps evenly spaced, no axis, no durations (there is no scale to draw) */
+  const undated = !!events && events.length > 0 && events.every((e) => !Number.isFinite(e.ms));
+  const S = events && !undated ? tl4Stops(events, { due, now: nowMs, closed, yours }) : null;
+  if (undated && events) {
+    return (
+      <div ref={ref} className="qc138-peek qc138-tl4 qc138-peek--even" data-qcv="peek" data-undated="" aria-hidden="true">
+        <div className="qc138-even" data-qcv="peek-even">
+          {events.map((e, i) => (
+            <span key={`${e.name}-${i}`} className="qc138-evs" data-qcv="peek-stop" style={{ left: `${events.length === 1 ? 0 : (i / (events.length - 1)) * 100}%` }}>
+              {e.status ? <StatusDot status={e.status} overrideSize={14} /> : <i className="qc138-mk-dot" />}
+              <small>{e.name}</small>
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
   const lay = S && W ? tl4Layout(S, W, tl4Measure, nowMs) : null;
   void fonts;
   const over = !!S?.some((s) => s.kind === "was");
@@ -303,6 +320,7 @@ const PeekLab: React.FC<{ nowMs: number }> = ({ nowMs }) => {
 
 /** "What you sent" (v138.5 §F): the package chip, as wide as its name up to the column (or "+ Add" when nothing is
     recorded), over the four material icons; with no package and something recorded, the icons alone on line 1 */
+const NO_TWINS: ReadonlyMap<string, string> = new Map();
 const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: number; onAdd: () => void; onPackage: () => void }> = ({ row, pkg, nowMs, onAdd, onPackage }) => {
   const m = sentCell(row, pkg, nowMs);
   return (
@@ -319,7 +337,8 @@ const SentCell138: React.FC<{ row: QcRow; pkg: SubmissionPackage | null; nowMs: 
         </button>
       ) : null}
       <span className="qc138-mic" data-qcv="sent-icons">
-        {m.tiles.map((t) => (
+        {/* v149.1 B2 — only what was sent: the faded placeholders for unsent items are gone */}
+        {m.tiles.filter((t) => t.state === "sent").map((t) => (
           <span key={t.kind} className={`qc138-tile${t.state === "sent" ? " on" : ""}`} data-qcv="sent-tile" data-kind={t.kind} data-state={t.state}
             tabIndex={0} role="img" aria-label={`${t.name}: ${t.line}`} data-tip={t.name} data-tl={t.line}>
             <Mark kind={t.kind} />
@@ -353,7 +372,10 @@ export interface QcList138Props {
   /** the list is still loading: the toolbar's controls wait */
   loading?: boolean;
   sort: Qc138Sort;
-  onHeading: (k: Qc138SortKey) => void;
+  /** navy-bar v1 — the headings no longer sort: kept optional for callers, never read */
+  onHeading?: (k: Qc138SortKey) => void;
+  /** cards-sort-search v1 §B — set the sort outright (the Cards view's chip) */
+  onSort?: (s: Qc138Sort) => void;
   density: QcDensity;
   onDensity: (d: QcDensity) => void;
   full: boolean;
@@ -367,11 +389,17 @@ export interface QcList138Props {
   onEdit?: (id: string) => void;
   onClose?: (id: string) => void;
   onAddSent?: (id: string) => void;
+  /** v149.1 B3 — "add date": the query's card, in edit mode, at its undated step */
+  onAddDate?: (id: string) => void;
+  /** v149.1 B4 — a later query to the same agent for the same book: "RESUBMISSION" or "V2", from the record */
+  twinTag?: ReadonlyMap<string, string>;
   onOpenPackage?: (packageId: string | null) => void;
   find?: string;
   /** v138.1 §F — the search, in the navy row */
   onFind?: (v: string) => void;
   findRef?: React.Ref<HTMLInputElement>;
+  /** v149 A3 — the view chips and Find, above the list card (not drawn in full screen) */
+  viewRow?: React.ReactNode;
   ringId?: string | null;
   /** v138 §H — the page-load entrance is running: bands and the first 16 rows land in list order */
   entering?: boolean;
@@ -397,15 +425,25 @@ export interface QcList138Props {
   /** v140 §F — the unpinned scroll position, for the visit: read once for the list's first draw (a reload within the
    *  visit) and again when the route comes back with its scroller at the top; written as the list scrolls unpinned. */
   scrollMemory?: { read: () => number; write: (y: number) => void };
+  /** v150 C — the search sits in the navy bar while unpinned */
+  findInBar?: boolean;
+  /** v150 D — Birds-eye: drawn in place of the headings and rows; its pills replace the bar's Group and Sort */
+  birds?: React.ReactNode;
+  birdsTools?: React.ReactNode;
+  /** v150.1 §7 — the compact switch for the full-screen toolbar */
+  fullSwitch?: React.ReactNode;
+  /** v149 B1 — the navy bar's "heard back" figure */
+  heard?: { pct: number; of: number; total: number };
 }
 
 /** v140 §F — the arrival's values: 420ms on cubic-bezier(.2,.8,.2,1) from −10px and transparent, 24ms apart, the
  *  stagger capped at the 17th item */
+
 export const ARRIVAL_140 = { ms: 420, easing: "cubic-bezier(.2,.8,.2,1)", from: -10, step: 24, items: 17 } as const;
 
 export const QcList138: React.FC<QcList138Props> = ({
-  groups, groupBy, onGroup, toneOf, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, onHeading, density, onDensity, full, onFull,
-  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onOpenPackage, find = "", onFind, findRef, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory,
+  groups, groupBy, onGroup, toneOf, total, shown, filterCount, onClearFilters, filtersMenu, applied, band = null, loading = false, stickyOn = true, sort, density, onDensity, full, onFull,
+  selectedId, onOpen, nowMs, coming, packageOf, onAct, onEdit, onClose, onAddSent, onAddDate, twinTag = NO_TWINS, onOpenPackage, find = "", onFind, findRef, viewRow, ringId = null, folded, onFold, loadPeek, onTimeline, selected, onPick, entering = false, deadEnd = null, practice = null, arrival, scrollMemory, heard, onSort, findInBar = false, birds = null, birdsTools = null, fullSwitch = null,
 }) => {
   /* §H — the order things land in: bands and rows, one sequence, the first 16 staggered and the rest with the last */
   let seq = 0;
@@ -513,24 +551,16 @@ export const QcList138: React.FC<QcList138Props> = ({
       arriving.current.set(el, a);
     }
   });
-  /* v140 §A — the jump row: a button per group (its band's mark, its label, its count), or, ungrouped, one per month of
-     the sort column's date, in list order */
-  /* v141 §D — two modes: GLYPH for Status and Who it's with (a 44 x 40 button, the glyph alone and a count badge, the
-     name on hover), NAME for Next action and Package (the name and count, no icon). The "+N more" menu draws a glyph
-     for every grouping but Package (every package shares one box, so its rows have none). Who it's with's Closed has
-     no art of its own, so it takes the closed glyph, the circle with a line. */
-  const jumpMode: Qc140JumpMode = groupBy === "none" ? "month" : groupBy === "status" || groupBy === "attention" ? "glyph" : "name";
+  /* navy-bar v1 A1 — the jump row is retired (both modes); Who it's with's Closed has no art of its own, so its heading
+     takes the closed glyph, the circle with a line */
   const CLOSED_ART = { kind: "glyph", glyph: "cl", grey: false, badge: null, badgeTone: null } as const;
-  const jumps: Qc140Jump[] = groupBy === "none"
-    ? monthJumps(rows, jumpColumn(sort.key), nowMs).map((m) => ({ key: m.key, label: m.label, full: m.label, n: m.n, mark: null, to: { kind: "row", id: m.firstId } }))
-    : groups.map((g) => {
-        const tone = toneOf(g);
-        const full = g.label || "All queries";
-        const art = groupBy === "attention" && g.key === "closed" ? CLOSED_ART : bandArtOf(groupBy, g.key);
-        const glyph = <JumpMark art={art} tone={tone} />;
-        return { key: g.key, label: jumpLabel(groupBy, g.key, full), full, n: g.rows.length,
-          mark: jumpMode === "glyph" ? glyph : null, menuMark: groupBy === "package" ? null : glyph, to: { kind: "group", key: g.key } };
-      });
+
+  /* v142 §C — a heading's glyph: the grouping's own mark (Status, Next action, Package), Who it's with's Closed the closed
+     glyph, and Your move / Waiting their tone icon — the same marks the jump row draws (no artwork on a ledger) */
+  const groupMark = (g: ListGroup, tone: BandTone): React.ReactNode => {
+    const art = groupBy === "attention" && g.key === "closed" ? CLOSED_ART : bandArtOf(groupBy, g.key);
+    return art ? <BandMark art={art} /> : <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>;
+  };
 
   const hl = (text: string): React.ReactNode => {
     const q = find.trim();
@@ -558,7 +588,7 @@ export const QcList138: React.FC<QcList138Props> = ({
     const peekOpen = peekId === r.id;
     return (
       <div key={r.id} id={`query-row-${r.id}`} className={`qc138-row${closed ? " qc138-row--closed" : ""}${ringId === r.id ? " kf" : ""}${picked ? " picked" : ""}`} data-picked={picked ? "" : undefined} data-ring={ringId === r.id || undefined} data-peek={peekOpen ? peekTone(due, nowMs, closed) : undefined}
-        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"}
+        data-qcv="row" data-id={r.id} data-qid={r.id} data-court={tileCourt(r.status) ?? "closed"} data-where={whereItStands(r, nowMs)} data-last={r.lastMs} data-status={r.status} data-you={r.withYou ? "true" : "false"} data-move={yours ? "true" : "false"}
         data-due={due ?? undefined} data-first={r.sentMs ?? undefined} data-from={r.stageStartMs ?? r.lastMs} data-name={r.agentName}
         role="option" aria-selected={on} tabIndex={on || (!selectedId && r === rows[0]) ? 0 : -1}
         onClick={() => onOpen(r.id)}
@@ -579,17 +609,23 @@ export const QcList138: React.FC<QcList138Props> = ({
           </button>
           <span className="qc138-agt">
             <b data-qcv="row-name" title={r.agentName}>{hl(r.agentName)}</b>
-            <small data-qcv="row-agency">{hl(r.agency)}</small>
+            <small data-qcv="row-agency">{hl(r.agency)}{twinTag.get(r.id) ? <em className="qc138-twin" data-qcv="row-twin">{twinTag.get(r.id)}</em> : null}</small>
           </span>
         </div>
         <div className="qc138-fq" data-qcv="row-first">
-          <span className="qc138-fqd" data-qcv="row-first-date">{r.sentMs != null ? firstQueried(r.sentMs, nowMs) : "Not dated"}</span>
+          {r.sentMs != null ? <span className="qc138-fqd" data-qcv="row-first-date">{firstQueried(r.sentMs, nowMs)}</span>
+            : <button type="button" className="qc138-fqd qc138-adddate" data-qcv="row-first-date" data-undated=""
+              onClick={(e) => { e.stopPropagation(); onAddDate?.(r.id); }}>Add date</button>}
           {r.dayN != null ? <span className="qc138-fqn" data-qcv="row-day">day {r.dayN}</span> : null}
         </div>
         <div className="qc138-st" data-qcv="row-stand">
           <div className="qc138-ws1"><StatusDot status={r.status} overrideSize={12} /><span>{STAGE_NAME[r.status]}</span></div>
           <Track level={trackLevel(r)} yours={yours} closed={closed} />
-          {detail ? <div className={`qc138-sub${detail.hot ? " hot" : ""}`} data-qcv="row-standline" data-hot={detail.hot || undefined}>{detail.text}</div> : null}
+          {detail ? (
+            <div className={`qc138-sub${detail.hot ? " hot" : ""}`} data-qcv="row-standline" data-hot={detail.hot || undefined} data-undated={detail.undated ? "" : undefined}>
+              {detail.undated ? <>{detail.verb}, <button type="button" className="qc138-adddate" data-qcv="row-adddate" onClick={(e) => { e.stopPropagation(); onAddDate?.(r.id); }}>add date</button></> : detail.text}
+            </div>
+          ) : null}
         </div>
         <div className="qc138-snt" data-qcv="row-sent">
           <SentCell138 row={r} pkg={pkg} nowMs={nowMs} onAdd={() => (onAddSent ?? onEdit)?.(r.id)} onPackage={() => onOpenPackage?.(pkgId)} />
@@ -632,7 +668,11 @@ export const QcList138: React.FC<QcList138Props> = ({
   };
 
   return (
-    <div className="qc138-sheet" data-qc138="sheet" data-density={density} ref={boxRef} {...tip.handlers}>
+    <>
+    {/* v149 A3 — THE VIEW ROW ABOVE THE LIST (the page's: the view chips and Find), in the place navy-bar v1's pill row
+        held. Full screen moved into the navy bar (B1). Not drawn in full screen, where Find is in the cream toolbar. */}
+    {!full ? viewRow ?? null : null}
+    <div className="qc138-sheet" data-qc138="sheet" data-density={density} data-view={birds ? "birds" : "list"} ref={boxRef} {...tip.handlers}>
       {/* v138.6 §B — THE STICKY ROW, in a wrapper that sticks under the sheet's lip and fills the lip's 12px with the
           sheet's colour. v140 §A — what sticks is the toolbar (QcToolbar140), and under it the applied-filters row while
           anything narrows the list: `useStickyStack` measures the two together, so the headings and the current group
@@ -643,25 +683,26 @@ export const QcList138: React.FC<QcList138Props> = ({
               current group band stick under both */}
           {full ? band : null}
           <QcToolbar140 rootRef={boxRef} pinned={full} loading={loading} groupBy={groupBy} onGroup={onGroup} density={density} onDensity={onDensity}
-            jumpColumn={groupBy === "none" ? JUMP_COLUMN_LABEL[jumpColumn(sort.key)] : null} jumps={jumps} jumpMode={jumpMode}
+            heard={heard}
             find={find} onFind={onFind} findRef={findRef} filterCount={filterCount} onClearFilters={onClearFilters ?? (() => {})}
-            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} />
+            filtersMenu={filtersMenu ?? (() => null)} onPin={onFull} sort={sort} onSort={(s) => onSort?.(s)} findInBar={findInBar} birdsTools={birdsTools} switcher={fullSwitch} />
           {applied}
         </div>
       </div>
-      <div className="qc138-heads lth" data-qc138="headings" role="row">
-        {HEADINGS.map((h) => {
-          const on = sort.key === h.key;
-          return (
-            <div key={h.key} role="columnheader" className={`qc138-h${on ? " on" : ""}`} data-k={h.key} data-qc138="heading"
-              aria-sort={on ? (sort.reversed ? "descending" : "ascending") : "none"}>
-              <button type="button" onClick={() => onHeading(h.key)}>
-                <span>{h.label}</span><i aria-hidden="true">{on && sort.reversed ? "↑" : "↓"}</i>
-              </button>
+      {/* v150 D — Birds-eye is the list's second view: it takes the place of the headings and the rows, under the bar */}
+      {birds ? <div className="qc150-bew" data-view="birds">{birds}</div> : (<>
+      {/* v149 B5 — list only: the headings are always drawn */}
+      {true ? (
+        <div className="qc138-heads lth" data-qc138="headings" role="row">
+          {/* navy-bar v1 A1 — THE HEADINGS ARE PLAIN LABELS: not buttons, no arrows, no sort state. Sorting is the Sort
+              chip's (the same one state the headings used to write). Due's label is blank: its column is the date ring. */}
+          {HEADINGS.map((h) => (
+            <div key={h.key} role="columnheader" className="qc138-h qc144-h" data-k={h.key} data-qc138="heading" aria-label={h.key === "due" ? h.label : undefined}>
+              <span aria-hidden={h.key === "due" || undefined}>{h.key === "due" ? "" : h.label}</span>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      ) : null}
       {/* a dev-only review aid: `window.__SA_QC138_PEEK_LAB` forces peek cases (the F2 edge-case sheet); production
           builds drop the branch, since MODE is replaced at build time */}
       {import.meta.env.MODE !== "production" ? <PeekLab nowMs={nowMs} /> : null}
@@ -696,26 +737,16 @@ export const QcList138: React.FC<QcList138Props> = ({
           const label = g.label || "All queries";
           return (
             <div key={g.key} className={`qc138-grp${shut ? " shut" : ""}`} data-qcv="grp" data-group={g.key}>
-              <button type="button" className={`qc138-band qc138-band--${tone}`} data-qcv="gband" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
+              {/* navy-bar v1 A4 — THE RULED HEADING ("C · Ruled"), the Cards view's own: the group's glyph (20), the name in
+                  the typewriter at 23, "N QUERIES" in mono, the fold chevron, then a hairline to the right edge. It
+                  replaces v142's cream ledger. Stuck, it is white and fades out over 14px below itself. */}
+              <button type="button" className={`qc138-band qc138-band--${tone} qc144-rh`} data-qcv="gband" data-qc144="heading" data-group={g.key} data-tone={tone} style={{ ["--qi" as string]: nextSeq() }}
                 aria-expanded={!shut} onClick={() => onFold(g.key)}>
-                {/* v139 §C — under Status, Next action and Package the band draws its own mark in the art slot, and never
-                    the default grouping's talon or hourglass (which used to appear on every non-urgency band) */}
-                {(() => {
-                  const art = bandArtOf(groupBy, g.key);
-                  if (art) return <BandMark art={art} />;
-                  return (
-                    <>
-                      <span className="qc138-gart" aria-hidden="true">{TONE_ICON[tone]}</span>
-                      {TONE_ART[tone] ? (
-                        <img className={`qc138-gimg qc138-gimg--${tone}`} data-qcv="gband-art" src={TONE_ART[tone]!.src} width={TONE_ART[tone]!.w} height={TONE_ART[tone]!.h} alt="" aria-hidden="true" draggable={false} />
-                      ) : null}
-                    </>
-                  );
-                })()}
-                <b className="qc138-gt" data-qcv="gband-t">{label}</b>
-                <span className="qc138-gn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
-                {g.hint ? <span className="qc138-gh" data-qcv="gband-h">{g.hint}</span> : <span className="qc138-gh" />}
+                <span className="qc144-rhm" data-qc144="heading-mark">{groupMark(g, tone)}</span>
+                <b className="qc138-gt qc144-rhl" data-qcv="gband-t">{label}</b>
+                <span className="qc138-gn qc144-rhn" data-qcv="gband-n">{g.rows.length} {g.rows.length === 1 ? "query" : "queries"}</span>
                 <span className="qc138-chev" aria-hidden="true">▾</span>
+                <i className="qc144-rhr" data-qc144="heading-rule" aria-hidden="true" />
               </button>
               {!shut && (
                 <div role="listbox" aria-label={`${label}: ${g.rows.length} ${g.rows.length === 1 ? "query" : "queries"}`} className="qc138-rows">
@@ -726,8 +757,10 @@ export const QcList138: React.FC<QcList138Props> = ({
           );
         })}
       </div>
+      </>)}
       {tip.node}
     </div>
+    </>
   );
 };
 

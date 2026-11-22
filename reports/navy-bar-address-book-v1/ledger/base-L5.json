@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L5",
+  "where": "1280 · population: the Contact list's group",
+  "ok": true,
+  "detail": "{\"group\":true,\"books\":0,\"toggle\":1,\"oldBody\":53,\"cols\":0,\"kids\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · no Cards / List toggle",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · no old list body (rows, cards, the list sheet)",
+  "ok": false,
+  "detail": "53"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 · exactly one two-column box",
+  "ok": false,
+  "detail": "{\"group\":true,\"books\":0,\"toggle\":1,\"oldBody\":53,\"cols\":0,\"kids\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · population: the Contact list's group",
+  "ok": true,
+  "detail": "{\"group\":true,\"books\":0,\"toggle\":1,\"oldBody\":53,\"cols\":0,\"kids\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · no Cards / List toggle",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · no old list body (rows, cards, the list sheet)",
+  "ok": false,
+  "detail": "53"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 · exactly one two-column box",
+  "ok": false,
+  "detail": "{\"group\":true,\"books\":0,\"toggle\":1,\"oldBody\":53,\"cols\":0,\"kids\":0}"
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L9-1512",
+  "where": "five steps with the exact titles",
+  "ok": true,
+  "detail": "[\"Make a package\",\"Pick each piece\",\"Set your current batch\",\"Log a query with it\",\"See what’s working\"]"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "no “Drag them into the package”",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "no “Keep your materials in one place”",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "no “Your packages sit in a row”",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the last step reads “Got it”",
+  "ok": true,
+  "detail": "no"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "Escape closes it",
+  "ok": true,
+  "detail": "still open"
+ }
+]

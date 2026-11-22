@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: an open query",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "it ends with the next step, faint (italic)",
+  "ok": true,
+  "detail": "{\"title\":\"Send the revision\",\"why\":\"Sophie asked for it on 27 Jun.\",\"faint\":\"italic\",\"last\":true}"
+ },
+ {
+  "where": "…which is the rule's own: the revision is owed",
+  "ok": true,
+  "detail": "{\"title\":\"Send the revision\",\"why\":\"Sophie asked for it on 27 Jun.\",\"faint\":\"italic\",\"last\":true}"
+ },
+ {
+  "where": "…with a one-line reason from the record",
+  "ok": true,
+  "detail": "{\"title\":\"Send the revision\",\"why\":\"Sophie asked for it on 27 Jun.\",\"faint\":\"italic\",\"last\":true}"
+ },
+ {
+  "where": "population: a closed query",
+  "ok": true,
+  "detail": "{\"card\":true,\"next\":false}"
+ },
+ {
+  "where": "a closed query has no next step",
+  "ok": true,
+  "detail": "{\"card\":true,\"next\":false}"
+ }
+]

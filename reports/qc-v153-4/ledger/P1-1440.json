@@ -1,0 +1,37 @@
+[
+ {
+  "name": "ground #f5f5f3",
+  "ok": true,
+  "got": "rgb(245, 245, 243)"
+ },
+ {
+  "name": "an even .45 wash over the tile (no fade)",
+  "ok": true,
+  "got": "linear-gradient(rgba(245, 245, 243, 0.45), rgba(245, 245, 243, 0.45)), url(\"https://scriptally-dev.web.app/images/qc/doodle-tile.svg\")"
+ },
+ {
+  "name": "both layers repeat, the tile at 340×360",
+  "ok": true,
+  "got": "auto, 340px 360px · repeat, repeat"
+ },
+ {
+  "name": "title in Special Elite 400",
+  "ok": true,
+  "got": "400 54px \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "name": "title tracking -0.01em",
+  "ok": true,
+  "got": "-0.54px"
+ },
+ {
+  "name": "scrolled to the foot",
+  "ok": true,
+  "got": "{\"top\":6998,\"max\":6998,\"att\":\"local, local\"}"
+ },
+ {
+  "name": "the pattern scrolls with the page (local)",
+  "ok": true,
+  "got": "local, local"
+ }
+]

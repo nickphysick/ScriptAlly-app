@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L6-1512",
+  "where": "population: an overdue, a waiting and an offer row",
+  "ok": true,
+  "detail": "[\"Queried\",\"Queried\",\"Offer\"]"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "overdue: the summary is one line (≤24)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "overdue: nothing past the list card's edges",
+  "ok": true,
+  "detail": "0 boxes outside"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "waiting: the summary is one line (≤24)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "waiting: nothing past the list card's edges",
+  "ok": true,
+  "detail": "0 boxes outside"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "offer: the summary is one line (≤24)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "offer: nothing past the list card's edges",
+  "ok": true,
+  "detail": "0 boxes outside"
+ }
+]

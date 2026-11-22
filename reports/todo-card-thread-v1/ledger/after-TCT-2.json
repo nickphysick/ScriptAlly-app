@@ -1,0 +1,32 @@
+[
+ {
+  "name": "q152-rr: population — the save landed and wrote one step",
+  "ok": true,
+  "got": "4 → 5"
+ },
+ {
+  "name": "q152-rr: the card draws the new step",
+  "ok": true,
+  "got": "[\"You sent Rhea your query\",\"Rhea asked for your full manuscript\",\"You sent Rhea your full manuscript\",\"Rhea asked you to revise and resubmit\"] → [\"You sent Rhea your query\",\"Rhea asked for your full manuscript\",\"You sent Rhea your full manuscript\",\"Rhea asked you to revise and resubmit\",\"You sent Rhea your revision\"]"
+ },
+ {
+  "name": "q152-rr: the draft settled into it (the same element, now the thread's newest step)",
+  "ok": true,
+  "got": "{\"in\":true,\"draft\":false,\"last\":true}"
+ },
+ {
+  "name": "q152-rr: Undo restores the stored query byte for byte",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-rr: and the card's thread as it was",
+  "ok": true,
+  "got": "[\"You sent Rhea your query\",\"Rhea asked for your full manuscript\",\"You sent Rhea your full manuscript\",\"Rhea asked you to revise and resubmit\"]"
+ },
+ {
+  "name": "a To-do task for a q152 query whose card saves from a composer with a draft was found",
+  "ok": true,
+  "got": ""
+ }
+]

@@ -2,180 +2,215 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ Submission packages v4 (route /manuscripts/packages; 14 Oct) ═════════════════════════════════════════════
- * Refs: design-refs/packages-v4/packages-v4.html (the page) and design-refs/materials/packages-v3.html (the drawer).
- * v3's data, drawer and derivations in the Query Centre v138 / Contact list v17.1 dress:
+ * ══ Submission packages v62 (18 Nov; ref design-refs/submission-packages-v62/) ══════════════════════════════════════
+ * "Send a few, see what comes back, change one thing, send again." Each package is a record of exactly what went out,
+ * and of what came back for it. Top to bottom:
+ *   the navy header (Pk62Header) · the founding writer's first-visit note (once; then the Pro tag) ·
+ *   the desk: "Your packages" (Pk62List) beside the open package (Pk62Open) and, once it has gone out, "What came
+ *   back" (Pk62Back) · "All your packages, side by side" (Pk62Table).
+ *   Day one (no package at all): the header and one framed card holding the How it works storyboard (Pk62DayOne).
+ * Every rule and word is lib/packagesV62's; the data is usePk62's, joined from the packages model (usePk26Model).
  *
- *   A · the centred light header and its summary card (Sent / Not sent yet / Retired, and the Reply rate ring)
- *   B · the filter row (v17's pills)
- *   C · the packages sheet (search in its navy row; In use, and Retired folded)
- *   D · the materials sheet (three columns)
- *   E · the blush banner and "What's getting replies"
- *   F · the empty page, with no packages: navy panel and the Archivist, How it works, Ways to get started
- *
- * ⚠️ THE PAGE DISPLAYS; THE DRAWER DOES EVERY CREATE AND EDIT (v3 decision 1). Viewing doesn't dim; forms do.
- * ⚠️ DEEP LINKS, read on every arrival (`location.key`): `?tab=builder` opens the package form (App's "New package"
- *    lands there), `?tab=tracking` scrolls to "What's getting replies", `?tab=packages` is the top of the page, and
- *    `?pkg={id}` opens that package's drawer (`&view=replies` its second tab).
- * ⚠️ OPEN TO ALL (D7). Nothing on this page reads the plan; the one gate is `addPackage`'s.
+ * ⚠️ /manuscripts/packages REDIRECTS HERE with its query string (lib/packagesRoute), so every deep link still works:
+ *    `?pkg={id}` opens that package (a retired one shows the retired list), `?tab=builder` and `?new=1` open New package
+ *    (`&version={id}` puts that version in the package it makes), `?tab=tracking` scrolls to the table, and
+ *    `?tab=let|syn|ver` opens that piece's list on the open package when it has not been sent.
+ * ⚠️ OPEN TO ALL (D7). Nothing on this page reads the plan. The founding writer's note and the Pro tag read only
+ *    whether the plan came from the founding offer, and the note's one stored flag (todoPrefs.packages.foundingNoteHidden).
+ * ⚠️ EVERY WORKSPACE PAGE STAYS MOUNTED: every Escape layer and overlay here is gated on `routeActive`.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
-import type { SubmissionPackage } from "../types";
+import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
-import { usePopover } from "./shell/ListPills";
-import { suggestPackageName, type MatKind } from "../lib/packagesPage";
-import { materialPackageCount, materialSplit, overall } from "../lib/packageReplies";
-import { PkgDrawer4, type DrawerView } from "./packages/v4/PkgDrawer4";
-import { EMPTY_PKG, usePackagesModel } from "./packages/v4/usePackagesModel";
-import { PkgHeader4, PkgSummaryCard, type StatusKey } from "./packages/v4/PkgHeader4";
-import { PkgFilters4, emptyPkgFilters, filterCount, pkgMatches, type PkgFilters, type PkgPop } from "./packages/v4/PkgFilters4";
-import { MaterialsSheet, PackagesSheet, type CardData } from "./packages/v4/PkgSheets4";
-import { RepliesBanner, RepliesSheet, materialSub, packageSub, type ByKind, type ReplyRow } from "./packages/v4/PkgReplies4";
-import { PkgEmpty4 } from "./packages/v4/PkgEmpty4";
-import "./packages/packagesV2.css";
-import "./packages/v4/packagesV4.css";
+import { usePk26Model } from "./packages/v26/usePk26Model";
+import { useScriptAllyDb } from "../lib/db";
+import { packagesViaFounding } from "../lib/entitlements";
+import { FOUNDING_NOTE_PATH, foundingNoteHidden } from "../lib/packagesV41";
+import { libTabFromParam } from "../lib/packagesV38";
+import { FIRST_BUTTON, NEW_BUTTON, headerTitle, isFinished } from "../lib/packagesV62";
+import type { SubmissionPackage } from "../types";
+import { Pk26Drawer, type DrawerView as MatView } from "./packages/v26/Pk26Drawer";
+import { usePk62 } from "./packages/v62/usePk62";
+import { usePk62Actions } from "./packages/v62/usePk62Actions";
+import { Pk62Header, Pk62Note, Pk62Slim } from "./packages/v62/Pk62Header";
+import { Pk62List } from "./packages/v62/Pk62List";
+import { Pk62Open, type StepKey } from "./packages/v62/Pk62Open";
+import { Pk62Back } from "./packages/v62/Pk62Back";
+import { Pk62Table } from "./packages/v62/Pk62Table";
+import { Pk62DayOne, Pk62How } from "./packages/v62/Pk62Story";
+import { Pk62Drawer, type DrawerView } from "./packages/v62/Pk62Drawer";
+/* the material drawer (a new letter, synopsis or version) is v26's, dressed by these */
+import "./packages/v26/pk40.generated.css";
+import "./packages/v26/pk26.css";
+import "./packages/v26/pk38.generated.css";
+import "./packages/v26/pk38.css";
+import "./packages/v26/pk39.generated.css";
+import "./packages/v26/pk39.css";
+import "./packages/v26/pk391.generated.css";
+import "./packages/v26/pk391.css";
+import "./packages/v41/pk41.css";
+/* the Query Centre's navy header and collapsed bar (the sheets they are dressed by, as Query letters imports them) */
+import "./queries/centre/qcv1531.css";
+import "./queries/centre/qcv1534.css";
+import "./queries/centre/qcv154.css";
+import "./queries/centre/qcv156.css";
+import "./letters/queryLetters.css";
+import "./packages/v43/pk43.css";
+import "./packages/v62/pk62.css";
 
-export const SubmissionPackages: React.FC = () => {
-  const model = usePackagesModel();
-  const { activeMs, msId, allMats, mats, msPkgs, live, retired, active, msQueries, rowsById, collectionsReady } = model;
+export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
+  const model = usePk26Model();
+  const { activeMs, live, msPkgs, msId, collectionsReady, active } = model;
+  const d = usePk62(model);
+  const act = usePk62Actions(model);
   const location = useLocation();
-  const noneLive = !!activeMs && msPkgs.length > 0 && live.length === 0;
+  const navigate = useNavigate();
 
-  /* ── the drawer (v3 Part D): every create and edit happens there ── */
-  const [view, setView] = useState<DrawerView | null>(null);
-  /* a letter (or synopsis) chosen on the way in fills the name suggestion, as picking one in the form does */
-  const openNew = (pre: { letter?: string; synopsis?: string; version?: string } = {}) => {
-    const letter = pre.letter ?? "", synopsis = pre.synopsis ?? "";
-    const name = letter || synopsis ? suggestPackageName(model.matById("letter", letter)?.name ?? null, model.matById("synopsis", synopsis)?.name ?? null) : "";
-    setView({ m: "pkgform", d: { ...EMPTY_PKG, letter, synopsis, version: pre.version ?? "", name } });
-  };
-  /* the replies sheet: the ring's press and ?tab=tracking scroll to it */
-  const repliesRef = useRef<HTMLElement | null>(null);
-  const scrollerOf = () => [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.querySelector('[data-pk4="page"]')) ?? null;
+  /* §5.2 — the founding writer's note, once; then the Pro tag (one stored flag on the user) */
+  const { currentUser, entitlement, updateUserPaths } = useScriptAllyDb();
+  const founding = packagesViaFounding(entitlement);
+  const dismissed = foundingNoteHidden(currentUser);
+  const showNote = founding && !dismissed;
+  const proTag = founding && dismissed;
 
-  /* ── deep links, on every arrival: ?tab=builder · ?tab=tracking · ?tab=packages · ?pkg={id}[&view=replies] ── */
-  const params = new URLSearchParams(location.search);
-  const tab = params.get("tab");
-  const pkgParam = params.get("pkg");
-  const [pendingTrack, setPendingTrack] = useState(false);
-  const [pendingPkg, setPendingPkg] = useState<{ id: string; replies: boolean } | null>(null);
-  useEffect(() => {
-    if (tab === "builder") openNew();
-    else if (tab === "tracking") setPendingTrack(true);
-    else if (tab === "packages") { const s = scrollerOf(); if (s) s.scrollTop = 0; }
-    if (pkgParam) setPendingPkg({ id: pkgParam, replies: params.get("view") === "replies" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.key]);
-  useEffect(() => {
-    if (!pendingPkg || !msPkgs.some((p) => p.id === pendingPkg.id)) return;
-    setView({ m: "pkg", id: pendingPkg.id, tab: pendingPkg.replies ? "replies" : "inside" });
-    setPendingPkg(null);
-  }, [pendingPkg, msPkgs]);
-  useLayoutEffect(() => {
-    if (!pendingTrack || !repliesRef.current) return;
-    repliesRef.current.scrollIntoView({ block: "start" });
-    setPendingTrack(false);
-  }, [pendingTrack, msPkgs.length]);
-  /* a different manuscript is a different page: the drawer closes */
+  const [curId, setCurId] = useState<string | null>(null);
+  const [showRetired, setShowRetired] = useState(false);
+  const [drawer, setDrawer] = useState<DrawerView | null>(null);
+  const [mat, setMat] = useState<MatView | null>(null);
+  const [how, setHow] = useState(false);
+  /** the list a package opens with: after New package, its version list; from a deep link, that piece's */
+  const [firstStep, setFirstStep] = useState<{ id: string | null; step: StepKey } | null>(null);
+  /** a version from Versions' "Add to a package" (`?new=1&version=`), put into the package New package makes */
+  const [withVersion, setWithVersion] = useState<string | null>(null);
+  const [stamp, setStamp] = useState(false);
+  useEffect(() => { if (!stamp) return undefined; const t = window.setTimeout(() => setStamp(false), 600); return () => window.clearTimeout(t); }, [stamp]);
+
+  const retired = useMemo(() => msPkgs.filter((p) => p.status === "Retired"), [msPkgs]);
+  const going = active && live.some((p) => p.id === active.id) ? active : null;
+  const options = useMemo(() => live.filter(isFinished), [live]);
+  /* the open package: the one chosen (a retired one only while the retired list shows), else the one going out, else the first */
+  const current = useMemo<SubmissionPackage | null>(() => {
+    const chosen = msPkgs.find((p) => p.id === curId) ?? null;
+    if (chosen && (chosen.status !== "Retired" || showRetired)) return chosen;
+    return going ?? live[0] ?? (showRetired ? retired[0] ?? null : null);
+  }, [msPkgs, curId, showRetired, going, live, retired]);
+  const ci = current ? d.info(current) : null;
+
+  /* a different manuscript is a different page */
   const lastMs = useRef(msId);
-  useEffect(() => { if (lastMs.current && lastMs.current !== msId) setView(null); lastMs.current = msId; }, [msId]);
+  useEffect(() => {
+    if (lastMs.current && lastMs.current !== msId) { setCurId(null); setDrawer(null); setMat(null); setShowRetired(false); setFirstStep(null); }
+    lastMs.current = msId;
+  }, [msId]);
 
-  const matName = (k: MatKind, id: string | undefined) => (id ? allMats[k].find((m) => m.id === id) ?? null : null);
+  /* the right column says, politely, which package is open */
+  const [said, setSaid] = useState("");
+  const lastOpen = useRef<string | null>(null);
+  useEffect(() => {
+    const id = current?.id ?? null;
+    if (lastOpen.current && id && lastOpen.current !== id) setSaid(`${current!.packageName} is open.`);
+    lastOpen.current = id;
+  }, [current]);
 
-  /* ── Part A · the card's counts and the status filter (shared with the Status pill, Part B) ── */
-  const counts: Record<StatusKey, number> = {
-    sent: live.filter((p) => model.goneOut(p)).length, new: live.filter((p) => !model.goneOut(p)).length, ret: retired.length,
-  };
-  /* Part B · the filters; Status is ONE state with the card's rows */
-  const [filters, setFilters] = useState<PkgFilters>(emptyPkgFilters);
-  const status = useMemo(() => new Set(filters.status), [filters.status]);
-  /* a row press shows only that row; pressed again it clears. It never scrolls (A2). */
-  const pressStatus = (k: StatusKey) => setFilters((f) => ({ ...f, status: f.status.length === 1 && f.status[0] === k ? [] : [k] }));
-  const keyOf = (p: SubmissionPackage): StatusKey => (p.status === "Retired" ? "ret" : model.goneOut(p) ? "sent" : "new");
-  const statusMatch = (p: SubmissionPackage) => pkgMatches(p, keyOf(p), filters);
-  const pop = usePopover<PkgPop>();
-  const inPackages = (kind: "letter" | "synopsis" | "version", id: string) => msPkgs.filter((p) =>
-    (kind === "letter" ? p.queryLetterVersionId : kind === "synopsis" ? p.synopsisVersionId || "" : p.bookVersionId || "") === id).length;
-  /* Part C · the sheet's search: package names and the names of the materials each holds now */
-  const [find, setFind] = useState("");
-  const findMatch = (p: SubmissionPackage) => {
-    const t = find.trim().toLowerCase();
-    if (!t) return true;
-    return [p.packageName, matName("letter", p.queryLetterVersionId)?.name, matName("synopsis", p.synopsisVersionId)?.name, matName("version", p.bookVersionId)?.name]
-      .some((x) => (x ?? "").toLowerCase().includes(t));
-  };
-  const clearAll = () => { setFilters(emptyPkgFilters()); setFind(""); };
-  const cardOf = (p: SubmissionPackage): CardData => ({
-    pkg: p, sent: model.goneOut(p), forNew: active?.id === p.id, split: model.currentSplit(p),
-    slots: { letter: matName("letter", p.queryLetterVersionId)?.name ?? null, synopsis: matName("synopsis", p.synopsisVersionId)?.name ?? null, version: matName("version", p.bookVersionId)?.name ?? null },
-  });
-  /* In use: the package used for new queries first, then newest (msPkgs is newest first) */
-  const cardsLive = live.filter((p) => statusMatch(p) && findMatch(p)).sort((a, b) => Number(active?.id === b.id) - Number(active?.id === a.id)).map(cardOf);
-  const cardsRet = retired.filter((p) => statusMatch(p) && findMatch(p)).map(cardOf);
-  const overallSplit = useMemo(() => overall(msPkgs, msQueries, rowsById), [msPkgs, msQueries, rowsById]);
-  const goReplies = () => {
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    repliesRef.current?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
-  };
-  /* Part E · the table's rows, ALL editions (the card and the drawer cells read the current one) */
-  const rowsFor = (by: ByKind): ReplyRow[] => {
-    if (by === "package") return msPkgs.map((p) => { const sp = model.allSplit(p); return { id: p.id, kind: "package", name: p.packageName, s: sp, sub: packageSub(p, sp), pkg: p }; });
-    const list = allMats[by].filter((m) => !m.retired || model.matSplit(m).sent > 0).map((m): ReplyRow => {
-      const sp = model.matSplit(m);
-      return { id: m.id, kind: by, name: m.name, s: sp, sub: materialSub(materialPackageCount(m.id, by, msPkgs, msQueries), sp), mat: m };
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const part = (k: string) => rootRef.current?.querySelector<HTMLElement>(`[data-pk62="${k}"]`) ?? null;
+  const toDesk = (focusRow: string | null) => {
+    requestAnimationFrame(() => {
+      part("desk")?.scrollIntoView({ block: "start", behavior: "auto" });
+      if (focusRow) rootRef.current?.querySelector<HTMLElement>(`[data-pk62-row="${focusRow}"]`)?.focus({ preventScroll: true });
     });
-    if (by === "version") {
-      const nr = materialSplit(null, "version", msPkgs, msQueries, rowsById);
-      if (nr.sent) list.push({ id: null, kind: "version", name: "Not recorded", s: nr, sub: `in ${materialPackageCount(null, "version", msPkgs, msQueries)} package${materialPackageCount(null, "version", msPkgs, msQueries) === 1 ? "" : "s"}` });
-    }
-    return list;
+  };
+  const open = (p: SubmissionPackage) => {
+    if (p.status === "Retired") setShowRetired(true);
+    if (p.id !== current?.id) setFirstStep(null);
+    setCurId(p.id);
   };
 
-  /* Part F · the empty page: no packages for the manuscript, live or retired */
-  /* only once every collection has answered: an account still loading is not an account with no packages */
-  const emptyPage = !!activeMs && collectionsReady && msPkgs.length === 0;
-  const newestLetter = mats.letter[0] ? { id: mats.letter[0].id, name: mats.letter[0].name } : null;
+  /* ── deep links, read on every arrival ── */
+  const [pending, setPending] = useState<{ pkg?: string; track?: boolean; step?: StepKey } | null>(null);
+  useEffect(() => {
+    if (!routeActive) return;
+    const q = new URLSearchParams(location.search);
+    const t = q.get("tab");
+    if (t === "builder" || q.get("new") === "1") { setDrawer({ m: "new" }); setWithVersion(q.get("version")); }
+    if (t === "tracking") setPending({ track: true });
+    const step = libTabFromParam(t);
+    const pkg = q.get("pkg");
+    if (pkg || step) setPending({ ...(pkg ? { pkg } : {}), ...(step ? { step } : {}) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key, routeActive]);
+  useLayoutEffect(() => {
+    if (!pending) return;
+    if (pending.pkg) {
+      const p = msPkgs.find((x) => x.id === pending.pkg);
+      if (!p) return;
+      open(p);
+      if (pending.step) setFirstStep({ id: p.id, step: pending.step });
+      toDesk(null);
+    } else if (pending.step && current) setFirstStep({ id: current.id, step: pending.step });
+    if (pending.track) part("table")?.scrollIntoView({ block: "start" });
+    setPending(null);
+  }, [pending, msPkgs]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const goQueries = (ids: string[]) => navigate({ pathname: "/queries", search: ids.length ? `?ids=${encodeURIComponent(ids.join(","))}` : "" });
+  const goComps = () => navigate("/manuscripts/comps");
+  const onChoose = async (p: SubmissionPackage) => { if (await act.useForNew(p)) { setCurId(p.id); setStamp(true); } };
+  const onCopy = async (p: SubmissionPackage) => {
+    const id = await act.copy(p);
+    if (id) { setShowRetired(false); setCurId(id); setFirstStep(null); toDesk(null); }
+  };
+  const onCreate = async (x: { name: string; note: string; icon: SubmissionPackage["icon"] & string }) => {
+    const id = await act.create(x);
+    if (!id) return false;
+    setCurId(id);
+    const v = withVersion && model.versionRows.some((r) => r.id === withVersion) ? withVersion : null;
+    setWithVersion(null);
+    if (v) {
+      const made = { id, queryLetterVersionId: "", synopsisVersionId: "", bookVersionId: "" } as SubmissionPackage;
+      await model.putPiece(made, "ver", v);
+      setFirstStep({ id, step: "let" });
+    } else setFirstStep({ id, step: "ver" });
+    toDesk(null);
+    return true;
+  };
+  const onNewPiece = (k: StepKey) => setMat(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k });
+
+  /* §5.7 · DAY ONE: the manuscript has no package at all (only once every collection has answered) */
+  const dayOne = !!activeMs && collectionsReady && msPkgs.length === 0;
+  const title = headerTitle(live.length);
+
   return (
-    <WorkspacePageGrid scrollLabel="Submission packages" masthead={null}>
-      <div className="ppv-page" data-ppv="page">
-        <div className="pk4 pk4-col" data-pk4="page">
-        {emptyPage ? (
-          <PkgEmpty4 msTitle={activeMs?.title ?? null} newestLetter={newestLetter}
-            onBuild={(letterId) => openNew(letterId ? { letter: letterId } : {})}
-            onAdd={(k) => setView({ m: "matform", d: { kind: k, name: "", note: "", text: "" } })} />
-        ) : <PkgHeader4 loading={!collectionsReady} live={collectionsReady ? live.length : null} msTitle={activeMs?.title ?? null}
-          onNew={() => openNew()} onAddMaterial={() => setView({ m: "matform", d: { kind: "letter", name: "", note: "", text: "" } })}
-          card={<PkgSummaryCard counts={counts} active={status} onStatus={pressStatus} overall={overallSplit} onRate={goReplies} loading={!collectionsReady} />}>
-          <PkgFilters4 filters={filters} onFilters={setFilters} pop={pop} statusCounts={counts} letters={allMats.letter} synopses={allMats.synopsis}
-            versions={allMats.version} inPackages={inPackages} showing={msPkgs.filter((p) => statusMatch(p) && findMatch(p)).length} />
-        </PkgHeader4>}
-        <div className="pk4-body" data-ppv="main">
-            {!activeMs || emptyPage ? null : (
-              <>
-                <PackagesSheet live={cardsLive} retired={cardsRet} total={msPkgs.length} filtered={filterCount(filters) > 0 || !!find.trim()}
-                  retiredForced={filters.status.includes("ret")} noneLive={noneLive} openId={view?.m === "pkg" ? view.id : null}
-                  find={find} onFind={setFind} onClearAll={clearAll} onOpen={(p) => setView({ m: "pkg", id: p.id, tab: "inside" })} onNew={() => openNew()} />
-                <MaterialsSheet mats={allMats} openId={view?.m === "mat" ? view.id : null}
-                  use={(m) => ({ packages: model.packagesWith(m).length, sent: model.matSplit(m).sent })}
-                  goneOut={(m) => (m.kind === "version" ? model.matSplit(m).sent > 0 : model.materialGoneOut(m.id))}
-                  onOpen={(m) => setView({ m: "mat", kind: m.kind, id: m.id })}
-                  onAdd={(k) => setView({ m: "matform", d: { kind: k, name: "", note: "", text: "" } })} />
-              </>
-            )}
-          {!activeMs || emptyPage ? null : (
-            <>
-              <RepliesBanner />
-              <div className="pk4-col2">
-                <RepliesSheet ref={repliesRef} rowsFor={rowsFor} packageRows={rowsFor("package")} letterRows={rowsFor("letter")} overall={overallSplit}
-                  onOpen={(r) => (r.pkg ? setView({ m: "pkg", id: r.pkg.id, tab: "replies" }) : r.mat ? setView({ m: "mat", kind: r.mat.kind, id: r.mat.id }) : undefined)} />
+    <WorkspacePageGrid className="pk39-wpg" scrollLabel="Submission packages" masthead={null}>
+      <div ref={rootRef} className={`pk43 pk62${dayOne ? " k62--day1" : ""}`} data-pk62="page" data-pk62-state={dayOne ? "day-one" : d.totals.sent ? "sent" : "nothing-sent"}>
+        {dayOne ? null : <Pk62Slim title={title} going={going?.packageName ?? null} onNew={() => setDrawer({ m: "new" })} />}
+        <Pk62Header d={d} title={title} msTitle={activeMs?.title ?? null} proTag={proTag} newLabel={msPkgs.length ? NEW_BUTTON : FIRST_BUTTON}
+          onNew={() => setDrawer({ m: "new" })} onHow={() => setHow(true)} going={going} options={options} onScreen={routeActive} onChoose={(p) => void onChoose(p)} />
+        {showNote ? <Pk62Note onOk={() => { void updateUserPaths({ [FOUNDING_NOTE_PATH]: true }); }} /> : null}
+        {dayOne ? <Pk62DayOne /> : msPkgs.length ? (
+          <>
+            <div className="k62-desk" data-pk62="desk">
+              <Pk62List d={d} live={live} retired={retired} showRetired={showRetired} openId={current?.id ?? null} stamp={stamp}
+                onShowRetired={(on) => { setShowRetired(on); if (!on && current?.status === "Retired") setCurId(null); }}
+                onOpen={(p) => open(p)} onNew={() => setDrawer({ m: "new" })} />
+              <div className="k62-stack" data-pk62="work">
+                <span className="k62-sr" aria-live="polite">{said}</span>
+                {ci ? <>
+                  <Pk62Open model={model} d={d} act={act} i={ci} onScreen={routeActive}
+                    firstStep={firstStep && (firstStep.id === ci.p.id) ? firstStep.step : null}
+                    onEdit={(p) => setDrawer({ m: "edit", id: p.id })} onCopy={(p) => void onCopy(p)} onNewPiece={onNewPiece}
+                    onOpenMaterial={(k, id) => setMat({ m: "mat", kind: k, id })} />
+                  <Pk62Back d={d} i={ci} onCopy={(p) => void onCopy(p)} onSeeQueries={goQueries} />
+                </> : null}
               </div>
-            </>
-          )}
-        </div>
-        </div>
-        <PkgDrawer4 model={model} view={view} go={setView} />
+            </div>
+            <Pk62Table d={d} pkgs={msPkgs} onOpen={(p) => { open(p); toDesk(p.id); }} />
+          </>
+        ) : null}
       </div>
+      <Pk26Drawer model={model} view={routeActive ? mat : null} go={setMat} onSeeQueries={goQueries} onOpenComps={goComps} />
+      <Pk62Drawer view={routeActive ? drawer : null} pkgOf={(id) => msPkgs.find((p) => p.id === id) ?? null} infoOf={d.info} onClose={() => setDrawer(null)}
+        onCreate={onCreate} onSave={act.save} onDelete={(p) => act.remove(p, d.info(p).sent)} onRetire={act.retire} />
+      <Pk62How open={routeActive && how} onClose={() => setHow(false)} />
     </WorkspacePageGrid>
   );
 };

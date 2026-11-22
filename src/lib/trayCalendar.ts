@@ -243,7 +243,7 @@ export type DayFilter = { k: "day"; kind: CalKind; ymd: string };
 export type CalFilter = { k: "overdue" | "today" | "later" | "undated" } | DayFilter;
 
 export function calFilterLabel(f: CalFilter, dayLabel: (ymd: string) => string): string {
-  if (f.k === "overdue") return "Overdue";
+  if (f.k === "overdue") return "Past expected";
   if (f.k === "today") return "Due today";
   if (f.k === "later") return "Later";
   if (f.k === "undated") return "No date";

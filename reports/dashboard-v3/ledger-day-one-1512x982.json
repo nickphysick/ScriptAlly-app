@@ -1,0 +1,178 @@
+{
+ "vw": 1512,
+ "vh": 982,
+ "state": "pre",
+ "nQueriesCount": 0,
+ "marks": [],
+ "band": {
+  "x": 112,
+  "y": 134,
+  "width": 1360,
+  "height": 121.484375,
+  "top": 134,
+  "right": 1472,
+  "bottom": 255.484375,
+  "left": 112
+ },
+ "bandH": 121.484375,
+ "bandSlack": 44,
+ "title": {
+  "x": 140,
+  "y": 156,
+  "width": 296.921875,
+  "height": 49.390625,
+  "top": 156,
+  "right": 436.921875,
+  "bottom": 205.390625,
+  "left": 140
+ },
+ "buttons": {
+  "x": 1100.25,
+  "y": 174.734375,
+  "width": 343.75,
+  "height": 40,
+  "top": 174.734375,
+  "right": 1444,
+  "bottom": 214.734375,
+  "left": 1100.25
+ },
+ "pills": [
+  {
+   "t": "Record a response",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+   "t": "Add an agent",
+   "bg": "rgba(0, 0, 0, 0)"
+  }
+ ],
+ "logInBand": false,
+ "founding": {
+  "x": 112,
+  "y": 271.484375,
+  "width": 1360,
+  "height": 62,
+  "top": 271.484375,
+  "right": 1472,
+  "bottom": 333.484375,
+  "left": 112
+ },
+ "foundingFolded": "1",
+ "left": {
+  "x": 112,
+  "y": 349.484375,
+  "width": 431.15625,
+  "height": 655.9375,
+  "top": 349.484375,
+  "right": 543.15625,
+  "bottom": 1005.421875,
+  "left": 112
+ },
+ "mid": {
+  "x": 559.15625,
+  "y": 349.484375,
+  "width": 560.53125,
+  "height": 655.9375,
+  "top": 349.484375,
+  "right": 1119.6875,
+  "bottom": 1005.421875,
+  "left": 559.15625
+ },
+ "right": {
+  "x": 1135.6875,
+  "y": 349.484375,
+  "width": 336.3125,
+  "height": 655.9375,
+  "top": 349.484375,
+  "right": 1472,
+  "bottom": 1005.421875,
+  "left": 1135.6875
+ },
+ "order": {
+  "left": [
+   "gs-slot",
+   "agents-hoop"
+  ],
+  "mid": [
+   "setup",
+   "expected"
+  ]
+ },
+ "closedHoop": false,
+ "navy": "rgb(42, 58, 82)",
+ "heads": {
+  "next": "",
+  "nextStage": null,
+  "expected": "rgb(239, 230, 214)",
+  "chart": "",
+  "agents": "rgb(255, 255, 255)"
+ },
+ "expected": {
+  "rows": 0,
+  "past": 0,
+  "say": "When to expect each reply."
+ },
+ "gsPlace": "lead",
+ "clippers": [],
+ "cards": [
+  {
+   "name": "agents-hoop",
+   "x": 112,
+   "y": 692.59375,
+   "width": 431.15625,
+   "height": 212,
+   "top": 692.59375,
+   "right": 543.15625,
+   "bottom": 904.59375,
+   "left": 112
+  },
+  {
+   "name": "os-card fv1-setup",
+   "x": 559.15625,
+   "y": 349.484375,
+   "width": 560.53125,
+   "height": 306.9375,
+   "top": 349.484375,
+   "right": 1119.6875,
+   "bottom": 656.421875,
+   "left": 559.15625
+  },
+  {
+   "name": "expected",
+   "x": 559.15625,
+   "y": 672.421875,
+   "width": 560.53125,
+   "height": 333,
+   "top": 672.421875,
+   "right": 1119.6875,
+   "bottom": 1005.421875,
+   "left": 559.15625
+  },
+  {
+   "name": "d2-feed",
+   "x": 1135.6875,
+   "y": 349.484375,
+   "width": 336.3125,
+   "height": 655.9375,
+   "top": 349.484375,
+   "right": 1472,
+   "bottom": 1005.421875,
+   "left": 1135.6875
+  }
+ ],
+ "navyFilled": [
+  "Add comparable titles →"
+ ],
+ "hScroll": 0,
+ "hawk": {
+  "pos": "fixed",
+  "x": 1374,
+  "y": 757,
+  "width": 134,
+  "height": 225,
+  "top": 757,
+  "right": 1508,
+  "bottom": 982,
+  "left": 1374
+ }
+}

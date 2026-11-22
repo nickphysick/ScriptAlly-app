@@ -1,0 +1,47 @@
+[
+ {
+  "name": "population: the save landed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the newest bubble is the step just saved",
+  "ok": true,
+  "got": "{\"n\":3,\"title\":\"You sent Mira your partial\",\"h\":68}"
+ },
+ {
+  "name": "population: the undone bubble began to leave",
+  "ok": true,
+  "got": "16"
+ },
+ {
+  "name": "at 150ms it is still in the DOM, opacity below 1",
+  "ok": true,
+  "got": "{\"t\":993.0999999046326,\"in\":true,\"leaving\":true,\"op\":0.210816,\"h\":68,\"above\":371,\"pe\":\"none\",\"waits\":2}"
+ },
+ {
+  "name": "at 350ms its height is under half its original",
+  "ok": true,
+  "got": "4 of 68"
+ },
+ {
+  "name": "by 500ms it is gone",
+  "ok": true,
+  "got": "{\"t\":1342.7000000476837,\"in\":false,\"leaving\":true,\"op\":null,\"h\":null,\"above\":371,\"pe\":null,\"waits\":0}"
+ },
+ {
+  "name": "it takes no clicks while leaving",
+  "ok": true,
+  "got": "44"
+ },
+ {
+  "name": "the bubble above never moves more than 2px between two frames",
+  "ok": true,
+  "got": "max step 0px over 102 frames"
+ },
+ {
+  "name": "its wait line folds with it (the bubble and its line leaving, then gone)",
+  "ok": true,
+  "got": "[0,2]"
+ }
+]

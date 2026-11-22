@@ -1,0 +1,32 @@
+[
+ {
+  "name": "ring 140 ±1",
+  "ok": true,
+  "got": "140.0×140.0"
+ },
+ {
+  "name": "archivist 118 ±1 wide",
+  "ok": true,
+  "got": "118.0"
+ },
+ {
+  "name": "the archivist's top is above the ring's top",
+  "ok": true,
+  "got": "archivist 174.3 · ring 182.3"
+ },
+ {
+  "name": "the pill centred on the ring (x ±1) and straddling its foot",
+  "ok": true,
+  "got": "pill cx 1092.0 y 304.3–331.3 · ring cx 1092.0 foot 322.3"
+ },
+ {
+  "name": "clicking the ring opens Housekeeping",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "Fill the gaps opens Housekeeping (79 gaps on the harness)",
+  "ok": true,
+  "got": "true"
+ }
+]

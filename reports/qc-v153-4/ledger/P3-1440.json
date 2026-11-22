@@ -1,0 +1,167 @@
+[
+ {
+  "name": "rail: no fill",
+  "ok": true,
+  "got": "rgba(0, 0, 0, 0) · rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "rail: no shadow, radius or padding",
+  "ok": true,
+  "got": "none · 0px · 0px"
+ },
+ {
+  "name": "header: no fill, 4 4 12, 2px navy rule",
+  "ok": true,
+  "got": "rgba(0, 0, 0, 0) pad 4px 4px 12px rgb(42, 58, 82) 0px -2px 0px 0px inset"
+ },
+ {
+  "name": "four sections",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "quick: 8px between sections, no hairline",
+  "ok": true,
+  "got": "8px · 0px"
+ },
+ {
+  "name": "quick: label Source Serif 600 12.5 #8a8076, 10 4 8",
+  "ok": true,
+  "got": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px"
+ },
+ {
+  "name": "quick: a white panel, radius 12, a 1px ring, 6px padding",
+  "ok": true,
+  "got": "rgb(255, 255, 255) r12px rgb(232, 225, 214) 0px 0px 0px 1px pad 6px"
+ },
+ {
+  "name": "where: 8px between sections, no hairline",
+  "ok": true,
+  "got": "8px · 0px"
+ },
+ {
+  "name": "where: label Source Serif 600 12.5 #8a8076, 10 4 8",
+  "ok": true,
+  "got": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px"
+ },
+ {
+  "name": "where: a white panel, radius 12, a 1px ring, 6px padding",
+  "ok": true,
+  "got": "rgb(255, 255, 255) r12px rgb(232, 225, 214) 0px 0px 0px 1px pad 6px"
+ },
+ {
+  "name": "sent: 8px between sections, no hairline",
+  "ok": true,
+  "got": "8px · 0px"
+ },
+ {
+  "name": "sent: label Source Serif 600 12.5 #8a8076, 10 4 8",
+  "ok": true,
+  "got": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px"
+ },
+ {
+  "name": "sent: a white panel, radius 12, a 1px ring, 6px padding",
+  "ok": true,
+  "got": "rgb(255, 255, 255) r12px rgb(232, 225, 214) 0px 0px 0px 1px pad 6px"
+ },
+ {
+  "name": "more: 8px between sections, no hairline",
+  "ok": true,
+  "got": "8px · 0px"
+ },
+ {
+  "name": "more: label Source Serif 600 12.5 #8a8076, 10 4 8",
+  "ok": true,
+  "got": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px"
+ },
+ {
+  "name": "Most used: rows (population)",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "Requests, offers a: a full-width row 8/10, radius 8",
+  "ok": true,
+  "got": "qc153-fr qc1534-q · 8px 10px · 8px · 256/268"
+ },
+ {
+  "name": "Requests, offers a: count Special Elite #8a8076",
+  "ok": true,
+  "got": "\"Special Elite\" rgb(138, 128, 118)"
+ },
+ {
+  "name": "description kept in title",
+  "ok": true,
+  "got": "Requests, offers and nudges"
+ },
+ {
+  "name": "Past the date you : a full-width row 8/10, radius 8",
+  "ok": true,
+  "got": "qc153-fr qc1534-q · 8px 10px · 8px · 256/268"
+ },
+ {
+  "name": "Past the date you : count Special Elite #8a8076",
+  "ok": true,
+  "got": "\"Special Elite\" rgb(138, 128, 118)"
+ },
+ {
+  "name": "description kept in title",
+  "ok": true,
+  "got": "Past the date you expected"
+ },
+ {
+  "name": "With agents, not y: a full-width row 8/10, radius 8",
+  "ok": true,
+  "got": "qc153-fr qc1534-q · 8px 10px · 8px · 256/268"
+ },
+ {
+  "name": "With agents, not y: count Special Elite #8a8076",
+  "ok": true,
+  "got": "\"Special Elite\" rgb(138, 128, 118)"
+ },
+ {
+  "name": "description kept in title",
+  "ok": true,
+  "got": "With agents, not yet due"
+ },
+ {
+  "name": "Waiting on your an: a full-width row 8/10, radius 8",
+  "ok": true,
+  "got": "qc153-fr qc1534-q · 8px 10px · 8px · 256/268"
+ },
+ {
+  "name": "Waiting on your an: count Special Elite #8a8076",
+  "ok": true,
+  "got": "\"Special Elite\" rgb(138, 128, 118)"
+ },
+ {
+  "name": "description kept in title",
+  "ok": true,
+  "got": "Waiting on your answer"
+ },
+ {
+  "name": "pressed row is on",
+  "ok": true,
+  "got": "you"
+ },
+ {
+  "name": "on: navy fill, cream text",
+  "ok": true,
+  "got": "rgb(42, 58, 82) rgb(244, 238, 229)"
+ },
+ {
+  "name": "the bar shows the row's count",
+  "ok": true,
+  "got": "23 vs 23"
+ },
+ {
+  "name": "\"1 on\"",
+  "ok": true,
+  "got": "1 on"
+ },
+ {
+  "name": "a second press clears",
+  "ok": true,
+  "got": ""
+ }
+]

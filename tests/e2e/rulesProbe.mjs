@@ -821,4 +821,77 @@ console.log("\nHousekeeping prefs by leaf — todoPrefs.contacts, noteboard and 
   console.log(`  ${back ? "✅" : "❌"} ${"todoPrefs restored to its exact prior state".padEnd(44)} ${back ? "" : "— THE ACCOUNT HAS CHANGED"}`);
 }
 
+/* ── Submission packages v26 (25 Oct) ──────────────────────────────────────────────────────────────
+ * A package may start EMPTY; its icon is outside the freeze; its named extras' ids are contents, frozen with the
+ * slots, except for the one-time migration (ids added to a package written before extras, its text unchanged); and
+ * the manuscript holds its extras. Every write is on a probe package of its own, deleted at the end.
+ */
+console.log("\nSubmission packages v26 — empty packages, icons, named extras:");
+{
+  const pref = doc(db, "users", uid, "packages", "probe-pk26");
+  const base = { id: "probe-pk26", manuscriptId: "seed-ms-1", userId: uid, packageName: "Probe v26", queryLetterVersionId: "",
+    synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: new Date().toISOString(), edition: 1 };
+  await attempt("create with no letter (Start from: Empty)", "v26 P2", () => setDoc(pref, { ...base, icon: "crown", extraIds: [] }));
+  await attempt("icon on an unsent package", "v26 P2", () => updateDoc(pref, { icon: "globe" }));
+  await attempt("an icon outside the twelve is refused…", "v26 P2 (expect DENIED)", () => updateDoc(pref, { icon: "rocket" }));
+  /* the migration shape: a package written before extras, then sent */
+  await attempt("…set up: legacy text, then the stamp", "setup", async () => {
+    await setDoc(pref, { ...base, otherMaterials: "Author bio" });
+    await updateDoc(pref, { firstSentAt: new Date().toISOString() });
+  });
+  await attempt("SENT package gains extraIds once (migration)", "v26 P6", () => updateDoc(pref, { extraIds: ["probe-ext-1"] }));
+  await attempt("SENT package changes extraIds w/o an edition…", "v26 P6 (expect DENIED)", () => updateDoc(pref, { extraIds: ["probe-ext-1", "probe-ext-2"], otherMaterials: "Author bio, CV" }));
+  /* v40: editions are switched off — a sent package's extras never change, with or without an edition */
+  await attempt("SENT package: extras WITH an edition…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { extraIds: ["probe-ext-1", "probe-ext-2"], otherMaterials: "Author bio, CV", edition: 2, editions: [{ n: 1 }, { n: 2 }] }));
+  await attempt("SENT package: icon still writable", "v26 P2", () => updateDoc(pref, { icon: "star" }));
+  try { await deleteDoc(pref); console.log("  · probe package removed"); } catch (e) { console.log(`  ⚠️  could not remove probe-pk26: ${e.message}`); }
+
+  const mref = doc(db, "users", uid, "manuscripts", "seed-ms-1");
+  const had = (await getDoc(mref)).data()?.extras;
+  await attempt("manuscript extras", "v26 P6", () => updateDoc(mref, { extras: [{ id: "probe-ext-1", name: "Probe extra" }] }),
+    () => updateDoc(mref, { extras: had === undefined ? deleteField() : had }));
+}
+
+/* ── Submission packages v40 (26 Oct) ──────────────────────────────────────────────────────────────
+ * A package that has gone out is LOCKED: its letter, synopsis, pages and extras never change again, with or without
+ * an edition. A change is a new package made from it, which records `copiedFromId` — set on create, never after.
+ */
+console.log("\nSubmission packages v40 — the lock and copiedFromId:");
+{
+  const pref = doc(db, "users", uid, "packages", "probe-pk40");
+  const cref = doc(db, "users", uid, "packages", "probe-pk40c");
+  const base = { id: "probe-pk40", manuscriptId: "seed-ms-1", userId: uid, packageName: "Probe v40", queryLetterVersionId: "probe-let",
+    synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: new Date().toISOString(), edition: 1, extraIds: [] };
+  await attempt("…set up: a package, then the stamp", "setup", async () => { await setDoc(pref, base); await updateDoc(pref, { firstSentAt: new Date().toISOString() }); });
+  await attempt("SENT package: the letter changes…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { queryLetterVersionId: "probe-let-2" }));
+  await attempt("SENT package: the synopsis changes…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { synopsisVersionId: "probe-syn" }));
+  await attempt("SENT package: the pages change…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { bookVersionId: "probe-ver" }));
+  await attempt("SENT package: extraIds change…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { extraIds: ["probe-ext-1"], otherMaterials: "Author bio" }));
+  await attempt("SENT package: the letter WITH an edition…", "v40 P1 (expect DENIED)", () => updateDoc(pref, { queryLetterVersionId: "probe-let-2", edition: 2, editions: [{ n: 1 }, { n: 2 }] }));
+  await attempt("SENT package: name, note and icon", "v40 P1", () => updateDoc(pref, { packageName: "Probe v40 renamed", note: "probe", icon: "star" }));
+  await attempt("SENT package: retire", "v40 P1", () => updateDoc(pref, { status: "Retired", retiredAt: new Date().toISOString() }));
+  await attempt("create with copiedFromId", "v40 P1", () => setDoc(cref, { ...base, id: "probe-pk40c", copiedFromId: "probe-pk40" }));
+  await attempt("copiedFromId changes…", "v40 P1 (expect DENIED)", () => updateDoc(cref, { copiedFromId: "probe-other" }));
+  await attempt("copiedFromId removed…", "v40 P1 (expect DENIED)", () => updateDoc(cref, { copiedFromId: deleteField() }));
+  await attempt("UNSENT copy: the letter changes", "v40 P1", () => updateDoc(cref, { queryLetterVersionId: "probe-let-2" }));
+  for (const r of [pref, cref]) { try { await deleteDoc(r); } catch (e) { console.log(`  ⚠️  could not remove ${r.id}: ${e.message}`); } }
+  console.log("  · probe packages removed");
+}
+
+/* ── Submission packages v39 (28 Oct) ──────────────────────────────────────────────────────────────
+ * A package's colour: one of eight keys, never a hex; filing, so a package that has gone out takes it too.
+ */
+console.log("\nSubmission packages v39 — the colour:");
+{
+  const pref = doc(db, "users", uid, "packages", "probe-pk39");
+  const base = { id: "probe-pk39", manuscriptId: "seed-ms-1", userId: uid, packageName: "Probe v39", queryLetterVersionId: "probe-let",
+    synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: new Date().toISOString(), extraIds: [] };
+  await attempt("create with a colour", "v39 P2", () => setDoc(pref, { ...base, colour: "plum" }));
+  await attempt("a colour outside the eight is refused…", "v39 P2 (expect DENIED)", () => updateDoc(pref, { colour: "crimson" }));
+  await attempt("a hex is refused…", "v39 P2 (expect DENIED)", () => updateDoc(pref, { colour: "#1d4b63" }));
+  await attempt("…set up: the stamp", "setup", () => updateDoc(pref, { firstSentAt: new Date().toISOString() }));
+  await attempt("SENT package: colour still writable", "v39 P2", () => updateDoc(pref, { colour: "pine" }));
+  try { await deleteDoc(pref); console.log("  · probe package removed"); } catch (e) { console.log(`  ⚠️  could not remove probe-pk39: ${e.message}`); }
+}
+
 process.exit(0);

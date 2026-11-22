@@ -1,0 +1,82 @@
+[
+ {
+  "where": "population: the §3 form's every option",
+  "ok": true,
+  "detail": "[\"partial_req\",\"full_req\",\"offer\",\"pass\",\"partial_sent\",\"full_sent\",\"nudge\",\"noresp\"]"
+ },
+ {
+  "where": "check 3 · a send needs its request: Sent the full refused",
+  "ok": false,
+  "detail": "{\"disabled\":false,\"why\":\"\"}"
+ },
+ {
+  "where": "check 6 · no nudge while it's your move",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"You nudge an agent while you’re waiting on them. After “Partial requested” it’s your move.\"}"
+ },
+ {
+  "where": "check 7 · no closed: no response while it's your move",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"You can only close for no reply while it’s with the agent. After “Partial requested” it’s your move.\"}"
+ },
+ {
+  "where": "check 8 · no pass while a request to you is open",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"After “Partial requested” the next step is yours, not a pass. Check the order.\"}"
+ },
+ {
+  "where": "check 4 · no duplicate: Asked for a partial refused",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"Partial requested is already on the timeline (1 Nov).\"}"
+ },
+ {
+  "where": "Sent the partial fits",
+  "ok": true,
+  "detail": "{\"disabled\":false,\"why\":\"\"}"
+ },
+ {
+  "where": "check 9 · the calendar greys tomorrow (in the future)",
+  "ok": true,
+  "detail": "{\"day\":\"2026-11-06\",\"off\":true,\"why\":\"In the future\"}"
+ },
+ {
+  "where": "the calendar greys days before the latest step",
+  "ok": true,
+  "detail": "[{\"day\":\"2026-10-29\",\"off\":true,\"why\":\"Before the latest step (1 Nov)\"},{\"day\":\"2026-10-30\",\"off\":true,\"why\":\"Before the latest step (1 Nov)\"},{\"day\":\"2026-10-31\",\"off\":true,\"why\":\"Before the latest step (1 Nov)\"}]"
+ },
+ {
+  "where": "population: Fix a mistake lists the long thread's steps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "check 1 · a second Query sent refused",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"There’s already a Query sent step.\"}"
+ },
+ {
+  "where": "check 2 · Full sent here would put the order out",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"That would put “Partial sent” (28 Jul) out of order.\"}"
+ },
+ {
+  "where": "check 5 · a pass here would leave steps after a close",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"After “Partial requested” the next step is yours, not a pass. Check the order.\"}"
+ },
+ {
+  "where": "check 4 · a second Partial requested is already on the timeline",
+  "ok": true,
+  "detail": "{\"disabled\":true,\"why\":\"Partial requested is already on the timeline (8 Jul).\"}"
+ },
+ {
+  "where": "removing Partial requested names Partial sent as depending on it",
+  "ok": false,
+  "detail": "Remove “Partial requested” (8 Jul)?RemoveKeep it"
+ },
+ {
+  "where": "…and offers Remove 2 steps",
+  "ok": false,
+  "detail": "Remove"
+ }
+]

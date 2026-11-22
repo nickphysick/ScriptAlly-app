@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 the tray's headline was read",
+  "ok": true,
+  "detail": "{\"overdue\":30,\"today\":0,\"head\":\"31 things to do first: 30 overdue and 2 offers to answer.\"}"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 home: the bar is drawn",
+  "ok": true,
+  "detail": "[object Object]"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 home: Home · Queries · + · To-do · Agents",
+  "ok": true,
+  "detail": "home,queries,plus,todo,agents"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 home: its own tab is chosen",
+  "ok": true,
+  "detail": "home"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 home: the chosen pill is navy, its icon white",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 home: the badge is on To-do and equals the tray's overdue + today",
+  "ok": false,
+  "detail": "todo 37 vs 30"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 home: the band is navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 home: the title is Special Elite at 400",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 400"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 home: the title is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 home: the tab band carries the book chip",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"w\":\"400\",\"colour\":\"rgb(255, 255, 255)\",\"text\":\"Evening, harness\",\"chip\":true,\"variant\":\"tab\"}"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 home: the title is the greeting",
+  "ok": true,
+  "detail": "Evening, harness"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 home: navy grounds judged",
+  "ok": true,
+  "detail": "{\"navy\":10,\"blush\":1}"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 home: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 home: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 queries: the bar is drawn",
+  "ok": true,
+  "detail": "[object Object]"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 queries: Home · Queries · + · To-do · Agents",
+  "ok": true,
+  "detail": "home,queries,plus,todo,agents"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 queries: its own tab is chosen",
+  "ok": true,
+  "detail": "queries"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 queries: the chosen pill is navy, its icon white",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 queries: the badge is on To-do and equals the tray's overdue + today",
+  "ok": false,
+  "detail": "todo 37 vs 30"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 queries: the band is navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 queries: the title is Special Elite at 400",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 400"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 queries: the title is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 queries: the tab band carries the book chip",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"w\":\"400\",\"colour\":\"rgb(255, 255, 255)\",\"text\":\"Queries\",\"chip\":true,\"variant\":\"tab\"}"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 queries: navy grounds judged",
+  "ok": true,
+  "detail": "{\"navy\":8,\"blush\":1}"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 queries: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 queries: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 todo: the bar is drawn",
+  "ok": true,
+  "detail": "[object Object]"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 todo: Home · Queries · + · To-do · Agents",
+  "ok": true,
+  "detail": "home,queries,plus,todo,agents"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 todo: its own tab is chosen",
+  "ok": true,
+  "detail": "todo"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 todo: the chosen pill is navy, its icon white",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 todo: the badge is on To-do and equals the tray's overdue + today",
+  "ok": false,
+  "detail": "todo 37 vs 30"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 todo: the band is navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 todo: the title is Special Elite at 400",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 400"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 todo: the title is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 todo: the tab band carries the book chip",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"w\":\"400\",\"colour\":\"rgb(255, 255, 255)\",\"text\":\"To-do\",\"chip\":true,\"variant\":\"tab\"}"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 todo: navy grounds judged",
+  "ok": true,
+  "detail": "{\"navy\":2,\"blush\":1}"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 todo: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 todo: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 agents: the bar is drawn",
+  "ok": true,
+  "detail": "[object Object]"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 agents: Home · Queries · + · To-do · Agents",
+  "ok": true,
+  "detail": "home,queries,plus,todo,agents"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 agents: its own tab is chosen",
+  "ok": true,
+  "detail": "agents"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 agents: the chosen pill is navy, its icon white",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) / rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S1",
+  "where": "390x844 agents: the badge is on To-do and equals the tray's overdue + today",
+  "ok": false,
+  "detail": "todo 37 vs 30"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 agents: the band is navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 agents: the title is Special Elite at 400",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 400"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 agents: the title is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "S3",
+  "where": "390x844 agents: the tab band carries the book chip",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"fam\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"w\":\"400\",\"colour\":\"rgb(255, 255, 255)\",\"text\":\"Agents\",\"chip\":true,\"variant\":\"tab\"}"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 agents: navy grounds judged",
+  "ok": true,
+  "detail": "{\"navy\":2,\"blush\":1}"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 agents: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 agents: no image twice",
+  "ok": true,
+  "detail": "[]"
+ }
+]

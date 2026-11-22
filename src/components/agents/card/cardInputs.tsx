@@ -129,7 +129,11 @@ export const GenreField: React.FC<{
   /** a typed genre matching nothing — the caller registers it (addPersonalGenre) */
   onNew: (typed: string) => Promise<{ ok: true; label: string } | { ok: false; reason: string }>;
   inputRef?: React.Ref<HTMLInputElement>;
-}> = ({ genres, onGenres, options, isHit, onNew, inputRef }) => {
+  /** Contact list v26.2 C — "chips": the same field as a wrap of toggle chips over the editor's own lists (the book's,
+   *  your list's, your own genres, and what is already picked), with "Add your own genre" opening the finder below for
+   *  everything else. Absent, the finder with its removable chips, as before. */
+  presentation?: "finder" | "chips";
+}> = ({ genres, onGenres, options, isHit, onNew, inputRef, presentation = "finder" }) => {
   const [q, setQ] = useState("");
   const [refused, setRefused] = useState<string | null>(null);
   const taken = (g: string) => genres.some((x) => x.toLowerCase() === g.toLowerCase());
@@ -162,6 +166,43 @@ export const GenreField: React.FC<{
   };
   const sugg = [...(options.ms ? [options.ms] : []), ...options.pool]
     .filter((g, i, a) => a.findIndex((x) => x.toLowerCase() === g.toLowerCase()) === i && !taken(g)).slice(0, 6);
+
+  const [finding, setFinding] = useState(false);
+  if (presentation === "chips") {
+    /* the toggles: what is picked, then the book's, your list's and your own genres, each once, in that order */
+    const seen = new Set<string>();
+    const pool = [...genres, ...(options.ms ? [options.ms] : []), ...options.pool, ...options.personal]
+      .filter((g) => { const k = g.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+    const toggle = (g: string) => onGenres(taken(g) ? genres.filter((x) => x.toLowerCase() !== g.toLowerCase()) : [...genres, g]);
+    return (
+      <div className="ae-fl ae-gchips" data-ae="genres" data-presentation="chips">
+        <div className="ae-gtog" role="group" aria-label="Genres">
+          {pool.map((g) => (
+            <button key={g} type="button" className={`ae-gt${taken(g) ? " on" : ""}${isHit(g) ? " hit" : ""}`} aria-pressed={taken(g)} data-ae="genre-chip" data-g={g} data-hit={isHit(g) ? "" : undefined}
+              onClick={() => toggle(g)}>{taken(g) ? "✓ " : null}{g}</button>
+          ))}
+        </div>
+        <p className="ae-gnote" data-ae="genre-note">Pick from the list. Can’t see one?{" "}
+          <button type="button" data-ae="genre-own" aria-expanded={finding} onClick={() => setFinding((v) => !v)}>Add your own genre</button></p>
+        {finding ? (
+          <div className="ae-gp ae-gfind" data-ae="genre-finder">
+            <Combo
+              inline className="ae-gpin" ae="genre-input" inputRef={inputRef} value={q}
+              onType={(v) => { setQ(v); setRefused(null); }} placeholder="Find a genre, or add your own"
+              items={items}
+              onPick={async (x) => {
+                if (!x.isNew) { add(x.value); return; }
+                const r = await onNew(x.value);
+                if ("reason" in r) setRefused(r.reason);
+                else add(r.label);
+              }}
+            />
+          </div>
+        ) : null}
+        {refused && <span className="ae-vl bad" data-ae="genre-refused">{refused}</span>}
+      </div>
+    );
+  }
 
   return (
     <div className="ae-fl" data-ae="genres">

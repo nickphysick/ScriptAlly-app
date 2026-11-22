@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C5",
+  "where": "close: the panel opens, 440px at the right, focus inside it",
+  "ok": true,
+  "detail": "{\"open\":true,\"w\":440,\"right\":16,\"focus\":\"close\"}"
+ },
+ {
+  "lock": "C5",
+  "where": "the panel's sections and rows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "no weekly-question rows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "the five tiers with their minimums",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C5",
+  "where": "close: the panel closes and focus returns to How it works",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"how\"}"
+ },
+ {
+  "lock": "C5",
+  "where": "esc: the panel opens, 440px at the right, focus inside it",
+  "ok": true,
+  "detail": "{\"open\":true,\"w\":440,\"right\":16,\"focus\":\"close\"}"
+ },
+ {
+  "lock": "C5",
+  "where": "esc: the panel closes and focus returns to How it works",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"how\"}"
+ },
+ {
+  "lock": "C5",
+  "where": "dim: the panel opens, 440px at the right, focus inside it",
+  "ok": true,
+  "detail": "{\"open\":true,\"w\":440,\"right\":16,\"focus\":\"close\"}"
+ },
+ {
+  "lock": "C5",
+  "where": "dim: the panel closes and focus returns to How it works",
+  "ok": true,
+  "detail": "{\"open\":false,\"focus\":\"how\"}"
+ }
+]

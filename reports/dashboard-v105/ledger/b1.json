@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "B1",
+  "where": "1440x900 egg population",
+  "ok": true,
+  "detail": "{\"name\":\"harness\",\"no\":\"FOUNDING WRITER · No. 023\",\"info\":\"How it works\",\"infoInStrip\":true,\"howInBody\":false,\"noFont\":\"\\\"JetBrains Mono\\\", ui-monospace, monospace\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 egg the name is the writer's display name",
+  "ok": true,
+  "detail": "harness"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 egg the number line",
+  "ok": true,
+  "detail": "FOUNDING WRITER · No. 023"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 egg the ⓘ is in the strip and opens How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 egg no How it works link in the body",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 egg the number line is mono",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", ui-monospace, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 nonumber population",
+  "ok": true,
+  "detail": "{\"name\":\"harness\",\"no\":\"FOUNDING WRITER\",\"info\":\"How it works\",\"infoInStrip\":true,\"howInBody\":false,\"noFont\":\"\\\"JetBrains Mono\\\", ui-monospace, monospace\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 nonumber the name is the writer's display name",
+  "ok": true,
+  "detail": "harness"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 nonumber the number line",
+  "ok": true,
+  "detail": "FOUNDING WRITER"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 nonumber the ⓘ is in the strip and opens How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 nonumber no How it works link in the body",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "1440x900 nonumber the number line is mono",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", ui-monospace, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 egg population",
+  "ok": true,
+  "detail": "{\"name\":\"harness\",\"no\":\"FOUNDING WRITER · No. 023\",\"info\":\"How it works\",\"infoInStrip\":true,\"howInBody\":false,\"noFont\":\"\\\"JetBrains Mono\\\", ui-monospace, monospace\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 egg the name is the writer's display name",
+  "ok": true,
+  "detail": "harness"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 egg the number line",
+  "ok": true,
+  "detail": "FOUNDING WRITER · No. 023"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 egg the ⓘ is in the strip and opens How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 egg no How it works link in the body",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 egg the number line is mono",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", ui-monospace, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 nonumber population",
+  "ok": true,
+  "detail": "{\"name\":\"harness\",\"no\":\"FOUNDING WRITER\",\"info\":\"How it works\",\"infoInStrip\":true,\"howInBody\":false,\"noFont\":\"\\\"JetBrains Mono\\\", ui-monospace, monospace\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 nonumber the name is the writer's display name",
+  "ok": true,
+  "detail": "harness"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 nonumber the number line",
+  "ok": true,
+  "detail": "FOUNDING WRITER"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 nonumber the ⓘ is in the strip and opens How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 nonumber no How it works link in the body",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "1100x800 nonumber the number line is mono",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", ui-monospace, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 egg population",
+  "ok": true,
+  "detail": "{\"name\":\"harness\",\"no\":\"FOUNDING WRITER · No. 023\",\"info\":\"How it works\",\"infoInStrip\":true,\"howInBody\":false,\"noFont\":\"\\\"JetBrains Mono\\\", ui-monospace, monospace\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 egg the name is the writer's display name",
+  "ok": true,
+  "detail": "harness"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 egg the number line",
+  "ok": true,
+  "detail": "FOUNDING WRITER · No. 023"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 egg the ⓘ is in the strip and opens How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 egg no How it works link in the body",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 egg the number line is mono",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", ui-monospace, monospace"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 nonumber population",
+  "ok": true,
+  "detail": "{\"name\":\"harness\",\"no\":\"FOUNDING WRITER\",\"info\":\"How it works\",\"infoInStrip\":true,\"howInBody\":false,\"noFont\":\"\\\"JetBrains Mono\\\", ui-monospace, monospace\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 nonumber the name is the writer's display name",
+  "ok": true,
+  "detail": "harness"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 nonumber the number line",
+  "ok": true,
+  "detail": "FOUNDING WRITER"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 nonumber the ⓘ is in the strip and opens How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 nonumber no How it works link in the body",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "B1",
+  "where": "1920x1080 nonumber the number line is mono",
+  "ok": true,
+  "detail": "\"JetBrains Mono\", ui-monospace, monospace"
+ }
+]

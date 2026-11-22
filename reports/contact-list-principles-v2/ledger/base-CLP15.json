@@ -1,0 +1,55 @@
+[
+ {
+  "where": "the harness has an agent rated 4",
+  "ok": true,
+  "detail": "[null,null,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,4,4,4,4,4,1,5,1,2,2,3,4,5,1,2,3,4,3,3,4,4,4,4,4,4,4,4,4]"
+ },
+ {
+  "where": "five glyphs",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "four filled navy, then one empty #d3c9bb",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "12.5px, letter-spacing 0.5px",
+  "ok": false,
+  "detail": "undefined undefined"
+ },
+ {
+  "where": "title and aria-label “Agent fit: Great fit”",
+  "ok": false,
+  "detail": "undefined / undefined"
+ },
+ {
+  "where": "not buttons",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "10px after the name (±1)",
+  "ok": false,
+  "detail": "NaN"
+ },
+ {
+  "where": "on the name's line, sitting on its middle (±3)",
+  "ok": false,
+  "detail": "name mid 493.1, stars mid NaN"
+ },
+ {
+  "where": "after a 2 on the card the row draws two filled",
+  "ok": false
+ },
+ {
+  "where": "restored: rated 4 again (emulator)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "…and the row draws four again",
+  "ok": false
+ }
+]

@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "P",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "state pre, marks 0"
+ },
+ {
+  "lock": "H1",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "no Log a query in the band"
+ },
+ {
+  "lock": "H2",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "[{\"t\":\"Record a response\",\"bg\":\"rgba(0, 0, 0, 0)\"},{\"t\":\"Add an agent\",\"bg\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "H3",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "H4",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H5",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "band 121px, 44px over its text"
+ },
+ {
+  "lock": "L1",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "three columns, left to right"
+ },
+ {
+  "lock": "L2",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "founding folded=1"
+ },
+ {
+  "lock": "L3",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "no Closed queries card"
+ },
+ {
+  "lock": "L4",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "gs-slot > agents-hoop"
+ },
+ {
+  "lock": "L5",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "setup > expected"
+ },
+ {
+  "lock": "L6",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "[\"Add comparable titles →\"]"
+ },
+ {
+  "lock": "C2",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "chart head , the band's navy rgb(42, 58, 82)"
+ },
+ {
+  "lock": "C3",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "agents head rgb(255, 255, 255)"
+ },
+ {
+  "lock": "N1",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "horizontal overflow 0px"
+ },
+ {
+  "lock": "N2",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "N3",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K1",
+  "where": "day-one 1280x720",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"x\":1142,\"y\":495,\"width\":134,\"height\":225,\"top\":495,\"right\":1276,\"bottom\":720,\"left\":1142}"
+ }
+]

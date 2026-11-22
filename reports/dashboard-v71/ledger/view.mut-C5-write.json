@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "C5",
+  "where": "population: a nudge, a close and a send",
+  "ok": true,
+  "detail": "nudge,close,send"
+ },
+ {
+  "lock": "C5",
+  "where": "nudge the query is known",
+  "ok": true,
+  "detail": "seed-pkgq-2"
+ },
+ {
+  "lock": "C5",
+  "where": "nudge lands on that query in the query panel",
+  "ok": true,
+  "detail": "{\"panel\":[\"seed-pkgq-2\"],\"drawer\":0}"
+ },
+ {
+  "lock": "C5",
+  "where": "nudge nothing written",
+  "ok": false,
+  "detail": "the query changed"
+ },
+ {
+  "lock": "C5",
+  "where": "close the query is known",
+  "ok": true,
+  "detail": "cor-move-b"
+ },
+ {
+  "lock": "C5",
+  "where": "close lands on that query in the query panel",
+  "ok": false,
+  "detail": "{\"panel\":[\"seed-query-8\"],\"drawer\":0}"
+ },
+ {
+  "lock": "C5",
+  "where": "close nothing written",
+  "ok": true,
+  "detail": "query, log and feed unchanged"
+ },
+ {
+  "lock": "C5",
+  "where": "send the query is known",
+  "ok": true,
+  "detail": "rj-dupe"
+ },
+ {
+  "lock": "C5",
+  "where": "send lands on that query in the query panel",
+  "ok": true,
+  "detail": "{\"panel\":[\"rj-dupe\"],\"drawer\":0}"
+ },
+ {
+  "lock": "C5",
+  "where": "send nothing written",
+  "ok": false,
+  "detail": "the query changed"
+ }
+]

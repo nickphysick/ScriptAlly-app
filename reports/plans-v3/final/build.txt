@@ -1,0 +1,23 @@
+vite v6.4.6 building for production...
+
+(!) outDir /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+transforming...
+✓ 417 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/index.html                        6.23 kB │ gzip:   2.21 kB
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/assets/PublicRoot-cKGhJAZH.css  142.69 kB │ gzip:  27.80 kB
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/assets/index.esm-D4Vco0kA.js     13.59 kB │ gzip:   3.92 kB
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/assets/index.esm-Dm72l2wA.js     26.68 kB │ gzip:   6.23 kB
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/assets/index.esm-D707vLK2.js     45.07 kB │ gzip:  10.18 kB
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/assets/PublicRoot-33RZ6HyK.js   238.83 kB │ gzip:  80.70 kB
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/assets/index-CLY5h2eR.js        330.50 kB │ gzip: 107.13 kB
+../../../private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-JkFB77/11fa20e2-21cd-4962-98ae-a6ba58fd1fed/scratchpad/final-dist/assets/firebase-oZyFbtUI.js     693.48 kB │ gzip: 177.63 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.58s

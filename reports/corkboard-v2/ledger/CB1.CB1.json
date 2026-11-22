@@ -1,0 +1,128 @@
+[
+ {
+  "lock": "CB1",
+  "where": "1512x982 butter",
+  "ok": true,
+  "detail": "cb2seed-n1 paints rgb(250, 240, 207) (want rgb(250, 240, 207))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 blush",
+  "ok": true,
+  "detail": "cb2seed-n3 paints rgb(245, 226, 216) (want rgb(245, 226, 216))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 powder",
+  "ok": true,
+  "detail": "cb2seed-n2 paints rgb(226, 231, 239) (want rgb(226, 231, 239))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 sand",
+  "ok": true,
+  "detail": "cb2seed-n5 paints rgb(240, 229, 212) (want rgb(240, 229, 212))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 stone",
+  "ok": true,
+  "detail": "cb2seed-n12 paints rgb(236, 232, 227) (want rgb(236, 232, 227))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 legacy old1",
+  "ok": true,
+  "detail": "old1 paints rgb(250, 240, 207) (want butter)"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 legacy old2",
+  "ok": true,
+  "detail": "old2 paints rgb(245, 226, 216) (want blush)"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 legacy old3",
+  "ok": true,
+  "detail": "old3 paints rgb(226, 231, 239) (want powder)"
+ },
+ {
+  "lock": "CB1",
+  "where": "1512x982 no write on load",
+  "ok": false,
+  "detail": "6 task write(s) on load: [{\"doc\":\"users/LS4ymFFCEvhN82advZQJ5zkr7sv2/tasks/cb2seed-old1\",\"paths\":[\"colour\",\"updatedAt\"]},{\"doc\":\"users/LS4ymFFCEvhN82advZQJ5zkr7sv2/tasks/cb2seed-old2\",\"paths\":[\"colour\",\"updatedAt\"]},{\"doc\":\"users/LS4ymFFCEvhN82advZQJ5zkr7sv2/tasks/cb2seed-old3\",\"paths\":[\"colour\",\"updatedAt\"]}]"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 butter",
+  "ok": true,
+  "detail": "cb2seed-n1 paints rgb(250, 240, 207) (want rgb(250, 240, 207))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 blush",
+  "ok": true,
+  "detail": "cb2seed-n3 paints rgb(245, 226, 216) (want rgb(245, 226, 216))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 powder",
+  "ok": true,
+  "detail": "cb2seed-n2 paints rgb(226, 231, 239) (want rgb(226, 231, 239))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 sand",
+  "ok": true,
+  "detail": "cb2seed-n5 paints rgb(240, 229, 212) (want rgb(240, 229, 212))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 stone",
+  "ok": true,
+  "detail": "cb2seed-n12 paints rgb(236, 232, 227) (want rgb(236, 232, 227))"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 legacy old1",
+  "ok": true,
+  "detail": "old1 paints rgb(250, 240, 207) (want butter)"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 legacy old2",
+  "ok": true,
+  "detail": "old2 paints rgb(245, 226, 216) (want blush)"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 legacy old3",
+  "ok": true,
+  "detail": "old3 paints rgb(226, 231, 239) (want powder)"
+ },
+ {
+  "lock": "CB1",
+  "where": "1280x800 no write on load",
+  "ok": true,
+  "detail": "0 task write(s) on load: []"
+ },
+ {
+  "lock": "CB1",
+  "where": "stored old1",
+  "ok": false,
+  "detail": "the document still says butter"
+ },
+ {
+  "lock": "CB1",
+  "where": "stored old2",
+  "ok": false,
+  "detail": "the document still says blush"
+ },
+ {
+  "lock": "CB1",
+  "where": "stored old3",
+  "ok": false,
+  "detail": "the document still says powder"
+ }
+]

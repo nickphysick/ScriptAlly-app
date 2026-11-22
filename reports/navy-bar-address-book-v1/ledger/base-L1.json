@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "L1",
+  "where": "1280 list · population: the bar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"count\":null,\"toggle\":null,\"filters\":1191,\"group\":1057,\"sort\":null,\"countText\":\"\",\"jump\":true,\"titleRow\":true}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list · count, toggle, then Filters, Group by, Sort in order",
+  "ok": false,
+  "detail": "[null,null,1191,1057,null]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list · the count reads \"N QUERIES\"",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list · no jump row",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 list · no title row above the list card",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 cards · population: the bar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"count\":null,\"toggle\":null,\"filters\":1191,\"group\":1057,\"sort\":909,\"countText\":\"\",\"jump\":true,\"titleRow\":true}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 cards · count, toggle, then Filters, Group by, Sort in order",
+  "ok": false,
+  "detail": "[null,null,1191,1057,909]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 cards · the count reads \"N QUERIES\"",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "1280 cards · no jump row",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 cards · no title row above the list card",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list · population: the bar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"count\":null,\"toggle\":null,\"filters\":1367,\"group\":1146,\"sort\":null,\"countText\":\"\",\"jump\":true,\"titleRow\":true}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list · count, toggle, then Filters, Group by, Sort in order",
+  "ok": false,
+  "detail": "[null,null,1367,1146,null]"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list · the count reads \"N QUERIES\"",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list · no jump row",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 list · no title row above the list card",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 cards · population: the bar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"count\":null,\"toggle\":null,\"filters\":1367,\"group\":1146,\"sort\":921,\"countText\":\"\",\"jump\":true,\"titleRow\":true}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 cards · count, toggle, then Filters, Group by, Sort in order",
+  "ok": false,
+  "detail": "[null,null,1367,1146,921]"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 cards · the count reads \"N QUERIES\"",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "1512 cards · no jump row",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 cards · no title row above the list card",
+  "ok": false,
+  "detail": "true"
+ }
+]

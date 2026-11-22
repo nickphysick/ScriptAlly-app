@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the strip in Tracking",
+  "ok": false,
+  "detail": "no strip"
+ },
+ {
+  "where": "its bottom is within 16px of the pane's",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "the court's tint (With you #f5e6df)",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "the old 'where it stands' block is gone",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "the button is the next move's",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "the strip's button opens what the tray's does",
+  "ok": false,
+  "detail": "strip \"\" · tray \"← Back to Sophie’s query SENT WHAT THEY ASKED FOR What went to Sophie? × SD Soph\""
+ },
+ {
+  "where": "a closed query's strip says how it ended, with no button",
+  "ok": false,
+  "detail": "{\"strip\":false,\"btn\":false,\"bold\":\"\"}"
+ }
+]

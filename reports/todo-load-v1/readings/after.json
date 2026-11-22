@@ -1,0 +1,168 @@
+{
+ "cold": {
+  "frames": 32,
+  "log": [
+   {
+    "t": 2141,
+    "what": "rows=0"
+   },
+   {
+    "t": 2307,
+    "what": "outline rows=0"
+   },
+   {
+    "t": 4944,
+    "what": "rows=53"
+   }
+  ],
+  "emptyWhileNoRows": []
+ },
+ "warm": {
+  "frames": 19,
+  "log": [
+   {
+    "t": 250,
+    "what": "rows=0"
+   },
+   {
+    "t": 428,
+    "what": "outline rows=0"
+   },
+   {
+    "t": 1043,
+    "what": "rows=53"
+   }
+  ],
+  "emptyWhileNoRows": []
+ },
+ "switch-fast": {
+  "frames": 32,
+  "log": [
+   {
+    "t": 276,
+    "what": "rows=0"
+   },
+   {
+    "t": 1148,
+    "what": "rows=53"
+   }
+  ],
+  "cls": [],
+  "geo": {
+   "loaded": {
+    "headerH": 265.13,
+    "wsTop": 401.13,
+    "trayW": 394.39,
+    "deskBarH": 58,
+    "phase": "loaded"
+   }
+  }
+ },
+ "switch-normal": {
+  "frames": 17,
+  "log": [
+   {
+    "t": 308,
+    "what": "rows=0"
+   },
+   {
+    "t": 1201,
+    "what": "outline rows=0"
+   },
+   {
+    "t": 2015,
+    "what": "rows=53"
+   }
+  ],
+  "cls": [],
+  "geo": {
+   "loaded": {
+    "headerH": 265.13,
+    "wsTop": 401.13,
+    "trayW": 394.39,
+    "deskBarH": 58,
+    "phase": "loaded"
+   }
+  }
+ },
+ "switch-slow": {
+  "frames": 43,
+  "log": [
+   {
+    "t": 273,
+    "what": "rows=0"
+   },
+   {
+    "t": 1211,
+    "what": "outline rows=0"
+   },
+   {
+    "t": 4075,
+    "what": "outline still rows=0"
+   },
+   {
+    "t": 5651,
+    "what": "rows=53"
+   }
+  ],
+  "cls": [],
+  "geo": {
+   "loaded": {
+    "headerH": 265.13,
+    "wsTop": 401.13,
+    "trayW": 394.39,
+    "deskBarH": 58,
+    "phase": "loaded"
+   }
+  }
+ },
+ "switch-fail": {
+  "frames": 48,
+  "log": [
+   {
+    "t": 235,
+    "what": "rows=0"
+   },
+   {
+    "t": 1080,
+    "what": "outline rows=0"
+   },
+   {
+    "t": 3939,
+    "what": "outline still rows=0"
+   },
+   {
+    "t": 5937,
+    "what": "failed rows=0"
+   }
+  ],
+  "cls": [],
+  "geo": {
+   "loaded": {
+    "headerH": 265.13,
+    "wsTop": 401.13,
+    "trayW": 394.39,
+    "deskBarH": 58,
+    "phase": "failed"
+   }
+  }
+ },
+ "b62": {
+  "loading": {
+   "headerH": 265.13,
+   "wsTop": 401.13,
+   "trayW": 394.39,
+   "deskBarH": 58,
+   "phase": "outline"
+  },
+  "loaded": {
+   "headerH": 265.13,
+   "wsTop": 401.13,
+   "trayW": 394.39,
+   "deskBarH": 58,
+   "phase": "loaded"
+  },
+  "clsAll": [],
+  "clsAfterOutline": []
+ }
+}

@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L4",
+  "where": "the shelf has tiles",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4",
+  "where": "the selector has buttons",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4",
+  "where": "the shelf is exactly Out + Retired",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4",
+  "where": "the selector is exactly Draft + Ready",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4",
+  "where": "active first, retired last",
+  "ok": false,
+  "detail": "[]"
+ }
+]

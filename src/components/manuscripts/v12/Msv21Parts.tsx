@@ -17,7 +17,6 @@
  * THE TWO DRAWINGS ARE SWAPPABLE BY FILE: the sheet sets each width, and nothing here depends on a
  * drawing's own size.
  */
-import { PanelHeader } from "../../shell/PanelHeader";
 import React, { useEffect, useId, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import "../../shell/headerPanel.css";
@@ -27,7 +26,6 @@ import type { QueryLine } from "../../../lib/compsPage";
 import { savedOn } from "../../../lib/manuscriptShelf";
 import { deckPose, shortDay } from "../../../lib/manuscriptV21";
 import type { BookFact, Door, V21ActivityRow, VersionCard } from "../../../lib/manuscriptV21";
-import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import versionsArt from "../../../assets/manuscripts/comps-tray-archivist.png";
 
 const Glyph: React.FC<{ status: QueryStatus; size?: number }> = ({ status, size = 14 }) => (
@@ -40,41 +38,8 @@ const Say: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => (
   </>
 );
 
-/* ══ the open header ══════════════════════════════════════════════════════════════════════════ */
-
-export const MS_HEADER_SUB = "Your book, every version of it, and what goes out with it.";
-
-export const MsOpenHeader: React.FC<{
-  title: string;
-  sub: string;
-  /** the "More manuscripts: coming soon" chip, after the subheader */
-  soon?: boolean;
-  children: React.ReactNode;
-  /** Header v3: the populated page's header is the shared panel header, as a TITLE page (the book's title has no
-      count in it). The empty and deleted states do not pass this and keep the header they had. */
-  v3?: boolean;
-}> = ({ title, sub, soon, children, v3 }) => v3 ? (
-  <PanelHeader
-    kind="title" className="ms21-hd3" attrs={{ "data-ms21": "header", "data-own-header": "" }}
-    title={title}
-    sub={<span data-ms21="sub">{sub}{soon ? <span className="ms21-soon" data-ms21="soon">More manuscripts: coming soon</span> : null}</span>}
-    acts={children}
-    art={<img data-ms21="header-art" src={heroArt} alt="" />} disc
-  />
-) : (
-  <header className="ms21-hd hpanel hpanel--hero" data-ms21="header" data-own-header="" data-hpanel="">
-    <div className="ms21-txt" data-ms21="header-text">
-      <h1 className="ms21-title" data-probe="title" data-page-title="">{title}</h1>
-      <p className="ms21-sub" data-ms21="sub">
-        {sub}
-        {soon ? <span className="ms21-soon" data-ms21="soon">More manuscripts: coming soon</span> : null}
-      </p>
-      <div className="ms21-acts">{children}</div>
-    </div>
-    {/* the drawing was made for a light ground, so it stands on the panel's white disc; swappable by file */}
-    <div className="ms21-art hpanel-disc" data-ms21="header-art" aria-hidden="true"><img src={heroArt} alt="" /></div>
-  </header>
-);
+/* ══ the open header ══ Workspace headers v1 (14 Nov): `MsOpenHeader` is gone — the page's header, with or without a
+   book, is `MsHeader` (v27/Msv27Parts), the shared navy header. ═══════════════════════════════════════════════════ */
 
 /* ══ the book card ════════════════════════════════════════════════════════════════════════════ */
 

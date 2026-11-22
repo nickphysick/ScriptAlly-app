@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: an agent to match",
+  "ok": true,
+  "detail": "Imogen Vale"
+ },
+ {
+  "where": "the notice shows",
+  "ok": true,
+  "detail": "dup"
+ },
+ {
+  "where": "it names them",
+  "ok": true,
+  "detail": "Already on your list: Imogen Vale · Vale & Winter Literary Open their card instead"
+ },
+ {
+  "where": "it offers their card",
+  "ok": true,
+  "detail": "open-dup"
+ },
+ {
+  "where": "Add waits",
+  "ok": true,
+  "detail": "true"
+ }
+]

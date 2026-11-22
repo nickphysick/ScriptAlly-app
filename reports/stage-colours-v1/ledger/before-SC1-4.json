@@ -1,0 +1,27 @@
+[
+ {
+  "name": "a quiet Queried card exists",
+  "ok": true,
+  "got": "thin-q-close"
+ },
+ {
+  "name": "quiet strip: a gradient from the band ending in white",
+  "ok": false,
+  "got": "linear-gradient(90deg, rgb(227, 219, 207) 0%, rgb(236, 230, 221) 18%, rgb(255, 255, 255) 42%)"
+ },
+ {
+  "name": "a waiting Queried card exists",
+  "ok": true,
+  "got": "seed-query-2"
+ },
+ {
+  "name": "waiting strip is flat",
+  "ok": false,
+  "got": "{\"img\":\"none\",\"bg\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "name": "no Offer card is quiet",
+  "ok": true,
+  "got": "0"
+ }
+]

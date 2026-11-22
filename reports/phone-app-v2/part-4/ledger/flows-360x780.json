@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "F1",
+  "where": "360x780 log opens on its first step",
+  "ok": true,
+  "detail": "{\"open\":true,\"steps\":[\"Agent and book\"],\"at\":\"Agent and book\",\"question\":\"Who did you query?\"}"
+ },
+ {
+  "lock": "pop",
+  "where": "360x780 log has its five steps once an agent is chosen",
+  "ok": true,
+  "detail": "Agent and book | Sending | What you sent | Response expectations | If they don't reply"
+ },
+ {
+  "lock": "F1",
+  "where": "360x780 log: the questions walked are the journey's own steps, in order, then the check",
+  "ok": true,
+  "detail": "[\"Agent and book\",\"Sending\",\"What you sent\",\"Response expectations\",\"If they don't reply\",\"CHECK\"]"
+ },
+ {
+  "lock": "F2",
+  "where": "360x780 the live card fills a slot for each answer after the first",
+  "ok": true,
+  "detail": "[1,2,3,4]"
+ },
+ {
+  "lock": "F2",
+  "where": "360x780 a filled slot returns to its question",
+  "ok": true,
+  "detail": "Sending"
+ },
+ {
+  "lock": "F3",
+  "where": "360x780 the check card lists every answer",
+  "ok": true,
+  "detail": "[\"Agent and book\",\"Sending\",\"What you sent\",\"Response expectations\",\"If they don't reply\"]"
+ },
+ {
+  "lock": "F3",
+  "where": "360x780 a check row returns to its question, the answer kept",
+  "ok": true,
+  "detail": "Sending on=2"
+ },
+ {
+  "lock": "F3",
+  "where": "360x780 back at the check, the answer is unchanged",
+  "ok": true,
+  "detail": "Thu 29 Oct · Email → Thu 29 Oct · Email"
+ },
+ {
+  "lock": "F8",
+  "where": "360x780 the flow: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 1"
+ },
+ {
+  "lock": "F8",
+  "where": "360x780 the flow: no image twice",
+  "ok": true,
+  "detail": "[\"/images/responses/responses-wall-hawk.webp\"]"
+ },
+ {
+  "lock": "F5",
+  "where": "360x780 partial: the celebration shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F6",
+  "where": "360x780 partial: the stamp reads \"Partial requested\"",
+  "ok": true,
+  "detail": "Partial requested"
+ },
+ {
+  "lock": "F6",
+  "where": "360x780 partial: the heading, the stamp and the agent are Special Elite",
+  "ok": true,
+  "detail": "[\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"]"
+ },
+ {
+  "lock": "F5",
+  "where": "360x780 partial: Undo is on top of the celebration",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F8",
+  "where": "360x780 partial: the celebration's colours (burgundy only on the stamp)",
+  "ok": true,
+  "detail": "navy 3"
+ },
+ {
+  "lock": "F8",
+  "where": "360x780 partial: the only burgundy is the stamp",
+  "ok": true,
+  "detail": "[\"cele-stamp\"]"
+ },
+ {
+  "lock": "F4",
+  "where": "360x780 partial: after Undo the account is as it was",
+  "ok": true,
+  "detail": ""
+ }
+]

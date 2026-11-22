@@ -28,9 +28,8 @@
  *     is the spacer that pins the pink to the right).
  *  4. ⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE (tasks-viewport P1). It was already OPTIONAL —
  *     absent means no aside element at all, never an empty gutter — and now exactly ONE page
- *     passes it. Today, Calendar and Noteboard are header block → hairline → full-width content.
- *     The freed width is the point rather than a side effect: Calendar's cells grow taller before
- *     they need to fold, and Today's two columns breathe. (Task settings therefore needs a second
+ *     passes it. The other pages (the Corkboard now; Today and the Calendar page are both retired) are
+ *     header block → hairline → full-width content. The freed width is the point rather than a side effect. (Task settings therefore needs a second
  *     door — Phase 5 — because the sidebar's foot is no longer reachable from three of the four.)
  *  5. ⚠️ THE PAGE NEVER SCROLLS (tasks-viewport P1). The frame is the viewport, the header block
  *     is fixed, and scrolling belongs to the `<TplZone>`s below it. The `min-height: 0` chain
@@ -150,8 +149,8 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
       fill
       /**
        * ⚠️ THE FAMILY NAMES ITS OWN SCROLLER, because the frame never scrolls and the collapsed bar
-       * has to follow the scroll that actually happens. The three pages carry three different zones
-       * — Noteboard's `.tpl-zone`, the To-do list's `.l-body`, Calendar's `.cal-fpbody` — and the
+       * has to follow the scroll that actually happens. The pages carry different zones
+       * — the Corkboard's `.tpl-zone`, the To-do list's `.l-body` (the Calendar page's `.cal-fpbody` went with it) — and the
        * grid picks whichever of them has anything to scroll, so a page carrying more than one class
        * does not bind to the first in document order.
        *
@@ -162,7 +161,7 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
        * ⚠️ THE PROP WAS `settleOn`. Nothing settles now — see the grid — and a prop named for a
        * deleted mechanism is a comment outliving what it described, at the API.
        */
-      scroller=".tpl-zone, .l-body, .cal-fpbody"
+      scroller=".tpl-zone, .l-body"
       scrollLabel={title}
       masthead={<PageHeader variant="workspace" panel mark={mark} title={title} description={subtitle} primary={primary} illo={illo} />}
       /* ⚠️ THE EYEBROW RIDES THE TOOL ROW. Mono context — a date, a week count — and the rule is

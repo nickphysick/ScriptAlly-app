@@ -1,0 +1,17 @@
+[
+ {
+  "where": "exactly one hairline between",
+  "ok": true,
+  "detail": "{\"n\":1,\"gapAbove\":30,\"gapBelow\":22,\"border\":\"1px\",\"style\":\"solid\"}"
+ },
+ {
+  "where": "30px above, 22px below",
+  "ok": true,
+  "detail": "{\"n\":1,\"gapAbove\":30,\"gapBelow\":22,\"border\":\"1px\",\"style\":\"solid\"}"
+ },
+ {
+  "where": "no border under Showing",
+  "ok": false,
+  "detail": "{\"n\":1,\"gapAbove\":30,\"gapBelow\":22,\"border\":\"1px\",\"style\":\"solid\"}"
+ }
+]

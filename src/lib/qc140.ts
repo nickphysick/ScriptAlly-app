@@ -21,6 +21,25 @@ import type { GroupBy } from "./qcCalView";
 import { placeOf } from "./responses";
 import { WHERE_LABEL } from "./qcSummary";
 import { sentWeeks, type SentWeek } from "./qcSentWeeks";
+import { STAGE_STATUSES, type Stage } from "./stageColours";
+
+/* ── List filters v1 — the five stages as a filter ───────────────────────────────────────────────────────────────── */
+
+/** the stages in pipeline order, with their names and the StatusDot mark each is drawn with (ink, never a colour) */
+export const STAGES: readonly Stage[] = ["queried", "partial", "full", "offer", "closed"];
+export const STAGE_LABEL: Record<Stage, string> = { queried: "Queried", partial: "Partial", full: "Full", offer: "Offer", closed: "Closed" };
+export const STAGE_MARK: Record<Stage, QueryStatus> = {
+  queried: QueryStatus.QUERIED, partial: QueryStatus.PARTIAL_SENT, full: QueryStatus.FULL_SENT, offer: QueryStatus.OFFER, closed: QueryStatus.REJECTED,
+};
+/** every one of the stage's statuses is in the filter */
+export const stageFull = (f: Qc138Filters, st: Stage): boolean => STAGE_STATUSES[st].every((s) => f.stages.includes(s));
+/** a stage reads on when ANY of its statuses is in (a part-set stage, from a link or an older session, reads on too) */
+export const stageOn = (f: Qc138Filters, st: Stage): boolean => STAGE_STATUSES[st].some((s) => f.stages.includes(s));
+/** a stage label pressed: on (whole or part) → every one of its statuses out; off → every one of them in */
+export const toggleStage = (f: Qc138Filters, st: Stage): Qc138Filters => {
+  const rest = f.stages.filter((s) => !STAGE_STATUSES[st].includes(s));
+  return { ...f, stages: stageOn(f, st) ? rest : [...rest, ...STAGE_STATUSES[st]] };
+};
 
 /* ── the jump row ─────────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -98,7 +117,8 @@ export interface QuickPick { key: QuickKey; title: string; line: string; field: 
 /** ⚠️ Overdue writes `past` and Offers writes `offers`: the same fields as the switch and the toggle */
 export const QUICK_PICKS: readonly QuickPick[] = [
   { key: "you", title: "Your move", line: "Requests, offers and nudges", field: "you" },
-  { key: "over", title: "Overdue", line: "Past the date you expected", field: "past" },
+  /* List filters v1 — "Overdue" is "Past their reply date": the quick pick and its applied chip say the same words */
+  { key: "over", title: "Past their reply date", line: "Time for a nudge", field: "past" },
   { key: "wait", title: "Waiting to hear back", line: "With agents, not yet due", field: "waiting" },
   { key: "offers", title: "Offers", line: "Waiting on your answer", field: "offers" },
 ];
@@ -120,6 +140,8 @@ export interface AppliedSpec {
   label: string;
   /** a status chip carries its glyph: the first status it stands for */
   status?: QueryStatus;
+  /** List filters v1 — a whole stage's chip: drawn on that stage's band */
+  stage?: Stage;
   off: (f: Qc138Filters) => Qc138Filters;
 }
 const STAGE_WORD: Partial<Record<QueryStatus, string>> = {
@@ -133,12 +155,19 @@ const STAGE_WORD: Partial<Record<QueryStatus, string>> = {
 export function appliedChips(f: Qc138Filters, sentName: (k: string) => string): AppliedSpec[] {
   const out: AppliedSpec[] = [];
   if (f.you) out.push({ key: "qp:you", label: "Your move", off: (g) => ({ ...g, you: false }) });
-  if (f.past) out.push({ key: "qp:over", label: "Overdue", off: (g) => ({ ...g, past: false }) });
+  if (f.past) out.push({ key: "qp:over", label: QUICK_PICKS[1].title, off: (g) => ({ ...g, past: false }) });
   if (f.waiting) out.push({ key: "qp:wait", label: "Waiting to hear back", off: (g) => ({ ...g, waiting: false }) });
   if (f.offers) out.push({ key: "qp:offers", label: "Offers", off: (g) => ({ ...g, offers: false }) });
   if (f.where) out.push({ key: `where:${f.where}`, label: WHERE_LABEL[f.where].label, off: (g) => ({ ...g, where: null }) });
   const covered = new Set<QueryStatus>();
+  /* List filters v1 — a whole stage (every status in STAGE_STATUSES[stage]) is ONE chip, drawn on the stage's band */
+  for (const st of STAGES) {
+    if (!stageFull(f, st)) continue;
+    STAGE_STATUSES[st].forEach((s) => covered.add(s));
+    out.push({ key: `stage:${st}`, label: STAGE_LABEL[st], status: STAGE_MARK[st], stage: st, off: (g) => ({ ...g, stages: g.stages.filter((s) => !STAGE_STATUSES[st].includes(s)) }) });
+  }
   for (const row of STAND_ROWS) {
+    if (row.statuses.every((s) => covered.has(s))) continue;
     if (!standOn(f, row)) continue;
     row.statuses.forEach((s) => covered.add(s));
     out.push({ key: `st:${row.key}`, label: row.label, status: row.statuses[0], off: (g) => toggleStand(g, row) });

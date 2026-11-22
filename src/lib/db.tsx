@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { freeWriterAid } from "./railReviewAid";
 import { MONTHS_SHORT } from "./dates";
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { findExistingAgent } from "./importDuplicates";
+import React, { createContext, useCallback, useContext, useMemo, useState, useEffect, useRef } from "react";
 import {
   User,
   UserPlan,
@@ -14,6 +16,7 @@ import {
   ManuscriptVersion,
   ComponentType,
   SubmissionPackage,
+  type BookVersion,
   Agent,
   SubmissionStatus,
   SubmissionMethod,
@@ -24,8 +27,9 @@ import {
   ActivityType,
   JournalEntry,
   Note,
-  NoteColour,
+  StoredNoteColour,
   UserTask,
+  TaskStep,
   SurfaceOffset,
   DismissedTask,
   TaskFlag,
@@ -45,7 +49,9 @@ import {
 
 import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from "./seedCommunityAgents";
 import { narratesManuscriptWrite } from "./manuscriptFeed";
-import { packagesUnlocked } from "./entitlements";
+import { packagesUnlocked, resolveEntitlement, type Entitlement } from "./entitlements";
+import { manuscriptLimitError } from "./manuscripts";
+import { versionAtLogging } from "./versionsV2";
 
 import {
   signInWithEmailAndPassword,
@@ -123,8 +129,8 @@ import { computeResponseDeadline } from "./responseDeadline";
    usage line must agree about "does a package hold this", so both go through one function rather
    than each filtering the three slot fields for itself. */
 import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from "./packageMetrics";
-import { nextEdition, contentsChanged, summaryFrom } from "./packageEditions";
-import { isVersionSent } from "./versionLock";
+import { contentsChanged } from "./packageEditions";
+import { contentWriteAllowed, isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
@@ -144,6 +150,11 @@ import { agentPrimary } from "./agentDisplay";
 import { taskSurvivesMute } from "./todoHousekeeping";
 import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
 import { applyUserPaths, type UserPaths } from "./userPaths";
+import { noteFirstWin } from "./firstWin";
+import { activeManuscriptOf, eventPath, logEvent } from "./events";
+import { manuscriptComps } from "./comps";
+import { isFirstAgentWin, isFirstQueryWin, winCopy } from "./dashFirstVisit";
+import { identifyForErrors } from "./sentry";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -156,6 +167,21 @@ async function testConnection() {
   }
 }
 testConnection();
+
+/**
+ * DEV-ONLY REVIEW AID (overnight fixes v1, Part 2): `window.__SA_LF = { fail: ["queries"], mutate?: "emptyonerror" }`
+ * makes a collection listener take its error path instead of subscribing, so the LF locks can show a failed read on
+ * the emulator. `mutate: "emptyonerror"` is the lock's named mutation: the old behaviour, where an error drew an empty
+ * list. Read at subscribe time, so "Try again" after the fault is lifted subscribes for real. Each caller gates on
+ * `import.meta.env.MODE !== "production"` at the call site, so a production build never reaches this.
+ */
+type ForcedRead = "queries" | "agents" | "manuscripts";
+function forcedReadFault(name: ForcedRead): null | { mutate: boolean } {
+  if (typeof window === "undefined") return null;
+  const aid = (window as unknown as { __SA_LF?: { fail?: readonly string[]; mutate?: string } }).__SA_LF;
+  if (!aid?.fail?.includes(name)) return null;
+  return { mutate: aid.mutate === "emptyonerror" };
+}
 
 /**
  * Single source of truth for the MATERIALS_SENT activity description. Used by both
@@ -243,8 +269,30 @@ export interface AddQueryOpts {
 interface DbContextType {
   currentUser: User | null;
   smartImportUsage: SmartImportUsage | null;
+  /** Plan rules v1 — what this account has: founding flag, then plan, then the 14-day trial (lib/entitlements). */
+  entitlement: Entitlement;
   authReady: boolean;
   collectionsReady: boolean;
+  /** ADDITIVE (To-do load v1, Phase B1): the To-do list's own "loaded" — true once the task list has been computed with
+   *  every read it is computed from in hand (manuscripts, agents and queries — `collectionsReady` — plus the activity
+   *  feed, the writer's own tasks and the task flags). `collectionsReady` can be true a render before the tasks exist
+   *  (they are computed in an effect from those collections), and own tasks and flags were never part of it.
+   *  Optional so test contexts need not carry it: absent, a page reads `collectionsReady` as before. */
+  tasksReady?: boolean;
+  /** ADDITIVE (To-do load v1): the own-tasks or task-flags listener errored (Firestore ends a listener on its error) */
+  tasksReadFailed?: boolean;
+  /** ADDITIVE (Contact list principles v1): how the agents listener stands — "failed" once it errored (the listener is
+   *  dead: Firestore ends a listener on its error), "retrying" while `retryAgents` waits for its first loaded snapshot.
+   *  Optional so the page sandboxes and test contexts need not carry it (absent reads as "ok"). */
+  agentsRead?: "ok" | "failed" | "retrying";
+  /** re-subscribe the agents listener after it failed (the Contact list's "Try again") */
+  retryAgents?: () => void;
+  /** ADDITIVE (overnight fixes v1, Part 2): the queries and manuscripts listeners, as `agentsRead` — a failed read never
+   *  resolves to an empty list a page could take for a blank account. Absent reads as "ok". */
+  queriesRead?: "ok" | "failed" | "retrying";
+  manuscriptsRead?: "ok" | "failed" | "retrying";
+  /** re-subscribe every collection listener that failed (the error's "Try again") */
+  retryReads?: () => void;
   /** ADDITIVE (Query Centre v11): the global activity feed has delivered — or failed, or the net fired. */
   activitiesReady: boolean;
   manuscripts: Manuscript[];
@@ -313,7 +361,7 @@ interface DbContextType {
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
   /** `unknown` values so a mode switch can pass `deleteField()` to UNSET rather than write a zero. */
-  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds", unknown>>, opts?: { restoring?: boolean }) => Promise<string | null>;
+  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds" | "changes", unknown>>, opts?: { restoring?: boolean }) => Promise<string | null>;
   /**
    * Delete a material outright. Returns `false` WITHOUT writing when a package still holds it.
    *
@@ -348,7 +396,7 @@ interface DbContextType {
    * stored empty string would be a claim that the question was answered. Keeping that conversion
    * here means the two callers cannot disagree about what empty means.
    */
-  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt">>) => Promise<string | null>;
+  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt" | "icon" | "colour" | "extraIds">>) => Promise<string | null>;
   /* ⚠️ `markPackageSent` IS RETIRED — it never had a caller. It was written in anticipation of a
      stamping surface that turned out not to need it: both real paths stamp INSIDE their own atomic
      batch (`commitQueryEdits` for the drawer, `setQueryPackage` for the pane), because a stamp that
@@ -450,6 +498,16 @@ interface DbContextType {
   ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => Promise<void>;
+  /**
+   * Versions v2 — ONE batched write of a manuscript's version fields (lib/bookVersions' `VersionFields`), with any
+   * package or query `bookVersionId`s the change carries (a delete clearing packages; the picker; Undo). `null` clears
+   * a key. Atomic, so a first save, a delete and every Undo land whole or not at all. Quiet: no feed narration.
+   */
+  writeVersionChange: (
+    msId: string,
+    fields: { bookVersions?: BookVersion[] | null; inUseBookVersionId?: string | null; bookVersionSeq?: number | null } | null,
+    extra?: { packages?: { id: string; bookVersionId: string | null }[]; queries?: { id: string; bookVersionId: string | null }[] },
+  ) => Promise<boolean>;
   deleteQuery: (id: string) => Promise<void>;
   
   // Journal Actions
@@ -471,7 +529,7 @@ interface DbContextType {
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
   addUserTask: (fields: { id?: string; text?: string; detail?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string; surfaceOffset?: SurfaceOffset; tags?: string[]; createdAt?: string }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null }) => Promise<void>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done">> & { completedAt?: string | null; detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null; committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null; steps?: TaskStep[] | null; pinned?: boolean | null; queryId?: string | null; agentId?: string | null; manuscriptId?: string | null }) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
   /** ⚠️ THE UNDO'S WRITE — the captured document, VERBATIM. A restore through addUserTask loses
    *  whatever that builder does not know about (it stamped createdAt once, then committedDate and
@@ -482,7 +540,7 @@ interface DbContextType {
      through handleFirestoreError and returns void, which is right for them and wrong for this:
      `colour` is not yet in the deployed rules allowlist, so the write CAN be denied, and a
      swatch that silently does nothing is worse than no swatch. It returns whether it landed. */
-  setUserTaskColour: (id: string, colour: NoteColour) => Promise<boolean>;
+  setUserTaskColour: (id: string, colour: StoredNoteColour) => Promise<boolean>;
 
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
@@ -556,6 +614,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // users/{uid}/private/entitlement (the client never writes it). null === not yet loaded / absent,
   // which the entitlement helper reads as "not used".
   const [smartImportUsage, setSmartImportUsage] = useState<SmartImportUsage | null>(null);
+  /* Plan rules v1 — the entitlement's three facts. The private doc's first snapshot (present or absent) is what makes the
+     founding answer known; until then the resolver says `pending`. The creation time is the sign-in account's own. */
+  const [entitlementLoaded, setEntitlementLoaded] = useState(false);
+  const [accountCreatedMs, setAccountCreatedMs] = useState<number | null>(null);
+  const [entitlementNowMs, setEntitlementNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    /* The trial ends while the app may be open: re-read the clock every ten minutes. */
+    const t = setInterval(() => setEntitlementNowMs(Date.now()), 10 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
+  const entitlement = useMemo(() => {
+    /* ⚠️ the review aid is gated HERE, at the call site, so a production build drops it (lib/railReviewAid) */
+    const asFree = import.meta.env.MODE !== "production" && freeWriterAid();
+    return resolveEntitlement({
+      founding: !currentUser || !entitlementLoaded ? null : asFree ? false : smartImportUsage?.founding === true,
+      plan: currentUser?.plan,
+      createdMs: asFree ? 0 : accountCreatedMs,
+      nowMs: entitlementNowMs,
+    });
+  }, [currentUser, entitlementLoaded, smartImportUsage, accountCreatedMs, entitlementNowMs]);
+
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [versions, setVersions] = useState<ManuscriptVersion[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -571,6 +650,29 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   //                  delivered their first snapshot. Lets the dashboard tell "loading" from "empty".
   const [authReady, setAuthReady] = useState<boolean>(false);
   const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
+  /* To-do load v1 (B1): the two task reads `collectionsReady` never covered, and the computed list's own readiness */
+  const [userTasksReady, setUserTasksReady] = useState<boolean>(false);
+  const [taskFlagsReady, setTaskFlagsReady] = useState<boolean>(false);
+  const [tasksReady, setTasksReady] = useState<boolean>(false);
+  const [tasksReadFailed, setTasksReadFailed] = useState<boolean>(false);
+  const [agentsRead, setAgentsRead] = useState<"ok" | "failed" | "retrying">("ok");
+  /* the agents listener's own (re)subscribe, set by the auth effect for the signed-in user; null when signed out */
+  const resubAgentsRef = useRef<(() => void) | null>(null);
+  const retryAgents = useCallback(() => { resubAgentsRef.current?.(); }, []);
+  /* overnight fixes v1, Part 2 — the same for queries and manuscripts */
+  const [queriesRead, setQueriesRead] = useState<"ok" | "failed" | "retrying">("ok");
+  const [manuscriptsRead, setManuscriptsRead] = useState<"ok" | "failed" | "retrying">("ok");
+  const resubQueriesRef = useRef<(() => void) | null>(null);
+  const resubManuscriptsRef = useRef<(() => void) | null>(null);
+  const readStateRef = useRef({ agents: "ok", queries: "ok", manuscripts: "ok" } as Record<"agents" | "queries" | "manuscripts", string>);
+  readStateRef.current = { agents: agentsRead, queries: queriesRead, manuscripts: manuscriptsRead };
+  /* re-run each read that failed, and only those (a live listener is not torn down to retry a dead one) */
+  const retryReads = useCallback(() => {
+    const r = readStateRef.current;
+    if (r.agents === "failed") resubAgentsRef.current?.();
+    if (r.queries === "failed") resubQueriesRef.current?.();
+    if (r.manuscripts === "failed") resubManuscriptsRef.current?.();
+  }, []);
   /**
    * ⚠️ ADDITIVE, AND SEPARATE FROM `collectionsReady` ON PURPOSE (Query Centre v11, 19 Sep). That flag
    * is the dashboard's "loading or empty?" answer and must not start waiting on a fourth collection.
@@ -611,12 +713,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubTaskFlags: () => void = () => {};
 
     const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      /* Crash reporting v1: error reports carry the uid and nothing else, and none once signed out */
+      identifyForErrors(firebaseUser ? firebaseUser.uid : null);
       if (!firebaseUser) {
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
         setSmartImportUsage(null);
+        setEntitlementLoaded(false);
+        setAccountCreatedMs(null);
         setAuthReady(true);          // auth resolved: definitively logged out
         setCollectionsReady(false);  // next sign-in starts in the loading state
+        setUserTasksReady(false); setTaskFlagsReady(false); setTasksReady(false); setTasksReadFailed(false);
+        setAgentsRead("ok");
+        resubAgentsRef.current = null;
+        setQueriesRead("ok"); setManuscriptsRead("ok");
+        resubQueriesRef.current = null; resubManuscriptsRef.current = null;
         setActivitiesReady(false);
         if (readinessNetRef.current) { clearTimeout(readinessNetRef.current); readinessNetRef.current = null; }
         try { localStorage.removeItem("scriptally_was_authed"); } catch {}
@@ -640,11 +751,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const uid = firebaseUser.uid;
+      { const t = Date.parse(firebaseUser.metadata.creationTime ?? ""); setAccountCreatedMs(Number.isNaN(t) ? null : t); }
 
       // Track first-load of the collections the dashboard's empty-state depends on, so the UI can
       // tell "still loading" from "genuinely empty" (kills the empty-state flicker on boot).
       setCollectionsReady(false);
       setActivitiesReady(false);
+      setUserTasksReady(false); setTaskFlagsReady(false); setTasksReady(false); setTasksReadFailed(false);
       let mLoaded = false, aLoaded = false, qLoaded = false;
       const markCollectionsLoaded = () => {
         if (mLoaded && aLoaded && qLoaded) setCollectionsReady(true);
@@ -672,6 +785,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         mLoaded = aLoaded = qLoaded = true;
         markCollectionsLoaded();
         setActivitiesReady(true);
+        setUserTasksReady(true); setTaskFlagsReady(true);
       }, 6000);
       readinessNetRef.current = readinessNet;
 
@@ -726,20 +840,33 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         // the server gate is the real enforcement, so we just log and leave usage null.
         unsubEntitlement = onSnapshot(doc(db, "users", uid, "private", "entitlement"), (snap) => {
           setSmartImportUsage(snap.exists() ? (snap.data() as SmartImportUsage) : null);
+          setEntitlementLoaded(true);
         }, (error) => {
+          /* A read error leaves the founding answer unknown for good; resolve it as "not founding" rather than hang in
+             `pending` (which opens everything). The server enforces its own gates either way. */
+          setEntitlementLoaded(true);
           handleFirestoreError(error, OperationType.GET, `users/${uid}/private/entitlement`);
         });
 
-        // Manuscripts reader snap
-        unsubManuscripts = onSnapshot(collection(db, "users", uid, "manuscripts"), (snap) => {
-          const arr: Manuscript[] = [];
-          snap.forEach(d => arr.push(d.data() as Manuscript));
-          setManuscripts(arr);
-          if (snapshotIsLoaded(snap)) { mLoaded = true; markCollectionsLoaded(); }
-        }, (error) => {
-          mLoaded = true; markCollectionsLoaded(); // don't hang the loading state on a read error
-          handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
-        });
+        // Manuscripts reader snap — a function, so the error's "Try again" can re-subscribe it (overnight fixes v1, Part 2)
+        const subManuscripts = () => {
+          unsubManuscripts();
+          const forced = import.meta.env.MODE !== "production" ? forcedReadFault("manuscripts") : null;
+          if (forced) { unsubManuscripts = () => {}; setManuscripts([]); mLoaded = true; markCollectionsLoaded(); setManuscriptsRead(forced.mutate ? "ok" : "failed"); return; }
+          unsubManuscripts = onSnapshot(collection(db, "users", uid, "manuscripts"), (snap) => {
+            const arr: Manuscript[] = [];
+            snap.forEach(d => arr.push(d.data() as Manuscript));
+            setManuscripts(arr);
+            if (snapshotIsLoaded(snap)) { mLoaded = true; markCollectionsLoaded(); setManuscriptsRead("ok"); }
+          }, (error) => {
+            mLoaded = true; markCollectionsLoaded(); // don't hang the loading state on a read error
+            setManuscriptsRead("failed");
+            handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
+          });
+        };
+        setManuscriptsRead("ok");
+        subManuscripts();
+        resubManuscriptsRef.current = () => { setManuscriptsRead("retrying"); subManuscripts(); };
 
         // Versions snapshot reader
         unsubVersions = onSnapshot(collection(db, "users", uid, "versions"), (snap) => {
@@ -773,27 +900,46 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           handleFirestoreError(error, OperationType.GET, `users/${uid}/packages`);
         });
 
-        // Agents snapshot reader
-        unsubAgents = onSnapshot(collection(db, "users", uid, "agents"), (snap) => {
-          const arr: Agent[] = [];
-          snap.forEach(d => arr.push(d.data() as Agent));
-          setAgents(arr);
-          if (snapshotIsLoaded(snap)) { aLoaded = true; markCollectionsLoaded(); }
-        }, (error) => {
-          aLoaded = true; markCollectionsLoaded();
-          handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
-        });
+        // Agents snapshot reader — a function, so the Contact list's "Try again" can re-subscribe it after an error
+        // (Firestore ends a listener on its error; Contact list principles v1)
+        const subAgents = () => {
+          unsubAgents();
+          const forced = import.meta.env.MODE !== "production" ? forcedReadFault("agents") : null;
+          if (forced) { unsubAgents = () => {}; setAgents([]); aLoaded = true; markCollectionsLoaded(); setAgentsRead(forced.mutate ? "ok" : "failed"); return; }
+          unsubAgents = onSnapshot(collection(db, "users", uid, "agents"), (snap) => {
+            const arr: Agent[] = [];
+            snap.forEach(d => arr.push(d.data() as Agent));
+            setAgents(arr);
+            if (snapshotIsLoaded(snap)) { aLoaded = true; markCollectionsLoaded(); setAgentsRead("ok"); }
+          }, (error) => {
+            aLoaded = true; markCollectionsLoaded();
+            setAgentsRead("failed");
+            handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
+          });
+        };
+        setAgentsRead("ok");
+        subAgents();
+        resubAgentsRef.current = () => { setAgentsRead("retrying"); subAgents(); };
 
-        // Queries snapshot reader
-        unsubQueries = onSnapshot(collection(db, "users", uid, "queries"), (snap) => {
-          const arr: Query[] = [];
-          snap.forEach(d => arr.push(d.data() as Query));
-          setQueries(arr);
-          if (snapshotIsLoaded(snap)) { qLoaded = true; markCollectionsLoaded(); }
-        }, (error) => {
-          qLoaded = true; markCollectionsLoaded();
-          handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
-        });
+        // Queries snapshot reader — a function, so the error's "Try again" can re-subscribe it (overnight fixes v1, Part 2)
+        const subQueries = () => {
+          unsubQueries();
+          const forced = import.meta.env.MODE !== "production" ? forcedReadFault("queries") : null;
+          if (forced) { unsubQueries = () => {}; setQueries([]); qLoaded = true; markCollectionsLoaded(); setQueriesRead(forced.mutate ? "ok" : "failed"); return; }
+          unsubQueries = onSnapshot(collection(db, "users", uid, "queries"), (snap) => {
+            const arr: Query[] = [];
+            snap.forEach(d => arr.push(d.data() as Query));
+            setQueries(arr);
+            if (snapshotIsLoaded(snap)) { qLoaded = true; markCollectionsLoaded(); setQueriesRead("ok"); }
+          }, (error) => {
+            qLoaded = true; markCollectionsLoaded();
+            setQueriesRead("failed");
+            handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
+          });
+        };
+        setQueriesRead("ok");
+        subQueries();
+        resubQueriesRef.current = () => { setQueriesRead("retrying"); subQueries(); };
 
         // Activities snapshot reader
         unsubActivities = onSnapshot(collection(db, "users", uid, "activities"), (snap) => {
@@ -855,7 +1001,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: UserTask[] = [];
           snap.forEach(d => arr.push(d.data() as UserTask));
           setUserTasks(arr);
+          if (snapshotIsLoaded(snap)) setUserTasksReady(true);
         }, (error) => {
+          setUserTasksReady(true); setTasksReadFailed(true); /* To-do load v1: a dead listener is a failed load, never an empty list */
           handleFirestoreError(error, OperationType.GET, `users/${uid}/tasks`);
         });
 
@@ -873,7 +1021,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: TaskFlag[] = [];
           snap.forEach(d => arr.push(d.data() as TaskFlag));
           setTaskFlags(arr);
+          if (snapshotIsLoaded(snap)) setTaskFlagsReady(true);
         }, (error) => {
+          setTaskFlagsReady(true); setTasksReadFailed(true); /* To-do load v1 */
           handleFirestoreError(error, OperationType.GET, `users/${uid}/taskFlags`);
         });
 
@@ -1009,14 +1159,24 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
          Change the field and the task changes with it; undo, edit and delete stay honest for free. */
       const offerRef = q.offerRefQueryId ? queries.find((x) => x.id === q.offerRefQueryId) : undefined;
       const liveOther = ![QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED].includes(q.status);
-      if (offerRef && offerRef.status === QueryStatus.OFFER && q.offerTold === false && liveOther) {
-        calculatedTasks.push({
-          id: `task-offer-tell-${q.id}`, priority: "urgent",
-          title: `Tell ${aName} about your offer`,
-          description: `You have an offer on '${mTitle}'. Let ${aName} know, with your deadline.`,
-          manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
-          taskType: "offer_tell", actionLabel: "Open the offer", actionPath: "queries",
-        });
+      /* ⚠️ v152.2 §6.1 (Nick, 6 Nov) — ONE CARD PER OFFER replaces the per-agent "Tell {agent}" cards, and it appears only
+         once the writer chose "Do it later" / "Do the rest later" (or accepted with the to-do ticked): the flag is
+         `tellLater` on the offer's step. The count is never stored — the other queries marked with this offer and not
+         yet told — and the card completes itself at 0. */
+      if ((q.status === QueryStatus.OFFER || q.status === QueryStatus.SIGNED)
+        && activities.some((a) => a.queryId === q.id && (a.resultingStatus === QueryStatus.OFFER) && (a as { tellLater?: unknown }).tellLater === true)) {
+        const left = queries.filter((x) => x.offerRefQueryId === q.id && x.offerTold === false).length;
+        if (left > 0) {
+          const by = q.status === QueryStatus.OFFER && q.offerResponseDeadline ? new Date(String(q.offerResponseDeadline)) : null;
+          const byWords = by && !Number.isNaN(by.getTime()) ? ` · answer by ${by.getDate()} ${MONTHS_SHORT[by.getMonth()]}` : "";
+          calculatedTasks.push({
+            id: `task-offer-tell-all-${q.id}`, priority: "urgent",
+            title: q.status === QueryStatus.SIGNED ? `Tell ${left} ${left === 1 ? "agent" : "agents"} you’ve signed with ${aName}` : `Tell ${left} ${left === 1 ? "agent" : "agents"} about ${aName}’s offer${byWords}`,
+            description: `You have an offer on '${mTitle}'.`,
+            manuscriptTitle: mTitle, context: `With agent ${aName}`, relatedRecordId: q.id,
+            taskType: "offer_tell_all", actionLabel: "Tell them", actionPath: "queries",
+          });
+        }
       }
       if (offerRef && q.offerReply === "full" && liveOther
         && [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED].includes(q.status)) {
@@ -1094,7 +1254,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       // Nudge/close precedence: one decision, one task (close SUCCEEDS nudge, never competes).
-      // No reply window → neither fires; the data_quality_poor "set a window" item does instead.
+      // No reply window → neither fires (only a nudge the writer booked, Log a query v1.3); the data_quality_poor
+      // "set a window" item does instead.
       const reply = replyTask({
         status: q.status,
         dateSent: q.dateSent,
@@ -1296,11 +1457,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     setTasks(activeTasks);
+    /* To-do load v1 (B1) — ⚠️ SET HERE, IN THE SAME EFFECT AS `setTasks`, so the two commit together: "ready" can never
+       be true over a list computed without every read it needs, nor a render before the list exists. */
+    setTasksReady(collectionsReady && activitiesReady && userTasksReady && taskFlagsReady);
     /* ⚠️ `userTasks` IS A DEPENDENCY SINCE §3 — the close suggestion is suppressed by a scheduled
        reminder, so completing or deleting that reminder has to re-run this. Without it the
        suggestion would reappear only on the next unrelated change, which is the shape of a bug
        nobody can reproduce. */
-  }, [queries, manuscripts, agents, taskFlags, activities, currentUser, userTasks]);
+  }, [queries, manuscripts, agents, taskFlags, activities, currentUser, userTasks, collectionsReady, activitiesReady, userTasksReady, taskFlagsReady]);
 
   /**
    * ══ §1 (provenance pack) · THE ONE-TIME EXPECTED-DATE MIGRATION ═════════════════════════════
@@ -1509,12 +1673,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Authentication status required." };
 
-    if (!bypassLimits && currentUser.plan === UserPlan.FREE && manuscripts.length >= 1) {
-      return {
-        success: false,
-        error: "Free tier is limited to 1 manuscript. Please upgrade to Pro to track multiple scripts!"
-      };
-    }
+    const limitErr = bypassLimits ? null : manuscriptLimitError(entitlement.pro, manuscripts.length);
+    if (limitErr) return { success: false, error: limitErr };
 
     /* ⚠️ SUCCESS IS THE MANUSCRIPT WRITE ALONE (timeline writer fix v1) — lib/manuscriptWrite.ts.
        The feed entry is narration: a failed one no longer reports a landed save as a failure, so the
@@ -1546,7 +1706,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
     /* ⚠️ THE UPDATE DECIDES, THE FEED NARRATES (timeline writer fix v1) — lib/manuscriptWrite.ts.
        A comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts. */
-    await updateManuscriptFields(
+    const landed = await updateManuscriptFields(
       db, currentUser.id, id, updates,
       narratesManuscriptWrite(fields)
         ? () => addActivity({
@@ -1560,6 +1720,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         : null,
       (e, op, path) => handleFirestoreError(e, op === "write" ? OperationType.WRITE : OperationType.UPDATE, path),
     );
+    /* first visit v2 (Part I): the writer's first comparable title, on any manuscript */
+    if (landed && Array.isArray(fields.comps) && fields.comps.length > 0 && manuscripts.every((m) => manuscriptComps(m).length === 0)) {
+      logEvent(currentUser.id, "first_comp", eventPath(currentUser, existingMs));
+    }
   };
 
   /**
@@ -1800,6 +1964,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
     try {
       await setDoc(doc(db, "users", currentUser.id, "versions", id), newVer);
+      /* first visit v2 (Part I): the writer's first query letter */
+      if (v.componentType === ComponentType.QUERY_LETTER && !versions.some((x) => x.componentType === ComponentType.QUERY_LETTER)) {
+        logEvent(currentUser.id, "first_letter", eventPath(currentUser, manuscripts.find((m) => m.id === v.manuscriptId)));
+      }
       return id; // returned so a build-slot "+ New …" can auto-select the freshly created version
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/versions/${id}`);
@@ -1822,7 +1990,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const updateVersion = async (
     id: string,
     fields: Partial<Record<
-      "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds",
+      "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount" | "compIds" | "changes",
       unknown
     >>,
     opts?: { restoring?: boolean },
@@ -1832,7 +2000,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        caller's job, through `addVersion`; this refusal is the backstop that says so rather than
        rewriting what an agent received. A rename and the writer's note are labels, not content. */
     const content = (["contentDraft", "fileAttached", "fileName", "contentType", "contentLink", "wordCount"] as const).some((k) => k in fields);
-    if (content && isVersionSent(id, queries, packages)) {
+    /* Query letters v2.1: ONE exception, `contentWriteAllowed` — a sent version whose saved text is empty may have its text
+       added once (and that add undone); once it has text it is fixed like any other. */
+    if (content && isVersionSent(id, queries, packages) && !contentWriteAllowed({
+      sent: true, savedText: versions.find((v) => v.id === id)?.contentDraft,
+      hasIncomingText: "contentDraft" in fields, incomingText: fields.contentDraft, restoring: opts?.restoring,
+    })) {
       return "This version has been sent, so its content stays as it went. Edit it to make the next version.";
     }
     /* ⚠️ A SENT LETTER'S RECORDED COMPS ARE FIXED (comps v25, Part A). A change is a new version of the
@@ -1903,11 +2076,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const addPackage = async (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Authentication required." };
 
-    /* founding-member access: open to all while PACKAGES_OPEN_TO_ALL (lib/entitlements.ts) */
-    if (!packagesUnlocked(currentUser)) {
+    /* plan rules v1: the one resolver (lib/entitlements.ts) — founding, Pro or trial */
+    if (!packagesUnlocked(entitlement)) {
       return {
         success: false,
-        error: "Custom Submission Packages & A/B Tracking are premium features. Upgrade to QueryHawk Pro!"
+        error: "Submission packages are part of Pro. On Free, the packages you made stay readable."
       };
     }
 
@@ -1951,22 +2124,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const updatePackage = async (
     id: string,
-    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt">>,
+    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId" | "otherMaterials" | "bookVersionId" | "note" | "noteEditedAt" | "icon" | "colour" | "extraIds">>,
   ): Promise<string | null> => {
     if (!currentUser) return "Authentication required.";
     const live = packages.find((p) => p.id === id);
-    /* ⚠️ A SENT PACKAGE'S CONTENTS NO LONGER REFUSE — THEY START ITS NEXT EDITION (Part B §B1).
-       The queries already sent keep the edition they went out as, so the record stays true; what
-       changes is the package from now on. Only the sample slot, which is not content (Nick, 28 Sep),
-       still refuses on a sent package: it is the `""` sentinel everywhere today. */
-    let bump: ReturnType<typeof nextEdition> = null;
+    /* ⚠️ SUBMISSION PACKAGES v40: A PACKAGE THAT HAS GONE OUT IS LOCKED, AND NOTHING STARTS AN EDITION ANY MORE.
+       Its letter, synopsis, pages and extras never change again; a change is a new package made from it
+       ("New package from this"). The name, the note and the icon are filing, outside the lock. The rules say the same
+       thing; this says it in words, so a refusal never reaches the writer as "Database transaction error".
+       The one exception is the other-materials migration: a package written before named extras gains `extraIds`
+       ONCE, naming what its `otherMaterials` text already says — what went does not change. */
     if (live && isPackageLocked(live)) {
-      if ("samplePagesVersionId" in fields && (fields.samplePagesVersionId ?? "") !== (live.samplePagesVersionId ?? "")) {
-        return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
-      }
-      const ms = manuscripts.find((m) => m.id === live.manuscriptId);
-      bump = nextEdition(live, { ...live, ...fields }, new Date().toISOString(),
-        summaryFrom(versions, ms?.bookVersions ?? []));
+      const contents = ["queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId", "bookVersionId", "otherMaterials", "extraIds"] as const;
+      const migration = Object.keys(fields).length === 1 && "extraIds" in fields && live.extraIds === undefined;
+      const changes = contents.some((k) => k in fields && JSON.stringify(fields[k] ?? "") !== JSON.stringify(live[k] ?? ""));
+      if (changes && !migration) return `${LOCKED_NOTE}. ${LOCKED_WHY}`;
     }
     /* ⚠️ CLEARING A FREE-TEXT FIELD IS AN UNSET, NOT AN EMPTY STRING. The caller sends what the
        input holds; the conversion lives here so no caller can drift. The three version slots use
@@ -1982,10 +2154,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       payload[k] = t ? t : deleteField();
       if (k === "note" && !t) payload.noteEditedAt = deleteField();
     }
-    if (bump) {
-      payload.edition = bump.edition;
-      payload.editions = bump.editions;
-    } else if (live && !isPackageLocked(live) && live.editions?.length && contentsChanged(live, { ...live, ...fields })) {
+    if (live && !isPackageLocked(live) && live.editions?.length && contentsChanged(live, { ...live, ...fields })) {
       /* an unsent draft changed: a stored 1st edition would now describe contents nobody received */
       payload.editions = deleteField();
     }
@@ -2136,19 +2305,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return { lifted, stamped };
   };
 
-  // Agent Actions with Free limits
+  // Agent Actions (no plan limit)
   const addAgent = async (
     a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string },
     bypassLimits: boolean = false
   ): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Not logged in." };
 
-    if (!bypassLimits && currentUser.plan === UserPlan.FREE && agents.length >= 5) {
-      return {
-        success: false,
-        error: "Free tier is capped at 5 agents. Upgrade to QueryHawk Pro for unlimited research!"
-      };
+    /* ⚠️ v152.2 §1.7 (Nick, 6 Nov) — A NAME THAT MATCHES AN EXISTING AGENT, IGNORING CASE AND SPACES, MERGES INTO IT rather
+       than making a second record (a "PRIYA RAMAN" with no agency beside Priya Raman of Raman & Rowe). The import paths'
+       own rule, `sameAgent`: the same name, and the same agency or either side giving none. An explicit id (an import
+       that has already decided) is written as asked. */
+    if (!a.id && (a.name ?? "").trim()) {
+      const twin = findExistingAgent(agents, { name: a.name, agency: a.agency });
+      if (twin) return { success: true, id: twin.id };
     }
+
+    /* ⚠️ PLAN RULES v1.1 (13 Nov, Nick) — THERE IS NO AGENT LIMIT on any plan; the plan table says "Unlimited" on both.
+       `bypassLimits` is kept for the callers that pass it and limits nothing here. planLimits.test.ts fails on a cap. */
+    void bypassLimits;
 
     const id = a.id || "agent-" + Math.random().toString(36).substr(2, 9);
     const rawAg: Agent = {
@@ -2191,6 +2366,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         date: new Date().toISOString(),
         details: ""
       }), `agent ${id} added`);
+      /* Dashboard first visit v1 (Part B): the writer's first agent is the dashboard's first-win stamp */
+      if (isFirstAgentWin(agents.length)) {
+        noteFirstWin({ kind: "agent", uid: currentUser.id, msId: null, ...winCopy.agent(newAg.name ?? "", newAg.agency ?? "") });
+        /* first visit v2 (Part I) */
+        logEvent(currentUser.id, "first_agent", eventPath(currentUser, activeManuscriptOf(manuscripts)));
+      }
       return { success: true, id };
     }
     return { success: false, error: "Operation failed." };
@@ -2250,7 +2431,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           manuscriptId: "",
           queryId: "",
           date: dateStr,
-          details: `Updated star rating field from ${previousStarRating} to ${fields.starRating}`
+          details: `Updated agent fit from ${previousStarRating} to ${fields.starRating}`
         });
       }
 
@@ -2439,6 +2620,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       dateSent: importedSentDate(q.dateSent, opts, () => new Date().toISOString()),
       responseDeadline: q.status === QueryStatus.QUERIED ? (q as any).responseDeadline || dead : undefined
     };
+    /* ⚠️ VERSIONS v2 (D3a, R6) — EVERY LOGGED QUERY RECORDS THE BOOK VERSION IT WENT WITH: its package's version,
+       else the manuscript's in-use one. This is the one chokepoint every log path goes through (the drawer, the
+       Query Centre's create mode). An IMPORT is skipped (D7): what went with an imported query is not known, so it
+       stays unrecorded and the Versions page's banner asks. A caller that already names a version keeps it. */
+    if (!newQ.bookVersionId && !opts?.imported) {
+      const msRec = manuscripts.find((m) => m.id === q.manuscriptId) ?? null;
+      const pkgRec = q.packageId ? packages.find((p) => p.id === q.packageId) : (q as Query).sentPackageId ? packages.find((p) => p.id === (q as Query).sentPackageId) : undefined;
+      const stamp = versionAtLogging(msRec, pkgRec, packages, versions);
+      if (stamp) newQ.bookVersionId = stamp;
+    }
     // Firestore (no ignoreUndefinedProperties) rejects undefined fields. An advanced-status
     // import sets responseDeadline: undefined above; strip every undefined so the write — and
     // therefore the per-query log seed below — actually lands.
@@ -2541,6 +2732,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
          at Queried is already at its derived status and has nothing to recompute towards */
       if (seeded.some(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED)) {
         await recomputeQueryOnline(currentUser.id, id);
+      }
+      /* Dashboard first visit v1 (Part B): the first query LOGGED on a manuscript is the dashboard's first-win stamp.
+         An imported query never is — the import records its own stamp, once, for the whole file. */
+      /* first visit v2 (Part I): the writer's first logged query on any manuscript (an import records import_finished) */
+      if (!opts?.imported && queries.length === 0) logEvent(currentUser.id, "first_query", eventPath(currentUser, manuscripts.find((m) => m.id === q.manuscriptId)));
+      if (isFirstQueryWin(queries, q.manuscriptId, !!opts?.imported)) {
+        noteFirstWin({ kind: "query", uid: currentUser.id, msId: q.manuscriptId, ...winCopy.query(agent ? agentPrimary(agent) : "", agent?.agency ?? "", newQ.dateSent) });
       }
       return { success: true, id };
     } catch (e) {
@@ -3210,11 +3408,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       completedAt?: string | null;
       detail?: string | null; dueDate?: string | null; surfaceOffset?: SurfaceOffset | null;
       committedDate?: string | null; tags?: string[] | null; estimateMin?: number | null;
+      steps?: TaskStep[] | null; queryId?: string | null; agentId?: string | null;
+      /* Corkboard v2: pin to top (false or null clears the field), and a note's manuscript link — null clears it. */
+      pinned?: boolean | null; manuscriptId?: string | null;
     },
   ) => {
     if (!currentUser) return;
-    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, ...rest } = fields;
+    const { committedDate, completedAt, detail, dueDate, surfaceOffset, tags, estimateMin, steps, queryId, agentId, pinned, manuscriptId, ...rest } = fields;
     const patch: Record<string, unknown> = { ...rest, updatedAt: new Date().toISOString() };
+    /* To-do list v50: the checklist is written whole; null (or an emptied list) takes the field off the document.
+       The links follow the same null-clears convention: "Unlink" is a deleteField, never a stored empty string. */
+    if (steps !== undefined) patch.steps = steps === null || steps.length === 0 ? deleteField() : steps.map((x) => ({ text: x.text, done: !!x.done }));
+    if (queryId !== undefined) patch.queryId = queryId === null ? deleteField() : queryId;
+    if (agentId !== undefined) patch.agentId = agentId === null ? deleteField() : agentId;
     // `null` clears the Today's-list commitment (uncommit); a string sets it.
     if (committedDate !== undefined) patch.committedDate = committedDate === null ? deleteField() : committedDate;
     /* board fixes II P1 — the ⋯ Edit needs to CLEAR fields (a task losing its date becomes a
@@ -3235,6 +3441,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        for the next reader who reasonably trusts the stamp. Found by the harness's first
        stored-field Undo assertion (completion-paths). */
     if (completedAt !== undefined) patch.completedAt = completedAt === null ? deleteField() : completedAt;
+    /* Corkboard v2 — an unpinned note carries no `pinned` at all (absence is "not pinned") */
+    if (pinned !== undefined) patch.pinned = pinned ? true : deleteField();
+    /* Corkboard v2 — a note's link can change after it is made (agent and query above); null removes the field */
+    if (manuscriptId !== undefined) patch.manuscriptId = manuscriptId === null ? deleteField() : manuscriptId;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), patch);
     } catch (e) {
@@ -3283,7 +3493,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * say so. `false` means "the colour did not land"; the note still reads yellow, which is what
    * `noteColour` returns for a note that has none.
    */
-  const setUserTaskColour = async (id: string, colour: NoteColour): Promise<boolean> => {
+  const setUserTaskColour = async (id: string, colour: StoredNoteColour): Promise<boolean> => {
     if (!currentUser) return false;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), {
@@ -3315,6 +3525,28 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+    }
+  };
+
+  const writeVersionChange: DbContextType["writeVersionChange"] = async (msId, fields, extra) => {
+    if (!currentUser) return false;
+    const orDelete = <T,>(v: T | null | undefined) => (v === null ? deleteField() : v);
+    try {
+      const batch = writeBatch(db);
+      if (fields) {
+        const up: Record<string, unknown> = {};
+        if (fields.bookVersions !== undefined) up.bookVersions = orDelete(fields.bookVersions);
+        if (fields.inUseBookVersionId !== undefined) up.inUseBookVersionId = orDelete(fields.inUseBookVersionId);
+        if (fields.bookVersionSeq !== undefined) up.bookVersionSeq = orDelete(fields.bookVersionSeq);
+        batch.update(doc(db, "users", currentUser.id, "manuscripts", msId), up);
+      }
+      for (const p of extra?.packages ?? []) batch.update(doc(db, "users", currentUser.id, "packages", p.id), { bookVersionId: orDelete(p.bookVersionId) });
+      for (const q of extra?.queries ?? []) batch.update(doc(db, "users", currentUser.id, "queries", q.id), { bookVersionId: orDelete(q.bookVersionId) });
+      await batch.commit();
+      return true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${msId}`);
+      return false;
     }
   };
 
@@ -3929,8 +4161,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       value={{
         currentUser,
         smartImportUsage,
+        entitlement,
         authReady,
         collectionsReady,
+        tasksReady,
+        tasksReadFailed,
+        agentsRead,
+        retryAgents,
+        queriesRead,
+        manuscriptsRead,
+        retryReads,
         activitiesReady,
         manuscripts,
         versions,
@@ -3993,6 +4233,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         recordHoldingReply,
         undoQueryStatus,
         updateQuery,
+        writeVersionChange,
         deleteQuery,
         addJournalEntry,
         deleteJournalEntry,

@@ -1,0 +1,428 @@
+[
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Dashboard header: the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Dashboard header: the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Dashboard header: no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Dashboard header: nothing navigated",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Dashboard header: cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Dashboard header: focus returns to the button that opened it",
+  "ok": true,
+  "detail": "btn-agent"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Dashboard): the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Dashboard): the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Dashboard): no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Dashboard): nothing navigated",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Dashboard): cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Query Centre): the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Query Centre): the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Query Centre): no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Query Centre): nothing navigated",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Query Centre): cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Discover): the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Discover): the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/agents/discover\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Discover): no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Discover): nothing navigated",
+  "ok": true,
+  "detail": "/agents/discover → /agents/discover"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 top-bar capture (Discover): cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/agents/discover\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 search palette: the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 search palette: the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 search palette: no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 search palette: nothing navigated",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 search palette: cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Contact list: the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Contact list: the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/agents\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Contact list: no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Contact list: nothing navigated",
+  "ok": true,
+  "detail": "/agents → /agents"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Contact list: cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/agents\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Log a query picker: the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Log a query picker: the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":\"drawer\",\"edit\":true,\"name\":\"zzadd1-a1-typed\",\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Log a query picker: no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Log a query picker: nothing navigated",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Log a query picker: the typed name is carried in",
+  "ok": true,
+  "detail": "zzadd1-a1-typed"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Log a query picker: the panel lies over the query drawer",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1512 Log a query picker: cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Dashboard header: hidden below 1440 (by design)",
+  "ok": true,
+  "detail": "0 visible"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Dashboard): the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Dashboard): the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Dashboard): no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Dashboard): nothing navigated",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Dashboard): cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Query Centre): the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Query Centre): the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Query Centre): no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Query Centre): nothing navigated",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Query Centre): cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Discover): the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Discover): the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/agents/discover\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Discover): no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Discover): nothing navigated",
+  "ok": true,
+  "detail": "/agents/discover → /agents/discover"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 top-bar capture (Discover): cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/agents/discover\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 search palette: the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 search palette: the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 search palette: no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 search palette: nothing navigated",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 search palette: cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/dashboard\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Contact list: the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Contact list: the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":null,\"edit\":true,\"name\":\"\",\"others\":[],\"pop\":false,\"url\":\"/agents\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Contact list: no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Contact list: nothing navigated",
+  "ok": true,
+  "detail": "/agents → /agents"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Contact list: cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/agents\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Log a query picker: the door could be pressed",
+  "ok": true,
+  "detail": "missing, hidden or covered"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Log a query picker: the new-agent panel is open in add mode",
+  "ok": true,
+  "detail": "{\"panels\":1,\"acting\":\"new\",\"over\":\"drawer\",\"edit\":true,\"name\":\"zzadd1-a1-typed\",\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Log a query picker: no centred add dialog and no pop-up is in the DOM",
+  "ok": true,
+  "detail": "{\"others\":[],\"pop\":false}"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Log a query picker: nothing navigated",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Log a query picker: the typed name is carried in",
+  "ok": true,
+  "detail": "zzadd1-a1-typed"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Log a query picker: the panel lies over the query drawer",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "ADD1-A1",
+  "where": "@1280 Log a query picker: cancel closes the panel",
+  "ok": true,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ }
+]

@@ -6,9 +6,12 @@
  * must not make.
  */
 import { describe, it, expect } from "vitest";
-import { PLAN_ROWS, PLAN_CTA_LABEL, PlanCell, planAllowanceLine, isStandingCapacity } from "./planComparison";
-import { getSmartImportEntitlement } from "./smartImportEntitlement";
-import { UserPlan } from "../types";
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import {
+  PLAN_ROWS, PLAN_GROUPS, PLAN_DIFFERS, DIFFERING_ROWS, rowDiffers, PLAN_CTA_LABEL, PlanCell, planAllowanceLine, isStandingCapacity,
+} from "./planComparison";
+import { PRO_FEATURES, PRO_FROM_LINE } from "./planRules";
 import { PRICING_TIERS } from "../marketing/landingCopy";
 
 const kinds = (c: PlanCell) => c.kind;
@@ -38,63 +41,46 @@ describe("the grammar rule — figures OR marks, never both in one row", () => {
   });
 });
 
-/* ⚠️ THE ROW IS RECONCILED AGAINST THE DERIVATION THE SERVER ENFORCES, not against a literal
-   typed twice. `getSmartImportEntitlement` is the policy `smartImportMap` mirrors; if it ever
-   stops allowing a fresh Free account exactly one, or a Pro account one per month, this fails —
-   which is the only way the table can be kept honest without someone remembering to look. */
-describe("Smart Import states the entitlement the server actually enforces", () => {
-  const R = row("Smart Import");
+/* PLAN RULES v1 — THE TABLE IS THE REF'S, ROW FOR ROW. The ref's own GROUPS literal is read out of
+   design-refs/plan-table-v1.html (its SHA256 checked first), so the table cannot drift from it unnoticed. */
+describe("the table is design-refs/plan-table-v1.html, exactly", () => {
+  const html = readFileSync(new URL("../../design-refs/plan-table-v1.html", import.meta.url), "utf8");
+  it("the ref is the one the plan rules name", () => {
+    expect(createHash("sha256").update(html).digest("hex")).toBe("cf5ae3db5248d4158fc2a9d97cf781faf175374f5328acd8cfbde8bb06b2db64");
+  });
+  const literal = html.slice(html.indexOf("const GROUPS = [") + "const GROUPS = ".length, html.indexOf("];\nconst S =") + 1);
+  // eslint-disable-next-line no-new-func
+  const REF = new Function(`return ${literal}`)() as [string, [string, string, string | number, string | number][]][];
+  const cellOf = (v: string | number): PlanCell => (v === 1 ? { kind: "included" } : v === 0 ? { kind: "absent" } : { kind: "figure", text: String(v) });
 
-  it("is stated as figures, because it is an allowance", () => {
-    expect(R.free.kind).toBe("figure");
-    expect(R.pro.kind).toBe("figure");
+  it("groups, labels, descriptions and both cells", () => {
+    expect(PLAN_GROUPS.map((g) => [g.group, g.rows.map((r) => [r.label, r.sub, r.free, r.pro])]))
+      .toEqual(REF.map(([g, rows]) => [g, rows.map(([l, d, f, p]) => [l, d, cellOf(f), cellOf(p)])]));
   });
 
-  it("Free is once for the lifetime of the account — not 'at sign-up', and not unlimited", () => {
-    expect(getSmartImportEntitlement(UserPlan.FREE, null).allowed).toBe(true);
-    expect(getSmartImportEntitlement(UserPlan.FREE, { smartImportFreeUsed: true }).allowed).toBe(false);
-    expect((R.free as { text: string }).text).toBe("One import");
+  it("seven rows differ, and they are exactly the Pro features the entitlement resolver gates", () => {
+    expect(PLAN_DIFFERS).toBe(7);
+    expect(PLAN_DIFFERS).toBe(REF.reduce((n, [, rows]) => n + rows.filter((r) => r[2] !== r[3]).length, 0));
+    expect(DIFFERING_ROWS.map((r) => r.feature)).toEqual([...PRO_FEATURES]);
+    expect(PLAN_ROWS.filter((r) => !rowDiffers(r)).every((r) => r.feature === undefined)).toBe(true);
   });
 
-  it("Pro is one per calendar month, so the table must not say Unlimited", () => {
-    const now = new Date("2026-08-20T00:00:00Z");
-    expect(getSmartImportEntitlement(UserPlan.PRO, null, now).allowed).toBe(true);
-    expect(
-      getSmartImportEntitlement(UserPlan.PRO, { smartImportLastUsedMonth: "2026-08" }, now).allowed,
-    ).toBe(false);
-    expect((R.pro as { text: string }).text).toBe("One a month");
-    expect((R.pro as { text: string }).text.toLowerCase()).not.toContain("unlimited");
+  it("there is no agent cap, and Smart Import is the same on both plans", () => {
+    expect(row("Agents").free).toEqual({ kind: "figure", text: "Unlimited" });
+    expect(rowDiffers(row("Smart Import"))).toBe(false);
   });
 });
 
-/* ⚠️ TWO ROWS THAT ARE NOT GATED, AND MUST NOT BE ADVERTISED AS IF THEY WERE. Neither
-   SubmissionPackages.tsx nor discover1/DiscoverPage.tsx references isProUser or UserPlan.PRO, and the
-   locked marketing copy lists submission packages under FREE. The old PlansPage table claimed
-   both as Pro-only. If either becomes Pro, the gate goes in the code first and this test is what
-   fails to remind whoever changes the table. */
-describe("no row advertises a gate the code does not enforce", () => {
-  it("Submission Packages is available on both plans", () => {
-    expect(row("Submission Packages").free.kind).toBe("included");
-    expect(row("Submission Packages").pro.kind).toBe("included");
-  });
-
-  it("Agent Discovery is available on both plans", () => {
-    expect(row("Agent Discovery").free.kind).toBe("included");
-    expect(row("Agent Discovery").pro.kind).toBe("included");
-  });
-
-  it("and the free tier's marketing copy agrees about packages", () => {
+describe("the marketing copy reads the table", () => {
+  it("Free's lists are the table's rows", () => {
     const free = PRICING_TIERS.find((t) => t.key === "free")!;
-    expect(free.includes.join(" ").toLowerCase()).toContain("submission packages");
+    expect(free.excludes!.map((e) => e.label)).toEqual(DIFFERING_ROWS.map((r) => r.label));
+    expect(free.includes).not.toContain("Submission packages");
+    expect(free.includes.join(" ")).not.toMatch(/twenty|20 agents/i);
   });
-});
-
-describe("the genuinely gated pair", () => {
-  it("Smart Email Drop and The Comp Scout are Pro-only", () => {
-    for (const label of ["Smart Email Drop", "The Comp Scout"]) {
-      expect(row(label).free.kind, label).toBe("absent");
-      expect(row(label).pro.kind, label).toBe("included");
-    }
+  it("Pro's list is everything in Free plus the seven", () => {
+    const pro = PRICING_TIERS.find((t) => t.key === "pro")!;
+    expect(pro.includes).toEqual(["Everything in Free", ...DIFFERING_ROWS.map((r) => r.label)]);
   });
 });
 
@@ -108,16 +94,14 @@ describe("the CTA cannot promise a purchase that has no path", () => {
 
   /* The price the card renders is the locked marketing copy's, and today that copy says there is
      no payment path. The card must never contradict it. */
-  it("the Pro price is whatever landingCopy says, and it says there is no path yet", () => {
+  it("the Pro price is the plan rules' — from £3.75 a month, four lengths — and it says there is no path yet", () => {
     const pro = PRICING_TIERS.find((t) => t.key === "pro")!;
-    /* ⚠️ RETARGETED, AND THE CLAIM NARROWED RATHER THAN LAPSING. `PRO_PRICE_MONTHLY` was `null` so
-       that no figure could appear before one was decided; it is decided, so the price is a real
-       £4.99 and this asserts it reaches the signed-in page from the same constant the public one
-       reads. What must NOT change is the second half: a price is what something will cost, and a
-       payment path is whether it can be bought. `PRO_PRICE_YEARLY` is still null, so the card goes
-       on saying there is no way to pay — which is the assertion that actually protects a reader. */
-    expect(pro.price).toBe("£4.99");
-    expect(pro.priceUnit).toBe("per month");
+    expect(pro.price).toBe(PRO_FROM_LINE);
+    expect(pro.price).toBe("from £3.75 a month");
+    expect(pro.priceNote).toBe("1, 3, 6 or 12 months");
+    const free = PRICING_TIERS.find((t) => t.key === "free")!;
+    expect(free.price).toBe("£0");
+    expect(free.priceNote).toBe("First 14 days are Pro");
     const after = pro.after.map((r) => (typeof r === "string" ? r : "b" in r ? r.b : "")).join("");
     expect(after, "a price is not a payment path").toContain("Not on sale yet");
     expect(after).toContain("nothing changes on your account");
@@ -136,7 +120,8 @@ describe("the table sells nothing and counts nothing", () => {
   });
 
   it("states no usage against a limit", () => {
-    for (const word of ["remaining", "you have used", "of your", "left this"]) {
+    /* "of your allowance", not "of your": the ref's own row is "Take a copy of your data". */
+    for (const word of ["remaining", "you have used", "of your allowance", "left this"]) {
       expect(text, word).not.toContain(word);
     }
   });
@@ -146,8 +131,8 @@ describe("the table sells nothing and counts nothing", () => {
    second hand-written feature list in the rail. */
 describe("planAllowanceLine — the rail aside reads the comparison, it does not restate it", () => {
   it("states the standing capacities, singular where the figure is one", () => {
-    expect(planAllowanceLine("free")).toBe("1 manuscript · unlimited agents · unlimited queries");
-    expect(planAllowanceLine("pro")).toBe("unlimited manuscripts · unlimited agents · unlimited queries");
+    expect(planAllowanceLine("free")).toBe("unlimited agents · unlimited queries and responses · 1 manuscript");
+    expect(planAllowanceLine("pro")).toBe("unlimited agents · unlimited queries and responses · 1 manuscript");
   });
 
   /* Smart Import's figures carry a period — "1 (lifetime)", "1 a month" — so they are an allowance

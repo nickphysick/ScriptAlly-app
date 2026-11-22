@@ -319,7 +319,7 @@
   background: var(--tdv2-card); color: var(--tdv2-ink); white-space: nowrap; cursor: pointer;
 }
 .tdv2-act:hover { background: var(--tdv2-anthracite); color: var(--tdv2-on-dark); border-color: var(--tdv2-anthracite); }
-.tdv2-row:focus-visible { outline: 2px solid var(--tdv2-anthracite); outline-offset: 2px; }
+.tdv2-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── group heads: sticky, anthracite, white (ref `.ghead`) ── */
 .tdv2-gsec { margin-bottom: 26px; }

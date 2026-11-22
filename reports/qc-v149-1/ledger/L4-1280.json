@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the strip in Tracking",
+  "ok": true,
+  "detail": "no strip"
+ },
+ {
+  "where": "its bottom is within 16px of the pane's",
+  "ok": true,
+  "detail": "{\"gap\":0,\"bg\":\"rgb(245, 230, 223)\",\"btn\":\"Mark sent\",\"bold\":\"Sophie asked for the revision 4 months ago.\",\"stand\":false}"
+ },
+ {
+  "where": "the court's tint (With you #f5e6df)",
+  "ok": true,
+  "detail": "rgb(245, 230, 223)"
+ },
+ {
+  "where": "the old 'where it stands' block is gone",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "where": "the button is the next move's",
+  "ok": true,
+  "detail": "Mark sent"
+ },
+ {
+  "where": "the strip's button opens what the tray's does",
+  "ok": true,
+  "detail": "strip \"← Back to Sophie’s query SENT WHAT THEY ASKED FOR What went to Sophie? × SD Soph\" · tray \"← Back to Sophie’s query SENT WHAT THEY ASKED FOR What went to Sophie? × SD Soph\""
+ },
+ {
+  "where": "a closed query's strip says how it ended, with no button",
+  "ok": true,
+  "detail": "{\"strip\":true,\"btn\":false,\"bold\":\"Passed on 13 Apr 2025.\"}"
+ }
+]

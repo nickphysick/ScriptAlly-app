@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: both kinds",
+  "ok": true,
+  "detail": "60 act, 28 text"
+ },
+ {
+  "where": "act: pink",
+  "ok": true,
+  "detail": "rgb(243, 200, 186)"
+ },
+ {
+  "where": "act: ink text",
+  "ok": true,
+  "detail": "rgb(28, 19, 15)"
+ },
+ {
+  "where": "act: not underlined",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "text: no button",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no links",
+  "ok": true,
+  "detail": ""
+ }
+]

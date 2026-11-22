@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "CL20-A1",
+  "where": "the account has agents (population)",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1512 the count exists",
+  "ok": true,
+  "detail": "{\"text\":\"All 52 agents\",\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":30}"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1512 unfiltered: \"All 52 agents\"",
+  "ok": true,
+  "detail": "All 52 agents"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1512 Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1512 30px ±0.5",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1512 Your move narrows the list (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1512 filtered: \"4 of 52 agents\"",
+  "ok": false,
+  "detail": "52 of 52 agents"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1512 the count equals the applied row's figure",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1280 the count exists",
+  "ok": true,
+  "detail": "{\"text\":\"All 52 agents\",\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":30}"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1280 unfiltered: \"All 52 agents\"",
+  "ok": true,
+  "detail": "All 52 agents"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1280 Special Elite",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1280 30px ±0.5",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1280 Your move narrows the list (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1280 filtered: \"4 of 52 agents\"",
+  "ok": false,
+  "detail": "52 of 52 agents"
+ },
+ {
+  "lock": "CL20-A1",
+  "where": "@1280 the count equals the applied row's figure",
+  "ok": true,
+  "detail": "4 vs 4"
+ }
+]

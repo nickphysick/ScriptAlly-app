@@ -38,17 +38,19 @@ const BY_STATUS: Partial<Record<QueryStatus, FeedFamily>> = {
   [QueryStatus.NO_RESPONSE]: "closed",
 };
 
-type Fields = Pick<FeedEntry, "app" | "activityType" | "status"> & Partial<Pick<FeedEntry, "imported">>;
+type Fields = Pick<FeedEntry, "app" | "activityType" | "status"> & Partial<Pick<FeedEntry, "imported" | "eventKey">>;
 
 /** True when the entry matches no row of the table and takes `closed` by default. */
 export const fellToClosed = (e: Fields): boolean =>
-  !e.imported && !e.app && e.activityType !== ActivityType.NUDGE_SENT && e.activityType !== ActivityType.OFFER_ACCEPTED
+  !e.imported && !e.app && e.eventKey !== "offer_told" && e.activityType !== ActivityType.NUDGE_SENT && e.activityType !== ActivityType.OFFER_ACCEPTED
   && e.activityType !== ActivityType.OFFER_DECLINED && !(e.status && BY_STATUS[e.status]);
 
 export function feedFamily(e: Fields): FeedFamily {
   /* import review v1: the import's own event — a family of its own, asked first */
   if (e.imported) return "import";
   if (e.app) return "housekeeping";
+  /* Query Centre v152.1: telling other agents about an offer is part of the offer (it carries no status) */
+  if (e.eventKey === "offer_told") return "offer";
   if (e.activityType === ActivityType.NUDGE_SENT) return "nudge";
   if (e.activityType === ActivityType.OFFER_ACCEPTED) return "offer";
   if (e.activityType === ActivityType.OFFER_DECLINED) return "closed";

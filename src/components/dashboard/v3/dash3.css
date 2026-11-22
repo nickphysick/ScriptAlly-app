@@ -1,0 +1,100 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD v3 (ref design-refs/dashboard-v3.html). Imported after every earlier dashboard sheet, so its rules win
+ * ties; every rule is scoped to `.d58.d2` or names a `d3-` class only this page renders. Values are the page's own
+ * tokens (`--d2-*`, `--d58-*`) and `lib/stageColours` (restated hexes are asserted against it in dash3.test.ts).
+ */
+
+/* ── Phase 1 · the navy band: title, stage marks, two outline buttons; never wraps, never grows ── */
+.d58.d2 .d2-band { flex-wrap: nowrap; gap: 24px; }
+.d58.d2 .d2-bandtx { flex: 0 1 auto; }
+.d58.d2 h1.d2-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .d3-marks { margin: 0 0 0 auto; padding: 0; list-style: none; display: flex; align-items: center; gap: 22px; flex: none; color: #fffaf3; }
+.d58.d2 .d3-marks li { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; color: #fffaf3; }
+.d58.d2 .d3-marks b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 22px; line-height: 1; color: #fffaf3; }
+.d58.d2 .d3-marks small { font-family: var(--d58-serif); font-size: 14px; color: rgba(244, 238, 229, 0.7); }
+.d58.d2 .d3-marks li.is-closed, .d58.d2 .d3-marks li.is-closed b, .d58.d2 .d3-marks li.is-closed small { color: rgba(244, 238, 229, 0.45); }
+.d58.d2 .d3-marks + .d2-acts { margin-left: 0; }
+.d58.d2 .d2-acts { flex: none; }
+@media (max-width: 1180px) { .d58.d2 .d3-marks { display: none; } .d58.d2 .d3-marks + .d2-acts { margin-left: auto; } }
+
+/* ── Phase 2 · three columns under the band and the founding strip (the ref's `.gA`) ── */
+.d58.d2 .d2-grid { grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.3fr) minmax(250px, 0.78fr); gap: 16px; align-items: stretch; margin-top: 16px; }
+.d58.d2 .d2-col { gap: 16px; }
+.d58.d2 .d22-fw { margin-top: 16px; }
+@media (max-width: 1320px) { .d58.d2 .d2-grid { grid-template-columns: minmax(280px, 1fr) minmax(340px, 1.3fr) minmax(250px, 0.78fr); gap: 16px; } }
+@media (max-width: 1180px) {
+  .d58.d2 .d2-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .d58.d2 .d2-right { grid-column: 1 / -1; min-height: 520px; }
+}
+
+/* the nudge-email ask, one line (the ref's `.mail`) */
+.d58.d2 .d3-mail { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; padding: 8px 8px 8px 12px; border-radius: 12px; background: #f8e8e5; box-shadow: inset 0 0 0 1px #dfb1ac; font-size: 14px; color: var(--d2-ink); }
+.d58.d2 .d3-mail svg { flex: none; width: 15px; height: 15px; fill: none; stroke: #a0675a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.d58.d2 .d3-mail span { flex: 1 1 auto; min-width: 0; }
+.d58.d2 .d3-mail button { height: 32px; padding: 0 12px; border: 0; border-radius: 16px; background: transparent; box-shadow: inset 0 0 0 1px #e3d5c9; font-weight: 600; font-size: 14px; white-space: nowrap; cursor: pointer; color: var(--d2-ink); }
+.d58.d2 .d3-mail button.is-x { box-shadow: none; color: var(--d2-muted); padding: 0 6px; }
+.d58.d2 .d3-mail button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* ── Phase 3 · card heads: a head takes the colour of the stage it is about (lib/stageColours, set inline by the card);
+   anything not about a stage is plain paper with a hairline beneath. The chart stays navy. No blush, no grey. ── */
+.d58.d2 .d2-tone--paper { background: #ffffff; color: var(--d2-ink); }
+.d58.d2 .d2-tone--paper:not([style]) { border-bottom: 1px solid #e3d5c9; }
+.d58.d2 .d2-tone--paper .os-cardttl { color: var(--d2-ink); }
+.d58.d2 .os-card.d60-agents .os-band.d60-band--slate { background: #ffffff; border-bottom: 1px solid #e3d5c9; }
+.d58.d2 .d2-gs .fv2-gsh { padding-bottom: 10px; border-bottom: 1px solid #e3d5c9; }
+
+/* ── Phase 4a · How it's going: the sentence, a line of counts, three bars (the ref's `.fun`) ── */
+.d58.d2 .d3-going { box-sizing: border-box; padding: 18px 18px 16px; }
+.d58.d2 .d3-gsay { margin: 0 0 4px; font-family: var(--d58-type) !important; font-size: 22px; line-height: 1.3; color: var(--d2-ink); }
+.d58.d2 .d3-gsub { margin: 0 0 16px; font-size: 15px; color: var(--d2-muted); }
+.d58.d2 .d3-frow { display: grid; grid-template-columns: 140px minmax(0, 1fr); align-items: center; gap: 12px; margin-top: 10px; font-size: 15px; }
+.d58.d2 .d3-flab { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.d58.d2 .d3-trk { position: relative; display: block; height: 30px; border-radius: 8px; background: #f6f5f3; }
+.d58.d2 .d3-fill, .d58.d2 .d3-none { position: absolute; top: 0; bottom: 0; left: 0; box-sizing: border-box; display: flex; align-items: center; padding-left: 10px; border-radius: 8px; font-family: var(--d58-type) !important; font-size: 18px; color: var(--d2-ink); }
+.d58.d2 .d3-fill { min-width: 38px; }
+.d58.d2 .d3-none { right: 0; border: 1px dashed #a8a199; color: var(--d2-muted); }
+.d58.d2 .d22-tog { flex-wrap: nowrap; }
+
+/* ── Phase 4b · Expected back (the ref's `.ex`) ── */
+.d58.d2 .d3-exsay { margin: 0 0 10px; font-family: var(--d58-type) !important; font-size: 20px; line-height: 1.3; color: var(--d2-ink); }
+.d58.d2 .d3-exl { list-style: none; margin: 0; padding: 0; }
+.d58.d2 .d3-exl li + li { border-top: 1px solid #ebe4da; }
+.d58.d2 .d3-exl.is-example { opacity: 0.55; }
+.d58.d2 .d3-ex { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(70px, 1fr) auto; align-items: center; gap: 12px; min-height: 44px; padding: 6px 4px; border: 0; border-radius: 8px; background: none; text-align: left; font-size: 15px; color: var(--d2-ink); }
+.d58.d2 button.d3-ex { cursor: pointer; }
+.d58.d2 button.d3-ex:hover { background: #f8f4ed; }
+.d58.d2 button.d3-ex:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.d58.d2 .d3-exw { min-width: 0; }
+.d58.d2 .d3-exw b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .d3-exw i { display: block; font-style: normal; font-size: 14px; color: var(--d2-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .d3-pb { display: block; height: 6px; border-radius: 3px; background: #efe6d6; overflow: hidden; }
+.d58.d2 .d3-pb u { display: block; height: 100%; border-radius: 3px; background: var(--d2-navy); }
+.d58.d2 .d3-when { font-size: 14px; color: var(--d2-muted); white-space: nowrap; text-align: right; }
+.d58.d2 .d3-when.is-past { color: #a0675a; font-weight: 600; }
+.d58.d2 .d3-exh { margin: 14px 0 2px; font-weight: 600; font-size: var(--sp-body-size); }
+.d58.d2 .d3-exf { margin: 12px 0 0; font-size: 14px; color: var(--d2-muted); }
+.d58.d2 .d3-egtag { display: inline-block; margin-bottom: 8px; padding: 1px 8px; border-radius: 9px; background: #efe6d6; font-size: 12px; color: var(--d2-muted); }
+
+/* ── Phase 5 · Agents on file and Getting started by stage ── */
+.d58.d2 .d3-aglink { margin-left: auto; font-size: 14px; white-space: nowrap; }
+.d58.d2 .d60-agents .d60-hn + small { text-transform: none; letter-spacing: 0; font-family: var(--d58-serif); font-size: 12px; color: var(--d2-muted); }
+.d58.d2 .d3-agnote { display: block; margin-top: 8px; font-size: 14px; color: var(--d2-muted); list-style: none; }
+.d58.d2 .d3-agnote .d60-ready { display: inline; padding: 0; font-weight: 600; color: var(--d2-ink); }
+.d58.d2 .d3-agnone { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0 0; }
+/* the one-row fold (the ref's `.gs`) */
+.d58.d2 .d3-gsrow { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 14px; background: #ffffff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32); font-size: 15px; color: var(--d2-ink); }
+.d58.d2 .d3-gssegs { display: flex; gap: 3px; flex: none; }
+.d58.d2 .d3-gssegs i { width: 16px; height: 4px; border-radius: 2px; background: #ebe4da; }
+.d58.d2 .d3-gssegs i.is-on { background: var(--d2-navy); }
+.d58.d2 .d3-gstx { flex: 1 1 auto; min-width: 0; }
+.d58.d2 .d3-gsrow .d2-link { white-space: nowrap; }
+.d58.d2 .d3-gshide { flex: none; border: 0; background: transparent; padding: 6px; font-size: 14px; color: var(--d2-muted); text-decoration: underline; cursor: pointer; }
+
+/* Consistency roll-out v2, Phase 3 (rulings v3, ruling 4): the text tag — 28 high, 0 12, fully rounded, Source Serif 4
+   600 14 (shell/primitives.css --sp-tag-*). Each keeps its own fill, edge and text colour. Desktop only. */
+@media (min-width: 768px) {
+  .d58.d2 .d3-egtag { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
+}

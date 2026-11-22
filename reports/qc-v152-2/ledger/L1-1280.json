@@ -1,0 +1,77 @@
+[
+ {
+  "where": "pro: population",
+  "ok": true,
+  "detail": "[{\"v\":\"status\",\"label\":\"Status\",\"on\":\"false\",\"locked\":false,\"pro\":false},{\"v\":\"attention\",\"label\":\"Action\",\"on\":\"true\",\"locked\":false,\"pro\":false},{\"v\":\"package\",\"label\":\"Package\",\"on\":\"false\",\"locked\":false,\"pro\":true}]"
+ },
+ {
+  "where": "pro: exactly Status, Action, Package",
+  "ok": true,
+  "detail": "[\"Status\",\"Action\",\"Package\"]"
+ },
+ {
+  "where": "pro: Action chosen by default",
+  "ok": true,
+  "detail": "[{\"v\":\"status\",\"label\":\"Status\",\"on\":\"false\",\"locked\":false,\"pro\":false},{\"v\":\"attention\",\"label\":\"Action\",\"on\":\"true\",\"locked\":false,\"pro\":false},{\"v\":\"package\",\"label\":\"Package\",\"on\":\"false\",\"locked\":false,\"pro\":true}]"
+ },
+ {
+  "where": "pro: Package carries the Pro tag",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "pro: Package open",
+  "ok": true,
+  "detail": "[{\"v\":\"status\",\"label\":\"Status\",\"on\":\"false\",\"locked\":false,\"pro\":false},{\"v\":\"attention\",\"label\":\"Action\",\"on\":\"true\",\"locked\":false,\"pro\":false},{\"v\":\"package\",\"label\":\"Package\",\"on\":\"false\",\"locked\":false,\"pro\":true}]"
+ },
+ {
+  "where": "pro: the heading is not uppercase",
+  "ok": true,
+  "detail": "{\"t\":\"Group the list by\",\"tt\":\"none\",\"ff\":\"\\\"Source Serif 4\\\", Georgia, serif\"}"
+ },
+ {
+  "where": "pro: the heading is not mono",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif"
+ },
+ {
+  "where": "free: population",
+  "ok": true,
+  "detail": "[{\"v\":\"status\",\"label\":\"Status\",\"on\":\"false\",\"locked\":false,\"pro\":false},{\"v\":\"attention\",\"label\":\"Action\",\"on\":\"true\",\"locked\":false,\"pro\":false},{\"v\":\"package\",\"label\":\"Package\",\"on\":\"false\",\"locked\":true,\"pro\":true}]"
+ },
+ {
+  "where": "free: exactly Status, Action, Package",
+  "ok": true,
+  "detail": "[\"Status\",\"Action\",\"Package\"]"
+ },
+ {
+  "where": "free: Action chosen by default",
+  "ok": true,
+  "detail": "[{\"v\":\"status\",\"label\":\"Status\",\"on\":\"false\",\"locked\":false,\"pro\":false},{\"v\":\"attention\",\"label\":\"Action\",\"on\":\"true\",\"locked\":false,\"pro\":false},{\"v\":\"package\",\"label\":\"Package\",\"on\":\"false\",\"locked\":true,\"pro\":true}]"
+ },
+ {
+  "where": "free: Package carries the Pro tag",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "free: Package locked",
+  "ok": true,
+  "detail": "[{\"v\":\"status\",\"label\":\"Status\",\"on\":\"false\",\"locked\":false,\"pro\":false},{\"v\":\"attention\",\"label\":\"Action\",\"on\":\"true\",\"locked\":false,\"pro\":false},{\"v\":\"package\",\"label\":\"Package\",\"on\":\"false\",\"locked\":true,\"pro\":true}]"
+ },
+ {
+  "where": "free: the heading is not uppercase",
+  "ok": true,
+  "detail": "{\"t\":\"Group the list by\",\"tt\":\"none\",\"ff\":\"\\\"Source Serif 4\\\", Georgia, serif\"}"
+ },
+ {
+  "where": "free: the heading is not mono",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgia, serif"
+ },
+ {
+  "where": "free: choosing Package changes nothing",
+  "ok": true,
+  "detail": "[\"offer\",\"materials\",\"nudge\",\"agent\",\"quiet\",\"closed\"]"
+ }
+]

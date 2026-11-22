@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the panel holds no export",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Export downloads exactly the rows the list shows",
+  "ok": true,
+  "got": "9 rows vs 9 shown"
+ },
+ {
+  "name": "its name is the old label",
+  "ok": true,
+  "got": ""
+ }
+]

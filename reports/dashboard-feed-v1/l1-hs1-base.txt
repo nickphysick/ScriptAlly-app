@@ -1,0 +1,101 @@
+
+Running 6 tests using 1 worker
+
+[1/6] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/6] [measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px
+  1) [measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:137:15
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-f76bd-ove-the-page-scrolled-400px-measure/error-context.md
+
+
+[3/6] [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order
+  2) [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:213:13
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-9507e-r-links-the-switch-in-order-measure/error-context.md
+
+
+[4/6] [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ?
+  3) [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:272:11
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-1e4ed--switch-Esc-returns-to-the--measure/error-context.md
+
+
+[5/6] [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself
+  4) [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:379:13
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-35960-pen-nothing-opens-by-itself-measure/error-context.md
+
+
+[6/6] [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot
+  5) [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:579:11
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-21ce3-card-draws-a-real-StatusDot-measure/error-context.md
+
+
+  5 failed
+    [measure] › tests/e2e/helpSystemV1.measure.ts:127:1 › HS1-A1 · on top: the Help menu, the Log a query menu and the checklist are above the page, scrolled 400px 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot 
+  1 passed (32.3s)

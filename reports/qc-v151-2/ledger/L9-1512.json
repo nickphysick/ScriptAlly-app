@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"h\":true,\"bg\":\"rgb(42, 58, 82)\",\"tBg\":\"rgb(255, 255, 255)\",\"tFg\":\"rgb(42, 58, 82)\",\"mo\":[\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\",\"rgb(255, 255, 255)\"]}"
+ },
+ {
+  "where": "the date header navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "TODAY white with navy text",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) rgb(42, 58, 82)"
+ },
+ {
+  "where": "month names white",
+  "ok": true,
+  "detail": "[\"rgb(255, 255, 255)\"]"
+ },
+ {
+  "where": "load: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":1112.390625,\"tag\":1112.125,\"inView\":true}"
+ },
+ {
+  "where": "drag: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":947.4375,\"tag\":947.125,\"inView\":true}"
+ },
+ {
+  "where": "zoom 6w: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":841.78125,\"tag\":841.28125,\"inView\":true}"
+ },
+ {
+  "where": "zoom 6m: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":992.71875,\"tag\":993.0625,\"inView\":true}"
+ },
+ {
+  "where": "zoom 3m: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":947.4375,\"tag\":947.125,\"inView\":true}"
+ }
+]

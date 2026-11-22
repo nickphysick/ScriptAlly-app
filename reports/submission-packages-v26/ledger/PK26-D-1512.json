@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PK26-D-1512",
+  "where": "the rim is 7px or more",
+  "ok": true,
+  "detail": "rim 7"
+ },
+ {
+  "lock": "PK26-D-1512",
+  "where": "header left at the inner border",
+  "ok": true,
+  "detail": "911.0 vs 911.0"
+ },
+ {
+  "lock": "PK26-D-1512",
+  "where": "header right at the inner border",
+  "ok": true,
+  "detail": "1497.0 vs 1497.0"
+ },
+ {
+  "lock": "PK26-D-1512",
+  "where": "header top at the inner border",
+  "ok": true,
+  "detail": "15.0 vs 15.0"
+ },
+ {
+  "lock": "PK26-D-1512",
+  "where": "the header is filled (pink)",
+  "ok": true,
+  "detail": "rgb(243, 212, 214)"
+ },
+ {
+  "lock": "PK26-D-1512",
+  "where": "the footer stops at the inner border too",
+  "ok": true,
+  "detail": "[911,1497,967]"
+ }
+]

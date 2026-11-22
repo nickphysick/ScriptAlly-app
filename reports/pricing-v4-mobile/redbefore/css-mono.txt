@@ -1,0 +1,40 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+PVM-10 .mk-pvh1 Special Elite 400
+PVM-10 .mk-pvptprice Special Elite 400
+PVM-10 .mk-pvsub Source Serif 4 400
+PVM-10 .mk-pvform button[type=submit] Source Serif 4 600
+PVM-10 .mk-pvsuit Source Serif 4 600
+PVM-10 .mk-pvmore Source Serif 4 500
+PVM-10 .mk-pvcount .mk-fmmeta JetBrains Mono 600
+PVM-10 .mk-pvsheet .mk-pvq Special Elite 400
+PVM-10 .mk-pvsheet .mk-pvopt Source Serif 4 600
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:404:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them (1.2s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:404:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them 
+
+    Error: .mk-pvmore
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "JetBrains Mono"
+    Received: "Source Serif 4"
+
+      418 |     const f = await face(sel);
+      419 |     console.log(`PVM-10 ${sel} ${f.family} ${f.weight}`);
+    > 420 |     expect.soft(f.family, sel).toBe(family);
+          |                                ^
+      421 |     if (weight) expect.soft(f.weight, `${sel} weight`).toBe(weight);
+      422 |   };
+      423 |   await expectFace(".mk-pvh1", "Special Elite", "400");
+        at expectFace (/Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:420:32)
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:428:3
+
+    Error Context: test-results/pricingMobile.measure.ts-P-6e434-ono-where-the-ref-puts-them-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:404:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them 
+  1 passed (19.5s)

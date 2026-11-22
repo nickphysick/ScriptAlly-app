@@ -21,6 +21,7 @@
  * soft pink with a sentence and a button. A Pro user reading a greyed-out upsell learns their
  * money bought them a disabled control.
  */
+import type { Entitlement } from "../../lib/entitlements";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { placeMenu } from "../../lib/todoMenu";
@@ -36,7 +37,8 @@ export interface AccountMenuProps {
   onClose: () => void;
   name: string;
   email?: string;
-  plan?: UserPlan;
+  /** Plan rules v1: the resolved entitlement (lib/entitlements), which decides the plan line and the upgrade link. */
+  entitlement: Entitlement;
   /** Router-direct navigation — AppShell's goPath. */
   onNavigatePath: (path: string) => void;
   onSignOut: () => void;
@@ -46,10 +48,12 @@ export interface AccountMenuProps {
    * triggers sit at opposite ends of the screen.
    */
   anchor?: HTMLElement | null;
+  /** Shell nav v3: Your notes' unseen replies, for the ink menu's "Your notes" row. */
+  newReplies?: number;
 }
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({
-  open, onClose, name, email, plan, onNavigatePath, onSignOut, anchor,
+  open, onClose, name, email, entitlement, onNavigatePath, onSignOut, anchor, newReplies = 0,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number; width?: number } | null>(null);
@@ -60,7 +64,8 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
    * inner edge and as wide as the sidebar's inner column, with the plan on an ink tile. Every other
    * opener (the phone's bar, the marketing nav, the dev shells) keeps the menu it had.
    */
-  const footRow = (anchor?.closest?.(".ws-pfrow") as HTMLElement | null) ?? null;
+  /* the full sidebar's foot row, or the rail's foot (sidebar rail v1): both open the ink menu above it */
+  const footRow = (anchor?.closest?.(".ws-pfrow, .wsr-foot") as HTMLElement | null) ?? null;
   const ink = !!footRow && typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 768px)").matches;
 
   /* the foot row stays lit while its menu is open */
@@ -139,7 +144,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   }, [open, onClose, anchor]);
 
   if (!open) return null;
-  const line = planLine(plan);
+  const line = planLine(entitlement);
   const go = (path: string) => () => { onClose(); onNavigatePath(path); };
   /* one way out, shared by both menus — no confirm: leaving is not destructive */
   const signOut = () => { onClose(); onSignOut(); };
@@ -154,6 +159,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         pos={pos}
         go={go}
         onSignOut={signOut}
+        newReplies={newReplies}
       />,
       document.body,
     );
@@ -246,7 +252,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
             `/account/tasks` is the one form for those fields, so this is a plain navigation — and
             the dispatch went in the SAME commit as the listener, because an event with no listener
             is a menu row that silently does nothing. */}
-        <button type="button" className="am-row" role="menuitem" onClick={go("/account/tasks")}>
+        <button type="button" className="am-row" role="menuitem" onClick={go("/account/preferences")}>
           <SlidersHorizontal aria-hidden="true" /><span>Task settings</span>
         </button>
         <button type="button" className="am-row" role="menuitem" onClick={go("/help")}>

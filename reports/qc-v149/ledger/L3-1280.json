@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L3-1280",
+  "where": "population: the banner and the With you chip",
+  "ok": true,
+  "detail": "n 27 · chip 27"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "its n is the With you chip's count",
+  "ok": true,
+  "detail": "27 vs 27"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "one to five faces",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "Show them presses With you",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "…and the list is exactly the With you set",
+  "ok": true,
+  "detail": "27 rows, 0 not you"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "…which the All view tagged the same",
+  "ok": true,
+  "detail": "ids differ"
+ },
+ {
+  "lock": "L3-1280",
+  "where": "drawn because n > 0",
+  "ok": true,
+  "detail": "27"
+ }
+]

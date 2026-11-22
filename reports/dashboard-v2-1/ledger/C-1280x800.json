@@ -1,0 +1,176 @@
+[
+ {
+  "lock": "C1",
+  "where": "Egg: population",
+  "ok": true,
+  "detail": "{\"steps\":6,\"tiles\":3,\"band\":\"rgb(244, 224, 215)\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "Egg: the ring's arc is the notes ratio ±2%",
+  "ok": true,
+  "detail": "0.0% want 0.0% (circle 0.0)"
+ },
+ {
+  "lock": "C1",
+  "where": "Egg: the rank, its article, the next rank",
+  "ok": true,
+  "detail": "{\"rank\":\"Egg\",\"pre\":\"You’re an\",\"next\":\"Fledgling\",\"on\":\"Egg\",\"nx\":\"Fledgling\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "Egg: the line, and \"hatch into\" for the Egg alone",
+  "ok": true,
+  "detail": "One more note and you hatch into a Fledgling."
+ },
+ {
+  "lock": "C1",
+  "where": "Egg: the badge and the pills",
+  "ok": true,
+  "detail": "badge 104 pill 44"
+ },
+ {
+  "lock": "C1",
+  "where": "Egg: no note, the first-note line and no chip",
+  "ok": true,
+  "detail": "Your first note counts towards Fledgling. chip false"
+ },
+ {
+  "lock": "C1",
+  "where": "Egg: the founding number",
+  "ok": true,
+  "detail": "No. 42 · "
+ },
+ {
+  "lock": "C1",
+  "where": "Fledgling: population",
+  "ok": true,
+  "detail": "{\"steps\":6,\"tiles\":3,\"band\":\"rgb(244, 224, 215)\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "Fledgling: the ring's arc is the notes ratio ±2%",
+  "ok": true,
+  "detail": "66.7% want 66.7% (circle 338.7)"
+ },
+ {
+  "lock": "C1",
+  "where": "Fledgling: the rank, its article, the next rank",
+  "ok": true,
+  "detail": "{\"rank\":\"Fledgling\",\"pre\":\"You’re a\",\"next\":\"Archivist\",\"on\":\"Fledgling\",\"nx\":\"Archivist\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "Fledgling: the line, and \"hatch into\" for the Egg alone",
+  "ok": true,
+  "detail": "One more note and you become an Archivist."
+ },
+ {
+  "lock": "C1",
+  "where": "Fledgling: the badge and the pills",
+  "ok": true,
+  "detail": "badge 104 pill 44"
+ },
+ {
+  "lock": "C1",
+  "where": "Fledgling: no note, the first-note line and no chip",
+  "ok": true,
+  "detail": "Your first note counts towards Archivist. chip false"
+ },
+ {
+  "lock": "C1",
+  "where": "Fledgling: the founding number",
+  "ok": true,
+  "detail": "No. 42 · "
+ },
+ {
+  "lock": "C1",
+  "where": "Like opens FeedbackDock with Like chosen",
+  "ok": true,
+  "detail": "Something I liked"
+ },
+ {
+  "lock": "C1",
+  "where": "Archivist: population",
+  "ok": true,
+  "detail": "{\"steps\":6,\"tiles\":3,\"band\":\"rgb(244, 224, 215)\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "Archivist: the ring's arc is the notes ratio ±2%",
+  "ok": true,
+  "detail": "75.0% want 75.0% (circle 338.7)"
+ },
+ {
+  "lock": "C1",
+  "where": "Archivist: the rank, its article, the next rank",
+  "ok": true,
+  "detail": "{\"rank\":\"Archivist\",\"pre\":\"You’re an\",\"next\":\"Scout\",\"on\":\"Archivist\",\"nx\":\"Scout\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "Archivist: the line, and \"hatch into\" for the Egg alone",
+  "ok": true,
+  "detail": "Two more notes and you become a Scout."
+ },
+ {
+  "lock": "C1",
+  "where": "Archivist: the badge and the pills",
+  "ok": true,
+  "detail": "badge 104 pill 44"
+ },
+ {
+  "lock": "C1",
+  "where": "Archivist: no note, the first-note line and no chip",
+  "ok": true,
+  "detail": "Your first note counts towards Scout. chip false"
+ },
+ {
+  "lock": "C1",
+  "where": "Archivist: the founding number",
+  "ok": true,
+  "detail": "No. 42 · "
+ },
+ {
+  "lock": "C1",
+  "where": "QueryHawk: population",
+  "ok": true,
+  "detail": "{\"steps\":6,\"tiles\":3,\"band\":\"rgb(244, 224, 215)\"}"
+ },
+ {
+  "lock": "C1",
+  "where": "QueryHawk: the ring's arc is the notes ratio ±2%",
+  "ok": true,
+  "detail": "100.0% want 100.0% (circle 338.7)"
+ },
+ {
+  "lock": "C1",
+  "where": "QueryHawk: the rank, its article, the next rank",
+  "ok": true,
+  "detail": "{\"rank\":\"QueryHawk\",\"pre\":\"You’re a\",\"next\":null,\"on\":\"QueryHawk\",\"nx\":null}"
+ },
+ {
+  "lock": "C1",
+  "where": "QueryHawk: the line, and \"hatch into\" for the Egg alone",
+  "ok": true,
+  "detail": "You’ve reached QueryHawk. Thank you."
+ },
+ {
+  "lock": "C1",
+  "where": "QueryHawk: the badge and the pills",
+  "ok": true,
+  "detail": "badge 104 pill 44"
+ },
+ {
+  "lock": "C1",
+  "where": "QueryHawk: no note, the first-note line and no chip",
+  "ok": true,
+  "detail": "null chip false"
+ },
+ {
+  "lock": "C1",
+  "where": "QueryHawk: the founding number",
+  "ok": true,
+  "detail": "No. 42 · "
+ }
+]

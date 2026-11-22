@@ -89,6 +89,7 @@ const TABLE: Record<TaskType, { onBoard: boolean; with: DueSource | null; owner:
   dream_agent_unqueried:     { onBoard: false, with: null,      owner: "none",   ownerUndated: "none" },
   /* Query actions v1 (27 Sep): the drawer's derived tasks carry no natural date of their own. */
   offer_tell:                { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
+  offer_tell_all:            { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
   offer_send_full:           { onBoard: true,  with: null,      owner: "owed",   ownerUndated: "owed" },
   withdraw_tell:             { onBoard: true,  with: null,      owner: "none",   ownerUndated: "none" },
   signed_tell:               { onBoard: true,  with: null,      owner: "none",   ownerUndated: "none" },
@@ -342,7 +343,9 @@ describe("when a task falls", () => {
     const table = ref.match(/const BUCK=\{([^;]+)\};/)?.[1] ?? "";
     expect(table, "the contract no longer carries its BUCK table").not.toBe("");
     /* each entry is `key:['Label','class']` — the FIRST string of each pair is the head's word */
-    const words = [...table.matchAll(/\w+:\['([^']*)'/g)].map((m) => m[1]);
+    const words = [...table.matchAll(/\w+:\['([^']*)'/g)].map((m) => m[1])
+      /* Consistency roll-out v1.1, Phase 2: the app says "Past expected" where the contract (a design ref, not edited) says "Overdue" */
+      .map((w) => (w === "Overdue" ? "Past expected" : w));
     expect(WHEN_ORDER.map((w) => WHEN_LABEL[w])).toEqual(words);
   });
 });

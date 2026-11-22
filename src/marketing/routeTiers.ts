@@ -10,7 +10,7 @@
  * Pure module: no React, no Firebase — App.tsx branches on tierForPath, and the tests lock
  * the resolution table.
  */
-import { routeBase } from "../lib/helpPath";
+import { HELP_PATH, routeBase } from "../lib/helpPath";
 import { ACCOUNT_SECTION_PATHS } from "../lib/accountRoutes";
 
 /**
@@ -30,10 +30,21 @@ export const WORKSPACE_PATHS = new Set([
      reported "no visible .wpg" on a page that renders one. */
   "/dashboard", "/queries", "/queries/analytics", "/queries/responses",
   // The To-do WORKSPACE — four pages, one section (workspace pack P1).
-  "/todo", "/todo/calendar", "/todo/corkboard",
+  "/todo", "/todo/corkboard",
   "/agents", "/agents/discover",
-  "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
+  "/manuscripts", "/manuscripts/comps", "/queries/packages", "/manuscripts/versions", "/import",
+  // Sidebar materials v1 (6 Nov): the Materials section's Query letters page.
+  "/materials/letters",
+  // Your notes v1 (9 Nov): the founding writer's notes, under More › Founding writer.
+  "/your-notes",
   "/account", "/plans", "/help",
+  // Phone app v2 Part 7D: Streaks & goals, a phone page (a computer is sent to the dashboard).
+  "/goals",
+  // Phone app v3: You, the phone's fifth place (a computer is sent to the dashboard).
+  "/you",
+  // Phone app v5: the full list of queries (pushed from Today) and the Materials tab — phone addresses; a computer is
+  // sent to `/queries` and to the dashboard (App.tsx, lib/phoneV5 `desktopV5Redirect`).
+  "/queries/all", "/materials",
   /* The settings SECTIONS are real routes (`/account/profile`, …) — spread from the one table so
      a new section cannot be added without being registered here. `/account` itself stays listed
      above: it must survive this check for App.tsx's redirect to it run at all. */
@@ -48,4 +59,13 @@ export function tierForPath(path: string): RouteTier {
   /* Help Centre v1 — an article (`/help/{slug}`) is the Help Centre to every exact-path table */
   if (WORKSPACE_PATHS.has(routeBase(path))) return "workspace";
   return null;
+}
+
+/**
+ * Non-workspace v1, Phase 7 — a workspace path that a signed-out visitor may still READ, in the public shell: the Help
+ * centre and its articles. Its tier is unchanged ("workspace": signed in, it is an app page in the app shell); App asks
+ * this only when there is no user, ahead of the sign-in screen.
+ */
+export function readableSignedOut(path: string): boolean {
+  return routeBase(path) === HELP_PATH;
 }

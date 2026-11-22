@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L7",
+  "where": "pk40-ms: the door is there",
+  "ok": true,
+  "detail": "[data-pk26=\"page\"] [data-pk39=\"how\"]"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: the guide opened",
+  "ok": true,
+  "detail": "hw"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: five steps",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: it opens on step 1 of 5",
+  "ok": true,
+  "detail": "Step 1 of 5"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: focus is on Next",
+  "ok": true,
+  "detail": "focus"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: → reaches step 5, whose button reads Got it",
+  "ok": true,
+  "detail": "step 5"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: the old dialog's markup is absent",
+  "ok": true,
+  "detail": "hwm"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: Escape closes it",
+  "ok": true,
+  "detail": "hw"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-ms: focus returns to the opener",
+  "ok": true,
+  "detail": "focus"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: the door is there",
+  "ok": true,
+  "detail": "[data-pk26=\"page\"] .p6-pb-bt .p6-hd-s"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: the guide opened",
+  "ok": true,
+  "detail": "hw"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: five steps",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: it opens on step 1 of 5",
+  "ok": true,
+  "detail": "Step 1 of 5"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: focus is on Next",
+  "ok": true,
+  "detail": "focus"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: → reaches step 5, whose button reads Got it",
+  "ok": true,
+  "detail": "step 5"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: the old dialog's markup is absent",
+  "ok": true,
+  "detail": "hwm"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: Escape closes it",
+  "ok": true,
+  "detail": "hw"
+ },
+ {
+  "lock": "L7",
+  "where": "pk40-new: focus returns to the opener",
+  "ok": true,
+  "detail": "focus"
+ }
+]

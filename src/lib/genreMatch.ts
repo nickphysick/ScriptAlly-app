@@ -20,7 +20,7 @@
  * chip fail to tint would learn that the feature is unreliable rather than that a space exists.
  */
 
-import { canonicalIdOf, isPersonalId, matchKey } from "./genres";
+import { canonicalIdOf, genreAndAncestors, isPersonalId, matchKey } from "./genres";
 
 /** The one switch. Flip to false and no chip, row or column head tints anywhere. */
 export const GENRE_MATCH_TINT = true;
@@ -39,7 +39,7 @@ export const matchGenre = (manuscriptGenre: string | undefined | null): string |
 
 /** Does this agent genre match? Both sides normalised — see the header. */
 export const isGenreMatch = (genre: string, match: string | null): boolean =>
-  match !== null && norm(genre) === match;
+  match !== null && (norm(genre) === match || bookKeys([match]).has(genreKey(genre)));
 
 /* ══ Contact list v14 (ruling Q5) — THE BOOK'S GENRES, ONE DEFINITION OF "TAKES THE BOOK" ══════════════════
  * A manuscript has a main `genre` and optional `subGenres`; an agent TAKES THE BOOK when their genres
@@ -72,8 +72,22 @@ export function bookGenres(ms: { genre?: string | null; subGenres?: readonly str
 }
 
 /** A chip-tick test over the book's genres: does this one agent genre match any of them? */
+/**
+ * Manuscripts v28 Part D2 — the keys a book's genres match on: each genre's key and, for a canonical sub-genre, every
+ * genre it counts as (`genreAndAncestors`). So a psychological thriller is taken by an agent who lists Thriller.
+ */
+export function bookKeys(book: readonly string[]): Set<string> {
+  const keys = new Set<string>();
+  for (const g of book) {
+    const k = genreKey(g);
+    if (!k) continue;
+    for (const a of canonicalIdOf(k) ? genreAndAncestors(k) : [k]) keys.add(a);
+  }
+  return keys;
+}
+
 export function bookGenreHit(book: readonly string[]): (genre: string) => boolean {
-  const keys = new Set(book.map(genreKey));
+  const keys = bookKeys(book);
   return (g) => keys.size > 0 && keys.has(genreKey(g));
 }
 

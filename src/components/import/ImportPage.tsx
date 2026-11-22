@@ -4,14 +4,20 @@
  *
  * The Import page (onboarding v5, part 3; ref design-refs/onboarding/onboarding-journey-v5.html #desk).
  *
- * The in-app home for all three ways of bringing a list across. It opens on three tiles — Smart
- * import, Our template, Match your own columns — under the shared panel header. The first two start
- * the SAME `ImportFlow` set-up runs; the third opens the column matcher (`ImportCsv`).
+ * The in-app home for bringing a list across. It opens on two tiles — Smart import and Match your own
+ * columns — under the shared panel header, with the headings line beneath (two-door import v1: the
+ * template tile went; the Smart import tile's picker reads a file with our headings straight in). The
+ * first starts the SAME `ImportFlow` set-up runs; the second opens the column matcher (`ImportCsv`).
  *
  * No tile is ringed, badged or recommended. A spent Smart Import disables its tile's button and the
  * fact line says why; there is no dead-end screen and no upgrade prompt here.
  */
-import React, { useRef, useState } from "react";
+import { importAgeCategory } from "../../lib/ageCategories";
+import { useIsMobile } from "../shell/mobileChrome";
+import { ImportDoorsPhone } from "../phone/pages/ImportDoorsPhone";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { BookStep } from "../onboarding/BookStep";
 import { ManuscriptFieldsState, emptyManuscriptFields } from "../onboarding/ManuscriptFields";
 import { ImportCancelConfirm } from "./ImportCancelConfirm";
@@ -25,12 +31,13 @@ import { PanelHeader } from "../shell/PanelHeader";
 import { ImportFlow, type ImportFlowHandle, type ImportFlowProps, type ImportFlowScreen } from "./ImportFlow";
 import { ImportCsv } from "../ImportCsv";
 import { useScriptAllyDb } from "../../lib/db";
+import { LoadFailed } from "../notes/LoadFailed";
+import { useLoadFailure } from "../notes/useLoadFailure";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import type { SmartImportEntitlement } from "../../lib/smartImportEntitlement";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
-import { dayMonth } from "../../lib/dates";
-import { CAPTURE_PHOTOS_ACTION } from "../../lib/captureFork";
-import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_TEMPLATE, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "../../lib/importPage";
+import { CAPTURE_PHOTOS_ACTION, CAPTURE_QUIET_LINE, CAPTURE_QUIET_LINK } from "../../lib/captureFork";
+import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "../../lib/importPage";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
@@ -53,11 +60,6 @@ const IconSpark = () => (
     <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" /><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" />
   </svg>
 );
-const IconSheet = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <rect x="4" y="3" width="16" height="18" rx="2" /><path d="M4 9h16M4 15h16M10 3v18" />
-  </svg>
-);
 const IconColumns = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M7 4v16M17 4v16M7 8h10M7 16h10" /><path d="M14 5l3 3-3 3M10 13l-3 3 3 3" />
@@ -65,9 +67,16 @@ const IconColumns = () => (
 );
 
 export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
-  const { manuscripts, currentUser, addManuscript } = useScriptAllyDb();
+  const { manuscripts, currentUser, addManuscript, entitlement: planEntitlement } = useScriptAllyDb();
   const liveEntitlement = useSmartImportEntitlement();
+  /* overnight fixes v1, Part 2 — while a read is down the page is the error: importing over a read that failed is how a
+     writer ends up with duplicates. Never in the labs, which have no reads. */
+  const liveFail = useLoadFailure();
+  const importFail = lab ? null : liveFail;
   const entitlement = lab?.entitlement ?? liveEntitlement;
+  /* Phone app v2 Part 8B: below 768px only the doors are the phone's (ImportDoorsPhone); every press below is this
+     page's own handler, and the flow, the book step and the matcher are untouched */
+  const phone = useIsMobile();
 
   const [view, setView] = useState<"tiles" | "matcher">("tiles");
   const [flowScreen, setFlowScreen] = useState<ImportFlowScreen>(lab?.flow ? "overview" : "idle");
@@ -87,20 +96,21 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const created = useRef<ManuscriptIdCache>({ id: null });
   const needsBook = !manuscript && !draft && !lab?.flow;
   const openPicker = (kind: "smart" | "photos" | "template") =>
-    kind === "smart" ? flowRef.current?.chooseFile() : kind === "photos" ? flowRef.current?.openPhotos() : flowRef.current?.chooseTemplate();
+    /* two-door import v1: one picker reads both — a file with our headings goes to the template parser */
+    kind === "photos" ? flowRef.current?.openPhotos() : flowRef.current?.chooseFile();
   const start = (kind: "smart" | "photos" | "template") => { if (needsBook) setBook(kind); else openPicker(kind); };
 
   const ensureManuscript = async (): Promise<string | null> => {
     if (lab?.ensure) return lab.ensure();
     if (manuscript) return manuscript.id;
     return ensureManuscriptOnce(created.current, !!draft, async () => {
-      const limit = manuscriptLimitError(currentUser?.plan, manuscripts.length);
+      const limit = manuscriptLimitError(planEntitlement.pro, manuscripts.length);
       if (limit) { setHostError(limit); return null; }
       const res = await addManuscript(buildManuscriptPayload({
         title: draft!.title.trim() || "Untitled manuscript",
         genre: draft!.genre,
         subGenres: draft!.subGenres,
-        ageCategory: draft!.ageCategory,
+        ageCategory: importAgeCategory(draft!.ageCategory),
         wordCount: parseInt(draft!.wordCount.replace(/\D/g, ""), 10) || 0,
         logline: draft!.strapline,
         status: ManuscriptStatus.QUERYING,
@@ -111,6 +121,38 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
     });
   };
 
+  /* ── Dashboard first visit v2 (Part F): "Carry on checking" opens /import?resume=1 ──
+     The kept review is read once, the flow reopens it at the step and row it was left on (its manuscript made the
+     active one first, so the import attaches where it was going), and the parameter comes off the URL. This page
+     stays mounted, so it answers the parameter whenever it arrives, not only on mount. */
+  const loc = useLocation();
+  const navigate = useNavigate();
+  const resumeAsked = !lab && new URLSearchParams(loc.search).get("resume") === "1";
+  /* "Start again with a different file" (the dashboard's resume card) deletes the draft and arrives here asking for
+     Smart Import's upload: the picker opens, inside the press's activation window */
+  const startAsked = !lab && new URLSearchParams(loc.search).get("start") === "smart";
+  useEffect(() => {
+    if (!startAsked || importFail) return; /* asked again once the reads are back: the parameter stays until then */
+    navigate("/import", { replace: true });
+    setView("tiles");
+    start("smart");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startAsked, !!importFail]);
+  useEffect(() => {
+    if (!resumeAsked || !currentUser || importFail) return;
+    let live = true;
+    /* loaded when first needed: it brings Firebase, and this page mounts in labs that have none */
+    void import("../../lib/importDraft").then((m) => m.loadDraft(currentUser.id)).then((d) => {
+      if (!live) return;
+      navigate("/import", { replace: true });
+      if (!d) return;
+      if (d.meta.manuscriptId) { try { window.localStorage.setItem(ACTIVE_MS_KEY, d.meta.manuscriptId); } catch { /* private mode */ } }
+      setView("tiles"); setBook(null);
+      flowRef.current?.resume(d);
+    }).catch(() => { if (live) navigate("/import", { replace: true }); });
+    return () => { live = false; };
+  }, [resumeAsked, currentUser, navigate, !!importFail]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* ── Leaving part-way ── "Cancel" asks with the drawer's own words; Discard drops the read file. */
   const [asking, setAsking] = useState(false);
 
@@ -119,9 +161,27 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   /* smart-import-photos-v1: the same Smart Import, read from photos of the list. */
   const usePhotos = act("usePhotos", () => start("photos"));
   const download = act("download", () => { void downloadTemplate(TEMPLATE_FILENAME); });
-  const chooseTemplate = act("templatePicker", () => start("template"));
   const openMatcher = act("matcher", () => setView("matcher"));
   const showTiles = !inFlow && !book;
+
+  /* overnight fixes v1, Part 2 — the error in the tiles' and the flow's place; the header stays. A flow already under
+     way is left to finish (its review holds what was read before the fault). */
+  if (importFail && !inFlow) {
+    return (
+      <WorkspacePageGrid
+        className="impg impg-wpg" scrollLabel="Import"
+        masthead={phone ? null : (
+          <PanelHeader
+            kind="title" slim className="ph ph--compact ph--panel"
+            attrs={{ "data-probe": "page-header", "data-size": "compact", "data-impg": "header" }}
+            title={IMPORT_TITLE} sub={IMPORT_SUB}
+          />
+        )}
+      >
+        <LoadFailed words={importFail.words} onRetry={importFail.retry} busy={importFail.busy} probe="import" />
+      </WorkspacePageGrid>
+    );
+  }
 
   if (view === "matcher") {
     /* The matcher opens with its own open title under a "‹ Back to import" link: no panel header. */
@@ -139,7 +199,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   return (
     <WorkspacePageGrid
       className="impg impg-wpg" scrollLabel="Import"
-      masthead={!showTiles ? null : (
+      masthead={!showTiles || phone ? null : (
         <PanelHeader
           kind="title" slim className="ph ph--compact ph--panel"
           attrs={{ "data-probe": "page-header", "data-size": "compact", "data-impg": "header" }}
@@ -147,7 +207,13 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
         />
       )}
     >
-      {showTiles && (
+      {showTiles && phone ? (
+        <ImportDoorsPhone lede={IMPORT_SUB} smartAllowed={entitlement.allowed} smartFact={smartFactLine(entitlement)}
+          onSmart={chooseSmart} onMatch={openMatcher}
+          onByHand={() => openQueryDrawer({ mode: "log", ...(manuscript ? { manuscriptId: manuscript.id } : {}) })}
+          footnote={`${IMPORT_FOOTNOTE} ${IMPORT_FOOTNOTE_SECOND}`} />
+      ) : null}
+      {showTiles && !phone && (
         <div className="impg-tilesview" data-impg="tiles-view">
           <div className="impg-tiles" data-impg="tiles">
             <section className="impg-tile" data-impg="tile" data-tile="smart" aria-labelledby="impg-t-smart">
@@ -156,22 +222,12 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
                 <h2 className="impg-h" id="impg-t-smart">{TILE_SMART.title}</h2>
                 <p className="impg-p">{TILE_SMART.text}</p>
                 <div className="impg-acts">
-                  <button type="button" className="impg-btn" data-act="smart" onClick={chooseSmart} disabled={!entitlement.allowed}>{TILE_SMART.action}</button>
+                  {/* two-door import v1: never disabled — the same picker reads a headings file, which spends nothing; a
+                      spent account's other files reach the "already used" screen, as in set-up */}
+                  <button type="button" className="impg-btn" data-act="smart" onClick={chooseSmart}>{TILE_SMART.action}</button>
                   <button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick={usePhotos} disabled={!entitlement.allowed}>{CAPTURE_PHOTOS_ACTION}</button>
                 </div>
-                <p className="impg-fact" data-impg="fact">{smartFactLine(entitlement, dayMonth)}</p>
-              </div>
-            </section>
-            <section className="impg-tile" data-impg="tile" data-tile="template" aria-labelledby="impg-t-template">
-              <span className="impg-disc" aria-hidden="true"><IconSheet /></span>
-              <div className="impg-body">
-                <h2 className="impg-h" id="impg-t-template">{TILE_TEMPLATE.title}</h2>
-                <p className="impg-p">{TILE_TEMPLATE.text}</p>
-                <div className="impg-acts">
-                  <button type="button" className="impg-btn impg-btn--line" data-act="download" onClick={download}>{TILE_TEMPLATE.download}</button>
-                  <button type="button" className="impg-btn impg-btn--line" data-act="upload" onClick={chooseTemplate}>{TILE_TEMPLATE.upload}</button>
-                </div>
-                <p className="impg-fact" data-impg="fact">{TILE_TEMPLATE.fact}</p>
+                <p className="impg-fact" data-impg="fact">{smartFactLine(entitlement)}</p>
               </div>
             </section>
             <section className="impg-tile" data-impg="tile" data-tile="match" aria-labelledby="impg-t-match">
@@ -186,6 +242,12 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
               </div>
             </section>
           </div>
+          {/* two-door import v1: the template is no longer a tile. The one picker above reads a file with our
+              headings straight in; the headings sheet is handed out by the fork's own quiet line. */}
+          <p className="impg-quiet" data-impg="quiet">
+            <span>{CAPTURE_QUIET_LINE}</span>
+            <button type="button" className="impg-link" data-act="download" onClick={download}>{CAPTURE_QUIET_LINK}</button>
+          </p>
           <p className="impg-foot" data-impg="footnote">{IMPORT_FOOTNOTE} {IMPORT_FOOTNOTE_SECOND}</p>
         </div>
       )}

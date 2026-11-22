@@ -46,10 +46,11 @@ describe("CV25 A4: inQuery is retired", () => {
     expect(MAY_NAME_IT.length).toBe(2);
   });
   it("the Scout's client, the one other file that names it, has no caller on the comps page", () => {
-    /* comps v28: every file the page is built from, read from its folders (a hand-written list named two components
+    /* RE-POINTED (comps v32, 17 Nov): the page's new folder, comps32/, joins the sweep.
+       comps v28: every file the page is built from, read from its folders (a hand-written list named two components
        after they were deleted), so a file added there is covered without an edit here */
     const dir = "src/components/manuscripts";
-    const files = ["ComparableTitlesPage.tsx", ...["comps25", "comps28"].flatMap((d) => readdirSync(`${dir}/${d}`).filter((f) => /\.tsx?$/.test(f) && !f.includes(".test.")).map((f) => `${d}/${f}`))];
+    const files = ["ComparableTitlesPage.tsx", ...["comps25", "comps28", "comps30", "comps32"].flatMap((d) => readdirSync(`${dir}/${d}`).filter((f) => /\.tsx?$/.test(f) && !f.includes(".test.")).map((f) => `${d}/${f}`))];
     expect(files.length, "the page's files were found").toBeGreaterThan(10);
     const page = files.map((f) => readFileSync(`${dir}/${f}`, "utf8")).join("\n");
     /* an import, never a mention: comments in those files say what they do not reach */
@@ -76,8 +77,9 @@ describe("CV25 A4: inQuery is retired", () => {
       const s = materialDoors({ comps, letterCompIds: ids, letters: 1, synopses: 0, letterName: null, livePackages: 0, packageQueries: 0 })[0].sentence;
       expect(s).toBe(`Books and films like yours. ${ids.length === 0 ? "None are in your query letter yet." : `${ids.length} ${ids.length === 1 ? "is" : "are"} in your query letter.`}`);
     }
+    /* Manuscripts v27 (22 Oct): the page draws no comps facts at all now, so the page half of this lock is retired with
+       its subject; it asserts the absence instead, so the facts cannot return reading a stored flag. */
     const page = readFileSync("src/components/manuscripts/v12/ManuscriptPage.tsx", "utf8");
-    expect(page).toContain("letterCompIds: nowLetter?.compIds ?? null");
-    expect(page).toContain("currentLetter(ms.id, versions)");
+    expect(page).not.toMatch(/inQuery|materialDoors\(/);
   });
 });

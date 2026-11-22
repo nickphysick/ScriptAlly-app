@@ -1,0 +1,37 @@
+[
+ {
+  "where": "sheet tile",
+  "ok": true,
+  "detail": "url(\"http://127.0.0.1:4321/images/qc/doodle-tile.svg\")"
+ },
+ {
+  "where": "tile size",
+  "ok": true,
+  "detail": "340px 360px"
+ },
+ {
+  "where": "sheet colour",
+  "ok": true,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "title 40px",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "title underline",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "one sentence",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "no banner",
+  "ok": true,
+  "detail": "0"
+ }
+]

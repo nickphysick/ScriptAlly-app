@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "L3",
+  "where": "pk40-std: exactly one status pill",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: it reads /^Out with agents · 5 sent$/",
+  "ok": true,
+  "detail": "Out with agents · 5 sent"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: it is the compact 28 tall at 1280 (±1)",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: the padlock is in it",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: no stage dots",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: the header's parts were read",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: nothing in the header overlaps at 1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-ready: exactly one status pill",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-ready: it reads /^Ready to send$/",
+  "ok": true,
+  "detail": "Ready to send"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-ready: it is the compact 28 tall at 1280 (±1)",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-ready: the padlock is not in it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-ready: no stage dots",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-ready: the header's parts were read",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-ready: nothing in the header overlaps at 1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-draft: exactly one status pill",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-draft: it reads /^Draft · needs /",
+  "ok": true,
+  "detail": "Draft · needs a query letter and pages"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-draft: it is the compact 28 tall at 1280 (±1)",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-draft: the padlock is not in it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-draft: no stage dots",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-draft: the header's parts were read",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-draft: nothing in the header overlaps at 1280",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L3",
+  "where": "labels read (4)",
+  "ok": true,
+  "detail": "[{\"on\":true,\"ring\":true,\"bar\":true,\"barW\":197.5,\"w\":233.5,\"lift\":\"none\"},{\"on\":false,\"ring\":false,\"bar\":false,\"barW\":null,\"w\":233.5,\"lift\":\"none\"},{\"on\":false,\"ring\":false,\"bar\":false,\"barW\":null,\"w\":233.5,\"lift\":\"none\"},{\"on\":false,\"ring\":false,\"bar\":false,\"barW\":null,\"w\":233.5,\"lift\":\"none\"}]"
+ },
+ {
+  "lock": "L3",
+  "where": "exactly one selected",
+  "ok": true,
+  "detail": "[{\"on\":true,\"ring\":true,\"bar\":true,\"barW\":197.5,\"w\":233.5,\"lift\":\"none\"}]"
+ },
+ {
+  "lock": "L3",
+  "where": "no label is ringed",
+  "ok": false,
+  "detail": "[{\"on\":true,\"ring\":true,\"bar\":true,\"barW\":197.5,\"w\":233.5,\"lift\":\"none\"},{\"on\":false,\"ring\":false,\"bar\":false,\"barW\":null,\"w\":233.5,\"lift\":\"none\"},{\"on\":false,\"ring\":false,\"bar\":false,\"barW\":null,\"w\":233.5,\"lift\":\"none\"},{\"on\":false,\"ring\":false,\"bar\":false,\"barW\":null,\"w\":233.5,\"lift\":\"none\"}]"
+ },
+ {
+  "lock": "L3",
+  "where": "the selected label has the 3px bar, inset 18 each side",
+  "ok": true,
+  "detail": "{\"on\":true,\"ring\":true,\"bar\":true,\"barW\":197.5,\"w\":233.5,\"lift\":\"none\"}"
+ },
+ {
+  "lock": "L3",
+  "where": "…and no lift",
+  "ok": true,
+  "detail": "none"
+ }
+]

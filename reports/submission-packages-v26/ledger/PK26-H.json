@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "PK26-H",
+  "where": "the note is one line at 1280",
+  "ok": true,
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":20.25,\"fs\":15,\"cut\":true,\"h3h\":30.890625,\"h3fs\":23}"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "…cut short (it is longer than the room)",
+  "ok": true,
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":20.25,\"fs\":15,\"cut\":true,\"h3h\":30.890625,\"h3fs\":23}"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "the name keeps one line",
+  "ok": true,
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":20.25,\"fs\":15,\"cut\":true,\"h3h\":30.890625,\"h3fs\":23}"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "no note: Add a note",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "…it opens Package details with the note focused",
+  "ok": true,
+  "detail": "pa-id-pdNote p6-id-pdNote"
+ }
+]

@@ -8,15 +8,13 @@
  * closing card pointing at the founding-writer offer.
  *
  * ⚠️ FULL-WIDTH BANDS, NOT THE DOCUMENT CARD. Privacy and Terms are documents you consult; this is
- * a page you read once. `DocumentShell` is for the legal tier and this page does not use it.
+ * a page you read once; it does not use the legal pages' layout.
  *
  * ⚠️ ITS MEASURE IS 1180, NOT THE LANDING'S 1300 — alignment down a page beats matching a number
  * across two.
  *
- * ⚠️ THE SIGN-OFF FOLLOWS `IdentityLine`'s LAW WITHOUT IMPORTING IT: the hairline is its OWN
- * element, never a border or a pseudo-element on either text. The component itself is not reused
- * because it takes an `AgentLike` and pulls `lib/agentDisplay`, a workspace import the marketing
- * tier states it does not make.
+ * The note is signed "Nick" with the role on one line under it (public sweep v1): no surname and no
+ * hairline, so there is no second label for a rule to sit between.
  *
  * Pure presentation over static copy: no Firebase, no stores, no workspace imports.
  */
@@ -26,8 +24,7 @@ import {
   ABOUT_DOCUMENT_TITLE, ABOUT_STORY_ALT, ABOUT_STATEMENT_LINES,
   ABOUT_GAP_BODY, ABOUT_GAP_HIT, ABOUT_TURN, ABOUT_SECTION_H2, ABOUT_VISIONS,
   ABOUT_PLATES, AboutPlate,
-  ABOUT_NOTE_EYEBROW, ABOUT_NOTE_HEADING, ABOUT_NOTE_BODY, ABOUT_NOTE_SIGNATURE,
-  ABOUT_FOUNDER_NAME, ABOUT_FOUNDER_ROLE,
+  ABOUT_NOTE_HEADING, ABOUT_NOTE_BODY, ABOUT_NOTE_SIGNATURE, ABOUT_FOUNDER_ROLE,
   ABOUT_CLOSE_HEADING, ABOUT_CLOSE_BODY, ABOUT_CLOSE_CTA, ABOUT_CLOSE_LINK,
 } from "./aboutCopy";
 import { Runs } from "./CopyRuns";
@@ -126,17 +123,13 @@ export const AboutPage: React.FC<{
         <section className="mk-note" aria-labelledby="mk-note-h">
           <PlateSlot plate={ABOUT_PLATES.founder} className="mk-noteart" />
           <div className="mk-notecol">
-            <p className="mk-notekick">{ABOUT_NOTE_EYEBROW}</p>
             <h2 id="mk-note-h" className="mk-noteh">{ABOUT_NOTE_HEADING}</h2>
             {ABOUT_NOTE_BODY.map((para, i) => (
               <p className="mk-notep" key={i}><Runs runs={para} onNavigate={onNavigate} /></p>
             ))}
             <p className="mk-notesig" aria-hidden="true">{ABOUT_NOTE_SIGNATURE}</p>
-            <div className="mk-signoff">
-              <span className="mk-signname">{ABOUT_FOUNDER_NAME}</span>
-              <span className="mk-signrule" aria-hidden="true" />
-              <span className="mk-signrole">{ABOUT_FOUNDER_ROLE}</span>
-            </div>
+            {/* Public sweep v1: signed "Nick" with the role under it — no surname, no rule. */}
+            <p className="mk-signoff mk-signrole">{ABOUT_FOUNDER_ROLE}</p>
           </div>
         </section>
 

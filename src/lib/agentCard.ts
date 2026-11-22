@@ -219,16 +219,18 @@ export function whereLine(a: Pick<Agent, "city" | "country" | "responseTimeWeeks
  * carry "QueryManager" and "Agency form", which mean Query Manager and the online form (ruling 2);
  * "Other", or anything unrecognised, says nothing rather than guessing.
  */
-export function methodPhrase(m: string | undefined | null): string | null {
+export function methodPhrase(m: string | undefined | null, other?: string | null): string | null {
   const v = (m ?? "").trim().toLowerCase().replace(/\s+/g, "");
+  /* Add agent v1 — an Other method says its own words, or "Other" */
+  if (v === "other") return `Via ${(other ?? "").trim() || "Other"}`;
   if (v === SubmissionMethod.EMAIL.toLowerCase()) return "By email";
   if (v === "querymanager") return "Via QueryManager";
   if (v === "onlineform" || v === "agencyform") return "Via their form";
   if (v === SubmissionMethod.POST.toLowerCase()) return "By post";
   return null;
 }
-export function howLine(a: Pick<Agent, "submissionMethod" | "noResponseMeansNo">): string | null {
-  const bits = [methodPhrase(a.submissionMethod), a.noResponseMeansNo === true ? "Silence means no" : null].filter(Boolean);
+export function howLine(a: Pick<Agent, "submissionMethod" | "noResponseMeansNo" | "submissionMethodOther">): string | null {
+  const bits = [methodPhrase(a.submissionMethod, a.submissionMethodOther), a.noResponseMeansNo === true ? "Silence means no" : null].filter(Boolean);
   return bits.length ? bits.join(" · ") : null;
 }
 

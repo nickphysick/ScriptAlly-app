@@ -20,6 +20,8 @@ import { QueryStatus } from "../types";
 import type { BoardCard } from "./todoBoard";
 import { cardBucket, taskDeed, type Bucket } from "./todoBuckets";
 import { listRowInputs, dueFor, type TaskData } from "./taskCardFacts";
+import type { DueSource } from "./taskDue";
+import { dropSupersededProvisional, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { ticketFacts } from "./ticketFacts";
 import { elapsedPhrase } from "./elapsed";
 import { agentPrimary } from "./agentDisplay";
@@ -163,6 +165,13 @@ export interface TrayItem {
   dial: Dial;
   /** the clock's anchor (ms) — what "oldest" sorts on */
   anchorMs: number;
+  /** v55 (D7): the anchor when the RECORD gives one, else null. `anchorMs` falls back to now (or an own task's
+   *  creation) so the sorts have a number; a figure counted from that fallback read "0 days waiting". Every day count
+   *  reads this instead, through `daysWaiting` (lib/todoWs). Optional so a hand-built item reads as before. */
+  waitMs?: number | null;
+  /** v58.2 (A1): where the due day came from (`taskDue`'s own `source`: a hold, a reminder, a check-in, the reply window…),
+   *  so a figure can say what it is counting from. Read, never re-decided. Optional so a hand-built item reads as before. */
+  dueSource?: DueSource;
   /** a search haystack: deed, agent, agency */
   hay: string;
   /** the due bucket for the Due filter */
@@ -189,6 +198,33 @@ const weekEndYmd = (now: number): string => {
   return localYmd(now + (6 - wd) * DAY);
 };
 
+/**
+ * To-do list v58.2 (A4) — WHEN THE AGENT ASKED, FOR A REQUEST'S FIGURE. The stored request date when the record holds one
+ * (`partialRequestedDate` / `fullRequestedDate`; an R&R has none); else the EARLIEST matching request in the query's
+ * activity log (the Tracking tab keeps the earliest of each status too); else null, and the row shows no figure.
+ * ⚠️ NEVER `lastStatusChange`: any later status write moves it, so a figure counted from it restarted ("3 days waiting"
+ *    on a request asked for in June). A PURE READ: nothing is written and `recomputeQuery` is not touched.
+ * ⚠️ THE LOG READ IS `users/{uid}/activities` (resultingStatus + date) — the log `recomputeQuery` derives from, and the
+ *    one the page holds. The Tracking tab reads its mirror, `queries/{id}/activity` (type + createdAt), written in the same
+ *    batch; where an old or seeded record has only the mirror, this finds nothing (reports/todo-list-v58-2/REPORT.md, A4).
+ * Returns undefined for a task that is not a request, so its anchor stays as it was.
+ */
+export function requestAskedMs(card: BoardCard, q: Query | undefined, activities: readonly Activity[]): number | null | undefined {
+  const status = card.taskType === "partial_requested" ? QueryStatus.PARTIAL_REQUESTED
+    : card.taskType === "full_requested" ? QueryStatus.FULL_REQUESTED
+    : card.taskType === "revise_resubmit" ? QueryStatus.REVISE_RESUBMIT
+    : undefined;
+  if (!status) return undefined;
+  const stored = status === QueryStatus.PARTIAL_REQUESTED ? q?.partialRequestedDate : status === QueryStatus.FULL_REQUESTED ? q?.fullRequestedDate : undefined;
+  const storedMs = stored ? Date.parse(String(stored)) : NaN;
+  if (Number.isFinite(storedMs)) return storedMs;
+  if (!q) return null;
+  const mine = activities.filter((a) => a.queryId === q.id);
+  const kept = dropSupersededProvisional(mine, (a) => ({ status: normalizeResultingStatus(a.resultingStatus), provisional: (a as { dateProvisional?: boolean }).dateProvisional === true }));
+  const times = kept.filter((a) => normalizeResultingStatus(a.resultingStatus) === status).map((a) => getActivityTime(a.date)).filter((t) => Number.isFinite(t) && t > 0);
+  return times.length ? Math.min(...times) : null;
+}
+
 export function dialFor(dueYmd: string | null, anchorMs: number, now: number): Dial {
   if (!dueYmd) return { kind: "none", frac: 0, day: null, mon: "", ymd: null, title: "No date" };
   const due = ymdMs(dueYmd);
@@ -214,6 +250,8 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
   const inp = listRowInputs(card, db);
   const due = dueFor(card, db, db.taskFlags);
   const anchorMs = typeof inp.days === "number" ? now - inp.days * DAY : NaN;
+  /* v58.2 (A4): a request's figure counts from when the agent asked — never from the status's last move */
+  const asked = requestAskedMs(card, query, db.activities ?? []);
   const dial = dialFor(due.ymd, anchorMs, now);
   const own = !!card.userTaskId;
   const name = agent ? agentPrimary(agent) : "";
@@ -245,6 +283,8 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
     card, key: card.key, group: groupOf(card), kind: kindOf(card), bucket, deed, query, agent, userTask, sub,
     initials: own ? null : initialsOf(name || agency || (isSweepCard(card) ? `${card.sweepOf} ` : card.title)),
     who, whoSub, dial, anchorMs: Number.isFinite(anchorMs) ? anchorMs : (userTask?.createdAt ? Date.parse(userTask.createdAt) : now),
+    waitMs: asked !== undefined ? asked : Number.isFinite(anchorMs) ? anchorMs : null,
+    dueSource: due.source,
     hay: `${deed} ${name} ${agency} ${card.title}`.toLowerCase(), due: dueKey, sweep: isSweepCard(card),
   };
 }
@@ -486,7 +526,9 @@ export function whereItStands(q: Query | undefined, spans: readonly { status: st
 
 /* ── Coming up (all caught up) ────────────────────────────────────────────────────────────────── */
 
-export interface Upcoming { ms: number; ymd: string; name: string; line: string; anchorMs: number }
+/** v12 — what lands: a planned nudge, the check-back after a nudge, an agent's reply date, an own task, a snooze's return */
+export type UpcomingKind = "nudge" | "check" | "reply" | "own" | "back";
+export interface Upcoming { ms: number; ymd: string; name: string; line: string; anchorMs: number; kind: UpcomingKind; queryId?: string; agentId?: string }
 /**
  * The next three dates a task will land: an agent's reply date passing, a nudge check-back, and an
  * own task's date. Read from `expectedFor` (the Query Centre's own clock) and the stored dates.
@@ -500,12 +542,18 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
     const nudgeAt = anyMs(q.nudgeDate);
     const nudged = anyMs(q.lastNudgeSentDate);
     if (Number.isFinite(nudgeAt) && Number.isFinite(nudged) && localYmd(nudgeAt) > today) {
-      out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The check-back after your nudge.", anchorMs: nudged });
+      out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The check-back after your nudge.", anchorMs: nudged, kind: "check", queryId: q.id, agentId: a?.id });
+      continue;
+    }
+    /* v12 — before any nudge, `nudgeDate` is the writer's planned nudge: the day `replyTask` raises the nudge task on
+       (taskDue's "chase" case reads it the same way) */
+    if (Number.isFinite(nudgeAt) && !Number.isFinite(nudged) && localYmd(nudgeAt) > today) {
+      out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The nudge you planned.", anchorMs: lastSendMs(q), kind: "nudge", queryId: q.id, agentId: a?.id });
       continue;
     }
     const e = expectedFor(q, a);
     if (e.kind === "reply" && e.ms != null && localYmd(e.ms) > today) {
-      out.push({ ms: e.ms, ymd: localYmd(e.ms), name, line: `${(q.status as string) === QueryStatus.QUERIED ? "Query" : String(q.status)} with the agent. The reply date passes.`, anchorMs: lastSendMs(q) });
+      out.push({ ms: e.ms, ymd: localYmd(e.ms), name, line: `${(q.status as string) === QueryStatus.QUERIED ? "Query" : String(q.status)} with the agent. The reply date passes.`, anchorMs: lastSendMs(q), kind: "reply", queryId: q.id, agentId: a?.id });
     }
   }
   /* v5.1 §I.6 — an own dated task lands on the day it SURFACES (its due day less its surface offset), not its due day */
@@ -515,7 +563,7 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
     const d = new Date(ymdMs(t.dueDate)); d.setDate(d.getDate() - lead);
     const joins = localYmd(d.getTime());
     if (joins <= today) continue;
-    out.push({ ms: ymdMs(joins), ymd: joins, name: t.text || "Your task", line: lead ? "Your own task joins your tray." : "Your own task is due.", anchorMs: Date.parse(t.createdAt || "") });
+    out.push({ ms: ymdMs(joins), ymd: joins, name: t.text || "Your task", line: lead ? "Your own task joins your tray." : "Your own task is due.", anchorMs: Date.parse(t.createdAt || ""), kind: "own" });
   }
   /* v5.1 §G — a snooze coming back on its day */
   for (const f of db.taskFlags) {
@@ -525,7 +573,7 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
     const q = f.queryId ? db.queries.find((x) => x.id === f.queryId) : undefined;
     const a = db.agents.find((x) => x.id === (q ? q.agentId : f.agentId));
     const own = f.taskType === "user_task" ? db.userTasks.find((t) => t.id === f.queryId) : undefined;
-    out.push({ ms, ymd: localYmd(ms), name: own ? own.text || "Your task" : a ? agentPrimary(a) : "A task", line: "A snooze comes back.", anchorMs: NaN });
+    out.push({ ms, ymd: localYmd(ms), name: own ? own.text || "Your task" : a ? agentPrimary(a) : "A task", line: "A snooze comes back.", anchorMs: NaN, kind: own ? "own" : "back", queryId: q?.id, agentId: a?.id });
   }
   return out.sort((a, b) => a.ms - b.ms).slice(0, limit);
 }

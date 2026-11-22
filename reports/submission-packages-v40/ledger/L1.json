@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L1",
+  "where": "an open package on the workbench",
+  "ok": true,
+  "detail": "pk40-draft"
+ },
+ {
+  "lock": "L1",
+  "where": "…and it is not a locked one",
+  "ok": true,
+  "detail": "pk40-draft"
+ },
+ {
+  "lock": "L1",
+  "where": "the shelf drawer opens",
+  "ok": true,
+  "detail": "{\"slots\":0,\"add\":0,\"ticks\":0,\"text\":\"Standard On query · locked since 27 Aug · Active ✕ What went Query letter Hook-first Synopsis One-page Pages from Fast-paced opening Also sends Author bio How it’s doing 5 sent 40% asked for more – days to reply Who got it EH Elinor Hale Cavendish & Roe · 1 Sep Queried TE Tom Ellery Curtis Vane · 1 Sep Rejected MR Marcus Reed Reed & Partners · 1 Sep Partial requested PN Priya Nair Northbank Literary · 1 Sep Full requested JW Joan Whitfield Whitfield Agency · 1 Sep No response New package from this\"}"
+ },
+ {
+  "lock": "L1",
+  "where": "…with no slot to drop on",
+  "ok": true,
+  "detail": "{\"slots\":0,\"add\":0,\"ticks\":0,\"text\":\"Standard On query · locked since 27 Aug · Active ✕ What went Query letter Hook-first Synopsis One-page Pages from Fast-paced opening Also sends Author bio How it’s doing 5 sent 40% asked for more – days to reply Who got it EH Elinor Hale Cavendish & Roe · 1 Sep Queried TE Tom Ellery Curtis Vane · 1 Sep Rejected MR Marcus Reed Reed & Partners · 1 Sep Partial requested PN Priya Nair Northbank Literary · 1 Sep Full requested JW Joan Whitfield Whitfield Agency · 1 Sep No response New package from this\"}"
+ },
+ {
+  "lock": "L1",
+  "where": "…no Add",
+  "ok": true,
+  "detail": "{\"slots\":0,\"add\":0,\"ticks\":0,\"text\":\"Standard On query · locked since 27 Aug · Active ✕ What went Query letter Hook-first Synopsis One-page Pages from Fast-paced opening Also sends Author bio How it’s doing 5 sent 40% asked for more – days to reply Who got it EH Elinor Hale Cavendish & Roe · 1 Sep Queried TE Tom Ellery Curtis Vane · 1 Sep Rejected MR Marcus Reed Reed & Partners · 1 Sep Partial requested PN Priya Nair Northbank Literary · 1 Sep Full requested JW Joan Whitfield Whitfield Agency · 1 Sep No response New package from this\"}"
+ },
+ {
+  "lock": "L1",
+  "where": "…no extra to tick",
+  "ok": true,
+  "detail": "{\"slots\":0,\"add\":0,\"ticks\":0,\"text\":\"Standard On query · locked since 27 Aug · Active ✕ What went Query letter Hook-first Synopsis One-page Pages from Fast-paced opening Also sends Author bio How it’s doing 5 sent 40% asked for more – days to reply Who got it EH Elinor Hale Cavendish & Roe · 1 Sep Queried TE Tom Ellery Curtis Vane · 1 Sep Rejected MR Marcus Reed Reed & Partners · 1 Sep Partial requested PN Priya Nair Northbank Literary · 1 Sep Full requested JW Joan Whitfield Whitfield Agency · 1 Sep No response New package from this\"}"
+ },
+ {
+  "lock": "L1",
+  "where": "…and says it is locked",
+  "ok": true,
+  "detail": "Standard On query · locked since 27 Aug · Active ✕ What went Query letter Hook-first Synopsis One-page Pages from Fast-paced opening Also sends Author bio How i"
+ }
+]

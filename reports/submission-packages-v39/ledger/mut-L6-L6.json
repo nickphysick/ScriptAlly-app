@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "L6",
+  "where": "Every package lists the fixture's five",
+  "ok": false,
+  "detail": "[\"pk:pk40-std\",\"pk:pk40-std2\",\"pk:pk40-old\",\"pk:pk40-draft\",\"pk:pk40-ready\",\"pk:pk40-std\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "…each exactly once",
+  "ok": false,
+  "detail": "[\"pk:pk40-std\",\"pk:pk40-std2\",\"pk:pk40-old\",\"pk:pk40-draft\",\"pk:pk40-ready\",\"pk:pk40-std\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "Standard is ranked at 40% (packageReplies)",
+  "ok": true,
+  "detail": "{\"pk:pk40-std\":\"40\",\"pk:pk40-std2\":\"early\",\"pk:pk40-old\":\"early\",\"pk:pk40-draft\":\"none\",\"pk:pk40-ready\":\"none\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Standard 2 and Old one are too early",
+  "ok": true,
+  "detail": "{\"pk:pk40-std\":\"40\",\"pk:pk40-std2\":\"early\",\"pk:pk40-old\":\"early\",\"pk:pk40-draft\":\"none\",\"pk:pk40-ready\":\"none\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Ready one and Draft one are not sent",
+  "ok": true,
+  "detail": "{\"pk:pk40-std\":\"40\",\"pk:pk40-std2\":\"early\",\"pk:pk40-old\":\"early\",\"pk:pk40-draft\":\"none\",\"pk:pk40-ready\":\"none\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Packages: ranked, then too early, then not sent",
+  "ok": false,
+  "detail": "[\"40\",\"early\",\"early\",\"none\",\"none\",\"40\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "let: switching keeps scrollTop (±1)",
+  "ok": true,
+  "detail": "2980 → 2980"
+ },
+ {
+  "lock": "L6",
+  "where": "let: rows are shown",
+  "ok": true,
+  "detail": "[{\"row\":\"let:pk40-let-a\",\"rate\":\"33\",\"txt\":\"Hook-first 6 5 2 33%\"},{\"row\":\"let:pk40-let-b\",\"rate\":\"early\",\"txt\":\"Comps-forward 4 2 1 Too early\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "let: every row is of that one type",
+  "ok": true,
+  "detail": "[\"let:pk40-let-a\",\"let:pk40-let-b\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "let:pk40-let-a: rate 33",
+  "ok": true,
+  "detail": "[{\"row\":\"let:pk40-let-a\",\"rate\":\"33\",\"txt\":\"Hook-first 6 5 2 33%\"},{\"row\":\"let:pk40-let-b\",\"rate\":\"early\",\"txt\":\"Comps-forward 4 2 1 Too early\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "let:pk40-let-b: rate early",
+  "ok": true,
+  "detail": "[{\"row\":\"let:pk40-let-a\",\"rate\":\"33\",\"txt\":\"Hook-first 6 5 2 33%\"},{\"row\":\"let:pk40-let-b\",\"rate\":\"early\",\"txt\":\"Comps-forward 4 2 1 Too early\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "let: nothing too early above a ranked row",
+  "ok": true,
+  "detail": "[\"33\",\"early\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "let: one tab selected",
+  "ok": true,
+  "detail": "[\"true\",\"false\",\"false\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "syn: switching keeps scrollTop (±1)",
+  "ok": true,
+  "detail": "2980 → 2980"
+ },
+ {
+  "lock": "L6",
+  "where": "syn: rows are shown",
+  "ok": true,
+  "detail": "[{\"row\":\"syn:pk40-syn\",\"rate\":\"33\",\"txt\":\"One-page 9 6 3 33%\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "syn: every row is of that one type",
+  "ok": true,
+  "detail": "[\"syn:pk40-syn\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "syn:pk40-syn: rate 33",
+  "ok": true,
+  "detail": "[{\"row\":\"syn:pk40-syn\",\"rate\":\"33\",\"txt\":\"One-page 9 6 3 33%\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "syn: nothing too early above a ranked row",
+  "ok": true,
+  "detail": "[\"33\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "syn: one tab selected",
+  "ok": true,
+  "detail": "[\"false\",\"true\",\"false\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "ver: switching keeps scrollTop (±1)",
+  "ok": true,
+  "detail": "2965 → 2965"
+ },
+ {
+  "lock": "L6",
+  "where": "ver: rows are shown",
+  "ok": true,
+  "detail": "[{\"row\":\"ver:pk40-v1\",\"rate\":\"30\",\"txt\":\"1 Fast-paced opening Cut the prologue 10 7 3 30%\"},{\"row\":\"ver:pk40-v0\",\"rate\":\"none\",\"txt\":\"O Original As you first sent it – – – Not sent\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "ver: every row is of that one type",
+  "ok": true,
+  "detail": "[\"ver:pk40-v1\",\"ver:pk40-v0\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "ver:pk40-v1: rate 30",
+  "ok": true,
+  "detail": "[{\"row\":\"ver:pk40-v1\",\"rate\":\"30\",\"txt\":\"1 Fast-paced opening Cut the prologue 10 7 3 30%\"},{\"row\":\"ver:pk40-v0\",\"rate\":\"none\",\"txt\":\"O Original As you first sent it – – – Not sent\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "ver: nothing too early above a ranked row",
+  "ok": true,
+  "detail": "[\"30\",\"none\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "ver: one tab selected",
+  "ok": true,
+  "detail": "[\"false\",\"false\",\"true\"]"
+ },
+ {
+  "lock": "L6",
+  "where": "the top three and the list agree for Standard (40%)",
+  "ok": true,
+  "detail": "40% of agents asked for more: 2 of 5, against your 30% average."
+ }
+]

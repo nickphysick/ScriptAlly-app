@@ -16,6 +16,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { EditQueryDrawer } from "./EditQueryDrawer";
+import { PageBoundary } from "./PageBoundary";
 
 export type OpenEditQuery = (queryId: string, opts?: { fromTask?: boolean }) => void;
 const OpenEditQueryContext = createContext<OpenEditQuery>(() => {});
@@ -35,15 +36,18 @@ export const EditQueryHost: React.FC<{
   return (
     <OpenEditQueryContext.Provider value={(id, opts) => setOpen({ id, fromTask: !!opts?.fromTask })}>
       {children}
-      {query && (
-        <EditQueryDrawer
-          query={query}
-          isOpen
-          lockScroll
-          onClose={() => setOpen(null)}
-          onSavedToast={onSavedToast}
-        />
-      )}
+      {/* Crash reporting v1: the drawer fails on its own, as every panel outside the pages does */}
+      <PageBoundary name="panel:edit-query" kind="panel" onClose={() => setOpen(null)}>
+        {query && (
+          <EditQueryDrawer
+            query={query}
+            isOpen
+            lockScroll
+            onClose={() => setOpen(null)}
+            onSavedToast={onSavedToast}
+          />
+        )}
+      </PageBoundary>
     </OpenEditQueryContext.Provider>
   );
 };

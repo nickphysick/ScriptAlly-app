@@ -1,0 +1,75 @@
+{
+  "checks": 35,
+  "before": {
+    "frame": "none 3px rgb(28, 19, 15)",
+    "strip": "rgba(0, 0, 0, 0)",
+    "stripWords": null,
+    "wash": "rgba(0, 0, 0, 0)",
+    "bar": null,
+    "save": null,
+    "title": null,
+    "dots": [],
+    "leave": null,
+    "editing": false
+  },
+  "LQE1": {
+    "frame": "dashed 2px rgb(42, 58, 82)",
+    "strip": "rgb(233, 237, 244)",
+    "stripWords": "Editing",
+    "wash": "rgb(251, 252, 254)",
+    "bar": "rgb(42, 58, 82)",
+    "save": true,
+    "title": "No changes yet",
+    "dots": [],
+    "leave": null,
+    "editing": true
+  },
+  "LQE2": {
+    "frame": "dashed 2px rgb(42, 58, 82)",
+    "strip": "rgb(233, 237, 244)",
+    "stripWords": "Editing",
+    "wash": "rgb(251, 252, 254)",
+    "bar": "rgb(42, 58, 82)",
+    "save": false,
+    "title": "1 unsaved change",
+    "dots": [
+      "agent"
+    ],
+    "leave": null,
+    "editing": true
+  },
+  "agentBefore": {
+    "name": "Peter Vance",
+    "responseTimeWeeks": 8,
+    "noResponseMeansNo": true,
+    "materialsWanted": [
+      "Query letter",
+      "Synopsis"
+    ],
+    "submissionMethod": "Email",
+    "mswlNotes": "",
+    "mswlCheckedAt": null,
+    "email": "peter@example.com",
+    "website": ""
+  },
+  "contactCard": "London · replies in about 12 weeks",
+  "queryBefore": {
+    "agentId": "seed-agent-10",
+    "dateSent": "2026-02-08",
+    "sendMethod": "Email",
+    "sentHow": null,
+    "packageId": "",
+    "sentPackageId": null,
+    "status": "Full Sent",
+    "stepDay": "2026-02-08",
+    "stepMats": 0
+  },
+  "pkgRow": 1,
+  "LQE5": {
+    "d0": "2026-02-08",
+    "d1": "2026-02-07",
+    "mats0": 0,
+    "mats1": 1,
+    "kind": "letter"
+  }
+}

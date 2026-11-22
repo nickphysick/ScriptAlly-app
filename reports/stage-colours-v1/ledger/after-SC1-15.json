@@ -1,0 +1,27 @@
+[
+ {
+  "name": "week points found (15)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "breakdown rows found (3)",
+  "ok": true,
+  "got": "queried, partial, full"
+ },
+ {
+  "name": "queried: segment rgb(239, 230, 214)",
+  "ok": true,
+  "got": "rgb(239, 230, 214)"
+ },
+ {
+  "name": "partial: segment rgb(228, 235, 242)",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "full: segment rgb(183, 201, 222)",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ }
+]

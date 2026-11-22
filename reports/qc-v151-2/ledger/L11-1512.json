@@ -1,0 +1,12 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[{\"k\":\"you\",\"sq\":0},{\"k\":\"agent\",\"sq\":0},{\"k\":\"quiet\",\"sq\":0},{\"k\":\"closed\",\"sq\":0}]"
+ },
+ {
+  "where": "no colour squares",
+  "ok": true,
+  "detail": "[{\"k\":\"you\",\"sq\":0},{\"k\":\"agent\",\"sq\":0},{\"k\":\"quiet\",\"sq\":0},{\"k\":\"closed\",\"sq\":0}]"
+ }
+]

@@ -7,7 +7,7 @@
  * delete loop is fully exercisable WITHOUT auth or a rules deploy. Not wired into the app.
  */
 import React, { useState } from "react";
-import type { Note, NoteColour } from "../../types";
+import type { Note, DeskNoteColour } from "../../types";
 import { pageGround, PAGE_GRAIN, FONT_SERIF, headingInk, mutedInk, FONT_MONO, burgundy } from "../../lib/designTokens";
 import { PostIt } from "./PostIt";
 import { NoteQuickAdd } from "./NoteQuickAdd";
@@ -32,11 +32,11 @@ export const NotesLab: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>(SEED);
   const [editing, setEditing] = useState<Note | null>(null);
 
-  const addNote = (fields: { text: string; colour: NoteColour; dueDate: string | null }) => {
+  const addNote = (fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) => {
     const n: Note = { id: mkId(), userId: "lab", text: fields.text, colour: fields.colour, dueDate: fields.dueDate, done: false, doneAt: null, createdAt: nowISO(), updatedAt: nowISO() };
     setNotes((prev) => [...prev, n]);
   };
-  const saveNote = (id: string, fields: { text: string; colour: NoteColour; dueDate: string | null }) =>
+  const saveNote = (id: string, fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) =>
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...fields, updatedAt: nowISO() } : n)));
   const completeNote = (id: string) =>
     setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, done: true, doneAt: nowISO(), updatedAt: nowISO() } : n)));

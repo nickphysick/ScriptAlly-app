@@ -1,0 +1,72 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88"
+ },
+ {
+  "where": "default Due ascending (late, most late first; then soonest)",
+  "ok": true,
+  "detail": "402 days late | 306 days late | 306 days late | 306 days late | 306 days late | 246 days late | 207 days late | 202 days late | 171 days late | 170 days late | 166 days late | 156 days late"
+ },
+ {
+  "where": "undated last",
+  "ok": true,
+  "detail": "— | — | — | — | — | —"
+ },
+ {
+  "where": "late rows lead",
+  "ok": true,
+  "detail": "late at 0,1,2,3,4,5,6,7"
+ },
+ {
+  "where": "agent asc",
+  "ok": true,
+  "detail": "ascending · agent not recorded | agent not recorded | aisha kapoor | alasdair crewe | ana duarte | ana duarte"
+ },
+ {
+  "where": "agent desc",
+  "ok": true,
+  "detail": "descending · wren calloway | wren ashcombe | william tan | tom ellery | tom ellery | tom ellery"
+ },
+ {
+  "where": "agency asc",
+  "ok": true,
+  "detail": "ascending · abara grant agency | ashcombe literary | ashgrove literary | ashworth literary | blaine & vole | bligh & sons"
+ },
+ {
+  "where": "agency desc",
+  "ok": true,
+  "detail": "descending · whitfield agency | whitfield agency | whitfield agency | whitfield agency | voss literary | vance associates"
+ },
+ {
+  "where": "queried asc",
+  "ok": true,
+  "detail": "ascending · 1713394800000 | 1755298800000 | 1767571200000 | 1770508800000 | 1772496000000 | 1772582400000"
+ },
+ {
+  "where": "queried desc",
+  "ok": true,
+  "detail": "descending · 1790722800000 | 1790550000000 | 1790204400000 | 1790118000000 | 1789858800000 | 1789858800000"
+ },
+ {
+  "where": "heard asc",
+  "ok": true,
+  "detail": "ascending · 1773446400000 | 1774137600000 | 1775862000000 | 1777590000000 | 1782342000000 | 1782687600000"
+ },
+ {
+  "where": "heard desc",
+  "ok": true,
+  "detail": "descending · 1793145600000 | 1790722800000 | 1790463600000 | 1790204400000 | 1789858800000 | 1789772400000"
+ },
+ {
+  "where": "due asc",
+  "ok": true,
+  "detail": "ascending · 1758931200000 | 1767225600000 | 1767225600000 | 1767225600000 | 1767225600000 | 1772409600000"
+ },
+ {
+  "where": "due desc",
+  "ok": true,
+  "detail": "descending · 1796860800000 | 1796774400000 | 1796083200000 | 1794960000000 | 1794700800000 | 1794700800000"
+ }
+]

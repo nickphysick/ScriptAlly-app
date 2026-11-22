@@ -1,0 +1,44 @@
+[
+ {
+  "where": "population: all six groups",
+  "ok": false,
+  "detail": "[\"you\",\"agent\",\"quiet\",\"closed\"]"
+ },
+ {
+  "where": "offer header rgb(42, 58, 82)",
+  "ok": false
+ },
+ {
+  "where": "materials header rgb(42, 58, 82)",
+  "ok": false
+ },
+ {
+  "where": "nudge header rgb(197, 208, 221)",
+  "ok": false
+ },
+ {
+  "where": "agent header rgb(227, 219, 207)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(227, 219, 207)\",\"img\":\"none\",\"label\":\"rgb(227, 219, 207)\",\"dashed\":false}"
+ },
+ {
+  "where": "closed header rgb(241, 239, 236)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(241, 239, 236)\",\"img\":\"none\",\"label\":\"rgb(241, 239, 236)\",\"dashed\":false}"
+ },
+ {
+  "where": "Gone quiet's title cell is a gradient starting rgb(227, 219, 207) and ending white",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "Gone quiet's column labels sit on white",
+  "ok": false,
+  "detail": "rgb(197, 208, 221)"
+ },
+ {
+  "where": "no dashed or dotted border in a Gone quiet header",
+  "ok": true,
+  "detail": "false"
+ }
+]

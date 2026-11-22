@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "L1",
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "Contact list found · Query Centre found"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · the title's left edge, from the card",
+  "ok": true,
+  "detail": "QC 22.0 · CL 22.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · the toggle, from the title's right edge",
+  "ok": true,
+  "detail": "QC 18.0 · CL 18.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · Full screen, from the title's right edge",
+  "ok": true,
+  "detail": "QC 203.7 · CL 203.7"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · 18 from the row to the card",
+  "ok": true,
+  "detail": "QC 18.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · 44 (H7) from the hero stack to the row",
+  "ok": true,
+  "detail": "QC 44.0 · CL 44.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · the words",
+  "ok": true,
+  "detail": "All 87 queries"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · population",
+  "ok": true,
+  "detail": "Contact list found · Query Centre found"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · the title's left edge, from the card",
+  "ok": true,
+  "detail": "QC 22.0 · CL 22.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · the toggle, from the title's right edge",
+  "ok": true,
+  "detail": "QC 18.0 · CL 18.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · Full screen, from the title's right edge",
+  "ok": true,
+  "detail": "QC 203.7 · CL 203.7"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · 18 from the row to the card",
+  "ok": true,
+  "detail": "QC 18.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · 44 (H7) from the hero stack to the row",
+  "ok": true,
+  "detail": "QC 44.0 · CL 44.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · the words",
+  "ok": true,
+  "detail": "All 87 queries"
+ }
+]

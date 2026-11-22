@@ -289,9 +289,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * now, which is what makes the column keep its air past 1360 — under the old form the content
      * ran the full 1360 at an ultrawide window and the gutter did nothing.
      */
+    /* page width v1 (6 Nov): re-pointed from the literals (1360, clamp(28px, 3.2vw, 52px)) to the two tokens; the
+       law is unchanged — the gutter is inside the cap — and pageWidth.test.ts holds the values (1256, 40). */
     const col = block(".wpg-scroll > *");
-    expect(col, "the scroller's children left the shared column").toContain("max-width: 1360px");
-    expect(col, "the gutter is outside the cap again").toContain("padding-inline: clamp(28px, 3.2vw, 52px)");
+    /* workspace width v2 (8 Nov): re-pointed to the workspace tokens (index.css); the law is unchanged */
+    expect(col, "the scroller's children left the shared column").toContain("max-width: var(--work-max)");
+    expect(col, "the gutter is outside the cap again").toContain("padding-inline: var(--work-gutter)");
     expect(col, "the column stopped centring itself").toContain("margin-inline: auto");
     /* ⚠️ AND `border-box`, or the padding would be added to the 1360 rather than taken out of it —
        the cap would be 1464 wide and every "equal margins" reading would still pass. */
@@ -307,8 +310,9 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     /* ⚠️ THE SAME EXPRESSION SHAPE AS THE CONTENT'S, deliberately — mixing a reduction with padding
        made the two diverge the moment the cap bound: measured, the masthead's ink sat 35px inside
        the panes it titles at 2300 while matching them exactly at 1440. One shape, both measures. */
+    /* workspace width v2: the folded bar states the content's own two declarations — one shape, both measures */
     expect(mastMeasure, "the masthead stopped taking the shared cap and the one constant gutter")
-      .toContain("max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)))");
+      .toContain("max-width: var(--work-max);\n  padding-inline: var(--work-gutter);");
     /* the cap is READ, never restated — `--work-max` is the app's shared centring measure and the
        content reads the same token through `--wpg-measure` */
     /**
@@ -320,11 +324,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      * reaching for. What must not come back is a measure of its own.
      */
     const mast = block(".wpg-scroll > .wpg-mast");
-    expect(mast, "the masthead left the shared column").toContain("max-width: 1360px");
-    expect(mast, "…and its gutter").toContain("padding-inline: clamp(28px, 3.2vw, 52px)");
-    expect(mast, "the masthead kept a measure of its own").not.toContain("--work-max");
+    /* workspace width v2: the masthead reads the SAME two tokens as the content — not a matching copy */
+    expect(mast, "the masthead left the shared column").toContain("max-width: var(--work-max)");
+    expect(mast, "…and its gutter").toContain("padding-inline: var(--work-gutter)");
     expect(mast, "…or a gutter of its own").not.toContain("--mast-gutter");
-    expect(block(".wpg"), "the constant gutter is not defined on the grid").toContain("--mast-gutter: 35px");
+    expect(block(".wpg"), "the retired masthead gutter came back").not.toContain("--mast-gutter:");
     /* ⚠️ `width: 100%` IS PART OF THE CLAIM, NOT TIDINESS. Without it an auto inline margin stops a
        FLEX child stretching, so on the five fill pages the masthead and the content both shrank to
        their own contents — the fix breaking both sides of the comparison it exists to hold. */
@@ -397,7 +401,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       /* comps v2 (27 Sep): the page's own group under `.cpv-page`, the scroller's direct child */
       ["Comparable titles", "components/manuscripts/compsV2.css", [".cpv-page", ".cpv-group", ".cpv-main"]],
       /* packages v2 (27 Sep): the same shape as comps — its own group under `.ppv-page` */
-      ["Submission packages", "components/packages/packagesV2.css", [".ppv-page", ".ppv-group", ".ppv-main"]],
+      /* Submission packages v26 (25 Oct): the root is `.p6`; it fills the scroll row and opts out of the shared
+         column by name (pk26.css), because the ref's insets are measured from the sheet's edge */
+      ["Submission packages", "components/packages/v26/pk26.css", [".wpg-scroll > .p6"]],
+      /* v40: the page's generated sheet is pk40.generated.css now (the v26 one is deleted); same law, the live file */
+      ["Submission packages", "components/packages/v26/pk40.generated.css", [".p6"]],
       ["Analytics", "components/shell/workspaceShell.css", [".qa-wrap"]],
     ];
       /* ⚠️ EXTRACT THE VALUE, NEVER LOOK AHEAD PAST IT — and this file already says so, about a
@@ -440,10 +448,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
         .not.toContain("contentVariant");
     }
     const pkg = readFileSync(resolve(__dirname, "../SubmissionPackages.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    /* packages v2 (27 Sep): the root is `.ppv-page` and states NO inline style at all — its padding
-       lives in packagesV2.css, which the chain above reads */
-    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className="ppv-page" data-ppv="page"');
-    expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/className="ppv-page"[^>]*style=/);
+    /* Submission packages v26 (25 Oct): the root is `.p6` and states NO inline style at all — what it says about
+       its width lives in pk26.css / pk40.generated.css, which the chain above reads. v41 adds `.p41`; v43 adds
+       `.pk43`, whose measure (the workspace's, both sides) and padding live in packages/v43/pk43.css §0. v62 (18 Nov):
+       the root is `.pk43.pk62`; its measure and padding live in packages/v62/pk62.css §0 */
+    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`pk43 pk62${dayOne ? " k62--day1" : ""}`} data-pk62="page"');
+    expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/data-pk62="page"[^>]*style=/);
   });
 
   /* ⚠️ NO PAGE MAY RE-STATE A WIDTH. The caps lived on five page stylesheets and a per-page gutter
@@ -455,7 +465,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       ["Manuscripts", "components/manuscripts/manuscripts.css"],
       ["Comparable titles", "components/manuscripts/compsV2.css"],
       ["Discover", "components/agents/discover1/discover1.css"],
-      ["Submission packages", "components/packages/packagesV2.css"],
+      ["Submission packages", "components/packages/v26/pk26.css"],
+      ["Submission packages", "components/packages/v26/pk40.generated.css"],
       /* ⚠️ QUERY CENTRE JOINED THE CENSUS LAST, and it was the alias's only caller. */
       ["Query Centre", "components/shell/f12.css"],
     ];

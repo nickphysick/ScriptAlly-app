@@ -1,0 +1,302 @@
+[
+ {
+  "lock": "E4",
+  "where": "surname first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "surname first pill",
+  "ok": true,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname first count line",
+  "ok": true,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname first heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "surname first order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "surname reversed order within groups",
+  "ok": false,
+  "detail": "closed: ashworth,tan,whitfield"
+ },
+ {
+  "lock": "E4",
+  "where": "fit first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "fit first pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit first count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit first heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "fit first order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "fit reversed order within groups",
+  "ok": true,
+  "detail": "in order"
+ },
+ {
+  "lock": "E4",
+  "where": "reply first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "reply first pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply first count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply first heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "reply first order within groups",
+  "ok": false,
+  "detail": "none: ,8,12,4,8,8,16,8,8,8,4,8,6,8,8,8,,8,8,8,10,8,8,6,,6,4,,8,10,8,6,,,6,6,8,6,8"
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "reply reversed order within groups",
+  "ok": false,
+  "detail": "none: ,8,12,4,8,8,16,8,8,8,4,8,6,8,8,8,,8,8,8,10,8,8,6,,6,4,,8,10,8,6,,,6,6,8,6,8"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency first order within groups",
+  "ok": false,
+  "detail": "agent: Partial sent,Queried,Full sent,Queried,Partial sent,Queried,Queried"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "urgency reversed order within groups",
+  "ok": false,
+  "detail": "agent: Partial sent,Queried,Full sent,Queried,Partial sent,Queried,Queried"
+ },
+ {
+  "lock": "E4",
+  "where": "rating first population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "rating first pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating first count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating first heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "rating first order within groups",
+  "ok": false,
+  "detail": "none: ,4,4,4,2,4,4,4,2,4,4,1,3,4,,,,1,2,3,4,4,1,3,,4,4,,4,4,3,,,,4,4,5,,5"
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed population",
+  "ok": true,
+  "detail": "4 groups"
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed pill",
+  "ok": false,
+  "detail": "pill \"Name A–Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed count line",
+  "ok": false,
+  "detail": "line \"53 agents  ·  69% list health  ·  grouped by status, A to Z\""
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed heading",
+  "ok": false,
+  "detail": "sorted heading null"
+ },
+ {
+  "lock": "E4",
+  "where": "rating reversed order within groups",
+  "ok": false,
+  "detail": "none: ,4,4,4,2,4,4,4,2,4,4,1,3,4,,,,1,2,3,4,4,1,3,,4,4,,4,4,3,,,,4,4,5,,5"
+ }
+]

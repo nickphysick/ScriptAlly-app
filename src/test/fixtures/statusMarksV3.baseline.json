@@ -1,0 +1,91 @@
+{
+  "capturedFrom": "StatusDot.tsx @ 9d66210a6 (shell-tabs-v2-1), before status marks v3",
+  "markup": {
+    "Queried": {
+      "13": "<span role=\"img\" aria-label=\"Queried\" title=\"Queried\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Queried\" title=\"Queried\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span>"
+    },
+    "Partial Requested": {
+      "13": "<span role=\"img\" aria-label=\"Partial Requested\" title=\"Partial Requested\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke-dasharray=\"6 4\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Partial Requested\" title=\"Partial Requested\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke-dasharray=\"6 4\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span>"
+    },
+    "Partial Sent": {
+      "13": "<span role=\"img\" aria-label=\"Partial Sent\" title=\"Partial Sent\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Partial Sent\" title=\"Partial Sent\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span>"
+    },
+    "Full Requested": {
+      "13": "<span role=\"img\" aria-label=\"Full Requested\" title=\"Full Requested\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke-dasharray=\"6 4\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Full Requested\" title=\"Full Requested\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke-dasharray=\"6 4\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span>"
+    },
+    "Full Sent": {
+      "13": "<span role=\"img\" aria-label=\"Full Sent\" title=\"Full Sent\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Full Sent\" title=\"Full Sent\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span>"
+    },
+    "Rejected": {
+      "13": "<span role=\"img\" aria-label=\"Rejected\" title=\"Rejected\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M7.5 12h9\" stroke-linecap=\"round\"></path></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Rejected\" title=\"Rejected\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M7.5 12h9\" stroke-linecap=\"round\"></path></svg></span>"
+    },
+    "Withdrawn": {
+      "13": "<span role=\"img\" aria-label=\"Withdrawn\" title=\"Withdrawn\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M7.5 12h9\" stroke-linecap=\"round\"></path></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Withdrawn\" title=\"Withdrawn\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M7.5 12h9\" stroke-linecap=\"round\"></path></svg></span>"
+    },
+    "No Response": {
+      "13": "<span role=\"img\" aria-label=\"No Response\" title=\"No Response\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M7.5 12h9\" stroke-linecap=\"round\"></path></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"No Response\" title=\"No Response\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M7.5 12h9\" stroke-linecap=\"round\"></path></svg></span>"
+    },
+    "Resubmitted": {
+      "13": "<span role=\"img\" aria-label=\"Resubmitted\" title=\"Resubmitted\" style=\"width:13px;height:13px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span>",
+      "24": "<span role=\"img\" aria-label=\"Resubmitted\" title=\"Resubmitted\" style=\"width:24px;height:24px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display:block;color:#1c130f\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span>"
+    }
+  },
+  "names": {
+    "Queried": {
+      "label": "Queried",
+      "title": "Queried"
+    },
+    "Partial Requested": {
+      "label": "Partial Requested",
+      "title": "Partial Requested"
+    },
+    "Partial Sent": {
+      "label": "Partial Sent",
+      "title": "Partial Sent"
+    },
+    "Full Requested": {
+      "label": "Full Requested",
+      "title": "Full Requested"
+    },
+    "Full Sent": {
+      "label": "Full Sent",
+      "title": "Full Sent"
+    },
+    "Revise & Resubmit": {
+      "label": "Revise &amp; Resubmit",
+      "title": "Revise &amp; Resubmit"
+    },
+    "Offer": {
+      "label": "Offer",
+      "title": "Offer"
+    },
+    "Rejected": {
+      "label": "Rejected",
+      "title": "Rejected"
+    },
+    "Withdrawn": {
+      "label": "Withdrawn",
+      "title": "Withdrawn"
+    },
+    "No Response": {
+      "label": "No Response",
+      "title": "No Response"
+    },
+    "Resubmitted": {
+      "label": "Resubmitted",
+      "title": "Resubmitted"
+    },
+    "Signed": {
+      "label": "Signed",
+      "title": "Signed"
+    }
+  }
+}

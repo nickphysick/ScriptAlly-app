@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "J6-1280",
+  "where": "genres · chips (4)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "genres · no free-text field",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "one sample unit chosen",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "reply tops out at 26",
+  "ok": true,
+  "detail": "−\nAbout 26 weeks\n+"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "reply floors at 1",
+  "ok": true,
+  "detail": "−\nAbout 1 week\n+"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "door Closed reveals Reopens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J6-1280",
+  "where": "door Open hides Reopens",
+  "ok": true,
+  "detail": ""
+ }
+]

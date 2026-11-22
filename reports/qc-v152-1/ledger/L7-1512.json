@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: a seven-step thread",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the fold button: 4 earlier steps · show",
+  "ok": true,
+  "detail": "4 earlier steps · show"
+ },
+ {
+  "where": "exactly three bubbles show",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "the three are the latest",
+  "ok": true,
+  "detail": "[\"Sent the partial\",\"Asked for the full\",\"Sent the full\"]"
+ },
+ {
+  "where": "opened: all seven",
+  "ok": true,
+  "detail": "7 null"
+ },
+ {
+  "where": "reopened: folded again",
+  "ok": true,
+  "detail": "3 4 earlier steps · show"
+ }
+]

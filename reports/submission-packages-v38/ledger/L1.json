@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L1",
+  "where": "the page rendered (the stat tiles present)",
+  "ok": true,
+  "detail": "tiles"
+ },
+ {
+  "lock": "L1",
+  "where": "no tab bar",
+  "ok": true,
+  "detail": "tabs"
+ },
+ {
+  "lock": "L1",
+  "where": "no Letters/Synopses page",
+  "ok": true,
+  "detail": "materials"
+ },
+ {
+  "lock": "L1",
+  "where": "the builder's steps are on the page, and no Your materials",
+  "ok": true,
+  "detail": "steps"
+ },
+ {
+  "lock": "L1",
+  "where": "the steps were read",
+  "ok": true,
+  "detail": "[\"ver=false\",\"let=false\",\"syn=true\",\"ext=false\"]"
+ },
+ {
+  "lock": "L1",
+  "where": "?tab=syn → the Synopsis step is open",
+  "ok": true,
+  "detail": "[\"ver=false\",\"let=false\",\"syn=true\",\"ext=false\"]"
+ },
+ {
+  "lock": "L1",
+  "where": "…and only that step",
+  "ok": true,
+  "detail": "[\"ver=false\",\"let=false\",\"syn=true\",\"ext=false\"]"
+ },
+ {
+  "lock": "L1",
+  "where": "…listing the synopsis",
+  "ok": true,
+  "detail": "[\"One-page\"]"
+ }
+]

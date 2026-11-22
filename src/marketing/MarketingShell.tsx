@@ -17,10 +17,9 @@ import { LANDING_ONLY } from "../lib/siteMode";
 import { BRAND_MARK, BRAND_MARK_SMALL, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
-import { ConsentBar } from "./ConsentBar";
 import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 import { captureAttribution } from "./attribution";
-import { WAITLIST_CTA, HERO_PHONE_JOIN } from "./landingCopy";
+import { HERO_CTA, WAITLIST_CTA, HERO_PHONE_JOIN } from "./landingCopy";
 import { scrollToJoin, NavPass } from "./WaitlistParts";
 import { WELCOME_FOOT } from "./welcomeCopy";
 
@@ -188,6 +187,12 @@ export const MarketingShell: React.FC<{
     { label: "Pricing", go: () => onNavigate("pricing"), current: path === "/pricing" },
     { label: "Contact", go: () => onNavigate("contact"), current: path === "/contact" },
   ];
+  /* The phone menu adds the founding page between Pricing and Contact (public pages on phones v1, 4B).
+     The bar's links and the 761–960 burger panel keep the four: on those widths the founding page is
+     the nav's own CTA. */
+  const MENU_LINKS = phone
+    ? [...LINKS.slice(0, 3), { label: "Founding writers", go: () => onNavigate("founders"), current: path === "/founders" }, LINKS[3]]
+    : LINKS;
   const pick = (go: () => void) => () => { closeMenu(); go(); };
 
   return (
@@ -295,7 +300,7 @@ export const MarketingShell: React.FC<{
             ground; it is only reachable below the breakpoint, where the links are hidden. */}
         {menuOpen && !waitlist && !welcome && (
           <div className="mk-navpanel" id="mk-navpanel" ref={panelRef}>
-            {LINKS.map((l) => (
+            {MENU_LINKS.map((l) => (
               <button key={l.label} type="button" onClick={pick(l.go)}
                       aria-current={l.current ? "page" : undefined}>
                 {l.label}
@@ -305,6 +310,15 @@ export const MarketingShell: React.FC<{
               <button type="button" onClick={pick(() => { window.location.hash = "#/login"; })}>
                 Log in
               </button>
+            )}
+            {/* The phone menu ends on the founding offer: the landing's join bar's own primary and its
+                own destination (public pages on phones v1, 4B). Anonymous only, as the desktop CTA is. */}
+            {phone && nav.mode === "anon" && (
+              <div className="mk-navjoinwrap">
+                <button type="button" className="mk-navjoin" onClick={pick(() => onNavigate("founders"))}>
+                  {HERO_CTA}
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -329,7 +343,6 @@ export const MarketingShell: React.FC<{
             : <a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate("privacy"); }}>Privacy</a>}</p>
         </footer>
       ) : <MarketingFooter onNavigate={onNavigate} waitlist={waitlist} />}
-      <ConsentBar onPrivacy={() => onNavigate("privacy")} />
     </div>
   );
 };

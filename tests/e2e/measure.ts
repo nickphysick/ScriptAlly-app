@@ -125,8 +125,8 @@ export async function ensureSignedIn(page: Page) {
      and then tried to sign in again, on a route that redirects away from the form when the session
      is live, and hung until the test timed out. Racing the shell against the form settles it. */
   const settled = await Promise.race([
-    page.locator(SHELL).first().waitFor({ state: "attached", timeout: 15_000 }).then(() => "shell").catch(() => null),
-    page.locator("#au-email").waitFor({ state: "attached", timeout: 15_000 }).then(() => "form").catch(() => null),
+    page.locator(SHELL).first().waitFor({ state: "attached", timeout: 30_000 }).then(() => "shell").catch(() => null),
+    page.locator("#au-email").waitFor({ state: "attached", timeout: 30_000 }).then(() => "form").catch(() => null),
   ]);
   if (settled === "shell") return;
   const pw = process.env.SA_E2E_PASSWORD ?? passwordFromEnvLocal();
@@ -143,8 +143,14 @@ export async function ensureSignedIn(page: Page) {
   for (const pause of [0, 30_000, 60_000, 90_000]) {
     if (pause) await page.waitForTimeout(pause);
     await page.goto("/#/signin");
-    /* an earlier press may have landed after all */
-    if (await page.locator(SHELL).first().isVisible().catch(() => false)) return;
+    /* an earlier press may have landed after all — or the session was live all along and the app routed away
+       from the form. ⚠️ RACE THE TWO, as above (phone fixes v1): a bare `isVisible()` read the shell before WebKit
+       had drawn it, and the `fill` below then waited the whole test out for a form that never comes. */
+    const here = await Promise.race([
+      page.locator(SHELL).first().waitFor({ state: "attached", timeout: 30_000 }).then(() => "shell").catch(() => null),
+      page.locator("#au-email").waitFor({ state: "attached", timeout: 30_000 }).then(() => "form").catch(() => null),
+    ]);
+    if (here === "shell") return;
     await page.locator("#au-email").fill(process.env.SA_E2E_EMAIL ?? "harness@scriptally.test");
     await page.locator("#au-pw").fill(pw);
     await page.getByRole("button", { name: /^Sign in$/ }).last().click();

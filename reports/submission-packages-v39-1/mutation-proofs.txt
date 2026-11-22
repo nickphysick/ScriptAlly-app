@@ -1,0 +1,30 @@
+== L1: [L1-1512] 19/19 green    2 passed (40.1s) 
+== L2: [L2] 4/4 green    2 passed (28.4s) 
+== L3: [L3] 25/26 green    1 failed   1 passed (29.8s) 
+  ✗ L3 · no label is ringed — [{"on":true,"ring":true,"bar":true,"barW":197.5,"w":233.5,"lift":"none"},{"on":false,"ring":false,"bar":false,"barW":null,"w":233.5,"lift":"none"},{"on":false,"ring":false,"bar":false,"barW":null,"w":233.5,"lift":"none"},{"on":false,"ring":false,"bar":false,"barW":null,"w":233.5,"lift":"none"}]
+== L4: [L4] 6/6 green    2 passed (29.2s) 
+== L5: [L5] 4/5 green    1 failed   1 passed (34.0s) 
+  ✗ L5 · a reload keeps it hidden — tip
+== L6: [L6] 9/10 green    1 failed   1 passed (33.0s) 
+  ✗ L6 · Plum changes the header's computed background before anything is saved — rgb(29, 75, 99)
+== L7: [L7-1512] 3/3 green    2 passed (27.9s) 
+== L1: [L1-1512] 17/19 green    1 failed   1 passed (34.1s) 
+  ✗ L1-1512 · the builder: left = the card's (±1) — 296 vs 276
+  ✗ L1-1512 · the builder: right = the card's (±1) — 1456 vs 1476
+== L2: [L2] 3/4 green    1 failed   1 passed (27.9s) 
+  ✗ L2 · exactly two typewriter elements — ["SPAN.hl","B.","B.","B.","B.","SPAN.p9-po-nm"]
+== L4: [L4] 5/6 green    1 failed   1 passed (29.4s) 
+  ✗ L4 · explainer → labels 48 (±1) — 20
+== L7: [L7-1512] 2/3 green    1 failed   1 passed (27.7s) 
+  ✗ L7-1512 · the background is #fbf9f5 — rgb(255, 255, 255)
+== pk39 L3: [L3-1512] 4/6 green    1 failed   1 passed (27.8s) 
+  ✗ L3-1512 · no label is narrower than 200 — [150,150,150,150]
+  ✗ L3-1512 · no label is ringed — [{"id":"pk40-draft","w":150,"ring":false,"on":false},{"id":"pk40-ready","w":150,"ring":false,"on":false},{"id":"pk40-std2","w":150,"ring":false,"on":false},{"id":"pk40-std","w":150,"ring":true,"on":true}]
+== pk39 L4: [L4-1512] 6/8 green    1 failed   1 passed (28.1s) 
+  ✗ L4-1512 · the cards are 24 ± 1 apart — 8
+  ✗ L4-1512 · exactly one status pill and no stage — status
+== pk38 L8: [L8] 15/15 green    2 passed (39.3s) 
+== pk26 PK26-W: [PK26-W-1512] 0/2 green    1 failed   1 passed (27.1s) 
+  ✗ PK26-W-1512 · build left — 48.0 (want 28)
+  ✗ PK26-W-1512 · build right — 48.0 (want 28)
+== pk38 L8: [L8] 10/15 green    1 failed   1 passed (39.6s) 

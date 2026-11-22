@@ -1,0 +1,271 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.2s)
+PL-2 @1440 how {"w":952,"b":"1px solid rgba(28, 19, 15, 0.13)","r":"26px"} below pair 28.0
+PL-2 @1440 case 6 [{"m":"1","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"3","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"6","checked":"true","role":"radio","flag":"Fits your campaign","visible":true},{"m":"12","checked":"false","role":"radio","flag":"Fits your campaign","visible":true}]
+PL-2 @1440 case 12 [{"m":"1","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"3","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"6","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"12","checked":"true","role":"radio","flag":"Fits your campaign","visible":true}]
+  ✘  2 [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1440: a result opens beneath the cards and checks and flags exactly the fitting row (2.5s)
+PL-2 @1280 how {"w":952,"b":"1px solid rgba(28, 19, 15, 0.13)","r":"26px"} below pair 26.0
+PL-2 @1280 case 6 [{"m":"1","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"3","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"6","checked":"true","role":"radio","flag":"Fits your campaign","visible":true},{"m":"12","checked":"false","role":"radio","flag":"Fits your campaign","visible":true}]
+PL-2 @1280 case 12 [{"m":"1","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"3","checked":"false","role":"radio","flag":"Fits your campaign","visible":true},{"m":"6","checked":"true","role":"radio","flag":"Fits your campaign","visible":true},{"m":"12","checked":"false","role":"radio","flag":"Fits your campaign","visible":true}]
+  ✘  3 [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1280: a result opens beneath the cards and checks and flags exactly the fitting row (2.1s)
+PL-2 @390 {"tab":"true","nav":60,"tabsTop":60,"tabsBottom":139.515625,"card":139.015625,"focus":"12","want":"12","checked":["12"]}
+  ✘  4 [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @390: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view (2.8s)
+PL-2 @375 {"tab":"true","nav":60,"tabsTop":60,"tabsBottom":139.515625,"card":139.015625,"focus":"12","want":"12","checked":["12"]}
+  ✘  5 [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @375: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view (5.3s)
+
+
+  1) [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1440: a result opens beneath the cards and checks and flags exactly the fitting row 
+
+    Error: exactly one row flagged, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 12
+
+      Array [
+        Array [
+    +     "1",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "3",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+          "6",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "12",
+          "Fits your campaign",
+        ],
+      ]
+
+      162 |       expect.soft(want, "the case fits what its name says").toBe(name);
+      163 |       expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "exactly one row checked, the estimate's").toEqual([want]);
+    > 164 |       expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+          |                                                                                                                 ^
+      165 |     }
+      166 |   });
+      167 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:164:113
+
+    Error: exactly one row flagged, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 12
+
+      Array [
+        Array [
+    +     "1",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "3",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "6",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+          "12",
+          "Fits your campaign",
+        ],
+      ]
+
+      162 |       expect.soft(want, "the case fits what its name says").toBe(name);
+      163 |       expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "exactly one row checked, the estimate's").toEqual([want]);
+    > 164 |       expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+          |                                                                                                                 ^
+      165 |     }
+      166 |   });
+      167 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:164:113
+
+    Error Context: test-results/pricingLadder.measure.ts-P-38e5c-ags-exactly-the-fitting-row-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1280: a result opens beneath the cards and checks and flags exactly the fitting row 
+
+    Error: exactly one row flagged, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 12
+
+      Array [
+        Array [
+    +     "1",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "3",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+          "6",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "12",
+          "Fits your campaign",
+        ],
+      ]
+
+      162 |       expect.soft(want, "the case fits what its name says").toBe(name);
+      163 |       expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "exactly one row checked, the estimate's").toEqual([want]);
+    > 164 |       expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+          |                                                                                                                 ^
+      165 |     }
+      166 |   });
+      167 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:164:113
+
+    Error: exactly one row checked, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "12",
+    +   "6",
+      ]
+
+      161 |       console.log(`PL-2 @${vp.width} case ${name}`, JSON.stringify(r.filter((x) => x.checked === "true" || x.flag)));
+      162 |       expect.soft(want, "the case fits what its name says").toBe(name);
+    > 163 |       expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "exactly one row checked, the estimate's").toEqual([want]);
+          |                                                                                                                     ^
+      164 |       expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+      165 |     }
+      166 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:163:117
+
+    Error: exactly one row flagged, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 12
+
+      Array [
+        Array [
+    +     "1",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "3",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "6",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+          "12",
+          "Fits your campaign",
+        ],
+      ]
+
+      162 |       expect.soft(want, "the case fits what its name says").toBe(name);
+      163 |       expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "exactly one row checked, the estimate's").toEqual([want]);
+    > 164 |       expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+          |                                                                                                                 ^
+      165 |     }
+      166 |   });
+      167 | }
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:164:113
+
+    Error Context: test-results/pricingLadder.measure.ts-P-f490d-ags-exactly-the-fitting-row-measure/error-context.md
+
+  3) [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @390: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+
+    Error: exactly one row flagged, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 12
+
+      Array [
+        Array [
+    +     "1",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "3",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "6",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+          "12",
+          "Fits your campaign",
+        ],
+      ]
+
+      199 |     expect.soft(st.tab, "the Pro tab is selected").toBe("true");
+      200 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "exactly one row checked, the estimate's").toEqual([want]);
+    > 201 |     expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+          |                                                                                                               ^
+      202 |     expect.soft(Math.abs(st.tabsTop - st.nav), "the tabs are pinned under the nav").toBeLessThan(1);
+      203 |     expect.soft(st.card, "the Pro card starts below the pinned tabs").toBeGreaterThanOrEqual(st.tabsBottom - 1);
+      204 |     expect.soft(st.card, "…close under them, in view").toBeLessThan(st.tabsBottom + 40);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:201:111
+
+    Error Context: test-results/pricingLadder.measure.ts-P-9fa0e-row-and-brings-it-into-view-measure/error-context.md
+
+  4) [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @375: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+
+    Error: exactly one row flagged, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 12
+
+      Array [
+        Array [
+    +     "1",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "3",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+    +     "6",
+    +     "Fits your campaign",
+    +   ],
+    +   Array [
+          "12",
+          "Fits your campaign",
+        ],
+      ]
+
+      199 |     expect.soft(st.tab, "the Pro tab is selected").toBe("true");
+      200 |     expect.soft(r.filter((x) => x.checked === "true").map((x) => x.m), "exactly one row checked, the estimate's").toEqual([want]);
+    > 201 |     expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+          |                                                                                                               ^
+      202 |     expect.soft(Math.abs(st.tabsTop - st.nav), "the tabs are pinned under the nav").toBeLessThan(1);
+      203 |     expect.soft(st.card, "the Pro card starts below the pinned tabs").toBeGreaterThanOrEqual(st.tabsBottom - 1);
+      204 |     expect.soft(st.card, "…close under them, in view").toBeLessThan(st.tabsBottom + 40);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:201:111
+
+    Error Context: test-results/pricingLadder.measure.ts-P-992a6-row-and-brings-it-into-view-measure/error-context.md
+
+  4 failed
+    [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1440: a result opens beneath the cards and checks and flags exactly the fitting row 
+    [measure] › tests/e2e/pricingLadder.measure.ts:139:3 › PL-2 @1280: a result opens beneath the cards and checks and flags exactly the fitting row 
+    [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @390: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+    [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @375: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+  1 passed (35.1s)

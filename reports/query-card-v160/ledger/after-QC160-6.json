@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: the save changes the stage (the strip's colour)",
+  "ok": true,
+  "got": "rgb(239, 230, 214) → rgb(228, 235, 242)"
+ },
+ {
+  "name": "population: both ends are single colours",
+  "ok": true,
+  "got": "none / none"
+ },
+ {
+  "name": "at 200ms the strip's background-color is strictly between the old and new",
+  "ok": true,
+  "got": "rgb(239, 230, 214) | rgb(230, 234, 237) @198ms | rgb(228, 235, 242)"
+ },
+ {
+  "name": "by 500ms it equals the new colour",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "the track's current mark pops (qc160-mark) as the stage moves",
+  "ok": true,
+  "got": "47 frames"
+ },
+ {
+  "name": "the strip's status moved on with it",
+  "ok": true,
+  "got": "Queried, step 1 of 4 → Partial requested, step 2 of 4"
+ },
+ {
+  "name": "the footer's new contents fade in (opacity strictly between 0 and 1 during the run)",
+  "ok": true,
+  "got": "[0,0,0.0255128,0.0854842,0.176659,0.290377,0.408628,0.517102,0.611701,0.691425]"
+ },
+ {
+  "name": "the footer is fully drawn by 500ms",
+  "ok": true,
+  "got": "1"
+ }
+]

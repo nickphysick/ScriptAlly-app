@@ -1,0 +1,277 @@
+[
+ {
+  "name": "q152-agent: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-agent: the strip names the status \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "q152-agent: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Queried✕"
+ },
+ {
+  "name": "q152-agent: the status's accessible name",
+  "ok": true,
+  "got": "img \"Queried, step 1 of 4\""
+ },
+ {
+  "name": "q152-agent: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-quiet: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-quiet: the strip names the status \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "q152-quiet: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Queried✕"
+ },
+ {
+  "name": "q152-quiet: the status's accessible name",
+  "ok": true,
+  "got": "img \"Queried, step 1 of 4\""
+ },
+ {
+  "name": "q152-quiet: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-materials: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-materials: the strip names the status \"Partial requested\"",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "q152-materials: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Partial requested✕"
+ },
+ {
+  "name": "q152-materials: the status's accessible name",
+  "ok": true,
+  "got": "img \"Partial requested, step 2 of 4\""
+ },
+ {
+  "name": "q152-materials: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-undated: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-undated: the strip names the status \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "q152-undated: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Partial sent✕"
+ },
+ {
+  "name": "q152-undated: the status's accessible name",
+  "ok": true,
+  "got": "img \"Partial sent, step 2 of 4\""
+ },
+ {
+  "name": "q152-undated: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-fullreq: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-fullreq: the strip names the status \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "q152-fullreq: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Full requested✕"
+ },
+ {
+  "name": "q152-fullreq: the status's accessible name",
+  "ok": true,
+  "got": "img \"Full requested, step 3 of 4\""
+ },
+ {
+  "name": "q152-fullreq: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-long: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-long: the strip names the status \"Full sent\"",
+  "ok": true,
+  "got": "Full sent"
+ },
+ {
+  "name": "q152-long: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Full sent✕"
+ },
+ {
+  "name": "q152-long: the status's accessible name",
+  "ok": true,
+  "got": "img \"Full sent, step 3 of 4\""
+ },
+ {
+  "name": "q152-long: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-rr: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-rr: the strip names the status \"Revise & resubmit\"",
+  "ok": true,
+  "got": "Revise & resubmit"
+ },
+ {
+  "name": "q152-rr: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Revise & resubmit✕"
+ },
+ {
+  "name": "q152-rr: the status's accessible name",
+  "ok": true,
+  "got": "img \"Revise & resubmit, step 3 of 4\""
+ },
+ {
+  "name": "q152-rr: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-offer: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-offer: the strip names the status \"Offer\"",
+  "ok": true,
+  "got": "Offer"
+ },
+ {
+  "name": "q152-offer: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Offer✕"
+ },
+ {
+  "name": "q152-offer: the status's accessible name",
+  "ok": true,
+  "got": "img \"Offer, step 4 of 4\""
+ },
+ {
+  "name": "q152-offer: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-closed: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-closed: the strip names the status \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "q152-closed: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Passed✕"
+ },
+ {
+  "name": "q152-closed: the status's accessible name",
+  "ok": true,
+  "got": "img \"Passed\""
+ },
+ {
+  "name": "q152-closed: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-passed: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-passed: the strip names the status \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "q152-passed: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Passed✕"
+ },
+ {
+  "name": "q152-passed: the status's accessible name",
+  "ok": true,
+  "got": "img \"Passed\""
+ },
+ {
+  "name": "q152-passed: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ },
+ {
+  "name": "q152-withdrew: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-withdrew: the strip names the status \"Withdrawn\"",
+  "ok": true,
+  "got": "Withdrawn"
+ },
+ {
+  "name": "q152-withdrew: no \"Your move\" / \"With the agent\" in the strip",
+  "ok": true,
+  "got": "Withdrawn✕"
+ },
+ {
+  "name": "q152-withdrew: the status's accessible name",
+  "ok": true,
+  "got": "img \"Withdrawn\""
+ },
+ {
+  "name": "q152-withdrew: strip at least 54px; its buttons 36px",
+  "ok": true,
+  "got": "54 · 36x36,36x36,36x36,36x36"
+ }
+]

@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "model sent 27, replies 10"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 shared header",
+  "ok": true,
+  "detail": "{\"n\":1,\"page\":\"analytics\",\"own\":0}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 headline",
+  "ok": true,
+  "detail": "\"27 queries, 10 replies\" vs \"27 queries, 10 replies\""
+ },
+ {
+  "lock": "A1",
+  "where": "1512 top",
+  "ok": true,
+  "detail": "analytics 143.8 · queries 143.8"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 left",
+  "ok": true,
+  "detail": "analytics 112.0 · queries 112.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 right",
+  "ok": true,
+  "detail": "analytics 1472.0 · queries 1472.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 height",
+  "ok": true,
+  "detail": "analytics 227.0 · queries 227.1 · title lines 1 (line 56.7)"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 one-line headline",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "model sent 27, replies 10"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 shared header",
+  "ok": true,
+  "detail": "{\"n\":1,\"page\":\"analytics\",\"own\":0}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 headline",
+  "ok": true,
+  "detail": "\"27 queries, 10 replies\" vs \"27 queries, 10 replies\""
+ },
+ {
+  "lock": "A1",
+  "where": "1280 top",
+  "ok": true,
+  "detail": "analytics 143.8 · queries 143.8"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 left",
+  "ok": true,
+  "detail": "analytics 112.0 · queries 112.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 right",
+  "ok": true,
+  "detail": "analytics 1240.0 · queries 1240.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 height",
+  "ok": true,
+  "detail": "analytics 250.6 · queries 227.1 · title lines 2 (line 56.7)"
+ }
+]

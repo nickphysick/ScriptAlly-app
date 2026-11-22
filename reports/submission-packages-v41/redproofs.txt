@@ -1,0 +1,93 @@
+== red-first: every SP41 lock against the v39.3 build (14d3d0e3, index-lZVjrZc5.js) ==
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+    TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+      74 |   await page.waitForTimeout(900);
+  18 failed
+  1 passed (13.1m)
+== mutation L1 on the final build ==
+  ✗ L1-1512 · ground: the gradient — none
+  ✗ L1-1512 · ground: the pattern over it — none
+[L1-1512] 13/15 green
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  ✗ L1-1280 · ground: the gradient — none
+  ✗ L1-1280 · ground: the pattern over it — none
+[L1-1280] 13/15 green
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  2 failed
+  1 passed (1.0m)
+== mutation L2 on the final build ==
+  ✗ L2-1512 · folder tab takes the strip's colour — rgb(251, 249, 245)
+  ✗ L2-1512 · its curved foot too — rgb(251, 249, 245)
+[L2-1512] 13/15 green
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  ✗ L2-1280 · folder tab takes the strip's colour — rgb(251, 249, 245)
+  ✗ L2-1280 · its curved foot too — rgb(251, 249, 245)
+[L2-1280] 13/15 green
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  2 failed
+  1 passed (1.2m)
+== mutation L3 on the final build ==
+  ✗ L3-1512 · height ≤ 100 — 121.125
+[L3-1512] 5/6 green
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  ✗ L3-1280 · height ≤ 100 — 113.28125
+[L3-1280] 5/6 green
+      48 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  2 failed
+  1 passed (42.3s)
+== mutation L4 on the final build ==
+    Error: Command failed: node tests/e2e/pk41Fixture.mjs --no-packages
+    Error: Command failed: node tests/e2e/seedPk40.mjs
+  2 failed
+  1 passed (40.3s)
+== mutation L5 on the final build ==
+    Error: Command failed: node tests/e2e/seedPk40.mjs
+    Error: Command failed: node tests/e2e/seedPk40.mjs --clean
+  1 failed
+  1 passed (19.3s)
+== mutation L6 on the final build ==
+    Error: expect(locator).toHaveCount(expected) failed
+  1 failed
+== mutation L7 on the final build ==
+    Error: expect(locator).toHaveCount(expected) failed
+  1 failed
+== mutation L8 on the final build ==
+    Error: expect(locator).toHaveCount(expected) failed
+  1 failed
+== mutation L9 on the final build ==
+[L9-1512] 6/6 green
+[L9-1280] 6/6 green
+  3 passed (41.2s)

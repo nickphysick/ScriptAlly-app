@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * DASHBOARD v58 — the activity feed: a floating ink tab, and a half-screen drawer from the right.
+ * DASHBOARD v58 — the activity feed: a half-screen drawer from the right (the phone dashboard's; the desktop
+ * dashboard's floating tab was retired by Dashboard feed v1, which puts the feed on the page).
  *
  * ⚠️ PORTALLED TO `document.body`, AND MOUNTED ONLY WHILE OPEN. `useOverlay` makes `#root` inert
  * and returns focus to whatever opened it; a drawer rendered inside the page would be inert itself.
@@ -22,46 +23,25 @@ import { useOverlay } from "../../shell/useOverlay";
 import { StatusDot } from "../../StatusDot";
 import { feedEntries, type FeedSeg } from "../../../lib/dashFeed";
 import {
-  FEED_FILTERS, SUMMARY_NOUN, defaultFrom, drawerDays, drawerEvents, drawerSummary, earlierWindow, rangeLabel,
+  FEED_FILTERS, SUMMARY_NOUN, SUMMARY_NONE, defaultFrom, drawerDays, drawerEvents, drawerSummary, earlierWindow, rangeLabel,
   windowEndLine, type DrawerEvent, type FeedFilter,
 } from "../../../lib/dashFeedDrawer";
 import { actModeFor, feedFamily } from "./feedFamily";
-import { badgeText } from "../../../lib/dashFeedSeen";
 import { buildQcRows } from "../../../lib/qcSummary";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 
-const ListGlyph = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-    <circle cx="4" cy="4" r="1.6" /><circle cx="4" cy="9" r="1.6" /><circle cx="4" cy="14" r="1.6" /><path d="M8 4h7M8 9h7M8 14h5" />
-  </svg>
-);
-
-/**
- * THE FOLDER TAB (v59): it rises from the page sheet's bottom edge in the desk's colour, with an
- * unseen badge. "LAST 30 DAYS" and the "{n} today" pill are retired. `unseen` is the count; the
- * badge is hidden at 0, and −1 holds its place while the page loads. `bump` replays the 250ms rise when the count goes up while the page is open.
- */
-export const FeedTab: React.FC<{ open: boolean; unseen: number; bump: boolean; onOpen: () => void }> = ({ open, unseen, bump, onOpen }) => (
-  <button type="button" className={`d59-ftab${bump ? " is-bump" : ""}`} data-d58="tab" aria-haspopup="dialog" aria-expanded={open} onClick={onOpen}
-    aria-label={unseen > 0 ? `Activity feed, ${unseen} new` : "Activity feed"}>
-    <span className="d59-ftabic" aria-hidden="true"><ListGlyph /></span>
-    <b>Activity feed</b>
-    {unseen !== 0 && <span className={`d59-badge${unseen < 0 ? " d58-sk" : ""}`} data-d58="tab-badge" aria-hidden="true">{unseen < 0 ? "0" : badgeText(unseen)}</span>}
-    <span className="d59-ftabup" aria-hidden="true">▲</span>
-  </button>
-);
 
 const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => (
   <>{say.map((s, i) => (s.who ? <b key={i}>{s.t}</b> : s.em ? <i key={i}>{s.t}</i> : <React.Fragment key={i}>{s.t}</React.Fragment>))}</>
 );
 
-/* The two marks that are not a status. Drawn here: nothing in the app exports a bell or a gear to share. */
-const BellGlyph = () => (
+/* The two marks that are not a status. Exported so the phone dashboard's Recent rows draw the feed's own disc. */
+export const BellGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-bell">
     <path d="M6 16V11a6 6 0 1112 0v5l2 2H4z" /><path d="M10 20a2 2 0 004 0" />
   </svg>
 );
-const GearGlyph = () => (
+export const GearGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-gear">
     <circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
   </svg>
@@ -141,7 +121,9 @@ export const Dash58Feed: React.FC<{
   now: Date;
   onClose: () => void;
   onAct: (queryId: string, mode: DrawerMode) => void;
-}> = ({ title, activities, queries, scopedQueries, agents, manuscripts, now, onClose, onAct }) => {
+  /** first visit v1 (D4): sends dated by their sent date (`feedEntries`'s honestDates) — the desktop passes it */
+  honestDates?: boolean;
+}> = ({ title, activities, queries, scopedQueries, agents, manuscripts, now, onClose, onAct, honestDates = false }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const { trapTab, scrimClick } = useOverlay(rootRef, { onEscape: onClose, captureEscape: true, scrimClasses: ["d58-wash"], onScrimClick: onClose });
   const [filter, setFilter] = useState<FeedFilter>("all");
@@ -161,8 +143,8 @@ export const Dash58Feed: React.FC<{
   }, []);
 
   const entries = useMemo(
-    () => feedEntries({ activities, queries, agents, manuscripts, now, seenAt: null, from }),
-    [activities, queries, agents, manuscripts, now, from],
+    () => feedEntries({ activities, queries, agents, manuscripts, now, seenAt: null, from, honestDates }),
+    [activities, queries, agents, manuscripts, now, from, honestDates],
   );
   const qcRows = useMemo(() => buildQcRows(scopedQueries, agents, activities, now.getTime()), [scopedQueries, agents, activities, now]);
   const days = useMemo(() => drawerDays(drawerEvents(entries, qcRows, filter), now), [entries, qcRows, filter, now]);
@@ -185,7 +167,6 @@ export const Dash58Feed: React.FC<{
       >
         <header className="d58-dhead" data-d58="drawer-head">
           <div className="d58-drow">
-            <span className="d58-dart" aria-hidden="true" />
             <div style={{ minWidth: 0 }}>
               <h2 className="d58-dtitle">Activity feed</h2>
               <small className="d58-dsub" data-d58="drawer-sub">Everything that's happened on <i>{title || "your manuscript"}</i></small>
@@ -211,9 +192,10 @@ export const Dash58Feed: React.FC<{
           </div>
         </header>
         <div className="d58-sum">
-          <div data-d58="sum"><b>{sum.replies}</b><span>{SUMMARY_NOUN.replies(sum.replies)}</span></div>
-          <div data-d58="sum"><b>{sum.did}</b><span>{SUMMARY_NOUN.did(sum.did)}</span></div>
-          <div data-d58="sum" className="is-you"><b>{sum.need}</b><span>{SUMMARY_NOUN.need(sum.need)}</span></div>
+          {/* first visit v1 (D4): a zero is said in words, never as a 0 */}
+          <div data-d58="sum">{sum.replies ? <><b>{sum.replies}</b><span>{SUMMARY_NOUN.replies(sum.replies)}</span></> : <span className="d58-sumnone">{SUMMARY_NONE.replies}</span>}</div>
+          <div data-d58="sum">{sum.did ? <><b>{sum.did}</b><span>{SUMMARY_NOUN.did(sum.did)}</span></> : <span className="d58-sumnone">{SUMMARY_NONE.did}</span>}</div>
+          <div data-d58="sum" className="is-you">{sum.need ? <><b>{sum.need}</b><span>{SUMMARY_NOUN.need(sum.need)}</span></> : <span className="d58-sumnone">{SUMMARY_NONE.need}</span>}</div>
         </div>
         <div className="d58-dbody" data-d58="drawer-body">
           {days.length === 0 && <p className="d58-dempty">Nothing here in this window.</p>}

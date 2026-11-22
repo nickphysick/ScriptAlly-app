@@ -17,6 +17,7 @@
 import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
 import { whereItStands, type WhereKey } from "./qcSummary";
+import { quickOfRow } from "./queryState";
 
 export type GlyphKey = "q" | "pr" | "ps" | "fr" | "fs" | "of" | "cl";
 
@@ -154,6 +155,8 @@ export interface Filterable {
   expectedMs: number | null;
   /** v141.1 — the nudge window's undated branch reads the stage's start */
   stageStartMs?: number | null;
+  /** cards-sort-search v1 — Last changed falls back to the last activity where no date marks the stage */
+  lastMs?: number;
   court: string;
   pastExpected: boolean;
   sentMs: number | null;
@@ -191,9 +194,10 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
   if (skip !== "overYear" && f.overYear && !overAYear(r, now)) return false;
   /* v141.1 — the "Your move" quick pick IS the "With you" set (the nudge window, lib/nudgeWindow), so the two can never
      disagree; `isYourMoveRow` stays for the Contact list and the "Who it's with" bands, which this pack leaves alone */
-  if (skip !== "you" && f.you && whereItStands(r, now) !== "you") return false;
+  if (skip !== "you" && f.you && quickOfRow(r, () => whereItStands(r, now)) !== "you") return false;
   if (skip !== "waiting" && f.waiting && !(r.court === "agent" && !r.pastExpected)) return false;
-  if (skip !== "where" && f.where && whereItStands(r, now) !== f.where) return false;
+  /* v152 §1.5 — a row the page stamped filters by its six-state set (lib/queryState); others keep the old rule */
+  if (skip !== "where" && f.where && quickOfRow(r, () => whereItStands(r, now)) !== f.where) return false;
   return true;
 }
 
@@ -202,7 +206,10 @@ export function matches138(r: Filterable, f: Qc138Filters, now: number, skip?: k
  *    from an already-sorted list. A row with nothing to sort on goes LAST in either direction (the house rule),
  *    so reversing a sort never floats the empties to the top.
  */
-export type Qc138SortKey = "agent" | "first" | "stage" | "sent" | "next" | "due";
+/** cards-sort-search v1 §B — "changed" (Last changed: the day the query reached the stage it stands at, else its last
+ *  activity) has no column heading; it is chosen from the Cards view's Sort chip, and while it is the List view shows no
+ *  active heading */
+export type Qc138SortKey = "agent" | "first" | "stage" | "sent" | "next" | "due" | "changed";
 export interface Qc138Sort { key: Qc138SortKey; reversed: boolean }
 export const DEFAULT_SORT_138: Qc138Sort = { key: "due", reversed: false };
 
@@ -240,6 +247,7 @@ export function sort138<T extends Filterable & { id: string; agentName: string }
       case "sent": return ctx.packageName(r)?.toLowerCase() ?? null;
       case "next": return ctx.nextLabel(r)?.toLowerCase() ?? null;
       case "due": return dueOf(r);
+      case "changed": return r.stageStartMs ?? r.lastMs ?? null;
     }
   };
   const dir = s.reversed ? -1 : 1;
@@ -282,12 +290,15 @@ const DETAIL_VERB: Record<string, string> = {
  * The stage's detail line: "Requested 2 Sep". None at Queried (the date is in First queried) and never "· day n".
  * `hot` (rust, upright, 600) when the row is the writer's to send and its send-by date has gone.
  */
-export function stageDetail(r: Filterable & { stageStartMs: number | null }, nowMs: number): { text: string; hot: boolean } | null {
+export function stageDetail(r: Filterable & { stageStartMs: number | null }, nowMs: number): { text: string; hot: boolean; verb: string; undated: boolean } | null {
   if (r.status === QueryStatus.QUERIED) return null;
   const verb = DETAIL_VERB[r.status] ?? "Since";
-  const text = r.stageStartMs != null ? `${verb} ${dayMonYear(r.stageStartMs, nowMs)}` : `${verb}, not dated`;
+  /* v149.1 B3 — ONE WORDING WHEREVER A DATE IS MISSING: "{step}, add date", the last two words a link to the card's
+     edit mode at that date (the row draws the link from `undated`) */
+  const undated = r.stageStartMs == null;
+  const text = undated ? `${verb}, add date` : `${verb} ${dayMonYear(r.stageStartMs!, nowMs)}`;
   const due = dueOf(r);
-  return { text, hot: r.court === "you" && due != null && due < startOfDay(nowMs) };
+  return { text, verb, undated, hot: r.court === "you" && due != null && due < startOfDay(nowMs) };
 }
 
 /** the track's four stops */
@@ -359,15 +370,18 @@ export const peekTone = (due: number | null, now: number, closed: boolean): Peek
  * "{d} until your send-by date" · "closed {d} after you queried" · "No date set". Same-day forms are said plainly.
  */
 export interface PeekSummary { head: string; line: string; hot: boolean }
+/** v149.1 B3 — the summary when nothing is dated */
+export const NO_DATES = "No dates yet";
 export function peekSummary(o: { sent: number | null; due: number | null; closedAt: number | null; closed: boolean; yours: boolean; now: number }): PeekSummary {
   const { sent, due, closedAt, closed, yours, now } = o;
   if (closed) {
-    if (sent == null || closedAt == null) return { head: "Closed", line: "closed, not dated", hot: false };
+    if (sent == null || closedAt == null) return { head: "Closed", line: NO_DATES, hot: false };
     const d = dDays(sent, closedAt);
     return { head: "Closed", line: d === 0 ? "closed the day you queried" : `closed ${gapWords(d)} after you queried`, hot: false };
   }
-  const out = sent == null ? "Out, not dated" : dDays(sent, now) === 0 ? "Out today" : `Out ${gapWords(dDays(sent, now))}`;
-  if (due == null) return { head: out, line: "No date set", hot: false };
+  if (sent == null) return { head: NO_DATES, line: "", hot: false };
+  const out = dDays(sent, now) === 0 ? "Out today" : `Out ${gapWords(dDays(sent, now))}`;
+  if (due == null) return { head: out, line: yours ? "No send-by date yet" : "No reply date yet", hot: false };
   if (peekLate(due, now)) return { head: out, line: `${gapWords(dDays(due, now))} past the date`, hot: true };
   const left = dDays(now, due);
   if (left === 0) return { head: out, line: yours ? "your send-by date is today" : "their reply date is today", hot: false };

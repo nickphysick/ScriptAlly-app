@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: one of each (paper, ring, tint)",
+  "ok": true,
+  "got": "1 1 1"
+ },
+ {
+  "name": "all three are 3200ms",
+  "ok": true,
+  "got": "[3200,3200,3200]"
+ },
+ {
+  "name": "they start within one frame (16.7ms) of each other",
+  "ok": true,
+  "got": "[5757.9,5757.9,5757.9]"
+ },
+ {
+  "name": "the paper is the frame's ::before, the ring the rim layer",
+  "ok": true,
+  "got": "frame::before ring"
+ },
+ {
+  "name": "population: frames with the breath running",
+  "ok": true,
+  "got": "89"
+ },
+ {
+  "name": "in every one the ring's scale equals the paper's",
+  "ok": true,
+  "got": "[[1.00116,1.00116],[1.00124,1.00124],[1.00132,1.00132]]"
+ }
+]

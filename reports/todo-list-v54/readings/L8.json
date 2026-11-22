@@ -1,0 +1,62 @@
+{
+ "cur": {
+  "q": "seed-cal-passed865-q",
+  "agent": "seed-cal-passed865",
+  "sent": 1713398400000
+ },
+ "list": [
+  {
+   "q": "seed-query-10",
+   "agent": "seed-agent-10",
+   "sent": 1713484800000,
+   "on": true,
+   "why": "week"
+  },
+  {
+   "q": "seed-query-19",
+   "agent": "seed-agent-7",
+   "sent": 1767571200000,
+   "on": true,
+   "why": "asks"
+  },
+  {
+   "q": "thin-q-cohort-1",
+   "agent": "thin-ag-close",
+   "sent": 1772641549259,
+   "on": false,
+   "why": null
+  },
+  {
+   "q": "msv12-q-7",
+   "agent": "msv12-agent-1",
+   "sent": 1773133200000,
+   "on": false,
+   "why": null
+  },
+  {
+   "q": "thin-q-cohort-2",
+   "agent": "thin-ag-chase",
+   "sent": 1773419149259,
+   "on": false,
+   "why": null
+  }
+ ],
+ "expected": [
+  "seed-query-10",
+  "seed-query-19"
+ ],
+ "tally": {
+  "week": 1,
+  "asks": 1,
+  "none": 3
+ },
+ "written": [
+  "Query Letter",
+  "Synopsis",
+  {
+   "material": "Sample Pages",
+   "type": "chapters",
+   "quantity": 3
+  }
+ ]
+}

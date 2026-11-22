@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "where": "every row kind present",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "54 ± 1",
+  "ok": true,
+  "detail": "0 off: "
+ },
+ {
+  "where": "agent 600",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "agency #5b4f47",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "agency one line",
+  "ok": true,
+  "detail": "0 wrap"
+ },
+ {
+  "where": "agent never truncates",
+  "ok": true,
+  "detail": "0: "
+ },
+ {
+  "where": "a truncated cell carries its full text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "where it stands gives way only after agency",
+  "ok": true,
+  "detail": "agency 0, stands 0"
+ }
+]

@@ -1,0 +1,84 @@
+{
+ "save": {
+  "frames": 38,
+  "scales": 35,
+  "below": 2,
+  "top": 1.02947,
+  "longs": [],
+  "span": 617,
+  "start": 9571.7,
+  "longsAll": [
+   {
+    "start": 6987.299999952316,
+    "dur": 71,
+    "name": "unknown"
+   },
+   {
+    "start": 7636.599999904633,
+    "dur": 1202,
+    "name": "unknown"
+   },
+   {
+    "start": 9017.099999904633,
+    "dur": 52,
+    "name": "unknown"
+   },
+   {
+    "start": 9070.200000047684,
+    "dur": 95,
+    "name": "unknown"
+   }
+  ]
+ },
+ "undo": {
+  "frames": 37,
+  "scales": 0,
+  "below": 36,
+  "top": 1,
+  "longs": [],
+  "span": 600,
+  "start": 14538.2,
+  "longsAll": [
+   {
+    "start": 12331.5,
+    "dur": 145,
+    "name": "unknown"
+   },
+   {
+    "start": 12331.5,
+    "dur": 145,
+    "name": "unknown"
+   },
+   {
+    "start": 12723.599999904633,
+    "dur": 1089,
+    "name": "unknown"
+   },
+   {
+    "start": 12723.599999904633,
+    "dur": 1089,
+    "name": "unknown"
+   },
+   {
+    "start": 14030.099999904633,
+    "dur": 55,
+    "name": "unknown"
+   },
+   {
+    "start": 14085.099999904633,
+    "dur": 93,
+    "name": "unknown"
+   },
+   {
+    "start": 14030.099999904633,
+    "dur": 55,
+    "name": "unknown"
+   },
+   {
+    "start": 14085.099999904633,
+    "dur": 93,
+    "name": "unknown"
+   }
+  ]
+ }
+}

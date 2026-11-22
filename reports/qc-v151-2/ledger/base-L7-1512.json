@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[22,38,10,18]"
+ },
+ {
+  "where": "navy buttons: navy, white text",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "Nudge: white, navy text, outlined #c9cfd8",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "every Your move row has a button; gone quiet's is Nudge",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "With the agent and Closed: none",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Birds-eye population",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "where": "Birds-eye: the list's colour and words for the same query",
+  "ok": false,
+  "detail": "[[{\"tone\":\"\",\"label\":\"Close query\",\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"},{\"tone\":\"\",\"label\":\"Consider closing\",\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"}],[{\"tone\":\"\",\"label\":\"Close query\",\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"},{\"tone\":\"\",\"label\":\"Consider closing\",\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"}],[{\"tone\":\"\",\"label\":\"Close query\",\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"},{\"tone\":\"\",\"label\":\"Consider closing\",\"bg\":\"rgb(243, 200, 186)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"}]]"
+ }
+]

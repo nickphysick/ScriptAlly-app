@@ -9,6 +9,22 @@ import type { Locator, Page } from "@playwright/test";
 
 const scopeOf = (page: Page, scope = "") => (sel: string) => page.locator(`${scope ? scope + " " : ""}${sel}`);
 
+/* Set-up on phones v1 (30 Oct): below 768px the deck is a compact card whose "Answer this" opens a
+   full-screen layer (`[data-im="q-layer"]`, portalled outside the deck) holding the SAME question
+   bodies. A question's own `.o9-ans > .sf-btn` is visually hidden there (the layer's "Save and next"
+   presses it), so a press dispatches on the element itself — the same handler, never a coordinate. */
+const LAYER = '[data-im="q-layer"]';
+async function openLayer(page: Page): Promise<void> {
+  if ((await page.locator(LAYER).count()) === 0 && (await page.locator('[data-im="deck-answer"]').count()) > 0) {
+    await page.locator('[data-im="deck-answer"]').click();
+    await page.locator(LAYER).waitFor({ timeout: 10_000 });
+  }
+}
+async function tap(l: Locator): Promise<void> {
+  if (await l.isVisible() && (await l.boundingBox())!.width > 2) await l.click();
+  else await l.evaluate((e) => (e as HTMLElement).click());
+}
+
 /** Decide every open duplicate set. `keepOne` keeps the set whose text matches apart, once. */
 export async function decideDuplicates(page: Page, opts: { scope?: string; keepOne?: RegExp } = {}): Promise<number> {
   const $ = scopeOf(page, opts.scope);
@@ -33,17 +49,21 @@ export async function fillDate(scope: Locator, iso: string) {
 /** Answer one open queries question by its reason. */
 export async function answerQuery(r: Locator, opts: { date?: string; undated?: boolean } = {}) {
   const code = await r.getAttribute("data-reason");
-  const press = async (name: RegExp) => { await r.getByRole("button", { name }).first().click(); };
+  const press = async (name: RegExp) => { await tap(r.getByRole("button", { name }).first()); };
   const typeDate = async (iso: string) => { await fillDate(r, iso); await press(/^Save date$/); };
   switch (code) {
     case "timeline": return answerStrip(r);
+    /* two-door import v1: the three new cards */
+    case "dates-out-of-order": return answerOrder(r);
+    case "date-to-confirm": return tap(r.locator("[data-reading]").first());
+    case "outcome-missing": return tap(r.locator("[data-outcome]").first());
     case "missing-day": return press(/^Keep as month$/);
     case "serial-outlier": return press(/^That's right$/);
     case "no-date": return opts.date ? typeDate(opts.date) : press(/^(I don't have this date|Leave undated)$/);
     case "unreadable-date": if (opts.undated) return press(/^I don't have this date$/); return typeDate(opts.date ?? "2024-05-14");
     case "unreadable-response-date": return typeDate(opts.date ?? "2024-05-14");
-    case "status-wording": return (await r.getByRole("button", { name: /^That's right$/ }).count()) ? press(/^That's right$/) : r.locator("[data-status]").first().click();
-    default: return r.locator("button").first().click(); // ambiguous dates and status direction: the first reading offered
+    case "status-wording": return (await r.getByRole("button", { name: /^That's right$/ }).count()) ? press(/^That's right$/) : tap(r.locator("[data-status]").first());
+    default: return tap(r.locator("button").first()); // ambiguous dates and status direction: the first reading offered
   }
 }
 
@@ -55,12 +75,33 @@ export async function answerQuery(r: Locator, opts: { date?: string; undated?: b
 export async function answerStrip(r: Locator) {
   const confirm = r.locator('[data-strip="confirm"]');
   for (let i = 0; i < 12 && !(await confirm.isEnabled()); i++) {
-    const order = /Fix the dates first/.test((await confirm.textContent()) ?? "");
+    /* two-door import v1: "Fix the dates first" now reads "Press a date to change it" */
+    const order = /Fix the dates first|Press a date to change it/.test((await confirm.textContent()) ?? "");
     const tile = order ? r.locator('[data-step="sent"]') : r.locator(".o9-stop.is-miss").first();
     const step = await tile.getAttribute("data-step");
     await tile.click();
-    if (step === "sent") await r.locator('[data-strip="waive"]').click();
-    else { await r.locator('[data-strip="date"]').fill("today"); await r.locator('[data-strip="save"]').click(); }
+    /* two-door import v1: the popover's buttons can sit under the review's sticky bar — pressed on the element */
+    const press = (sel: string) => r.locator(sel).evaluate((e) => (e as HTMLElement).click());
+    if (step === "sent") await press('[data-strip="waive"]');
+    else { await r.locator('[data-strip="date"]').fill("today"); await press('[data-strip="save"]'); }
+  }
+  await confirm.click();
+}
+
+/**
+ * Dates out of order (two-door import v1): the button stays disabled until the dates run in order.
+ * The quickest honest fix: move each dated step that comes before the query's sent date to the sent
+ * date itself (typed day first), then "Yes, that's right".
+ */
+export async function answerOrder(r: Locator) {
+  const confirm = r.locator('[data-order="confirm"]');
+  for (let i = 0; i < 6 && !(await confirm.isEnabled()); i++) {
+    const sent = ((await r.locator('[data-step="sent"] small').textContent()) ?? "").trim();
+    const tiles = r.locator('.o9-stop[data-step]:not([data-step="sent"]):not([data-step="new"])');
+    await tiles.first().click();
+    await r.locator('[data-strip="date"]').fill(sent || "today");
+    /* the popover's Save can sit under the review's sticky bar: pressed on the element itself */
+    await r.locator('[data-strip="save"]').evaluate((e) => (e as HTMLElement).click());
   }
   await confirm.click();
 }
@@ -70,15 +111,16 @@ export async function answerAgents(page: Page, opts: { scope?: string } = {}): P
   const $ = scopeOf(page, opts.scope);
   let n = 0;
   for (let i = 0; i < 30; i++) {
-    const card = $('[data-im="deck"] [data-reason], [data-row="agent"][data-asks="1"] [data-reason]').first();
+    await openLayer(page);
+    const card = $(`[data-im="deck"] [data-reason], ${LAYER} [data-reason], [data-row="agent"][data-asks="1"] [data-reason]`).first();
     if ((await card.count()) === 0) break;
     const by = (name: string) => card.getByRole("button", { name });
-    if (await by("Carry on without an agency").count()) await by("Carry on without an agency").first().click();
-    else if (await by("Mark as checked").count()) await by("Mark as checked").first().click();
-    else if (await by("Remove this row").count()) await by("Remove this row").first().click();
-    else if (await by("Merge them").count()) await by("Merge them").first().click();
+    if (await by("Carry on without an agency").count()) await tap(by("Carry on without an agency").first());
+    else if (await by("Mark as checked").count()) await tap(by("Mark as checked").first());
+    else if (await by("Remove this row").count()) await tap(by("Remove this row").first());
+    else if (await by("Merge them").count()) await tap(by("Merge them").first());
     /* a name or agency to check (photos): the first reading offered */
-    else if (await card.locator("[data-reading]").count()) await card.locator("[data-reading]").first().click();
+    else if (await card.locator("[data-reading]").count()) await tap(card.locator("[data-reading]").first());
     else break;
     n++;
   }
@@ -88,9 +130,13 @@ export async function answerAgents(page: Page, opts: { scope?: string } = {}): P
 /** Every question the queries step is asking, answered. */
 export async function answerQueries(page: Page, opts: { scope?: string; date?: string; undated?: boolean } = {}): Promise<number> {
   const $ = scopeOf(page, opts.scope);
-  const asks = () => $('[data-im="deck"] [data-reason], [data-row="query"][data-asks="1"] [data-reason]');
+  const asks = () => $(`[data-im="deck"] [data-reason], ${LAYER} [data-reason], [data-row="query"][data-asks="1"] [data-reason]`);
   let n = 0;
-  for (let i = 0; i < 60 && (await asks().count()) > 0; i++) { await answerQuery(asks().first(), opts); n++; }
+  for (let i = 0; i < 60; i++) {
+    await openLayer(page);
+    if ((await asks().count()) === 0) break;
+    await answerQuery(asks().first(), opts); n++;
+  }
   return n;
 }
 

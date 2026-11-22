@@ -1,0 +1,39 @@
+== CHANGE G6
+[G6] 12/12 green
+  2 passed (54.0s)
+== BASE
+[G1] 2/38 green
+[G2] 1/19 green
+[G3] 1/11 green
+[G4] 2/8 green
+[G5] 2/8 green
+[G6] 6/12 green
+  6 failed
+  1 passed (3.3m)
+== MUT G1
+[G1] 38/38 green
+== MUT G2
+  ✗ G2 · seed-cal-near rows in order — 
+  ✗ G2 · seed-cal-near email row — none
+  ✗ G2 · seed-cal-near website row — none
+  ✗ G2 · seed-cal-soon rows in order — 
+== MUT G3
+  ✗ G3 · cv25-q-08 the waiting bar only while waiting — Offer: bar true
+  ✗ G3 · cv25-q-08 no reply time: the caption alone — 4 blocks
+[G3] 67/69 green
+== MUT G4
+  ✗ G4 · 1512 clv-fx-reopen the dashed panel, no timeline — false  "" 0
+  ✗ G4 · 1512 clv-fx-stub0 the dashed panel, no timeline — false  "" 0
+  ✗ G4 · 1512 clv-fx-stale the dashed panel, no timeline — false  "" 0
+  ✗ G4 · 1280 clv-fx-reopen the dashed panel, no timeline — false  "" 0
+== MUT G5
+  ✗ G5 · 1512 column 2: How and Reach — [] facts true
+  ✗ G5 · 1512 the panel's pieces — 
+  ✗ G5 · 1280 column 2: How and Reach — [] facts true
+  ✗ G5 · 1280 the panel's pieces — 
+== MUT G6
+  ✗ G6 · 1512 list Your move is the ! disc — ym false  "" 0.0px; 1 stage glyphs
+  ✗ G6 · 1512 cards Your move is the ! disc — ym false  "" 0.0px; 1 stage glyphs
+  ✗ G6 · 1512 full screen band key — true false 0.0px swatch none
+  ✗ G6 · 1280 list Your move is the ! disc — ym false  "" 0.0px; 1 stage glyphs
+== DONE

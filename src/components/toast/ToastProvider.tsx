@@ -15,6 +15,9 @@
  */
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useIsMobile } from "../shell/mobileChrome";
+import { ArtPlaceholder, PhoneArt } from "../phone/PhoneArtSpot";
+import { PHONE_ART } from "../phone/phoneArt";
 import { useLocation } from "react-router-dom";
 import "./toast.css";
 
@@ -25,6 +28,9 @@ export interface ToastOptions {
   undo?: () => void | Promise<void>;
   /** Overrides the "UNDO" button label (upper-cased in the chip). */
   undoLabel?: string;
+  /** What the toast says once its Undo has run (default "Undone") — e.g. "{Name} removed". It rides the same channel
+   *  (`replaces`) and lifetime as the toast it follows. Additive: omit it and nothing changes. */
+  undoneMessage?: string;
   /**
    * A second, quieter line beneath the message — mono, uppercase.
    *
@@ -115,7 +121,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     dismiss(t.id);
     try {
       await t.undo?.();
-      showToast({ message: "Undone" });
+      showToast({ message: t.undoneMessage ?? "Undone", ...(t.replaces ? { replaces: t.replaces } : {}), ...(t.undoneMessage && t.duration ? { duration: t.duration } : {}) });
     } catch {
       showToast({ message: "Couldn't undo that — please try again." });
     }
@@ -146,6 +152,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
      other page's should. `useLocation` re-renders on navigation, so a toast raised while leaving
      the page cannot keep the palette after it. */
   const qcPalette = useLocation().pathname.startsWith("/queries");
+  const phone = useIsMobile();
 
   return (
     <NotifyContext.Provider value={{ showToast, showConfirm }}>
@@ -157,7 +164,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
            would put the test somewhere nobody asked for it. The pathname is the only thing that
            distinguishes them, and this provider sits inside the Router. */
         <div className={`t-f12${qcPalette ? " qc-neutral" : ""}`}>
-          <div className="sa-toasts" role="status" aria-live="polite">
+          {/* Phone app v2 (Part 1E) — on a phone each toast is the ref's snackbar (toastv.js TSV C): a navy pill, the
+              placeholder picture, one line of white text, and the same Undo as a blush pill. Same messages, same undo,
+              same timings — the list below is unchanged at 768px and up. */}
+          {phone ? (
+            <div className="pa-layer pa-snackhost" role="status" aria-live="polite">
+              {toasts.slice(-1).map((t) => (
+                <div key={t.id} className="pa-snack" data-pa="snack">
+                  {PHONE_ART.snack ? <PhoneArt art={PHONE_ART.snack} size={30} className="pa-tph" /> : <ArtPlaceholder size={30} className="pa-tph" />}
+                  <span className="pa-snacktx">{t.message}</span>
+                  {t.undo ? <button type="button" className="sa-toast-undo" data-pa="snack-undo" onClick={() => runUndo(t)}>{t.undoLabel ?? "Undo"}</button> : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <div className="sa-toasts" role="status" aria-live="polite" hidden={phone || undefined}>
             {toasts.map((t) => (
               <div key={t.id} className="sa-toast">
                 <span>

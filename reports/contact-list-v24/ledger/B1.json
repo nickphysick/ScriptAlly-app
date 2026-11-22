@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "bar true switch true"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 switch inside the navy bar, at its left",
+  "ok": true,
+  "detail": "bar {\"l\":308,\"r\":1444,\"t\":561.828125,\"b\":613.828125,\"w\":1136,\"h\":52} sw {\"l\":328,\"r\":503.71875,\"t\":569.828125,\"b\":605.828125,\"w\":175.71875,\"h\":36}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 switching keeps Find, the filters and the sort",
+  "ok": true,
+  "detail": "find \"a\" sort \"Your query ↓\" rows 54→54"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "bar true switch true"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 switch inside the navy bar, at its left",
+  "ok": true,
+  "detail": "bar {\"l\":280,\"r\":1240,\"t\":578.828125,\"b\":630.828125,\"w\":960,\"h\":52} sw {\"l\":300,\"r\":475.71875,\"t\":586.828125,\"b\":622.828125,\"w\":175.71875,\"h\":36}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 switching keeps Find, the filters and the sort",
+  "ok": true,
+  "detail": "find \"a\" sort \"Your query ↓\" rows 54→54"
+ },
+ {
+  "lock": "B1",
+  "where": "reload opens Cards with no flash of List",
+  "ok": true,
+  "detail": "seen cards"
+ }
+]

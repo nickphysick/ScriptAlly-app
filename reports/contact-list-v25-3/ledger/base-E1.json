@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "53 rows, 53 with a wishlist"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 at rest",
+  "ok": false,
+  "detail": "cv25-agent-06: CB Clara Beaumont HARBOUR LANE ✓ Thriller — Partial requested DAY 54 Send the partial — No wishlist yet"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 hover clv181-bare",
+  "ok": false,
+  "detail": "WT Wren Tallis TALLIS & MOOR No genres yet + Add —+ Add Not queried Log a query No wishlist yet + Add their wishlist"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "53 rows, 53 with a wishlist"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 at rest",
+  "ok": false,
+  "detail": "cv25-agent-06: CB Clara Beaumont HARBOUR LANE ✓ Thriller Partial requested DAY 54 Send the partial No wishlist yet"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 hover clv181-bare",
+  "ok": false,
+  "detail": "WT Wren Tallis TALLIS & MOOR No genres yet + Add Not queried Log a query No wishlist yet + Add their wishlist"
+ }
+]

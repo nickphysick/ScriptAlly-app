@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L3",
+  "where": "the probe task (due today) is a Needs you now card",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L3",
+  "where": "…and has no tray row",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "a Your move card to press",
+  "ok": false,
+  "detail": ""
+ }
+]

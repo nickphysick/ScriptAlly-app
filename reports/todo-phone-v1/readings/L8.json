@@ -1,0 +1,66 @@
+{
+ "docs": [
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3/activity/act-9qmwt9if0",
+   "fields": [
+    "agentName",
+    "createdAt",
+    "eventKey",
+    "note",
+    "queryId",
+    "reminderDate",
+    "type"
+   ],
+   "mask": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-9qmwt9if0",
+   "fields": [
+    "activityType",
+    "date",
+    "description",
+    "details",
+    "eventKey",
+    "id",
+    "manuscriptId",
+    "queryId",
+    "userId"
+   ],
+   "mask": null
+  },
+  {
+   "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-3",
+   "fields": [
+    "closePlan",
+    "lastNudgeSentDate"
+   ],
+   "mask": [
+    "closePlan",
+    "lastNudgeSentDate",
+    "nudgeDate"
+   ]
+  }
+ ],
+ "shape": [
+  {
+   "kind": "step",
+   "fields": "agentName,createdAt,eventKey,note,queryId,reminderDate,type",
+   "mask": null
+  },
+  {
+   "kind": "feed",
+   "fields": "activityType,date,description,details,eventKey,id,manuscriptId,queryId,userId",
+   "mask": null
+  },
+  {
+   "kind": "query",
+   "fields": "closePlan,lastNudgeSentDate",
+   "mask": "closePlan,lastNudgeSentDate,nudgeDate"
+  }
+ ],
+ "moved": {
+  "open": true,
+  "key": "task-nudge-seed-query-5",
+  "was": "task-nudge-seed-query-3"
+ }
+}

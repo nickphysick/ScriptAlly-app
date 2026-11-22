@@ -39,7 +39,6 @@ export const SCREENS: Array<{ id: string; q: string; form: "account" | "setup" }
   { id: "confirm", q: "s=confirm", form: "setup" },
   { id: "confirm-pro", q: "s=confirm&plan=pro", form: "setup" },
   { id: "used-free", q: "s=used-free", form: "setup" },
-  { id: "used-pro", q: "s=used-pro", form: "setup" },
   { id: "unreadable", q: "s=unreadable", form: "setup" },
   { id: "nothing", q: "s=nothing&errs=1", form: "setup" },
   { id: "unloaded", q: "s=unloaded", form: "setup" },
@@ -246,7 +245,8 @@ test.describe("OB1", () => {
       expect(s.steps, `flow ${flow || "none"}`).toEqual(steps);
       expect(s.current.length, "exactly one current").toBe(1);
       expect(s.tab, "the tab names the current step").toBe(s.current[0]);
-      expect(s.group).toBe("Getting set up");
+      /* shell tabs v2: on the desktop the frame's tab is the bar's own TabStrip — one shape, words only, no group label */
+      expect(s.group, "no group label on the desktop").toBeUndefined();
     }
   });
 
@@ -255,13 +255,15 @@ test.describe("OB1", () => {
       await lab(page, sc.q + "&rows=40", VPS[2]);
       const f = await page.evaluate(() => {
         const vis = (sel: string) => Array.from(document.querySelectorAll(sel)).filter((e) => (e as HTMLElement).getBoundingClientRect().width > 0);
-        const tab = document.querySelector(".sf .ws-ftab")!.getBoundingClientRect();
+        /* Set-up on phones v1 (30 Oct): below 768px a set-up screen's folder tab is replaced by the navy
+           progress band (`.sf-pband`, SIP1 S1); other frames keep the tab. */
+        const tab = (document.querySelector(".sf .sf-pband") ?? document.querySelector(".sf .ws-ftab"))!.getBoundingClientRect();
         const exit = document.querySelector(".sf .sf-exit")!.getBoundingClientRect();
         const brand = vis(".sf .ws-bwm")[0]?.getBoundingClientRect();
         const last = Array.from(document.querySelectorAll(".sf-scroll *")).pop()!.getBoundingClientRect();
         const d = document.documentElement;
         return {
-          panels: vis(".sf .ws-panel").length, brandTop: brand?.top ?? null, brandBottom: brand?.bottom ?? null,
+          bandShown: !!document.querySelector(".sf .sf-pband"), panels: vis(".sf .ws-panel").length, brandTop: brand?.top ?? null, brandBottom: brand?.bottom ?? null,
           tabTop: tab.top, tabBottom: tab.bottom, exitTop: exit.top, exitBottom: exit.bottom,
           lastBottom: last.bottom + window.scrollY, scrollH: d.scrollHeight, viewH: window.innerHeight,
           overflow: d.scrollWidth - d.clientWidth,
@@ -270,7 +272,9 @@ test.describe("OB1", () => {
       expect(f.panels, "no sidebar").toBe(0);
       expect(f.brandTop, "the brand row is visible").not.toBeNull();
       expect(f.brandBottom!, "the brand row sits above the tab").toBeLessThanOrEqual(f.tabTop + 1);
-      expect(f.exitTop < f.tabBottom && f.exitBottom > f.tabTop, "the tab and the exit share a row").toBe(true);
+      /* With the band, the exit moved up into the brand row (board 1, 1B). */
+      if (f.bandShown) expect(f.exitTop < f.brandBottom! && f.exitBottom > f.brandTop!, "the exit sits in the brand row").toBe(true);
+      else expect(f.exitTop < f.tabBottom && f.exitBottom > f.tabTop, "the tab and the exit share a row").toBe(true);
       /* The two filler screens are padded past the fold so the scrolling half is really exercised;
          a real screen may fit, and is then reachable without scrolling. */
       if (sc.id.startsWith("frame-")) expect(f.lastBottom, "the content is taller than the screen (the case is real)").toBeGreaterThan(f.viewH);
@@ -292,7 +296,8 @@ test.describe("OB1", () => {
       const read = () => page.evaluate(() => ({
         raised: document.querySelector(".sf .ws-ftn")?.textContent,
         group: document.querySelector(".sf .ws-ftg")?.textContent,
-        other: Array.from(document.querySelectorAll(".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib")).map((e) => e.textContent),
+        /* shell tabs v2: the desktop's other tab is a TabStrip resting tab; the phone keeps FolderTab's sibling */
+        other: Array.from(document.querySelectorAll('.sf [data-shell="tabs"] .ws-fttab:not(.is-cur), .sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib')).map((e) => e.textContent),
         panel: getComputedStyle(document.querySelector(".sf-offer")!).backgroundColor,
         title: document.querySelector(".sf-offerh")?.textContent,
         email: (document.querySelector("#au-email") as HTMLInputElement).value,
@@ -300,14 +305,16 @@ test.describe("OB1", () => {
       }));
       await page.fill("#au-email", "writer@example.com");
       const up = await read();
-      expect(up.group).toBe("Your account");
+      expect(up.group).toBe(vp.width < 768 ? "Your account" : undefined);
       expect(up.raised).toBe("Create account");
       expect(up.other, `@${vp.width}: exactly one recessed tab`).toEqual(["Sign in"]);
       expect(up.panel).toBe("rgb(45, 58, 80)");
       /* The offer panel reads the landing hero's headline (`HERO_H1`), which landing hero v3 changed. */
       expect(up.title).toBe("No more winging it.");
       expect(up.old, "the preview and the segmented control are gone").toBe(0);
-      await page.click(".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib");
+      /* Phone last screens v1 (1B): below 768px the sibling tab is hidden and the in-card link is the way
+         between the two (PLS1 L1 holds the one tab). */
+      await page.click(vp.width < 768 ? '.sf [data-sf="to-signin"]' : '.sf [data-shell="tabs"] .ws-fttab:not(.is-cur)');
       await page.waitForFunction(() => document.querySelector(".sf .ws-ftn")?.textContent === "Sign in");
       const inn = await read();
       expect(inn.other).toEqual(["Create account"]);
@@ -335,8 +342,16 @@ test.describe("OB1", () => {
           expect(f.family, `${f.id} is the typewriter face`).toMatch(/Special Elite/);
           expect(Math.abs(f.size - 18), `${f.id} size ${f.size}`).toBeLessThanOrEqual(0.5);
           expect(f.style, `${f.id} rule`).toBe("dashed");
-          expect(f.labFamily, `${f.id} label is mono`).toMatch(/JetBrains Mono/);
-          expect(f.labCase).toBe("uppercase");
+          /* RETARGET (public pages on phones v1, 29 Oct): below 768px the ACCOUNT frame's field labels
+             are sentence case in Source Sans 3 (14.5px/600, ink). The set-up screens keep mono capitals
+             at every width; that is not this lock's subject. */
+          if (vp.width < 768) {
+            expect(f.labFamily, `${f.id} label is the body face on a phone`).toMatch(/Source Sans 3/);
+            expect(f.labCase).toBe("none");
+          } else {
+            expect(f.labFamily, `${f.id} label is mono`).toMatch(/JetBrains Mono/);
+            expect(f.labCase).toBe("uppercase");
+          }
         }
       }
       await lab(page, "s=signin", vp);
@@ -409,7 +424,8 @@ test.describe("OB1", () => {
           rows: rows.length, checked: rows.filter((r) => r.getAttribute("aria-checked") === "true").length,
           pressed: document.querySelectorAll(".sf-opts [aria-pressed]").length,
           ring: rows.filter((r) => r.getAttribute("aria-checked") === "true").map((r) => getComputedStyle(r).boxShadow),
-          disabled: (Array.from(document.querySelectorAll(".sf-stepcard .sf-btn")).pop() as HTMLButtonElement).disabled,
+          /* Set-up on phones v1: below 768px Continue is pinned in `.sf-foothost` (SIP1 S4). */
+          disabled: (Array.from(document.querySelectorAll(".sf-stepcard .sf-btn, .sf-foothost .sf-btn")).pop() as HTMLButtonElement).disabled,
         };
       });
       const before = await read();
@@ -526,11 +542,9 @@ test.describe("OB1", () => {
   test("E1 the dead ends: chip, title and actions per state, each press to its own handler", async ({ page }) => {
     const want: Record<string, { chip: string; fail: boolean; title: string; presses: Array<[string, string]> }> = {
       "used-free": { chip: "Smart Import already used", fail: false, title: "You've used your Smart Import.",
-        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="template"]', "useTemplate"]] },
-      "used-pro": { chip: "Smart Import already used", fail: false, title: "Next Smart Import next month",
-        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"]] },
+        presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="template"]', "useTemplate"]] },
       unreadable: { chip: "File couldn't be read", fail: true, title: "We couldn't read that one.",
-        presses: [[".sf-dead .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="download"]', "download"]] },
+        presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="download"]', "download"]] },
       nothing: { chip: "Nothing imported", fail: true, title: "That didn't work.", presses: [['[data-act="review"]', "review"]] },
       unloaded: { chip: "Step didn't load", fail: false, title: "That step didn't load.",
         presses: [['[data-act="byhand"]', "byhand"], ['[data-act="restart"]', "restart"]] },
@@ -547,14 +561,16 @@ test.describe("OB1", () => {
           chip: chip.textContent, chipBg: getComputedStyle(chip).backgroundColor, chipCase: getComputedStyle(chip).textTransform,
           title: h.textContent, family: getComputedStyle(h).fontFamily, size: parseFloat(getComputedStyle(h).fontSize),
           width: card.getBoundingClientRect().width, text: card.innerText,
-          controls: Array.from(card.querySelectorAll("button")).map((b) => b.textContent ?? ""),
+          /* Phone last screens v1 (2B): below 768px the actions are pinned in `.sf-foothost` (PLS1 L2). */
+          controls: [...card.querySelectorAll("button"), ...document.querySelectorAll(".sf-foothost button")].map((b) => b.textContent ?? ""),
         };
       });
       expect(d.cards, `${id}: one card`).toBe(1);
       expect(d.open, `${id}: no open title above it`).toBe(0);
       expect(d.chip).toBe(w.chip);
       expect(d.chipBg, `${id}: chip tone`).toBe(w.fail ? "rgb(243, 221, 210)" : "rgb(244, 239, 233)");
-      expect(d.chipCase).toBe("uppercase");
+      /* Set-up on phones v1: sentence case below 768px (board 1, 2B; SIP1 S2). */
+      expect(d.chipCase).toBe(vp.width < 768 ? "none" : "uppercase");
       expect(d.title).toBe(w.title);
       expect(d.family).toMatch(/Special Elite/);
       expect(Math.abs(d.size - 23)).toBeLessThanOrEqual(0.5);

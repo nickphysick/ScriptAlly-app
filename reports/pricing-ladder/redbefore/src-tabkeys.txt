@@ -1,0 +1,174 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.3s)
+PL-3 @390 {"nav":60,"tabs":-895.328125,"card":0}
+  ✘  2 [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @390: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move (1.0s)
+PL-3 @375 {"nav":60,"tabs":-872.328125,"card":0}
+  ✘  3 [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @375: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move (932ms)
+
+
+  1) [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @390: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move 
+
+    Error: ArrowRight selects Pro
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "false",
+        "true",
+    +   "false",
+      ]
+
+      221 |     /* the arrow keys move between the tabs, selecting as they go */
+      222 |     await page.keyboard.press("ArrowRight");
+    > 223 |     expect.soft(await sel(), "ArrowRight selects Pro").toEqual(["false", "true"]);
+          |                                                        ^
+      224 |     expect.soft(await page.evaluate(() => document.activeElement?.id), "…and focuses it").toBe("mk-pvtab-pro");
+      225 |     await page.keyboard.press("ArrowLeft");
+      226 |     expect.soft(await sel(), "ArrowLeft selects Free").toEqual(["true", "false"]);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:223:56
+
+    Error: …and focuses it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "mk-pvtab-pro"
+    Received: "mk-pvtab-free"
+
+      222 |     await page.keyboard.press("ArrowRight");
+      223 |     expect.soft(await sel(), "ArrowRight selects Pro").toEqual(["false", "true"]);
+    > 224 |     expect.soft(await page.evaluate(() => document.activeElement?.id), "…and focuses it").toBe("mk-pvtab-pro");
+          |                                                                                           ^
+      225 |     await page.keyboard.press("ArrowLeft");
+      226 |     expect.soft(await sel(), "ArrowLeft selects Free").toEqual(["true", "false"]);
+      227 |     await page.keyboard.press("End");
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:224:91
+
+    Error: End selects Pro
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "false",
+        "true",
+    +   "false",
+      ]
+
+      226 |     expect.soft(await sel(), "ArrowLeft selects Free").toEqual(["true", "false"]);
+      227 |     await page.keyboard.press("End");
+    > 228 |     expect.soft(await sel(), "End selects Pro").toEqual(["false", "true"]);
+          |                                                 ^
+      229 |     /* pinned under the nav while the Pro card scrolls under it */
+      230 |     const card = await rect(page, "#mk-pvpanel-pro .mk-lcard");
+      231 |     await scrollTo(page, card.docTop + card.height / 2 - 200);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:228:49
+
+    Error: the tabs stay pinned just under the nav
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 1
+    Received:   955.328125
+
+      237 |     console.log(`PL-3 @${vp.width}`, JSON.stringify(p));
+      238 |     expect.soft(p.card, "the precondition: the Pro card's top has scrolled under the nav").toBeLessThan(p.nav);
+    > 239 |     expect.soft(Math.abs(p.tabs - p.nav), "the tabs stay pinned just under the nav").toBeLessThan(1);
+          |                                                                                      ^
+      240 |   });
+      241 | }
+      242 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:239:86
+
+    Error Context: test-results/pricingLadder.measure.ts-P-360ff-Pro-scrolls-arrow-keys-move-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @375: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move 
+
+    Error: ArrowRight selects Pro
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "false",
+        "true",
+    +   "false",
+      ]
+
+      221 |     /* the arrow keys move between the tabs, selecting as they go */
+      222 |     await page.keyboard.press("ArrowRight");
+    > 223 |     expect.soft(await sel(), "ArrowRight selects Pro").toEqual(["false", "true"]);
+          |                                                        ^
+      224 |     expect.soft(await page.evaluate(() => document.activeElement?.id), "…and focuses it").toBe("mk-pvtab-pro");
+      225 |     await page.keyboard.press("ArrowLeft");
+      226 |     expect.soft(await sel(), "ArrowLeft selects Free").toEqual(["true", "false"]);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:223:56
+
+    Error: …and focuses it
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "mk-pvtab-pro"
+    Received: "mk-pvtab-free"
+
+      222 |     await page.keyboard.press("ArrowRight");
+      223 |     expect.soft(await sel(), "ArrowRight selects Pro").toEqual(["false", "true"]);
+    > 224 |     expect.soft(await page.evaluate(() => document.activeElement?.id), "…and focuses it").toBe("mk-pvtab-pro");
+          |                                                                                           ^
+      225 |     await page.keyboard.press("ArrowLeft");
+      226 |     expect.soft(await sel(), "ArrowLeft selects Free").toEqual(["true", "false"]);
+      227 |     await page.keyboard.press("End");
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:224:91
+
+    Error: End selects Pro
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "false",
+        "true",
+    +   "false",
+      ]
+
+      226 |     expect.soft(await sel(), "ArrowLeft selects Free").toEqual(["true", "false"]);
+      227 |     await page.keyboard.press("End");
+    > 228 |     expect.soft(await sel(), "End selects Pro").toEqual(["false", "true"]);
+          |                                                 ^
+      229 |     /* pinned under the nav while the Pro card scrolls under it */
+      230 |     const card = await rect(page, "#mk-pvpanel-pro .mk-lcard");
+      231 |     await scrollTo(page, card.docTop + card.height / 2 - 200);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:228:49
+
+    Error: the tabs stay pinned just under the nav
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 1
+    Received:   932.328125
+
+      237 |     console.log(`PL-3 @${vp.width}`, JSON.stringify(p));
+      238 |     expect.soft(p.card, "the precondition: the Pro card's top has scrolled under the nav").toBeLessThan(p.nav);
+    > 239 |     expect.soft(Math.abs(p.tabs - p.nav), "the tabs stay pinned just under the nav").toBeLessThan(1);
+          |                                                                                      ^
+      240 |   });
+      241 | }
+      242 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:239:86
+
+    Error Context: test-results/pricingLadder.measure.ts-P-283f1-Pro-scrolls-arrow-keys-move-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @390: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move 
+    [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @375: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move 
+  1 passed (20.6s)

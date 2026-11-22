@@ -1,0 +1,53 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (19.2s)
+PVM-1 @760 {"h1":1,"phoneH1":0,"deskH1":1,"phoneTree":false,"deskTree":true}
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:140:1 › PVM-1 at 760 the phone tree renders and at 761 the desktop one — one h1 either way, the box's (893ms)
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:409:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them (10.8s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:140:1 › PVM-1 at 760 the phone tree renders and at 761 the desktop one — one h1 either way, the box's 
+
+    Error: phone tree @760
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      147 |     console.log(`PVM-1 @${w}`, JSON.stringify(n));
+      148 |     expect(n.h1, `one h1 @${w}`).toBe(1);
+    > 149 |     expect(n.phoneTree, `phone tree @${w}`).toBe(phone);
+          |                                             ^
+      150 |     expect(n.deskTree, `desktop tree @${w}`).toBe(!phone);
+      151 |     expect(phone ? n.phoneH1 : n.deskH1, `the h1 is the box's @${w}`).toBe(1);
+      152 |   }
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:149:45
+
+    Error Context: test-results/pricingMobile.measure.ts-P-a5cff-one-h1-either-way-the-box-s-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:409:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them 
+
+    TimeoutError: locator.evaluate: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('.mk-pvh1').first()
+
+
+      416 |     expect(ok, `${f} is loaded`).toBe(true);
+      417 |   }
+    > 418 |   const face = (sel: string) => page.locator(sel).first().evaluate((e) => {
+          |                                                           ^
+      419 |     const c = getComputedStyle(e);
+      420 |     return { family: c.fontFamily.split(",")[0].replace(/["']/g, "").trim(), weight: c.fontWeight };
+      421 |   });
+        at face (/Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:418:59)
+        at expectFace (/Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:423:21)
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:428:9
+
+    Error Context: test-results/pricingMobile.measure.ts-P-6e434-ono-where-the-ref-puts-them-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:140:1 › PVM-1 at 760 the phone tree renders and at 761 the desktop one — one h1 either way, the box's 
+    [measure] › tests/e2e/pricingMobile.measure.ts:409:1 › PVM-10 the faces: Special Elite 400, Source Serif 4 and JetBrains Mono where the ref puts them 
+  1 passed (57.4s)

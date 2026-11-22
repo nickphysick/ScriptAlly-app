@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L11",
+  "where": "pk40-ms: tiles renders",
+  "ok": true,
+  "detail": "tiles"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-ms: results renders",
+  "ok": true,
+  "detail": "results"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-ms: the builder renders",
+  "ok": true,
+  "detail": "builder"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: hero (the brand-new page) renders",
+  "ok": true,
+  "detail": "hero (the brand-new page)"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: results renders",
+  "ok": true,
+  "detail": "results"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: the builder renders",
+  "ok": true,
+  "detail": "builder"
+ },
+ {
+  "lock": "L11",
+  "where": "no console errors",
+  "ok": true,
+  "detail": "[]"
+ }
+]

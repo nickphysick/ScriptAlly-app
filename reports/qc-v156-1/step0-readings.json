@@ -1,0 +1,106 @@
+{
+ "1920-ids": {
+  "wait": "probe-dangling-pkg",
+  "hot": "seed-query-12",
+  "nudgeLines": 0,
+  "waits": 5
+ },
+ "1920-wait": [
+  {
+   "k": "sent",
+   "top": 2383.81,
+   "bottom": 2452.5,
+   "h": 68.69,
+   "pad": "8px 10px",
+   "bg": "rgb(251, 249, 245)"
+  },
+  {
+   "k": "next",
+   "top": 2383.81,
+   "bottom": 2452.5,
+   "h": 68.69,
+   "pad": "8px 10px",
+   "bg": "rgb(251, 249, 245)"
+  }
+ ],
+ "1920-wait-hover-next": {
+  "bg": "rgb(42, 58, 82)",
+  "op": "1",
+  "label": "Open the card →"
+ },
+ "1920-hot": [
+  {
+   "k": "sent",
+   "top": -1072.08,
+   "bottom": -1005.2,
+   "h": 66.88,
+   "pad": "8px 10px",
+   "bg": "rgb(251, 249, 245)"
+  },
+  {
+   "k": "next",
+   "top": -1072.08,
+   "bottom": -1005.2,
+   "h": 66.88,
+   "pad": "8px 10px",
+   "bg": "rgb(246, 238, 232)"
+  }
+ ],
+ "1920-hot-hover-next": {
+  "bg": "rgb(42, 58, 82)",
+  "op": "1",
+  "label": "Answer the offer →"
+ },
+ "1440-ids": {
+  "wait": "probe-dangling-pkg",
+  "hot": "seed-query-12",
+  "nudgeLines": 0,
+  "waits": 5
+ },
+ "1440-wait": [
+  {
+   "k": "sent",
+   "top": 2320.56,
+   "bottom": 2385.59,
+   "h": 65.03,
+   "pad": "7px 8px",
+   "bg": "rgb(251, 249, 245)"
+  },
+  {
+   "k": "next",
+   "top": 2320.56,
+   "bottom": 2385.59,
+   "h": 65.03,
+   "pad": "7px 8px",
+   "bg": "rgb(251, 249, 245)"
+  }
+ ],
+ "1440-wait-hover-next": {
+  "bg": "rgb(42, 58, 82)",
+  "op": "1",
+  "label": "Open the card →"
+ },
+ "1440-hot": [
+  {
+   "k": "sent",
+   "top": -1099.08,
+   "bottom": -1035.86,
+   "h": 63.22,
+   "pad": "7px 8px",
+   "bg": "rgb(251, 249, 245)"
+  },
+  {
+   "k": "next",
+   "top": -1099.08,
+   "bottom": -1035.86,
+   "h": 63.22,
+   "pad": "7px 8px",
+   "bg": "rgb(246, 238, 232)"
+  }
+ ],
+ "1440-hot-hover-next": {
+  "bg": "rgb(42, 58, 82)",
+  "op": "1",
+  "label": "Answer the offer →"
+ }
+}

@@ -1,0 +1,32 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 1.15
+  ✘  2 [measure] › tests/e2e/landingColoursV2.measure.ts:534:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment (658ms)
+
+
+  1) [measure] › tests/e2e/landingColoursV2.measure.ts:534:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment 
+
+    Error: founders hero: .mk-fwcol input[type=email]
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 4.5
+    Received:    1.153347923317276
+
+      541 |         console.log(`LC2 F2 ${label} · ${selector}${pseudo ?? ""} · ${f.ratio.toFixed(2)}`);
+      542 |         expect(lum(f.ground), `${label}: ${selector} sits on a light ground`).toBeGreaterThan(0.7);
+    > 543 |         expect(f.ratio, `${label}: ${selector}${pseudo ?? ""}`).toBeGreaterThanOrEqual(floor);
+          |                                                                 ^
+      544 |         n++;
+      545 |       }
+      546 |     };
+        at light (/Users/nickphysick/ScriptAlly-pricing4/tests/e2e/landingColoursV2.measure.ts:543:65)
+        at /Users/nickphysick/ScriptAlly-pricing4/tests/e2e/landingColoursV2.measure.ts:550:7
+
+    Error Context: test-results/landingColoursV2.measure.t-5a5ab-p-a-dark-on-light-treatment-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/landingColoursV2.measure.ts:534:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment 
+  1 passed (18.6s)

@@ -68,11 +68,11 @@ describe("the three counters, per type (the ref's rule 3: counter one is the eye
   it("passed: overdue turns ROSE (the ref's counter-one rule)", () => {
     const [a] = cardCFor(base({ kind: "passed", eyebrowDays: 5 })).counters;
     expect(a.rose).toBe(true);
-    expect(a.label).toBe("days overdue");
+    expect(a.label).toBe("days past expected");
   });
   it("your move, dated: overdue · the window you were given · total", () => {
     const [a, b] = cardCFor(base({ kind: "moveDated", end: 21, today: 27, eyebrowDays: 6, windowDays: 21 })).counters;
-    expect([a.v, a.label, a.rose]).toEqual(["6", "days overdue", true]);
+    expect([a.v, a.label, a.rose]).toEqual(["6", "days past expected", true]);
     expect([b.v, b.label]).toEqual(["21", "days you had"]);
   });
   it("your move, no date: counter two is an HONEST DASH — never a guess", () => {
@@ -99,7 +99,7 @@ describe("the three counters, per type (the ref's rule 3: counter one is the eye
     expect([t[0].v, t[0].label]).toEqual(["4", "days left"]);
     expect([t[1].v, t[1].label]).toEqual(["1", "rolled"]);
     const od = cardCFor(base({ kind: "task", end: 10, today: 14, eyebrowDays: 4, rolled: 0, daysOpen: 18 })).counters;
-    expect([od[0].label, od[0].rose]).toEqual(["days overdue", true]);
+    expect([od[0].label, od[0].rose]).toEqual(["days past expected", true]);
   });
   it("closed: total · nudges · the outcome word (the ref's rule 5)", () => {
     const [a, , c] = cardCFor(base({ kind: "closed", totalDays: 112, outcome: "Rejected" })).counters;

@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "AC21-1",
+  "where": "1512 · Profile: how they work, wishlist, genres, what they ask for, then Added",
+  "ok": true,
+  "detail": "[\"facts-sec\",\"wishlist\",\"genres\",\"asks\",\"profile-foot\"]"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1512 · no contact row in Profile",
+  "ok": true,
+  "detail": "[\"facts-sec\",\"wishlist\",\"genres\",\"asks\",\"profile-foot\"]"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1512 · the email's text is the stored address, inside the head",
+  "ok": true,
+  "detail": "acv21fx-full@pryce.example · inHead true"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1512 · nothing reads \"Copy email\"",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1512 · the copy button is 28px ±1",
+  "ok": true,
+  "detail": "28.5802001953125×28.580245971679688"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1512 · the copy glyph is #9a948b at rest, no fill",
+  "ok": true,
+  "detail": "rgb(154, 148, 139) · rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1512 · the website opens in a new tab",
+  "ok": true,
+  "detail": "_blank"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1280 · Profile: how they work, wishlist, genres, what they ask for, then Added",
+  "ok": true,
+  "detail": "[\"facts-sec\",\"wishlist\",\"genres\",\"asks\",\"profile-foot\"]"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1280 · no contact row in Profile",
+  "ok": true,
+  "detail": "[\"facts-sec\",\"wishlist\",\"genres\",\"asks\",\"profile-foot\"]"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1280 · the email's text is the stored address, inside the head",
+  "ok": true,
+  "detail": "acv21fx-full@pryce.example · inHead true"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1280 · nothing reads \"Copy email\"",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1280 · the copy button is 28px ±1",
+  "ok": true,
+  "detail": "28.5802001953125×28.580245971679688"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1280 · the copy glyph is #9a948b at rest, no fill",
+  "ok": true,
+  "detail": "rgb(154, 148, 139) · rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "1280 · the website opens in a new tab",
+  "ok": true,
+  "detail": "_blank"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "copy · the clipboard holds the address",
+  "ok": true,
+  "detail": "acv21fx-full@pryce.example"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "copy · the snackbar reads “Email address copied”",
+  "ok": true,
+  "detail": " | Email address copied✕ | Email address copied✕"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "flag · acv21fx-full: one flag, GB",
+  "ok": true,
+  "detail": "{\"n\":1,\"c\":\"GB\",\"cls\":\"ag-flag fi fi-gb\",\"w\":18.27880859375,\"h\":13.873992919921875,\"r\":\"2px\"}"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "flag · acv21fx-full: 18 × 13.5, a 2px radius",
+  "ok": true,
+  "detail": "{\"n\":1,\"c\":\"GB\",\"cls\":\"ag-flag fi fi-gb\",\"w\":18.27880859375,\"h\":13.873992919921875,\"r\":\"2px\"}"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "flag · acv21fx-ie: one flag, IE",
+  "ok": true,
+  "detail": "{\"n\":1,\"c\":\"IE\",\"cls\":\"ag-flag fi fi-ie\",\"w\":18.27880859375,\"h\":13.873992919921875,\"r\":\"2px\"}"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "flag · acv21fx-ie: 18 × 13.5, a 2px radius",
+  "ok": true,
+  "detail": "{\"n\":1,\"c\":\"IE\",\"cls\":\"ag-flag fi fi-ie\",\"w\":18.27880859375,\"h\":13.873992919921875,\"r\":\"2px\"}"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "flag · acv21fx-us: one flag, US",
+  "ok": true,
+  "detail": "{\"n\":1,\"c\":\"US\",\"cls\":\"ag-flag fi fi-us\",\"w\":18.27880859375,\"h\":13.873992919921875,\"r\":\"2px\"}"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "flag · acv21fx-us: 18 × 13.5, a 2px radius",
+  "ok": true,
+  "detail": "{\"n\":1,\"c\":\"US\",\"cls\":\"ag-flag fi fi-us\",\"w\":18.27880859375,\"h\":13.873992919921875,\"r\":\"2px\"}"
+ },
+ {
+  "lock": "AC21-1",
+  "where": "flag · acv21fx-none: no country, no flag",
+  "ok": true,
+  "detail": "{\"n\":0,\"c\":\"\",\"cls\":\"\",\"w\":0,\"h\":0,\"r\":\"\"}"
+ }
+]

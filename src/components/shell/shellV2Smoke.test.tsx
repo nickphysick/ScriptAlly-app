@@ -39,6 +39,8 @@ vi.mock("../../lib/db", () => ({
     taskFlags: [],
     notes: [],
     currentUser: { id: "u1", name: "Nick Physick", plan: UserPlan.FREE },
+    /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer */
+    entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
   }),
 }));
 
@@ -100,7 +102,7 @@ describe("v2 shell — smoke renders", () => {
   it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — a text link, no row, no pill, no card", () => {
     const col = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
     // the plan is stated as fact beside the name, and Upgrade is a plain link in that line
-    expect(col).toContain("planLine(currentUser?.plan)");
+    expect(col).toContain("planLine(entitlement)"); // plan rules v1: the resolver, not the stored plan
     expect(col).toContain("ws-up");
     expect(col).toContain("Upgrade");
     // Pro is a text link HERE and a card in the account menu. Nowhere else.
@@ -116,7 +118,7 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("sv2-topbar");
     expect(html).toContain("sv2-tuck");        // the bar's only chrome control
     expect(html).toContain("sv2-crumb");
-    expect(html).toContain("Shelf");           // the section
+    expect(html).toContain("Materials</span>"); // the section — the workspace nav's name (shell nav v3: Manuscripts is in Materials)
     expect(html).toContain("<b>Manuscripts</b>"); // the page, bold and inert
     expect(html).toContain("sv2-vr");
     expect(html).toContain("sv2-scope");
@@ -144,9 +146,9 @@ describe("v2 shell — smoke renders", () => {
   });
 
   it("the crumb is on EVERY workspace page", () => {
-    /* /todo/today left this list with the page (tasks-consolidation P1, 9 Aug); /todo/calendar
-       takes its place so a Tasks SUB-page is still covered, which is what the case is really for. */
-    for (const [path, page] of [["/queries", "Queries Hub"], ["/agents", "Contact list"], ["/todo", "To-do list"], ["/todo/calendar", "Calendar"], ["/import", "Import"]] as const) {
+    /* /todo/today left this list with the page (tasks-consolidation P1, 9 Aug); /todo/corkboard
+       takes its place (the Calendar page that held it was retired 29 Oct) so a Tasks SUB-page is still covered. */
+    for (const [path, page] of [["/queries", "Query Centre"], ["/agents", "Contact list"], ["/todo", "To-do list"], ["/todo/corkboard", "Corkboard"], ["/import", "Import"]] as const) {
       const html = bar(path);
       expect(html, path).toContain("sv2-crumb");
       expect(html, path).toContain(`<b>${page}</b>`);

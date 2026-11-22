@@ -1,0 +1,133 @@
+/*
+ * Manuscript spine v1 (16 Nov) — the collapsed rail's manuscript selector as a navy cloth book spine standing on
+ * a shelf line at the foot of the rail, above Feedback. Ref: design-refs/shell/manuscript-spine-v1.html; every
+ * rule under its "THE SHELF", "THE SPINE" and "THE EMPTY SPINE" comments is ported here with its values as
+ * written. Two mappings only: the ref's `--type` / `--serif` are the app's `--sp-type` (Special Elite) and
+ * `--sp-serif` (Source Serif 4), the same faces.
+ *
+ * ⚠️ PLACEMENT IS THE RAIL'S FLEX COLUMN, NOT THE REF'S ABSOLUTE OFFSETS. The ref pins its stand-in rail's spine
+ * with `position: absolute; left: 50%; transform: translateX(-50%)` and a `bottom` per demo. Here the slot
+ * (`.ms-shelfwrap`) is a flex item between the nav and Feedback that takes the free height, and stacks the spine's
+ * button on the shelf line at its foot, centred. What the ref states as placement is kept exactly: a 50px line
+ * centred in the 80px rail, 10px above Feedback's top edge, the spine's foot on the line.
+ *
+ * Desktop only — the rail does not exist under 768px.
+ */
+@media (min-width: 768px) {
+  /* ── the slot: the free height between the nav and Feedback ──
+     ⚠️ `margin-bottom: 10px` IS THE WHOLE GAP. The slot ends at the shelf line's foot, and the ref puts the line 10px
+     above Feedback's top. Feedback has no margin of its own on the rendered page: `.wsr-fb { margin: 12px 0 }` is
+     outranked by `.wsr button { margin: 0 }` (sidebarRail.css, untouched), measured 0 (MSP1). A -2px written
+     against the declared 12 put the line 2px INSIDE Feedback's box.
+     ⚠️ THE FLOOR IS 97px = the 72px shortest spine + the 24px the height rule keeps clear + the 1px line. Below
+     that the nav gives way (it shrinks and scrolls), never the spine and never Feedback. */
+  .wsr .ws-ms--rail.ms-shelfwrap {
+    flex: 1 1 0; min-height: 97px; min-width: 0; width: auto;
+    margin-bottom: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    container-type: size;
+  }
+
+  /* ================= THE SHELF ================= */
+  .wsr .ms-shelf { flex: none; display: block; width: 50px; height: 1px; background: rgba(244, 238, 229, .22); }
+
+  /* ================= THE SPINE ================= */
+  .wsr .ms-spine-btn {
+    flex: none; appearance: none; border: 0; background: transparent; padding: 6px 4px 0; border-radius: 10px;
+    cursor: pointer; display: block;
+  }
+  /* ⚠️ THE REF'S RING, NOT THE RAIL'S TERRACOTTA ONE: `.wsr :focus-visible` (sidebarRail.css) is `!important`, so
+     this states its own with one more class and `!important` too. */
+  .wsr .ms-spine-btn:focus-visible { outline: 2px solid #f4eee5 !important; outline-offset: 2px; border-radius: 10px; }
+  .wsr .ms-spine {
+    /* the short-window rule: min(152px, free height - 24px), never under 72px. The free height is the slot's
+       (`100cqh`) less the shelf line's 1px. */
+    --msp-h: clamp(72px, calc(100cqh - 25px), 152px);
+    position: relative; display: grid; place-items: center; width: 32px; height: var(--msp-h);
+    box-sizing: border-box;
+    border-radius: 3px 3px 2px 2px; overflow: hidden;
+    background: linear-gradient(90deg, rgba(0, 0, 0, .16), rgba(255, 255, 255, .14) 20%, rgba(255, 255, 255, 0) 55%, rgba(0, 0, 0, .14)), #34425c;
+    box-shadow: 0 1px 3px rgba(8, 12, 20, .55), inset 0 0 0 1px rgba(244, 238, 229, .16);
+    color: #f4eee5; transform-origin: 100% 100%;
+    transition: transform .22s cubic-bezier(.2, .8, .3, 1), box-shadow .22s ease;
+  }
+  .wsr .ms-spine::before, .wsr .ms-spine::after {
+    content: ""; position: absolute; left: 0; right: 0; height: 5px;
+    border-top: 2px solid #d9967a; border-bottom: 1px solid #d9967a;
+    /* content-box, as in the ref: its `*` border-box rule never reaches a pseudo-element, so each band is 5px + its rules */
+    box-sizing: content-box;
+  }
+  .wsr .ms-spine::before { top: 9px; }
+  .wsr .ms-spine::after { bottom: 22px; border-top-width: 1px; border-bottom-width: 2px; }
+  .wsr .ms-spine-title {
+    font: 400 10.5px/1 var(--sp-type); writing-mode: vertical-rl; white-space: nowrap;
+    /* the title's max-height is the spine's height - 40px (112px at full height, as the ref) */
+    max-height: calc(var(--msp-h) - 40px);
+    overflow: hidden; text-overflow: ellipsis; padding-left: 1px; margin-top: -10px;
+  }
+  .wsr .ms-spine-orn {
+    position: absolute; bottom: 8px; left: 50%; width: 6px; height: 6px; margin-left: -3px;
+    background: #d9967a; transform: rotate(45deg);
+  }
+  /* tipped: under the pointer, with keyboard focus, and for as long as its menu is open */
+  .wsr .ms-spine-btn:hover .ms-spine,
+  .wsr .ms-spine-btn:focus-visible .ms-spine,
+  .wsr .ms-spine-btn[aria-expanded="true"] .ms-spine {
+    transform: rotate(-7deg) translateY(-3px);
+    box-shadow: 6px 6px 10px rgba(8, 12, 20, .5), inset 0 0 0 1px rgba(244, 238, 229, .16);
+  }
+
+  /* ================= THE EMPTY SPINE (no manuscript yet) ================= */
+  .wsr .ms-spine--empty {
+    background: transparent; box-shadow: none; border: 1px dashed rgba(244, 238, 229, .45);
+    color: rgba(244, 238, 229, .8); font: 400 16px/1 var(--sp-serif);
+  }
+  .wsr .ms-spine--empty::before, .wsr .ms-spine--empty::after { content: none; }
+}
+
+/* reduced motion: the same end positions, no transition */
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .wsr .ms-spine { transition: none; }
+}
+
+/* ================= THE LABEL (hover and keyboard focus) =================
+   The ref's .ms-label* rules, with one change of position scheme: the ref's label is `absolute` inside its demo
+   page; this one is portalled to <body> (the sidebar clips) and so is `fixed`, placed by SpineLabel.tsx from the
+   spine's measured rect — left edge 8px right of the rail's right edge, vertically centred on the spine, at least
+   8px inside the window. Nothing in it is clickable.
+   ⚠️ EVERY TEXT ELEMENT NAMES ITS FACE: brand.tsx sets the body sans on every bare `span` and `div`, which beats
+   inheritance, so the "Add a manuscript" span carries a class of its own. */
+@media (min-width: 768px) {
+  .ms-label {
+    position: fixed; left: 0; top: 0; z-index: 87; pointer-events: none;
+    filter: drop-shadow(0 6px 14px rgba(8, 12, 20, .3)) drop-shadow(0 1px 2px rgba(8, 12, 20, .2));
+    transform-origin: 0 50%;
+    animation: ms-label-in .16s ease-out .1s both;
+  }
+  .ms-label[hidden] { display: none; }
+  .ms-label-in {
+    position: relative; background: #34425c; color: #f4eee5; border-radius: 10px; padding: 13px 18px 12px;
+    box-shadow: inset 0 0 0 1px rgba(244, 238, 229, .16); box-sizing: border-box;
+  }
+  .ms-label-nib {
+    position: absolute; left: -6px; top: 50%; width: 12px; height: 12px; margin-top: -6px;
+    transform: rotate(45deg); border-radius: 2px; background: #34425c;
+  }
+  .ms-label-title { display: block; font: 400 17px/1.25 var(--sp-type); white-space: nowrap; }
+  .ms-label-rule {
+    display: block; width: 30px; height: 5px; border-top: 2px solid #d9967a; border-bottom: 1px solid #d9967a;
+    margin: 8px 0 7px; box-sizing: border-box;
+  }
+  .ms-label-line { display: block; font: 400 14px/1.35 var(--sp-serif); color: rgba(255, 253, 244, .8); white-space: nowrap; }
+  .ms-label-soon {
+    display: flex; justify-content: space-between; gap: 22px; margin-top: 11px; padding-top: 9px;
+    border-top: 1px solid rgba(244, 238, 229, .2);
+    font: 400 14px/1.3 var(--sp-serif); color: rgba(255, 253, 244, .72); white-space: nowrap;
+  }
+  .ms-label-soon-t { font-family: inherit; }
+  .ms-label-soon i { font-style: italic; color: #e6ad95; }
+}
+@keyframes ms-label-in { from { opacity: 0; transform: translateX(-7px); } to { opacity: 1; transform: translateX(0); } }
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .ms-label { animation: none; }
+}

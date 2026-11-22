@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L3",
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "CL true · QC true"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · no hairline (shadow, borders)",
+  "ok": true,
+  "detail": "none · 0px/0px"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the background is the Contact list's",
+  "ok": true,
+  "detail": "QC rgb(244, 240, 233) · CL rgb(244, 240, 233)"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the vertical padding and height are the Contact list's",
+  "ok": true,
+  "detail": "QC 0px/0px h54 · CL 0px/0px h54"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the name's font is the Contact list's",
+  "ok": true,
+  "detail": "QC 400 21px Special Elite normal none · CL 400 21px Special Elite normal none"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the count's font is the Contact list's",
+  "ok": true,
+  "detail": "QC 500 10.5px JetBrains Mono 1.47px uppercase · CL 500 10.5px JetBrains Mono 1.47px uppercase"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · population",
+  "ok": true,
+  "detail": "CL true · QC true"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · no hairline (shadow, borders)",
+  "ok": true,
+  "detail": "none · 0px/0px"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the background is the Contact list's",
+  "ok": true,
+  "detail": "QC rgb(244, 240, 233) · CL rgb(244, 240, 233)"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the vertical padding and height are the Contact list's",
+  "ok": true,
+  "detail": "QC 0px/0px h54 · CL 0px/0px h54"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the name's font is the Contact list's",
+  "ok": true,
+  "detail": "QC 400 21px Special Elite normal none · CL 400 21px Special Elite normal none"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the count's font is the Contact list's",
+  "ok": true,
+  "detail": "QC 500 10.5px JetBrains Mono 1.47px uppercase · CL 500 10.5px JetBrains Mono 1.47px uppercase"
+ }
+]

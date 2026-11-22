@@ -1,0 +1,446 @@
+[
+ {
+  "lock": "L7",
+  "where": "1512: rows",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: no SVG ring in any row's date",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: overdue rows to read",
+  "ok": true,
+  "detail": "44"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"20 Jun\" is d Mon",
+  "ok": true,
+  "detail": "20 Jun"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"4 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "4 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"22 Aug\" is d Mon",
+  "ok": true,
+  "detail": "22 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"9 Sep\" is d Mon",
+  "ok": true,
+  "detail": "9 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"12 Sep\" is d Mon",
+  "ok": true,
+  "detail": "12 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"12 Sep\" is d Mon",
+  "ok": true,
+  "detail": "12 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"19 Sep\" is d Mon",
+  "ok": true,
+  "detail": "19 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"6 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "6 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"4 Sep\" is d Mon",
+  "ok": true,
+  "detail": "4 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"8 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "8 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"4 Sep\" is d Mon",
+  "ok": true,
+  "detail": "4 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"8 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "8 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"13 Sep\" is d Mon",
+  "ok": true,
+  "detail": "13 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1512: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: rows",
+  "ok": true,
+  "detail": "54"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: no SVG ring in any row's date",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: overdue rows to read",
+  "ok": true,
+  "detail": "44"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"20 Jun\" is d Mon",
+  "ok": true,
+  "detail": "20 Jun"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"4 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "4 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"19 Aug\" is d Mon",
+  "ok": true,
+  "detail": "19 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"22 Aug\" is d Mon",
+  "ok": true,
+  "detail": "22 Aug"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"2 mo overdue\" ends overdue",
+  "ok": true,
+  "detail": "2 mo overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"9 Sep\" is d Mon",
+  "ok": true,
+  "detail": "9 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"12 Sep\" is d Mon",
+  "ok": true,
+  "detail": "12 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"12 Sep\" is d Mon",
+  "ok": true,
+  "detail": "12 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"19 Sep\" is d Mon",
+  "ok": true,
+  "detail": "19 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"6 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "6 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"4 Sep\" is d Mon",
+  "ok": true,
+  "detail": "4 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"8 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "8 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"4 Sep\" is d Mon",
+  "ok": true,
+  "detail": "4 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"8 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "8 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"13 Sep\" is d Mon",
+  "ok": true,
+  "detail": "13 Sep"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: \"7 wk overdue\" ends overdue",
+  "ok": true,
+  "detail": "7 wk overdue"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ },
+ {
+  "lock": "L7",
+  "where": "1280: an undated row reads No date",
+  "ok": true,
+  "detail": "No date"
+ }
+]

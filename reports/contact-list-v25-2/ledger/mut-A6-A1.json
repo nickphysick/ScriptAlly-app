@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 headings",
+  "ok": true,
+  "detail": "agent · what they want · replies in · your query · your rating"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 a heading still sorts",
+  "ok": true,
+  "detail": "fit heading pressed"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 headings",
+  "ok": true,
+  "detail": "agent · what they want · your query"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 a heading still sorts",
+  "ok": true,
+  "detail": "fit heading pressed"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows"
+ }
+]

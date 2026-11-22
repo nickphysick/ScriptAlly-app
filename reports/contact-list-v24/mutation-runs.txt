@@ -1,0 +1,63 @@
+=== MUTATE A1 (CL24-A1 A2 A3)
+  ✗ A1 · 1512 card left — qc 340.0 cl 380.0
+  ✗ A1 · 1512 card right — qc 1412.0 cl 1452.0
+  ✗ A1 · 1512 ban left — qc 340.0 cl 380.0
+  ✗ A1 · 1512 ban right — qc 1412.0 cl 1452.0
+  ✗ A1 · 1280 card left — qc 304.0 cl 344.0
+  ✗ A1 · 1280 card right — qc 1216.0 cl 1256.0
+  ✗ A1 · 1280 ban left — qc 304.0 cl 344.0
+  ✗ A1 · 1280 ban right — qc 1216.0 cl 1256.0
+[A1] 18/26 green
+  1 failed
+  1 passed (53.9s)
+=== MUTATE B2 (CL24-B1 B2 B3)
+[B1] 7/7 green
+  ✗ B2 · 1280 Replies in and Added hidden — {"replies":true,"added":true}
+[B2] 9/10 green
+  1 failed
+  1 passed (53.5s)
+=== MUTATE B3 (CL24-B1 B2 B3)
+[B1] 7/7 green
+[B2] 10/10 green
+  ✗ B3 · 1280 2 across — across 3
+[B3] 5/6 green
+  1 failed
+  1 passed (43.8s)
+=== MUTATE B3x (CL24-B1 B2 B3)
+[B1] 7/7 green
+[B2] 10/10 green
+  ✗ B3 · 1280 2 across — across 3
+[B3] 5/6 green
+  1 failed
+  1 passed (44.1s)
+=== MUTATE C1 (CL24-C1)
+  ✗ C1 · 1512 no scrim — scrim opacity 1
+  ✗ C1 · 1280 no scrim — scrim opacity 1
+[C1] 10/12 green
+  1 failed
+  1 passed (1.3m)
+=== MUTATE D1 (CL24-D1)
+  ✗ D1 · 1512 the archivist breaks out below the band — art bottom 191.796875 band bottom 197.796875
+  ✗ D1 · 1280 the archivist breaks out below the band — art bottom 195.796875 band bottom 197.796875
+[D1] 6/8 green
+  1 failed
+  1 passed (43.7s)
+=== MUTATE D2 (CL24-D1)
+[D1] 8/8 green
+  ✗ D2 · 1512 selected row pale with a navy edge — {"bg":"rgb(42, 58, 82)","sh":"rgb(42, 58, 82) 3px 0px 0px 0px inset"}
+  ✗ D2 · 1280 selected row pale with a navy edge — {"bg":"rgb(42, 58, 82)","sh":"rgb(42, 58, 82) 3px 0px 0px 0px inset"}
+[D2] 8/10 green
+  1 failed
+  1 passed (41.7s)
+=== MUTATE D3 (CL24-D1)
+[D1] 8/8 green
+[D2] 10/10 green
+  ✗ D3 · reduced motion: no slide — animations 1
+[D3] 3/4 green
+  1 failed
+  1 passed (41.4s)
+=== MUTATE F1 (CL24-F1)
+  ✗ F1 · pin: the spotlight finds its target — no spotlight
+[F1] 13/14 green
+  1 failed
+  1 passed (39.6s)

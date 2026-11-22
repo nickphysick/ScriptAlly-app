@@ -16,10 +16,9 @@ vi.mock("../../../lib/db", async () => (await import("../../../test/pageSmoke"))
 vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSmoke")).firebaseMock());
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
-import { ManuscriptPage, DELETED_TITLE, EMPTY_TITLE, MS_GUIDE, deletedSub } from "./ManuscriptPage";
+import { ManuscriptPage, DELETED_TITLE, EMPTY_TITLE, deletedSub } from "./ManuscriptPage";
 import { factPatch, parseWords } from "./Msv21Dialogs";
-import { EMPTY_PREVIEWS, MS_HEADER_SUB } from "./Msv21Parts";
-import { SD_VIEWBOX } from "../../../test/statusDotSignature";
+import { EMPTY_PREVIEWS } from "./Msv21Parts";
 import { sliceBetween } from "../../../test/sliceBetween";
 import { deleteField, type FieldValue } from "firebase/firestore";
 
@@ -39,34 +38,19 @@ describe("/manuscripts (v21) renders", () => {
     expect(html.match(/data-ms21="preview"/g)?.length ?? 0).toBe(3);
     for (const p of EMPTY_PREVIEWS) expect(html).toContain(p.title);
     for (const probe of ["book", "activity", "versions", "materials"]) expect(html, probe).not.toContain(`data-ms21="${probe}"`);
-    /* header v3 does not reach the empty state: it keeps the header it had */
     expect(html).not.toContain("data-hp3");
-    expect(html).toContain('class="ms21-title"');
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the empty state's header is the shared navy header, with no book */
+    expect(html).toContain('data-wsnh-page="manuscripts"');
+    expect(html).not.toContain('class="ms21-title"');
     /* the previews are inert furniture: each ghost is aria-hidden and holds no control */
     const ghosts = [...html.matchAll(/<div class="ms21-ghost[^"]*" aria-hidden="true" data-ms21="ghost">([\s\S]*?)<\/div><h3/g)];
     expect(ghosts.length).toBe(3);
     for (const g of ghosts) expect(g[1]).not.toMatch(/<button|<a |<input/);
   });
 
-  it("filled: the book's title is the page title, over the book, activity, the banner, versions and three doors", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toMatch(/<h1 class="hp3-title" data-probe="title" data-page-title="">The Smoke Test<\/h1>/);
-    expect(html).toContain('data-hp3="title"');
-    expect(html).toContain(MS_HEADER_SUB);
-    for (const probe of ["header", "book", "activity", "banner", "versions", "materials"]) expect(html, probe).toContain(`data-ms21="${probe}"`);
-    expect(html.match(/data-ms21="door"/g)?.length ?? 0).toBe(3);
-    expect(html.match(/data-ms21-fact="/g)?.length ?? 0).toBe(9);
-    expect(html, "the shared footer").toContain('data-probe="app-footer"');
-    /* the v13 page is gone: no shelf, no owed list, no desk hero */
-    expect(html).not.toMatch(/msv13-|data-msv12="hero"|data-msv12="owed"/);
-  });
-
-  it("every status glyph is the real StatusDot, and no mock ring was ported", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    expect(html).toContain(SD_VIEWBOX);
-    expect(html).not.toMatch(/class="[^"]*\bdot\b[^"]*"/);
-    expect(html.split('data-ms21-sd=""').length - 1).toBeGreaterThan(0);
-  });
+  /* v27 (22 Oct): the filled page is two containers (msv27Smoke.test.tsx). Retired here, deliberately: "filled: the book,
+     activity, the banner, versions and three doors" and "every status glyph is the real StatusDot" (no query status is
+     drawn on the v27 page). */
 
   it("no appraisal word in the page's own text, either state", () => {
     const banned = /(?<![\w-])(only|already|still|good|bad|slow|fast|poor|strong|weak|overdue|late|behind|impressive|finally|unfortunately)(?![\w-])/i;
@@ -81,11 +65,7 @@ describe("/manuscripts (v21) renders", () => {
     expect(deletedSub("The Salt Ledger")).toBe("The Salt Ledger has been deleted, along with its queries and materials. Add a manuscript to start again.");
   });
 
-  it("the page guide has three steps, each pointing at a part the page draws", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    expect(MS_GUIDE.map((s) => s.title)).toEqual(["Your book on one page", "Versions", "Your materials"]);
-    for (const s of MS_GUIDE) expect(html, s.subject).toContain(/\[(.+)\]/.exec(s.subject!)![1]);
-  });
+  /* v27: the three-step PageGuide is retired; the page's guide is the four-item checklist (msv27Smoke.test.tsx) */
 });
 
 describe("the page writes nothing itself, and deletes nothing", () => {
@@ -99,9 +79,7 @@ describe("the page writes nothing itself, and deletes nothing", () => {
     expect(parts, "the parts take no writer at all").not.toMatch(/updateManuscript|addManuscript/);
   });
 
-  it("an activity row opens the query drawer, and the journey comes from rowDoor", () => {
-    expect(src).toMatch(/const d = rowDoor\(r\); if \(d\) openQueryDrawer\(\{ mode: d\.mode, queryId: d\.queryId \}\)/);
-  });
+  /* v27: the activity card left the page, and with it the row door ("an activity row opens the query drawer") */
 
   it("the retired components are gone", () => {
     for (const f of ["Msv12EditDetails.tsx", "Msv12Empty.tsx", "Msv12Sections.tsx", "Msv13Shelf.tsx"]) {
@@ -112,18 +90,10 @@ describe("the page writes nothing itself, and deletes nothing", () => {
 
 describe("the dialogs", () => {
   const src = strip(read("Msv21Dialogs.tsx"));
-  const edit = sliceBetween(src, "export const Msv21EditDetails", "export const Msv21Version", "the edit dialog");
   const version = sliceBetween(src, "export const Msv21Version", "export const Msv21AddManuscript", "the version dialog");
   const add = src.slice(src.indexOf("export const Msv21AddManuscript"));
 
-  it("Edit details: one write, the eight fields in the oracle's order, the six statuses, and no author", () => {
-    expect(edit.match(/\bupdateManuscript\(/g)?.length ?? 0).toBe(1);
-    const labels = [...edit.matchAll(/<label htmlFor="[^"]+">([^<]+)<\/label>|<span className="ms21-fl"[^>]*>([^<]+)<\/span>/g)].map((m) => m[1] ?? m[2]);
-    expect(labels).toEqual(["Title", "Word count", "Genre", "Age category", "Logline", "Setting", "Series", "Status", "Shelved reason"]);
-    expect(edit).toContain("STATUS_ORDER.map");
-    expect(edit).not.toMatch(/author|updateUserProfile/i);
-    expect(edit).toMatch(/<select id="ms21-f-genre"/);
-  });
+  /* v28 (22 Oct): Edit details is the slide-in drawer (v28/MsEditDrawer); its field lock moved to msv28Smoke.test.tsx */
 
   it("a fact rides only when it changed, and a cleared fact is REMOVED — never '' and never undefined", () => {
     expect(factPatch("West Cork", "West Cork")).toBeNull();
@@ -141,7 +111,7 @@ describe("the dialogs", () => {
     const block = [...rules.matchAll(/hasOnly\(\[([\s\S]*?)\]/g)].map((m) => m[1]).find((b) => b.includes("'bookVersions'"));
     expect(block, "the manuscript update allowlist moved — re-find it").toBeTruthy();
     const listed = block!.replace(/\/\/[^\n]*/g, "");
-    for (const k of ["'title'", "'genre'", "'ageCategory'", "'wordCount'", "'logline'", "'status'", "'shelvedReason'", "'setting'", "'series'", "'bookVersions'"]) {
+    for (const k of ["'title'", "'genre'", "'ageCategory'", "'wordCount'", "'logline'", "'status'", "'shelvedReason'", "'setting'", "'series'", "'elevatorPitch'", "'synopsis'", "'bookVersions'"]) {
       expect(listed, `${k} left the allowlist — every save carrying it now fails whole`).toContain(k);
     }
     /* `BookVersion.wordCount` is safe to add only while the rules treat the list as a list */
@@ -174,7 +144,7 @@ describe("the dialogs", () => {
   it("every dialog portals out of #root — useOverlay seals #root inert, so a dialog inside it is dead", () => {
     expect(src.match(/return toBody\(/g)?.length ?? 0, "the one shell every dialog is drawn through").toBe(1);
     expect(src).toMatch(/createPortal\(node, document\.body\)/);
-    expect(src.match(/<Shell\b/g)?.length ?? 0).toBe(3);
+    expect(src.match(/<Shell\b/g)?.length ?? 0).toBe(2); /* v28: Edit details left for the drawer */
     /* the dialogs' sheet reads only :root tokens, so leaving the page's scope loses nothing */
     const css = read("msv21.css").replace(/\/\*[\s\S]*?\*\//g, "");
     const dialogs = css.slice(css.indexOf(".ms21-layer {"));
@@ -189,7 +159,7 @@ describe("the sheet", () => {
   it("every token it reads is a :root token", () => {
     const read = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
     const own = new Set([...css.matchAll(/(--ms21-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-    for (const t of read) expect(own.has(t) || ["--sp-type", "--sp-serif", "--font-mono", "--ws-page", "--ws-sheet", "--ws-band", "--hsheet-flap", "--hsheet-w", "--hsheet-clip"].includes(t) || /^--hpanel-/.test(t) /* the header panel's :root tokens (shell/headerPanel.css) */, t).toBe(true);
+    for (const t of read) expect(own.has(t) || ["--sp-type", "--sp-serif", "--sp-muted", "--sp-quiet" /* roll-out v2, Phase 2: :root in shell/primitives.css */, "--sp-anthracite" /* roll-out v2, Phase 6: the one focus ring */, "--font-mono", "--ws-page", "--ws-sheet", "--ws-band", "--hsheet-flap", "--hsheet-w", "--hsheet-clip"].includes(t) || /^--hpanel-/.test(t) /* the header panel's :root tokens (shell/headerPanel.css) */, t).toBe(true);
   });
   it("the deck and the doors stand still under reduced motion", () => {
     const rm = sliceBetween(css, "@media (prefers-reduced-motion: reduce)", ".ms21-band {", "the reduced-motion block");

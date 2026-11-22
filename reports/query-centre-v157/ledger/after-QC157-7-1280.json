@@ -1,0 +1,22 @@
+[
+ {
+  "name": "every quiet badge is navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "every quiet badge holds three circles and no arrow path",
+  "ok": true,
+  "got": "3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0 3/0"
+ },
+ {
+  "name": "the link after a quiet card's current step is dotted",
+  "ok": true,
+  "got": "repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.5) 0px, rgba(28, 19, 15, 0.5) 2px, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0) 4px)"
+ },
+ {
+  "name": "a card that is not quiet keeps its arrow",
+  "ok": true,
+  "got": "seed-query-12"
+ }
+]

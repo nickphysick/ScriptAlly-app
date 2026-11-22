@@ -1,0 +1,37 @@
+[
+ {
+  "where": "title text",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "list line",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "switch centred",
+  "ok": false,
+  "detail": "undefined vs 760.0"
+ },
+ {
+  "where": "switch under the line",
+  "ok": false,
+  "detail": "undefined vs 0.0"
+ },
+ {
+  "where": "no switch in the bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "birds line",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "no switch in the bar (birds)",
+  "ok": true,
+  "detail": "0"
+ }
+]

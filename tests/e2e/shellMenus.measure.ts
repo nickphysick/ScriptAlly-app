@@ -184,15 +184,16 @@ test.describe("shell menus · the language", () => {
     });
     await inkOpen(page, "/queries", 1440, { scope: "ms3" });
     await openSearch(page);
-    const titles = page.locator(".sp-pal--ink .sp-res:not(.sp-res--soon) .sp-t1");
+    /* search v1: the rows are SearchDesk's (.sv1-row); the selectors moved, the measure did not */
+    const titles = page.locator(".sp-pal--ink .sv1-row:not(.sv1-row--soon) .sv1-t1");
     const n = await titles.count();
     expect(n, "search titles to measure").toBeGreaterThan(3);
     for (let i = 0; i < n; i++) {
-      const r = await pixelContrast(page, ".sp-pal--ink .sp-res:not(.sp-res--soon) .sp-t1", i);
+      const r = await pixelContrast(page, ".sp-pal--ink .sv1-row:not(.sv1-row--soon) .sv1-t1", i);
       expect(r, `search title ${i}: ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
     }
-    secondary.push(`search description: ${(await pixelContrast(page, ".sp-pal--ink .sp-t2", 1)).toFixed(2)}:1`);
-    secondary.push(`search eyebrow: ${(await pixelContrast(page, ".sp-pal--ink .sp-grp")).toFixed(2)}:1`);
+    secondary.push(`search description: ${(await pixelContrast(page, ".sp-pal--ink .sv1-t2", 1)).toFixed(2)}:1`);
+    secondary.push(`search eyebrow: ${(await pixelContrast(page, ".sp-pal--ink .sv1-grp")).toFixed(2)}:1`);
     mkdirSync("reports/ink-shell-v1/menus", { recursive: true });
     writeFileSync("reports/ink-shell-v1/menus/ms3-secondary.json", JSON.stringify(secondary, null, 2));
   });
@@ -254,7 +255,8 @@ test.describe("shell menus · the language", () => {
       await open();
       expect(await page.locator(row).count(), `${where}: the entry exists`).toBe(1);
       expect(await page.locator(row).getAttribute("aria-disabled"), `${where}: aria-disabled`).toBe("true");
-      expect(await page.locator(`${row} .sa-soon`).innerText(), `${where}: the SOON tag`).toBe("SOON");
+      /* search v1's SOON is its own 12px tag (.sv1-soon); the menus keep .sa-soon */
+      expect(await page.locator(`${row} .sa-soon, ${row} .sv1-soon`).innerText(), `${where}: the SOON tag`).toBe("SOON");
       /* the arrow keys walk every row twice round and never land on it */
       await page.locator(`${menu} [role="menuitem"], ${menu} [role="menuitemradio"], ${menu} [role="option"]`).first().focus().catch(() => {});
       let landed = false;
@@ -273,7 +275,7 @@ test.describe("shell menus · the language", () => {
     await check("selector menu", '.ws-ms-menu--port [data-ms="add"]', ".ws-ms-menu--port", async () => {
       await page.locator("#ws-sidebar [data-shell='switcher'] .ws-ms-btn").click(); await page.waitForTimeout(350);
     });
-    await check("search", '.sp-pal--ink .sp-res--soon', ".sp-pal--ink", async () => {
+    await check("search", '.sp-pal--ink .sv1-row--soon', ".sp-pal--ink", async () => {
       await openSearch(page); await page.keyboard.type("add a manuscript"); await page.waitForTimeout(300);
     });
   });
@@ -281,17 +283,18 @@ test.describe("shell menus · the language", () => {
 
 test.describe("search", () => {
   /* ── MS7 · the frame ──────────────────────────────────────────────────────────────────────────── */
-  test("MS7 · 660 wide, centred on the sheet, 10 below the bar, an ink input band, no sans-serif", async ({ page }) => {
+  /* search v1 (19 Nov): 920 wide with the peek on a sheet 1180px or wider, 660 below — was 660 at every width */
+  test("MS7 · 920 or 660 wide by the sheet, centred on the sheet, 10 below the bar, an ink input band, no sans-serif", async ({ page }) => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/queries", w, { scope: "ms7" });
       await openSearch(page);
       const p = (await vis(page, ".sp-pal--ink"))!;
       const sheet = (await vis(page, ".ws-window"))!;
       const bar = (await vis(page, ".ws-pagebar"))!;
-      expect(near(p.w, 660), `${w}: ${p.w} wide`).toBe(true);
+      expect(near(p.w, sheet.w >= 1180 ? 920 : 660), `${w}: ${p.w} wide on a ${sheet.w} sheet`).toBe(true);
       expect(near(p.x + p.w / 2, sheet.x + sheet.w / 2), `${w}: centre ${p.x + p.w / 2} vs the sheet's ${sheet.x + sheet.w / 2}`).toBe(true);
       expect(near(p.y, bar.b + 10), `${w}: top ${p.y} vs bar + 10 ${bar.b + 10}`).toBe(true);
-      const band = await page.evaluate(() => getComputedStyle(document.querySelector(".sp-pal--ink .sp-in")!).backgroundColor);
+      const band = await page.evaluate(() => getComputedStyle(document.querySelector(".sp-pal--ink .sv1-in")!).backgroundColor);
       expect(band, `${w}: the input band`).toBe("rgb(27, 36, 51)");
       const dim = await page.evaluate(() => getComputedStyle(document.querySelector(".sp-dim")!).backgroundColor);
       expect(dim, `${w}: the window dims`).toBe("rgba(10, 14, 22, 0.42)");
@@ -301,14 +304,15 @@ test.describe("search", () => {
   });
 
   /* ── MS8 · labels ─────────────────────────────────────────────────────────────────────────────── */
-  test("MS8 · no \"Queries Hub\" in search; the eyebrows read START SOMETHING and GO TO", async ({ page }) => {
+  /* search v1 (19 Nov): the headings are plain words in sentence case — no mono, no capitals (Nick's ruling) */
+  test("MS8 · no \"Queries Hub\" in search; the headings read Start something and Go to", async ({ page }) => {
     await inkOpen(page, "/queries", 1440, { scope: "ms8" });
     await openSearch(page);
     const text = await page.locator(".sp-pal--ink").innerText();
     expect(text, "Query Centre is listed (the precondition)").toMatch(/Query Centre|Queries Hub/);
     expect(text).not.toContain("Queries Hub");
-    const eyebrows = (await page.locator(".sp-pal--ink .sp-grp").allInnerTexts()).map((t) => t.trim());
-    expect(eyebrows.slice(0, 2)).toEqual(["START SOMETHING", "GO TO"]);
+    const eyebrows = (await page.locator(".sp-pal--ink .sv1-grp").allInnerTexts()).map((t) => t.trim());
+    expect(eyebrows.slice(0, 2)).toEqual(["Start something", "Go to"]);
   });
 
   /* ── MS9 · page icons ─────────────────────────────────────────────────────────────────────────── */
@@ -317,8 +321,8 @@ test.describe("search", () => {
     const side = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>("#ws-sidebar .ws-ni")]
       .map((e) => [e.querySelector(".ws-lbl")?.textContent?.trim() ?? "", [...e.querySelectorAll(".ws-ic svg *")].map((n) => n.outerHTML.replace(/\s+/g, " ")).join("")])));
     await openSearch(page);
-    const rows = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.sp-pal--ink .sp-res[data-kind="page"]')]
-      .map((e) => ({ t: e.querySelector(".sp-t1")?.textContent?.trim() ?? "", d: [...e.querySelectorAll(".sp-ic svg *")].map((n) => n.outerHTML.replace(/\s+/g, " ")).join("") })));
+    const rows = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.sp-pal--ink .sv1-row[data-kind="page"]')]
+      .map((e) => ({ t: e.querySelector(".sv1-t1")?.textContent?.trim() ?? "", d: [...e.querySelectorAll(".sv1-tile svg *")].map((n) => n.outerHTML.replace(/\s+/g, " ")).join("") })));
     const sidebarPages = rows.filter((r) => side[r.t] !== undefined);
     expect(sidebarPages.length, "Go-to rows that are sidebar pages").toBeGreaterThanOrEqual(3);
     for (const r of sidebarPages) expect(r.d, `"${r.t}"`).toBe(side[r.t]);
@@ -328,14 +332,16 @@ test.describe("search", () => {
   test("MS10 · every keycap shown is a bound key", async ({ page }) => {
     /* the Step 0 audit's bound list: the palette's own keys (↑ ↓ ↵ Esc), ⌘K / Ctrl K (usePalette), and
        "?" (ShortcutsSheet) — nothing else is bound, so nothing else may show a keycap */
-    const BOUND = new Set(["↑", "↓", "↵", "ESC", "⌘K", "Ctrl K", "?"]);
+    /* search v1 adds ⌘↵ / Ctrl ↵ (SHORTCUTS.searchSecond) and Tab (SHORTCUTS.searchScope); its esc cap is lower case */
+    const BOUND = new Set(["↑", "↓", "↵", "ESC", "esc", "Tab", "⌘ ↵", "Ctrl ↵", "⌘K", "Ctrl K", "?"]);
     await inkOpen(page, "/queries", 1440, { scope: "ms10" });
     await openSearch(page);
-    const caps = async () => (await page.locator(".sp-pal--ink .sp-kc, .sp-pal--ink .sp-kb, .sp-pal--ink .sp-foot i, .sp-pal--ink .sp-esc").allInnerTexts()).map((t) => t.trim());
+    const caps = async () => (await page.locator(".sp-pal--ink .sv1-key").allInnerTexts()).map((t) => t.trim());
     const a = await caps();
     await page.keyboard.type("marsh"); await page.waitForTimeout(300);
     const b = await caps();
-    await closeAll(page);
+    /* search v1: Esc clears the words first and a second Esc closes (Nick's ruling) */
+    await closeAll(page); await closeAll(page);
     await openHelp(page);
     const c = (await page.locator('[data-shell="help-menu"] .sa-kc').allInnerTexts()).map((t) => t.trim());
     const all = [...a, ...b, ...c];
@@ -368,14 +374,14 @@ test.describe("your menu", () => {
 
 test.describe("settings", () => {
   /* ── MS12 · the shell ─────────────────────────────────────────────────────────────────────────── */
-  test("MS12 · the tab says ACCOUNT · Settings; Back to app once, in the bar; no Playfair in the sidebar", async ({ page }) => {
+  test("MS12 · the tab says Settings (shell nav v3: no group label); Back to app once, in the bar; no Playfair in the sidebar", async ({ page }) => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/account/profile", w, { scope: "ms12" });
       const tab = await page.evaluate(() => ({
         g: (document.querySelector(".ws-ftab .ws-ftg, .ws-ftab small") as HTMLElement | null)?.innerText ?? "",
         n: (document.querySelector(".ws-ftab .ws-ftn") as HTMLElement | null)?.innerText ?? "",
       }));
-      expect(tab.g, `${w}: the tab's group`).toBe("ACCOUNT");
+      expect(tab.g, `${w}: no group label on the tab (shell nav v3)`).toBe("");
       expect(tab.n, `${w}: the tab's page`).toBe("Settings");
       const backs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("button, a")]
         .filter((e) => /Back to app/.test(e.innerText) && e.getBoundingClientRect().width > 0 && getComputedStyle(e).visibility !== "hidden")

@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "H2",
+  "where": "93 arc colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H2",
+  "where": "93 arc length ∝ score (±1%)",
+  "ok": true,
+  "detail": "0.93"
+ },
+ {
+  "lock": "H2",
+  "where": "93 the score in the ring",
+  "ok": true,
+  "detail": "93%"
+ },
+ {
+  "lock": "H2",
+  "where": "93 the score centred in the ring (±1.5px)",
+  "ok": true,
+  "detail": "[0,0]"
+ },
+ {
+  "lock": "H2",
+  "where": "93 ring 124",
+  "ok": true,
+  "detail": "124"
+ },
+ {
+  "lock": "H2",
+  "where": "93 no disc, no archivist",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) / 0 img"
+ },
+ {
+  "lock": "H2",
+  "where": "72 arc colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H2",
+  "where": "72 arc length ∝ score (±1%)",
+  "ok": true,
+  "detail": "0.72"
+ },
+ {
+  "lock": "H2",
+  "where": "72 the score in the ring",
+  "ok": true,
+  "detail": "72%"
+ },
+ {
+  "lock": "H2",
+  "where": "72 the score centred in the ring (±1.5px)",
+  "ok": true,
+  "detail": "[0,0]"
+ },
+ {
+  "lock": "H2",
+  "where": "72 ring 124",
+  "ok": true,
+  "detail": "124"
+ },
+ {
+  "lock": "H2",
+  "where": "72 no disc, no archivist",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) / 0 img"
+ },
+ {
+  "lock": "H2",
+  "where": "44 arc colour",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H2",
+  "where": "44 arc length ∝ score (±1%)",
+  "ok": true,
+  "detail": "0.44"
+ },
+ {
+  "lock": "H2",
+  "where": "44 the score in the ring",
+  "ok": true,
+  "detail": "44%"
+ },
+ {
+  "lock": "H2",
+  "where": "44 the score centred in the ring (±1.5px)",
+  "ok": true,
+  "detail": "[0,0]"
+ },
+ {
+  "lock": "H2",
+  "where": "44 ring 124",
+  "ok": true,
+  "detail": "124"
+ },
+ {
+  "lock": "H2",
+  "where": "44 no disc, no archivist",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) / 0 img"
+ }
+]

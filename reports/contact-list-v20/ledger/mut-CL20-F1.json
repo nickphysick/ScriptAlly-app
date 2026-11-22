@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "CL20-F1",
+  "where": "@1512 non-current glyphs to measure (population)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "CL20-F1",
+  "where": "@1512 every one is rgb(244,238,229)",
+  "ok": false,
+  "detail": "rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15)"
+ },
+ {
+  "lock": "CL20-F1",
+  "where": "@1280 non-current glyphs to measure (population)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "CL20-F1",
+  "where": "@1280 every one is rgb(244,238,229)",
+  "ok": false,
+  "detail": "rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15) · rgb(28, 19, 15)"
+ }
+]

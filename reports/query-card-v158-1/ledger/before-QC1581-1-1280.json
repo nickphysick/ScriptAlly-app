@@ -1,0 +1,32 @@
+[
+ {
+  "name": "1 action: every text line lies inside its box, nothing clipped",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "1 action (long sub): every text line lies inside its box, nothing clipped",
+  "ok": false,
+  "got": "[{\"box\":[67,32,232,34],\"in\":[14,13,301,52],\"clipped\":false}]"
+ },
+ {
+  "name": "a 2-action footer in the fixture",
+  "ok": false,
+  "got": "none"
+ },
+ {
+  "name": "3 actions: every text line lies inside its box, nothing clipped",
+  "ok": false,
+  "got": "[{\"box\":[67,3,113,38],\"in\":[14,13,182,52],\"clipped\":false},{\"box\":[67,41,113,34],\"in\":[14,13,182,52],\"clipped\":false}]"
+ },
+ {
+  "name": "3 actions (long sub): every text line lies inside its box, nothing clipped",
+  "ok": false,
+  "got": "[{\"box\":[67,-5,113,38],\"in\":[14,13,182,52],\"clipped\":false},{\"box\":[67,33,113,51],\"in\":[14,13,182,52],\"clipped\":false}]"
+ },
+ {
+  "name": "checked one-, two- and three-action footers",
+  "ok": false,
+  "got": "1,3"
+ }
+]

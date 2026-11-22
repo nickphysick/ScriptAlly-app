@@ -17,6 +17,9 @@
  * ⚠️ NO SAGE. The rings, the track and the finished disc are navy; the finished mark is a cream
  * tick.
  */
+import { createPortal } from "react-dom";
+import { useIsMobile } from "../shell/mobileChrome";
+import { useSetupFootHost } from "./SetupFrame";
 import React, { useEffect, useRef, useState } from "react";
 import "./importFlow.css";
 import { DashGhost } from "./DashGhost";
@@ -48,6 +51,11 @@ export interface ImportingLoaderProps {
 
 export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onProceed, onLift }) => {
   const [msgIndex, setMsgIndex] = useState(0);
+  /* The phone's checklist (set-up on phones v1, board 2 6B) counts the same interval's beats without
+     wrapping, so a step ticks when the existing timing reaches it. The interval itself is unchanged. */
+  const [beats, setBeats] = useState(0);
+  const isMobile = useIsMobile();
+  const host = useSetupFootHost();
   // Once complete, a brief "all set" beat, then the card lifts away to show the dashboard's loading
   // page that has been behind it all along — the page the app opens on.
   const [revealing, setRevealing] = useState(false);
@@ -55,7 +63,7 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
   // Cycle the lines while loading; stop the moment we're complete.
   useEffect(() => {
     if (complete) return;
-    const id = setInterval(() => setMsgIndex((i) => (i + 1) % IMPORTING_MESSAGES.length), IMPORTING_TIMINGS.MESSAGE_INTERVAL_MS);
+    const id = setInterval(() => { setMsgIndex((i) => (i + 1) % IMPORTING_MESSAGES.length); setBeats((b) => b + 1); }, IMPORTING_TIMINGS.MESSAGE_INTERVAL_MS);
     return () => clearInterval(id);
   }, [complete]);
 
@@ -73,6 +81,29 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
     <div className="im-bare im-ldr" data-im="importing" data-im-state={revealing ? "lifting" : complete ? "done" : "work"}>
       {/* The dashboard building itself behind the card: the page the writer is about to land on. */}
       <DashGhost />
+
+      {isMobile && (() => {
+        /* The phone (6B; DOCS.loadB): full-screen navy over the same ghost — a picture spot (placeholder
+           until the drawing arrives), the heading, the loader's own step words as a checklist ticking
+           blush on the existing beat, and a slim blush bar. It lifts on the same beat as the card. */
+        const STEPS = IMPORTING_MESSAGES.slice(0, 5);
+        const done = complete ? STEPS.length : Math.min(STEPS.length, beats);
+        const layer = (
+          <div className={`im-pldr${revealing ? " is-lifting" : ""}`} role="status" data-im="phone-loader">
+            <span className="im-pldrspot" aria-hidden="true" data-im="loader-spot" />
+            <h1 className="im-pldrh">{(complete ? IMPORTING_HEAD.done : IMPORTING_HEAD.working) + "."}</h1>
+            <ul className="im-pldrst" data-im="loader-steps">
+              {STEPS.map((m, k) => (
+                <li key={m} className={k < done ? "is-on" : undefined} data-state={k < done ? "done" : "todo"}>
+                  <span className="im-pldrck" aria-hidden="true" />{m.replace(/…$/, "")}
+                </li>
+              ))}
+            </ul>
+            <div className="im-pldrbar" aria-hidden="true"><i style={{ width: `${Math.round((done / STEPS.length) * 100)}%` }} /></div>
+          </div>
+        );
+        return host?.parentElement ? createPortal(layer, host.parentElement) : layer;
+      })()}
 
       <div className={`im-ldrcard${complete ? " is-done" : ""}${revealing ? " is-lifting" : ""}`} role="status" data-im="loader-card">
         <div className="im-ldremblem">

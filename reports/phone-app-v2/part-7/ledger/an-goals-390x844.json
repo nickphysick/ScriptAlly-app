@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "P3",
+  "where": "390x844 all: \"{p}% heard back\" is bandFigures' heardPct",
+  "ok": true,
+  "detail": "60% vs 60%"
+ },
+ {
+  "lock": "P3",
+  "where": "390x844 all: the stage counts are analyticsModel's reached counts",
+  "ok": true,
+  "detail": "{\"queried\":52,\"request\":22,\"full\":15,\"offer\":1} vs 52/22/15/1"
+ },
+ {
+  "lock": "P3",
+  "where": "390x844 all: the wait is the glance's median for the range",
+  "ok": true,
+  "detail": "\"31 replies from 52 queries · median wait 14 days\" vs 14 days"
+ },
+ {
+  "lock": "P3",
+  "where": "390x844 d90: \"{p}% heard back\" is bandFigures' heardPct",
+  "ok": true,
+  "detail": "40% vs 40%"
+ },
+ {
+  "lock": "P3",
+  "where": "390x844 d90: the stage counts are analyticsModel's reached counts",
+  "ok": true,
+  "detail": "{\"queried\":25,\"request\":5,\"full\":2,\"offer\":0} vs 25/5/2/0"
+ },
+ {
+  "lock": "P3",
+  "where": "390x844 d90: the wait is the glance's median for the range",
+  "ok": true,
+  "detail": "\"10 replies from 25 queries · median wait 16 days\" vs 16 days"
+ },
+ {
+  "lock": "P3",
+  "where": "390x844 the range is remembered across a reload",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P3",
+  "where": "390x844 fourteen weeks",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "P7",
+  "where": "390x844 Analytics: white on navy, no green or red",
+  "ok": true,
+  "detail": "navy 6"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 six milestones",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 First query: earned and dated by the writer's own first event",
+  "ok": true,
+  "detail": "{\"k\":\"first\",\"earned\":\"1\",\"at\":\"1713398400000\"} vs true 1713398400000"
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 10 out: earned and dated by the writer's own first event",
+  "ok": true,
+  "detail": "{\"k\":\"ten\",\"earned\":\"1\",\"at\":\"1773489600000\"} vs true 1773489600000"
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 First request: earned and dated by the writer's own first event",
+  "ok": true,
+  "detail": "{\"k\":\"request\",\"earned\":\"1\",\"at\":\"1783594029371\"} vs true 1783594029371"
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 First full: earned and dated by the writer's own first event",
+  "ok": true,
+  "detail": "{\"k\":\"full\",\"earned\":\"1\",\"at\":\"1783594029371\"} vs true 1783594029371"
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 25 out: earned and dated by the writer's own first event",
+  "ok": true,
+  "detail": "{\"k\":\"twentyfive\",\"earned\":\"1\",\"at\":\"1782345600000\"} vs true 1782345600000"
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 First offer: earned and dated by the writer's own first event",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"earned\":\"1\",\"at\":\"\"} vs true null"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 an earned milestone with a date",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 seven week dots, the last is this week, none after today",
+  "ok": true,
+  "detail": "2026-09-14,2026-09-21,2026-09-28,2026-10-05,2026-10-12,2026-10-19,2026-10-26 vs 2026-10-26"
+ },
+ {
+  "lock": "P4",
+  "where": "390x844 the dots and the streak are weekStreak's",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "P7",
+  "where": "390x844 Streaks & goals: white on navy, no green or red",
+  "ok": true,
+  "detail": "navy 1"
+ },
+ {
+  "lock": "P7",
+  "where": "390x844 Streaks & goals: no image twice",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "P5",
+  "where": "390x844 the Streaks & goals tile opens /goals",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/goals"
+ }
+]

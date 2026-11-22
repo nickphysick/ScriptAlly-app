@@ -18,7 +18,7 @@
  */
 import type { PackageEdition, SubmissionPackage } from "../types";
 
-export type PackageContents = Pick<SubmissionPackage, "queryLetterVersionId" | "synopsisVersionId" | "bookVersionId" | "otherMaterials">;
+export type PackageContents = Pick<SubmissionPackage, "queryLetterVersionId" | "synopsisVersionId" | "bookVersionId" | "otherMaterials"> & Partial<Pick<SubmissionPackage, "extraIds">>;
 
 const norm = (s: string | undefined | null) => (s ?? "").trim();
 
@@ -45,6 +45,9 @@ export function editionRecord(n: number, startedAt: string, p: PackageContents, 
     queryLetterVersionId: c.ql, synopsisVersionId: c.syn,
     ...(c.bv ? { bookVersionId: c.bv } : {}),
     ...(c.other ? { otherMaterials: c.other } : {}),
+    /* v26 — the named extras it held, by id; their names are `otherMaterials`. NOT compared by `contentsChanged`:
+       the names already decide an edition, and the one-time migration adds ids to a sent package without one. */
+    ...(p.extraIds?.length ? { extraIds: [...p.extraIds] } : {}),
   };
 }
 

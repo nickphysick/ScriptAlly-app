@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L2",
+  "where": "the census read the page (over 60 text elements)",
+  "ok": true,
+  "detail": "231"
+ },
+ {
+  "lock": "L2",
+  "where": "exactly two typewriter elements",
+  "ok": false,
+  "detail": "[\"SPAN.hl\",\"B.\",\"B.\",\"B.\",\"B.\",\"SPAN.p9-po-nm\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "…the title's",
+  "ok": true,
+  "detail": "[\"SPAN.hl\",\"B.\",\"B.\",\"B.\",\"B.\",\"SPAN.p9-po-nm\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "…and the open package's name",
+  "ok": true,
+  "detail": "[\"SPAN.hl\",\"B.\",\"B.\",\"B.\",\"B.\",\"SPAN.p9-po-nm\"]"
+ }
+]

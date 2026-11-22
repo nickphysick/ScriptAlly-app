@@ -1,0 +1,56 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.9s)
+PVM-7 @390 bar 770.0 lowest footer link 816.3 of 9
+PVM-7 @390 field {"focused":true,"top":350.140625,"bottom":402.140625}
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.2s)
+PVM-7 @375 bar 593.0 lowest footer link 639.2 of 9
+PVM-7 @375 field {"focused":true,"top":325.140625,"bottom":377.140625}
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back (2.4s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+
+    Error: the footer's last link is clear of the bar
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 770
+    Received:    816.34375
+
+      314 |     console.log(`PVM-7 @${vp.width} bar ${bar.top.toFixed(1)} lowest footer link ${lowest.toFixed(1)} of ${links.length}`);
+      315 |     expect.soft(links.length, "the footer's links were found").toBeGreaterThan(3);
+    > 316 |     expect.soft(lowest, "the footer's last link is clear of the bar").toBeLessThanOrEqual(bar.top);
+          |                                                                       ^
+      317 |     /* the bar's button brings the field into view, focused */
+      318 |     await page.click(".mk-pvstick button");
+      319 |     await page.waitForTimeout(700);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:316:71
+
+    Error Context: test-results/pricingMobile.measure.ts-P-88c49-r-and-brings-the-field-back-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+
+    Error: the footer's last link is clear of the bar
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 593
+    Received:    639.21875
+
+      314 |     console.log(`PVM-7 @${vp.width} bar ${bar.top.toFixed(1)} lowest footer link ${lowest.toFixed(1)} of ${links.length}`);
+      315 |     expect.soft(links.length, "the footer's links were found").toBeGreaterThan(3);
+    > 316 |     expect.soft(lowest, "the footer's last link is clear of the bar").toBeLessThanOrEqual(bar.top);
+          |                                                                       ^
+      317 |     /* the bar's button brings the field into view, focused */
+      318 |     await page.click(".mk-pvstick button");
+      319 |     await page.waitForTimeout(700);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:316:71
+
+    Error Context: test-results/pricingMobile.measure.ts-P-a8bd3-r-and-brings-the-field-back-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @390: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+    [measure] › tests/e2e/pricingMobile.measure.ts:291:3 › PVM-7 @375: the sticky sign-up shows only once the form has gone, never over the footer, and brings the field back 
+  1 passed (22.9s)

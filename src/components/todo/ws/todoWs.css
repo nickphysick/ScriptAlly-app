@@ -1,0 +1,725 @@
+/*
+ * To-do list v50 — THE TASK WORKSPACE (design-refs/todo-list-v50/todo-list-v50.html). Every value here was read off the
+ * rendered mockup at 1512 × 900, not out of its source (the mock is cumulative, 28 versions deep).
+ *
+ * ⚠️ NO GREEN ON THIS PAGE. Navy, slate, cream and blush only.
+ * ⚠️ The palette is declared on `.tws` AND on `.tws-layer`: the pop-ups and the toast portal to the body, where
+ *    no ancestor declares it (a `var()` on an undeclared token paints nothing, silently).
+ */
+.tws, .tws-layer {
+  --tw-navy: #2a3a52;
+  --tw-navy2: #3c4c64;
+  --tw-slate: #7d8ea6;
+  --tw-blush: #f3d3c6;
+  --tw-blush2: #f8e2d8;
+  --tw-blush-ink: #7a3a2a;
+  --tw-bubble-ink: #3d2a22;
+  --tw-cream: #faf8f4;
+  --tw-beige: #ebe4d9;
+  --tw-hair: #e3dbcf;
+  --tw-ink: #1c130f;
+  --tw-ink2: #3a332d;
+  --tw-mut: var(--sp-muted);
+  --tw-mut2: var(--sp-quiet);
+  --tw-terra: #c9765d;
+  --tw-tray: #fbf9f5;
+  --tw-deskbg: #f7f3ee;
+  /* v53 (D4): the Query Centre slip colours (lib/qc153 SLIP_TONE_FILL): rose = something came in, sand = something went
+     out; Gone quiet is stone fading to white (v52's own stone) */
+  --tw-rose: #ecd6d2;
+  --tw-sand: #efe7da;
+  --tw-stone: #e3dbcf;
+  --tw-stone-fade: linear-gradient(90deg, #e3dbcf, #f1ece5 55%, #ffffff);
+  --tw-type: var(--sp-type);
+  --tw-serif: var(--sp-serif);
+  --tw-mono: var(--sp-mono);
+}
+
+/* the root fills the stage slot, so the grid's scroll row is a real scrollport with a height of its own (without it the
+   row grows with its content, and a workspace sized from the row's height grows with it) */
+.tws-root { height: 100%; min-height: 0; }
+
+/* ── the page (v52 Part A): the slim navy header, then the workspace, filling the scrollport so the page itself never
+   scrolls ──
+   ⚠️ THE HEIGHT IS THE SCROLLER'S OWN (--tws-port, its clientHeight: never 100vh); the column is a flex column and the
+      workspace takes what the header leaves, with a 520px floor.
+   ⚠️ PAGE WIDTH v1 (Nick, 7 Nov): the To-do list takes the shared content column (`.wpg-scroll > *`: 1256 cap, 40px
+      gutter) like every other page. v52's own 1320 column is retired; block padding only, so the gutter survives. */
+.tws {
+  box-sizing: border-box;
+  height: var(--tws-port, 800px); display: flex; flex-direction: column; padding-block: 0 12px; /* the title row pays its own 14px top (workspace width v2) */
+  color: var(--tw-ink); font-family: var(--tw-serif);
+}
+.tws *, .tws-layer * { box-sizing: border-box; }
+.tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
+
+/* v54 (D1): the thin header (.tws-hd, .tws-ttl, .tws-tsub, .tws-addb) is retired — the page header is WsHeader56, the
+   Query Centre's navy panel (todoWs56.css). `tws-hd` and `tws-addb` survive on it as class names only, with no rules. */
+.tws-sp { flex: 1; min-width: 8px; }
+
+
+/* the workspace takes the rest of the column (min 520); its panes scroll on their own */
+.tws-ws {
+  flex: 1 1 auto; min-height: 520px; display: grid; grid-template-columns: 340px minmax(0, 1fr);
+  background: #fff; border-radius: 22px; overflow: hidden;
+  box-shadow: 0 0 0 1px #e2d9cc, 0 24px 48px -36px rgba(28, 19, 15, 0.5);
+}
+
+/* ── the tray ── */
+.tws-tray { background: var(--tw-tray); display: flex; flex-direction: column; min-height: 0; border-right: 1px solid #efe9e0; }
+.tws-th { padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 10px; flex: none; }
+.tws-seg { display: flex; padding: 3px; border-radius: 11px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12); }
+.tws-seg button {
+  flex: 1; height: 40px; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 0 11px; border: 0;
+  border-radius: 8px; background: none; color: var(--sp-muted); font: 400 15px var(--tw-serif); cursor: pointer;
+}
+.tws-seg button b { font: 400 15px var(--tw-type); }
+.tws-seg button[aria-pressed="true"] { background: var(--tw-navy); color: #fff; }
+.tws-row { display: flex; align-items: center; gap: 8px; }
+.tws-find {
+  flex: 1; min-width: 0; height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 11px; border-radius: 10px;
+  background: #fff; color: var(--sp-quiet); box-shadow: inset 0 0 0 1px #d9d0c3;
+}
+.tws-find input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: 15px var(--tw-serif); color: var(--tw-ink); padding: 1px 2px; }
+.tws-find:focus-within { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-ib {
+  position: relative; width: 40px; height: 40px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 10px; background: #fff; color: var(--sp-muted); cursor: pointer; box-shadow: inset 0 0 0 1px #d4cabd;
+}
+.tws-ib svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-ib[data-on] { background: #eef1f5; color: var(--tw-navy); box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-ib .tws-nb {
+  position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--tw-navy);
+  color: #fff; font: 600 10px/16px var(--tw-serif);
+}
+.tws-menu {
+  position: absolute; z-index: 40; top: calc(100% + 6px); right: 0; width: 290px; padding: 10px; border-radius: 14px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 18px 36px -18px rgba(28, 19, 15, 0.45);
+}
+.tws-menu h6 { margin: 6px 4px 6px; font: 600 12.5px var(--tw-serif); color: var(--sp-quiet); text-transform: none; letter-spacing: 0; }
+.tws-fcs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.tws-fc {
+  height: 30px; padding: 0 11px; border: 0; border-radius: 15px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px #e3dbcf;
+  font: 14px var(--tw-serif); color: var(--tw-ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.tws-fc em { font: normal 12px var(--tw-type); color: var(--sp-quiet); }
+.tws-fc[aria-pressed="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
+.tws-fc[aria-pressed="true"] em { color: rgba(255, 255, 255, 0.7); }
+.tws-fc:disabled { opacity: 0.4; cursor: default; }
+.tws-gopt { display: grid; grid-template-columns: 16px 1fr; gap: 10px; width: 100%; padding: 8px; border: 0; border-radius: 10px; background: none; text-align: left; cursor: pointer; }
+.tws-gopt:hover { background: var(--tw-cream); }
+.tws-gopt i { width: 14px; height: 14px; margin-top: 3px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #c8bdae; }
+.tws-gopt[aria-checked="true"] i { box-shadow: inset 0 0 0 4px var(--tw-navy); }
+.tws-gopt b { display: block; font: 600 14.5px var(--tw-serif); color: var(--tw-ink); }
+.tws-gopt small { display: block; font: 13px/1.3 var(--tw-serif); color: var(--sp-quiet); }
+.tws-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tws-chip { height: 26px; padding: 0 10px; border: 0; border-radius: 13px; background: #eef1f5; color: var(--tw-navy); font: 13.5px var(--tw-serif); cursor: pointer; }
+.tws-chip i { font-style: normal; margin-left: 6px; opacity: 0.7; }
+
+.tws-tl { flex: 1; min-height: 0; overflow-y: auto; padding: 0 11px 18px 12px; scrollbar-width: thin; }
+.tws-gb {
+  height: 40px; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0 12px; border: 0; width: 100%;
+  border-radius: 9px; cursor: pointer; text-align: left; opacity: 0.8; transition: opacity 0.15s;
+}
+.tws-gbw { position: relative; margin: 14px 0 4px; }
+.tws-gbw:first-child { margin-top: 2px; }
+.tws-gb b { font: 400 16px var(--tw-type); }
+.tws-gb em { font: normal 15px var(--tw-type); opacity: 0.75; }
+.tws-gb .tws-cv { margin-left: auto; font-size: 13px; opacity: 0.6; transition: transform 0.15s; }
+.tws-gb[aria-expanded="false"] .tws-cv { transform: rotate(-90deg); }
+.tws-gb[data-band="wait"] { background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1px #d4cabd; }
+.tws-gb[data-band="wait"] em { box-shadow: inset 0 0 0 1px #d4cabd; }
+.tws-gb[data-band="nudge"] { background: var(--tw-sand); color: var(--tw-ink); }
+.tws-gb[data-band="quiet"] { background: var(--tw-stone-fade); color: var(--tw-ink); }
+.tws-gb[data-band="house"] { background: #e4ebf1; color: #2f4357; box-shadow: none; }
+.tws-gb[data-band="yours"] { background: #efe6d2; color: var(--tw-ink); }
+
+.tws-ti {
+  position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 11px;
+  width: 100%; padding: 10px 11px; margin: 0 0 2px; border: 0; border-radius: 12px; background: none; text-align: left;
+  cursor: pointer; opacity: 0.62; transition: opacity 0.15s, background 0.15s;
+}
+.tws-tray:hover .tws-ti, .tws-tray:hover .tws-gb, .tws-tray:focus-within .tws-ti, .tws-tray:focus-within .tws-gb { opacity: 1; }
+.tws-ti:hover { background: #fff; }
+.tws-ti[aria-current="true"] { opacity: 1; background: #fff; box-shadow: 0 0 0 1.5px var(--tw-navy), 0 8px 18px -12px rgba(28, 19, 15, 0.4); }
+.tws-av {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none;
+  font: 500 10.5px var(--tw-mono); letter-spacing: 0.04em; color: var(--tw-navy); background: #e4e9f0;
+}
+.tws-av[data-k="own"] { background: #fff; box-shadow: inset 0 0 0 1.6px #b9ae9f; color: #b9ae9f; }
+.tws-av[data-k="own"] svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.tws-av[data-k="form"] { border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #e3dbcf; }
+.tws-av[data-k="glyph"] svg, .tws-av[data-k="form"] svg { width: 20px; height: 20px; }
+.tws-av[data-k="glyph"] { background: #fff; box-shadow: inset 0 0 0 1px #e3dbcf; }
+.tws-av[data-k="done"] { background: var(--tw-navy); }
+.tws-av[data-k="done"] svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.tws-av[data-k="muted"] { background: #f1ede7; color: var(--sp-quiet); }
+.tws-av[data-k="muted"] svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.tws-tx { min-width: 0; }
+.tws-tx b { display: block; font: 500 15px/1.25 var(--tw-serif); color: var(--tw-ink2); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tws-ti[aria-current="true"] .tws-tx b { font-weight: 600; color: var(--tw-ink); }
+.tws-tx span { display: block; font: italic 14px/1.45 var(--tw-serif); color: var(--sp-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tws-du { text-align: right; min-width: 40px; line-height: 1.15; }
+.tws-du b { display: block; font: 400 16px var(--tw-type); color: var(--tw-ink2); }
+.tws-du small { display: block; font: 14px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
+.tws-qact { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: none; gap: 4px; background: #fff; padding-left: 6px; }
+.tws-ti:hover .tws-qact, .tws-ti:focus-within .tws-qact { display: flex; }
+.tws-qact span[role="button"] {
+  width: 30px; height: 30px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: var(--sp-muted);
+  box-shadow: inset 0 0 0 1px #d9d0c3; background: #fff; cursor: pointer;
+}
+.tws-qact span[role="button"]:hover { color: var(--tw-navy); box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-qact svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-bb {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none; height: 28px; padding: 0 12px; border-radius: 14px;
+  background: #fff; color: var(--tw-navy); font: 600 13.5px var(--tw-serif); box-shadow: inset 0 0 0 1.5px var(--tw-navy); cursor: pointer; border: 0;
+}
+.tws-ti:hover .tws-bb, .tws-ti:focus-within .tws-bb { display: inline-flex; align-items: center; }
+.tws-ti[data-muted] { opacity: 0.7; }
+.tws-ti[data-muted] .tws-tx b { color: var(--sp-muted); }
+.tws-more { display: block; width: 100%; padding: 8px; border: 0; background: none; color: var(--tw-navy); font: 600 14px var(--tw-serif); cursor: pointer; }
+.tws-addt {
+  display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 12px;
+  border: 1.5px dashed #cbbfae; background: none; color: var(--sp-quiet); font: 15px var(--tw-serif); cursor: pointer;
+}
+.tws-addt:hover { color: var(--tw-navy); border-color: var(--tw-navy); }
+.tws-note { margin: 4px 4px 6px; font: 14px/1.45 var(--tw-serif); color: var(--sp-muted); }
+.tws-note b { color: var(--tw-ink); font-weight: 600; }
+.tws-dlab { margin: 14px 4px 6px; font: 400 14px var(--tw-type); color: var(--sp-quiet); }
+.tws-empty { padding: 30px 12px; text-align: center; color: var(--sp-quiet); font-size: 15px; }
+.tws-empty button { border: 0; background: none; color: var(--tw-navy); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* ── the desk ── */
+.tws-desk { background: var(--tw-deskbg); padding: 14px; display: flex; min-width: 0; min-height: 0; }
+.tws-wsx {
+  flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; border-radius: 20px; overflow: hidden;
+  box-shadow: 0 0 0 1px #e2d9cc, 0 20px 40px -32px rgba(28, 19, 15, 0.45);
+}
+.tws-wh { flex: none; min-height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 22px; }
+.tws-wh[data-band="wait"] { background: var(--tw-navy); color: #fff; --wh-mut: rgba(255, 255, 255, 0.72); --wh-chip: rgba(255, 255, 255, 0.14); --wh-ring: #fff; }
+.tws-wh[data-band="nudge"] { background: #c5d0dd; color: var(--tw-ink); --wh-mut: #46556a; --wh-chip: rgba(255, 255, 255, 0.55); --wh-ring: #46556a; }
+.tws-wh[data-band="quiet"] { background: linear-gradient(90deg, #e3dbcf, #efe9e0 60%, #f7f3ee); color: var(--tw-ink); --wh-mut: #6f655b; --wh-chip: rgba(255, 255, 255, 0.7); --wh-ring: #6f655b; }
+.tws-wh[data-band="house"] { background: #efe9df; color: var(--tw-ink); --wh-mut: #6f655b; --wh-chip: rgba(255, 255, 255, 0.7); --wh-ring: #6f655b; }
+.tws-wh[data-band="yours"] { background: #efe6d2; color: var(--tw-ink); --wh-mut: #7a6a49; --wh-chip: rgba(255, 255, 255, 0.7); --wh-ring: #7a6a49; }
+.tws .tws-wh h2 { margin: 0; font: 400 22px/1.3 var(--tw-type) !important; color: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 120px; flex: 0 1 auto; }
+@container (max-width: 620px) { .tws-wh .tws-m, .tws-wh .tws-pos { display: none; } }
+.tws-wh .tws-m { font: italic 15px var(--tw-serif); color: var(--wh-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 0 1 auto; }
+.tws-dchip { flex: none; height: 30px; display: inline-flex; align-items: center; gap: 5px; padding: 0 12px; border-radius: 15px; background: var(--wh-chip); font: 14px var(--tw-serif); white-space: nowrap; }
+.tws-dchip b { font: 400 14px var(--tw-type); }
+.tws-dchip[data-late] { color: inherit; box-shadow: inset 0 0 0 1px var(--tw-terra); }
+.tws-pos { flex: none; font: 14.5px var(--tw-serif); color: var(--wh-mut); white-space: nowrap; }
+.tws-pos b { font-weight: 600; color: inherit; }
+.tws-wb {
+  flex: none; width: 40px; height: 40px; border: 0; border-radius: 10px; background: none; color: inherit; font: 18px var(--tw-serif); cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--wh-ring); opacity: 0.6;
+}
+.tws-wb:hover { opacity: 1; }
+.tws-wbody { flex: 1; min-height: 0; display: flex; }
+/* v52 Part C — the questions column holds the questions AND the footer; the preview runs full height beside it.
+   ⚠️ A SIZE CONTAINER, so the footer fits by the COLUMN's width (never the viewport's): see the two queries below. */
+.tws-wcol { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; container-type: inline-size; container-name: twscol; }
+/* workspace width v2 (8 Nov): actions follow the content — the body hugs (grows to its content, shrinks and scrolls when
+   taller), so the footer sits directly under short content and pins to the foot of tall content. */
+.tws-wq { position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto; padding: 16px 28px 18px; scrollbar-width: thin; }
+/* the card preview: 390 at every size (v52 Part B), never growing with the screen */
+.tws-wp { position: relative; flex: none; width: 390px; background: var(--tw-cream); padding: 14px 14px 12px; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; border-left: 1px solid #efe9e0; }
+.tws-wf { position: relative; z-index: 1; flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px 12px 20px; border-top: 1px solid #e6dfd5; background: #fff; transition: box-shadow 0.2s; }
+/* v53 (D1): while more of the questions is hidden above the footer's edge, a soft shadow says so */
+.tws-wf[data-over] { box-shadow: 0 -10px 14px -10px rgba(28, 19, 15, 0.18); }
+.tws-wf .tws-go { flex: none; }
+.tws-wf .tws-sb { flex: none; }
+.tws-wf em.tws-prog { flex: none; margin: 0 4px 0 0; font: italic 16px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
+/* the footer always fits its column: the primary never shrinks; Snooze and Dismiss go to their icons under 540,
+   "n of m" goes under 400 (each keeps its accessible name, its title and its key) */
+@container twscol (max-width: 539.98px) {
+  .tws-wf .tws-sb:not(.tws-back) { width: 44px; padding: 0; justify-content: center; }
+  .tws-wf .tws-sb span, .tws-wf .tws-sb kbd { display: none; }
+}
+/* v57.1 (18 Nov): with "← Back" in the footer (step 2 on), the labelled footer needs 580px (todoV57 M12, measured), so
+   Snooze and Dismiss go to their icons under 600 there; v57's wider tray had left a 544 column at 1512 and Next 24px
+   over the preview (todoV52 L7) */
+@container twscol (max-width: 599.98px) {
+  .tws-wf:has(.tws-back) .tws-sb:not(.tws-back) { width: 44px; padding: 0; justify-content: center; }
+  .tws-wf:has(.tws-back) .tws-sb span, .tws-wf:has(.tws-back) .tws-sb kbd { display: none; }
+}
+@container twscol (max-width: 399.98px) { .tws-wf em.tws-prog { display: none; } }
+.tws-sb {
+  /* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`) */
+  position: relative; display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer;
+  height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring);
+}
+.tws-sb svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-sb kbd { font: 12px var(--tw-mono); color: var(--sp-quiet); padding: 1px 5px; border-radius: 4px; box-shadow: inset 0 0 0 1px #e3dbcf; }
+.tws-sb[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+/* the hawk (v53 D6): a 34px picture beside a compact blush bubble, above the rail */
+.tws-mnote { display: flex; align-items: flex-start; gap: 12px; margin: 0 0 16px; }
+.tws-mnote img { width: 34px; flex: none; margin-top: 0; }
+.tws-mnote p {
+  position: relative; margin: 0; padding: 9px 14px; border-radius: 12px; background: var(--tw-blush2); color: var(--tw-bubble-ink);
+  font: 400 var(--sp-body-size)/1.4 var(--tw-serif);
+}
+
+/* the questions */
+.tws-q { margin-top: 8px; padding: 14px 0 6px; }
+.tws-q > .tws-qh { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font: 600 17px/1.4 var(--tw-serif); color: var(--tw-ink); }
+.tws-qn {
+  width: 26px; height: 26px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font: 600 12.5px var(--tw-serif); color: #fff; background: var(--tw-navy);
+}
+.tws-qn svg { width: 13px; height: 13px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.tws-q .tws-qbody { margin-left: 36px; }
+.tws-hint { display: block; margin: -4px 0 10px 36px; font: italic 14px/1.4 var(--tw-serif); color: var(--sp-muted); }
+/* option cards: cream, filling navy when picked */
+.tws-tiles { display: flex; flex-direction: column; gap: 8px; }
+.tws-tile {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 56px; padding: 12px 16px; border: 0; border-radius: 14px;
+  background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); text-align: left; cursor: pointer; color: var(--tw-ink);
+  transition: background 0.12s, box-shadow 0.12s;
+}
+.tws-tile:hover:not(:disabled) { background: #f4efe7; box-shadow: inset 0 0 0 1px #cfc3b2; }
+.tws-tile .tws-tn { flex: 1; min-width: 0; font: 16px/1.3 var(--tw-serif); }
+.tws-tile .tws-tn small { display: block; margin-top: 2px; font: 14px/1.3 var(--tw-serif); color: var(--sp-muted); }
+.tws-tile .tws-di { width: 30px; height: 30px; flex: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #f6f2ec; color: var(--sp-muted); }
+.tws-tile .tws-di svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+.tws-tile .tws-tk { width: 20px; height: 20px; flex: none; display: none; align-items: center; justify-content: center; }
+.tws-tile .tws-tk svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.tws-tile[aria-pressed="true"], .tws-tile[aria-checked="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
+.tws-tile[aria-pressed="true"] .tws-tn small, .tws-tile[aria-checked="true"] .tws-tn small { color: rgba(255, 255, 255, 0.78); }
+.tws-tile[aria-pressed="true"] .tws-tk, .tws-tile[aria-checked="true"] .tws-tk { display: flex; }
+.tws-tile[aria-pressed="true"] .tws-di, .tws-tile[aria-checked="true"] .tws-di { background: rgba(255, 255, 255, 0.14); color: #fff; }
+.tws-tile:disabled { opacity: 0.5; cursor: default; }
+.tws-sugg {
+  display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 10px; background: var(--tw-blush); color: var(--tw-blush-ink);
+  font: italic 600 12px/1.4 var(--tw-serif); vertical-align: 1px;
+}
+.tws-tile[aria-pressed="true"] .tws-sugg, .tws-tile[aria-checked="true"] .tws-sugg { background: rgba(255, 255, 255, 0.85); color: var(--tw-blush-ink); }
+
+/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`); it was a 46-high pill at 17 */
+.tws-go {
+  display: inline-flex; align-items: center; gap: 8px; border: 0; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: var(--sp-anthracite); color: #fff; box-shadow: none;
+  cursor: pointer; white-space: nowrap; min-width: 120px; justify-content: center;
+}
+.tws-go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.tws-go:disabled { opacity: 0.4; cursor: default; }
+.tws-go:hover:not(:disabled) { background: #1f2c40; }
+.tws-go[data-red] { background: var(--sp-danger); } /* Consistency roll-out v2, Phase 2: the one red (--tw-late retired) */
+.tws-lnk { border: 0; background: none; padding: 0; color: var(--tw-navy); font: 15px var(--tw-serif); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
+
+/* reply-time slider */
+.tws-wks .tws-wkr { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.tws-wks .tws-wkr b { font: 400 30px var(--tw-type); color: var(--tw-ink); }
+.tws-wks .tws-wkr span { font: italic 14.5px var(--tw-serif); color: var(--sp-muted); }
+.tws-wks:not([data-set]) .tws-wkr b { color: var(--sp-quiet); font-size: 22px; }
+.tws-wks input[type="range"] { width: 100%; accent-color: var(--tw-navy); }
+.tws-wkl { position: relative; height: 18px; margin: 2px 8px 0; }
+.tws-wkl span { position: absolute; transform: translateX(-50%); font: 12px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
+
+/* genres */
+.tws-gtok {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 44px; padding: 6px 8px; border-radius: 12px; background: #fff;
+  box-shadow: inset 0 0 0 1px #d9d0c3; cursor: text;
+}
+.tws-gtok:focus-within { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-gtk { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 11px; border-radius: 14px; background: var(--tw-navy); color: #fff; font: 14px var(--tw-serif); }
+.tws-gtk button { border: 0; background: none; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 12px; }
+.tws-gtok input { flex: 1; min-width: 120px; border: 0; outline: 0; font: 15px var(--tw-serif); background: none; }
+.tws-gwrap { position: relative; z-index: 12; }
+.tws-gs {
+  position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0; padding: 6px; border-radius: 12px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 16px 30px -16px rgba(28, 19, 15, 0.45);
+}
+.tws-gso { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: none; text-align: left; font: 15px var(--tw-serif); cursor: pointer; }
+.tws-gso[data-on], .tws-gso:hover { background: var(--tw-cream); }
+.tws-gso small { margin-left: auto; color: var(--sp-quiet); font-style: italic; }
+.tws-gpop { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.tws-gpop > span { font: 13px var(--tw-serif); color: var(--sp-quiet); margin-right: 2px; }
+.tws-gpop button { height: 28px; padding: 0 10px; border: 0; border-radius: 14px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); font: 14px var(--tw-serif); cursor: pointer; }
+.tws-yb { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 9px; background: var(--tw-blush); color: var(--tw-blush-ink); font: italic 600 11.5px var(--tw-serif); }
+
+/* dates */
+.tws-dstrip { display: flex; gap: 6px; flex-wrap: wrap; }
+.tws-dchip2 {
+  width: 50px; height: 56px; border: 0; border-radius: 12px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--tw-ink);
+}
+.tws-dchip2 small { font: 11.5px var(--tw-serif); color: var(--sp-quiet); }
+.tws-dchip2 b { font: 400 17px var(--tw-type); }
+.tws-dchip2 svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.tws-dchip2[aria-pressed="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
+.tws-dchip2[aria-pressed="true"] small { color: rgba(255, 255, 255, 0.75); }
+.tws-mcal { margin-top: 10px; padding: 10px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--tw-hair); max-width: 320px; }
+.tws-mcal .tws-mh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; font: 600 14.5px var(--tw-serif); }
+.tws-mcal .tws-mh button { width: 28px; height: 28px; border: 0; border-radius: 8px; background: none; cursor: pointer; font-size: 16px; }
+.tws-mcal .tws-mh button:disabled { opacity: 0.3; cursor: default; }
+.tws-mg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.tws-mg i { font: normal 11.5px var(--tw-serif); color: var(--sp-quiet); padding: 2px 0; }
+.tws-mg button { height: 32px; border: 0; border-radius: 8px; background: none; font: 14px var(--tw-serif); cursor: pointer; color: var(--tw-ink); }
+.tws-mg button:hover:not(:disabled) { background: var(--tw-cream); }
+.tws-mg button[data-today] { box-shadow: inset 0 0 0 1px var(--tw-slate); }
+.tws-mg button[aria-pressed="true"] { background: var(--tw-navy); color: #fff; }
+.tws-mg button:disabled { color: #cfc6ba; cursor: default; }
+.tws-dsel { margin-top: 8px; font: 600 15px var(--tw-serif); color: var(--tw-ink); }
+
+.tws-ta {
+  width: 100%; min-height: 110px; padding: 12px 14px; border: 0; border-radius: 12px; outline: 0; resize: vertical; background: #fff;
+  box-shadow: inset 0 0 0 1px #d9d0c3; font: 15.5px/1.5 var(--tw-serif); color: var(--tw-ink);
+}
+.tws-ta:focus { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-draft {
+  white-space: pre-wrap; padding: 14px 16px; border-radius: 12px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair);
+  font: 15px/1.55 var(--tw-serif); color: var(--tw-ink); margin-bottom: 8px;
+}
+.tws-copy { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; color: var(--tw-navy); font: 600 14px var(--tw-serif); cursor: pointer; padding: 0; margin-bottom: 10px; }
+.tws-copy svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+
+/* the preview column */
+.tws-wpl { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font: 13.5px var(--tw-serif); color: var(--sp-quiet); min-height: 20px; }
+.tws-pvslot { position: relative; flex: 0 1 auto; min-height: 0; /* workspace width v2: hugs the card */ overflow: hidden; border-radius: 16px; cursor: pointer; }
+.tws-pvslot .tws-pvz { transform-origin: 0 0; pointer-events: none; display: flex; flex-direction: column; } /* a flex column, so its max-height shrinks the card and the card scrolls inside */
+.tws-pvopen {
+  position: absolute; left: 50%; bottom: 14px; transform: translate(-50%, 6px); opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 5;
+  height: 34px; padding: 0 16px; border: 0; border-radius: 17px; background: var(--tw-navy); color: #fff; font: 600 14px var(--tw-serif);
+  pointer-events: none; white-space: nowrap;
+}
+.tws-pvslot:hover .tws-pvopen, .tws-pvslot:focus-visible .tws-pvopen { opacity: 1; transform: translate(-50%, 0); }
+.tws-pvz .spanel.tws-pvpanel {
+  position: relative; inset: auto; top: auto; right: auto; bottom: auto; width: 100%; height: auto; flex: 0 1 auto; min-height: 0; z-index: auto; animation: none;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.08), 0 18px 36px -26px rgba(28, 19, 15, 0.45);
+}
+/* the section the task fills, on the address book's card (AgentCard262's sections are data-cl262="sec" data-k="…") */
+[data-tws-sec="how"] [data-cl262="sec"][data-k="how"], [data-tws-sec="wishlist"] [data-cl262="sec"][data-k="wishlist"],
+[data-tws-sec="materials"] [data-cl262="sec"][data-k="materials"], [data-tws-sec="genres"] [data-cl262="sec"][data-k="genres"] {
+  border-radius: 12px; padding-left: 12px; padding-right: 12px; margin-left: -12px; margin-right: -12px;
+  box-shadow: 0 0 0 2.5px var(--tw-terra), 0 0 0 7px rgba(201, 118, 93, 0.18);
+}
+.tws-olempty {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 24px;
+  border: 1.5px dashed #cbbfae; border-radius: 16px; color: var(--sp-muted);
+}
+.tws-olempty b { font: 600 16px var(--tw-serif); color: var(--tw-ink); }
+.tws-olempty p { margin: 0 0 6px; font: 14.5px/1.45 var(--tw-serif); max-width: 280px; }
+.tws-olkadd { height: 34px; padding: 0 14px; border: 0; border-radius: 17px; background: #fff; box-shadow: inset 0 0 0 1px #d4cabd; font: 600 14px var(--tw-serif); color: var(--tw-navy); cursor: pointer; }
+
+/* own tasks */
+.tws-otask { margin-top: 4px; }
+.tws-ot1 { display: flex; align-items: flex-start; gap: 14px; }
+.tws-otick {
+  width: 34px; height: 34px; flex: none; margin-top: 2px; border: 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px #b9ae9f; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: transparent;
+}
+.tws-otick:hover { box-shadow: inset 0 0 0 2px var(--tw-navy); color: var(--tw-navy); }
+.tws-otick svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.tws-ott { flex: 1; min-width: 0; padding: 2px 0; border: 0; outline: 0; resize: none; background: none; font: 400 21px/1.3 var(--tw-type); color: var(--tw-ink); }
+.tws-ott:focus { box-shadow: 0 2px 0 var(--tw-navy); }
+.tws-otm { margin: 6px 0 0 48px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 14px var(--tw-serif); color: var(--sp-muted); }
+.tws-odd { position: relative; }
+.tws-oddb { height: 28px; padding: 0 10px; border: 0; border-radius: 14px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); font: 14px var(--tw-serif); color: var(--tw-ink); cursor: pointer; }
+.tws-oddm { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 16px 30px -16px rgba(28, 19, 15, 0.45); display: flex; flex-direction: column; min-width: 160px; }
+.tws-oddm button { padding: 8px 10px; border: 0; border-radius: 8px; background: none; text-align: left; font: 14.5px var(--tw-serif); cursor: pointer; }
+.tws-oddm button:hover, .tws-oddm button[aria-checked="true"] { background: var(--tw-cream); }
+.tws-osec { margin: 22px 0 0 48px; }
+.tws-osec h5 { margin: 0 0 8px; font: 600 14.5px var(--tw-serif); color: var(--sp-muted); text-transform: none; letter-spacing: 0; }
+.tws-ostep { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 0; border: 0; background: none; text-align: left; font: 15.5px var(--tw-serif); color: var(--tw-ink); cursor: pointer; }
+.tws-obx { width: 20px; height: 20px; flex: none; border-radius: 5px; box-shadow: inset 0 0 0 1.6px #b9ae9f; display: flex; align-items: center; justify-content: center; color: var(--sp-quiet); font-size: 14px; }
+.tws-obx svg { width: 12px; height: 12px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-ostep[aria-checked="true"] .tws-obx { background: var(--tw-navy); box-shadow: none; }
+.tws-ostep[aria-checked="true"] span:last-child { color: var(--sp-muted); }
+.tws-ostep input { flex: 1; border: 0; outline: 0; background: none; font: 15.5px var(--tw-serif); }
+.tws-opad {
+  min-height: 96px; padding: 4px 2px; border: 0; outline: 0; width: 100%; resize: vertical; background:
+    repeating-linear-gradient(transparent 0 25px, #ece5da 25px 26px); font: 15.5px/26px var(--tw-serif); color: var(--tw-ink);
+}
+.tws-olk { display: inline-flex; align-items: center; gap: 8px; padding: 4px 6px 4px 4px; border-radius: 18px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); }
+.tws-olk .tws-av { width: 28px; height: 28px; font-size: 9.5px; }
+.tws-olk b { font: 600 14.5px var(--tw-serif); }
+.tws-olk em { font: italic 13.5px var(--tw-serif); color: var(--sp-muted); }
+.tws-olk button { width: 24px; height: 24px; border: 0; border-radius: 12px; background: none; color: var(--sp-muted); cursor: pointer; }
+.tws-picker { margin-top: 8px; max-width: 360px; padding: 8px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 16px 30px -16px rgba(28, 19, 15, 0.45); }
+.tws-picker input { width: 100%; height: 34px; padding: 0 10px; border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px #d9d0c3; outline: 0; font: 15px var(--tw-serif); margin-bottom: 6px; }
+.tws-picker ul { margin: 0; padding: 0; list-style: none; max-height: 220px; overflow: auto; }
+.tws-picker li button { display: flex; flex-direction: column; width: 100%; padding: 7px 10px; border: 0; border-radius: 8px; background: none; text-align: left; cursor: pointer; }
+.tws-picker li button:hover { background: var(--tw-cream); }
+.tws-picker li b { font: 600 14.5px var(--tw-serif); }
+.tws-picker li span { font: italic 13px var(--tw-serif); color: var(--sp-muted); }
+
+/* calm states */
+.tws-calm { flex: 1; display: grid; grid-template-columns: 170px 1fr; gap: 28px; align-items: center; padding: 40px; }
+.tws-calm img { width: 170px; justify-self: center; }
+.tws .tws-calm h2 { margin: 0 0 8px; font: 400 26px var(--tw-type) !important; }
+.tws-calm p { margin: 0 0 16px; font: 16px/1.55 var(--tw-serif); color: var(--sp-muted); max-width: 440px; }
+.tws-calm .tws-bt { display: flex; gap: 10px; }
+.tws-btn { height: 40px; padding: 0 18px; border: 0; border-radius: 20px; font: 600 15px var(--tw-serif); cursor: pointer; }
+.tws-btn[data-k="k"] { background: var(--tw-navy); color: #fff; }
+.tws-btn[data-k="o"] { background: #fff; color: var(--tw-navy); box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+
+/* add a task */
+.tws-addcard { flex: 0 1 auto; min-height: 0; overflow: auto; padding: 22px 28px; }
+.tws-addcard input.tws-newt { width: 100%; height: 54px; padding: 0 2px; border: 0; border-bottom: 1.5px solid #d9d0c3; outline: 0; font: 400 24px var(--tw-type); background: none; }
+.tws-addcard input.tws-newt:focus { border-color: var(--tw-navy); }
+.tws-lbl { display: block; margin: 20px 0 8px; font: 600 14.5px var(--tw-serif); color: var(--sp-muted); }
+.tws-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.tws-opts button { height: 34px; padding: 0 14px; border: 0; border-radius: 17px; background: var(--tw-cream); box-shadow: inset 0 0 0 1px var(--tw-hair); font: 14.5px var(--tw-serif); cursor: pointer; }
+.tws-opts button[aria-checked="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
+
+/* ── the pop-ups (snooze, dismiss) ── */
+.tws-layer.tws-pop {
+  position: fixed; z-index: 70; width: 320px; padding: 12px; border-radius: 16px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 22px 44px -22px rgba(28, 19, 15, 0.5);
+}
+.tws-pop .tws-ph { display: flex; align-items: center; justify-content: space-between; margin: 2px 4px 8px; }
+.tws-pop .tws-ph b { font: 600 15.5px var(--tw-serif); color: var(--tw-ink); }
+.tws-pop .tws-px { width: 28px; height: 28px; border: 0; border-radius: 8px; background: none; cursor: pointer; color: var(--sp-muted); }
+.tws-pop .tws-pp { margin: 0 4px 10px; font: 14px/1.45 var(--tw-serif); color: var(--sp-muted); }
+.tws-po {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px; border: 0; border-radius: 10px; background: none; text-align: left; cursor: pointer;
+  font: 15px var(--tw-serif); color: var(--tw-ink);
+}
+.tws-po:hover:not(:disabled) { background: var(--tw-cream); }
+.tws-po em { margin-left: auto; font: 13.5px var(--tw-serif); color: var(--sp-quiet); font-style: normal; }
+.tws-po small { display: block; font: 13px/1.35 var(--tw-serif); color: var(--sp-muted); margin-top: 2px; }
+.tws-po .tws-rd { width: 16px; height: 16px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #c8bdae; margin-top: 2px; align-self: flex-start; }
+.tws-po[aria-checked="true"] { background: var(--tw-cream); }
+.tws-po[aria-checked="true"] .tws-rd { box-shadow: inset 0 0 0 5px var(--tw-navy); }
+.tws-po:disabled { opacity: 0.45; cursor: default; }
+.tws-po[data-warn] span { color: var(--sp-danger); }
+.tws-pop .tws-warn { margin: 6px 4px; padding: 8px 10px; border-radius: 10px; background: #fbf1ec; font: 13.5px/1.4 var(--tw-serif); color: var(--tw-blush-ink); }
+.tws-pop input.tws-pn {
+  width: 100%; height: 36px; margin: 8px 0; padding: 0 10px; border: 0; border-radius: 10px; outline: 0; box-shadow: inset 0 0 0 1px #d9d0c3; font: 14.5px var(--tw-serif);
+}
+.tws-pop .tws-go { width: 100%; justify-content: center; height: 42px; margin-top: 4px; }
+
+/* the toast */
+.tws-toast {
+  position: fixed; z-index: 80; left: 50%; bottom: 118px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px;
+  padding: 10px 12px 10px 18px; border-radius: 14px; background: var(--tw-navy); color: #fff; font: 15px var(--tw-serif);
+  box-shadow: 0 18px 36px -18px rgba(28, 19, 15, 0.6);
+}
+.tws-toast button { border: 0; background: rgba(255, 255, 255, 0.14); color: #fff; height: 30px; padding: 0 12px; border-radius: 15px; font: 600 14px var(--tw-serif); cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tws *, .tws-layer, .tws-layer * { animation: none !important; transition: none !important; }
+}
+/* v51: the Filters menu's way in to tag management */
+.tws-menu .tws-mlink { display: block; margin: 12px 0 0; padding: 10px 0 0; width: 100%; border: 0; border-top: 1px solid var(--tw-hair); background: none; text-align: left; font: 600 14px var(--tw-serif); color: var(--tw-navy); cursor: pointer; }
+.tws-menu .tws-mlink:hover { text-decoration: underline; }
+/* v51.1 — the batch row's "Skip this one": a quiet link under the questions */
+.tws-skip { margin-top: 14px; }
+/* v52 Part D — the live Query Centre card (QcQueryCard149 over the v152 thread) is read-only in the preview: its
+   footer, its reply box, the pencil, the ✕, each step's edit control and the add buttons are not drawn here; they work
+   as normal in the real card the frame opens */
+.tws-pvz [data-qc1522="footer"], .tws-pvz [data-qc152="reply"], .tws-pvz [data-qc152="pencil"], .tws-pvz [data-qc149c="close"],
+.tws-pvz [data-qc152="edit-step"], .tws-pvz [data-qc152="add"], .tws-pvz [data-qc152="mat-edit"], .tws-pvz [data-qc158="add"], .tws-pvz [data-qc158="edit-details"], .tws-pvz [data-qc1522="toast"] { display: none !important; }
+/* v52 Part D — the v152 card's frame (qcv152card.css) is a fixed panel centred in the viewport with a 1.6° lean and a
+   slide-in. In the preview the frame sits in the column, upright and still, as tall as the column: the same frame
+   (rim, radius, inner border), only placed. The selector out-ranks the frame's own (0-4-0 with :has). */
+.tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
+  /* Query card v158: the card is always the column's full height, as on the Query Centre — never its content's */
+  position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: auto; max-height: none; flex: 1 1 auto; min-height: 0; rotate: none; animation: none; transition: none; z-index: auto;
+}
+
+/* ── v52 Part B — the tray ── */
+.tws-ws[data-slim] { grid-template-columns: 112px minmax(0, 1fr); }
+
+.tws-qf { flex: none; height: 26px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 13px; background: #e4ebf1; color: #2f4357; font: 14px var(--tw-serif); white-space: nowrap; }
+/* v53 (D4): the folded Housekeeping header's Quick fill, over the header's right end (its chevron moves left of it) */
+.tws-qfb {
+  position: absolute; right: 34px; top: 50%; transform: translateY(-50%); height: 30px; padding: 0 12px; border: 0; border-radius: 15px;
+  background: #fff; box-shadow: inset 0 0 0 1px #c9d5e0; color: #2f4357; font: 14px var(--tw-serif); cursor: pointer; white-space: nowrap;
+}
+.tws-qfb:hover { box-shadow: inset 0 0 0 1.5px var(--tw-navy); color: var(--tw-navy); }
+
+/* v53 (D3): the breakdown — one thin bar in the groups' header colours, then the words */
+.tws-bd { margin: 2px 2px 0; }
+.tws-bar { display: flex; gap: 3px; height: 12px; border-radius: 6px; overflow: hidden; }
+.tws-bar button { flex: 1 1 0; min-width: 6px; height: 100%; padding: 0; border: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.08); }
+.tws-bar button[data-k="wait"] { background: var(--tw-rose); }
+.tws-bar button[data-k="nudge"] { background: var(--tw-sand); }
+.tws-bar button[data-k="quiet"] { background: var(--tw-stone); }
+.tws-bar button:hover { filter: brightness(0.94); }
+.tws-bd p { margin: 8px 0 0; font: 15px/1.4 var(--tw-serif); color: var(--tw-ink2); }
+.tws-bd p b { font: 400 16px var(--tw-type); color: var(--tw-ink); }
+.tws-bd .tws-bdt { padding: 0; border: 0; background: none; font: inherit; color: var(--sp-quiet); text-decoration: underline; text-decoration-color: #d9cfc1; text-underline-offset: 3px; cursor: pointer; }
+.tws-bd .tws-bdt:hover { color: var(--tw-navy); }
+
+/* the collapsed strip: 112 wide, each task its icon over three centred lines */
+.tws-strip { overflow: hidden; }
+.tws-wide {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; margin: 12px 8px 4px; border: 0; border-radius: 10px;
+  background: #fff; box-shadow: inset 0 0 0 1px #d4cabd; color: var(--tw-ink); font: 600 13.5px var(--tw-serif); cursor: pointer; white-space: nowrap;
+}
+.tws-wide svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tws-wide:hover { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-sl { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 8px 16px; scrollbar-width: none; }
+.tws-sgb { display: flex; align-items: center; justify-content: center; gap: 5px; height: 26px; margin: 10px 0 4px; border-radius: 8px; font: 600 12.5px var(--tw-serif); white-space: nowrap; }
+.tws-sgb em { font: normal 12px var(--tw-type); opacity: 0.8; }
+.tws-sgb[data-band="wait"] { background: var(--tw-rose); color: var(--tw-ink); }
+.tws-sgb[data-band="nudge"] { background: var(--tw-sand); color: var(--tw-ink); }
+.tws-sgb[data-band="quiet"] { background: var(--tw-stone-fade); color: var(--tw-ink); }
+.tws-sgb[data-band="house"] { background: #e4ebf1; color: #2f4357; }
+.tws-sgb[data-band="yours"] { background: #efe6d2; color: var(--tw-ink); }
+.tws-si {
+  display: flex; flex-direction: column; align-items: center; gap: 1px; width: 100%; padding: 8px 4px; margin: 0 0 2px; border: 0; border-radius: 12px;
+  background: none; text-align: center; cursor: pointer; color: var(--tw-ink);
+}
+.tws-si:hover { background: #fff; }
+.tws-si[aria-current="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+.tws-sav {
+  width: 30px; height: 30px; flex: none; margin-bottom: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: #fff; box-shadow: inset 0 0 0 1px #e3dbcf; font: 500 9px var(--tw-mono); color: var(--tw-navy);
+}
+.tws-sav[data-k="own"] { box-shadow: inset 0 0 0 1.6px #b9ae9f; }
+.tws-sav[data-k="house"] { border-radius: 9px; background: #eef3f7; box-shadow: inset 0 0 0 1px #d3dde6; color: #5f7b93; }
+.tws-sav svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-si b { max-width: 100%; font: 600 13px/1.25 var(--tw-serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tws-si i { font: italic 11.5px/1.25 var(--tw-serif); color: var(--sp-muted); }
+.tws-si small { font: 600 11px/1.3 var(--tw-serif); color: var(--sp-muted); }
+.tws-si small[data-hot] { color: #9b4a33; }
+
+/* ── v52 (7 Nov): "Tasks you've switched off" — the quiet link at the Done tab's foot, the Filters menu entry, the pop-up ── */
+.tws-offlink { display: block; margin: 16px 12px 8px; padding: 0; border: 0; background: none; font: 13.5px var(--tw-serif); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.tws-offlink:hover { color: var(--tw-navy); }
+.tws-menu .tws-mlink.tws-mlink--off { margin-top: 4px; padding-top: 8px; border-top: 0; }
+.tws-pop .tws-offrow { display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-top: 1px solid var(--tw-hair); }
+.tws-pop .tws-offrow > span { flex: 1 1 auto; min-width: 0; font: 14.5px/1.35 var(--tw-serif); color: var(--tw-ink); }
+.tws-pop .tws-offrow small { display: block; margin-top: 2px; font: 12.5px var(--tw-serif); color: var(--sp-muted); }
+.tws-pop .tws-offon { flex: none; height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: #fff; color: var(--tw-navy); font: 600 13.5px var(--tw-serif); box-shadow: inset 0 0 0 1.5px var(--tw-navy); cursor: pointer; }
+.tws-pop .tws-offon:hover { background: var(--tw-navy); color: #fff; }
+
+/* workspace width v2 (8 Nov): the side card is as tall as its content — the cream rail stays the desk's height, and the
+   card in it ends at its last item, scrolling inside only when it is taller than the rail (WsPreview's ScaledCard gives
+   it the rail's space as a maximum). The card is the shared query / agent card, dressed here by class, never forked. */
+.tws-wp > :not(.tws-wpl) { flex: 0 1 auto; min-height: 0; }
+.tws-wp .qc149c, .tws-wp .qc149c .qc149c-in, .tws-wp .qc149c .qc149c-pane { flex: 0 1 auto; }
+
+/* workspace width v2 (8 Nov): the desk is wider on a big screen, but a task's questions are read, not scanned — its
+   body stops at 680 and the rest of the desk is air. The footer and the preview rail are unaffected. */
+.tws-wq > *, .tws-addcard > * { max-width: 680px; }
+
+/* ══ To-do list v53 (design-refs/todo-list-v53/) ══════════════════════════════════════════════════════════════════ */
+
+/* D6 — the steps as a rail: numbers 28px, one continuous line joining them; the open step's question 20px, its hint
+   15.5px; a finished step one line with "change"; a step to come one grey line */
+.tws-rail { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tws-st { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: 12px; padding-bottom: 12px; }
+.tws-st:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 28px; bottom: -2px; width: 2px; background: #e6dfd4; z-index: 0; }
+.tws-st > * { min-width: 0; }
+.tws-sn {
+  position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tw-navy); color: #fff; font: 600 14px var(--tw-serif);
+}
+.tws-sn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.tws-st[data-st="done"] .tws-sn { background: #d7e0e8; color: var(--tw-navy); }
+.tws-st[data-st="todo"] .tws-sn { background: #fff; color: var(--sp-quiet); box-shadow: inset 0 0 0 1.5px #e6dfd4; }
+.tws-sx { padding-top: 3px; }
+.tws-st .tws-sq { font: 400 var(--sp-body-size)/1.45 var(--tw-serif); color: var(--sp-quiet); }
+.tws-st[data-st="done"] .tws-sx { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.tws-st[data-st="done"] .tws-sa { font: 15.5px/1.45 var(--tw-serif); color: var(--tw-ink2); }
+.tws-st[data-st="done"] .tws-sa b { font-weight: 600; }
+.tws-chg { padding: 0; border: 0; background: none; font: inherit; color: var(--tw-navy); text-decoration: underline; text-decoration-color: #d9cfc1; text-underline-offset: 3px; cursor: pointer; }
+.tws-chg:hover { text-decoration-color: var(--tw-navy); }
+.tws .tws-st .tws-qh { display: block; margin: 0 0 4px; font: 600 20px/1.3 var(--tw-serif); color: var(--tw-ink); }
+.tws .tws-st .tws-chh { margin-bottom: 14px; }
+.tws-st .tws-hint { display: block; margin: 0 0 12px; font: italic var(--sp-body-size)/1.4 var(--tw-serif); color: var(--tw-ink2); }
+.tws-st .tws-qbody { margin: 0; }
+.tws-wq .tws-q { margin: 0; padding: 0 0 12px; }
+
+/* D5 — answers as tiles: a grid, the icon beside the label and its note, 56px tall at least */
+.tws .tws-tiles[data-desk] { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.tws .tws-tiles[data-desk] .tws-tile { min-height: 56px; padding: 10px 14px; gap: 10px; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--tw-hair); background: #faf8f4; color: var(--tw-ink); }
+.tws .tws-tiles[data-desk] .tws-tile .tws-tn { font: 16.5px/1.3 var(--tw-serif); }
+.tws .tws-tiles[data-desk] .tws-tile .tws-tn small { font: 14px/1.3 var(--tw-serif); color: var(--tw-ink2); margin-top: 1px; }
+.tws-ti2 { width: 26px; height: 26px; flex: none; border-radius: 7px; display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 1px var(--tw-hair); color: var(--sp-muted); }
+.tws-ti2 svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws .tws-tiles[data-desk] .tws-tile[aria-pressed="true"], .tws .tws-tiles[data-desk] .tws-tile[aria-checked="true"] {
+  background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 2px var(--tw-navy);
+}
+.tws .tws-tiles[data-desk] .tws-tile[aria-pressed="true"] .tws-tn small, .tws .tws-tiles[data-desk] .tws-tile[aria-checked="true"] .tws-tn small { color: var(--tw-ink2); }
+.tws .tws-tiles[data-desk] .tws-tile[aria-pressed="true"] .tws-ti2, .tws .tws-tiles[data-desk] .tws-tile[aria-checked="true"] .tws-ti2 { background: var(--tw-navy); color: #fff; box-shadow: none; }
+.tws .tws-tiles[data-desk] .tws-tile[aria-pressed="true"] .tws-ti2 svg, .tws .tws-tiles[data-desk] .tws-tile[aria-checked="true"] .tws-ti2 svg { stroke-width: 2.4; }
+.tws .tws-dpick .tws-mcal { margin-top: 10px; }
+
+/* D7 — "Check it, then log it": the courier hawk, the sentence, the dotted timeline, the closing line */
+.tws-sumx { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 16px; align-items: start; }
+.tws-ill, .tws-tart, .tws-mph { display: block; border-radius: 14px; background: repeating-linear-gradient(45deg, #ead2c7 0 6px, #f3dfd6 6px 12px); }
+.tws-ill { width: 72px; height: 72px; }
+.tws-sumb { min-width: 0; }
+.tws .tws-lead { margin: 2px 0 14px; font: 16.5px/1.45 var(--tw-serif); color: var(--tw-ink); }
+.tws-tl3 { position: relative; list-style: none; margin: 4px 0 10px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tws-tl3[data-n="1"] { grid-template-columns: minmax(0, 1fr); }
+.tws-tl3[data-n="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tws-tl3::before { content: ""; position: absolute; left: 10px; right: 10px; top: 53px; height: 2px; background: repeating-linear-gradient(90deg, #cfc6b8 0 6px, transparent 6px 11px); }
+.tws-tl3[data-n="1"]::before { display: none; }
+.tws-tl3 li { position: relative; padding-right: 14px; min-width: 0; }
+.tws-tart { width: 46px; height: 34px; margin: 0 0 9px; border-radius: 8px; background: repeating-linear-gradient(45deg, #e7e2d9 0 5px, #f3efe8 5px 10px); }
+.tws-tdot { position: relative; z-index: 1; display: block; width: 22px; height: 22px; margin-bottom: 8px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px #cfc6b8; }
+.tws-tl3 li[data-now] .tws-tdot { background: var(--tw-navy); box-shadow: inset 0 0 0 5px var(--tw-navy), inset 0 0 0 11px #fff; }
+.tws-twhen { display: block; font: 400 15px var(--tw-type); color: var(--tw-ink); }
+.tws-twhat { display: block; margin-top: 2px; font: 14.5px/1.35 var(--tw-serif); color: var(--tw-ink2); }
+.tws .tws-after { margin: 0; font: italic 14.5px/1.4 var(--tw-serif); color: var(--sp-quiet); }
+
+/* D1/D6 — the footer: Snooze, Dismiss, "{n} of {m}" pushed right, Back, the one primary */
+.tws-wf em.tws-prog { margin-left: auto; }
+.tws-wf .tws-sp { display: none; }
+.tws-wf .tws-go[data-logged] { opacity: 1; }
+
+/* D8 — the card is the framed slip: a 7px white rim, radius 20, the soft lift; inside it a 1px #e3d5c9 line, radius
+   14, that clips. On the check step it takes a 2px navy outline, with the italic line above it. */
+.tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
+  padding: 7px; border-radius: 20px; background: #fff;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
+}
+.tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) > .spanel-own { border: 1px solid #e3d5c9; border-radius: 14px; overflow: hidden; }
+.tws-wp[data-future] .tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) { box-shadow: 0 0 0 2px var(--tw-navy), 0 22px 40px -22px rgba(28, 19, 15, 0.32); }
+.tws-pvslot { overflow: visible; border-radius: 20px; }
+.tws-pvslot .tws-pvz { padding: 2px; }
+.tws .tws-flabel { margin: 0 0 10px; font: italic 14px/1.35 var(--tw-serif); color: var(--sp-quiet); }
+.tws-pvz .qc153-clippop { display: none !important; }
+.tws-layer.tws-clippop {
+  position: fixed; z-index: 85; display: flex; flex-direction: column; min-width: 160px; max-width: 220px; padding: 8px 12px; border-radius: 10px;
+  background: var(--tw-navy); color: #fff; font: 14px/1.5 var(--tw-serif); pointer-events: none; box-shadow: 0 12px 26px -12px rgba(28, 19, 15, 0.5);
+}
+.tws-layer.tws-clippop .tws-cpv { margin-top: 2px; opacity: 0.8; font-style: italic; }
+
+/* D10 — finishing: the button reads "✓ Logged", the row's glyph ticks, then the row slides out and the desk crossfades */
+.tws-ti[data-ticked] .tws-av { background: var(--tw-navy) !important; box-shadow: none !important; color: #fff; transition: background 0.2s; }
+.tws-ti[data-ticked] .tws-av > * { visibility: hidden; }
+.tws-ti[data-ticked] .tws-av::after { content: ""; position: absolute; width: 12px; height: 7px; border: solid #fff; border-width: 0 0 2.4px 2.4px; transform: translateY(-2px) rotate(-45deg); }
+.tws-ti[data-ticked] .tws-av { position: relative; }
+.tws-ti[data-leaving] { opacity: 0 !important; transform: translateX(-24px); max-height: 0; padding-top: 0; padding-bottom: 0; margin: 0; overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1), padding 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.tws-ti { max-height: 120px; }
+.tws-wsx[data-phase="leave"] { opacity: 0; transform: translateY(-10px); transition: opacity 0.22s, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.tws-wsx.tws-in { animation: tws-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes tws-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* D10 — the snackbar: navy, a tick, what happened and its detail, Undo, and a line that runs out over 6s */
+/* above the pinned footer (D1), never over it: the mock's 118 */
+.tws-layer.tws-toast[data-snack] { left: calc(50% + 170px); bottom: 118px; padding: 12px 14px 14px 14px; border-radius: 999px; gap: 14px; font: 16px var(--tw-serif); white-space: nowrap; animation: tws-snack 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes tws-snack { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+.tws-layer.tws-toast small { font: 15px var(--tw-serif); opacity: 0.78; }
+.tws-snt { width: 26px; height: 26px; flex: none; border-radius: 50%; background: #fff; color: var(--tw-navy); display: grid; place-items: center; }
+.tws-snt svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.tws-layer.tws-toast button { height: 40px; padding: 0 18px; border-radius: 20px; font: 600 15px var(--tw-serif); }
+.tws-snbar { position: absolute; left: 22px; right: 22px; bottom: 5px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, 0.2); overflow: hidden; }
+.tws-snbar i { display: block; height: 100%; background: rgba(255, 255, 255, 0.7); transform-origin: 0 50%; animation: tws-runout 6s linear both; }
+@keyframes tws-runout { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* D10 — the milestone: a group cleared, or the whole list */
+.tws-desk { position: relative; }
+.tws-mile { position: absolute; inset: 14px; z-index: 6; display: grid; place-items: center; border-radius: 20px; background: rgba(42, 58, 82, 0.94); color: #fff; text-align: center; animation: tws-fade 0.3s both; }
+@keyframes tws-fade { from { opacity: 0; } to { opacity: 1; } }
+.tws-mph { width: 120px; height: 120px; margin: 0 auto 14px; border-radius: 18px; background: repeating-linear-gradient(45deg, #3d4f6b 0 8px, #34465f 8px 16px); }
+.tws .tws-mile h2 { margin: 0 0 8px; font: 400 32px/1.3 var(--tw-type) !important; color: #fff !important; }
+.tws-mile p { margin: 0 0 20px; font: 17px/1.5 var(--tw-serif); opacity: 0.9; }
+.tws-mbtn { height: 46px; padding: 0 26px; border: 0; border-radius: 999px; background: #fff; color: var(--tw-navy); font: 600 17px var(--tw-serif); cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tws-ti[data-leaving], .tws-wsx[data-phase="leave"] { transition: none; }
+  .tws-snbar i { animation: none; transform: scaleX(0.5); }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.tws-go:hover:not(:disabled) { background: var(--sp-navy-hover); }
+.tws-go[data-red]:hover:not(:disabled) { background: #983629; } /* the destructive red, darkened by the navy's step */
+.tws-wf .tws-sb:hover:not(:disabled) { background: var(--sp-btn-line-hov); }

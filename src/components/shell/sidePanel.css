@@ -15,10 +15,11 @@
   display: flex; flex-direction: column; overflow: hidden;
   background: #fff; border-radius: 12px;
   box-shadow: -24px 0 48px -24px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.08);
-  animation: spanelIn 180ms ease-out backwards;
+  /* Record a response v1, Phase 6 — in from the right over 280ms; out over 200ms ease-in (lib/cardMotion leaveGhost) */
+  animation: spanelIn 280ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 @media (max-width: 1440px) { .spanel { width: min(520px, calc(100vw - 48px)); } }
-@keyframes spanelIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+@keyframes spanelIn { from { transform: translateX(calc(100% + 30px)); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .spanel { animation: none; } }
 
 .spanel > .spanel-own, .spanel > .spanel-slot { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
@@ -34,6 +35,13 @@
 /* ── Query panel v2 §D · the scrim: while an action runs in the panel, everything but the panel dims — the
    shell's bar included. z 65, one under the panel. Clear and inert otherwise, so browsing costs nothing. ── */
 .spanel-scrim { position: fixed; inset: 0; z-index: 65; background: rgba(28, 19, 15, 0.45); opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
-/* in over 200ms; out a little quicker, so the page is back by the time the query is */
-.spanel-scrim[data-on="true"] { opacity: 1; pointer-events: auto; transition-duration: 200ms; }
+/* Record a response v1 — in over 240ms; out over 200ms, ease-in */
+.spanel-scrim { transition: opacity 200ms ease-in; }
+.spanel-scrim[data-on="true"] { opacity: 1; pointer-events: auto; transition: opacity 240ms ease; }
 @media (prefers-reduced-motion: reduce) { .spanel-scrim { transition: none; } }
+
+/* Record a response v1, Phase 5 — leaving with something entered: the discard strip, and the card gives a short shake
+   (the reference's 320ms). On the inner frame, so the panel's own slide-in is never replayed. */
+.spanel:has([data-qc1522="discard-strip"]) > .spanel-own { animation: spanelShake 320ms; }
+@keyframes spanelShake { 20% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 80% { transform: translateX(-2px); } }
+@media (prefers-reduced-motion: reduce) { .spanel:has([data-qc1522="discard-strip"]) > .spanel-own { animation: none; } }

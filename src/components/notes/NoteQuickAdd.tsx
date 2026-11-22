@@ -8,7 +8,7 @@
  */
 import React, { useState } from "react";
 import { Plus, CalendarPlus, X } from "lucide-react";
-import type { NoteColour } from "../../types";
+import type { DeskNoteColour } from "../../types";
 import {
   parchment,
   insetBorder,
@@ -22,7 +22,7 @@ import { BrandDatePicker } from "../forms/BrandDatePicker";
 import { NOTE_THEMES, NOTE_COLOURS, FONT_CAVEAT } from "./notesTheme";
 
 export interface NoteQuickAddProps {
-  onAdd: (fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
+  onAdd: (fields: { text: string; colour: DeskNoteColour; dueDate: string | null }) => void;
   autoFocus?: boolean;
   /** Optional dismiss affordance (shown when the quick-add lives in a popover). */
   onClose?: () => void;
@@ -30,7 +30,7 @@ export interface NoteQuickAddProps {
 
 export const NoteQuickAdd: React.FC<NoteQuickAddProps> = ({ onAdd, autoFocus, onClose }) => {
   const [text, setText] = useState("");
-  const [colour, setColour] = useState<NoteColour>("pink");
+  const [colour, setColour] = useState<DeskNoteColour>("pink");
   const [dueDate, setDueDate] = useState(""); // "YYYY-MM-DD" or ""
   const [showDate, setShowDate] = useState(false);
 

@@ -1,0 +1,11 @@
+{"lock": "A1", "exit": 1, "red": "  ✗ A1 · title, then by-line — [\"by harness\",\"The Smoke Test\"] "}
+{"lock": "A2", "exit": 1, "red": "  ✗ A2 · right column width — right 378.7 (want 400), xs 298,1054,651 "}
+{"lock": "A3", "exit": 1, "red": "  ✗ A3 · removed — still present: Top tip, data-df1=\"tip-slot\" "}
+{"lock": "B1", "exit": 1, "red": "  ✗ B1 · Next up rim — 0,0,0,0 rgb(255, 255, 255)   ✗ B1 · Agents on file rim — 0,0,0,0 rgb(255, 255, 255)   ✗ B1 · Closed queries rim — 0,0,0,0 rgb(255, 255, 255) "}
+{"lock": "C1", "exit": 1, "red": "  ✗ C1 · fill reaches the left inner edge — 671.3 vs 659.3   ✗ C1 · fill reaches the right inner edge — 1012.3 vs 1022.0 "}
+{"lock": "C2", "exit": 1, "red": "  ✗ C2 · one per week, each the derivation's — got 33,33,34,35,39,40,40,40,40,40,39 want 33,34,35,39,40,40,40,40,40,39,39 "}
+{"lock": "C3", "exit": 1, "red": "✗ C3 · hover: date, total, change — 5 Oct/40/no change want 12 Oct/40/no change; ✗ C3 · focus: same", "note": "first run's mutation was faulty (indexed the hidden weeks); fixed and re-run"}
+{"lock": "D1", "exit": 1, "red": "  ✗ D1 · rank and count are the stats — {\"tier\":\"2\",\"rank\":\"Egg\",\"count\":\"0 of 1 notes\",\"no\":\"Founding writer · No. 23\",\"on\":\"Archivist\",\"steps\":6} "}
+{"lock": "E1", "exit": 1, "red": "  ✗ E1 · ends level with the founding card — feed 1233.2 founding 1473.1 mid 1473.1 "}
+{"lock": "F1", "exit": 1, "red": "✗ F1 · corner after scrolling 600px — bottom 474.75 against a 982 viewport", "note": "the brief's bare position:absolute is a no-op (portalled to body, document never scrolls); the break is the hawk mounted in the page, absolute"}
+{"lock": "A1 (inset)", "exit": 1, "red": "✗ A1 · 28px below the sheet's top, clear of its lip — 6.0px", "note": "added after the first full run: the page rules had missed their element and the band sat under the sheet lip (measured 0.0px)"}

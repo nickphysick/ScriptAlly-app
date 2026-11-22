@@ -1,0 +1,99 @@
+{
+  "checks": 49,
+  "LAQ1 Agent": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": [
+      {
+        "type": "text",
+        "qls": "find"
+      }
+    ]
+  },
+  "LAQ1 Sent": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ1 Sent, calendar open": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ2": {
+    "future": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "past": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "next": true
+  },
+  "LAQ1 Materials": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ1 How": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ1 Check": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ3": {
+    "who": "Alasdair",
+    "when": "12 Oct",
+    "what": "Coastal",
+    "how": "Email"
+  },
+  "LAQ6": {
+    "toast": "Alasdair loggedUndo",
+    "line": "Alasdair is logged. Who's next? We'll keep the same date and materials.",
+    "whenBefore": "Today",
+    "whatBefore": "Coastal",
+    "landed": "check"
+  },
+  "LAQ7": {
+    "ms": "Twenty-five queries. That takes some nerve.",
+    "n": "25",
+    "line": "Your 25th query for Murphy's Day Out."
+  },
+  "LAQ8": {
+    "head": "Off to Alasdair.",
+    "cursor": false,
+    "confetti": false,
+    "anims": 0
+  }
+}

@@ -27,6 +27,8 @@ vi.mock("../../lib/db", () => ({
     tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], packages: [],
     versions: [], activities: [], taskFlags: [], notes: [], logout: () => {},
     currentUser: { id: "u1", name: "Nick Physick", email: "n@example.com" },
+    /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer */
+    entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
   }),
 }));
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -50,7 +52,7 @@ const renderShell = (path: string, todo = 0) =>
     </MemoryRouter>,
   );
 
-describe("⚠️ the TASKS section renders — same grammar, three rows, in order", () => {
+describe("⚠️ the TASKS section renders — same grammar, two rows, in order", () => {
   const html = renderShell("/todo");
 
   /* ⚠️ RETARGETED TWICE, AND THE SECOND TIME REVERSES THE FIRST. The rule has always been the
@@ -66,21 +68,24 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
   /* ⚠️ RETARGETED A THIRD TIME (sidebar metrics pass): Dashboard gets its WORKSPACE heading back — the
      capture button takes the top slot, so the first rule separates it from the nav — and ACCOUNT
      left the nav: Settings is the foot's gear again (reversing P5, Nick's call). */
-  it("the groups run in the work's order — Workspace first, Tasks last, no Account", () => {
+  it("the groups run in the work's order — Dashboard first on its own, Tasks last, no Account", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    expect(labels).toEqual(["Workspace", "Queries", "Agents", "Materials", "Tasks"]);
+    /* Dashboard sits on its own with NO heading (Nick's ruling, 25 Oct), and its row comes before every heading.
+       Shell nav v3 (13 Nov): five sections — no "Your book", no "Founding writer". */
+    expect(labels).toEqual(["Queries", "Agents", "Materials", "Tasks"]);
     expect(html).toContain(">Dashboard<");
+    expect(html.indexOf(">Dashboard<")).toBeLessThan(html.indexOf("ws-glabel"));
     // the nav renders no Settings row; the foot's gear is the door (SB5)
-    const nav = sliceBetween(html, '<nav class="ws-nav"', "</nav>", "the sidebar nav");
+    const nav = sliceBetween(html, 'class="ws-nav"', "</nav>", "the sidebar nav");
     expect(nav).not.toContain(">Settings<");
   });
 
-  it("the three rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {
-    /* Three since 9 Aug (tasks-consolidation P1): To-do list · Calendar · Noteboard. The rows
+  it("the two rows render in TODO_ROUTES order — and no To-do row sits under Workspace", () => {
+    /* Two since 29 Oct (the Calendar page retired): To-do list · Corkboard. The rows
        ARE the routes, so the section cannot drift from the router or the palette. */
     for (const r of TODO_ROUTES) expect(html).toContain(r.label);
     const order = TODO_ROUTES.map((r) => html.indexOf(`>${r.label}<`)).filter((i) => i >= 0);
-    expect(order).toHaveLength(3);
+    expect(order).toHaveLength(2);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     // Workspace holds Dashboard alone
     const workspace = workspaceSections({ todo: 3 }).find((s) => s.id === "workspace")!;
@@ -92,10 +97,15 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
   it("⚠️ the count pill renders EXACTLY ONCE, on the To-do list row", () => {
     const withCount = renderShell("/todo", 7);
     expect(withCount.match(/class="ws-ct"/g)?.length).toBe(1);
+    /* sidebar rail v1: the rail carries the same figure as a corner badge on its Tasks row — once */
+    expect(withCount.match(/class="wsr-ct"/g)?.length).toBe(1);
     expect(withCount).not.toContain("sp-ct");
-    const listAt = withCount.indexOf(">To-do list<");
-    const nextRowAt = withCount.indexOf(">Calendar<"); // the row after the list, since P1
-    const chipAt = withCount.indexOf("ws-ct");
+    /* the full sidebar's nav, after the rail layer: the rail's tray carries the same page names */
+    expect(withCount.indexOf('class="ws-pin"'), "the full sidebar layer is rendered").toBeGreaterThan(-1);
+    const full = withCount.slice(withCount.indexOf('class="ws-pin"'));
+    const listAt = full.indexOf(">To-do list<");
+    const nextRowAt = full.indexOf(">Corkboard<"); // the row after the list, since the Calendar page retired
+    const chipAt = full.indexOf("ws-ct");
     expect(chipAt).toBeGreaterThan(listAt);   // after the list row's label…
     expect(chipAt).toBeLessThan(nextRowAt);   // …and before the next row begins
     // the model behind it: count + urgent on the list child, nowhere else
@@ -120,7 +130,7 @@ describe("⚠️ the breadcrumb reads Tasks / {page} — from the same definitio
 
   it("the capsule bar's crumb (mobile) says the same", () => {
     expect(shellCrumbForPath("/todo")).toEqual({ section: "Tasks", page: "To-do list" });
-    expect(shellCrumbForPath("/todo/calendar")).toEqual({ section: "Tasks", page: "Calendar" });
+    expect(shellCrumbForPath("/todo/corkboard")).toEqual({ section: "Tasks", page: "Corkboard" });
     // and its section's pages ARE the routes — derived, not restated
     const sec = SHELL_SECTIONS.find((s) => s.key === "todo")!;
     expect(sec.label).toBe("Tasks");
@@ -128,14 +138,14 @@ describe("⚠️ the breadcrumb reads Tasks / {page} — from the same definitio
   });
 
   it("the rendered shell carries the crumb strings at each route", () => {
-    const cal = renderShell("/todo/calendar");
-    expect(cal).toContain("Tasks");
-    expect(cal).toContain("Calendar");
+    const cork = renderShell("/todo/corkboard");
+    expect(cork).toContain("Tasks");
+    expect(cork).toContain("Corkboard");
   });
 });
 
-describe("⚠️ the palette indexes all three — derived from TODO_ROUTES", () => {
-  it("three page entries, titles and paths verbatim from the routes", () => {
+describe("⚠️ the palette indexes both — derived from TODO_ROUTES", () => {
+  it("two page entries, titles and paths verbatim from the routes", () => {
     for (const r of TODO_ROUTES) {
       const entry = PALETTE_PAGES.find(
         (p) => (p.run as { path?: string }).path === r.path && p.kind === "page",
@@ -146,7 +156,8 @@ describe("⚠️ the palette indexes all three — derived from TODO_ROUTES", ()
     }
     // the established ids survive the derivation (an id is an identifier, not a caption)
     expect(PALETTE_PAGES.map((p) => p.id)).toEqual(
-      expect.arrayContaining(["page:todo", "page:todo-calendar", "page:todo-noteboard"]),
+      expect.arrayContaining(["page:todo", "page:todo-noteboard"]),
     );
+    expect(PALETTE_PAGES.map((p) => p.id)).not.toContain("page:todo-calendar");
   });
 });

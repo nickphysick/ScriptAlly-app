@@ -20,7 +20,11 @@ import { MONTHS_SHORT } from "./dates";
 export const BETA_MODE = true;
 
 /**
- * ⚠️ THE INVITE GATE IS BUILT AND NOT ARMED, AND IT IS A SEPARATE FLAG FOR A REASON.
+ * ⚠️ NON-WORKSPACE V1 (12 Nov): ARMED ON DEV ONLY — on when the bundle targets `scriptally-dev`, off on prod, locally
+ * and in the emulator. `redeemInviteCode` ships to dev in the same deploy. Prod's gate is Nick's to arm.
+ * Signing in is never gated: the gate stands only in front of creating an account.
+ *
+ * ⚠️ THE INVITE GATE IS A SEPARATE FLAG FOR A REASON.
  *
  * `BETA_MODE` is safe to ship true: it draws the strip and the feedback dock, and the worst a
  * writer meets if the feedback function is undeployed is a send that reports its own failure. The
@@ -34,7 +38,7 @@ export const BETA_MODE = true;
  * Nick: deploy `functions:redeemInviteCode` and `firestore:rules`, seed at least one
  * `inviteCodes/{CODE}` document, redeem a code end to end, THEN set this true.
  */
-export const INVITE_GATE_ENABLED = false;
+export const INVITE_GATE_ENABLED: boolean = import.meta.env.VITE_FIREBASE_PROJECT_ID === "scriptally-dev";
 
 /**
  * Where the strip's dismissal is remembered.
@@ -59,13 +63,14 @@ export const BETA_STRIP_KNOWN_LINK = "What we already know about";
 /** The feedback panel's own copy (Help system v1, Part E — design-refs/help-system-v1, screens 08 to 11). */
 export const FEEDBACK_FAB = "Give feedback";
 export const FEEDBACK_HEADING = "Tell us what you found";
-export const FEEDBACK_SUBHEAD = "Every message reaches Nick, the founder.";
+/* Dashboard v77 (Nick's ruling): where a writer gives feedback the app says "us", "we" or "our founder", never "Nick". */
+export const FEEDBACK_SUBHEAD = "Every message reaches our founder.";
 export const FEEDBACK_CLOSE_LABEL = "Close. Your draft is kept";
 export const FEEDBACK_KIND_LABEL = "What kind of thing is it?";
-export const FEEDBACK_SEND = "Send to Nick";
+export const FEEDBACK_SEND = "Tell us";
 export const FEEDBACK_SENDING = "Sending…";
 export const FEEDBACK_SENT_TITLE = "Got it, thank you";
-export const FEEDBACK_SIGNATURE = "— Nick, founder";
+export const FEEDBACK_SIGNATURE = "— The QueryHawk team";
 export const FEEDBACK_SEVERITY_LABEL = "How much is it in your way?";
 export const FEEDBACK_MAX = 4000;
 export const FEEDBACK_SHOT_MAX = 5 * 1024 * 1024;

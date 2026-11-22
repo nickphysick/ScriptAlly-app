@@ -1,0 +1,77 @@
+[
+ {
+  "name": "Queried: pill is rgb(248, 244, 237)",
+  "ok": true,
+  "got": "rgb(248, 244, 237)"
+ },
+ {
+  "name": "Queried: pill mark ink, no disc behind it",
+  "ok": true,
+  "got": "rgb(28, 19, 15) rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "Queried: pill carries the word",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Partial Requested: pill is rgb(243, 246, 249)",
+  "ok": true,
+  "got": "rgb(243, 246, 249)"
+ },
+ {
+  "name": "Partial Requested: pill mark ink, no disc behind it",
+  "ok": true,
+  "got": "rgb(28, 19, 15) rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "Partial Requested: pill carries the word",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "Full Requested: pill is rgb(223, 231, 240)",
+  "ok": true,
+  "got": "rgb(223, 231, 240)"
+ },
+ {
+  "name": "Full Requested: pill mark ink, no disc behind it",
+  "ok": true,
+  "got": "rgb(28, 19, 15) rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "Full Requested: pill carries the word",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Offer: pill is rgb(248, 232, 229)",
+  "ok": true,
+  "got": "rgb(248, 232, 229)"
+ },
+ {
+  "name": "Offer: pill mark ink, no disc behind it",
+  "ok": true,
+  "got": "rgb(28, 19, 15) rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "Offer: pill carries the word",
+  "ok": true,
+  "got": "Offer"
+ },
+ {
+  "name": "Rejected: pill is rgb(246, 245, 243)",
+  "ok": true,
+  "got": "rgb(246, 245, 243)"
+ },
+ {
+  "name": "Rejected: pill mark ink, no disc behind it",
+  "ok": true,
+  "got": "rgb(28, 19, 15) rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "Rejected: pill carries the word",
+  "ok": true,
+  "got": "Passed"
+ }
+]

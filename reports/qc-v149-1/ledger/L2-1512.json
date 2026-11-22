@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: the seeded story's steps",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "the request's chip is rust (#f5e6df)",
+  "ok": true,
+  "detail": "{\"tone\":\"ask\",\"bg\":\"rgb(245, 230, 223)\",\"tick\":false,\"text\":\"Full manuscript\"}"
+ },
+ {
+  "where": "the send that answers it is green (#e4ece1) with a ✓",
+  "ok": true,
+  "detail": "{\"tone\":\"ok\",\"bg\":\"rgb(228, 236, 225)\",\"tick\":true,\"text\":\"Full manuscript\"}"
+ },
+ {
+  "where": "the R&R's note is the agent's words, quoted, in italics",
+  "ok": true,
+  "detail": "{\"text\":\"“Loved the voice; the middle third drags. Happy to read again.”\",\"style\":\"italic\"}"
+ },
+ {
+  "where": "the undated nudge says Add date",
+  "ok": true,
+  "detail": "Add date"
+ },
+ {
+  "where": "Add date opens edit mode, focused on a date field",
+  "ok": true,
+  "detail": "{\"mode\":\"edit\",\"focus\":\"step-date\"}"
+ }
+]

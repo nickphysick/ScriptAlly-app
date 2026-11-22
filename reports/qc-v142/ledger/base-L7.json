@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · population: the strip",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · population: the strip",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · population: the strip",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · population: the strip",
+  "ok": false,
+  "detail": "null"
+ }
+]

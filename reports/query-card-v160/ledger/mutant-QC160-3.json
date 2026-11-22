@@ -1,0 +1,57 @@
+[
+ {
+  "name": "population: opening the card was sampled",
+  "ok": true,
+  "got": "93"
+ },
+ {
+  "name": "opening the card: no scale animation on the frame",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "population: changing tab was sampled",
+  "ok": true,
+  "got": "106"
+ },
+ {
+  "name": "changing tab: no scale animation on the frame",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "population: adding a note was sampled",
+  "ok": true,
+  "got": "187"
+ },
+ {
+  "name": "adding a note: no scale animation on the frame",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "population: stepping to the next query was sampled",
+  "ok": true,
+  "got": "111"
+ },
+ {
+  "name": "stepping to the next query: no scale animation on the frame",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "population: opening the composer was sampled",
+  "ok": true,
+  "got": "113"
+ },
+ {
+  "name": "opening the composer: no scale animation on the frame",
+  "ok": false,
+  "got": "[{\"uid\":3,\"props\":[\"transform\"],\"dur\":500,\"peak\":1,\"play\":\"running\"}]"
+ },
+ {
+  "name": "population: the note was added",
+  "ok": true,
+  "got": ""
+ }
+]

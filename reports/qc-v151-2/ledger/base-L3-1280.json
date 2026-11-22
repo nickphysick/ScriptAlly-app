@@ -1,0 +1,152 @@
+[
+ {
+  "where": "who: population",
+  "ok": true,
+  "detail": "[\"you\",\"agent\",\"quiet\",\"closed\"]"
+ },
+ {
+  "where": "who · Your move",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) rgb(28, 19, 15)"
+ },
+ {
+  "where": "who · With the agent",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) rgb(28, 19, 15)"
+ },
+ {
+  "where": "who · Gone quiet",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) rgb(28, 19, 15)"
+ },
+ {
+  "where": "who · Closed",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) rgb(28, 19, 15)"
+ },
+ {
+  "where": "next action: population",
+  "ok": true,
+  "detail": "[\"Offer pending\",\"Revision owed\",\"Full owed\",\"Partial owed\",\"Nudge due\",\"Consider closing\",\"Waiting on the agent\",\"Passed\",\"Closed with no reply\",\"Withdrawn\"]"
+ },
+ {
+  "where": "next action: in the brief's order",
+  "ok": false,
+  "detail": "[\"Offer pending\",\"Revision owed\",\"Full owed\",\"Partial owed\",\"Nudge due\",\"Consider closing\",\"Waiting on the agent\",\"Passed\",\"Closed with no reply\",\"Withdrawn\"]"
+ },
+ {
+  "where": "next action · Offer pending",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Revision owed",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Full owed",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Partial owed",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Nudge due",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Consider closing",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Waiting on the agent",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Passed",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Closed with no reply",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "next action · Withdrawn",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "where": "status: population",
+  "ok": true,
+  "detail": "[\"Queried\",\"Partial Requested\",\"Partial Sent\",\"Full Requested\",\"Full Sent\",\"Revise & Resubmit\",\"Offer\",\"Rejected\",\"No Response\",\"Withdrawn\"]"
+ },
+ {
+  "where": "status · Queried",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Partial Requested",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Partial Sent",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Full Requested",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Full Sent",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Revise & Resubmit",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Offer",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Rejected",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · No Response",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "status · Withdrawn",
+  "ok": false,
+  "detail": "rgb(242, 238, 232) glyph false"
+ },
+ {
+  "where": "package: population",
+  "ok": true,
+  "detail": "[\"pkg:Agents with MSWL\",\"pkg:Autumn round\",\"pkg:Comps-led variant\",\"pkg:First round\",\"pkg:Light\",\"pkg:Original\",\"pkg:Prologue-led\",\"pkg:Standard\",\"pkg:The Complete Autumn Submission Bundle for Literary Agents\",\"pkg:Unattributed set\",\"pkg:none\"]"
+ },
+ {
+  "where": "package: all stone",
+  "ok": false,
+  "detail": "[\"rgb(242, 238, 232)\"]"
+ }
+]

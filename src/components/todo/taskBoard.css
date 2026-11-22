@@ -22,7 +22,7 @@
    a sage that belongs to a different system. A token that resolves to the WRONG value is worse
    than one that resolves to nothing: nothing leaves a mark somebody eventually notices. */
 .brd { --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8; --paper:#fdfaf5; --white:#ffffff;
-       --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c; --sage:#5a6e58; }
+       --ink2:#3a1c14; --muted:#9c8878; --muted2:var(--sp-quiet); --sage:#5a6e58; }
 
 .brd {
   display: grid;
@@ -67,7 +67,7 @@
 }
 .brd-colh .r2 {
   font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--muted2); padding-left: 38px; margin-top: 2px;
+  text-transform: uppercase; color: var(--sp-quiet); padding-left: 38px; margin-top: 2px;
 }
 
 .brd-stack {
@@ -94,7 +94,7 @@
   box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 12px 28px rgba(58, 28, 20, 0.10);
   transform: translateY(-1px);
 }
-.brd-card:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
+.brd-card:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .brd-card.sel { box-shadow: 0 0 0 2px var(--pink-b), 0 12px 28px rgba(58, 28, 20, 0.10); }
 /* the urgent card's resting mark — the burgundy head. Phase 6 adds the motion, elsewhere. */
 .brd-card.urgent { border-top-color: var(--burg); }
@@ -125,7 +125,6 @@
    run two years is a fact about the agency, not a debt the writer is behind on. */
 .brd-card .bw { margin-left: auto; flex-shrink: 0; text-align: right; line-height: 1.1; }
 .brd-card .bw b { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--ink2); font-weight: 500; display: block; }
-.brd-card .bw b.late { color: var(--burg); }
 .brd-card .bw span { font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .brd-card .bw .none { color: #c8bcae; }
 .brd-card .ag b { font-weight: 500; color: var(--ink2); }

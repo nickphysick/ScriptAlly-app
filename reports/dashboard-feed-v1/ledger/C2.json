@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512x982c population: the card and its descendants",
+  "ok": true,
+  "detail": "132 elements"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982c the left column's last card",
+  "ok": true,
+  "detail": "{\"inLeft\":true,\"last\":true}"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982c its footer line",
+  "ok": true,
+  "detail": "Top contributors win a weekly prize."
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982c no descendant is clipped",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 population: the card and its descendants",
+  "ok": true,
+  "detail": "132 elements"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 the left column's last card",
+  "ok": true,
+  "detail": "{\"inLeft\":true,\"last\":true}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 its footer line",
+  "ok": true,
+  "detail": "Top contributors win a weekly prize."
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 no descendant is clipped",
+  "ok": true,
+  "detail": ""
+ }
+]

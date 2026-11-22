@@ -1,0 +1,57 @@
+[
+ {
+  "where": "1512 no image inside the ring",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "1512 the percentage inside the ring's box",
+  "ok": true,
+  "detail": "69% inside=true"
+ },
+ {
+  "where": "1512 the percentage 28px, ink",
+  "ok": true,
+  "detail": "28px rgb(28, 19, 15)"
+ },
+ {
+  "where": "1512 the harness has gaps (population)",
+  "ok": true,
+  "detail": "79 details missing"
+ },
+ {
+  "where": "1512 exactly one button beside it, 'Fill the gaps'",
+  "ok": true,
+  "detail": "[\"Fill the gaps\"]"
+ },
+ {
+  "where": "1280 no image inside the ring",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "1280 the percentage inside the ring's box",
+  "ok": true,
+  "detail": "69% inside=true"
+ },
+ {
+  "where": "1280 the percentage 28px, ink",
+  "ok": true,
+  "detail": "28px rgb(28, 19, 15)"
+ },
+ {
+  "where": "1280 the harness has gaps (population)",
+  "ok": true,
+  "detail": "79 details missing"
+ },
+ {
+  "where": "1280 exactly one button beside it, 'Fill the gaps'",
+  "ok": true,
+  "detail": "[\"Fill the gaps\"]"
+ },
+ {
+  "where": "Fill the gaps opens Housekeeping",
+  "ok": true,
+  "detail": "no drawer"
+ }
+]

@@ -1,0 +1,41 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.3s)
+PV4-2 line "63 PLACES LEFT"
+  ✓  2 [measure] › tests/e2e/pricingV4.measure.ts:111:1 › PV4-2 the counter is live or absent, and reads '{n} places left' (1.0s)
+  ✘  3 [measure] › tests/e2e/pricingV4.measure.ts:130:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy (6.6s)
+
+
+  1) [measure] › tests/e2e/pricingV4.measure.ts:130:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.mk-pv4ptile--fit')
+    Expected: 1
+    Received: 2
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for locator('.mk-pv4ptile--fit')
+        - locator resolved to 0 elements
+        - unexpected value "0"
+        13 × locator resolved to 2 elements
+           - unexpected value "2"
+
+
+      180 |   expect(Number(await page.locator(".mk-jyplan").getAttribute("data-fit"))).toBe(want.fit);
+      181 |   /* The fit reaches the tiles in an effect after the result paints — wait for it, never sample. */
+    > 182 |   await expect(page.locator(".mk-pv4ptile--fit")).toHaveCount(1);
+          |                                                   ^
+      183 |   const navy = await page.locator(".mk-pv4ptile--fit").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.m));
+      184 |   console.log("PV4-3", JSON.stringify({ label: want.label, fit: want.fit, navy }));
+      185 |   expect(navy, "exactly the fitting tile is navy").toEqual([String(want.fit)]);
+        at /Users/nickphysick/ScriptAlly-pricing4/tests/e2e/pricingV4.measure.ts:182:51
+
+    Error Context: test-results/pricingV4.measure.ts-PV4-3-af01f-actly-the-fitting-tile-navy-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/pricingV4.measure.ts:130:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy 
+  2 passed (25.7s)

@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "A5",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "0 rows with a status, 0 with a next step"
+ },
+ {
+  "lock": "A5",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "0 rows with a status, 0 with a next step"
+ }
+]

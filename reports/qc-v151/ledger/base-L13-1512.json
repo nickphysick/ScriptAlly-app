@@ -1,0 +1,22 @@
+[
+ {
+  "where": "in the header",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "before Record a response",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "→ birds: kept",
+  "ok": false,
+  "detail": "{\"n\":null} → {\"n\":null}"
+ },
+ {
+  "where": "→ list: kept",
+  "ok": false,
+  "detail": "{\"n\":null} → {\"n\":null}"
+ }
+]

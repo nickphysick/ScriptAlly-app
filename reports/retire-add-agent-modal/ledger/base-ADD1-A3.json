@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 Log a query could be pressed",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the picker took the name",
+  "ok": true,
+  "detail": "no picker"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 \"+ Add … as a new agent\" could be pressed",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the panel opened over the drawer with the name",
+  "ok": false,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the agent could be saved",
+  "ok": false,
+  "detail": "no agency field or save"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the panel closed",
+  "ok": true,
+  "detail": "still open"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the drawer is still open",
+  "ok": false,
+  "detail": "the drawer went"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the new agent is picked in the log flow (CHANGE shown, no picker)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the picked agent is the new one",
+  "ok": false,
+  "detail": "-"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1512 the log was discarded",
+  "ok": true,
+  "detail": "the drawer is still there"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 Log a query could be pressed",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the picker took the name",
+  "ok": true,
+  "detail": "no picker"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 \"+ Add … as a new agent\" could be pressed",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the panel opened over the drawer with the name",
+  "ok": false,
+  "detail": "{\"panels\":0,\"acting\":null,\"over\":null,\"edit\":false,\"name\":null,\"others\":[],\"pop\":false,\"url\":\"/queries\"}"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the agent could be saved",
+  "ok": false,
+  "detail": "no agency field or save"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the panel closed",
+  "ok": true,
+  "detail": "still open"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the drawer is still open",
+  "ok": false,
+  "detail": "the drawer went"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the new agent is picked in the log flow (CHANGE shown, no picker)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the picked agent is the new one",
+  "ok": false,
+  "detail": "-"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "@1280 the log was discarded",
+  "ok": true,
+  "detail": "the drawer is still there"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "the plan was restored exactly",
+  "ok": true,
+  "detail": "Free → Free"
+ },
+ {
+  "lock": "ADD1-A3",
+  "where": "every agent the lock made is gone",
+  "ok": true,
+  "detail": "52 → 52"
+ }
+]

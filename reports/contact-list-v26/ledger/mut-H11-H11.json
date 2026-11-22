@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "H11",
+  "where": "rows (population)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "H11",
+  "where": "two chips: Missing details and the genre",
+  "ok": true,
+  "detail": "[\"missing\",\"genres\"]"
+ },
+ {
+  "lock": "H11",
+  "where": "Clear filters",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "H11",
+  "where": "every row says what it is missing",
+  "ok": true,
+  "detail": "1/1 of 1"
+ },
+ {
+  "lock": "H11",
+  "where": "dropping the genre widens the list",
+  "ok": true,
+  "detail": "1 → 52 (count 52)"
+ },
+ {
+  "lock": "H11",
+  "where": "Clear filters takes the row away",
+  "ok": false,
+  "detail": "the applied row is still up"
+ },
+ {
+  "lock": "H11",
+  "where": "…and the list is whole again",
+  "ok": true,
+  "detail": "52"
+ }
+]

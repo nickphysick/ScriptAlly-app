@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "D3",
+  "where": "1512 the card slides in (240ms)",
+  "ok": true,
+  "detail": "[{\"name\":\"cl24Slide\",\"d\":240}]"
+ },
+ {
+  "lock": "D3",
+  "where": "1280 the card slides in (240ms)",
+  "ok": true,
+  "detail": "[{\"name\":\"cl24Slide\",\"d\":240}]"
+ },
+ {
+  "lock": "D3",
+  "where": "reduced motion: population",
+  "ok": true,
+  "detail": "no rows"
+ },
+ {
+  "lock": "D3",
+  "where": "reduced motion: no slide",
+  "ok": false,
+  "detail": "animations 1"
+ }
+]

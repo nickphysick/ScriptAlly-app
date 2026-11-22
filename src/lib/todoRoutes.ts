@@ -25,7 +25,7 @@ import { TASK_GROUP_META } from "./todoGroups";
    bookmark keeps working without a redirect table anyone has to maintain. The fallback was
    written for a different reason and happens to be exactly right here; `todoWorkspace.test.ts`
    asserts it against the retired path so it cannot quietly stop being true. */
-export type TodoPageId = "list" | "calendar" | "noteboard";
+export type TodoPageId = "list" | "noteboard";
 
 export interface TodoRoute {
   id: TodoPageId;
@@ -38,7 +38,8 @@ export interface TodoRoute {
 /** The default is the bare `/todo`, so an existing link or bookmark still lands somewhere real. */
 export const TODO_ROUTES: TodoRoute[] = [
   { id: "list", label: "To-do list", path: "/todo", blurb: "Everything waiting on you, most pressing first" },
-  { id: "calendar", label: "Calendar", path: "/todo/calendar", blurb: "Your work by date" },
+  /* The Calendar page was RETIRED on 29 Oct. The To-do list keeps its own calendar (the day card and the
+     slide-out month/week drawer); `/todo/calendar` redirects to `/todo` through TODO_RETIRED_PATHS below. */
   /* Corkboard v1 (12 Oct): the Noteboard RENAMED. The label and the path are the writer's; the id stays
      `noteboard` because it is an identifier (the nav key, `todoPrefs.noteboard`, the `nb-` classes), not a caption. */
   { id: "noteboard", label: "Corkboard", path: "/todo/corkboard", blurb: "Notes to self and your own tasks, pinned" },
@@ -49,7 +50,11 @@ export const TODO_ROUTES: TodoRoute[] = [
  * palette's history and every link written before 12 Oct still carry it. `todoPageForPath`'s fallback would
  * answer `list` for it — the WRONG page, silently — so App.tsx redirects it first, keeping the query string.
  */
-export const TODO_RETIRED_PATHS: Readonly<Record<string, string>> = { "/todo/noteboard": "/todo/corkboard" };
+export const TODO_RETIRED_PATHS: Readonly<Record<string, string>> = {
+  "/todo/noteboard": "/todo/corkboard",
+  /* Calendar retired (29 Oct): an EXPLICIT redirect, as the Corkboard rename's is — never the fallback alone. */
+  "/todo/calendar": "/todo",
+};
 /** Where a retired To-do path lives now, with its query string and hash carried; null for a live path. */
 export function todoRedirectFor(pathname: string, search = "", hash = ""): string | null {
   const to = TODO_RETIRED_PATHS[pathname.replace(/\/+$/, "")];

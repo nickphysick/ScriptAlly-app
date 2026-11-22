@@ -1,0 +1,176 @@
+
+Running 7 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.6s)
+  ✗ HS1-B1 · @1512 the three articles are the page's — ["Add an agent2 min","What List health measures1 min","Go full screen on the Query Centre30 sec"]
+  ✗ HS1-B1 · @1280 the three articles are the page's — ["Add an agent2 min","What List health measures1 min","Go full screen on the Query Centre30 sec"]
+[HS1-B1] 10/12 green
+  ✘  2 [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order (14.9s)
+  ✗ HS1-B3 · @1512 Esc closes it — 
+  ✗ HS1-B3 · @1512 …and focuses the ? — 
+  ✗ HS1-B3 · @1280 Esc closes it — 
+  ✗ HS1-B3 · @1280 …and focuses the ? — 
+[HS1-B3] 6/10 green
+  ✘  3 [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? (13.6s)
+  ✘  4 [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's (21.4s)
+  ✗ HS1-C3 · @1512 an agent to open (precondition) — 
+  ✗ HS1-C3 · @1512 the agent panel is open (precondition) — 
+  ✗ HS1-C3 · @1512 the checklist did not open — 
+  ✗ HS1-C3 · @1280 an agent to open (precondition) — 
+  ✗ HS1-C3 · @1280 the agent panel is open (precondition) — 
+  ✗ HS1-C3 · @1280 the checklist did not open — 
+[HS1-C3] 2/8 green
+  ✘  5 [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself (1.1m)
+  ✘  6 [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms (21.4s)
+  ✗ HS1-D3 · @1512 status cells to read (precondition) — 0
+  ✗ HS1-D3 · @1280 status cells to read (precondition) — 0
+[HS1-D3] 2/4 green
+  ✘  7 [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot (11.9s)
+
+
+  1) [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "@1512 the three articles are the page's — [\"Add an agent2 min\",\"What List health measures1 min\",\"Go full screen on the Query Centre30 sec\"]",
+    +   "@1280 the three articles are the page's — [\"Add an agent2 min\",\"What List health measures1 min\",\"Go full screen on the Query Centre30 sec\"]",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:239:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-9507e-r-links-the-switch-in-order-measure/error-context.md
+
+  2) [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "@1512 Esc closes it — ",
+    +   "@1512 …and focuses the ? — ",
+    +   "@1280 Esc closes it — ",
+    +   "@1280 …and focuses the ? — ",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:289:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-1e4ed--switch-Esc-returns-to-the--measure/error-context.md
+
+  3) [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's 
+
+    TimeoutError: locator.click: Timeout 8000ms exceeded.
+    Call log:
+      - waiting for locator('#ws-sidebar').getByText('Query Centre', { exact: true }).first()
+
+
+      353 |       await page.keyboard.press("Escape"); await page.waitForTimeout(600);
+      354 |       /* an in-app route change (the sidebar), so the browser session is the same one */
+    > 355 |       await page.locator("#ws-sidebar").getByText("Query Centre", { exact: true }).first().click({ timeout: 8000 });
+          |                                                                                            ^
+      356 |       await page.waitForURL(/\/queries/);
+      357 |       await pillReady(page);
+      358 |       await page.waitForTimeout(4000);
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:355:92
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-19af9-y-pulses-the-Query-Centre-s-measure/error-context.md
+
+  4) [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "@1512 an agent to open (precondition) — ",
+    +   "@1512 the agent panel is open (precondition) — ",
+    +   "@1512 the checklist did not open — ",
+    +   "@1280 an agent to open (precondition) — ",
+    +   "@1280 the agent panel is open (precondition) — ",
+    +   "@1280 the checklist did not open — ",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:394:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-35960-pen-nothing-opens-by-itself-measure/error-context.md
+
+  5) [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms 
+
+    TimeoutError: locator.waitFor: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for locator('[data-term=\'listHealth\']').filter({ visible: true }).first() to be visible
+
+
+      534 |     await page.mouse.move(5, 600);
+      535 |     const term = vis(page, "[data-term='listHealth']");
+    > 536 |     await term.waitFor({ timeout: 15_000 });
+          |                ^
+      537 |     await term.hover();
+      538 |     await page.waitForTimeout(200);
+      539 |     L.check(`${w} no card at 200ms`, await page.locator("[data-term-card='listHealth']").count() === 0, "");
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:536:16
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-ff01b-e-card-with-a-link-at-400ms-measure/error-context.md
+
+  6) [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot 
+
+    Error: HS1-D3: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 6
+    Received:    4
+
+      45 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      49 |   }
+      50 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:47:77)
+        at /Users/nickphysick/ScriptAlly-fv2/tests/e2e/helpSystemV1.measure.ts:597:5
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-21ce3-card-draws-a-real-StatusDot-measure/error-context.md
+
+  6 failed
+    [measure] › tests/e2e/helpSystemV1.measure.ts:204:1 › HS1-B1 · contents: no Keyboard shortcuts; eyebrow, guide, three articles, four links, the switch, in order 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:267:1 › HS1-B3 · keys: ↓ on the ? opens with focus on the first item, End lands on the switch, Esc returns to the ? 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:369:1 › HS1-C3 · quiet: on a first visit with an agent's panel open, nothing opens by itself 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:574:1 › HS1-D3 · every status in the status column is a defined word whose card draws a real StatusDot 
+  1 passed (2.9m)

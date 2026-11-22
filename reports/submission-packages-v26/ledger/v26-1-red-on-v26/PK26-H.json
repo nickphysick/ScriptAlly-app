@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "PK26-H",
+  "where": "the note is one line at 1280",
+  "ok": false,
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":95,\"fs\":13.5,\"cut\":false,\"h3h\":51.5,\"h3fs\":21}"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "…cut short (it is longer than the room)",
+  "ok": false,
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":95,\"fs\":13.5,\"cut\":false,\"h3h\":51.5,\"h3fs\":21}"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "the name and its pencil keep one line",
+  "ok": false,
+  "detail": "{\"text\":\"For agents who ask for a synopsis and the first three chapters, in the UK and Ireland\",\"h\":95,\"fs\":13.5,\"cut\":false,\"h3h\":51.5,\"h3fs\":21}"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "no note: + Add a note",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "PK26-H",
+  "where": "…it opens Package details with the note focused",
+  "ok": false,
+  "detail": "no link"
+ }
+]

@@ -1,0 +1,24 @@
+# Baseline — overnight-fixes-v1 @ 7792872ab (served dev tip), 15 Nov ~22:30
+
+## tsc --noEmit (NODE_OPTIONS=--max-old-space-size=4096; the default heap OOMs at ~2 GB, exit 134)
+exit 0, 0 errors
+
+## vite build (prod)
+✓ 417 modules transformed.
+✓ built in 1.55s
+exit 0; grep error|[WARNING]: no matches
+
+## vite build --mode development
+✓ 4042 modules transformed.
+✓ built in 12.63s
+exit 0; grep error|[WARNING]: no matches
+
+## vitest run --maxWorkers=2 (functions/node_modules linked)
+ Test Files  2 failed | 869 passed | 1 skipped (872)
+      Tests  3 failed | 12567 passed | 4 skipped (12574)
+exit 1. The three reds (pre-existing on the served line, source scans over tests/):
+ FAIL  src/test/emuGuard.test.ts > emulator runs go through the guard > no recipe under tests/ starts an emulator without the guard
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > every file that creates a Firebase app goes through fsTarget, or only ever names a demo- project
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > no file that creates an app reads .env.development itself — only fsTarget does, behind the opt-in
+  - emuGuard: tests/e2e/cb21Emu.sh starts an emulator without the guard
+  - firestoreTarget (x2): 25 tests/e2e/*.mjs files (cl251Agents.mjs …) create a Firebase app outside fsTarget

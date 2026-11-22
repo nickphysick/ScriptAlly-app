@@ -1,0 +1,57 @@
+[
+ {
+  "where": "population: the full-requested card's button reads Mark full sent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the form opens on Mark full sent with the step chosen",
+  "ok": true,
+  "detail": "{\"kind\":\"full_sent\",\"title\":\"Mark full sent\",\"chosen\":[\"full_sent\"],\"date\":\"5 Nov 2026\",\"chips\":[\"Full manuscript · Post-R&R (T. Marsh)\",\"Synopsis\"]}"
+ },
+ {
+  "where": "today's date",
+  "ok": true,
+  "detail": "5 Nov 2026 vs 5 Nov 2026"
+ },
+ {
+  "where": "the request's materials prefilled: the full manuscript and the synopsis it asked for",
+  "ok": true,
+  "detail": "[\"Full manuscript · Post-R&R (T. Marsh)\",\"Synopsis\"]"
+ },
+ {
+  "where": "See what changes shows the step being added",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "in the same render: band, pill and reply box read With the agent",
+  "ok": true,
+  "detail": "{\"band\":\"WITH THE AGENT\",\"pill\":\"Full sent\",\"act\":\"resp\",\"state\":\"agent\"}"
+ },
+ {
+  "where": "exactly one step added",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "the step is Full sent with what was asked for",
+  "ok": true,
+  "detail": "{\"agentName\":\"Hannah Vale\",\"createdAt\":{\"nanoseconds\":0,\"seconds\":1793880000},\"eventKey\":\"full_sent\",\"manuscriptTitle\":\"The Smoke Test\",\"materials\":[{\"kind\":\"full\",\"versionId\":\"bv-rr\"},{\"kind\":\"synopsis\"}],\"note\":\"Full manuscript sent to Hannah Vale at State & Window\",\"queryId\":\"q152-fullreq\",\"resultingStatus\":\"Full Sent\",\"type\":\"Full Sent\"}"
+ },
+ {
+  "where": "dated today",
+  "ok": true,
+  "detail": "{\"nanoseconds\":0,\"seconds\":1793880000}"
+ },
+ {
+  "where": "Undo is offered",
+  "ok": true,
+  "detail": "no undo"
+ },
+ {
+  "where": "Undo restores the query, its log and its feed byte-for-byte",
+  "ok": true,
+  "detail": ""
+ }
+]

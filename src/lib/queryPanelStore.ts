@@ -12,6 +12,8 @@
  *
  * Module scope, like `drawerStore`: nothing to mount means nothing to forget.
  */
+import { spyJourney } from "./journeySpy";
+import { openQueryDrawer, type OpenRequest } from "./queryActions/drawerStore";
 /* "agent" (Contact list v16 §F): opened from an agent's panel, on its Queries tab — the query view carries a way back */
 export type PanelOrigin = "dashboard" | "feed" | "other" | "agent";
 export interface PanelRequest { id: string; from: PanelOrigin }
@@ -21,11 +23,34 @@ const subs = new Set<() => void>();
 const tell = () => { for (const f of [...subs]) f(); };
 
 export const currentQueryPanel = (): PanelRequest | null => current;
-export function openQueryPanel(id: string, from: PanelOrigin = "other"): void {
-  if (current?.id === id && current.from === from) return;
-  back = null;
-  current = { id, from };
-  tell();
+export function openQueryPanel(id: string, from: PanelOrigin = "other", step?: OpenRequest): void {
+  if (!(current?.id === id && current.from === from)) {
+    back = null;
+    current = { id, from };
+    tell();
+  }
+  if (step) stepWhenReady(id, step);
+}
+
+/**
+ * Next up v1, Phase 3 — OPEN AT THIS STEP. The panel opens, and once ITS slot is on the page the journey is asked for
+ * with `panel` set, so its form steps into the panel exactly as the Query Centre's own tray buttons do (Queries.tsx
+ * `stepRow` → `pendingStepRef`). Nothing about the journey changes: the request is the task's own door, and the
+ * writer confirms (or cancels, which saves nothing) in the panel. A later open, or the panel closing, drops the wait.
+ */
+let stepToken = 0;
+const STEP_WAIT_MS = 4000;
+function stepWhenReady(id: string, req: OpenRequest): void {
+  const token = ++stepToken;
+  if (typeof document === "undefined" || typeof requestAnimationFrame === "undefined") return;
+  const sel = `[data-qp="panel"][data-qp-id="${CSS.escape(id)}"] [data-side-slot]`;
+  const until = Date.now() + STEP_WAIT_MS;
+  const tick = () => {
+    if (token !== stepToken || current?.id !== id) return;
+    if (document.querySelector(sel)) { openQueryDrawer({ ...req, queryId: id }); return; }
+    if (Date.now() < until) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 /**
  * Contact list v16 §F — THE AGENT A QUERY WAS OPENED FROM. The agent's panel shows one of its queries in the query
@@ -36,6 +61,7 @@ export interface PanelBack { agentId: string; first: string }
 let back: PanelBack | null = null;
 export const queryPanelBack = (): PanelBack | null => back;
 export function openQueryPanelFromAgent(id: string, from: PanelBack): void {
+  spyJourney({ via: "query-card", mode: "open", queryId: id, back: from.first });
   back = from;
   current = { id, from: "agent" };
   tell();
@@ -51,19 +77,55 @@ export function subscribeQueryPanel(f: () => void): () => void {
   return () => { subs.delete(f); };
 }
 
+
 /**
- * Query panel v2 §E — "Record a response" from the shell's menu, on any page: the panel opens in its acting look
- * at the picker ("Who replied?"), with the query that was open listed first. The Query Centre's component hosts
- * the panel, so it listens.
+ * Record a response v1, Phase 2 — THE ONE DOOR. Every desktop "Record a response" comes here.
+ *   - with a query: that query's card opens in the side panel (`?q` on Queries) with its composer at "reply"; a CLOSED
+ *     query's composer opens at "reopen", as the closed card's own Reopen does;
+ *   - without one: the card frame opens at "Who replied?", and a pick becomes that query's card in the same panel.
+ * The Query Centre's component is mounted on every workspace page and composes the card, so it listens here. While
+ * nothing listens (the phone page, which keeps its own flow), the old drawer journey stands, exactly as before.
+ *
+ * ⚠️ ONE WRITER. The composer saves through lib/qc1522Write; `onSaved` is how a door that wants to know (the To-do
+ *    task, the dashboard row, the Responses list) hears of it: called once, with the query's id, when a response the
+ *    door opened is saved on that query.
  */
-const pickerSubs = new Set<() => void>();
-export function openResponsePicker(): void { for (const f of [...pickerSubs]) f(); }
-export function subscribeResponsePicker(f: () => void): () => void {
-  pickerSubs.add(f);
-  return () => { pickerSubs.delete(f); };
+export interface ResponseRequest {
+  queryId?: string;
+  from?: PanelOrigin;
+  /** the agent card a query was opened from: the card takes its place with "← Back to {first}" */
+  back?: PanelBack;
+  /** the door's own contract: told once a response is saved on this query */
+  onSaved?: (queryId: string) => void;
+  /** the answer the reply box starts on ("req": the To-do's "they asked for the partial") */
+  reply?: "req" | "passed" | "rr" | "offer" | "more" | null;
 }
-/** true while something is listening: the shell falls back to the standalone drawer when nothing is */
-export const responsePickerHosted = (): boolean => pickerSubs.size > 0;
+/** the way back to an agent's card, for a response opened from it */
+export const agentBack = (a: { id: string; name?: string | null; agency?: string | null }): PanelBack =>
+  ({ agentId: a.id, first: (a.name ?? "").trim().split(/\s+/)[0] || (a.agency ?? "").trim() || "the agent" });
+const respSubs = new Set<(r: ResponseRequest) => void>();
+export function subscribeResponse(f: (r: ResponseRequest) => void): () => void {
+  respSubs.add(f);
+  return () => { respSubs.delete(f); };
+}
+/** true while the card can take the request; the phone page does not listen, so its doors keep their flow */
+export const responseHosted = (): boolean => respSubs.size > 0;
+let savedWaiter: { id: string | null; f: (id: string) => void } | null = null;
+export function openResponse(opts: ResponseRequest = {}): boolean {
+  spyJourney({ via: "response", mode: "resp", queryId: opts.queryId ?? null });
+  /* the phone (nothing listens): its own flow, unchanged — the drawer's response journey */
+  if (!respSubs.size) { openQueryDrawer({ mode: "resp", ...(opts.queryId ? { queryId: opts.queryId } : {}) }); return false; }
+  savedWaiter = opts.onSaved ? { id: opts.queryId ?? null, f: opts.onSaved } : null;
+  for (const f of [...respSubs]) f(opts);
+  return true;
+}
+/** the composer saved a response on `id`: the door that opened it hears once (a pick from "Who replied?" binds it) */
+export function responseSaved(id: string): void {
+  const w = savedWaiter;
+  if (!w || (w.id && w.id !== id)) return;
+  savedWaiter = null;
+  w.f(id);
+}
 
 /**
  * ONE RIGHT-HAND PANEL AT A TIME. The query panel, the activity feed drawer and the Birds-eye drawer share

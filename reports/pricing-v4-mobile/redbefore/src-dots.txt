@@ -1,0 +1,70 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.6s)
+PVM-4 @390 [true,false,false,false]
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @390: swiping to the third perk moves the current dot to the third (1.0s)
+PVM-4 @375 [true,false,false,false]
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @375: swiping to the third perk moves the current dot to the third (1.0s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @390: swiping to the third perk moves the current dot to the third 
+
+    Error: the third dot is current
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    +   true,
+        false,
+        false,
+    -   true,
+        false,
+      ]
+
+      206 |     const dots = await on();
+      207 |     console.log(`PVM-4 @${vp.width}`, JSON.stringify(dots));
+    > 208 |     expect(dots, "the third dot is current").toEqual([false, false, true, false]);
+          |                                              ^
+      209 |     const w = await page.$$eval(".mk-pvdots i", (d) => d.map((x) => (x as HTMLElement).offsetWidth));
+      210 |     expect(w[2], "and it is the wide pill").toBeGreaterThan(w[0]);
+      211 |   });
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:208:46
+
+    Error Context: test-results/pricingMobile.measure.ts-P-6b116-he-current-dot-to-the-third-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @375: swiping to the third perk moves the current dot to the third 
+
+    Error: the third dot is current
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    +   true,
+        false,
+        false,
+    -   true,
+        false,
+      ]
+
+      206 |     const dots = await on();
+      207 |     console.log(`PVM-4 @${vp.width}`, JSON.stringify(dots));
+    > 208 |     expect(dots, "the third dot is current").toEqual([false, false, true, false]);
+          |                                              ^
+      209 |     const w = await page.$$eval(".mk-pvdots i", (d) => d.map((x) => (x as HTMLElement).offsetWidth));
+      210 |     expect(w[2], "and it is the wide pill").toBeGreaterThan(w[0]);
+      211 |   });
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:208:46
+
+    Error Context: test-results/pricingMobile.measure.ts-P-8cdad-he-current-dot-to-the-third-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @390: swiping to the third perk moves the current dot to the third 
+    [measure] › tests/e2e/pricingMobile.measure.ts:194:3 › PVM-4 @375: swiping to the third perk moves the current dot to the third 
+  1 passed (21.5s)

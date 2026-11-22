@@ -1,0 +1,260 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query letters v2 (12 Nov) — the letter desk, ported from design-refs/query-letters-v2 (its desktop rules; the phone
+ * and drawer code in the ref are out of scope). Faces are READ from the app: --sp-type (Special Elite), --sp-serif
+ * (Source Serif). ⚠️ lib/brand.tsx forces h1/h2 faces with `!important` and names bare spans and paragraphs as the sans,
+ * so the page hands inheritance back once (`:where`) and every heading states its face with two classes.
+ * ⚠️ THE HEADER IS THE QUERY CENTRE'S NAVY HEADER (v2.4): `shell/OpenHeader` in a `.qc151.qc153` wrapper, dressed by the
+ *    Query Centre's own sheets. Every difference here is scoped to this page (`.qlp …`); nothing in queries/centre/ is
+ *    edited and the Query Centre's look does not change.
+ * ⚠️ BARS AND MARKS ARE NAVY (#2a3a52). No rust or red on this page.
+ */
+.qlp {
+  --ql-ink: #1c130f; --ql-navy: #2a3a52; --ql-btn: var(--sp-anthracite); --ql-cream: #f4eee5;
+  --ql-berry: #8f4a5a; --ql-blush: #f8e8ea;
+  --ql-t62: rgba(28, 19, 15, .62); --ql-t72: rgba(28, 19, 15, .72); --ql-line: rgba(28, 19, 15, .12);
+  position: relative; box-sizing: border-box; min-width: 0;
+  /* the ground fills the scroll port even when the page is short (day one): `100%` has no sized parent to resolve against */
+  min-height: max(100%, var(--qlp-port-h, 0px));
+  /* no top padding: the header's wrapper (.qc151.qc153) brings the Query Centre's own 30, so the navy header starts
+     where the Query Centre's and the Contact list's do (QL24-1 measures its top on all three) */
+  padding: 0 var(--work-gutter) 64px;
+  font: 16px/1.5 var(--sp-serif); color: var(--ql-ink);
+  /* the Query Centre's ground: the cool off-white with the doodle tile under an even .45 wash (qcv1534) */
+  background-color: var(--ws-ground-cool);
+  background-image: linear-gradient(rgba(245, 245, 243, .45), rgba(245, 245, 243, .45)), url("/images/qc/doodle-tile.svg");
+  background-repeat: repeat, repeat;
+  background-size: auto, 340px 360px;
+}
+.qlp :where(span, p, div, b, i, em, small, button, a, label, li, ul, ol, input, textarea, article, nav, aside, section, kbd) { font-family: inherit; }
+.qlp *, .qlp *::before, .qlp *::after { box-sizing: border-box; }
+/* the page's resets stop at the shared navy header: it is dressed by the Query Centre's sheets alone. (Unscoped, the
+   margin reset outranked qcv1531's `.qc1531-for { margin: 8px 0 12px }` and squashed the title, the "for" line and
+   the buttons together.) */
+.qlp :is(h1, h2, h3, h4, p):not(.qc1531-hd *) { margin: 0; }
+.qlp button:not(.qc1531-hd *) { cursor: pointer; color: inherit; }
+.qlp > * { max-width: calc(var(--work-max) - 2 * var(--work-gutter)); margin-inline: auto; }
+.qlp :focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* ── the header (v2.4): the Query Centre's navy header as built (qcv1534 §2–3, qcv156 §1), reached through the
+   `.qc151.qc153` wrapper. This page's one difference: two parts, the drawing and the title block, so the right-hand
+   column the Query Centre keeps for "this week" is dropped (OpenHeader always renders `.qc1531-rc`; it stays empty
+   and takes no room). The art column (268) and its gap (28) stay the Query Centre's. Its height is the built one. ── */
+@media (min-width: 768px) {
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { grid-template-columns: 268px minmax(0, 1fr); min-height: 227px; }
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd > .qc1531-rc { display: none; }
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd h1.qc1531-t { outline: none; }
+  /* the drawing sits where the Query Centre's and the Contact list's do: 190 wide (qcv1531's `.qc1531-art img`),
+     centred in the 268 art column (qcv1534), in a box exactly as tall as the Query Centre's armchair hawk (360 × 347
+     drawn at 190 = 183.14). This drawing is 400 × 369 (175.28 at 190), so it takes the difference as equal margins
+     — the Contact list's recipe (contactQcLayout.css) for its taller bird. */
+  .qlp .qlp-art img { margin-block: calc((190px * 347 / 360 - 190px * 369 / 400) / 2); }
+  /* v2.4 · the step from header to content (the ref's `.sp48 .head`): 48 under the header, larger than any gap inside
+     the content (30), and the header casts the ref's soft card shadow. This page only: the Query Centre's and the
+     Contact list's headers keep their 30 and their shadow. */
+  /* Consistency roll-out v1, Phase 5 (ruling 2): 40 under the header, as on every workspace page (it was 48) */
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { margin-bottom: 40px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
+}
+
+.qlp-lnk { padding: 0; border: 0; background: none; color: var(--ql-navy) !important; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); min-height: 32px; }
+.qlp-lnk--sm { font-size: 14px; margin-top: 10px; }
+
+/* v2.1 · the package line, on the in-use letter */
+.qlp .qlp-lt-pkg { margin-top: 4px; font-size: 14px; color: var(--sp-muted); }
+.qlp-lt-pkg a { color: var(--ql-navy); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); }
+/* v2.4 · "No text saved" (the ref's `.paper.nt`): no lined paper and no fill of its own (the workspace's paper-white
+   shows through), a 1.5px dashed edge, 14px corners, no shadow; the quill, a heading, one paragraph, two buttons */
+.qlp-paper.qlp-paper--nt { min-height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; white-space: normal;
+  background: none; border: 1.5px dashed #cfc5b7; border-radius: 14px; box-shadow: none; }
+.qlp-paper--nt img { width: 76px; }
+.qlp h3.qlp-nt-h { margin-top: 14px; font: 400 24px/1.25 var(--sp-type) !important; color: var(--ql-ink) !important; }
+.qlp .qlp-paper--nt p { max-width: 470px; margin: 10px auto 0; color: var(--sp-muted); }
+.qlp-nt-a { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 22px; }
+
+/* buttons */
+.qlp-b1, .qlp-b2 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; white-space: nowrap; font-family: var(--sp-type) !important; font-weight: 400; }
+/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`); it was 46 high, radius 12, the typewriter at 17 */
+.qlp-b1.qlp-b1 { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: var(--ql-btn); color: #fff !important; }
+.qlp-b1:hover { background: #24324a; }
+.qlp-b1:disabled { opacity: .55; cursor: default; }
+.qlp-b1--sm { height: 40px; font-size: 15px; padding: 0 18px; } /* Phase 9: `.qlp-b1.qlp-b1` above outranks this; the one size is the standard */
+/* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`) */ 
+.qlp-b2.qlp-b2 { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
+.qlp-b2.qlp-b2:hover { background: var(--sp-btn-line-hov); box-shadow: var(--sp-btn-ring); }
+.qlp-b2 { height: 40px; padding: 0 16px; border-radius: 12px; background: #fff; color: var(--ql-ink); font-size: 15px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14), 0 4px 10px -6px rgba(28, 19, 15, .3); }
+.qlp-b2:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, .3), 0 6px 12px -6px rgba(28, 19, 15, .3); }
+.qlp-b2 svg, .qlp-b1 svg { width: 16px; height: 16px; flex: none; }
+
+/* ── the desk: letters · the letter · how it's doing ─────────────────────────────────────────────────────────── */
+/* v2.4 · one list, one workspace (the ref's `.one`). The list and the workspace beside it; the workspace's left edge
+   sits under the headline. The ref draws 270 + 30 under a 300 header column; the built header's columns are the Query
+   Centre's 268 + 28, so the desk takes the Query Centre's own list column and gap, as the ref's note asks ("as the list
+   does on the other two pages"). */
+.qlp-desk { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: 28px; align-items: start; padding-top: 0; }
+.qlp-work { display: grid; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; min-width: 0;
+  background: #fbf9f5; border-radius: 18px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 18px 34px -26px rgba(28, 19, 15, .4); }
+.qlp-work > .qlp-mid { padding: 26px 32px 36px; min-width: 0; }
+.qlp-work > .qlp-rail { position: sticky; top: 16px; align-self: stretch; padding: 26px 26px 30px; border-left: 1px solid rgba(28, 19, 15, .1); }
+.qlp .qlp-work > .qlp-rail h2.qlp-h2 { border-bottom: 0; padding-bottom: 0; margin-bottom: 14px; font: 400 22px/1.15 var(--sp-type) !important; }
+.qlp .qlp-work h2.qlp-lt-name { font: 400 26px/1.15 var(--sp-type) !important; }
+.qlp-work .qlp-lt-top { padding-top: 0; }
+/* the 760 caps come off inside the workspace: the title row, the status line and the sheet fill the letter area */
+.qlp-work :is(.qlp-lt-top, .qlp-lt-bar, .qlp-paper, .qlp-ed-top, .qlp-ed-status) { max-width: none; }
+.qlp h2.qlp-h2 { font: 400 22px/1.15 var(--sp-type) !important; color: var(--ql-ink) !important; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ql-navy); }
+.qlp-list { position: sticky; top: 16px; display: flex; flex-direction: column; min-width: 0;
+  /* many letters: the list scrolls inside its own sticky column (the scroll port's height, published by the page) */
+  max-height: calc(var(--qlp-port-h, 100vh) - 32px); overflow-y: auto; overscroll-behavior: contain; padding: 2px; margin: -2px; }
+.qlp-rows { display: flex; flex-direction: column; gap: 8px; }
+.qlp-row { position: relative; display: block; width: 100%; padding: 14px 16px; border: 0; border-radius: 14px; background: rgba(255, 255, 255, .55); text-align: left;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08); transition: background-color .15s, box-shadow .15s; }
+.qlp-row:hover { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, .18); }
+.qlp-row[aria-current="true"] { background: #fff; box-shadow: 0 0 0 2px var(--ql-navy), 0 10px 22px -16px rgba(28, 19, 15, .4); }
+.qlp .qlp-row-n { display: block; font: 400 20px/1.2 var(--sp-type); overflow-wrap: anywhere; }
+.qlp-row-s { display: block; margin-top: 2px; font-style: italic; font-size: 14px; color: var(--sp-muted); }
+.qlp-flag { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--ql-berry); color: #fff6f4; font-size: 13px; line-height: 1; }
+.qlp-flag svg { width: 12px; height: 12px; }
+.qlp-flag--stamp { animation: qlp-stamp .24s ease-out; }
+@keyframes qlp-stamp { 0% { transform: scale(1.35) rotate(-6deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.qlp-row-f { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(28, 19, 15, .16); font-size: 14px; color: var(--sp-muted); }
+.qlp .qlp-row-f b { font: 400 16px/1 var(--sp-type); color: var(--ql-ink); }
+.qlp-bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(28, 19, 15, .09); overflow: hidden; min-width: 40px; }
+.qlp-bar i { display: block; height: 100%; border-radius: 3px; background: var(--ql-navy); }
+.qlp-row-f em { font-style: italic; color: var(--sp-muted); }
+.qlp-row--new { background: #fff; box-shadow: 0 0 0 2px var(--ql-navy), 0 10px 22px -16px rgba(28, 19, 15, .4); cursor: default; }
+.qlp-row--new .qlp-row-s { color: var(--ql-berry); }
+.qlp-row--flash { animation: qlp-flash 1.4s ease-out; }
+@keyframes qlp-flash { 0% { background: var(--ql-blush); } 100% { background: #fff; } }
+.qlp .qlp-note { margin-top: 14px; font-size: 14px; line-height: 1.45; color: var(--sp-muted); }
+.qlp-retired { margin-top: 14px; }
+.qlp-rows--retired { margin-top: 10px; }
+
+/* the letter */
+.qlp-mid { min-width: 0; }
+.qlp-lt-top { padding-top: 2px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; max-width: 760px; }
+.qlp h2.qlp-lt-name { font: 400 24px/1.2 var(--sp-type) !important; color: var(--ql-ink) !important; overflow-wrap: anywhere; }
+.qlp .qlp-lt-meta { margin-top: 4px; font-size: 14px; color: var(--sp-muted); }
+.qlp-lt-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.qlp-lt-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; max-width: 760px; margin: 16px 0 0; font-size: 14px; color: var(--sp-muted); min-height: 32px; }
+.qlp-lt-r { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.qlp-lock { display: flex; align-items: center; gap: 8px; }
+.qlp-lock svg { width: 16px; height: 16px; flex: none; color: var(--ql-t62); }
+.qlp-sw { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0; border: 0; background: none; font-size: 14px; color: var(--ql-ink); }
+.qlp-sw i { position: relative; width: 34px; height: 20px; border-radius: 10px; background: rgba(28, 19, 15, .22); transition: background-color .15s; flex: none; }
+.qlp-sw i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.qlp-sw[aria-checked="true"] i { background: var(--ql-navy); }
+.qlp-sw[aria-checked="true"] i::after { transform: translateX(14px); }
+.qlp-paper { display: block; width: 100%; max-width: 760px; margin: 16px 0 0; padding: 48px 56px; background: #fff; border: 0; border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 18px 34px -22px rgba(28, 19, 15, .45);
+  font: 400 16px/1.65 var(--sp-serif) !important; color: var(--ql-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+textarea.qlp-paper--edit { resize: vertical; min-height: 520px; box-shadow: 0 0 0 2px var(--ql-navy), 0 18px 34px -22px rgba(28, 19, 15, .45); outline: none; }
+.qlp-paper ins { text-decoration: none; background: var(--ql-blush); box-shadow: 0 0 0 2px var(--ql-blush); border-radius: 2px; }
+.qlp-paper del { color: var(--sp-quiet); text-decoration: line-through; }
+.qlp-key { display: flex; gap: 16px; font-size: 14px; color: var(--sp-muted); }
+.qlp-key ins { text-decoration: none; background: var(--ql-blush); padding: 0 6px; border-radius: 3px; color: var(--ql-ink); }
+.qlp-key del { color: var(--sp-quiet); }
+.qlp .qlp-first-note { max-width: 760px; margin-top: 16px; padding: 12px 16px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1); font-size: 15px; color: var(--sp-muted); }
+
+/* editing in place */
+.qlp-ed-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; max-width: 760px; }
+.qlp .qlp-ed-name { flex: 1 1 300px; min-width: 0; max-width: 460px; height: 40px; padding: 0 2px; border: 0; border-bottom: 1.5px dashed rgba(28, 19, 15, .3); background: transparent;
+  font: 400 24px/1.2 var(--sp-type) !important; color: var(--ql-ink); outline: none; }
+.qlp .qlp-ed-name:focus { border-bottom: 2px solid var(--ql-navy); }
+.qlp .qlp-ed-status { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 760px; margin-top: 16px; min-height: 32px; font-size: 14px; color: var(--sp-muted); white-space: pre-wrap; }
+.qlp-dirt { width: 8px; height: 8px; border-radius: 50%; background: var(--ql-berry); flex: none; display: inline-block; }
+.qlp-err { color: #7a2f3c; }
+.qlp .qlp-ed-status kbd { font: 400 12px/1 var(--sp-mono, ui-monospace, monospace); padding: 3px 6px; border-radius: 5px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); }
+.qlp-guard { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 760px; margin-top: 16px; padding: 12px 12px 12px 18px; border-radius: 12px; background: var(--ql-blush); color: #3b1f27; font-size: 15px; animation: qlp-up .18s ease-out; }
+.qlp-guard > span { flex: 1; min-width: 220px; }
+@keyframes qlp-up { 0% { transform: translateY(-6px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.qlp-nx { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; max-width: 760px; margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 10px 22px -16px rgba(28, 19, 15, .4); animation: qlp-up .2s ease-out; }
+.qlp-nx > svg { width: 30px; height: 30px; color: var(--ql-berry); flex: none; }
+.qlp-nx > div { flex: 1; min-width: 240px; font-size: 15px; color: var(--sp-muted); }
+.qlp .qlp-nx > div b { display: block; font: 400 17px/1.3 var(--sp-type); color: var(--ql-ink); }
+.qlp-gp { display: inline-flex; align-items: center; min-height: 28px; margin: 0 6px 6px 0; padding: 0 10px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .14); font-size: 14px; }
+.qlp .qlp-chin { display: block; width: 100%; height: 40px; margin-bottom: 8px; padding: 0 12px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18);
+  font: 400 15px/1 var(--sp-serif); color: var(--ql-ink); outline: none; }
+.qlp .qlp-chin:focus { box-shadow: inset 0 0 0 2px var(--ql-navy); }
+.qlp .qlp-hint2 { margin: 4px 0 0; font-size: 14px; color: var(--sp-muted); }
+
+/* how it's doing */
+.qlp-rail { position: sticky; top: 16px; min-width: 0; }
+.qlp-cells { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.qlp-cells div { padding: 14px 12px; background: #fff; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1); }
+.qlp .qlp-cells b { display: block; font: 400 28px/1 var(--sp-type); }
+.qlp-cells span { display: block; margin-top: 6px; font-size: 14px; color: var(--sp-muted); }
+.qlp h3.qlp-h3 { font: 400 20px/1.2 var(--sp-type) !important; color: var(--ql-ink) !important; margin: 24px 0 10px; }
+.qlp h3.qlp-h3--first { margin-top: 0; }
+.qlp .qlp-wait { padding: 16px; border-radius: 12px; background: var(--ql-blush); color: #5c2e39; font-size: 14px; line-height: 1.5; margin-top: 8px; }
+.qlp-ql { list-style: none; margin: 0; padding: 0; background: #fff; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1); overflow: hidden; }
+.qlp-ql li { border-bottom: 1px solid rgba(28, 19, 15, .07); }
+.qlp-ql li:last-child { border-bottom: 0; }
+.qlp-ql button { display: flex; width: 100%; align-items: center; gap: 12px; min-height: 56px; padding: 10px 14px; border: 0; background: none; text-align: left; }
+.qlp-ql button:hover { background: #faf6f1; }
+.qlp .qlp-qi { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .25);
+  font: 500 12px/1 var(--sp-mono, ui-monospace, monospace); color: var(--ql-navy); }
+.qlp-qn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.qlp .qlp-qn b { font: 400 16px/1.3 var(--sp-type); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qlp-qs { display: flex; align-items: center; gap: 6px; margin-top: 2px; font-size: 14px; color: var(--sp-muted); min-width: 0; }
+.qlp-qs > span { color: var(--ql-ink); white-space: nowrap; }
+.qlp-qs em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: normal; }
+.qlp-chg { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .1); font-size: 14px; }
+.qlp-chg-r { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.qlp .qlp-chg-a, .qlp .qlp-chg-b { padding: 5px 10px; border-radius: 8px; font: 400 14px/1.2 var(--sp-type); background: #f2eee8; }
+.qlp .qlp-chg-b { background: var(--ql-blush); color: var(--ql-berry); }
+.qlp-chg svg { width: 16px; height: 16px; color: rgba(28, 19, 15, .4); }
+.qlp-chg ul { margin: 0; padding-left: 18px; color: var(--sp-muted); }
+.qlp-chip { display: inline-flex; align-items: center; gap: 6px; margin: 0 6px 6px 0; min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .14); font-size: 14px; }
+.qlp-chip svg { width: 14px; height: 14px; color: var(--ql-t62); }
+.qlp-chip--pk { background: var(--ql-navy); color: var(--ql-cream) !important; box-shadow: none; }
+.qlp-chip--pk svg { color: rgba(244, 238, 229, .75); }
+.qlp .qlp-none { font-style: italic; color: var(--sp-muted); font-size: 14px; }
+
+/* ── day one ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+.qlp-first { display: grid; grid-template-columns: 270px minmax(0, 760px); gap: 30px; align-items: start; padding-top: 0; justify-content: start; }
+.qlp-steps { list-style: none; counter-reset: qls; margin: 8px 0 0; padding: 0; display: grid; gap: 24px; }
+.qlp-steps li { counter-increment: qls; position: relative; padding-left: 52px; color: var(--sp-muted); }
+.qlp-steps li::before { content: counter(qls); position: absolute; left: 0; top: -2px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--ql-navy); color: var(--ql-cream); font: 400 16px/1 var(--sp-type); }
+.qlp .qlp-steps b { display: block; font: 400 20px/1.3 var(--sp-type); color: var(--ql-ink); }
+.qlp-quill { display: block; width: 74px; margin-bottom: 16px; }
+.qlp-first-p { background: #fff; border-radius: 6px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 18px 34px -22px rgba(28, 19, 15, .45); padding: 24px 24px 20px; }
+.qlp .qlp-first-p textarea { display: block; width: 100%; min-height: 360px; border: 0; outline: none; resize: vertical; padding: 24px 32px;
+  font: 400 16px/1.65 var(--sp-serif) !important; color: var(--ql-ink); background: #fbf9f5; border-radius: var(--sp-fld-r); box-shadow: var(--sp-fld-edge); }
+/* Phase 11: the letter's textarea takes the field's radius, edge and focus (6, .12 and 2px before); its height, its
+   paper ground and its writing line stay */
+.qlp .qlp-first-p textarea:focus { box-shadow: var(--sp-fld-focus); }
+.qlp-first-f { display: flex; align-items: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+.qlp-sp { flex: 1; }
+.qlp-fld { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.qlp .qlp-fld > span:first-child { font: 400 16px/1 var(--sp-type); }
+.qlp .qlp-fld input { height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18);
+  font: 400 16px/1 var(--sp-serif); color: var(--ql-ink); outline: none; }
+/* Phase 11: the field's focus edge (primitives.css `.sp-fld`) */ .qlp .qlp-fld input:focus { box-shadow: var(--sp-fld-focus); }
+
+/* ── loading: blocks at the columns' final sizes ─────────────────────────────────────────────────────────────── */
+.qlp-sk { display: block; border-radius: 12px; background: #ebe5db; }
+.qlp-sk--h2 { height: 34px; margin-bottom: 16px; border-radius: 6px; }
+.qlp-sk--row { height: 112px; margin-bottom: 8px; border-radius: 14px; background: rgba(255, 255, 255, .7); box-shadow: 0 0 0 1px #ebe5db; }
+.qlp-sk--name { height: 29px; width: 260px; border-radius: 6px; }
+.qlp-sk--meta { height: 18px; width: 220px; margin-top: 8px; border-radius: 6px; }
+.qlp-sk--paper { height: 560px; max-width: 760px; margin-top: 64px; border-radius: 6px; background: #fff; box-shadow: 0 0 0 1px #ebe5db; }
+.qlp-sk--cells { height: 82px; }
+.qlp-sk--list { height: 280px; margin-top: 54px; background: #fff; box-shadow: 0 0 0 1px #ebe5db; }
+
+/* the ref's narrower desktop: the rail drops under the letter below 1320px */
+@media (max-width: 1320px) {
+  /* the side panel drops under the letter, inside the same surface, full width, ruled along its top */
+  .qlp-work { grid-template-columns: minmax(0, 1fr); }
+  .qlp-work > .qlp-rail { position: static; border-left: 0; border-top: 1px solid rgba(28, 19, 15, .1); }
+}
+@media (max-width: 900px) {
+  .qlp-desk, .qlp-first { grid-template-columns: 1fr; gap: 24px; }
+  .qlp-desk > .qlp-list { position: static; grid-column: auto; max-height: none; }
+  .qlp-paper { padding: 32px 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qlp *, .qlp *::before, .qlp *::after { animation: none !important; transition: none !important; }
+}

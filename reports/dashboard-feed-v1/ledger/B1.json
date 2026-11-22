@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "B1",
+  "where": "population: the goals page read",
+  "ok": true,
+  "detail": "{\"count\":\"0\",\"target\":\"8\"}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982c population: card and sheet",
+  "ok": true,
+  "detail": "{\"book\":277.9375,\"goal\":277.9375,\"ring\":[\"0\",\"of 8\"]}"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982c the sheet's top is the card's bottom ±1",
+  "ok": true,
+  "detail": "277.9375 / 277.9375"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982c the ring says the goals code's count of its target",
+  "ok": true,
+  "detail": "[\"0\",\"of 8\"] vs 0/8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 population: card and sheet",
+  "ok": true,
+  "detail": "{\"book\":277.9375,\"goal\":277.9375,\"ring\":[\"0\",\"of 8\"]}"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 the sheet's top is the card's bottom ±1",
+  "ok": true,
+  "detail": "277.9375 / 277.9375"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 the ring says the goals code's count of its target",
+  "ok": true,
+  "detail": "[\"0\",\"of 8\"] vs 0/8"
+ },
+ {
+  "lock": "B1",
+  "where": "no goal: Set a weekly goal shows",
+  "ok": true,
+  "detail": "Set a weekly goal"
+ },
+ {
+  "lock": "B1",
+  "where": "no goal: the tiles and the streak still render",
+  "ok": true,
+  "detail": "{\"set\":\"Set a weekly goal\",\"sent\":true,\"added\":true,\"streak\":true}"
+ }
+]

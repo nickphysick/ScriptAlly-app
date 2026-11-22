@@ -1,0 +1,27 @@
+[
+ {
+  "name": "header height = the Query Centre's ±1",
+  "ok": true,
+  "got": "CL 227.2 · QC 227.1"
+ },
+ {
+  "name": "art column x and width ±1",
+  "ok": true,
+  "got": "CL 151.0/190.0 · QC 151.0/190.0"
+ },
+ {
+  "name": "headline's left x ±1",
+  "ok": true,
+  "got": "CL 408.0 · QC 408.0"
+ },
+ {
+  "name": "buttons' height ±1",
+  "ok": true,
+  "got": "CL 46.0 · QC 46.0"
+ },
+ {
+  "name": "header top = the Query Centre's ±1",
+  "ok": true,
+  "got": "CL 143.8 · QC 143.8"
+ }
+]

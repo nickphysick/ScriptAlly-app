@@ -1,0 +1,254 @@
+[
+ {
+  "lock": "F4",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "10 rows"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 msv12-agent-4 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 msv12-agent-4 Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 seed-cal-near no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 seed-cal-near Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 seed-cal-soon no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 seed-cal-soon Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 seed-cal-passed20 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 seed-cal-passed20 Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-06 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-06 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-08 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-08 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-09 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-09 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-07 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-07 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-05 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-05 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-13 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1512 cv25-agent-13 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "10 rows"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 msv12-agent-4 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 msv12-agent-4 Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 seed-cal-near no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 seed-cal-near Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 seed-cal-soon no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 seed-cal-soon Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 seed-cal-passed20 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 seed-cal-passed20 Log a query only",
+  "ok": false,
+  "detail": "log 1; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-06 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-06 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-08 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-08 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-09 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-09 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-07 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-07 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-05 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-05 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-13 no gaps button, no icons",
+  "ok": false,
+  "detail": "1 gaps, 0 icons"
+ },
+ {
+  "lock": "F4",
+  "where": "1280 cv25-agent-13 no actions",
+  "ok": false,
+  "detail": "log 0; others [Fill in 2 gaps →]"
+ }
+]

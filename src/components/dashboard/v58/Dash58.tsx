@@ -4,61 +4,94 @@
  *
  * DASHBOARD v58 — one screen (ref design-refs/dashboard/dashboard-v58.html).
  *
- * The header is the book being queried. Two framed cards down the left: active queries (today's
- * card and chart) over closed queries. The right column has no container: a typewriter title, one
- * item in focus, and the rest of the list under it. The activity feed is a drawer behind a
- * floating tab.
+ * The header is the book being queried. Down the left, the active-queries chart over the Closed and
+ * Agents on file hoop cards (v60). Down the right (v71), the task card, which cycles through the
+ * plan's items, over the founding writer card. The activity feed is a drawer behind a folder tab.
  *
  * ⚠️ NOTHING HERE WRITES A STATUS. Every action opens the flow that does: the query drawer
  * (`openQueryDrawer`), the agent card, or a route.
  */
-import { claimRightPanel, openQueryPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
+import { openQueryPanel, openResponse, responseHosted } from "../../../lib/queryPanelStore";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import type { Activity, Agent, Manuscript, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
+import { ComponentType } from "../../../types";
+import type { Activity, Agent, Manuscript, ManuscriptStatus, ManuscriptVersion, Query, SmartImportUsage, Task, TaskFlag, User, UserTask } from "../../../types";
 import { scopeActivities, scopeQueries, scopeTasks } from "../../../lib/manuscriptScope";
 import { localYMD } from "../../../lib/shellSidebar";
 import { liveCount, undatedLiveCount } from "../../../lib/dashBreakdown";
 import { closedTile } from "../../../lib/dashClosed";
 import { assembleBoardColumns } from "../../../lib/todoColumns";
 import { todoRows } from "../../../lib/dashTodo";
-import { dashList, focusOf, startingPlan, type ListAction } from "../../../lib/dashList";
+import { dashList, needsYouIds, type ListAction, type ListPlan } from "../../../lib/dashList";
+import { buildQcRows } from "../../../lib/qcSummary";
+import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
-import { feedEntries } from "../../../lib/dashFeed";
-import { todayCount } from "../../../lib/dashFeedDrawer";
-import { readFeedSeen, unseenCount, writeFeedSeen } from "../../../lib/dashFeedSeen";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
-import { queriesPathFor } from "../../../lib/queriesFilterParam";
+import { contactListForStatus } from "../../../lib/contactList";
 import { dashAid, useDashHold, type DashAid } from "../../../lib/dashReviewAid";
 import { readShape, writeShape } from "../../../lib/dashShape";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadline, noticeWhy, noticeToggle, NOTICE_DISMISS, type ImportNotice } from "../../../lib/importNotice";
 import { DashPopupProvider } from "../DashPopup";
-import { OneScreenChart } from "../OneScreenChart";
-import { Dash58Header } from "./Dash58Header";
-import { Dash58List } from "./Dash58List";
-import { Dash58Feed, FeedTab } from "./Dash58Feed";
-import { Dash59Panel, type PulseState } from "../v59/Dash59Panel";
-import { agentCoverage, firstUseTiles, isPreQuery, type TileKey } from "../../../lib/dashFirstUse";
-import { QueriesDoor, AgentsDoor, AgentsSnap, ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
-import { Dash60Lift } from "../v60/Dash60Lift";
-import { SpotProvider, WhereStart } from "../v60/WhereStart";
-import type { StartKey } from "../../../lib/dashFirstUse";
-import { switcherStanding } from "../../../lib/manuscriptStanding";
+import { F1Feed } from "../f1/F1Feed";
+import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
+import { AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { openFeedback } from "../../../lib/feedbackStore";
-import { pulseWeeks, readEcho, writeEcho, type Mood } from "../../../lib/weeklyPulse";
-import { readWeeklyPulse, sendWeeklyPulse } from "../../../lib/weeklyPulseClient";
+import { foundingFoldWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import type { UserPaths } from "../../../lib/userPaths";
+import { SetUpCard } from "../fv1/SetUpCard";
+import { GsSheet } from "../fv2/GsSheet";
+import { EmptyFeed } from "../fv2/EmptyFeed";
+import { FirstVisitTour } from "../fv2/FirstVisitTour";
+import { ExampleDashboard } from "../fv2/ExampleDashboard";
+import { ResumeCard } from "../fv2/ResumeCard";
+import { LoadFailed } from "../../notes/LoadFailed";
+import type { PageLoadFailure } from "../../notes/useLoadFailure";
+import { ReminderDone } from "../fv2/ReminderAsk";
+import { logEvent } from "../../../lib/events";
+import type { DraftMeta } from "../../../lib/importDraft";
+/* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase, and this page is also the onboarding ghost, mounted by
+   suites and the import loader with no Firebase to load */
+const draftStore = () => import("../../../lib/importDraft");
+import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState } from "../../../lib/dashTour";
+import { FirstWinStamp } from "../fv1/FirstWinStamp";
+import { Dash2Band } from "../v2/Dash2Band";
+import { wholeWeeksQuerying } from "../../../lib/dash2";
+import { expectedBack, howItsGoing, stageMarks, withoutContradictions } from "../../../lib/dash3";
+import { Dash3Expected } from "../v3/Dash3Expected";
+import { Dash3GsRow } from "../v3/Dash3GsRow";
+import { Dash3Reminder } from "../v3/Dash3Reminder";
+import { Dash2Next } from "../v2/Dash2Next";
+import { Dash2Active } from "../v2/Dash2Active";
+import { Dash2Founding } from "../v2/Dash2Founding";
+import { Dash2Hawk } from "../v2/Dash2Hawk";
 import "../oneScreen.css";
 import "./dash58.css";
 import "../v59/dash59.css";
 /* ⚠️ LAST: the bundle orders sheets by first import, and v60's rules win ties against v58's and v59's */
 import "../v60/dash60.css";
+/* ⚠️ AND v71 LAST OF ALL: its rules win ties against v58–v60's */
+import "../v71/dash71.css";
+/* ⚠️ AND v77 AFTER IT */
+import "../v77/dash77.css";
+import "../v105/dash105.css";
+/* ⚠️ AND THE FIRST VISIT LAST OF ALL (Dashboard first visit v1): its pre-query layout wins ties */
+import "../fv1/fv1.css";
+/* ⚠️ AND DASHBOARD FEED v1 AFTER EVERYTHING: the three-column layout (`data-mode="f1"`) wins every tie */
+import "../f1/df1.css";
+/* ⚠️ AND FIRST VISIT v2 AFTER FEED v1: every first-visit state in the three columns */
+import "../fv2/fv2.css";
+import "../v2/dash2.css";
+import "../v2/dash2Feed.css";
+/* ⚠️ AND DASHBOARD v3 LAST OF ALL: its rules win every tie */
+import "../v3/dash3.css";
 
 export interface Dash58Props {
   loading: boolean;
+  /** overnight fixes v1, Part 2 — a read that failed (the host's `useLoadFailure`); absent in labs and the example */
+  loadFailure?: PageLoadFailure | null;
   queries: Query[];
   agents: Agent[];
   manuscripts: Manuscript[];
@@ -73,10 +106,32 @@ export interface Dash58Props {
   now?: Date;
   /** v60: the "Import your journey" tile reads the entitlement from it */
   smartImportUsage?: SmartImportUsage | null;
+  /** v105: records the founding rank last celebrated (users.foundingSeenTier). Absent (the onboarding ghost) → no celebration, no write. */
+  onFoundingSeen?: (tier: number) => void | Promise<void>;
+  /** First visit v1: writes the page's own prefs (`todoPrefs.dash`, one dotted leaf each). Absent (the onboarding ghost) → nothing is stored. */
+  onPrefs?: (paths: UserPaths) => void | Promise<void>;
+  /** Dashboard feed v1: writes the querying goal from the goal sheet (the goals card's own write). Absent → read only. */
+  onGoal?: (patch: Partial<User>) => void | Promise<void>;
+  /** First visit v2 (Part B): the set-up answer changed on the dashboard — write the SAME fields sign-up wrote
+   *  (`User.queryingStage`, `Manuscript.status`). Absent (the onboarding ghost) → shown, never stored. */
+  onAnswer?: (msId: string, w: AnswerWrite) => void | Promise<void>;
+  /** First visit v2 (Part E): this mount is the example dashboard — sample data, no side effects of any kind */
+  example?: boolean;
 }
+
+/** Dashboard first visit v2 (Part A): the task card's last "Then:" while the Getting started sheet is open. */
+export const THEN_FINISH_GS = "finish getting started";
+/** First visit v2 (Part D): how long after the first loaded paint the tour opens — after the first paint's sequence
+ *  (`PAINT_MS`), so the spotlight opens on cards where they rest. */
+export const TOUR_SETTLE_MS = 1600;
+
+/** Dashboard feed v1, Part C: the founding card's footer line on this page. */
+export const FOUNDING_RANKS_F1 = "Top contributors win a weekly prize.";
 
 const NO_AID: DashAid = { drop: [], noClosed: false, noAgents: false };
 const NO_AGENTS: Agent[] = [];
+/** Before the first query the page draws no task card, so its plan is empty. */
+const EMPTY_PLAN: ListPlan = { groups: [], items: [], thenLabel: "Then", all: { label: "All", tab: "todo" } };
 
 /** The hawk's shadow, cast across the sheet (v59). The same versioned file the other pages place. */
 export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
@@ -84,8 +139,6 @@ export const DASH_SHADOW = { src: "/images/hawk-shadow.png", version: 1 };
 /** The first paint's whole length: the end dot finishes at 900 + 300 = 1200ms; a little after. */
 export const PAINT_MS = 1400;
 
-/** The panel's height below which its note's second sentence gives way (dash59.css `max-height: 178px`). */
-export const PANEL_FULL_H = 179;
 
 /** "14 Mar 2026" from an ISO date, read as written (no timezone arithmetic). */
 const noticeDate = (iso: string | null): string => {
@@ -141,9 +194,16 @@ const ImportNoticeRow: React.FC<{ notice: ImportNotice; onDismiss: () => void; o
   );
 };
 
+/** The feed column while the page loads (v1.1): plain shimmer blocks, a day heading then two entries,
+ *  repeated. No text, so it cannot say anything about data that has not arrived. */
+const FeedSkeleton: React.FC = () => (
+  <div className="d2-fsk" data-d2="feed-skeleton" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <i key={i} />)}</div>
+);
+
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
+  onFoundingSeen, onPrefs, onGoal, onAnswer, example = false, loadFailure,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -156,6 +216,9 @@ export const Dash58: React.FC<Dash58Props> = ({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const held = import.meta.env.MODE !== "production" ? useDashHold() : false;
   const loading = dataLoading || held;
+  /* overnight fixes v1, Part 2 — a failed read: the grid gives way to the error (never the set-up card or the empty
+     feed, both of which offer an import), and the band's figures show nothing rather than 0 */
+  const loadFail = loadFailure ?? null;
   const aid = import.meta.env.MODE !== "production" ? dashAid() : NO_AID;
   /* v60: the dev aid's "no agents" hands the page none (the day-one state); production never reads it */
   const agents = aid.noAgents ? NO_AGENTS : agentsIn;
@@ -176,12 +239,75 @@ export const Dash58: React.FC<Dash58Props> = ({
     return closedTile(aid.noClosed ? [] : scopedQueries, scopedActivities);
   }, [loading, scopedQueries, scopedActivities, aid.noClosed]);
 
+  /* ── first visit v1: the set-up answer, the tip, and Getting started ──
+     ⚠️ EVERY PREFERENCE IS A PREFERENCE, NEVER A SOURCE: the answer chooses a path and an order, the tip
+     index chooses which tip opens, and Hide hides a page. None of them is read by anything that counts. */
+  const prefs = useMemo(() => dashPrefsOf(currentUser), [currentUser]);
+  /* first visit v2 (Part B): the answer is the SIGN-UP answer. A change on the dashboard is held locally as well, so a
+     click shows at once (and the ghost, which has no writer, still answers); the held status is what the label reads
+     until the manuscript document comes back with it. */
+  const [answerHeld, setAnswerHeld] = useState<Record<string, { path: StartPath; status: ManuscriptStatus | null }>>({});
+  const heldNow = scopeId ? answerHeld[scopeId] : undefined;
+  const msStatus = heldNow?.status ?? activeManuscript?.status ?? null;
+  const path: StartPath | null = heldNow?.path ?? answerFor({ stage: currentUser?.queryingStage, status: activeManuscript?.status, legacy: legacyStartOf(prefs, scopeId) });
+  const choose = (c: AnswerChoice) => {
+    if (!scopeId) return;
+    const w = answerWrite(c, currentUser?.queryingStage, msStatus);
+    setAnswerHeld((o) => ({ ...o, [scopeId]: { path: pathAfter(c, msStatus), status: w.status ?? (msStatus as ManuscriptStatus | null) } }));
+    void onAnswer?.(scopeId, w);
+    /* Part I: the answer changed on the dashboard */
+    const to = pathAfter(c, msStatus);
+    if (!example && to !== (path ?? "ready")) logEvent(currentUser?.id, "path_changed", to, { from: path ?? "ready", to });
+  };
+  const logQuery = () => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
+  const addAgent = () => openNewAgentCard({ from: "button", host: "panel" });
+  const goGs = (go: GsLink) => {
+    if (go === "manuscript") onNavigate("manuscripts", "Add a manuscript");
+    else if (go === "agent") addAgent();
+    else if (go === "import") onNavigate("import");
+    else if (go === "log") logQuery();
+    /* the query letter is a material: it is written where the letter and synopsis are (Submission packages) */
+    else if (go === "materials" || go === "letter") onNavigate("manuscripts", "Submission packages");
+    else if (go === "discover") onNavigate("agents", "Discover");
+    /* first visit v2 (Part C): "It's ready →" is the ready answer — READY_TO_QUERY, and not querying yet */
+    else if (go === "ready") choose("ready");
+    else onNavigate("manuscripts", "Comparable titles");
+  };
+  const gsRows = useMemo(() => {
+    const shared = gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: scopedQueries.length, versions, activeManuscript });
+    /* Part C: a query-letter version saved for this book */
+    const letter = !!scopeId && versions.some((v) => v.manuscriptId === scopeId && v.componentType === ComponentType.QUERY_LETTER);
+    return gsOrder(path).map((k) => ({ key: k, done: gsRowDone(k, { shared, letter }) }));
+  }, [manuscripts, agents.length, scopedQueries.length, versions, activeManuscript, path, scopeId]);
+  const gsHidden = !!scopeId && !!prefs.gsHidden[seg(scopeId)];
+  /* first visit v2 (Part A): Getting started is the sheet under the manuscript card — always before the first query,
+     and afterwards while any row is undone and the writer has not hidden it. Otherwise the goal sheet has the slot. */
+  /* first visit v2 (Part H): every row done → the finish line, until it is closed; closed or hidden → the goal sheet */
+  const [gsClosedNow, setGsClosedNow] = useState(false);
+  const gsClosed = gsClosedNow || (!!scopeId && !!prefs.gsClosed[seg(scopeId)]);
+  const gsAllDone = gsRows.length > 0 && gsRows.every((r) => r.done);
+  const gsWhat = gsSlot({ pre: empty, hidden: gsHidden, closed: gsClosed, allDone: gsAllDone });
+  const gsSheetOpen = gsWhat !== "goal";
+  /* Part I: a Getting started row ticking while this page is mounted. The rows already done when it first loads are not
+     ticks; nor is anything in the ghost or the example. */
+  const gsSeen = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (loading || example || !currentUser || rootRef.current?.closest(".im-ghost")) return;
+    const done = new Set(gsRows.filter((r) => r.done).map((r) => r.key));
+    if (gsSeen.current) for (const k of done) if (!gsSeen.current.has(k)) logEvent(currentUser.id, "getting_started_step", path ?? "ready", { step: k });
+    gsSeen.current = done;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, gsRows]);
+  /* "Hide" only once the first query exists: before it, Getting started is the page's whole job */
+  const gsHide = !empty && scopeId && onPrefs && !example ? () => {
+    void onPrefs(gsHideWrite(scopeId));
+    logEvent(currentUser?.id, "getting_started_hidden", path ?? "ready");
+  } : undefined;
+
   /* ── the list: the board's own cards, then the contact list's, then the clock's ── */
   const plan = useMemo(() => {
-    /* first run: no query on this book yet, so the list is the getting-started deeds */
-    if (empty && aid.drop.length === 0) {
-      return startingPlan(gettingStartedRows({ manuscripts, agentCount: agents.length, queryCount: queries.length, versions, activeManuscript }), scopeId);
-    }
+    /* first run: no query on this book yet, so there is no task card at all (first visit v2, Part A) */
+    if (empty && aid.drop.length === 0) return EMPTY_PLAN;
     const cols = assembleBoardColumns({
       tasks: scopedTasks, userTasks, queries, agents, manuscripts, taskFlags, activities: scopedActivities,
       now: now.getTime(), today: localYMD(now.getTime()), mutedTaskRules: currentUser?.mutedTaskRules,
@@ -191,52 +317,32 @@ export const Dash58: React.FC<Dash58Props> = ({
     return dashList({
       rows, cards, queries, scopedQueries, agents, activities: scopedActivities, allActivities: activities,
       userTasks, manuscript: activeManuscript, user: currentUser, now, drop: aid.drop,
+      /* first visit v1 (Part C): Getting started stays a page — after the real tasks, before housekeeping — until
+         every row is done or the writer hides it */
+      /* first visit v2 (Part A): Getting started is a sheet under the manuscript card now, never a page of this card */
+      start: null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
 
-  const [step, setStep] = useState(0);
-  const focus = useMemo(() => focusOf(plan, step), [plan, step]);
-  useEffect(() => { if (step !== focus.index) setStep(focus.index); }, [step, focus.index]);
+  /* Dashboard v3, Phase 2: an agent who has asked for materials is never also a nudge or a close in Next up */
+  const nextPlan = useMemo(() => withoutContradictions(plan, queries), [plan, queries]);
 
-  /* ── the feed ── */
-  const feed30 = useMemo(
-    () => (loading ? [] : feedEntries({ activities: scopedActivities, queries, agents, manuscripts, now, seenAt: null })),
-    [loading, scopedActivities, queries, agents, manuscripts, now],
+  /* v2.1: the feed opens a big event only while its query is in Next up's "Agents are waiting" group */
+  const needsYou = useMemo(() => needsYouIds(plan), [plan]);
+
+  /* v71: the task card reads the Query Centre's own rows for the dates it draws */
+  const taskCtx = useMemo<TaskCtx>(
+    () => ({ queries, agents, qcRows: buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), nowMs: now.getTime() }),
+    [queries, agents, scopedQueries, scopedActivities, now],
   );
-  const today = todayCount(feed30, now);
-  const [feedOpen, setFeedOpen] = useState(false);
-  /* v59: the tab's unseen badge — entries newer than this account last opened the drawer */
-  const feedUid = currentUser?.id ?? "";
-  const [feedSeenAt, setFeedSeenAt] = useState<number | null>(() => readFeedSeen(feedUid));
-  useEffect(() => { setFeedSeenAt(readFeedSeen(feedUid)); }, [feedUid]);
-  const unseen = loading ? 0 : unseenCount(feed30, feedSeenAt, now);
-  const lastUnseen = useRef<number | null>(null);
-  const [bump, setBump] = useState(false);
-  useEffect(() => {
-    if (loading) return undefined;
-    const prev = lastUnseen.current;
-    lastUnseen.current = unseen;
-    if (prev === null || unseen <= prev) return undefined;
-    setBump(true);
-    const t = window.setTimeout(() => setBump(false), 260);
-    return () => window.clearTimeout(t);
-  }, [unseen, loading]);
-  const openFeed = () => {
-    const at = Date.now();
-    writeFeedSeen(feedUid, at);
-    setFeedSeenAt(at);
-    setFeedOpen(true);
-  };
-  /* Query panel v1 — one right-hand panel at a time: the feed says when it opens, and closes when a query does */
-  useEffect(() => {
-    if (!feedOpen) return undefined;
-    claimRightPanel("feed");
-    const off = subscribeRightPanel((o) => { if (o && o !== "feed") setFeedOpen(false); });
-    return () => { off(); releaseRightPanel("feed"); };
-  }, [feedOpen]);
+
+  /* Dashboard v3, Phase 4b: Expected back — the Query Centre's own clock, read off the same rows */
+  const expected = useMemo(() => expectedBack(taskCtx.qcRows, now.getTime()), [taskCtx, now]);
 
   const run = (a: ListAction) => {
+    /* Record a response v1 — a response is the query's card and its composer, over the dashboard */
+    if (a.kind === "drawer" && a.request.mode === "resp" && a.request.queryId && responseHosted()) { openResponse({ queryId: a.request.queryId, from: "dashboard" }); return; }
     if (a.kind === "drawer") openQueryDrawer({ ...a.request });
     else if (a.kind === "agent") openAgentCard(a.agentId, { tab: a.tab, focus: a.focus, from: "hk", sequence: a.sequence });
     else onNavigate(a.tab, a.sub);
@@ -250,45 +356,22 @@ export const Dash58: React.FC<Dash58Props> = ({
     if (qid) openQueryPanel(qid, "dashboard");
     else run(a);
   };
-
-  /* ── the founding writer panel's weekly pulse (v59) ──
-     One answer per ISO week, changeable within it. The face fills at once and the call runs; only
-     the server's yes shows "Noted" and moves this week's dot. A failure clears the face back to what
-     was stored and says so. The read of the five weeks never holds the panel back. */
-  const pulseUid = currentUser?.id ?? "";
-  const weeks = useMemo(() => pulseWeeks(now), [now]);
-  const thisWeek = weeks[4];
-  const [pulseHistory, setPulseHistory] = useState<(Mood | null)[]>([null, null, null, null, null]);
-  const [pulseStored, setPulseStored] = useState<Mood | null>(null);
-  const [pulseChosen, setPulseChosen] = useState<Mood | null>(null);
-  const [pulseState, setPulseState] = useState<PulseState>("idle");
-  useEffect(() => {
-    if (!pulseUid) return undefined;
-    let live = true;
-    const echo = readEcho(pulseUid, thisWeek);
-    if (echo) { setPulseStored(echo); setPulseChosen(echo); setPulseState("noted"); setPulseHistory((h) => [...h.slice(0, 4), echo]); }
-    void readWeeklyPulse(pulseUid, weeks).then((read) => {
-      if (!live) return;
-      const now4 = read[4] ?? echo;
-      setPulseHistory([...read.slice(0, 4), now4]);
-      if (read[4]) { setPulseStored(read[4]); setPulseChosen((c) => c ?? read[4]); setPulseState((st) => (st === "idle" ? "noted" : st)); }
-    });
-    return () => { live = false; };
-  }, [pulseUid, thisWeek, weeks]);
-  const choosePulse = (m: Mood) => {
-    if (!pulseUid || pulseState === "sending") return;
-    setPulseChosen(m);
-    setPulseState("sending");
-    sendWeeklyPulse(m, thisWeek).then(() => {
-      writeEcho(pulseUid, thisWeek, m);
-      setPulseStored(m);
-      setPulseHistory((h) => [...h.slice(0, 4), m]);
-      setPulseState("noted");
-    }, () => {
-      setPulseChosen(pulseStored);
-      setPulseState("failed");
-    });
+  /* Next up v1, Phase 3 — a lead button opens the slide-out AT the task's step, filled in and waiting: the query's panel,
+     with the task's own journey stepped into it (as the Query Centre's tray buttons do). The writer confirms there.
+     A response is the card's composer (`run`); a task about no query opens what it opens today. */
+  const stepTask = (a: ListAction) => {
+    const qid = a.kind === "drawer" && a.request.mode !== "log" && a.request.mode !== "resp" ? a.request.queryId : undefined;
+    if (!qid || a.kind !== "drawer") { run(a); return; }
+    const q = queries.find((x) => x.id === qid);
+    const ag = q ? agents.find((x) => x.id === q.agentId) : undefined;
+    const name = (ag?.name || ag?.agency || "The agent").trim();
+    openQueryPanel(qid, "dashboard", { ...a.request, panel: { name, agency: (ag?.name ? ag?.agency ?? "" : "").trim(), first: (ag?.name || "").trim().split(/\s+/)[0] ?? "" } });
   };
+
+  /* ── the founding writer card (v105): a press ID — the writer's name and founding number, feedback composed in the
+     card, the rank read live from their own `foundingStats` doc. The sidebar's Give feedback (FeedbackDock) is unchanged. */
+  /* the example (first visit v2, Part E) reads no founding stats: its writer is a sample */
+  const fwUid = example ? null : currentUser?.id ?? null;
 
   /* ── the page's own scrollport: the height the one screen fills ──
      ⚠️ MEASURED, NEVER `100vh`: the page starts under the top bar. `--d58-chrome` is the rest of
@@ -324,9 +407,24 @@ export const Dash58: React.FC<Dash58Props> = ({
       if (win) {
         const pr = port.getBoundingClientRect();
         set("--d58-inset-b", Math.max(0, win.bottom - pr.bottom) + (parseFloat(cs.paddingBottom) || 0));
-        const btns = root.querySelector('[data-d58="buttons"]')?.getBoundingClientRect();
-        if (btns && btns.width > 0) setSheet((o) => {
-          const r = Math.round(win.right - btns.right);
+        /* the buttons' right edge; before the first query there are none (first visit v1), so the header's
+           own content edge — where they would end — stands in for it */
+        /* Dashboard feed v1: the pinned feed column — its top is where it rests (the first left card's top, measured
+           at the page's own scroll offset, so it reads the same scrolled or not), and its foot is 14px above the
+           sheet's bottom. ⚠️ MEASURED, NEVER `100vh`. */
+        const cols = root.querySelector<HTMLElement>('[data-d2="grid"]');
+        if (cols) {
+          const stick = cols.getBoundingClientRect().top - pr.top + port.scrollTop - (parseFloat(cs.paddingTop) || 0);
+          set("--df1-stick", Math.max(0, stick));
+          set("--df1-feed-h", Math.max(320, win.bottom - 14 - (pr.top + (parseFloat(cs.paddingTop) || 0) + Math.max(0, stick))));
+        }
+        const btnEl = root.querySelector<HTMLElement>('[data-d58="buttons"]');
+        const head = root.querySelector<HTMLElement>('[data-d58="header"]') ?? cols;
+        const btns = btnEl?.getBoundingClientRect();
+        const edge = btns && btns.width > 0 ? btns.right
+          : head ? head.getBoundingClientRect().right - (parseFloat(getComputedStyle(head).paddingRight) || 0) : 0;
+        if (edge > 0) setSheet((o) => {
+          const r = Math.round(win.right - edge);
           return o && o.el === winEl && o.r === r ? o : { el: winEl!, r };
         });
       }
@@ -335,51 +433,15 @@ export const Dash58: React.FC<Dash58Props> = ({
     measure();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
     ro?.observe(port);
+    ro?.observe(root);
     window.addEventListener("resize", schedule);
     return () => { ro?.disconnect(); window.removeEventListener("resize", schedule); if (frame) window.cancelAnimationFrame(frame); };
   }, []);
 
-  /* ── the timeline gives way first (v59) ──
-     The pack's order of giving way is the focus card's timeline, THEN the panel's second sentence.
-     A media query cannot keep that order on every shell: the real header is taller than the ref's
-     (the beta strip, the book's title block), so at 1696×820 the panel lost its second sentence with
-     the timeline still showing. So it is MEASURED: while the timeline shows and the panel is below
-     the height that keeps both sentences, the timeline goes; it comes back only when the panel would
-     still keep them with the timeline's own height returned (the remembered height is the
-     hysteresis, so the two never chase each other). */
-  const [tight, setTight] = useState(false);
-  const tightRef = useRef(false);
-  const stagesH = useRef(0);
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root || loading) return undefined;
-    const check = () => {
-      const panel = root.querySelector<HTMLElement>('[data-d58="panel"][data-loading="0"]');
-      const ph = panel?.getBoundingClientRect().height ?? 0;
-      if (ph <= 0) return; // not laid out (another page is on screen)
-      if (!tightRef.current) {
-        const st = root.querySelector<HTMLElement>('[data-d58="focus-stages"]');
-        if (st && st.offsetHeight > 0 && ph < PANEL_FULL_H) {
-          const cs = getComputedStyle(st);
-          stagesH.current = st.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
-          tightRef.current = true;
-          setTight(true);
-        }
-      } else if (ph - stagesH.current >= PANEL_FULL_H) {
-        tightRef.current = false;
-        setTight(false);
-      }
-    };
-    check();
-    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => check()) : null;
-    const col = root.querySelector('[data-d58="right"]');
-    if (col) ro?.observe(col);
-    window.addEventListener("resize", check);
-    return () => { ro?.disconnect(); window.removeEventListener("resize", check); };
-  }, [loading, focus.item?.key]);
-
   const hoopNeedRef = useRef(0);
   /* ── v60: the left column's floor in the querying state — what the two hoop cards need ──
+     ⚠️ RESTORED IN DASHBOARD v71 PART E: retiring it with v60's grid was wrong — v71's `1.72fr 1fr` cut the
+     Closed legend at 1440×900 and the Agents legend at 1100×800 (DB71 G1). It now feeds v71's grid.
      Each card's width, less its legend's box, plus the legend's NATURAL width (a Range over each row,
      which is the text's own width whatever the column does — so this cannot feed back on itself). */
   useLayoutEffect(() => {
@@ -428,7 +490,7 @@ export const Dash58: React.FC<Dash58Props> = ({
       const n = need > 0 ? Math.ceil(need) : 0;
       /* remembered for the next loading page the moment it changes — the shape effect below runs before
          the webfonts land, and a floor written then is the narrower one */
-      if (n > 0 && n !== hoopNeedRef.current) writeShape({ ...readShape(), hoopNeed: n });
+      if (n > 0 && n !== hoopNeedRef.current && !example) writeShape({ ...readShape(), hoopNeed: n });
       hoopNeedRef.current = n;
       const v = need > 0 ? `${Math.ceil(need)}px` : "";
       if (root.style.getPropertyValue("--d60-hoop-need") !== v) {
@@ -443,47 +505,85 @@ export const Dash58: React.FC<Dash58Props> = ({
 
   /* ── what the loading page should be the shape of: this account's last loaded page ── */
   const [shape] = useState(() => readShape());
-  const focusRef = useRef<HTMLDivElement>(null);
+  const focusRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (loading) return;
     const h = focusRef.current?.getBoundingClientRect().height ?? 0;
-    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: unseen > 0, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
-  }, [loading, focus.item?.key, closed, unseen, shape.focusH, empty, agents.length]);
+    /* the example's shape is not the writer's: it is never remembered as the loading page's */
+    if (example) return;
+    writeShape({ focusH: h > 0 ? Math.round(h) : shape.focusH, closed: closed && closed.total === 0 ? "none" : "some", today: false, pre: empty, agents: agents.length > 0, hoopNeed: hoopNeedRef.current || shape.hoopNeed });
+  }, [loading, plan, closed, shape.focusH, empty, agents.length]);
 
   /* ── v60: first use, and the two hoops ──
      While loading, the page draws whichever state the shape memory last saw, so the swap never
      flashes; once loaded it is the one predicate's answer. */
   const pre = loading ? shape.pre : empty;
+  /* Dashboard v3, Phase 5: where Getting started sits — read off `pre`, so it follows the loading page's shape memory too.
+     All done is gone: v2's finish line is not drawn on this page. */
+  const gsLeft = gsRows.filter((r) => !r.done).length;
+  const gsPlace: "lead" | "under-next" | "row" | "none" = pre ? "lead" : !gsSheetOpen || gsLeft === 0 ? "none" : gsLeft === 1 ? "row" : "under-next";
   const hasAgents = loading ? shape.agents : agents.length > 0;
-  /* v60.1 "Where do I start?": page state only — nothing stored, nothing routed */
-  const [startOpen, setStartOpen] = useState(false);
-  const [startAnswer, setStartAnswer] = useState<StartKey | null>(null);
-  const spotValue = useMemo(() => ({ answer: pre ? startAnswer : null, hasAgents }), [pre, startAnswer, hasAgents]);
-  useEffect(() => { if (!pre) { setStartOpen(false); setStartAnswer(null); } }, [pre]);
+  /* first visit v2 (Part A): which first-visit state the page is in; while loading, the shape memory's */
+  /* ── first visit v2 (Part F): a Smart Import review left halfway, for this book (or for a book set-up has not made yet) ── */
+  const [draftMeta, setDraftMeta] = useState<DraftMeta | null>(null);
+  const draftUid = example ? null : currentUser?.id ?? null;
+  useEffect(() => {
+    if (!draftUid) { setDraftMeta(null); return undefined; }
+    let off: (() => void) | null = null;
+    let live = true;
+    void draftStore().then((m) => { if (live) off = m.subscribeDraftMeta(draftUid, setDraftMeta); });
+    return () => { live = false; off?.(); };
+  }, [draftUid]);
+  const resumeDraft = draftMeta && (draftMeta.manuscriptId === null || draftMeta.manuscriptId === scopeId) ? draftMeta : null;
+  const fvState: DashState = loading ? (shape.pre ? "pre" : "querying") : dashState(scopedQueries, !!resumeDraft);
+
+  /* ── first visit v2 (Part D): the three-stop tour ──
+     Decided ONCE, on the first loaded dashboard of an account (the stored flag): run it before the first query, or record
+     that it never runs (the first load already has queries). Finishing or skipping stores the flag; it never runs again
+     by itself. "Show me round again" in the "?" menu replays it in the pre-query and resume states. Never in the ghost. */
+  const [tour, setTour] = useState<number | null>(null);
+  const tourDecided = useRef(false);
+  const tourTimer = useRef(0);
+  /* the onboarding ghost and the example (Part E) are for show: neither decides, registers or writes the tour */
+  const isGhost = () => example || !!rootRef.current?.closest(".im-ghost");
+
+  /* ── first visit v2 (Part E): the example dashboard, opened from the empty feed ── */
+  const [exampleOpen, setExampleOpen] = useState(false);
+  const openExample = () => { setExampleOpen(true); logEvent(currentUser?.id, "example_opened", path ?? "ready"); };
+  const closeExample = React.useCallback(() => setExampleOpen(false), []);
+  useEffect(() => {
+    if (loading || !onDash || !currentUser || tourDecided.current || isGhost()) return;
+    tourDecided.current = true;
+    const d = tourDecision(prefs.tour, fvState);
+    /* Part I: the account's first loaded dashboard is the one where the tour is still undecided */
+    if (d !== "none") logEvent(currentUser.id, "dashboard_first_seen", path ?? "ready");
+    if (d === "never") void onPrefs?.(TOUR_DONE_PATH);
+    /* after the page has settled: the first paint's sequence is over and the cards are where they rest */
+    else if (d === "run") tourTimer.current = window.setTimeout(() => setTour(0), TOUR_SETTLE_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, onDash, currentUser, fvState, prefs.tour]);
+  useEffect(() => () => window.clearTimeout(tourTimer.current), []);
+  /* the tour belongs to the pre-query page: if the page leaves that state (a query logged in another tab), it ends */
+  useEffect(() => { if (tour !== null && !loading && !tourState(fvState)) setTour(null); }, [tour, loading, fvState]);
+  const endTour = (how: "finished" | "skipped") => {
+    const stop = (tour ?? 0) + 1;
+    setTour(null);
+    if (!currentUser) return;
+    void onPrefs?.(TOUR_DONE_PATH);
+    logEvent(currentUser.id, how === "finished" ? "tour_finished" : "tour_skipped", path ?? "ready", { stop });
+  };
+  const nextStop = () => { if (tour === null) return; if (tour + 1 >= TOUR_STOPS.length) endTour("finished"); else setTour(tour + 1); };
+  useEffect(() => {
+    if (isGhost()) return undefined;
+    if (!onDash || loading || !tourState(fvState)) { registerTourReplay(null); return undefined; }
+    registerTourReplay(() => setTour(0));
+    return () => registerTourReplay(null);
+  }, [onDash, loading, fvState]);
   const cov = useMemo(
     () => agentCoverage({ agents, queries, manuscript: activeManuscript, now, todayIso: localYMD(now.getTime()) }),
     [agents, queries, activeManuscript, now],
   );
-  const tiles = useMemo(
-    () => firstUseTiles({ plan: currentUser?.plan, usage: smartImportUsage, manuscript: activeManuscript, versions, now }),
-    [currentUser?.plan, smartImportUsage, activeManuscript, versions, now],
-  );
-  /* ⚠️ EACH TILE OPENS AN EXISTING PAGE. The add-material button (Submission packages), the comps add
-     drawer and the version dialog (Manuscripts) are each the page's own state with no door from
-     outside, so the tile lands on the page that holds the button — never a route invented here. */
-  const onTile = (k: TileKey) => {
-    if (k === "import") onNavigate("import");
-    else if (k === "mats") onNavigate("manuscripts", "Submission packages");
-    else if (k === "comps") onNavigate("manuscripts", "Comparable titles");
-    else onNavigate("manuscripts");
-  };
   const toContacts = () => onNavigate("agents");
-  /* "Log a query" on the queries door: with agents, the drawer's log journey; with none, the new-agent
-     card first (its own "Log a query" door then opens the drawer), as the hint says */
-  const logFromDoor = () => {
-    if (agents.length === 0) openNewAgentCard({ from: "button" });
-    else openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) });
-  };
 
   /* ── the skipped-rows line: read for this account, and read again whenever it changes ──
      This page stays mounted while the writer is on the Import page, so reading once showed the
@@ -515,117 +615,122 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => window.clearTimeout(t);
   }, [loading]);
 
+  /* Dashboard v3, Phase 1: the header's stage marks — current-stage counts for this manuscript */
+  const marks = useMemo(() => stageMarks(scopedQueries), [scopedQueries]);
+  /* Phase 4a: the chart's third view — sent, ever asked for more, ever an offer */
+  const going = useMemo(() => (loading ? null : howItsGoing(scopedQueries, scopedActivities, agents, now.getTime())), [loading, scopedQueries, scopedActivities, agents, now]);
   const author = (currentUser?.name ?? "").trim();
-  /* v60.1: the eyebrow reads the sidebar's own function */
-  const standing = activeManuscript ? switcherStanding(activeManuscript, scopedQueries) : null;
   const title = (activeManuscript?.title ?? "").trim();
 
+  /* ── first visit v2 (Part G): the nudge-email ask — once per account, after its first query, under that query's row ── */
+  const [reminderSaid, setReminderSaid] = useState<"yes" | "not_now" | null>(null);
+  const firstQuery = useMemo(() => {
+    const dated = queries.filter((q) => q.dateSent).sort((a, b) => Date.parse(a.dateSent!) - Date.parse(b.dateSent!));
+    return dated[0] ?? queries[0] ?? null;
+  }, [queries]);
+  const askReminder = !loading && !example && !!currentUser && !!onPrefs && !!firstQuery && reminderSaid === null
+    && shouldAskReminder({ queries: queries.length, answered: prefs.reminder, storedNudges: (currentUser?.notifyPrefs as { nudges?: unknown } | undefined)?.nudges });
+  const reminderNode = askReminder && firstQuery ? (
+    /* Dashboard v3, Phase 2: the ask as one line — same two answers, same writes */
+    <Dash3Reminder
+      onYes={() => { setReminderSaid("yes"); void onPrefs?.(REMINDER_YES); logEvent(currentUser?.id, "reminder_answered", path ?? "ready", { answer: "yes" }); }}
+      onNotNow={() => { setReminderSaid("not_now"); void onPrefs?.(REMINDER_NOT_NOW); logEvent(currentUser?.id, "reminder_answered", path ?? "ready", { answer: "not_now" }); }}
+    />
+  ) : reminderSaid === "yes" ? <ReminderDone onSettings={() => navigate("/account")} /> : null;
+
+  /* ── the querying page's cards (Dashboard feed v1). Each is the app's own component; the layout below places them. ── */
+  /* ⚠️ DASHBOARD v3, Phase 2: the Closed queries card is off the Dashboard (ClosedHoop stays exported in v60/Dash60Left) */
+  const agentsCard = (
+    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts}
+      /* v118 Part B — a slice or row opens the Contact list filtered to that status */
+      onOpen={(k) => navigate(contactListForStatus(k))}
+      agents={agents} queries={queries} msId={scopeId}
+      onDiscover={() => onNavigate("agents", "Discover")} onImport={() => onNavigate("import")} onAddAgent={addAgent} />
+  );
+
   return (
-    <div ref={rootRef} className="os-root d58" data-paint={paint ? "1" : undefined} data-tight={tight ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
+    <div ref={rootRef} className="os-root d58 d2" data-mode="d2" data-scope={scopeId ?? ""} data-fv2={fvState} data-paint={paint ? "1" : undefined} style={noticeListH > 0 ? ({ ["--d58-notice-list-h" as string]: `${noticeListH}px` } as React.CSSProperties) : undefined}>
       <DashPopupProvider rootRef={rootRef}>
         <div className="d58-page" data-d58="page" data-loading={loading ? "1" : "0"}>
+          {exampleOpen ? <ExampleDashboard onBack={closeExample} /> : (<>
           {notice && <ImportNoticeRow notice={notice} onDismiss={dismissNotice} onListHeight={setNoticeListH} />}
-          <Dash58Header
-            loading={loading}
-            title={title}
-            author={author}
-            onLog={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
-            onRecord={() => onNavigate("queries", "Record a response")}
-            onAddAgent={() => onNavigate("agents", "Add an agent")}
-            status={standing?.status ?? null}
-            start={pre ? <WhereStart hasAgents={hasAgents} open={startOpen} setOpen={setStartOpen} answer={startAnswer} setAnswer={setStartAnswer} disabled={loading} /> : undefined}
-          />
-          <SpotProvider value={spotValue}>
-          <div className="d58-body" data-d58="body">
-            <div className="d58-left" data-d58="left" data-pre={pre ? "1" : "0"}>
-              {pre ? (
-                <>
-                  <QueriesDoor loading={loading} agents={loading ? (hasAgents ? 1 : 0) : agents.length} onLog={logFromDoor} />
-                  {hasAgents
-                    ? <AgentsSnap loading={loading} cov={cov} onReady={toContacts} />
-                    : <AgentsDoor loading={loading} onAdd={() => openNewAgentCard({ from: "button" })} onImport={() => onNavigate("import")} />}
-                </>
-              ) : (
-                <>
-                  <div className="d58-active" data-d58="active">
-                    <OneScreenChart
-                      loading={loading}
-                      queries={scopedQueries}
-                      activities={scopedActivities}
-                      agents={agents}
-                      manuscripts={manuscripts}
-                      /* Query panel v1: the query opens in the side panel, over this page */
-                      onOpenQuery={(id) => openQueryPanel(id, "dashboard")}
-                      activeCount={activeCount}
-                      undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)}
-                      now={now}
-                      empty={empty}
-                      onSendFirst={() => openQueryDrawer({ mode: "log", ...(scopeId ? { manuscriptId: scopeId } : {}) })}
-                    />
-                  </div>
-                  {/* v60: Closed folds into a pair of hoops beneath the full-width chart, beside Agents on file */}
-                  <div className="d60-hoops" data-d60="hoops">
-                    <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))} />
-                    <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts} />
-                  </div>
-                </>
+          {/* ⚠️ DASHBOARD v2 (3 Nov) as v2.2 lays it out (6 Nov; ref design-refs/dashboard-v2-2): the navy title band, the
+              founding writer band, then three columns of framed cards — left: Next up, then Agents on file · middle: the
+              queries chart, then Closed queries · right: the feed, as tall as the grid row (so its scroll area ends level
+              with the taller of the other two columns). Before the first query the middle holds the set-up card and the
+              right the empty feed. */}
+          {/* Dashboard v3, Phase 1: the stage marks in the band; Log a query is the top bar's alone */}
+          <Dash2Band loading={loading} title={title} author={author}
+            weeks={loading || loadFail ? null : wholeWeeksQuerying(scopedQueries, now)}
+            marks={loading || loadFail ? [] : marks}
+            onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
+          {/* ⚠️ DASHBOARD v2.2 (Part A; ref design-refs/dashboard-v2-2): the founding writer is a full-width band under the
+              navy header, never a card inside a column. */}
+          {/* Part D: the rank last celebrated is `users.foundingSeenTier` (v105's field); never written from the ghost or the example */}
+          <Dash2Founding loading={loading} uid={fwUid} seenTier={currentUser?.foundingSeenTier}
+            onSeen={example || !onFoundingSeen ? undefined : onFoundingSeen}
+            /* Part E: the fold is `todoPrefs.dash.foundingFolded`, one dotted leaf; absent onPrefs → this view's only */
+            folded={prefs.foundingFolded} onFold={onPrefs && !example ? (f) => onPrefs(foundingFoldWrite(f)) : undefined}
+            onAllNotes={example ? undefined : () => navigate("/your-notes")} />
+          {loadFail ? <LoadFailed words={loadFail.words} onRetry={loadFail.retry} busy={loadFail.busy} probe="dashboard" /> : (
+          <div className="d2-grid" data-d2="grid">
+            {/* ⚠️ DASHBOARD v3 (ref design-refs/dashboard-v3.html), Phase 2: left — Next up, Agents on file, Getting started;
+                middle — the chart, then Expected back; right — the feed */}
+            <div className="d2-col d2-left" data-d2="left" data-gs={gsPlace}>
+              {/* Dashboard v3, Phase 5: Getting started by stage — before the first query the full card leads and Next up is
+                  not drawn; two or more steps left, the full card under Next up; one step left, one row under Agents on file;
+                  all done or hidden, gone */}
+              {!pre && <Dash2Next loading={loading} plan={nextPlan} ctx={taskCtx} onView={viewTask} onStep={stepTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
+              {(gsPlace === "lead" || gsPlace === "under-next") && (
+                <div className="d2-gs" data-d2="gs-slot">
+                  <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide} />
+                </div>
               )}
+              {agentsCard}
+              {gsPlace === "row" && <Dash3GsRow rows={gsRows} path={path} onGo={goGs} onHide={gsHide} />}
             </div>
-            <Dash58List
-              loading={loading}
-              focusH={shape.focusH}
-              plan={plan}
-              focus={focus}
-              focusRef={focusRef}
-              onStep={setStep}
-              onView={viewTask}
-              onRun={run}
-              onAll={() => onNavigate("todo")}
-              onAddAgent={() => onNavigate("agents", "Add an agent")}
-              lift={pre ? <Dash60Lift loading={loading} tiles={tiles} hasAgents={hasAgents} onTile={onTile} /> : undefined}
-              panel={
-                <Dash59Panel
-                  loading={loading}
-                  history={pulseHistory}
-                  chosen={pulseChosen}
-                  state={pulseState}
-                  onChoose={choosePulse}
-                  onChange={() => setPulseState("idle")}
-                  onFeedback={openFeedback}
-                />
-              }
-            />
+            <div className="d2-col d2-mid" data-d2="mid">
+              {pre ? (
+                <div className="d2-setup" data-d2="setup">
+                  {fvState === "resume" && resumeDraft ? (
+                    <ResumeCard meta={resumeDraft} now={now}
+                      onCarryOn={() => navigate("/import?resume=1")}
+                      onStartAgain={() => { if (draftUid) void draftStore().then((m) => m.deleteDraft(draftUid)).finally(() => navigate("/import?start=smart")); }} />
+                  ) : <SetUpCard
+                    loading={loading} title={title} path={path} onChoose={choose}
+                    agents={loading ? (hasAgents ? 1 : 0) : agents.length}
+                    onImport={() => onNavigate("import")} onLog={logQuery} onAddAgent={addAgent} onDiscover={() => onNavigate("agents", "Discover")}
+                    onComps={() => goGs("comps")}
+                  />}
+                </div>
+              ) : (
+                <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} agents={agents}
+                  activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} going={going} />
+              )}
+              {/* before the first query, a labelled example; afterwards, the clock's own rows. A row opens its query's card. */}
+              <Dash3Expected loading={loading} model={pre ? null : expected}
+                onOpen={(id) => openQueryPanel(id, "dashboard")} onAll={() => onNavigate("queries")} />
+            </div>
+            <div className="d2-right" data-d2="right">
+              <div className="d2-feed" data-d2="feed">
+                {loading ? <FeedSkeleton /> : pre ? <EmptyFeed onExample={example ? undefined : openExample} /> : (
+                  <F1Feed loading={loading} activities={scopedActivities} queries={queries} agents={agents} manuscripts={manuscripts} userName={author} now={now}
+                    needsYou={needsYou}
+                    under={reminderNode && firstQuery ? { queryId: firstQuery.id, node: reminderNode } : null} />
+                )}
+              </div>
+            </div>
+            <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !example && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
           </div>
-          </SpotProvider>
+          )}
+          {tour !== null && onDash && !loadFail && <FirstVisitTour stop={tour} onNext={nextStop} onSkip={() => endTour("skipped")} />}
+          </>)}
         </div>
-
       </DashPopupProvider>
-      {/* ⚠️ ONLY WHILE THE DASHBOARD IS THE PAGE ON SCREEN: every page stays mounted, and a layer
-          portalled into the shell's sheet outlives its page otherwise. Never in the onboarding ghost. */}
-      {sheet && onDash && !rootRef.current?.closest(".im-ghost") && createPortal(
-        <div className="d58-layer d59-sheet" data-d58="sheet-layer" style={{ ["--d59-tab-r" as string]: `${sheet.r}px` } as React.CSSProperties}>
-          <img className="d59-hawkshadow" data-d58="shadow" alt="" aria-hidden="true" draggable={false} src={`${DASH_SHADOW.src}?v=${DASH_SHADOW.version}`} />
-          <FeedTab open={feedOpen} unseen={loading ? (shape.today ? -1 : 0) : unseen} bump={bump} onOpen={openFeed} />
-        </div>,
-        sheet.el,
-      )}
-      {feedOpen && (
-        <Dash58Feed
-          title={title}
-          activities={scopedActivities}
-          queries={queries}
-          scopedQueries={scopedQueries}
-          agents={agents}
-          manuscripts={manuscripts}
-          now={now}
-          onClose={() => setFeedOpen(false)}
-          onAct={(queryId, mode) => {
-            /* the drawer closes first: one asking surface at a time, and the flow is not behind it */
-            setFeedOpen(false);
-            openQueryDrawer(mode === "offer" ? { mode, queryId, preset: { step: 1 } } : { mode, queryId });
-          }}
-        />
-      )}
+      {/* ⚠️ DASHBOARD v2 (Part F): the hawk in the corner, ONLY WHILE THE DASHBOARD IS THE PAGE ON SCREEN — every page
+          stays mounted. Portalled to <body>, so a transform on the stage page can never become his containing block.
+          Never in the onboarding ghost or the example. The v59 shadow layer it replaces is retired. */}
+      {onDash && !example && !exampleOpen && typeof document !== "undefined" && !rootRef.current?.closest(".im-ghost") && createPortal(<Dash2Hawk />, document.body)}
     </div>
   );
 };

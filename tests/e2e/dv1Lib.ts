@@ -45,10 +45,13 @@ export class Ledger {
 
 /** one named break per lock, applied in the page */
 export const MUTATIONS: Record<string, { css?: string; js?: string }> = {
+  /* RETIRED (Workspace headers v1, 14 Nov): both B1 header locks are skipped (v1's light header and its `.dv1-rg` ring are
+     gone; this break's targets no longer exist). Successor: tests/e2e/wsHeaders.measure.ts H1 "discover". Kept for the record. */
   /* the ring's box sized by its content (the loading face has no figure, so it collapses) */
   B1: { css: `.dv1-rg { width: auto !important; height: auto !important; } .dv1-rg svg { width: auto !important; height: auto !important; } .dv1-hd[data-loading] .dv1-rg svg { display: none !important; }` },
   /* a stroke on the empty ring: the "none" state draws an arc anyway */
-  B2: { js: `(() => { const fix = () => { for (const svg of document.querySelectorAll('[data-dv1="ring"] svg')) { if (svg.querySelector('[data-dv1="ring-arc"]')) continue; const c = document.createElementNS("http://www.w3.org/2000/svg", "circle"); for (const [k, v] of [["data-dv1", "ring-arc"], ["cx", "42"], ["cy", "42"], ["r", "36"], ["fill", "none"], ["stroke", "#2a3a52"], ["stroke-width", "8"], ["stroke-linecap", "round"], ["stroke-dasharray", "0 226.19"]]) c.setAttribute(k, v); svg.appendChild(c); } }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); fix(); })()` },
+  /* RE-POINTED (Workspace headers v1, 14 Nov): the ring is the navy header's (`[data-wsnh="ring"]`, arc `[data-wsnh="ring-arc"]`, r 50) */
+  B2: { js: `(() => { const fix = () => { for (const svg of document.querySelectorAll('[data-wsnh-page="discover"] [data-wsnh="ring"] svg')) { if (svg.querySelector('[data-wsnh="ring-arc"]')) continue; const c = document.createElementNS("http://www.w3.org/2000/svg", "circle"); for (const [k, v] of [["data-wsnh", "ring-arc"], ["cx", "60"], ["cy", "60"], ["r", "50"], ["fill", "none"], ["stroke", "#f4eee5"], ["stroke-width", "10"], ["stroke-linecap", "round"], ["stroke-dasharray", "0 314.16"]]) c.setAttribute(k, v); svg.appendChild(c); } }; new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); fix(); })()` },
   /* the class collision restored: the catalogue section's rules on the lead card's slate band */
   C1T: { css: `.dv1-band { position: relative !important; margin-top: 72px !important; padding: 56px 0 64px !important; }` },
   /* the facts' reflow by viewport instead of the card */
@@ -92,7 +95,9 @@ export async function openDiscover(page: Page, vp: VP, state: DvState, opts: { m
   await page.waitForFunction(({ f, held }) => {
     const r = [...document.querySelectorAll('[data-dv1="page"]')].find((e) => e.getBoundingClientRect().height > 0);
     if (!r || r.getAttribute("data-face") !== f) return false;
-    const loading = !!r.querySelector('[data-dv1="header"][data-loading]');
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the shared header has no `data-loading`; the live face is loaded once the
+       picks section (`[data-dv1="picks"]`, rendered in every live state once the queue has answered) is on the page */
+    const loading = f === "live" && !r.querySelector('[data-dv1="picks"]');
     return held ? true : !loading;
   }, { f: face, held: !!opts.holdMs }, { timeout: 30_000 });
   await page.waitForTimeout(300);
@@ -185,7 +190,8 @@ export async function ownedPage(browser: Browser, baseURL: string, vp: VP, face:
   await page!.waitForFunction((f) => {
     const r = [...document.querySelectorAll('[data-dv1="page"]')].find((e) => e.getBoundingClientRect().height > 0);
     if (!r || r.getAttribute("data-face") !== f) return false;
-    return f === "soon" ? !!r.querySelector('[data-dv1="coming-soon"]') : !r.querySelector('[data-dv1="header"][data-loading]') && !!r.querySelector('[data-dv1="picks"]');
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the header's `data-loading` is gone; `[data-dv1="picks"]` alone is the live face's readiness */
+    return f === "soon" ? !!r.querySelector('[data-dv1="coming-soon"]') : !!r.querySelector('[data-dv1="picks"]');
   }, face, { timeout: 45_000 });
   await page!.waitForTimeout(400);
   return { ctx: ctx!, page: page! };

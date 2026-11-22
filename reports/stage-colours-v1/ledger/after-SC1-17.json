@@ -1,0 +1,12 @@
+[
+ {
+  "name": "both Contact list shots exist",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Contact list: identical bytes",
+  "ok": true,
+  "got": "304474 / 304474"
+ }
+]

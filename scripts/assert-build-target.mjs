@@ -88,4 +88,10 @@ if (!hasIntended || hasForbidden) {
   process.exit(1);
 }
 
+/* Crash reporting v1: the dev crash trigger is gated on MODE and must not reach a production build. */
+if (target === "prod" && bundle.includes("qh-crash")) {
+  console.error(`\n✖ The dev crash trigger reached the production bundle. It is gated on MODE in src/components/PageBoundary.tsx.\n`);
+  process.exit(1);
+}
+
 console.log(`✓ build target OK: bundle targets ${intended} (${target}); ${forbidden} absent.`);

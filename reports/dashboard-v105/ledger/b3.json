@@ -1,0 +1,476 @@
+[
+ {
+  "lock": "B3",
+  "where": "1440x900 like the question",
+  "ok": true,
+  "detail": "What do you like?"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 like the placeholder",
+  "ok": true,
+  "detail": "Tell us what’s working for you…"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 like the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 like Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 like Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 like Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 like one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"Something I liked\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 like the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"Something I liked\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screenshot"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont the question",
+  "ok": true,
+  "detail": "What isn’t working?"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont the placeholder",
+  "ok": true,
+  "detail": "What happened, or where did you get stuck?"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont two chips, broken selected by default",
+  "ok": true,
+  "detail": "[[\"Something's broken\",\"true\"],[\"Something's confusing\",\"false\"]]"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"Something's broken\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's broken\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screensho"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) the question",
+  "ok": true,
+  "detail": "What isn’t working?"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) the placeholder",
+  "ok": true,
+  "detail": "What happened, or where did you get stuck?"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) two chips, broken selected by default",
+  "ok": true,
+  "detail": "[[\"Something's broken\",\"true\"],[\"Something's confusing\",\"false\"]]"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"Something's confusing\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 dont (confusing) the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's confusing\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screen"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea the question",
+  "ok": true,
+  "detail": "What would you add?"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea the placeholder",
+  "ok": true,
+  "detail": "Something you wish QueryHawk did…"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"An idea\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1440x900 idea the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"An idea\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screenshotPath\":\"\",\""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like the question",
+  "ok": true,
+  "detail": "What do you like?"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like the placeholder",
+  "ok": true,
+  "detail": "Tell us what’s working for you…"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"Something I liked\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 like the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"Something I liked\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screenshot"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont the question",
+  "ok": true,
+  "detail": "What isn’t working?"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont the placeholder",
+  "ok": true,
+  "detail": "What happened, or where did you get stuck?"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont two chips, broken selected by default",
+  "ok": true,
+  "detail": "[[\"Something's broken\",\"true\"],[\"Something's confusing\",\"false\"]]"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"Something's broken\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's broken\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screensho"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) the question",
+  "ok": true,
+  "detail": "What isn’t working?"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) the placeholder",
+  "ok": true,
+  "detail": "What happened, or where did you get stuck?"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) two chips, broken selected by default",
+  "ok": true,
+  "detail": "[[\"Something's broken\",\"true\"],[\"Something's confusing\",\"false\"]]"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"Something's confusing\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 dont (confusing) the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"Something's confusing\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screen"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea the question",
+  "ok": true,
+  "detail": "What would you add?"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea the placeholder",
+  "ok": true,
+  "detail": "Something you wish QueryHawk did…"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea the textarea has focus",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea Send is disabled when empty",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea Send is disabled for whitespace",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea Send is enabled with text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea one payload, the kind sent",
+  "ok": true,
+  "detail": "[\"An idea\"]"
+ },
+ {
+  "lock": "B3",
+  "where": "1366x768 idea the message and the fields",
+  "ok": true,
+  "detail": "{\"kind\":\"An idea\",\"message\":\"The filter resets every time I come back to the page.\",\"severity\":\"\",\"wantsReply\":true,\"pageName\":\"Dashboard\",\"screenshotPath\":\"\",\""
+ },
+ {
+  "lock": "B3",
+  "where": "refusal: still composing",
+  "ok": true,
+  "detail": "write"
+ },
+ {
+  "lock": "B3",
+  "where": "refusal: the text is kept",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "refusal: the line",
+  "ok": true,
+  "detail": "That didn’t send. Try again?"
+ },
+ {
+  "lock": "B3",
+  "where": "✕ returns to idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "the text is kept after ✕",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "compact like: the panel opens on Something I liked",
+  "ok": true,
+  "detail": "Something I liked"
+ },
+ {
+  "lock": "B3",
+  "where": "compact like: the card stays idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "compact dont: the panel opens on Something's broken",
+  "ok": true,
+  "detail": "Something's broken"
+ },
+ {
+  "lock": "B3",
+  "where": "compact dont: the card stays idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B3",
+  "where": "compact idea: the panel opens on An idea",
+  "ok": true,
+  "detail": "An idea"
+ },
+ {
+  "lock": "B3",
+  "where": "compact idea: the card stays idle",
+  "ok": true,
+  "detail": ""
+ }
+]

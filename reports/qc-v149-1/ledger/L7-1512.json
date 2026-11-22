@@ -1,0 +1,17 @@
+[
+ {
+  "where": "population: the header row",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "its background is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "where": "…over its hairline",
+  "ok": true,
+  "detail": "1px"
+ }
+]

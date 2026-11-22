@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 elements swept (population)",
+  "ok": true,
+  "detail": "1356"
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 unpinned: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 the guide's item reads \"Go full screen\"",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 guide open: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 scrolled: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 full screen: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1512 F ticked the guide's item",
+  "ok": true,
+  "detail": "{\"edit\":true,\"add\":true,\"open\":true,\"pin\":true}"
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 elements swept (population)",
+  "ok": true,
+  "detail": "1303"
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 unpinned: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 the guide's item reads \"Go full screen\"",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 guide open: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 scrolled: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 full screen: no Pin / Unpin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-G2",
+  "where": "@1280 F ticked the guide's item",
+  "ok": true,
+  "detail": "{\"edit\":true,\"add\":true,\"pin\":true,\"open\":true}"
+ }
+]

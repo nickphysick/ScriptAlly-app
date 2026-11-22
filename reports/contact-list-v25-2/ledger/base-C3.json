@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C3",
+  "where": "Query Centre's agent tab gap (QueryAgentTab)",
+  "ok": false,
+  "detail": "{\"panelEdit\":false,\"legacy\":3}"
+ },
+ {
+  "lock": "C3",
+  "where": "Dashboard housekeeping (Dash58)",
+  "ok": false,
+  "detail": "{\"panelEdit\":false,\"legacy\":3}"
+ },
+ {
+  "lock": "C3",
+  "where": "To-do data-quality task (TodoTray)",
+  "ok": false,
+  "detail": "{\"panelEdit\":false,\"legacy\":3}"
+ },
+ {
+  "lock": "C3",
+  "where": "an editor asked for with carried answers",
+  "ok": false,
+  "detail": "{\"panelEdit\":false,\"legacy\":3}"
+ },
+ {
+  "lock": "C3",
+  "where": "the quick view is open",
+  "ok": true,
+  "detail": "pencil"
+ },
+ {
+  "lock": "C3",
+  "where": "the quick view's Edit",
+  "ok": false,
+  "detail": "{\"panelEdit\":false,\"legacy\":3}"
+ },
+ {
+  "lock": "C3",
+  "where": "QC Edit agent present",
+  "ok": true,
+  "detail": "button"
+ },
+ {
+  "lock": "C3",
+  "where": "the Query Centre's Edit agent",
+  "ok": false,
+  "detail": "{\"panelEdit\":false,\"legacy\":3}"
+ },
+ {
+  "lock": "C3",
+  "where": "Contact list: in the page's own card",
+  "ok": false,
+  "detail": "{\"inCard\":false,\"panelEdit\":false,\"legacy\":3}"
+ }
+]

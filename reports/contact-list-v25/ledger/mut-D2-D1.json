@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "4 of 4 blocks found"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 lefts",
+  "ok": true,
+  "detail": "card 276.0 · glance 276.0 · title 276.0 · sheet 276.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 rights",
+  "ok": true,
+  "detail": "card 1476.0 · glance 1476.0 · title 1476.0 · sheet 1476.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 width",
+  "ok": true,
+  "detail": "list 1200.0 against min(S − 48, 1200) = 1200.0 (S 1256.0)"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "4 of 4 blocks found"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 lefts",
+  "ok": true,
+  "detail": "card 272.0 · glance 272.0 · title 272.0 · sheet 272.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 rights",
+  "ok": true,
+  "detail": "card 1248.0 · glance 1248.0 · title 1248.0 · sheet 1248.0"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 width",
+  "ok": true,
+  "detail": "list 976.0 against min(S − 48, 1200) = 976.0 (S 1024.0)"
+ }
+]

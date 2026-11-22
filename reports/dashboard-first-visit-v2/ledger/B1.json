@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "B1",
+  "where": "said",
+  "ok": false,
+  "detail": "You said you've already sent some queries for DB60 Pre-query. Not right? Change it"
+ },
+ {
+  "lock": "B1",
+  "where": "write",
+  "ok": true,
+  "detail": "Manuscript.status re-read: Drafting"
+ },
+ {
+  "lock": "B1",
+  "where": "path",
+  "ok": true,
+  "detail": "the path heading"
+ },
+ {
+  "lock": "B1",
+  "where": "order",
+  "ok": true,
+  "detail": "[\"manuscript\",\"comps\",\"agent\",\"letter\",\"ready\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "label",
+  "ok": true,
+  "detail": "the label follows"
+ }
+]

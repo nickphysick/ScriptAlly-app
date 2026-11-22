@@ -156,53 +156,23 @@ describe("⚠️ one implementation — logout() itself", () => {
   });
 });
 
-describe("the second door — Account & settings", () => {
+describe("Settings is no longer a door — the account menu is (non-workspace v1, Phase 2; re-pointed)", () => {
+  /* ⚠️ RE-POINTED, NOT DELETED. The settings-v2 ref draws no sign-out card in the sheet — its audit names "one
+     [card] that is just Sign out" as a fault — and signing out lives in the account menu. What the old cases
+     protected still holds and is asserted here: there is exactly one implementation (the shared `logout`),
+     and Settings' deletion path cannot reach it. */
   const SETTINGS = read("../AccountSettings.tsx");
-
-  /* ⚠️ ANCHORED ON THE HEADING ids, NOT ON A PROP'S SPELLING (settings-mode pack, Phase 2). These
-     three cases read `title="Signing out"` and `title="Danger zone"` — props of `SubCard`, which the
-     stacked-cards chassis retired; the cards are `heading=` on `SettingsCard` now and the copy of
-     one of them changed. Not one of the CLAIMS moved: there is still a sign-out card, it still sits
-     above the deletion card, and it still touches nothing on the deletion path. A lock that goes red
-     on a refactor which changed nothing it asserts cannot tell a refactor from a regression, which
-     is the only thing a lock is for.
-     `acct-h-signout` and `acct-h-danger` are the two headings' ids. They are what the page's own
-     `aria-labelledby` and its smoke test already address, so they are load-bearing rather than
-     incidental — a spelling that cannot drift without something else failing first. */
-  it("offers a sign-out row", () => {
-    expect(SETTINGS).toContain("acct-h-signout");
-    expect(SETTINGS).toContain("Sign out");
+  it("Settings draws no sign-out row of its own", () => {
+    expect(SETTINGS).not.toContain("acct-h-signout");
+    expect(SETTINGS).not.toContain("void logout()");
   });
-
-  /**
-   * ⚠️ ABOVE THE DANGER ZONE, NOT BELOW IT. Someone scrolling to close their account should not
-   * pass the way out on the journey to deletion — and someone looking for the way out should not
-   * have to scroll past a delete button to find it. Two exits; the reversible one comes first.
-   */
-  it("sits above the closing-your-account block", () => {
-    const signOut = SETTINGS.indexOf("acct-h-signout");
-    const danger = SETTINGS.indexOf("acct-h-danger");
-    expect(signOut, "the sign-out card's heading id").toBeGreaterThan(-1);
-    expect(danger, "the deletion card's heading id").toBeGreaterThan(-1);
-    expect(signOut).toBeLessThan(danger);
-  });
-
-  /** ⚠️ THE SAME HANDLER, never a local signOut of its own. */
-  it("calls the shared logout", () => {
-    expect(SETTINGS).toContain("logout,");
-    expect(SETTINGS).toContain("void logout()");
+  it("Settings never signs out by itself", () => {
     expect(SETTINGS).not.toContain("signOut(auth)");
+    expect(SETTINGS).not.toMatch(/\blogout\b/);
   });
-
-  /**
-   * ⚠️ AND IT DOES NOT TOUCH THE DELETION PATH. The two controls sit next to each other, which is
-   * exactly why the boundary is worth asserting: sign-out must never reach the flag or the confirm.
-   */
-  it("is independent of the deletion path", () => {
-    const card = sliceBetween(SETTINGS, "acct-h-signout", "acct-h-danger", "the sign-out card");
-    expect(card).not.toContain("ACCOUNT_DELETION_ENABLED");
-    expect(card).not.toContain("setShowDelete");
-    expect(card).not.toContain("deletionConfirmed");
+  it("the deletion card is still there, and still only schedules", () => {
+    expect(SETTINGS).toContain("acct-h-danger");
+    expect(SETTINGS).toContain("deletionRequest()");
   });
 });
 

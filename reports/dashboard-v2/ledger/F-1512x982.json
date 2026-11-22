@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "F1",
+  "where": "population",
+  "ok": true,
+  "detail": "{\"r\":1508,\"b\":982,\"h\":225,\"vw\":1512,\"vh\":982,\"look\":0}"
+ },
+ {
+  "lock": "F1",
+  "where": "corner",
+  "ok": true,
+  "detail": "{\"r\":1508,\"b\":982,\"h\":225,\"vw\":1512,\"vh\":982,\"look\":0}"
+ },
+ {
+  "lock": "F1",
+  "where": "corner after scrolling 600px",
+  "ok": true,
+  "detail": "{\"r\":1508,\"b\":982,\"h\":225,\"vw\":1512,\"vh\":982,\"look\":0}"
+ },
+ {
+  "lock": "F1",
+  "where": "looks at you on hover",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F1",
+  "where": "absent at 390",
+  "ok": true,
+  "detail": "true"
+ }
+]

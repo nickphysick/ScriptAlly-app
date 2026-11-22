@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "71"
+ },
+ {
+  "where": "hidden at rest",
+  "ok": true,
+  "detail": "0 of 71 shown"
+ },
+ {
+  "where": "axis to 16px of the edge",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "where": "rows to 16px of the edge",
+  "ok": true,
+  "detail": "16.0"
+ },
+ {
+  "where": "hover: shown",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "hover: only that row's",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "hover: row #faf6f0",
+  "ok": true,
+  "detail": "rgb(250, 246, 240)"
+ },
+ {
+  "where": "hover: no visible label under the button",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: 1920 with the panel open",
+  "ok": true,
+  "detail": "{\"sheetR\":1336,\"panelL\":1352,\"hit\":true}"
+ },
+ {
+  "where": "the list card ends 16px left of the panel (±1)",
+  "ok": true,
+  "detail": "{\"sheetR\":1336,\"panelL\":1352,\"hit\":true}"
+ },
+ {
+  "where": "Filters is visible and clickable",
+  "ok": true,
+  "detail": "{\"sheetR\":1336,\"panelL\":1352,\"hit\":true}"
+ },
+ {
+  "where": "closing restores the width",
+  "ok": true,
+  "detail": "1880 → 1880"
+ },
+ {
+  "where": "at 1440 the card keeps its width under the panel (overlay)",
+  "ok": true,
+  "detail": "{\"r14\":{\"sheetR\":1408,\"panelL\":null,\"hit\":true},\"g14\":{\"sheetR\":1408,\"panelL\":912,\"hit\":false}}"
+ }
+]

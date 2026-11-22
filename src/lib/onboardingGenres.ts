@@ -22,7 +22,8 @@ for (const label of PREDEFINED_GENRES) {
 }
 
 /** The fixed list the search offers: every genre in the taxonomy. */
-export const GENRE_LIST: readonly { id: string; label: string }[] = CANONICAL_GENRES.map((g) => ({ id: g.id, label: g.label }));
+/* Manuscripts v28 D2: set-up keeps the main genres it always offered; sub-genres are the Manuscripts drawer's */
+export const GENRE_LIST: readonly { id: string; label: string }[] = CANONICAL_GENRES.filter((g) => !g.parent).map((g) => ({ id: g.id, label: g.label }));
 /** A pill's words. */
 export const pillLabel = (id: string): string => genreLabel(id);
 /** What is stored for a genre id. */

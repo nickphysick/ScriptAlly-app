@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "1 ledger card(s), 4 cells"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 equal widths",
+  "ok": true,
+  "detail": "widths 289.5 / 289.5 / 289.5 / 289.5"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 no gap",
+  "ok": false,
+  "detail": "14.0 / 14.0 / 14.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 rules between",
+  "ok": true,
+  "detail": "none | rgba(28, 19, 15, 0.09) 1px 0px 0px 0px inset | rgba(28, 19, 15, 0.09) 1px 0px 0px 0px inset | rgba(28, 19, 15, 0.09) 1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 label tops",
+  "ok": true,
+  "detail": "415.3 / 415.3 / 415.3 / 415.3"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 count bottoms",
+  "ok": true,
+  "detail": "492.9 / 492.9 / 492.9 / 492.9"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 right sits on the count",
+  "ok": true,
+  "detail": "health -6.0 / none -6.0 / querying -6.0 / closed -6.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 none shown + N",
+  "ok": true,
+  "detail": "6 + 33 against 39"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 querying shown + N",
+  "ok": true,
+  "detail": "6 + 5 against 11"
+ },
+ {
+  "lock": "A1",
+  "where": "1512 closed shown + N",
+  "ok": true,
+  "detail": "3 + 0 against 3"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "1 ledger card(s), 4 cells"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 equal widths",
+  "ok": true,
+  "detail": "widths 233.5 / 233.5 / 233.5 / 233.5"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 no gap",
+  "ok": false,
+  "detail": "14.0 / 14.0 / 14.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 rules between",
+  "ok": true,
+  "detail": "none | rgba(28, 19, 15, 0.09) 1px 0px 0px 0px inset | rgba(28, 19, 15, 0.09) 1px 0px 0px 0px inset | rgba(28, 19, 15, 0.09) 1px 0px 0px 0px inset"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 label tops",
+  "ok": true,
+  "detail": "413.3 / 413.3 / 413.3 / 413.3"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 count bottoms",
+  "ok": true,
+  "detail": "490.9 / 490.9 / 490.9 / 490.9"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 right sits on the count",
+  "ok": true,
+  "detail": "health -6.0 / none -6.0 / querying -6.0 / closed -6.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 none shown + N",
+  "ok": true,
+  "detail": "3 + 36 against 39"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 querying shown + N",
+  "ok": true,
+  "detail": "3 + 8 against 11"
+ },
+ {
+  "lock": "A1",
+  "where": "1280 closed shown + N",
+  "ok": true,
+  "detail": "3 + 0 against 3"
+ }
+]

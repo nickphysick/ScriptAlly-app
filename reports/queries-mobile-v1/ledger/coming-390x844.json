@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "pop",
+  "where": "entries in the next 21 days",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L8",
+  "where": "every day is today to day 20",
+  "ok": true,
+  "detail": "[\"Sun Nov 15 2026\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "in date order",
+  "ok": true,
+  "detail": "[1794700800000]"
+ },
+ {
+  "lock": "L11",
+  "where": "Coming up: no image twice",
+  "ok": true,
+  "detail": "[\"/images/qc/qc-plate-courier-figure.png\",\"/images/query-centre/waiting-hourglass.webp\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "Coming up: colour rules",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L8",
+  "where": "the past-due count equals the overdue queries",
+  "ok": true,
+  "detail": "25 vs 25"
+ },
+ {
+  "lock": "L8",
+  "where": "with an entry today, today's ticket is pink",
+  "ok": true,
+  "detail": "{\"ms\":1794700800000,\"today\":true,\"bg\":\"rgb(243, 200, 186)\",\"n\":1}"
+ },
+ {
+  "lock": "L8",
+  "where": "only today is marked",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L8",
+  "where": "an entry on day 21 is not shown",
+  "ok": true,
+  "detail": "[\"Tue Oct 27 2026\"]"
+ }
+]

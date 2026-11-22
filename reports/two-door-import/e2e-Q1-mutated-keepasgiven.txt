@@ -1,0 +1,7 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.5s)
+  ✘  2 [measure] › tests/e2e/twoDoorImport.measure.ts:123:1 › Q1 the out-of-order card's button is disabled until the dates run in order, then the model holds them (5.0s)
+    Error: disabled while out of order
+  1 failed
+  1 passed (22.2s)
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/twoDoorImport.measure.ts' '-g' 'Q1'" exited with code 1
+exit=1

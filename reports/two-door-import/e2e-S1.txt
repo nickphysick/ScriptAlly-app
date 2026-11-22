@@ -1,0 +1,6 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.5s)
+  ✓  2 [measure] › tests/e2e/onbV9.measure.ts:538:3 › S1 › S1 the summary opens on the mark, and its tiers need an answer (950ms)
+  ✓  3 [measure] › tests/e2e/onbV9.measure.ts:578:3 › S1 › S1 duplicates: Continue lights only when every set is decided, then the mark (1.2s)
+  ✓  4 [measure] › tests/e2e/onbV9.measure.ts:618:3 › S1 › S1 queries: the last answer brings the sage band, which accounts for every answer (1.1s)
+  4 passed (20.9s)
+exit=0

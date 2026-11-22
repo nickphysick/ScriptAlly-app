@@ -24,6 +24,7 @@ import {
   getDocs
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+import { useNavigate } from "react-router-dom";
 /* §6 — the same atomic path the Edit drawer saves its dates through; recompute derives the rest. */
 import { commitQueryEdits } from "../lib/saveQueryEdits";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStatus, ActivityType, QueryMaterial, UserPlan, ComponentType , SubmissionPackage} from "../types";
@@ -80,14 +81,13 @@ import "./queries/queryCard.css";
 import "./queries/queryCentreGrid.css";
 import "./queries/queryStatTiles.css";
 import type { GridCard } from "./queries/QueryCentreGrid";
-import { QueryEmptyCard, TEMPLATE_HREF } from "./queries/QueryEmptyCard";
+import { QueryEmptyCard } from "./queries/QueryEmptyCard";
 import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */
 import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
 import { QcEmpty } from "./queries/centre/QcEmpty";
 import { AgentDisc } from "./shared/AgentDisc";
-import { QcEmpty138 } from "./queries/centre/QcEmpty138";
 import { QcExhibit } from "./queries/centre/QcExhibit";
 import { qcHeaderCopy } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
@@ -99,12 +99,78 @@ import { readQcView, readQcVisit, writeQcView, writeQcVisit } from "../lib/qcVie
 import { facesFor } from "../lib/qcFaces";
 import { QcCourts, QcCourtsSkeleton } from "./queries/centre/QcCourts";
 import { QcStrip } from "./queries/centre/QcStrip";
-import { QcHeader138 } from "./queries/centre/QcHeader138";
+import { QcHeader149, QcViewRow149 } from "./queries/centre/QcHeader149";
+import { QcStatCards150 } from "./queries/centre/QcStatCards150";
+import { beGroups, closedCount as beClosedCount, groupPhrase, readView150, sortPhrase, statCards, writeView150, type BeGroup, type BeSort, type QcView150 } from "../lib/qc150";
+import { QcBePills150, QcBirds150 } from "./queries/centre/QcBirds150";
+import { QcListTitle150, QcViewSwitch150 } from "./queries/centre/QcListTitle150";
+import { QC_SORT_FIELDS } from "../lib/cardsSort";
+import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
+import { eyeRows } from "../lib/qcBirdsEye";
+import { QcWhoReplied, type WhoRow } from "./queries/centre/QcWhoReplied";
+import { swapCard } from "../lib/cardMotion";
+import { LogStagesHost } from "./queries/centre/LogStagesHost";
+import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
+import { packagesFor } from "../lib/queryActions/packages";
+import { previousQueryFor } from "../lib/requery";
+import { QcQueryCard149, fieldDay, parseDay, type CardEdits, type CardMode, type CardStep, type RespChoice, type StepChoice } from "./queries/centre/QcQueryCard149";
+import { RESP_SAVED, offerOthers, respondDefaults, saveResponse as saveResponseShared } from "../lib/queryActions/respondSave";
+import { nudgeDefaults, saveNudgeSent, saveSent, sentDefaults, type SentKind } from "../lib/queryActions/stepSaves";
+import { individualNext, packageNext, sentCorrectionFields, type SentNext } from "../lib/queryActions/sentCorrect";
+import { currentVersion, editionsOn, readSummary } from "../lib/queryActions/packages";
+import { sentRecordOf } from "../lib/queryActions/sentRecord";
+import { blankSample } from "../lib/queryActions/sample";
+import { dayIso } from "../lib/queryActions/dates";
+import { isLive as qaIsLive, viaLabel } from "./queryActions/journeys/common";
+import { commitCardSave } from "../lib/agentCardSave";
+import { copyText } from "./agents/contact/ContactCells";
+import type { AgentEditPatch } from "../lib/saveAgentEdits";
+import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcCardEdit152";
+import type { RowSpec } from "./reading-pane/QueryTimeline";
+import { courtOf, expectedFor, type QcRow } from "../lib/qcSummary";
+import { nextLine } from "../lib/qcRowLines";
+import { QcPage151, Track151, type State155 } from "./queries/centre/QcPage151";
+import { useLoadFailure } from "./notes/useLoadFailure";
+import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
+import { QcViews156 } from "./queries/centre/QcViews156";
+import { QcLine156 } from "./queries/centre/QcLine156";
+import { weekGoal154, type WeekGoal154 } from "../lib/qc154goal";
+import { railCounts } from "../lib/qc153Rail";
+import { stageOf } from "../lib/stageColours";
+import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
+import { qcStateAid } from "../lib/qcReviewAid155";
+import { goalAidSends, qcGoalAid } from "../lib/qcReviewAid156";
+import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
+import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
+import { qcPlanAid } from "../lib/qcReviewAid1522";
+import { dayLabel as dayLabel152, orderSteps as orderSteps152, sideOf as side152, stepTitle as stepTitle152, type ThreadStepIn } from "../lib/qcThread152";
+import { getActivityTime } from "../lib/queryDerivation";
+import { anyToMs } from "../lib/qcStages";
+import { qc152DevFree } from "../lib/qc152ReviewAid";
+import { packageLockStamp } from "../lib/saveQueryEdits";
+import { commitMany, commitPlan, planFix, planRecord, readFeed, readLog, refusedMarks, storedLabels, TOLD_TYPE, type FixStep, type StepMaterial } from "../lib/qc152Write";
+import { readMat } from "../lib/qcThread152";
+import { dependents, STEP_LABEL, type LogStep, type StepType } from "../lib/qcLogic152";
+import type { MatEnv } from "./queries/centre/QcEdit152";
+import { QcComposer1522, type ComposerCtx, type ComposerSave, type Journey, type ReplyType } from "./queries/centre/QcComposer1522";
+import { QcStepEdit1522 } from "./queries/centre/QcStepEdit1522";
+import { holdsPages, planDetails1522, planReply, planSigned, planStepEdit, planTell, planUnpass } from "../lib/qc1522Write";
+import type { FootAct } from "../lib/qcFoot1522";
+import type { Snapshot } from "../lib/queryActions/snapshot";
+import { inUseId as inUseBookVersion } from "../lib/versionsV2";
+import type { QcCard152Data } from "./queries/centre/QcCard152";
+import { buildCardView, capWord } from "./queries/centre/qcCardView";
+import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
+import { pillGroups } from "../lib/qc1511";
+import { rowAct, statusKind } from "../lib/qc1512";
+import { pressView, twinTags } from "../lib/qc149";
 import { PIN_KEYS, usePinList } from "./shell/useFullScreenList";
+import { listCountTitle } from "./shell/ViewTitleRow";
 import { QcWhereCard } from "./queries/centre/QcWhere141";
 import { SENT_NONE, dueThisWeek, pressHeading, sort138, type Qc138Sort, emptyQc138Filters, glyphCounts, matches138, nothingRecorded, overAYear, pkgKeyOf, pressGlyph, qc138FilterCount, type GlyphKey, type Qc138Filters } from "../lib/qc138";
 import { QcFilters138, type Qc138Pop, type SentOption } from "./queries/centre/QcFilters138";
-import { QcAppliedRow140, QcFilterMenu140, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
+import { QcAppliedRow140, QcFilterStrip142, type Qc140Chip } from "./queries/centre/QcFilterMenu140";
 import { appliedChips, bandFigures, waitingRow } from "../lib/qc140";
 import { QcBand140 } from "./queries/centre/QcBand140";
 import { useEntrance138 } from "./queries/centre/useEntrance138";
@@ -134,9 +200,9 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
-import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
-import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, queryPanelBack, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
-import { useQcLoad } from "./queries/centre/useQcLoad";
+import { QueryPanelHost } from "./queries/QueryPanelHost";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, openQueryPanelFromAgent, queryPanelBack, releaseRightPanel, responseSaved, subscribeQueryPanel, subscribeResponse, subscribeRightPanel, type PanelBack, type PanelOrigin, type ResponseRequest } from "../lib/queryPanelStore";
+import { QC155_LOAD, useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
@@ -158,10 +224,8 @@ import { fanCardModel } from "../lib/qcFanModel";
    would not disagree in detail, it would disagree in STRUCTURE, and the two pages would draw the
    same wait in two different places. */
 import { crossAt } from "./shared/timeline/boardParts";
-/* ⚠️ THE BOARD'S STYLESHEET, IMPORTED EXPLICITLY. It is already in the bundle at runtime —
-   every workspace page stays mounted, so `TodoCalendarPage` has loaded it — and relying on
-   that is an invisible dependency on another page continuing to exist. Named here so the
-   calendar keeps its styling if that page is ever unmounted or split out. */
+/* ⚠️ THE BOARD'S STYLESHEET, IMPORTED EXPLICITLY. The To-do Calendar page used to import it too; that page was
+   retired on 29 Oct, and this explicit import is why nothing here depended on it being mounted. */
 /* ⚠️ KEPT ON PURPOSE though this page no longer mounts the board (v11): the app ships ONE stylesheet
    whose order is the order of first import, and removing this line would move To-do's calendar sheet
    relative to everything imported between here and To-do. A reorder is a cascade change nobody asked for. */
@@ -194,11 +258,13 @@ import { QueryAgentTab, type AgentHistoryRow } from "./queries/QueryAgentTab";
 import { QueryLogSheet } from "./queries/QueryLogSheet";
 import { queriesForAgent } from "../lib/agentList";
 import { openAgentCard } from "../lib/agentCardStore";
+import { agentView as qcAgentView, bookChips as qcBookChips, methodQualifier, nextStepOf, storySteps, stripOf, submissionWords, undatedIds } from "../lib/qcCardStory";
+import { hrefFor } from "../lib/quickAdd";
 import { rungFacts } from "../lib/queryPanelRungs";
 import { queryMaterialsToRows, draftMaterialsToQuery, draftExpectedOverrideIso } from "../lib/queryDraft";
 import { parseQty } from "../lib/createQty";
 import { compareAttention, type AttentionRow } from "../lib/queryAttentionSort";
-import { closeQueryDrawer, currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type OpenRequest } from "../lib/queryActions/drawerStore";
+import { closeQueryDrawer, currentDrawerRequest, openQueryDrawer, showUndoBar, subscribeDrawer, subscribeDrawerPick, type DrawerMode, type OpenRequest } from "../lib/queryActions/drawerStore";
 import { restoreSnapshot, takeSnapshot } from "../lib/queryActions/snapshot";
 import { deleteTimelineEntries, offerMarkedBy } from "../lib/entryDeleteWrite";
 import { DRAWER_LIVE, nextDoor, primaryDoor } from "../lib/queryActions/entry";
@@ -370,6 +436,12 @@ import {
 } from "lucide-react";
 import { csvCell } from "../lib/csvCell";
 import { formatDate } from "../lib/dates";
+import { EditQueryPhone } from "./queries/phone/EditQueryPhone";
+import { QueriesV4 } from "./phone/v4/QueriesV4";
+/* the phone query card's own sheet (`.qm1-*`, QcQueryCard149 `layout="phone"`), which other pages still open through this
+   page's query panel host; it was loaded here through the retired QueriesPhone, so the bundle keeps it unchanged */
+import "./queries/phone/queriesPhone.css";
+import { QM1_ART } from "./queries/phone/qm1Art";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
 // the one place a material (legacy string or structured QueryMaterial) becomes display text.
@@ -451,6 +523,16 @@ const pastWhen = (outcome: ResponseOutcome | null, reached: RespStepId): boolean
   return order.indexOf(reached) > order.indexOf("when");
 };
 
+
+/** v156 §2 — the writer's own sends (every manuscript, as the Streaks & goals card counts them) against their weekly
+ *  target. A dev-only review aid (lib/qcReviewAid156) fabricates the send dates for the streak / no-streak / met
+ *  screens; the mode check is here, at the aid's one call site, so a production build drops the module. */
+function goal156Of(sentMs: (number | null)[], goals: Parameters<typeof weekGoal154>[1], nowMs: number): WeekGoal154 {
+  const raw = weekGoal154(sentMs, goals, nowMs);
+  const aid = import.meta.env.MODE !== "production" ? qcGoalAid() : null;
+  return aid ? weekGoal154(goalAidSends(aid, raw.goal, nowMs), goals, nowMs) : raw;
+}
+
 export const Queries: React.FC<{
   searchQuery: string;
   onNavigate?: (tab: string, subPageName?: string) => void;
@@ -466,6 +548,14 @@ export const Queries: React.FC<{
   /** The shell's Queries child, as `?status=`. Absent = the plain hub, filters untouched. */
   statusFilter?: QueriesStatusFilter;
   /**
+   * Submission packages v26 — `?ids=a,b,c` from a Results row's "See these queries in the Query Centre". The list
+   * narrows to those queries and says so in ONE removable chip of the applied row; removing it, or "Clear all",
+   * shows every query again. It arrives as a prop, on the same seam as `statusFilter`.
+   */
+  idsFilter?: string | null;
+  /** Dashboard v118 — what an `?ids=` list is (`?from=`), for its chip; absent, the chip keeps Submission packages' words. */
+  idsLabel?: string | null;
+  /**
    * ⚠️ THE VIEW IS A ROUTE AND ARRIVES AS A PROP, on the same seam as `statusFilter` and `?q=`.
    * `cards` is the browsing grid; `detail` is the two-pane surface. App.tsx derives it — `?q=<id>`
    * implies `detail`, so every existing deep link from To-do, Calendar and Noteboard opens a record
@@ -475,7 +565,7 @@ export const Queries: React.FC<{
   onSelectView?: (view: "cards" | "detail") => void;
   /** opening a card is a NAVIGATION — it sets `?q=<id>`, which is what puts the page in detail view */
   onOpenQuery?: (id: string) => void;
-}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter, view = "cards", onSelectView, onOpenQuery }) => {
+}> = ({ searchQuery, onNavigate, activeSubPage, inShell = false, createSeed, onCreateSeedConsumed, routeActive = false, statusFilter, idsFilter = null, idsLabel = null, view = "cards", onSelectView, onOpenQuery }) => {
   const {
     currentUser,
     manuscripts,
@@ -513,7 +603,7 @@ export const Queries: React.FC<{
     editActivity,
     updateAgent,
     updateQueryStatus,
-    logNudge, setQueryPackage, updateUserPaths} = useScriptAllyDb();
+    logNudge, setQueryPackage, updateUserPaths, entitlement} = useScriptAllyDb();
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
@@ -550,6 +640,20 @@ export const Queries: React.FC<{
      pane shows. Both panes stay mounted (translated, never display:none'd), so the list's
      scroll survives the push for free. */
   const isMobile = useIsMobile();
+  /* Phone app v3 — below 768px the page is `QueriesV4` (Phone app v4) (see the return at the foot), on the app's one breakpoint (the v1
+     page's own 760px retired with it). Declared up here because the response picker's subscription below must know it
+     (a later declaration would be a TDZ read). */
+  const qmPhone = isMobile;
+  /* Phone app v2, Part 3 — the query sheet's ••• opens the phone's more sheet; the card is built here, so the state is too */
+  const [qmMore, setQmMore] = useState(false);
+  /* Phone last screens v1, 9B — the query open in "Edit this query" on a phone */
+  const [phoneEditId, setPhoneEditId] = useState<string | null>(null);
+  /* Phone app v3 — the query sheet's "Edit" opens the same screen (the sheet lives in the shell, so it asks by event) */
+  useEffect(() => {
+    const on = (e: Event) => setPhoneEditId(String((e as CustomEvent).detail ?? "") || null);
+    window.addEventListener("pa3:edit-query", on);
+    return () => window.removeEventListener("pa3:edit-query", on);
+  }, []);
   const { setMobileDetail } = useMobileChrome();
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
@@ -673,7 +777,16 @@ export const Queries: React.FC<{
 
   /** Enter create mode. A seeded agent pre-fills the materials checklist from what they ask for,
    *  and counts as part of the baseline — an untouched seeded draft still discards silently. */
+  /* v149 Part D — on the desktop Query Centre, while it is the page on screen, the header's two actions open in the
+     query panel as cards; everywhere else the drawer's journeys stand. Written each render once `qcDesk` is known. */
+  const qcFlowGate = useRef({ desk: false, active: false });
+  /* Log a query v1.2 — the staged journey's leave check, for the dimmed page's scrim */
+  const laqLeaveRef = useRef<(() => void) | null>(null);
   const openCreate = (seed: { agentId?: string | null; manuscriptId?: string | null } = {}) => {
+    if (qcFlowGate.current.desk && qcFlowGate.current.active) {
+      setQcFlow({ kind: "log", agentId: seed.agentId ?? null, manuscriptId: seed.manuscriptId ?? null });
+      return;
+    }
     /* ⚠️ QUERY ACTIONS v1 — every "Log query" in the app funnels here, so this one line moves them
        all to the drawer at once. The create pane below stays until the cut-over deletes it. */
     if (DRAWER_LIVE.log) {
@@ -1525,6 +1638,7 @@ export const Queries: React.FC<{
     /* Query actions v1 — every desk verb whose journey is live finishes in the drawer instead. */
     const mode = verb === "respond" ? "resp" : verb === "marksent" ? "sent" : verb === "nudge" ? "nudge" : "close";
     const qid = selectedQueryId ?? activeQuery?.id;
+    if (qid && mode === "resp" && !qmPhone) { setDeskVerb(null); respOpenRef.current({ queryId: qid }); return; }
     if (qid && DRAWER_LIVE[mode]) { setDeskVerb(null); openQueryDrawer({ mode, queryId: qid }); return; }
     setCorrecting(null);
     correctingTriggerRef.current = anchor;
@@ -1725,6 +1839,42 @@ export const Queries: React.FC<{
    * v1 met on the late reply. The undo is the drawer's SNAPSHOT, so it puts back exactly the
    * documents that were there, whichever store held them.
    */
+  /* v149 Part C — the query card's mode (view · respond · edit), the step it lights after a save, and a mode asked for
+     before the card has opened (the header's "Who replied?" opens a query straight into respond) */
+  const [qcCardMode, setQcCardMode] = useState<CardMode>("view");
+  const [qcCardFresh, setQcCardFresh] = useState<string | null>(null);
+  /* v152 §3 — what the record form opened on (the reply box's button), and a save in flight */
+  const [qc152Busy, setQc152Busy] = useState(false);
+  /* v152 §4 — the step Fix a mistake opens on (a bubble's ✎ Edit), and where the record form was opened from */
+  /* v152.2 §3 — the card's composer (its journey; `n` remounts it), its draft, the bubble edited in place, the toast */
+  const [qc1522J, setQc1522J] = useState<{ j: Journey; n: number; reply?: ReplyType | null } | null>(null);
+  const [qc1522Draft, setQc1522Draft] = useState<ThreadStepIn | null>(null);
+  const [qc1522Edit, setQc1522Edit] = useState<string | null>(null);
+  const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: (() => Promise<void>) | null; bump?: boolean } | null>(null);
+  /* Query card v160 — a save has started or Undo was pressed: the card moves when the change lands (QcCard152 `motion`) */
+  const [qcMotion160, setQcMotion160] = useState<{ kind: "save" | "undo"; n: number; done?: boolean } | null>(null);
+  const [qc1522Burst, setQc1522Burst] = useState<number | null>(null);
+  /* the toast lasts 5.2s; opening another composer dismisses it */
+  useEffect(() => { if (!qc1522Toast) return undefined; const t = window.setTimeout(() => setQc1522Toast(null), 5200); return () => window.clearTimeout(t); }, [qc1522Toast]);
+  useEffect(() => { if (!qc1522Burst) return undefined; const t = window.setTimeout(() => setQc1522Burst(null), 2400); return () => window.clearTimeout(t); }, [qc1522Burst]);
+  const FOOT_J: Record<FootAct, Journey> = { offer: "offer", tell: "tell", sent: "send", nudge: "nudge", close: "close", resp: "reply", reopen: "reopen" };
+  const open1522 = useCallback((a: FootAct | Journey, reply: ReplyType | null = null) => {
+    setQc1522Edit(null); setQc1522Toast(null); setQc1522Draft(null);
+    setQc1522J({ j: (FOOT_J as Record<string, Journey>)[a] ?? (a as Journey), n: Date.now(), reply });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* Record a response v1, Phase 3 — the query picked from "Who replied?": its composer's Cancel is "← Someone else" */
+  const whoPickedRef = useRef<string | null>(null);
+  /* Log a query v1.1 — a query opened from the list's "Add date": its first undated step's editor opens with the card */
+  const qc1522EditPending = useRef<string | null>(null);
+  /* v152.2 §1.6 — a list row's button opens that query's card with its composer (the footer's own journey) */
+  const qc1522Pending = useRef<{ id: string; a: FootAct; reply?: ReplyType | null } | null>(null);
+  /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
+  const [qcEditUndated, setQcEditUndated] = useState(false);
+  /* v149 Part D — the header's two flows in the same panel: a new query, and "Who replied?" */
+  const [qcFlow, setQcFlow] = useState<null | { kind: "log"; agentId: string | null; manuscriptId: string | null } | { kind: "who" }>(null);
+  const scriptDb = useScriptAllyDb();
+  const routerNav = useNavigate();
   const [entryDel, setEntryDel] = useState<null | { activityId: string; ids: string[]; labels: string[]; whole: boolean }>(null);
   /* the confirm belongs to the query it was asked on — opening another query drops it */
   useEffect(() => { setEntryDel(null); }, [selectedQueryId]);
@@ -1993,29 +2143,7 @@ export const Queries: React.FC<{
     };
   }, [currentUser?.id, selectedQueryId]);
 
-  // Setup real-time listener for the query's activity subcollection (Fix 3)
-  useEffect(() => {
-    if (!currentUser || !selectedQueryId) {
-      setTrackingEvents([]);
-      return;
-    }
-
-    const unsubscribe = onSnapshot(
-      query(
-        collection(db, 'users', currentUser.id, 'queries', selectedQueryId, 'activity'),
-        orderBy('createdAt', 'asc')
-      ),
-      (snapshot) => {
-        const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTrackingEvents(events);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/queries/${selectedQueryId}/activity`);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [selectedQueryId, currentUser?.id]);
+  /* the activity listener follows the query the open card describes (`cardQueryId`, below), not only the selected row */
 
   const triggerToast = (config: {
     queryId: string;
@@ -2347,31 +2475,21 @@ export const Queries: React.FC<{
     pendingStepRef.current = null;
     openQueryDrawer(p);
   });
+  /* Record a response v1 — the shell's picker in the panel (Query panel v2 §E: `picking`, its "query you had open", the
+     old QueryPicker stepped into the panel's slot) is retired: the shell opens "Who replied?" through `openResponse`. */
   /**
-   * Query panel v2 §E — "RECORD A RESPONSE" FROM THE SHELL'S MENU OPENS THE PANEL AT THE PICKER. With a query open
-   * the picker steps into its panel and lists it first; with none, the panel opens for the picker alone
-   * (`picking`), and becomes the chosen query's when one is picked.
+   * Record a response v1, Phase 2 — THE ONE DOOR (lib/queryPanelStore `openResponse`). Every desktop "Record a response"
+   * arrives here: with a query, that query's card opens with its composer at "reply" (a closed one's at "reopen"); with
+   * none, the card frame opens at "Who replied?". Not on the phone page: its doors keep the phone's own flow.
    */
-  const [picking, setPicking] = useState(false);
-  const openIdRef = useRef<string | null>(null);
-  const queriesRef = useRef<Query[]>([]);
-  const agentsRef = useRef<Agent[]>([]);
-  useEffect(() => subscribeResponsePicker(() => {
-    const had = openIdRef.current;
-    const q = had ? queriesRef.current.find((x) => x.id === had) : undefined;
-    const ag = q ? agentsRef.current.find((a) => a.id === q.agentId) : undefined;
-    pendingStepRef.current = { mode: "resp", hadOpen: q?.id, panel: { name: "", agency: "", first: (ag?.name || "").trim().split(/\s+/)[0] ?? "", back: !!q } };
-    setPicking(true);
-    bumpStep((n) => n + 1);
-  }), []);
+  const respOpenRef = useRef<(r: ResponseRequest) => void>(() => {});
+  useEffect(() => (qmPhone ? undefined : subscribeResponse((r) => respOpenRef.current(r))), [qmPhone]);
   /* the picker chose: the panel becomes that query's — `?q` on this page, the store's request anywhere else */
   const pickOpenRef = useRef<(id: string) => void>(() => {});
   useEffect(() => subscribeDrawerPick((id) => pickOpenRef.current(id)), []);
   /* ruling 2 — the serif's real italic, asked for by the app alone (this component is mounted on every workspace
      page and on no public one) */
   useEffect(() => { ensureAppSerifItalic(); }, []);
-  /* the picker's panel goes when its journey does, unless a query took it over */
-  useEffect(() => subscribeDrawer((r) => { if (!r) setPicking(false); }), []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -2388,6 +2506,9 @@ export const Queries: React.FC<{
   const qcRemVisit = useMemo(() => readQcVisit(), []);
   const [qcGroup, setQcGroupState] = useState<GroupBy>(() => qcRemView.group);
   const setQcGroup = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcView({ group: g }); }, []);
+  /* v152.2 §1.1 — the desktop's Group menu: Status, Action (\`attention\`), Package. The ungrouped list (the pill's ×) is
+     for the visit only; the device remembers Action in its place. */
+  const setQcGroup1522 = useCallback((g: GroupBy) => { setQcGroupState(g); writeQcView({ group: savedGroupOf(g) }); }, []);
   /** §2 — the Find field in the list head; remembered for the visit (v140 §F). */
   const [qcFind, setQcFind] = useState(() => qcRemVisit?.search ?? "");
 
@@ -2445,6 +2566,8 @@ export const Queries: React.FC<{
   const qc138Pop = usePopover<Qc138Pop>();
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
+  /* v151 §7 — the table's headings sort (Due ascending by default), for the visit */
+  const [qcSort151, setQcSort151] = useState<Sort151>(DEFAULT_SORT_151);
   /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
   const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
   /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
@@ -2472,10 +2595,17 @@ export const Queries: React.FC<{
   const qc138Ref = useRef<HTMLDivElement>(null);
   /* Query Centre v131 renders at ≥768px; the phone keeps the v126 page exactly (QC15) */
   const qcDesk = useDeskWidth();
+  /* v156 §6 — the desktop has no "Where it stands" tiles any more, so a tile filter held from a remembered visit, a link
+     or the phone page would narrow the list invisibly: clear it whenever the desktop page holds one */
+  useEffect(() => { if (qcDesk && qcF138.where) setQcF138((f) => ({ ...f, where: null })); }, [qcDesk, qcF138.where]);
+  const qmOrderRef = useRef<string[]>([]);
+  qcFlowGate.current = { desk: qcDesk, active: routeActive };
   /* v138.6 §A — the pin is the shared hook (`usePinList`, the Contact list's too): held sidebar, remembered per page
      and restored on the first frame, F and Esc, and the scroll position put back on the way out. `qcFull` keeps its
      name. */
-  const qcPin = usePinList("queries", { routeActive: routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
+  /* v151 §0 — FULL SCREEN IS NOT PART OF THIS PAGE: the hook stays, inert (`QC_FULL_SCREEN`), so nothing is restored,
+     held or bound to F. The full-screen code in QcList138/QcToolbar140 is unreferenced from the desktop page. */
+  const qcPin = usePinList("queries", { routeActive: QC_FULL_SCREEN && routeActive && qcDesk, scroller: () => qc138Ref.current?.closest<HTMLElement>(".wpg-scroll") ?? null });
   const qcFull = qcPin.full;
   /* v140 §C — the folder tab and the sheet lip go navy to join the band while this list is pinned and on screen, and
      ONLY then: a layout effect, so the tab never paints navy over an unpinned page (Contact list v19's own rule) */
@@ -2502,7 +2632,8 @@ export const Queries: React.FC<{
   /* ⚠️ ONE LOADING MODEL FOR THE BROWSING PAGE (v11): no flash under 150ms, a 400ms floor once shown,
      and one entrance when the data lands. "Ready" includes the ACTIVITY FEED — every gauge and every
      calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
-  const qcLoad = useQcLoad(collectionsReady && activitiesReady);
+  /* v155 §3 — the desktop page shows its skeleton only after 200ms and swaps straight to the list (QC155_LOAD) */
+  const qcLoad = useQcLoad(collectionsReady && activitiesReady, qcDesk ? QC155_LOAD : undefined);
   /* v138 §H — one staggered entrance on the first mount, once the data is ready */
   const qc138In = useEntrance138(routeActive && qcDesk && collectionsReady && activitiesReady && !qcLoad.loading);
   /* LIVING HEADERS — a DEV-ONLY review aid (lib/livingHeaderReview): render the hero as if the page
@@ -2510,6 +2641,8 @@ export const Queries: React.FC<{
      reaches the module; the condition is a build-time constant, so the hook order cannot vary. */
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  /* v152 §1.4 — the quiet window, the writer's one setting for it (todoPrefs.queries.quietWeeks) */
+  const qcQuietWeeks = quietWeeksOf(currentUser);
   const qcRows = useMemo(
     /* ⚠️ THE MODE CHECK IS HERE, NOT ONLY INSIDE THE AID, SO THE BUNDLER CAN DROP IT. With the gate
        only in `qcReviewAid` the guard folded correctly (`num = () => 0`, provably inert) and the
@@ -2517,10 +2650,22 @@ export const Queries: React.FC<{
        A statically-replaced `import.meta.env.MODE` makes this branch dead code in a production
        build, the import unreachable, and the module absent from the bundle. Verified by grepping
        `dist/`, not by reading this line. */
-    () => buildQcRows(
-      import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
-      agents, activities, Date.now()),
-    [queries, agents, activities],
+    /* v152 §1 — the six states, stamped on each row once (lib/queryState): the desktop list, Birds-eye and the card read
+       `qs`; every other reader of these rows keeps `whereItStands` and `court`.
+       ⚠️ DESKTOP ONLY: the phone page reads these same rows, and an unstamped row is what keeps it on the old rule (its
+       chips, its groups) — measured, a stamp moved its With you / With the agent / Gone quiet counts (qc152Phone L14). */
+    () => {
+      const rows = buildQcRows(
+        import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
+        agents, activities, Date.now());
+      if (qmPhone) return rows;
+      const stamped = stampRows(rows, agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() });
+      /* v155 — a dev-only review aid (lib/qcReviewAid155): the quiet state or day one, by taking rows away. The mode
+         check is here so a production build drops the module. */
+      const aid155 = import.meta.env.MODE !== "production" ? qcStateAid() : null;
+      return aid155 === "first" ? [] : aid155 === "quiet" ? stamped.filter((r) => { const s = stateOf(r); return !(s && NEEDS_YOU_155.has(s)); }) : stamped;
+    },
+    [queries, agents, activities, qcQuietWeeks, qmPhone],
   );
 
   /* ── THE ?status= FILTER (shell-rebuild pack, Phase 3) ──
@@ -2543,6 +2688,14 @@ export const Queries: React.FC<{
        reply" (needsOverdue), so it maps to Past expected — see `filterForStatusParam`. */
     setQcFilter(filterForStatusParam(statusFilter));
   }, [statusFilter]);
+  /* v26 — the Results link's queries. Re-applied only when the PARAM changes, like `statusFilter`. */
+  const [qcIds, setQcIds] = useState<Set<string> | null>(null);
+  useEffect(() => {
+    const ids = (idsFilter ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+    setQcIds(ids.length ? new Set(ids) : null);
+    /* Dashboard v118 — a list opened from a link arrives at the top of the page, not where the page was last left */
+    if (ids.length && typeof window !== "undefined") requestAnimationFrame(() => { const port = document.getElementById("app-stage-scroll"); if (port) port.scrollTop = 0; });
+  }, [idsFilter]);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
 
@@ -2872,6 +3025,36 @@ export const Queries: React.FC<{
    */
   /* the store's wins while it is set: it is what the reader last pressed */
   const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
+  /* To-do card thread v1 — THE ACTIVITY LISTENER FOLLOWS THE CARD'S QUERY. Every reader of `trackingEvents` pairs it with
+     `activeQuery` (this id). It used to follow `selectedQueryId` only, so a card opened from another page (the To-do desk,
+     through the shared panel) or from Birds-eye was drawn from another query's activity, or none: a short thread, and a
+     save's new step never drawn. A change of query empties the events at once, so no frame draws one query's log on
+     another's card. ⚠️ Declared after `cardQueryId` on purpose (a render-time read of it above would be a TDZ crash). */
+  useEffect(() => {
+    setTrackingEvents([]);
+    if (!currentUser || !cardQueryId) return undefined;
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'users', currentUser.id, 'queries', cardQueryId, 'activity'), orderBy('createdAt', 'asc')),
+      (snapshot) => { const events = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })); setTrackingEvents(events); },
+      (error) => { handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/queries/${cardQueryId}/activity`); },
+    );
+    return () => unsubscribe();
+  }, [cardQueryId, currentUser?.id]);
+  /* v149 C — another query in the panel opens in view mode, unless a flow asked for respond on that very query */
+  useEffect(() => {
+    const p = qcCardPendingMode.current;
+    /* v152.2 — another query's card opens with no composer, no edit and no toast; a list row's action opens its composer */
+    setQc1522J(null); setQc1522Edit(null); setQc1522Draft(null); setQc1522Toast(null);
+    if (whoPickedRef.current !== cardQueryId) whoPickedRef.current = null;
+    const pj = qc1522Pending.current;
+    if (pj && pj.id === cardQueryId) { qc1522Pending.current = null; open1522(pj.a, pj.reply ?? null); }
+    if (qc1522EditPending.current && qc1522EditPending.current === cardQueryId) { qc1522EditPending.current = null; setQc1522Edit("__undated"); }
+    if (p && p.id === cardQueryId) {
+      /* v152.2 §5 — on the desktop "respond" is the card's composer, "What did they say?" */
+      if (p.mode === "respond" && qcDesk) { setQcCardMode("view"); open1522("resp"); } else setQcCardMode(p.mode);
+      qcCardPendingMode.current = null;
+    } else setQcCardMode("view");
+  }, [cardQueryId]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v138 §G — a bulk action runs each ticked query's journey in turn: when the panel closes, the next one opens.
      `stepRow` is declared far below, so the effect reaches it through a ref the render keeps current. */
   const stepRowRef = useRef<((req: OpenRequest) => void) | null>(null);
@@ -2884,12 +3067,11 @@ export const Queries: React.FC<{
     const [next, ...rest] = qcBulk.ids;
     bulkWaitRef.current = true;
     setQcBulk({ mode: qcBulk.mode, ids: rest });
+    /* Record a response v1 — a response is the card's composer, each ticked query's in turn */
+    if (qcBulk.mode === "resp" && !qmPhone) { respOpenRef.current({ queryId: next }); return; }
     stepRowRef.current?.({ mode: qcBulk.mode, queryId: next });
   }, [qcBulk, cardQueryId]);
   /* §E — what the picker's listeners read: the query open now, and how a pick opens the panel on it */
-  openIdRef.current = cardQueryId ?? null;
-  queriesRef.current = queries;
-  agentsRef.current = agents;
   pickOpenRef.current = (id: string) => {
     if (id === cardQueryId) return;
     if (routeActive && !extPanel) onOpenQuery?.(id); else openQueryPanel(id, extPanel?.from ?? "other");
@@ -3816,7 +3998,7 @@ export const Queries: React.FC<{
      phone `qcCzCourt` still chooses for the v126 carousel and filters nothing. */
   const qcCourtOn = qcDesk ? qcCzCourt : null;
   const qcNow138 = Date.now();
-  const qcFiltered = qcScoped.filter((r) => matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)));
+  const qcFiltered = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)));
   /* v138 §C — on the desk the headings sort; the phone keeps the v126 sort */
   const qcVisible = qcDesk
     ? sort138(qcFiltered, qcSort138, {
@@ -3827,27 +4009,34 @@ export const Queries: React.FC<{
   /* v140.1 §A — the rows in the order the desktop list draws them: its groups, each in the headings' sort, flattened
      (one source with the list, so an export is the list as shown) */
   const qcListOrder = () => (qcGroup === "none" ? qcVisible : qcListGroups(qcVisible, qcGroup, Date.now(), qcPackageName).flatMap((g) => g.rows));
+  /* v142.1 A2 — the ONE export handler, run by the strip's header and the applied row alike: exactly the rows the list
+     shows, in its order (v140.1 §A) */
+  const exportQcList = () => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`);
   /* v138 §A — the glyph row's seven counts, over the manuscript-scoped set; they sum to its length */
   const qcGlyphCounts = glyphCounts(qcScoped);
   /* v140 §D — the applied row's chips: one per active filter (lib/qc140), the older sentence filter and the strip's court
      when either is set (both still narrow the list), and the search, shown as "…" and never counted on the Filters chip */
   const qc140Chips: Qc140Chip[] = [
-    ...appliedChips(qcF138, (k) => qcPackageOf(k)?.packageName ?? "Package no longer on file").map((c) => ({ key: c.key, label: c.label, status: c.status, off: () => setQcF138((f) => c.off(f)) })),
+    ...appliedChips(qcF138, (k) => qcPackageOf(k)?.packageName ?? "Package no longer on file").map((c) => ({ key: c.key, label: c.label, status: c.status, stage: c.stage, off: () => setQcF138((f) => c.off(f)) })),
     ...(qcFilter !== "all" ? [{ key: "sentence", label: qcFilter === "you" ? "With you" : qcFilter === "agent" ? "With the agent" : qcFilter === "offers" ? "Offers" : qcFilter === "past" ? "Past expected" : qcFilter === "closed" ? "Closed" : qcFilter.startsWith("stage:") ? STAGE_NAME[qcFilter.slice(6) as QueryStatus] ?? "Stage" : qcFilter === "court:agent" ? "With agents" : qcFilter === "court:closed" ? "Closed" : "With you", off: () => setQcFilter("all") }] : []),
     ...(qcCourtOn ? [{ key: `court:${qcCourtOn}`, label: qcCourtOn === "you" ? "Your move" : qcCourtOn === "agent" ? "With agents" : "Closed", off: () => setQcCzCourt(null) }] : []),
     ...(qcFind.trim() ? [{ key: "find", label: `“${qcFind.trim()}”`, off: () => setQcFind("") }] : []),
+    /* v26 — from Submission packages' Results */
+    ...(qcIds ? [{ key: "ids", label: idsLabel ? `${idsLabel} · ${qcIds.size}` : `${qcIds.size} from Submission packages`, off: () => setQcIds(null) }] : []),
   ];
   /* v140 §D — the quick picks' counts, over the scoped rows */
   const qc140QuickN = {
     /* v141.1 — the "Your move" quick pick is the "With you" set */
-    you: qcScoped.filter((r) => whereItStands(r, qcNow138) === "you").length,
+    you: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, qcNow138)) === "you").length,
     over: qcScoped.filter((r) => r.pastExpected).length,
     wait: qcScoped.filter((r) => waitingRow(r)).length,
     offers: qcScoped.filter((r) => r.status === QueryStatus.OFFER).length,
   };
   /* v141 — the four sets over the scoped rows (lib/qcSummary `whereItStands`): the hero card, the pinned band and the
      Filters menu's "Where it stands" all state these, and all three write the one `qcF138.where` */
-  const qcWhereN = whereCounts(qcScoped, qcNow138);
+  /* v152 §1.5 — the quick filters' counts: Your move = Offers + Materials requested + Nudge due (lib/queryState) */
+  const qcWhereN: Record<WhereKey, number> = { you: 0, agent: 0, quiet: 0, closed: 0 };
+  for (const r of qcScoped) qcWhereN[quickOfRow(r, () => whereItStands(r, qcNow138))] += 1;
   /* v141 §B/§E — the pinned band's figures, read by the hero card's Heard back too (one computation, one number) */
   const qcBandFig = bandFigures(qcScoped, qcNow138);
   /* v141 §B — a card row or a band part: set (or, pressed again, clear) the one "Where it stands" filter; from the
@@ -3864,9 +4053,51 @@ export const Queries: React.FC<{
       sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
     });
   };
+  /* v149 A2/A3 — a view chip or the banner's "Show them": set (never toggle) the one "Where it stands" filter, or clear
+     it for All; from the banner, bring the list's top into view as a card row did */
+  const qcShowWhere = (k: WhereKey | null, scroll = true) => {
+    setQcF138((f) => ({ ...f, where: k }));
+    if (!k || !scroll || qcFull) return;
+    requestAnimationFrame(() => {
+      const tb = [...document.querySelectorAll<HTMLElement>('[data-qc150="title"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const sc = tb?.closest<HTMLElement>(".wpg-scroll");
+      if (!tb || !sc) return;
+      const top = sc.scrollTop + tb.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20;
+      sc.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    });
+  };
+  /* v150 C3 — the list's view: List or Birds-eye, remembered for the session (the app's view prefs are per device,
+     never per user, so the session is the honest scope) */
+  const [qcView150, setQcView150] = useState<QcView150>(() => {
+    /* `?view=calendar` (and `cal`), the old drawer's one URL, opens the page on Birds-eye */
+    try { if (readBirdsEyeOpen(window.location.search)) return "birds"; } catch { /* no window */ }
+    return readView150();
+  });
+  const pickView150 = (v: QcView150) => { setQcView150(v); writeView150(v); };
+  /* v150 D — on the desktop the old drawer is retired: a remembered `?view=calendar` opens the view, never the drawer */
+  useEffect(() => { if (qcDesk && beOpen) setBeOpen(false); }, [qcDesk, beOpen]);
+  /* v150 D8 — Birds-eye's own grouping and sort: separate from the list's, and never written to the list's memory */
+  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("urgency");
+  const [qcBeSort, setQcBeSort] = useState<BeSort>("due");
+  /* v150 D9 — over the rows the list shows (search, Filters, the stat card), closed dropped */
+  const qcBeGroups = useMemo(() => beGroups(qcVisible, qcBeGroup, qcBeSort, qcNow138),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [qcVisible, qcBeGroup, qcBeSort]);
+  const qcBeOrder = qcBeGroups.flatMap((g) => g.rows.map((r) => r.id));
+  /* v150 C2 — the count line's figures follow the active filter: the rows the list shows */
+  const qc150Sort = QC_SORT_FIELDS.find((f) => f.key === qcSort138.key);
+  const qc150SortOrder = qc150Sort?.order.find((o) => o.reversed === qcSort138.reversed)?.label ?? "";
+  const qc150Group = GROUP_BY_OPTIONS.find((o) => o.key === qcGroup);
+  const qc150ListLine = {
+    n: qcVisible.length,
+    heardPct: bandFigures(qcVisible, qcNow138).heardPct,
+    group: groupPhrase(qcGroup, qc150Group?.short ?? ""),
+    sort: sortPhrase(qcSort138.key, qcSort138.reversed, qc150SortOrder.toLowerCase(), qc150Sort?.label ?? ""),
+  };
+  const qc150BeLive = qcBeOrder.length;
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
-  const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn;
-  const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); };
+  const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn || !!qcIds;
+  const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); setQcIds(null); };
   /* v138 §C — a band's tint from its group (Part D settles the groups themselves) */
   /* v139 §C — under Status and Next action the band follows whose court it is; packages are powder */
   const qc138Tone = (g: { key: string }): BandTone => bandToneOf(qcGroup, g.key);
@@ -4260,7 +4491,7 @@ export const Queries: React.FC<{
     ),
     ...(selectedManuscriptFilter !== "All" ? [{ key: "ms", label: (manuscriptsWithQueries.find(m => m.id === selectedManuscriptFilter)?.title || "MANUSCRIPT").toUpperCase(), remove: () => setSelectedManuscriptFilter("All") }] : []),
     ...(statusFilterActive ? statusSel.map(s => ({ key: `st:${s}`, label: (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s).toUpperCase(), remove: () => setStatusSel(prev => prev.filter(x => x !== s)) })) : []),
-    ...(needsOverdue ? [{ key: "overdue", label: "OVERDUE FOR A REPLY", remove: () => setNeedsOverdue(false) }] : []),
+    ...(needsOverdue ? [{ key: "overdue", label: "PAST EXPECTED", remove: () => setNeedsOverdue(false) }] : []),
   ];
   const activeFilterCount = activeFilterChips.length;
   /* Is the list narrowed? Both doors count — the filter popovers AND either search (the list's
@@ -4357,7 +4588,7 @@ export const Queries: React.FC<{
       { key: "date_newest", label: "Date sent · newest", sub: "Your latest queries first" },
       { key: "date_oldest", label: "Date sent · oldest" },
       { key: "waiting_longest", label: "Waiting longest", sub: "Silence, longest first" },
-      { key: "due_soonest", label: "Reply due soonest", sub: "Floats overdue queries to the top" },
+      { key: "due_soonest", label: "Reply due soonest", sub: "Floats queries past expected to the top" },
     ]},
     { group: "Pipeline", items: [
       { key: "journey_depth", label: "Journey depth", sub: "Offers and fulls above fresh queries" },
@@ -5162,6 +5393,9 @@ export const Queries: React.FC<{
    * than delaying it, and so cannot leave a gap for anything else to fill.
    */
   const dataReady = collectionsReady;
+  /* overnight fixes v1, Part 2 — the reads this page draws from; non-null while one is down (lib/loadFailure) */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const qcLoadFail = useLoadFailure();
 
   /**
    * ══ §4/§5 · THE LIVE VIEWS' SKELETON, AND THE ENTRANCE IT GOVERNS ════════════════════════════
@@ -5186,23 +5420,32 @@ export const Queries: React.FC<{
      when NO skeleton had been shown, the inverse of what the page does now. `useQcLoad` is the one
      model; these names survive as plain consts because the unreachable three-column pane reads them. */
   const showGridSkeleton = qcLoad.loading;
+  /* v155 — the desktop list's state, from the data (lib/qc155). Nothing narrowing it means no chip, no "Where it stands"
+     and no search, the page's or the shell's. Declared up here, below everything it reads. */
+  const filtersOn155 = qc140Chips.length > 0 || qcF138.where != null || qcTerm !== "";
+  /* overnight fixes v1, Part 2 — a failed read comes first: an error is never drawn as day one (nor as a skeleton forever) */
+  const state155: State155 | null = qcLoadFail ? { kind: "error", words: qcLoadFail.words, busy: qcLoadFail.busy, retry: qcLoadFail.retry }
+    : showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }
+    /* §2 day one: the manuscript's own rows (never the searched view: a search that matches nothing is not day one) */
+    : qcLivingRows.length === 0 ? { kind: "first" }
+    : quietNow155({ rows: qcScoped, view: qcView150, filtersOn: filtersOn155 }) ? { kind: "quiet", body: quietBody155(qcScoped, qcNow138) }
+    : null;
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
+  /* v149 Part A — the header card and the "waiting on you" banner (the Versions page's own components); the hero
+     (QcHeader138) and the breakdown card (QcWhereCard) are no longer drawn on this page */
   const qc138Header = qcDesk ? (
-    <QcHeader138
+    <QcHeader149
       loading={showGridSkeleton}
-      total={showGridSkeleton ? null : qcScoped.length}
       msTitle={qcLineTitle}
-      counts={qcGlyphCounts}
-      stages={qcStages}
-      onGlyph={pickGlyph}
-      entering={qc138In !== "done"}
       onLog={() => onNavigate?.("queries", "Log a query")}
       onRecord={() => onNavigate?.("queries", "Record a response")}
       logDisabled={creating}
       logRef={logTriggerRef}
-      chart={<QcWhereCard counts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} heard={qcBandFig.more + qcBandFig.passed}
-        heardPct={qcBandFig.heardPct} where={qcF138.where} onPick={(k) => qcPickWhere(k, true)} />}
     >
+      {/* v150 Part B — the four stat cards: the old quick-filter chips' counts and filter (`qcF138.where`), and the
+          retired banner's "Next" on Your move */}
+      <QcStatCards150 cards={showGridSkeleton ? null : statCards(qcScoped, qcNow138)} where={qcF138.where} loading={showGridSkeleton}
+        onCard={(k) => qcShowWhere(pressView(qcF138.where, k))} />
       <i ref={qc138Ref} hidden />
       <BulkBar138
         anchor={qc138Ref}
@@ -5213,8 +5456,7 @@ export const Queries: React.FC<{
         onClose={() => startBulk("close")}
         onClear={() => setQcPicked(new Set())}
       />
-      {/* v138.6 §B — the old pinned bar is retired: the navy list header is the sticky row */}
-    </QcHeader138>
+    </QcHeader149>
   ) : undefined;
 
   /**
@@ -5452,6 +5694,28 @@ export const Queries: React.FC<{
    * and both must show the same timeline, the same agent tab and the same notes thread, wired to
    * the same handlers. Built here, handed to whichever is mounted; nothing about them changed.
    */
+  /* v149 — where things stand (lib/standCard), built ONCE for the ledger's stand card and the query card's note, so
+     the two cannot describe one query differently */
+  const qcStandView = (ledgerRows: RowSpec[], qcRow: QcRow, standNow: number) => {
+    const activeQuery0 = activeQuery!;
+    return standCard({
+      status: qcRow.status,
+      first: (activeAgent?.name || "").trim().split(/\s+/)[0] || (activeAgent?.agency ? "the agency" : "the agent"),
+      agency: (activeAgent?.agency || "").trim(),
+      court: qcRow.court,
+      stageStartMs: qcRow.stageStartMs,
+      expectedMs: qcRow.expectedMs,
+      windowWeeks: typeof activeAgent?.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null,
+      unansweredNudgeMs: ledgerRows.filter((r) => r.kind === "nudge" && /no reply/i.test(r.title) && (r.timeMs ?? 0) >= (qcRow.stageStartMs ?? 0))
+        .reduce<number | null>((m, r) => (r.timeMs != null && (m == null || r.timeMs > m) ? r.timeMs : m), null),
+      closedHow: qcRow.closedHow,
+      manuscriptTitle: activeMs?.title ?? null,
+      hasSentDate: !!activeQuery0.dateSent,
+      keepTracking: (activeQuery as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
+      /* an open "Nudge {agent}" to-do for this query: "Remind me later" must not add a second */
+      reminderOpen: (userTasks ?? []).some((t) => !t.done && t.queryId === activeQuery0.id && /^Nudge /.test(t.text ?? "")),
+    }, standNow);
+  };
   const qpTracking = panelRow && activeQuery ? ((() => {
                 /* §2 (respond-nudge) — while a response is being drafted the timeline shows the
                    PROPOSED world: the ghost activity appended to the real events (same builder,
@@ -5502,23 +5766,7 @@ export const Queries: React.FC<{
                 const qcRow = qcById.get(activeQuery.id);
                 const standNow = Date.now();
                 const stand = qcRow ? (
-                  <StandCard key={activeQuery.id} view={standCard({
-                    status: qcRow.status,
-                    first: (activeAgent?.name || "").trim().split(/\s+/)[0] || (activeAgent?.agency ? "the agency" : "the agent"),
-                    agency: (activeAgent?.agency || "").trim(),
-                    court: qcRow.court,
-                    stageStartMs: qcRow.stageStartMs,
-                    expectedMs: qcRow.expectedMs,
-                    windowWeeks: typeof activeAgent?.responseTimeWeeks === "number" && activeAgent.responseTimeWeeks > 0 ? activeAgent.responseTimeWeeks : null,
-                    unansweredNudgeMs: ledgerRows.filter((r) => r.kind === "nudge" && /no reply/i.test(r.title) && (r.timeMs ?? 0) >= (qcRow.stageStartMs ?? 0))
-                      .reduce<number | null>((m, r) => (r.timeMs != null && (m == null || r.timeMs > m) ? r.timeMs : m), null),
-                    closedHow: qcRow.closedHow,
-                    manuscriptTitle: activeMs?.title ?? null,
-                    hasSentDate: !!activeQuery.dateSent,
-                    keepTracking: (activeQuery as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
-                    /* an open "Nudge {agent}" to-do for this query: "Remind me later" must not add a second */
-                    reminderOpen: (userTasks ?? []).some((t) => !t.done && t.queryId === activeQuery.id && /^Nudge /.test(t.text ?? "")),
-                  }, standNow)}
+                  <StandCard key={activeQuery.id} view={qcStandView(ledgerRows, qcRow, standNow)}
                   /* Ruling 3 — each link goes to the control that already did the job; nothing here is a new write. */
                   onLink={(link, anchor) => {
                     if (link === "addSentDate") {
@@ -5584,7 +5832,8 @@ export const Queries: React.FC<{
                     };
                   })}
                   onOpenContactList={() => onNavigate?.("agents")}
-                  onEditAgent={() => openAgentCard(activeAgent.id, { from: "qc" })}
+                  /* Contact list v25.2 C3 — "Edit agent ›" opens the agent panel in edit mode (the centred editor is retired) */
+                  onEditAgent={() => openAgentCard(activeAgent.id, { tab: "who", host: "panel", from: "qc" })}
                 />
               ) : undefined) : null;
   const qpNotesTab = panelRow && activeQuery ? ((
@@ -5616,7 +5865,10 @@ export const Queries: React.FC<{
   /** Query panel v1 — open the row's panel and step it into `req`'s journey (see `pendingStepRef`). */
   const stepRow = (req: OpenRequest) => {
     const q = req.queryId ? queries.find((x) => x.id === req.queryId) : undefined;
-    if (!q) { openQueryDrawer(req); return; }
+    /* the phone has no side panel for a step to wait for — its query sheet opens the drawer over itself */
+    if (!q || qmPhone) { openQueryDrawer(req); return; }
+    /* Record a response v1 — on the desktop a response is the card's composer, whichever row or list asked */
+    if (req.mode === "resp") { respondOn(q.id, { set: qcVisible.map((r) => r.id) }); return; }
     const ag = agents.find((a) => a.id === q.agentId);
     const nm = (ag?.name || ag?.agency || "The agent").trim();
     pendingStepRef.current = { ...req, panel: { name: nm, agency: (ag?.name ? ag?.agency ?? "" : "").trim(), first: (ag?.name || "").trim().split(/\s+/)[0] ?? "" } };
@@ -5628,8 +5880,657 @@ export const Queries: React.FC<{
   /* Contact list v16 §F — the query view opened from an agent's panel. Escape and "← Back" return to the agent
      (the agent's panel is still the page's `?agent`, and redraws the moment this one closes); the × closes both. */
   const fromAgent = extPanel?.from === "agent" ? queryPanelBack() : null;
-  const backToAgent = () => closeQueryPanel();
+  /* Record a response v1 — the agent card stood aside for this one (one right-hand panel): "← Back" brings it back */
+  const backToAgent = () => { const b = queryPanelBack(); closeQueryPanel(); if (b) openAgentCard(b.agentId); };
   const closeFromAgent = () => { window.dispatchEvent(new CustomEvent("sa:agent-panel-close")); closeQueryPanel(); };
+  /**
+   * Record a response v1, Phase 2 — A RESPONSE ON ONE QUERY: its card, with the composer at "reply" once the card is on
+   * the page (the existing pending mechanism, `qc1522Pending`); a closed query's composer opens at "reopen", as the
+   * closed card's own Reopen does. `set` is what the band's arrows step through (the door's own list; one query
+   * otherwise). `back`: opened from the agent card, which this card replaces with "← Back to {first}".
+   */
+  const respondOn = (id: string, o: { from?: PanelOrigin; back?: PanelBack; set?: string[] | null; reply?: ReplyType | null } = {}) => {
+    if (isPracticeId(id)) { openPipResp(); return; }
+    const q = queries.find((x) => x.id === id);
+    if (!q) return;
+    const a: FootAct = courtOf(q.status as QueryStatus) === "closed" ? "reopen" : "resp";
+    setQcFlow(null);
+    cardSetRef.current = o.set ?? [id];
+    const reply = a === "resp" ? o.reply ?? null : null;
+    if (id === cardQueryId && (!o.back || fromAgent)) { setQcCardMode("view"); open1522(a, reply); return; }
+    qc1522Pending.current = { id, a, reply };
+    if (o.back) openQueryPanelFromAgent(id, o.back);
+    else if (routeActive && !extPanel) onOpenQuery?.(id);
+    else openQueryPanel(id, o.from ?? extPanel?.from ?? "other");
+  };
+  respOpenRef.current = (r) => {
+    whoPickedRef.current = null;
+    if (r.queryId) { respondOn(r.queryId, { from: r.from, back: r.back, reply: r.reply }); return; }
+    setQcFlow({ kind: "who" });
+  };
+  /* ══ v149 Part C — THE QUERY PANEL IS THE QUERY CARD ══════════════════════════════════════════════════════════════
+     The panel (QueryPanelHost) is unchanged; on the desktop Query Centre it holds QcQueryCard149 instead of QcOpenCard.
+     Every save below is an existing writer under one snapshot with the undo bar: the response journey's save, the
+     entry date edit (`editActivity`), the entry delete (`deleteTimelineEntries`, behind the same root and dependency
+     guards), the sent and nudge saves, the "what was sent" correction, and the agent card's own save path. */
+  const qcCardNode = (() => {
+    if (!(qcDesk || qmPhone) || !activeQuery || !currentUser) return null;
+    if (qcDesk && !panelRow) return null;
+    const row = qcById.get(activeQuery.id);
+    if (!row) return null;
+    const q = activeQuery as Query;
+    const ag = (activeAgent ?? null) as Agent | null;
+    const ms = (activeMs ?? null) as Manuscript | null;
+    const now = Date.now();
+    /* To-do list v52 — the card's reading half (ledger, story, strip, agent view, the v152 thread) is one shared
+       derivation (queries/centre/qcCardView), which the To-do list's preview draws from too. Only the handlers stay here. */
+    const view = buildCardView({
+      row, q, ag, ms, events: trackingEvents, packages, queries: queries as Query[], manuscripts, nowMs: now, quietWeeks: qcQuietWeeks, desk: qcDesk,
+      free: !packagesUnlocked(entitlement) || (import.meta.env.MODE !== "production" ? qc152DevFree() : false),
+    });
+    const { steps, sv, sent, story, nl, door, evStore, first } = view;
+    const v152 = view.v152;
+    /* v150 D10 — opened from Birds-eye, ‹ › and "N / M" follow Birds-eye's visible order */
+    const order = qmPhone ? (qmOrderRef.current.includes(q.id) ? qmOrderRef.current : [q.id])
+      : qcView150 === "birds" && qcBeOrder.includes(q.id) ? qcBeOrder : qcVisible.map((r) => r.id);
+    const idx = Math.max(0, order.indexOf(q.id));
+    /* what was sent, as the edit mode's select and pieces read it (EditJourney's own derivations) */
+    const rec = sentRecordOf(q);
+    const sentDay = q.dateSent ? dayIso(new Date(q.dateSent)) : dayIso(new Date(now));
+    const editions = editionsOn(q.manuscriptId, sentDay, packages, scriptDb.versions, ms?.bookVersions);
+    const recKey = rec.how === "package" && rec.packageId ? `${rec.packageId}#${rec.edition ?? 1}` : "__ind";
+    const packageChoices = [{ key: "__ind", label: "Sent individually" }, ...editions.map((c) => ({ key: c.key, label: `${c.name} · ${ordinal(c.edition)} edition` }))];
+    if (recKey !== "__ind" && !editions.some((c) => c.key === recKey)) packageChoices.push({ key: recKey, label: sv.how === "package" && sv.name ? sv.name : "The recorded package" });
+    const was = readSummary(rec.materials);
+    const recordedPortion = was.pieces.find((x) => x.key === "sample")?.value.split(" · ")[0] ?? "";
+    const has = (k: string) => was.pieces.some((x) => x.key === k);
+    const pieces = [
+      { key: "ql", label: "Query letter", on: has("ql") },
+      { key: "syn", label: "Synopsis", on: has("syn") },
+      { key: "sample", label: recordedPortion ? capWord(recordedPortion) : "Opening sample", on: has("sample") },
+    ];
+    const qlV = currentVersion(q.manuscriptId, scriptDb.versions, ComponentType.QUERY_LETTER);
+    const synV = currentVersion(q.manuscriptId, scriptDb.versions, ComponentType.SYNOPSIS);
+    /* the steps that may follow where the query stands now (the next-move engine's own stages) */
+    const st = q.status as QueryStatus;
+    const stepChoices: StepChoice[] = [];
+    if ([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED].includes(st)) {
+      if (st === QueryStatus.QUERIED) stepChoices.push({ key: "r:partial", label: "Partial requested" });
+      stepChoices.push({ key: "r:full", label: "Full requested" }, { key: "r:pass", label: "Passed" }, { key: "r:offer", label: "Offer" }, { key: "nudge", label: "Nudge sent" });
+    }
+    if (st === QueryStatus.PARTIAL_REQUESTED) stepChoices.push({ key: "s:partial", label: "Partial sent" });
+    if (st === QueryStatus.FULL_REQUESTED) stepChoices.push({ key: "s:full", label: "Full sent" });
+    const removable = (id: string): string[] => {
+      const evts = guardEvents();
+      const me = evts.find((e) => e.activityId === id);
+      if (!me || rootGuard(me, evts).kind === "route") return [];
+      const dep = dependencyGuard(me, evts);
+      return [id, ...(dep.kind === "cascade" ? dep.partners.map((x) => x.activityId!) : [])];
+    };
+    const sameDay = (a: number, b: number) => new Date(a).toDateString() === new Date(b).toDateString();
+
+    const onRespond = async (k: RespChoice, dayMs: number, note: string): Promise<boolean> => {
+      const others = k === "offer" ? offerOthers(q, queries, qaIsLive) : [];
+      const uid = currentUser.id;
+      let snap;
+      try {
+        snap = await takeSnapshot(uid, [q.id, ...others.map((o) => o.id)]);
+        await saveResponseShared(scriptDb, { q, agent: ag, ms }, respondDefaults(k, new Date(dayMs), note, others));
+      } catch (e) {
+        console.error("[query card] response save failed", e);
+        showToast({ message: "Couldn't save the response. Nothing was changed." });
+        return false;
+      }
+      const kept = note.trim() && k !== "pass" ? note.trim() : "";
+      if (kept) await addJournalEntry(q.id, kept);
+      setQcCardFresh("__last");
+      window.setTimeout(() => setQcCardFresh(null), 1600);
+      const s0 = snap;
+      showUndoBar({
+        message: `Saved. ${RESP_SAVED[k]} added to the story.`,
+        sub: k === "pass" ? "CLOSED · ADDED TO YOUR WALL OF NO" : k === "offer" ? "DECIDE BY YOUR DATE" : "YOUR MOVE",
+        undo: async () => {
+          await restoreSnapshot(s0);
+          if (kept) { const j = journalEntries.find((x) => x.queryId === q.id && x.entryText === kept); if (j) await deleteJournalEntry(j.id); }
+        },
+      });
+      return true;
+    };
+
+    const onSaveEdits = async (e: CardEdits): Promise<boolean> => {
+      const uid = currentUser.id;
+      let snap;
+      let agentUndo: (() => Promise<boolean>) | undefined;
+      try {
+        snap = await takeSnapshot(uid, [q.id, ...(await offerMarkedBy(uid, q.id))]);
+        const extra: Record<string, unknown> = {};
+        /* 1 · the dates (both stores, then recompute); a moved send moves dateSent, a moved latest nudge its date */
+        const lastNudge = [...steps].reverse().find((x) => /nudge/i.test(x.title));
+        for (const [aid, txt] of Object.entries(e.dates)) {
+          const stp = steps.find((x) => x.activityId === aid);
+          const ms0 = parseDay(txt, now);
+          if (!stp || ms0 == null || e.removed.includes(aid) || (stp.ms != null && sameDay(ms0, stp.ms))) continue;
+          await editActivity(q.id, aid, { date: dayIso(new Date(ms0)) });
+          if (stp.root) extra.dateSent = dayIso(new Date(ms0));
+          if (lastNudge && lastNudge.activityId === aid) extra.lastNudgeSentDate = dayIso(new Date(ms0));
+        }
+        /* 2 · what was sent: a package edition, or the pieces chosen individually */
+        let next: SentNext | null = null;
+        if (e.packageKey != null && e.packageKey !== recKey && e.packageKey !== "__ind") {
+          const picked = editions.find((c) => c.key === e.packageKey);
+          if (picked) next = packageNext(picked, recordedPortion);
+        } else if (Object.keys(e.pieces).length || (e.packageKey === "__ind" && recKey !== "__ind")) {
+          const on = (k: string) => e.pieces[k] ?? has(k);
+          next = individualNext({ ql: on("ql"), syn: on("syn"), s: { ...blankSample(), unit: "none" } }, qlV, synV, on("sample") ? recordedPortion : "");
+        }
+        /* a change of record is a change of how it went, of package or edition, or of the pieces' words — a query with
+           nothing recorded has an empty summary either way, so the words alone would call a switch "no change" */
+        const recChanged = !!next && (next.summary !== (q.sentMaterials ?? "") || next.sentHow !== rec.how
+          || (next.id ?? null) !== (rec.packageId ?? null) || (next.edition ?? null) !== (rec.edition ?? null));
+        if (next && recChanged) Object.assign(extra, sentCorrectionFields(scriptDb, q, ms, next));
+        else next = null;
+        if (Object.keys(extra).length) await updateQuery(q.id, extra as Partial<Query>, next?.id ? { stampPackage: next.id } as never : undefined);
+        const oldPkg = q.sentPackageId || q.packageId;
+        if (next && oldPkg && oldPkg !== next.id) await scriptDb.reconcileStamps([oldPkg]);
+        /* 3 · the steps removed (one batch: the entry, its feed row and the fields it owned) */
+        if (e.removed.length) await deleteTimelineEntries(uid, q.id, e.removed);
+        /* 4 · the step added, through the journey's own write for that step */
+        if (e.added && e.added.kind) {
+          const fresh = (await getDoc(doc(db, "users", uid, "queries", q.id))).data() ?? {};
+          const q2 = { ...q, ...fresh, id: q.id } as Query;
+          const day = new Date(parseDay(e.added.date, now)!);
+          const [kind, sub] = e.added.kind.split(":");
+          if (kind === "r") {
+            const t = sub as RespChoice;
+            const others = t === "offer" ? offerOthers(q2, queries, qaIsLive) : [];
+            await saveResponseShared(scriptDb, { q: q2, agent: ag, ms }, respondDefaults(t, day, "", others));
+          } else if (kind === "s") {
+            const sk = sub as SentKind;
+            await saveSent(scriptDb, q2, { kind: sk, sent: day, ...sentDefaults(sk, day) });
+          } else if (kind === "nudge") {
+            const nd = nudgeDefaults(q2, ag, day);
+            await saveNudgeSent(scriptDb, q2, ag, { sent: day, then: nd.then, via: nd.via, said: "", viaWords: viaLabel(nd.via) });
+          }
+        }
+        /* 5 · the agent's own record, through the agent card's save path (its own snapshot and undo) */
+        if (ag) {
+          const patch: AgentEditPatch = {};
+          const a0 = e.agent;
+          if (a0.name != null && a0.name.trim() !== (ag.name ?? "")) patch.name = a0.name.trim();
+          if (a0.agency != null && a0.agency.trim() !== (ag.agency ?? "")) patch.agency = a0.agency.trim();
+          if (a0.email != null && a0.email.trim() !== (ag.email ?? "")) patch.email = a0.email.trim();
+          if (a0.replyWeeks != null) {
+            const w = a0.replyWeeks.trim() === "" ? null : Number(a0.replyWeeks.trim());
+            if (w !== (typeof ag.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null)) patch.responseTimeWeeks = w;
+          }
+          if (Object.keys(patch).length) {
+            const out = await commitCardSave({ uid, agent: ag, queries, patch, resolveTaskFlag: scriptDb.resolveTaskFlag });
+            if ("error" in out.res) throw new Error(String(out.res.error));
+            agentUndo = out.undo;
+          }
+        }
+      } catch (err) {
+        console.error("[query card] edit save failed", err);
+        if (snap) { try { await restoreSnapshot(snap); } catch { /* the bar below says so */ } }
+        showToast({ message: "Couldn't save the changes. Nothing was changed." });
+        return false;
+      }
+      const s0 = snap;
+      setQcCardFresh(e.added ? "__last" : null);
+      if (e.added) window.setTimeout(() => setQcCardFresh(null), 1600);
+      showUndoBar({
+        message: `Changes saved · ${ag?.name || ag?.agency || "The agent"}`,
+        sub: e.removed.length ? `${e.removed.length} ${e.removed.length === 1 ? "STEP" : "STEPS"} REMOVED` : "THE QUERY IS UPDATED",
+        undo: async () => { await restoreSnapshot(s0); if (agentUndo) await agentUndo(); },
+      });
+      return true;
+    };
+
+    /* what the material editors offer (§4.4): the book's versions (Pro), the saved letters and synopses, the one in use */
+    const pro1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(entitlement);
+    const qc152Env = (): MatEnv => ({
+      free: !pro1522,
+      versions: bookVersionsOf(ms).filter((v) => !(v as { archived?: boolean }).archived)
+        .map((v) => ({ id: v.id, name: v.name, madeMs: new Date(v.createdDate).getTime() })).sort((a, b) => a.madeMs - b.madeMs),
+      inUseVersionId: inUseBookVersion(ms, packages),
+      letters: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.QUERY_LETTER).map((v) => ({ name: v.versionName })),
+      synopses: scriptDb.versions.filter((v) => v.manuscriptId === q.manuscriptId && v.componentType === ComponentType.SYNOPSIS).map((v) => ({ name: v.versionName })),
+    });
+    const asMats = (labels: string[]): StepMaterial[] => labels.map((l) => {
+      const m = readMat(l);
+      return m.kind === "sample" ? { kind: "sample" as const, unit: m.unit, n: m.n } : m.kind === "other" ? { kind: "other" as const, text: l } : { kind: m.kind };
+    });
+    const storedMats = (id?: string): StepMaterial[] | null => {
+      const m = id ? evStore.get(id)?.materials : undefined;
+      return Array.isArray(m) && m.length && typeof m[0] === "object" ? (m as StepMaterial[]).map((x) => ({ ...x })) : null;
+    };
+
+    /* ══ v152.2 §2–§7 — THE COMPOSER, THE BUBBLE EDITED IN PLACE, AND THEIR SAVES ═══════════════════════════════════
+       Every footer action opens the composer at the foot of the card (QcComposer1522); ✎ Edit turns one bubble into a
+       small form (QcStepEdit1522). Each save is one plan on the page's batched writer (lib/qc1522Write), one snapshot,
+       and an undo toast inside the card. ⚠️ v152.1's "What needs changing?" fork, Fix a mistake, the record form and
+       "See what changes" are gone. */
+    let composer1522: React.ReactNode = null;
+    let edit1522: React.ReactNode = null;
+    const card1522: NonNullable<React.ComponentProps<typeof QcQueryCard149>["card1522"]> = {};
+    if (v152 && qcDesk && currentUser) {
+      const uid = currentUser.id;
+      const env = qc152Env();
+      const steps1522 = v152.steps;
+      const dated = steps1522.filter((x) => x.ms != null).sort((a, b) => a.ms! - b.ms!);
+      const floorMs = dated.length ? dated[dated.length - 1].ms! : null;
+      const T: Partial<Record<string, StepType>> = {
+        [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "preq", [QueryStatus.PARTIAL_SENT]: "psent", [QueryStatus.FULL_REQUESTED]: "freq",
+        [QueryStatus.FULL_SENT]: "fsent", [QueryStatus.REVISE_RESUBMIT]: "rr", [QueryStatus.OFFER]: "offer", [QueryStatus.REJECTED]: "passed", [QueryStatus.NO_RESPONSE]: "noresp", [QueryStatus.WITHDRAWN]: "withdrawn",
+      };
+      const logOf = (xs: readonly ThreadStepIn[]): LogStep[] => xs.flatMap((x) => {
+        const t = x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : x.status ? T[x.status] : undefined;
+        return t && x.ms != null && x.activityId ? [{ id: x.activityId, t, d: x.ms }] : [];
+      });
+      const agentWord = ag?.name || ag?.agency || "The agent";
+      /* the request the send answers: what was asked, with the version in use (Pro) */
+      const req = [...steps1522].reverse().find((x) => x.status === QueryStatus.PARTIAL_REQUESTED || x.status === QueryStatus.FULL_REQUESTED || x.status === QueryStatus.REVISE_RESUBMIT) ?? null;
+      const reqMats = (() => {
+        const m = req?.activityId ? evStore.get(req.activityId)?.materials : undefined;
+        return Array.isArray(m) ? m.filter((x): x is StepMaterial => !!x && typeof x === "object" && "kind" in x).map((x) => ({ ...x })) : null;
+      })();
+      const withVer = (m: StepMaterial): StepMaterial => (pro1522 && (m.kind === "sample" || m.kind === "full") && !m.versionId && env.inUseVersionId ? { ...m, versionId: env.inUseVersionId } : m);
+      const sendKind = q.status === QueryStatus.FULL_REQUESTED ? "full_sent" as const : q.status === QueryStatus.REVISE_RESUBMIT ? "resubmitted" as const : "partial_sent" as const;
+      const sendMats = (() => {
+        if (sendKind !== "partial_sent") return (reqMats?.length ? reqMats : [{ kind: "full" as const }]).map(withVer);
+        if (reqMats?.length) return reqMats.map(withVer);
+        const u = String(q.materialsRequestedType ?? "").toLowerCase(), n = Number(q.materialsRequestedQuantity);
+        const unit = u === "pages" || u === "chapters" || u === "words" ? u : "chapters";
+        return [withVer({ kind: "sample", unit, n: Number.isFinite(n) && n > 0 ? n : undefined }), ...(q.requestSynopsis ? [{ kind: "synopsis" as const }] : [])];
+      })();
+      const pass = [...steps1522].reverse().find((x) => x.status === QueryStatus.REJECTED && !x.kind) ?? null;
+      const before = pass ? [...steps1522].filter((x) => x.ms != null && pass.ms != null && x.ms <= pass.ms && x !== pass).reverse().find((x) => !x.kind && x.status && [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED].includes(x.status)) : null;
+      const passedAfter = before?.status === QueryStatus.FULL_SENT ? "your full" : before?.status === QueryStatus.PARTIAL_SENT ? "your partial" : before?.status === QueryStatus.RESUBMITTED ? "your revision" : "your query";
+      const offerStep = [...steps1522].reverse().find((x) => x.status === QueryStatus.OFFER && !x.kind) ?? null;
+      const STAGE_HAS: Partial<Record<string, string>> = {
+        [QueryStatus.FULL_SENT]: "Has your full", [QueryStatus.RESUBMITTED]: "Has your revision", [QueryStatus.PARTIAL_SENT]: "Has your partial",
+        [QueryStatus.FULL_REQUESTED]: "Asked for your full", [QueryStatus.PARTIAL_REQUESTED]: "Asked for your partial", [QueryStatus.REVISE_RESUBMIT]: "Asked for a revision",
+      };
+      const live1522 = queries.filter((x) => x.id !== q.id && x.manuscriptId === q.manuscriptId && qaIsLive(x));
+      const others = live1522.map((x) => {
+        const a = agents.find((y) => y.id === x.agentId);
+        const sentMs = anyToMs(x.dateSent);
+        return {
+          id: x.id, name: a ? agentPrimary(a) : "An agent", initials: a ? agentInitials(a) : "?",
+          stage: STAGE_HAS[x.status] ?? (sentMs != null ? `Queried ${dayLabel152(sentMs, now)}` : "Queried"),
+          group: holdsPages(x.status) ? "pages" as const : "query" as const, email: (a?.email ?? "").trim(),
+          told: x.offerRefQueryId === q.id && x.offerTold === true, offerReply: x.offerReply ?? null, holdsPages: holdsPages(x.status),
+        };
+      }).sort((a, b) => (a.group === b.group ? a.name.localeCompare(b.name) : a.group === "pages" ? -1 : 1));
+      const via = String(q.sendMethod ?? "Email");
+      const pkgList = pro1522 ? packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => ({ id: k.id, name: k.packageName })) : null;
+      const rec0 = sentRecordOf(q);
+      const ctx: ComposerCtx = {
+        first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522, status: q.status,
+        sendKind, sendMats, queriedVia: via === "QueryManager" ? "QueryManager" : via === "Email" ? "Email" : "Other",
+        nudgedMs: nudgeMsOf({ ...row, nrmn: !!v152.nrmn }, now), queryOnly: q.status === QueryStatus.QUERIED, remindDays: 14,
+        fullAsked: q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.OFFER,
+        passMs: pass?.ms ?? null, passedAfter, restartToMs: now + 28 * 86_400_000,
+        offerFromMs: offerStep?.ms ?? null, offerByMs: anyToMs(q.offerResponseDeadline), others,
+        openOthers: live1522.length, withPages: others.filter((o) => o.holdsPages).length,
+        packages: pkgList, packageId: rec0.how === "package" ? rec0.packageId ?? null : null,
+      };
+      /* one save: plan it, commit it in one batch, then the toast and its Undo */
+      const done1522 = (snap: Snapshot, msg: string, freshId: string | null, bump = true) => {
+        setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
+        whoPickedRef.current = null;
+        if (freshId) { setQcCardFresh(freshId); window.setTimeout(() => setQcCardFresh(null), 1600); }
+        setQc1522Toast({ msg, undo: async () => { await restoreSnapshot(snap); }, bump });
+      };
+      const newId = (plan: { set: { path: string }[] }) => plan.set.find((x) => x.path.includes("/activity/"))?.path.split("/").pop() ?? null;
+      /* `bump`: a save that adds a step or moves the query (Query card v160) — a step's date or materials edit does not */
+      const run1522 = async (fn: () => Promise<void>, bump = true): Promise<boolean> => {
+        if (qc152Busy) return false;
+        setQc152Busy(true);
+        /* Query card v160 — the card moves when the save lands (QcCard152 `motion`); it replaces Phase 6's savedCard */
+        if (bump) setQcMotion160({ kind: "save", n: Date.now() });
+        /* the composer (or the bubble's form) gives way as the save starts: its draft would otherwise sit beside the new
+           step the local write has already drawn, until the server answers */
+        setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
+        try {
+          await fn();
+          /* Query card v161 — the save is done: the card releases its held motion after the page has drawn it */
+          if (bump) setQcMotion160((m) => (m && m.kind === "save" ? { ...m, done: true } : m));
+          return true;
+        } catch (e) {
+          console.error("v152.2: the save failed", e);
+          if (bump) setQcMotion160(null);
+          showToast({ message: "Couldn't save that. Nothing was changed." });
+          return false;
+        } finally { setQc152Busy(false); }
+      };
+      const save1522 = (p: ComposerSave): Promise<boolean> => run1522(async () => {
+        const existing = await readLog(uid, q.id);
+        const pc = { uid, q, agent: ag, ms, existing, nowMs: Date.now(), quietWeeks: qcQuietWeeks };
+        if (p.j === "send") {
+          const plan = planRecord(pc, sendKind, p.dayMs, p.mats);
+          done1522(await commitPlan(uid, plan), sendKind === "partial_sent" ? "Partial sent" : sendKind === "resubmitted" ? "Revision sent" : "Full sent", newId(plan));
+        } else if (p.j === "nudge") {
+          const plan = planRecord(pc, "nudge", p.dayMs, [], { step: { sentVia: p.via } });
+          done1522(await commitPlan(uid, plan), "Nudge logged", newId(plan));
+        } else if (p.j === "close") {
+          const plan = p.as === "withdrawn" ? planRecord(pc, "withdrawn", p.dayMs, [], { withdraw: { token: "withdrew", event: "withdrawn" } }) : planRecord(pc, "noresp", p.dayMs, []);
+          done1522(await commitPlan(uid, plan), "Closed", newId(plan));
+        } else if (p.j === "reply") {
+          const plan = planReply(pc, { ...p, queryOnly: q.status === QueryStatus.QUERIED });
+          done1522(await commitPlan(uid, plan),
+            p.rt === "passed" ? `Closed as passed${p.wall ? " · added to your Wall of no" : ""}` : p.rt === "offer" ? "Offer added" : `${first}’s reply added`, newId(plan));
+          /* Record a response v1 — the door that opened this response hears of it (its own contract: a task, a row) */
+          responseSaved(q.id);
+        } else if (p.j === "unpass") {
+          if (!pass?.activityId) throw new Error("No pass to take off");
+          const feed = await readFeed(uid, q.id);
+          const plan = planUnpass({ ...pc, feed }, pass.activityId);
+          done1522(await commitPlan(uid, plan), "Pass taken off", null);
+          responseSaved(q.id);
+        } else if (p.j === "tell") {
+          const feed = await readFeed(uid, q.id);
+          let plan = planTell({ ...pc, feed }, others, p.told, p.later, anyToMs(q.offerResponseDeadline));
+          const ids = others.map((o) => o.id);
+          let snap: Snapshot, refused: string[] = [];
+          try { snap = await commitPlan(uid, plan, undefined, ids); } catch (e) {
+            /* v152.1 — a sibling at the rules' field ceiling refuses the batch: save the rest, and name the refused ones */
+            if ((e as { code?: string })?.code !== "permission-denied") throw e;
+            refused = await refusedMarks(uid, plan);
+            if (!refused.length) throw e;
+            plan = planTell({ ...pc, feed }, others.filter((o) => !refused.includes(o.id)), p.told, p.later, anyToMs(q.offerResponseDeadline));
+            snap = await commitPlan(uid, plan, undefined, ids.filter((i) => !refused.includes(i)));
+          }
+          const n = others.filter((o) => p.told[o.id] && !o.told).length, left = others.filter((o) => !p.told[o.id]).length;
+          const names = refused.map((id) => others.find((o) => o.id === id)?.name ?? "an agent");
+          const msg = refused.length ? `Saved. Couldn’t mark ${names.join(", ")}`
+            : !left ? `All ${others.length} agents told`
+            : n ? `${n} told · the other ${left} ${left === 1 ? "is" : "are"} on your to-do list` : `${left} to tell · on your to-do list`;
+          done1522(snap, msg, newId(plan));
+        } else if (p.j === "accept") {
+          const feed = await readFeed(uid, q.id);
+          const holders = others.filter((o) => o.holdsPages).map((o) => o.id);
+          const plans = [planSigned({ ...pc, feed }, p.todo, holders)];
+          if (p.closeOthers) {
+            for (const o of live1522) {
+              const ox = await readLog(uid, o.id);
+              plans.push(planRecord({ uid, q: o, agent: agents.find((a) => a.id === o.agentId) ?? null, ms, existing: ox, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+                "withdrawn", Date.now(), [], { withdraw: { token: "accepted_offer", event: "withdrawn_on_offer" } }));
+            }
+          }
+          const snap = await commitMany(uid, plans, holders);
+          done1522(snap, "Offer accepted", newId(plans[0]));
+          setQc1522Burst(Date.now());
+        } else if (p.j === "decline") {
+          const plan = planRecord(pc, "withdrawn", Date.now(), [], { withdraw: { token: "offer_declined", event: "offer_declined", notes: p.note } });
+          done1522(await commitPlan(uid, plan), "Offer declined", newId(plan));
+        }
+      });
+      if (qc1522J) {
+        composer1522 = (
+          <QcComposer1522 key={`${q.id}:${qc1522J.j}:${qc1522J.n}`} journey={qc1522J.j} replyStart={qc1522J.reply ?? null} ctx={ctx} busy={qc152Busy}
+            onDraft={setQc1522Draft} onSave={save1522}
+            /* came through "Who replied?": one level up is the list again, in the same frame */
+            cancelLabel={whoPickedRef.current === q.id && qc1522J.j === "reply" ? "← Someone else" : undefined}
+            onClose={() => {
+              if (whoPickedRef.current === q.id && qc1522J.j === "reply") {
+                whoPickedRef.current = null;
+                swapCard(-1, () => { setQc1522J(null); setQc1522Draft(null); closeQueryCard(); setQcFlow({ kind: "who" }); });
+                return;
+              }
+              setQc1522J(null); setQc1522Draft(null);
+            }}
+            onAddEmail={() => { setQc1522J(null); if (ag) openAgentCard(ag.id, { tab: "who", focus: "email", from: "qc" }); }}
+            onEditOffer={() => { setQc1522J(null); setQc1522Edit(offerStep?.activityId ?? null); }} />
+        );
+      }
+      /* §2.4 the bubble edited in place */
+      /* "__undated": the list's "Add date" asked for the first undated step's editor (Log a query v1.1) */
+      const editKey = qc1522Edit === "__undated" ? steps1522.find((x) => x.ms == null && x.activityId && !x.kind)?.activityId ?? null : qc1522Edit;
+      const ed = editKey ? steps1522.find((x) => x.activityId === editKey) ?? null : null;
+      /* an undated step can be edited too: giving it a date is the commonest reason to open it */
+      if (ed && ed.activityId) {
+        const i = dated.indexOf(ed);
+        const log = logOf(steps1522);
+        const deps = dependents(log, ed.activityId, { nowMs: now, first });
+        const depName = (d: LogStep) => { const s0 = steps1522.find((x) => x.activityId === d.id); return s0 ? stepTitle152(s0, first) : STEP_LABEL[d.t]; };
+        /* where the card goes back to: the latest status step left, in the thread's own order (undated ones by stage) */
+        const gone = new Set([ed.activityId, ...deps.map((d) => d.id)]);
+        const rest = orderSteps152(steps1522.filter((x) => !x.kind && x.status && !gone.has(x.activityId ?? ""))).pop();
+        const backTo = rest?.status ? STAGE_NAME[rest.status] ?? null : null;
+        const deleteText = `Delete this step? ${deps.length ? `${deps.map((d) => depName(d)).join(", ")} ${deps.length === 1 ? "depends" : "depend"} on it, so ${deps.length === 1 ? "it goes" : "they go"} too. ` : ""}${backTo ? `${first}’s card goes back to ${backTo}.` : "This removes the whole query."}`;
+        const words0 = typeof (evStore.get(ed.activityId) as { replyNote?: unknown } | undefined)?.replyNote === "string" ? String((evStore.get(ed.activityId) as { replyNote?: string }).replyNote) : (ed.quote ?? "");
+        const isQueryStep = ed.status === QueryStatus.QUERIED && !ed.kind;
+        const kind: FixStep["kind"] = ed.kind === "nudge" ? "nudge" : ed.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[ed.status ?? ""] ?? "queried"] ?? "queried";
+        edit1522 = (
+          <QcStepEdit1522 key={ed.activityId} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
+            mats={storedMats(ed.activityId) ?? (ed.status === QueryStatus.QUERIED ? asMats(ed.chips.map((c) => c.label)) : [])}
+            request={ed.status === QueryStatus.PARTIAL_REQUESTED || ed.status === QueryStatus.FULL_REQUESTED || ed.status === QueryStatus.REVISE_RESUBMIT}
+            words={words0} first={first} env={env} nowMs={now} floorMs={i > 0 ? dated[i - 1].ms : null} ceilMs={i >= 0 && i < dated.length - 1 ? dated[i + 1].ms : null}
+            deleteText={deleteText} busy={qc152Busy}
+            /* Log a query v1.1 — the query's method and package are edited on its first step, and nowhere else */
+            how={isQueryStep ? { value: q.sendMethod ?? null, options: EDIT_METHODS } : null}
+            pkg={isQueryStep && pkgList ? { value: ctx.packageId ?? null, options: pkgList } : null}
+            onCancel={() => setQc1522Edit(null)}
+            onSave={(v) => run1522(async () => {
+              const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+              const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+                { id: ed.activityId!, kind, dayMs: v.dayMs, materials: v.mats }, side152(ed) === "them" ? v.words : null);
+              if (isQueryStep && (v.how !== undefined || v.pkgId !== undefined)) {
+                /* the old details save's own fields (lib/qc1522Write planDetails1522), riding the step's plan: one write, one undo */
+                const k = v.pkgId ? packages.find((x) => x.id === v.pkgId) : null;
+                const dp = planDetails1522(q, { agentId: q.agentId, method: v.how ?? q.sendMethod ?? "",
+                  pkg: k ? { id: k.id, name: k.packageName, edition: k.edition ?? 1 } : null, pkgChanged: !!pkgList && v.pkgId !== undefined && (v.pkgId ?? null) !== (ctx.packageId ?? null) });
+                plan.query = { ...plan.query, ...dp.query };
+              }
+              done1522(await commitPlan(uid, plan), "Step saved", null, false);
+            }, false)}
+            onDelete={() => run1522(async () => {
+              const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+              const marked = queries.filter((x) => x.offerRefQueryId === q.id).map((x) => x.id);
+              const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks, marked }, [], [ed.activityId!, ...deps.map((d) => d.id)], null);
+              done1522(await commitPlan(uid, plan, undefined, marked), deps.length ? `${deps.length + 1} steps deleted` : "Step deleted", null);
+            })} />
+        );
+      }
+      card1522.composer = composer1522;
+      card1522.draft = qc1522J ? qc1522Draft : null;
+      card1522.editingId = edit1522 ? editKey : null;
+      /* Log a query v1.1 — editing in place: the agent, the agent's details and the notes, saved on the card's Save */
+      const detailsOf = (id: string): AgentDetails | null => {
+        const a = agents.find((x) => x.id === id);
+        if (!a) return null;
+        return {
+          weeks: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
+          nrmn: typeof a.noResponseMeansNo === "boolean" ? a.noResponseMeansNo : null,
+          asks: (a.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
+          method: a.submissionMethod ? String(a.submissionMethod) : null,
+          wishlist: a.mswlNotes ?? "", email: a.email ?? "", website: a.website ?? "",
+        };
+      };
+      card1522.editData = {
+        agentId: q.agentId,
+        agents: [...agents].map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) || null })).sort((a, b) => a.name.localeCompare(b.name)),
+        detailsOf,
+        notes: journalEntries.filter((j) => j.queryId === q.id)
+          .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
+          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" })),
+      };
+      card1522.onSaveEdits = async (e) => {
+        if (qc152Busy) return false;
+        setQc152Busy(true);
+        try {
+          /* 1 · the agent the query is to: the old details save (planDetails1522), on the page's batched writer */
+          if (e.agentId) await commitPlan(uid, planDetails1522(q, { agentId: e.agentId, method: q.sendMethod ?? "", pkg: null, pkgChanged: false }));
+          /* 2 · the agent's own details: the agent card's save path (its snapshot, the reply-time fan-out, the flag) */
+          const target = agents.find((x) => x.id === e.detailsAgentId);
+          if (target && Object.keys(e.details).length) {
+            const d = e.details;
+            const patch: AgentEditPatch = {};
+            if ("weeks" in d) patch.responseTimeWeeks = d.weeks ?? null;
+            if ("nrmn" in d && typeof d.nrmn === "boolean") patch.noResponseMeansNo = d.nrmn;
+            if ("asks" in d) patch.materialsWanted = d.asks ?? [];
+            if ("method" in d && d.method) patch.submissionMethod = d.method;
+            if ("wishlist" in d) { patch.mswlNotes = (d.wishlist ?? "").trim(); patch.mswlCheckedAt = new Date().toISOString(); }
+            if ("email" in d) patch.email = (d.email ?? "").trim();
+            if ("website" in d) patch.website = (d.website ?? "").trim();
+            const out = await commitCardSave({ uid, agent: target, queries, patch, resolveTaskFlag: scriptDb.resolveTaskFlag });
+            if ("error" in out.res) throw new Error(String(out.res.error));
+          }
+          /* 3 · the notes: the notes path (journalEntries) */
+          for (const n of e.notes.updated) await updateJournalEntry(n.id, n.text);
+          for (const id of e.notes.deleted) await deleteJournalEntry(id);
+          for (const t of e.notes.added) await addJournalEntry(q.id, t);
+        } catch (err) {
+          console.error("[query card] edit-in-place save failed", err);
+          showToast({ message: "Couldn't save all the changes. Check the card and try again." });
+          return false;
+        } finally { setQc152Busy(false); }
+        setQc1522Toast({ msg: "Changes saved", undo: null });
+        return true;
+      };
+      card1522.editNode = edit1522;
+      card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: qc1522Toast.undo ? () => {
+        const t = qc1522Toast; setQc1522Toast(null);
+        if (t.bump) setQcMotion160({ kind: "undo", n: Date.now() });
+        /* a restore the rules refuse writes nothing (one batch): say so, never leave the writer believing it was undone */
+        void t.undo?.().then(() => { if (t.bump) setQcMotion160((m) => (m && m.kind === "undo" ? { ...m, done: true } : m)); }).catch((e) => { console.error("v152.2 undo refused", (e as { code?: string })?.code ?? e); setQcMotion160(null); setQc1522Toast({ msg: "Couldn’t undo that. Nothing was changed.", undo: null }); });
+      } : null } : null;
+      card1522.burst = qc1522Burst;
+      card1522.motion = qcMotion160;
+      card1522.onFoot = (a) => open1522(a);
+      /* Record a response v1, Phase 5 — the band's ‹ ›: the set the card was opened from, else the list's order */
+      const set1522 = cardSetRef.current?.includes(q.id) ? cardSetRef.current : order;
+      const at1522 = set1522.indexOf(q.id);
+      card1522.backTo = fromAgent ? { label: `Back to ${fromAgent.first}`, onBack: backToAgent } : null;
+      card1522.stepCard = fromAgent ? null : {
+        at: at1522, of: set1522.length,
+        go: (d) => {
+          const nid = set1522[at1522 + d];
+          if (!nid) return;
+          cardSetRef.current = set1522;
+          if (routeActive && !extPanel) onOpenQuery?.(nid); else openQueryPanel(nid, extPanel?.from ?? "other");
+        },
+      };
+    }
+
+    return (
+      <QcQueryCard149
+        onReply152={(a) => open1522(a)}
+        edit152={null}
+        onBack152={() => setQcCardMode("view")}
+        /* v152.2 §2.5 — the pencil goes straight to "Query details"; §2.4 ✎ Edit turns that bubble into a form in place */
+        onEditStep152={(id) => { setQc1522J(null); setQc1522Draft(null); setQc1522Toast(null); setQc1522Edit(id); }}
+        card1522={card1522}
+        {...view.display}
+        v152={v152}
+        freshKey={qcCardFresh === "__last" ? (steps[steps.length - 1]?.activityId ?? steps[steps.length - 1]?.key ?? null) : qcCardFresh}
+        focusStep={qcEditUndated && qcCardMode === "edit" ? story.find((x) => x.ms == null && x.activityId)?.activityId ?? null : null}
+        onFocused={() => setQcEditUndated(false)}
+        onAgentField={(f) => {
+          if (!ag) return;
+          /* Agent card v2 — "Open {first}'s full card" reads the card; the tab "who" opened every section for editing */
+          if (f === null) openAgentCard(ag.id, { from: "qc" });
+          else if (f === "wishlist") openAgentCard(ag.id, { tab: "want", focus: "wishlist", from: "qc" });
+          else if (f === "method") openAgentCard(ag.id, { tab: "work", focus: "method", from: "qc" });
+          else if (f === "reply") openAgentCard(ag.id, { tab: "work", focus: "reply", from: "qc" });
+          else if (f === "materials") openAgentCard(ag.id, { tab: "work", focus: "materials", from: "qc" });
+          else openAgentCard(ag.id, { tab: "who", focus: f, from: "qc" });
+        }}
+        index={idx}
+        total={order.length}
+        notes={journalEntries.filter((j) => j.queryId === q.id)
+          .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
+          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "",
+            ms: j.createdAt ? new Date(j.createdAt as string).getTime() : null, pinned: !!(j as { pinned?: boolean }).pinned }))}
+        /* Query card v158 §5 — a note's actions. Pinning is the journal's own `pinned` (one per query: pinning a note
+           unpins any other); Make it a task and Send to Corkboard copy the text through addUserTask (dated today, or
+           undated: an undated task is a Corkboard note) and leave the note where it is. */
+        onPinNote={(id, on) => {
+          const others = on ? journalEntries.filter((j) => j.queryId === q.id && j.id !== id && (j as { pinned?: boolean }).pinned) : [];
+          void Promise.all([...others.map((j) => pinJournalEntry(j.id, false)), pinJournalEntry(id, on)])
+            .then(() => showToast({ message: on ? "Pinned to the top" : "Unpinned" }));
+        }}
+        onNoteTask={(text) => {
+          const d = new Date();
+          const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          void addUserTask({ text, queryId: q.id, agentId: ag?.id, manuscriptId: q.manuscriptId, dueDate: today })
+            .then(() => showToast({ message: "On your to-do list for today" }));
+        }}
+        onNoteCork={(text) => { void addUserTask({ text, queryId: q.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }}
+        mode={qcCardMode}
+        /* PHONE APP v2, PART 4 — on a phone a response is recorded in the response journey's flow layout, the same
+           walk as every other journey; the card's inline form stays the desktop's */
+        onMode={qmPhone ? (m) => { if (m === "respond") openQueryDrawer({ mode: "resp", queryId: q.id }); else setQcCardMode(m); } : (m) => { if (m === "respond") open1522("resp"); else setQcCardMode(m); }}
+        onClose={qmPhone ? () => setQcCardMode("view") : fromAgent ? closeFromAgent : closeQueryCard}
+        onStep={(d) => {
+          const nid = order[idx + d];
+          if (!nid) return;
+          /* the phone steps in place: one history entry for the card, whichever query it shows */
+          if (qmPhone) { const n = new URLSearchParams(window.location.search); n.set("q", nid); routerNav({ pathname: "/queries", search: `?${n}` }, { replace: true, state: window.history.state?.usr ?? null }); return; }
+          cardSetRef.current = order; onOpenQuery?.(nid);
+        }}
+        onPrimary={() => { if (!door) return; if (door.mode === "resp" && !qmPhone) open1522("resp"); else stepRow({ mode: door.mode, queryId: q.id }); }}
+        onCloseQuery={() => stepRow({ mode: "close", queryId: q.id })}
+        onContactList={() => { if (ag) routerNav(`/agents?agent=${encodeURIComponent(ag.id)}`); else onNavigate?.("agents"); }}
+        onCopyEmail={() => {
+          if (!ag?.email) return;
+          const em = ag.email;
+          void copyText(em).then((ok) => showToast({ message: ok ? `Copied ${em}` : "Couldn't copy the email" }));
+        }}
+        onOpenPiece={() => { if (sv.how === "package") onNavigate?.("manuscripts", "Submission packages"); else routerNav("/manuscripts/versions"); }}
+        onAddNote={(t) => { void addJournalEntry(q.id, t).then(() => showToast({ message: `Note added for ${first}` })); }}
+        onRespond={onRespond}
+        packageChoices={packageChoices}
+        packageKey={recKey}
+        pieces={pieces}
+        stepChoices={stepChoices}
+        removable={removable}
+        onSaveEdits={onSaveEdits}
+        layout={qmPhone ? "phone" : undefined}
+        sheet={qmPhone}
+        onMore={qmPhone ? () => setQmMore(true) : undefined}
+        onWall={qmPhone ? () => routerNav("/queries/responses") : undefined}
+        nextArt={qmPhone ? QM1_ART.quill : null}
+      />
+    );
+  })();
+  /* ══ v149 Part D — THE HEADER'S ACTIONS IN THE SAME PANEL: a new query card, and "Who replied?" ══════════════════ */
+  const qcFlowNode = (() => {
+    if (!qcDesk || !qcFlow || !currentUser) return null;
+    laqLeaveRef.current = null;
+    const now = Date.now();
+    if (qcFlow.kind === "who") {
+      /* Record a response v1, Phase 3 — every query, on every book: waiting on the agent (longest wait first), then those
+         already with the writer; the closed ones only while something is typed (QcWhoReplied) */
+      const dm = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
+      const rows: WhoRow[] = qcRows.map((r) => {
+        const closed = r.court === "closed";
+        const since = r.stageStartMs ?? r.lastMs ?? r.sentMs ?? 0;
+        return {
+          id: r.id, initials: r.initials, name: r.agentName, agency: r.agencyKey, status: r.status,
+          step: `${closed ? "closed" : (STAGE_NAME[r.status] ?? "").toLowerCase()}${since ? ` ${dm(since)}` : ""}`,
+          group: closed ? "closed" as const : r.court === "agent" ? "wait" as const : "you" as const, sinceMs: since,
+        };
+      });
+      return (
+        <QcWhoReplied rows={rows} onClose={() => setQcFlow(null)}
+          onLog={() => setQcFlow({ kind: "log", agentId: null, manuscriptId: null })}
+          onPick={(id) => { whoPickedRef.current = id; swapCard(1, () => respondOn(id, { set: null })); }} />
+      );
+    }
+    /* the book: the one the door named, else the page's (the header's own), else the first that can be queried */
+    const scopeMs = qcScope && qcScope !== QC_UNASSIGNED ? qcScope : manuscripts.length === 1 ? manuscripts[0].id : undefined;
+    const msId = resolveInitialManuscriptId(qcFlow.manuscriptId ?? scopeMs, pickableManuscripts(manuscripts));
+    const ms = manuscripts.find((m) => m.id === msId) ?? null;
+    if (!ms) return null;
+    /* Log a query v1 — the staged journey (LogStagesHost), which saves through the same log save; "Open {First}'s
+       card" is the page's own open-query door */
+    return (
+      <LogStagesHost key={`${ms.id}:${qcFlow.agentId ?? ""}`} ms={ms} seedAgentId={qcFlow.agentId} onClose={() => setQcFlow(null)} leaveRef={laqLeaveRef}
+        onOpenCard={(id) => { setQcFlow(null); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} />
+    );
+  })();
   const qcOpenCardNode = panelRow && activeQuery && qcById.get(activeQuery.id) ? (
       <QcOpenCard
       row={qcById.get(activeQuery.id)!}
@@ -5706,8 +6607,10 @@ export const Queries: React.FC<{
   useEffect(() => { if (routeActive && narrowed) tickGuide.current("find"); }, [routeActive, narrowed]);
   const realPanel = !!(qcOpenCardNode && cardQueryId && queries.some((q) => q.id === cardQueryId));
   useEffect(() => { if (routeActive && realPanel) tickGuide.current("open"); }, [routeActive, realPanel]);
-  useEffect(() => { if (routeActive && beOpen) tickGuide.current("birds"); }, [routeActive, beOpen]);
-  /* v140 §G — "Pin the list" ticks when the writer pins (the button or F, walkthrough or not), never for a remembered pin
+  /* v150 D — the step ticks when the list switches to Birds-eye (the drawer on the phone) */
+  const birdsSeen = qcDesk ? qcView150 === "birds" : beOpen;
+  useEffect(() => { if (routeActive && birdsSeen) tickGuide.current("birds"); }, [routeActive, birdsSeen]);
+  /* v140 §G, v142 — "Go full screen" ticks when the writer goes full screen (the button or F, walkthrough or not), never for a remembered pin
      put back on arrival. ⚠️ THE DISCRIMINATOR IS THE DEVICE'S PIN RECORD AS IT WAS ONE RENDER BEFORE THE LIST PINNED: a
      restore pins a list the device already remembers as pinned, while the writer's press is what writes it. (Reading
      "was the page already on screen", as the Contact list does, ticked every pinned reload here: the restore lands a
@@ -5746,12 +6649,11 @@ export const Queries: React.FC<{
     switch (k) {
       case "log": return unpinned(() => ({ el: vis("[data-qcv='oh-log']"), text: "Every query starts here: who you sent it to, and when. Press + Log a query. It also sits in the top bar on every page." }));
       case "find": return { el: vis(".qc138-sheet [data-qc138='top']"), text: "Type an agent or agency in the search, or press Filters and tick a status under Where it stands." };
-      /* v140 §G — the toolbar's Pin button, unpinned first (pinned, it reads Unpin list and the page is not the one the
-         card describes) */
+      /* v142 §A — "Go full screen": the title row's Full screen button, unpinned first (in full screen there is no title
+         row and the page is not the one the card describes). The Contact list v20 wording. */
       case "pin": return unpinned(() => ({
-        el: vis(".qc138-sheet button[data-qc140='pin']"), keyCap: "F",
-        /* v140.1 §B — names the button, not its label: at a toolbar of 1000px or less the Pin shows only its icon */
-        text: <>Press the <b>pin</b> button, or <b>F</b>, and the list becomes the whole page: the sidebar tucks away and the counts move into a band at the top. Press it again, or Esc, to put things back.</>,
+        el: vis(".qcv-group [data-qc142='full']") ?? vis(".qc138-sheet [data-qc142='full-tb']"), keyCap: "F",
+        text: "Press Full screen, or F. The list becomes the whole page; Exit full screen brings the page back.",
       }));
       case "open": {
         const row = vis(".qc138-sheet [data-qcv='row']");
@@ -5760,7 +6662,10 @@ export const Queries: React.FC<{
         const first = ((ag?.name || ag?.agency || "").trim().split(/\s+/)[0]) || "the first";
         return { el: row, text: `Click ${first}'s row, or any row. The query opens in a panel on the right, with its whole story.` };
       }
-      case "birds": return { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Click here, or press B from anywhere on the page." };
+      /* v150 D — on the desktop the step points at the switch's Birds-eye button (the floating pill is retired there) */
+      case "birds": return vis("[data-qc150='switch'] [data-v='birds']")
+        ? { el: vis("[data-qc150='switch'] [data-v='birds']"), text: "Every live query on one timeline, so you can see what's due and what's past expected at a glance. Switch the list to Birds-eye here." }
+        : { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's past expected at a glance. Click here, or press B from anywhere on the page." };
       default: return { el: null, text: "" };
     }
   }, [queries, agents, qcPin]);
@@ -5959,9 +6864,57 @@ export const Queries: React.FC<{
     );
   })() : null;
   const pipStepOpen = useSyncExternalStore(subscribeDrawer, () => { const r = currentDrawerRequest(); return !!r && isPracticeId(r.queryId) && !!r.panel; }, () => false);
-  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || picking);
+  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || qcFlow);
   const guideFlowShown = pipFlow ?? guideFlow;
   useEffect(() => { setGuideWalk(!!guideFlowShown || !!walk); }, [guideFlowShown, walk]);
+
+  /**
+   * THE ONE QUERY PANEL HOST (Query panel v1: one mount for every door), built here so both returns place the same element.
+   * Queries on a phone v1 — on the phone page it serves only what other pages ask for (`extPanel`) and the practice walk:
+   * the phone page draws its own `?q` card, and the picker and the header's flows are the desktop's. Its contents there are
+   * the open card the base drew at this width, never the phone layout.
+   */
+  const queryPanelOn = qmPhone
+    ? !!(pipShown || (extPanel && qcOpenCardNode && cardQueryId))
+    : !!(pipShown || (qcOpenCardNode && cardQueryId) || qcFlowNode);
+  const queryPanelHost = queryPanelOn ? (
+    <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : cardQueryId ?? ""} from={extPanel && !pipShown ? extPanel.from : "queries"}
+      step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb}
+      /* Log a query v1.2 — a press on the dimmed page runs the staged journey's leave check. Record a response v1 — on
+         "Who replied?" it closes; on the card it is the Escape key while something is being entered there (the composer's
+         discard strip, the edit layer's ask) and closes the card otherwise */
+      onScrim={qcFlowNode && qcFlow?.kind === "log" ? () => (laqLeaveRef.current ? laqLeaveRef.current() : setQcFlow(null))
+        : qcFlowNode ? () => setQcFlow(null)
+        : pipShown ? undefined
+        : () => {
+          const panel = document.querySelector("[data-qp='panel']");
+          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-editing], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
+          if (busy) { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); return; }
+          (fromAgent ? closeFromAgent : closeQueryCard)();
+        }}
+      onClose={qcFlowNode ? () => setQcFlow(null) : pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
+      {qcFlowNode ?? (pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? (qmPhone ? qcOpenCardNode : (qcCardNode ?? qcOpenCardNode)) : null)}
+    </QueryPanelHost>
+  ) : null;
+
+  /* Queries on a phone v1 — every hook above has run; at 760px and narrower the page is the phone page, and above it
+     nothing here changes. The open query's card is the one built above, laid out for a phone. */
+  const phoneEditQuery = phoneEditId ? (queries as Query[]).find((q) => q.id === phoneEditId) ?? null : null;
+  if (qmPhone) {
+    return (
+      <>
+      <QueriesV4 />
+      {/* ⚠️ THE QUERY PANEL STILL OPENS FROM OTHER PAGES ON A PHONE: `openQueryPanel` (the phone dashboard's View task,
+          the agent panel, search) is drawn by this page's ONE host whichever route is on screen. Found by the dashboard's
+          C1 lock, after the phone return first left the host out. */}
+      {queryPanelHost}
+      {/* Phone last screens v1, 9B: the ••• menu's Edit opens "Edit this query", whose every save is the
+          edit drawer's own (commitQueryEdits) */}
+      {phoneEditQuery && <EditQueryPhone query={phoneEditQuery} onClose={() => setPhoneEditId(null)}
+        onDelete={(id) => { void deleteQueryWithUndo(id); }} />}
+      </>
+    );
+  }
 
   return (
     /* ── F12 root, headerless (shell rollout Phase 6): the v2 shell's top bar draws the crumb
@@ -6569,7 +7522,9 @@ export const Queries: React.FC<{
             REAL page is drawn — `QcCentre` with placeholders inside its cards — so the first-run branch
             must not answer until the data has: `queries` is `[]` during the load, and "No queries yet"
             would be the page stating a fact about an account it has not read. */}
-        {!qcLoad.loading && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (
+        {/* v155 §2 — the desktop's day one is drawn by QcPage151 itself (header, chart, toolbar, rail and the panel), so this
+            first-run branch is the phone's only; v138's desktop empty page (QcEmpty138) is retired with it */}
+        {!qcLoad.loading && !qcDesk && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (
           /**
            * LIVING HEADERS §3 — THE EMPTY PAGE: the shared header with no page title and no rule, the
            * same two buttons and the same courier in the same places, then the exhibition of what the
@@ -6578,15 +7533,6 @@ export const Queries: React.FC<{
            * reachable (this repo's replacement rule).
            */
           <div data-qc-fade={fadeIn ? "in" : undefined}>
-            {qcDesk ? (
-              /* v138 §I — the desktop's empty page: the navy header, How it works, Ways to get started */
-              <QcEmpty138
-                logRef={logTriggerRef}
-                manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
-                onLog={() => openCreate()}
-                onImport={() => onNavigate?.("import")}
-              />
-            ) : (
             <QcEmpty
               logRef={logTriggerRef}
               manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
@@ -6596,7 +7542,6 @@ export const Queries: React.FC<{
               /* §4 — the page's own components over a sample constant, mounted ONLY here */
               exhibition={<QcExhibit />}
             />
-            )}
           </div>
         ) : (
         <>
@@ -6952,6 +7897,7 @@ export const Queries: React.FC<{
                     setCorrecting(null);
                     /* v1.1 — what happened next is a response, and responses finish in the drawer. */
                     /* Query panel v2 §E — in the panel, not a drawer of its own */
+                    if (activeQuery && !qmPhone) { respOpenRef.current({ queryId: activeQuery.id }); return; }
                     if (activeQuery && DRAWER_LIVE.resp) { stepRow({ mode: "resp", queryId: activeQuery.id }); return; }
                     setIsRecordResponseFocusFormOpen(true);
                   }}
@@ -7208,7 +8154,122 @@ export const Queries: React.FC<{
             * the tiles' and the pills' job; the shell's search still narrows the list.
             */}
           <QcCentre
-            header138={qc138Header}
+            /* v151 — on the desktop the whole page is QcPage151: header, banner, toolbar, the panel, the strip and the
+               table (or Birds-eye). The v150 header card, At a glance, Your queries, the navy bar and the list card
+               are not drawn; QcCentre's own body is not drawn either (`bodyless`). */
+            bodyless={qcDesk}
+            header138={qcDesk ? (() => {
+              const now151 = qcNow138;
+              const phrase151 = (r: QcRow) => nextLine(r, qcComing.get(r.id) ?? null, now151).phrase;
+              const sorted151 = sort151(qcVisible, qcSort151, (r) => nextCell(r, phrase151(r), now151).label);
+              /* v152 §1.5 — Who it's with is the six states, and under a quick filter its headers still show (this
+                 supersedes v151.1 §6's single label row) */
+              /* v152.2 §1.1 — three groupings: Status, Action (the six states, "With the agent" reading "Watch and wait"),
+                 Package (Pro or founding); "Next action" is gone and reads as Action */
+              const pkgOk1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(entitlement);
+              const group1522 = listGroupOf(qcGroup, pkgOk1522);
+              const statusGroups = (): Section<QcRow>[] => {
+                const live = qcListGroups(sorted151.filter((r) => !CLOSED_SET.includes(r.status)), "status", now151, qcPackageName).map((g) => ({ key: g.key, label: g.label, rows: g.rows }));
+                const shut = sorted151.filter((r) => CLOSED_SET.includes(r.status));
+                return shut.length ? [...live, { key: "closed", label: "Closed", rows: shut }] : live;
+              };
+              const sections151: Section<QcRow>[] = group1522 === "attention" ? whoSections(sorted151, now151).map((x) => ({ ...x, label: ACTION_LABEL[x.key as keyof typeof ACTION_LABEL] ?? x.label }))
+                : group1522 === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+                : group1522 === "status" ? statusGroups()
+                : qcListGroups(sorted151, "package", now151, qcPackageName).map((g) => ({
+                  key: g.key, rows: g.rows,
+                  label: g.key === "pkg:none" ? "Nothing recorded" : `${g.label} package`,
+                }));
+              if (practice && pipRow) sections151.unshift({ key: "practice", label: "Practice", rows: [pipRow] });
+              const strip151 = qc140Chips.filter((c) => !c.key.startsWith("where:"));
+              /* v153 — "Where it stands" is in the rail now, so Reset clears it with the rest */
+              const keepWhere = () => setQcF138(emptyQc138Filters());
+              const clear151 = () => { keepWhere(); setQcFilter("all"); setQcCzCourt(null); setQcIds(null); };
+              const order151 = sections151.flatMap((x) => x.rows.map((r) => r.id));
+              /* v153 — the rail's faceted counts, over what the rail does not own (scope, search, the older narrowings) */
+              const railBase = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn));
+              /* List filters v1 — the foot's "{y} need you": Your move with nothing filtered, over the list in scope */
+              const needYou = qcScoped.filter((r) => matches138(r, { ...emptyQc138Filters(), you: true }, now151)).length;
+              const railN = railCounts(railBase, qcF138, qc138Counts.sent.map((o) => o.key), (r, g) => matches138(r, g, now151));
+              /* v156 §2 — the header's line and the collapsed bar's "n of goal" (goal156Of) */
+              const goal156 = showGridSkeleton || qcLoadFail ? null : goal156Of(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151);
+              const beEmpty = !showGridSkeleton && qcBeOrder.length === 0
+                ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
+              return (
+                <QcPage151
+                  state155={state155}
+                  loading={showGridSkeleton}
+                  counts={showGridSkeleton || qcLoadFail ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
+                  /* v156 §2 — "this week" as a line on the navy header (v154's bar chart is gone) */
+                  ring={<QcLine156 m={goal156} />} goal={goal156}
+                  view={qcView150} onView={pickView150}
+                  onLog={() => onNavigate?.("queries", "Log a query")}
+                  onRecord={() => onNavigate?.("queries", "Record a response")}
+                  logDisabled={creating} logRef={logTriggerRef}
+                  tabCounts={showGridSkeleton ? null : qcWhereN} total={qcScoped.length} where={qcF138.where}
+                  onWhere={(k) => setQcF138((f) => ({ ...f, where: k }))}
+                  showing={qcVisible.length}
+                  find={qcFind} onFind={setQcFind} findRef={qcSheetFindRef}
+                  filterCount={strip151.filter((c) => c.key !== "find").length}
+                  onClearFilters={clear151} onExport={exportQcList}
+                  filterPanel={(close) => (
+                    <QcFilterPanel151 close={close} onResetAll={strip151.some((c) => c.key !== "find") ? clear151 : null} model={{
+                      filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
+                      quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
+                      moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more }, whereN: qcWhereN,
+                      filtered: qc140Chips.length > 0, onExport: exportQcList,
+                    }} />
+                  )}
+                  pills={pillGroups(strip151)}
+                  /* List filters v1 — the applied row: every chip (the search in quotes, a whole stage on its band), and
+                     Clear all = the filters and the search; the sort and grouping stay (the bar's buttons show them) */
+                  applied={qc140Chips.map((c) => ({ key: c.key, label: c.label, stage: c.stage, mark: c.stage ? c.status : undefined, onRemove: c.off }))}
+                  onClearApplied={() => { clear151(); setQcFind(""); }}
+                  group={group1522} onGroup={setQcGroup1522} packageOk={pkgOk1522}
+                  sort={qcSort151} onSort={setQcSort151}
+                  sections={showGridSkeleton ? [] : sections151}
+                  phraseOf={phrase151}
+                  nowMs={now151}
+                  selectedId={pipOpen ? PIP_ID : selectedQueryId}
+                  onOpen={(id) => { if (isPracticeId(id)) { openPip(); return; } cardSetRef.current = order151; onOpenQuery?.(id); }}
+                  onAct={(id, mode) => {
+                    if (isPracticeId(id)) { openPip(); return; }
+                    /* v152.2 §1.6 — the row's button is the footer's: it opens the card with that composer */
+                    const fa: FootAct | null = mode === "nudge" ? "nudge" : mode === "close" ? "close" : mode === "sent" ? "sent" : mode === "offer" ? "offer" : mode === "resp" ? "resp" : null;
+                    if (fa) {
+                      if (cardQueryId === id) { open1522(fa); return; }
+                      qc1522Pending.current = { id, a: fa }; cardSetRef.current = order151; onOpenQuery?.(id); return;
+                    }
+                    /* v151.2 — the row's one action names its journey (lib/qc1512 `rowAct`): a gone-quiet row's is Nudge */
+                    if (mode && DRAWER_LIVE[mode]) { stepRow({ mode, queryId: id, ...(mode === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) }); return; }
+                    const r = qcById.get(id);
+                    const req = r ? trayOpen(qcComing.get(id)?.bucket ?? null, r) : null;
+                    if (req) stepRow(req); else onOpenQuery?.(id);
+                  }}
+                  signoff={!showGridSkeleton && qcScoped.length > 0 && qcF138.where === null && qc140Chips.length === 0 ? { total: qcScoped.length } : null}
+                  onImport={() => onNavigate?.("import")}
+                  packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
+                  agentOf={(r) => qcLivingAgents.get(r.query.agentId) ?? null}
+                  rail={<QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
+                    showing={qcVisible.length} total={qcScoped.length} needYou={needYou} loading={showGridSkeleton} />}
+                  birds={qcView150 === "birds" && !showGridSkeleton ? (
+                    <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
+                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      lead={(r) => <Track151 row={r.row} />}
+                      act={(id) => { const r = qcById.get(id); return r ? rowAct(r, now151) : null; }}
+                      barKind={(r) => stageOf(r.row.status)}
+                      onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
+                      onAct={(id, mode) => {
+                        const m = mode as DrawerMode | undefined;
+                        if (m && DRAWER_LIVE[m]) { stepRow({ mode: m, queryId: id, ...(m === "close" ? { preset: { closeWhy: "noreply" as const } } : {}) }); return; }
+                        const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id);
+                      }} />
+                  ) : null}
+                  birdsEmpty={beEmpty}
+                  beGroup={qcBeGroup} onBeGroup={setQcBeGroup} beSort={qcBeSort} onBeSort={setQcBeSort}
+                />
+              );
+            })() : qc138Header}
             full={qcDesk && qcFull}
             enter138={qcDesk && qc138In === "run"}
             v131={qcDesk}
@@ -7302,7 +8363,9 @@ export const Queries: React.FC<{
              * mounted so its grouping, sort and filters survive closing and reopening it. A name or
              * a bar opens the centred card over it; a row's action opens the one action drawer.
              */
-            overlay={(
+            /* v150 D — on the desktop Birds-eye is the list's second view: the floating pill and its drawer are retired
+               there. Below 768px (the phone keeps its v126 page) the drawer stays, as the phone's only Birds-eye. */
+            overlay={qcDesk ? undefined : (
               <QcBirdsDrawer
                 routeActive={routeActive}
                 rows={qcScoped}
@@ -7391,6 +8454,22 @@ export const Queries: React.FC<{
               ) : (
                 qcDesk ? (
                 <QcList138
+                  onAddDate={(id) => {
+                    cardSetRef.current = qcVisible.map((r) => r.id);
+                    /* Log a query v1.1 — on the desktop the card's step editor gives the step its date (the old edit mode
+                       carried native selects) */
+                    if (qcDesk) {
+                      if (cardQueryId === id) { setQcCardMode("view"); setQc1522J(null); setQc1522Edit("__undated"); return; }
+                      qc1522EditPending.current = id;
+                      onOpenQuery?.(id);
+                      return;
+                    }
+                    setQcEditUndated(true);
+                    if (cardQueryId === id) { setQcCardMode("edit"); return; }
+                    qcCardPendingMode.current = { id, mode: "edit" };
+                    onOpenQuery?.(id);
+                  }}
+                  twinTag={twinTags(queries)}
                   groupBy={qcGroup}
                   onGroup={setQcGroup}
                   toneOf={qc138Tone}
@@ -7404,12 +8483,11 @@ export const Queries: React.FC<{
                   onClearFilters={() => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcCzCourt(null); }}
                   loading={showGridSkeleton}
                   filtersMenu={(pop) => (
-                    <QcFilterMenu140 pop={pop} model={{
+                    <QcFilterStrip142 pop={pop} pinned={qcFull} model={{
                       filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
                       quickN: qc140QuickN, stageCounts: qc138Counts.stage, sent: qc138Counts.sent,
                       moreN: { dueWeek: qc138Counts.dueWeek, ...qc138Counts.more }, whereN: qcWhereN,
-                      filtered: qc140Chips.length > 0,
-                      onExport: () => exportQueriesToCSV(qcListOrder().map((r) => r.query), `QueryHawk_Filtered_Queries_${new Date().toISOString().slice(0, 10)}`),
+                      filtered: qc140Chips.length > 0, onExport: exportQcList,
                     }} />
                   )}
                   /* v140 §C — the pinned band, over the rows the list is built from (the manuscript-scoped set; Pip is
@@ -7421,14 +8499,18 @@ export const Queries: React.FC<{
                       onLog={() => onNavigate?.("queries", "Log a query")} />
                   ) : null}
                   applied={qc140Chips.length ? (
-                    <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll} />
+                    <QcAppliedRow140 chips={qc140Chips} showing={qcVisible.length} total={qcScoped.length} pinned={qcFull} onClearAll={qc138ClearAll}
+                      /* v142 §E — Export CSV (v140.1 §A) moved here from the retired menu footer: exactly the rows the list shows, in its order */
+                      onExport={exportQcList} />
                   ) : null}
                   sort={qcSort138}
                   onHeading={(k) => setQcSort138((s0) => pressHeading(s0, k))}
+                  onSort={setQcSort138}
                   density={qcDensity}
                   onDensity={setQcDensity}
                   full={qcFull}
                   onFull={qcPin.toggle}
+                  /* v150 B4 — the bar's "heard back" moved to the list title (Part C) */
                   /* v138.2 §C — "Open the full timeline →": the row's own open, on the timeline (Tracking) tab */
                   onTimeline={(id) => { if (isPracticeId(id)) { openPip(); return; } requestPanelTab("tracking"); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }}
                   /* §F — the peek reads the query's activity log through the panel's own builder */
@@ -7437,9 +8519,13 @@ export const Queries: React.FC<{
                     const q0 = qcById.get(id)?.query;
                     if (!q0) return [];
                     const docs = await readQueryActivity(id);
-                    const rows0 = buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), q0, agents.find((a) => a.id === q0.agentId) ?? null);
+                    const evs = docs.map((d) => ({ id: d.id, ...d.data }));
+                    const noDate = undatedIds(evs as { id?: unknown; createdAt?: unknown }[]);
+                    const rows0 = buildTimelineRows(evs, q0, agents.find((a) => a.id === q0.agentId) ?? null).map((r0) => (r0.activityId && noDate.has(r0.activityId) ? { ...r0, timeMs: undefined } : r0));
                     /* v138.3 — the stage comes from the row itself (`status`); a nudge or a holding reply is not a status (`kind`) */
-                    return rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs)).map((r0) => ({ name: r0.title, ms: r0.timeMs as number, status: r0.kind ? null : r0.status }));
+                    const dated = rows0.filter((r0) => typeof r0.timeMs === "number" && Number.isFinite(r0.timeMs));
+                    /* v149.1 B3 — nothing dated: the steps still show, evenly spaced and without a scale (ms NaN marks them) */
+                    return (dated.length ? dated : rows0).map((r0) => ({ name: r0.title, ms: dated.length ? r0.timeMs as number : NaN, status: r0.kind ? null : r0.status }));
                   }}
                   entering={qc138In === "run"}
                   /* v140 §F — the arrival plays on the load (the rows' first appearance) and on every grouping, filter
@@ -7467,6 +8553,22 @@ export const Queries: React.FC<{
                   find={qcFind}
                   onFind={setQcFind}
                   findRef={qcSheetFindRef}
+                  /* v150 C — the list's title, its count line and the List | Birds-eye switch replace the view row; the
+                     search moved into the navy bar */
+                  findInBar
+                  /* v150 D — Birds-eye in the list card, under the navy bar; its Group and Sort replace the list's */
+                  birds={qcView150 === "birds" && !showGridSkeleton ? (
+                    <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
+                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
+                      /* the list tray's own action: the row's next move, through its panel */
+                      onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />
+                  ) : null}
+                  /* v150.1 §7 — in full screen the switch moves into the toolbar (the Your queries block is hidden there) */
+                  fullSwitch={<QcViewSwitch150 compact view={qcView150} onView={pickView150} loading={showGridSkeleton} />}
+                  birdsTools={qcView150 === "birds" ? <QcBePills150 group={qcBeGroup} onGroup={setQcBeGroup} sort={qcBeSort} onSort={setQcBeSort} loading={showGridSkeleton} /> : null}
+                  viewRow={<QcListTitle150 view={qcView150} onView={pickView150} loading={showGridSkeleton}
+                    list={showGridSkeleton ? null : qc150ListLine} birds={showGridSkeleton ? null : { n: qc150BeLive }} />}
                   ringId={qcKeys.ringId}
                   /* ⚠️ GROUPED AFTER THE SORT, over the rows the list is already showing, so the headings' sort
                      applies WITHIN each group for free */
@@ -7630,13 +8732,7 @@ export const Queries: React.FC<{
               and never the panel: the journey's form is portalled into this element's slot. */}
           {/* v139 §B — the same one host holds the practice query's panel while it is open (built over Pip's in-memory
               object); the page's own query and the picker otherwise. Opening Pip closes any real query first. */}
-          {(pipShown || (qcOpenCardNode && cardQueryId) || picking) && (
-            <QueryPanelHost id={pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
-              step={pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
-              onClose={pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
-              {pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? qcOpenCardNode : null}
-            </QueryPanelHost>
-          )}
+          {queryPanelHost}
           </>
         ) : (
         <div data-qc-fade={fadeIn ? "in" : undefined} className="f12-body">
@@ -8669,7 +9765,6 @@ export const Queries: React.FC<{
                                    attribute, which is exactly the leak: the type of each slot
                                    rather than the material in it, and only on hover. `linkedChips`
                                    resolves the real names onto the strip instead. */
-                                const isPro = currentUser?.plan === UserPlan.PRO;
                                 const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
                                 /* §2 — this manuscript's live packages; retired ones are not offered */
                                 const attachablePkgs = attachablePackages(packages, activeQuery.manuscriptId);
@@ -9069,8 +10164,8 @@ export const Queries: React.FC<{
                                          `· Pro` and sent a Free user to the plans page; beta grants
                                          everyone Pro, and the free plan shows no ceilings here. The
                                          gate is `canAttachPackages`, one place, currently open. */
-                                      ...(packageMenuRow(canAttachPackages(currentUser), attachablePkgs.length).length ? ["divider" as const] : []),
-                                      ...packageMenuRow(canAttachPackages(currentUser), attachablePkgs.length).map((r) => ({
+                                      ...(packageMenuRow(canAttachPackages(entitlement), attachablePkgs.length).length ? ["divider" as const] : []),
+                                      ...packageMenuRow(canAttachPackages(entitlement), attachablePkgs.length).map((r) => ({
                                         label: r.label,
                                         onClick: () => {
                                           setAddMatOpen(false);

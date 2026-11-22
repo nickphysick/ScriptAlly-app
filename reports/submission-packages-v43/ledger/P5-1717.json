@@ -1,0 +1,156 @@
+{
+ "green": [
+  {
+   "where": "present",
+   "ok": true,
+   "detail": "no bar"
+  },
+  {
+   "where": "at rest: hidden, inert, aria-hidden",
+   "ok": true,
+   "detail": "{\"shown\":false,\"inert\":true,\"ah\":\"true\"}"
+  },
+  {
+   "where": "at 200: shown only at the Query Centre's top",
+   "ok": true,
+   "detail": "{\"shown\":true,\"top\":12}"
+  },
+  {
+   "where": "at 260: shown only at the Query Centre's top",
+   "ok": true,
+   "detail": "{\"shown\":true,\"top\":12}"
+  },
+  {
+   "where": "at 320: shown only at the Query Centre's top",
+   "ok": true,
+   "detail": "{\"shown\":true,\"top\":12}"
+  },
+  {
+   "where": "at 600: shown",
+   "ok": true,
+   "detail": "{\"shown\":true,\"inert\":false}"
+  },
+  {
+   "where": "height 60 = the Query Centre's",
+   "ok": true,
+   "detail": "60"
+  },
+  {
+   "where": "top = the Query Centre's",
+   "ok": true,
+   "detail": "12 vs 12"
+  },
+  {
+   "where": "title 24px",
+   "ok": true,
+   "detail": "24px"
+  },
+  {
+   "where": "button 40 = the Query Centre's",
+   "ok": true,
+   "detail": "40"
+  },
+  {
+   "where": "ground from the sheet's left edge",
+   "ok": true,
+   "detail": "{\"left\":80,\"right\":1709,\"sheetLeft\":80,\"sheetRight\":1709,\"bg\":\"rgb(242, 238, 232)\"}"
+  },
+  {
+   "where": "…to its right edge",
+   "ok": true,
+   "detail": "{\"left\":80,\"right\":1709,\"sheetLeft\":80,\"sheetRight\":1709,\"bg\":\"rgb(242, 238, 232)\"}"
+  },
+  {
+   "where": "content inset to the header's edges",
+   "ok": true,
+   "detail": "{\"left\":112,\"right\":1677,\"top\":12,\"height\":60}"
+  },
+  {
+   "where": "headline",
+   "ok": true,
+   "detail": "4 packages"
+  },
+  {
+   "where": "the package going out",
+   "ok": true,
+   "detail": "Standardgoes out with new queries"
+  }
+ ],
+ "red": [
+  {
+   "where": "present",
+   "ok": true,
+   "detail": "no bar"
+  },
+  {
+   "where": "at rest: hidden, inert, aria-hidden",
+   "ok": true,
+   "detail": "{\"shown\":false,\"inert\":true,\"ah\":\"true\"}"
+  },
+  {
+   "where": "at 200: shown only at the Query Centre's top",
+   "ok": true,
+   "detail": "{\"shown\":false,\"top\":-200}"
+  },
+  {
+   "where": "at 260: shown only at the Query Centre's top",
+   "ok": true,
+   "detail": "{\"shown\":false,\"top\":-260}"
+  },
+  {
+   "where": "at 320: shown only at the Query Centre's top",
+   "ok": false,
+   "detail": "{\"shown\":true,\"top\":-320}"
+  },
+  {
+   "where": "at 600: shown",
+   "ok": true,
+   "detail": "{\"shown\":true,\"inert\":false}"
+  },
+  {
+   "where": "height 60 = the Query Centre's",
+   "ok": false,
+   "detail": "45"
+  },
+  {
+   "where": "top = the Query Centre's",
+   "ok": false,
+   "detail": "-600 vs 12"
+  },
+  {
+   "where": "title 24px",
+   "ok": false,
+   "detail": "15px"
+  },
+  {
+   "where": "button 40 = the Query Centre's",
+   "ok": false,
+   "detail": "22.5"
+  },
+  {
+   "where": "ground from the sheet's left edge",
+   "ok": false,
+   "detail": "{\"left\":null,\"right\":null,\"sheetLeft\":80,\"sheetRight\":1709,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+  },
+  {
+   "where": "…to its right edge",
+   "ok": false,
+   "detail": "{\"left\":null,\"right\":null,\"sheetLeft\":80,\"sheetRight\":1709,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+  },
+  {
+   "where": "content inset to the header's edges",
+   "ok": true,
+   "detail": "{\"left\":112,\"right\":1677,\"top\":-600,\"height\":45}"
+  },
+  {
+   "where": "headline",
+   "ok": true,
+   "detail": "4 packages"
+  },
+  {
+   "where": "the package going out",
+   "ok": true,
+   "detail": "Standardgoes out with new queries"
+  }
+ ]
+}

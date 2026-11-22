@@ -1,0 +1,250 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v26.2 (design-refs/contact-list-v26-2/) — the agent card as the landing page's card, with editing on
+ * the card. The host and the card portal to document.body, so no page token reaches them: colours are literals and the
+ * faces are the shell's `:root` ones (`--sp-type`, `--sp-serif`, `--font-mono`).
+ *
+ * ⚠️ brand.tsx names bare spans, paragraphs and headings as the body faces at runtime: the faces here carry `!important`.
+ */
+
+/* ═════════ A · the host: no backdrop, no padding, no background ═════════ */
+/* Card offers v1 — the card's scrim sits just under it (the SidePanel's own sits at 65, above a query panel) */
+.spanel-scrim.cl262-scrim { z-index: 60; transition: opacity 280ms ease, background-color 280ms ease; }
+.cl262-panel {
+  position: fixed; z-index: 61; top: 14px; bottom: 14px; right: 16px; width: 580px; box-sizing: border-box;
+  padding: 0; background: none; box-shadow: none; pointer-events: none;
+}
+@media (max-width: 1280px) { .cl262-panel { width: 540px; } }
+.cl262-lean {
+  height: 100%; pointer-events: auto; transform-origin: 70% 20%; transform: rotate(-1.2deg);
+  transition: transform 350ms cubic-bezier(.2, .8, .2, 1);
+}
+.cl262-lean[data-editing] { transform: rotate(0deg); }
+/* arrival: the host slides in while the card swings into its lean, once */
+.cl262-panel[data-arrive] { animation: cl262-in 420ms cubic-bezier(.2, .9, .25, 1.05) both; }
+.cl262-panel[data-arrive] .cl262-lean { animation: cl262-swing 700ms cubic-bezier(.2, .8, .2, 1); }
+.cl262-panel[data-leave] { animation: cl262-out 300ms cubic-bezier(.4, 0, .6, 1) forwards; }
+@keyframes cl262-in { from { transform: translateX(120%); } to { transform: translateX(0); } }
+@keyframes cl262-out { from { transform: translateX(0); } to { transform: translateX(120%); } }
+@keyframes cl262-swing {
+  0% { transform: rotate(3deg) translateX(30px); }
+  60% { transform: rotate(-2deg); }
+  100% { transform: rotate(-1.2deg); }
+}
+.cl262-panel[data-reduce] .cl262-lean { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cl262-panel, .cl262-panel .cl262-lean { animation: none !important; transition: none !important; }
+}
+
+/* the card: AgentPaperCard, framed, filling the height — white, padding 10, radius 22, the frame inside it */
+.cl262-card {
+  box-sizing: border-box; height: auto; max-height: 100%; display: flex; flex-direction: column; padding: 10px; border-radius: 22px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 40px 70px -30px rgba(28, 19, 15, .55), 0 12px 24px -16px rgba(28, 19, 15, .35);
+}
+.cl262-card > .cl262-frame, .cl262-card.apc > .apc-frame {
+  position: relative; flex: 0 1 auto; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column;
+  border: 1px solid #a5837b; border-radius: 13px; overflow: hidden; background: #fff;
+}
+/* workspace width v2 (8 Nov): actions follow the content — the body hugs (grows to its content, shrinks and scrolls when
+   taller), so the footer sits directly under short content and pins to the foot of tall content. */
+.cl262-frame > .cl262-scroll { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+/* the editor the card hands over to (until Part C) straightens it too */
+.cl262-lean:has([data-cl24="agent-card"][data-editing]) { transform: rotate(0deg); }
+
+/* ═════════ B · the card's face (AgentPaperCard's panel variant, on the Contact list) ═════════ */
+.cl262-lean { display: flex; flex-direction: column; }
+.cl262-card.apc.apc--panel { flex: 1 1 auto; min-height: 0; }
+.cl262-card.apc .apc-band { height: 56px; padding: 0 10px 0 18px; position: relative; z-index: 2; }
+.cl262-card.apc .apc-st { font-size: 10.5px !important; }
+
+.cl262-stars { display: inline-flex; gap: 1px; margin-right: 6px; }
+.cl262-stars button {
+  padding: 0 1px; border: 0; background: none; cursor: pointer; color: #f4eee5; opacity: .35;
+  font: 400 16px/1 var(--sp-serif) !important;
+}
+.cl262-stars button[data-on] { opacity: 1; }
+.cl262-stars button:hover { opacity: .8; }
+
+.cl262-card.apc .apc-head { margin: 0 22px; padding: 22px 0 18px; gap: 16px; align-items: center; }
+.cl262-card.apc .apc-nm { font: 600 29px/1.1 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card.apc .apc-ag { margin-top: 6px; }
+.cl262-card.apc .apc-meta { margin-top: 4px; display: block; }
+
+
+/* the next-step box — the card's one coloured thing */
+
+/* the tabs */
+.cl262-tabs { display: flex; align-items: flex-end; gap: 22px; margin: 14px 22px 0; border-bottom: 1px solid rgba(28, 19, 15, .12); }
+.cl262-tab {
+  padding: 0 0 9px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer;
+  color: var(--sp-quiet); font: 400 17px/1.2 var(--sp-type) !important;
+}
+.cl262-tab[aria-selected="true"] { color: #1c130f; border-bottom-color: #1c130f; }
+
+/* the sections */
+.cl262-body { padding-bottom: 8px; }
+.cl262-card.apc .cl262-sec { margin: 0 22px; padding: 16px 0; border-top: 1px solid rgba(28, 19, 15, .1); }
+.cl262-card.apc .cl262-body > .cl262-sec:first-child { border-top: 0; }
+.cl262-card.apc .cl262-sec h5 { display: flex; align-items: center; gap: 8px; min-height: 24px; margin: 0 0 10px; font-size: 10.5px !important; letter-spacing: .18em; }
+.cl262-pen {
+  display: inline-grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 7px; cursor: pointer;
+  background: #f4f0eb; color: #2a3a52; opacity: 0; transition: opacity 150ms ease;
+}
+.cl262-sec:hover .cl262-pen, .cl262-pen:focus-visible { opacity: 1; }
+.cl262-card.apc .apc-chip { font-size: 11px !important; padding: 8px 12px; }
+.cl262-card.apc .apc-wish { font-size: 19px !important; line-height: 1.45 !important; }
+.cl262-card.apc .apc-mat { font-size: 12px !important; padding: 8px 12px; }
+
+/* gaps are ghost lines and one outlined "+ Add …" */
+
+/* History and Notes, inside the card's sections */
+.cl262-hist, .cl262-notes { margin: 0 22px; padding-top: 16px; }
+.cl262-notes .cl24c-notes { width: 100%; box-sizing: border-box; min-height: 160px; }
+
+/* the foot */
+
+/* ═════════ C · editing on the card ═════════ */
+.cl262-lean:has(.cl262-card.is-editing) { transform: rotate(0deg); }
+.cl262-editing {
+  display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 8px; background: #f4eee5; color: #1c130f;
+  font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: .16em; text-transform: uppercase;
+}
+/* a section being edited: inset, tinted, a navy ring, no hairlines either side */
+.cl262-card.apc .cl262-sec.is-edit {
+  margin: 4px 12px; padding: 14px 10px 16px; border-radius: 12px; background: #f7f4ef; box-shadow: inset 0 0 0 1.5px #2a3a52; border-top: 0;
+}
+.cl262-card.apc .cl262-sec.is-edit + .cl262-sec { border-top: 0; }
+.cl262-card.apc .cl262-sec.is-edit h5 { margin-left: 2px; }
+/* genres: the editor's GenreField as toggle chips */
+.cl262-card .cl262-fx .ae-gtog { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl262-card .cl262-fx .ae-gt {
+  height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: #fff; color: #1c130f; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); font: 400 14px/1 var(--sp-type) !important;
+}
+.cl262-card .cl262-fx .ae-gt.hit { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16), inset 0 -2px 0 #5e7189; }
+.cl262-card .cl262-fx .ae-gt.on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+.cl262-card .cl262-fx .ae-gnote { margin: 12px 0 0; font: italic 400 14.5px/1.35 var(--sp-serif) !important; color: var(--sp-muted); }
+.cl262-card .cl262-fx .ae-gnote button { padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; font: inherit !important; }
+.cl262-card .cl262-fx .ae-gfind { margin-top: 10px; background: #fff; }
+/* the wishlist */
+.cl262-wishf { display: flex; flex-direction: column; gap: 6px; }
+.cl262-wta {
+  box-sizing: border-box; width: 100%; min-height: 96px; padding: 10px 12px; border: 0; border-radius: 10px; background: #fff; resize: vertical;
+  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); color: #1c130f; font: italic 400 18px/1.45 var(--sp-serif) !important;
+}
+.cl262-wta:focus { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.cl262-cnt { align-self: flex-end; font: 400 12.5px/1 var(--sp-type) !important; color: var(--sp-quiet); }
+/* materials: the editor's rows, 22px boxes, ticked navy with a cream ✓ */
+.cl262-card .cl262-fx .ae-mt { display: flex; flex-direction: column; gap: 10px; }
+.cl262-card .cl262-fx .ae-mtr { display: flex; align-items: center; gap: 10px; font: 400 15px/1.3 var(--sp-type) !important; }
+.cl262-card .cl262-fx .ae-mtr > span { font: inherit !important; }
+/* the editor's own box and tick (its ::after), at 22px; ticked is navy with a cream tick */
+.cl262-card .cl262-fx .ae-bx { flex: none; width: 22px; height: 22px; border-radius: 6px; display: inline-grid; place-items: center; }
+.cl262-card .cl262-fx .ae-bx.on { background: #2a3a52; }
+.cl262-card .cl262-fx .ae-bx.on::after { border-color: #f4eee5; }
+.cl262-card .cl262-fx .ae-mtx { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; }
+/* how they work: a 120px label column */
+.cl262-how { display: flex; flex-direction: column; gap: 12px; }
+.cl262-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 10px; }
+.cl262-row > label { font: 400 14px/1.2 var(--sp-type) !important; color: var(--sp-quiet); }
+.cl262-rf { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
+.cl262-hint { padding: 0; border: 0; background: none; font: italic 400 14px/1.3 var(--sp-serif) !important; color: var(--sp-quiet); }
+button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
+/* contact details: two columns */
+.cl262-ctg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.cl262-cf { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.cl262-cf > label { font: 400 14px/1.2 var(--sp-type) !important; color: var(--sp-quiet); }
+.cl262-card .cl262-fx .cl262-cf .ac-in, .cl262-card .cl262-fx .cl262-cf input { box-sizing: border-box; width: 100%; background: #fff; }
+.cl262-bad { font: italic 400 13px/1.3 var(--sp-serif) !important; color: var(--sp-rust); }
+/* the save bar: at the card's foot while anything is open */
+.cl262-save {
+  flex: none; display: flex; align-items: center; gap: 14px; margin: 12px; padding: 12px 12px 12px 16px; border-radius: 12px;
+  background: #2a3a52; color: #f4eee5;
+}
+.cl262-save.is-guard { background: var(--sp-rust); }
+.cl262-sv { flex: 1; min-width: 0; font: 400 15px/1.3 var(--sp-type) !important; }
+.cl262-sv b { font: inherit !important; font-weight: 400 !important; }
+.cl262-sv i { font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); }
+.cl262-sx { padding: 0; border: 0; background: none; color: #f4eee5; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; font: 400 15px/1 var(--sp-type) !important; }
+.cl262-sb { height: 40px; padding: 0 16px; border: 0; border-radius: 10px; background: #f4eee5; color: #1c130f; cursor: pointer; font: 400 15px/1 var(--sp-type) !important; }
+.cl262-sb:disabled { opacity: .45; cursor: default; }
+/* saved: the frame flashes a 2px sage inset for 1.2s */
+
+.cl262-card .cl262-fx .ae-step { background: #fff; }
+.cl262-card .cl262-fx .ae-seg button { font-family: var(--sp-type) !important; }
+/* the tile's tail ("· checked Jun", " replies") reads as an aside: smaller and grey, kept on the tile */
+
+/* ═════════ Add agent v1 Phase 4 · editing on the card with the add journey's controls (agent-card-edit-v1.html) ═════════
+   A section being edited is inset, its head band in its family's tint, with a Close link: Contact details in powder,
+   genres and wishlist in blush, materials and how they work in sand. No green, no burgundy. */
+.cl262-sec[data-fam="who"]   { --t: #e6edf6; --t2: #dbe4ee; --td: #2a3a52; }
+.cl262-sec[data-fam="want"]  { --t: #f5e6df; --t2: #f0dcd2; --td: #b8735f; }
+.cl262-sec[data-fam="query"] { --t: #f7efe3; --t2: #f1e5d3; --td: #9c7a4c; }
+.cl262-card.apc .cl262-sec.is-edit {
+  margin: 6px 12px; padding: 0 0 14px; border-radius: 12px; border-top: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--t2); overflow: hidden;
+  animation: cl262SecIn .22s ease-out;
+}
+@keyframes cl262SecIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.cl262-card.apc .cl262-sec.is-edit > h5 { margin: 0 0 4px; padding: 10px 12px; min-height: 0; background: var(--t); color: var(--td); }
+.cl262-card.apc .cl262-sec.is-edit > .cl262-fx { padding: 4px 14px 0; }
+.cl262-done { all: unset; cursor: pointer; margin-left: auto; font: italic 400 13.5px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #6c675f; box-shadow: inset 0 -1px 0 rgba(28, 19, 15, .25); }
+.cl262-done:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.cl262-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.cl262-ctg { display: block; }
+.cl262-card .cl262-fx .aap-inp { box-sizing: border-box; }
+/* the save bar's two lines: the count (or the problem), and what changed */
+.cl262-sv i { display: block; }
+.cl262-svbad { color: #f4eee5; }
+/* saved: the frame flashes a 2px navy inset for 1.2s (it was sage; no green anywhere) */
+
+/* Agent fit in the band: the word, the five stars, the "i" */
+.cl262-fitwrap { display: inline-flex; align-items: center; margin-right: 4px; }
+.cl262-fitro { display: inline-flex; align-items: center; gap: 1px; }
+.cl262-fitro i { font: 400 16px/1 var(--sp-serif); font-style: normal; color: #f4eee5; opacity: .35; padding: 0 1px; }
+.cl262-fitro i[data-on] { opacity: 1; }
+.cl262-fitro .aap-fitw { margin-right: 8px; font: italic 400 13px var(--sp-serif); color: rgba(244, 238, 229, .85); }
+@media (prefers-reduced-motion: reduce) { .cl262-card.apc .cl262-sec.is-edit { animation: none; } }
+/* Add agent v1 — the band now carries Agent fit's word, stars and "i": the status chip keeps one line and gives way first */
+.cl262-card.apc .apc-band > .apc-st { min-width: 0; flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; line-height: 1 !important; }
+.cl262-card.apc .apc-band > .apc-bandr { flex: none; }
+.cl262-two > .aap-f, .cl262-two > .aap-f:first-child { margin-top: 16px; }
+.cl262-ctg > .aap-f:first-child, .cl262-ctg > .cl262-two:first-child > .aap-f { margin-top: 6px; }
+
+/* ══ Card offers v1 (design-refs/card-offers-v1/agent-card-edit-v8.html) ═════════════════════════════════════════════
+   What an edit does to the queries already out: an OFFER that asks (sand header, white body), a calm powder note when a
+   request in progress is safe, and quiet grey footnotes. No green anywhere; no burgundy. The panel portals to
+   `document.body`, so every value here is a literal or a `:root` token, and every face is stated with `!important`
+   on two classes (brand.tsx names a face on bare `p`, `span` and `b`). */
+.cl262-card .co-quiet { margin: 10px 0 0; font: italic 400 13.5px/1.45 var(--sp-serif) !important; color: #8f8a82; }
+.cl262-card .co-offer { margin-top: 14px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #e6dccd, 0 6px 16px -12px rgba(28, 19, 15, .35); overflow: hidden; animation: co-in .22s ease-out; }
+@keyframes co-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cl262-card .co-offer { animation: none; } }
+.cl262-card .co-h { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #f7efe3; }
+.cl262-card .co-ic { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #9c7a4c; }
+.cl262-card .co-h b { font: 600 15px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-b { padding: 12px 14px 14px; }
+.cl262-card .co-lead { margin: 0 0 4px; font: 400 15px/1.45 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-lead b { font: 600 15px/1.45 var(--sp-serif) !important; }
+.cl262-card .co-qrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font: 400 14.5px/1.35 var(--sp-serif) !important; color: #3d3530; }
+.cl262-card .co-st { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: #f7efe3; font: 400 13.5px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-dates { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 12px; font: 400 15px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-dates dt { color: var(--sp-quiet); font: 400 15px/1.35 var(--sp-serif) !important; }
+.cl262-card .co-dates dd { margin: 0; font: 400 15px/1.35 var(--sp-serif) !important; }
+.cl262-card .co-dates s { color: #a39b90; text-decoration-thickness: 1px; }
+.cl262-card .co-to { font: 600 15px/1.35 var(--sp-serif) !important; }
+.cl262-card .co-arrow { color: #9c7a4c; margin: 0 6px; }
+.cl262-card .co-sub { display: block; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: var(--sp-quiet); }
+.cl262-card .co-ask { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl262-card .co-why { margin: 10px 0 0; font: italic 400 13.5px/1.45 var(--sp-serif) !important; color: var(--sp-quiet); }
+.cl262-card .co-opt { all: unset; box-sizing: border-box; cursor: pointer; display: flex; gap: 12px; width: 100%; padding: 11px 13px; margin-top: 8px; border-radius: 10px; background: #faf7f2; box-shadow: inset 0 0 0 1px #ece4d9; font: 400 15px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.cl262-card .co-opt small { display: block; margin-top: 2px; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: var(--sp-quiet); }
+.cl262-card .co-rd { flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ae9f; background: #fff; }
+.cl262-card .co-opt[aria-checked="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl262-card .co-opt[aria-checked="true"] .co-rd { box-shadow: inset 0 0 0 5px #2a3a52; }
+.cl262-card .co-tag { margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: #e6edf6; font: 400 12.5px/1.6 var(--sp-serif) !important; font-style: normal !important; color: #2a3a52; }
+.cl262-card .co-safe { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 11px 13px; border-radius: 10px; background: #e6edf6; font: 400 14.5px/1.45 var(--sp-serif) !important; color: #2a3a52; }
+.cl262-card .co-safe span, .cl262-card .co-safe b { font: inherit !important; color: inherit; }
+.cl262-card .co-safe b { font-weight: 600 !important; }

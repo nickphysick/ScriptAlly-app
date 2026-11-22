@@ -1,0 +1,410 @@
+[
+ {
+  "lock": "G3",
+  "where": "population",
+  "ok": true,
+  "detail": "3 waiting past, 3 your move, 1 offer, 2 closed"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-near one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-near-q steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@9 Aug (now Queried)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-near-q Queried dated as stored",
+  "ok": true,
+  "detail": "\"9 Aug\" vs 9 Aug"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-near-q a next step is last and rust",
+  "ok": true,
+  "detail": "step,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-near-q the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Queried: bar true"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-near-q rust blocks = weeks past the reply time",
+  "ok": true,
+  "detail": "3 rust, 11w vs 3 (11w, usual 8)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-passed20 one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-passed20-q steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@11 Aug (now Queried)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-passed20-q Queried dated as stored",
+  "ok": true,
+  "detail": "\"11 Aug\" vs 11 Aug"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-passed20-q a next step is last and rust",
+  "ok": true,
+  "detail": "step,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,nudge,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-passed20-q the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Queried: bar true"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-cal-passed20-q rust blocks = weeks past the reply time",
+  "ok": true,
+  "detail": "4 rust, 11w vs 4 (11w, usual 4)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-agent-9 one block per query",
+  "ok": true,
+  "detail": "3 blocks, 3 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-pkgq-9 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@19 Jul → Full Sent@19 Jul (now Full Sent)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-pkgq-9 Queried dated as stored",
+  "ok": true,
+  "detail": "\"19 Jul\" vs 19 Jul"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-pkgq-9 Full Sent dated as stored",
+  "ok": true,
+  "detail": "\"19 Jul\" vs 19 Jul"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-pkgq-9 a next step is last and rust",
+  "ok": true,
+  "detail": "step,step,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-pkgq-9 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Full Sent: bar true"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-pkgq-9 rust blocks = weeks past the reply time",
+  "ok": true,
+  "detail": "6 rust, 14w vs 6 (14w, usual 8)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-9 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@8 Jul → Partial Requested@22 Jul → Partial Sent@5 Aug → Full Requested@19 Aug (now Full Requested)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-9 Queried dated as stored",
+  "ok": true,
+  "detail": "\"8 Jul\" vs 8 Jul"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-9 Partial Requested dated as stored",
+  "ok": true,
+  "detail": "\"22 Jul\" vs 22 Jul"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-9 Partial Sent dated as stored",
+  "ok": true,
+  "detail": "\"5 Aug\" vs 5 Aug"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-9 Full Requested dated as stored",
+  "ok": true,
+  "detail": "\"19 Aug\" vs 19 Aug"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-9 writer's move: the next step last, in rust",
+  "ok": true,
+  "detail": "step,step,step,step,nudge,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-9 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Full Requested: bar false"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@27 May → Partial Requested@10 Jun → Partial Sent@24 Jun → Full Requested@8 Jul → Full Sent@22 Jul (now Full Sent)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 Queried dated as stored",
+  "ok": true,
+  "detail": "\"27 May\" vs 27 May"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 Partial Requested dated as stored",
+  "ok": true,
+  "detail": "\"10 Jun\" vs 10 Jun"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 Partial Sent dated as stored",
+  "ok": true,
+  "detail": "\"24 Jun\" vs 24 Jun"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 Full Requested dated as stored",
+  "ok": true,
+  "detail": "\"8 Jul\" vs 8 Jul"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 Full Sent dated as stored",
+  "ok": true,
+  "detail": "\"22 Jul\" vs 22 Jul"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 a next step is last and rust",
+  "ok": true,
+  "detail": "step,step,step,step,step,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Full Sent: bar true"
+ },
+ {
+  "lock": "G3",
+  "where": "seed-query-21 rust blocks = weeks past the reply time",
+  "ok": true,
+  "detail": "5 rust, 13w vs 5 (13w, usual 8)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-06 one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-06 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@2 Sep → Partial Requested@2 Sep (now Partial Requested)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-06 Queried dated as stored",
+  "ok": true,
+  "detail": "\"2 Sep\" vs 2 Sep"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-06 writer's move: the next step last, in rust",
+  "ok": true,
+  "detail": "step,step,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-06 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Partial Requested: bar false"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-08 one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-08 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@22 Aug → Offer@22 Aug (now Offer)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-08 Queried dated as stored",
+  "ok": true,
+  "detail": "\"22 Aug\" vs 22 Aug"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-08 writer's move: the next step last, in rust",
+  "ok": true,
+  "detail": "step,step,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-08 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Offer: bar false"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-09 one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-09 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@24 Sep → Full Requested@24 Sep (now Full Requested)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-09 Queried dated as stored",
+  "ok": true,
+  "detail": "\"24 Sep\" vs 24 Sep"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-09 writer's move: the next step last, in rust",
+  "ok": true,
+  "detail": "step,step,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-09 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Full Requested: bar false"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-12 one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-12 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@20 Aug → Rejected@20 Aug (now Rejected)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-12 Queried dated as stored",
+  "ok": true,
+  "detail": "\"20 Aug\" vs 20 Aug"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-12 closed: no next step",
+  "ok": true,
+  "detail": "step,step"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-12 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Rejected: bar false"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-02 one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-02 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@11 Apr → Rejected@11 Apr (now Rejected)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-02 Queried dated as stored",
+  "ok": true,
+  "detail": "\"11 Apr\" vs 11 Apr"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-02 closed: no next step",
+  "ok": true,
+  "detail": "step,step"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-02 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Rejected: bar false"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-agent-05 one block per query",
+  "ok": true,
+  "detail": "1 blocks, 1 queries"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-05 steps in order, Query sent first, current last",
+  "ok": true,
+  "detail": "Queried@3 Jun → Partial Sent@3 Jun (now Partial Sent)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-05 Queried dated as stored",
+  "ok": true,
+  "detail": "\"3 Jun\" vs 3 Jun"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-05 a next step is last and rust",
+  "ok": true,
+  "detail": "step,step,next rgb(162, 69, 42)"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-05 the waiting bar only while waiting",
+  "ok": true,
+  "detail": "Partial Sent: bar true"
+ },
+ {
+  "lock": "G3",
+  "where": "cv25-q-05 no reply time: the caption alone",
+  "ok": true,
+  "detail": "0 blocks"
+ },
+ {
+  "lock": "G3",
+  "where": "branches: a story of three or more steps, a bar with rust",
+  "ok": true,
+  "detail": "2 long stories, 4 bars past"
+ }
+]

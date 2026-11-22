@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "L1-1280",
+  "where": "the page's scroller and header card were measured",
+  "ok": true,
+  "detail": "[object Object]"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the page ground carries the packages tile",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "at the Contact list's size, 340 × 360, repeating",
+  "ok": true,
+  "detail": "340px 360px repeat"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "scrolling with the page (local), on the Contact list's ground #f2eee8",
+  "ok": true,
+  "detail": "local rgb(242, 238, 232)"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the tile's opacity is the Contact list's (read from both SVGs)",
+  "ok": true,
+  "detail": "0.085 vs 0.085"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the header card has no pattern: no ::before image, a flat fill",
+  "ok": true,
+  "detail": "{\"img\":\"none\",\"col\":\"rgb(251, 248, 244)\",\"before\":\"none\",\"beforeImg\":\"none\"}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the scroller has no horizontal overflow",
+  "ok": true,
+  "detail": "{\"sw\":1024,\"cw\":1024}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the window has no horizontal overflow",
+  "ok": true,
+  "detail": "{\"sw\":1024,\"cw\":1024}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the document has no horizontal overflow",
+  "ok": true,
+  "detail": "{\"sw\":1280,\"cw\":1280}"
+ }
+]

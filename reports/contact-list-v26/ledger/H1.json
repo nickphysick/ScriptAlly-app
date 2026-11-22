@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "H1",
+  "where": "1512 header found",
+  "ok": true,
+  "detail": "no header"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 on the page's ground (no panel)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0), 0 panels"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 title",
+  "ok": true,
+  "detail": "53 agents on file"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 the subheader",
+  "ok": true,
+  "detail": "39 not yet queried"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 one button (header v2: Discover left the header)",
+  "ok": true,
+  "detail": "[\"+ Add an agent\"]"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 ring beside the text",
+  "ok": true,
+  "detail": "the ring is under the title block"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 no At a glance",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "1512 no title card",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 header found",
+  "ok": true,
+  "detail": "no header"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 on the page's ground (no panel)",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0), 0 panels"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 title",
+  "ok": true,
+  "detail": "53 agents on file"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 the subheader",
+  "ok": true,
+  "detail": "39 not yet queried"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 one button (header v2: Discover left the header)",
+  "ok": true,
+  "detail": "[\"+ Add an agent\"]"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 ring beside the text",
+  "ok": true,
+  "detail": "the ring is under the title block"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 no At a glance",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1",
+  "where": "1280 no title card",
+  "ok": true,
+  "detail": "0"
+ }
+]

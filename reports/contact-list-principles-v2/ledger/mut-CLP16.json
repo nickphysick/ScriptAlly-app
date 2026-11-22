@@ -1,0 +1,17 @@
+[
+ {
+  "where": "the list has unrated rows",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "where": "no unrated row draws stars (no ★, no ☆, no “Not set”)",
+  "ok": false,
+  "detail": "msv12-agent-4,cv25-agent-12,cv25-agent-06,cv25-agent-05,cv25-agent-08,cv25-agent-13,cv25-agent-10,clv-fx-reopen,msv12-agent-1,clv-fx-stub0,cv25-agent-09,cv25-agent-04,msv12-agent-5,cv25-agent-11,msv12-agent-6,cv25-agent-03,cv25-agent-07,msv12-agent-2,cv25-agent-14,clv181-bare,cv25-agent-02,clv-fx-never,msv12-agent-3,cv25-agent-01"
+ },
+ {
+  "where": "every rated row does",
+  "ok": true,
+  "detail": "29/29"
+ }
+]

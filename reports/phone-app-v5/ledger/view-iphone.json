@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "PA5-9",
+  "where": "block: each bar drawn from its row's date (population 8)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-8",
+  "where": "(kept) groups over five fold (population overdue 42, upcoming 19, watch 3, nodate 6)",
+  "ok": true,
+  "detail": "[{\"k\":\"overdue\",\"n\":42,\"shown\":5,\"more\":\"Show 37 more\"},{\"k\":\"upcoming\",\"n\":19,\"shown\":5,\"more\":\"Show 14 more\"},{\"k\":\"nodate\",\"n\":6,\"shown\":5,\"more\":\"Show 1 more\"}]"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "view: rows past their date (population 42, 0 on screen)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-6",
+  "where": "view: the deeper segment runs from the notch to today",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "view: no ring on a bar",
+  "ok": true,
+  "detail": "0"
+ }
+]

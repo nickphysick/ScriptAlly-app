@@ -4,8 +4,9 @@
  *
  * The timeline board's presentational leaves — the card, the markers and the action mark.
  *
- * ⚠️ MOVED VERBATIM FROM `TodoCalendarPage.tsx`, AND THE VERBATIM IS THE POINT. This is an
- * extraction, not a redesign: the board renders in Query Centre exactly as it renders in To-do, so
+ * ⚠️ MOVED VERBATIM FROM `TodoCalendarPage.tsx` (that page was retired on 29 Oct; the Query Centre is now this
+ * board's only host), AND THE VERBATIM IS THE POINT. This is an
+ * extraction, not a redesign: the board rendered in Query Centre exactly as it rendered in To-do, so
  * every line below is the line that was there, and the proof is a byte-identical `outerHTML` diff
  * of the `.tl` subtree at 1280/1440/1920 (`reports/calendar-extract-dom/`). Anything that renders
  * differently is a regression to fix, never a design decision taken in passing.

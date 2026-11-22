@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "AC21-2b",
+  "where": "the order: Response time, If they don’t reply, How they take queries, Open to queries?",
+  "ok": false,
+  "detail": "[\"door\",\"weeks\",\"nrn\",\"method\"]"
+ },
+ {
+  "lock": "AC21-2b",
+  "where": "the three boxes stay while How is open",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "AC21-2b",
+  "where": "changing the slider changes “Replies in” in the same frame",
+  "ok": true,
+  "detail": "{\"was\":\"About 6 weeks\",\"now\":\"About 8 weeks\"}"
+ }
+]

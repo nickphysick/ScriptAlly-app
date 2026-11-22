@@ -46,3 +46,21 @@ export function lockedEditLine(name: string, next: string): string {
   const short = (s: string) => /(v\d+)\s*$/i.exec(s)?.[1] ?? s;
   return `${short(name)} has been sent, so your changes become ${short(next)}.`;
 }
+
+/* ── Query letters v2.1 (13 Nov): the add-once rule ─────────────────────────────────────────────────────────────── */
+
+/** True when a stored or incoming text says nothing: absent, whitespace, or `deleteField()` (a FieldValue object). */
+const isEmptyText = (t: unknown): boolean => (typeof t === "string" ? !t.trim() : t == null || typeof t === "object");
+
+/**
+ * May a write that touches a version's CONTENT go ahead? A version that has not gone out: always. A sent one: only
+ *   - ONCE, while its saved text is empty — the writer adding the words they sent to a letter recorded by name, or
+ *   - as the Undo of that add (`restoring`), which may only put the text back to empty.
+ * Once a sent letter has text, its content is fixed and the change is a new version. Client-side only, like the rest of
+ * the sent lock: `firestore.rules` allows `contentDraft` on any version update.
+ */
+export function contentWriteAllowed(a: { sent: boolean; savedText: unknown; incomingText?: unknown; hasIncomingText: boolean; restoring?: boolean }): boolean {
+  if (!a.sent) return true;
+  if (isEmptyText(a.savedText)) return true;
+  return !!a.restoring && a.hasIncomingText && isEmptyText(a.incomingText);
+}

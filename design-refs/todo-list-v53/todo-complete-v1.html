@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>To-do — finishing a task, v1</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#2a3a52;--oat:#f2eee8;--paper:#fbf9f5;--ink:#1c130f;--ink2:#3a332d;--muted:#7a7066;--rule:#e6dfd4;--blush:#f3dfd6;--slate:#d7e0e8;--sand:#f2ebe0;--rust:#8a4a3a;
+    --type:"Special Elite","Courier New",monospace;--serif:"Source Serif 4",Georgia,serif;--spring:cubic-bezier(.22,1,.36,1)}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--oat);font-family:var(--serif);color:var(--ink);display:flex;flex-direction:column;overflow:hidden}
+  button{font-family:inherit;cursor:pointer}
+  .ctl{background:var(--navy);color:#fff;padding:10px 28px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .ctl b{font:400 17px var(--type);margin-right:8px}
+  .opt{height:34px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px}
+  .opt.on{background:#fff;color:var(--navy)}
+  .ctl .sep{width:1px;height:22px;background:rgba(255,255,255,.3);margin:0 6px}
+  .ctl .rs{margin-left:auto;background:none;border:0;color:#fff;text-decoration:underline;font-size:14px}
+  .explain{background:#fff;border-bottom:1px solid var(--rule);padding:10px 28px;font-size:15.5px;line-height:1.45;color:var(--ink2)}
+  .explain b{color:var(--ink)}
+
+  .page{flex:1;min-height:0;padding:16px 28px 20px;display:flex;flex-direction:column}
+  .ph{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .ph h1{font:400 28px var(--type);margin:0 8px 0 0}
+  .pill{height:32px;padding:0 13px;border-radius:999px;display:inline-flex;align-items:center;font-size:15px;background:#fff;border:1px solid var(--rule);transition:transform .3s var(--spring)}
+  .pill.bump{transform:scale(1.12)}
+  .frame{flex:1;min-height:0;background:var(--paper);border:1px solid var(--rule);border-radius:22px;display:grid;grid-template-columns:340px 1fr;overflow:hidden}
+
+  .tray{border-right:1px solid var(--rule);padding:16px;overflow-y:auto}
+  .seg{display:flex;border:1px solid var(--rule);border-radius:12px;padding:4px;background:#fff;margin-bottom:12px}
+  .seg span{flex:1;text-align:center;padding:7px 0;border-radius:9px;font-size:15px}
+  .seg .on{background:var(--navy);color:#fff}
+  .gh{margin-top:12px;border-radius:10px;padding:8px 14px;font:400 16px var(--type);display:flex;justify-content:space-between;transition:opacity .3s}
+  .gh.gw{background:#6a7a93;color:#fff}.gh.gn{background:var(--slate)}.gh.gq{background:linear-gradient(90deg,#e4e1db,#f6f4f0)}
+  .grp{overflow:hidden}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:12px;font-size:15.5px;border:2px solid transparent;max-height:90px;transition:max-height .35s var(--spring) .25s,padding .35s var(--spring) .25s,opacity .25s,transform .35s var(--spring),background .2s,border-color .2s}
+  .row.sel{border-color:var(--navy);background:#fff}
+  .row .d{width:36px;height:36px;border-radius:50%;border:1.5px solid #cfc6b8;background:#fff;flex:none;display:grid;place-items:center;color:#fff;font-size:16px;transition:background .2s,border-color .2s}
+  .row b{display:block;font-weight:600}
+  .row i{color:var(--muted)}
+  .row em{margin-left:auto;font-style:normal;font-size:13px;color:var(--muted);text-align:right;white-space:nowrap}
+  .row em b{font:400 15px var(--type);color:var(--ink)}
+  .row.ticked .d{background:var(--navy);border-color:var(--navy)}
+  .row.gone{opacity:0;transform:translateX(-24px);max-height:0;padding-top:0;padding-bottom:0}
+
+  .desk{padding:18px;display:flex;flex-direction:column;min-width:0;min-height:0;position:relative}
+  .dband{background:var(--navy);color:#fff;border-radius:18px 18px 0 0;padding:16px 22px;display:flex;align-items:baseline;gap:14px}
+  .dband h2{font:400 24px var(--type);margin:0}
+  .dband i{opacity:.8}
+  .dband .pos{margin-left:auto;opacity:.8}
+  .dbody{flex:1;min-height:0;background:#fff;border:1px solid var(--rule);border-top:0;border-radius:0 0 18px 18px;display:grid;grid-template-columns:1fr minmax(380px,34%);position:relative;overflow:hidden}
+  .work{padding:24px 30px 0;display:flex;flex-direction:column;min-height:0}
+  .swap{transition:opacity .22s,transform .3s var(--spring)}
+  .swap.out{opacity:0;transform:translateY(-10px)}
+  .swap.in{opacity:0;transform:translateY(14px)}
+  .bub{background:var(--blush);border-radius:14px;padding:10px 16px;font-size:16.5px;line-height:1.45;margin-bottom:18px}
+  .q{font:600 23px var(--serif);margin:0 0 4px}
+  .hint{font-style:italic;color:var(--ink2);margin:0 0 14px;font-size:17px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .tile{padding:16px;border:1.5px solid var(--rule);border-radius:14px;background:#faf8f4;font-size:18px;text-align:left;min-height:84px}
+  .tile small{display:block;font-size:15px;color:var(--ink2)}
+  .tile.on{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy);background:#fff}
+  .wn{margin-top:18px;border:1px solid var(--rule);border-radius:14px;background:var(--paper);padding:14px 18px;font-size:16px;line-height:1.5}
+  .wn h4{font:400 17px var(--type);margin:0 0 4px}
+  .foot{margin-top:auto;border-top:1px solid var(--rule);padding:14px 0 16px;display:flex;align-items:center;gap:12px}
+  .gbtn{height:46px;padding:0 18px;border:1px solid var(--rule);border-radius:999px;background:#fff;font-size:17px}
+  .of{margin-left:auto;font-style:italic;color:var(--muted)}
+  .next{height:54px;padding:0 30px;border:0;border-radius:999px;background:var(--navy);color:#fff;font-size:19px;font-weight:600;min-width:150px}
+  .next:disabled{background:#b6bcc6}
+  .next.saving{background:var(--navy)}
+
+  .prev{border-left:1px solid var(--rule);padding:18px;background:#fdfcfa;overflow-y:auto}
+  .qc{border:1px solid var(--rule);border-radius:14px;background:#fff;overflow:hidden}
+  .qch{background:var(--navy);color:#fff;display:flex;justify-content:space-between;padding:9px 16px;font-size:13px;transition:background .4s}
+  .qch b{font:400 15px var(--type)}
+  .qcb{padding:14px 16px}
+  .qcb b{font:600 19px var(--serif);display:block}
+  .qcb span{color:var(--muted);font-size:14px}
+  .thr{padding:6px 16px 16px;display:flex;flex-direction:column;gap:9px;font-size:15px;border-top:1px solid var(--rule)}
+  .m{max-width:80%;padding:9px 13px;border-radius:14px}
+  .m small{display:block;color:var(--muted);font-size:12.5px}
+  .me{align-self:flex-end;background:#f6f3ee}
+  .th{align-self:flex-start;background:var(--slate)}
+  .dr{align-self:flex-end;border:1.5px dashed #c8beb1;color:var(--muted);background:#fff;position:relative;transition:all .35s var(--spring)}
+  .dr.real{border:1.5px solid transparent;background:#f6f3ee;color:var(--ink)}
+  .stamp{position:absolute;right:-8px;top:-14px;font:400 13px var(--type);color:var(--navy);border:2px solid var(--navy);border-radius:6px;padding:2px 7px;background:#fff;transform:rotate(-8deg) scale(1.8);opacity:0;transition:transform .35s var(--spring),opacity .2s}
+  .dr.real .stamp{transform:rotate(-8deg) scale(1);opacity:1}
+  .qfoot{padding:11px 16px;background:var(--blush);font-size:15px;transition:background .4s}
+  .qfoot.calm{background:var(--sand)}
+
+  /* as on dev: the whole desk becomes a celebration */
+  .yay{position:absolute;inset:0;background:#fff;display:none;place-items:center;text-align:center;z-index:5}
+  .yay.show{display:grid}
+  .yay .tk{width:64px;height:64px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:30px;margin:0 auto 12px}
+  .yay h2{font:400 28px var(--type);margin:0 0 6px}
+  .yay p{margin:0 0 18px;color:var(--ink2);font-size:17px;max-width:460px}
+  .ynx{display:flex;align-items:center;gap:14px;border:1px solid var(--rule);border-radius:14px;padding:12px 18px;background:#faf8f4;font-size:16px;margin:6px auto 12px;text-align:left}
+  .ynx small{display:block;color:var(--muted)}
+  .lnk{background:none;border:0;text-decoration:underline;color:var(--ink2);font-size:15px}
+
+  /* the milestone: a group or the whole list cleared */
+  .mile{position:absolute;inset:0;z-index:6;display:none;place-items:center;background:rgba(42,58,82,.92);color:#fff;text-align:center}
+  .mile.show{display:grid;animation:fade .3s}
+  .mile .ph2{width:120px;height:120px;border-radius:18px;margin:0 auto 14px;background:repeating-linear-gradient(45deg,#3d4f6b 0 8px,#34465f 8px 16px);display:grid;place-items:center;font-size:12px;color:#aeb8c8}
+  .mile h2{font:400 32px var(--type);margin:0 0 8px}
+  .mile p{margin:0 0 20px;font-size:17px;opacity:.9}
+  .mile button{height:48px;padding:0 26px;border-radius:999px;border:0;background:#fff;color:var(--navy);font-size:17px;font-weight:600}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* snackbar */
+  .snack{position:fixed;left:calc(50% + 170px);bottom:118px;transform:translate(-50%,30px);opacity:0;background:var(--navy);color:#fff;border-radius:999px;padding:12px 14px 12px 22px;display:flex;align-items:center;gap:16px;font-size:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);transition:all .35s var(--spring);z-index:10;white-space:nowrap}
+  .snack.show{transform:translate(-50%,0);opacity:1}
+  .snack .t{width:26px;height:26px;border-radius:50%;background:#fff;color:var(--navy);display:grid;place-items:center;font-size:14px;flex:none}
+  .snack small{opacity:.75;margin-left:4px}
+  .snack button{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:999px;height:34px;padding:0 16px;font-size:15px;font-weight:600}
+  .snack .bar{position:absolute;left:22px;right:22px;bottom:5px;height:2px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden}
+  .snack .bar i{display:block;height:100%;background:rgba(255,255,255,.7);width:100%}
+</style>
+</head>
+<body>
+<div class="ctl">
+  <b>Finishing a task</b>
+  <button class="opt" data-m="dev">1 · As on dev</button>
+  <button class="opt" data-m="straight">2 · Straight on</button>
+  <button class="opt on" data-m="stamp">3 · Stamp, then on</button>
+  <span class="sep"></span>
+  <button class="opt on" id="mileBtn">Celebrate milestones</button>
+  <button class="rs" onclick="reset()">Start again</button>
+</div>
+<div class="explain" id="explain"></div>
+
+<div class="page">
+  <div class="ph"><h1>Murphy's Day Out</h1><span class="pill" style="background:var(--blush);border-color:transparent;color:var(--rust)">• 3 late</span><span class="pill" id="todoPill">4 to do</span><span class="pill" id="donePill">0 done today</span></div>
+  <div class="frame">
+    <aside class="tray" id="tray"></aside>
+    <section class="desk">
+      <div class="dband"><h2 id="tTitle"></h2><i id="tWho"></i><span class="pos" id="tPos"></span></div>
+      <div class="dbody">
+        <div class="work swap" id="work"></div>
+        <aside class="prev swap" id="prev"></aside>
+        <div class="yay" id="yay"></div>
+        <div class="mile" id="mile"></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="snack" id="snack"></div>
+
+<script>
+const TASKS=[
+ {k:1,g:"w",title:"Send Jonathan your full",who:"Jonathan Marsh · The Marsh Agency",first:"Jonathan",agency:"The Marsh Agency",wait:"951 days",
+  bub:"Jonathan asked for your full manuscript. Once it's gone, log it here and I'll keep an eye out for his reply.",
+  q:"When did it go?",hint:"Pick a day.",o:[["Today","Sun 8 Nov"],["Yesterday","Sat 7 Nov"],["Older","Pick from the month"]],
+  head:"Materials requested",draft:"Full manuscript",snack:"Full sent to Jonathan",snackSub:"reply expected by 31 Jan",yayHead:"Sent. Nice work.",yayMsg:"Jonathan's reply is expected by 31 Jan. If nothing's come by 14 Feb, I'll put “Nudge Jonathan” on your list.",verb:"Log it"},
+ {k:2,g:"w",title:"Send Daniel your partial",who:"Daniel Okafor · Inkwell & Stone",first:"Daniel",agency:"Inkwell & Stone",wait:"944 days",
+  bub:"Daniel asked for the first three chapters. Once they've gone, log it here.",
+  q:"When did it go?",hint:"Pick a day.",o:[["Today","Sun 8 Nov"],["Yesterday","Sat 7 Nov"],["Older","Pick from the month"]],
+  head:"Materials requested",draft:"First three chapters",snack:"Partial sent to Daniel",snackSub:"reply expected by 3 Jan",yayHead:"Sent. Nice work.",yayMsg:"Daniel's reply is expected by 3 Jan.",verb:"Log it"},
+ {k:3,g:"n",title:"Nudge Eleanor",who:"Eleanor Price · Greenfield Literary",first:"Eleanor",agency:"Greenfield Literary",wait:"78 late",
+  bub:"Send Eleanor a nudge, then log it here. It goes to eleanor@greenfield.co.uk.",
+  q:"Have you sent the nudge?",hint:"",o:[["Yes, I've sent it",""]],
+  head:"Nudge due",draft:"Nudge",snack:"Nudge logged for Eleanor",snackSub:"I'll suggest closing it if nothing by 6 Dec",yayHead:"Nudged.",yayMsg:"If Eleanor still hasn't replied by 6 Dec, I'll suggest closing it.",verb:"Log it"},
+ {k:4,g:"q",title:"Aisha's gone quiet",who:"Aisha Bello · The Lantern Agency",first:"Aisha",agency:"The Lantern Agency",wait:"949 days",
+  bub:"It's been a long time with no word from Aisha, and you've already nudged once.",
+  q:"What would you like to do?",hint:"",o:[["Close it","Mark it as no reply"],["Nudge again",""],["Keep waiting",""]],
+  head:"Gone quiet",draft:"Closed · no reply",snack:"Closed Aisha's query",snackSub:"it's on your Wall of no",yayHead:"Closed.",yayMsg:"It's on your Wall of no. Onwards.",verb:"Close it"}
+];
+const GN={w:"Agents are waiting",n:"Nudges",q:"Gone quiet"};
+let mode="stamp",mile=true,left,cur,pick,done,busy=false,snackT;
+const $=id=>document.getElementById(id);
+const EX={
+ dev:"<b>As on dev.</b> Log it swaps the whole desk for a celebration screen. You read it, then click “Next up” to carry on. Every task ends with a full stop and an extra click.",
+ straight:"<b>Straight on</b> (Superhuman, Linear's inbox, Gmail's auto-advance). Log it ticks the row, it slides out of the tray, and the next task is on the desk straight away. A snackbar says what happened, with Undo, and fades after a few seconds.",
+ stamp:"<b>Stamp, then on</b> (my pick). Same as Straight on, but for under a second you see it land: the dashed bubble on the card becomes real and gets stamped, the row ticks, then the desk moves on. You see proof it worked without having to click anything. Celebrations are saved for milestones: clearing a group, or the whole list."
+};
+function reset(){left=TASKS.map(t=>t.k);cur=1;pick=null;done=0;busy=false;$("yay").classList.remove("show");$("mile").classList.remove("show");hideSnack();renderAll()}
+function T(k){return TASKS.find(t=>t.k===k)}
+function renderTray(){
+  let h='<div class="seg"><span class="on">To do '+left.length+'</span><span>Snoozed 0</span><span>Done '+done+'</span></div>';
+  ["w","n","q"].forEach(g=>{const ts=TASKS.filter(t=>t.g===g&&left.includes(t.k));if(!ts.length)return;
+    h+=`<div class="grp" data-g="${g}"><div class="gh g${g}"><span>${GN[g]}</span><span>${ts.length}</span></div>`+
+    ts.map(t=>`<div class="row${t.k===cur?" sel":""}" id="r${t.k}" onclick="go(${t.k})"><span class="d"></span><span><b>${t.title}</b><i>${t.agency}</i></span><em><b>${t.wait.split(" ")[0]}</b><br>${t.wait.split(" ").slice(1).join(" ")||"waiting"}</em></div>`).join("")+`</div>`});
+  $("tray").innerHTML=h;
+  $("todoPill").textContent=left.length+" to do";$("donePill").textContent=done+" done today";
+}
+function renderDesk(){
+  const t=T(cur);if(!t)return;
+  $("tTitle").textContent=t.title;$("tWho").textContent=t.who;$("tPos").textContent=(left.indexOf(cur)+1)+"/"+left.length;
+  $("work").innerHTML=`<div class="bub">${t.bub}</div><p class="q">${t.q}</p>${t.hint?`<p class="hint">${t.hint}</p>`:""}
+   <div class="tiles">${t.o.map((o,n)=>`<button class="tile${pick===n?" on":""}" onclick="choose(${n})">${o[0]}${o[1]?`<small>${o[1]}</small>`:""}</button>`).join("")}</div>
+   <div class="wn"><h4>When you log it</h4>${t.snack}, ${t.snackSub}. It leaves your tray.</div>
+   <div class="foot"><button class="gbtn">↻ Snooze</button><button class="gbtn">⊘ Dismiss</button><span class="of">1 of 1</span><button class="next" id="next" ${pick===null?"disabled":""} onclick="logIt()">${t.verb}</button></div>`;
+  $("prev").innerHTML=`<div class="qc"><div class="qch" id="qch"><span>${t.head}</span><b>Day 951</b></div><div class="qcb"><b>${t.who.split(" · ")[0]}</b><span>${t.agency}</span></div>
+   <div class="thr"><div class="m me">Query sent<small>2 Apr 2024 · by email</small></div><div class="m th">${t.g==="w"?"Asked for it":"No reply yet"}<small>2 Apr 2024</small></div>
+   <div class="m dr" id="dr">${t.draft}<small>${pick===null?"not logged yet":"logs "+(t.o[pick][1]||"today")}</small><span class="stamp">Logged</span></div></div>
+   <div class="qfoot" id="qf"><b>Your move.</b> ${t.first}'s waiting on you.</div></div>`;
+}
+function renderAll(){renderTray();renderDesk();$("explain").innerHTML=EX[mode]}
+function choose(n){pick=n;renderDesk()}
+function go(k){if(busy)return;cur=k;pick=null;$("yay").classList.remove("show");renderAll()}
+function nextAfter(k){const i=left.indexOf(k);const rest=left.filter(x=>x!==k);return rest.length?rest[Math.min(i,rest.length-1)]:null}
+function bump(id){const p=$(id);p.classList.add("bump");setTimeout(()=>p.classList.remove("bump"),300)}
+function showSnack(t){
+  clearTimeout(snackT);const s=$("snack");
+  s.innerHTML=`<span class="t">✓</span><span>${t.snack}<small>· ${t.snackSub}</small></span><button onclick="undo(${t.k})">Undo</button><span class="bar"><i id="sbar"></i></span>`;
+  s.classList.add("show");const b=$("sbar");b.style.transition="none";b.style.width="100%";requestAnimationFrame(()=>{b.style.transition="width 6s linear";b.style.width="0%"});
+  snackT=setTimeout(hideSnack,6000);
+}
+function hideSnack(){$("snack").classList.remove("show")}
+let lastUndo=null;
+function undo(k){hideSnack();if(lastUndo&&lastUndo.k===k){left.splice(lastUndo.i,0,k);done--;cur=k;pick=null;$("mile").classList.remove("show");renderAll()}}
+function milestone(t,groupCleared){
+  if(!mile)return false;
+  if(!left.length){$("mile").innerHTML=`<div><div class="ph2">hawk</div><h2>All caught up.</h2><p>Nothing needs you right now. Every query is with an agent.</p><button onclick="this.closest('.mile').classList.remove('show')">Back to the desk</button></div>`;$("mile").classList.add("show");return true}
+  if(groupCleared){$("mile").innerHTML=`<div><div class="ph2">hawk</div><h2>No agents waiting on you.</h2><p>You've sent everything that was asked for.</p><button onclick="this.closest('.mile').classList.remove('show')">On to ${GN[T(cur).g].toLowerCase()} →</button></div>`;$("mile").classList.add("show");return true}
+  return false;
+}
+function logIt(){
+  if(busy||pick===null)return;busy=true;
+  const t=T(cur),i=left.indexOf(cur),nx=nextAfter(cur);
+  const groupCleared=!left.some(k=>k!==t.k&&T(k).g===t.g);
+  lastUndo={k:t.k,i};
+  const row=$("r"+t.k);
+  if(mode==="dev"){
+    left.splice(i,1);done++;
+    $("yay").innerHTML=`<div><div class="tk">✓</div><h2>${t.yayHead}</h2><p>${t.yayMsg}</p>${nx?`<div style="font-size:14px;color:var(--muted)">Next up</div><button class="ynx" onclick="go(${nx})"><span><b>${T(nx).title}</b><small>${T(nx).agency}</small></span>→</button>`:`<button class="ynx" onclick="reset()">Back to your tray</button>`}<button class="lnk" onclick="undo(${t.k});">Undo</button></div>`;
+    $("yay").classList.add("show");renderTray();busy=false;return;
+  }
+  const n=$("next");n.textContent="✓ Logged";n.classList.add("saving");
+  row&&row.classList.add("ticked");
+  const land=mode==="stamp";
+  if(land){$("dr").classList.add("real");$("dr").querySelector("small").textContent="just now";$("qf").classList.add("calm");$("qf").innerHTML=`<b>With ${t.first}.</b> Nothing for you to do.`}
+  setTimeout(()=>{
+    row&&row.classList.add("gone");
+    $("work").classList.add("out");$("prev").classList.add("out");
+    setTimeout(()=>{
+      left.splice(i,1);done++;bump("todoPill");bump("donePill");
+      showSnack(t);
+      if(nx){cur=nx;pick=null}
+      renderAll();
+      const ms=milestone(t,groupCleared);
+      if(nx){$("work").classList.remove("out");$("prev").classList.remove("out");$("work").classList.add("in");$("prev").classList.add("in");
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{$("work").classList.remove("in");$("prev").classList.remove("in")}))}
+      else if(!ms){$("work").classList.remove("out")}
+      busy=false;
+    },380);
+  },land?850:250);
+}
+document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-m]").forEach(x=>x.classList.remove("on"));b.classList.add("on");mode=b.dataset.m;reset()});
+$("mileBtn").onclick=()=>{mile=!mile;$("mileBtn").classList.toggle("on",mile)};
+reset();
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "B2",
+  "where": "Who replied population",
+  "ok": true,
+  "detail": "Who replied open"
+ },
+ {
+  "lock": "B2",
+  "where": "Who replied",
+  "ok": true,
+  "detail": "title \"Recording response\" line \"null\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied respond population",
+  "ok": true,
+  "detail": "respond mode open"
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied respond title, no line before a pick",
+  "ok": true,
+  "detail": "title \"Recording response\" line \"null\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied partial line",
+  "ok": true,
+  "detail": "partial: \"A partial request: they want to read more, and tha…\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied full line",
+  "ok": true,
+  "detail": "full: \"A full request. They’ve read enough to want the wh…\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied pass line",
+  "ok": true,
+  "detail": "pass: \"It stings, but every answer gets you closer to the…\""
+ },
+ {
+  "lock": "B2",
+  "where": "via Who replied offer line",
+  "ok": true,
+  "detail": "offer: \"An offer of representation. Huge news. Add the dat…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card respond population",
+  "ok": true,
+  "detail": "respond mode open"
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card respond title, no line before a pick",
+  "ok": true,
+  "detail": "title \"Recording response\" line \"null\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card partial line",
+  "ok": true,
+  "detail": "partial: \"A partial request: they want to read more, and tha…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card full line",
+  "ok": true,
+  "detail": "full: \"A full request. They’ve read enough to want the wh…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card pass line",
+  "ok": true,
+  "detail": "pass: \"It stings, but every answer gets you closer to the…\""
+ },
+ {
+  "lock": "B2",
+  "where": "from a query card offer line",
+  "ok": true,
+  "detail": "offer: \"An offer of representation. Huge news. Add the dat…\""
+ }
+]

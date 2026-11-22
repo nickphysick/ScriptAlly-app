@@ -1,0 +1,25 @@
+{
+ "q": {
+  "status": "Full Requested",
+  "fullRequestedDate": null,
+  "partialRequestedDate": null,
+  "lastStatusChange": "2026-09-24T12:00:00.000Z",
+  "dateSent": "2026-09-24T12:00:00.000Z"
+ },
+ "days": 48,
+ "fig": "48days waiting",
+ "figs": [
+  144,
+  84,
+  84,
+  84,
+  70,
+  62,
+  62,
+  59,
+  60,
+  53,
+  48
+ ],
+ "note": "Agents waiting16144 days"
+}

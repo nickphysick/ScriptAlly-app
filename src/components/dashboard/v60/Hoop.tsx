@@ -36,7 +36,21 @@ export function hoopArcs(segs: readonly HoopSeg[]): { key: string; color: string
   return out;
 }
 
-export const Hoop: React.FC<{ segs: readonly HoopSeg[]; play?: boolean; label: string; className?: string; children?: React.ReactNode }> = ({ segs, play, label, className, children }) => {
+/** Dashboard v116: a ring whose slices answer the hover. Each slice gets a transparent hit stroke the
+ *  keyboard can reach; `swell` names the slice drawn 1.5× wide. Without `hit`, the hoop is as it was. */
+export interface HoopHit {
+  swell: string | null;
+  label: (key: string) => string;
+  onEnter: (key: string, ev: React.PointerEvent<SVGElement>) => void;
+  onMove?: (key: string, ev: React.PointerEvent<SVGElement>) => void;
+  onLeave: (key: string) => void;
+  onFocus: (key: string, el: Element) => void;
+  onBlur: (key: string) => void;
+  onKey: (key: string, ev: React.KeyboardEvent<SVGElement>, el: Element) => void;
+  onClick?: (key: string) => void;
+}
+
+export const Hoop: React.FC<{ segs: readonly HoopSeg[]; play?: boolean; label: string; className?: string; children?: React.ReactNode; hit?: HoopHit }> = ({ segs, play, label, className, children, hit }) => {
   const arcs = hoopArcs(segs);
   const ref = useRef<SVGSVGElement>(null);
   useLayoutEffect(() => {
@@ -52,7 +66,7 @@ export const Hoop: React.FC<{ segs: readonly HoopSeg[]; play?: boolean; label: s
     return () => { for (const a of anims) a?.cancel(); };
   }, [play]);
   return (
-    <div className={`d60-hoop${className ? ` ${className}` : ""}`} data-d60="hoop" role="img" aria-label={label}>
+    <div className={`d60-hoop${className ? ` ${className}` : ""}${hit ? " d116-ring" : ""}`} data-d60="hoop" role={hit ? "group" : "img"} aria-label={label}>
       <svg ref={ref} viewBox="0 0 100 100" aria-hidden="true">
         <circle cx="50" cy="50" r={R} fill="none" stroke="#ece8e1" strokeWidth="9" />
         {arcs.map((a) => (
@@ -62,6 +76,22 @@ export const Hoop: React.FC<{ segs: readonly HoopSeg[]; play?: boolean; label: s
             cx="50" cy="50" r={R} fill="none" style={{ stroke: a.color }} strokeWidth="9" pathLength={100}
             strokeDasharray={`${a.len.toFixed(3)} ${(100 - a.len).toFixed(3)}`} strokeDashoffset={(-a.at).toFixed(3)}
             transform="rotate(-90 50 50)"
+            className={hit?.swell === a.key ? "is-swell" : undefined}
+          />
+        ))}
+        {hit && arcs.map((a) => (
+          <circle
+            key={`hit-${a.key}`} data-d116="slice" data-seg={a.key} className="d116-hit" tabIndex={0} role="button" aria-label={hit.label(a.key)}
+            cx="50" cy="50" r={R} fill="none" stroke="transparent" strokeWidth="16" pathLength={100}
+            strokeDasharray={`${a.len.toFixed(3)} ${(100 - a.len).toFixed(3)}`} strokeDashoffset={(-a.at).toFixed(3)}
+            transform="rotate(-90 50 50)"
+            onPointerEnter={(ev) => hit.onEnter(a.key, ev)}
+            onPointerMove={hit.onMove ? (ev) => hit.onMove!(a.key, ev) : undefined}
+            onPointerLeave={() => hit.onLeave(a.key)}
+            onFocus={(ev) => hit.onFocus(a.key, ev.currentTarget)}
+            onBlur={() => hit.onBlur(a.key)}
+            onKeyDown={(ev) => hit.onKey(a.key, ev, ev.currentTarget)}
+            onClick={hit.onClick ? () => hit.onClick!(a.key) : undefined}
           />
         ))}
       </svg>

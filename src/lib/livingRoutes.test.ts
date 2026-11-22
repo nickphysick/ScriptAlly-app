@@ -10,7 +10,7 @@ import { LIVING_ROUTES, isLivingRoute } from "./livingRoutes";
 
 describe("the living routes", () => {
   it("are exactly the six pages in scope", () => {
-    expect([...LIVING_ROUTES].sort()).toEqual(["/agents", "/manuscripts/comps", "/manuscripts/packages", "/queries", "/queries/analytics", "/todo"]);
+    expect([...LIVING_ROUTES].sort()).toEqual(["/agents", "/manuscripts/comps", "/queries", "/queries/analytics", "/queries/packages", "/todo"]);
   });
   it("match the exact route, with or without a trailing slash, and nothing beneath it", () => {
     expect(isLivingRoute("/queries")).toBe(true);

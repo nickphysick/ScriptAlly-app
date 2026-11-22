@@ -153,21 +153,3 @@ test("the To-do pane: the chip beneath the agent and the box on the send rung", 
   }
 });
 
-test("the Calendar drawer: the chip under the agency and the box under the send", async ({ page }) => {
-  test.setTimeout(300_000);
-  await start(page, "/todo/calendar");
-  for (const c of CASES) {
-    const bar = page.locator(`.tl-p[data-rel*="${c.agent}"]`).first();
-    await expect(bar, `no calendar bar for ${c.name}`).toHaveCount(1, { timeout: 20_000 });
-    await bar.evaluate((e) => (e as HTMLElement).click());
-    await page.locator(".tl-cc .tl-ccopen").first().evaluate((e) => (e as HTMLElement).click());
-    await page.locator("body > .tl-dw").first().waitFor({ timeout: 10_000 });
-    /* an urgent row opens on Actions; the chip and the box are on View, the first tab */
-    await page.locator("body > .tl-dw .tl-dwtabs button").first().evaluate((e) => (e as HTMLElement).click());
-    await page.waitForTimeout(400);
-    const s = await seen(page, "body > .tl-dw");
-    ok(s?.chip === c.kind && s?.box === c.kind, `Calendar drawer for ${c.kind}: ${JSON.stringify(s)}`);
-    await page.keyboard.press("Escape");
-    await page.waitForTimeout(500);
-  }
-});

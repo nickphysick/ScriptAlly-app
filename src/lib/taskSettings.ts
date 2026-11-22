@@ -79,6 +79,26 @@ export const RULE_TITLE: Record<string, string> = {
   dq_mswl: "Missing wishlists",
   dq_responseTime: "Missing reply times",
 };
+/** a switched-off rule in plain words, as the Done tab's "Tasks you've switched off" pop-up lists it (v52, 7 Nov) */
+export const RULE_OFF_WORDS: Record<string, string> = {
+  send: "Your-turn-to-send reminders",
+  nudge_overdue: "Nudge reminders",
+  no_response_close: "Stale-query reminders",
+  dq_materials: "Submission-details questions",
+  dq_mswl: "Wishlist questions",
+  dq_responseTime: "Reply-time questions",
+};
+export interface SwitchedOff { rule: string; words: string; at: string | null }
+/**
+ * The rules switched off for every agent, newest first. `at` comes from `todoPrefs.switchedOffAt`, written since v52;
+ * a rule switched off before then has no date and is listed last, with none shown. Every rule is account-wide: there is
+ * no per-agent rule (a per-agent "I don't need this" is a single dismissal, which is final once its week has passed).
+ */
+export function switchedOffRules(muted: readonly string[] | null | undefined, at?: Record<string, string> | null): SwitchedOff[] {
+  return [...new Set(muted ?? [])].filter((r) => r in RULE_TITLE)
+    .map((r) => ({ rule: r, words: `${RULE_OFF_WORDS[r] ?? RULE_TITLE[r]}, for every agent`, at: at?.[r] ?? null }))
+    .sort((a, b) => (b.at ? Date.parse(b.at) : -Infinity) - (a.at ? Date.parse(a.at) : -Infinity));
+}
 /** the same rule, in a sentence: "Stop asking about missing reply times, for every agent" */
 export const RULE_PLAIN: Record<string, string> = {
   dq_materials: "missing submission details",

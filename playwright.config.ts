@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -81,6 +82,15 @@ export const BASE_URL = resolveBaseUrl();
 
 /** The saved logged-in session. Gitignored — it IS a credential. */
 export const STORAGE_STATE = "tests/e2e/.auth/state.json";
+/* Phone fixes v1: every phone suite, by name — the four with "Phone" mid-name were never in the phone projects. */
+const PHONE_SUITES = /(^|\/)(phone[A-Za-z0-9]*|publicPhonePolish|setupImportPhone|dashV118Phone)\.(measure|e2e)\.ts$/;
+/* ONE SIGN-IN PER ENGINE: a session saved WITH IndexedDB (where Firebase keeps it) by phoneFixes' `phone()`. Without it
+   every test password-signs-in and a run this size trips Firebase's throttle, which reads as "the page never rendered". */
+const phoneSession = (engine: string): string | undefined => {
+  const port = (() => { try { return new URL(process.env.SA_E2E_BASE_URL ?? "").port || "443"; } catch { return "443"; } })();
+  const f = `tests/e2e/.auth/pf1-${engine}-${port}.json`;
+  return existsSync(f) ? f : undefined;
+};
 
 export default defineConfig({
   testDir: "tests/e2e",
@@ -123,6 +133,18 @@ export default defineConfig({
       testMatch: /.*\.measure\.ts/,
       dependencies: ["setup"],
       use: { storageState: STORAGE_STATE },
+    },
+    /* Phone fixes v1: the phone suites run as a real phone does — touch, a mobile viewport, and Safari's
+       engine (WebKit) as well as Chromium. Desktop launch flags stay off these (WebKit rejects Chromium args). */
+    {
+      name: "iphone",
+      testMatch: PHONE_SUITES,
+      use: { ...devices["iPhone 13"], hasTouch: true, isMobile: true, launchOptions: {}, storageState: phoneSession("webkit") },
+    },
+    {
+      name: "pixel",
+      testMatch: PHONE_SUITES,
+      use: { ...devices["Pixel 5"], hasTouch: true, isMobile: true, launchOptions: {}, storageState: phoneSession("chromium") },
     },
   ],
 });

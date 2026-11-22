@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "31 text leaves read"
+ },
+ {
+  "where": "no aria-invalid",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "no red text",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "the start line",
+  "ok": true,
+  "detail": "Add their name and agency to start."
+ },
+ {
+  "where": "2–4 locked",
+  "ok": true,
+  "detail": "[\"want:true\",\"query:true\",\"reach:true\"]"
+ },
+ {
+  "where": "Who is open",
+  "ok": true,
+  "detail": "who"
+ }
+]

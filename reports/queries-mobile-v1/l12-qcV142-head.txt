@@ -1,0 +1,36 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/qcV142.measure.ts:356:1 › QC142-L8 landing untouched
+  1) [measure] › tests/e2e/qcV142.measure.ts:356:1 › QC142-L8 landing untouched ────────────────────
+
+    Error: expect(Buffer).toMatchSnapshot(expected) failed
+
+      Expected an image 501px by 609px, received 500px by 594px. 29900 pixels (ratio 0.10 of all image pixels) are different.
+
+      Snapshot: qc142-l8-landing-front.png
+
+
+      368 |   mkdirSync(`${DIR}/ledger`, { recursive: true });
+      369 |   writeFileSync(`${DIR}/ledger/${BASE ? "base-" : ""}${MUT === "L8" ? "mut-" : ""}L8-front.png`, shot);
+    > 370 |   expect(shot).toMatchSnapshot("qc142-l8-landing-front.png", { maxDiffPixelRatio: 0.001 });
+          |                ^
+      371 | });
+      372 |
+        at /Users/nickphysick/ScriptAlly-qm1/tests/e2e/qcV142.measure.ts:370:16
+
+    attachment #1: qc142-l8-landing-front (image/png) ──────────────────────────────────────────────
+    Expected: tests/e2e/qcV142.measure.ts-snapshots/qc142-l8-landing-front-measure-darwin.png
+    Received: test-results/qcV142.measure.ts-QC142-L8-landing-untouched-measure/qc142-l8-landing-front-actual.png
+    Diff:     test-results/qcV142.measure.ts-QC142-L8-landing-untouched-measure/qc142-l8-landing-front-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/qcV142.measure.ts-QC142-L8-landing-untouched-measure/error-context.md
+
+    Error Context: test-results/qcV142.measure.ts-QC142-L8-landing-untouched-measure/error-context.md
+
+
+  1 failed
+    [measure] › tests/e2e/qcV142.measure.ts:356:1 › QC142-L8 landing untouched ─────────────────────
+  1 passed (22.6s)

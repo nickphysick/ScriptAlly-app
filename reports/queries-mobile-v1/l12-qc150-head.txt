@@ -1,0 +1,101 @@
+
+Running 25 tests using 1 worker
+
+[1/25] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/25] [measure] › tests/e2e/qc150.measure.ts:122:5 › QC150 @ 1280 › L1 · dressing: the doodle sheet, the 40px title with its underline, one sentence, a header ≤200 at 1512, no banner
+[measure] › tests/e2e/qc150.measure.ts:122:5 › QC150 @ 1280 › L1 · dressing: the doodle sheet, the 40px title with its underline, one sentence, a header ≤200 at 1512, no banner
+[L1-1280] 7/7 green
+
+[3/25] [measure] › tests/e2e/qc150.measure.ts:148:5 › QC150 @ 1280 › L2 · cards: four, in order, counts from the data, heads inset 4–6, faces = queries (capped + N), no chips
+[measure] › tests/e2e/qc150.measure.ts:148:5 › QC150 @ 1280 › L2 · cards: four, in order, counts from the data, heads inset 4–6, faces = queries (capped + N), no chips
+[L2-1280] 16/16 green
+
+[4/25] [measure] › tests/e2e/qc150.measure.ts:169:5 › QC150 @ 1280 › L3 · card filter: With the agent narrows the list and Birds-eye, is navy, and clears on a second press
+[measure] › tests/e2e/qc150.measure.ts:169:5 › QC150 @ 1280 › L3 · card filter: With the agent narrows the list and Birds-eye, is navy, and clears on a second press
+[L3-1280] 7/7 green
+
+[5/25] [measure] › tests/e2e/qc150.measure.ts:198:5 › QC150 @ 1280 › L4 · widths: the list is min(S − 40, 1320) and centred; the title matches it; header and cards keep v149.2
+[measure] › tests/e2e/qc150.measure.ts:198:5 › QC150 @ 1280 › L4 · widths: the list is min(S − 40, 1320) and centred; the title matches it; header and cards keep v149.2
+[L4-1280] 6/6 green
+
+[6/25] [measure] › tests/e2e/qc150.measure.ts:221:5 › QC150 @ 1280 › L5 · title: the text and count line change with the view; the switch is centred under it; the bar has none
+[measure] › tests/e2e/qc150.measure.ts:221:5 › QC150 @ 1280 › L5 · title: the text and count line change with the view; the switch is centred under it; the bar has none
+[L5-1280] 7/7 green
+
+[7/25] [measure] › tests/e2e/qc150.measure.ts:248:5 › QC150 @ 1280 › L6 · one scale: TODAY's tag and the today line share an x; a bar's left is the axis x of its start, at each zoom
+[measure] › tests/e2e/qc150.measure.ts:248:5 › QC150 @ 1280 › L6 · one scale: TODAY's tag and the today line share an x; a bar's left is the axis x of its start, at each zoom
+[L6-1280] 12/12 green
+
+[8/25] [measure] › tests/e2e/qc150.measure.ts:283:5 › QC150 @ 1280 › L7 · no overlap: at each zoom, home and after dragging, no two visible boxes in a row meet, the axis is clean, nothing is clipped
+[measure] › tests/e2e/qc150.measure.ts:283:5 › QC150 @ 1280 › L7 · no overlap: at each zoom, home and after dragging, no two visible boxes in a row meet, the axis is clean, nothing is clipped
+[L7-1280] 28/28 green
+
+[9/25] [measure] › tests/e2e/qc150.measure.ts:335:5 › QC150 @ 1280 › L8 · smooth: a drag rebuilds nothing, moves every cell by one scrollLeft, carries on after a fast release, opens nothing
+[measure] › tests/e2e/qc150.measure.ts:335:5 › QC150 @ 1280 › L8 · smooth: a drag rebuilds nothing, moves every cell by one scrollLeft, carries on after a fast release, opens nothing
+[L8-1280] 23/23 green
+
+[10/25] [measure] › tests/e2e/qc150.measure.ts:380:5 › QC150 @ 1280 › L9 · past bars: the seeded three-stage query draws two past bars and the current, in date order, apart
+[measure] › tests/e2e/qc150.measure.ts:380:5 › QC150 @ 1280 › L9 · past bars: the seeded three-stage query draws two past bars and the current, in date order, apart
+[L9-1280] 6/6 green
+
+[11/25] [measure] › tests/e2e/qc150.measure.ts:407:5 › QC150 @ 1280 › L10 · pinning: after 800px of page scroll the navy bar's bottom is the date row's top, and both are on screen
+[measure] › tests/e2e/qc150.measure.ts:407:5 › QC150 @ 1280 › L10 · pinning: after 800px of page scroll the navy bar's bottom is the date row's top, and both are on screen
+[L10-1280] 3/3 green
+
+[12/25] [measure] › tests/e2e/qc150.measure.ts:428:5 › QC150 @ 1280 › L11 · group/sort: Birds-eye by Status shows pipeline bands with true counts; the list's grouping and the time scroll hold
+[measure] › tests/e2e/qc150.measure.ts:428:5 › QC150 @ 1280 › L11 · group/sort: Birds-eye by Status shows pipeline bands with true counts; the list's grouping and the time scroll hold
+[L11-1280] 8/8 green
+
+[13/25] [measure] › tests/e2e/qc150.measure.ts:469:5 › QC150 @ 1280 › L12 · open: a Birds-eye bar opens its query; N / M and › follow Birds-eye's order; the pill and drawer are gone
+[measure] › tests/e2e/qc150.measure.ts:469:5 › QC150 @ 1280 › L12 · open: a Birds-eye bar opens its query; N / M and › follow Birds-eye's order; the pill and drawer are gone
+[L12-1280] 7/7 green
+
+[14/25] [measure] › tests/e2e/qc150.measure.ts:122:5 › QC150 @ 1512 › L1 · dressing: the doodle sheet, the 40px title with its underline, one sentence, a header ≤200 at 1512, no banner
+[measure] › tests/e2e/qc150.measure.ts:122:5 › QC150 @ 1512 › L1 · dressing: the doodle sheet, the 40px title with its underline, one sentence, a header ≤200 at 1512, no banner
+[L1-1512] 8/8 green
+
+[15/25] [measure] › tests/e2e/qc150.measure.ts:148:5 › QC150 @ 1512 › L2 · cards: four, in order, counts from the data, heads inset 4–6, faces = queries (capped + N), no chips
+[measure] › tests/e2e/qc150.measure.ts:148:5 › QC150 @ 1512 › L2 · cards: four, in order, counts from the data, heads inset 4–6, faces = queries (capped + N), no chips
+[L2-1512] 16/16 green
+
+[16/25] [measure] › tests/e2e/qc150.measure.ts:169:5 › QC150 @ 1512 › L3 · card filter: With the agent narrows the list and Birds-eye, is navy, and clears on a second press
+[measure] › tests/e2e/qc150.measure.ts:169:5 › QC150 @ 1512 › L3 · card filter: With the agent narrows the list and Birds-eye, is navy, and clears on a second press
+[L3-1512] 7/7 green
+
+[17/25] [measure] › tests/e2e/qc150.measure.ts:198:5 › QC150 @ 1512 › L4 · widths: the list is min(S − 40, 1320) and centred; the title matches it; header and cards keep v149.2
+[measure] › tests/e2e/qc150.measure.ts:198:5 › QC150 @ 1512 › L4 · widths: the list is min(S − 40, 1320) and centred; the title matches it; header and cards keep v149.2
+[L4-1512] 6/6 green
+
+[18/25] [measure] › tests/e2e/qc150.measure.ts:221:5 › QC150 @ 1512 › L5 · title: the text and count line change with the view; the switch is centred under it; the bar has none
+[measure] › tests/e2e/qc150.measure.ts:221:5 › QC150 @ 1512 › L5 · title: the text and count line change with the view; the switch is centred under it; the bar has none
+[L5-1512] 7/7 green
+
+[19/25] [measure] › tests/e2e/qc150.measure.ts:248:5 › QC150 @ 1512 › L6 · one scale: TODAY's tag and the today line share an x; a bar's left is the axis x of its start, at each zoom
+[measure] › tests/e2e/qc150.measure.ts:248:5 › QC150 @ 1512 › L6 · one scale: TODAY's tag and the today line share an x; a bar's left is the axis x of its start, at each zoom
+[L6-1512] 12/12 green
+
+[20/25] [measure] › tests/e2e/qc150.measure.ts:283:5 › QC150 @ 1512 › L7 · no overlap: at each zoom, home and after dragging, no two visible boxes in a row meet, the axis is clean, nothing is clipped
+[measure] › tests/e2e/qc150.measure.ts:283:5 › QC150 @ 1512 › L7 · no overlap: at each zoom, home and after dragging, no two visible boxes in a row meet, the axis is clean, nothing is clipped
+[L7-1512] 28/28 green
+
+[21/25] [measure] › tests/e2e/qc150.measure.ts:335:5 › QC150 @ 1512 › L8 · smooth: a drag rebuilds nothing, moves every cell by one scrollLeft, carries on after a fast release, opens nothing
+[measure] › tests/e2e/qc150.measure.ts:335:5 › QC150 @ 1512 › L8 · smooth: a drag rebuilds nothing, moves every cell by one scrollLeft, carries on after a fast release, opens nothing
+[L8-1512] 23/23 green
+
+[22/25] [measure] › tests/e2e/qc150.measure.ts:380:5 › QC150 @ 1512 › L9 · past bars: the seeded three-stage query draws two past bars and the current, in date order, apart
+[measure] › tests/e2e/qc150.measure.ts:380:5 › QC150 @ 1512 › L9 · past bars: the seeded three-stage query draws two past bars and the current, in date order, apart
+[L9-1512] 6/6 green
+
+[23/25] [measure] › tests/e2e/qc150.measure.ts:407:5 › QC150 @ 1512 › L10 · pinning: after 800px of page scroll the navy bar's bottom is the date row's top, and both are on screen
+[measure] › tests/e2e/qc150.measure.ts:407:5 › QC150 @ 1512 › L10 · pinning: after 800px of page scroll the navy bar's bottom is the date row's top, and both are on screen
+[L10-1512] 3/3 green
+
+[24/25] [measure] › tests/e2e/qc150.measure.ts:428:5 › QC150 @ 1512 › L11 · group/sort: Birds-eye by Status shows pipeline bands with true counts; the list's grouping and the time scroll hold
+[measure] › tests/e2e/qc150.measure.ts:428:5 › QC150 @ 1512 › L11 · group/sort: Birds-eye by Status shows pipeline bands with true counts; the list's grouping and the time scroll hold
+[L11-1512] 8/8 green
+
+[25/25] [measure] › tests/e2e/qc150.measure.ts:469:5 › QC150 @ 1512 › L12 · open: a Birds-eye bar opens its query; N / M and › follow Birds-eye's order; the pill and drawer are gone
+[measure] › tests/e2e/qc150.measure.ts:469:5 › QC150 @ 1512 › L12 · open: a Birds-eye bar opens its query; N / M and › follow Birds-eye's order; the pill and drawer are gone
+[L12-1512] 7/7 green
+
+  25 passed (4.5m)

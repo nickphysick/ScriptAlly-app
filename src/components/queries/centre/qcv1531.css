@@ -1,0 +1,271 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v153.1 (design-refs/query-centre-v153-1.html, read from the rendered page at 1920) — the header with the
+ * stage ring card. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * Faces are READ, never named: --font-serif (Playfair), --sp-type (Special Elite), --sp-serif (Source Serif). Every
+ * face carries `!important`, and the headings two classes, because brand.tsx forces a face on h1/h2 and bare buttons.
+ * ⚠️ NO RED OR RUST TEXT anywhere: the ring's inks are the slip headers' own stage inks.
+ */
+@media (min-width: 768px) {
+  /* ── the header: three columns on the page's own ground ─────────────────────────────────────────────────── */
+  .qc1531-hd {
+    --ink: #1c130f; --mut: var(--sp-muted); --navy: #2a3a52; --cream: #f4eee5;
+    box-sizing: border-box; display: grid; grid-template-columns: 190px minmax(0, 1fr) minmax(400px, 560px);
+    align-items: center; gap: 36px; padding: 0 0 18px; color: var(--ink);
+  }
+  .qc1531-hd * { box-sizing: border-box; }
+  .qc1531-art img { display: block; width: 190px; height: auto; filter: drop-shadow(0 14px 14px rgba(28, 19, 15, 0.12)); }
+  .qc1531-main { min-width: 0; }
+  /* the title: Playfair 54/600. Mixed case at 1.05 is the ref's; nothing above it clips, so the descenders print */
+  :is(.qc151, .cl27) .qc1531-hd h1.qc1531-t {
+    margin: 0; font: 600 54px/1.05 var(--font-serif) !important; color: var(--ink) !important; letter-spacing: 0;
+    white-space: nowrap; overflow: visible; min-height: 1.05em;
+  }
+  .qc1531-for { display: flex; align-items: center; gap: 18px; max-width: 640px; margin: 8px 0 12px; }
+  .qc1531-for i { flex: 1 1 0; height: 1px; background: #cfc5b7; }
+  :is(.qc151, .cl27) .qc1531-for span { flex: none; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 21px/1.25 var(--sp-type) !important; color: var(--ink); }
+  :is(.qc151, .cl27) .qc1531-for em { margin-right: 6px; font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--sp-muted); }
+  /* with no "for" line (several manuscripts, none scoped) the buttons keep the same distance from the title */
+  .qc1531-t + .qc1531-acts { margin-top: 18px; }
+  .qc1531-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+  :is(.qc151, .cl27) .qc1531-b {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 46px; padding: 0 22px;
+    border-radius: 12px; font: 400 16.5px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  :is(.qc151, .cl27) .qc1531-b--n { background: var(--navy); color: #fff; }
+  :is(.qc151, .cl27) .qc1531-b--g { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #d9d0c3, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
+  :is(.qc151, .cl27) .qc1531-b--g:hover { box-shadow: inset 0 0 0 1px #b9ad9e, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
+  :is(.qc151, .cl27) .qc1531-b:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+  :is(.qc151, .cl27) .qc1531-b:disabled { opacity: 0.55; cursor: default; }
+  /* nothing in the row wraps mid-label; the row itself may wrap */
+  .qc1531-acts > * { white-space: nowrap; }
+  .qc1531-rc { min-width: 0; }
+
+  /* ── the stage ring card ────────────────────────────────────────────────────────────────────────────────── */
+  .qc1531-ring {
+    position: relative; background: #fff; border: 1px solid #e3d5c9; border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
+  }
+  .qc1531-rh { display: flex; align-items: baseline; gap: 12px; padding: 11px 14px; border-radius: 13px 13px 0 0; background: var(--navy); }
+  .qc151 .qc1531-rh h2 { margin: 0; font: 400 19px/1 var(--sp-type) !important; color: var(--cream) !important; letter-spacing: 0; }
+  .qc151 .qc1531-rh small { margin-left: auto; font: italic 400 13.5px/1 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.72); white-space: nowrap; }
+  .qc1531-rb { display: grid; grid-template-columns: 214px minmax(0, 1fr); align-items: center; gap: 20px; padding: 8px 18px 10px 10px; }
+  .qc1531-rsvg { position: relative; width: 214px; height: 214px; }
+  .qc1531-rsvg svg { display: block; overflow: visible; }
+  .qc1531-seg { cursor: pointer; transition: opacity 0.15s; }
+  .qc1531-segn { pointer-events: none; font: 400 13px var(--sp-type); transition: opacity 0.15s; }
+  .qc1531-rb.is-hv .qc1531-seg:not(.is-on), .qc1531-rb.is-hv .qc1531-segn:not(.is-on) { opacity: 0.3; }
+  /* the pile overflows onto the ring: it takes no pointer, so the segment under it is still the target */
+  .qc1531-pile { pointer-events: none; }
+  /* the tooltip follows the pointer, dark as the ref's */
+  .qc1531-tip {
+    position: absolute; z-index: 5; pointer-events: none; white-space: nowrap;
+    padding: 7px 10px; border-radius: 8px; background: var(--ink); color: var(--cream);
+    font: 400 13px/1.35 var(--sp-serif); box-shadow: 0 8px 18px -8px rgba(28, 19, 15, 0.45);
+  }
+  .qc1531-tip.is-flip { transform: translateX(-100%); }
+  .qc151 .qc1531-tip b { font: 400 13.5px/1.35 var(--sp-type) !important; color: var(--cream); }
+
+  .qc1531-lg { margin: 0; padding: 0; list-style: none; min-width: 0; }
+  .qc1531-lg li + li { border-top: 1px solid #f1ebe2; }
+  .qc151 .qc1531-lg button {
+    all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
+    display: grid; grid-template-columns: 16px minmax(0, 1fr) auto 40px; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 7px; font: 400 15px/1.2 var(--sp-serif) !important; color: var(--ink);
+  }
+  .qc151 .qc1531-lg button:disabled { cursor: default; }
+  .qc151 .qc1531-lg button.is-on, .qc151 .qc1531-lg button.is-pick { background: #f6f1ea; }
+  .qc151 .qc1531-lg button.is-pick .qc1531-lbl { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.55); text-underline-offset: 3px; }
+  .qc151 .qc1531-lg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+  .qc1531-sw { display: block; width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
+  .qc1531-sw.is-hatch { background: repeating-linear-gradient(45deg, #d8d1c7 0 2px, #f1eee9 2px 5px); }
+  .qc1531-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qc151 .qc1531-lg b { font: 400 17px/1 var(--sp-type) !important; text-align: right; }
+  .qc151 .qc1531-lg em { font: italic 400 13px/1 var(--sp-serif) !important; color: var(--sp-muted); text-align: right; }
+
+  @media (prefers-reduced-motion: reduce) { .qc1531-seg, .qc1531-segn { transition: none; } }
+}
+
+/* ══ phase 2 · the faint pattern and the rail's header ═══════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  /* the doodle tile now runs the whole page: clear to 84px, then the ground laid over it at .72 by 360px and held
+     there to the foot (the ref's gradient). This overrides v150's A1, which stopped the tile at 280px; the selector
+     carries `.ws-window` so it wins on specificity rather than on load order. */
+  .ws-window .qc-wpg.qc-wpg--v11 > .wpg-scroll {
+    background-color: #f2eee8;
+    background-image: linear-gradient(to bottom, rgba(242, 238, 232, 0) 84px, rgba(242, 238, 232, 0.72) 360px), url("/images/qc/doodle-tile.svg");
+    background-repeat: no-repeat, repeat;
+    background-size: 100% 100%, 340px 360px;
+    background-attachment: local, local;
+  }
+  /* the filter rail's header band: white, a 2px navy rule along its foot (it was sand) */
+  .qc153-rail .qc153-rbd { background: #fff; box-shadow: inset 0 -2px 0 #2a3a52; }
+}
+
+/* ══ phase 3 · the slip: compact header, their policy (the materials strip left in v153.3) ═══════════════════════════════════
+   ⚠️ THIS SHEET IS BUNDLED BEFORE qcv153.css (the header imports it first), so every override here is scoped under the
+   page root (`.qc151.qc153`, 0-2-0 and up) and wins on specificity, never on load order. */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-slip { container: qc1531slip / inline-size; }
+  /* the header: two lines, a 40px seal, a 34px current step */
+  .qc151.qc153 .qc153-top { grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; padding: 10px 14px; margin-bottom: 10px; }
+  .qc151.qc153 .qc153-seal { width: 40px; height: 40px; font: 400 14px/1 var(--sp-type) !important; }
+  .qc151.qc153 .qc153-nd--cur { width: 34px; height: 34px; }
+  .qc151.qc153 .qc153-nd--cur svg { width: 20px; height: 20px; }
+  /* v153.3 — the arrow badge: a 19px disc carrying a 13px glyph, centred, 5px over the node's top-right. The rule above
+     reached the badge's own svg too (a 20px glyph in a 19px disc, spilling past its edge); this one is scoped to it. */
+  .qc151.qc153 .qc153-nd--cur .qc153-arw { box-sizing: border-box; top: -5px; right: -5px; width: 19px; height: 19px; padding: 0; place-items: center; overflow: hidden; }
+  .qc151.qc153 .qc153-nd--cur .qc153-arw svg { width: 13px; height: 13px; overflow: hidden; }
+
+  /* the facts: four equal boxes, lined up under the name (14 + 40 + 14) */
+  .qc151.qc153 .qc153-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0 14px 14px 68px; }
+  .qc151.qc153 .qc1531-pol b { font: 400 15.5px/1.2 var(--sp-type) !important; }
+  /* too narrow for four boxes: two by two. Measured: "Replies to everyone" needs a 183px box (159 of type + 24 of
+     padding), and four of those with the gaps and the 68 + 14 inset need a 858px slip — about a 1318px viewport. */
+  @container qc1531slip (max-width: 857px) {
+    .qc151.qc153 .qc153-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+}
+
+
+/* ══ v153.2 · the open ring (design-refs/query-centre-v153-2.html) ════════════════════════════════════════════
+   No card, no navy bar, no artwork: the ring and its legend sit on the page's ground, as the armchair hawk does. */
+@media (min-width: 768px) {
+  .qc1531-ring { background: none; border: 0; border-radius: 0; box-shadow: none; }
+  .qc1531-rb { grid-template-columns: 214px minmax(0, 1fr); gap: 20px; padding: 0; }
+  /* the middle: the number still in play over "still in play" */
+  .qc1531-midn { font: 600 46px var(--font-serif); fill: var(--ink); pointer-events: none; }
+  .qc1531-midl { font: italic 400 12.5px var(--sp-serif); fill: #7a6f66; pointer-events: none; }
+  /* the legend's heading: the filter rail's header treatment, a 2px navy rule under it */
+  .qc1531-lgw { min-width: 0; }
+  .qc1531-lgh { display: flex; align-items: baseline; gap: 12px; padding: 0 4px 8px; margin-bottom: 6px; border-bottom: 2px solid var(--navy); }
+  .qc151 .qc1531-lgh h2 { margin: 0; font: 400 19px/1.2 var(--sp-type) !important; color: var(--ink) !important; letter-spacing: 0; }
+  .qc151 .qc1531-lgh small { margin-left: auto; font: italic 400 13px/1.2 var(--sp-serif) !important; color: var(--sp-muted); white-space: nowrap; }
+  /* the rows: tighter, finer hairlines, a soft white fill when hovered or linked */
+  .qc1531-lg li + li { border-top: 1px solid rgba(28, 19, 15, 0.08); }
+  .qc151 .qc1531-lg button { padding: 6px 4px; }
+  .qc151 .qc1531-lg button.is-on, .qc151 .qc1531-lg button.is-pick { background: rgba(255, 255, 255, 0.55); }
+}
+
+/* ══ v153.2 · a tighter gap above the list: the header's foot 4px, as the ref's (content to bar 30px, measured) ══ */
+@media (min-width: 768px) {
+  :is(.qc151, .cl27) .qc1531-hd { padding-bottom: 4px; }
+}
+
+/* ══ v153.2 · the slip's header back to two lines: the status word beside the track, not above it ═══════════════ */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-st { flex-direction: row; align-items: center; gap: 14px; }
+}
+
+/* ══ v153.3 · the paperclip tab (design-refs/query-centre-v153-3.html) ═══════════════════════════════════════════
+   Beside the name and agency, vertically centred on them (and so on the seal), 16px from the longer line. Glass over
+   the stage's deeper accent; the ink 82% over white at rest. Its pop-up opens below, left-aligned; upwards with under
+   200px below. ⚠️ The slip's inner frame clips (framedSlip.css), so on these slips it does not, and the tinted header
+   carries the frame's top corners itself; a slip with its pop-up open is raised above the next one. */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-slip > .sa-slip-in { overflow: visible; }
+  .qc151.qc153 .qc153-top { position: relative; border-radius: 13px 13px 0 0; }
+  .qc151.qc153 .qc153-slip.has-pop { z-index: 40; }
+  .qc151.qc153 .qc153-slip.has-pop .qc153-top { z-index: 3; }
+  .qc1533-wr { display: flex; align-items: center; min-width: 0; }
+  .qc1533-wr > .qc153-who { flex: 0 1 auto; min-width: 0; }
+  .qc1533-tw { position: relative; flex: none; display: inline-flex; margin-left: 16px; }
+  .qc151 .qc1533-clip {
+    all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px 0 10px;
+    border-radius: 10px; cursor: pointer; color: var(--acc-rest);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.18) 48%, rgba(255, 255, 255, 0) 52%), var(--acc);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(28, 19, 15, 0.08), 0 1px 2px rgba(28, 19, 15, 0.12), 0 4px 10px -6px rgba(28, 19, 15, 0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .qc1533-clip svg { display: block; flex: none; width: 18px; height: 18px; stroke-width: 1.5; transition: stroke-width 0.15s; }
+  .qc151 .qc1533-clip i { display: block; font: normal 400 16.5px/1 var(--sp-type) !important; color: inherit; transition: -webkit-text-stroke 0.15s; }
+  .qc151 .qc1533-clip:hover, .qc151 .qc1533-clip:focus, .qc151 .qc1533-clip.is-open {
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85), inset 0 -1px 0 rgba(28, 19, 15, 0.1), 0 2px 4px rgba(28, 19, 15, 0.16), 0 8px 16px -8px rgba(28, 19, 15, 0.4);
+  }
+  .qc151 .qc1533-clip:hover i, .qc151 .qc1533-clip:focus i, .qc151 .qc1533-clip.is-open i { -webkit-text-stroke: 0.25px currentColor; }
+  .qc1533-clip:hover svg, .qc1533-clip:focus svg, .qc1533-clip.is-open svg { stroke-width: 1.8; }
+  .qc151 .qc1533-clip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+  .qc151 .qc1533-pop {
+    position: absolute; left: 0; top: calc(100% + 8px); z-index: 50; display: block; box-sizing: border-box; min-width: 270px;
+    padding: 12px 14px; border-radius: 12px; background: #fff; color: #1c130f; text-align: left; white-space: normal; cursor: default;
+    box-shadow: 0 12px 30px -10px rgba(28, 19, 15, 0.35), 0 0 0 1px #e3d5c9;
+  }
+  .qc151 .qc1533-pop.is-up { top: auto; bottom: calc(100% + 8px); }
+  .qc151 .qc1533-pop > b { display: block; margin: 0 0 6px; font: 400 14px/1.2 var(--sp-type) !important; color: #1c130f; }
+  .qc1533-pg { display: block; padding: 8px 0; }
+  .qc1533-pg:first-of-type { padding-top: 2px; }
+  .qc1533-pg + .qc1533-pg { border-top: 1px solid #f1ebe2; }
+  .qc1533-pg:last-child { padding-bottom: 0; }
+  .qc151 .qc1533-pgh { display: block; margin: 0 0 6px; font: italic 400 12.5px/1.35 var(--sp-serif) !important; color: var(--sp-muted); }
+  .qc1533-mxr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .qc151 .qc1533-mc {
+    box-sizing: border-box; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px 0 5px; border-radius: 6px;
+    background: #fff; box-shadow: 0 1px 1.5px rgba(28, 19, 15, 0.12); font: 400 12px/12px var(--sp-serif) !important; color: #1c130f; white-space: nowrap;
+  }
+  .qc151 .qc1533-mc.is-ask { background: transparent; box-shadow: none; border: 1px dashed rgba(42, 58, 82, 0.6); color: #2a3a52; }
+  .qc1533-sh { flex: none; display: block; width: 8px; height: 10px; border-radius: 1px 2.5px 1px 1px; background: #fff; box-shadow: inset 0 0 0 1px #a99e91; }
+  .qc151 .qc1533-mpk { margin-left: 2px; font: italic 400 12px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
+  @media (prefers-reduced-motion: reduce) { .qc1533-clip, .qc1533-clip svg, .qc1533-clip i { transition: none; } }
+}
+
+/* ══ v153.3 · the filter rail as chips (design-refs/query-centre-v153-3.html, its `chips` rail) ══════════════════
+   One white card: no 7px rim and no inner frame line. The header as v153.1 built it, padded 14 16 12. Section headings
+   in the typewriter with a drawn chevron; Most used as pills; the four tiles in their stage colours; no proportion
+   bars. Filter logic, counts, zero-fade and Reset are unchanged. */
+@media (min-width: 768px) {
+  :is(.qc151, .cl27) .qc153-rail { box-sizing: border-box; padding: 0; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9, 0 1px 2px rgba(28, 19, 15, 0.06), 0 18px 36px -24px rgba(28, 19, 15, 0.3); }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rin { border-radius: 16px; overflow-x: hidden; background: #fff; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rbd { padding: 14px 16px 12px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rsec { border-top: 1px solid #f1ebe2; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rbd + .qc153-rsec { border-top: 0; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rh5 button { padding: 13px 16px 8px; font: 400 15px/1.2 var(--sp-type) !important; color: #1c130f; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rh5 i { display: grid; place-items: center; width: 14px; height: 14px; color: var(--sp-quiet); }
+  .qc153-rail .qc153-rh5 i svg { display: block; width: 12px; height: 12px; }
+
+  /* Most used: pills in a wrapping row */
+  :is(.qc151, .cl27) .qc153-rail .qc1533-pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 14px; }
+  :is(.qc151, .cl27) .qc1533-pill {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 11px 6px 12px; border-radius: 999px; background: #faf7f2; box-shadow: inset 0 0 0 1px #e9e0d4; color: #1c130f;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  :is(.qc151, .cl27) .qc1533-pill .qc153-tx { flex: none; font: 400 14px/1.25 var(--sp-serif) !important; color: inherit; }
+  :is(.qc151, .cl27) .qc1533-pill .qc153-n { font: 400 12.5px/1 var(--sp-type) !important; color: var(--sp-muted); }
+  :is(.qc151, .cl27) .qc1533-pill:hover:not(.is-on) { background: #fff; box-shadow: inset 0 0 0 1px #d6cabb; }
+  :is(.qc151, .cl27) .qc1533-pill.is-on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+  :is(.qc151, .cl27) .qc1533-pill.is-on .qc153-n { color: rgba(244, 238, 229, 0.75); }
+  :is(.qc151, .cl27) .qc1533-pill.is-zero { opacity: 0.45; cursor: default; pointer-events: none; }
+  :is(.qc151, .cl27) .qc1533-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+  /* Where it stands: the tiles in their stage colours, then the stage rows */
+  :is(.qc151, .cl27) .qc153-rail .qc1533-where { padding: 0 8px 10px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-courts { gap: 6px; padding: 0 6px 12px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court { border-radius: 12px; padding: 10px 11px 9px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="you"] { background: #ecd6d2; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="agent"] { background: #efe7da; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="quiet"] { background: #f3efe9; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="closed"] { background: repeating-linear-gradient(135deg, #f3f0eb 0 6px, #ebe6df 6px 8px); }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court.is-on { background: #2a3a52; color: #f4eee5; }
+}
+
+/* ══ v153.3 · the group headings, ruled (design-refs/query-centre-v153-3.html, its `ruled` headings) ═══════════════
+   In a row: the name in the typewriter 21, the count in a small glass chip in the group's colour, a hairline filling
+   the width, the description in italic at the right; all centred. The swatch square is gone. The folds are untouched. */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-sec { display: flex; align-items: center; gap: 10px; }
+  .qc151.qc153 .qc153-sec b { font: 400 21px/1.3 var(--sp-type) !important; color: #1c130f; }
+  .qc151.qc153 .qc153-sec small {
+    box-sizing: border-box; display: inline-grid; place-items: center; min-width: 26px; height: 24px; padding: 0 7px; border-radius: 7px;
+    font: 400 13.5px/1 var(--sp-type) !important; color: #1c130f;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1) 50%, transparent 52%), var(--sw, #efe7da);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(28, 19, 15, 0.12);
+  }
+  .qc151.qc153 .qc1533-rule { display: block; flex: 1 1 0; min-width: 12px; height: 1px; margin: 0 4px; background: rgba(28, 19, 15, 0.14); }
+  .qc151.qc153 .qc153-sec em, .qc151.qc153 .qc153-sec .qc153-lnk--r { margin-left: 0; text-align: right; }
+}

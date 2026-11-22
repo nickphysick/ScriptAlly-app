@@ -1,0 +1,393 @@
+✓ 4070 modules transformed.
+✓ built in 12.46s
+[emu-guard] 31.8 GB free. Debug logs: /dev/null.
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (2.2s)
+QC160-1 ✓ population: the save landed (toast) — 
+QC160-1 ✓ save: exactly one pop, at most one press, and no other scale animation on the frame — [{"uid":3,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":4,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-1 ✓ save: they animate scale only, never transform — [["scale"],["scale"]]
+QC160-1 ✓ save: the pop is 520ms — 520
+QC160-1 ✓ save: the pop peaks at 1.035 — 1.035
+QC160-1 ✓ save: population — frames with the bump running — 31
+QC160-1 ✓ save: the frame's rotate is unchanged during it (frames where the lean's own return is not running) — 31 frames: ["1.6deg"]
+QC160-1 ✓ save: the frame's translate is unchanged during it — ["none"]
+QC160-1 ✓ save: transform is never set on the frame — ["none"]
+QC160-2 ✓ population: Undo was pressed — 82
+QC160-2 ✓ undo: exactly one pop, at most one press, and no other scale animation on the frame — [{"uid":5,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":6,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-2 ✓ undo: they animate scale only, never transform — [["scale"],["scale"]]
+QC160-2 ✓ undo: the pop is 520ms — 520
+QC160-2 ✓ undo: the pop peaks at 1.035 — 1.035
+QC160-2 ✓ undo: population — frames with the bump running — 31
+QC160-2 ✓ undo: the frame's rotate is unchanged during it (frames where the lean's own return is not running) — 31 frames: ["1.6deg"]
+QC160-2 ✓ undo: the frame's translate is unchanged during it — ["none"]
+QC160-2 ✓ undo: transform is never set on the frame — ["none"]
+  ✓   2 [measure] › tests/e2e/qc160.measure.ts:240:17 › QC160-1/2 · the bump on save and on undo (12.2s)
+QC160-3 ✓ population: opening the card was sampled — 92
+QC160-3 ✓ opening the card: no scale animation on the frame — []
+QC160-3 ✓ population: changing tab was sampled — 103
+QC160-3 ✓ changing tab: no scale animation on the frame — []
+QC160-3 ✓ population: adding a note was sampled — 382
+QC160-3 ✓ adding a note: no scale animation on the frame — []
+QC160-3 ✓ population: stepping to the next query was sampled — 110
+QC160-3 ✓ stepping to the next query: no scale animation on the frame — []
+QC160-3 ✓ population: opening the composer was sampled — 112
+QC160-3 ✓ opening the composer: no scale animation on the frame — []
+QC160-3 ✓ population: the note was added — 
+  ✓   3 [measure] › tests/e2e/qc160.measure.ts:258:17 › QC160-3 · no bump otherwise (17.1s)
+QC160-4 ✓ population: the save landed and Undo was pressed — 
+QC160-4 ✓ at most one running scale animation on the frame in any frame — 1
+QC160-4 ✓ population: two pops ran (the save's and the undo's) — ["qc1611-press","qc160-bump","qc1611-press","qc160-bump"]
+QC160-4 ✓ the frame's box at rest equals its box before the save — 932,100,540,700,none,1.6deg → 932,100,540,700,none,1.6deg
+  ✓   4 [measure] › tests/e2e/qc160.measure.ts:291:17 › QC160-4 · a save then Undo 100ms later: no stacking, the frame's box at rest unchanged (11.5s)
+QC160-5 ✓ population: a draft was showing, and the save landed — {"ok":true,"tagged":true}
+QC160-5 ✓ population: the landing frame was found — 19
+QC160-5 ✓ population: the held motion was released — 38
+QC160-5 ✓ the same bubble element stays in the DOM through the save — []
+QC160-5 ✓ it is the thread's newest step after the landing, no longer a draft — {"in":true,"draft":false,"isLast":true,"cls":"qc152-m them"}
+QC160-5 ✓ its background-size animates (the fill runs on the bubble) — 44
+QC160-5 ✓ the fill starts near 0% and reaches 100% — ["0% 100%","99.999% 100%"]
+QC160-5 ✓ the fill's run is 420ms (none after 500ms) — 
+QC160-5 ✓ after 500ms its background is the stage's Band — rgb(228, 235, 242) vs rgb(228, 235, 242) (#e4ebf2)
+QC160-5 ✓ after 500ms it has no dashed outline — none rgb(28, 19, 15) / solid
+QC160-5 ✓ it eased in from scale 1.015 — ["1.015","1.015","1.015","1.015"]
+QC160-5 ✓ no new element popped in (no .new on it) — 
+QC160-6 ✓ population: the save changes the stage (the strip's colour) — rgb(239, 230, 214) → rgb(228, 235, 242)
+QC160-6 ✓ population: both ends are single colours — none / none
+QC160-6 ✓ at 200ms the strip's background-color is strictly between the old and new — rgb(239, 230, 214) | rgb(230, 234, 236) @200ms | rgb(228, 235, 242)
+QC160-6 ✓ by 500ms it equals the new colour — rgb(228, 235, 242)
+QC160-6 ✓ the label's colour eases too (between at 200ms, where it changes) — rgb(248, 244, 237) | rgb(244, 246, 246) | rgb(243, 246, 249)
+QC160-6 ✓ the footer's new contents fade in (opacity strictly between 0 and 1 during the run) — [0,0,0,0.0254683,0.0854064,0.177182,0.290255,0.408511,0.516998,0.612133]
+QC160-6 ✓ the footer is fully drawn by 500ms — 1
+  ✓   5 [measure] › tests/e2e/qc160.measure.ts:332:17 › QC160-5/6 · the draft settles in place; the strip and the label ease (12.2s)
+QC160-9 ✓ population: the save landed — 
+QC160-9 ✓ on Undo: some frame shows the leaving toast with opacity strictly between 0 and 1 — [0.0498379,0.152833,0.295126,0.44493,0.575532,0.682466,0.767243,0.833759,0.885194,0.924866,0.954355,0.975612]
+QC160-9 ✓ on Undo: it is invisible by 400ms, and the live toast gone — ghost from 1082ms; []
+QC160-9 ✓ on Undo: the leaving copy is removed by 1s — 
+QC160-9 ✓ population: the second save landed — 
+QC160-9 ✓ timed out: some frame shows it leaving, opacity strictly between 0 and 1 — [1,0.989982,0.962848,0.921417,0.86805,0.804401,0.732175,0.651446,0.5639,0.469019,0.367676,0.260051]
+QC160-9 ✓ timed out: the live toast is gone — undefined
+  ✓   6 [measure] › tests/e2e/qc160.measure.ts:380:17 › QC160-9 · the toast leaves over 220ms (on Undo, and when it times out) (28.6s)
+QC160-7 ✓ population: the save landed — 
+QC160-7 ✓ population: the newest bubble is the step just saved — {"n":3,"title":"You sent Mira your partial","h":61}
+QC160-7 ✓ population: the undone bubble began to leave — 19
+QC160-7 ✓ at 150ms it is still in the DOM, opacity below 1 — {"t":1148.3999999761581,"in":true,"leaving":true,"op":0.210726,"h":61,"above":380,"pe":"none","waits":2}
+QC160-7 ✓ at 350ms its height is under half its original — 4 of 61
+QC160-7 ✓ by 500ms it is gone — {"t":1498.3000000715256,"in":false,"leaving":true,"op":null,"h":null,"above":380,"pe":null,"waits":0}
+QC160-7 ✓ it takes no clicks while leaving — 47
+QC160-7 ✓ the bubble above never moves more than 2px between two frames — max step 0px over 104 frames
+QC160-7 ✓ its wait line folds with it (the bubble and its line leaving, then gone) — [0,2]
+QC160-8 ✓ the stored query is restored, byte for byte — 
+QC160-8 ✓ population: the restore's read and its commit were seen — [{"t":73,"kind":"read"},{"t":111,"kind":"read"},{"t":135,"kind":"read"},{"t":146,"kind":"read"},{"t":529,"kind":"commit"}]
+QC160-8 ✓ population: the press was timed by the page — 1795177027815
+QC160-8 ✓ the restore starts at the press (its read goes out within 100ms) — {"t":73,"kind":"read"}
+QC160-8 ✓ the undo's commit is not held for a motion: it goes out before the fold has run (420ms) — {"commit":{"t":529,"kind":"commit"},"foldFromPress":823}
+  ✓   7 [measure] › tests/e2e/qc160.measure.ts:444:17 › QC160-7/8 · undo folds the step away; the undo is not held for the motion (14.5s)
+QC160-14 ✓ population: the grid has solid, offer and gone-quiet cards — 
+QC160-14 ✓ population: the grid card's band changed colour — rgb(239, 230, 214) → rgb(228, 235, 242)
+QC160-14 ✓ the band is part-way between the old and new colour 150–300ms in (the card stayed mounted) — rgb(239, 230, 214) | rgb(233, 233, 230) | rgb(228, 235, 242) · mounted once: true
+QC160-14 ✓ the band's ease ran on the grid card (Web Animations, 500ms) — 
+QC160-14 ✓ it has the new colour by 560ms — rgb(228, 235, 242)
+  ✓   8 [measure] › tests/e2e/qc160.measure.ts:504:18 › QC160-14 · the grid card's band eases to a new stage (13.3s)
+QC160-10 ✓ population: the page reports reduced motion — 
+QC160-10 ✓ population: the save landed — 
+QC160-10 ✓ the save started no animation and no transition anywhere in the card — []
+QC160-10 ✓ after the save: the strip, label and footer moved on — {"w0":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]},"w1":{"band":"WITH THE AGENT","pill":"Partial sent","foot":"Waiting on Mira Reply expected by 12 Feb 2027 Record a response","steps":["You sent Mira your query","Mira asked for a partial","You sent Mira your partial"]}}
+QC160-10 ✓ after the save: one more step, the one saved — ["You sent Mira your query","Mira asked for a partial","You sent Mira your partial"]
+QC160-10 ✓ the undo started no animation and no transition anywhere in the card — []
+QC160-10 ✓ after the undo: exactly as before the save — {"w0":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]},"w2":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]}}
+QC160-10 ✓ no leaving copy of the toast or of a step is left — 
+  ✓   9 [measure] › tests/e2e/qc160.measure.ts:577:18 › QC160-10 · reduced motion: a save and an undo start no animation and no transition; every end state is right (15.4s)
+QC160-11 ✓ mark the partial sent: the save presses in and pops (at most one press; one pop, 520ms, peak 1.035) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ mark the partial sent: its undo presses in and pops — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ log a nudge: the save presses in and pops (at most one press; one pop, 520ms, peak 1.035) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ log a nudge: its undo presses in and pops — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ record a response (a request): the save presses in and pops (at most one press; one pop, 520ms, peak 1.035) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ record a response (a request): its undo presses in and pops — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ record a response (a pass, which closes it): the save presses in and pops (at most one press; one pop, 520ms, peak 1.035) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ record a response (a pass, which closes it): its undo presses in and pops — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ close the query: the save presses in and pops (at most one press; one pop, 520ms, peak 1.035) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ close the query: its undo presses in and pops — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-11 ✓ reopen a closed query: its composer saves in one press (not run: no save) — 
+QC160-11 ✓ answer an offer: its composer saves in one press (not run: no save) — 
+QC160-11 ✓ it ran at least four different actions — ["mark the partial sent","log a nudge","record a response (a request)","record a response (a pass, which closes it)","close the query"]
+  ✓  10 [measure] › tests/e2e/qc160.measure.ts:605:18 › QC160-11 · every save and undo from Step 0.3 bumps, on at least four actions (2.1m)
+QC160-12 ✓ materials: population — boxes read — 73
+QC160-12 ✓ materials: population — the save landed and was undone — 
+QC160-12 ✓ materials: the same elements — 73 → 73
+QC160-12 ✓ materials: every box equals its baseline within 1px — []
+QC160-12 ✓ materials: no wording changed — 
+QC160-12 ✓ agent: population — boxes read — 58
+QC160-12 ✓ agent: population — the save landed and was undone — 
+QC160-12 ✓ agent: the same elements — 58 → 58
+QC160-12 ✓ agent: every box equals its baseline within 1px — []
+QC160-12 ✓ agent: no wording changed — 
+  ✓  11 [measure] › tests/e2e/qc160.measure.ts:647:18 › QC160-12 · nothing else moved: at rest after a save and its undo, every box and every word as before (58.0s)
+QC160-13 ✓ population: a To-do task's query card (seed-pkgq-3) saved from its composer, a draft showing — seed-pkgq-3
+QC160-13 ✓ the route is the To-do desk — http://127.0.0.1:4321/todo
+QC160-13 ✓ the save presses the card's frame in and pops it (at most one press; one pop, 520ms, peak 1.035) — [{"uid":1,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":2,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-13 ✓ the save drew no new step on this desk (as on the base): nothing to settle — 3 → 3 · {"in":false,"draft":true,"isLast":false,"cls":"qc152-m me qc1522-draft"}
+QC160-13 ✓ its undo presses in and pops too — [{"uid":3,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"play":"running"},{"uid":4,"id":"qc160-bump","props":["scale"],"dur":520,"peak":1.035,"play":"running"}]
+QC160-13 ✓ a To-do task whose card saves from a composer with a draft was found — 
+  ✓  12 [measure] › tests/e2e/qc160.measure.ts:676:18 › QC160-13 · the To-do desk: a save in the card it opens bumps and settles as in the Query Centre (18.5s)
+  ✓  13 [measure] › tests/e2e/qc160.measure.ts:732:36 › QC160-F · frames of one save and one undo (20.4s)
+QC161-1 ✓ seed-cal-bang-q: population — its grid card — AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 93 days ago Next Re
+QC161-1 ✓ seed-cal-bang-q: the grid card says no "Nudged"/"nudged" — AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 93 days ago Next Response overdue Send nudge now → Nudge
+QC161-1 ✓ seed-cal-bang-q: the footer says no "Nudged" and no "You nudged Alasdair" — No reply from Alasdair yet Reply expected by 9 Dec Alasdair replied Close it Nudge
+QC161-1 ✓ seed-cal-bang-q: the thread has no nudge step — ["You sent Alasdair your query"]
+QC161-2 ✓ seed-cal-bang-q: it is nudge due or gone quiet, never waiting (state "nudge") — nudge · No reply from Alasdair yet Reply expected by 9 Dec Alasdair replied Close it Nudge
+QC161-2 ✓ seed-cal-bang-q: nudge due leads with Nudge — No reply from Alasdair yet Reply expected by 9 Dec Alasdair replied Close it Nudge
+QC161-1 ✓ seed-cal-soon-q: population — its grid card — HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 73 days ago Next Respo
+QC161-1 ✓ seed-cal-soon-q: the grid card says no "Nudged"/"nudged" — HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 73 days ago Next Response overdue Send nudge now → Nudge
+QC161-1 ✓ seed-cal-soon-q: the footer says no "Nudged" and no "You nudged Hester" — No reply from Hester yet Reply expected by 1 Dec Hester replied Close it Nudge
+QC161-1 ✓ seed-cal-soon-q: the thread has no nudge step — ["You sent Hester your query"]
+QC161-2 ✓ seed-cal-soon-q: it is nudge due or gone quiet, never waiting (state "nudge") — nudge · No reply from Hester yet Reply expected by 1 Dec Hester replied Close it Nudge
+QC161-2 ✓ seed-cal-soon-q: nudge due leads with Nudge — No reply from Hester yet Reply expected by 1 Dec Hester replied Close it Nudge
+QC161-1 ✓ thin-q-remind: population — its grid card — IF Imogen Farr Farr & Boyd Queried Queried Sent 21 Aug 91 days ago Gone quiet Nu
+QC161-1 ✓ thin-q-remind: the grid card says no "Nudged"/"nudged" — IF Imogen Farr Farr & Boyd Queried Queried Sent 21 Aug 91 days ago Gone quiet Nudge or close since 16 Oct → Nudge or close z z z 1
+QC161-1 ✓ thin-q-remind: the footer says no "Nudged" and no "You nudged Imogen" — No reply from Imogen Reply was due 16 Oct · not nudged yet Imogen replied Close it Nudge
+QC161-1 ✓ thin-q-remind: the thread has no nudge step — ["You sent Imogen your query"]
+QC161-2 ✓ thin-q-remind: it is nudge due or gone quiet, never waiting (state "quiet") — quiet · No reply from Imogen Reply was due 16 Oct · not nudged yet Imogen replied Close it Nudge
+QC161-3 ✓ thin-q-remind: gone quiet with no logged nudge — Nudge leads, Close it second (unless 8 weeks past the reply date) — Nudge · No reply from Imogen Reply was due 16 Oct · not nudged yet Imogen replied Close it Nudge
+QC161-3 ✓ thin-q-remind: "quiet since"/"Reply was due" counted from the reply date, never the reminder — No reply from Imogen Reply was due 16 Oct · not nudged yet Imogen replied Close it Nudge
+QC161-3 ✓ rj-nudge: a logged nudge — the footer says Nudged and Close it leads — Close it · No reply from Tamsin Nudged 21 Sep · quiet since 19 Oct Tamsin replied Nudge again Close it
+  ✓  14 [measure] › tests/e2e/qc161.measure.ts:158:17 › QC161-1/2/3 · a passed reminder is not a nudge: never 'Nudged', nudge due, and Nudge leads (11.4s)
+QC161-4 ✓ population: queries waiting on the agent checked — 70
+QC161-4 ✓ population: at least one nudged query and one not — 3 nudged · 67 not
+QC161-4 ✓ the footer and the thread agree on every one — []
+  ✓  15 [measure] › tests/e2e/qc161.measure.ts:186:17 › QC161-4 · for every seed query waiting on the agent, the footer says 'Nudged {date}' iff the thread has a nudge on that date (3.6m)
+QC161-5 ✓ population: q152-nudge is nudge due — No reply from Priya yet Reply was due 13 Nov · 7 days ago Priya replied Close it Nudge
+QC161-5 ✓ population: the nudge was logged — 
+QC161-5 ✓ the footer says "Nudged today" — Waiting on Priya Nudged today · goes quiet on 18 Dec Record a response
+QC161-5 ✓ the thread gained a nudge step — ["You sent Priya your query","You nudged Priya"]
+QC161-5 ✓ the reply date moved to the nudge plus the quiet window (goes quiet on 18 Dec) — Waiting on Priya Nudged today · goes quiet on 18 Dec Record a response
+  ✓  16 [measure] › tests/e2e/qc161.measure.ts:212:17 › QC161-5 · a real nudge still counts: Nudged today, the step, and the reply date moved on (12.6s)
+QC161-6 ✓ population: the bump ran on save — {"frames":31,"scales":30,"longs":[],"span":500,"start":9642.9}
+QC161-6 ✓ at least 24 frames painted while the bump ran — 31 frames over 500ms
+QC161-6 ✓ the frame's scale took at least 10 distinct values above 1 — 30
+QC161-6 ✓ no long task over 50ms overlaps it — []
+QC161-6 ✓ the draft's settle ran with it (the fill painted on 10+ frames) — 68
+QC161-7 ✓ population: the bump ran on undo — {"frames":31,"scales":30,"longs":[],"span":500,"start":14476.1}
+QC161-7 ✓ at least 24 frames painted while it ran — 31 frames over 500ms
+QC161-7 ✓ the frame's scale took at least 10 distinct values above 1 — 30
+QC161-7 ✓ no long task over 50ms overlaps it — []
+QC161-7 ✓ the undone step's height took at least 6 distinct values while folding — [40,39,35,29,22,15,10,7,4,3,1,0]
+  ✓  17 [measure] › tests/e2e/qc161.measure.ts:246:17 › QC161-6/7 · CPU 4×: the bump on save and on undo is seen — 24+ frames, 10+ scales, no long task under it; the fold too (18.2s)
+QC161-8 ✓ population: the render counter is live and counted the grid — 110
+QC161-8 ✓ population: 116 other grid cards — 116
+QC161-8 ✓ not one of them rendered on the save — []
+QC161-8 ✓ the saved query's own card did render (the counter counts) — 2 → 3
+  ✓  18 [measure] › tests/e2e/qc161.measure.ts:284:17 › QC161-8 · on a save, a grid card for a different query renders 0 times (13.4s)
+QC161-9 ✓ q152-agent: population — the reply drawer is open — 
+QC161-9 ✓ q152-agent: no chip row — 
+QC161-9 ✓ q152-agent: the line under the title — 
+QC161-9 ✓ q152-agent: one tile per answer, in the order given — ["req","offer","rr","passed","more"]
+QC161-9 ✓ q152-agent · req: the label and the second line (Rufus) — Asked for the partial / You send the pages next
+QC161-9 ✓ q152-agent · req: the disc is its stage's Band (partial) — rgb(228, 235, 242) none
+QC161-9 ✓ q152-agent · offer: the label and the second line (Rufus) — Made an offer / Record it and when Rufus needs an answer
+QC161-9 ✓ q152-agent · offer: the disc is its stage's Band (offer) — rgb(239, 205, 201) linear-gradient(112deg, rgba(2
+QC161-9 ✓ q152-agent · rr: the label and the second line (Rufus) — Revise & resubmit / Rufus wants changes, then another look
+QC161-9 ✓ q152-agent · rr: the disc is its stage's Band (full) — rgb(183, 201, 222) none
+QC161-9 ✓ q152-agent · passed: the label and the second line (Rufus) — Passed / Closes this query
+QC161-9 ✓ q152-agent · passed: the disc is its stage's Band (closed) — rgb(236, 234, 230) none
+QC161-9 ✓ q152-agent · more: the label and the second line (Rufus) — Something else / A question, a call, more pages
+QC161-9 ✓ q152-agent · more: the disc is its stage's Band (queried) — rgb(239, 230, 214) none
+QC161-9 ✓ q152-agent: Something else spans both columns, 46px high — {"v":"more","label":"Something else","line":"A question, a call, more pages","bg":"rgb(239, 230, 214)","img":"none","wide":true,"h":46}
+QC161-9 ✓ q152-long: population — the reply drawer is open — 
+QC161-9 ✓ q152-long: no chip row — 
+QC161-9 ✓ q152-long: the line under the title — 
+QC161-9 ✓ q152-long: one tile per answer, in the order given — ["offer","rr","passed","more"]
+QC161-9 ✓ q152-long · offer: the label and the second line (Jonathan) — Made an offer / Record it and when Jonathan needs an answer
+QC161-9 ✓ q152-long · offer: the disc is its stage's Band (offer) — rgb(239, 205, 201) linear-gradient(112deg, rgba(2
+QC161-9 ✓ q152-long · rr: the label and the second line (Jonathan) — Revise & resubmit / Jonathan wants changes, then another look
+QC161-9 ✓ q152-long · rr: the disc is its stage's Band (full) — rgb(183, 201, 222) none
+QC161-9 ✓ q152-long · passed: the label and the second line (Jonathan) — Passed / Closes this query
+QC161-9 ✓ q152-long · passed: the disc is its stage's Band (closed) — rgb(236, 234, 230) none
+QC161-9 ✓ q152-long · more: the label and the second line (Jonathan) — Something else / A question, a call, more pages
+QC161-9 ✓ q152-long · more: the disc is its stage's Band (full) — rgb(183, 201, 222) none
+QC161-9 ✓ q152-long: Something else spans both columns, 46px high — {"v":"more","label":"Something else","line":"A question, a call, more pages","bg":"rgb(183, 201, 222)","img":"none","wide":true,"h":46}
+QC161-10 ✓ req: the tiles are gone — 
+QC161-10 ✓ req: one row shows the pick, with Change — Asked for the partial You send the pages next Change
+QC161-10 ✓ req: the built questions follow — 
+QC161-10 ✓ req: the primary's label and state are the old chips' (Add Rufus’s reply, enabled) — {"label":"Add Rufus’s reply","disabled":false}
+QC161-10 ✓ picking moves focus to the first question — question
+QC161-10 ✓ Change brings the tiles back — 
+QC161-10 ✓ and focuses the tile that was picked — 
+QC161-10 ✓ offer: the tiles are gone — 
+QC161-10 ✓ offer: one row shows the pick, with Change — Made an offer Record it and when Rufus needs an answer Change
+QC161-10 ✓ offer: the built questions follow — 
+QC161-10 ✓ offer: the primary's label and state are the old chips' (Add the offer, enabled) — {"label":"Add the offer","disabled":false}
+QC161-10 ✓ rr: the tiles are gone — 
+QC161-10 ✓ rr: one row shows the pick, with Change — Revise & resubmit Rufus wants changes, then another look Change
+QC161-10 ✓ rr: the built questions follow — 
+QC161-10 ✓ rr: the primary's label and state are the old chips' (Add Rufus’s reply, enabled) — {"label":"Add Rufus’s reply","disabled":false}
+QC161-10 ✓ passed: the tiles are gone — 
+QC161-10 ✓ passed: one row shows the pick, with Change — Passed Closes this query Change
+QC161-10 ✓ passed: the built questions follow — 
+QC161-10 ✓ passed: the primary's label and state are the old chips' (Close as passed, enabled) — {"label":"Close as passed","disabled":false}
+QC161-10 ✓ more: the tiles are gone — 
+QC161-10 ✓ more: one row shows the pick, with Change — Something else A question, a call, more pages Change
+QC161-10 ✓ more: the built questions follow — 
+QC161-10 ✓ more: the primary's label and state are the old chips' (Add Rufus’s reply, enabled) — {"label":"Add Rufus’s reply","disabled":false}
+  ✓  19 [measure] › tests/e2e/qc161.measure.ts:366:17 › QC161-9/10 · tiles in the order given, each disc its stage's Band; picked: one row with Change, the questions, the same primary (24.4s)
+QC161-11 ✓ population: the old chip row's plan for req — 
+QC161-11 ✗ req: the stored query, its log and its feed are the old chip row's — …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-13\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-20\",\"manuscriptId\":\"seed-ms-1\", ≠ …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-12\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-19\",\"manuscriptId\":\"seed-ms-1\",
+QC161-11 ✓ population: the old chip row's plan for offer — 
+QC161-11 ✗ offer: the stored query, its log and its feed are the old chip row's — …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-13\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-20\",\"manuscriptId\":\"seed-ms-1\", ≠ …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-12\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-19\",\"manuscriptId\":\"seed-ms-1\",
+QC161-11 ✓ population: the old chip row's plan for rr — 
+QC161-11 ✗ rr: the stored query, its log and its feed are the old chip row's — …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-13\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-20\",\"manuscriptId\":\"seed-ms-1\", ≠ …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-12\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-19\",\"manuscriptId\":\"seed-ms-1\",
+QC161-11 ✓ population: the old chip row's plan for passed — 
+QC161-11 ✗ passed: the stored query, its log and its feed are the old chip row's — …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-13\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-20\",\"manuscriptId\":\"seed-ms-1\", ≠ …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-12\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-19\",\"manuscriptId\":\"seed-ms-1\",
+QC161-11 ✓ population: the old chip row's plan for more — 
+QC161-11 ✗ more: the stored query, its log and its feed are the old chip row's — …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-13\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-20\",\"manuscriptId\":\"seed-ms-1\", ≠ …{"q":"{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-12\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-19\",\"manuscriptId\":\"seed-ms-1\",
+  ✘  20 [measure] › tests/e2e/qc161.measure.ts:419:18 › QC161-11 · for each answer the save commits what the old chip row committed with the same inputs (2.0m)
+QC161-12 ✓ send: population — the drawer opened — 
+QC161-12 ✓ send: paper rgb(251, 249, 245), and its button row — rgb(251, 249, 245) / rgb(251, 249, 245)
+QC161-12 ✓ send: the top shadow and the hairline — rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)
+QC161-12 ✓ send: its box equals the baseline within 1px — [0,442,524,242] → [0,442,524,242]
+QC161-12 ✓ nudge: population — the drawer opened — 
+QC161-12 ✓ nudge: paper rgb(251, 249, 245), and its button row — rgb(251, 249, 245) / rgb(251, 249, 245)
+QC161-12 ✓ nudge: the top shadow and the hairline — rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)
+QC161-12 ✓ nudge: its box equals the baseline within 1px — [0,384,524,300] → [0,384,524,300]
+QC161-12 ✓ reply: population — the drawer opened — 
+QC161-12 ✓ reply: paper rgb(251, 249, 245), and its button row — rgb(251, 249, 245) / rgb(251, 249, 245)
+QC161-12 ✓ reply: the top shadow and the hairline — rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)
+QC161-12 ✓ reply: its box grows with the tiles, under the drawer's cap (66% of the card) — [0,474,524,210] → [0,319,524,365]
+QC161-12 ✓ close: population — the drawer opened — 
+QC161-12 ✓ close: paper rgb(251, 249, 245), and its button row — rgb(251, 249, 245) / rgb(251, 249, 245)
+QC161-12 ✓ close: the top shadow and the hairline — rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)
+QC161-12 ✓ close: its box equals the baseline within 1px — [0,437,524,247] → [0,437,524,247]
+QC161-12 ✓ reopen: population — the drawer opened — 
+QC161-12 ✓ reopen: paper rgb(251, 249, 245), and its button row — rgb(251, 249, 245) / rgb(251, 249, 245)
+QC161-12 ✓ reopen: the top shadow and the hairline — rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)
+QC161-12 ✓ reopen: its box equals the baseline within 1px — [0,382,524,302] → [0,382,524,302]
+QC161-12 ✓ offer: population — the drawer opened — 
+QC161-12 ✓ offer: paper rgb(251, 249, 245), and its button row — rgb(251, 249, 245) / rgb(251, 249, 245)
+QC161-12 ✓ offer: the top shadow and the hairline — rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)
+QC161-12 ✓ offer: its box equals the baseline within 1px — [0,214,524,470] → [0,214,524,470]
+  ✓  21 [measure] › tests/e2e/qc161.measure.ts:451:18 › QC161-12 · every composer journey's drawer is paper with the top shadow; its box is the baseline's (23.3s)
+QC161-13 ✓ population: the tiles are drawn — 
+QC161-13 ✓ the tiles run no animation — []
+QC161-13 ✓ the picked row and the questions run no animation — []
+QC161-13 ✓ the bump does not run — 0
+  ✓  22 [measure] › tests/e2e/qc161.measure.ts:472:18 › QC161-13 · reduced motion: tiles and questions appear with no animation, and the bump does not run (24.5s)
+QC1611-1 ✓ population: the primary is "Add Rufus’s reply" — Add Rufus’s reply
+QC1611-1 ✓ population: the save landed (the toast) — 
+QC1611-1 ✓ save: a painted frame shows the frame's scale below 1 within 100ms of the press — 41ms
+QC1611-2 ✓ save: population — frames held between the press-in and the landing — 72
+QC1611-2 ✓ save: every one at scale 0.985 — [0.985]
+QC1611-2 ✓ population: a long task (over 50ms) ran while the frame was held — [90,1098,103]
+QC1611-2 ✗ the frames either side of the long task are at 0.985 — [0.99113,0.988867,0.987015,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985]
+QC1611-2 ✓ the press is a finished animation filled forwards (the compositor holds it) — ["qc160-bump:paused"]
+QC1611-3 ✓ save: the pop rises above 1.03 and stays below 1.04 — 1.03499
+QC1611-3 ✓ save: at least 24 frames painted in the pop's 520ms — 31 frames over 500ms
+QC1611-3 ✓ save: it ends at exactly 1 — 1
+  ✘  23 [measure] › tests/e2e/qc1611.measure.ts:163:17 › QC1611-1/2/3 · CPU 4×: pressed in at the press, held through the save, the pop at the landing (13.6s)
+QC1611-4 ✓ mark the partial sent: pressed in within 100ms — 35ms
+QC1611-4 ✓ mark the partial sent: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 32 frames · ends 1
+QC1611-4 ✓ mark the partial sent · its undo: pressed in within 100ms — 37ms
+QC1611-4 ✓ mark the partial sent · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 29 frames · ends 1
+QC1611-4 ✓ log a nudge: pressed in within 100ms — 40ms
+QC1611-4 ✓ log a nudge: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 32 frames · ends 1
+QC1611-4 ✓ log a nudge · its undo: pressed in within 100ms — 21ms
+QC1611-4 ✓ log a nudge · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 31 frames · ends 1
+QC1611-4 ✓ record a response: pressed in within 100ms — 42ms
+QC1611-4 ✓ record a response: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 32 frames · ends 1
+QC1611-4 ✓ record a response · its undo: pressed in within 100ms — 27ms
+QC1611-4 ✓ record a response · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 31 frames · ends 1
+QC1611-4 ✓ close the query: pressed in within 100ms — 41ms
+QC1611-4 ✓ close the query: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 31 frames · ends 1
+QC1611-4 ✓ close the query · its undo: pressed in within 100ms — 30ms
+QC1611-4 ✓ close the query · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 31 frames · ends 1
+QC1611-4 ✓ decline the offer: pressed in within 100ms — 37ms
+QC1611-4 ✓ decline the offer: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 31 frames · ends 1
+QC1611-4 ✓ decline the offer · its undo: pressed in within 100ms — 32ms
+QC1611-4 ✓ decline the offer · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 30 frames · ends 1
+QC1611-4 ✓ delete a step: pressed in within 100ms — 38ms
+QC1611-4 ✓ delete a step: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 31 frames · ends 1
+QC1611-4 ✓ delete a step · its undo: pressed in within 100ms — 34ms
+QC1611-4 ✓ delete a step · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames — 1.03499 · 31 frames · ends 1
+QC1611-4 ✓ it ran at least five different actions — ["mark the partial sent","log a nudge","record a response","close the query","decline the offer","delete a step"]
+  ✓  24 [measure] › tests/e2e/qc1611.measure.ts:193:17 › QC1611-4 · every save and its undo presses in and pops (at least five actions) (3.9m)
+QC1611-5 ✓ fails (every Firestore request refused): population — it pressed in — 
+QC1611-5 ✓ fails (every Firestore request refused): back at scale 1 within 4.2s — 1 at 4185ms
+QC1611-5 ✓ fails (every Firestore request refused): no pop — 1
+QC1611-5 ✓ never lands (every Firestore request left unanswered): population — it pressed in — 
+QC1611-5 ✓ never lands (every Firestore request left unanswered): back at scale 1 within 4.2s — 1 at 4184ms
+QC1611-5 ✓ never lands (every Firestore request left unanswered): no pop — 1
+  ✓  25 [measure] › tests/e2e/qc1611.measure.ts:234:17 › QC1611-5 · never stuck: a failed save and a save that never lands are back at 1 within 4.2s, with no pop (58.1s)
+QC1611-6 ✓ population: the click and the save's requests were seen — {"at":1795178115613,"first":1795178115638}
+QC1611-6 ✓ the save's first request goes out within 50ms of the click — 25ms
+  ✓  26 [measure] › tests/e2e/qc1611.measure.ts:264:17 › QC1611-6 · CPU 1×: the save's first request goes out within 50ms of the press (13.9s)
+QC1611-7 ✓ a tab change: population — sampled — 71
+QC1611-7 ✓ a tab change: no scale animation on the frame — []
+QC1611-7 ✓ adding a note: population — sampled — 132
+QC1611-7 ✓ adding a note: no scale animation on the frame — []
+QC1611-7 ✓ opening the drawer: population — sampled — 95
+QC1611-7 ✓ opening the drawer: no scale animation on the frame — ["rotate:running"]
+QC1611-7 ✓ from the press-in to the pop's end, outside the lean's own return, the frame's rotate never changes — ["1.6deg"]
+QC1611-7 ✓ its translate never changes — ["none"]
+QC1611-7 ✓ transform is never set on it — ["none"]
+QC1611-7 ✓ its box at rest is the baseline's — 932,100,540,700 → 932,100,540,700
+  ✓  27 [measure] › tests/e2e/qc1611.measure.ts:286:17 › QC1611-7 · nothing else: rotate and translate unchanged, the box at rest the same, no bump on a tab, a note, the drawer (17.9s)
+QC1611-8 ✓ population: the save landed and was undone — 
+QC1611-8 ✓ no scale animation on the frame, on the save or the undo — []
+QC1611-8 ✓ its scale never leaves 1 — 
+  ✓  28 [measure] › tests/e2e/qc1611.measure.ts:322:17 › QC1611-8 · reduced motion: no scale animation is created on the frame (13.3s)
+  ✓  29 [measure] › tests/e2e/qc1611.measure.ts:348:36 › QC1611-F · frames of one save at CPU 1× and 4×: the press, mid-freeze, the pop's peak, at rest (1.2m)
+QC1612-1 ✓ population: the drawer is "What did Rufus say?" — What did Rufus say?
+QC1612-1 ✓ population: frames sampled over the 4s — 276
+QC1612-1 ✓ the frame's scale passes above 1.008 at least twice — 2 peaks
+QC1612-1 ✓ and returns below 1.002 between — 2 dips
+QC1612-1 ✓ it never exceeds 1.011 — 1.01
+QC1612-1 ✓ it starts 300ms after the drawer's 320ms entrance (no sooner than 600ms after the press) — 840ms
+QC1612-1 ✓ one breathing animation at most in any frame — 1
+QC1612-1 ✓ it animates scale only, never transform — ["1"]
+QC1612-1 ✓ it is the rim that breathes (the frame's ::before) — 
+QC1612-1 ✓ the frame itself never scales: scale 1 in every frame — [1]
+QC1612-1 ✓ nothing clickable moves: every button in the drawer has one box throughout — 1 distinct
+  ✓  30 [measure] › tests/e2e/qc1612.measure.ts:164:15 › QC1612-1 · it breathes: the drawer open and untouched for 4s (11.2s)
+QC1612-2 ✓ the footer's Record a response (reply): population — the drawer is the reply journey — reply
+QC1612-2 ✓ the footer's Record a response (reply): it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  31 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.1 · every way in: the footer's Record a response (reply) (9.0s)
+QC1612-2 ✓ the grid card's arrow chip: population — Mira's chip acts — sent
+QC1612-2 ✓ the grid card's arrow chip: population — the drawer is the send journey — send
+QC1612-2 ✓ the grid card's arrow chip: it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  32 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.2 · every way in: the grid card's arrow chip (7.8s)
+QC1612-2 ✓ the page header's Record a response: population — the drawer is the reply journey — reply
+QC1612-2 ✓ the page header's Record a response: it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  33 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.3 · every way in: the page header's Record a response (9.2s)
+QC1612-2 ✓ the Dashboard's Record a response: population — the drawer is the reply journey — reply
+QC1612-2 ✓ the Dashboard's Record a response: it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  34 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.4 · every way in: the Dashboard's Record a response (7.2s)
+QC1612-2 ✓ the To-do desk: population — a gone-quiet task — 24 (0 Quinn's)
+QC1612-2 ✓ the To-do desk's They did reply → Record what {first} said: population — the drawer is the reply journey — reply
+QC1612-2 ✓ the To-do desk's They did reply → Record what {first} said: it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  35 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.5 · every way in: the To-do desk's They did reply → Record what {first} said (8.2s)
+QC1612-2 ✓ a send journey (Mira's Mark partial sent): population — the drawer is the send journey — send
+QC1612-2 ✓ a send journey (Mira's Mark partial sent): it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  36 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.6 · every way in: a send journey (Mira's Mark partial sent) (8.8s)
+QC1612-2 ✓ a nudge journey (Priya's Log a nudge): population — the drawer is the nudge journey — nudge
+QC1612-2 ✓ a nudge journey (Priya's Log a nudge): it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  37 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.7 · every way in: a nudge journey (Priya's Log a nudge) (8.7s)
+QC1612-2 ✓ a close journey (Nell's Close the query): population — the drawer is the close journey — close
+QC1612-2 ✓ a close journey (Nell's Close the query): it breathes (a running breath, the scale above 1.008) — 1 peaks, max 1.01
+  ✓  38 [measure] › tests/e2e/qc1612.measure.ts:227:55 › QC1612-2.8 · every way in: a close journey (Nell's Close the query) (8.7s)
+QC1612-3 ✗ Cancel: population — breathing before it — 
+QC1612-3 ✓ Cancel: population — the action reached the page — 
+QC1612-3 note · Cancel: the drawer left the page 15ms after it
+QC1612-3 ✓ Cancel: the frame is at scale 1 within 200ms, and stays there — 31 frames: [1]
+QC1612-3 ✓ Cancel: no breathing animation remains — ["rotate:running"]
+  ✘  39 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.1 · every way out: Cancel (9.4s)
+QC1612-3 ✗ ✕: population — breathing before it — 
+QC1612-3 ✓ ✕: population — the action reached the page — 
+QC1612-3 note · ✕: the drawer left the page 33ms after it
+QC1612-3 ✓ ✕: the frame is at scale 1 within 200ms, and stays there — 32 frames: [1]
+QC1612-3 ✓ ✕: no breathing animation remains — ["rotate:running"]
+  ✘  40 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.2 · every way out: ✕ (10.3s)
+QC1612-3 ✗ Escape: population — breathing before it — 
+QC1612-3 ✓ Escape: population — the action reached the page — 
+QC1612-3 note · Escape: the drawer left the page 15ms after it
+QC1612-3 ✓ Escape: the frame is at scale 1 within 200ms, and stays there — 31 frames: [1]
+QC1612-3 ✓ Escape: no breathing animation remains — ["rotate:running"]
+⚠  Script exited with signal: SIGTERM
+i  emulators: Received SIGTERM for the first time. Starting a clean shutdown.
+i  emulators: Please wait for a clean shutdown or send the SIGTERM signal again to stop right now.

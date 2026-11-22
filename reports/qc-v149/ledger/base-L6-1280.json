@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L6-1280",
+  "where": "population: an overdue, a waiting and an offer row",
+  "ok": false,
+  "detail": "[\"Queried\",null,\"Offer\"]"
+ },
+ {
+  "lock": "L6-1280",
+  "where": "overdue: the summary is one line (≤24)",
+  "ok": false,
+  "detail": "80.609375"
+ },
+ {
+  "lock": "L6-1280",
+  "where": "overdue: nothing past the list card's edges",
+  "ok": true,
+  "detail": "0 boxes outside"
+ },
+ {
+  "lock": "L6-1280",
+  "where": "offer: the summary is one line (≤24)",
+  "ok": false,
+  "detail": "104.15625"
+ },
+ {
+  "lock": "L6-1280",
+  "where": "offer: nothing past the list card's edges",
+  "ok": true,
+  "detail": "0 boxes outside"
+ }
+]

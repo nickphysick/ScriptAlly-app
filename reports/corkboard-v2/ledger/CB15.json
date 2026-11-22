@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "CB15",
+  "where": "1512x982 last child",
+  "ok": true,
+  "detail": "last child is the ghost: true"
+ },
+ {
+  "lock": "CB15",
+  "where": "1512x982 width",
+  "ok": true,
+  "detail": "ghost 266 vs post-it 266"
+ },
+ {
+  "lock": "CB15",
+  "where": "1512x982 height",
+  "ok": true,
+  "detail": "ghost 232 vs its row's post-it 232"
+ },
+ {
+  "lock": "CB15",
+  "where": "1512x982 opens",
+  "ok": true,
+  "detail": "the note pop-up opened"
+ },
+ {
+  "lock": "CB15",
+  "where": "1512x982 find",
+  "ok": true,
+  "detail": "the ghost shows while find narrows the wall"
+ },
+ {
+  "lock": "CB15",
+  "where": "1512x982 tag pill",
+  "ok": true,
+  "detail": "the ghost shows while a tag pill narrows the wall"
+ },
+ {
+  "lock": "CB15",
+  "where": "1512x982 glance",
+  "ok": true,
+  "detail": "the ghost shows while a glance row narrows the wall"
+ },
+ {
+  "lock": "CB15",
+  "where": "1280x800 last child",
+  "ok": true,
+  "detail": "last child is the ghost: true"
+ },
+ {
+  "lock": "CB15",
+  "where": "1280x800 width",
+  "ok": true,
+  "detail": "ghost 264 vs post-it 264"
+ },
+ {
+  "lock": "CB15",
+  "where": "1280x800 height",
+  "ok": true,
+  "detail": "ghost 232 vs its row's post-it 232"
+ },
+ {
+  "lock": "CB15",
+  "where": "1280x800 opens",
+  "ok": true,
+  "detail": "the note pop-up opened"
+ },
+ {
+  "lock": "CB15",
+  "where": "1280x800 find",
+  "ok": true,
+  "detail": "the ghost shows while find narrows the wall"
+ },
+ {
+  "lock": "CB15",
+  "where": "1280x800 tag pill",
+  "ok": true,
+  "detail": "the ghost shows while a tag pill narrows the wall"
+ },
+ {
+  "lock": "CB15",
+  "where": "1280x800 glance",
+  "ok": true,
+  "detail": "the ghost shows while a glance row narrows the wall"
+ }
+]

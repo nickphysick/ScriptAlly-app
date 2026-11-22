@@ -6,8 +6,9 @@
  * file unreadable, nothing imported, step didn't load. Each is ONE card on the sheet under the
  * tab — a chip, a title, the text, the foot — with no open title above it.
  *
- * ⚠️ NONE OF THEM SELLS. The free "already used" card used to lead with "Upgrade to Pro"; it leads
- * with the template now, which is always free and is what a writer in that position can do next.
+ * ⚠️ NONE OF THEM SELLS. The free "already used" card used to lead with "Upgrade to Pro", then with the
+ * template. The template stopped being a way in on 14 Nov (overnight fixes v1), so both cards that offered it
+ * now offer the two-door page's own "Upload a file" and adding by hand.
  *
  * ⚠️ THE UNREADABLE-FILE CARD DOES NOT SAY WHETHER THE SMART IMPORT WAS SPENT. A read that timed out
  * here may still finish on the server, so "hasn't been used" would be a guess stated as a fact.
@@ -17,7 +18,8 @@
 
 import React from "react";
 import "./onboarding.css";
-import { BackLink } from "./setupParts";
+import { BackLink, StepFoot } from "./setupParts";
+import { CAPTURE_UPLOAD_ACTION } from "../../lib/captureFork";
 
 export const CHIP_USED = "Smart Import already used";
 export const CHIP_UNREADABLE = "File couldn't be read";
@@ -25,10 +27,9 @@ export const CHIP_NOTHING = "Nothing imported";
 export const CHIP_UNLOADED = "Step didn't load";
 
 export const USED_FREE_TITLE = "You've used your Smart Import.";
-export const USED_FREE_TEXT = "The template is always free, and reads your sheet exactly. Or add your agents by hand for now.";
-export const USED_PRO_TITLE = "Next Smart Import next month";
+export const USED_FREE_TEXT = "Add your agents by hand for now.";
 export const UNREADABLE_TITLE = "We couldn't read that one.";
-export const UNREADABLE_TEXT = "Use the template, or add your agents by hand. Nothing has been saved.";
+export const UNREADABLE_TEXT = "Add your agents by hand. Nothing has been saved.";
 export const NOTHING_TITLE = "That didn't work.";
 /** When every row of the file was already in the account: the import worked, and found nothing new. */
 export const NOTHING_NEW_TITLE = "Nothing new to import.";
@@ -50,10 +51,9 @@ export const DeadEndCard: React.FC<{
       <p className={`sf-chip${fail ? " sf-chip--fail" : ""}`} data-sf="chip">{chip}</p>
       <h1 className="sf-deadh">{title}</h1>
       <div className="sf-deadtx">{children}</div>
-      <div className={`sf-cfoot${left ? "" : " sf-cfoot--end"}`}>
-        {left}
-        <span className="sf-footr">{actions}</span>
-      </div>
+      {/* Phone last screens v1 (2B): `StepFoot` pins the actions to the bottom on a phone, through the
+          set-up frame's foot host; on the desktop it renders this same `.sf-cfoot` in place. */}
+      <StepFoot left={left}>{actions}</StepFoot>
     </section>
   </div>
 );
@@ -65,28 +65,20 @@ const Primary: React.FC<{ act: string; onClick: () => void; children: React.Reac
   <button type="button" className="sf-btn" data-act={act} onClick={onClick}>{children}</button>
 );
 
-/** Free tier, Smart Import already used. Leads with the template; no Upgrade. */
-export const UsedFree: React.FC<{ onBack: () => void; onAddByHand: () => void; onUseTemplate: () => void }> = ({ onBack, onAddByHand, onUseTemplate }) => (
+/** Smart Import already used — on any plan (plan rules v1: once per account). "Upload a file" (a headings file is
+ *  still read free); no Upgrade. */
+export const UsedFree: React.FC<{ onBack: () => void; onAddByHand: () => void; onUpload: () => void }> = ({ onBack, onAddByHand, onUpload }) => (
   <DeadEndCard kind="used-free" chip={CHIP_USED} title={USED_FREE_TITLE}
     left={<BackLink onClick={onBack} />}
-    actions={<><Quiet act="byhand" onClick={onAddByHand}>Add by hand</Quiet><Primary act="template" onClick={onUseTemplate}>Use the template</Primary></>}>
+    actions={<><Quiet act="byhand" onClick={onAddByHand}>Add by hand</Quiet><Primary act="upload" onClick={onUpload}>{CAPTURE_UPLOAD_ACTION}</Primary></>}>
     <p>{USED_FREE_TEXT}</p>
   </DeadEndCard>
 );
 
-/** Pro, this month's Smart Import already used. The built words and date. */
-export const UsedProMonth: React.FC<{ nextLabel: string; onBack: () => void; onAddByHand: () => void }> = ({ nextLabel, onBack, onAddByHand }) => (
-  <DeadEndCard kind="used-pro" chip={CHIP_USED} title={USED_PRO_TITLE}
-    left={<BackLink onClick={onBack} />}
-    actions={<Primary act="byhand" onClick={onAddByHand}>Add them by hand</Primary>}>
-    <p>You've used this month's Smart Import. Your next one is available on <strong>{nextLabel}</strong>. You can add agents by hand in the meantime.</p>
-  </DeadEndCard>
-);
-
-export const Unreadable: React.FC<{ onBack: () => void; onAddByHand: () => void; onDownload: () => void }> = ({ onBack, onAddByHand, onDownload }) => (
+export const Unreadable: React.FC<{ onBack: () => void; onAddByHand: () => void; onUpload: () => void }> = ({ onBack, onAddByHand, onUpload }) => (
   <DeadEndCard kind="unreadable" chip={CHIP_UNREADABLE} fail title={UNREADABLE_TITLE}
     left={<BackLink onClick={onBack} />}
-    actions={<><Quiet act="byhand" onClick={onAddByHand}>Add by hand</Quiet><Primary act="download" onClick={onDownload}>Download the template</Primary></>}>
+    actions={<><Quiet act="byhand" onClick={onAddByHand}>Add by hand</Quiet><Primary act="upload" onClick={onUpload}>{CAPTURE_UPLOAD_ACTION}</Primary></>}>
     <p>{UNREADABLE_TEXT}</p>
   </DeadEndCard>
 );

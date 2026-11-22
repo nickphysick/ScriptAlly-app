@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512x982c population: the page scrolls at least 300px",
+  "ok": true,
+  "detail": "max 611"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x982c the feed's top is unchanged ±1",
+  "ok": true,
+  "detail": "119.8 → 119.8 (scrolled 600)"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x982c the first left card moved up by the scroll ±1",
+  "ok": true,
+  "detail": "600.0 vs 600"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x982c population: the feed overflows",
+  "ok": true,
+  "detail": "227"
+ },
+ {
+  "lock": "A2",
+  "where": "1512x982c the feed's own scrollTop moves",
+  "ok": true,
+  "detail": "200"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 population: the page scrolls at least 300px",
+  "ok": true,
+  "detail": "max 1930"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 the feed's top is unchanged ±1",
+  "ok": true,
+  "detail": "119.8 → 119.8 (scrolled 600)"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 the first left card moved up by the scroll ±1",
+  "ok": true,
+  "detail": "600.0 vs 600"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 population: the feed overflows",
+  "ok": true,
+  "detail": "409"
+ },
+ {
+  "lock": "A2",
+  "where": "1280x800 the feed's own scrollTop moves",
+  "ok": true,
+  "detail": "200"
+ }
+]

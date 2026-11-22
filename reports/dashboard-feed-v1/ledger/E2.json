@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "E2",
+  "where": "1512x982c population: the art and 4 tips",
+  "ok": true,
+  "detail": "{\"card\":[1069.828125,414.671875,1484,773.90625],\"art\":[1347,423.671875,1474,527.671875],\"n\":4}"
+ },
+ {
+  "lock": "E2",
+  "where": "1512x982c the art lies inside the card ±0.5",
+  "ok": true,
+  "detail": "{\"card\":[1069.828125,414.671875,1484,773.90625],\"art\":[1347,423.671875,1474,527.671875],\"n\":4}"
+ },
+ {
+  "lock": "E2",
+  "where": "1512x982c the card's height is equal across all tips ±1",
+  "ok": true,
+  "detail": "359.2,359.2,359.2,359.2"
+ },
+ {
+  "lock": "E2",
+  "where": "1280x800 population: the art and 4 tips",
+  "ok": true,
+  "detail": "{\"card\":[268,433.09375,719.875,792.328125],\"art\":[582.875,442.09375,709.875,546.09375],\"n\":4}"
+ },
+ {
+  "lock": "E2",
+  "where": "1280x800 the art lies inside the card ±0.5",
+  "ok": true,
+  "detail": "{\"card\":[268,433.09375,719.875,792.328125],\"art\":[582.875,442.09375,709.875,546.09375],\"n\":4}"
+ },
+ {
+  "lock": "E2",
+  "where": "1280x800 the card's height is equal across all tips ±1",
+  "ok": true,
+  "detail": "359.2,359.2,359.2,359.2"
+ },
+ {
+  "lock": "E2",
+  "where": "it advances after 7000 ±300ms",
+  "ok": true,
+  "detail": "7049ms"
+ },
+ {
+  "lock": "E2",
+  "where": "it does not advance during an 8s hover",
+  "ok": true,
+  "detail": "2 → 2"
+ },
+ {
+  "lock": "E2",
+  "where": "› restarts the timer: the next turn is a full 7s after",
+  "ok": true,
+  "detail": "7052ms"
+ },
+ {
+  "lock": "E2",
+  "where": "reduced motion: no advance after 10s",
+  "ok": true,
+  "detail": "0 → 0"
+ }
+]

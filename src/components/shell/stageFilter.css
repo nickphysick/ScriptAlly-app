@@ -1,0 +1,34 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * List filters v1 — Stage's bar and labels (shell/StageFilter), from the reference's "the stage bar and stage labels".
+ * ⚠️ No colour is written here: each shape's background and its edge (`--sf-edge`) are set inline from lib/stageColours.
+ */
+@media (min-width: 768px) {
+  :is(.qc151.qc153, .cl27) .fp .sf-bar { display: flex; gap: 2px; height: 18px; margin: 0 4px 12px; border-radius: 999px; overflow: hidden; background: #f1ebe2; }
+  :is(.qc151.qc153, .cl27) .fp .sf-seg { flex: 1 1 0; min-width: 0; height: 100%; cursor: pointer; }
+  :is(.qc151.qc153, .cl27) .fp .sf-seg:hover { filter: brightness(0.96); }
+  :is(.qc151.qc153, .cl27) .fp .sf-bar.is-some .sf-seg:not(.is-on) { opacity: 0.45; }
+
+  :is(.qc151.qc153, .cl27) .fp .sf-labs { display: flex; flex-wrap: wrap; gap: 6px; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab {
+    all: unset; cursor: pointer; box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px;
+    min-height: 32px; padding: 5px 11px 5px 9px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--sf-edge);
+    font: 400 14.5px/1.2 var(--sp-serif) !important; color: #1c130f;
+  }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab .sf-n { font: 400 12.5px/1 var(--sp-type) !important; color: var(--sp-muted); }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab.is-on { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2a3a52; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab.is-on .sf-nm { font-weight: 600 !important; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab.is-zero { opacity: 0.45; cursor: default; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab.is-on:focus-visible { outline-offset: 5px; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab svg { flex: none; }
+}
+
+/* List filters v1 Phase 6 · motion: segments grow from where they were; a label lifts on hover. None under reduced motion. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  :is(.qc151.qc153, .cl27) .fp .sf-seg { transition: flex-grow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab { transition: box-shadow 0.15s, transform 0.15s; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab:hover:not(:disabled) { transform: translateY(-1px); }
+}

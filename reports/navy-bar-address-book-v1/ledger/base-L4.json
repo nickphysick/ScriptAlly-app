@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "L4",
+  "where": "1280 list · population: headings",
+  "ok": false,
+  "detail": "{\"n\":0,\"sheetRight\":1248,\"hs\":[]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 list · population: a stuck heading",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · population: headings",
+  "ok": true,
+  "detail": "{\"n\":10,\"sheetRight\":1248,\"hs\":[{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1224,\"ruleH\":1},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1224,\"ruleH\":1},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1224,\"ruleH\":1},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1224,\"ruleH\":1}]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 0: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 0: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1224 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 1: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 1: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1224 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 2: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 2: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1224 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 3: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · heading 3: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1224 vs 1248"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 cards · population: a stuck heading",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · population: headings",
+  "ok": false,
+  "detail": "{\"n\":0,\"sheetRight\":1480,\"hs\":[]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 list · population: a stuck heading",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · population: headings",
+  "ok": true,
+  "detail": "{\"n\":10,\"sheetRight\":1480,\"hs\":[{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1456,\"ruleH\":1},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1456,\"ruleH\":1},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1456,\"ruleH\":1},{\"font\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"size\":\"21px\",\"ruleRight\":1456,\"ruleH\":1}]}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 0: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 0: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1456 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 1: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 1: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1456 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 2: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 2: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1456 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 3: Special Elite 23px",
+  "ok": false,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21px"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · heading 3: a rule within 40px of the list's right edge",
+  "ok": true,
+  "detail": "1456 vs 1480"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 cards · population: a stuck heading",
+  "ok": false,
+  "detail": "null"
+ }
+]

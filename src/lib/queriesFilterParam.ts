@@ -39,6 +39,21 @@ export function parseStatusFilter(raw: string | null | undefined): QueriesStatus
   return (VALUES as string[]).includes(v) ? (v as QueriesStatusFilter) : "all";
 }
 
+/**
+ * The Query Centre opened on EXACTLY these queries (`?ids=`), with what they are (`?from=`, the chip's words).
+ *
+ * ⚠️ ONE HELPER FOR EVERY CALLER (Dashboard v118 Part B): the phone dashboard's cards and the desktop hoops' slices both
+ * open it. The Query Centre lists every manuscript while the dashboard counts one, so a `?status=` link lands on a
+ * different number; the ids are the card's own queries. An empty set opens the page whole rather than an empty list.
+ * Without `from`, the chip keeps its original wording (Submission packages' "See these queries").
+ */
+export const QUERIES_IDS_PARAM = "ids";
+export const QUERIES_FROM_PARAM = "from";
+export const queriesForIds = (ids: readonly string[], label?: string): string =>
+  ids.length
+    ? `/queries?${QUERIES_IDS_PARAM}=${encodeURIComponent(ids.join(","))}${label ? `&${QUERIES_FROM_PARAM}=${encodeURIComponent(label)}` : ""}`
+    : "/queries";
+
 /** The path a nav child points at. `all` carries no param — a bare /queries is the plain hub. */
 export function queriesPathFor(f: QueriesStatusFilter): string {
   return f === "all" ? "/queries" : `/queries?${QUERIES_STATUS_PARAM}=${f}`;

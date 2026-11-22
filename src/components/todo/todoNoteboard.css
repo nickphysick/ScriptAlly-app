@@ -184,7 +184,7 @@
 .nb-note .tbd-more.cb-more:focus-visible,
 .nb-note .tbd-more.cb-more[aria-expanded="true"] { opacity: 0.7; }
 .nb-note .tbd-more.cb-more:hover { background: rgba(28, 19, 15, 0.08); opacity: 1; }
-.nb-note .tbd-more.cb-more:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 2px; }
+.nb-note .tbd-more.cb-more:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE STITCHED BADGE IS DERIVED, and it is DASHED because it is a link to something living elsewhere
    rather than a state of the note. The note is unchanged; the same document is on the to-do list. */
@@ -395,7 +395,7 @@
 .nb-scope {
   --cb-paper: #fbf9f5;
   --cb-line: #ddd6ca;
-  --cb-band: #2d3a50;
+  --cb-band: var(--sp-anthracite);
   --cb-cream: #f6efe2;
   --cb-ink: #1c130f;
   --cb-mute: #6f675e;
@@ -500,7 +500,7 @@
 .cb-chip b { font-family: var(--sp-mono); font-weight: 500; font-size: 11px; opacity: 0.6; margin-left: 5px; }
 .cb-chip[aria-pressed="true"] { background: var(--cb-band); border-color: var(--cb-band); color: var(--cb-cream); }
 .cb-chip--tool { border-style: dashed; margin-left: 6px; }
-.cb-chip:focus-visible, .cb-sup:focus-visible, .cb-pad:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 2px; }
+.cb-chip:focus-visible, .cb-sup:focus-visible, .cb-pad:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE "n of N notes" LABEL TAKES NO ROOM. In the row it widened the filters by its own width, the row wrapped
    at 1512 and the whole board dropped a line the moment a chip was pressed (measured). It hangs in the 14px
@@ -535,7 +535,7 @@
 }
 /* places slide only once the first measured arrangement has been painted — never on arrival */
 .cb-pins.cb-ready .cb-item { transition: left 0.35s, top 0.35s, transform 0.2s, opacity 0.2s, box-shadow 0.2s; }
-.cb-item:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 3px; }
+.cb-item:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* in the hand: straight, lifted, in front (its z-index is set inline) */
 .cb-pins .cb-item.cb-drag {
   transition: transform 0.15s, box-shadow 0.15s;
@@ -553,7 +553,7 @@
 /* the pin: an 18px head with a highlight and a cast shadow, in rust, navy or slate (`--pc`) */
 .cb-pin {
   position: absolute; top: -9px; left: 50%; margin-left: -9px; width: 18px; height: 18px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.75) 0 14%, transparent 16%), radial-gradient(circle at 60% 70%, rgba(0, 0, 0, 0.28), transparent 62%), var(--pc, #2d3a50);
+  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.75) 0 14%, transparent 16%), radial-gradient(circle at 60% 70%, rgba(0, 0, 0, 0.28), transparent 62%), var(--pc, var(--sp-anthracite));
   box-shadow: 3px 6px 5px -1px rgba(30, 20, 10, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 /* the tape: a torn strip across the top edge, slate or cream */
@@ -581,7 +581,7 @@
   content: ""; width: 8px; height: 4px; border-left: 2px solid var(--cb-cream); border-bottom: 2px solid var(--cb-cream);
   transform: rotate(-45deg) translateY(-1px);
 }
-.cb-tick:focus-visible { outline: 2px solid var(--cb-slate); outline-offset: 2px; }
+.cb-tick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cb-task-t { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .cb-task.is-done .cb-task-t { text-decoration: line-through; opacity: 0.5; }
 .cb-task time { font-family: var(--sp-mono); font-size: 10.5px; line-height: 1.45; color: var(--cb-mute); padding-top: 3px; white-space: nowrap; }

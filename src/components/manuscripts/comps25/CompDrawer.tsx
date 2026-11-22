@@ -2,50 +2,43 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Comparable titles v25, Part E: the comp drawer. A row opens it; "+ Add a comp" opens it on the
- * empty form; Edit swaps its body for the comp form. It floats on the right (HalfDrawer: 8px in,
- * 12px corners) and sits on the escape stack.
+ * Comparable titles v25, Part E: the comp drawer. "+ Add a comp" opens it on the empty form; Edit opens it on a comp's
+ * form. It floats on the right (HalfDrawer: 8px in, 12px corners) and sits on the escape stack.
  *
  * Comps v26: add and edit are ONE form (`../CompForm`). The drawer calls its hook once, so the head
  * (the chosen type's disc, the drawer's only heading), the scrolling body and the pinned foot all
  * read the same state.
  *
  * ⚠️ PORTALLED, so everything in it hangs off `.cv-layer` (literals and `:root` tokens).
+ *
+ * Comps v30 §E: the drawer wears v30's dress (comps30/comps30.css, `.cp30-layer`): a navy head with the cream
+ * media disc and the light ✕.
+ * Comps v32: its detail view is retired — a comp's details live on the page, in the open comp beside the shelf. The
+ * drawer adds and edits, nothing else (tests/e2e/RETIRED-comps-v32.md).
  */
 import React, { useRef } from "react";
 import type { CompTitle } from "../../../types";
 import type { CompDraft } from "../../../lib/comps";
 import type { CompRow } from "../../../lib/compsLibrary";
-import { dayMonth } from "../../../lib/dates";
 import { HalfDrawer } from "../../shell/HalfDrawer";
-import { StatusDot } from "../../StatusDot";
-import { CompFormBody, CompFormFoot, TypeIcon, splitTags, useCompForm } from "../CompForm";
-import { CloseButton, KindIcon, LetterIcon, LockIcon } from "./marks";
+import { CompFormBody, CompFormFoot, TypeIcon, useCompForm } from "../CompForm";
+import { Close30, Media30 } from "../comps30/marks30";
 
 export const DRAWER_WIDTH = "min(640px, 54vw)";
 
 export type DrawerState =
-  | { mode: "view"; key: string }
-  /** `back`: opened from this comp's detail, so ✕, Escape, Cancel and Save return there (comps v28 §E) */
-  | { mode: "edit"; key: string; focusNote?: boolean; back?: boolean }
+  | { mode: "edit"; key: string; focusNote?: boolean }
   | { mode: "add" };
-
-/** The same status words the Query Centre prints. */
-const statusWord = (s: string): string => (s === "Rejected" ? "Passed" : s === "No Response" ? "Closed with no reply" : s.replace(/ (Requested|Sent)$/, (m) => m.toLowerCase()));
 
 export const CompDrawer: React.FC<{
   state: DrawerState | null;
+  /** the comp being edited (null when adding) */
   row: CompRow | null;
   comps: readonly CompTitle[];
   /** why Remove is not offered, or null when it is */
   removeBlocked: string | null;
-  letterShortOf: (letterId: string) => string;
-  /** close everything (the dim, and ✕/Escape anywhere but an edit opened from the detail) */
+  /** ✕, Escape, Cancel and the dim */
   onClose: () => void;
-  /** ✕, Escape and Cancel: back to the detail when the edit was opened from it, else close */
-  onBack: () => void;
-  onEdit: (focusNote?: boolean) => void;
-  onPick: () => void;
   onSave: (draft: CompDraft) => void;
   /** `again`: the writer pressed "Add and add another", so the drawer stays open */
   onAdd: (draft: CompDraft, o: { again: boolean }) => void;
@@ -55,15 +48,11 @@ export const CompDrawer: React.FC<{
   const { state, row } = p;
   const open = !!state && (state.mode === "add" || !!row);
   const c = row?.comp;
-  const editing = state?.mode === "edit" || state?.mode === "add";
-  const byline = c ? [c.author?.trim(), c.publisher?.trim() || (row!.kind === "book" ? "publisher not recorded" : ""), c.year ? String(c.year) : ""].filter(Boolean).join(" · ") : "";
-  const tags = c ? splitTags(c.matchAxis) : [];
-
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const first = p.comps.length === 0;
   const form = useCompForm({
     /* a new key whenever the drawer opens on something else, so the form starts from that comp */
-    resetKey: !state ? "closed" : state.mode === "add" ? "add" : state.mode === "edit" ? `edit:${state.key}` : `view:${state.key}`,
+    resetKey: !state ? "closed" : state.mode === "add" ? "add" : `edit:${state.key}`,
     mode: state?.mode === "edit" ? "edit" : "add",
     initial: state?.mode === "edit" ? c : undefined,
     focusNote: state?.mode === "edit" && !!state.focusNote,
@@ -74,101 +63,39 @@ export const CompDrawer: React.FC<{
     onCleared: () => { if (bodyRef.current) bodyRef.current.scrollTop = 0; },
   });
 
+  const editing = state?.mode === "edit" && !!row;
   const head = (
-    <div className="cv-layer cv-dh" data-cv="drawer-head">
-      {state?.mode === "add" || !row ? (
+    <div className="cp30-layer cp30-dh" data-cv="drawer-head">
+      {editing ? (
         <>
-          {/* a new comp's disc is ringed, and shows the type chosen below */}
-          <span className="cv-cdisc is-ring" data-cv="drawer-disc" data-media={form.f.media}><TypeIcon media={form.f.media} /></span>
-          <div>
-            <h3 className="cv-dt" data-cv="drawer-title">{first ? "Add your first comp" : "Add a comp"}</h3>
-            <small className="cv-dby">A book, film or show your manuscript sits beside.</small>
+          <span className="cp30-md" data-cv="drawer-disc"><Media30 kind={row!.kind} /></span>
+          <div className="cp30-dhx">
+            <h3 className="cp30-dtl" data-cv="drawer-title">{`Edit ${c!.title}`}</h3>
+            <span className="cp30-dby" data-cv="drawer-sub">Update its details.</span>
           </div>
         </>
       ) : (
         <>
-          <span className={`cv-cdisc${row.where === "none" ? " is-ring" : ""}`} data-cv="drawer-disc"><KindIcon kind={row.kind} /></span>
-          <div>
-            <h3 className="cv-dt" data-cv="drawer-title">{state?.mode === "edit" ? `Edit ${c!.title}` : c!.title}</h3>
-            <small className="cv-dby">{byline}</small>
+          {/* a new comp's disc shows the type chosen below */}
+          <span className="cp30-md" data-cv="drawer-disc" data-media={form.f.media}><TypeIcon media={form.f.media} /></span>
+          <div className="cp30-dhx">
+            <h3 className="cp30-dtl" data-cv="drawer-title">{first ? "Add your first comp" : "Add a comp"}</h3>
+            <span className="cp30-dby" data-cv="drawer-sub">A book, film or show your manuscript sits beside.</span>
           </div>
         </>
       )}
-      <CloseButton className="cv-x" data-cv="drawer-close" onClick={editing ? p.onBack : p.onClose} />
+      <Close30 data-cv="drawer-close" onClick={p.onClose} />
     </div>
   );
 
-  const foot = editing ? (
-    <CompFormFoot form={form}
-      onCancel={() => (state!.mode === "edit" ? p.onBack() : p.onClose())}
-      onRemove={state!.mode === "edit" ? p.onRemove : undefined} removeBlocked={p.removeBlocked} />
-  ) : row ? (
-    <div className="cv-layer cv-df" data-cv="drawer-foot">
-      <span data-cv="drawer-foot-line">{row.letters.some((l) => l.sent) ? "A sent letter names it, so that record is fixed." : "You can still change which letters name it."}</span>
-      <span className="cv-bt">
-        <button type="button" className="cv-ghost" data-cv="drawer-edit" onClick={() => p.onEdit(false)}>Edit</button>
-        <button type="button" className="cv-pillbtn" data-cv="drawer-pick" disabled={!row.ready} onClick={p.onPick}>Log in a letter</button>
-      </span>
-    </div>
+  const foot = state ? (
+    <CompFormFoot form={form} onCancel={p.onClose}
+      onRemove={state.mode === "edit" ? p.onRemove : undefined} removeBlocked={p.removeBlocked} />
   ) : undefined;
 
   return (
-    <HalfDrawer probe="comp" open={open} onClose={editing ? p.onBack : p.onClose} onDim={p.onClose} label={state?.mode === "add" ? "Add a comp" : state?.mode === "edit" ? "Edit a comp" : "Comp details"} width={DRAWER_WIDTH} head={head} foot={foot} bodyRef={bodyRef}>
-      {editing ? (
-        <CompFormBody form={form} first={first} />
-      ) : row ? (
-        <div className="cv-layer cv-db" data-cv="drawer-body">
-          <div className="cv-stat">
-            <div><span>Named in</span><b data-cv="stat-named">{row.letters.length ? `${row.letters.length} ${row.letters.length === 1 ? "letter" : "letters"}` : "No letter yet"}</b></div>
-            <div><span>Went out with</span><b data-cv="stat-seen">{row.queries.length ? `${row.queries.length} ${row.queries.length === 1 ? "query" : "queries"}` : "None yet"}</b></div>
-            <div><span>Asked for more</span><b data-cv="stat-asked">{row.queries.length ? `${row.askedForMore} · ${Math.round((row.askedForMore / row.queries.length) * 100)}%` : "—"}</b></div>
-          </div>
-
-          <h5 className="cv-h5">Why it compares</h5>
-          {c!.note?.trim()
-            ? <p className="cv-why">{c!.note}</p>
-            : <p className="cv-why is-none">No note yet. <button type="button" className="cv-addl" data-cv="add-note" onClick={() => p.onEdit(true)}>Add one</button></p>}
-          {/* `matchAxis` split on "·" (trimmed, empties dropped): no chips and no label when there are none */}
-          {tags.length > 0 && (
-            <>
-              <h5 className="cv-h5" data-cv="drawer-tags-label">Matches on</h5>
-              <div className="cv-tags" data-cv="drawer-tags">{tags.map((t, i) => <span key={`${t}-${i}`}>{t}</span>)}</div>
-            </>
-          )}
-
-          <h5 className="cv-h5">Letters</h5>
-          {row.letters.length ? row.letters.map((l) => (
-            <div key={l.id} className="cv-lt" data-cv="drawer-letter">
-              <LetterIcon /><b>{l.short}</b>
-              <span className="cv-pk">{l.packages.length ? `in ${l.packages.join(", ")}` : "in no package"}</span>
-              <span className="cv-lk" data-cv="drawer-letter-state">{l.sent ? <><LockIcon />SENT · FIXED</> : "NOT SENT"}</span>
-            </div>
-          )) : <div className="cv-empq">{row.ready ? "Not logged in any letter yet." : "Add a publisher before a letter can name it."}</div>}
-
-          <h5 className="cv-h5">Queries it went out with · <span data-cv="drawer-qn">{row.queries.length}</span></h5>
-          {row.queries.length ? (
-            <div className="cv-qt" data-cv="drawer-queries">
-              {row.queries.map((q) => (
-                <div key={q.id} className="cv-qr" data-cv="drawer-query" data-q={q.id}>
-                  <span className="cv-disc">{q.initials}</span>
-                  <span><b>{q.agentName}</b><small>{q.agency}</small></span>
-                  <span>
-                    <span className="cv-st"><StatusDot status={q.status} overrideSize={14} decorative />{statusWord(q.status)}</span>
-                    <small className="cv-via">{[p.letterShortOf(q.letterId), q.packageName].filter(Boolean).join(" · ")}</small>
-                  </span>
-                  <span className="cv-d">{q.dateSent ? dayMonth(q.dateSent).toUpperCase() : "NO DATE"}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="cv-empq" data-cv="drawer-noq">
-              {row.letters.length
-                ? "The letter that names it hasn’t gone out yet. When it does, each query appears here."
-                : "Once it’s logged in a letter, every query that letter goes out with appears here."}
-            </div>
-          )}
-        </div>
-      ) : null}
+    <HalfDrawer probe="comp" open={open} onClose={p.onClose} onDim={p.onClose} label={state?.mode === "edit" ? "Edit a comp" : "Add a comp"} width={DRAWER_WIDTH} head={head} foot={foot} bodyRef={bodyRef}>
+      {state ? <CompFormBody form={form} first={first} /> : null}
     </HalfDrawer>
   );
 };

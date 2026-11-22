@@ -1,0 +1,176 @@
+[
+ {
+  "lock": "L1",
+  "where": "1280: the shared card (.phc) renders",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: \"+ Add a task\"",
+  "ok": true,
+  "detail": "+ Add a task"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: \"Set aside · n\"",
+  "ok": true,
+  "detail": "Set aside · 2"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: the Contact list card was read",
+  "ok": true,
+  "detail": "{\"x\":272,\"w\":976,\"y\":129.75}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "272.0 vs 272.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "976.0 vs 976.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1280: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: the shared card (.phc) renders",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: \"+ Add a task\"",
+  "ok": true,
+  "detail": "+ Add a task"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: \"Set aside · n\"",
+  "ok": true,
+  "detail": "Set aside · 2"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: the Contact list card was read",
+  "ok": true,
+  "detail": "{\"x\":276,\"w\":1200,\"y\":129.75}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "276.0 vs 276.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "1200.0 vs 1200.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1512: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: the shared card (.phc) renders",
+  "ok": true,
+  "detail": "phc td7-card"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: h1 \"To-do list\" with data-page-title",
+  "ok": true,
+  "detail": "To-do list · true"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: art is MENTOR_ART",
+  "ok": true,
+  "detail": "/images/dash/mentor-leaning.png"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: \"+ Add a task\"",
+  "ok": true,
+  "detail": "+ Add a task"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: \"Set aside · n\"",
+  "ok": true,
+  "detail": "Set aside · 2"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: the Contact list card was read",
+  "ok": true,
+  "detail": "{\"x\":480,\"w\":1200,\"y\":129.75}"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: card x equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "480.0 vs 480.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: card w equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "1200.0 vs 1200.0"
+ },
+ {
+  "lock": "L1",
+  "where": "1920: card y equals the Contact list's (±1)",
+  "ok": true,
+  "detail": "129.8 vs 129.8"
+ },
+ {
+  "lock": "L1",
+  "where": "+ Add a task opens the compose card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L1",
+  "where": "Set aside opens the Set aside view",
+  "ok": true,
+  "detail": ""
+ }
+]

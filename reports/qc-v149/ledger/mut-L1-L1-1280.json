@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "L1-1280",
+  "where": "population: the Versions card was read",
+  "ok": true,
+  "detail": "{\"top\":24,\"c\":{\"border-top-left-radius\":\"18px\",\"background-color\":\"rgb(251, 248, 244)\",\"box-shadow\":\"rgba(28, 19, 15, 0.05) 0px 1px 2px 0px, rgba(28, 19, 15, 0.4) 0px 18px 34px -28px, rgba(28, 19, 15, 0.1) 0px 0px 0px 1px inset\"},\"h\":{\"font-family\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"font-size\":\"34px\"}}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the header card",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "title",
+  "ok": true,
+  "detail": "Query Centre"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "body names the page's book in bold, or says every query you've sent",
+  "ok": true,
+  "detail": "Every query you’ve sent, wherever it stands. Log what you send, record · ms null"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "+ Log a query",
+  "ok": true,
+  "detail": "+ Log a query"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "Record a response",
+  "ok": true,
+  "detail": "Record a response"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "the art, drawn, 180 × 160",
+  "ok": true,
+  "detail": "{\"w\":440,\"bw\":180,\"bh\":160}"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "its top equals the Versions card's below the content top",
+  "ok": true,
+  "detail": "qc 24.0 · versions 24.0"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "card border-top-left-radius equals Versions'",
+  "ok": false,
+  "detail": "4px vs 18px"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "card background-color equals Versions'",
+  "ok": true,
+  "detail": "rgb(251, 248, 244) vs rgb(251, 248, 244)"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "card box-shadow equals Versions'",
+  "ok": true,
+  "detail": "rgba(28, 19, 15, 0.05) 0px 1px 2px 0px, rgba(28, 19, 15, 0.4) 0px 18px 34px -28px, rgba(28, 19, 15, 0.1) 0px 0px 0px 1px inset vs rgba(28, 19, 15, 0.05) 0px 1px 2px 0px, rgba(28, 19, 15, 0.4) 0px 18px 34px -28px, rgba(28, 19, 15, 0.1) 0px 0px 0px 1px inset"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "title font-family equals Versions'",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace vs \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "title font-size equals Versions'",
+  "ok": true,
+  "detail": "34px vs 34px"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "no living hero",
+  "ok": true,
+  "detail": "qc138 header present"
+ },
+ {
+  "lock": "L1-1280",
+  "where": "no breakdown card",
+  "ok": true,
+  "detail": "breakdown present"
+ }
+]

@@ -1,0 +1,381 @@
+{
+  "checks": 89,
+  "LAQ1 Agent": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": [
+      {
+        "type": "text",
+        "qls": "find"
+      }
+    ]
+  },
+  "LAQ1 Sent": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ1 Sent, calendar open": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ2": {
+    "future": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "past": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "next": true
+  },
+  "LAQ1 Materials": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ1 How": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ1 Check": {
+    "selects": 0,
+    "dates": 0,
+    "inputs": []
+  },
+  "LAQ3": {
+    "who": "Ana",
+    "when": "12 Oct",
+    "what": "Coastal",
+    "how": "Email"
+  },
+  "LAQ9 Agent": [
+    {
+      "k": "who",
+      "state": "now",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 40,
+      "bg": "rgb(255, 255, 255)",
+      "text": "1"
+    },
+    {
+      "k": "when",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "2"
+    },
+    {
+      "k": "what",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "3"
+    },
+    {
+      "k": "how",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "4"
+    },
+    {
+      "k": "check",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "5"
+    }
+  ],
+  "LAQ9 Sent": [
+    {
+      "k": "who",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "when",
+      "state": "now",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 40,
+      "bg": "rgb(255, 255, 255)",
+      "text": "2"
+    },
+    {
+      "k": "what",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "3"
+    },
+    {
+      "k": "how",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "4"
+    },
+    {
+      "k": "check",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "5"
+    }
+  ],
+  "LAQ9 Materials": [
+    {
+      "k": "who",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "when",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "what",
+      "state": "now",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 40,
+      "bg": "rgb(255, 255, 255)",
+      "text": "3"
+    },
+    {
+      "k": "how",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "4"
+    },
+    {
+      "k": "check",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "5"
+    }
+  ],
+  "LAQ9 How": [
+    {
+      "k": "who",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "when",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "what",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "how",
+      "state": "now",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 40,
+      "bg": "rgb(255, 255, 255)",
+      "text": "4"
+    },
+    {
+      "k": "check",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "5"
+    }
+  ],
+  "LAQ9 Check": [
+    {
+      "k": "who",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "when",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "what",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "how",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "check",
+      "state": "now",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 40,
+      "bg": "rgb(255, 255, 255)",
+      "text": "5"
+    }
+  ],
+  "LAQ9 Sent, reopened": [
+    {
+      "k": "who",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "when",
+      "state": "now",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 40,
+      "bg": "rgb(255, 255, 255)",
+      "text": "2"
+    },
+    {
+      "k": "what",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "how",
+      "state": "done",
+      "tag": "BUTTON",
+      "focusable": true,
+      "w": 32,
+      "bg": "rgb(42, 58, 82)",
+      "text": "✓"
+    },
+    {
+      "k": "check",
+      "state": "todo",
+      "tag": "SPAN",
+      "focusable": false,
+      "w": 32,
+      "bg": "rgb(243, 238, 232)",
+      "text": "5"
+    }
+  ],
+  "LAQ6": {
+    "toast": "Ana loggedUndo",
+    "line": "Ana is logged. Who's next? We'll keep the same date and materials.",
+    "whenBefore": "Today",
+    "whatBefore": "Coastal",
+    "landed": "check"
+  },
+  "LAQ7": {
+    "ms": "Twenty-five queries. That takes some nerve.",
+    "n": "25",
+    "line": "Your 25th query for Murphy's Day Out."
+  },
+  "LAQ8": {
+    "head": "Off to Ana.",
+    "cursor": false,
+    "confetti": false,
+    "anims": 0
+  }
+}

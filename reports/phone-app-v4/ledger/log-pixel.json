@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PA4-7",
+  "where": "an agent with no query yet (population)",
+  "ok": true,
+  "detail": "53 agents"
+ },
+ {
+  "lock": "PA4-7",
+  "where": "With it says first 50 pages, untouched",
+  "ok": true,
+  "detail": "Query letter, Synopsis, First 50 pages"
+ },
+ {
+  "lock": "PA4-7",
+  "where": "Reply expected is 8 weeks out, with its date",
+  "ok": true,
+  "detail": "In 8 weeks, by 7 Jan vs 7 Jan"
+ },
+ {
+  "lock": "PA4-7",
+  "where": "one query stored",
+  "ok": true,
+  "detail": "q_mwcv8lz6_mpe9oy"
+ },
+ {
+  "lock": "PA4-7",
+  "where": "v3's record: agent, today, the sample, the nudge a week after the date",
+  "ok": true,
+  "detail": "{\"dateSent\":\"2026-11-12T12:00:00.000Z\",\"nudge\":\"2027-01-14T12:00:00.000Z\",\"mw\":[\"{\\\"stringValue\\\":\\\"Query Letter\\\"}\",\"{\\\"stringValue\\\":\\\"Synopsis\\\"}\",\"{\\\"mapValue\\\":{\\\"fields\\\":{\\\"material\\\":{\\\"stringValue\\\":\\\"Sample Pages\\\"},\\\"type\\\":{\\\"stringValue\\\":\\\"pages\\\"},\\\"quantity\\\":{\\\"integerValue\\\":\\\"50\\\"}}}}\"],\"ifNo\":\"Remind me to nudge\",\"we\":false}"
+ },
+ {
+  "lock": "PA4-7",
+  "where": "Undo removes it",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,590 @@
+{
+ "H2-1440": {
+  "qc": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 829.25,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "88 queries sent",
+    "buttonH": 46,
+    "grid": "268px 374px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   }
+  },
+  "cl": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.90625,
+    "height": 227.15625,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 867,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "53 agents on file",
+    "buttonH": 23.75,
+    "grid": "268px 374px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "todo": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 847.984375,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "105 things to do",
+    "buttonH": 46,
+    "grid": "268px 552.359px 381.641px",
+    "artDisplay": "flex",
+    "rightW": 381.640625
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 0,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "105 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "letters": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.859375,
+    "height": 227.109375,
+    "width": 1288,
+    "scLeft": 0,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 821.8125,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "3 query letters",
+    "buttonH": 46,
+    "grid": "268px 962px",
+    "artDisplay": "block",
+    "rightW": 0
+   },
+   "bar": {
+    "missing": ".qc156-slim"
+   }
+  },
+  "pk": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.890625,
+    "height": 227.140625,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 696.265625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "4 packages",
+    "buttonH": 46,
+    "grid": "268px 934px 0px",
+    "artDisplay": "flex",
+    "rightW": 0
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  }
+ },
+ "H2-1717": {
+  "qc": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 829.25,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "88 queries sent",
+    "buttonH": 46,
+    "grid": "268px 651px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   }
+  },
+  "cl": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.90625,
+    "height": 227.15625,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 867,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "53 agents on file",
+    "buttonH": 23.75,
+    "grid": "268px 651px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "todo": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 847.984375,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "105 things to do",
+    "buttonH": 46,
+    "grid": "268px 829.359px 381.641px",
+    "artDisplay": "flex",
+    "rightW": 381.640625
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 0,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "105 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "letters": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.859375,
+    "height": 227.109375,
+    "width": 1565,
+    "scLeft": 0,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 821.8125,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "3 query letters",
+    "buttonH": 46,
+    "grid": "268px 1239px",
+    "artDisplay": "block",
+    "rightW": 0
+   },
+   "bar": {
+    "missing": ".qc156-slim"
+   }
+  },
+  "pk": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.890625,
+    "height": 227.140625,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 696.265625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "4 packages",
+    "buttonH": 46,
+    "grid": "268px 1211px 0px",
+    "artDisplay": "flex",
+    "rightW": 0
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  }
+ },
+ "manuscripts-1440": {
+  "header": {
+   "left": 112,
+   "right": 1400,
+   "top": 143.75,
+   "bottom": 370.75,
+   "height": 227,
+   "width": 1288,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 861.640625,
+   "titleSize": "54px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "Murphy's Day Out",
+   "buttonH": 46,
+   "grid": "268px 504.031px 429.969px",
+   "artDisplay": "block",
+   "rightW": 429.96875
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 394.75,
+   "bottom": 1244.296875,
+   "tag": "DIV",
+   "cls": "ms29-desk"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     "[data-ms27='header']",
+     0
+    ],
+    [
+     "[data-ms27='book']",
+     0
+    ],
+    [
+     "[data-ms28='foot']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "hidden",
+   "opacity": "0",
+   "top": 6,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "Murphy's Day Out",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 900,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 12,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "Murphy's Day Out",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ },
+ "manuscripts-1717": {
+  "header": {
+   "left": 112,
+   "right": 1677,
+   "top": 143.75,
+   "bottom": 370.75,
+   "height": 227,
+   "width": 1565,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 861.640625,
+   "titleSize": "54px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "Murphy's Day Out",
+   "buttonH": 46,
+   "grid": "268px 781.031px 429.969px",
+   "artDisplay": "block",
+   "rightW": 429.96875
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 394.75,
+   "bottom": 1244.296875,
+   "tag": "DIV",
+   "cls": "ms29-desk"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     "[data-ms27='header']",
+     0
+    ],
+    [
+     "[data-ms27='book']",
+     0
+    ],
+    [
+     "[data-ms28='foot']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "hidden",
+   "opacity": "0",
+   "top": 6,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "Murphy's Day Out",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 900,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 12,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "Murphy's Day Out",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ },
+ "manuscripts-H8": {
+  "820": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 37.140625,
+   "titleClipped": true,
+   "headerClipped": false,
+   "past": []
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": []
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": []
+  },
+  "long": {
+   "len": 60,
+   "lines": 7,
+   "size": "54px",
+   "clipped": false
+  }
+ }
+}

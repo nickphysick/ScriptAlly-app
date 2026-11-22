@@ -1,0 +1,17 @@
+[
+ {
+  "name": "1 action: the footer is one height across the tabs",
+  "ok": true,
+  "got": "121 / 121 / 121 / 121"
+ },
+ {
+  "name": "3 actions: the footer is one height across the tabs",
+  "ok": true,
+  "got": "121 / 121 / 121 / 121"
+ },
+ {
+  "name": "one- and three-action cards are one height on every tab",
+  "ok": true,
+  "got": "700 / 700 / 700 / 700 / 700 / 700 / 700 / 700"
+ }
+]

@@ -1,0 +1,139 @@
+
+Running 8 tests using 1 worker
+
+[1/8] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/8] [measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage
+  1) [measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:311:13
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-76bce--of-N-no-bars-finished-sage-measure/error-context.md
+
+
+[3/8] [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's
+  2) [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:349:13
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-19af9-y-pulses-the-Query-Centre-s-measure/error-context.md
+
+
+[4/8] [measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s
+  3) [measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:426:13
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-11d94--1s-to-8s-still-there-at-8s-measure/error-context.md
+
+
+[5/8] [measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s
+  4) [measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:472:13
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-4c511-sage-and-still-there-at-15s-measure/error-context.md
+
+
+[6/8] [measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick
+  5) [measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:499:13
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-0d84f-r-a-skip-shows-a-plain-tick-measure/error-context.md
+
+
+[7/8] [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms
+  6) [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:533:11
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-ff01b-e-card-with-a-link-at-400ms-measure/error-context.md
+
+
+[8/8] [measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens)
+  7) [measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens) 
+
+    TypeError: browserContext.addCookies: Invalid URL
+
+      88 |   const token = `t${Date.now()}${Math.floor(Math.random() * 1e6)}`;
+      89 |   const base = process.env.SA_E2E_BASE_URL!;
+    > 90 |   await page.context().addCookies([{ name: "hs1", value: token, url: base }]);
+         |                        ^
+      91 |   await page.addInitScript(({ fresh, token }) => {
+      92 |     try {
+      93 |       if (!document.cookie.split("; ").includes(`hs1=${token}`)) return;
+        at open (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:90:24)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/helpSystemV1.measure.ts:559:11
+
+    Error Context: test-results/helpSystemV1.measure.ts-HS-79b39-g-s-job-Housekeeping-opens--measure/error-context.md
+
+
+  7 failed
+    [measure] › tests/e2e/helpSystemV1.measure.ts:302:1 › HS1-C1 · the pill: a ring and "n of N", no bars; finished, sage 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:335:1 › HS1-C2 · once: a fresh session auto-opens the Contact list's guide and only pulses the Query Centre's 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:416:1 › HS1-C4 · the note: present at 5.5s, gone at 6.6s; hovered from 1s to 8s, still there at 8s 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:463:1 › HS1-C5 · the last item's note is sage and still there at 15s 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:488:1 › HS1-C6 · skip ticks the row and raises n; Undo lowers it; a real save after a skip shows a plain tick 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:528:1 › HS1-D1 · hovering "list health": no card at 200ms, the card with a link at 400ms 
+    [measure] › tests/e2e/helpSystemV1.measure.ts:554:1 › HS1-D2 · click-through: pressing exactly on the words "list health" does the ring's job (Housekeeping opens) 
+  1 passed (37.6s)

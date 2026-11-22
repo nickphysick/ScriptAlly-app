@@ -1,0 +1,72 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88"
+ },
+ {
+  "where": "default Due ascending (late, most late first; then soonest)",
+  "ok": true,
+  "detail": "15 Nov | 15 Nov | 18 Nov | 1 Dec | 9 Dec | 10 Dec | — | — | — | — | — | —"
+ },
+ {
+  "where": "undated last",
+  "ok": false,
+  "detail": "— | — | — | — | — | —"
+ },
+ {
+  "where": "late rows lead",
+  "ok": false,
+  "detail": "late at 48,49,50,51,52,53,54,55"
+ },
+ {
+  "where": "agent asc",
+  "ok": false,
+  "detail": "ascending · out of order at 48: “wren calloway” then “ana duarte”"
+ },
+ {
+  "where": "agent desc",
+  "ok": false,
+  "detail": "descending · out of order at 48: “agent not recorded” then “wren ashcombe”"
+ },
+ {
+  "where": "agency asc",
+  "ok": false,
+  "detail": "ascending · out of order at 45: “whitfield agency” then “blaine & vole”"
+ },
+ {
+  "where": "agency desc",
+  "ok": false,
+  "detail": "descending · out of order at 46: “abara grant agency” then “vance associates”"
+ },
+ {
+  "where": "queried asc",
+  "ok": false,
+  "detail": "ascending · out of order at 17: “1789858800000” then “1772496000000”"
+ },
+ {
+  "where": "queried desc",
+  "ok": false,
+  "detail": "descending · out of order at 48: “1713394800000” then “1788822000000”"
+ },
+ {
+  "where": "heard asc",
+  "ok": false,
+  "detail": "ascending · out of order at 31: “1793145600000” then “1782774000000”"
+ },
+ {
+  "where": "heard desc",
+  "ok": false,
+  "detail": "descending · out of order at 31: “1773446400000” then “1787871600000”"
+ },
+ {
+  "where": "due asc",
+  "ok": false,
+  "detail": "ascending · out of order at 6: “1796860800000” then “1758931200000”"
+ },
+ {
+  "where": "due desc",
+  "ok": true,
+  "detail": "descending · 1796860800000 | 1796774400000 | 1796083200000 | 1794960000000 | 1794700800000 | 1794700800000"
+ }
+]

@@ -1,0 +1,17 @@
+[
+ {
+  "where": "the Contact list (1277 elements) has no green",
+  "ok": false,
+  "detail": "b.cl26-ht color=rgb(78, 125, 96)"
+ },
+ {
+  "where": "the card's saved outline is navy, not green",
+  "ok": true,
+  "detail": "rgb(42, 58, 82) 0px 0px 0px 2px inset"
+ },
+ {
+  "where": "the open card (119 elements) has no green",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "F5",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 cells"
+ },
+ {
+  "lock": "F5",
+  "where": "1280 none clipped or wrapped",
+  "ok": false,
+  "detail": "\"Partial requestedDAY 55\" clip false lines 4; \"OfferDAY 66\" clip false lines 4; \"Full requestedDAY 33\" clip false lines 4"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 cells"
+ },
+ {
+  "lock": "F5",
+  "where": "1512 none clipped or wrapped",
+  "ok": false,
+  "detail": "\"Partial requestedDAY 55\" clip false lines 4; \"OfferDAY 66\" clip false lines 4; \"Full requestedDAY 33\" clip false lines 4"
+ }
+]

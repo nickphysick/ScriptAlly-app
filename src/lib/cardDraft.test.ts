@@ -43,12 +43,13 @@ describe("reading a record", () => {
     const a = { ...agent("fx-long"), genres: ["literary-fiction", "Thriller"] } as Agent;
     expect(draftOf(a).genres).toEqual(["Literary fiction", "Thriller"]);
   });
-  it("legacy method spellings read as the enum (ruling 2); Other reads as nothing chosen", () => {
+  /* re-pointed (Add agent v1): "Other" is its own method now (SubmissionMethod.OTHER), with its words beside it */
+  it("legacy method spellings read as the enum (ruling 2); Other reads as Other", () => {
     expect(methodOf("QueryManager")).toBe(SubmissionMethod.QUERY_MANAGER);
     expect(methodOf("Agency form")).toBe(SubmissionMethod.ONLINE_FORM);
     expect(methodOf("Online Form")).toBe(SubmissionMethod.ONLINE_FORM);
     expect(methodOf("Post")).toBe(SubmissionMethod.POST);
-    expect(methodOf("Other")).toBeNull();
+    expect(methodOf("Other")).toBe(SubmissionMethod.OTHER);
     expect(methodOf(undefined)).toBeNull();
   });
   it("a legacy full-name country reads as its ISO code", () => {

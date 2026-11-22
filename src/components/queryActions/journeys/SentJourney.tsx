@@ -14,8 +14,9 @@
  * as a CHECK: a second partial to one agent is legitimate (a resend) and unusual, which is exactly
  * what a check is for.
  */
+import { STAGE_RESPONSE_WINDOWS } from "../../../lib/queryAmbient";
 import React, { useMemo, useState } from "react";
-import { deleteField } from "firebase/firestore";
+import { saveSent } from "../../../lib/queryActions/stepSaves";
 import { useScriptAllyDb } from "../../../lib/db";
 import { QueryStatus, SubmissionMethod, type Agent, type Query } from "../../../types";
 import {
@@ -27,12 +28,13 @@ import {
   Chips, DateField, Fl, Note, NoteLink, PlanTrack, Radios, SampleControl, SampleLine, TextBox, Toggle, Who,
 } from "../controls";
 import type { JourneyProps } from "../QueryDrawer";
+import { sendKindOf, type SentKind } from "../../../lib/queryActions/sendKind";
 import type { Guard, JourneyStep, JourneyView } from "../journey";
 import type { TrackPoint } from "../../../lib/queryActions/track";
 import { emptyView } from "./ResponseJourney";
 import { agentName, dayIn, dayOut, firstName, nrmnOf, seedOf, viaLabel, viaOptions, whoLine } from "./common";
 
-type Kind = "partial" | "full" | "rr";
+type Kind = SentKind;
 
 /** The stored request → the sample it asked for, or null when the request named no amount. */
 export function requestSample(q: Query): Sample | null {
@@ -84,7 +86,8 @@ export function SentJourney({ req, today, children }: JourneyProps) {
   const [touched, setTouched] = useState(!!req.seed);
 
   if (!q) return children(emptyView("SENT WHAT THEY ASKED FOR", "I’ve sent it"));
-  const kind: Kind = q.status === QueryStatus.FULL_REQUESTED ? "full" : q.status === QueryStatus.REVISE_RESUBMIT ? "rr" : "partial";
+  /* v1.1 — one reading (lib/queryActions/sendKind): an offer's "send the full" is a full, whatever the status */
+  const kind: Kind = sendKindOf(q);
   const first = firstName(agent);
   const reqOn = (kind === "partial" ? toDay(q.partialRequestedDate) : kind === "full" ? toDay(q.fullRequestedDate) : null) ?? toDay(q.lastStatusChange) ?? today;
   const due = toDay(q.expectedSendDate);
@@ -184,7 +187,9 @@ export function SentJourney({ req, today, children }: JourneyProps) {
   });
 
   /* ---------- reading window ---------- */
-  const wk = kind === "partial" ? [6, 8, 10] : [8, 12, 16];
+  /* v152 — the usual window is the house one for both (STAGE_RESPONSE_WINDOWS, 12 and 12), the same source as the
+     page's clock; the partial no longer opens on its own 8 */
+  const wk = [8, kind === "partial" ? STAGE_RESPONSE_WINDOWS.partial : STAGE_RESPONSE_WINDOWS.full, 16];
   const ex: Anchor[] = wk.map((w, i) => {
     const d = addDays(sent, w * 7);
     return { k: `w${i}`, label: i === 1 ? `Usual for a ${kind === "partial" ? "partial" : "full"} · ${w} wks` : `${w} wks`, d, sub: dm(d) };
@@ -236,22 +241,8 @@ export function SentJourney({ req, today, children }: JourneyProps) {
     touched: () => [q.id],
     commit: async () => {
       const label = kind === "partial" ? capFirst(`${syn ? "synopsis and " : ""}${sampleName(s)}`) : `${kind === "full" ? "Full manuscript" : "Revised manuscript"}${verName ? ` · ${verName}` : ""}${syn ? " and synopsis" : ""}`;
-      await db.recordMaterialsSent({
-        queryId: q.id,
-        targetStatus: target,
-        sentDate: dayIso(sent),
-        isResubmit: kind === "rr",
-        writerExpectedDate: dayIso(exp),
-        ...(nd ? { nudgeDate: dayIso(nd) } : {}),
-        note: kind === "rr" ? changed : undefined,
-        ...(kind !== "partial" && ver ? { bookVersionId: ver } : {}),
-        eventKey: kind === "partial" ? "partial_sent" : kind === "full" ? "full_sent" : "resubmitted",
-      } as never);
-      const extra: Record<string, unknown> = { lastSentLabel: label };
-      if (q.expectedSendDate) extra.expectedSendDate = deleteField();
-      if (q.sendReminderDate) extra.sendReminderDate = deleteField();
-      if (!nd && q.nudgeDate) extra.nudgeDate = deleteField();
-      await db.updateQuery(q.id, extra as Partial<Query>);
+      /* v149 — the write is the shared sent save (lib/queryActions/stepSaves), the query card's "+ Add a step" too */
+      await saveSent(db, q, { kind, sent, exp, nd, label, note: changed, bookVersionId: ver });
       return { queryId: q.id, message: `${lab} · ${agentName(agent)}`, sub: `REPLY EXPECTED ${up(exp)}`, touched: [q.id] };
     },
   };

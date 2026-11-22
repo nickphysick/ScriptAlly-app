@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "B1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "4 cards, 4 list groups"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 order",
+  "ok": true,
+  "detail": "order health,none,querying,closed"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 equal widths",
+  "ok": false,
+  "detail": "widths 421.0 / 247.7 / 247.7 / 247.7"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 health figure",
+  "ok": true,
+  "detail": "List health reads \"69%\""
+ },
+ {
+  "lock": "B1",
+  "where": "1512 none count",
+  "ok": true,
+  "detail": "none card 39, the list's none rows 39"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 none faces",
+  "ok": true,
+  "detail": "6 faces + 33 more = 39 against 39"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 querying count",
+  "ok": true,
+  "detail": "querying card 11, the list's Your move + Querying rows 11"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 querying faces",
+  "ok": true,
+  "detail": "6 faces + 5 more = 11 against 11"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed count",
+  "ok": true,
+  "detail": "closed card 3, the list's closed rows 3"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 closed faces",
+  "ok": true,
+  "detail": "3 faces + 0 more = 3 against 3"
+ },
+ {
+  "lock": "B1",
+  "where": "1512 heights",
+  "ok": true,
+  "detail": "heights 102.5 / 102.5 / 102.5 / 102.5 against 103"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "4 cards, 4 list groups"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 order",
+  "ok": true,
+  "detail": "order health,none,querying,closed"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 equal widths",
+  "ok": false,
+  "detail": "widths 340.0 / 200.0 / 200.0 / 200.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 health figure",
+  "ok": true,
+  "detail": "List health reads \"69%\""
+ },
+ {
+  "lock": "B1",
+  "where": "1280 none count",
+  "ok": true,
+  "detail": "none card 39, the list's none rows 39"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 none faces",
+  "ok": true,
+  "detail": "5 faces + 34 more = 39 against 39"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 querying count",
+  "ok": true,
+  "detail": "querying card 11, the list's Your move + Querying rows 11"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 querying faces",
+  "ok": true,
+  "detail": "5 faces + 6 more = 11 against 11"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed count",
+  "ok": true,
+  "detail": "closed card 3, the list's closed rows 3"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 closed faces",
+  "ok": true,
+  "detail": "3 faces + 0 more = 3 against 3"
+ },
+ {
+  "lock": "B1",
+  "where": "1280 heights",
+  "ok": true,
+  "detail": "heights 95.1 / 95.1 / 95.1 / 95.1 against 95"
+ }
+]

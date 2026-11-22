@@ -1,0 +1,147 @@
+[
+ {
+  "where": "long · Queried: its title names it, and is on screen (Query sent)",
+  "ok": true,
+  "detail": "Query sent / seen: Query sent 8 JUN COVERING LETTER by email"
+ },
+ {
+  "where": "long · Partial Requested: its title names it, and is on screen (Asked for a partial)",
+  "ok": false,
+  "detail": "Asked for a partial / seen: 8 JUL"
+ },
+ {
+  "where": "long · Partial Sent: its title names it, and is on screen (Sent the partial)",
+  "ok": true,
+  "detail": "Sent the partial / seen: Sent the partial 28 JUL"
+ },
+ {
+  "where": "long · Full Requested: its title names it, and is on screen (Asked for the full)",
+  "ok": false,
+  "detail": "Asked for the full / seen: 6 SEP"
+ },
+ {
+  "where": "long · Full Sent: its title names it, and is on screen (Sent the full)",
+  "ok": true,
+  "detail": "Sent the full / seen: Sent the full 16 OCT"
+ },
+ {
+  "where": "rr · Queried: its title names it, and is on screen (Query sent)",
+  "ok": true,
+  "detail": "Query sent / seen: Query sent 28 JUL COVERING LETTER by email"
+ },
+ {
+  "where": "rr · Full Requested: its title names it, and is on screen (Asked for the full)",
+  "ok": false,
+  "detail": "Asked for the full / seen: 27 AUG"
+ },
+ {
+  "where": "rr · Full Sent: its title names it, and is on screen (Sent the full)",
+  "ok": true,
+  "detail": "Sent the full / seen: Sent the full 16 SEP"
+ },
+ {
+  "where": "rr · Revise & Resubmit: its title names it, and is on screen (Asked for a revision (R&R))",
+  "ok": false,
+  "detail": "Asked for a revision (R&R) / seen: 26 OCT “Loved the voice. The middle sags; tighten the second"
+ },
+ {
+  "where": "passed · Queried: its title names it, and is on screen (Query sent)",
+  "ok": true,
+  "detail": "Query sent / seen: Query sent 7 AUG COVERING LETTER by email"
+ },
+ {
+  "where": "passed · Full Requested: its title names it, and is on screen (Asked for the full)",
+  "ok": false,
+  "detail": "Asked for the full / seen: 26 SEP"
+ },
+ {
+  "where": "passed · Full Sent: its title names it, and is on screen (Sent the full)",
+  "ok": true,
+  "detail": "Sent the full / seen: Sent the full 6 OCT"
+ },
+ {
+  "where": "passed · Rejected: its title names it, and is on screen (Passed)",
+  "ok": false,
+  "detail": "Passed / seen: 26 OCT “Beautifully written, but I didn’t fall for it quite "
+ },
+ {
+  "where": "withdrew · Queried: its title names it, and is on screen (Query sent)",
+  "ok": true,
+  "detail": "Query sent / seen: Query sent 6 SEP COVERING LETTER by email"
+ },
+ {
+  "where": "withdrew · Withdrawn: its title names it, and is on screen (You withdrew)",
+  "ok": true,
+  "detail": "You withdrew / seen: You withdrew 31 OCT an offer elsewhere"
+ },
+ {
+  "where": "offertold · Queried: its title names it, and is on screen (Query sent)",
+  "ok": true,
+  "detail": "Query sent / seen: Query sent 17 AUG COVERING LETTER by email"
+ },
+ {
+  "where": "offertold · Offer: its title names it, and is on screen (Made an offer)",
+  "ok": false,
+  "detail": "Made an offer / seen: 26 OCT “I’d love to represent this book.”"
+ },
+ {
+  "where": "offertold · told: its title names it, and is on screen (Told 6 other agents)",
+  "ok": true,
+  "detail": "Told 6 other agents / seen: Told 6 other agents 27 OCT offer deadline 13 Nov"
+ },
+ {
+  "where": "seven · Queried: its title names it, and is on screen (Query sent)",
+  "ok": true,
+  "detail": "Query sent / seen: Query sent 9 MAY COVERING LETTER by email ✎ Edit"
+ },
+ {
+  "where": "seven · nudge: its title names it, and is on screen (You nudged Seth)",
+  "ok": true,
+  "detail": "You nudged Seth / seen: Following up Query sent · 9 May You nudged Seth 8 JUN by ema"
+ },
+ {
+  "where": "seven · nudge: its title names it, and is on screen (You nudged Seth)",
+  "ok": true,
+  "detail": "You nudged Seth / seen: Following up Query sent · 9 May You nudged Seth 2nd nudge 28"
+ },
+ {
+  "where": "seven · Partial Requested: its title names it, and is on screen (Asked for a partial)",
+  "ok": false,
+  "detail": "Asked for a partial / seen: 18 JUL"
+ },
+ {
+  "where": "seven · Partial Sent: its title names it, and is on screen (Sent the partial)",
+  "ok": true,
+  "detail": "Sent the partial / seen: Sent the partial 7 AUG"
+ },
+ {
+  "where": "seven · Full Requested: its title names it, and is on screen (Asked for the full)",
+  "ok": false,
+  "detail": "Asked for the full / seen: 6 SEP"
+ },
+ {
+  "where": "seven · Full Sent: its title names it, and is on screen (Sent the full)",
+  "ok": true,
+  "detail": "Sent the full / seen: Sent the full 16 OCT"
+ },
+ {
+  "where": "undated · Queried: its title names it, and is on screen (Query sent)",
+  "ok": true,
+  "detail": "Query sent / seen: Query sent 17 AUG COVERING LETTER by email ✎ Edit"
+ },
+ {
+  "where": "undated · Partial Requested: its title names it, and is on screen (Asked for a partial)",
+  "ok": false,
+  "detail": "Asked for a partial / seen: No date"
+ },
+ {
+  "where": "undated · Partial Sent: its title names it, and is on screen (Sent the partial)",
+  "ok": true,
+  "detail": "Sent the partial / seen: Sent the partial 16 OCT"
+ },
+ {
+  "where": "population: every kind of step",
+  "ok": true,
+  "detail": "28"
+ }
+]

@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: a To-do task's query card (seed-pkgq-3) saved from its composer, a draft showing",
+  "ok": true,
+  "got": "seed-pkgq-3"
+ },
+ {
+  "name": "the route is the To-do desk",
+  "ok": true,
+  "got": "http://127.0.0.1:4321/todo"
+ },
+ {
+  "name": "the save bumps the card's frame (one scale animation, 500ms, peak 1.022)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "the save drew no new step on this desk (as on the base): nothing to settle",
+  "ok": true,
+  "got": "1 → 1 · {\"in\":false,\"draft\":true,\"isLast\":false,\"cls\":\"qc152-m me qc1522-draft\"}"
+ },
+ {
+  "name": "its undo bumps too",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "a To-do task whose card saves from a composer with a draft was found",
+  "ok": true,
+  "got": ""
+ }
+]

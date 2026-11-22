@@ -5,17 +5,17 @@
  * cookies from a third party that may use the data for its own purposes need prior consent (PECR;
  * the 2026 statistical-purposes exception is not read as covering GA). So `gtag.js` is never
  * requested, and `window.gtag` never exists, until `grantAnalytics()` runs — and that only runs
- * from the consent bar's Accept or from a stored "granted". "No thanks" stores "denied" and
- * loads nothing.
+ * from a stored "granted". ⚠️ THE CONSENT BAR THAT ASKED WAS DELETED (13 Nov; it could never show,
+ * as no build sets an id), so nothing on any page calls `grantAnalytics` or `denyAnalytics` today:
+ * turning GA on needs a way to ask before it needs an id.
  *
  * ⚠️ THE MEASUREMENT ID IS SET IN `.env.production` ONLY (`VITE_GA_MEASUREMENT_ID`). Dev and local
- * builds carry none, so neither the bar nor the script ever appears there, and test traffic never
- * reaches the live property.
+ * builds carry none, so the script never appears there, and test traffic never reaches the live
+ * property.
  *
- * ⚠️ PUBLIC PAGES ONLY. The bar is mounted by `MarketingShell`; nothing in the app calls this.
+ * ⚠️ PUBLIC PAGES ONLY. `MarketingShell` initialises it; nothing in the app calls this.
  *
- * The visitor's choice is kept in localStorage (`qh.analyticsConsent`) and can be changed from the
- * footer's "Cookie choices", which clears it and shows the bar again. Withdrawing consent stops
+ * The visitor's choice is kept in localStorage (`qh.analyticsConsent`). Withdrawing consent stops
  * further measurement (GA's own consent API) and deletes the `_ga` cookies this site set.
  */
 
@@ -100,7 +100,7 @@ export const denyAnalytics = (): void => {
   clearGaCookies();
 };
 
-/** "Cookie choices" in the footer: forget the answer so the bar asks again. */
+/** Forget the answer, so the next way of asking asks again. (The footer's "Cookie choices" and the bar are gone.) */
 export const reopenConsent = (): void => {
   writeConsent(null);
 };

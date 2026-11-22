@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is none",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is agent",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is you",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 · population: an agent who is closed",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is none",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is agent",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is you",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 · population: an agent who is closed",
+  "ok": false,
+  "detail": "null"
+ }
+]

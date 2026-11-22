@@ -1,0 +1,35 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.2s)
+PVM-3 .mk-pvh1 436.1–537.3
+PVM-3 .mk-pvcount .mk-fmcount 619.2–644.1
+PVM-3 .mk-pvform input[type=email] 658.1–710.1
+PVM-3 .mk-pvform button[type=submit] 720.1–772.1
+PVM-3 .mk-pvmore 825.5–880.5
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:176:1 › PVM-3 @390 × 844: the H1, the counter, the field, Claim and the toggle are all on screen (738ms)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:176:1 › PVM-3 @390 × 844: the H1, the counter, the field, Claim and the toggle are all on screen 
+
+    Error: .mk-pvmore is above the fold
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 844
+    Received:    880.546875
+
+      181 |     console.log(`PVM-3 ${sel} ${r.top.toFixed(1)}–${r.bottom.toFixed(1)}`);
+      182 |     expect(r.top, `${sel} top`).toBeGreaterThanOrEqual(0);
+    > 183 |     expect(r.bottom, `${sel} is above the fold`).toBeLessThanOrEqual(vp.height);
+          |                                                  ^
+      184 |   }
+      185 | });
+      186 |
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:183:50
+
+    Error Context: test-results/pricingMobile.measure.ts-P-6b8b2-he-toggle-are-all-on-screen-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:176:1 › PVM-3 @390 × 844: the H1, the counter, the field, Claim and the toggle are all on screen 
+  1 passed (18.7s)

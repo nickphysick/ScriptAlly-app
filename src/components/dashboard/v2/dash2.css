@@ -1,0 +1,90 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Dashboard v2 (3 Nov; ref design-refs/dashboard-v2). Every rule is scoped to `.d58.d2` (or names a `d2-` class that
+ * only this page renders), so no earlier dashboard sheet's rule is edited. The two built hoop cards are dressed here
+ * by class, never forked.
+ *
+ * ⚠️ brand.tsx names a face on bare h1/h2/h3 with `!important` and on bare p/span/div: every heading here names its
+ * face with two classes and `!important`, and the page hands body text back with one 0-2-1 rule.
+ * ⚠️ THE WEEK CARD (`.d2-wtip`) IS PORTALLED TO <body>: its rules read literals only, never a `--d58-*` token.
+ */
+
+/* ── the page: the landing page's warm gradient, on the dashboard's own scroller only ── */
+.dash-mode .ws-wbody:has(.d58.d2) { background: linear-gradient(180deg, #fbf9f5 0%, #eeebe5 100%); }
+.d58.d2 { --d2-navy: var(--sp-anthracite); --d2-ink: #1c130f; --d2-muted: var(--sp-quiet); --d2-rose: #a0675a; --d2-hair: #ebe4da; background: transparent; }
+/* ⚠️ THE PAGE MAY SCROLL, as feed v1's did: v58's one-screen height (`.d58`'s height from the scrollport, the page
+   `flex: 1 1 0`) is switched off for this mode the way df1.css switches it off for `f1`. The page element is
+   `.d58-page` (v58's); the sheet's padding is the ref's 28px 32px around content capped at 1360px. */
+.d58[data-mode="d2"] { height: auto; }
+.d58[data-mode="d2"] .d58-page {
+  flex: none; box-sizing: border-box; width: 100%; max-width: var(--work-max); margin-inline: auto;
+  /* workspace width v2 (8 Nov): the workspace column — `--work-max` with `--work-gutter` inside it (index.css) */
+  padding: 28px var(--work-gutter) 60px; font-family: var(--d58-serif); color: var(--d2-ink);
+}
+.d58.d2 :is(p, span, div, button, small, b, time, li, em, label) { font-family: inherit; }
+
+/* ── Part A · the navy band ──
+   ⚠️ 28px FROM THE SHEET'S TOP (the ref's sheet padding): the shell's 12px sticky lip (SheetLip) covers the top of
+   every page's scroller, so a smaller inset puts the band's rounded corners under it. DB2 A1 measures it. */
+.d2-band {
+  box-sizing: border-box; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  padding: 22px 28px; border-radius: 18px; background: var(--sp-anthracite); color: #fffaf3;
+  box-shadow: 0 8px 22px rgba(27, 36, 51, 0.18); position: relative; z-index: 2;
+}
+.d2-bandtx { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.d58.d2 .d2-wq { margin: 0 0 6px; font-family: var(--d58-mono) !important; font-weight: 500; font-size: 12px; line-height: 1.3; letter-spacing: 0.16em; text-transform: uppercase; color: #d9967a; }
+.d58.d2 h1.d2-title { margin: 0; font-family: var(--d58-type) !important; font-weight: 400 !important; font-size: 38px !important; line-height: 1.3 !important; letter-spacing: -0.01em; color: #fffaf3 !important; overflow-wrap: anywhere; }
+.d58.d2 .d2-by { margin: 0; font-family: var(--d58-serif); font-style: italic; font-size: var(--sp-body-size); line-height: 1.3; color: rgba(244, 238, 229, 0.75); }
+.d2-acts { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.d58.d2 .d2-pill {
+  height: 40px; padding: 0 16px; border: 0; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font-family: var(--d58-serif); font-weight: 600; font-size: 15px; white-space: nowrap;
+  background: transparent; color: #fffaf3; box-shadow: inset 0 0 0 1px rgba(255, 250, 243, 0.25);
+}
+.d58.d2 .d2-pill--pri { background: #fffaf3; color: #1c130f; box-shadow: none; }
+.d58.d2 .d2-pill:hover { box-shadow: inset 0 0 0 1px rgba(255, 250, 243, 0.55); }
+.d58.d2 .d2-pill--pri:hover { background: #fff; }
+.d2-pill:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+.d2-pill svg { width: 16px; height: 16px; flex: none; }
+.d2-gl { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── the grid ── */
+.d2-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) 400px; gap: 24px; align-items: stretch; margin-top: 22px; }
+/* v2.2: no column grows to fill — each holds its cards at their own height, and the feed (absolute, inset 0) takes the
+   row's height, which is the taller of the left and middle columns */
+.d2-col { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.d2-right { position: relative; min-width: 0; min-height: 420px; }
+@media (max-width: 1320px) {
+  .d2-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) 340px; gap: 18px; }
+  .d58.d2 .d2-pill:not(.d2-pill--pri) { padding: 0 12px; }
+  .d58.d2 .d2-pill:not(.d2-pill--pri) span { display: none; }
+}
+
+
+/* ── ONE LOADING STATE ON DASHBOARD v2 (smart-import-photos-v1.1, issue 6) ───────────────────────
+   While the page loads, EVERY card in the grid is the same pure skeleton: its real frame and size,
+   its band in the grey shimmer, and nothing inside (dash58.css's `d58-skcard` look, applied by the
+   page rather than by each card, so a card that forgets the class cannot leak its content: Next up,
+   Active queries, the Getting started sheet and the founding writer card all did). The contents stay
+   laid out (visibility, never display), so nothing moves when the data lands, and everything fills
+   in at once. The header band and its buttons are page chrome and stay. The feed column draws plain
+   shimmer blocks (Dash58's FeedSkeleton). The corner hawk is not in the grid. */
+.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) * { visibility: hidden !important; }
+.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) :is(.os-frame, .df1-goal) { visibility: visible !important; }
+.d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-card, .d2-gs) :is(.os-band, .fv2-gsh),
+.d58.d2 .d2-fsk i {
+  visibility: visible !important;
+  background: linear-gradient(90deg, #e7e1d9 0%, #f1ece6 45%, #e7e1d9 90%) !important;
+  background-size: 220% 100% !important;
+  animation: d58-sk-shimmer 1.4s linear infinite;
+  color: transparent !important; box-shadow: none !important;
+}
+.d58.d2 .d58-page[data-loading="1"] .d2-grid .d2-gs .fv2-gsh { border-radius: 8px; }
+.d58.d2 .d2-fsk { display: grid; gap: 14px; align-content: start; height: 100%; overflow: hidden; }
+.d58.d2 .d2-fsk i { display: block; height: 22px; width: 46%; border-radius: 8px; }
+.d58.d2 .d2-fsk i:nth-child(3n + 2), .d58.d2 .d2-fsk i:nth-child(3n + 3) { height: 64px; width: 100%; border-radius: 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .d58.d2 .d58-page[data-loading="1"] .d2-grid :is(.os-band, .fv2-gsh), .d58.d2 .d2-fsk i { animation: none; }
+}

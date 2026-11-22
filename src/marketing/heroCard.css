@@ -66,7 +66,7 @@
 .mk-lc-t { font: 400 16.5px/1.25 var(--mk-f-serif); }
 .mk-lc-t i { font-style: italic; color: rgba(28,19,15,.62); }
 .mk-lc-d { padding-top: 4px; font: 400 10.5px/1 var(--mk-f-mono); letter-spacing: .1em; color: #79746c; white-space: nowrap; } /* WCAG AA (launch polish, 2 Nov) */
-.mk-lc-d.mk-late { color: #a2452a; }
+.mk-lc-d.mk-late { color: var(--mk-rust); }
 .mk-lc-att { grid-column: 2/4; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .mk-lc-att span {
   display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 6px; background: #f5f1ea;
@@ -108,7 +108,7 @@
 }
 .mk-lc-ft { display: flex; align-items: flex-end; justify-content: space-between; margin: 12px 18px 0; padding: 12px 0 14px; border-top: 1px solid #ece6de; }
 .mk-lc-ft > span:first-child { display: inline-flex; align-items: center; gap: 7px; font: 400 10.5px/1 var(--mk-f-mono); letter-spacing: .14em; text-transform: uppercase; color: #79746c; } /* WCAG AA (launch polish, 2 Nov): same hue, darker, ≥4.6:1 */
-.mk-lc-ft > span:first-child.mk-late { color: #a2452a; }
+.mk-lc-ft > span:first-child.mk-late { color: var(--mk-rust); }
 .mk-lc-ft > span:first-child em { font-style: normal; }
 .mk-lc-ft > span:last-child { font: 400 16px/1 var(--mk-f-serif); padding-bottom: 3px; box-shadow: inset 0 -1px 0 #1c130f; }
 
@@ -250,7 +250,7 @@
   font: 500 12px/1 var(--mk-f-mono); letter-spacing: .16em; text-transform: uppercase;
 }
 .mk-cgx-body { position: absolute; left: 0; right: 0; top: 44px; height: var(--mk-cgx-h); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 40px; }
-.mk-cgx-disc { position: relative; width: 96px; height: 96px; border-radius: 50%; background: #f5e6df; display: grid; place-items: center; color: #a2452a; box-shadow: 0 0 0 10px rgba(245,230,223,.45); }
+.mk-cgx-disc { position: relative; width: 96px; height: 96px; border-radius: 50%; background: #f5e6df; display: grid; place-items: center; color: var(--mk-rust); box-shadow: 0 0 0 10px rgba(245,230,223,.45); }
 .mk-cgx-disc svg { width: 46px; height: 46px; }
 .mk-cgx-t { margin: 34px 0 0; font: 400 44px/1.08 var(--mk-f-display); letter-spacing: -.01em; color: #1c130f; }
 .mk-cgx-l { margin: 18px 0 0; font: 400 22px/1.45 var(--mk-f-serif); color: rgba(28,19,15,.72); }
@@ -269,3 +269,10 @@
   box-shadow: inset 0 0 0 1px rgba(28,19,15,.12); font: 600 16px/1 var(--mk-f-sans); color: #2a3a52;
 }
 @media (prefers-reduced-motion: reduce) { .mk-pillpop, .mk-lc-att .mk-taskchip { display: none; } }
+
+/* Public pages on phones v1 (29 Oct): the drawer's privacy note under its sign-up was 10.5px, the one
+   line on the landing under 12px once the drawer has grown (publicPhonePolish P2). 12px, and nothing
+   else about the drawer or the card above it changes. */
+@media (max-width: 760px) {
+  .mk-hp-su .mk-betanote { font-size: 12px; }
+}

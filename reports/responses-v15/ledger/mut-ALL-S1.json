@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: the builder opened under the collection",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "agent names off by default",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "a preview drawn",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "nothing uploaded",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "the collection's button opens and closes it",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "CB9",
+  "where": "both written",
+  "ok": true,
+  "detail": "corkboard true, todo true"
+ },
+ {
+  "lock": "CB9",
+  "where": "same fields",
+  "ok": true,
+  "detail": "{\"done\":false,\"dueDate\":\"2026-11-08\",\"surfaceOffset\":\"day-before\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"} vs {\"done\":false,\"dueDate\":\"2026-11-08\",\"surfaceOffset\":\"day-before\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}"
+ },
+ {
+  "lock": "CB9",
+  "where": "turn cb2seed-n7",
+  "ok": true,
+  "detail": "paths colour, dueDate, updatedAt (want colour, dueDate, updatedAt)"
+ },
+ {
+  "lock": "CB9",
+  "where": "turn cb2seed-n12",
+  "ok": true,
+  "detail": "paths dueDate, updatedAt (want dueDate, updatedAt)"
+ }
+]

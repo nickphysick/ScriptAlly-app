@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L6-1512",
+  "where": "no packages: the card",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "its heading",
+  "ok": true,
+  "detail": "No packages yet"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "its button",
+  "ok": true,
+  "detail": "+ New package"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "no tiles",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "no builder",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "no Retired link",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "the button opens the New drawer",
+  "ok": true,
+  "detail": "not open"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "only retired: the card",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "only retired: Retired (1)",
+  "ok": true,
+  "detail": "Retired (1)"
+ },
+ {
+  "lock": "L6-1512",
+  "where": "only retired: no builder",
+  "ok": true,
+  "detail": "0"
+ }
+]

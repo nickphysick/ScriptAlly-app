@@ -1,0 +1,7 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.7s)
+  ✘  2 [measure] › tests/e2e/twoDoorImport.measure.ts:40:1 › D1 the fork renders exactly two tiles and exactly one filled navy button (2.1s)
+    Expected: 2
+    Received: 3
+  1 failed
+  1 passed (20.3s)
+exit=1

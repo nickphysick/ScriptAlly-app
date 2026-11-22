@@ -139,15 +139,10 @@ describe("motion vocabulary lives in ONE shared place", () => {
    MATHS above stay locked — `rowDelayMs`/`gridColumnCount` are pure and would be the first thing
    a future entrance reaches for — and the FLIP's own laws live on: the rows carry
    `data-agent-card`, flip.ts's default selector, asserted below. */
-describe("the FLIP survived the renderer swap", () => {
-  const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
-  const rows = readFileSync(new URL("../components/agents/contact/ContactRows.tsx", import.meta.url), "utf8");
-  it("rows carry flip.ts's own selector, and the page still measures before a reflow", () => {
-    expect(rows).toContain("data-agent-card={a.id}");
-    expect(list).toContain("flipBefore.current = measureFlip(gridRef.current)");
-    expect(list).toContain("playFlip(gridRef.current, before, { durationMs: BUMP_MS })");
-  });
-});
+/* RETIRED (navy-bar-address-book v1, B1): "the FLIP survived the renderer swap" asserted that rows carry
+   `data-agent-card` and that the page measures before a reflow. The address book replaced the rows: a save changes
+   the selected card in place and nothing travels, so the FLIP machinery (flipBefore, measureFlip, playFlip) went with
+   them. The stagger maths above stay locked. */
 
 /* ⚠️ THE THREE-BEAT SAVE IS RETIRED WITH THE FLIP CARD (v11 P4, 25 Sep). Crossfade → breath →
    travel animated a FACE SWAP — the editor face becoming the card face in place, holding still,
@@ -160,23 +155,15 @@ describe("the FLIP survived the renderer swap", () => {
    surviving scrolls target a normal-height ROW and centre it, which is the right block for that
    subject, so the block:"start" law does not transfer. */
 
-describe("the save notice and the FLIP still agree (the surviving law)", () => {
+/* RETARGETED (navy-bar-address-book v1, B1): the FLIP measurement this ordering was anchored on is gone with the rows.
+   The law that survives is the notice's own: where the agent lands is derived through the page's sort before the
+   sentence is written. */
+describe("the save notice knows where the agent landed (the surviving law)", () => {
   const list = readFileSync(new URL("../components/agents/AgentList.tsx", import.meta.url), "utf8");
 
-  it("the outcome is computed BEFORE the motion is measured, so the sentence and the travel agree", () => {
-    /* the outcome derives against the v11 pipeline; the anchor is its own first line, and the
-       "motion" is now the FLIP measurement the reflow plays from */
-    const outcomeAt = list.indexOf("const savedFacts = agentFacts(saved");
-    const measureAt = list.indexOf("flipBefore.current = measureFlip(gridRef.current)");
-    expect(
-      outcomeAt > -1 && measureAt > -1 && outcomeAt < measureAt,
-      "the outcome is worked out after the FLIP measurement — the row can then travel one way while the notice describes another",
-    ).toBe(true);
-  });
-
   it("the notice knows where the row LANDED, not where it was — the sort runs before the sentence", () => {
-    const block = sliceBetween(list, "const savedFacts = agentFacts(saved", "flipBefore.current = measureFlip");
+    const block = sliceBetween(list, "const savedFacts = agentFacts(saved", "canUndo: !!undoSave.current");
     expect(block, "the landing position is no longer derived through the page's own sort").toContain("sortFacts(");
-    expect(block).toContain("setNotice({");
+    expect(block.indexOf("sortFacts(")).toBeLessThan(block.indexOf("setNotice({"));
   });
 });

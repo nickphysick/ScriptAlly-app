@@ -7,7 +7,8 @@
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
-import { renderPage, renderPageSeeded, noNavigate, setActiveManuscript } from "../test/pageSmoke";
+import { renderPage, renderPageSeeded, renderPageSeededWith, noNavigate, setActiveManuscript } from "../test/pageSmoke";
+import { ComponentType } from "../types";
 
 vi.mock("../lib/db", async () => (await import("../test/pageSmoke")).dbMock());
 vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).firebaseMock());
@@ -176,17 +177,32 @@ describe("/manuscripts/comps renders", () => {
     const html = renderPageSeeded(page(), "/manuscripts/comps");
     /* comps v25: the query line left the page (which comps a letter names is logged on the letter) */
     expect(html, "the query line is still on the page").not.toContain("Your query line");
-    /* comps v28: the shared light header (its card counts where the comps are used), the shelf of cards and "What's
-       landing" all rendered, with the comp as a card. The steps still open in a pop-up, so none are on the page. */
-    expect(html, "the light header did not render").toContain('data-slh="header"');
-    expect(html, "the header did not count the comps").toContain("1 comp on file");
-    expect(html, "the header card's rows did not render").toContain('data-slh="row"');
-    expect(html, "the pop-up's link did not render").toContain('data-cx="how-link"');
-    expect(html, "the steps are on the page").not.toContain('data-cv="how-step"');
-    expect(html, "the shelf did not render").toContain("Your comp shelf");
-    expect(html, "the comp's card did not render").toMatch(/data-cx="card"[^>]*>[\s\S]*The Smoke Comp/);
-    expect(html, "the card's slip did not run").toMatch(/data-slip="(notready|sent|draft|shelf)"/);
-    expect(html, "What's landing did not render").toContain("What’s landing");
+    /* comps v30: the navy title card with its highlight, the shelf of cards with each card's stat card, the Scout section;
+       the steps open in a pop-up, so none are on the page. */
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the title card is the shared navy header; its headline is the count,
+       its paragraph and early highlight blocks are gone (the leader shows only once there is one), and "How comp
+       tracking works" sits on the shelf's heading row. */
+    /* RE-POINTED (comps v32, 17 Nov): the headline is "{n} comparable titles"; the shelf is a card of Next up rows with
+       the open comp beside it, then the podium and the Comp-pendium, closed by the Scout strip. v30's paper cards, letter
+       cards and standalone Scout section are retired (tests/e2e/RETIRED-comps-v32.md). */
+    expect(html, "the navy header did not render").toContain('data-wsnh-page="comps"');
+    expect(html, "the headline did not count the comps").toContain(">1 comparable title</h1>");
+    expect(html, "the title card is still on the page").not.toContain('data-cp="top"');
+    expect(html, "the header's paragraph is still on the page").not.toContain('data-cp="lead"');
+    expect(html, "How it works is not in the header").toMatch(/data-cp="how"[^>]*>How it works</);
+    expect(html, "the steps are on the page").not.toContain('data-cp="how-steps"');
+    expect(html, "the shelf did not render").toContain("Your shelf");
+    expect(html, "the comp's row did not render").toMatch(/data-cp="row"[^>]*>[\s\S]*The Smoke Comp/);
+    expect(html, "the row's line did not run").toMatch(/data-cp="row-line"[^>]*>(Not used yet|In a draft letter|Sent to|<b>)/);
+    expect(html, "the open comp did not render").toMatch(/data-cp="open"[^>]*>[\s\S]*Why it compares/);
+    expect(html, "the podium did not render").toContain("The podium");
+    expect(html, "the Comp-pendium did not render").toContain("The Comp-pendium");
+    expect(html, "the Scout strip is not inside the Comp-pendium").toMatch(/data-cp="pendium"[\s\S]*data-cp="scout"/);
+    expect(html, "v30's paper cards are still on the page").not.toContain('data-cp="card"');
+    expect(html, "v30's letter cards are still on the page").not.toContain("Which letter named which comps");
+    /* v28's light header, slip and "What's landing" are gone */
+    expect(html, "v28's light header is still on the page").not.toContain('data-slh="header"');
+    expect(html, "What's landing is still on the page").not.toContain("What’s landing");
     /* v25's list, strip and title panel are gone */
     expect(html, "the strip is still on the page").not.toContain("At a glance");
     expect(html, "the v25 list is still on the page").not.toContain('data-cv="row"');
@@ -196,34 +212,91 @@ describe("/manuscripts/comps renders", () => {
   });
 });
 
-describe("/manuscripts/packages renders", () => {
-  it("renders without throwing with no materials", () => {
-    expect(() => renderPage(<SubmissionPackages />, "/manuscripts/packages")).not.toThrow();
+/* Submission packages v26 (25 Oct): the page lives at /queries/packages. Smoked empty (no manuscript; a manuscript
+   with no package — v43's day one) and POPULATED (a letter in a sent package), because
+   the builder, its packing list and Results only execute once there is something to put in a package. */
+describe("/queries/packages renders", () => {
+  const LETTER = { id: "v1", manuscriptId: "m1", userId: "u1", componentType: ComponentType.QUERY_LETTER, versionName: "Hook-first", fileAttached: false, createdDate: "2026-01-02T00:00:00.000Z", notes: "Names two comps", contentDraft: "Dear agent" };
+  const PACKAGE = { id: "pk1", manuscriptId: "m1", userId: "u1", packageName: "Standard UK", queryLetterVersionId: "v1", synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: "2026-01-03T00:00:00.000Z", icon: "crown" };
+
+  it("renders without throwing with no manuscript", () => {
+    expect(() => renderPage(<SubmissionPackages />, "/queries/packages")).not.toThrow();
   });
 
-  it("…and produces its own chrome", () => {
-    /* v4 Part A: the centred light header — its title keeps data-page-title and counts packages in use */
-    const html = renderPage(<SubmissionPackages />, "/manuscripts/packages");
-    expect(html).toContain('data-page-title="" data-pk4="title"');
-    expect(html).toContain("packages in use");
-  });
-
-  it("renders without throwing once a manuscript is active", () => {
+  /* v62 (18 Nov; re-pointed from v43's day one): a manuscript with no package at all is DAY ONE — the navy header with
+     "No packages yet", "+ Make your first package" and How it works, the founding writer's first-visit note, and one
+     framed card holding the storyboard. No list, no open package, no table. */
+  it("a manuscript with no package is day one: the header, the note, and the storyboard card", () => {
     setActiveManuscript();
-    expect(() => renderPageSeeded(<SubmissionPackages />, "/manuscripts/packages")).not.toThrow();
+    const html = renderPageSeeded(<SubmissionPackages />, "/queries/packages");
+    expect(html).toContain('data-pk62-state="day-one"');
+    expect(html).toContain('data-pk62="title" tabindex="-1">No packages yet</h1>');
+    expect(html).toContain(">+ Make your first package</button>");
+    expect(html).toContain('data-pk62="how"');
+    expect(html).not.toContain('data-pk62="going-out"');
+    expect(html).toContain('data-pk62="note"');
+    expect(html).toContain("<b>Packages is a Pro page.</b> It’s free for you as a founding writer.");
+    expect(html).not.toContain('data-pk62="pro-tag"');
+    expect(html).toContain('data-pk62="day-one"');
+    expect(html).toContain('data-pk62="storyboard"');
+    expect(html).toContain("“Can you write, and is it for me?”");
+    expect(html).toContain("A package needs a version and a letter before it can go out.");
+    for (const gone of ['data-pk62="list"', 'data-pk62="open"', 'data-pk62="table"', "Founding writer perk", "Tell us what you think"]) expect(html).not.toContain(gone);
   });
 
-  /* v4 Part F: a manuscript with no packages is the empty page — the navy panel and its h1, "How it works" with
-     its example, "Ways to get started" — and none of the populated page's header card, filters or sheets. */
-  it("…and with no packages it is the empty page", () => {
+  it("populated, nothing sent: the list, the open package with what it needs, and the table of dashes", () => {
     setActiveManuscript();
-    const html = renderPageSeeded(<SubmissionPackages />, "/manuscripts/packages");
-    expect(html).toContain('data-pk4="empty-panel"');
-    expect(html).toContain("ready to send");
-    expect(html).toContain('data-pk4="example"');
-    expect(html).toContain('data-pk4="ways"');
-    expect(html).not.toContain('data-pk4="summary"');
-    expect(html).not.toContain('data-pk4="pkg-sheet"');
+    const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", { versions: [LETTER], packages: [PACKAGE] });
+    expect(html).toContain('data-pk62-state="nothing-sent"');
+    expect(html).toContain('data-pk62="title" tabindex="-1">1 package</h1>');
+    expect(html).toContain("<em>for</em> The Smoke Test");
+    expect(html).toContain(">+ New package</button>");
+    /* the header's right block shows only a package that can go out — this one has no version */
+    expect(html).not.toContain('data-pk62="going-out"');
+    expect(html).toContain('data-pk62="list"');
+    expect(html).toContain('data-pk62-row="pk1"');
+    expect(html).toContain("Hook-first · no sample yet");
+    expect(html).toContain("Needs a manuscript version");
+    expect(html.indexOf('data-pk62="list"')).toBeLessThan(html.indexOf('data-pk62="open"'));
+    expect(html).toContain("No note yet. Who is this package for?");
+    expect(html).toContain(">Always sent</h4>");
+    expect(html).toContain(">Only if an agent asks</h4>");
+    expect(html).toContain(">Not chosen yet</b>");
+    expect(html).toContain("Names two comps");
+    expect(html).toContain('data-pk62="foot">A package needs a letter and a sample before it can go out.</p>');
+    /* the seeded agent is already queried for this book, so the preview addresses "An agent (example)" */
+    expect(html).toContain("An agent <em>(example)</em>");
+    expect(html).toContain("<p>Dear agent,</p>");
+    expect(html).not.toContain('data-pk62="back"');
+    expect(html).toContain("Nothing sent yet");
+    expect(html).toContain('data-pk62-tr="pk1"');
+    expect(html).not.toContain('data-pk62="totals"');
+    expect(html).not.toMatch(/\d%/);
+  });
+
+  it("populated, sent: In use, As it went, What came back with StatusDot rows, and the totals line", () => {
+    setActiveManuscript();
+    const SENT = { ...PACKAGE, bookVersionId: "bv1", firstSentAt: "2026-01-10T00:00:00.000Z" };
+    const Q = (id: string, status: string) => ({ id, userId: "u1", manuscriptId: "m1", agentId: "a1", packageId: "pk1", status, dateSent: "2026-01-10T00:00:00.000Z", personalisationNotes: "", sendMethod: "Email", responseDeadline: "2026-03-07T00:00:00.000Z", materialsWanted: [] });
+    const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", {
+      versions: [LETTER], packages: [SENT],
+      queries: [Q("q1", "Partial Requested"), Q("q2", "Rejected"), Q("q3", "Queried")],
+    });
+    expect(html).toContain('data-pk62-state="sent"');
+    expect(html).toContain('data-pk62="lock-line"');
+    expect(html).toContain("Sent, so it can’t be changed. Make a copy to try something different.");
+    expect(html).toContain("<small>As it went</small>");
+    expect(html).not.toContain('data-pk62="foot"');
+    expect(html).toContain('data-pk62="back"');
+    expect(html).toContain('data-pk62="cells"');
+    expect(html).toContain('data-pk62-rule="1"');
+    expect(html).toContain("2 of 3 have replied. Wait for 2 more before you change anything.");
+    expect(html).toContain("3 agents, 1 still to reply");
+    expect(html).toContain(">Partial requested<");
+    expect(html).toContain(">Passed<");
+    expect(html).toContain("See these in Queries →");
+    expect(html).toContain('data-pk62="totals">3 queries have gone out with a package. 2 agents have replied and 1 asked to read more.</p>');
+    expect(html).not.toMatch(/\d%/);
   });
 });
 

@@ -104,6 +104,18 @@ describe("the one-time migration", () => {
     expect(planExpectedDateMigration([{ id: "q1", agentId: "stated", dateSent: sent, responseDeadline: near }], weeksFor).drop).toEqual(["q1"]);
   });
 
+  /* Log a query v1.3 — "Close it" stores the day it closes in responseDeadline; that is not a stale expected date */
+  it("a query set to close itself keeps its close date, whether it matches the window or the writer's date", () => {
+    const close = "Mark as no response automatically";
+    const plan = planExpectedDateMigration([
+      { id: "agency", agentId: "stated", dateSent: sent, responseDeadline: derived, ifNoResponse: close },
+      { id: "writer", agentId: "stated", dateSent: sent, responseDeadline: iso(NOW + 40 * DAY), writerExpectedDate: iso(NOW + 40 * DAY), ifNoResponse: close },
+      { id: "nudge", agentId: "stated", dateSent: sent, responseDeadline: derived, ifNoResponse: "Remind me to nudge" },
+    ], weeksFor);
+    expect(plan.drop).toEqual(["nudge"]);
+    expect(plan.adopt).toEqual([]);
+  });
+
   it("a date the agency's window cannot explain becomes the writer's", () => {
     const mine = iso(NOW + 40 * DAY);
     const plan = planExpectedDateMigration([{ id: "q1", agentId: "stated", dateSent: sent, responseDeadline: mine }], weeksFor);
@@ -168,7 +180,7 @@ describe("§1 · addQuery no longer seeds the agency's window", () => {
    incident it recorded (a probe clicking `.agl-done` hit DISCARD, because a shared chassis was
    named for one of its two actions) stays worth knowing, and the agent card's editor does not
    recreate the shape: its foot's Cancel and Save are separately marked buttons
-   (`data-ae="cancel"` / `data-ae="save"`, AgentCardEditor.tsx) with no shared class named for
+   (`data-ae="cancel"` / `data-ae="save"`, AgentEditMode.tsx since v25.2) with no shared class named for
    either action. The WRITE path the incident
    exonerated — draft diff → deletes → `deleteField()` — is unchanged and is asserted by the
    saveAgentEdits suite, not here. Recoverable at 2d160183's parent. */

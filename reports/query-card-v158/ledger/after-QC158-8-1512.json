@@ -1,0 +1,22 @@
+[
+ {
+  "name": "exactly three groups: query, partial, full, in order",
+  "ok": true,
+  "got": "With the query | With the partial | With the full"
+ },
+ {
+  "name": "With the query: disc is queried's Band",
+  "ok": true,
+  "got": "rgb(239, 230, 214)"
+ },
+ {
+  "name": "With the partial: disc is partial's Band",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "With the full: disc is full's Band",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "name": "the fixture holds notes (3) and recorded words (2)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "one list in date order: the older recorded words before this week's notes",
+  "ok": true,
+  "got": "qqnnn"
+ },
+ {
+  "name": "Partial Requested: background is its stage's Band; Send to Corkboard only",
+  "ok": true,
+  "got": "rgb(228, 235, 242) cork"
+ },
+ {
+  "name": "Full Requested: background is its stage's Band; Send to Corkboard only",
+  "ok": true,
+  "got": "rgb(183, 201, 222) cork"
+ }
+]

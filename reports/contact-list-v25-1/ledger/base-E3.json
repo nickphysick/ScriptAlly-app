@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "E3",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "29 rated rows"
+ },
+ {
+  "lock": "E3",
+  "where": "1512 last heading",
+  "ok": false,
+  "detail": "last \"added\""
+ },
+ {
+  "lock": "E3",
+  "where": "1512 stars = starRating",
+  "ok": false,
+  "detail": "53 rows disagree with Firestore"
+ }
+]

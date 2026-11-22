@@ -1,0 +1,22 @@
+[
+ {
+  "name": "a thread of six or more steps exists",
+  "ok": true,
+  "got": "{\"id\":\"seed-query-12\",\"steps\":6}"
+ },
+ {
+  "name": "the body scrolls",
+  "ok": true,
+  "got": "503 > 348"
+ },
+ {
+  "name": "the card did not grow",
+  "ok": true,
+  "got": "714.8048095703125"
+ },
+ {
+  "name": "the footer stays inside the card",
+  "ok": true,
+  "got": ""
+ }
+]

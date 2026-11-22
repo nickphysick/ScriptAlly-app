@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "population: the dock is open",
+  "ok": true,
+  "detail": "Tell us what you found\n\nEvery message reaches our founder.\n\n×\nWHAT KIND OF THING"
+ },
+ {
+  "lock": "D1",
+  "where": "the open dock names no Nick",
+  "ok": true,
+  "detail": "Tell us what you found\n\nEvery message reaches our founder.\n\n×\nWHAT KIND OF THING IS IT?\n!\nSomething's broken\n?\nSomething's confusing\n✦\nAn idea\n♥\nSomething I liked\n⌘ ↵ to send\nTell us                  "
+ },
+ {
+  "lock": "D1",
+  "where": "the dock says 'Every message reaches our founder.'",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "D1",
+  "where": "population: the dock's sent view",
+  "ok": true,
+  "detail": "Got it, thank you\n\nIf it needs a reply, it'll come to harness@scriptally.test fr"
+ },
+ {
+  "lock": "D1",
+  "where": "the sent dock names no Nick, and signs as the team",
+  "ok": true,
+  "detail": "Got it, thank you\n\nIf it needs a reply, it'll come to harness@scriptally.test from feedback@queryhawk.net.\n\n— The QueryHawk team\n\nSend another\nClose                                        "
+ },
+ {
+  "lock": "D1",
+  "where": "the help receipt reads 'Thanks. That goes straight to us.'",
+  "ok": true,
+  "detail": "Thanks. That goes straight to us. "
+ },
+ {
+  "lock": "D1",
+  "where": "population: the help home and its no-results line",
+  "ok": true,
+  "detail": "Nothing matches \"zzqxv\". Try a status name or a page name, or ask us.        "
+ },
+ {
+  "lock": "D1",
+  "where": "the help home names no Nick",
+  "ok": true,
+  "detail": "Nothing matches \"zzqxv\". Try a status name or a page name, or ask us.        "
+ }
+]

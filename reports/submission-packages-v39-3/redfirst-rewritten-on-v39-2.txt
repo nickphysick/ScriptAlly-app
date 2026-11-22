@@ -1,0 +1,18 @@
+  ✗ L1 · the builder's steps are on the page, and no Your materials — steps
+  ✗ L1 · the steps were read — []
+  ✗ L1 · ?tab=syn → the Synopsis step is open — []
+  ✗ L1 · …and only that step — []
+  ✗ L1 · …listing the synopsis — []
+  ✗ L5 · pk40-std (sent): the sent note says it is locked — {"note":0,"stage":1,"name":0}
+  ✗ L5 · pk40-std (sent): no padlock in the pill or beside the name — {"note":0,"stage":1,"name":0}
+  ✗ L3 · pk40-std: it is 30 tall (±1) — 28
+  ✗ L3 · pk40-std: no padlock in it (the sent note says it) — 1
+  ✗ L3 · pk40-ready: it is 30 tall (±1) — 28
+  ✗ L3 · pk40-draft: it reads /^0 of 2 needed$/ — Draft · needs a query letter and pages
+  ✗ L3 · pk40-draft: it is 30 tall (±1) — 28
+  ✗ L4 · BUILD label → the builder 24 (±1) — null
+  ✗ L2 · no other typewriter text (the materials tab, the one exception, is retired) — [{"tag":"H3","cls":"p9-id-libT","head":true,"text":"Your materials"}]
+  ✗ L8-1280 · it holds the labels, the builder label and the builder — {"has":true,"labels":true,"lib":false,"open":true,"kicker":true,"tipIn":false,"bandIn":false,"tip":true,"band":true,"p":{"x":272,"right":1248,"t
+  ✗ L8-1512 · it holds the labels, the builder label and the builder — {"has":true,"labels":true,"lib":false,"open":true,"kicker":true,"tipIn":false,"bandIn":false,"tip":true,"band":true,"p":{"x":276,"right":1476,"t
+  7 failed
+  1 passed (2.1m)

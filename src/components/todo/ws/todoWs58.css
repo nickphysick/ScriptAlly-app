@@ -1,0 +1,119 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v58 — the tray and the hawk's bubble (design-refs/todo-list-v58/todo-list-v58.html, the state it opens in:
+ * all six switches on, open row "Navy edge", colour "Behind the glyph", hawk's bubble "Stage colour"). The ref's
+ * blocks "v58 · 1" to "v58 · 6", "v58.2" and "v58.3" ported with their `body[data-…]` switch prefixes dropped.
+ * Desktop only (768px up); imported last, after todoWs57.css, so it wins at equal specificity.
+ *
+ * ⚠️ NO STAGE HEX IS WRITTEN HERE. The row and the hawk's note carry the query's stage as inline custom properties
+ *    (`--tws58-band`, `--tws58-edge`, `--tws58-ink`, from `stageVars` in lib/todoWs.ts, which reads STAGE_COLOURS and
+ *    bandBackground); a task with no stage carries none and keeps its own drawing.
+ */
+@media (min-width: 768px) {
+  /* ── v58 · 1 · group headings: a ruled line (the Query Centre's), never a band. Supersedes v57 rule 5's chip. ── */
+  .tws .tws-gb, .tws .tws-gb[data-band] { height: 32px; padding: 0 2px; background: none; box-shadow: none; border-radius: 6px; color: var(--tw-ink); }
+  .tws .tws-gb em, .tws .tws-gb[data-band] em { min-width: 0; height: auto; padding: 0; background: none; box-shadow: none; color: var(--tw-mut2); }
+  .tws .tws-gb .tws58-rule { display: block; flex: 1; height: 1px; background: var(--tw-hair); margin: 0 4px 0 6px; }
+  .tws .tws-gb .tws-cv { margin-left: 0; margin-right: 4px; }
+  .tws .tws-gb:hover b { text-decoration: underline; text-decoration-color: var(--tw-hair); text-underline-offset: 4px; }
+
+
+  /* ── v58.2 · one 32px glyph column. A StatusDot row draws its glyph (ink, 19px) on a disc in its query's stage band
+        with a 1px inset edge in the stage's edge colour; every other kind keeps its own drawing at 32px. ── */
+  .tws .tws-ti { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 11px; }
+  .tws .tws-ti .tws-av { width: 32px; height: 32px; }
+  .tws .tws-ti[data-tws58-stage] .tws-av[data-k="glyph"] {
+    border-radius: 50%; background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge); color: var(--tw-ink);
+  }
+  .tws .tws-ti[data-tws58-stage] .tws-av[data-k="glyph"] svg { width: 19px; height: 19px; }
+
+
+  /* ── v58 · 2 · the open row: white, a hairline ring, a soft shadow and a 3px navy bar on its left edge ── */
+  .tws .tws-ti[aria-current="true"], .tws .tws-ti[aria-current="true"]:hover {
+    background: #fff; box-shadow: 0 0 0 1px var(--tw-hair), 0 6px 16px -10px rgba(28, 19, 15, 0.3); margin-top: 4px; margin-bottom: 6px;
+  }
+  .tws .tws-ti[aria-current="true"]::after {
+    content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--tw-navy);
+  }
+
+
+  /* ── v58 · 3 · the figure on one line: the number in typewriter, then its words in serif ── */
+  .tws .tws-du { display: flex; align-items: baseline; justify-content: flex-end; gap: 5px; }
+  .tws .tws-du b { font-size: 15px; }
+  .tws .tws-du small { font-size: 13.5px; }
+
+
+  /* ── v58 · 4 · nothing changes colour with how long a task has waited: the figure is one ink on every row, and the
+        desk's chip (which now says what the row says) is drawn one way on every task, as the ref's chip is ── */
+  .tws .tws-du[data-late] b { color: var(--tw-ink2); }
+  .tws .tws-du[data-late] small { color: var(--tw-mut2); }
+  .tws .tws-dchip, .tws .tws-dchip[data-late] { color: inherit; } /* its edge: v58.1 rule 3, none */
+
+
+  /* ── v58 · 6 · one row height, a hairline between rows, more air above a group ── */
+  .tws .tws-ti { min-height: 58px; padding: 8px 11px; margin: 0; border-radius: 10px; }
+  .tws .tws-ti:not([aria-current="true"]) + .tws-ti:not([aria-current="true"])::before {
+    content: ""; position: absolute; top: 0; left: 54px; right: 11px; border-top: 1px solid #ece6dc;
+  }
+  .tws .tws-ti:hover::before, .tws .tws-ti:hover + .tws-ti::before { display: none; }
+  .tws .tws-gbw { margin: 24px 0 6px; }
+  .tws .tws-gbw:first-child { margin-top: 10px; }
+
+
+  /* ── v58.3 · the hawk's bubble in its query's stage colour; a task with no query keeps the blush bubble ── */
+  .tws .tws-mnote[data-tws58-stage] p { background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge); color: var(--tws58-ink); }
+
+
+  /* ══ v58.1 — five fixes to v58 (design-refs/todo-list-v58-1/) ═══════════════════════════════════════════════════ */
+
+  /* ── v58.1 · 1 · the desk header is navy on every task: the wait band's ground, ink and header tokens (todoWs.css's
+     [data-band="wait"]), whatever the band. Stage colour lives on the row's disc, the hawk's bubble and the card, never
+     on the desk header. The housekeeping batch band (todoWs54) keeps its layout; only its colours turn over to read on
+     navy. One shared rule carries the values: CSS cannot point at another rule's declarations, so they are the wait
+     band's, restated once. ── */
+  .tws .tws-wh[data-band], .tws .tws-wh.tws54-band[data-band] {
+    background: var(--tw-navy); color: #fff;
+    --wh-mut: rgba(255, 255, 255, 0.72); --wh-chip: rgba(255, 255, 255, 0.14); --wh-ring: #fff;
+  }
+  .tws .tws-wh.tws54-band .tws54-now, .tws .tws-wh.tws54-band .tws54-now b { color: #fff; }
+  .tws .tws-wh.tws54-band .tws54-prog span { background: rgba(255, 255, 255, 0.22); }
+  .tws .tws-wh.tws54-band .tws54-prog span[data-st="cur"] { background: rgba(255, 255, 255, 0.6); }
+  .tws .tws-wh.tws54-band .tws54-prog span[data-st="done"] { background: #fff; }
+  .tws .tws-wh.tws54-band .tws54-vsw { border-color: transparent; }
+
+  /* ── v58.1 · 2 · a clicked row looks like an open row. No outline from a mouse click; a navy ring for the keyboard
+     (`:focus-visible`), never the browser's blue. The quick actions show, and the figure hides, on hover or keyboard
+     focus only: todoWs.css and v57 rule 4 also do it on `:focus-within`, which a click leaves set, so a row focused
+     with nothing focus-visible and no pointer over it turns back. Tab still reaches both actions (they show as soon as
+     the row or either action is focus-visible).
+     ⚠️ The hider is keyed on the ROW holding focus (`:focus`), never `:focus-within` + `:not(:has(:focus-visible))`:
+     that form hid Snooze in the instant Tab moved focus onto it, and Chromium blurs an element turned display:none, so
+     focus fell to <body> (measured, after run 1). ── */
+  .tws .tws-ti:focus { outline: none; }
+  .tws .tws-ti:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+  .tws .tws-qact [role="button"]:focus { outline: none; }
+  .tws .tws-qact [role="button"]:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 1px; }
+  .tws .tws-ti:focus:not(:focus-visible):not(:hover) .tws-qact { display: none; }
+  .tws .tws-ti:focus:not(:focus-visible):not(:hover) :is(.tws-du, .tws-qf) { visibility: visible; }
+
+  /* ── v58.1 · 3 · no edge on the desk chip, on any task: same ground, same type. Colour never signals time pressure
+     (todoWs.css still draws a terracotta edge on [data-late]; this takes it away). ── */
+  .tws .tws-dchip, .tws .tws-dchip[data-late] { box-shadow: none; }
+
+  /* ── v58.1 · 4 · on a narrow tray (360px or less) the figure's words drop under its number, right-aligned, so the
+     title keeps its line; wider, the figure stays on one line as v58 built it. The tray is a NAMED size container (its
+     width is its grid column's clamp, never its content), so no unnamed @container query inside it changes target;
+     the collapsed strip is left out. ── */
+  .tws .tws-tray:not([data-slim]) { container: tws581tray / inline-size; }
+  @container tws581tray (max-width: 360px) {
+    .tws .tws-ti .tws-du { flex-direction: column; align-items: flex-end; gap: 1px; }
+    .tws .tws-ti .tws-du small { font-size: 13px; }
+  }
+
+  /* ── v58.1 · 5 · Housekeeping's ruled line stops short of Quick fill instead of running under it; the button and the
+     chevron do not move. The ref's 96px leaves the rule 1px under the button on the app (measured: rule end 414, button
+     321–406 at 1280), so 108px: it ends ~11px clear of the button, about the gap the button keeps from the chevron. ── */
+  .tws .tws-gbw:has(.tws-qfb) .tws58-rule { margin-right: 108px; }
+}

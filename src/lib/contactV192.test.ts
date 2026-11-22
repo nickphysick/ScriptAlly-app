@@ -28,10 +28,10 @@ describe("v19.2 §D — past the expected date: a count up to 30 days, then the 
     expect(line(30)).toEqual({ text: "Expected 19 Sep · 30d over", over: true });
   });
   it("31 days over reads Overdue since, with no year in the current year", () => {
-    expect(line(31)).toEqual({ text: "Overdue since 18 Sep", over: true });
+    expect(line(31)).toEqual({ text: "Past expected since 18 Sep", over: true });
   });
   it("400 days over adds the year, because it is not this year's", () => {
-    expect(line(400)).toEqual({ text: "Overdue since 14 Sep 2025", over: true });
+    expect(line(400)).toEqual({ text: "Past expected since 14 Sep 2025", over: true });
   });
   it("the threshold is 30, and the writer's own send-by line is untouched", () => {
     expect(LONG_OVER).toBe(30);

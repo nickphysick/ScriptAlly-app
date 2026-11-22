@@ -1,0 +1,64 @@
+{
+ "cold": {
+  "frames": 33,
+  "log": [
+   {
+    "t": 2147,
+    "what": "NOTHING-YET rows=0"
+   },
+   {
+    "t": 4420,
+    "what": "CAUGHT-UP rows=0"
+   },
+   {
+    "t": 4514,
+    "what": "rows=45"
+   },
+   {
+    "t": 4801,
+    "what": "rows=53"
+   }
+  ],
+  "emptyWhileNoRows": [
+   {
+    "t": 2147,
+    "what": "NOTHING-YET rows=0"
+   },
+   {
+    "t": 4420,
+    "what": "CAUGHT-UP rows=0"
+   }
+  ]
+ },
+ "warm": {
+  "frames": 19,
+  "log": [
+   {
+    "t": 130,
+    "what": "NOTHING-YET rows=0"
+   },
+   {
+    "t": 368,
+    "what": "CAUGHT-UP rows=0"
+   },
+   {
+    "t": 468,
+    "what": "rows=45"
+   },
+   {
+    "t": 739,
+    "what": "rows=53"
+   }
+  ],
+  "emptyWhileNoRows": [
+   {
+    "t": 130,
+    "what": "NOTHING-YET rows=0"
+   },
+   {
+    "t": 368,
+    "what": "CAUGHT-UP rows=0"
+   }
+  ]
+ }
+}

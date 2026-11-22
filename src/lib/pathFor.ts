@@ -32,10 +32,13 @@ export function pathFor(tab: string, subPageName?: string): string {
     case "todo": return "/todo";
     case "agents": return subPageName === "Discover new agents" ? "/agents/discover" : "/agents";
     case "manuscripts": {
-      if (subPageName === "Submission packages") return "/manuscripts/packages";
-      /* the dashboard's quick action — the packages page's Builder tab, where a package is made */
-      if (subPageName === "New package") return "/manuscripts/packages?tab=builder";
+      /* Submission packages v26: the page lives under Queries now (/manuscripts/packages redirects) */
+      if (subPageName === "Submission packages") return "/queries/packages";
+      /* the dashboard's quick action — the packages page's New package dialog */
+      if (subPageName === "New package") return "/queries/packages?tab=builder";
       if (subPageName === "Comparable titles") return "/manuscripts/comps";
+      if (subPageName === "Versions") return "/manuscripts/versions";
+      if (subPageName === "Query letters") return "/materials/letters";
       return "/manuscripts";
     }
     // Two pricing surfaces, and they answer different questions: PUBLIC /pricing is the shop

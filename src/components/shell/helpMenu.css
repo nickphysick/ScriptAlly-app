@@ -30,7 +30,7 @@
 .hm .hm-head { background: #fbeee8; padding: 12px 14px 14px; border-bottom: 1px solid rgba(162, 69, 42, 0.16); }
 .hm .hm-eyb {
   margin: 0; font: 500 10px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase;
-  color: #a2452a;
+  color: var(--sp-rust);
 }
 .hm .hm-eyb + * { margin-top: 10px; }
 .hm .hm-guide { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; }
@@ -38,23 +38,23 @@
 .hm .hm-ring svg { display: block; }
 .hm .hm-ring b {
   position: absolute; inset: 0; display: grid; place-items: center;
-  font: 400 12px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: #a2452a;
+  font: 400 12px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: var(--sp-rust);
 }
 .hm .hm-gt h5 { margin: 0; font: 600 15px/1.3 var(--sp-serif) !important; color: #1c130f; }
-.hm .hm-gt p { margin: 1px 0 0; font: 400 12.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.hm .hm-gt p { margin: 1px 0 0; font: 400 12.5px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); }
 .hm .hm-go {
   all: unset; box-sizing: border-box; cursor: pointer; padding: 6px 10px; border-radius: 8px; background: #2d3a52; color: #ffffff;
   font: 400 12.5px/1.3 var(--sp-serif) !important; white-space: nowrap;
 }
 .hm .hm-go:hover { background: #3b4a66; }
-.hm .hm-go:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+.hm .hm-go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* sections */
 .hm .hm-sec { padding: 6px; }
 .hm .hm-sec + .hm-sec { border-top: 1px solid rgba(28, 19, 15, 0.12); }
 .hm .hm-sl {
   display: block; padding: 6px 10px 4px; font: 400 9.5px/1.3 var(--font-mono, "JetBrains Mono", monospace) !important;
-  letter-spacing: 0.16em; color: rgba(28, 19, 15, 0.45);
+  letter-spacing: 0.16em; color: var(--sp-quiet);
 }
 .hm .hm-row {
   all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 10px;
@@ -63,13 +63,13 @@
 .hm .hm-row:hover, .hm .hm-row:focus-visible { background: #fbf9f5; }
 .hm .hm-row:focus-visible { box-shadow: inset 0 0 0 2px rgba(45, 58, 82, 0.35); }
 .hm .hm-row .t { flex: 1; min-width: 0; font: inherit !important; }
-.hm .hm-i { flex: none; width: 18px; height: 18px; color: rgba(28, 19, 15, 0.62); }
+.hm .hm-i { flex: none; width: 18px; height: 18px; color: var(--sp-muted); }
 .hm .hm-i--arrow { width: 14px; height: 14px; }
 .hm .hm-row .mt, .hm .hm-row .hm-key {
-  font: 400 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.45); border: 0; background: none;
+  font: 400 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: var(--sp-quiet); border: 0; background: none;
 }
 .hm .hm-bdg {
-  font: 600 10px/1.5 var(--font-mono, "JetBrains Mono", monospace) !important; background: #a2452a; color: #ffffff; border-radius: 999px;
+  font: 600 10px/1.5 var(--font-mono, "JetBrains Mono", monospace) !important; background: var(--sp-rust); color: #ffffff; border-radius: 999px;
   padding: 1px 7px;
 }
 /* an article row: 14px, ink 60%, ink on hover; a 15px document icon */
@@ -83,7 +83,7 @@
 /* the foot: PAGE GUIDES and the switch */
 .hm .hm-foot {
   display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid rgba(28, 19, 15, 0.12);
-  background: #fbf9f5; color: rgba(28, 19, 15, 0.62);
+  background: #fbf9f5; color: var(--sp-muted);
 }
 .hm .hm-fl { font: 400 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; }
 .hm .hm-sw {
@@ -94,7 +94,7 @@
 }
 .hm .hm-sw[aria-checked="false"] { background: #c9c3b9; }
 .hm .hm-sw[aria-checked="false"]::after { left: 3px; }
-.hm .hm-sw:focus-visible { outline: 2px solid #a2452a; outline-offset: 2px; }
+.hm .hm-sw:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .hm, .hm .hm-sw::after { animation: none; transition: none; }

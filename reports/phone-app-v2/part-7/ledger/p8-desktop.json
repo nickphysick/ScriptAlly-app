@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "pop",
+  "where": "1512 /queries/responses: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /queries/responses: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /queries/responses: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /queries/analytics: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /queries/analytics: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /queries/analytics: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /manuscripts: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /manuscripts: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /manuscripts: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /queries/responses: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /queries/responses: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /queries/responses: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /queries/analytics: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /queries/analytics: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /queries/analytics: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /manuscripts: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /manuscripts: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /manuscripts: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ }
+]

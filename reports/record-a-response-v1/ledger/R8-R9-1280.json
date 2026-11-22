@@ -1,0 +1,57 @@
+[
+ {
+  "where": "R8 query card: scrim at .45",
+  "ok": true,
+  "detail": "{\"a\":0.45,\"side\":\"scrim\",\"bar\":\"scrim\",\"inert\":true}"
+ },
+ {
+  "where": "R8 query card: over the sidebar and the bar",
+  "ok": true,
+  "detail": "{\"a\":0.45,\"side\":\"scrim\",\"bar\":\"scrim\",\"inert\":true}"
+ },
+ {
+  "where": "R8 query card: the page is inert",
+  "ok": true,
+  "detail": "{\"a\":0.45,\"side\":\"scrim\",\"bar\":\"scrim\",\"inert\":true}"
+ },
+ {
+  "where": "R9 with an answer: the discard strip shows",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "R9 with an answer: the panel stays",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "R9 with nothing entered: it closes",
+  "ok": true,
+  "detail": "{\"dialogs\":1,\"which\":[\"div.d105-how[]\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R9 focus is back on the opener",
+  "ok": true,
+  "detail": "record"
+ },
+ {
+  "where": "R8 closing removes the scrim",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "R8 agent card: scrim at .45",
+  "ok": true,
+  "detail": "{\"a\":0.45,\"side\":\"scrim\",\"bar\":\"scrim\",\"inert\":true}"
+ },
+ {
+  "where": "R8 agent card: over the sidebar and the bar",
+  "ok": true,
+  "detail": "{\"a\":0.45,\"side\":\"scrim\",\"bar\":\"scrim\",\"inert\":true}"
+ },
+ {
+  "where": "R8 agent card: closing removes the scrim",
+  "ok": true,
+  "detail": ""
+ }
+]

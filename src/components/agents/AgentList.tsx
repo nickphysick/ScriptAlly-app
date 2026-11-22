@@ -12,96 +12,108 @@
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
 import { flushSync } from "react-dom";
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../lib/db";
 import { Agent } from "../../types";
-import { agentRelationship } from "../../lib/agentList";
-import {
-  isDoorOpen,
-  contactListState,
-  matchesAgentSearch,
-} from "../../lib/agentList";
+import { contactListState, matchesAgentSearch } from "../../lib/agentList";
 import { prefersReducedMotion } from "../../lib/agentMotion";
 import { reopenReminder } from "../../lib/agentCard";
-import { BUMP_MS } from "../../lib/agentMotion";
 import { SaveOutcome, saveNotice } from "../../lib/agentSaveOutcome";
-import { FlipRects, clearFlip, measureFlip, playFlip } from "../../lib/flip";
 import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
-
-import { useFixedMenu } from "../forms/useFixedMenu";
 import { hkAllFilled } from "../../lib/hkReviewAid";
 import { INTRO_PATH_V18, dismissPath, dismissedAtGaps, introSeenOf, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
-import { agentGapLine, hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
+import { GAP_FOCUS, agentGapAction, agentGapLine, hasPassedOn, hkModel, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
-  contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
+  contactPrefsOf, readHkView, wishlistEveryPath, wishlistNextPath,
   writeHkView, type HkView, type WishlistEvery,
 } from "../../lib/contactPrefs";
 import { type FixResult, type HkFix } from "./contact/ContactHousekeeping";
 import { HousekeepingDrawer } from "./contact/HousekeepingDrawer";
+import { useHkFixes } from "./contact/useHkFixes";
+import { fitToast } from "./card/agentPills";
 import { health as healthOf } from "../../lib/listHealth";
-import { applyPatch, cardPatch, draftOf, inversePatch, toContactDraft, type CardDraft } from "../../lib/cardDraft";
+import { draftOf, toContactDraft, type CardDraft } from "../../lib/cardDraft";
 import { alsoChanges } from "../../lib/contactEdit";
-import { commitCardSave } from "../../lib/agentCardSave";
+import { savedWords, sectionSavedWords, UNDONE_WORDS } from "../../lib/agentCardV2";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
-import { contactFilterCount, agentRows, appliedFilters, GROUP_OPTIONS } from "../../lib/contactList";
+import { CONTACT_STATUS_PARAM, glanceForParam, contactFilterCount, agentRows } from "../../lib/contactList";
 import {
   AgentCardOptions, openAgentCard, openNewAgentCard, subscribeAgentCardEvents,
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactLightHeader } from "./contact/ContactLightHeader";
-import {
-  type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts,
-  contactCensus, contactGroups, dropOptions, emptyContactFilters,
-  letterCounts, matchesContactFilters, sortFacts, surnameInitial,
-} from "../../lib/contactList";
+import { ContactHeaderQc } from "./contact/ContactHeaderQc";
+import { ContactSlimBar } from "./contact/ContactSlimBar";
+import { ContactViews } from "./contact/ContactViews";
+import { useTallRail } from "../shell/useTallRail";
+import { headerFigures } from "../../lib/contactV26";
+import { SET_LABEL } from "../../lib/contactV24";
+/** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
+const setsLabel = (sets: readonly SetKey[]): string => (sets.length === 2 && sets.includes("you") && sets.includes("agent") ? "Querying" : sets.map((k) => SET_LABEL[k]).join(" + "));
+import { ContactLogFlow } from "./contact/ContactLogFlow";
+import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
+import { GLANCE_SETS } from "../../lib/contactV25";
+import { ContactSheet26 } from "./contact/ContactSheet26";
+import { ContactBar } from "./contact/ContactBar";
+import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
+import { bookSteps, stepDate } from "../../lib/contactBook";
+import { heardWords, replyWeeksOf, storyBlocks } from "../../lib/contactStory255";
+import { materialRowsFromAgent } from "../../lib/agentMaterials";
+import { materialWords } from "../../lib/agentPanel";
+import type { AgentFacts as Facts24 } from "../../lib/contactList";
+import { AgentCardPanel24 } from "./contact/AgentCardPanel24";
+import { AgentCardPanel262, requestCardClose, type CloseGuard } from "./contact/AgentCardPanel262";
+import { AgentCard262 } from "./contact/AgentCard262";
+import { agentHistory } from "../../lib/agentHistory";
+import { destroyManifest } from "../../lib/cascade";
+import type { ContactView, Group26Key } from "../../lib/contactListMemory";
+import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wideNext, type SetKey } from "../../lib/contactV24";
+import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
-import { ContactRows } from "./contact/ContactRows";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { GroupMenu, type ContactPop } from "./contact/ContactListControls";
-import { ContactAppliedRow, ContactFilterMenu, genreWords, type AppliedChip } from "./contact/ContactFilterStrip";
-import { escapeDepth } from "../../lib/escapeStack";
-import { quietScroll, usePopover } from "../shell/ListPills";
+import { agentBack, openResponse, responseHosted } from "../../lib/queryPanelStore";
+import { type ContactPop } from "./contact/ContactListControls";
+import { ESC_LEVEL, escapeDepth } from "../../lib/escapeStack";
+import { useAgentSave } from "./card/useAgentSave";
+import { useEditOptions } from "./card/useEditOptions";
+import { useAgentNotes } from "./card/useAgentNotes";
+import { inlineFor, type CardEditKit } from "./contact/AgentCard24";
+import { useToast } from "../toast/ToastProvider";
+import { setAgentEditInterceptor } from "../../lib/agentCardStore";
+import type { InlineField } from "./card/InlineEdits";
+import { usePopover } from "../shell/ListPills";
 import { CONTACT_PIN_STORE, readListView, readListVisit, writeListView, writeListVisit } from "../../lib/contactListMemory";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
 import "./contact/contactV11.css";
 import "./contact/contactV13.css";
 import "./contact/contactV14.css";
-import { nextStep } from "../../lib/contactNextStep";
-import { BLANK_GLANCE } from "./contact/ContactStrip";
-import { ContactListHead } from "./contact/ContactListHead";
-import { AgentPanelNew } from "./panel/AgentPanelNew";
-import { AgentPanel, type AgentPanelTab } from "./panel/AgentPanel";
-import type { PanelAct } from "../../lib/agentPanel";
-import { firstNameOf } from "../../lib/agentPanel";
+/* navy-bar v1 — kept for what still renders: these sheets came in with the list head and the title row (both retired with
+   the Cards and List views), and they also style the light header (`cl17-hd`), the group and the scroller's foot. */
+import "./contact/contactV19.css";
+import "./contact/contactV20.css";
 import { genreLabel } from "../../lib/genres";
-import { destroyManifest } from "../../lib/cascade";
-import { emitAgentCardEvent, closeAgentCard } from "../../lib/agentCardStore";
-import { currentQueryPanel, openQueryPanelFromAgent, subscribeQueryPanel } from "../../lib/queryPanelStore";
-import { GLANCE_LABEL, glanceModel, glanceOf, type GlanceKey } from "../../lib/contactGlance";
-import { usePinList } from "../shell/useFullScreenList";
-import "../shell/listToolbar.css"; /* v18.3 §E — the list toolbar and headings, shared with the Query Centre */
-import { useStickyStack } from "../shell/stickyStack";
+import { glanceOf, type GlanceKey } from "../../lib/contactGlance";
 import { fitsGenre } from "../../lib/contactStrip";
-import { joinGenres } from "../../lib/genreNoun";
-import { cardQuery, cardRows, primaryFor, type CardAct, type CardPrimary } from "../../lib/agentCard";
-import { CANONICAL_GENRES } from "../../lib/genres";
 import { RAIL_GROUPS } from "../shell/railNav";
-import { countryName } from "../../lib/territory";
 
 /** The shared manuscript-scope key — the same one Packages, Comps and Manuscripts read. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
+import { readClpFigures, readClpState } from "../../lib/contactPrinciplesReview";
+import { isDayOne } from "../../lib/contactPrinciples";
+import { undoAgentAdd } from "../../lib/scoutStore";
+import { agentPrimary } from "../../lib/agentDisplay";
+import { Stamp } from "../phone/v4/V4Parts";
 import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
 import { readSkipped } from "../../lib/guideHub";
-import { ContactSkeleton } from "./contact/ContactSkeleton";
+import { downloadAgentsCsv } from "../../lib/agentCsv";
 import "./agentList.css";
 
 /**
@@ -113,6 +125,12 @@ import "./agentList.css";
 /** v16 §E — the device key the shared full-screen hook remembers under (Comparable titles has its own) */
 /** v16 E's key: the shared pin hook reads it once and moves it to `sa.pinList.agents` (v138.6) */
 export const CONTACTS_FULL_KEY = "sa.contactsFull";
+/** principles v1 — the frame's empty pool while loading or failed (one constant, so no render makes a new array) */
+const NO_FACTS: readonly AgentFacts[] = [];
+/** principles v1 — the page's snackbar channel and lifetime (a new one replaces the old; they never stack) */
+const CLP_TOAST = "contact-list";
+const CLP_TOAST_MS = 5000;
+const MONTH3 = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 const DISCOVER = RAIL_GROUPS.flatMap((g) => g.items).find((i) => i.path === "/agents/discover");
 
@@ -133,8 +151,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      page went on stating the old book's facts after the bar had changed book. */
   const { key: locationKey } = useLocation();
   const {
-    agents, queries, manuscripts, activities, updateAgent, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths, taskFlags, deleteAgent,
+    agents, queries, manuscripts, activities, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
+    currentUser, updateUserPaths, deleteAgent, taskFlags, agentsRead, retryAgents,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -157,7 +175,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      so this page and the QC cannot disagree (v11 §10). The clock freezes per data change. */
   const qcRows = useMemo(() => buildQcRows(queries, agents, activities, Date.now()), [queries, agents, activities]);
   /* ⚠️ TOTALS, NEVER THE FILTERED VIEW — over `agents`, not `visible` (the house tile law). */
-  const census = useMemo(() => contactCensus(agents, qcRows, scoped?.id ?? null), [agents, qcRows, scoped]);
   /* ⚠️ THE COUNT CARDS LEFT WITH v12: the card index took the list mount (P2 — their pool
      narrowing, the cardSel state and the bar's "Showing" chips went with them), and P5's empty
      state took the exhibit's. `CountCards` is deleted; the strip indexes, it never filters. */
@@ -173,15 +190,36 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [filters, setFilters] = useState<ContactFilters>(() => rememberedVisit?.filters ?? emptyContactFilters());
   /* v16 §B — THE "AT A GLANCE" GROUP the list is filtered to (Not queried · Querying · Closed), or null. It sits
      BESIDE the chips: both apply, a chip change leaves it alone, and "Clear all" clears both. */
-  const [glance, setGlance] = useState<GlanceKey | null>(() => rememberedVisit?.glance ?? null);
+  /* v24 — the "At a glance" group retired with the light header; the view row's set (below) replaced it. The visit's
+     stored glance is no longer read, so a remembered one cannot filter the list unseen. */
+  const [glance, setGlance] = useState<GlanceKey | null>(null);
+  /* v24 A3 — THE SET (full screen's segments, and since v25 B2 At a glance's cards): over `AgentFacts.stand`, for the
+     visit. A list since v25: At a glance's Querying is two sets, Your move and With the agent. */
+  const [sets, setSets] = useState<readonly SetKey[] | null>(null);
   const [search, setSearch] = useState(() => searchQuery?.trim() || rememberedVisit?.search || "");
   /* v16 §C / v19 baked 2: the page opens UNGROUPED, A to Z by surname; the column headings sort (there is no sort pill) */
-  const [groupKey, setGroupKey] = useState<GroupKey>(() => rememberedView.group);
+  const [groupKey] = useState<GroupKey>(() => rememberedView.group);
   const [sortKey, setSortKeyRaw] = useState<ContactSortKey>(() => rememberedView.sort);
   const [reversed, setReversed] = useState<boolean>(() => rememberedView.reversed);
   /* choosing a sort resets the direction to its natural order (§5) */
-  const setSortKey = useCallback((k: ContactSortKey) => { setSortKeyRaw(k); setReversed(false); }, []);
-  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed }); }, [groupKey, sortKey, reversed]);
+  /* v24 B1 — the view (List or Cards) and the grouping, per device; both read before the first paint */
+  const [view, setView] = useState<ContactView>(() => rememberedView.view);
+  const [byStatus] = useState<boolean>(() => rememberedView.byStatus);
+  /* v26 B — the page's grouping (Letter · Status · No grouping), per device; Letter by default */
+  const [group26, setGroup26] = useState<Group26Key>(() => rememberedView.group26);
+  useEffect(() => { writeListView({ group: groupKey, sort: sortKey, reversed, view, byStatus, group26 }); }, [groupKey, sortKey, reversed, view, byStatus, group26]);
+  /* v24 B2 — the agent whose card is open (Part C draws it); its row and card are marked */
+  const [cardId, setCardId] = useState<string | null>(null);
+  /* v25.1 C4 — the in-place log flow: its seed while open. The page hosts it while it is the page on screen (and not a
+     sandbox); opening it closes the agent card, as one right-hand panel at a time. */
+  const [logSeed, setLogSeed] = useState<ContactLogSeed | null>(null);
+  /* Log a query v1.2 — the staged journey's leave check, for the dimmed page's scrim */
+  const logLeave = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    if (!active || sandbox) return undefined;
+    return hostContactLog((seed) => { setCardId(null); setLogSeed(seed); });
+  }, [active, sandbox]);
+  useEffect(() => { if (!active) setLogSeed(null); }, [active]);
   useEffect(() => { writeListVisit({ filters, search, glance }); }, [filters, search, glance]);
   const pop = usePopover<ContactPop>();
   /* v16 §E — FULL SCREEN is the shared `useFullScreenList` (Comparable titles v25 built it for both pages): the URL
@@ -194,28 +232,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      owns F. The URL still carries it and Esc still leaves it last. */
   /* v19 §A — the pin no longer holds the sidebar at its icons: pinned, the list is the whole sheet and the sidebar
      stays as the writer left it (the mock's pinned state) */
-  const { full, setFull } = usePinList("agents", { routeActive: active, scroller: fullScroller, holdSidebar: false, store: CONTACT_PIN_STORE });
-  /* v19 §A — pin and unpin in one view transition (old out 220ms, new in 300ms); instant under reduced motion or
-     where the browser has none. */
-  const togglePin = useCallback(() => {
-    const next = !full;
-    const doc = document as Document & { startViewTransition?: (cb: () => Promise<void>) => { finished: Promise<void> } };
-    if (!doc.startViewTransition || prefersReducedMotion()) { setFull(next); return; }
-    document.documentElement.classList.add("cl19-vt");
-    /* the router renders the change in a transition, so the callback waits until the group actually wears (or has
-       shed) `data-full` before the new view is captured — never a capture of the old page */
-    const vt = doc.startViewTransition(() => new Promise<void>((resolve) => {
-      flushSync(() => setFull(next));
-      const until = performance.now() + 400;
-      const check = () => {
-        const g = mainColRef.current?.closest(".clv-group");
-        if (!g || g.hasAttribute("data-full") === next || performance.now() > until) resolve();
-        else window.setTimeout(check, 16); /* rendering is held during the update callback, so no rAF */
-      };
-      check();
-    }));
-    void vt.finished.finally(() => document.documentElement.classList.remove("cl19-vt"));
-  }, [full, setFull]);
+  /* v24 D — full screen is the address book, and the sidebar folds to its icons while it is on (the hook's default, as
+     on the Query Centre and in the v24 mock); v19 §A had held it open */
+  /* v26 B — FULL SCREEN IS RETIRED (and with it the address book and the F key): the page is one list. A device that
+     remembered full screen (`qh.cl.view`'s pinned) opens on the list; the flag is no longer read. */
+  const full = false;
 
   // ── Page-load motion (Baked 1) ────────────────────────────────────────────
   // ROUTE ENTRY ONLY. `loadAnim` is armed once on mount and disarmed as soon as the sequence has
@@ -223,42 +244,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   // that re-animates every time you tick a checkbox is exhausting, and this animation introduces
   // the page, it doesn't celebrate each interaction.
   //
-  // Disarming also matters MECHANICALLY: these animations carry fill-mode `both`, and a filled
-  // animation outranks an inline transform, so cards still holding one would silently ignore the
-  // FLIP transforms that arrive in Phase 2. Clearing the class returns them to a movable state.
-  const gridRef = useRef<HTMLDivElement>(null);
   /** the LIST column's box — what the floating bar centres on (§5.4) */
   const mainColRef = useRef<HTMLDivElement>(null);
   /* v138.6 §C — the navy list header: the sticky row, measured by the one stack writer */
-  const lhRef = useRef<HTMLDivElement>(null);
-  // The positions captured just BEFORE a change that reflows the list. Consumed once, by the
-  // layout effect below, on the very next render. (The FLIP survives the grid→rows move: the
-  // rows carry `data-agent-card`, flip.ts's own default selector.)
-  const flipBefore = useRef<FlipRects | null>(null);
   /** The saved card's beat, and the inline notice that outlives the motion. */
   const [notice, setNotice] = useState<{
     text: string; kind: "travel" | "filtered-out" | "failed"; agentId: string; canUndo: boolean;
   } | null>(null);
   /** Which section the card sat in before the save — read once the outcome is computed. */
-  const sectionBeforeSave = useRef<string | null>(null);
   /** The card's own Undo for the last save — the SAME closure its foot offers (a whole-document
    *  snapshot: the agent, the deadlines the fan-out moved, the task flag), so the notice and the card
    *  cannot restore different things. Null when the card could not take a snapshot. */
   const undoSave = useRef<(() => Promise<unknown>) | null>(null);
-
-  // LAST + INVERT + PLAY. Runs after the DOM has the new arrangement but before paint, so the
-  // displaced cards are jumped back to their old positions and released on the next frame. Only
-  // cards that actually MOVED are touched; a card that stayed put gets no transform and no layer.
-  useLayoutEffect(() => {
-    const before = flipBefore.current;
-    if (!before) return;
-    flipBefore.current = null;
-    if (prefersReducedMotion()) return clearFlip(gridRef.current);
-    playFlip(gridRef.current, before, { durationMs: BUMP_MS });
-    const done = window.setTimeout(() => clearFlip(gridRef.current), BUMP_MS + 60);
-    return () => window.clearTimeout(done);
-  });
-
 
   /* ⚠️ THE ONE-SHOT REVEAL (board fixes II, P1). The To-do board's ⋯ menu offers "View the
      agent"; this is the receiving end. sessionStorage rather than a route param, deliberately:
@@ -285,8 +282,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     try { sessionStorage.removeItem("sa.agentReveal"); } catch { /* private mode */ }
     if (!agents.some((a) => a.id === id)) return;  // stale id — consumed, nothing to show
     revealed.current = true; /* v19 §G — the reveal's scroll wins over the visit's remembered one */
-    const card = document.querySelector<HTMLElement>(`[data-agent-card="${id}"]`);
-    card?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    setBookReq({ id, seq: Date.now() });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, agents.length]);
 
@@ -298,576 +294,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
    * list — never a second ordering pass that could disagree.
    */
   const nowMs = useMemo(() => Date.now(), [qcRows]);
-  /* ── v15 §4 — THE NEXT STEP, over the UNFILTERED agent set (§9): the list's filters and Find never reach it.
-     ⚠️ DECLARED HERE, above `inPool` — the ready-only mode reads `readyIds` at render (the TDZ order rule). */
-  const todayIso = useMemo(() => {
-    const d = new Date(nowMs);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  }, [nowMs]);
-  const step = useMemo(
-    () => nextStep({ agents, queries, msId: scoped?.id ?? null, book, todayIso }),
-    [agents, queries, scoped, book, todayIso],
-  );
-  /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
-     v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
-  const factsAll = useMemo(
-    () => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)),
-    [agents, qcRows, scoped],
-  );
-  /* ruling Q5: "takes the book" — any of the agent's genres matching the main genre or any subGenre */
-  const takesFact = useCallback(
-    (x: { genres: string[] }) => x.genres.some(bookHit),
-    [bookHit],
-  );
-  /* the pool: Find and the "At a glance" group — so every chip's count is faceted under them */
-  const inPool = useCallback(
-    (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!glance || glanceOf(x) === glance),
-    [search, glance],
-  );
-  /* v16 §B — the strip's figures, over every agent (never the filtered view) */
-  const glanceM = useMemo(
-    () => glanceModel({ facts: factsAll, rows: qcRows, msId: scoped?.id ?? null, readyIds: step.ready.map((a) => a.id), nowMs }),
-    [factsAll, qcRows, scoped, step, nowMs],
-  );
-  /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
-     the genre tallies it fed are retired with the strip */
-  const visibleFacts = useMemo(
-    () => sortFacts(factsAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed),
-    [factsAll, inPool, filters, sortKey, reversed],
-  );
-  const groupCtx = useMemo(() => ({ takes: takesFact }), [takesFact]);
-  const groups = useMemo(() => contactGroups(groupKey, visibleFacts, groupCtx), [groupKey, visibleFacts, groupCtx]);
-  /* v19 §E — a band counts the rows showing; the v13 "n of m" heading is retired with the powder bands */
-  const factsById = useMemo(
-    () => new Map(visibleFacts.map((x) => [x.agent.id, x])),
-    [visibleFacts],
-  );
-  /* §7.8 — the dead end's drops, only when the list is empty */
-  const drops = useMemo(
-    () => (visibleFacts.length > 0 ? [] : dropOptions(factsAll, filters, search, (x, q) => matchesAgentSearch(x.agent, q), (k) => CANONICAL_GENRES.find((g) => g.id === k)?.label ?? k)),
-    [visibleFacts.length, factsAll, filters, search],
-  );
-  /* §7.7 — the keyboard's focus ring: the rows in the order they are DRAWN (groups flattened) */
-  const [kfId, setKfId] = useState<string | null>(null);
-  const displayIds = useMemo(() => groups.flatMap((g) => g.ids), [groups]);
-  useEffect(() => { if (kfId && !displayIds.includes(kfId)) setKfId(null); }, [displayIds, kfId]);
-  /* §7.7 — what the row keys read, current on every render (the key handler is bound once). ⚠️ DECLARED HERE, above
-     every render-time reader (the trayFor assignment below), never beside the handler — the TDZ order rule. */
-  const rowKeys = useRef({ kfId, displayIds, factsById, trayFor: null as null | ((x: AgentFacts) => CardPrimary), onOpen: null as null | ((id: string, r?: DOMRect) => void), act: null as null | ((id: string, a: CardAct) => void) });
-  rowKeys.current = { ...rowKeys.current, kfId, displayIds, factsById };
-  const shownGroups = groups;
-  const visible = visibleFacts;
-  /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
-  const anyActive = contactFilterCount(filters) > 0 || !!glance || search.trim() !== "";
-  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); }, [setFilters]);
-  /** the "Your agents" panel — "/" scrolls it into view before focusing Find */
-  const wsRef = useRef<HTMLElement | null>(null);
-  /** v19 §F — the toolbar's Filters button: "+N more" on the applied row opens the menu from it */
-  const filRef = useRef<HTMLButtonElement | null>(null);
-
-  /* ── v12 §4 / v13 §6: the marked letter ───────────────────────────────────
-   * ⚠️ DERIVED FROM THE RECTS ON SCROLL, NEVER AN IntersectionObserver'S MEMORY (the house
-   * IO-misses-are-permanent law): the marked cell is the LAST letter divider at or above the line a
-   * strip pick lands a divider on, re-read rAF-throttled on every scroll — a reading that cannot go
-   * stale. Capture-phase on document because scroll does not bubble and the page's scroller is the
-   * shell's, not this component's to name. Letters only: under any other grouping nothing marks.
-   * ⚠️ THE LINE IS READ, NOT RESTATED: the bottom of the list's pinned headings, which is where `landUnder` puts a
-   * picked divider, so a picked letter is always the marked one. */
-  /* v18 §A — THE CURRENT LETTER: the letter of the row at the line under the pinned row and the column headings (the
-     last row whose top is at or above that line; none while the first row is still below it). ONE reader, scheduled once
-     per animation frame on scroll; it writes the current letter for both strips and nothing else. Capture-phase on
-     document because scroll does not bubble. */
-  const [markedLetter, setMarkedLetter] = useState<string | null>(null);
-  useEffect(() => {
-    if (!active) { setMarkedLetter(null); return; }
-    let raf = 0;
-    const read = () => {
-      raf = 0;
-      const col = mainColRef.current;
-      const rows = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-clv="row"][data-initial]')) : [];
-      if (!col || !rows.length) { setMarkedLetter((m) => (m === null ? m : null)); return; }
-      const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
-      const scroller = col.closest<HTMLElement>(".wpg-scroll");
-      if (!scroller) return;
-      /* the line is where the headings sit once STUCK (their sticky top + their height), the place a pick lands a
-         row: read against their current bottom, the first row always touched it and "A" was marked at the top */
-      const line = scroller.getBoundingClientRect().top + (labels ? (parseFloat(getComputedStyle(labels).top) || 0) + labels.offsetHeight : 12) + 2;
-      let cur: HTMLElement | null = null;
-      for (const r of rows) {
-        if (r.getBoundingClientRect().top <= line) cur = r;
-        else break;
-      }
-      const L = cur?.dataset.initial ?? null;
-      setMarkedLetter((m) => (m === L ? m : L));
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
-    raf = requestAnimationFrame(read);
-    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
-    return () => {
-      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [active, groupKey, sortKey, reversed, visibleFacts]);
-
-  /* v16 §C — A LETTER TAB. In the ungrouped list it scrolls to the first agent whose surname starts with the
-     letter, lands that row just under the pinned controls and washes it for 1.4s. Grouped by letter it scrolls to
-     the letter's divider; under any other grouping the pick restores the letter grouping first. "All" returns to
-     the list's top.
-     ⚠️ THE LANDING IS MEASURED, IN PASSES: the stack the row lands under changes height as it pins, so the target
-     is re-read after each jump (the column headings' own bottom, once they have stuck) until it holds. An instant
-     jump, never a smooth one: a smooth scroll cannot be corrected until it ends. */
-  const landUnder = useCallback((el: HTMLElement) => {
-    const sc = el.closest<HTMLElement>(".wpg-scroll");
-    if (!sc) return;
-    let passes = 0;
-    const pass = () => {
-      const labels = el.closest(".lt-panel")?.querySelector<HTMLElement>(":scope > .lt-labels");
-      const line = labels ? labels.getBoundingClientRect().bottom : sc.getBoundingClientRect().top + 12;
-      const delta = el.getBoundingClientRect().top - line;
-      if (Math.abs(delta) < 0.5 || passes >= 4) return;
-      passes += 1;
-      sc.scrollTo({ top: sc.scrollTop + delta, behavior: "instant" as ScrollBehavior });
-      requestAnimationFrame(() => requestAnimationFrame(pass));
-    };
-    pass();
-  }, []);
-  /* the jump to a letter's first row (in the order the list draws): smooth, to the row's measured place under the
-     stuck headings, then `landUnder` corrects it once the scroll has ended */
-  const jumpToLetter = useCallback((letter: string) => {
-    const col = mainColRef.current;
-    const sc = col?.closest<HTMLElement>(".wpg-scroll");
-    const row = col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-clv="row"][data-initial="${letter}"]`)).find((r) => r.getBoundingClientRect().height > 0) : null;
-    if (!col || !sc || !row) return;
-    const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
-    const stickTop = labels ? parseFloat(getComputedStyle(labels).top) || 0 : 12;
-    const under = sc.getBoundingClientRect().top + stickTop + (labels?.offsetHeight ?? 0);
-    const top = Math.max(0, sc.scrollTop + row.getBoundingClientRect().top - under);
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    let done = false;
-    const settle = () => { if (done) return; done = true; sc.removeEventListener("scrollend", settle); landUnder(row); };
-    sc.addEventListener("scrollend", settle, { once: true });
-    window.setTimeout(settle, reduce ? 0 : 900);
-    sc.scrollTo({ top, behavior: reduce ? ("instant" as ScrollBehavior) : "smooth" });
-    row.setAttribute("data-wash", "");
-    window.setTimeout(() => row.removeAttribute("data-wash"), 1400);
-  }, [landUnder]);
-  /* v19 §B — A LETTER PICK. Ungrouped: the first row IN THE CURRENT ORDER whose surname starts with the letter (the
-     sort is left as it is). Grouped by Letter: that letter's band. The A to Z shows only in those two groupings. */
-  const pickLetter = useCallback((letter: string) => {
-    if (groupKey === "letter") {
-      const col = mainColRef.current;
-      const band = col ? Array.from(col.querySelectorAll<HTMLElement>(`[data-clv="band"][data-letter="${letter}"]`)).find((b) => b.getBoundingClientRect().height > 0) : null;
-      /* v19 §E — the band sticks inside its section, so the section's top is where the band starts */
-      if (band) landUnder(band.closest<HTMLElement>('[data-cl19="group-section"]') ?? band);
-      return;
-    }
-    jumpToLetter(letter);
-  }, [groupKey, jumpToLetter, landUnder]);
-  /* v19 §E — THE JUMP ROW (grouped by anything but Letter): one button per group, the current group following the
-     scroll (the last section whose top has reached the stuck headings' foot), a click landing that group's band at
-     the headings' foot. Read per frame from the boxes, as the letters are. */
-  const [markedGroup, setMarkedGroup] = useState<string | null>(null);
-  const jumping = groupKey !== "none" && groupKey !== "letter";
-  useEffect(() => {
-    if (!active || !jumping) { setMarkedGroup(null); return; }
-    let raf = 0;
-    const read = () => {
-      raf = 0;
-      const col = mainColRef.current;
-      const secs = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-cl19="group-section"]')).filter((x) => x.offsetHeight > 0) : [];
-      if (!col || !secs.length) { setMarkedGroup((m) => (m === null ? m : null)); return; }
-      const labels = col.querySelector<HTMLElement>(".lt-panel > .lt-labels");
-      const scroller = col.closest<HTMLElement>(".wpg-scroll");
-      if (!scroller) return;
-      const line = scroller.getBoundingClientRect().top + (labels ? (parseFloat(getComputedStyle(labels).top) || 0) + labels.offsetHeight : 12) + 2;
-      let cur: HTMLElement = secs[0];
-      for (const x of secs) { if (x.getBoundingClientRect().top <= line) cur = x; else break; }
-      /* at the list's foot a short last group can never reach the line: the scroll has nowhere further to go, so the
-         group whose band is on screen last is the one being read */
-      if (scroller.scrollTop > 0 && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2) {
-        const bottom = scroller.getBoundingClientRect().bottom;
-        for (const x of secs) if (x.getBoundingClientRect().top < bottom - 50) cur = x;
-      }
-      const k = cur.dataset.gkey ?? null;
-      setMarkedGroup((m) => (m === k ? m : k));
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(read); };
-    raf = requestAnimationFrame(read);
-    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
-    return () => {
-      document.removeEventListener("scroll", onScroll, { capture: true } as EventListenerOptions);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [active, jumping, groupKey, sortKey, reversed, visibleFacts]);
-  const jumpToGroup = useCallback((key: string) => {
-    const col = mainColRef.current;
-    const sec = col ? Array.from(col.querySelectorAll<HTMLElement>('[data-cl19="group-section"]')).find((x) => x.dataset.gkey === key && x.offsetHeight > 0) : null;
-    if (sec) landUnder(sec);
-  }, [landUnder]);
-  const jump = useMemo(() => (jumping ? {
-    groups: groups.map((g) => ({ key: g.key ?? g.label, label: g.label, n: g.ids.length })),
-    current: markedGroup ?? (groups[0] ? groups[0].key ?? groups[0].label : null),
-    onJump: jumpToGroup,
-  } : null), [jumping, groups, markedGroup, jumpToGroup]);
-  const stripCounts = useMemo(() => letterCounts(visibleFacts), [visibleFacts]);
-  /* the current letter: the per-frame reader's, else (at the list's top) the first row's own */
-  const firstInitial = useMemo(() => (visibleFacts.length ? surnameInitial(groups[0] ? (factsById.get(groups[0].ids[0])?.agent ?? visibleFacts[0].agent) : visibleFacts[0].agent) : null), [visibleFacts, groups, factsById]);
-  const currentLetter = markedLetter ?? firstInitial;
-  /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
-  const yourMoveN = useMemo(() => factsAll.filter((x) => x.standing.kind === "open" && x.standing.yourMove).length, [factsAll]);
-  /**
-   * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
-   * never restated here. See `contactListState` for why there are three of them and why the
-   * unsaved stub is one of its inputs.
-   */
-  /* v16 §D — the list's controls pin (the hook re-binds when the list mounts or its grouping changes its layers) */
-  /* v13 §8, lock 12 — the dev-only hold (gated HERE, at the call site, so production never reaches
-     the module): it holds the settling beat so the placeholders can be measured against the page */
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const agentsHeld = import.meta.env.MODE !== "production" ? useAgentsHold() : false;
-  const pageState = contactListState({
-    /* as if the agents listener had not answered: not ready, and nothing on file yet (an agent on file
-       is a list whatever the flag says, so holding the flag alone holds nothing) */
-    collectionsReady: collectionsReady && !agentsHeld,
-    agentCount: agentsHeld ? 0 : agents.length,
-    adding: false, /* the in-grid draft retired with the flip editor; P5's add card is an overlay */
-  });
-
-  /* ⚠️ LIVING HEADERS (§1–§3). The headline is the scale and the subline the one thing that needs the
-     writer next, both DERIVED here from the QC's own rows and never stored. While the page settles
-     the header renders its fixed shape with both lines empty (count null) — never the page name.
-     The dev review aid (`__SA_LH_COUNT`) fabricates the COUNT only; gated at the call site so a
-     production build never reaches the module. */
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
-  const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
-  const showList = pageState === "list" && !showEmpty;
-  /* v16 §E — full screen is on only over a list, on this page's own route */
-  const fullOn = full && showList;
-  /* v19 §G — THE SCROLL POSITION, FOR THE VISIT. Saved (once a frame) while the list is on screen; put back once when the
-     list first draws (a reload within the visit) and when the route comes back with its scroller at the top. A reveal
-     handed in from another page wins. A new visit has nothing stored, so it opens at the top. */
-  const scrollPending = useRef<number | null>(rememberedVisit?.scroll || null);
-  /* the first draw: the list's arrival calls this before it picks the rows on screen (v19 §H), so the rows that animate
-     are the ones the reader comes back to */
-  const restoreScroll = useCallback(() => {
-    const y = scrollPending.current;
-    scrollPending.current = null;
-    if (revealed.current) { revealed.current = false; return; }
-    const sc = fullScroller();
-    if (y && sc) sc.scrollTop = y;
-  }, [fullScroller]);
-  /* coming back to the route: a scroller the browser reset to its top is put back */
-  const wasActive = useRef(active);
-  useLayoutEffect(() => {
-    const back = active && !wasActive.current;
-    wasActive.current = active;
-    if (!back || !showList) return;
-    const sc = fullScroller();
-    if (!sc) return;
-    if (revealed.current) { revealed.current = false; return; }
-    const y = readListVisit()?.scroll || 0;
-    if (y && sc.scrollTop === 0) sc.scrollTop = y;
-  }, [active, showList, fullScroller]);
-  useEffect(() => {
-    if (!active || !showList) return undefined;
-    const sc = fullScroller();
-    if (!sc) return undefined;
-    let raf = 0;
-    const save = () => { raf = 0; writeListVisit({ scroll: sc.scrollTop }); };
-    const on = () => { if (!raf) raf = requestAnimationFrame(save); };
-    sc.addEventListener("scroll", on, { passive: true });
-    return () => { sc.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
-  }, [active, showList, fullScroller]);
-  /* ── v19 §F — THE APPLIED-FILTERS ROW: one chip per filter, per search and for the band's group, in that order the
-     search first. The Filters chip counts the filters (and the band's group) but never the search. */
-  const appliedChips = useMemo<AppliedChip[]>(() => {
-    const out: AppliedChip[] = [];
-    const q = search.trim();
-    if (q) out.push({ key: "search", label: `\u201c${q}\u201d`, off: () => setSearch("") });
-    if (glance) out.push({ key: "glance", label: GLANCE_LABEL[glance], off: () => setGlance(null) });
-    for (const a of appliedFilters(filters, genreWords)) out.push({ key: a.key, label: a.label, off: () => setFilters(a.drop(filters)) });
-    return out;
-  }, [search, glance, filters]);
-  const chipCount = contactFilterCount(filters) + (glance ? 1 : 0);
-  /* the row's measured height, published on the list card as `--cl19-af-h` (0 when there is no row) so the headings and
-     the group bands stick under it */
-  const afRef = useRef<HTMLDivElement | null>(null);
-  const afOn = appliedChips.length > 0;
-  useLayoutEffect(() => {
-    const card = wsRef.current;
-    const row = afRef.current;
-    if (!card) return undefined;
-    if (!afOn || !row) { card.style.setProperty("--cl19-af-h", "0px"); return undefined; }
-    const write = () => { const h = row.offsetHeight; if (h > 0) card.style.setProperty("--cl19-af-h", `${h}px`); };
-    write();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(write);
-    ro.observe(row);
-    return () => ro.disconnect();
-  }, [afOn, showList, fullOn]);
-  /* v19 §I — THE LIST HAS NO FOOTER: THE CARD RUNS TO THE PAGE'S FOOT. With more rows than the page holds the last row
-     ends the card and the card ends the scroll (contactV19.css drops the page's foot air). With fewer — a search, a
-     filter, a short list — the card still runs to the page's foot rather than ending mid-page (v19.1 §F: unpinned it
-     stops 22px short, rounded, the scroll area's foot padding; pinned it meets the foot square): its min-height is the
-     scroll area's height less the card's own top in the scrolled content and that padding, measured, and
-     re-measured whenever the scroll area or the group above it changes size. Desktop only (the phone keeps its flow). */
-  useLayoutEffect(() => {
-    const card = wsRef.current;
-    const sc = card?.closest<HTMLElement>(".wpg-scroll");
-    if (!card || !sc || !(active && showList)) return undefined;
-    const group = card.closest<HTMLElement>(".clv-group");
-    const write = () => {
-      if (!window.matchMedia?.("(min-width: 768px)").matches) { card.style.minHeight = ""; return; }
-      const top = card.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
-      const pad = parseFloat(getComputedStyle(sc).paddingBottom) || 0;
-      const h = Math.floor(sc.clientHeight - top - pad);
-      const v = h > 0 ? `${h}px` : "";
-      if (card.style.minHeight !== v) card.style.minHeight = v;
-    };
-    write();
-    if (typeof ResizeObserver === "undefined") return undefined;
-    const ro = new ResizeObserver(write);
-    ro.observe(sc);
-    if (group) ro.observe(group);
-    return () => { ro.disconnect(); };
-  }, [active, showList, fullOn]);
-  /* when the SET of filters changes, the list goes back to its top (the toolbar at the top of the scroll area) — only if
-     it has scrolled past it, and quietly, so a live menu stays open */
-  const filterSig = JSON.stringify([filters, search.trim(), glance]);
-  const lastSig = useRef(filterSig);
-  useEffect(() => {
-    if (lastSig.current === filterSig) return;
-    lastSig.current = filterSig;
-    const card = wsRef.current;
-    const sc = card?.closest<HTMLElement>(".wpg-scroll");
-    if (!card || !sc) return;
-    const over = card.getBoundingClientRect().top - sc.getBoundingClientRect().top;
-    if (over < -0.5) quietScroll(() => { sc.scrollTop += over; });
-  }, [filterSig]);
-  /* v19 §A — the folder tab and the sheet lip go navy while this list is pinned and on screen, and ONLY then: a
-     layout effect, so the tab never paints navy over an unpinned page (or cream over a pinned one) */
-  useLayoutEffect(() => {
-    if (!(active && fullOn)) return undefined;
-    document.documentElement.setAttribute("data-cl19-pinned", "");
-    return () => document.documentElement.removeAttribute("data-cl19-pinned");
-  }, [active, fullOn]);
-  /* v138.6 §C — the pinned row (v17 C) is retired: the navy list header is the sticky row. One writer measures the
-     stack (the lip's cover and the header's height) while this page is on screen over a list. */
-  useStickyStack(lhRef, active && showList);
-  /* v14 (ruling Q7): the sticky slim bar retired with the open banner — the sticky column labels (Phase 5)
-     are the only sticky element in the list. */
-
-  /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
-     Grouping arranges the BOARD — the pack's own division — so when the Group control moved to the
-     board this page's `grouping` state kept its initial "none" and `setGrouping` was never called
-     again: a section renderer that could not be reached, running `groupAgents` on every render to
-     produce an empty array. A frozen control is worse than a deleted one, because it reads as a
-     feature to whoever finds it next. */
-
-
-  /* ⚠️ THE CARD IS APP-LEVEL (Agent card v1 §2). The page opens it through the store and keeps
-     only what is the LIST's: the ring on the open row, the notice and FLIP after a save, the ring
-     on a new row. The card no longer closes when its agent leaves the filter — opened, it stays
-     open, and ‹ › step through the order it was opened from. */
-  /* Housekeeping's drawer closes when an agent's panel opens from it (declared further down; read through a ref) */
-  const setHkOpenRef = useRef<(v: boolean) => void>(() => {});
-  const cardReq = useAgentCardRequest();
-  /* ── v16 §F — THE AGENT PANEL. On this page an agent opens in the query panel's container, and the page's
-     address says which: `?agent={id}`. The row, a "+ Add" on a row, Housekeeping's doors and the row keys all open
-     it; nothing here opens the centred agent card any more. Opening pushes one history entry (so Back closes the
-     panel); swapping to another agent and closing replace it. */
-  const [params, setParams] = useSearchParams();
-  const navigate = useNavigate();
-  const panelParam = active ? params.get("agent") : null;
-  const panelAgent = panelParam ? agents.find((a) => a.id === panelParam) ?? null : null;
-  const panelId = panelAgent?.id ?? null;
-  const [panelTab, setPanelTab] = useState<AgentPanelTab>("profile");
-  const setPanelParam = useCallback((id: string | null, how: "push" | "replace") => {
-    setParams((prev) => { const n = new URLSearchParams(prev); if (id) n.set("agent", id); else n.delete("agent"); return n; }, { replace: how === "replace" });
-  }, [setParams]);
-  const panelIdRef = useRef(panelId);
-  panelIdRef.current = panelId;
-  const closePanel = useCallback(() => { closeAgentCard(); if (panelIdRef.current) setPanelParam(null, "replace"); }, [setPanelParam]);
-  /** open the panel on this agent — and, when a door asks for it, the editor at a field */
-  const openPanel = useCallback((agentId: string, edit?: { tab?: AgentCardOptions["tab"]; focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] }) => {
-    if (!agents.some((a) => a.id === agentId)) return;
-    setHkOpenRef.current(false);
-    if (panelIdRef.current !== agentId) { setPanelTab("profile"); setPanelParam(agentId, panelIdRef.current ? "replace" : "push"); }
-    if (edit) openAgentCard(agentId, { tab: edit.tab ?? "who", focus: edit.focus, prefill: edit.prefill, from: "row", host: "panel" });
-    else closeAgentCard();
-  }, [agents, setPanelParam]);
-  /* an id the list does not hold (deleted, or a stale link) clears itself once the agents can answer */
-  useEffect(() => { if (active && panelParam && collectionsReady && agents.length > 0 && !panelAgent) setPanelParam(null, "replace"); }, [active, panelParam, panelAgent, collectionsReady, agents.length, setPanelParam]);
-  /* the query view opened from this panel has its own ×: it closes the agent too */
-  useEffect(() => {
-    const on = () => { if (panelIdRef.current) setPanelParam(null, "replace"); };
-    window.addEventListener("sa:agent-panel-close", on);
-    return () => window.removeEventListener("sa:agent-panel-close", on);
-  }, [setPanelParam]);
-  /* while one of this agent's queries has the box (opened from the Queries tab), the agent's panel stands aside */
-  const qPanel = useSyncExternalStore(subscribeQueryPanel, currentQueryPanel, currentQueryPanel);
-  const queryHasBox = qPanel?.from === "agent";
-  const openId = panelId;
-  /** the list's current order and filter */
-  const sequence = useMemo(() => visibleFacts.map((x) => x.agent.id), [visibleFacts]);
-  /** OPEN this agent — a row, a strip, a key */
-  const onOpen = useCallback((agentId: string, _from?: DOMRect) => openPanel(agentId), [openPanel]);
-  /* kept under its old name for the doors that asked for the card's editor at a field */
-  const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => openPanel(agentId, opts.tab || opts.focus || opts.prefill ? { tab: opts.tab, focus: opts.focus, prefill: opts.prefill } : undefined), [openPanel]);
-
-  /** "+ Add an agent" — v18.3 §D: the agent panel's act view in a new-agent state (the centred card is no longer
-   *  opened from this page). An agent's panel open at the time closes first: one right-hand panel at a time. */
-  const addedInPanel = useRef<string | null>(null);
-  /* only an add STARTED here moves the panel (a centred add on another page emits "added" too) */
-  const addFromHere = useRef(false);
-  const openAdd = useCallback(() => {
-    addFromHere.current = true;
-    if (panelIdRef.current) setPanelParam(null, "replace");
-    setHkOpenRef.current(false);
-    openNewAgentCard({ from: "button", host: "panel" });
-  }, [setPanelParam]);
-
-  /* ⚠️ THE VIEW SWITCH IS RETIRED (v11 decision 1) — one page, one renderer, as the Query
-     Centre. A `?view=` parameter in the URL is ACCEPTED AND IGNORED: nothing reads it, nothing
-     clears it, and a bookmarked `?view=board` lands on the one list rather than erroring
-     (`readQcView` is the precedent). Grid/List/Board and their model went with the switch. */
-
-  /**
-   * The SAVE NOTICE (v11 P4). The three-beat card choreography retired with the flip card it
-   * animated; what survives is the sentence — where the record ended up — computed BEFORE
-   * anything else so the notice and the list cannot disagree (the agentMotion law).
-   */
-  const beginSaveChoreography = useCallback(
-    (saved: Agent) => {
-      /* the outcome, against the NEW pipeline (the old saveOutcome read the retired filter set):
-         does the saved record still match the pool and the panel, and where does it land */
-      const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
-      const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
-      const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
-        .map((a) => (a.id === saved.id ? savedFacts : (factsById.get(a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
-      const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed);
-      const index = after.findIndex((x) => x.agent.id === saved.id);
-      const outcome: SaveOutcome = !survives
-        ? { kind: "filtered-out" }
-        : { kind: "travel", index: index < 0 ? 0 : index + 1, total: after.length,
-            sortLabel: (SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? "the current sort") };
-      setNotice({
-        text: saveNotice(saved.name || saved.agency, outcome),
-        kind: outcome.kind,
-        agentId: saved.id,
-        // the card's snapshot Undo, when it could take one
-        canUndo: !!undoSave.current,
-      });
-
-      /* the list reflows under the store's own update — measure BEFORE it lands so the FLIP
-         can play the move (rows carry data-agent-card, flip.ts's selector) */
-      flipBefore.current = measureFlip(gridRef.current);
-    },
-    [agents, filters, sortKey, reversed, qcRows, scoped, factsById, inPool],
-  );
-
-  /**
-   * Undo — the card's own (Agent card v1 P4). ⚠️ The old one restored by `updateAgent(prev)`, which
-   * merged (a field the save ADDED survived it), logged an activity the save never logged, and left
-   * every deadline the reply-time fan-out had moved where the save put it. The card's snapshot
-   * restores all of it, whichever of the two places it is pressed in.
-   */
-  const runUndoSave = useCallback(async () => {
-    const undo = undoSave.current;
-    setNotice(null);
-    undoSave.current = null;
-    if (!undo) return;
-    flipBefore.current = measureFlip(gridRef.current);
-    await undo();
-  }, []);
-  /* the row a delete collapses — kept so a delete that fails can put the row back */
-  const collapsing = useRef<Animation | null>(null);
-
-  /* the just-added agent — its row scrolls into view centred and wears the 2.4s ring (§8.4) */
-  const [newId, setNewId] = useState<string | null>(null);
-
-  /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
-  const remindRef = useRef<(a: Agent) => void>(() => {});
-  /** a card's (and, from Phase 4, a row tray's) next step, WITHOUT the card: the same journey the card's
-   *  button opens, straight to the drawer (§4: "its button opens the journey directly") */
-  const actWithoutCard = useCallback((agentId: string, act: CardAct) => {
-    const agent = agents.find((a) => a.id === agentId);
-    if (!agent) return;
-    if (act === "log") { openQueryDrawer({ mode: "log", agentId, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }); return; }
-    if (act === "remind") { remindRef.current(agent); return; }
-    const q = cardQuery(cardRows(qcRows, agentId, scoped?.id ?? null));
-    if (!q || act === "qc") { openCard(agentId, { from: "row" }); return; }
-    openQueryDrawer({ mode: act, queryId: q.id });
-  }, [agents, scoped, qcRows, openCard]);
-  /** v13 §6 — a row's hover tray offers the card's own next step (one derivation: the card's button) */
-  const trayFor = useCallback((x: AgentFacts) => primaryFor(x, cardQuery(cardRows(qcRows, x.agent.id, scoped?.id ?? null))), [qcRows, scoped]);
-  rowKeys.current = { ...rowKeys.current, trayFor, onOpen: (id, r) => onOpen(id, r), act: actWithoutCard };
-
-  /* the app-level "Add an agent" capture reaches here through the `sa:contact-add` event App.tsx
-     dispatches on /agents (ruling f); elsewhere the old focus form is untouched (ruling 3, 5 Oct). */
-  useEffect(() => {
-    if (!active) return;
-    window.addEventListener("sa:contact-add", openAdd);
-    return () => window.removeEventListener("sa:contact-add", openAdd);
-  }, [active, openAdd]);
-
-  /* the card's aftermath ON THE LIST: a save's notice (with the card's Undo) and FLIP, an add's ring,
-     the notice withdrawing once the Undo has run, and a delete's row collapsing */
-  useEffect(() => subscribeAgentCardEvents((e) => {
-    if (e.type === "saved") {
-      tickGuide.current("edit");
-      undoSave.current = e.undo ?? null;
-      beginSaveChoreography(e.after);
-    } else if (e.type === "added") {
-      tickGuide.current("add");
-      setNewId(e.agentId);
-      /* v18.3 §D — added from the panel: the panel switches to the new agent's Profile once the list holds it */
-      if (addFromHere.current) addedInPanel.current = e.agentId;
-      addFromHere.current = false;
-    } else if (e.type === "undone") {
-      undoSave.current = null;
-      setNotice((n) => (n && n.agentId === e.agentId && n.kind !== "failed" ? null : n));
-    } else if (e.type === "deleting") {
-      /* §7: the row collapses over 240ms, then the delete runs and the list closes the gap */
-      const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${e.agentId}"]`)]
-        .find((r) => r.getBoundingClientRect().height > 0);
-      if (row && !prefersReducedMotion() && typeof row.animate === "function") {
-        row.style.overflow = "hidden";
-        collapsing.current = row.animate(
-          [{ height: `${row.offsetHeight}px`, opacity: 1 }, { height: "0px", opacity: 0, paddingTop: "0px", paddingBottom: "0px", marginTop: "0px", marginBottom: "0px" }],
-          { duration: 240, easing: "cubic-bezier(.4,0,.8,.4)", fill: "forwards" },
-        );
-      }
-    } else if (e.type === "delete-failed") {
-      collapsing.current?.cancel();
-      collapsing.current = null;
-      setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
-    }
-  }), [beginSaveChoreography]);
-
-  /* the new-agent form left without an add: a later add elsewhere is not this page's */
-  useEffect(() => { if (!cardReq && !addedInPanel.current) addFromHere.current = false; }, [cardReq]);
-  /* v18.3 §D — the panel follows an add made in it */
-  useEffect(() => {
-    const id = addedInPanel.current;
-    if (!id || !agents.some((a) => a.id === id)) return;
-    addedInPanel.current = null;
-    openPanel(id);
-  }, [agents, openPanel]);
-
-  /* §8.4: the new row into view, centred, once the store's own update has rendered it; the ring
-     class rides `newId` and drops when the animation has had its 2.4s (reduced motion shows the
-     ring statically for the same window — the CSS half). */
-  useEffect(() => {
-    if (!newId || !factsById.has(newId)) return;
-    const row = document.querySelector<HTMLElement>(`[data-agent-card="${newId}"]`);
-    row?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    const drop = window.setTimeout(() => setNewId(null), 2500);
-    return () => window.clearTimeout(drop);
-  }, [newId, factsById]);
-
-  /* ── Housekeeping v2 (Contact list v13 §6) ───────────────────────────────────────────────
+  /* v25.4 D — Housekeeping's model is built BEFORE the list's facts, which carry its per-agent gap count (the
+     "Missing details" filter reads it); everything it reads is declared above.
+     ── Housekeeping v2 (Contact list v13 §6) ───────────────────────────────────────────────
      The gap model over the WHOLE list. "Live" is any live query whatever the manuscript — the
      reply window fans out to every query, so the scope chip has no say there; "fits", "queried" and
      "passed" (ruling Q6) read the manuscript in scope. The reopen flag reads the writer's own undone
@@ -903,6 +332,341 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const hk = useMemo(() => (hkAllFilledAid
     ? hkModel(agents.filter((a) => (hkAll.gapsById.get(a.id)?.length ?? 0) === 0), hkCtxOf, hkPrefs)
     : hkAll), [hkAllFilledAid, hkAll, agents, hkCtxOf, hkPrefs]);
+  /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
+     v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
+  const factsAll = useMemo(
+    () => agents.map((a) => ({ ...agentFacts(a, qcRows, scoped?.id ?? null), gaps: agentGapAction(hk, a.id)?.n ?? 0 })),
+    [agents, qcRows, scoped, hk],
+  );
+  /* ruling Q5: "takes the book" — any of the agent's genres matching the main genre or any subGenre */
+  /* the pool: Find and the "At a glance" group — so every chip's count is faceted under them */
+  const inPool = useCallback(
+    (x: AgentFacts) => matchesAgentSearch(x.agent, search) && (!glance || glanceOf(x) === glance),
+    [search, glance],
+  );
+  /* v19 §F — the menu counts each choice itself (`wouldShow`, under Find and the band's group): the v14 faceted counts and
+     the genre tallies it fed are retired with the strip */
+  /* v25.1 E4 — the heading sorts' context: the day (Your query's urgency) and each agent's matches with the book */
+  const sortCtx = useMemo<SortCtx>(() => ({ nowMs, fitOf: (x) => (x.agent.genres ?? []).filter((g) => bookHit(g)).length }), [nowMs, bookHit]);
+  const visibleFacts = useMemo(
+    () => sortFacts(factsAll.filter((x) => inPool(x) && inSet(x, sets) && matchesContactFilters(x, filters)), sortKey, reversed, sortCtx),
+    [factsAll, inPool, sets, filters, sortKey, reversed, sortCtx],
+  );
+  /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
+  const anyActive = contactFilterCount(filters) > 0 || !!glance || !!sets || search.trim() !== "";
+  const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); setSets(null); }, [setFilters]);
+  /* v27 — the applied row's "Clear filters" and the rail's Reset: ONE handler (the filters, the set and the glance; Find stays) */
+  const clearRailFilters = useCallback(() => { setFilters(emptyContactFilters()); setSets(null); setGlance(null); }, [setFilters]);
+  /* v24 A3 — each chip's count, over every agent (never the filtered view) */
+  const counts = useMemo(() => setCounts(factsAll), [factsAll]);
+  /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
+  /**
+   * Loading · blank account · list — the page's three states, derived once in `agentList.ts` and
+   * never restated here. See `contactListState` for why there are three of them and why the
+   * unsaved stub is one of its inputs.
+   */
+  /* v16 §D — the list's controls pin (the hook re-binds when the list mounts or its grouping changes its layers) */
+  /* v13 §8, lock 12 — the dev-only hold (gated HERE, at the call site, so production never reaches
+     the module): it holds the settling beat so the placeholders can be measured against the page */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const agentsHeld = import.meta.env.MODE !== "production" ? useAgentsHold() : false;
+  const pageState = contactListState({
+    /* as if the agents listener had not answered: not ready, and nothing on file yet (an agent on file
+       is a list whatever the flag says, so holding the flag alone holds nothing) */
+    collectionsReady: collectionsReady && !agentsHeld,
+    agentCount: agentsHeld ? 0 : agents.length,
+    adding: false, /* the in-grid draft retired with the flip editor; P5's add card is an overlay */
+  });
+
+  /* ⚠️ LIVING HEADERS (§1–§3). The headline is the scale and the subline the one thing that needs the
+     writer next, both DERIVED here from the QC's own rows and never stored. While the page settles
+     the header renders its fixed shape with both lines empty (count null) — never the page name.
+     The dev review aid (`__SA_LH_COUNT`) fabricates the COUNT only; gated at the call site so a
+     production build never reaches the module. */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
+  /* Contact list principles v1 — THE LIST'S FRAME STATE: loading (the settling beat, or a retry under way) and can't load
+     (the agents listener errored: until now an error drew the blank account's page, as if nothing were on file) draw inside
+     the list's own frame, under its navy bar, with the header in its loading shape. The dev-only aid `__SA_CLP_STATE`
+     forces one (gated here, at the call site). */
+  const clpForced = import.meta.env.MODE !== "production" ? readClpState() : null;
+  const frameState: "loading" | "error" | null = clpForced === "loading" || clpForced === "error" ? clpForced
+    : !sandbox && agentsRead === "failed" && agents.length === 0 ? "error"
+    : !sandbox && agentsRead === "retrying" && agents.length === 0 ? "loading"
+    : pageState === "settling" ? "loading" : null;
+  const showEmpty = !frameState && (pageState === "blank" || (pageState === "list" && lhOverride === 0));
+  const showList = pageState === "list" && !showEmpty && !frameState;
+  const showFrame = showList || frameState !== null;
+  /* QC layout v1 — the Views panel pins as the Query Centre's does, and scrolls with the page when taller than the port */
+  useTallRail(mainColRef, `${showFrame}-${frameState}`);
+  /* v16 §E — full screen is on only over a list, on this page's own route */
+  const fullOn = full && showList;
+  const fullRef = useRef(fullOn);
+  fullRef.current = fullOn;
+  /* v19 §G — THE SCROLL POSITION, FOR THE VISIT. Saved (once a frame) while the list is on screen; put back once when the
+     list first draws (a reload within the visit) and when the route comes back with its scroller at the top. A reveal
+     handed in from another page wins. A new visit has nothing stored, so it opens at the top. */
+  /* the first draw: the list's arrival calls this before it picks the rows on screen (v19 §H), so the rows that animate
+     are the ones the reader comes back to */
+  /* coming back to the route: a scroller the browser reset to its top is put back */
+  const wasActive = useRef(active);
+  useLayoutEffect(() => {
+    const back = active && !wasActive.current;
+    wasActive.current = active;
+    if (!back || !showList) return;
+    const sc = fullScroller();
+    if (!sc) return;
+    if (revealed.current) { revealed.current = false; return; }
+    const y = readListVisit()?.scroll || 0;
+    if (y && sc.scrollTop === 0) sc.scrollTop = y;
+  }, [active, showList, fullScroller]);
+  useEffect(() => {
+    if (!active || !showList) return undefined;
+    const sc = fullScroller();
+    if (!sc) return undefined;
+    let raf = 0;
+    const save = () => { raf = 0; writeListVisit({ scroll: sc.scrollTop }); };
+    const on = () => { if (!raf) raf = requestAnimationFrame(save); };
+    sc.addEventListener("scroll", on, { passive: true });
+    return () => { sc.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
+  }, [active, showList, fullScroller]);
+  /* v14 (ruling Q7): the sticky slim bar retired with the open banner — the sticky column labels (Phase 5)
+     are the only sticky element in the list. */
+
+  /* ⚠️ THE GRID DOES NOT GROUP, AND ITS GROUPING IS RETIRED RATHER THAN LEFT FROZEN (Phase 7).
+     Grouping arranges the BOARD — the pack's own division — so when the Group control moved to the
+     board this page's `grouping` state kept its initial "none" and `setGrouping` was never called
+     again: a section renderer that could not be reached, running `groupAgents` on every render to
+     produce an empty array. A frozen control is worse than a deleted one, because it reads as a
+     feature to whoever finds it next. */
+
+
+  /* ⚠️ THE CARD IS APP-LEVEL (Agent card v1 §2). The page opens it through the store and keeps
+     only what is the LIST's: the ring on the open row, the notice and FLIP after a save, the ring
+     on a new row. The card no longer closes when its agent leaves the filter — opened, it stays
+     open, and ‹ › step through the order it was opened from. */
+  /* Housekeeping's drawer closes when an agent's panel opens from it (declared further down; read through a ref) */
+  const setHkOpenRef = useRef<(v: boolean) => void>(() => {});
+  const cardReq = useAgentCardRequest();
+  /* ── v16 §F — THE AGENT PANEL. On this page an agent opens in the query panel's container, and the page's
+     address says which: `?agent={id}`. The row, a "+ Add" on a row, Housekeeping's doors and the row keys all open
+     it; nothing here opens the centred agent card any more. Opening pushes one history entry (so Back closes the
+     panel); swapping to another agent and closing replace it. */
+  const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const panelParam = active ? params.get("agent") : null;
+  const panelAgent = panelParam ? agents.find((a) => a.id === panelParam) ?? null : null;
+  const panelId = panelAgent?.id ?? null;
+  const setPanelParam = useCallback((id: string | null, how: "push" | "replace") => {
+    setParams((prev) => { const n = new URLSearchParams(prev); if (id) n.set("agent", id); else n.delete("agent"); return n; }, { replace: how === "replace" });
+  }, [setParams]);
+  /* Dashboard v118 Part B — `?status=querying|closed|notq` from the dashboard's Agents-on-file hoop presses the matching
+     "At a glance" card (its own filter: shown pressed, cleared by pressing again), clears the search and filters, puts the
+     page at its top, and leaves the address so clearing it is not undone by the link. */
+  const statusParam = active ? params.get(CONTACT_STATUS_PARAM) : null;
+  useEffect(() => {
+    if (!statusParam) return;
+    const g = glanceForParam(statusParam);
+    if (g) { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); setSets(GLANCE_SETS[g]); }
+    setParams((prev) => { const n = new URLSearchParams(prev); n.delete(CONTACT_STATUS_PARAM); return n; }, { replace: true });
+    requestAnimationFrame(() => { const port = document.getElementById("app-stage-scroll"); if (port) port.scrollTop = 0; });
+  }, [statusParam]); // eslint-disable-line react-hooks/exhaustive-deps
+  const panelIdRef = useRef(panelId);
+  panelIdRef.current = panelId;
+  /** open the panel on this agent — and, when a door asks for it, the editor at a field */
+  /* navy-bar v1 B6 — THE AGENT'S PANEL IS RETIRED ON THIS PAGE: every door that opened it (a deep link, Housekeeping,
+     an add) now selects the agent in the address book and docks the box to it; a door that asked for the editor opens
+     the agent card's editor at that field. */
+  const [bookReq, setBookReq] = useState<{ id: string; seq: number } | null>(null);
+  /* v25.2 C — an edit request for the card on screen: an inline field, or the card's edit mode (at a field, with any
+     carried answers). The card acts on it once, by its seq. */
+  const [editReq, setEditReq] = useState<{ id: string; seq: number; inline?: InlineField; edit?: { focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] } } | null>(null);
+  const openPanel = useCallback((agentId: string, edit?: { tab?: AgentCardOptions["tab"]; focus?: AgentCardOptions["focus"]; prefill?: AgentCardOptions["prefill"] }) => {
+    if (!agents.some((a) => a.id === agentId)) return;
+    setHkOpenRef.current(false);
+    /* v24 C — outside full screen a door opens the agent's card; in full screen it selects the agent in the book */
+    if (fullRef.current) setBookReq({ id: agentId, seq: Date.now() }); else setCardId(agentId);
+    /* v25.2 C1/C3 — a door asking for a field opens it IN THE CARD: in place where an inline edit holds it, else the
+       card's edit mode at that field (carried answers always go to the edit mode); the centred editor is retired */
+    if (edit) {
+      const inline = edit.prefill ? null : inlineFor(edit.focus);
+      setEditReq({ id: agentId, seq: Date.now(), ...(inline ? { inline } : { edit: { focus: edit.focus, prefill: edit.prefill } }) });
+    }
+  }, [agents]);
+  /* v25.2 C3 — while this page is on screen, an edit asked for anywhere (Housekeeping, a task, the palette) opens in
+     the page's own card rather than a second panel over it */
+  useEffect(() => {
+    if (!active || sandbox) return undefined;
+    return setAgentEditInterceptor((id, o) => {
+      if (!agents.some((a) => a.id === id)) return false;
+      openPanel(id, { tab: o.tab, focus: o.focus, prefill: o.prefill });
+      return true;
+    });
+  }, [active, sandbox, agents, openPanel]);
+  /* a link to `?agent=` selects that agent and docks, then the parameter goes */
+  useEffect(() => {
+    if (!active || !panelParam || !collectionsReady) return;
+    if (agents.some((a) => a.id === panelParam)) { if (fullRef.current) setBookReq({ id: panelParam, seq: Date.now() }); else setCardId(panelParam); }
+    setPanelParam(null, "replace");
+  }, [active, panelParam, collectionsReady, agents, setPanelParam]);
+  /* an id the list does not hold (deleted, or a stale link) clears itself once the agents can answer */
+  useEffect(() => { if (active && panelParam && collectionsReady && agents.length > 0 && !panelAgent) setPanelParam(null, "replace"); }, [active, panelParam, panelAgent, collectionsReady, agents.length, setPanelParam]);
+  /* the query view opened from this panel has its own ×: it closes the agent too */
+  useEffect(() => {
+    const on = () => { if (panelIdRef.current) setPanelParam(null, "replace"); };
+    window.addEventListener("sa:agent-panel-close", on);
+    return () => window.removeEventListener("sa:agent-panel-close", on);
+  }, [setPanelParam]);
+  /* while one of this agent's queries has the box (opened from the Queries tab), the agent's panel stands aside */
+  const openId = panelId ?? cardId;
+  /** the list's current order and filter */
+  /** OPEN this agent — a row, a strip, a key */
+  /* kept under its old name for the doors that asked for the card's editor at a field */
+  const openCard = useCallback((agentId: string, opts: AgentCardOptions = {}) => openPanel(agentId, opts.tab || opts.focus || opts.prefill ? { tab: opts.tab, focus: opts.focus, prefill: opts.prefill } : undefined), [openPanel]);
+
+  /** "+ Add an agent" — v18.3 §D: the agent panel's act view in a new-agent state (the centred card is no longer
+   *  opened from this page). An agent's panel open at the time closes first: one right-hand panel at a time. */
+  const addedInPanel = useRef<string | null>(null);
+  /* only an add STARTED here moves the panel (a centred add on another page emits "added" too) */
+  const addFromHere = useRef(false);
+  const openAdd = useCallback(() => {
+    openNewAgentCard({ from: "button", host: "panel" });
+  }, []);
+  /* RETIRE THE ADD-AGENT POP-UP — every door opens the ONE new-agent panel through the store (the app-level host draws
+     its frame), so this page no longer needs its own door or event. What made an add "this page's" moves here: a new-agent
+     panel opened while this is the page on screen — from its own button, the top bar's capture, the palette — closes an
+     agent's panel and Housekeeping (one right-hand panel at a time), and the panel follows the add. A flow WAITING on the
+     new agent (Log a query's picker) keeps it, so the page does not take over. */
+  useLayoutEffect(() => {
+    if (!active || !cardReq || cardReq.agentId !== null || cardReq.host !== "panel" || cardReq.onCreated) return;
+    addFromHere.current = true;
+    if (panelIdRef.current) setPanelParam(null, "replace");
+    setHkOpenRef.current(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening (the seq), never on a re-render
+  }, [active, cardReq?.seq]);
+
+  /* ⚠️ THE VIEW SWITCH IS RETIRED (v11 decision 1) — one page, one renderer, as the Query
+     Centre. A `?view=` parameter in the URL is ACCEPTED AND IGNORED: nothing reads it, nothing
+     clears it, and a bookmarked `?view=board` lands on the one list rather than erroring
+     (`readQcView` is the precedent). Grid/List/Board and their model went with the switch. */
+
+  /**
+   * The SAVE NOTICE (v11 P4). The three-beat card choreography retired with the flip card it
+   * animated; what survives is the sentence — where the record ended up — computed BEFORE
+   * anything else so the notice and the list cannot disagree (the agentMotion law).
+   */
+  const beginSaveChoreography = useCallback(
+    (saved: Agent) => {
+      /* the outcome, against the NEW pipeline (the old saveOutcome read the retired filter set):
+         does the saved record still match the pool and the panel, and where does it land */
+      const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
+      savedFacts.gaps = agentGapAction(hk, saved.id)?.n ?? 0;
+      const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
+      const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
+        .map((a) => (a.id === saved.id ? savedFacts : (factsAll.find((x) => x.agent.id === a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
+      const after = sortFacts(afterAll.filter((x) => inPool(x) && matchesContactFilters(x, filters)), sortKey, reversed, sortCtx);
+      const index = after.findIndex((x) => x.agent.id === saved.id);
+      const outcome: SaveOutcome = !survives
+        ? { kind: "filtered-out" }
+        : { kind: "travel", index: index < 0 ? 0 : index + 1, total: after.length,
+            sortLabel: (SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? "the current sort") };
+      setNotice({
+        text: saveNotice(saved.name || saved.agency, outcome),
+        kind: outcome.kind,
+        agentId: saved.id,
+        // the card's snapshot Undo, when it could take one
+        canUndo: !!undoSave.current,
+      });
+    },
+    [agents, filters, sortKey, reversed, qcRows, scoped, factsAll, inPool],
+  );
+
+  /**
+   * Undo — the card's own (Agent card v1 P4). ⚠️ The old one restored by `updateAgent(prev)`, which
+   * merged (a field the save ADDED survived it), logged an activity the save never logged, and left
+   * every deadline the reply-time fan-out had moved where the save put it. The card's snapshot
+   * restores all of it, whichever of the two places it is pressed in.
+   */
+  const runUndoSave = useCallback(async () => {
+    const undo = undoSave.current;
+    setNotice(null);
+    undoSave.current = null;
+    if (!undo) return;
+    await undo();
+  }, []);
+
+
+  /* Contact list principles v1 — an add FINISHED HERE (the journey's Done) lands on the list, not in a panel: the new row
+     comes into view, tinted powder, phone v4's rust postmark ("ADDED" and the date) lands on it, and the page's snackbar
+     offers Undo — `undoAgentAdd`, exactly what `addAgent` created (the agent and its AGENT_ADDED row), never the delete
+     path's compensating "You deleted" record. */
+  const [justAdded, setJustAdded] = useState<string | null>(null);
+  /* the page's snackbar (declared here, above every reader) */
+  const { showToast } = useToast();
+  const [stampAt, setStampAt] = useState<{ left: number; top: number; date: string } | null>(null);
+
+  /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
+  const remindRef = useRef<(a: Agent) => void>(() => {});
+  /* the card's aftermath ON THE LIST: a save's notice (with the card's Undo) and FLIP, an add's ring,
+     the notice withdrawing once the Undo has run, and a delete's row collapsing */
+  useEffect(() => subscribeAgentCardEvents((e) => {
+    if (e.type === "saved") {
+      tickGuide.current("edit");
+      undoSave.current = e.undo ?? null;
+      beginSaveChoreography(e.after);
+    } else if (e.type === "added") {
+      tickGuide.current("add");
+      /* principles v1 — the journey's Done: the row, the postmark and the snackbar (below). v18.3 §D still holds for a
+         hand-off (the finish screen's edit doors): the panel follows the add once the list holds it. */
+      if (addFromHere.current) { if (e.how === "done") setJustAdded(e.agentId); else addedInPanel.current = e.agentId; }
+      addFromHere.current = false;
+    } else if (e.type === "undone") {
+      undoSave.current = null;
+      setNotice((n) => (n && n.agentId === e.agentId && n.kind !== "failed" ? null : n));
+    } else if (e.type === "delete-failed") {
+      setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
+    }
+  }), [beginSaveChoreography]);
+
+  useEffect(() => {
+    const id = justAdded;
+    if (!id) return;
+    const a = agents.find((x) => x.id === id);
+    if (!a) return; /* waits for the list to hold it */
+    setJustAdded(null);
+    const name = agentPrimary(a);
+    const uid = currentUser?.id ?? null;
+    showToast({
+      message: `${name} added to your list`, duration: CLP_TOAST_MS, replaces: CLP_TOAST, undoneMessage: `${name} removed`,
+      ...(uid ? { undo: async () => { await undoAgentAdd(uid, id); } } : {}),
+    });
+    /* two frames: the row is drawn by the render the new agent caused */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll<HTMLElement>(`.aglist [data-cl26='row'][data-id="${CSS.escape(id)}"]`)].find((el) => el.offsetHeight > 0);
+      if (!row) return; /* filtered out of view: the snackbar alone says so */
+      row.scrollIntoView({ block: "center" });
+      row.removeAttribute("data-clp-new");
+      void row.offsetWidth;
+      row.setAttribute("data-clp-new", "");
+      window.setTimeout(() => row.removeAttribute("data-clp-new"), 2300);
+      const r = row.getBoundingClientRect();
+      const d = new Date();
+      setStampAt({ left: r.left + r.width * 0.56 - 37, top: r.top + r.height / 2 - 37, date: `${d.getDate()} ${MONTH3[d.getMonth()]}` });
+      window.setTimeout(() => setStampAt(null), 1700);
+      row.focus({ preventScroll: true });
+    }));
+  }, [justAdded, agents]); // eslint-disable-line react-hooks/exhaustive-deps -- showToast and the uid are read once, at the add
+
+  /* the new-agent form left without an add: a later add elsewhere is not this page's */
+  useEffect(() => { if (!cardReq && !addedInPanel.current) addFromHere.current = false; }, [cardReq]);
+  /* v18.3 §D — the panel follows an add made in it */
+  useEffect(() => {
+    const id = addedInPanel.current;
+    if (!id || !agents.some((a) => a.id === id)) return;
+    addedInPanel.current = null;
+    openPanel(id);
+  }, [agents, openPanel]);
+
   const hkCheckin = useMemo(() => wishlistCheckin(agents, hkCtxOf, hkPrefs, hkToday), [agents, hkCtxOf, hkPrefs, hkToday]);
   const hkBook: HkBook = useMemo(() => ({ title: scoped?.title?.trim() || null, genre: scoped?.genre?.trim() || null, genres: book }), [scoped, book]);
   const [hkOpen, setHkOpen] = useState(false);
@@ -911,9 +675,37 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const openHk = useCallback(() => setHkOpen(true), []);
   /* v18.1 §B.4 — the agent panel's "Fill in": a run over that agent's tasks only */
   const [hkRun, setHkRun] = useState<{ id: string; seq: number } | null>(null);
-  const health = useMemo(() => listHealth(agents, hk), [agents, hk]);
+  /* v25.6 E — a DEV-ONLY review aid: `window.__SA_CL_HEALTH = 44` shows every List health ring at that score, so the
+     CL256 H4 lock can see all three tones on one account. The MODE test is at the call site, so a production build
+     folds it to nothing and carries no trace of it. */
+  const healthStub: number | null = import.meta.env.MODE !== "production" && typeof window !== "undefined"
+    && typeof (window as unknown as { __SA_CL_HEALTH?: unknown }).__SA_CL_HEALTH === "number"
+    ? (window as unknown as { __SA_CL_HEALTH: number }).__SA_CL_HEALTH : null;
+  const health0 = useMemo(() => listHealth(agents, hk), [agents, hk]);
+  const health = useMemo(() => (healthStub === null ? health0 : { ...health0, pct: healthStub }), [health0, healthStub]);
+  /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
+  const banner = useMemo(() => bannerFigures(hk), [hk]);
+  /* v26 A — the header's sentence: every agent on file, the ones queried, the ones waiting on the writer */
+  const headFigures0 = useMemo(() => headerFigures(factsAll), [factsAll]);
+  /* Contact list principles v1 — a DEV-ONLY review aid: `window.__SA_CLP_FIG = { n, q, y }` puts the headline's figures
+     (and only the headline's) at those numbers, so CLP2 can render each case. Gated here, at the call site. */
+  const clpFig = import.meta.env.MODE !== "production" ? readClpFigures() : null;
+  /* principles v1 — day one: three or fewer agents, none queried. The dev aid's "day1" draws it over the harness account
+     with its first two not-queried agents (the list and the headline both read that pair; nothing is written) */
+  const day1Facts = useMemo(() => (clpForced === "day1" ? factsAll.filter((x) => x.stand === "none").slice(0, 2) : null), [clpForced, factsAll]);
+  const headFigures = clpFig ?? (day1Facts ? headerFigures(day1Facts) : headFigures0);
+  const dayOneHere = isDayOne(headFigures);
+  const listAll = day1Facts ?? factsAll;
+  const listPool = day1Facts ?? visibleFacts;
+  /* Contact list header v2 — "{nq} not yet queried": the existing `queried: "no"` filter and nothing else — Find, the
+     group and the other filters cleared, so the list shows exactly the nq agents the line counted — then the list into view */
+  const showNotQueried = useCallback(() => {
+    setFilters({ ...emptyContactFilters(), queried: "no" }); setSearch(""); setGlance(null); setSets(null);
+    requestAnimationFrame(() => mainColRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+  }, [setFilters]);
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
-  const listH = useMemo(() => healthOf(agents, hk), [agents, hk]);
+  const listH0 = useMemo(() => healthOf(agents, hk), [agents, hk]);
+  const listH = useMemo(() => (healthStub === null ? listH0 : { ...listH0, pct: healthStub }), [listH0, healthStub]);
   /* v18 §F.3 — the intro's flag, in Housekeeping's own store (beside v17.1's tab dismissal) */
   const hkIntroSeen = introSeenOf(currentUser);
   const markIntroSeen = useCallback(() => { if (!hkIntroSeen) void updateUserPaths(INTRO_PATH_V18); }, [hkIntroSeen, updateUserPaths]);
@@ -931,8 +723,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   };
   useEffect(() => { if (search.trim().length >= 2) tickGuide.current("search"); }, [search]);
   useEffect(() => { if (panelId) tickGuide.current("open"); }, [panelId]);
-  /* v19 §K — "Pin the list" ticks when the writer pins (the button or F): a change from unpinned to pinned on this page,
-     never a remembered pin put back on arrival */
+  /* v19 §K, v20 §G — "Go full screen" ticks when the writer goes full screen (the button or F): a change into full
+     screen on this page, never a remembered full screen put back on arrival */
   const wasPin = useRef({ full, active });
   useEffect(() => {
     const was = wasPin.current;
@@ -956,19 +748,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* the control each item shows, on this page, as it is now */
   const guideTarget = useCallback((k: ContactGuideKey): ChecklistTarget => {
     const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
-    const row = () => vis(".aglist [data-clv='row'][data-agent-card]");
+    /* v24 F — the rows and cards of List and Cards, and full screen's book rows */
+    const row = () => vis(".aglist [data-cl26='row']");
     switch (k) {
-      case "add": return { el: vis(".aglist [data-cl17='add']"), text: "Start here. Name and agency are enough; the rest can wait." };
-      case "search": return { el: vis(".aglist [data-cl19='toolbar'] [data-cl17='find']"), text: "Type a name or an agency. The list narrows as you type." };
-      /* v19 §K — the toolbar's Pin button (pinned already, it reads Unpin: the spotlight still points at it) */
-      case "pin": return { el: vis(".aglist button.cl19-pin[data-cl19='pin']"), text: "Press the pin. The list becomes the whole page; press it again to come back." };
-      case "open": return { el: row(), text: "Click any row. Their whole card opens on the right." };
-      case "edit": {
-        const edit = vis("[data-ap='panel'] [data-ap='edit']");
-        return edit ? { el: edit, text: "Press Edit profile. Everything on the card can be changed here." }
-          : { el: row(), text: "Open any agent's card first. Edit profile is at the foot of it." };
-      }
-      case "hk": return { el: vis(".aglist [data-cl183='fill']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
+      case "add": return { el: vis(".aglist [data-cl24='add']") ?? vis("[data-cl24='band-add']"), text: "Start here. Name and agency are enough; the rest can wait." };
+      case "search": return { el: vis(".aglist [data-cl26='find']"), text: "Type a name or an agency. The list narrows as you type." };
+      /* v26 C — the index row under the band (full screen is retired) */
+      case "pin": return { el: vis(".aglist [data-cl26='index']") ?? vis(".aglist [data-clq='group']"), text: "Press a letter to jump to it. Change the sort and the row follows: weeks, months or statuses." };
+      case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
+      /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
+      case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
+      case "hk": return { el: vis(".aglist [data-cl26='ring']"), text: "Press this. Housekeeping asks for one missing detail at a time." };
     }
   }, []);
   /* v17.1 §D — THE TAB'S DISMISSAL, SAVED TO THE ACCOUNT (`todoPrefs.contacts.tabDismissedAtGaps`): the gap count
@@ -1005,51 +795,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [dismissReady, health.gaps, storedDismiss, updateUserPaths]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
-  /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
-     the snapshot first, the reply-time deadline fan-out in the same batch, the data-quality flag, and
-     a snapshot Undo. In the lab the card's sandbox writer stands in, with the inverse patch as Undo. */
+  /* ── Housekeeping's fixes — lifted verbatim into the shared hook (`useHkFixes`, beside the drawer), which the phone's
+     gap-filling sheet calls too: the card's save path, the snapshot Undo, the sandbox writer in the lab. */
   const personalGenres = currentUser?.personalGenres ?? [];
-  const writeFix = useCallback(async (agent: Agent, patch: AgentEditPatch): Promise<FixResult | { ok: true; undo?: () => Promise<boolean> }> => {
-    if (Object.keys(patch).length === 0) return { ok: false, error: "Nothing to save." };
-    if (sandbox?.writeAgent) {
-      const write = sandbox.writeAgent;
-      const before = { ...agent } as Agent;
-      const r = await write(agent.id, patch);
-      if ("error" in r) return { ok: false, error: r.error };
-      return { ok: true, undo: async () => !("error" in (await write(before.id, inversePatch(before, patch)))) };
-    }
-    if (!currentUser) return { ok: false, error: "Not signed in." };
-    const out = await commitCardSave({ uid: currentUser.id, agent, queries, patch, resolveTaskFlag });
-    if ("error" in out.res) return { ok: false, error: out.res.error };
-    return { ok: true, undo: out.undo };
-  }, [sandbox, currentUser, queries, resolveTaskFlag]);
-
-  const onHkFix = useCallback(async (item: HkItem, fix: HkFix): Promise<FixResult> => {
-    const agent = agents.find((a) => a.id === item.agent.id) ?? item.agent;
-    if (fix.kind === "settled") {
-      const before = hkPrefs.settled;
-      try { await updateUserPaths(settledPath(hkPrefs, agent.id)); } catch (e) { return { ok: false, error: (e as Error).message || "the setting did not save" }; }
-      return { ok: true, line: savedLine(item, { settled: true }), undo: async () => { try { await updateUserPaths(settledRestorePath(before)); return true; } catch { return false; } } };
-    }
-    if (fix.kind === "remind") {
-      const name = (agent.name ?? "").trim() || (agent.agency ?? "").trim();
-      let id: string | undefined;
-      try { id = await addUserTask({ agentId: agent.id, dueDate: fix.on, text: `Check ${name} has reopened to queries` }); } catch (e) { return { ok: false, error: (e as Error).message || "the reminder did not save" }; }
-      return { ok: true, line: savedLine(item, { remindOn: fix.on }), undo: id ? async () => { try { await deleteUserTask(id!); return true; } catch { return false; } } : undefined };
-    }
-    const base = draftOf(agent, personalGenres);
-    const change: Partial<CardDraft> = fix.kind === "weeks" ? { weeks: fix.weeks }
-      : fix.kind === "mats" ? { mats: fix.mats } : fix.kind === "genres" ? { genres: fix.genres } : { wishlist: fix.text };
-    const patch = cardPatch(agent, base, { ...base, ...change }, new Date().toISOString());
-    const r = await writeFix(agent, patch);
-    if ("error" in r) return r;
-    const after = applyPatch(agent, patch);
-    return {
-      ok: true,
-      line: savedLine(item, { weeks: fix.kind === "weeks" ? fix.weeks : undefined, genres: fix.kind === "genres" ? fix.genres : undefined, fitsAfter: fitsGenre(after, hkBook.genres), book: hkBook }),
-      undo: r.undo,
-    };
-  }, [agents, hkPrefs, updateUserPaths, addUserTask, deleteUserTask, personalGenres, writeFix, hkBook]);
+  const { onHkFix, onLater: onHkLater, onShowAll: onHkShowAll, onWishlistStill } = useHkFixes({
+    agents, queries, currentUser, updateUserPaths, addUserTask, deleteUserTask, resolveTaskFlag, hkPrefs, hkToday, hkBook, sandbox,
+  });
   /* v18.3 §F.4 — a Housekeeping save that landed ticks the guide's "Do some housekeeping" */
   const onHkFixGuided = useCallback(async (item: HkItem, fix: HkFix): Promise<FixResult> => {
     const r = await onHkFix(item, fix);
@@ -1075,20 +826,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     openPanel(item.agent.id, { tab: t.tab, focus: t.focus, prefill: Object.keys(prefill).length ? prefill : undefined });
   }, [openPanel]);
 
-  const onWishlistStill = useCallback(async (agentId: string) => {
-    const agent = agents.find((a) => a.id === agentId);
-    if (!agent) return;
-    const patch: AgentEditPatch = { mswlCheckedAt: new Date().toISOString() };
-    if (sandbox?.writeAgent) { await sandbox.writeAgent(agentId, patch); return; }
-    if (!currentUser) return;
-    await commitAgentEdits(firestoreDb, currentUser.id, agentId, patch);
-  }, [agents, sandbox, currentUser]);
-
   /* v13 §8 — the page's keys, from the shared registry (and so on the shortcut sheet): H opens
      Housekeeping, / scrolls to the list and focuses Find. Not in a field, not while a card, the drawer
      or a popover is open, and only while this is the page on screen. */
-  const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false, full: false, setFull });
-  hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0, full: fullOn, setFull };
+  const hkKeyState = useRef({ active, hkOpen, popOpen: false, cardOpen: false, enabled: false, full: false });
+  hkKeyState.current = { active, hkOpen, popOpen: !!pop.open, cardOpen: !!openId, enabled: agents.length > 0, full: fullOn };
 
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
@@ -1108,40 +850,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       /* §7.7 — the row keys: J K / ↑ ↓ move the ring (scrolling to keep it in view, its tray showing), Enter opens
          the card, L starts the next action, Esc lets go. Enter, L and Esc act only while a ring is held, and Enter
          only from the page itself — a focused control answers its own Enter. */
-      if (down || up || openK || actK || letGo) {
-        const r = rowKeys.current;
-        if ((openK || actK || letGo) && !r.kfId) return;
-        if (openK && e.target instanceof HTMLElement && e.target.closest("button, a, [role='button']") && !e.target.closest('[data-clv="row"]')) return;
-        e.preventDefault();
-        if (letGo) { setKfId(null); return; }
-        const id = r.kfId;
-        if (down || up) {
-          const ids = r.displayIds;
-          if (!ids.length) return;
-          const i = id ? ids.indexOf(id) : -1;
-          const next = ids[Math.max(0, Math.min(ids.length - 1, i < 0 ? 0 : i + (down ? 1 : -1)))];
-          setKfId(next);
-          requestAnimationFrame(() => {
-            const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${next}"]`)].find((x) => x.getBoundingClientRect().height > 0);
-            row?.scrollIntoView({ block: "nearest", behavior: "auto" });
-          });
-          return;
-        }
-        const row = id ? [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${id}"]`)].find((x) => x.getBoundingClientRect().height > 0) : null;
-        if (openK && id) { r.onOpen?.(id, row?.getBoundingClientRect()); return; }
-        if (actK && id) {
-          const x = r.factsById.get(id);
-          const tray = x && r.trayFor ? r.trayFor(x) : null;
-          if (tray && !tray.ghost) r.act?.(id, tray.act);
-        }
-        return;
-      }
+      /* navy-bar v1 — the address book's list has its own ↑ ↓ while it has focus; the old row ring has no rows */
+      if (down || up || openK || actK || letGo) return;
       e.preventDefault();
       if (hk) { openHk(); return; }
       /* / — the bar's Find, the panel scrolled into view first so the field a writer is typing into is on screen */
       /* v138.6 §C: the pinned row (and its mirrored search) is retired; the navy header is the sticky row, so its
          own search is on screen whenever the list is, and is brought into view otherwise */
-      const input = [...document.querySelectorAll<HTMLInputElement>('[data-cl13-find="banner"] input')].find((x) => x.getBoundingClientRect().height > 0);
+      const input = [...document.querySelectorAll<HTMLInputElement>('[data-nb1="find"] input')].find((x) => x.getBoundingClientRect().height > 0);
       if (!input) return;
       input.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" });
       input.focus({ preventScroll: true });
@@ -1157,103 +873,137 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [addUserTask, openCard]);
   remindRef.current = onHkRemind;
 
-  /* ── v16 §F — the panel's acts ─────────────────────────────────────────────────────────────────────────── */
-  const panelFacts = useMemo(() => (panelAgent ? agentFacts(panelAgent, qcRows, scoped?.id ?? null) : null), [panelAgent, qcRows, scoped]);
-  const panelQ = useMemo(() => (panelAgent ? cardQuery(cardRows(qcRows, panelAgent.id, scoped?.id ?? null)) : null), [panelAgent, qcRows, scoped]);
-  const panelRows = useMemo(() => (panelAgent ? qcRows.filter((r) => r.query.agentId === panelAgent.id) : []), [panelAgent, qcRows]);
-  /* v18.2 §B — the same queries as documents, for the History tab */
-  const panelQueries = useMemo(() => (panelAgent ? queries.filter((q) => q.agentId === panelAgent.id) : []), [panelAgent, queries]);
-  const panelGenres = useMemo(
-    () => (panelAgent?.genres ?? []).map((g) => ({ label: genreLabel(g, personalGenres), hit: bookHit(g) })),
-    [panelAgent, personalGenres, bookHit],
-  );
-  const titleOf = useCallback((id: string) => manuscripts.find((m) => m.id === id)?.title?.trim() || null, [manuscripts]);
-  /** ↑ ↓ J K: the row before or after the open one, in the order the list draws */
-  const walkPanel = useCallback((dir: 1 | -1) => {
-    const ids = rowKeys.current.displayIds;
-    const i = panelIdRef.current ? ids.indexOf(panelIdRef.current) : -1;
-    const next = ids[Math.max(0, Math.min(ids.length - 1, i < 0 ? 0 : i + dir))];
-    if (!next || next === panelIdRef.current) return;
-    closeAgentCard();
-    setPanelTab("profile");
-    setPanelParam(next, "replace");
-    requestAnimationFrame(() => {
-      const row = [...document.querySelectorAll<HTMLElement>(`[data-agent-card="${next}"]`)].find((x) => x.getBoundingClientRect().height > 0);
-      row?.scrollIntoView({ block: "nearest", behavior: "auto" });
-    });
-  }, [setPanelParam]);
-  /** a query journey, stepped into the panel in the action drawer's look */
-  /* v17 §D — "+ Log a query" on a row: the agent's panel opens and steps straight to the Log a query journey with
-     the agent chosen (v16 Part F's act look). The journey is portalled into the panel, so it starts once the panel
-     for THAT agent is on the page. */
-  const pendingLog = useRef<string | null>(null);
-  const logInPanel = useCallback((agentId: string) => {
-    pendingLog.current = agentId;
-    openPanel(agentId);
-  }, [openPanel]);
-  useEffect(() => {
-    const a = panelAgent;
-    if (!a || pendingLog.current !== a.id) return undefined;
-    pendingLog.current = null;
-    const first = firstNameOf(a);
-    const nm = (a.name || a.agency || "The agent").trim();
-    const id = requestAnimationFrame(() => openQueryDrawer({
-      mode: "log", agentId: a.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}),
-      panel: { name: nm, agency: (a.name ? a.agency ?? "" : "").trim(), first, backLabel: `Back to ${first}`, title: `Query ${first}` },
-    }));
-    return () => cancelAnimationFrame(id);
-  }, [panelAgent, scoped]);
-  const actInPanel = useCallback((act: PanelAct) => {
-    const a = panelAgent;
-    if (!a || act.kind !== "journey") return;
-    const first = firstNameOf(a);
-    const nm = (a.name || a.agency || "The agent").trim();
-    const panel = { name: nm, agency: (a.name ? a.agency ?? "" : "").trim(), first, backLabel: `Back to ${first}`, ...(act.mode === "log" ? { title: `Query ${first}` } : {}) };
-    if (act.mode === "log") { openQueryDrawer({ mode: "log", agentId: a.id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}), panel }); return; }
-    if (panelQ) openQueryDrawer({ mode: act.mode, queryId: panelQ.id, panel });
-  }, [panelAgent, panelQ, scoped]);
-  const panelDeleteFacts = useMemo(() => {
-    if (!panelAgent) return null;
-    const m = destroyManifest("agent", panelAgent.id, { queries, activities, taskFlags });
-    return { queries: m.queries, history: m.activityRecords };
-  }, [panelAgent, queries, activities, taskFlags]);
-  /** ⋯ → Delete agent…, confirmed: the panel closes, the row collapses (the list's own aftermath), then the cascade runs */
-  const deletePanelAgent = useCallback(async () => {
-    const a = panelAgent;
-    if (!a) return;
-    const name = (a.name ?? "").trim() || a.agency;
-    closePanel();
-    emitAgentCardEvent({ type: "deleting", agentId: a.id });
-    await new Promise((r) => window.setTimeout(r, 240));
-    try { await deleteAgent(a.id); } catch { emitAgentCardEvent({ type: "delete-failed", agentId: a.id, name }); }
-  }, [panelAgent, closePanel, deleteAgent]);
-  const writePanelAgent = useCallback(async (id: string, patch: AgentEditPatch): Promise<SaveAgentResult> => {
+  /* navy-bar v1 B4 — the card's Notes write through the card's own path (`commitAgentEdits`, or the lab's sandbox) */
+  const writeAgentPatch = useCallback(async (id: string, patch: AgentEditPatch): Promise<SaveAgentResult> => {
     if (sandbox?.writeAgent) return sandbox.writeAgent(id, patch);
     if (!currentUser) return { ok: false, error: "Not signed in." } as SaveAgentResult;
     return commitAgentEdits(firestoreDb, currentUser.id, id, patch);
   }, [sandbox, currentUser]);
-  const panelMenu = useMemo(() => {
-    const out: { key: string; label: string; run: () => void }[] = [];
-    if (panelQ) out.push({ key: "qc", label: "Open in Query Centre", run: () => navigate(`/queries?q=${encodeURIComponent(panelQ.id)}`) });
-    if (panelQ && panelQ.court === "agent" && panelQ.pastExpected) out.push({ key: "nudge", label: "Send a nudge", run: () => actInPanel({ kind: "journey", mode: "nudge" }) });
-    if (panelAgent && panelFacts?.door === "closed" && reopenReminder(panelAgent)) out.push({ key: "remind", label: "Remind me when they reopen", run: () => remindRef.current(panelAgent) });
-    return out;
-  }, [panelQ, panelAgent, panelFacts, navigate, actInPanel]);
 
-  /** v19 §A/§B — the list's head (the band, pinned, and the toolbar), the same markup pinned and unpinned; the
-   *  loading skeleton draws it inert */
-  const listHead = (loading: boolean) => (
-    <ContactListHead pinned={loading ? full : fullOn} loading={loading} headRef={loading ? undefined : lhRef}
-      band={!loading && fullOn ? {
-        total: factsAll.length, model: glanceM, glance, onGlance: (k) => setGlance((g) => (g === k ? null : k)),
-        yourMove: yourMoveN, health: pageState === "list" ? health : null, onHealth: openHk, onAdd: openAdd,
-      } : null}
-      counts={stripCounts} current={currentLetter} onPick={pickLetter}
-      search={search} onSearch={setSearch} groupKey={groupKey} filterCount={chipCount} onClearFilters={clearFilters}
-      filtersRef={loading ? undefined : filRef} pop={pop}
-      onStopGroup={() => setGroupKey("none")} jump={loading ? null : jump}
-      onPin={togglePin} />
-  );
+  /* ── v24 C · THE AGENT CARD, in the Query Centre's panel (outside full screen) ── */
+  const cardFacts = cardId && !fullOn ? factsAll.find((x) => x.agent.id === cardId) ?? null : null;
+  /* going full screen hands the open agent to the book, and the panel closes */
+  useEffect(() => {
+    if (fullOn && cardId) { setBookReq({ id: cardId, seq: Date.now() }); setCardId(null); }
+  }, [fullOn, cardId]);
+  /* principles v1 — Esc (or ✕) closes the card and focus goes back to its row, unless it has already gone somewhere real */
+  const lastCard = useRef<string | null>(null);
+  useEffect(() => {
+    const was = lastCard.current;
+    lastCard.current = cardId;
+    if (!was || cardId) return;
+    requestAnimationFrame(() => {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && document.contains(ae)) return;
+      const row = [...document.querySelectorAll<HTMLElement>(`.aglist [data-cl26='row'][data-id="${CSS.escape(was)}"]`)].find((el) => el.offsetHeight > 0);
+      row?.focus({ preventScroll: true });
+    });
+  }, [cardId]);
+  /* an agent that is no longer on file closes its card */
+  useEffect(() => { if (cardId && collectionsReady && !agents.some((a) => a.id === cardId)) setCardId(null); }, [cardId, agents, collectionsReady]);
+  const titleOf = useCallback((msId: string) => manuscripts.find((m) => m.id === msId)?.title?.trim() || "Untitled manuscript", [manuscripts]);
+  /** v24 C/D — ONE card-props builder for the panel's card and full screen's wide card */
+  /* ── v25.2 C · editing inside the agent card ── */
+  const editOpts = useEditOptions(scoped?.genre ?? null);
+  const { saveDraft } = useAgentSave({ writeAgent: sandbox?.writeAgent, editCtx: hkEditCtx });
+  /* the open card's stored notes (the retired centred editor's Notes, kept in the edit mode) */
+  const notesAgent = cardId ? agents.find((a) => a.id === cardId) ?? null : null;
+  const cardNotes = useAgentNotes(notesAgent, currentUser?.id ?? null, writeAgentPatch);
+  /* picking another agent while the edit mode has changes asks first (the drawer's discard confirm); the pick waits */
+  const editLeave = useRef<(() => void) | null>(null);
+  /* v26.2 D — the card's discard guard: the host asks it before ✕ or Esc closes the card */
+  const cardGuard = useRef<CloseGuard | null>(null);
+  const pendingPick = useRef<string | null>(null);
+  const pickCard = useCallback((id: string) => {
+    if (editLeave.current && id !== cardId) { pendingPick.current = id; editLeave.current(); return; }
+    setCardId(id);
+  }, [cardId]);
+  /** what a card needs to edit its agent in place — one save path (`useAgentSave`), the app's genre lists */
+  const editKitFor = (agent: Agent): CardEditKit => {
+    const first = ((agent.name ?? "").trim().split(/\s+/)[0] || (agent.agency ?? "").trim() || "the agent");
+    const req = editReq && editReq.id === agent.id ? editReq : null;
+    return {
+      draft: draftOf(agent, personalGenres),
+      genre: {
+        options: { ms: scoped?.genre ?? null, pool: editOpts.genrePool, personal: editOpts.personalLabels, all: [...editOpts.allGenres] },
+        isHit: bookHit, onNew: editOpts.onNewGenre,
+      },
+      save: async (change) => {
+        const base = draftOf(agent, personalGenres);
+        const r = await saveDraft(agent, base, { ...base, ...change }, { emit: false });
+        if (!r.ok) { showToast({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
+        const undo = r.undo;
+        /* principles v1 — the page's one snackbar channel: about 5 seconds, a new one replaces the old */
+        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, duration: CLP_TOAST_MS, replaces: CLP_TOAST,
+          ...(undo ? { undo: async () => { await undo(); } } : {}) });
+        return true;
+      },
+      /* Add agent v1 Phase 5 — the long form is retired: the card's own sections are the editor (`form` below) */
+      renderEdit: () => null,
+      request: req ? { seq: req.seq, inline: req.inline, edit: req.edit ? { focus: req.edit.focus, prefill: req.edit.prefill } : undefined } : null,
+      /* v26.2 C — editing on the card: one draft, the editor's own lists and Also-changes, one write (`saveDraft`),
+         and the page's toast ("Saved {first}'s card", with the save's snapshot Undo) */
+      form: {
+        personal: editOpts.personal, agents, msGenre: scoped?.genre ?? null, genrePool: editOpts.genrePool, personalGenres: editOpts.personalLabels,
+        allGenres: editOpts.allGenres, nowMs, onNewGenre: editOpts.onNewGenre,
+        alsoFor: (d, base) => alsoChanges(agent, toContactDraft(agent, base, d), hkEditCtx),
+        onSave: async (d, base, offers, meta) => {
+          const r = await saveDraft(agent, base, d, { emit: false, offers });
+          if (!r.ok) return { ok: false, error: (r as { error: string }).error };
+          const undo = r.undo;
+          /* Card offers v1 — a query that did not update is named, and the agent's save stands. Agent card v2 — otherwise
+             "Saved {n} changes to {first}", plus what it did to the query; Undo puts the snapshot back ("Changes undone") */
+          const failed = (r as { failed?: string[] }).failed ?? [];
+          const message = failed.length ? `Saved ${first}’s card, but ${failed.join(" and ")} didn’t update. Try it from the query.`
+            : meta?.section ? sectionSavedWords(meta.section, first, offers) : savedWords(meta?.n ?? 1, first, offers);
+          /* Agent card v2.1 — a section's save names the section; Save all makes its own snackbar (`silent`), and the card
+             plays its Undo motion once the snapshot is back (`onUndo`) */
+          if (!meta?.silent) showToast({ message, ...(undo ? { undo: async () => { const ok = await undo(); if (ok) meta?.onUndo?.(); showToast({ message: UNDONE_WORDS }); } } : {}) });
+          return { ok: true, undo };
+        },
+        leaveRef: editLeave,
+        closeGuardRef: cardGuard,
+        resumePick: () => { const n = pendingPick.current; pendingPick.current = null; if (n) setCardId(n); },
+      },
+    };
+  };
+  const cardPropsFor = (x: Facts24, index: number, total: number, onStep: (d: -1 | 1) => void, onOpenAgent: (id: string) => void, onClose?: () => void): AgentCard24Props => {
+    const id = x.agent.id;
+    const toAgent = queries.filter((q) => q.agentId === id);
+    return {
+      x, all: factsAll, nowMs, bookTitle: scoped?.title?.trim() || null,
+      genreWord: (raw) => genreLabel(raw, personalGenres), genreHit: bookHit,
+      queries: toAgent, titleOf, history: agentHistory({ agent: x.agent, queries: toAgent, activities, notes: [], titleOf, nowMs }),
+      index, total, onStep, onClose,
+      /* Record a response v1 — a response is the query's card, in this card's place ("← Back to {first}") */
+      onJourney: (mode, queryId) => { if (mode === "resp" && responseHosted()) { openResponse({ queryId, back: agentBack(x.agent) }); return; } openQueryDrawer({ mode: mode as "resp", queryId }); },
+      onLog: () => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }),
+      onEdit: (tab, focus) => openPanel(id, { tab: tab ?? "who", focus }),
+      edit: editKitFor(x.agent),
+      /* v25.5 B — the History tab's query story: every query to the agent on any manuscript, newest first */
+      story: (() => {
+        const rows = agentRows(qcRows, id, null);
+        return { blocks: storyBlocks(rows, toAgent, activities, (ms) => titleOf(ms) || null, replyWeeksOf(x.agent), nowMs), heard: heardWords(rows) };
+      })(),
+      /* v25.4 D — the Profile tab's "{n} details missing": Housekeeping's count, and its first gap's field */
+      gaps: (() => { const g = agentGapAction(hk, id); return g ? { n: g.n, focus: GAP_FOCUS[g.first].focus, tab: GAP_FOCUS[g.first].tab, keys: g.keys } : null; })(),
+      onOpenQuery: (queryId) => navigate(`/queries?q=${encodeURIComponent(queryId)}`),
+      onNotes: async (text) => (await writeAgentPatch(id, { notes: text })).ok,
+      /* v24 E1/E2 — the genre fit against the book in scope, and the agent's colleagues at the agency */
+      fit: genreFit(x.agent.genres, book, scoped?.title ?? null, (raw) => genreLabel(raw, personalGenres)),
+      colleagues: colleaguesOf(x, factsAll), onOpenAgent,
+      deleteQueries: destroyManifest("agent", id, { queries, activities, taskFlags }).queries,
+      onDelete: () => {
+        const name = (x.agent.name ?? "").trim() || x.agent.agency;
+        onClose?.();
+        void deleteAgent(id).catch(() => setNotice({ text: `Couldn’t delete ${name} — try again.`, kind: "failed", agentId: id, canUndo: false }));
+      },
+    };
+  };
+  /* ‹ › step through the list in the order it is DRAWN: grouped by Status, the groups' runs; else the sorted pool */
+  const drawnOrder = useMemo(() => (byStatus ? setGroups(visibleFacts).flatMap((g) => g.ids) : visibleFacts.map((x) => x.agent.id)), [byStatus, visibleFacts]);
+  const cardIndex = cardFacts ? drawnOrder.indexOf(cardFacts.agent.id) : -1;
+
   return (
     <div className="aglist">
       <div className="agl-page">
@@ -1312,8 +1062,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             open={hkOpen} onOpen={openHk} onClose={() => { setHkOpen(false); setHkRun(null); }} runAgent={hkRun}
             view={hkView} onView={setHkView} routeActive={active}
             onFix={onHkFixGuided}
-            onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
-            onShowAll={async () => { await updateUserPaths(showAllPath()); }}
+            onLater={onHkLater}
+            onShowAll={onHkShowAll}
             onCard={onHkCard}
             onAgentCard={(id, tab) => openPanel(id, tab ? { tab } : undefined)}
             alsoFor={hkAlsoFor}
@@ -1323,25 +1073,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             onWishlistChanged={(id) => openPanel(id, { tab: "want", focus: "wishlist" })}
           />
         )}
-        {/* v16 §F — the agent's panel (portalled): only while this is the page on screen, and not while one of the
-            agent's queries has the box */}
-        {showList && active && panelAgent && panelFacts && !queryHasBox && (
-          <AgentPanel
-            agent={panelAgent} facts={panelFacts} q={panelQ} rows={panelRows}
-            queries={panelQueries} activities={activities} msTitle={scoped?.title?.trim() || null} titleOf={titleOf}
-            genres={panelGenres} nowMs={nowMs} uid={currentUser?.id ?? null} writeAgent={writePanelAgent}
-            tab={panelTab} onTab={setPanelTab}
-            editing={cardReq?.host === "panel" && cardReq.agentId === panelAgent.id}
-            onClose={closePanel} onWalk={walkPanel}
-            onEdit={(tab, focus) => openPanel(panelAgent.id, { tab: tab ?? "who", focus })}
-            onAct={actInPanel}
-            onOpenQuery={(queryId) => openQueryPanelFromAgent(queryId, { agentId: panelAgent.id, first: firstNameOf(panelAgent) })}
-            menu={panelMenu} deleteFacts={panelDeleteFacts} onDelete={deletePanelAgent}
-            gaps={agentGapLine(hk, panelAgent.id)}
-            onFillIn={() => { const id = panelAgent.id; closePanel(); setHkRun({ id, seq: Date.now() }); setHkOpen(true); }}
-          />
-        )}
-        {active && cardReq?.host === "panel" && cardReq.agentId === null && <AgentPanelNew />}
         {/* v18.3 §F — the page guide: a pill in the top bar's page slot, a checklist, a spotlight per item */}
         {!sandbox && (
           <PageChecklist page="Contact list" items={CONTACT_CHECKLIST} done={guideDone} seen={guide.seen} hidden={guide.hidden}
@@ -1358,114 +1089,89 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
-          aria-busy={pageState === "settling" || undefined}
-          inert={pageState === "settling" || undefined}>
+        <div className="clv-group cl27" data-v24="" data-v25="" data-v26="" data-v27="" data-full={full && showFrame ? "" : undefined} data-loading={frameState === "loading" ? "" : undefined}
+          aria-busy={frameState === "loading" || undefined}
+          inert={frameState === "loading" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
-        {(showList || pageState === "settling") && (
-          <ContactLightHeader loading={pageState !== "list"} total={pageState === "list" ? factsAll.length : null}
-            msTitle={scoped?.title?.trim() || null} model={pageState === "list" ? glanceM : BLANK_GLANCE} active={glance}
-            onGroup={(k) => setGlance((g) => (g === k ? null : k))}
-            addRef={addBtnRef} onAdd={openAdd}
-            health={pageState === "list" ? health : null} onHealth={openHk}
-            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}>
-            {/* v17 §C — the pin line: the header's foot */}
-            <i className="cl17-sentinel" data-cl17="pin-sentinel" aria-hidden="true" />
-          </ContactLightHeader>
+        {/* v27 — THE QUERY CENTRE'S OPEN HEADER, the Contact list's content (supersedes v26's navy panel): the mirrored
+            bird, "{n} agents on file" over "you've queried {q}" and the two buttons, and v26's List health unchanged. */}
+        {/* Contact list header v2 — the slim pinned row once the header has scrolled away (desktop only; never on day one,
+            on the empty page or while loading) */}
+        {showList && !dayOneHere && (
+          <ContactSlimBar figures={headFigures} health={health} onNotQueried={showNotQueried} onOpenHealth={openHk} onAdd={openAdd} />
         )}
-        {pageState === "settling" && (
-          <ContactSkeleton controls={listHead(true)} />
+        {showFrame && (
+          <ContactHeaderQc loading={!showList} figures={showList ? headFigures : null}
+            health={showList ? health : null} addRef={addBtnRef} onAdd={openAdd}
+            onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
+            onOpenHealth={openHk} onNotQueried={showNotQueried} />
         )}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
             `settling` draws the header's fixed shape with both lines empty and nothing below it. The
             filtered "No agents match." branch below is reachable only with agents on file. */}
-        {!showList ? null : (
+        {!showFrame ? null : (
         <>
 
         {/* v16 §C — THE LIST IS THE PAGE. It breaks out of the column to 24px from the page sheet's edges (capped at
             1600, centred): the ink control bar, the white filter row with the count at its right, the letter tabs,
             then the rows. The title bar, its hawk and its two pills are gone. */}
-        {showList && (
-        <section className="cl14-ws cl16-list cl19-card" data-cl14="ws" data-cl16="list" data-cl19="card" ref={wsRef} aria-label="The full list">
-          {/* v17 §B — THE SHEET'S TOP ROW: what is showing, left; grouping, density and full screen, right. The ink
-              control bar is gone: search and the filters are in the header. */}
-          {/* v18 §B — THE LIST HEADER: the top of the list sheet, slate. One sentence, left (the group name opens the
-              grouping menu); search, Filters, density and full screen, right. */}
-          {/* v138.6 §C — THE STICKY ROW: the navy header in a wrapper that sticks under the sheet's lip, filled with the
-              sheet's colour (the Query Centre's own construction) */}
-          {/* v19 §A/§B — THE HEAD: the band (pinned only) and the toolbar, sticky at the scroll area's top; the column
-              headings stick directly under it. The old list bar ("Showing all N agents · Grouped by …", its own Find,
-              density and pin) is retired: the toolbar is the list's only control row. */}
-          {listHead(false)}
-          <GroupMenu groupKey={groupKey} onGroup={setGroupKey} pop={pop} />
-          {afOn ? (
-            <ContactAppliedRow chips={appliedChips} showing={visibleFacts.length} total={factsAll.length} pinned={fullOn} rowRef={afRef}
-              onClearAll={clearFilters}
-              onMore={() => { const b = filRef.current; if (b && pop.open !== "filters") pop.toggle("filters", b); }} />
-          ) : null}
-          <ContactFilterMenu filters={filters} onFilters={setFilters} facts={factsAll} pool={inPool} pop={pop}
-            showing={visibleFacts.length} total={factsAll.length} />
-          <div className="cl14-list" data-cl14="list">
-        {/* ⚠️ ONE SET OF AGENTS, ONE RENDERER (v11 decision 1) — grouped bands over rows. The
-            FLIP container moved with the renderer: rows carry data-agent-card, flip.ts's own
-            default selector, so a filter change still animates the reflow. */}
-        <div ref={gridRef}>
-          {visible.length === 0 ? (
-            /* §7.8 — THE HELPFUL DEAD END: each active control offered as one drop, with how many it brings back */
-            <div className="cl14-none" data-cl13="none" role="status">
-              <b>No agents match all of these.</b>
-              <span>{drops.length ? "Drop one filter to see some again:" : "Even dropping one filter leaves nobody. Try clearing them."}</span>
-              {drops.length > 0 && (
-                <span className="cl14-lz" data-cl14="drops">
-                  {drops.map((d) => (
-                    <button key={d.key} type="button" data-cl14-drop={d.key} data-n={d.n} onClick={() => { if (d.clearsSearch) setSearch(""); else setFilters(d.drop(filters)); }}>
-                      Drop <em>{d.label}</em><small>{d.n} {d.n === 1 ? "agent" : "agents"}</small>
-                    </button>
-                  ))}
-                </span>
-              )}
-              <button type="button" className="cl14-lzc" data-cl13="none-clear" onClick={clearFilters}>Clear all filters</button>
-            </div>
-          ) : (
-            <ContactRows
-              groups={shownGroups}
-              byId={factsById}
-              nowMs={nowMs}
-              genreHit={bookHit}
-              /* §4: under Status and Action grouping the heading already says it */
-              hideYourMove={groupKey === "status" || groupKey === "action"}
-              /* §5: Letter draws one panel with letter dividers; any other grouping a powder band per group;
-                 v16 §C: no grouping is one panel with no dividers */
-              byLetter={groupKey === "letter"}
-              ungrouped={groupKey === "none"}
-              /* v19 §E — every grouping draws the strong band over its own section */
-              groupKey={groupKey}
-              /* §6: the sortable column labels drive the page's own sort */
-              sort={{ key: sortKey, reversed, onSort: setSortKey, onReverse: () => setReversed((r) => !r) }}
-              /* §7.7 the keyboard's ring · §7.3 the Find text marked · §7.6 the density */
-              focusId={kfId}
-              highlight={search.trim()}
-              compact={false}
-              /* v19 §H — one arrival for every change to what the list shows or how: load (the first draw), grouping,
-                 sort, filters, the summary card's group, Find and the pin */
-              arrival={{ key: JSON.stringify([groupKey, sortKey, reversed, filters, search.trim(), glance, fullOn]), before: restoreScroll }}
-              openId={openId}
-              newId={newId}
-              onOpen={onOpen}
-              onAddGenres={(id) => openCard(id, { tab: "want", focus: "genres", from: "slip" })}
-              onAddWishlist={(id) => openCard(id, { tab: "want", focus: "wishlist", from: "slip" })}
-              onEdit={(id, tab, focus) => openCard(id, { tab, focus, from: "slip" })}
-              trayFor={trayFor} onLog={logInPanel}
-              onAct={actWithoutCard}
-            />
-          )}
+        {showFrame && (
+        <>
+        {/* v26 B — THE LIST IS ONE BIG CARD: the landing page's framed card opening on a navy band (count, Find, Filters,
+            Group, Sort). The List / Cards switch, Cards and Full screen (the address book) are retired. */}
+        {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the Views panel (sticky; QC layout v1), then the list */}
+        <div className="qc153-cl" data-cl27="columns">
+        <div className="qc153-railcol" data-cl27="rail-column">
+          <ContactViews all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} pool={inPool}
+            genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={frameState ? 0 : listPool.length}
+            onReset={clearRailFilters} />
         </div>
-          </div>
-        </section>
+        <div className="qc153-main" data-cl27="list-column">
+        {/* QC layout v1 — the Query Centre's light bar above the card (count, Find, Sort, Group), on its sticky strip */}
+        <ContactBar shown={frameState ? 0 : listPool.length} loading={frameState !== null} search={search} onSearch={setSearch}
+          sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
+          group={group26} onGroup={setGroup26}
+          onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
+        <ContactSheet26 pool={frameState ? NO_FACTS : listPool} all={frameState ? NO_FACTS : listAll} group={group26}
+          state={frameState ?? "list"} onRetry={retryAgents} dayOne={dayOneHere ? { onAdd: openAdd } : null}
+          sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
+          filters={filters} onFilters={setFilters} onClearAll={clearFilters} search={search} onSearch={setSearch}
+          genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
+          openId={cardId} onOpen={pickCard} onJump={() => tickGuide.current("pin")}
+          wouldShow={(f) => factsAll.reduce((n, x) => n + (inPool(x) && inSet(x, sets) && matchesContactFilters(x, f) ? 1 : 0), 0)}
+          gapsOf={(id) => agentGapLine(hk, id)?.words ?? null}
+          onFill={(id) => {
+            if (!agents.some((x) => x.id === id)) return;
+            const g = agentGapAction(hk, id);
+            setHkOpenRef.current(false);
+            setCardId(id);
+            setEditReq({ id, seq: Date.now(), edit: { focus: g ? GAP_FOCUS[g.first].focus : "genres" } });
+          }}
+          setChip={sets ? { label: setsLabel(sets), onDrop: () => setSets(null) } : null}
+          onClearFilters={clearRailFilters}
+          onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
+        </div>
+        </div>
+        {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
+        {logSeed && active ? (
+          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)} onScrim={() => (logLeave.current ? logLeave.current() : setLogSeed(null))}>
+            <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} leaveRef={logLeave} />
+          </AgentCardPanel24>
+        ) : null}
+        {/* v26.2 A — THE PANEL IS THE CARD: no backdrop or padding, leaning, an arrival swing (once; paging swaps the
+            content in the same host) */}
+        {cardFacts && active && !logSeed ? (
+          <AgentCardPanel262 agentId={cardFacts.agent.id} onClose={() => setCardId(null)} guardRef={cardGuard}>
+            {/* v26.2 B — the card's face: AgentPaperCard's panel variant, the landing sections, the next-step box */}
+            <AgentCard262 {...cardPropsFor(cardFacts, cardIndex, drawnOrder.length,
+              (d) => { const n = drawnOrder[cardIndex + d]; if (n) pickCard(n); }, (id) => pickCard(id), requestCardClose)} />
+          </AgentCardPanel262>
+        ) : null}
+        </>
         )}
         </>
         )}
@@ -1484,12 +1190,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
                   setSearch("");
                   setGlance(null);
                   setNotice(null);
-                  // let the cleared list render, then bring the card into view
-                  window.setTimeout(() => {
-                    document
-                      .querySelector(`[data-agent-card="${notice.agentId}"]`)
-                      ?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-                  }, 0);
+                  // the book selects the agent once the cleared list holds it
+                  setBookReq({ id: notice.agentId, seq: Date.now() });
                 }}
               >
                 Show all agents
@@ -1514,6 +1216,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       </div>
 
 
+      {/* principles v1 — the postmark over the new row (fixed, where the row was measured; gone after 1.7s) */}
+      {stampAt ? (
+        <div className="clp-stamp-at" data-clp="stamp" style={{ left: stampAt.left, top: stampAt.top }}><Stamp word="ADDED" date={stampAt.date} /></div>
+      ) : null}
       {/* the card itself is app-level now — AgentCardHost, mounted once by App (Agent card v1 §2) */}
     </div>
   );

@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "C2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "line \"53 agents  ·  A to Z · 69% list health\""
+ },
+ {
+  "lock": "C2",
+  "where": "1512 no list health",
+  "ok": false,
+  "detail": "line \"53 agents  ·  A to Z · 69% list health\""
+ },
+ {
+  "lock": "C2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "line \"53 agents  ·  A to Z · 69% list health\""
+ },
+ {
+  "lock": "C2",
+  "where": "1280 no list health",
+  "ok": false,
+  "detail": "line \"53 agents  ·  A to Z · 69% list health\""
+ }
+]

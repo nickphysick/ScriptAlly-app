@@ -1,0 +1,8 @@
+
+Running 4 tests using 1 worker
+
+[1/4] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/4] [measure] › tests/e2e/dashFirstVisit.measure.ts:103:3 › first visit › DFV-A — the pre-query page at three sizes, and the founding card as it is after the first query
+[3/4] [measure] › tests/e2e/dashMobileV1.measure.ts:458:1 › DM1-E1 · the desktop furniture is gone on phones, and stays on the desktop
+[4/4] [measure] › tests/e2e/dashV118.measure.ts:29:1 › DB118-A1 · every stack opens at the pointer
+  4 passed (2.4m)

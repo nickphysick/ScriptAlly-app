@@ -1,0 +1,140 @@
+[
+ {
+  "lock": "PA5-14",
+  "where": "Today · Queries: no \"overdue\", no \"late\" (1446 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "Today · Agents: no \"overdue\", no \"late\" (580 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "Today · Activity: no \"overdue\", no \"late\" (494 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "To do: no \"overdue\", no \"late\" (4115 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "a task's journey: no \"overdue\", no \"late\" (4540 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "Materials · Packages: no \"overdue\", no \"late\" (521 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "Materials · Letters: no \"overdue\", no \"late\" (487 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "Materials · Versions: no \"overdue\", no \"late\" (223 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "Materials · Comps: no \"overdue\", no \"late\" (617 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "Profile: no \"overdue\", no \"late\" (316 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "the full Birds-eye view, unfolded: no \"overdue\", no \"late\" (1432 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "the full list: no \"overdue\", no \"late\" (4097 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "the gaps sheet: no \"overdue\", no \"late\" (983 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "the feedback sheet: no \"overdue\", no \"late\" (658 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "words read (population 20509 chars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "reduced motion · Today (header, chart, block): nothing running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "reduced motion · a block row opened: nothing running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "reduced motion · To do: nothing running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "reduced motion · Not now: nothing running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "reduced motion · the full Birds-eye view: nothing running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "reduced motion · Materials: nothing running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "reduced motion · Profile: nothing running",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-14",
+  "where": "control: without reduced motion the block's replay is running",
+  "ok": true,
+  "detail": "pa5-fade, pa5-line, pa5-fade, pa5-fade"
+ }
+]

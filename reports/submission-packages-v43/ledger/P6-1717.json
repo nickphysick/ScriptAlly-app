@@ -1,0 +1,56 @@
+{
+ "green": [
+  {
+   "where": "one drawing in the header",
+   "ok": true,
+   "detail": "1"
+  },
+  {
+   "where": "…the standing hawk",
+   "ok": true,
+   "detail": "/images/packages/packages-hawk-standing.png"
+  },
+  {
+   "where": "…decorative (aria-hidden)",
+   "ok": true,
+   "detail": "true"
+  },
+  {
+   "where": "no .p41-perch",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "where": "no drawing pinned to the window",
+   "ok": true,
+   "detail": "0"
+  }
+ ],
+ "red": [
+  {
+   "where": "one drawing in the header",
+   "ok": true,
+   "detail": "1"
+  },
+  {
+   "where": "…the standing hawk",
+   "ok": true,
+   "detail": "/images/packages/packages-hawk-standing.png"
+  },
+  {
+   "where": "…decorative (aria-hidden)",
+   "ok": true,
+   "detail": "true"
+  },
+  {
+   "where": "no .p41-perch",
+   "ok": false,
+   "detail": "1"
+  },
+  {
+   "where": "no drawing pinned to the window",
+   "ok": false,
+   "detail": "1"
+  }
+ ]
+}

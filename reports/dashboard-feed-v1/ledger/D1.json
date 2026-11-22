@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512x982c three buttons, the pack's labels",
+  "ok": true,
+  "detail": "[\"All activity\",\"Agents\",\"You\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982c population: entries by agents and by you",
+  "ok": true,
+  "detail": "{\"in\":5,\"out\":122}"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982c Agents: non-zero, none by you",
+  "ok": true,
+  "detail": "[\"in\",\"in\",\"in\",\"in\",\"in\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982c You: non-zero, none by an agent",
+  "ok": true,
+  "detail": "[\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982c a full request renders a big card with its journey",
+  "ok": true,
+  "detail": "[{\"q\":\"qc150l9-q\",\"journey\":3},{\"q\":\"rj-send\",\"journey\":3}]"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x982c a query sent renders a mini row, never a big card",
+  "ok": true,
+  "detail": "{\"fullReq\":[{\"q\":\"qc150l9-q\",\"journey\":3},{\"q\":\"rj-send\",\"journey\":3}],\"sentMini\":1,\"sentBig\":0}"
+ },
+ {
+  "lock": "D1",
+  "where": "a full request shows the package's materials as tiles",
+  "ok": true,
+  "detail": "[\"Query letterVersion 3\",\"SynopsisOne page\",\"Opening sampleFirst 3 chapters\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 three buttons, the pack's labels",
+  "ok": true,
+  "detail": "[\"All activity\",\"Agents\",\"You\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 population: entries by agents and by you",
+  "ok": true,
+  "detail": "{\"in\":5,\"out\":122}"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 Agents: non-zero, none by you",
+  "ok": true,
+  "detail": "[\"in\",\"in\",\"in\",\"in\",\"in\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 You: non-zero, none by an agent",
+  "ok": true,
+  "detail": "[\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\",\"out\"]"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 a full request renders a big card with its journey",
+  "ok": true,
+  "detail": "[{\"q\":\"qc150l9-q\",\"journey\":3},{\"q\":\"rj-send\",\"journey\":3}]"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 a query sent renders a mini row, never a big card",
+  "ok": true,
+  "detail": "{\"fullReq\":[{\"q\":\"qc150l9-q\",\"journey\":3},{\"q\":\"rj-send\",\"journey\":3}],\"sentMini\":1,\"sentBig\":0}"
+ }
+]

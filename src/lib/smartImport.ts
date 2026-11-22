@@ -116,8 +116,6 @@ export interface ValidatedImport {
   /** Queries dropped before commit (null/bad status, unknown agentRef, or an unwritable no-name
    *  agent). A missing date never drops a row — it imports provisionally. */
   skipped: { query: ParsedQuery; reason: string }[];
-  /** Date-order violations, flagged for the user — never auto-fixed. */
-  dateWarnings: string[];
 }
 
 /**
@@ -132,7 +130,6 @@ export function validateSmartImport(result: SmartImportResult): ValidatedImport 
   const agentByRef = new Map((result.agents || []).map((a) => [a.ref, a]));
   const importable: ParsedQuery[] = [];
   const skipped: { query: ParsedQuery; reason: string }[] = [];
-  const dateWarnings: string[] = [];
 
   for (const q of result.queries || []) {
     if (!q.status) {
@@ -157,19 +154,10 @@ export function validateSmartImport(result: SmartImportResult): ValidatedImport 
       skipped.push({ query: q, reason: "Row has no agent name or agency to identify it" });
       continue;
     }
-
-    // Date order where present: the sent date (the spine) then each later timeline event, in order.
-    const seq = [q.sentDate, ...(q.timeline ?? []).map((t) => t.date)]
-      .filter((d): d is string => !!d);
-    for (let i = 1; i < seq.length; i++) {
-      if (seq[i] < seq[i - 1]) {
-        const who = result.agents.find((a) => a.ref === q.agentRef)?.name || q.agentRef;
-        dateWarnings.push(`${who}: dates run out of order (${seq[i - 1]} → ${seq[i]}) — kept as given.`);
-        break;
-      }
-    }
+    /* Two-door import v1: dates out of order are no longer "kept as given" here. The review asks
+       (lib/importRules, "Dates out of order") and cannot import until they run in order. */
     importable.push(q);
   }
 
-  return { result, importable, skipped, dateWarnings };
+  return { result, importable, skipped };
 }

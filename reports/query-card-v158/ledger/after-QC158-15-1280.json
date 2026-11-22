@@ -1,0 +1,52 @@
+[
+ {
+  "name": "one: strip within 1px of the baseline",
+  "ok": true,
+  "got": "25.98,8.22,489.15,61.61 vs 25.98,8.22,489.15,61.61"
+ },
+ {
+  "name": "one: head within 1px of the baseline",
+  "ok": true,
+  "got": "24.05,56.2,489.74,82.83 vs 24.05,56.2,489.74,82.83"
+ },
+ {
+  "name": "one: book within 1px of the baseline",
+  "ok": true,
+  "got": "37.37,125.86,458.49,108.29 vs 37.37,125.86,458.49,108.29"
+ },
+ {
+  "name": "one: tabs within 1px of the baseline",
+  "ok": true,
+  "got": "38.14,233.46,452.72,44.61 vs 38.14,233.46,452.72,44.61"
+ },
+ {
+  "name": "one: foot within 1px of the baseline",
+  "ok": true,
+  "got": "8.22,612.98,490.02,92.59 vs 8.22,612.98,490.02,92.59"
+ },
+ {
+  "name": "many: strip within 1px of the baseline",
+  "ok": true,
+  "got": "25.98,8.22,489.15,61.61 vs 25.98,8.22,489.15,61.61"
+ },
+ {
+  "name": "many: head within 1px of the baseline",
+  "ok": true,
+  "got": "24.05,56.2,489.74,82.83 vs 24.05,56.2,489.74,82.83"
+ },
+ {
+  "name": "many: book within 1px of the baseline",
+  "ok": true,
+  "got": "37.37,125.86,458.49,108.29 vs 37.37,125.86,458.49,108.29"
+ },
+ {
+  "name": "many: tabs within 1px of the baseline",
+  "ok": true,
+  "got": "38.14,233.46,452.72,44.61 vs 38.14,233.46,452.72,44.61"
+ },
+ {
+  "name": "many: foot within 1px of the baseline",
+  "ok": true,
+  "got": "8.22,612.98,490.02,92.59 vs 8.22,612.98,490.02,92.59"
+ }
+]

@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "Calendar" | "A task's choices" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "Calendar", "A task's choices", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
+export type ShortcutScope = "Everywhere" | "Search" | "To-do list" | "A task's choices" | "Corkboard" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "Search", "To-do list", "A task's choices", "Corkboard", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -38,7 +38,10 @@ const k = (key: string, mod = false): KeyChord => ({ key, mod });
 
 export const SHORTCUTS = {
   search:           { chords: [k("k", true)], label: "Search", scope: "Everywhere", bound: "src/components/shell/usePalette.tsx", inFields: "works" },
-  sidebar:          { chords: [k("\\", true), k("[")], label: "Collapse or expand the sidebar", scope: "Everywhere", bound: "src/components/shell/useSidebarCollapsed.ts", inFields: "stands down" },
+  /* search v1: inside ⌘K search, with focus in its field (the field is where the keys are read) */
+  searchSecond:     { chords: [k("Enter", true)], label: "Run the selected result's second action", scope: "Search", bound: "src/components/shell/SearchDesk.tsx", inFields: "works" },
+  searchScope:      { chords: [k("Tab")], label: "Narrow to the next kind of result (Shift Tab goes back)", scope: "Search", bound: "src/components/shell/SearchDesk.tsx", inFields: "works" },
+  sidebar:          { chords: [k("\\", true), k("[")], label: "Open or close the sidebar", scope: "Everywhere", bound: "src/components/shell/useSidebarState.ts", inFields: "stands down" },
   switchManuscript: { chords: [k("m")], label: "Switch manuscript", scope: "Everywhere", bound: "src/components/shell/BarSwitcher.tsx", inFields: "stands down" },
   shortcuts:        { chords: [k("?")], label: "Show keyboard shortcuts", scope: "Everywhere", bound: "src/components/shell/ShortcutsSheet.tsx", inFields: "stands down" },
   undo:             { chords: [k("z", true)], label: "Undo, while its note is showing", scope: "Everywhere", bound: "src/components/queryActions/UndoBar.tsx", inFields: "stands down" },
@@ -49,12 +52,8 @@ export const SHORTCUTS = {
   todoSnooze:       { chords: [k("s")], label: "Snooze the task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
   todoDismiss:      { chords: [k("d")], label: "Dismiss the task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
   todoClose:        { chords: [k("Escape")], label: "Close the open task", scope: "To-do list", bound: "src/lib/taskShortcuts.ts", inFields: "stands down" },
-  /* To-do list v5 (desktop): the desk's action. j/k and / are the entries above, read by the same page. */
-  todoAct:          { chords: [k("e"), k("Enter")], label: "Act on the task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
-  todoAdd:          { chords: [k("n")], label: "Add a task on the desk", scope: "To-do list", bound: "src/components/todo/v5/TodoTray.tsx", inFields: "stands down" },
-  calBack:          { chords: [k("ArrowLeft")], label: "A week earlier", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
-  calForward:       { chords: [k("ArrowRight")], label: "A week later", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
-  calToday:         { chords: [k("t")], label: "Back to today", scope: "Calendar", bound: "src/components/todo/TodoCalendarPage.tsx", inFields: "stands down" },
+  /* To-do list v51 (desktop): add a task. j/k, /, s and d are the entries above, read by the same page. */
+  todoAdd:          { chords: [k("n")], label: "Add a task", scope: "To-do list", bound: "src/components/todo/ws/TodoWorkspace.tsx", inFields: "stands down" },
   taskChoice:       { chords: [k("1"), k("9")], label: "Choose an option by its number (1 to 9)", scope: "A task's choices", bound: "src/components/todo/TaskPane.tsx", inFields: "stands down" },
   compAdd:          { chords: [k("n")], label: "Add a comparable title", scope: "Comparable titles", bound: "src/components/manuscripts/ComparableTitlesPage.tsx", inFields: "stands down" },
   /* comps v25: the list's own keys — not in a field, and not while the drawer or the picker is open */
@@ -63,13 +62,16 @@ export const SHORTCUTS = {
      open */
   contactsHk:       { chords: [k("h")], label: "Open Housekeeping", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsFind:     { chords: [k("/")], label: "Find an agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
+  corkboardNew:     { chords: [k("n")], label: "New note", scope: "Corkboard", bound: "src/components/todo/TodoNoteboardPage.tsx", inFields: "stands down" },
+  /* Corkboard v15 (desktop): focus Find a note; Escape in the field clears it */
+  corkboardFind:    { chords: [k("/")], label: "Find a note", scope: "Corkboard", bound: "src/components/todo/TodoNoteboardPage.tsx", inFields: "stands down" },
   contactsDown:     { chords: [k("j"), k("ArrowDown")], label: "Next agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsUp:       { chords: [k("k"), k("ArrowUp")], label: "Previous agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsOpen:     { chords: [k("Enter")], label: "Open the agent's card", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsAct:      { chords: [k("l")], label: "Start the agent's next action", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsLetGo:    { chords: [k("Escape")], label: "Let go of the agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   /* v16 §E, v138.6 §C — the pin: owned by the shared pin hook (usePinList), not by the page; Escape leaves it last */
-  contactsFull:     { chords: [k("f")], label: "Pin the list", scope: "Contact list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
+  contactsFull:     { chords: [k("f")], label: "Full screen", scope: "Contact list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
   /* Discover v1 — the Scout's picks: they act on the lead card, and stand down in a field, over a modal and while any
      escape-stack layer is open (the Tune drawer, the passed list, the query drawer) */
   discoverAdd:      { chords: [k("a")], label: "Add the lead pick to your contact list", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
@@ -79,8 +81,7 @@ export const SHORTCUTS = {
   discoverPrev:     { chords: [k("k")], label: "Previous pick", scope: "Discover", bound: "src/components/agents/discover1/DvPicks.tsx", inFields: "stands down" },
   /* the Query Centre list's keys (v132 §4) — not in a field, and not while a card, a drawer or a popover is open */
   /* v138.6 §A — the pin: owned by the shared pin hook (usePinList), not by the page */
-  qcPin:            { chords: [k("f")], label: "Pin the list", scope: "Query Centre", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
-  todoPin:          { chords: [k("f")], label: "Pin the list", scope: "To-do list", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
+  qcPin:            { chords: [k("f")], label: "Full screen", scope: "Query Centre", bound: "src/components/shell/useFullScreenList.ts", inFields: "stands down" },
   qcFind:           { chords: [k("/")], label: "Find a query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcDown:           { chords: [k("j"), k("ArrowDown")], label: "Next query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcUp:             { chords: [k("k"), k("ArrowUp")], label: "Previous query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
@@ -88,7 +89,7 @@ export const SHORTCUTS = {
   qcAct:            { chords: [k("l")], label: "Start the query's next action", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcLetGo:          { chords: [k("Escape")], label: "Clear the search, then let go of the query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "works" },
   /* Responses v2 — the list of nos */
-  respFind:         { chords: [k("/")], label: "Find an agent in the list of nos", scope: "Responses", bound: "src/components/responses/RspNos.tsx", inFields: "stands down" },
+  respFind:         { chords: [k("/")], label: "Find in your Rejection collection", scope: "Responses", bound: "src/components/responses/RspCollection.tsx", inFields: "stands down" },
   respDown:         { chords: [k("j"), k("ArrowDown")], label: "Next answer, with one open", scope: "Responses", bound: "src/components/responses/RspPanel.tsx", inFields: "stands down" },
   respUp:           { chords: [k("k"), k("ArrowUp")], label: "Previous answer, with one open", scope: "Responses", bound: "src/components/responses/RspPanel.tsx", inFields: "stands down" },
   /* the quick view's keys (Agent card v1 §2–3) — they act only on the card that is open, and only

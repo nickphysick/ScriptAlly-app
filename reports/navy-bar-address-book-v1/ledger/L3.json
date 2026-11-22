@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "L3",
+  "where": "1280 list · population: the full-screen toolbar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":642.078125,\"filLeft\":652.078125,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 list · Find is inside the toolbar, left of Filters",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":642.078125,\"filLeft\":652.078125,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 list · Find is 40 tall (±1)",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 list · the pill row is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 cards · population: the full-screen toolbar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":729.515625,\"filLeft\":739.515625,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 cards · Find is inside the toolbar, left of Filters",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":729.515625,\"filLeft\":739.515625,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 cards · Find is 40 tall (±1)",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 cards · the pill row is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 list · population: the full-screen toolbar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":681.8125,\"filLeft\":691.8125,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 list · Find is inside the toolbar, left of Filters",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":681.8125,\"filLeft\":691.8125,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 list · Find is 40 tall (±1)",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 list · the pill row is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 cards · population: the full-screen toolbar",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":769.25,\"filLeft\":779.25,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 cards · Find is inside the toolbar, left of Filters",
+  "ok": true,
+  "detail": "{\"tb\":true,\"find\":true,\"inTb\":true,\"fRight\":769.25,\"filLeft\":779.25,\"fH\":40,\"srow\":false}"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 cards · Find is 40 tall (±1)",
+  "ok": true,
+  "detail": "40"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 cards · the pill row is hidden",
+  "ok": true,
+  "detail": "false"
+ }
+]

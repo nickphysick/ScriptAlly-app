@@ -1,0 +1,52 @@
+[
+ {
+  "where": "population: the Agent tab",
+  "ok": true,
+  "detail": "no agent pane"
+ },
+ {
+  "where": "the wishlist, in the agent's words",
+  "ok": true,
+  "detail": "{\"wish\":\"Big-hearted book club fiction with a dark edge.\",\"add\":null,\"facts\":4,\"hist\":3,\"cur\":1,\"ct\":3,\"bad\":false}"
+ },
+ {
+  "where": "exactly four fact cells",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "'You and Sophie' lists every query to her in the data (3), the current one marked",
+  "ok": true,
+  "detail": "{\"wish\":\"Big-hearted book club fiction with a dark edge.\",\"add\":null,\"facts\":4,\"hist\":3,\"cur\":1,\"ct\":3,\"bad\":false}"
+ },
+ {
+  "where": "Contact: email, website and submissions rows",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "no visible 'Not recorded' or 'Not stated'",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "where": "population: a thin agent",
+  "ok": true,
+  "detail": "no agent pane"
+ },
+ {
+  "where": "no wishlist: '+ Add their wishlist'",
+  "ok": true,
+  "detail": "{\"wish\":null,\"add\":\"+ Add their wishlist\",\"facts\":2,\"hist\":1,\"cur\":1,\"ct\":3,\"bad\":false}"
+ },
+ {
+  "where": "…still four fact cells",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "where": "…and no 'Not recorded' or 'Not stated'",
+  "ok": true,
+  "detail": "false"
+ }
+]

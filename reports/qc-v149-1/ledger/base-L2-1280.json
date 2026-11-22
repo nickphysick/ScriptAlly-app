@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: the seeded story's steps",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "the request's chip is rust (#f5e6df)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "the send that answers it is green (#e4ece1) with a ✓",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "the R&R's note is the agent's words, quoted, in italics",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "the undated nudge says Add date",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "Add date opens edit mode, focused on a date field",
+  "ok": false,
+  "detail": "{\"mode\":\"view\",\"focus\":\"name\"}"
+ }
+]

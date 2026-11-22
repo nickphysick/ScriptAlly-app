@@ -27,7 +27,15 @@ import { routeBase } from "./helpPath";
  *  optional path here: absence is expressed by omitting the child. */
 export interface ShellChild {
   id: string;
+  /** The page's FULL name — the folder tab (active and siblings), the bar, breadcrumbs and every reader but the
+   *  sidebar's own row. */
   label: string;
+  /** The sidebar row's SHORT label, where it differs (Nick's ruling, 25 Oct: "Queries", "Packages"). The sidebar
+   *  ALONE reads it — `sidebarLabel()` — so the page keeps its full name everywhere else. */
+  navLabel?: string;
+  /** SHELL NAV v3 (13 Nov): the page's short name in the folder tab strip ONLY ("Letters", "Packages", "Comps",
+   *  "Manuscript"). Absent = `label`. The palette, the document title, breadcrumbs and aria-labels keep `label`. */
+  tabLabel?: string;
   /** Where it goes, search included (e.g. "/queries?status=attention"). */
   path: string;
   count?: number;
@@ -36,7 +44,15 @@ export interface ShellChild {
   /** The row's OWN icon key. Every destination carries one now — the flat nav has no parent row
    *  to inherit from, and a row without an icon in a list of rows with them reads as broken. */
   icon?: string;
+  /** A Pro page, named by its entitlement (Manuscripts v27 Part E gave Versions a "PRO" tag shown to everyone;
+   *  sidebar rail v1 makes every Pro tag DORMANT): the rail and the full sidebar draw the tag only when the
+   *  user is NOT entitled (lib/entitlements). With today's founding access nobody sees one. */
+  pro?: ProEntitlement;
 }
+
+/** The entitlements a nav mark can name (lib/entitlements). Shell nav v3: every mark is a PAGE's; "materials" is
+ *  carried by Query letters, Submission packages and Comparable titles. */
+export type ProEntitlement = "discover" | "packages" | "versions" | "materials";
 
 export interface ShellSection {
   id: string;
@@ -48,7 +64,15 @@ export interface ShellSection {
   def?: string;
   count?: number;
   urgent?: boolean;
+  /** The sidebar draws no heading over this group (Dashboard's, 25 Oct). The label stays: the rail row and every
+   *  section lookup still read it. */
+  noHeading?: boolean;
+  /** The section's own icon key in WORKSPACE_ICONS (sidebar rail v1: the rail draws one row per section). */
+  icon?: string;
 }
+
+/** The text the SIDEBAR prints for a row — its short `navLabel` where it has one, else its full `label`. */
+export const sidebarLabel = (ch: Pick<ShellChild, "label" | "navLabel">): string => ch.navLabel ?? ch.label;
 
 /** What the route says is lit. `child` is absent for childless sections. */
 export interface ShellHit {
@@ -286,7 +310,8 @@ export function openForHit(hit: ShellHit | null): string | null {
  *
  * Routes outside the nav name themselves from the table below — the words their own headers use.
  */
-export const OFF_NAV_NAMES: Record<string, string> = { "/import": "Import", "/plans": "Plans", "/help": "Help centre" };
+/* Shell nav v3: /your-notes left the nav (it has no section now), so its tab names it from here */
+export const OFF_NAV_NAMES: Record<string, string> = { "/import": "Import", "/plans": "Plans", "/help": "Help centre", "/your-notes": "Your notes" };
 
 export function barPageName(
   sections: ShellSection[],
@@ -301,7 +326,8 @@ export function barPageName(
     if (!sec || !name) return null;
     return { section: gi > 0 ? sec.label : null, name };
   }
-  if (isAccountPath(pathname)) return { section: "Account", name: "Settings" };
+  /* non-workspace v1.1 (4a): a plain name, like the Plans tab — no small-capitals "Account" label in settings mode */
+  if (isAccountPath(pathname)) return { section: null, name: "Settings" };
   const n = OFF_NAV_NAMES[routeBase(pathname.replace(/\/+$/, "") || "/")];
   return n ? { section: null, name: n } : null;
 }

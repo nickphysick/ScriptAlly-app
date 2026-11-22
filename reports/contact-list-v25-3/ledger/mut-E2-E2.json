@@ -1,0 +1,650 @@
+[
+ {
+  "lock": "E2",
+  "where": "population (Housekeeping)",
+  "ok": true,
+  "detail": "52 agents with gaps"
+ },
+ {
+  "lock": "E2",
+  "where": "population (rows)",
+  "ok": true,
+  "detail": "53 rows, 53 with the action"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-06 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-06 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-08 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-08 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-09 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-09 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-07 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-07 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-05 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-05 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-13 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-13 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-10 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-10 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-04 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-04 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-11 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-11 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-03 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-03 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-14 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-14 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-4 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-4 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-near one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-near n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-soon one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-soon n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-passed20 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-passed20 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-12 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-12 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "qc150l9-ag one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "qc150l9-ag n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-bang one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-bang n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-9 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-9 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-2 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-2 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-remind one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-remind n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-passed865 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-cal-passed865 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-1 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-1 n = Housekeeping",
+  "ok": true,
+  "detail": "\"Fill in 2 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-nowin-1 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-nowin-1 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "rj-agent-2 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "rj-agent-2 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "clv-fx-reopen one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "clv-fx-reopen n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 3 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-1 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-1 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 3 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "clv-fx-stub0 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "clv-fx-stub0 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 3 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-11 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-11 n = Housekeeping",
+  "ok": true,
+  "detail": "\"Fill in 2 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-7 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-7 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-8 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-8 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "clv-fx-stale no gaps, no action",
+  "ok": false,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-4 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-4 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-6 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-6 n = Housekeeping",
+  "ok": true,
+  "detail": "\"Fill in 2 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-nowin-2 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-nowin-2 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-5 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-5 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "rj-agent-3 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "rj-agent-3 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-chase one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-chase n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-6 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-6 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "rej-agent-1 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "rej-agent-1 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-gap one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-gap n = Housekeeping",
+  "ok": true,
+  "detail": "\"Fill in 2 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-3 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-3 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-2 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-2 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 3 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "clv181-bare one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "clv181-bare n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 5 gaps →\" vs 4"
+ },
+ {
+  "lock": "E2",
+  "where": "clv-fx-never one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "clv-fx-never n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 3"
+ },
+ {
+  "lock": "E2",
+  "where": "rj-agent-1 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "rj-agent-1 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-close one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "thin-ag-close n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-10 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-10 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-3 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "msv12-agent-3 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 3 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-5 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "seed-agent-5 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 2 gaps →\" vs 1"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-12 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-12 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-02 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-02 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-01 one action, first",
+  "ok": true,
+  "detail": "1 button(s)"
+ },
+ {
+  "lock": "E2",
+  "where": "cv25-agent-01 n = Housekeeping",
+  "ok": false,
+  "detail": "\"Fill in 4 gaps →\" vs 2"
+ },
+ {
+  "lock": "E2",
+  "where": "shown on hover",
+  "ok": true,
+  "detail": "true"
+ }
+]

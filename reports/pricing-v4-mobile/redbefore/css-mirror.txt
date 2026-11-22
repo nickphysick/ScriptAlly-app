@@ -1,0 +1,54 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.0s)
+PVM-2 @390 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"none"}
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (931ms)
+PVM-2 @375 {"navBottom":60,"sheetTop":210,"box":[94,605.546875],"artTop":37,"t":"none"}
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up (761ms)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+
+    Error: the drawing is mirrored
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "matrix(-1, 0, 0, 1, 0, 0)"
+    Received: "none"
+
+      165 |     expect(bx.top, "the box's top is above the sheet's").toBeLessThan(sheet.top);
+      166 |     expect(bx.bottom, "the box's bottom is below the sheet's top").toBeGreaterThan(sheet.top);
+    > 167 |     expect(t, "the drawing is mirrored").toBe("matrix(-1, 0, 0, 1, 0, 0)");
+          |                                          ^
+      168 |     expect(art.top, "the drawing's top is above the box's").toBeLessThan(bx.top);
+      169 |     expect(art.bottom, "…and it still overlaps the box (perched on it, not floating)").toBeGreaterThan(bx.top);
+      170 |     /* ⚠️ THE SHEET STARTS 150px UNDER THE NAV, WHERE THE BOX'S −116px MARGIN CANNOT REACH IT. */
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:167:42
+
+    Error Context: test-results/pricingMobile.measure.ts-P-37198--the-sheet-has-not-moved-up-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+
+    Error: the drawing is mirrored
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "matrix(-1, 0, 0, 1, 0, 0)"
+    Received: "none"
+
+      165 |     expect(bx.top, "the box's top is above the sheet's").toBeLessThan(sheet.top);
+      166 |     expect(bx.bottom, "the box's bottom is below the sheet's top").toBeGreaterThan(sheet.top);
+    > 167 |     expect(t, "the drawing is mirrored").toBe("matrix(-1, 0, 0, 1, 0, 0)");
+          |                                          ^
+      168 |     expect(art.top, "the drawing's top is above the box's").toBeLessThan(bx.top);
+      169 |     expect(art.bottom, "…and it still overlaps the box (perched on it, not floating)").toBeGreaterThan(bx.top);
+      170 |     /* ⚠️ THE SHEET STARTS 150px UNDER THE NAV, WHERE THE BOX'S −116px MARGIN CANNOT REACH IT. */
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:167:42
+
+    Error Context: test-results/pricingMobile.measure.ts-P-d89b9--the-sheet-has-not-moved-up-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @390: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+    [measure] › tests/e2e/pricingMobile.measure.ts:157:3 › PVM-2 @375: the box straddles the join, the drawing is mirrored and perched, the sheet has not moved up 
+  1 passed (21.4s)

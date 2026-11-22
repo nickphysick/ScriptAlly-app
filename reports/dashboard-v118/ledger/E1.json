@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "E1",
+  "where": "quiet seed-query-18: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"seed-query-18\",\"future\":false,\"queried\":\"Queried 5 Aug\",\"end\":\"2 wks\",\"label\":\"Sam Okoro\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "quiet seed-query-18: never \"0 wks\"",
+  "ok": true,
+  "detail": "2 wks"
+ },
+ {
+  "lock": "E1",
+  "where": "quiet seed-query-18: the full name is the accessible label",
+  "ok": true,
+  "detail": "Sam Okoro"
+ },
+ {
+  "lock": "E1",
+  "where": "letter rej-query-1: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"rej-query-1\",\"future\":false,\"queried\":\"Queried 12 Aug\",\"end\":\"Passed 30 Aug\",\"label\":\"Imogen Rackham\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "letter rej-query-1: never \"0 wks\"",
+  "ok": true,
+  "detail": "Passed 30 Aug"
+ },
+ {
+  "lock": "E1",
+  "where": "letter rej-query-1: the full name is the accessible label",
+  "ok": true,
+  "detail": "Imogen Rackham"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-13: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"seed-query-13\",\"future\":false,\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\",\"label\":\"Elinor Hale\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-13: never \"0 wks\"",
+  "ok": true,
+  "detail": "Passed 5 Aug"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-13: the full name is the accessible label",
+  "ok": true,
+  "detail": "Elinor Hale"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-15: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"seed-query-15\",\"future\":false,\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\",\"label\":\"Marcus Reed\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-15: never \"0 wks\"",
+  "ok": true,
+  "detail": "Passed 5 Aug"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-15: the full name is the accessible label",
+  "ok": true,
+  "detail": "Marcus Reed"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-16: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"seed-query-16\",\"future\":false,\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\",\"label\":\"Priya Nair\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-16: never \"0 wks\"",
+  "ok": true,
+  "detail": "Passed 5 Aug"
+ },
+ {
+  "lock": "E1",
+  "where": "letter seed-query-16: the full name is the accessible label",
+  "ok": true,
+  "detail": "Priya Nair"
+ },
+ {
+  "lock": "E1",
+  "where": "letter cor-move-c: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"cor-move-c\",\"future\":false,\"queried\":\"Queried 9 Jul\",\"end\":\"Passed 9 Jul\",\"label\":\"Joan Whitfield\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "letter cor-move-c: never \"0 wks\"",
+  "ok": true,
+  "detail": "Passed 9 Jul"
+ },
+ {
+  "lock": "E1",
+  "where": "letter cor-move-c: the full name is the accessible label",
+  "ok": true,
+  "detail": "Joan Whitfield"
+ },
+ {
+  "lock": "E1",
+  "where": "full seed-query-14: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"seed-query-14\",\"future\":false,\"queried\":\"Queried 5 Aug\",\"end\":\"Passed 5 Aug\",\"label\":\"Tom Ellery\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "full seed-query-14: never \"0 wks\"",
+  "ok": true,
+  "detail": "Passed 5 Aug"
+ },
+ {
+  "lock": "E1",
+  "where": "full seed-query-14: the full name is the accessible label",
+  "ok": true,
+  "detail": "Tom Ellery"
+ },
+ {
+  "lock": "E1",
+  "where": "full cor-closed: a future sent date reads \"Queried —\"",
+  "ok": true,
+  "detail": "{\"id\":\"cor-closed\",\"future\":false,\"queried\":\"Queried 19 Jul\",\"end\":\"Passed 19 Jul\",\"label\":\"Tom Ellery\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "full cor-closed: never \"0 wks\"",
+  "ok": true,
+  "detail": "Passed 19 Jul"
+ },
+ {
+  "lock": "E1",
+  "where": "full cor-closed: the full name is the accessible label",
+  "ok": true,
+  "detail": "Tom Ellery"
+ },
+ {
+  "lock": "E1",
+  "where": "population: cards read",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "E1",
+  "where": "a seeded long name shows at least 14 characters",
+  "ok": true,
+  "detail": "{\"fit\":19,\"fitWeb\":20,\"fitFallback\":19,\"cardW\":214.46340942382812,\"pillWords\":false,\"ellipsis\":\"ellipsis\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "below 230px of card the pill is its icon alone",
+  "ok": true,
+  "detail": "{\"fit\":19,\"fitWeb\":20,\"fitFallback\":19,\"cardW\":214.46340942382812,\"pillWords\":false,\"ellipsis\":\"ellipsis\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "past that, an ellipsis",
+  "ok": true,
+  "detail": "{\"fit\":19,\"fitWeb\":20,\"fitFallback\":19,\"cardW\":214.46340942382812,\"pillWords\":false,\"ellipsis\":\"ellipsis\"}"
+ }
+]

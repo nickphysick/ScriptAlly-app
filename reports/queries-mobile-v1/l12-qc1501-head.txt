@@ -1,0 +1,61 @@
+
+Running 15 tests using 1 worker
+
+[1/15] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/15] [measure] › tests/e2e/qc1501.measure.ts:78:5 › QC1501 @ 1280 › L1 · one width: the header card, At a glance, Your queries and the list share edges, each min(S − 48, 1200)
+[measure] › tests/e2e/qc1501.measure.ts:78:5 › QC1501 @ 1280 › L1 · one width: the header card, At a glance, Your queries and the list share edges, each min(S − 48, 1200)
+[L1-1280] 10/10 green
+
+[3/15] [measure] › tests/e2e/qc1501.measure.ts:99:5 › QC1501 @ 1280 › L2 · glance: At a glance and Your queries are one heading size (28px) and family; no subheading
+[measure] › tests/e2e/qc1501.measure.ts:99:5 › QC1501 @ 1280 › L2 · glance: At a glance and Your queries are one heading size (28px) and family; no subheading
+[L2-1280] 6/6 green
+
+[4/15] [measure] › tests/e2e/qc1501.measure.ts:119:5 › QC1501 @ 1280 › L3 · cards: four of equal width and height, no detail lines, Next or Show them; ≤110 tall at 1512
+[measure] › tests/e2e/qc1501.measure.ts:119:5 › QC1501 @ 1280 › L3 · cards: four of equal width and height, no detail lines, Next or Show them; ≤110 tall at 1512
+[L3-1280] 5/5 green
+
+[5/15] [measure] › tests/e2e/qc1501.measure.ts:137:5 › QC1501 @ 1280 › L4 · bar type: every word and placeholder in the navy bar is Special Elite, upright, in both views
+[measure] › tests/e2e/qc1501.measure.ts:137:5 › QC1501 @ 1280 › L4 · bar type: every word and placeholder in the navy bar is Special Elite, upright, in both views
+[L4-1280] 4/4 green
+
+[6/15] [measure] › tests/e2e/qc1501.measure.ts:169:5 › QC1501 @ 1280 › L5 · bar order: search first; Filters, group, sort and Full screen sit where List puts them, less the pills' width
+[measure] › tests/e2e/qc1501.measure.ts:169:5 › QC1501 @ 1280 › L5 · bar order: search first; Filters, group, sort and Full screen sit where List puts them, less the pills' width
+[L5-1280] 9/9 green
+
+[7/15] [measure] › tests/e2e/qc1501.measure.ts:206:5 › QC1501 @ 1280 › L6 · hover actions: hidden at rest, the timeline to 16px of the card's edge, shown on hover and covering what is under it
+[measure] › tests/e2e/qc1501.measure.ts:206:5 › QC1501 @ 1280 › L6 · hover actions: hidden at rest, the timeline to 16px of the card's edge, shown on hover and covering what is under it
+[L6-1280] 8/8 green
+
+[8/15] [measure] › tests/e2e/qc1501.measure.ts:252:5 › QC1501 @ 1280 › L7 · full screen: the header, At a glance and Your queries hide; the switch is in the toolbar; Birds-eye there keeps full screen and its scale; exit restores
+[measure] › tests/e2e/qc1501.measure.ts:252:5 › QC1501 @ 1280 › L7 · full screen: the header, At a glance and Your queries hide; the switch is in the toolbar; Birds-eye there keeps full screen and its scale; exit restores
+[L7-1280] 10/10 green
+
+[9/15] [measure] › tests/e2e/qc1501.measure.ts:78:5 › QC1501 @ 1512 › L1 · one width: the header card, At a glance, Your queries and the list share edges, each min(S − 48, 1200)
+[measure] › tests/e2e/qc1501.measure.ts:78:5 › QC1501 @ 1512 › L1 · one width: the header card, At a glance, Your queries and the list share edges, each min(S − 48, 1200)
+[L1-1512] 10/10 green
+
+[10/15] [measure] › tests/e2e/qc1501.measure.ts:99:5 › QC1501 @ 1512 › L2 · glance: At a glance and Your queries are one heading size (28px) and family; no subheading
+[measure] › tests/e2e/qc1501.measure.ts:99:5 › QC1501 @ 1512 › L2 · glance: At a glance and Your queries are one heading size (28px) and family; no subheading
+[L2-1512] 6/6 green
+
+[11/15] [measure] › tests/e2e/qc1501.measure.ts:119:5 › QC1501 @ 1512 › L3 · cards: four of equal width and height, no detail lines, Next or Show them; ≤110 tall at 1512
+[measure] › tests/e2e/qc1501.measure.ts:119:5 › QC1501 @ 1512 › L3 · cards: four of equal width and height, no detail lines, Next or Show them; ≤110 tall at 1512
+[L3-1512] 6/6 green
+
+[12/15] [measure] › tests/e2e/qc1501.measure.ts:137:5 › QC1501 @ 1512 › L4 · bar type: every word and placeholder in the navy bar is Special Elite, upright, in both views
+[measure] › tests/e2e/qc1501.measure.ts:137:5 › QC1501 @ 1512 › L4 · bar type: every word and placeholder in the navy bar is Special Elite, upright, in both views
+[L4-1512] 4/4 green
+
+[13/15] [measure] › tests/e2e/qc1501.measure.ts:169:5 › QC1501 @ 1512 › L5 · bar order: search first; Filters, group, sort and Full screen sit where List puts them, less the pills' width
+[measure] › tests/e2e/qc1501.measure.ts:169:5 › QC1501 @ 1512 › L5 · bar order: search first; Filters, group, sort and Full screen sit where List puts them, less the pills' width
+[L5-1512] 9/9 green
+
+[14/15] [measure] › tests/e2e/qc1501.measure.ts:206:5 › QC1501 @ 1512 › L6 · hover actions: hidden at rest, the timeline to 16px of the card's edge, shown on hover and covering what is under it
+[measure] › tests/e2e/qc1501.measure.ts:206:5 › QC1501 @ 1512 › L6 · hover actions: hidden at rest, the timeline to 16px of the card's edge, shown on hover and covering what is under it
+[L6-1512] 8/8 green
+
+[15/15] [measure] › tests/e2e/qc1501.measure.ts:252:5 › QC1501 @ 1512 › L7 · full screen: the header, At a glance and Your queries hide; the switch is in the toolbar; Birds-eye there keeps full screen and its scale; exit restores
+[measure] › tests/e2e/qc1501.measure.ts:252:5 › QC1501 @ 1512 › L7 · full screen: the header, At a glance and Your queries hide; the switch is in the toolbar; Birds-eye there keeps full screen and its scale; exit restores
+[L7-1512] 10/10 green
+
+  15 passed (2.2m)

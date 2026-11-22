@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L6",
+  "where": "+ New package opens the drawer",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "L6",
+  "where": "…and no centred dialog is in the DOM",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "…it reads New package",
+  "ok": true,
+  "detail": "title"
+ },
+ {
+  "lock": "L6",
+  "where": "the header was another colour before",
+  "ok": true,
+  "detail": "rgb(44, 103, 130)"
+ },
+ {
+  "lock": "L6",
+  "where": "Plum changes the header's computed background before anything is saved",
+  "ok": true,
+  "detail": "rgb(88, 58, 90)"
+ },
+ {
+  "lock": "L6",
+  "where": "Create closes the drawer",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "L6",
+  "where": "…and adds a label of that colour",
+  "ok": true,
+  "detail": "rgb(88, 58, 90)"
+ },
+ {
+  "lock": "L6",
+  "where": "“Note, copy or delete…” opens the drawer",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "L6",
+  "where": "…its details form (Ready one, Delete package, Save)",
+  "ok": true,
+  "detail": "details"
+ },
+ {
+  "lock": "L6",
+  "where": "Escape closes it",
+  "ok": true,
+  "detail": "drawer"
+ }
+]

@@ -66,7 +66,7 @@ test("every page still in the shared treatment renders its subtitle identically"
   };
   /* ⚠️ THE POPULATION IS ASSERTED FIRST. With the Query Centre gone from the set, a comparison over
      what is left is satisfied by ONE page — which proves nothing about a shared treatment. */
-  const shared = ["/manuscripts", "/agents", "/manuscripts/packages"].filter((r) => !isOptedOut(r));
+  const shared = ["/manuscripts", "/agents", "/queries/packages"].filter((r) => !isOptedOut(r));
   expect(shared.length, "a shared treatment needs at least two pages to be shared BETWEEN").toBeGreaterThan(1);
   const first = await typography(shared[0]);
   console.log(`  ${shared[0]}: ${JSON.stringify(first)}`);

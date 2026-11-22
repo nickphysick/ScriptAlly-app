@@ -35,3 +35,25 @@ export function subscribeBarSlot(l: Listener): () => void {
 export function useBarSlot(): HTMLElement | null {
   return useSyncExternalStore(subscribeBarSlot, barSlot, () => null);
 }
+
+/* ── Shell tabs v2.1: WHETHER THE SLOT IS FOLDED. When the bar's tabs run out of room, search folds first, then the
+   slot's control folds to a 38px icon (the shell sets `data-fold` on the slot; inkShell.css draws it). The control
+   reads this to give its folded icon a tooltip with the words it no longer shows. */
+const foldListeners = new Set<Listener>();
+let folded = false;
+export function setBarSlotFolded(on: boolean): void {
+  if (on === folded) return;
+  folded = on;
+  foldListeners.forEach((l) => l());
+}
+export function barSlotFolded(): boolean {
+  return folded;
+}
+function subscribeBarSlotFolded(l: Listener): () => void {
+  foldListeners.add(l);
+  return () => { foldListeners.delete(l); };
+}
+/** True while the shell has folded the slot's control to its icon. */
+export function useBarSlotFolded(): boolean {
+  return useSyncExternalStore(subscribeBarSlotFolded, barSlotFolded, () => false);
+}

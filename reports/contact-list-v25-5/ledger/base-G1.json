@@ -1,0 +1,230 @@
+[
+ {
+  "lock": "G1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "6 agents"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-near sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-near nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-near scale",
+  "ok": false,
+  "detail": "-1/-1 for 8 — \"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-soon sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-soon nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-soon scale",
+  "ok": false,
+  "detail": "-1/-1 for 12 — \"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-passed20 sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-passed20 nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-passed20 scale",
+  "ok": false,
+  "detail": "-1/-1 for 4 — \"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-06 sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-06 nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-06 no reply time",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-08 sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-08 nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-08 no reply time",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-bang sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-bang nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-bang scale",
+  "ok": false,
+  "detail": "-1/-1 for 16 — \"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "6 agents"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-near sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-near nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-near scale",
+  "ok": false,
+  "detail": "-1/-1 for 8 — \"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-soon sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-soon nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-soon scale",
+  "ok": false,
+  "detail": "-1/-1 for 12 — \"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-passed20 sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-passed20 nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-passed20 scale",
+  "ok": false,
+  "detail": "-1/-1 for 4 — \"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-06 sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-06 nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-06 no reply time",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-08 sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-08 nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-08 no reply time",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-bang sections",
+  "ok": false,
+  "detail": " also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-bang nothing about the query",
+  "ok": false,
+  "detail": "1 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-bang scale",
+  "ok": false,
+  "detail": "-1/-1 for 16 — \"\""
+ }
+]

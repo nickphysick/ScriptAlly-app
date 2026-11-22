@@ -11,6 +11,8 @@
  */
 
 import React from "react";
+import { createPortal } from "react-dom";
+import { useSetupFootHost } from "./SetupFrame";
 import "./onboarding.css";
 
 /** The single column a step sits in: 760 wide, centred in the sheet. `wide` is the fork's 1280. */
@@ -63,11 +65,26 @@ export const BackLink: React.FC<{ onClick: () => void; label?: string }> = ({ on
 );
 
 /** The card's foot: a text link on the left (or nothing), the primary on the right. */
+/** On a phone inside a set-up frame (set-up on phones v1, 6B), draws its children in the frame's
+ *  foot host — pinned to the bottom of the screen — and leaves a spacer of the foot's measured height
+ *  so the step's last content clears it. Same buttons, same handlers; only where they are drawn
+ *  moves. Anywhere else (the desktop, the app's /import) it draws them where they stand. */
+export const PhonePin: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const host = useSetupFootHost();
+  if (!host) return children;
+  return (<>
+    <div className="sf-cfootspace" aria-hidden="true" data-sf="footspace" />
+    {createPortal(children, host)}
+  </>);
+};
+
 export const StepFoot: React.FC<{ left?: React.ReactNode; children: React.ReactNode }> = ({ left, children }) => (
-  <div className={`sf-cfoot${left ? "" : " sf-cfoot--end"}`}>
-    {left}
-    <span className="sf-footr">{children}</span>
-  </div>
+  <PhonePin>
+    <div className={`sf-cfoot${left ? "" : " sf-cfoot--end"}`}>
+      {left}
+      <span className="sf-footr">{children}</span>
+    </div>
+  </PhonePin>
 );
 
 /** One rust sentence above the foot. */

@@ -147,7 +147,7 @@ export const overdueDays = (ymd: string, todayYmd: string): number => daysBetwee
 export type WhenBucket = "over" | "week" | "later" | "none";
 export const WHEN_ORDER: WhenBucket[] = ["over", "week", "later", "none"];
 export const WHEN_LABEL: Record<WhenBucket, string> = {
-  over: "Overdue", week: "Due this week", later: "Coming up", none: "No date",
+  over: "Past expected", week: "Due this week", later: "Coming up", none: "No date",
 };
 
 export function whenBucket(ymd: string | null, todayYmd: string): WhenBucket {

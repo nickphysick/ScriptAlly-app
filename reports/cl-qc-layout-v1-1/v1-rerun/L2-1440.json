@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the panel's left x = the header's ±1",
+  "ok": true,
+  "got": "panel 112.0 · header 112.0"
+ },
+ {
+  "name": "the bar's left x = the headline's ±1",
+  "ok": true,
+  "got": "bar 408.0 · headline 408.0"
+ },
+ {
+  "name": "the panel's and the bar's tops = the Query Centre's ±1",
+  "ok": true,
+  "got": "CL 400.9/400.9 · QC 400.9/400.9"
+ }
+]

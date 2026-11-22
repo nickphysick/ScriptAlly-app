@@ -2,60 +2,103 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Bottom tab bar — the mobile primary navigation, rebuilt to the capsule language (Mobile Pass 1;
- * ref design-refs/mobile-concept-v1.html). It floats as ITS OWN CAPSULE (baked decision 1): inset
- * from the screen edges, capsule border + layered shadow, four equal tabs with mono micro-labels.
- * Active = ground-fill pill with ink text (baked decision 3 — never burgundy, never pink; the
- * desktop rail's exact active grammar).
+ * THE PHONE'S TAB BAR (Phone app v2, Part 1B; ref design-refs/phone-app-v2/src/screens.js `tabbar()`, app.css `.tabbar`
+ * `.tb` `.plus`). A floating capsule with five slots: Home · Queries · [+] · Packages · Agents.
  *
- * Four tabs (baked decision 2): Home (Dashboard) · Queries · Agents · Scripts. To-do has NO tab —
- * it is reached from the dashboard desk line and the you-menu. Route-driven active state via
- * `activeTab` (the shell's routeKey); off-tab routes light nothing.
+ * Phone round two v1 (2B, ref design-refs/phone-round-two-v1 `n2`): Packages takes To-do's slot. To-do is a page now,
+ * opened from Home's "See all", the menu, the + sheet and every old address; its badge moves onto Home and counts the
+ * same number it always counted (`lib/todoDueTally`).
  *
- * Hidden at ≥md and on pushed detail screens (`hidden` — the shell passes the active route's
- * MobileDetailSpec presence; query detail gets the condensed command bar, the agent editor its
- * own Done/Cancel — baked decision 5). All geometry/colour lives in mobileShell.css — display is
- * class + media-query driven, never inline (the shell CSS footgun law).
+ *  - The chosen tab is a NAVY pill behind a white icon; its label is navy.
+ *  - The + is a blush disc in the centre slot. While its sheet is open it is the close button (`aria-expanded`, the
+ *    plus turns 45°).
+ *  - Home carries the badge (it was To-do's until round two): the To-do tray's own tally of tasks due today or earlier (`lib/todoDueTally`, the
+ *    tray's `dayBuckets` overdue + today). No badge at zero. The Queries Your-move badge is retired from the bar.
+ *  - It tucks away as the page scrolls down and comes back when it scrolls up (`away`, driven by the shell's one
+ *    scroll listener with the ref's thresholds), and it is not drawn on a page opened from the menu or on a pushed
+ *    detail screen (`hidden`).
+ *
+ * SUPERSEDES the Queries on a phone v1 five-tab bar (Home · Queries · Agents · Analytics · More): Analytics moved to the
+ * menu. (Phone app v3: below 768px the shell mounts the phone bar (v4: V4TabBar) instead; this capsule now renders only at 768px and up, where it is hidden.)
+ *
+ * Phone only: the bar is `display: none` at 768px and up (class + media query, never inline — the shell CSS law).
  */
 import React from "react";
-import { Home, Send, Users, BookOpen, LucideIcon } from "lucide-react";
+import { PI } from "./phone/phoneIcons";
 
-interface BottomTabBarProps {
-  activeTab: string;
-  onNavigate: (tab: string, subPageName?: string) => void;
-  /** True while the active route shows a pushed detail screen — the bar stands down. */
-  hidden?: boolean;
+type TabKey = "home" | "queries" | "packages" | "agents";
+
+/** The packages page's address (Submission packages v26 moved it under Queries). */
+export const PACKAGES_TAB_PATH = "/queries/packages";
+
+/** The four tab routes. Everything else on a phone is a page opened from the menu, with the page band and no bar —
+ *  To-do included since round two. */
+export function tabFor(pathname: string): TabKey | null {
+  const p = pathname.replace(/\/+$/, "") || "/";
+  if (p === "/dashboard") return "home";
+  if (p === "/queries") return "queries";
+  if (p === PACKAGES_TAB_PATH) return "packages";
+  if (p === "/agents" || p.startsWith("/agents/")) return "agents";
+  return null;
 }
+/** a menu page: any workspace route that is not one of the four tabs */
+export const isMenuPage = (pathname: string): boolean => tabFor(pathname) === null;
 
-const TABS: { tab: string; label: string; Icon: LucideIcon }[] = [
-  { tab: "dashboard", label: "Home", Icon: Home },
-  { tab: "queries", label: "Queries", Icon: Send },
-  { tab: "agents", label: "Agents", Icon: Users },
-  { tab: "manuscripts", label: "Scripts", Icon: BookOpen },
+const TABS: { key: TabKey; label: string; path: string }[] = [
+  { key: "home", label: "Home", path: "/dashboard" },
+  { key: "queries", label: "Queries", path: "/queries" },
+  { key: "packages", label: "Packages", path: PACKAGES_TAB_PATH },
+  { key: "agents", label: "Agents", path: "/agents" },
 ];
 
-export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onNavigate, hidden = false }) => {
+interface BottomTabBarProps {
+  /** the router's pathname; it decides the chosen tab */
+  pathname: string;
+  /** go to a path (a tap on the tab you are on scrolls it back to the top instead) */
+  onGo: (path: string) => void;
+  /** the + : open its sheet, or close it while open */
+  onPlus: () => void;
+  plusOpen?: boolean;
+  /** the To-do badge, on Home since round two: tasks due today or earlier (none at zero) */
+  badge?: number;
+  /** tucked away while scrolling down */
+  away?: boolean;
+  /** not drawn: a pushed detail screen or a page opened from the menu */
+  hidden?: boolean;
+  /** Phone fixes v1 (1B): there is more of the page below, so the edge fade shows */
+  more?: boolean;
+}
+
+export const BottomTabBar: React.FC<BottomTabBarProps> = ({ pathname, onGo, onPlus, plusOpen = false, badge = 0, away = false, hidden = false, more = false }) => {
   if (hidden) return null;
-  return (
-    <nav className="sa-mtabbar" aria-label="Primary">
-      {TABS.map(({ tab, label, Icon }) => {
-        const active = activeTab === tab;
-        // Queries goes straight to the hub on mobile — logging/recording are in-page affordances.
-        const sub = tab === "queries" ? "Query database" : undefined;
-        return (
-          <button
-            key={tab}
-            type="button"
-            className={`sa-mtab${active ? " on" : ""}`}
-            onClick={() => onNavigate(tab, sub)}
-            aria-label={label}
-            aria-current={active ? "page" : undefined}
-          >
-            <Icon aria-hidden="true" strokeWidth={active ? 2.2 : 1.8} />
-            <span>{label}</span>
-          </button>
-        );
-      })}
+  const on = tabFor(pathname);
+  const tab = (t: (typeof TABS)[number]) => {
+    const active = on === t.key;
+    return (
+      <button key={t.key} type="button" className="pa-tb" data-tab={t.key} data-pa="tab"
+        onClick={() => onGo(t.path)}
+        aria-label={t.key === "home" && badge > 0 ? `Home, ${badge} to-do due` : t.label}
+        aria-current={active ? "page" : undefined}>
+        <span className="pa-tbi">{t.key === "packages" ? PI.box : PI[t.key]}</span>
+        {t.label}
+        {t.key === "home" && badge > 0 ? <span className="pa-tbbadge" data-pa="tab-badge" aria-hidden="true">{badge}</span> : null}
+      </button>
+    );
+  };
+  return (<>
+    {/* Phone fixes v1 (1B; boot.js `.fx-b2 .app::after`): the edge fade is anchored to the screen's foot and runs
+        up behind the frosted bar, so content scrolls clearly behind it. It goes when the bar tucks away and at
+        the end of the page. */}
+    <div className={`pa-edgefade${away || !more ? " off" : ""}`} aria-hidden="true" data-pa="edgefade" />
+    <nav className={`pa-tabbar${away ? " away" : ""}${plusOpen ? " plus-open" : ""}`} aria-label="Primary" data-pa="tabbar">
+      {tab(TABS[0])}
+      {tab(TABS[1])}
+      <button type="button" className="pa-plus" data-pa="plus" aria-label={plusOpen ? "Close" : "Log something"}
+        aria-haspopup="dialog" aria-expanded={plusOpen} onClick={onPlus}>
+        {PI.plus}
+      </button>
+      {tab(TABS[2])}
+      {tab(TABS[3])}
     </nav>
-  );
+  </>);
 };

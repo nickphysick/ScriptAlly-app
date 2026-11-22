@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "A1",
+  "where": "population: three columns found",
+  "ok": true,
+  "detail": "{\"left\":{\"l\":88,\"w\":414.15625,\"r\":502.15625},\"feed\":{\"l\":532.15625,\"w\":507.671875,\"r\":1039.828125},\"right\":{\"l\":1069.828125,\"w\":414.171875,\"r\":1484},\"header\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "left 417 ±4",
+  "ok": true,
+  "detail": "414.2"
+ },
+ {
+  "lock": "A1",
+  "where": "feed 511 ±4",
+  "ok": true,
+  "detail": "507.7"
+ },
+ {
+  "lock": "A1",
+  "where": "right 417 ±4",
+  "ok": true,
+  "detail": "414.2"
+ },
+ {
+  "lock": "A1",
+  "where": "gap left→feed 30 ±1",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "A1",
+  "where": "gap feed→right 30 ±1",
+  "ok": true,
+  "detail": "30.0"
+ },
+ {
+  "lock": "A1",
+  "where": "no navy header band",
+  "ok": true,
+  "detail": "false"
+ }
+]

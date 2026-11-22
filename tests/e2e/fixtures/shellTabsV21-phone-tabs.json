@@ -1,0 +1,42 @@
+{
+  "signup": [
+    {
+      "sel": "ws-ftab",
+      "text": "Your accountCreate account",
+      "cur": false,
+      "x": 8,
+      "y": 76,
+      "w": 181.16,
+      "h": 41
+    },
+    {
+      "sel": "ws-ftnm",
+      "text": "Your accountCreate account",
+      "cur": false,
+      "x": 26,
+      "y": 84.16,
+      "w": 145.16,
+      "h": 24.69
+    }
+  ],
+  "signin": [
+    {
+      "sel": "ws-ftab",
+      "text": "Your accountSign in",
+      "cur": false,
+      "x": 8,
+      "y": 76,
+      "w": 109.47,
+      "h": 41
+    },
+    {
+      "sel": "ws-ftnm",
+      "text": "Your accountSign in",
+      "cur": false,
+      "x": 26,
+      "y": 84.16,
+      "w": 73.47,
+      "h": 24.69
+    }
+  ]
+}

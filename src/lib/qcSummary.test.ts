@@ -53,11 +53,13 @@ describe("⚠️ ONE definition of 'with you' — rust, the chip and the filter 
 });
 
 describe("the ONE clock — expectedFor", () => {
-  it("agent's turn: the agency's window from the LAST send; null when nobody stated one (never 8/12/12)", () => {
+  it("agent's turn: the agency's window from the LAST send for a query; null when nobody stated one; partial and full take the house 12 and 12 (v152)", () => {
     expect(expectedFor(mkQ({ dateSent: ago(20) }), agent({ responseTimeWeeks: 6 }))).toEqual({ ms: NOW - 20 * DAY + 42 * DAY, kind: "reply" });
     expect(expectedFor(mkQ({ dateSent: ago(20) }), agent())).toEqual({ ms: null, kind: "reply" });
     const ps = mkQ({ status: QueryStatus.PARTIAL_SENT, dateSent: ago(90), partialSentDate: ago(10) });
-    expect(expectedFor(ps, agent({ responseTimeWeeks: 4 })).ms).toBe(NOW - 10 * DAY + 28 * DAY);
+    expect(expectedFor(ps, agent({ responseTimeWeeks: 4 })).ms).toBe(NOW - 10 * DAY + 84 * DAY);
+    const fs = mkQ({ status: QueryStatus.FULL_SENT, dateSent: ago(90), fullSentDate: ago(5) });
+    expect(expectedFor(fs, agent()).ms).toBe(NOW - 5 * DAY + 84 * DAY);
   });
   it("agent's turn: the writer's own expected date outranks the agency's window", () => {
     const q = { ...mkQ({ dateSent: ago(20) }), writerExpectedDate: ahead(3) } as Query;
@@ -246,7 +248,7 @@ describe("v126.2 · the desk foot says when the earliest date has passed", () =>
     /* sent 40 days ago against a 4-week window: its reply date has passed */
     const past = rowsOf([mkQ({ dateSent: ago(40) })], [a]);
     const f1 = courtFoot(past, "agent", NOW);
-    expect(f1.when.label).toBe("overdue since");
+    expect(f1.when.label).toBe("past expected since");
     expect(f1.when.date).toMatch(/^[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}$/);
     /* sent 5 days ago: still to come */
     const f2 = courtFoot(rowsOf([mkQ({ dateSent: ago(5) })], [a]), "agent", NOW);

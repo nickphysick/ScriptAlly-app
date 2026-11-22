@@ -2,6 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
+ * ⚠️ PHONE ONLY SINCE LOG A QUERY v1.2. On a desktop every "log" request is handed to the staged journey
+ *    (queries/centre/LogStagesPanel) by QueryDrawer; this journey is what the phone's flow still walks, until the phone
+ *    has a design of its own. Do not delete it while the phone uses it.
+ *
  * D1 · LOG A QUERY (design-refs/query-actions-v11.html §3.10).
  * Agent and book → Sending → What you sent → Response expectations → If they don't reply → Check and log.
  *
@@ -10,15 +14,18 @@
  * CHECK the method differs from how the agent takes queries · BLOCK nothing marked as sent ·
  * CHECK the materials differ from the agent's guidelines · CHECK a nudge before the reply date.
  */
+import { queryViaOf } from "../../../lib/queryVia";
+import { inUseLetter } from "../../../lib/queryLetters";
 import { previousQueryFor } from "../../../lib/requery";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { materialsToQuery, saveLog, type IfNo } from "../../../lib/queryActions/logSave";
 import { useNavigate } from "react-router-dom";
 import { collection, doc } from "firebase/firestore";
 import { db as fsdb } from "../../../lib/firebase";
 import { useScriptAllyDb } from "../../../lib/db";
-import { ComponentType, QueryStatus, SubmissionMethod, SubmissionStatus, type Agent, type QueryMaterial } from "../../../types";
+import { ComponentType, QueryStatus, SubmissionMethod, type Agent } from "../../../types";
 import {
-  addDays, dayDiff, dayIso, dm, fmt, pastAnchors, reminderAnchors, sameDay, up, type Anchor,
+  addDays, dayDiff, dm, fmt, pastAnchors, reminderAnchors, sameDay, up, type Anchor,
 } from "../../../lib/queryActions/dates";
 import {
   bookOf, capFirst, materialsName, sameSample, sampleName, type Materials, type Sample,
@@ -28,8 +35,11 @@ import {
   piecesChanged, sentPieces, summaryOf, summaryWith, type PackageCard,
 } from "../../../lib/queryActions/packages";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { openNewAgentCard } from "../../../lib/agentCardStore";
+import { ReplyWheel } from "../../phone/ReplyWheel";
+import { useIsMobile } from "../../shell/mobileChrome";
+import { packageStage } from "../../../lib/packagesV40";
 import { SentChip } from "../SentHow";
-import { buildAgentMaterials, emptyMaterials } from "../../../lib/agentMaterials";
 import {
   Chip, Chips, DateField, Fl, Note, NoteLink, SampleControl, SampleLine, Seg, Toggle, Who, initialsOf,
 } from "../controls";
@@ -39,23 +49,10 @@ import {
   agencyOf, agentName, dayIn, dayOut, firstName, isLive, seedOf, viaLabel, viaOptions, whoLine,
 } from "./common";
 
-type IfNo = "nudge" | "close" | "nothing";
-const IF_NO_STORED: Record<IfNo, string> = {
-  nudge: "Remind me to nudge",
-  close: "Mark as no response automatically",
-  nothing: "Do nothing",
-};
-
 const noSample = (): Sample => ({ unit: "none", amt: 3, from: 1, sect: false, fu: null });
 
-/** Materials → the query's stored `materialsWanted`, the shape the rest of the app reads. */
-export function materialsToQuery(m: Materials): (string | QueryMaterial)[] {
-  const out: (string | QueryMaterial)[] = [];
-  if (m.ql) out.push("Query Letter");
-  if (m.syn) out.push("Synopsis");
-  if (m.s.unit !== "none") out.push({ material: "Sample Pages", type: m.s.unit, quantity: m.s.amt });
-  return out;
-}
+/** Materials → the query's stored `materialsWanted` (v149: one definition, in lib/queryActions/logSave). */
+export { materialsToQuery };
 
 function readActiveManuscript(): string | null {
   try { return localStorage.getItem("scriptally_active_manuscript_id"); } catch { return null; }
@@ -70,6 +67,8 @@ interface LogAnswers {
 }
 
 export function LogJourney({ req, today, children }: JourneyProps) {
+  /* Phone fixes v1 (decision 6): on a phone the reply question is the shared weeks-and-days wheel */
+  const onPhone = useIsMobile();
   const db = useScriptAllyDb();
   const { agents, queries, manuscripts, packages, versions } = db;
   const liveMss = manuscripts.filter((m) => !m.shelved);
@@ -133,7 +132,8 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     if (!pkgTouched) applyOrder(msId);
   }, [pkgKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const ask = useMemo(() => guidelineAsk(agent), [agent]);
-  const qlV = currentVersion(msId, versions, ComponentType.QUERY_LETTER);
+  /* Query letters v1 (6 Nov): the individual send's letter is THE in-use letter — the Query letters page's one reader. */
+  const qlV = inUseLetter(ms ?? null, versions, packages);
   const synV = currentVersion(msId, versions, ComponentType.SYNOPSIS);
 
   /* ---------- picking an agent fills the rest from their guidelines ---------- */
@@ -143,7 +143,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     const g = guidelineAsk(a);
     setAgentId(a.id);
     setRequery(false);
-    setVia((a.submissionMethod as SubmissionMethod) || SubmissionMethod.EMAIL);
+    setVia(queryViaOf(a.submissionMethod) || SubmissionMethod.EMAIL);
     if (!again) {
       /* ⚠️ A GUIDELINE MATCH NEVER CHANGES THE PACKAGE (§A1, LP2). It fills the sample's portion —
          the agent's to set (D2) — and, when the writer is choosing individually, the ticks. */
@@ -308,7 +308,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
         ) : (
           <>
             {again ? <Note kind="ok" tag="KEPT" style={{ marginBottom: 10 }}>{again.how === "individual" || again.pkg === "custom" ? "Same day, same way and the same pieces as your last query." : "Same day, same way and the same package as your last query."} Just choose the agent.</Note> : null}
-            <AgentPicker typed={typed} setTyped={setTyped} agents={agents} queried={new Set(forBook.map((q) => q.agentId))} onPick={pickAgent} book={book} />
+            <AgentPicker typed={typed} setTyped={setTyped} agents={agents} queried={new Set(forBook.map((q) => q.agentId))} onPick={pickAgent} />
           </>
         )}
         <Fl>MANUSCRIPT</Fl>
@@ -338,6 +338,32 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     const askLine = ask.stated ? `${first.toUpperCase()} ASKS FOR: ${materialsName({ ql: ask.ql, syn: ask.syn, s: ask.sample }).toUpperCase()}` : undefined;
     const match = agent && ask.stated ? pkgs.find((p) => packageMatches(p, ask)) ?? null : null;
     const bookTitle = ms?.title ?? "this book";
+    /* Phone round two v1 (ref boot3 `sent`): ON A PHONE THE STEP IS ONE LIST. The package new queries go out with comes
+       first, marked "The package you're using now"; then the other packages that are ready or out with agents (a draft
+       is not something anyone was sent); then "Something different", which is the individual choice. The help line is
+       the agency's own requirements, when they are recorded. The desktop drawer is unchanged. */
+    const nowId = activePackageId(ms, packages);
+    const phoneOptions = onPhone ? [...pkgs]
+      .filter((p) => { const sp = packages.find((x) => x.id === p.id); return p.id === nowId || (sp ? packageStage(sp) !== "draft" : true); })
+      .sort((a, b) => Number(b.id === nowId) - Number(a.id === nowId)) : [];
+    const phoneSent = onPhone ? (
+      <>
+        {agent && ask.stated ? <p className="pf-help" data-pa="log-asks">{(agent.agency || first).trim()} asks for {materialsName({ ql: ask.ql, syn: ask.syn, s: ask.sample }).replace(/^Q/, "a q").replace(/^S/, "a s")}.</p> : null}
+        <div className="pa-logsent" role="radiogroup" aria-label="What you sent" data-pa="log-sent">
+          {phoneOptions.map((p) => (
+            <button type="button" role="radio" key={p.id} aria-checked={how === "package" && pkg === p.id} className={`pa-logopt${how === "package" && pkg === p.id ? " on" : ""}`}
+              data-pa="log-pkg" data-id={p.id} data-now={p.id === nowId ? "1" : "0"} onClick={() => attach(p.id)}>
+              <i aria-hidden="true" />
+              <span><b>{p.name}</b><small>{p.id === nowId ? `The package you’re using now${agent && packageMatches(p, ask) ? " · matches what they ask for" : ""}` : `${p.summary}${p.bookVersion ? ` · ${p.bookVersion}` : ""}`}</small></span>
+            </button>
+          ))}
+          <button type="button" role="radio" aria-checked={how === "individual"} className={`pa-logopt${how === "individual" ? " on" : ""}`} data-pa="log-something" onClick={() => chooseHow("individual")}>
+            <i aria-hidden="true" />
+            <span><b>Something different</b><small>Choose the letter, synopsis and pages</small></span>
+          </button>
+        </div>
+      </>
+    ) : null;
     steps.push({
       title: "What you sent",
       /* ⚠️ THE REVIEW WEARS THE SAME PAIR AS THE CARD AND TRACKING (§A3): the chip is SentChip
@@ -354,6 +380,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
       ownWarn: true,
       body: (
         <>
+          {phoneSent ?? (<>
           <div className="qad-hows" role="radiogroup" aria-label="How you record what you sent">
             <button type="button" role="radio" aria-checked={how === "package"} className={`qad-how${how === "package" ? " on" : ""}${pkgs.length ? "" : " dis"}`}
               disabled={!pkgs.length} data-qad-how="package" onClick={() => chooseHow("package")}>
@@ -367,8 +394,10 @@ export function LogJourney({ req, today, children }: JourneyProps) {
           {!pkgs.length ? (
             <div className="qad-nopkg" data-qad-nopkg>No packages yet. <a role="button" tabIndex={0} onClick={() => setLeaving(true)} onKeyDown={(e) => { if (e.key === "Enter") setLeaving(true); }}>Make one in Submission packages ›</a></div>
           ) : null}
+          </>)}
           {how === "package" && pkCard ? (
             <>
+              {phoneSent ? null : <>
               <Fl right={askLine}>WHICH PACKAGE</Fl>
               <div className="qad-plist" role="radiogroup" aria-label="Which package">
                 {pkgs.map((p) => (
@@ -382,6 +411,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
                   </button>
                 ))}
               </div>
+              </>}
               <div className="qad-inpk" data-qad-inpk>
                 <h5>IN THIS PACKAGE</h5>
                 {sentPieces({ ...mat, ql: pkCard.ql, syn: pkCard.syn, s: noSample() }, pieceV).map((x) => (
@@ -440,9 +470,16 @@ export function LogJourney({ req, today, children }: JourneyProps) {
       body: (
         <>
           <p className="qad-secs">What {first} says about replies — change either if you know better.</p>
+          {onPhone ? (
+            /* the same control as "Edit this query" (10B): the answer is the expected DATE, sent + n days, so the
+               days are kept; the usual window keeps its own mode so the agency's stated weeks still read as usual */
+            <ReplyWheel sentMs={sent.getTime()} days={Math.max(0, Math.round((expect.getTime() - sent.getTime()) / 86_400_000))} usual={wks}
+              onDays={(d) => { const at = addDays(sent, d); if (wks && d === wks * 7) setExpectMode("usual"); else { setExpectMode("custom"); setExpectCustom(at); } setTouched(true); }} />
+          ) : (
           <DateField id="logExpect" label="REPLY EXPECTED BY" value={expect} anchors={exA} dir="future"
             forceKey={expectMode === "custom" ? null : expectMode}
             onPick={(d, k) => { if (!d) return; if (k === "custom") { setExpectMode("custom"); setExpectCustom(d); } else setExpectMode(k); setTouched(true); }} />
+          )}
           <Fl right={agent.noResponseMeansNo ? `${first.toUpperCase()}'S GUIDELINES SAY YES` : `${first.toUpperCase()}'S GUIDELINES DON'T SAY SO`}>DOES NO REPLY MEAN NO?</Fl>
           <Chips name="nrmn" options={[["yes", "Yes — silence is a pass"], ["no", "No — they reply to everyone"]]} value={nrmnNow ? "yes" : "no"}
             onPick={(k) => { const v = k === "yes"; setNrmn(v); if (!ifNoSet) setIfNo(v ? "close" : "nudge"); setTouched(true); }} />
@@ -501,6 +538,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     button: "Log query",
     ok,
     steps,
+    live: agent ? { name: agentName(agent), agency: agencyOf(agent), book: ms?.title ?? null } : null,
     preNote: !agent ? <Note kind="info" tag="NEXT" style={{ marginTop: 22 }}>Choose the agent first. Their reply time, how they take queries and what they ask for fill in the rest.</Note> : undefined,
     saves,
     reviewNote: exact && exact.id !== exactDeclined ? (
@@ -529,38 +567,15 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     touched: () => [newId.current],
     commit: async () => {
       if (!agent) throw new Error("No agent chosen");
-      /* §C3 — how the materials were recorded, frozen here and never read back from a live package. */
-      const summary = summaryWith(pieces, pkCard?.name ?? null, !pkCard && basedOn && changes.length ? basedOn.name : null);
-      const versionIds = [pieceV.qlId, pieceV.synId].filter((x): x is string => !!x);
-      const record: Record<string, unknown> = pkCard
-        ? { sentHow: "package", sentPackageId: pkCard.id, sentPackageEdition: pkCard.edition, sentPackageName: pkCard.name }
-        : { sentHow: "individual", ...(basedOn && changes.length ? { basedOnPackageId: basedOn.id, basedOnPackageEdition: basedOn.edition, sentChanges: changes } : {}) };
+      /* §C3 — how the materials were recorded, frozen here and never read back from a live package. v149: the payload
+         and the write are the shared log save (lib/queryActions/logSave), the query card's "+ Log a query" too. */
       const writerExpected = !wks || expectMode !== "usual";
-      const payload: Record<string, unknown> = {
-        id: newId.current,
-        manuscriptId: msId,
-        agentId: agent.id,
-        /* kept in step with sentPackageId for older readers — empty when not a package (§C3) */
-        packageId: pkCard ? pkCard.id : "",
-        materialsWanted: materialsToQuery(mat),
-        personalisationNotes: "",
-        sendMethod: via,
-        dateSent: dayIso(sent),
-        ifNoResponse: IF_NO_STORED[ifNo],
-        ...record,
-        sentMaterials: summary,
-        sentVersions: versionIds,
-        ...(nudgeDate ? { nudgeDate: dayIso(nudgeDate) } : {}),
-        ...(writerExpected ? { writerExpectedDate: dayIso(expect), writerExpectedSetAt: new Date().toISOString() } : {}),
-        ...(prev || (dup && requery) ? { requery: true } : {}),
-        ...(nrmnNow !== !!agent.noResponseMeansNo ? { nrmnOverride: nrmnNow } : {}),
-      };
-      const details = summary;
-      const res = await db.addQuery(payload as never, false, { eventKey: prev || (dup && requery) ? "requery_sent" : "query_sent", details, stampPackage: !!pkCard });
-      if (!res.success) throw new Error(res.error || "Couldn't log the query");
-      /* "Close it" is the app's existing auto-close, which fires from `responseDeadline` — so the
-         writer's choice writes that date, and only that choice does. */
-      if (ifNo === "close") await db.updateQuery(newId.current, { responseDeadline: dayIso(expect) });
+      await saveLog(db, {
+        id: newId.current, manuscriptId: msId, agent, sent, via, pkCard, mat, pieceV,
+        basedOn: !pkCard && basedOn ? { pk: basedOn, changes } : null,
+        expect, writerExpected, ifNo, nudgeDate, requery: !!(prev || (dup && requery)),
+        nrmnOverride: nrmnNow !== !!agent.noResponseMeansNo ? nrmnNow : null,
+      });
       const keep = { sent, via, how: (pkCard ? "package" : "individual") as "package" | "individual", pkg: pkCard ? pkCard.id : "custom", mat, manuscriptId: msId };
       return {
         queryId: newId.current,
@@ -593,97 +608,58 @@ function matchSentences(first: string, ask: ReturnType<typeof guidelineAsk>, m: 
   return out;
 }
 
-/* ---------- the agent picker, and "+ Add … as a new agent" ---------- */
+/* ---------- the agent picker, and "+ Add … as a new agent" (the new-agent panel, over the drawer) ---------- */
 
-function AgentPicker({ typed, setTyped, agents, queried, onPick, book }: {
-  typed: string; setTyped: (v: string) => void; agents: Agent[]; queried: Set<string>; onPick: (a: Agent) => void; book: ReturnType<typeof bookOf>;
+function AgentPicker({ typed, setTyped, agents, queried, onPick }: {
+  typed: string; setTyped: (v: string) => void; agents: Agent[]; queried: Set<string>; onPick: (a: Agent) => void;
 }) {
   const [focus, setFocus] = useState(true);
-  const [adding, setAdding] = useState(false);
+  /* RETIRE THE ADD-AGENT POP-UP — "+ Add … as a new agent" opens THE new-agent panel, over this drawer, with the typed
+     name carried in; its save hands the new agent's id back here, and the agent is picked the moment the list holds it
+     (the store's update lands a beat after the write). A cancel hands nothing back, and the picker is as it was. */
+  const [waiting, setWaiting] = useState<string | null>(null);
+  useEffect(() => {
+    if (!waiting) return;
+    const made = agents.find((a) => a.id === waiting);
+    if (!made) return;
+    setWaiting(null);
+    onPick(made);
+  }, [waiting, agents, onPick]);
   const t = typed.trim().toLowerCase();
+  /* PHONE APP v2, PART 4 (FA B) — on a phone the picker IS the question: the whole list under the search field,
+     filtered as you type, and "Someone not on my list" always last. The desktop keeps its five suggestions. */
+  const phone = useIsMobile();
   const list = agents
     .filter((a) => !a.setAside)
     .filter((a) => !t || (a.name || "").toLowerCase().includes(t) || (a.agency || "").toLowerCase().includes(t))
-    .slice(0, 5);
-  if (adding) return <NewAgentForm initialName={typed.trim()} onCancel={() => setAdding(false)} onSaved={(a) => { setAdding(false); onPick(a); }} book={book} />;
+    .slice(0, phone ? undefined : 5);
+  const addNew = () => openNewAgentCard({
+    from: "button", host: "panel", over: "drawer",
+    ...(typed.trim() ? { prefill: { name: typed.trim() } } : {}),
+    onCreated: (id) => setWaiting(id),
+  });
   return (
     <div className="qad-apick">
-      <input className="qad-fin" autoFocus placeholder="Start typing an agent's name…" value={typed} data-qad-agent-input
+      {/* Phone fixes v1 (5C): no autofocus on a phone — focusing the field scrolled the flow down to it on open */}
+      <input className="qad-fin" autoFocus={!phone} placeholder="Start typing an agent's name…" value={typed} data-qad-agent-input
         onChange={(e) => setTyped(e.target.value)} onFocus={() => setFocus(true)} onBlur={() => window.setTimeout(() => setFocus(false), 150)}
         onKeyDown={(e) => { if (e.key === "Enter" && list[0]) { e.preventDefault(); onPick(list[0]); } }} autoComplete="off" />
-      {focus || t ? (
+      {phone || focus || t ? (
         <div className="qad-sugg" data-qad-sugg>
           {list.map((a, i) => (
             <button type="button" key={a.id} className={`it${i === 0 && t ? " hi" : ""}`} onMouseDown={(e) => { e.preventDefault(); onPick(a); }} data-qad-agent={a.id}>
               <span className="qad-av">{initialsOf(a.name || a.agency || "?")}</span>
-              <span><b>{a.name || a.agency}</b><small>{(a.agency || "").toUpperCase()}{a.responseTimeWeeks ? ` · ~${a.responseTimeWeeks} WKS` : ""}</small></span>
+              <span><b>{a.name || a.agency}</b><small>{phone ? `${a.agency || ""}${a.responseTimeWeeks ? ` · about ${a.responseTimeWeeks} weeks` : ""}` : <>{(a.agency || "").toUpperCase()}{a.responseTimeWeeks ? ` · ~${a.responseTimeWeeks} WKS` : ""}</>}</small></span>
               {queried.has(a.id) ? <span className="qad-tag">ALREADY QUERIED</span> : a.noResponseMeansNo ? <span className="qad-tag">NO REPLY MEANS NO</span> : null}
             </button>
           ))}
-          {t ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); setAdding(true); }} data-qad-new-agent>+ Add “{typed.trim()}” as a new agent</button> : null}
+          {phone
+            ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); addNew(); }} data-qad-new-agent><b>Someone not on my list</b><small>{t ? `Add “${typed.trim()}” as you go` : "Add them as you go"}</small></button>
+            : t ? <button type="button" className="new" onMouseDown={(e) => { e.preventDefault(); addNew(); }} data-qad-new-agent>+ Add “{typed.trim()}” as a new agent</button> : null}
         </div>
       ) : null}
     </div>
   );
 }
-
-function NewAgentForm({ initialName, onCancel, onSaved, book }: { initialName: string; onCancel: () => void; onSaved: (a: Agent) => void; book: ReturnType<typeof bookOf> }) {
-  const db = useScriptAllyDb();
-  const [name, setName] = useState(initialName);
-  const [agency, setAgency] = useState("");
-  const [wks, setWks] = useState<string>("8");
-  const [via, setVia] = useState<SubmissionMethod>(SubmissionMethod.EMAIL);
-  const [nr, setNr] = useState(false);
-  const [ql, setQl] = useState(true);
-  const [syn, setSyn] = useState(false);
-  const [s, setS] = useState<Sample>({ unit: "pages", amt: 10, from: 1, sect: false, fu: null });
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  async function save() {
-    if (!name.trim() && !agency.trim()) { setErr("Add a name or an agency."); return; }
-    setBusy(true);
-    const st = emptyMaterials();
-    if (ql) st.selected.push("Query letter");
-    if (syn) st.selected.push("Synopsis");
-    if (s.unit !== "none") {
-      const pill = s.unit === "pages" ? "Sample pages" : s.unit === "words" ? "Sample words" : "Sample chapters";
-      st.selected.push(pill); st.counts[pill] = String(s.amt);
-    }
-    const w = parseInt(wks, 10);
-    const res = await db.addAgent({
-      name: name.trim(), agency: agency.trim(), email: "", website: "", genres: [], mswlNotes: "", notes: "",
-      submissionStatus: SubmissionStatus.OPEN, submissionMethod: via, materialsWanted: buildAgentMaterials(st),
-      ...(Number.isFinite(w) && w > 0 ? { responseTimeWeeks: w } : {}),
-      ...(nr ? { noResponseMeansNo: true } : {}),
-    } as never);
-    setBusy(false);
-    if (!res.success || !res.id) { setErr(res.error || "Couldn't add the agent."); return; }
-    const made = { ...(db.agents.find((a) => a.id === res.id) || {}), id: res.id, name: name.trim(), agency: agency.trim(), submissionMethod: via, responseTimeWeeks: Number.isFinite(w) && w > 0 ? w : undefined, noResponseMeansNo: nr || undefined, materialsWanted: buildAgentMaterials(st) } as Agent;
-    onSaved(made);
-  }
-  return (
-    <div className="qad-newag" data-qad-newagent>
-      <Fl>NAME</Fl>
-      <input className="qad-fin" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
-      <Fl>AGENCY</Fl>
-      <input className="qad-fin" value={agency} onChange={(e) => setAgency(e.target.value)} />
-      <Fl>REPLY TIME</Fl>
-      <Chips options={[["4", "4 wks"], ["6", "6 wks"], ["8", "8 wks"], ["12", "12 wks"], ["0", "Not stated"]]} value={wks} onPick={setWks} />
-      <Fl>HOW THEY TAKE QUERIES</Fl>
-      <Chips<SubmissionMethod> options={VIA_ALL} value={via} onPick={setVia} />
-      <Toggle on={nr} onClick={() => setNr(!nr)}>No reply means no</Toggle>
-      <Fl>WHAT THEY ASK FOR</Fl>
-      <Toggle on={ql} onClick={() => setQl(!ql)}>Query letter</Toggle>
-      <Toggle on={syn} onClick={() => setSyn(!syn)}>Synopsis</Toggle>
-      <SampleControl sample={s} onChange={setS} book={book} allowNone />
-      {err ? <Note kind="warn" tag="CHECK">{err}</Note> : null}
-      <div className="acts">
-        <Chip on onClick={() => { if (!busy) void save(); }}>{busy ? "Adding…" : "Add to your Contact list"}</Chip>
-        <Chip onClick={onCancel}>Back</Chip>
-      </div>
-    </div>
-  );
-}
-const VIA_ALL: [SubmissionMethod, string][] = [[SubmissionMethod.EMAIL, "Email"], [SubmissionMethod.QUERY_MANAGER, "QueryManager"], [SubmissionMethod.ONLINE_FORM, "Online form"], [SubmissionMethod.POST, "Post"]];
 
 export { capFirst, Seg };

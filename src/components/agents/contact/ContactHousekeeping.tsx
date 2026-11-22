@@ -51,7 +51,9 @@ export type HkFix =
   | { kind: "mats"; mats: CardMats }
   | { kind: "genres"; genres: string[] }
   | { kind: "wishlist"; text: string }
-  | { kind: "remind"; on: string };
+  | { kind: "remind"; on: string }
+  /** Add agent v1 — the agency, typed */
+  | { kind: "agency"; agency: string };
 
 export type FixResult = { ok: true; line: string; undo?: () => Promise<boolean> } | { ok: false; error: string };
 
@@ -222,6 +224,14 @@ const Fix: React.FC<FixProps> = ({ item, book, today, agents, h, where, onSave, 
           </div>
           <p className="hkv-hint">Got an exact date? Set it on their card.</p>
           {acts(null)}
+        </div>
+      );
+    case "agency":
+      return (
+        <div className="hkv-fx" data-hkv="fix" data-gap="agency">
+          <input className="hkv-ta" data-hkv="agency" value={wish} placeholder="e.g. Fenwick & Rowe" autoComplete="off"
+            onChange={(e) => setWish(e.target.value)} aria-label={`Which agency ${f} is with`} />
+          {acts(save({ kind: "agency", agency: wish.trim() }, wish.trim().length > 0))}
         </div>
       );
     default: {

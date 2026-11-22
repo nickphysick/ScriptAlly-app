@@ -14,8 +14,8 @@
  *
  * Reuses: MaterialsEditor (the editor), MountPanel (the clipping card, for the pink-band explainer),
  * BrandDropdown (the package picker), and the existing Query.packageId link. isPro reads the one
- * package entitlement, `packagesUnlocked` (lib/entitlements.ts) — open to all while
- * PACKAGES_OPEN_TO_ALL. No billing/enforcement here.
+ * package entitlement, `packagesUnlocked` (lib/entitlements.ts) — the one resolver (plan rules v1).
+ * No billing/enforcement here.
  */
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -151,9 +151,9 @@ export const MaterialsField: React.FC<MaterialsFieldProps> = ({
   allowCustom,
   onNavigate,
 }) => {
-  const { currentUser, packages, versions } = useScriptAllyDb();
+  const { currentUser, entitlement, packages, versions } = useScriptAllyDb();
   /* founding-member access (lib/entitlements.ts) — the attach lock reads the entitlement */
-  const isPro = packagesUnlocked(currentUser);
+  const isPro = packagesUnlocked(entitlement);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [picking, setPicking] = useState(false);
 

@@ -1,0 +1,41 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+PV4-2 line "63 PLACES LEFT"
+  ✓  2 [measure] › tests/e2e/pricingV4.measure.ts:111:1 › PV4-2 the counter is live or absent, and reads '{n} places left' (965ms)
+  ✘  3 [measure] › tests/e2e/pricingV4.measure.ts:130:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy (6.3s)
+
+
+  1) [measure] › tests/e2e/pricingV4.measure.ts:130:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy 
+
+    Error: a novel needs its length
+
+    expect(locator).toBeDisabled() failed
+
+    Locator:  locator('.mk-jynext')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - a novel needs its length with timeout 5000ms
+      - waiting for locator('.mk-jynext')
+        14 × locator resolved to <button type="button" class="mk-btn mk-btn--navy mk-jynext">Next</button>
+           - unexpected value "enabled"
+
+
+      147 |   await expect(next, "question 2 opens with Next disabled").toBeDisabled();
+      148 |   await answer(page, "A novel");
+    > 149 |   await expect(next, "a novel needs its length").toBeDisabled();
+          |                                                  ^
+      150 |   await answer(page, "80,000 to 110,000");
+      151 |   await expect(next).toBeEnabled();
+      152 |   await next.click();
+        at /Users/nickphysick/ScriptAlly-pricing4/tests/e2e/pricingV4.measure.ts:149:50
+
+    Error Context: test-results/pricingV4.measure.ts-PV4-3-af01f-actly-the-fitting-tile-navy-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/pricingV4.measure.ts:130:1 › PV4-3 the questions open, gate each step, and turn exactly the fitting tile navy 
+  2 passed (25.4s)

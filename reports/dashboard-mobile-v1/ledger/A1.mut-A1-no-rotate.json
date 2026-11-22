@@ -1,0 +1,362 @@
+[
+ {
+  "lock": "A1",
+  "where": "390x844 population: the top bar",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":71,\"w\":390,\"h\":50,\"r\":390,\"b\":121}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 name visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":56,\"t\":84.703125,\"r\":190.75,\"b\":106.296875,\"w\":134.75,\"h\":21.59375}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 search visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":260,\"t\":75.5,\"r\":300,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 feedback visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":300,\"t\":75.5,\"r\":340,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 add visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":340,\"t\":75.5,\"r\":380,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 search hit area ≥ 40",
+  "ok": true,
+  "detail": "40×40"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the name never runs under search",
+  "ok": true,
+  "detail": "ink {\"l\":56,\"t\":85.703125,\"r\":190.75,\"b\":103.703125,\"w\":134.75,\"h\":18} vs {\"l\":260,\"t\":75.5,\"r\":300,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 feedback hit area ≥ 40",
+  "ok": true,
+  "detail": "40×40"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the name never runs under feedback",
+  "ok": true,
+  "detail": "ink {\"l\":56,\"t\":85.703125,\"r\":190.75,\"b\":103.703125,\"w\":134.75,\"h\":18} vs {\"l\":300,\"t\":75.5,\"r\":340,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 add hit area ≥ 40",
+  "ok": true,
+  "detail": "40×40"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the name never runs under add",
+  "ok": true,
+  "detail": "ink {\"l\":56,\"t\":85.703125,\"r\":190.75,\"b\":103.703125,\"w\":134.75,\"h\":18} vs {\"l\":340,\"t\":75.5,\"r\":380,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the controls in order: Search, Feedback, Add",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the bar is 50 tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the mark is a 30px circle",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 a long title ellipsises before Search",
+  "ok": false,
+  "detail": "{\"nameR\":770.171875,\"searchL\":800.171875,\"addR\":920.171875,\"ell\":\"ellipsis\",\"clipped\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 a long title leaves + inside the window",
+  "ok": false,
+  "detail": "{\"nameR\":770.171875,\"searchL\":800.171875,\"addR\":920.171875,\"ell\":\"ellipsis\",\"clipped\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the shell's generic phone bar is gone on Home",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 + opens a role=menu",
+  "ok": true,
+  "detail": "{\"open\":true,\"role\":\"menu\",\"items\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"w\":230,\"right\":380,\"rot\":\"none\",\"expanded\":\"true\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the menu's three items",
+  "ok": true,
+  "detail": "[\"Log a query\",\"Record a response\",\"Add an agent\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 the menu is 230 wide, inside the window",
+  "ok": true,
+  "detail": "230 → 380"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 + reads × while open (rotated 45°)",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 aria-expanded true while open",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 an outside tap closes the menu",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 Esc closes the menu and returns focus to +",
+  "ok": true,
+  "detail": "{\"menu\":false,\"focus\":\"Add\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 \"Log a query\" opens its flow",
+  "ok": true,
+  "detail": "{\"before\":{\"path\":\"/dashboard\",\"drawer\":false,\"agentPanel\":false,\"dialogs\":[]},\"after\":{\"path\":\"/dashboard\",\"drawer\":true,\"agentPanel\":false,\"dialogs\":[\"Log a query\"]}}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 \"Log a query\" closes the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 \"Record a response\" opens its flow",
+  "ok": true,
+  "detail": "{\"before\":{\"path\":\"/dashboard\",\"drawer\":false,\"agentPanel\":false,\"dialogs\":[]},\"after\":{\"path\":\"/dashboard\",\"drawer\":true,\"agentPanel\":false,\"dialogs\":[\"Query\"]}}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 \"Record a response\" closes the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 \"Add an agent\" opens its flow",
+  "ok": true,
+  "detail": "{\"before\":{\"path\":\"/dashboard\",\"drawer\":false,\"agentPanel\":false,\"dialogs\":[]},\"after\":{\"path\":\"/dashboard\",\"drawer\":true,\"agentPanel\":false,\"dialogs\":[\"Add an agent\"]}}"
+ },
+ {
+  "lock": "A1",
+  "where": "390x844 \"Add an agent\" closes the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 population: the top bar",
+  "ok": true,
+  "detail": "{\"x\":0,\"y\":71,\"w\":375,\"h\":50,\"r\":375,\"b\":121}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 name visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":56,\"t\":84.703125,\"r\":190.75,\"b\":106.296875,\"w\":134.75,\"h\":21.59375}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 search visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":245,\"t\":75.5,\"r\":285,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 feedback visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":285,\"t\":75.5,\"r\":325,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 add visible and inside the window",
+  "ok": true,
+  "detail": "{\"l\":325,\"t\":75.5,\"r\":365,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 search hit area ≥ 40",
+  "ok": true,
+  "detail": "40×40"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the name never runs under search",
+  "ok": true,
+  "detail": "ink {\"l\":56,\"t\":85.703125,\"r\":190.75,\"b\":103.703125,\"w\":134.75,\"h\":18} vs {\"l\":245,\"t\":75.5,\"r\":285,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 feedback hit area ≥ 40",
+  "ok": true,
+  "detail": "40×40"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the name never runs under feedback",
+  "ok": true,
+  "detail": "ink {\"l\":56,\"t\":85.703125,\"r\":190.75,\"b\":103.703125,\"w\":134.75,\"h\":18} vs {\"l\":285,\"t\":75.5,\"r\":325,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 add hit area ≥ 40",
+  "ok": true,
+  "detail": "40×40"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the name never runs under add",
+  "ok": true,
+  "detail": "ink {\"l\":56,\"t\":85.703125,\"r\":190.75,\"b\":103.703125,\"w\":134.75,\"h\":18} vs {\"l\":325,\"t\":75.5,\"r\":365,\"b\":115.5,\"w\":40,\"h\":40}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the controls in order: Search, Feedback, Add",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the bar is 50 tall",
+  "ok": true,
+  "detail": "50"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the mark is a 30px circle",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 a long title ellipsises before Search",
+  "ok": false,
+  "detail": "{\"nameR\":770.171875,\"searchL\":800.171875,\"addR\":920.171875,\"ell\":\"ellipsis\",\"clipped\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 a long title leaves + inside the window",
+  "ok": false,
+  "detail": "{\"nameR\":770.171875,\"searchL\":800.171875,\"addR\":920.171875,\"ell\":\"ellipsis\",\"clipped\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the shell's generic phone bar is gone on Home",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 + opens a role=menu",
+  "ok": true,
+  "detail": "{\"open\":true,\"role\":\"menu\",\"items\":[\"Log a query\",\"Record a response\",\"Add an agent\"],\"w\":230,\"right\":365,\"rot\":\"none\",\"expanded\":\"true\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the menu's three items",
+  "ok": true,
+  "detail": "[\"Log a query\",\"Record a response\",\"Add an agent\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 the menu is 230 wide, inside the window",
+  "ok": true,
+  "detail": "230 → 365"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 + reads × while open (rotated 45°)",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 aria-expanded true while open",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 an outside tap closes the menu",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A1",
+  "where": "375x667 Esc closes the menu and returns focus to +",
+  "ok": true,
+  "detail": "{\"menu\":false,\"focus\":\"Add\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 no phone top bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x900 the desktop page renders",
+  "ok": true,
+  "detail": "{\"x\":248,\"y\":105.75,\"w\":1256,\"h\":786,\"r\":1504,\"b\":891.75}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 no phone top bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the desktop page renders",
+  "ok": true,
+  "detail": "{\"x\":248,\"y\":105.75,\"w\":1024,\"h\":686,\"r\":1272,\"b\":791.75}"
+ },
+ {
+  "lock": "A1",
+  "where": "768x900 no phone top bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "A1",
+  "where": "768x900 the desktop page renders",
+  "ok": true,
+  "detail": "{\"x\":248,\"y\":120.5,\"w\":512,\"h\":1153.34375,\"r\":760,\"b\":1273.84375}"
+ }
+]

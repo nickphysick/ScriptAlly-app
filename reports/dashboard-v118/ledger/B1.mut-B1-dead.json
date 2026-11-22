@@ -1,0 +1,392 @@
+[
+ {
+  "lock": "B1",
+  "where": "closed-hoop: population, the key rows",
+  "ok": true,
+  "detail": "[{\"key\":\"quiet\",\"label\":\"No reply\",\"n\":1,\"cursor\":\"pointer\"},{\"key\":\"letter\",\"label\":\"Passed on query\",\"n\":8,\"cursor\":\"pointer\"},{\"key\":\"partial\",\"label\":\"Passed on partial\",\"n\":0,\"cursor\":\"default\"},{\"key\":\"full\",\"label\":\"Passed on full\",\"n\":2,\"cursor\":\"pointer\"}]"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop: a row with some",
+  "ok": true,
+  "detail": "[1,8,0,2]"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1): the cursor says whether it opens",
+  "ok": true,
+  "detail": "pointer"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) click: opens the Query Centre on exactly the slice's queries",
+  "ok": false,
+  "detail": "/dashboard · 0 ids"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) click: the arrival says what the list is",
+  "ok": false,
+  "detail": "{\"from\":\"\",\"chips\":[]}"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) click: every query on show is one of them",
+  "ok": false,
+  "detail": "0 on show"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) click: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1): Back returns to the dashboard",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) enter: opens the Query Centre on exactly the slice's queries",
+  "ok": true,
+  "detail": "/queries · 1 ids"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) enter: the arrival says what the list is",
+  "ok": true,
+  "detail": "{\"from\":\"No reply\",\"chips\":[\"No reply · 1\",\"No reply · 1\",\"No reply · 1\"]}"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) enter: every query on show is one of them",
+  "ok": true,
+  "detail": "1 on show"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row quiet (1) enter: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8): the cursor says whether it opens",
+  "ok": true,
+  "detail": "pointer"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) click: opens the Query Centre on exactly the slice's queries",
+  "ok": false,
+  "detail": "/dashboard · 0 ids"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) click: the arrival says what the list is",
+  "ok": false,
+  "detail": "{\"from\":\"\",\"chips\":[]}"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) click: every query on show is one of them",
+  "ok": false,
+  "detail": "0 on show"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) click: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8): Back returns to the dashboard",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) enter: opens the Query Centre on exactly the slice's queries",
+  "ok": true,
+  "detail": "/queries · 8 ids"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) enter: the arrival says what the list is",
+  "ok": true,
+  "detail": "{\"from\":\"Passed on query\",\"chips\":[\"Passed on query · 8\",\"Passed on query · 8\",\"Passed on query · 8\"]}"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) enter: every query on show is one of them",
+  "ok": true,
+  "detail": "8 on show"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row letter (8) enter: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row partial (0): the cursor says whether it opens",
+  "ok": true,
+  "detail": "default"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row partial (0) click: a 0 row does nothing",
+  "ok": true,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2): the cursor says whether it opens",
+  "ok": true,
+  "detail": "pointer"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) click: opens the Query Centre on exactly the slice's queries",
+  "ok": false,
+  "detail": "/dashboard · 0 ids"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) click: the arrival says what the list is",
+  "ok": false,
+  "detail": "{\"from\":\"\",\"chips\":[]}"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) click: every query on show is one of them",
+  "ok": false,
+  "detail": "0 on show"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) click: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2): Back returns to the dashboard",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) enter: opens the Query Centre on exactly the slice's queries",
+  "ok": true,
+  "detail": "/queries · 2 ids"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) enter: the arrival says what the list is",
+  "ok": true,
+  "detail": "{\"from\":\"Passed on full\",\"chips\":[\"Passed on full · 2\",\"Passed on full · 2\",\"Passed on full · 2\"]}"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) enter: every query on show is one of them",
+  "ok": true,
+  "detail": "2 on show"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop row full (2) enter: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "closed-hoop: a slice click opens its list",
+  "ok": true,
+  "detail": "/queries?ids=seed-query-18&from=No%20reply"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop: population, the key rows",
+  "ok": true,
+  "detail": "[{\"key\":\"querying\",\"label\":\"Querying\",\"n\":21,\"cursor\":\"pointer\"},{\"key\":\"closed\",\"label\":\"Closed\",\"n\":3,\"cursor\":\"pointer\"},{\"key\":\"none\",\"label\":\"Not yet queried\",\"n\":29,\"cursor\":\"pointer\"}]"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop: a row with some",
+  "ok": true,
+  "detail": "[21,3,29]"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21): the cursor says whether it opens",
+  "ok": true,
+  "detail": "pointer"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21) click: opens the Contact list",
+  "ok": false,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21) click: the list is filtered",
+  "ok": false,
+  "detail": "0 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21) click: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21): Back returns to the dashboard",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21) enter: opens the Contact list",
+  "ok": true,
+  "detail": "/agents"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21) enter: the list is filtered",
+  "ok": true,
+  "detail": "23 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row querying (21) enter: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3): the cursor says whether it opens",
+  "ok": true,
+  "detail": "pointer"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3) click: opens the Contact list",
+  "ok": false,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3) click: the list is filtered",
+  "ok": false,
+  "detail": "0 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3) click: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3): Back returns to the dashboard",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3) enter: opens the Contact list",
+  "ok": true,
+  "detail": "/agents"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3) enter: the list is filtered",
+  "ok": true,
+  "detail": "1 rows"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row closed (3) enter: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29): the cursor says whether it opens",
+  "ok": true,
+  "detail": "pointer"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29) click: opens the Contact list",
+  "ok": false,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29) click: the list holds the hoop's number",
+  "ok": false,
+  "detail": "0 rows vs 29"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29) click: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29): Back returns to the dashboard",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29) enter: opens the Contact list",
+  "ok": true,
+  "detail": "/agents"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29) enter: the list holds the hoop's number",
+  "ok": true,
+  "detail": "29 rows vs 29"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop row none (29) enter: arrives at the top",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "B1",
+  "where": "agents-hoop: a slice click opens its list",
+  "ok": true,
+  "detail": "/agents"
+ },
+ {
+  "lock": "B1",
+  "where": "a 0 row was exercised (inert)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list: querying + closed = the hoop's querying + closed",
+  "ok": true,
+  "detail": "{\"querying\":23,\"closed\":1} vs 24"
+ },
+ {
+  "lock": "B1",
+  "where": "the \"+N more\" pill says a click shows them all",
+  "ok": true,
+  "detail": "8 · +3 more · click to see all"
+ }
+]

@@ -1,0 +1,220 @@
+
+Running 9 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.4s)
+PL-1 @1440 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  2 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1440: the ladder is four radios, 6 months on load, one checked at a time (1.5s)
+PL-1 @1280 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  3 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1280: the ladder is four radios, 6 months on load, one checked at a time (1.1s)
+PL-1 @390 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  4 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @390: the ladder is four radios, 6 months on load, one checked at a time (1.2s)
+PL-1 @375 [["1","false"],["3","false"],["6","true"],["12","false"]]
+  ✘  5 [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @375: the ladder is four radios, 6 months on load, one checked at a time (1.0s)
+PL-5 @1440 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  6 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1440: the small print once, the FAQ and tails verbatim, none of the retired words (4.0s)
+PL-5 @1280 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  7 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1280: the small print once, the FAQ and tails verbatim, none of the retired words (2.1s)
+PL-5 @390 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  8 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @390: the small print once, the FAQ and tails verbatim, none of the retired words (2.5s)
+PL-5 @375 tails ["If your last replies run late, your plan simply carries on month by month until you're done.","If you're still querying after that, your plan simply carries on month by month."]
+  ✘  9 [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @375: the small print once, the FAQ and tails verbatim, none of the retired words (2.5s)
+
+
+  1) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1440: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: the mono lines
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "The monthly rate",
+    +   "Add to any plan",
+        "£6.33 a month · save 20%",
+        "£4.83 a month · save 40%",
+        "£3.75 a month · save 53%",
+      ]
+
+      121 |     const lines = await page.$$eval(".mk-ladder:not([hidden]) .mk-rungline", (e) => e.map((x) => x.textContent));
+      122 |     expect.soft(prices, "the prices").toEqual(["£7.99", "£19", "£29", "£45"]);
+    > 123 |     expect.soft(lines, "the mono lines").toEqual(["The monthly rate", "£6.33 a month · save 20%", "£4.83 a month · save 40%", "£3.75 a month · save 53%"]);
+          |                                          ^
+      124 |     /* a click moves the check, and only one row is ever checked */
+      125 |     await page.locator('.mk-ladder:visible .mk-rung[data-m="3"]').click();
+      126 |     r = await rows(page);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:123:42
+
+    Error Context: test-results/pricingLadder.measure.ts-P-5fe1d--load-one-checked-at-a-time-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1280: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: the mono lines
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "The monthly rate",
+    +   "Add to any plan",
+        "£6.33 a month · save 20%",
+        "£4.83 a month · save 40%",
+        "£3.75 a month · save 53%",
+      ]
+
+      121 |     const lines = await page.$$eval(".mk-ladder:not([hidden]) .mk-rungline", (e) => e.map((x) => x.textContent));
+      122 |     expect.soft(prices, "the prices").toEqual(["£7.99", "£19", "£29", "£45"]);
+    > 123 |     expect.soft(lines, "the mono lines").toEqual(["The monthly rate", "£6.33 a month · save 20%", "£4.83 a month · save 40%", "£3.75 a month · save 53%"]);
+          |                                          ^
+      124 |     /* a click moves the check, and only one row is ever checked */
+      125 |     await page.locator('.mk-ladder:visible .mk-rung[data-m="3"]').click();
+      126 |     r = await rows(page);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:123:42
+
+    Error Context: test-results/pricingLadder.measure.ts-P-cab2c--load-one-checked-at-a-time-measure/error-context.md
+
+  3) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @390: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: the mono lines
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "The monthly rate",
+    +   "Add to any plan",
+        "£6.33 a month · save 20%",
+        "£4.83 a month · save 40%",
+        "£3.75 a month · save 53%",
+      ]
+
+      121 |     const lines = await page.$$eval(".mk-ladder:not([hidden]) .mk-rungline", (e) => e.map((x) => x.textContent));
+      122 |     expect.soft(prices, "the prices").toEqual(["£7.99", "£19", "£29", "£45"]);
+    > 123 |     expect.soft(lines, "the mono lines").toEqual(["The monthly rate", "£6.33 a month · save 20%", "£4.83 a month · save 40%", "£3.75 a month · save 53%"]);
+          |                                          ^
+      124 |     /* a click moves the check, and only one row is ever checked */
+      125 |     await page.locator('.mk-ladder:visible .mk-rung[data-m="3"]').click();
+      126 |     r = await rows(page);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:123:42
+
+    Error Context: test-results/pricingLadder.measure.ts-P-bead5--load-one-checked-at-a-time-measure/error-context.md
+
+  4) [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @375: the ladder is four radios, 6 months on load, one checked at a time 
+
+    Error: the mono lines
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    -   "The monthly rate",
+    +   "Add to any plan",
+        "£6.33 a month · save 20%",
+        "£4.83 a month · save 40%",
+        "£3.75 a month · save 53%",
+      ]
+
+      121 |     const lines = await page.$$eval(".mk-ladder:not([hidden]) .mk-rungline", (e) => e.map((x) => x.textContent));
+      122 |     expect.soft(prices, "the prices").toEqual(["£7.99", "£19", "£29", "£45"]);
+    > 123 |     expect.soft(lines, "the mono lines").toEqual(["The monthly rate", "£6.33 a month · save 20%", "£4.83 a month · save 40%", "£3.75 a month · save 53%"]);
+          |                                          ^
+      124 |     /* a click moves the check, and only one row is ever checked */
+      125 |     await page.locator('.mk-ladder:visible .mk-rung[data-m="3"]').click();
+      126 |     r = await rows(page);
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:123:42
+
+    Error Context: test-results/pricingLadder.measure.ts-P-79fe4--load-one-checked-at-a-time-measure/error-context.md
+
+  5) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1440: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: no /Add to any plan/
+
+    expect(received).toBeNull()
+
+    Received: "Add to any plan"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-6f3a7-m-none-of-the-retired-words-measure/error-context.md
+
+  6) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1280: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: no /Add to any plan/
+
+    expect(received).toBeNull()
+
+    Received: "Add to any plan"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-50777-m-none-of-the-retired-words-measure/error-context.md
+
+  7) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @390: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: no /Add to any plan/
+
+    expect(received).toBeNull()
+
+    Received: "Add to any plan"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-86690-m-none-of-the-retired-words-measure/error-context.md
+
+  8) [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @375: the small print once, the FAQ and tails verbatim, none of the retired words 
+
+    Error: no /Add to any plan/
+
+    expect(received).toBeNull()
+
+    Received: "Add to any plan"
+
+      317 |     /* none of the retired words anywhere in the page, hidden parts included */
+      318 |     const all = (await page.evaluate(() => document.querySelector(".mk-scope")!.textContent ?? "")) ?? "";
+    > 319 |     for (const re of FORBIDDEN) expect.soft(all.match(re)?.[0] ?? null, `no ${re}`).toBeNull();
+          |                                                                                     ^
+      320 |   });
+      321 | }
+      322 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:319:85
+
+    Error Context: test-results/pricingLadder.measure.ts-P-480f8-m-none-of-the-retired-words-measure/error-context.md
+
+  8 failed
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1440: the ladder is four radios, 6 months on load, one checked at a time 
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @1280: the ladder is four radios, 6 months on load, one checked at a time 
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @390: the ladder is four radios, 6 months on load, one checked at a time 
+    [measure] › tests/e2e/pricingLadder.measure.ts:110:3 › PL-1 @375: the ladder is four radios, 6 months on load, one checked at a time 
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1440: the small print once, the FAQ and tails verbatim, none of the retired words 
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @1280: the small print once, the FAQ and tails verbatim, none of the retired words 
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @390: the small print once, the FAQ and tails verbatim, none of the retired words 
+    [measure] › tests/e2e/pricingLadder.measure.ts:281:3 › PL-5 @375: the small print once, the FAQ and tails verbatim, none of the retired words 
+  1 passed (40.0s)

@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the drawer has a field to type in",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the keys were seen in the drawer",
+  "ok": true,
+  "got": "25"
+ },
+ {
+  "name": "from 200ms after the first key to the last, the tint is at rest (below 0.02)",
+  "ok": true,
+  "got": "[\"0.000\"]"
+ },
+ {
+  "name": "and stays so until 2s after the last key",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "then it breathes again",
+  "ok": true,
+  "got": "max 0.508927"
+ }
+]

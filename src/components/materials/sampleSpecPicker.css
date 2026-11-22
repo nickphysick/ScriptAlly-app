@@ -60,7 +60,7 @@
   font-size: 9px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8a7a6c;
+  color: var(--sp-quiet);
   min-width: 62px;
 }
 
@@ -117,7 +117,7 @@
 /* The unit rides INSIDE the field — the count and its measure are one value, not two controls. */
 .ssp-suffix {
   font-size: 11px;
-  color: #8a7a6c;
+  color: var(--sp-quiet);
   padding: 0 8px 0 4px;
   white-space: nowrap;
   pointer-events: none;

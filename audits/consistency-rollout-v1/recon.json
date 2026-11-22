@@ -1,0 +1,32 @@
+{
+ "_note": "Consistency roll-out v1 — Step 0 recon: every selector a phase names, on every page (\"*\"). probe.js also sweeps rendered late/overdue text (__late) and the old navy rgb(45,58,80) (__navy).",
+ "fixes": {
+  "A2-acq-qtx": { "sel": ".ac .acq-qtx.late", "pages": ["*"] },
+  "A2-cl255": { "sel": ".cl255-cap > b.late", "pages": ["*"] },
+  "A2-qc1512-nx": { "sel": ".qc1512-nx--late", "pages": ["*"] },
+  "A2-qc1522-tr": { "sel": ".qc151 .qc1522-tr[data-late] i", "pages": ["*"] },
+  "A2-qc152-rb": { "sel": ".qc152 .qc152-rb.late .qc152-rft span, .qc152 .qc152-rb.late .qc152-fc", "pages": ["*"] },
+  "A2-qc138-dial": { "sel": ".qc138-sheet .qc138-dial.over .qc138-dial-d, .qc138-sheet .qc138-dial.over .qc138-dial-m", "pages": ["*"] },
+  "A2-qcv-open": { "sel": ".qsp .qcv-open[data-over=\"true\"] .qcv-open-ft .qcv-open-stand span", "pages": ["*"] },
+  "A2-qcw-pill": { "sel": ".qcw .qcw-pill--over", "pages": ["*"] },
+  "A2-bvd-over": { "sel": ".bvd-over", "pages": ["*"] },
+  "A2-qcv-be-over": { "sel": ".qcv-be-nm em.qcv-be-over", "pages": ["*"] },
+  "A2-f12-due": { "sel": ".f12-task-due.overdue", "pages": ["*"] },
+  "A2-qc-gh-od": { "sel": ".qc-gh-od span", "pages": ["*"] },
+  "A2-brd": { "sel": ".brd-card .bw b.late", "pages": ["*"] },
+  "A2-tlc": { "sel": ".tlc .grp .g-lbl.over", "pages": ["*"] },
+  "A2-tkt": { "sel": ".tkt .cell .v.late", "pages": ["*"] },
+  "A2-tl-cccv": { "sel": ".tl-cccv.od, .tl-act--od .tl-actlab", "pages": ["*"] },
+  "A2-clv-qd": { "sel": ".clv-qd--over", "pages": ["*"] },
+  "A2-vp-o": { "sel": ".vv2 .vp-o[data-late] .vp-ot b", "pages": ["*"] },
+  "A2-tws-dchip": { "sel": ".tws-dchip[data-late]", "pages": ["*"] },
+  "A3-pip": { "sel": ".tws55-pip", "pages": ["*"] },
+  "A3-bd": { "sel": ".tws-bd, .tws-bd .tws-bdl", "pages": ["*"] },
+  "P1-ct": { "sel": ".wsr-ct", "pages": ["*"] },
+  "P1-ic": { "sel": ".wsr-ni .wsr-ic", "pages": ["*"] },
+  "P1-ni": { "sel": ".wsr-ni", "pages": ["*"] },
+  "P2-main": { "sel": ".ws-main", "pages": ["*"] },
+  "P2-scroll": { "sel": ".wpg-scroll", "pages": ["*"] },
+  "P4-sheet": { "sel": ".mk-sheet", "pages": ["*"] }
+ }
+}

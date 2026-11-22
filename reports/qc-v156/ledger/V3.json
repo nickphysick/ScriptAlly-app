@@ -1,0 +1,127 @@
+[
+ {
+  "name": "1920: the panel is navy, 20px radius, the ref's shadow",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / 20px / rgba(28, 19, 15, 0.55) 0px 22px 34px -22px"
+ },
+ {
+  "name": "1920: padding 22 30 22 0, 8px above",
+  "ok": true,
+  "got": "22px 30px 22px 0px / 8px"
+ },
+ {
+  "name": "1920: it spans the content width (filter column + list column)",
+  "ok": true,
+  "got": "hd 198–1794 · cols 198–1794"
+ },
+ {
+  "name": "1920: 30px between the panel and the columns",
+  "ok": true,
+  "got": "30.00"
+ },
+ {
+  "name": "1920: the hawk is 190 wide, centred over the filter column, inside the panel",
+  "ok": true,
+  "got": "art 237–427 · rail 198–466"
+ },
+ {
+  "name": "1920: the title starts on the list column's left edge",
+  "ok": true,
+  "got": "494 vs 494"
+ },
+ {
+  "name": "1920: the week block ends 30px inside the panel (the list's right edge)",
+  "ok": true,
+  "got": "1764 vs 1764"
+ },
+ {
+  "name": "1920: the panel is about 237px tall (ref 243 with its paragraph hidden)",
+  "ok": true,
+  "got": "242.9"
+ },
+ {
+  "name": "1920: cream title, inverted buttons",
+  "ok": true,
+  "got": "rgb(251, 247, 240) · rgb(244, 238, 229)/rgb(42, 58, 82) · rgba(0, 0, 0, 0) rgba(244, 238, 229, 0.6) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "name": "1920: the line is 74px with 20 points and a text alternative; no bars",
+  "ok": true,
+  "got": "74 · 20 · \"Queries sent per week over the last 20 weeks. This week: 0 of 3.\" · bars 0"
+ },
+ {
+  "name": "1920: the headline reads \"n of goal sent this week\"",
+  "ok": true,
+  "got": "0 of 3sent this week"
+ },
+ {
+  "name": "1440: the panel is navy, 20px radius, the ref's shadow",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / 20px / rgba(28, 19, 15, 0.55) 0px 22px 34px -22px"
+ },
+ {
+  "name": "1440: padding 22 30 22 0, 8px above",
+  "ok": true,
+  "got": "22px 30px 22px 0px / 8px"
+ },
+ {
+  "name": "1440: it spans the content width (filter column + list column)",
+  "ok": true,
+  "got": "hd 112–1400 · cols 112–1400"
+ },
+ {
+  "name": "1440: 30px between the panel and the columns",
+  "ok": true,
+  "got": "30.00"
+ },
+ {
+  "name": "1440: the hawk is 190 wide, centred over the filter column, inside the panel",
+  "ok": true,
+  "got": "art 151–341 · rail 112–380"
+ },
+ {
+  "name": "1440: the title starts on the list column's left edge",
+  "ok": true,
+  "got": "408 vs 408"
+ },
+ {
+  "name": "1440: the week block ends 30px inside the panel (the list's right edge)",
+  "ok": true,
+  "got": "1370 vs 1370"
+ },
+ {
+  "name": "1440: the panel is about 237px tall (ref 243 with its paragraph hidden)",
+  "ok": true,
+  "got": "242.9"
+ },
+ {
+  "name": "1440: cream title, inverted buttons",
+  "ok": true,
+  "got": "rgb(251, 247, 240) · rgb(244, 238, 229)/rgb(42, 58, 82) · rgba(0, 0, 0, 0) rgba(244, 238, 229, 0.6) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "name": "1440: the line is 74px with 20 points and a text alternative; no bars",
+  "ok": true,
+  "got": "74 · 20 · \"Queries sent per week over the last 20 weeks. This week: 0 of 3.\" · bars 0"
+ },
+ {
+  "name": "1440: the headline reads \"n of goal sent this week\"",
+  "ok": true,
+  "got": "0 of 3sent this week"
+ },
+ {
+  "name": "aid streak: 2 of 3 · 6-week streak · One more keeps the streak going.",
+  "ok": true,
+  "got": "2 of 3 · 6-week streak · One more keeps the streak going."
+ },
+ {
+  "name": "aid none: 1 of 3 · no streak · 2 more to hit your goal this week.",
+  "ok": true,
+  "got": "1 of 3 · null · 2 more to hit your goal this week."
+ },
+ {
+  "name": "aid met: 3 of 3 · 6-week streak · Goal met — nice work.",
+  "ok": true,
+  "got": "3 of 3 · 6-week streak · Goal met — nice work."
+ }
+]

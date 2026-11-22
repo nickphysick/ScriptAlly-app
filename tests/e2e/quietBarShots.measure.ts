@@ -12,7 +12,7 @@ import { openApp } from "./pageHeaderV2Lib";
 import { scrollTo, suppressMotion, tagScroller, titleGoneAt } from "./quietBarLib";
 
 const OUT = "reports/quiet-bar/shots";
-const ROUTES = ["/queries", "/agents", "/manuscripts/packages"] as const;
+const ROUTES = ["/queries", "/agents", "/queries/packages"] as const;
 test.describe.configure({ timeout: 900_000 });
 
 for (const vp of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }] as const) {

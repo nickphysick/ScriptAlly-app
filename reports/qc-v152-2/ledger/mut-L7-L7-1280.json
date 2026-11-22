@@ -1,0 +1,57 @@
+[
+ {
+  "where": "population: the list",
+  "ok": true,
+  "detail": "9751"
+ },
+ {
+  "where": "the list never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "nudge: the card never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "agent: the card never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "nudgedwait: the card never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "undated: the card never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "seven: the card never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "materials: the card never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "offer: the card never says 0 days",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "sameday: the card never says 0 days",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "sameday: population — the two steps on one day read Same day",
+  "ok": false,
+  "detail": "WITH THE AGENT Day 40 ✕ SV Sami Vale STATE & WINDOW Partial sent QUERYING The Smoke Test ADULT LITERARY FICTION 92,000 WORDS Tracking Agent Materials Notes Quer"
+ }
+]

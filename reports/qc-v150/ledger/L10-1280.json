@@ -1,0 +1,17 @@
+[
+ {
+  "where": "population: the page scrolled",
+  "ok": true,
+  "detail": "800"
+ },
+ {
+  "where": "flush",
+  "ok": true,
+  "detail": "169.8 vs 169.8"
+ },
+ {
+  "where": "both visible",
+  "ok": true,
+  "detail": "bar 118, row 170–251, scroller 106"
+ }
+]

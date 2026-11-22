@@ -68,7 +68,8 @@ describe("§B the sample control — conversions and summaries (brief §H 6)", (
     expect(sampleName({ unit: "chapters", amt: 3, from: 4, sect: true, fu: "chapter" })).toBe("chapters 4–6");
     expect(sampleName({ unit: "pages", amt: 10, from: 40, sect: true, fu: "page" })).toBe("pages 40–49");
     expect(sampleName({ unit: "words", amt: 5000, from: 40, sect: true, fu: "page" })).toBe("5,000 words from page 40");
-    expect(sampleName({ unit: "chapters", amt: 1, from: 1, sect: false, fu: null })).toBe("first 1 chapter");
+    /* v54: one of anything from the opening drops its numeral, as formatQueryMaterial always has ("First chapter") */
+    expect(sampleName({ unit: "chapters", amt: 1, from: 1, sect: false, fu: null })).toBe("first chapter");
   });
   it("the approximation line", () => {
     expect(sampleApprox({ unit: "pages", amt: 10, from: 1, sect: false, fu: null }, b)).toBe("≈ 2,500 WORDS · 5% OF THE BOOK");

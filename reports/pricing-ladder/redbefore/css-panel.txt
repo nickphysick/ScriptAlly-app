@@ -1,0 +1,10 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.5s)
+PL-3 @390 {"nav":60,"tabs":60,"card":-183.984375}
+  ✓  2 [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @390: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move (1.0s)
+PL-3 @375 {"nav":60,"tabs":60,"card":-183.984375}
+  ✓  3 [measure] › tests/e2e/pricingLadder.measure.ts:211:3 › PL-3 @375: Pro on load, Free shows only Free, pinned while Pro scrolls, arrow keys move (874ms)
+
+  3 passed (20.7s)

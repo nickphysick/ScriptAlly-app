@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88"
+ },
+ {
+  "where": "every cap is its status colour",
+  "ok": false,
+  "detail": "[{\"st\":\"Queried\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(241, 240, 238)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"},{\"st\":\"Queried\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(241, 240, 238)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"},{\"st\":\"Queried\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(241, 240, 238)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"}]"
+ },
+ {
+  "where": "every body white, 30 tall, a 34px cap",
+  "ok": true,
+  "detail": "[{\"st\":\"Partial Requested\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(243, 211, 198)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"},{\"st\":\"Partial Sent\",\"w\":\"you\",\"body\":\"rgb(255, 255, 255)\",\"cap\":\"rgb(243, 211, 198)\",\"capW\":34,\"h\":30,\"fg\":\"rgb(28, 19, 15)\"}]"
+ },
+ {
+  "where": "Queried's cap is sand, not grey",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Closed text #8a8076; open text ink",
+  "ok": true,
+  "detail": ""
+ }
+]

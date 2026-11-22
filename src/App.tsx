@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { canUse } from "./lib/entitlements";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
@@ -20,20 +21,22 @@ import { Queries } from "./components/Queries";
 import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
-import { SubmissionPackages } from "./components/SubmissionPackages";
+import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
+import { AnalyticsRoute, GoalsRoute, YouRoute, HelpRoute, ManuscriptRoute, PackagesRoute, PlansRoute, ResponsesRoute, SettingsRoute } from "./components/phone/pages/PageRoutes";
+import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
-import { ManuscriptPage } from "./components/manuscripts/v12/ManuscriptPage";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
+import { VersionsV2Page } from "./components/versions/VersionsV2Page";
+import { QueryLettersPage } from "./components/letters/QueryLettersPage";
+import { MaterialsLock } from "./components/letters/MaterialsLock";
 import { ImportPage } from "./components/import/ImportPage";
 import { BrandStudio } from "./components/BrandStudio";
-import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
-import { HelpCentre } from "./components/HelpCentre";
-import { AccountSettings } from "./components/AccountSettings";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
 import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
-import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
-import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib/queryPanelStore";
+import { PASTE_RESPONSE_EVENT, closeQueryDrawer, hideUndoBar, openQueryDrawer } from "./lib/queryActions/drawerStore";
+import { MOBILE_MEDIA_QUERY } from "./components/shell/mobileChrome";
+import { closeQueryPanel, openResponse } from "./lib/queryPanelStore";
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
@@ -41,23 +44,38 @@ import { LandingOnlySite, MarketingPage } from "./marketing/LandingOnlySite";
 import { LANDING_ONLY, AUTH_HASH } from "./lib/siteMode";
 import { pathFor } from "./lib/pathFor";
 import { useHash } from "./lib/useHash";
-import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { readableSignedOut, tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { HelpCentre } from "./components/HelpCentre";
 import { shellForRoute } from "./lib/shellForRoute";
 import { routeBase } from "./lib/helpPath";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { todoPageForPath, todoRedirectFor } from "./lib/todoRoutes";
 import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
-import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
-import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
+/* ⚠️ THE RETIRED CALENDAR PAGE'S STYLESHEETS, PINNED WHERE ITS IMPORT USED TO SIT (29 Oct). The app ships ONE
+   stylesheet in first-import order, and `TodoCalendarPage` was the first importer of these three; deleting it moved
+   `tasksLayout.css` behind sheets imported by the Corkboard, which is a cascade change nobody asked for. Pinned here,
+   the built CSS is byte-identical to the build before the retirement (checked by `cmp`). All three are still shared. */
+import "./components/todo/tasksLayout.css";
+import "./components/todo/taskChrome.css";
+import "./components/todo/todoCalendar.css";
+import { NoteboardRoute } from "./components/todo/NoteboardRoute";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
 // import { TopNavHost } from "./components/shell/TopNavHost";
-import { QueryAnalytics } from "./components/QueryAnalytics";
-import { ResponsesPage } from "./components/responses/ResponsesPage";
 import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
-import { ErrorBoundary } from "./components/ErrorBoundary";
+import { ErrorBoundary, ThrowLab } from "./components/ErrorBoundary";
+import { PageBoundary, crashProbe } from "./components/PageBoundary";
+import { redeemKeptCode, JOIN_PREFIX } from "./lib/inviteCode";
+import { SIGNIN_LINK_PATH } from "./lib/authActions";
+import { NotFoundCard } from "./components/NotFoundCard";
+import { closeAgentCard } from "./lib/agentCardStore";
+import { PhoneSectionLanding, phoneSectionFor } from "./components/phone/PhoneSectionLanding";
+import { desktopV5Redirect, phoneV5Redirect } from "./lib/phoneV5";
+import { MaterialsRoute } from "./components/phone/v5/MaterialsV5";
+import { PhoneMaterialsHost } from "./components/phone/materials/PhoneMaterialsHost";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
+import { PlansLab } from "./components/plans/PlansLab";
 import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
 // TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
 // a mock record so the shared shell can be eyeballed without signing in. DEV only.
@@ -70,12 +88,17 @@ import { NotesLab } from "./components/notes/NotesLab";
 // state is unreachable on any account that has agents, which is every real one.
 import { ContactListLab } from "./components/agents/ContactListLab";
 import { OnbLab } from "./components/onboarding/OnbLab";
+import { EmailDropLab } from "./components/emailImport/EmailDropLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
 import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
+import { openNewAgentCard } from "./lib/agentCardStore";
 import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { openContactLog } from "./lib/contactLogStore";
+/* Your notes v1 — imported last so its sheets (and the Dashboard's it reads) keep their first-import places */
+import { YourNotesPage } from "./components/notes/YourNotesPage";
 
 /** TEMP dev harness for the shared Form11Drawer (#/drawer-lab): renders EditQueryDrawer over a mock
  *  query so the shell can be reviewed without signing in. Sits inside DbProvider, so the drawer's
@@ -258,7 +281,7 @@ export { pathFor } from "./lib/pathFor";
 // tier is retired — capsule fixes P5).
 
 function AppContent() {
-  const { currentUser, authReady, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, authReady, updateUserProfile, entitlement } = useScriptAllyDb();
 
   // URL routing — replaces the old activeTab/activeSubPage state machine. The path is the single
   // source of truth; pages stay mounted across navigation (StagePage display toggling).
@@ -267,6 +290,8 @@ function AppContent() {
   const path = location.pathname.replace(/\/+$/, "") || "/";
   /* Query panel v1 — a query opened over another page (the Dashboard) belongs to that page: leaving it closes it */
   useEffect(() => { closeQueryPanel(); }, [path]);
+  /* Non-workspace v1, Phase 1 — a founder's code kept from the invite link is redeemed once there is an account */
+  useEffect(() => { if (currentUser?.id) void redeemKeptCode(); }, [currentUser?.id]);
   const routeKey = path.split("/")[1] || "";
   const params = new URLSearchParams(location.search);
 
@@ -278,7 +303,6 @@ function AppContent() {
      routes to the Queries hub and hands it this SEED, which opens inline create mode there. A new
      object per invocation, so a repeat press with no seeds still fires the hub's effect. */
   const [createQuerySeed, setCreateQuerySeed] = useState<{ agentId: string | null; manuscriptId: string | null } | null>(null);
-  const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
   // Query actions v1.1 — the Pro paste-an-email lane, opened from the drawer's query picker. It
   // lived in RecordResponseScreen (retired); App hosts the EXISTING flow so it sits above everything.
@@ -305,27 +329,30 @@ function AppContent() {
   // manuscript (the bookplate hero / Send-first) — every existing two-arg call is untouched.
   const handleNavigate = (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
+      /* Contact list v25.1 C4 — on the Contact list the log flow opens IN PLACE, in its panel; elsewhere unchanged */
+      if (window.location.pathname === "/agents" && openContactLog({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null })) return;
+      /* Log a query v1.2 — ONE JOURNEY EVERYWHERE: on a desktop the staged journey opens over the page it was asked for on
+         (QueryDrawer hands "log" to it). The Query Centre keeps its own host, so it still navigates there; the phone too. */
+      const desk = typeof window.matchMedia === "function" && !window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+      if (desk && window.location.pathname !== "/queries") {
+        openQueryDrawer({ mode: "log", ...(opts?.agentId ? { agentId: opts.agentId } : {}), ...(opts?.manuscriptId ? { manuscriptId: opts.manuscriptId } : {}) });
+        return;
+      }
       // Inline creation lives on the hub, so this one NAVIGATES (the popup did not) and seeds it.
       setCreateQuerySeed({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null });
       navigate(pathFor("queries"));
       return;
     }
     if (subPageName === "Add an agent") {
-      /* Ruling (f), Contact list v11: ON /agents the capture opens the page's own add card —
-         two add surfaces on one page would be the two-asking-surfaces fault — and everywhere
-         else the app-level focus form is untouched. An event rather than a prop because the
-         page stays mounted on every route and already owns the card's state. */
-      if (window.location.pathname === "/agents") {
-        window.dispatchEvent(new CustomEvent("sa:contact-add"));
-        return;
-      }
-      setIsAddAgentOpen(true);
+      /* RETIRE THE ADD-AGENT POP-UP — on EVERY route the slide-in new-agent panel (v18.3 §D), through the ONE opener
+         the Contact list's own button uses; its frame is mounted app-level by AgentCardHost, so it opens over the
+         page you are on and nothing navigates. On /agents the page hears the same request (AgentList). */
+      openNewAgentCard({ from: "button", host: "panel" });
       return;
     }
     if (subPageName === "Record a response") {
-      /* Query actions v1.1 — opened with no query: its first step is choosing one. Query panel v2 §E — in the
-         query's side panel ("Who replied?"), not a drawer of its own, wherever the panel's host is mounted. */
-      if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" });
+      /* Record a response v1 — the one door: the card frame at "Who replied?" on every page (the phone keeps its flow) */
+      openResponse();
       return;
     }
     if (subPageName === "Add a manuscript" || subPageName === "Add a Manuscript") {
@@ -383,8 +410,19 @@ function AppContent() {
      served by `build:dev`, absent from production. It carries a query (`?s=fork&…`), so it is
      matched by prefix. ⚠️ `MODE` FIRST: with the hash first, the minifier kept the `startsWith`
      call, and the lab's name with it, in the production bundle (`prodBuild.test.ts` P1). */
+  /* #/email-drop-lab — the phone email drop over a fixture (phone last screens v1, PLS1 L6). Dev only.
+     MODE first, for the same reason. */
+  if (import.meta.env.MODE !== "production" && hash.startsWith("#/email-drop-lab")) {
+    return <EmailDropLab />;
+  }
   if (import.meta.env.MODE !== "production" && hash.startsWith("#/onb-lab")) {
     return <OnbLab />;
+  }
+  /* #/plans-lab — the Plans page for any viewer (plans v3). Today every account is a founding writer, so the three
+     after-launch states and the selling flag can be seen and measured nowhere else; `?v=founding|trial|free|pro`,
+     `&days=N`, `&sell=1`. MODE first, as the labs above. */
+  if (import.meta.env.MODE !== "production" && hash.startsWith("#/plans-lab")) {
+    return <PlansLab hash={hash} />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {
@@ -465,6 +503,16 @@ function AppContent() {
     );
   }
 
+  /* Non-workspace v1, Phase 7: the Help centre is readable signed out, in the public shell (someone who cannot sign in
+     can still reach the help). Signed in, it stays a workspace page in the app shell below. */
+  if (!currentUser && readableSignedOut(path)) {
+    return (
+      <MarketingShell user={null} onNavigate={handleNavigate} path={path}>
+        <HelpCentre />
+      </MarketingShell>
+    );
+  }
+
   // Logged-out front door for the app tiers. As a founding-members acquisition page the screen
   // defaults to Create account; an explicit #/login (or #/signin) deep link opens it in sign-in
   // mode instead. (Deep links keep their URL until sign-in — unchanged behaviour.)
@@ -506,18 +554,52 @@ function AppContent() {
      to the dashboard — landing a mistyped settings link on the wrong page entirely instead of on
      the section list. `replace`, so Back leaves settings rather than bouncing off the redirect. */
   const accountRedirect = accountRedirectFor(path);
-  if (accountRedirect) return <Navigate to={accountRedirect} replace />;
+  /* Phone app v2 Part 8B: on a phone the bare `/account` is the Settings index (SettingsRoute), not a redirect */
+  const phoneAccountIndex = path === "/account" && typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767.98px)").matches;
+  if (accountRedirect && !phoneAccountIndex) return <Navigate to={accountRedirect} replace />;
 
-  /* Corkboard v1: `/todo/noteboard` is the Corkboard's OLD address. It sits above the unknown-path guard for
+  /* Corkboard v1: `/todo/noteboard` is the Corkboard's OLD address (and, since 29 Oct, `/todo/calendar` the retired
+     Calendar page's, which lands on the To-do list). It sits above the unknown-path guard for
      the same reason the settings redirect does — the retired path is no longer a workspace path, so the guard
      would send a bookmark to the dashboard. The query string and hash travel with it (`?q=` deep links). */
   const todoRedirect = todoRedirectFor(path, location.search, location.hash);
   if (todoRedirect) return <Navigate to={todoRedirect} replace />;
+  /* Submission packages v26: /manuscripts/packages moved to /queries/packages — above the guard, same reason */
+  const packagesRedirect = packagesRedirectFor(path, location.search, location.hash);
+  if (packagesRedirect) return <Navigate to={packagesRedirect} replace />;
+  /* Phone last screens v1, 4B: below 768px the desktop-only Packages, Comps and Versions addresses land
+     on the phone Manuscript page at their section (PhoneSectionLanding scrolls there and opens a
+     `?pkg=`/`?version=` item). Read like Part 8B's account index above, without a hook, because this
+     sits among early returns. `replace`, so the back gesture returns to wherever the link was opened. */
+  const isPhoneNow = typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767.98px)").matches;
+  /* Phone app v5: the dock is Today · To do · Materials · Profile. Below 768px `/queries` and `/agents` land on Today
+     on that tab (their full lists are pushed), and packages, letters, versions and comps land on Materials on theirs;
+     a deep link that names one thing keeps going where it went (lib/phoneV5). At 768px and up the two new addresses
+     (`/queries/all`, `/materials`) send a computer where it went before they existed. */
+  const v5Redirect = isPhoneNow ? phoneV5Redirect(path, location.search, location.hash) : desktopV5Redirect(path, location.search);
+  if (v5Redirect) return <Navigate to={v5Redirect} replace />;
+  const phoneSection = isPhoneNow ? phoneSectionFor(path) : null;
+  if (phoneSection) return <Navigate to={`/manuscripts${location.search}#${phoneSection}`} replace />;
+  /* (Phone app v3 sent `/todo` to Today and `/materials/letters` to the book page on a phone. Phone app v5: To do is a
+     dock tab again, and the letters are Materials' Letters tab — phoneV5Redirect above.) */
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
+  /* An invite link or a sign-in link opened by someone already signed in has done its job: go to the Dashboard. */
+  if (path.startsWith(JOIN_PREFIX) || path === SIGNIN_LINK_PATH) return <Navigate to="/dashboard" replace />;
+  /* Non-workspace v1, Phase 1 (getting-in-v1.html, screen 6): an unknown address says so, in the app's shell, instead
+     of silently landing on the Dashboard — a mistyped or out-of-date link used to look like the app ignoring you. */
   if (!WORKSPACE_PATHS.has(routeBase(path))) {
-    return <Navigate to="/dashboard" replace />;
+    return (
+      <AppShell
+        routeKey="not-found" onNavigate={handleNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+        theme={currentUser?.queriesTheme === "bold" || currentUser?.queriesTheme === "editorial" ? currentUser.queriesTheme : "cappuccino"}
+      >
+        <StagePage name="not-found" active>
+          <NotFoundCard onNavigate={handleNavigate} />
+        </StagePage>
+      </AppShell>
+    );
   }
 
   // ── WHICH SHELL (app-shell pack, Phase 5) — ONE mapping, in one place (lib/shellForRoute).
@@ -565,13 +647,17 @@ function AppContent() {
   const queriesAnalytics = path === "/queries/analytics";
   /* Responses v2 — the third Queries tab; like Analytics it is its own slot, and the Query Centre stands aside */
   const queriesResponses = path === "/queries/responses";
+  /* Submission packages v26 — the packages page is a Queries slot of its own, like Analytics */
+  const queriesPackages = path === PACKAGES_PATH;
   const todoPage = todoPageForPath(path);
   const agentsDiscover = path === "/agents/discover";
-  const manuscriptsPackages = path === "/manuscripts/packages";
   const manuscriptsComps = path === "/manuscripts/comps";
+  const manuscriptsVersions = path === "/manuscripts/versions";
 
   return (
     <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
+      <PhoneSectionLanding active={isPhoneNow} />
+      <PhoneMaterialsHost active={isPhoneNow} />
       {/* Global AppShell: persistent left rail + the stage (the app's scroll container); pages
           render inside as persistent StagePage slots. EditQueryHost mounts the single Edit Query
           drawer as an app-level overlay (useOpenEditQuery — no route change, scroll preserved);
@@ -590,7 +676,7 @@ function AppContent() {
             paired with `fit` on the work wrapper, so it took exactly the space under the bar and
             never scrolled. Nick dropped that lock: the page now grows with its rows and the stage
             scrolls it, so the slot is a plain block and the route is off `fit` in AppShell. */}
-        <StagePage active={routeKey === "dashboard"}>
+        <StagePage name="dashboard" active={routeKey === "dashboard"}>
           <Dashboard
             onNavigate={handleNavigate}
             searchQuery={searchQuery}
@@ -601,13 +687,13 @@ function AppContent() {
         {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
             its OWN chrome (F12Page — its own crumb header + centred --maxw column), so the slot has
             no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
-        <StagePage active={routeKey === "queries" && !queriesAnalytics && !queriesResponses} layout="fill" clip>
+        <StagePage name="queries" active={routeKey === "queries" && !queriesAnalytics && !queriesResponses && !queriesPackages} layout="fill" clip>
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell
-            statusFilter={queriesStatus} view={queriesView}
+            statusFilter={queriesStatus} view={queriesView} idsFilter={params.get("ids")} idsLabel={params.get("from")}
             onSelectView={() => { const n = new URLSearchParams(params); n.delete("view"); n.delete("q"); navigate({ pathname: "/queries", search: n.toString() ? `?${n.toString()}` : "" }); }}
             onOpenQuery={(id) => { const n = new URLSearchParams(params); n.set("q", id); n.delete("view"); navigate({ pathname: "/queries", search: `?${n.toString()}` }); }}
             createSeed={createQuerySeed} onCreateSeedConsumed={() => setCreateQuerySeed(null)}
-            routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses} />
+            routeActive={routeKey === "queries" && !queriesAnalytics && !queriesResponses && !queriesPackages} />
         </StagePage>
 
         {/* Amendment 1 (H3) — Analytics is a real destination so the nav carries no dead link.
@@ -628,19 +714,22 @@ function AppContent() {
             `fill` gives the slot `flex: 1; min-height: 0`, so it takes the REMAINING height of the
             fixed-viewport work wrapper and the chain resolves. Same fault as `.tpl-cols` and
             `.f12-body`; same tell — a page that scrolls where its spec says its rows do. */}
-        <StagePage active={queriesAnalytics} layout="fill" clip>
-          <QueryAnalytics onNavigate={handleNavigate} />
+        <StagePage name="analytics" active={queriesAnalytics} layout="fill" clip>
+          <AnalyticsRoute onNavigate={handleNavigate} />
         </StagePage>
 
         {/* Responses v2 (15 Oct) — every agent answer for the book in scope. A flowing page in the shared grid. */}
-        <StagePage active={queriesResponses} layout="fill" clip>
-          <ResponsesPage onNavigate={handleNavigate} routeActive={queriesResponses} />
+        <StagePage name="packages" active={queriesPackages} layout="fill" clip>
+          <MaterialsLock page="packages"><PackagesRoute active={queriesPackages} onNavigate={handleNavigate} /></MaterialsLock>
+        </StagePage>
+        <StagePage name="responses" active={queriesResponses} layout="fill" clip>
+          <ResponsesRoute onNavigate={handleNavigate} routeActive={queriesResponses} />
         </StagePage>
 
         {/* THE TO-DO WORKSPACE — four routes under one routeKey (To-do workspace pack, Phase 1).
             The list page owns its internal scroll like the Queries desk and stays mounted so its
             mode/filter/selection survive; the other three are ordinary flow pages. */}
-        <StagePage active={routeKey === "todo" && todoPage === "list"} layout="fillColumn" clip>
+        <StagePage name="todo" active={routeKey === "todo" && todoPage === "list"} layout="fillColumn" clip>
           {/* To-do list v5: the tray and the desk on a desktop, the v2 page on a phone (TodoRoute chooses) */}
           <TodoRoute onNavigate={handleNavigate} />
         </StagePage>
@@ -654,14 +743,12 @@ function AppContent() {
             cannot diverge on either axis because nothing about their mounting differs at all.
             (Today's slot went with its page — tasks-consolidation P1.) */}
 
-        {/* tasks-pages P3: the Calendar is REAL — the placeholder era ends here. */}
-        <StagePage active={routeKey === "todo" && todoPage === "calendar"} layout="fillColumn" clip>
-          <TodoCalendarPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
-        </StagePage>
+        {/* Calendar retired (29 Oct): its slot went with the page. `/todo/calendar` now redirects to `/todo`
+            (TODO_RETIRED_PATHS); the To-do list keeps its own calendar card and slide-out drawer. */}
 
         {/* tasks-pages P4: the Noteboard is REAL — the placeholder era ends for good. */}
-        <StagePage active={routeKey === "todo" && todoPage === "noteboard"} layout="fillColumn" clip>
-          <TodoNoteboardPage onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
+        <StagePage name="corkboard" active={routeKey === "todo" && todoPage === "noteboard"} layout="fillColumn" clip>
+          <NoteboardRoute onNavigate={handleNavigate} onNavigatePath={(p) => navigate(p)} />
         </StagePage>
 
         {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;
@@ -672,11 +759,11 @@ function AppContent() {
             together and centred the lot. Measured at 2400px against the built stylesheet:
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
-        <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
-          <DiscoverPage onNavigate={handleNavigate} />
+        <StagePage name="discover" active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
+          <MaterialsLock page="scout"><DiscoverRoute onNavigate={handleNavigate} /></MaterialsLock>
         </StagePage>
-        <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
-          <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
+        <StagePage name="agents" active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
+          <AgentsRoute searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
         </StagePage>
 
         {/* ⚠️ NO `contentVariant` (header spec §1). The ultrawide caps — `work` 1600 and
@@ -685,22 +772,31 @@ function AppContent() {
             together and centred the lot. Measured at 2400px against the built stylesheet:
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
-        <StagePage active={routeKey === "manuscripts"} layout="fill">
-          {manuscriptsPackages ? (
-            <SubmissionPackages />
-          ) : manuscriptsComps ? (
-            <ComparableTitlesPage onNavigate={handleNavigate} />
+        <StagePage name={manuscriptsComps ? "comps" : manuscriptsVersions ? "versions" : "manuscripts"} active={routeKey === "manuscripts"} layout="fill">
+          {manuscriptsComps ? (
+            <MaterialsLock page="comps"><ComparableTitlesPage onNavigate={handleNavigate} /></MaterialsLock>
+          ) : manuscriptsVersions ? (
+            /* Versions v2 (23 Oct) — the Versions page, built to design-refs/versions-v2. It replaces Versions v1
+               (deleted in the same commit). v27 Part E's interim page stays in the tree, mounted nowhere. */
+            <VersionsV2Page onNavigate={handleNavigate} active={routeKey === "manuscripts" && manuscriptsVersions} />
           ) : (
             /* Manuscripts v12 (25 Sep): the route now renders `ManuscriptPage` — one manuscript,
                its versions, letters, synopses, packages and comps, built to
                design-refs/manuscripts/manuscripts-v12.html. `AllManuscripts` is a locked file and
                stays in the tree, unrouted. */
-            <ManuscriptPage
+            <ManuscriptRoute
               onNavigate={handleNavigate}
               openId={manuscriptView}
-              active={routeKey === "manuscripts" && !manuscriptsPackages && !manuscriptsComps}
+              active={routeKey === "manuscripts" && !manuscriptsComps && !manuscriptsVersions}
             />
           )}
+        </StagePage>
+
+        {/* Sidebar materials v1 (6 Nov) — the Materials section's own route. Query letters is a placeholder until the
+            Query letters pack; Comparable titles and Submission packages keep their old addresses. */}
+        {/* Phone app v5: below 768px `/materials` is the dock's Materials tab (MaterialsRoute chooses by width) */}
+        <StagePage name="materials" active={routeKey === "materials"}>
+          <MaterialsRoute><MaterialsLock page="letters"><QueryLettersPage active={routeKey === "materials"} /></MaterialsLock></MaterialsRoute>
         </StagePage>
 
         {/* Secondary pages mount on demand (same lifecycle as the old conditional render).
@@ -712,23 +808,42 @@ function AppContent() {
             the STAGE scrolls rather than the settings plane. `fill` hands down flex:1/min-height:0
             and `.acct-page` continues the chain. /plans and /help keep the wrapper unchanged. */}
         {routeKey === "account" && (
-          <StagePage active layout="fill">
-            <AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
+          <StagePage name="account" active layout="fill">
+            <SettingsRoute path={path} section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
+          </StagePage>
+        )}
+        {/* Your notes v1 (9 Nov) — the founding writer's notes. Mounted on demand: its read of the writer's notes and a
+            note's thread run only while the page is open. */}
+        {routeKey === "your-notes" && (
+          <StagePage name="your-notes" active>
+            <YourNotesPage active />
+          </StagePage>
+        )}
+        {/* Phone app v3 — You: a phone tab; a computer is sent to the dashboard (YouRoute) */}
+        {routeKey === "you" && (
+          <StagePage name="you" active>
+            <YouRoute />
+          </StagePage>
+        )}
+        {/* Phone app v2 Part 7D — Streaks & goals: a phone page; a computer is sent to the dashboard (GoalsRoute) */}
+        {routeKey === "goals" && (
+          <StagePage name="goals" active layout="fill">
+            <GoalsRoute />
           </StagePage>
         )}
         {routeKey === "plans" && (
-          <StagePage active>
-            <div className="sv2-focuscol"><PlansPage /></div>
+          <StagePage name="plans" active>
+            <PlansRoute />
           </StagePage>
         )}
         {routeKey === "help" && (
-          <StagePage active>
+          <StagePage name="help" active>
             {/* Help Centre v1 — its own column (1120, 40px either side), not the 860px focus column */}
-            <HelpCentre />
+            <HelpRoute path={path} />
           </StagePage>
         )}
         {routeKey === "import" && (
-          <StagePage active><ImportPage onNavigate={handleNavigate} /></StagePage>
+          <StagePage name="import" active><ImportPage onNavigate={handleNavigate} /></StagePage>
         )}
 
         {/* The legacy site footer ("QueryHawk · The Literary Querying Companion" + Help Centre)
@@ -739,37 +854,38 @@ function AppContent() {
       </AppShell>
       </EditQueryHost>
 
-      {/* Focus Mode Overlay Dialog Form */}
-      <AddAgentFocusForm
-        isOpen={isAddAgentOpen}
-        onClose={() => setIsAddAgentOpen(false)}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-      />
-
-      <AddManuscriptFocusForm
-        isOpen={isAddManuscriptOpen}
-        onClose={() => setIsAddManuscriptOpen(false)}
-        onSuccessToast={(msg) => setSuccessToast(msg)}
-      />
+      {/* Crash reporting v1: every drawer and dock outside the pages has its own boundary, so a crash
+          in one is a one-line card ("This panel hit a problem.") rather than the whole screen. */}
+      <PageBoundary name="panel:add-manuscript" kind="panel" onClose={() => setIsAddManuscriptOpen(false)}>
+        <AddManuscriptFocusForm
+          isOpen={isAddManuscriptOpen}
+          onClose={() => setIsAddManuscriptOpen(false)}
+          onSuccessToast={(msg) => setSuccessToast(msg)}
+        />
+      </PageBoundary>
 
       {/* Agent card v1 — THE agent card, mounted once for the workspace. Every surface opens it
           through `openAgentCard(…)` / `openNewAgentCard(…)` (lib/agentCardStore). */}
-      <AgentCardHost />
+      <PageBoundary name="panel:agent-card" kind="panel" onClose={closeAgentCard}><AgentCardHost /></PageBoundary>
 
       {/* Query actions v1 — THE query drawer and its undo bar, mounted once for the workspace.
           Every surface opens it through `openQueryDrawer(…)` (lib/queryActions/drawerStore). */}
       {/* v139 §B — the drawer alone sees the practice query, through its own copy of the context */}
-      <PracticeOverlay><QueryDrawer /></PracticeOverlay>
-      <UndoBar />
+      <PageBoundary name="panel:query-drawer" kind="panel" onClose={closeQueryDrawer}>
+        <PracticeOverlay><QueryDrawer /></PracticeOverlay>
+      </PageBoundary>
+      <PageBoundary name="panel:undo-bar" kind="panel" onClose={hideUndoBar}><UndoBar /></PageBoundary>
 
       {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}
-      {currentUser?.plan === UserPlan.PRO && (
-        <PasteEmailFlow
-          isOpen={isPasteResponseOpen}
-          onClose={() => setIsPasteResponseOpen(false)}
-          onNavigate={handleNavigate}
-          onSuccessToast={(msg) => setSuccessToast(msg)}
-        />
+      {currentUser && canUse(entitlement, "emailDrop") && (
+        <PageBoundary name="panel:paste-email" kind="panel" onClose={() => setIsPasteResponseOpen(false)}>
+          <PasteEmailFlow
+            isOpen={isPasteResponseOpen}
+            onClose={() => setIsPasteResponseOpen(false)}
+            onNavigate={handleNavigate}
+            onSuccessToast={(msg) => setSuccessToast(msg)}
+          />
+        </PageBoundary>
       )}
 
       {/* Toast Notification HUD */}
@@ -831,6 +947,10 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
+      {/* Dev builds only: `#/throw-lab` forces a render error so the fallback can be measured. */}
+      {import.meta.env.MODE !== "production" && <ThrowLab />}
+      {/* Crash reporting v1: the dev trigger's probe for the top level, outside every page boundary */}
+      {crashProbe("app")}
       <DbProvider>
         <BrandProvider>
           {/* BrowserRouter carries the URL; the dev-lab hashes (#/shell-lab etc.) and the pre-auth

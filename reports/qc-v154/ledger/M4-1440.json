@@ -1,0 +1,42 @@
+[
+ {
+  "name": "cards with materials (population)",
+  "ok": true,
+  "got": "26"
+ },
+ {
+  "name": "no clip on a card without materials",
+  "ok": true,
+  "got": "checked"
+ },
+ {
+  "name": "column 1: the pop-up opens",
+  "ok": true,
+  "got": "{\"l\":456.65625,\"r\":726.65625,\"t\":392.234375,\"b\":543.78125,\"onTop\":true,\"listL\":424,\"listR\":1384,\"vw\":1440,\"up\":false}"
+ },
+ {
+  "name": "column 1: nothing paints over it",
+  "ok": true,
+  "got": "{\"l\":456.65625,\"r\":726.65625,\"t\":392.234375,\"b\":543.78125,\"onTop\":true,\"listL\":424,\"listR\":1384,\"vw\":1440,\"up\":false}"
+ },
+ {
+  "name": "column 1: inside the window",
+  "ok": true,
+  "got": "{\"l\":456.65625,\"r\":726.65625,\"t\":392.234375,\"b\":543.78125,\"onTop\":true,\"listL\":424,\"listR\":1384,\"vw\":1440,\"up\":false}"
+ },
+ {
+  "name": "column 3: the pop-up opens",
+  "ok": true,
+  "got": "{\"l\":1105.984375,\"r\":1375.984375,\"t\":391.75,\"b\":543.296875,\"onTop\":true,\"listL\":424,\"listR\":1384,\"vw\":1440,\"up\":false}"
+ },
+ {
+  "name": "column 3: nothing paints over it",
+  "ok": true,
+  "got": "{\"l\":1105.984375,\"r\":1375.984375,\"t\":391.75,\"b\":543.296875,\"onTop\":true,\"listL\":424,\"listR\":1384,\"vw\":1440,\"up\":false}"
+ },
+ {
+  "name": "column 3: inside the window",
+  "ok": true,
+  "got": "{\"l\":1105.984375,\"r\":1375.984375,\"t\":391.75,\"b\":543.296875,\"onTop\":true,\"listL\":424,\"listR\":1384,\"vw\":1440,\"up\":false}"
+ }
+]

@@ -133,7 +133,7 @@ describe("2 · the wiring — RENDERED, so the claims are about the markup and n
     const html = render(card(), { sort: "over" });
     const hd = sliceBetween(html, 'class="lhd"', 'class="l-body"');
     const labels = [...hd.matchAll(/aria-label="Sort by ([^"]+)"/g)].map((m) => m[1]);
-    expect(labels).toEqual(["Task", "Agent", "Due", "Overdue by"]);
+    expect(labels).toEqual(["Task", "Agent", "Due", "Past expected by"]);
     expect(hd).toContain('class="h-over on" aria-pressed="true"');
     expect(hd.match(/aria-pressed="true"/g) ?? []).toHaveLength(1);
     expect(hd, "longest overdue first reads ▼").toContain(">▼</span>");
@@ -208,8 +208,9 @@ describe("3 · the stylesheet states the contract's row, once", () => {
     expect(decls, "a theirs rule would be a second colour meaning the same thing").not.toMatch(/\.lov\.theirs/);
   });
 
-  it("the Overdue head's colour is burgundy, and it is the only head colour stated", () => {
-    expect(rule(".tlc .grp .g-lbl.over")).toContain("color:var(--burg)");
+  /* consistency roll-out v1 (A2): colour never marks time — the Overdue head takes the base head's ink */
+  it("the Overdue head states no colour of its own; the base head's ink is the only head colour", () => {
+    expect(decls, "the Overdue head took a colour again").not.toMatch(/\.tlc \.grp \.g-lbl\.over\s*\{/);
     expect(rule(".tlc .grp .g-lbl"), "the base head takes the ink, not the accent").toContain("color:var(--ink2)");
   });
 

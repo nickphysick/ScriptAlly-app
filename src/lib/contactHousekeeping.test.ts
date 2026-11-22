@@ -50,7 +50,8 @@ describe("the gaps — reply · materials · genres · wishlist · reopen, and n
     expect(by("fx-stale").mswlCheckedAt, "precondition: a stamp from January").toMatch(/^2026-01/);
     const all = A.flatMap((a) => agentGaps(a, ctxOf(a), []));
     expect(all).not.toContain("recheck");
-    expect(GAP_ORDER).toEqual(["reply", "materials", "genres", "wishlist", "reopen"]);
+    /* re-pointed (Add agent v1): the agency joins, last */
+    expect(GAP_ORDER).toEqual(["reply", "materials", "genres", "wishlist", "reopen", "agency"]);
   });
   it("reopen: a closed door with no undone dated task (ruling b); the task closes it", () => {
     const shut = by("fx-reopen");
@@ -66,6 +67,8 @@ describe("the gaps — reply · materials · genres · wishlist · reopen, and n
       reply: { tab: "work", focus: "reply" }, materials: { tab: "want", focus: "materials" },
       genres: { tab: "want", focus: "genres" }, wishlist: { tab: "want", focus: "wishlist" },
       reopen: { tab: "work", focus: "reopen" },
+      /* Add agent v1 — the agency opens Contact details */
+      agency: { tab: "who", focus: "agency" },
     });
   });
 });

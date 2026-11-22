@@ -1,0 +1,77 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Manuscripts v27 (design-refs/manuscripts-v27/manuscripts-v27.html): the book container, the coming-soon strip, the
+ * book view (`.ms27-bx*`), and the Versions page's header. Values are the mock's `.bkp`/`.bkx`/`.bf`/`.bkl`/`.soon2`/
+ * `.s-*`/`#bx` rules; the header's geometry is the house hero's (`--hero-*`, shell/pageHeroFrame.css).
+ *
+ * ⚠️ THE MOCK'S `@container sheet` HAS NO TWIN IN THE APP. "Wide" (> 1440 of sheet) is the shell's own switch,
+ *    `.ws-app.sheet-wide`; "narrow" (≤ 1200 of sheet) is a container query on the page root (`ms27`), whose content box
+ *    is the sheet less the 24px gutters, so ≤ 1152.
+ * ⚠️ lib/brand.tsx forces faces on h1–h3 and bare spans at runtime: every heading here states its face with two classes
+ *    and `!important`.
+ * ⚠️ THE BOOK VIEW PORTALS TO THE BODY, so its sheet reads only `:root` tokens and literals.
+ */
+
+/* ── the page root. ⚠️ WORKSPACE WIDTH v2 (8 Nov): it takes the shared workspace column (`--work-max` with
+   `--work-gutter` inside it, workspacePageGrid.css) — its own full-sheet width and 24 / 36px gutters are retired. ── */
+.wpg-scroll > .ms27 {
+  container: ms27 / inline-size;
+  --ms27-ink: #1c130f;
+  --ms27-navy: #2a3a52;
+  --ms27-rust: var(--sp-rust);
+  --ms27-serif: var(--msv12-serif);
+  --ms27-txt: var(--hero-text-x, 243px);
+}
+.ms27 { color: var(--ms27-ink); font-family: var(--ms27-serif); }
+.ms27 :is(h1, h2, p, dl, dt, dd) { margin: 0; }
+.ms27 button { font: inherit; color: inherit; }
+
+/* ── the header (header rules v1.1: art 14 · text column --hero-text-x · stack --hero-stack-h) ── */
+.ms27-mh {
+  position: relative; isolation: isolate; padding: var(--hero-top, 36px) 0 var(--hero-gap-below, 44px);
+  --ms27-ins: max(64px, calc((100cqw - 900px) / 2));
+  --ms27-cw: 404px;
+  min-height: calc(var(--hero-stack-h) + var(--hero-top, 36px));
+}
+.ws-app.sheet-wide .ms27-mh { --ms27-ins: max(64px, calc((100cqw - 1080px) / 2)); --ms27-cw: 420px; }
+.ms27-mh-art {
+  position: absolute; left: var(--hero-art-x, 14px); top: var(--hero-top, 36px); width: var(--hero-art-w); height: var(--hero-art-h);
+  max-width: none; object-fit: contain; object-position: left center; filter: drop-shadow(0 12px 16px rgba(28, 19, 15, 0.16));
+  pointer-events: none; z-index: 1;
+}
+.ms27-mh-t { margin-left: var(--ms27-txt); position: relative; z-index: 1; max-width: calc(100% - var(--ms27-txt) - var(--ms27-ins) - var(--ms27-cw) - 24px); }
+.ms27 .ms27-mh-k { margin: 0 0 var(--hero-ey-gap, 15px); height: var(--hero-ey-lh, 12px); font: 500 12px/12px var(--font-mono) !important; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ms27-rust); white-space: nowrap; }
+.ms27 h1.ms27-h1 {
+  margin: 0 !important; height: var(--hero-title-size); white-space: nowrap; overflow: visible;
+  font: 400 var(--hero-title-size)/1 var(--sp-type) !important; color: var(--ms27-ink); letter-spacing: -0.01em;
+}
+.ms27 .ms27-mh-by { display: flex; align-items: center; gap: 14px; height: var(--hero-by-lh, 26px); margin: var(--hero-by-gap, 12px) 0 0; font: 400 20px/26px var(--sp-type) !important; color: #3a2e27; white-space: nowrap; }
+.ms27-mh-by i { flex: 0 0 40px; height: 1px; background: rgba(28, 19, 15, 0.3); }
+.ms27-mh-by i:last-child { flex: 0 1 120px; min-width: 30px; }
+.ms27 .ms27-mh-by em { font: italic 20px var(--ms27-serif) !important; color: #6b5f56; margin-right: -4px; }
+.ms27-mh-b { display: flex; align-items: center; gap: 10px; margin-top: var(--hero-act-gap, 24px); height: var(--hero-act-h, 46px); }
+.ms27 .ms27-p1, .ms27 .ms27-p2 { box-sizing: border-box; height: 46px; padding: 0 22px; border-radius: 12px; border: 0; cursor: pointer; font: 400 17px var(--sp-type); white-space: nowrap; }
+.ms27 .ms27-p1 { background: var(--ms27-navy); color: #f4eee5; }
+.ms27 .ms27-p1:hover { background: #1c130f; }
+.ms27 .ms27-p2 { background: #fff; color: var(--ms27-ink); box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
+.ms27 .ms27-p2:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.3), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
+.ms27 :is(.ms27-p1, .ms27-p2, .ms27-lnk):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.ms27-mh-r { position: absolute; right: var(--ms27-ins); top: var(--hero-top, 36px); height: var(--hero-stack-h); width: var(--ms27-cw); display: flex; align-items: center; z-index: 2; }
+/* the Versions page: the same header on the page, no card on the right */
+.ms27-mh--page .ms27-mh-t { max-width: calc(100% - var(--ms27-txt) - 24px); }
+.ms27 .ms27-mh-b .ms27-hw { all: unset; cursor: pointer; margin-left: 10px; font: 400 15px var(--ms27-serif); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(28, 19, 15, 0.3); white-space: nowrap; }
+.ms27 .ms27-mh-b .ms27-hw:hover { color: var(--ms27-ink); }
+
+
+/* ── the guide: the pill's narrow-window rule is this page's own (four tabs in the bar), and the all-done links ── */
+@media (max-width: 1400px) {
+  .pck-pill.pck-pill--ms27 .pck-pt { display: none; }
+  .pck-pill.pck-pill--ms27 { padding: 0 12px 0 8px; }
+}
+.pck-pop .ms27-gl { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; background: #4b6151; color: #fff; font: 400 13px var(--sp-type); white-space: nowrap; }
+.pck-pop .ms27-gl + .ms27-gl { background: #fff; color: #4b6151; box-shadow: inset 0 0 0 1.5px rgba(75, 97, 81, 0.5); }
+.pck-pop .ms27-gl:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* Manuscripts v29 retired the logline strip, the details card and the book view: their rules went with them. */

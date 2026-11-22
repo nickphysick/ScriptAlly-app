@@ -1,0 +1,32 @@
+[
+ {
+  "name": "/queries: marks found (224)",
+  "ok": true,
+  "got": "224"
+ },
+ {
+  "name": "/queries: every open mark ink or ink at .42",
+  "ok": true,
+  "got": "all ink"
+ },
+ {
+  "name": "/dashboard: marks found (3)",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "/dashboard: every open mark ink or ink at .42",
+  "ok": true,
+  "got": "all ink"
+ },
+ {
+  "name": "/queries/responses: marks found (60)",
+  "ok": true,
+  "got": "84"
+ },
+ {
+  "name": "/queries/responses: every open mark ink or ink at .42",
+  "ok": false,
+  "got": "rgb(95, 67, 61)"
+ }
+]

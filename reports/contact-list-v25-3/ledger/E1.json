@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows, 2 with a wishlist"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 at rest",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 no wishlist, shorter row",
+  "ok": true,
+  "detail": "82.8 < 103.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 hover clv181-bare",
+  "ok": true,
+  "detail": "WT Wren Tallis TALLIS & MOOR Not queried Log a query Fill in 4 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 hover cv25-agent-06",
+  "ok": true,
+  "detail": "CB Clara Beaumont HARBOUR LANE ✓ Thriller Partial requested DAY 54 Send the partial Fill in 2 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 hover cv25-agent-08",
+  "ok": true,
+  "detail": "TE Tom Ellery ELLERY & FINCH ✓ Thriller Offer DAY 65 Decide on offer Fill in 2 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 hover cv25-agent-09",
+  "ok": true,
+  "detail": "JM Jonathan Marsh THE MARSH AGENCY ✓ Thriller Full requested DAY 32 Send the full Fill in 2 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 hover cv25-agent-07",
+  "ok": true,
+  "detail": "MR Marcus Reed BLOOMSBURY QUILL ✓ Thriller Partial requested DAY 46 Send the partial Fill in 2 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows, 2 with a wishlist"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 at rest",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 no wishlist, shorter row",
+  "ok": true,
+  "detail": "82.8 < 103.0"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 hover clv181-bare",
+  "ok": true,
+  "detail": "WT Wren Tallis TALLIS & MOOR Not queried Log a query Fill in 4 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 hover cv25-agent-06",
+  "ok": true,
+  "detail": "CB Clara Beaumont HARBOUR LANE ✓ Thriller Partial requested DAY 54 Send the partial Fill in 2 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 hover cv25-agent-08",
+  "ok": true,
+  "detail": "TE Tom Ellery ELLERY & FINCH ✓ Thriller Offer DAY 65 Decide on offer Fill in 2 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 hover cv25-agent-09",
+  "ok": true,
+  "detail": "JM Jonathan Marsh THE MARSH AGENCY ✓ Thriller Full requested DAY 32 Send the full Fill in 2 gaps →"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 hover cv25-agent-07",
+  "ok": true,
+  "detail": "MR Marcus Reed BLOOMSBURY QUILL ✓ Thriller Partial requested DAY 46 Send the partial Fill in 2 gaps →"
+ }
+]

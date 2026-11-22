@@ -138,9 +138,11 @@ describe("the ways in (locked)", () => {
     expect(b).toContain("onUsePhotos={() => flowRef.current?.openPhotos()}");
     expect(b).toContain("onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}");
   });
-  it("the Import page offers Use photos beside its Smart Import action, gated the same", () => {
+  /* RE-POINTED (two-door import v1): the spreadsheet button is never disabled now — the same picker
+     reads a headings file, which spends nothing. Use photos is still gated on the entitlement. */
+  it("the Import page offers Use photos beside its Smart Import action; photos are gated", () => {
     const p = code("src/components/import/ImportPage.tsx");
-    expect(p).toMatch(/data-act="smart" onClick=\{chooseSmart\} disabled=\{!entitlement\.allowed\}>\{TILE_SMART\.action\}<\/button>\s*<button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick=\{usePhotos\} disabled=\{!entitlement\.allowed\}>\{CAPTURE_PHOTOS_ACTION\}<\/button>/);
+    expect(p).toMatch(/data-act="smart" onClick=\{chooseSmart\}>\{TILE_SMART\.action\}<\/button>\s*<button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick=\{usePhotos\} disabled=\{!entitlement\.allowed\}>\{CAPTURE_PHOTOS_ACTION\}<\/button>/);
     expect(p).toContain('kind === "photos" ? flowRef.current?.openPhotos()');
   });
 });

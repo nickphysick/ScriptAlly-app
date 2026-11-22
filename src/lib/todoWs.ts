@@ -1,0 +1,592 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v50 — THE TASK WORKSPACE's model (design-refs/todo-list-v50/todo-list-v50.html). Pure: no React, no IO.
+ *
+ * The page is a tray of tasks on the left and a desk on the right where the selected task is done. This file turns
+ * the board's cards (already shaped by `lib/todoTray`) into the workspace's tasks: their kind, their group, the
+ * title the tray and the desk read, the day count, the page header's priority line and the Mentor's lines.
+ *
+ * ⚠️ A HOUSEKEEPING SWEEP CARD IS EXPANDED INTO ONE ROW PER AGENT. The board folds every agent with a missing reply
+ *    time into one card ("3 reply times"); the workspace asks one agent one question at a time, so each member is a
+ *    row. Every member still writes through its own agent's flag (`data_quality_poor` + agentId).
+ * ⚠️ NOTES TO SELF NEVER REACH THE TRAY. A user task without a due date is a note (`isNoteTask`); only dated tasks
+ *    are tasks. The board already keeps notes off its columns; `wsTasks` checks again so a note can never arrive here.
+ */
+import type { Agent, Query, UserTask } from "../types";
+import type { TrayItem } from "./todoTray";
+import type { DueSource } from "./taskDue";
+import { sendKindOf } from "./queryActions/sendKind";
+import type { AgentDataNeed } from "./agentDataQuality";
+import { isTaskType, type TaskType } from "./todoActions";
+import { londonDayEnd, londonWeekStart, type ClearedAct } from "./todoCleared";
+import type { SetAsideItem } from "./taskSettings";
+import { STAGE_COLOURS, STAGE_INK, bandBackground, stageOf, type Stage } from "./stageColours";
+
+const DAY = 86400000;
+const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+export type WsKind = "offer" | "send" | "rr" | "nudge" | "quiet" | "fix" | "own" | "other" | "batch";
+export type WsGroupId = "wait" | "nudge" | "quiet" | "house" | "yours";
+export type WsType = "Send" | "Decide" | "Nudge" | "Close" | "Fill in";
+export type WsWhen = "Overdue" | "Due this week" | "Coming up" | "No date";
+
+export interface WsTask {
+  /** the card's key, or `${card key}|${agentId}` for one member of a housekeeping sweep */
+  key: string;
+  item: TrayItem;
+  kind: WsKind;
+  group: WsGroupId;
+  title: string;
+  /** the agent's first name ("The agent" where none is stored) */
+  first: string;
+  agentName: string;
+  agency: string;
+  query?: Query;
+  agent?: Agent;
+  userTask?: UserTask;
+  /** a housekeeping row's gap */
+  need?: AgentDataNeed;
+  /** whole days until the due date (negative: past it); null where the task has no date */
+  dueDays: number | null;
+  /** Gone quiet: days since the last thing was sent */
+  quietDays: number | null;
+  /** v58.2 (A1): where `dueDays` was counted from (`taskDue`'s source, carried on the tray item); undefined on a hand-built item */
+  dueSource?: DueSource;
+  type: WsType | null;
+  /** search haystack */
+  hay: string;
+  /** a batch row (v51.1): the queries it works through, oldest first, and every board card it stands for (a snooze or a
+   *  dismiss reaches them all) */
+  batch?: { queryId: string; agentId: string }[];
+  batchItems?: TrayItem[];
+}
+
+export const WS_GROUPS: readonly { id: WsGroupId; name: string }[] = [
+  { id: "wait", name: "Agents are waiting" },
+  { id: "nudge", name: "Nudges" },
+  { id: "quiet", name: "Gone quiet" },
+  { id: "house", name: "Housekeeping" },
+  { id: "yours", name: "Your tasks" },
+];
+
+const GROUP_OF: Record<string, WsGroupId> = { you: "wait", chase: "nudge", quiet: "quiet", tidy: "house", mine: "yours" };
+
+const firstOf = (a?: Agent | null): string => {
+  const n = (a?.name ?? "").trim();
+  if (n) return n.split(/\s+/)[0];
+  return (a?.agency ?? "").trim() || "The agent";
+};
+const poss = (n: string): string => (/s$/i.test(n) ? `${n}’` : `${n}’s`);
+
+const ymdMs = (ymd: string): number => Date.parse(`${ymd}T12:00:00`);
+const localYmd = (t: number): string => {
+  const d = new Date(t);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+export const daysBetweenYmd = (a: string, b: string): number => Math.round((ymdMs(b) - ymdMs(a)) / DAY);
+
+/** a dateless own task is a note (the board's own law, `isNoteTask`) */
+const isNote = (t?: UserTask): boolean => !!t && !t.dueDate;
+
+const NEED_TITLE: Record<AgentDataNeed, (f: string) => string> = {
+  responseTime: (f) => `How long does ${f} take to reply?`,
+  mswl: (f) => `Add ${poss(f)} wishlist`,
+  materials: (f) => `What does ${f} want sent?`,
+};
+
+/* ⚠️ EVERY TASK TYPE THE BOARD DOESN'T NAME HAS ITS OWN WORDS HERE (To-do list v51.1). The row's title names the agent
+   (the writer can tell two rows apart without opening them), and the header's phrase is built from the same kind, first
+   name and agency — never the card's own stored sentence, which is what put raw text in the header. Typed over every
+   TaskType, so a new type fails to compile until it says how it reads. The board's named kinds (offer, send, R&R,
+   nudge, close) and the profile gaps are handled by `titleOf` and `doingPhrase` directly; their entries here are never
+   read and say so. */
+type OtherWords = { title: (first: string, book: string) => string; doing: (who: string, book: string) => string };
+const NAMED: OtherWords = { title: (f) => f, doing: (w) => w };
+export const OTHER_WORDS: Record<TaskType, OtherWords> = {
+  offer_received: NAMED, partial_requested: NAMED, full_requested: NAMED, revise_resubmit: NAMED,
+  nudge_overdue: NAMED, no_response_close: NAMED, data_quality_poor: NAMED,
+  materials_unrecorded: { title: (f) => `Fill in what you sent ${f}`, doing: (w) => `Filling in what you sent ${w}` },
+  materials_unrecorded_bulk: { title: (f) => `Fill in what you sent ${f}`, doing: (w) => `Filling in what you sent ${w}` },
+  offer_tell: { title: (f) => `Tell ${f} about your offer`, doing: (w) => `Telling ${w} about your offer` },
+  /* Query Centre v152.2 §6.1: one card per offer, naming the agent who made it (the count lives on the card's own title) */
+  offer_tell_all: { title: (f) => `Tell the other agents about ${poss(f)} offer`, doing: (w) => `Telling the other agents about ${poss(w)} offer` },
+  offer_send_full: { title: (f) => `Send ${f} your full`, doing: (w) => `Sending ${w} your full` },
+  withdraw_tell: { title: (f) => `Tell ${f} you’ve withdrawn`, doing: (w) => `Telling ${w} you’ve withdrawn` },
+  signed_tell: { title: (f) => `Tell ${f} you’ve signed`, doing: (w) => `Telling ${w} you’ve signed` },
+  agent_recheck: { title: (f) => `Check on ${f}`, doing: (w) => `Checking on ${w}` },
+  dream_agent_unqueried: { title: (f) => `Query ${f}`, doing: (w) => `Querying ${w}` },
+  /* the one task about a book rather than an agent: it names the book */
+  querying_unstarted: { title: (_f, b) => `Start querying ${b}`, doing: (_w, b) => `Starting to query ${b}` },
+};
+const taskTypeOf = (i: TrayItem): TaskType | null => (isTaskType(i.card.taskType) ? i.card.taskType : null);
+const bookOf = (i: TrayItem): string => {
+  const t = (i.card as { manuscriptTitle?: string }).manuscriptTitle?.trim();
+  return t ? `‘${t}’` : "your book";
+};
+
+function kindOf(i: TrayItem, need?: AgentDataNeed): WsKind {
+  if (i.userTask || i.bucket === "note") return "own";
+  switch (i.bucket) {
+    case "send": return "send";
+    case "decide": return i.card.taskType === "revise_resubmit" ? "rr" : "offer";
+    case "chase": return "nudge";
+    case "close": return "quiet";
+    default: return need ? "fix" : "other";
+  }
+}
+
+const TYPE_OF: Record<WsKind, WsType | null> = { send: "Send", rr: "Send", own: "Send", offer: "Decide", nudge: "Nudge", quiet: "Close", fix: "Fill in", other: null, batch: "Fill in" };
+
+function titleOf(kind: WsKind, i: TrayItem, first: string, need?: AgentDataNeed): string {
+  switch (kind) {
+    case "send": return `Send ${first} your ${i.query && sendKindOf(i.query) === "full" ? "full" : "partial"}`;
+    case "rr": return `Send ${first} your revision`;
+    case "offer": return `Answer ${poss(first)} offer`;
+    case "nudge": return `Nudge ${first}`;
+    case "quiet": return `${poss(first)} gone quiet`;
+    case "fix": return NEED_TITLE[need!](first);
+    case "own": return (i.userTask?.text ?? i.deed).trim() || "Your task";
+    default: {
+      const tt = taskTypeOf(i);
+      return tt ? OTHER_WORDS[tt].title(first, bookOf(i)) : i.deed;
+    }
+  }
+}
+
+/** One workspace task per tray item, and one per member of a housekeeping sweep. */
+export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sweepNeed: (i: TrayItem) => AgentDataNeed | null, memberIds: (i: TrayItem) => string[], nowMs: number,
+  /** the materials bulk card's queries ("12 queries have no record of what you sent"): one row each, naming its agent */
+  gapMembers: (i: TrayItem) => { queryId: string; agentId: string }[] = () => [], queries: readonly Query[] = []): WsTask[] {
+  const today = localYmd(nowMs);
+  const out: WsTask[] = [];
+  const make = (i: TrayItem, agent: Agent | undefined, need: AgentDataNeed | undefined, key: string, query: Query | undefined = i.query): WsTask => {
+    const kind = kindOf(i, need);
+    const first = agent ? firstOf(agent) : "";
+    const agentName = (agent?.name ?? "").trim() || (agent?.agency ?? "").trim();
+    const agency = (agent?.agency ?? "").trim();
+    const dueYmd = kind === "own" ? i.userTask?.dueDate ?? null : i.dial.ymd;
+    const dueDays = kind === "fix" || kind === "quiet" || !dueYmd ? null : daysBetweenYmd(today, dueYmd.slice(0, 10));
+    const quietDays = kind === "quiet" ? daysSinceAnchor(i, nowMs) : null;
+    const title = titleOf(kind, i, first || "the agent", need);
+    return {
+      key, item: i, kind, group: GROUP_OF[i.group.id] ?? "house", title, first: first || "The agent", agentName, agency,
+      query, agent, userTask: i.userTask, need, dueDays, quietDays, dueSource: i.dueSource,
+      type: kind === "other" && (i.card.taskType === "materials_unrecorded" || i.card.taskType === "materials_unrecorded_bulk") ? "Fill in" : TYPE_OF[kind],
+      hay: `${title} ${agentName} ${agency}`.toLowerCase(),
+    };
+  };
+  /* ⚠️ "FILL IN WHAT YOU SENT" IS ONE ROW (v51.1, Nick): every materials gap — the board's single cards below its
+     threshold, or its one bulk card above it — folds into a single batch row, counted as one, that the desk works through
+     a query at a time. With exactly one gap it is that query's own row, "Fill in what you sent {first}". */
+  const MATS = new Set(["materials_unrecorded", "materials_unrecorded_bulk"]);
+  const matItems = items.filter((i) => MATS.has(i.card.taskType ?? ""));
+  const queue: { queryId: string; agentId: string }[] = [];
+  for (const i of matItems) {
+    const add = i.card.taskType === "materials_unrecorded_bulk" ? gapMembers(i)
+      : i.card.relatedRecordId ? [{ queryId: i.card.relatedRecordId, agentId: i.agent?.id ?? i.query?.agentId ?? "" }] : [];
+    for (const m of add) if (!queue.some((x) => x.queryId === m.queryId)) queue.push(m);
+  }
+  let batchPlaced = false;
+  for (const i of items) {
+    if (isNote(i.userTask)) continue;
+    if (MATS.has(i.card.taskType ?? "") && queue.length >= 2) {
+      if (batchPlaced) continue;
+      batchPlaced = true;
+      const head = queue[0];
+      const a0 = agents.find((x) => x.id === head.agentId);
+      const title = `Fill in what you sent · ${queue.length} queries`;
+      const names = queue.map((m) => { const a = agents.find((x) => x.id === m.agentId); return `${a?.name ?? ""} ${a?.agency ?? ""}`; }).join(" ");
+      out.push({
+        key: "materials-batch", item: i, kind: "batch", group: "house", title, first: a0 ? firstOf(a0) : "The agent",
+        agentName: "", agency: "", query: queries.find((q) => q.id === head.queryId), agent: a0, userTask: undefined, need: undefined,
+        dueDays: null, quietDays: null, type: "Fill in", hay: `${title} ${names}`.toLowerCase(),
+        batch: queue, batchItems: matItems,
+      });
+      continue;
+    }
+    const need = sweepNeed(i);
+    if (i.sweep && need) {
+      for (const id of memberIds(i)) {
+        const a = agents.find((x) => x.id === id);
+        if (a) out.push(make(i, a, need, `${i.key}|${id}`));
+      }
+      continue;
+    }
+    /* one gap: that query's own row, naming its agent (a bulk card is only raised at three or more) */
+    if (i.card.taskType === "materials_unrecorded_bulk" && queue.length === 1) {
+      out.push(make(i, agents.find((x) => x.id === queue[0].agentId), undefined, `${i.key}|${queue[0].queryId}`, queries.find((q) => q.id === queue[0].queryId)));
+      continue;
+    }
+    out.push(make(i, i.agent, need ?? undefined, i.key));
+  }
+  return out;
+}
+
+/* ── filters, grouping, order ─────────────────────────────────────────────────────────────────── */
+
+export const WS_TYPES: readonly WsType[] = ["Send", "Decide", "Nudge", "Close", "Fill in"];
+export const WS_WHENS: readonly WsWhen[] = ["Overdue", "Due this week", "Coming up", "No date"];
+
+export const whenOf = (t: WsTask): WsWhen =>
+  t.dueDays == null ? "No date" : t.dueDays < 0 ? "Overdue" : t.dueDays <= 6 ? "Due this week" : "Coming up";
+
+/** v53: a filter's and a group's words; "No date" is never shown (it read as a missing figure) */
+export const whenWord = (w: WsWhen): string => (w === "No date" ? "Not dated" : w);
+
+export interface WsFilters { q: string; types: ReadonlySet<WsType>; whens: ReadonlySet<WsWhen> }
+export const NO_WS_FILTERS: WsFilters = { q: "", types: new Set(), whens: new Set() };
+
+export function passes(t: WsTask, f: WsFilters): boolean {
+  if (f.q.trim() && !t.hay.includes(f.q.trim().toLowerCase())) return false;
+  if (f.types.size && !(t.type && f.types.has(t.type))) return false;
+  if (f.whens.size && !f.whens.has(whenOf(t))) return false;
+  return true;
+}
+
+const dueKey = (t: WsTask): number => (t.dueDays == null ? 9999 : t.dueDays);
+export const byDue = (a: WsTask, b: WsTask): number => dueKey(a) - dueKey(b) || (b.quietDays ?? 0) - (a.quietDays ?? 0);
+
+export type WsGrouping = "category" | "urgency" | "when" | "agent" | "none";
+export const WS_GROUPINGS: readonly { id: WsGrouping; label: string; hint: string }[] = [
+  { id: "category", label: "Category", hint: "Agents are waiting · Nudges · Gone quiet · Housekeeping · Yours" },
+  { id: "urgency", label: "Urgency", hint: "Needs you now · Housekeeping · Yours" },
+  { id: "when", label: "When", hint: "Past expected · Due this week · Coming up · Not dated" },
+  { id: "agent", label: "Agent", hint: "What you owe each person" },
+  { id: "none", label: "None", hint: "One flat list" },
+];
+
+/** the band class a group's header takes (`wait` is navy; the rest are the mock's tints) */
+export type WsBand = "wait" | "nudge" | "quiet" | "house" | "yours";
+export interface WsSection { id: string; name: string; band: WsBand; tasks: WsTask[] }
+
+export function wsSections(tasks: readonly WsTask[], g: WsGrouping): WsSection[] {
+  const sorted = [...tasks].sort(byDue);
+  if (g === "category") return WS_GROUPS.map((x) => ({ id: x.id, name: x.name, band: x.id, tasks: sorted.filter((t) => t.group === x.id) }));
+  if (g === "urgency") {
+    const now = sorted.filter((t) => t.group === "wait" || t.group === "nudge" || t.group === "quiet");
+    return [
+      { id: "now", name: "Needs you now", band: "wait", tasks: now },
+      { id: "house", name: "Housekeeping", band: "house", tasks: sorted.filter((t) => t.group === "house") },
+      { id: "yours", name: "Yours", band: "yours", tasks: sorted.filter((t) => t.group === "yours") },
+    ];
+  }
+  if (g === "when") {
+    return WS_WHENS.map((w, n) => ({ id: w, name: whenWord(w), band: (["wait", "nudge", "quiet", "house"] as const)[n], tasks: sorted.filter((t) => whenOf(t) === w) }));
+  }
+  if (g === "agent") {
+    const names = [...new Set(sorted.map((t) => t.agentName || "Yours"))];
+    return names.map((n) => ({ id: `a:${n}`, name: n, band: n === "Yours" ? "yours" : "quiet", tasks: sorted.filter((t) => (t.agentName || "Yours") === n) }));
+  }
+  return [{ id: "all", name: "Everything", band: "quiet", tasks: sorted }];
+}
+
+/* ── the page header's priority line ──────────────────────────────────────────────────────────── */
+
+/** "Sending Clara at Harbour Lane your partial" */
+export function doingPhrase(t: WsTask): string {
+  /* "{first} at {agency}" where both are known and differ; the first name alone otherwise */
+  const who = t.agency && t.agentName && t.agentName !== t.agency ? `${t.first} at ${t.agency}` : t.first;
+  switch (t.kind) {
+    case "offer": return t.agency && t.agentName !== t.agency ? `Answering ${poss(t.first)} offer from ${t.agency}` : `Answering ${poss(t.first)} offer`;
+    case "send": return `Sending ${who} your ${t.query && sendKindOf(t.query) === "full" ? "full" : "partial"}`;
+    case "rr": return `Sending ${who} your revision`;
+    case "nudge": return `Nudging ${who}`;
+    case "quiet": return `Deciding what to do about ${who}`;
+    case "fix":
+      return t.need === "responseTime" ? `Adding how long ${who} takes to reply`
+        : t.need === "mswl" ? `Adding ${poss(who)} wishlist` : `Adding what ${who} wants sent`;
+    case "own": return t.title;
+    case "batch": return `Filling in what you sent for ${t.batch?.length ?? 0} queries`;
+    case "other": {
+      const tt = taskTypeOf(t.item);
+      return tt ? OTHER_WORDS[tt].doing(who, bookOf(t.item)) : `Doing what ${who} needs`;
+    }
+    default: { const unhandled: never = t.kind; return unhandled; }
+  }
+}
+
+/**
+ * The one task the header names. Urgent: an offer due within a day, else the most overdue dated task (Gone quiet
+ * excluded). Otherwise the next best: the soonest dated task, then Gone quiet, then Housekeeping.
+ */
+export function priorityTask(tasks: readonly WsTask[]): { task: WsTask | null; urgent: boolean } {
+  const dated = tasks.filter((t) => t.kind !== "quiet" && t.dueDays != null);
+  const offer = dated.filter((t) => t.kind === "offer" && (t.dueDays as number) <= 1).sort(byDue)[0];
+  if (offer) return { task: offer, urgent: true };
+  const late = dated.filter((t) => (t.dueDays as number) < 0).sort(byDue)[0];
+  if (late) return { task: late, urgent: true };
+  const next = [...dated].sort(byDue)[0]
+    ?? [...tasks].filter((t) => t.kind === "quiet").sort((a, b) => (b.quietDays ?? 0) - (a.quietDays ?? 0))[0]
+    ?? tasks.find((t) => t.kind === "fix")
+    ?? tasks[0];
+  return { task: next ?? null, urgent: false };
+}
+
+/* ── the tray row's day count ─────────────────────────────────────────────────────────────────── */
+
+export interface DayBit { big: string | null; small: string; late: boolean }
+export function dayBit(t: WsTask): DayBit {
+  if (t.kind === "fix" || t.kind === "batch" || t.kind === "other" && t.dueDays == null) return { big: null, small: "No date", late: false };
+  if (t.kind === "quiet") return { big: t.quietDays != null ? String(t.quietDays) : null, small: t.quietDays != null ? "days in" : "No date", late: false };
+  if (t.dueDays == null) return { big: null, small: "No date", late: false };
+  if (t.dueDays === 0) return { big: "Today", small: "", late: true };
+  if (t.dueDays < 0) return { big: String(-t.dueDays), small: -t.dueDays === 1 ? "day past expected" : "days past expected", late: true };
+  return { big: String(t.dueDays), small: t.dueDays === 1 ? "day left" : "days left", late: false };
+}
+
+/* ── To-do list v53 (D4) — the tray row's right-hand figure, and the breakdown bar ─────────────────── */
+
+export interface TrayFigure { n: string; words: string; late: boolean }
+
+/** whole days since a tray item's anchor, or null where the record gives no date (never a "0" counted from today) */
+function daysSinceAnchor(i: TrayItem, nowMs: number): number | null {
+  const at = i.waitMs !== undefined ? i.waitMs : (Number.isFinite(i.anchorMs) ? i.anchorMs : null);
+  return at == null || !Number.isFinite(at) ? null : Math.max(0, Math.round((nowMs - at) / DAY));
+}
+/**
+ * v55 (D7) — THE ONE DAYS-WAITING FIGURE: whole days since the event that started this wait (for a request, the day the
+ * agent asked). The tray row and the page header's legend both read it, so the two cannot disagree. null where the
+ * record cannot say; an own task has none.
+ */
+export function daysWaiting(t: WsTask, nowMs: number): number | null {
+  return t.kind === "own" ? null : daysSinceAnchor(t.item, nowMs);
+}
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day past expected", "days past expected"), late: true }
+  : d === 0 ? { n: "Today", words: "", late: true } : { n: String(d), words: plural(d, "day left", "days left"), late: false };
+/**
+ * To-do list v58.2 — THE FIGURE'S WORDS SAY WHAT IT COUNTS FROM (Nick, 21 Nov):
+ *   · a nudge past the agent's reply window: "{n} days past expected"; past the writer's own date (a hold, a planned
+ *     nudge or a booked check-in, `taskDue`'s "hold" / "reminder" / "check-in"): "{n} days since your reminder";
+ *   · an offer: "{n} days since it came in", from `offerDate`, else `lastStatusChange`; never "past expected" or "left";
+ *   · an own task past its date: "{n} days past its date".
+ *   Not yet reached: "{n} days left"; the day itself: "Today". Which date wins is `taskDue`'s, unchanged.
+ */
+const WRITER_SET: ReadonlySet<DueSource> = new Set<DueSource>(["hold", "reminder", "check-in"]);
+const nudgeFigure = (d: number, source: DueSource | undefined): TrayFigure =>
+  d < 0 && source && WRITER_SET.has(source) ? { n: String(-d), words: plural(-d, "day since your reminder", "days since your reminder"), late: true } : dueFigure(d);
+const ownFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day past its date", "days past its date"), late: true } : dueFigure(d);
+/** the day an offer came in (local ms), or null: `offerDate` when stored, else the status's last move */
+function offerCameInMs(q: Query | undefined): number | null {
+  for (const v of [q?.offerDate, q?.lastStatusChange]) {
+    const at = anyMs(v);
+    if (at != null) return at;
+  }
+  return null;
+}
+const anyMs = (v: unknown): number | null => {
+  if (v == null || v === "") return null;
+  if (typeof v === "string") { const t = Date.parse(v); return Number.isFinite(t) ? t : null; }
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (v instanceof Date) return v.getTime();
+  const o = v as { toMillis?: () => number; seconds?: number };
+  if (typeof o.toMillis === "function") return o.toMillis();
+  if (typeof o.seconds === "number") return o.seconds * 1000;
+  return null;
+};
+function offerFigure(t: WsTask, nowMs: number): TrayFigure | null {
+  const at = offerCameInMs(t.query);
+  if (at == null) return null;
+  const d = Math.max(0, daysBetweenYmd(localYmd(at), localYmd(nowMs)));
+  return d === 0 ? { n: "Today", words: "", late: false } : { n: String(d), words: plural(d, "day since it came in", "days since it came in"), late: false };
+}
+/**
+ * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge past expected or since your
+ * reminder, Gone quiet "{n} days quiet", an offer "since it came in", an own task its due date. ⚠️ NEVER "No date": a
+ * task with no number to give shows none. Housekeeping shows its Quick fill label instead (null here).
+ */
+export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
+  const waited = daysWaiting(t, nowMs);
+  const waiting = (): TrayFigure | null => (waited == null ? null : { n: String(waited), words: plural(waited, "day waiting", "days waiting"), late: false });
+  switch (t.kind) {
+    case "fix": case "batch": return null;
+    case "quiet": return t.quietDays == null ? null : { n: String(t.quietDays), words: plural(t.quietDays, "day quiet", "days quiet"), late: false };
+    case "send": case "rr": return waiting();
+    case "nudge": return t.dueDays == null ? waiting() : nudgeFigure(t.dueDays, t.dueSource);
+    case "offer": return offerFigure(t, nowMs);
+    case "own": return t.dueDays == null ? null : ownFigure(t.dueDays);
+    case "other": return t.dueDays == null ? waiting() : dueFigure(t.dueDays);
+    default: { const unhandled: never = t.kind; return unhandled; }
+  }
+}
+
+export interface Breakdown { wait: number; nudge: number; quiet: number; house: number; late: number; need: number }
+/** the bar's counts, read off the category sections the tray draws (so the two cannot disagree) and the late count */
+export function breakdownOf(sections: readonly WsSection[]): Breakdown {
+  const n = (id: string) => sections.find((s) => s.id === id)?.tasks.length ?? 0;
+  const urgent = sections.filter((s) => s.id === "wait" || s.id === "nudge" || s.id === "quiet").flatMap((s) => s.tasks);
+  const late = sections.flatMap((s) => s.tasks).filter((t) => t.kind !== "quiet" && t.dueDays != null && t.dueDays < 0).length;
+  return { wait: n("wait"), nudge: n("nudge"), quiet: n("quiet"), house: n("house"), late, need: urgent.length };
+}
+
+/**
+ * v53 (D10): what finishing `t` clears — the whole list, its group, or neither. Read over the WHOLE list (never the
+ * tray's filtered view: a search must not turn one row into "All caught up").
+ */
+export function milestoneFor(all: readonly WsTask[], t: WsTask): "list" | "group" | null {
+  const rest = all.filter((x) => x.key !== t.key);
+  if (!rest.length) return "list";
+  return rest.some((x) => x.group === t.group) ? null : "group";
+}
+
+/**
+ * To-do list v58 — THE STAGE A TASK WEARS: its query's stage (the slate ladder, lib/stageColours), or null. An own task
+ * and a housekeeping row (a gap to fill, a batch) have none and keep their own drawing, even where a batch names a query.
+ */
+export function wsStage(t: WsTask): Stage | null {
+  if (t.kind === "own" || t.group === "house" || !t.query) return null;
+  return stageOf(t.query.status);
+}
+/** the stage as the inline custom properties todoWs58.css reads (band, edge, ink); undefined where there is no stage */
+export function stageVars(s: Stage | null): Record<"--tws58-band" | "--tws58-edge" | "--tws58-ink", string> | undefined {
+  return s ? { "--tws58-band": bandBackground(s), "--tws58-edge": STAGE_COLOURS[s].edge, "--tws58-ink": STAGE_INK } : undefined;
+}
+
+/**
+ * To-do list v58 (5.1) — THE DESK'S CHIP SAYS WHAT THE ROW SAYS: the same number and words as the task's tray row, read
+ * from `trayFigure`; null (no chip) where the row shows no figure. (dueChip below is the phone's, unchanged.)
+ */
+export function deskChip(t: WsTask, nowMs: number): { b: string; s: string; late: boolean } | null {
+  const f = trayFigure(t, nowMs);
+  return f ? { b: f.n, s: f.words, late: f.late } : null;
+}
+
+/** the desk header's due chip: [figure, words], or null (the phone's task screen reads it; the desk reads deskChip) */
+export function dueChip(t: WsTask): { b: string; s: string; late: boolean } | null {
+  if (t.kind === "fix") return null;
+  if (t.kind === "quiet") return t.quietDays != null ? { b: String(t.quietDays), s: "days", late: false } : null;
+  if (t.dueDays == null) return null;
+  if (t.dueDays === 0) return { b: "Today", s: "", late: true };
+  if (t.dueDays < 0) return { b: String(-t.dueDays), s: -t.dueDays === 1 ? "day past expected" : "days past expected", late: true };
+  return { b: String(t.dueDays), s: t.dueDays === 1 ? "day left" : "days left", late: false };
+}
+
+/* ── the Mentor's first line on the desk ─────────────────────────────────────────────────────── */
+
+export interface QuietFacts {
+  /** a nudge already logged since the last send */
+  nudgedOn: Date | null;
+  /** the agency says no reply means no */
+  nrmn: boolean;
+  /** the agency's stated reply time, in weeks */
+  windowWeeks: number | null;
+}
+
+export function mentorLine(t: WsTask, facts?: QuietFacts): string {
+  const a = t.first;
+  switch (t.kind) {
+    /* v53 (D12): the hawk only says what the app does — it works out dates and adds tasks; it never watches, checks or
+       hears from an agent, because the writer logs everything */
+    case "send": return `${a} asked for your ${t.query && sendKindOf(t.query) === "full" ? "full manuscript" : "partial"}. Once you’ve sent it, log it here and I’ll work out when ${poss(a)} reply is due.`;
+    case "rr": return `${a} asked you to revise and resubmit. Once you’ve sent the new version, log it here and I’ll work out when ${poss(a)} reply is due.`;
+    case "offer": return `An offer! Take your time. Tell me what you said to ${a} and I’ll sort out what happens next.`;
+    /* the agent's stated reply time is said only where it is set (Agent.responseTimeWeeks); otherwise nothing about it */
+    case "nudge": return facts?.windowWeeks
+      ? `${a} usually takes about ${facts.windowWeeks} weeks to reply, and that’s gone by. A short, friendly nudge is completely normal. Let me know once you’ve sent it.`
+      : `${a} hasn’t replied yet. A short, friendly nudge is completely normal. Let me know once you’ve sent it.`;
+    case "quiet": {
+      const weeks = t.quietDays != null ? Math.round(t.quietDays / 7) : null;
+      if (facts?.nudgedOn) return `You nudged ${a} on ${facts.nudgedOn.getDate()} ${MONTHS_LONG[facts.nudgedOn.getMonth()]} and still nothing. You can close it, or give ${a} a little longer.`;
+      if (facts?.nrmn && facts.windowWeeks && weeks != null) return `${t.agency || a} say no reply after ${facts.windowWeeks} weeks means no, and it’s been ${weeks} weeks. Closing it is reasonable, but it’s your call.`;
+      if (facts?.windowWeeks && weeks != null) return `${a} usually takes about ${facts.windowWeeks} weeks to reply, and it’s been ${weeks} weeks with no word. One polite nudge is normal before you give up on it.`;
+      return `${weeks != null ? `It’s been ${weeks} weeks` : "It’s been a long while"} with no word from ${a}. One polite nudge is normal before you give up on it.`;
+    }
+    case "fix":
+      return t.need === "responseTime" ? `A quick one. Knowing how long ${a} takes means I can tell you when a nudge is due.`
+        : t.need === "mswl" ? `A quick one. ${poss(a)} wishlist helps you check your book is a fit.`
+        : `A quick one. Knowing what ${a} wants sent means you’ll have it ready when you query.`;
+    case "batch": return `Let’s go through these one at a time. Tick what went to ${a} with this query, or skip it if you can’t remember.`;
+    case "own": {
+      const steps = t.userTask ? (t.userTask as UserTask & { steps?: unknown[] }).steps : undefined;
+      return steps && steps.length ? "This one’s yours. Tick the steps off as you go, then mark it done." : "This one’s yours. Mark it done when it’s finished, or break it into steps if it’s a big one.";
+    }
+    default: return `This one needs doing from ${t.agentName ? `${poss(a)} card` : "its own page"}. Open it and it comes off your list once it’s done.`;
+  }
+}
+
+/** "the suggested choice" for Gone quiet */
+export type QuietAct = "nudge" | "wait" | "replied" | "close";
+export function quietSuggestion(facts: QuietFacts): QuietAct {
+  if (facts.nudgedOn) return "close";
+  if (facts.nrmn) return "close";
+  return "nudge";
+}
+
+/* ── the reply-time slider's words ───────────────────────────────────────────────────────────── */
+
+export function replyWords(w: number | null): [string, string] {
+  if (!w) return ["Not set yet", "Drag the slider"];
+  const months = Math.round((w / 4.345) * 2) / 2;
+  const m = w >= 8 ? ` · about ${months % 1 ? `${Math.floor(months)} and a half` : months} months` : "";
+  const d = w <= 2 ? "Very quick" : w <= 6 ? "Quicker than most" : w <= 12 ? `About average${m}` : `Slower than most${m}`;
+  return [`${w} week${w === 1 ? "" : "s"}`, d];
+}
+
+/** "Query letter, synopsis and full manuscript" */
+export const andList = (a: readonly string[]): string => (a.length < 2 ? (a[0] ?? "") : `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}`);
+
+/* ── To-do list v52 Part B — the tray's Start here card, and the collapsed strip ─────────────────── */
+
+/** Start here's italic reason: "Due tomorrow", "8 days past expected", or "Nothing urgent" (the priority task's own urgency) */
+export function startReason(p: { task: WsTask | null; urgent: boolean }): string {
+  const d = p.task?.dueDays;
+  if (!p.task || !p.urgent || d == null) return "Nothing urgent";
+  if (d < 0) return `${-d} ${d === -1 ? "day" : "days"} past expected`;
+  if (d === 0) return "Due today";
+  if (d === 1) return "Due tomorrow";
+  return `Due in ${d} days`;
+}
+
+/** the collapsed strip's group words */
+export const STRIP_GROUP: Record<WsGroupId, string> = { wait: "Waiting", nudge: "Nudges", quiet: "Quiet", house: "Fill in", yours: "Yours" };
+
+export interface StripWords { name: string; what: string; when: string; hot: boolean }
+
+/**
+ * A task in the collapsed strip: who (the agent's first name, or an own task's first two words), what it is, and when
+ * ("8d past", "Today", "Tmrw", "7d", "16 wks"; nothing when undated). `hot` is terracotta: late, today or tomorrow.
+ */
+export function stripWords(t: WsTask): StripWords {
+  const name = t.kind === "own" ? (t.userTask?.text ?? t.title).trim().split(/\s+/).slice(0, 2).join(" ") : t.first;
+  let what: string;
+  switch (t.kind) {
+    case "send": what = t.query && sendKindOf(t.query) === "full" ? "Full" : "Partial"; break;
+    case "rr": what = "Revision"; break;
+    case "offer": what = "Offer"; break;
+    case "nudge": what = "Nudge"; break;
+    case "quiet": what = "Quiet"; break;
+    case "fix": what = t.need === "responseTime" ? "Reply time" : t.need === "mswl" ? "Wishlist" : "What to send"; break;
+    case "own": what = "Your task"; break;
+    case "batch": what = "What you sent"; break;
+    case "other": what = "To do"; break;
+    default: { const unhandled: never = t.kind; what = unhandled; }
+  }
+  if (t.kind === "quiet") return { name, what, when: t.quietDays != null ? `${Math.round(t.quietDays / 7)} wks` : "", hot: false };
+  if (t.kind === "fix" || t.kind === "batch" || t.dueDays == null) return { name, what, when: "", hot: false };
+  const d = t.dueDays;
+  if (d < 0) return { name, what, when: `${-d}d past`, hot: true };
+  if (d === 0) return { name, what, when: "Today", hot: true };
+  if (d === 1) return { name, what, when: "Tmrw", hot: true };
+  return { name, what, when: `${d}d`, hot: false };
+}
+
+/* ── To-do list v52 (7 Nov) — the Done tab and "cleared this week" are one count ───────────────── */
+
+export interface DoneRow { key: string; ms: number; label: string; sub: string; dis?: SetAsideItem }
+
+/**
+ * The Done tab's rows: what was ticked off and what was dismissed THIS WEEK (Monday 00:00 London to the end of today),
+ * newest first. Its length is the header's "{n} cleared this week" and the tab's count, so the two cannot disagree.
+ * ⚠️ A dismissal with no date (a switched-off rule, a legacy mute) cannot be placed in a week, so it is not listed.
+ */
+export function doneTabRows(done: readonly ClearedAct[], dismissed: readonly SetAsideItem[], titleOf: (a: SetAsideItem) => string, nowMs: number): DoneRow[] {
+  const from = londonWeekStart(nowMs), until = londonDayEnd(nowMs);
+  const inWeek = (t: number) => Number.isFinite(t) && t >= from && t < until;
+  return [
+    ...done.filter((d) => inWeek(d.at)).map((d) => ({ key: d.id, ms: d.at, label: d.label, sub: d.consequence })),
+    ...dismissed.filter((a) => inWeek(a.at ? Date.parse(a.at) : NaN))
+      .map((a) => ({ key: a.id, ms: Date.parse(a.at!), label: titleOf(a), sub: a.kind === "rule" ? "Switched off for every agent" : "Dismissed", dis: a })),
+  ].sort((x, y) => y.ms - x.ms);
+}

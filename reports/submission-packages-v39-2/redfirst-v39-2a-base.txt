@@ -1,0 +1,242 @@
+
+Running 9 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.7s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L1-1280 · the page ground carries the packages tile — none
+  ✗ L1-1280 · at the Contact list's size, 340 × 360, repeating — auto repeat
+  ✗ L1-1280 · scrolling with the page (local), on the Contact list's ground #f2eee8 — scroll rgba(0, 0, 0, 0)
+  ✗ L1-1280 · the tile's opacity is the Contact list's (read from both SVGs) — null vs 0.085
+  ✗ L1-1280 · the header card has no pattern: no ::before image, a flat fill — {"img":"none","col":"rgb(251, 248, 244)","before":"\"\"","beforeImg":"url(\"http://127.0.0.1:4393/images/packages/packages-pattern.svg\")"}
+[L1-1280] 4/9 green
+removed 22
+
+  ✘  2 [measure] › tests/e2e/pk392.measure.ts:88:3 › L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at 1280 (6.9s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L1-1512 · the page ground carries the packages tile — none
+  ✗ L1-1512 · at the Contact list's size, 340 × 360, repeating — auto repeat
+  ✗ L1-1512 · scrolling with the page (local), on the Contact list's ground #f2eee8 — scroll rgba(0, 0, 0, 0)
+  ✗ L1-1512 · the tile's opacity is the Contact list's (read from both SVGs) — null vs 0.085
+  ✗ L1-1512 · the header card has no pattern: no ::before image, a flat fill — {"img":"none","col":"rgb(251, 248, 244)","before":"\"\"","beforeImg":"url(\"http://127.0.0.1:4393/images/packages/packages-pattern.svg\")"}
+[L1-1512] 4/9 green
+removed 22
+
+  ✘  3 [measure] › tests/e2e/pk392.measure.ts:88:3 › L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at 1512 (6.9s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L2] 10/10 green
+  ✓  4 [measure] › tests/e2e/pk392.measure.ts:121:1 › L2 exactly three headings are set in the typewriter; the materials tab's label is the one exception (6.5s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L7-1280] 17/17 green
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✓  5 [measure] › tests/e2e/pk392.measure.ts:159:3 › L7 the materials folder tab, and rows that never cut a name off, at 1280 (15.6s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+[L7-1512] 14/14 green
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✓  6 [measure] › tests/e2e/pk392.measure.ts:159:3 › L7 the materials folder tab, and rows that never cut a name off, at 1512 (14.2s)
+  ✗ L8-1280 · the panel is on the page — false
+  ✗ L8-1280 · it holds the labels, the builder label and both builder cards — {"has":false,"labels":false,"lib":false,"open":false,"kicker":false,"tipIn":false,"bandIn":false,"tip":true,"band":true,"p":null,"card":{"x":272,"right":1248,"top":129.75,"bottom":321.3125},"b":{"x":248,"right":1272,"top":1419.609375,"bottom":1746.9375}}
+  ✗ L8-1280 · its left edge is the header card's (±1) — undefined vs 272
+  ✗ L8-1280 · its right edge is the header card's (±1) — undefined vs 1248
+  ✗ L8-1280 · #fbf9f5, radius 20 — undefined undefined
+  ✗ L8-1280 · the band is 80 below it (±1) — 1419.609375 − undefined
+[L8-1280] 2/8 green
+removed 22
+
+  ✘  7 [measure] › tests/e2e/pk392.measure.ts:225:3 › L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at 1280 (8.3s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L8-1512 · the panel is on the page — false
+  ✗ L8-1512 · it holds the labels, the builder label and both builder cards — {"has":false,"labels":false,"lib":false,"open":false,"kicker":false,"tipIn":false,"bandIn":false,"tip":true,"band":true,"p":null,"card":{"x":276,"right":1476,"top":129.75,"bottom":321.3125},"b":{"x":248,"right":1504,"top":1412.609375,"bottom":1632.078125}}
+  ✗ L8-1512 · its left edge is the header card's (±1) — undefined vs 276
+  ✗ L8-1512 · its right edge is the header card's (±1) — undefined vs 1476
+  ✗ L8-1512 · #fbf9f5, radius 20 — undefined undefined
+  ✗ L8-1512 · the band is 96 below it (±1) — 1412.609375 − undefined
+[L8-1512] 2/8 green
+removed 22
+
+  ✘  8 [measure] › tests/e2e/pk392.measure.ts:225:3 › L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at 1512 (8.6s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L9 · the packing list's first slot is the version — ["let","syn","ver","ex"]
+  ✗ L9 · …then the letter, the synopsis and Also sends — ["let","syn","ver","ex"]
+  ✗ L9 · …labelled Version over 'Sets the pages that go out' — Query letter / Needed
+  ✗ L9 · Your materials leads with Versions and opens on it — [["Letters","true"],["Synopses","false"],["Versions","false"]]
+  ✗ L9 · the pieces list leads with Versions and opens on it — [["Query letters","true"],["Synopses","false"],["Versions","false"]]
+  ✗ L9 · the pieces row starts with Best opening — ["Best letter","Best synopsis","Best opening"]
+  ✗ L9 · the drawer's What's in it starts with Version — ["Query letter","Synopsis","Pages from","Also sends"]
+  ✗ L9 · a saved package's stored fields are unchanged — {"pk40-std":{"packageName":"Standard","bookVersionId":"pk40-v1","id":"pk40-std","otherMaterials":"Author bio","firstSentAt":"2026-08-30T10:07:46.248Z","extraIds":["pk40-ext"],"synopsisVersionId":"pk40 … vs … {"pk40-std":{"id":"pk40-std","synopsisVersionId":"pk40-syn","status":"Active","extraIds":["pk40-ext"],"bookVersionId":"pk40-v1","createdDate":"2026-08-20T10:07:46.248Z","packageName":"Standard","first
+[L9] 0/8 green
+removed 22
+
+  ✘  9 [measure] › tests/e2e/pk392.measure.ts:255:1 › L9 the version leads: the packing list, the drawer, the pieces row and both tab rows; stored fields unchanged (9.7s)
+
+
+  1) [measure] › tests/e2e/pk392.measure.ts:88:3 › L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at 1280 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   "the page ground carries the packages tile — none",
+    +   "at the Contact list's size, 340 × 360, repeating — auto repeat",
+    +   "scrolling with the page (local), on the Contact list's ground #f2eee8 — scroll rgba(0, 0, 0, 0)",
+    +   "the tile's opacity is the Contact list's (read from both SVGs) — null vs 0.085",
+    +   "the header card has no pattern: no ::before image, a flat fill — {\"img\":\"none\",\"col\":\"rgb(251, 248, 244)\",\"before\":\"\\\"\\\"\",\"beforeImg\":\"url(\\\"http://127.0.0.1:4393/images/packages/packages-pattern.svg\\\")\"}",
+    + ]
+
+      50 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      51 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 52 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      53 |   }
+      54 | }
+      55 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:52:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:116:7
+
+    Error Context: test-results/pk392.measure.ts-L1-the-pa-8d9e1-n-nothing-overflows-at-1280-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L1-the-pa-8d9e1-n-nothing-overflows-at-1280-measure/error-context.md
+
+  2) [measure] › tests/e2e/pk392.measure.ts:88:3 › L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at 1512 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   "the page ground carries the packages tile — none",
+    +   "at the Contact list's size, 340 × 360, repeating — auto repeat",
+    +   "scrolling with the page (local), on the Contact list's ground #f2eee8 — scroll rgba(0, 0, 0, 0)",
+    +   "the tile's opacity is the Contact list's (read from both SVGs) — null vs 0.085",
+    +   "the header card has no pattern: no ::before image, a flat fill — {\"img\":\"none\",\"col\":\"rgb(251, 248, 244)\",\"before\":\"\\\"\\\"\",\"beforeImg\":\"url(\\\"http://127.0.0.1:4393/images/packages/packages-pattern.svg\\\")\"}",
+    + ]
+
+      50 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      51 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 52 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      53 |   }
+      54 | }
+      55 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:52:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:116:7
+
+    Error Context: test-results/pk392.measure.ts-L1-the-pa-10f66-n-nothing-overflows-at-1512-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L1-the-pa-10f66-n-nothing-overflows-at-1512-measure/error-context.md
+
+  3) [measure] › tests/e2e/pk392.measure.ts:225:3 › L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at 1280 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "the panel is on the page — false",
+    +   "it holds the labels, the builder label and both builder cards — {\"has\":false,\"labels\":false,\"lib\":false,\"open\":false,\"kicker\":false,\"tipIn\":false,\"bandIn\":false,\"tip\":true,\"band\":true,\"p\":null,\"card\":{\"x\":272,\"right\":1248,\"top\":129.75,\"bottom\":321.3125},\"b\":{\"x\":248,\"right\":1272,\"top\":1419.609375,\"bottom\":1746.9375}}",
+    +   "its left edge is the header card's (±1) — undefined vs 272",
+    +   "its right edge is the header card's (±1) — undefined vs 1248",
+    +   "#fbf9f5, radius 20 — undefined undefined",
+    +   "the band is 80 below it (±1) — 1419.609375 − undefined",
+    + ]
+
+      50 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      51 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 52 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      53 |   }
+      54 | }
+      55 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:52:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:250:7
+
+    Error Context: test-results/pk392.measure.ts-L8-one-pa-c8dac-header-card-s-edges-at-1280-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L8-one-pa-c8dac-header-card-s-edges-at-1280-measure/error-context.md
+
+  4) [measure] › tests/e2e/pk392.measure.ts:225:3 › L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at 1512 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "the panel is on the page — false",
+    +   "it holds the labels, the builder label and both builder cards — {\"has\":false,\"labels\":false,\"lib\":false,\"open\":false,\"kicker\":false,\"tipIn\":false,\"bandIn\":false,\"tip\":true,\"band\":true,\"p\":null,\"card\":{\"x\":276,\"right\":1476,\"top\":129.75,\"bottom\":321.3125},\"b\":{\"x\":248,\"right\":1504,\"top\":1412.609375,\"bottom\":1632.078125}}",
+    +   "its left edge is the header card's (±1) — undefined vs 276",
+    +   "its right edge is the header card's (±1) — undefined vs 1476",
+    +   "#fbf9f5, radius 20 — undefined undefined",
+    +   "the band is 96 below it (±1) — 1412.609375 − undefined",
+    + ]
+
+      50 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      51 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 52 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      53 |   }
+      54 | }
+      55 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:52:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:250:7
+
+    Error Context: test-results/pk392.measure.ts-L8-one-pa-34c0c-header-card-s-edges-at-1512-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L8-one-pa-34c0c-header-card-s-edges-at-1512-measure/error-context.md
+
+  5) [measure] › tests/e2e/pk392.measure.ts:255:1 › L9 the version leads: the packing list, the drawer, the pieces row and both tab rows; stored fields unchanged 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   "the packing list's first slot is the version — [\"let\",\"syn\",\"ver\",\"ex\"]",
+    +   "…then the letter, the synopsis and Also sends — [\"let\",\"syn\",\"ver\",\"ex\"]",
+    +   "…labelled Version over 'Sets the pages that go out' — Query letter / Needed",
+    +   "Your materials leads with Versions and opens on it — [[\"Letters\",\"true\"],[\"Synopses\",\"false\"],[\"Versions\",\"false\"]]",
+    +   "the pieces list leads with Versions and opens on it — [[\"Query letters\",\"true\"],[\"Synopses\",\"false\"],[\"Versions\",\"false\"]]",
+    +   "the pieces row starts with Best opening — [\"Best letter\",\"Best synopsis\",\"Best opening\"]",
+    +   "the drawer's What's in it starts with Version — [\"Query letter\",\"Synopsis\",\"Pages from\",\"Also sends\"]",
+    +   "a saved package's stored fields are unchanged — {\"pk40-std\":{\"packageName\":\"Standard\",\"bookVersionId\":\"pk40-v1\",\"id\":\"pk40-std\",\"otherMaterials\":\"Author bio\",\"firstSentAt\":\"2026-08-30T10:07:46.248Z\",\"extraIds\":[\"pk40-ext\"],\"synopsisVersionId\":\"pk40 … vs … {\"pk40-std\":{\"id\":\"pk40-std\",\"synopsisVersionId\":\"pk40-syn\",\"status\":\"Active\",\"extraIds\":[\"pk40-ext\"],\"bookVersionId\":\"pk40-v1\",\"createdDate\":\"2026-08-20T10:07:46.248Z\",\"packageName\":\"Standard\",\"first",
+    + ]
+
+      50 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      51 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 52 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      53 |   }
+      54 | }
+      55 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:52:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:285:5
+
+    Error Context: test-results/pk392.measure.ts-L9-the-ve-5251f-ows-stored-fields-unchanged-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L9-the-ve-5251f-ows-stored-fields-unchanged-measure/error-context.md
+
+  5 failed
+    [measure] › tests/e2e/pk392.measure.ts:88:3 › L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at 1280 
+    [measure] › tests/e2e/pk392.measure.ts:88:3 › L1 the page ground carries the packages pattern as the Contact list does; the header card is plain; nothing overflows, at 1512 
+    [measure] › tests/e2e/pk392.measure.ts:225:3 › L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at 1280 
+    [measure] › tests/e2e/pk392.measure.ts:225:3 › L8 one panel holds the labels and the builder; the explainer and the band are outside; the header card's edges, at 1512 
+    [measure] › tests/e2e/pk392.measure.ts:255:1 › L9 the version leads: the packing list, the drawer, the pieces row and both tab rows; stored fields unchanged 
+  4 passed (1.9m)

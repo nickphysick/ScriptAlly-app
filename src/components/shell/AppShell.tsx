@@ -18,32 +18,51 @@
  * critical colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
 import { STAGE_REPLAY_EVENT } from "./BarSwitcher";
+import { PageBoundary } from "../PageBoundary";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Book, BookCopy, CalendarDays, Compass, HelpCircle, LayoutGrid, Library, LineChart, ListChecks,
-  LogOut, Package, Send, Settings, StickyNote, Sun, Upload, Users,
+  ArrowLeftRight, Book, BookCopy, CalendarDays, Compass, FilePenLine, LayoutGrid, Library, LineChart, ListChecks,
+  Mail, MessageSquareText, Send, Settings, StickyNote, Sun, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
 import { BetaStrip } from "./BetaStrip";
 import { DeletionBanner } from "../settings/DeletionBanner";
 import { FeedbackDock } from "./FeedbackDock";
-import { subscribeFeedback } from "../../lib/feedbackStore";
+import { useNewReplies } from "../../lib/yourNotesStore";
+import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
 import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
-import { MobileChromeContext, MobileDetailSpec } from "./mobileChrome";
-import { MobileSheet } from "./MobileSheet";
-import { BottomTabBar } from "../BottomTabBar";
+import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
+import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
+import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
+import { V4PushedHeader } from "../phone/v4/V4Chrome";
+import { V5Dock, V5MiniBar } from "../phone/v5/V5Chrome";
+import { openFeedbackHere } from "../phone/v5/FeedbackSheetV5";
+import { V3Provider } from "../phone/v3/V3Provider";
+import { V3Layer } from "../phone/v3/V3Layer";
+import { renderJourney } from "../phone/v3/JourneysV3";
+import { renderAgents } from "../phone/v3/AgentsV3";
+import { renderV4 } from "../phone/v4/renderV4";
+import { openV3, closeV3, v3Overlay } from "../phone/v3/v3Store";
+import { QUERIES_ALL_PATH, v3BackFor, v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
+import { PhoneBandContext } from "../phone/phoneBandStore";
+import { PhoneComposeHost } from "../phone/PhoneComposeFlow";
+import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { shellCrumbForPath } from "./shellV2Nav";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { useScriptAllyDb } from "../../lib/db";
-import { planLine } from "../../lib/shellSidebar";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 import "./mobileShell.css";
+import "../phone/phoneTokens.css";
+import "../phone/phone.css";
+import "../phone/phoneShell.css";
+import "../phone/sweepPhone.css";
 
 /* ── Stage page slot ─────────────────────────────────────────────────────── */
 
@@ -69,8 +88,11 @@ export const StagePage: React.FC<{
    *  centres the page inside a capped column (work 1600 / read 1200) — the ONE place a route
    *  declares its width kind. Omit → uncapped (the dashboard's exemption). See contentColumn.css. */
   contentVariant?: "work" | "read";
+  /** Crash reporting v1: the page's name. A named slot wraps its page in a PageBoundary, so a crash
+   *  shows a fallback in this slot only, and leaving the slot resets it. */
+  name?: string;
   children: React.ReactNode;
-}> = ({ active, layout = "flow", background, clip = false, contentVariant, children }) => {
+}> = ({ active, layout = "flow", background, clip = false, contentVariant, name, children }) => {
   const [entering, setEntering] = useState(false);
   const prevActive = useRef(false);
   React.useEffect(() => {
@@ -132,7 +154,7 @@ export const StagePage: React.FC<{
         minWidth: 0,
       }}
     >
-      {body}
+      {name ? <PageBoundary name={name} active={active}>{body}</PageBoundary> : body}
     </div>
   );
 };
@@ -166,7 +188,10 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   tasks: <ListChecks aria-hidden="true" />,
   queries: <Send aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
-  materials: <Book aria-hidden="true" />,
+  /* the rail reads each section's own `icon` key (mail for Materials); the group key stays for any reader that falls
+     back to the id. Shell nav v3 (13 Nov) deleted the `book` and `founding` keys with their sections. */
+  materials: <Mail aria-hidden="true" />,
+  manuscript: <Library aria-hidden="true" />,
   /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
      added — the group's and the row's — per the parallel-surface warning below; adding the
      section without its glyph is the quiet half of that failure.
@@ -199,14 +224,21 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
      the second pair; this is the established vocabulary and the one the parity lock names. */
   library: <Library aria-hidden="true" />,
   books: <BookCopy aria-hidden="true" />,
+  /* sidebar materials v1 — the Materials section (Mail) and its Query letters row (FilePenLine) */
+  mail: <Mail aria-hidden="true" />,
+  letter: <FilePenLine aria-hidden="true" />,
   folder: <Book aria-hidden="true" />,
+  /* Manuscripts v27 Part E — Versions: the mock's ⇆ */
+  versions: <ArrowLeftRight aria-hidden="true" />,
+  /* Your notes v1 — the page's glyph; shell nav v3: the account menu's "Your notes" row draws it */
+  notes: <MessageSquareText aria-hidden="true" />,
   settings: <Settings aria-hidden="true" />,
 };
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   // The palette's corpus reads these — already in memory on every route (DbProvider), so the
   // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
-  const { agents, queries, manuscripts, currentUser, logout } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, currentUser, logout, tasks, userTasks, taskFlags, entitlement } = useScriptAllyDb();
 
   /* ⚠️ ONE FIGURE IN THE NAV NOW (Amendment 1, H5). The Queries attention count went with the
      filter children: with the sidebar carrying destinations rather than views, there is nothing
@@ -233,6 +265,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // reversed; the board's sidebar no longer carries help).
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  /* Your notes v1 — replies on Your notes the writer has not seen: the sidebar link's pill, the rail's dot, the pop-up's */
+  const newReplies = useNewReplies(currentUser?.id);
   /* Dashboard v59: a page may ask for the ONE feedback panel to open (lib/feedbackStore) */
   useEffect(() => subscribeFeedback(() => setFeedbackOpen(true)), []);
   // (NavDrawer retired — shell follow-up P3. The slim mobile Nav is retired too (Mobile Pass 1):
@@ -243,7 +277,6 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // The you-menu sheet (concept frame 07) and the per-route pushed-detail registry. Pages
   // register a MobileDetailSpec under their OWN route key (mounted-but-inactive StagePage slots
   // can therefore never hide another route's tab bar); the shell reads only the active route's.
-  const [youOpen, setYouOpen] = useState(false);
   // The SHARED account menu's open state — Phase 4's top-nav shell will drive the same component.
   const [accountOpen, setAccountOpen] = useState(false);
   /* ⚠️ THE MENU IS PORTALLED, SO IT NEEDS THE ELEMENT THAT OPENED IT. Two shells offer a trigger —
@@ -277,7 +310,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
      The concept returns — deliberately, visibly — as the workspace sidebar's icon rail
      (WorkspaceShell + useSidebarCollapsed), which is what now owns the freed ⌘\. */
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
 
   // ── THE FOOT FADE (canonical shell pack). It appears ONLY when content continues below the
   // fold: a permanent fade over a short page reads as a rendering fault rather than an
@@ -332,6 +366,45 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     },
     [navigate, setSearchQuery]
   );
+  /* Phone app v3 — THE PHONE'S CHROME (design-refs/phone-app-v3/). Below 768px the slim header and the docked bar take
+     the places of the navy band and the floating capsule; the menu behind the initials, the book chip and switcher, the
+     feedback icon and the tile band retire with them (every door they held has a home on You, Settings or Today). At
+     768px and up `phoneNav` is false and the shell renders exactly what it did before. */
+  const phoneNav = useIsMobile();
+  /* a navigation closes any v3 sheet or journey still open (the ref's `go` clears the overlay) */
+  useEffect(() => { if (phoneNav) closeV3(); }, [pathname, phoneNav]);
+  /* Phone app v4: a root page's navy header runs to the top edge (phoneV4.css reads the class) */
+  useEffect(() => {
+    const on = phoneNav && v3IsRoot(pathname);
+    document.body.classList.toggle("pa4-root", on);
+    return () => document.body.classList.remove("pa4-root");
+  }, [pathname, phoneNav]);
+  const [bandSlots, setBandSlots] = useState<Record<string, React.ReactNode | null>>({});
+  const setBandSlot = useCallback((path: string, node: React.ReactNode | null) => {
+    setBandSlots((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
+  }, []);
+  const [bandExtras, setBandExtras] = useState<Record<string, React.ReactNode | null>>({});
+  const setBandExtra = useCallback((path: string, node: React.ReactNode | null) => {
+    setBandExtras((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
+  }, []);
+  const phoneBandValue = useMemo(() => ({ setBandSlot, setBandExtra }), [setBandSlot, setBandExtra]);
+  /* a tab's own page is named for the tab; a pushed page keeps the name it had */
+  const bandTitle = useMemo(() => {
+    const root = v3RootTitle(pathname);
+    if (root) return root;
+    const section = ACCOUNT_ROUTES.find((r) => r.path === pathname);
+    if (section) return section.label;
+    if (pathname === "/account") return "Settings";
+    if (pathname === "/plans") return "Plan & billing";
+    /* Phone app v5: the full list of queries, pushed from Today's Queries tab */
+    if (pathname === QUERIES_ALL_PATH) return "Queries";
+    return shellCrumbForPath(pathname)?.page ?? "QueryHawk";
+  }, [pathname]);
+
+  /* a fresh clock for the phone's one read on every navigation */
+  const v3Now = useMemo(() => Date.now(), [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [plusOpen, setPlusOpen] = useState(false);
+  useEffect(() => { setPlusOpen(false); }, [pathname]);
 
   return (
     /**
@@ -366,7 +439,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           computes the header's collapse and its scroll-invariance padding within `.wpg`; a strip
           up here is outside that box entirely, so `--wpg-reclaim-pad` and the collapse trigger
           cannot see it. That separation is the condition this was allowed under. */}
-      <BetaStrip onReport={() => setFeedbackOpen(true)} />
+      {/* Phone app v3: no full-width beta banner on a phone — Today ends on its one-row beta notice instead */}
+      {phoneNav ? null : <BetaStrip onReport={() => setFeedbackOpen(true)} />}
 
       {/* ⚠️ A PENDING DELETION IS A FACT ABOUT THE WHOLE ACCOUNT, so it is stated on every page.
           It used to live inside the Danger zone card — the one place you reach only by going
@@ -377,6 +451,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       <DeletionBanner />
 
       <div className="sv2-app ws-host">
+      {/* Phone app v3: the one read every phone screen makes, computed once (phone only; renders no element) */}
+      <V3Provider on={phoneNav} now={v3Now}>
 
       {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
           desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
@@ -434,6 +510,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
            `BetaStrip`'s "tell us when you find one" still opens the same panel. */
         onOpenFeedback={() => setFeedbackOpen((o) => !o)}
         feedbackOpen={feedbackOpen}
+        newReplies={newReplies}
         onOpenAccount={toggleAccount}
         onUpgrade={() => goPath("/plans")}
         onNavigate={onNavigate}
@@ -456,10 +533,11 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             onClose={() => setAccountOpen(false)}
             name={currentUser?.name ?? ""}
             email={currentUser?.email}
-            plan={currentUser?.plan}
+            entitlement={entitlement}
             onNavigatePath={goPath}
             onSignOut={logout}
             anchor={accountAnchor}
+            newReplies={newReplies}
           />
         }
       >
@@ -467,6 +545,33 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             and both rebuild mockups are desktop-only — so the new chrome is a ≥768px
             replacement and this keeps rendering below it. Removing it would take the phone's
             only bar with it. */}
+        {/* ⚠️ PHONE APP v2 (Part 1C): ON A PHONE THE NAVY BAND TAKES THIS SLOT, for every route that is not showing a
+            pushed detail screen. The old mobile bar (ShellTopBar) stays for pushed detail screens only — their back,
+            Cancel and Done live in it (MobileDetailSpec) until each is rebuilt. At 768px and up `phoneNav` is false and
+            this renders exactly what it did before. */}
+        {phoneNav && activeMobileDetail === null ? (
+          /* Phone app v4: a root page draws its own navy header, so the shell draws only the slim bar that stands in for
+             it once scrolled; a pushed page keeps a navy header with its back arrow.
+             Phone app v5: the slim bar is on every root (on Today and Materials it comes on as their tab strip reaches it);
+             on Today it carries the feedback button. The full list of queries keeps its header pinned (its Birds-eye ruler
+             sticks under it), and a back arrow with no history goes to its tab's root (Today on the right tab). */
+          v3IsRoot(pathname) ? (
+            <V5MiniBar title={bandTitle} pathname={pathname} scroller={() => stageRef.current}
+              onSearch={() => openV3({ type: "search" })}
+              onFeedback={pathname === "/dashboard" ? () => openFeedbackHere(pathname) : undefined} />
+          ) : (
+            <V4PushedHeader
+              title={bandTitle}
+              sticky={pathname === QUERIES_ALL_PATH}
+              onBack={() => {
+                const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+                if (idx > 0) navigate(-1); else goPath(v3BackFor(pathname));
+              }}
+              extra={bandExtras[pathname] ?? null}
+              slot={bandSlots[pathname] ?? null}
+            />
+          )
+        ) : (
         <div className="ws-mobilebar">
           <ShellTopBar
             onNavigate={onNavigate}
@@ -479,16 +584,19 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
                itself belongs to the LOCKED mobile bar and is left for a mobile pass to remove. */
             onOpenAccount={toggleAccount}
             mobileDetail={activeMobileDetail}
-            onOpenYou={() => setYouOpen(true)}
+            onOpenYou={() => goPath("/you")}
           />
         </div>
+        )}
 
         {/* ⚠️ THE STAGE MOVED INTO THE CARD (refinement §4). It is still the app's ONE scroll
             container and still carries STAGE_SCROLL_ID, the ref and the scroll memory — because
             stageScroll.ts and per-route restoration address it by id — but the element itself is
             now the card's `.ws-cscroll`, so the bar can be sticky above the scrolling content.
             Keeping a second scroller here would have double-scrolled every page. */}
-        <MobileChromeContext.Provider value={mobileChromeValue}>{children}</MobileChromeContext.Provider>
+        <MobileChromeContext.Provider value={mobileChromeValue}>
+          <PhoneBandContext.Provider value={phoneBandValue}>{children}</PhoneBandContext.Provider>
+        </MobileChromeContext.Provider>
       </WorkspaceShell>
 
       {palette}
@@ -528,53 +636,45 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
       {/* The floating tab-bar capsule (<md). It stands down while the active route shows a
           pushed detail screen (baked decision 5) — the detail's own affordances take the foot. */}
-      <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} hidden={activeMobileDetail !== null} />
+      {phoneNav ? (
+        <V5Dock
+          pathname={pathname}
+          scroller={() => stageRef.current}
+          /* a tap on the tab you are on, at its own page, takes it back to the top (ref `ACT.tab`) */
+          onGo={(path, tab) => {
+            if (tab === v3TabFor(pathname) && v3IsRoot(pathname) && stageRef.current) { stageRef.current.scrollTo({ top: 0, behavior: "smooth" }); return; }
+            goPath(path);
+          }}
+          onPlus={() => { if (v3Overlay()?.type === "plus") closeV3(); else openV3({ type: "plus" }); }}
+          hidden={activeMobileDetail !== null}
+        />
+      ) : (
+      /* the floating capsule — at 768px and up it is `display: none`, rendered exactly as before */
+      <BottomTabBar
+        pathname={pathname}
+        onGo={(path) => {
+          if (tabFor(path) === tabFor(pathname) && stageRef.current) { stageRef.current.scrollTo({ top: 0, behavior: "smooth" }); return; }
+          goPath(path);
+        }}
+        onPlus={() => setPlusOpen((o) => !o)}
+        plusOpen={plusOpen}
+        badge={0}
+        away={false}
+        more={fadeOn}
+        hidden={activeMobileDetail !== null || isMenuPage(pathname)}
+      />
+      )}
 
-      {/* THE YOU-MENU (Mobile Pass 1, concept frame 07) — the avatar's sheet: user block with
-          the plan as PLAIN SLATE TEXT (no Pro card), then the demoted destinations. Rows route
-          to existing pages; nothing here is a new surface. */}
-      <MobileSheet open={youOpen} onClose={() => setYouOpen(false)} ariaLabel="Your account and shortcuts">
-        {currentUser && (
-          <div className="sa-ymenu-user">
-            <span className="sa-ymenu-av" aria-hidden="true">
-              {currentUser.name.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
-            </span>
-            <div>
-              <div className="sa-ymenu-nm">{currentUser.name}</div>
-              <div className="sa-ymenu-em">{currentUser.email}</div>
-              <div className="sa-ymenu-plan">
-                {planLine(currentUser.plan).label}
-                {planLine(currentUser.plan).upgrade && (
-                  <>
-                    {" · "}
-                    <button type="button" className="sa-ymenu-uplink" onClick={() => { setYouOpen(false); goPath("/plans"); }}>
-                      Upgrade
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/todo"); }}>
-          <ListChecks aria-hidden="true" /> To-do
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/manuscripts/packages"); }}>
-          <Package aria-hidden="true" /> Submission packages
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/import"); }}>
-          <Upload aria-hidden="true" /> Import your queries
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/account"); }}>
-          <Settings aria-hidden="true" /> Account settings
-        </button>
-        <button type="button" className="sa-ymenu-row" onClick={() => { setYouOpen(false); goPath("/help"); }}>
-          <HelpCircle aria-hidden="true" /> Help
-        </button>
-        <button type="button" className="sa-ymenu-row sa-ymenu-out" onClick={() => { setYouOpen(false); logout(); }}>
-          <LogOut aria-hidden="true" /> Sign out
-        </button>
-      </MobileSheet>
+      {phoneNav ? <V3Layer render={(o) => renderV4(o) ?? renderJourney(o) ?? renderAgents(o)} /> : null}
+      {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
+          frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
+          Import, Settings, Help, Sign out and Upgrade (Plan & billing) are in the menu. Phones only; at 768px and up
+          none of the three can open (their openers are phone chrome). */}
+      {phoneNav ? (
+        <>
+          <PhoneComposeHost />
+        </>
+      ) : null}
 
       {/* DEV-only page-colour lab (local + scriptally-dev builds; statically false → tree-shaken
           from prod). Overrides ride an injected <style>; the root's data-sa-ground is its hook. */}
@@ -583,15 +683,22 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* ⚠️ THE RECEIPT IS THE PANEL'S OWN "Got it" STATE. `useTodoToast` is the app's toast, and
           it is PAGE-scoped: the hook returns a toast object its caller renders, so using it here
           would mean mounting a second toast surface app-wide beside the one every To-do page
-          already draws. The seam is kept so a shell-level toast can take it the day one exists. */}
-      <FeedbackDock
-        uid={currentUser?.id}
-        email={currentUser?.email ?? null}
-        open={feedbackOpen}
-        onOpenChange={setFeedbackOpen}
-        onReceipt={() => {}}
-      />
+          already draws. The seam is kept so a shell-level toast can take it the day one exists.
+          Dashboard v71: the seam publishes the send (`feedbackStore`), so the founding writer card
+          can say "Sent. Thank you." — nothing in the dock changes. */}
+      <PageBoundary name="panel:feedback" kind="panel" onClose={() => setFeedbackOpen(false)}>
+        <FeedbackDock
+          uid={currentUser?.id}
+          email={currentUser?.email ?? null}
+          name={currentUser?.name ?? null}
+          newReplies={newReplies}
+          open={feedbackOpen}
+          onOpenChange={setFeedbackOpen}
+          onReceipt={() => notifyFeedbackSent()}
+        />
+      </PageBoundary>
 
+      </V3Provider>
       </div>{/* closes .sv2-app.ws-host — EVERYTHING except the strip stays inside it, deliberately:
                  the floating chrome below (tab bar, sheets, dock, the dev lab) has always been a
                  descendant of `.sv2-app`, and moving it up to the frame would silently change what

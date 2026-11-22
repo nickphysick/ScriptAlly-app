@@ -1,0 +1,112 @@
+[
+ {
+  "name": "q152-agent: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-agent: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-quiet: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px,40/10px"
+ },
+ {
+  "name": "q152-materials: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-materials: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-undated: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-undated: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-fullreq: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-fullreq: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-long: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-long: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-rr: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-rr: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-offer: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-offer: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-closed: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-closed: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-passed: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-passed: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "q152-withdrew: footer buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px"
+ },
+ {
+  "name": "q152-withdrew: footer status box radius 12",
+  "ok": true,
+  "got": "12px"
+ },
+ {
+  "name": "the drawer's buttons 40 high, radius 10",
+  "ok": true,
+  "got": "40/10px,40/10px"
+ }
+]

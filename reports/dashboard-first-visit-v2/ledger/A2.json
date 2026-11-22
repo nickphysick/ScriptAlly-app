@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "A2",
+  "where": "Ready to Query",
+  "ok": false,
+  "detail": "GETTING READY"
+ },
+ {
+  "lock": "A2",
+  "where": "Drafting",
+  "ok": false,
+  "detail": "STILL WRITING"
+ },
+ {
+  "lock": "A2",
+  "where": "Revising",
+  "ok": false,
+  "detail": "IN REVISION"
+ },
+ {
+  "lock": "A2",
+  "where": "querying",
+  "ok": false,
+  "detail": "QUERYING"
+ },
+ {
+  "lock": "A2",
+  "where": "between",
+  "ok": false,
+  "detail": "BETWEEN ROUNDS"
+ }
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "L7",
+  "where": "1280 · population: the header and its rows",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 · population: the header and its rows",
+  "ok": false,
+  "detail": "null"
+ }
+]

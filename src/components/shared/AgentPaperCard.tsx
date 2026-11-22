@@ -11,19 +11,23 @@
  *   panel   (v18.1) the agent panel itself: framed's frame, band and head, with ✕ in the band, and the panel's tabs,
  *           body and footer as slots. The band is fixed; the head, tabs and body scroll together; the footer is fixed.
  *
- * ⚠️ THE BAND IS ALWAYS THE LIST HEADER'S SLATE, #3e5170 (v18.2 §B; v18.1 coloured it by whose move it was, and that
- *    rule is retired). The state is said by the agent panel's stand slip, not by the band. `status` still travels as
- *    `data-kind` for anything that reads it, and is never a colour.
+ * ⚠️ THE BAND IS THE LIST HEADER'S SLATE, #3e5170 (v18.2 §B; v18.1 coloured it by whose move it was, and that rule is
+ *    retired), EXCEPT where a caller passes `tone="pink"`: Contact list v20 §F gives a your-move card in the Cards view
+ *    the app's pink. The panel's state is said by its stand slip, not by the band. `status` still travels as
+ *    `data-kind` for anything that reads it, and is never a colour on its own.
  *
  * ⚠️ IT DRAWS WHAT IT IS GIVEN AND DERIVES NOTHING: the caller says the status, the words and which genre is the
  *    manuscript's. A value given as null is a dashed "+ Add …" pill when `onAdd` is supplied, and is left out when not.
  */
 import React from "react";
 import "./agentPaperCard.css";
+import { GenrePills } from "./agentRowParts";
 
 export type PaperStatus = "you" | "none" | "querying" | "closed";
 /** v18.2 §B — every band, in every variant and every state: the list header's slate */
 export const PAPER_BAND = "#3e5170";
+/** v20 §F — the Contact list's Cards view: a your-move card's band, the app's `--pink` */
+export const PAPER_BAND_PINK = "#f5e2da";
 
 export type PaperAddKey = "website" | "email" | "genres" | "wishlist" | "materials";
 
@@ -74,6 +78,22 @@ export interface PaperPanelSlots {
   foot: React.ReactNode;
   /** the scrolling region's attributes (the tab it shows) */
   scrollAttrs?: Record<string, string | undefined>;
+  /* ── Contact list v26.2 B — optional, additive: absent, the panel draws exactly as before (the To-do page's) ── */
+  /** the band's colour (v26.2: #5e7189 on the Contact list's card); absent, the list header's slate */
+  band?: string;
+  /** the band's right side, already built (stars, edit, ✕); absent, the stars and ✕ */
+  bandRight?: React.ReactNode;
+  /** the head's disc, already built; absent, the initials disc */
+  disc?: React.ReactNode;
+  /** the line under the agency ("Bristol · replies in about 6 weeks") */
+  meta?: React.ReactNode;
+  /** what sits between the head and the tabs (the next-step box) */
+  afterHead?: React.ReactNode;
+  /** the scrolling region and the frame, for the card's scroll keeping */
+  scrollRef?: React.Ref<HTMLDivElement>;
+  frameRef?: React.Ref<HTMLDivElement>;
+  /** what sits after the scroll region inside the frame, before the foot (the save bar) */
+  afterScroll?: React.ReactNode;
 }
 
 const hrefOf = (url: string): string => (/^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`);
@@ -86,30 +106,42 @@ export const AgentPaperCard: React.FC<{
   className?: string;
   /** the panel variant's slots */
   panel?: PaperPanelSlots;
-}> = ({ variant, data: d, onAdd, className, panel }) => {
+  /** Contact list v20 §F — the band's tone. Absent: the list header's slate (every card, every variant, as v18.2). "pink":
+   *  the app's pink with rust words, which only the Contact list's Cards view asks for, on a card whose next step is the
+   *  writer's. The agent panel and Housekeeping never pass it. */
+  tone?: "pink";
+  /** Contact list v25.2 B — a your-move agent: the disc is navy with the rust "!" */
+  yourMove?: boolean;
+}> = ({ variant, data: d, onAdd, className, panel, tone, yourMove }) => {
   if (variant === "panel" && panel) {
     return (
       <div className={`apc apc--panel${className ? ` ${className}` : ""}`} data-apc="card" data-variant="panel" data-status={d.status}>
-        <div className="apc-frame" data-apc="frame">
-          <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: PAPER_BAND }}>
+        <div className="apc-frame" data-apc="frame" ref={panel.frameRef}>
+          <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: panel.band ?? PAPER_BAND }}>
             <span className="apc-st" data-apc="status">{d.statusLabel}</span>
-            <span className="apc-bandr">
-              <Stars n={d.stars ?? 0} />
-              <button type="button" className="apc-x" data-apc="close" data-ap="close" aria-label={panel.closeLabel} onClick={panel.onClose}><span aria-hidden="true">{"×"}</span></button>
-            </span>
+            {panel.bandRight ?? (
+              <span className="apc-bandr">
+                <Stars n={d.stars ?? 0} />
+                <button type="button" className="apc-x" data-apc="close" data-ap="close" aria-label={panel.closeLabel} onClick={panel.onClose}><span aria-hidden="true">{"×"}</span></button>
+              </span>
+            )}
           </div>
-          <div className="apc-scroll" data-apc="scroll" {...panel.scrollAttrs}>
+          <div className="apc-scroll" data-apc="scroll" ref={panel.scrollRef} {...panel.scrollAttrs}>
             <div className="apc-head" data-apc="head">
-              <span className="apc-disc" aria-hidden="true">{d.initials}</span>
+              {panel.disc ?? <span className={`apc-disc${yourMove ? " cl252-yd" : ""}`} data-cl252={yourMove ? "yd" : undefined} aria-hidden="true">{d.initials}</span>}
               <div className="apc-who">
                 <h2 className="apc-nm" data-apc="name" data-ap="name" ref={panel.nameRef} tabIndex={-1}>{d.name}</h2>
-                {[d.agency?.trim(), d.city?.trim()].filter(Boolean).length ? <span className="apc-ag" data-ap="place">{[d.agency?.trim(), d.city?.trim()].filter(Boolean).join(" · ")}</span> : null}
+                {panel.meta !== undefined ? (
+                  <>{d.agency?.trim() ? <span className="apc-ag" data-ap="place">{d.agency.trim()}</span> : null}{panel.meta}</>
+                ) : [d.agency?.trim(), d.city?.trim()].filter(Boolean).length ? <span className="apc-ag" data-ap="place">{[d.agency?.trim(), d.city?.trim()].filter(Boolean).join(" · ")}</span> : null}
                 {panel.links}
               </div>
             </div>
+            {panel.afterHead}
             {panel.tabs}
             {panel.body}
           </div>
+          {panel.afterScroll}
           {panel.foot}
         </div>
       </div>
@@ -123,8 +155,9 @@ export const AgentPaperCard: React.FC<{
   ));
   const genres = ghost ? <span className="apc-chips">{bar(110, 26)}{bar(80, 26)}</span>
     : d.genres.length ? (
+      /* Contact list v25.2 A3 — the row's genre pills, one component */
       <span className="apc-chips" data-apc="genres">
-        {d.genres.map((g) => <span key={g.label} className={`apc-chip${g.hit ? " is-hit" : ""}`} data-hit={g.hit ? "true" : undefined}>{g.hit ? "✓ " : ""}{g.label}</span>)}
+        <GenrePills genres={d.genres.map((g) => g.label)} hit={(l) => d.genres.some((g) => g.label === l && g.hit)} word={(l) => l} max={d.genres.length} className="wrap" />
       </span>
     ) : add("genres", "+ Add their genres");
   const wish = ghost ? <span className="apc-lines">{bar(260)}{bar(200)}</span>
@@ -144,14 +177,15 @@ export const AgentPaperCard: React.FC<{
   );
   const meta = [d.city?.trim(), d.weeks ? `Replies in about ${d.weeks} weeks` : null].filter(Boolean).join(" · ");
   return (
-    <div className={`apc apc--${variant}${className ? ` ${className}` : ""}`} data-apc="card" data-variant={variant} data-status={d.status} aria-hidden={ghost || undefined}>
+    <div className={`apc apc--${variant}${className ? ` ${className}` : ""}`} data-apc="card" data-variant={variant} data-status={d.status} data-tone={tone}
+      aria-hidden={ghost || undefined}>
       <div className="apc-frame" data-apc="frame">
-        <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: PAPER_BAND }}>
+        <div className="apc-band" data-apc="band" data-kind={d.status} style={{ background: tone === "pink" ? PAPER_BAND_PINK : PAPER_BAND }}>
           <span className="apc-st" data-apc="status">{ghost ? bar(110, 12) : d.statusLabel}</span>
           {!ghost && d.stars ? <Stars n={d.stars} /> : null}
         </div>
         <div className="apc-head" data-apc="head">
-          <span className="apc-disc" aria-hidden="true">{ghost ? null : d.initials}</span>
+          <span className={`apc-disc${yourMove ? " cl252-yd" : ""}`} data-cl252={yourMove ? "yd" : undefined} aria-hidden="true">{ghost ? null : d.initials}</span>
           <div className="apc-who">
             {ghost ? <>{bar(150, 18)}{bar(110)}{bar(170)}</> : (
               <>

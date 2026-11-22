@@ -1,0 +1,167 @@
+[
+ {
+  "where": "long: population — a thread with messages",
+  "ok": true,
+  "detail": "[\"msg\",\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"msg\",\"wait\",\"msg\"]"
+ },
+ {
+  "where": "long: Queried sits right",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":255.21875,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"8 Jun\"}"
+ },
+ {
+  "where": "long: Queried has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "long: Partial Requested sits left",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Partial Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":222.671875,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"8 Jul\"}"
+ },
+ {
+  "where": "long: Partial Requested has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "long: Partial Sent sits right",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Partial Sent\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"28 Jul\"}"
+ },
+ {
+  "where": "long: Partial Sent has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "long: Full Requested sits left",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Full Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":226,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Sep\"}"
+ },
+ {
+  "where": "long: Full Requested has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "long: Full Sent sits right",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Full Sent\",\"kind\":\"\",\"label\":\"\",\"left\":258,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"16 Oct\"}"
+ },
+ {
+  "where": "long: Full Sent has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "long: the wait between 8 Jun and 8 Jul reads 30 days",
+  "ok": true,
+  "detail": "30 days"
+ },
+ {
+  "where": "long: the wait between 8 Jul and 28 Jul reads 20 days",
+  "ok": true,
+  "detail": "20 days"
+ },
+ {
+  "where": "long: the wait between 28 Jul and 6 Sep reads 40 days",
+  "ok": true,
+  "detail": "40 days"
+ },
+ {
+  "where": "long: the wait between 6 Sep and 16 Oct reads 40 days",
+  "ok": true,
+  "detail": "40 days"
+ },
+ {
+  "where": "long: no today divider, and the thread ends on a message",
+  "ok": true,
+  "detail": "[\"wait\",\"msg\"]"
+ },
+ {
+  "where": "long: opens scrolled to the bottom",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "materials: population — a thread with messages",
+  "ok": true,
+  "detail": "[\"msg\",\"wait\",\"msg\"]"
+ },
+ {
+  "where": "materials: Queried sits right",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":255.21875,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Oct\"}"
+ },
+ {
+  "where": "materials: Queried has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "materials: Partial Requested sits left",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Partial Requested\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":222.671875,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"1 Nov\"}"
+ },
+ {
+  "where": "materials: Partial Requested has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "materials: the wait between 6 Oct and 1 Nov reads 26 days",
+  "ok": true,
+  "detail": "26 days"
+ },
+ {
+  "where": "materials: no today divider, and the thread ends on a message",
+  "ok": true,
+  "detail": "[\"wait\",\"msg\"]"
+ },
+ {
+  "where": "materials: opens scrolled to the bottom",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "closed: population — a thread with messages",
+  "ok": true,
+  "detail": "[\"msg\",\"wait\",\"msg\"]"
+ },
+ {
+  "where": "closed: Queried sits right",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"me\",\"status\":\"Queried\",\"kind\":\"\",\"label\":\"\",\"left\":255.21875,\"right\":0,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"6 Sep\"}"
+ },
+ {
+  "where": "closed: Queried has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "closed: Rejected sits left",
+  "ok": true,
+  "detail": "{\"k\":\"msg\",\"side\":\"them\",\"status\":\"Rejected\",\"kind\":\"\",\"label\":\"\",\"left\":0,\"right\":226,\"disc\":{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"},\"date\":\"16 Oct\"}"
+ },
+ {
+  "where": "closed: Rejected has a 26px glyph box with no fill",
+  "ok": true,
+  "detail": "{\"w\":26,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "where": "closed: the wait between 6 Sep and 16 Oct reads 40 days",
+  "ok": true,
+  "detail": "40 days"
+ },
+ {
+  "where": "closed: no today divider, and the thread ends on a message",
+  "ok": true,
+  "detail": "[\"wait\",\"msg\"]"
+ },
+ {
+  "where": "closed: opens scrolled to the bottom",
+  "ok": true,
+  "detail": "0"
+ }
+]

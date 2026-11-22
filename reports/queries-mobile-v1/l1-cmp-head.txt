@@ -1,0 +1,9 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/queriesMobileV1.measure.ts:381:1 › QM1 · L1 desktop compare
+[measure] › tests/e2e/queriesMobileV1.measure.ts:381:1 › QM1 · L1 desktop compare
+L1 {"pixels":1360800,"diff":0,"domSame":true}
+
+  2 passed (17.8s)

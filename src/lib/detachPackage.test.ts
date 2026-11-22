@@ -150,7 +150,7 @@ describe("it is MOUNTED, in the menu that attaches", () => {
   });
 
   it("removal sits in the SAME menu as attach, not a second entry point (D1)", () => {
-    const menu = page.indexOf("packageMenuRow(canAttachPackages(currentUser)");
+    const menu = page.indexOf("packageMenuRow(canAttachPackages(entitlement)");
     expect(menu, "the attach row is gone").toBeGreaterThan(-1);
     const detach = page.indexOf("detachMenuRows(sentGroups)", menu);
     expect(detach, "the removal rows are not in the attach menu").toBeGreaterThan(menu);

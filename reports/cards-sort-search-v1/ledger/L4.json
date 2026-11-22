@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L4",
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "87 cards"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 · j rings the first card",
+  "ok": true,
+  "detail": "{\"i\":0,\"id\":\"thin-q-close\",\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 · j again moves to the next",
+  "ok": true,
+  "detail": "{\"i\":1,\"id\":\"msv12-q-1\",\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 · Enter opens that query",
+  "ok": true,
+  "detail": "msv12-q-1 vs msv12-q-1"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · population",
+  "ok": true,
+  "detail": "87 cards"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · j rings the first card",
+  "ok": true,
+  "detail": "{\"i\":0,\"id\":\"thin-q-close\",\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · j again moves to the next",
+  "ok": true,
+  "detail": "{\"i\":1,\"id\":\"msv12-q-1\",\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · Enter opens that query",
+  "ok": true,
+  "detail": "msv12-q-1 vs msv12-q-1"
+ }
+]

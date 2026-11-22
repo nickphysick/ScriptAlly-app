@@ -1,0 +1,122 @@
+[
+ {
+  "name": "send: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "send: paper rgb(251, 249, 245), and its button row",
+  "ok": true,
+  "got": "rgb(251, 249, 245) / rgb(251, 249, 245)"
+ },
+ {
+  "name": "send: the top shadow and the hairline",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)"
+ },
+ {
+  "name": "send: its box is the baseline's, 2px shorter for the 40px buttons (v164), within 1px",
+  "ok": true,
+  "got": "[0,442,524,242] → [0,444,524,240]"
+ },
+ {
+  "name": "nudge: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nudge: paper rgb(251, 249, 245), and its button row",
+  "ok": true,
+  "got": "rgb(251, 249, 245) / rgb(251, 249, 245)"
+ },
+ {
+  "name": "nudge: the top shadow and the hairline",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)"
+ },
+ {
+  "name": "nudge: its box is the baseline's, 2px shorter for the 40px buttons (v164), within 1px",
+  "ok": true,
+  "got": "[0,384,524,300] → [0,386,524,298]"
+ },
+ {
+  "name": "reply: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "reply: paper rgb(251, 249, 245), and its button row",
+  "ok": true,
+  "got": "rgb(251, 249, 245) / rgb(251, 249, 245)"
+ },
+ {
+  "name": "reply: the top shadow and the hairline",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)"
+ },
+ {
+  "name": "reply: its box grows with the tiles, under the drawer's cap (66% of the card)",
+  "ok": true,
+  "got": "[0,474,524,210] → [0,321,524,363]"
+ },
+ {
+  "name": "close: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "close: paper rgb(251, 249, 245), and its button row",
+  "ok": true,
+  "got": "rgb(251, 249, 245) / rgb(251, 249, 245)"
+ },
+ {
+  "name": "close: the top shadow and the hairline",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)"
+ },
+ {
+  "name": "close: its box is the baseline's, 2px shorter for the 40px buttons (v164), within 1px",
+  "ok": true,
+  "got": "[0,437,524,247] → [0,439,524,245]"
+ },
+ {
+  "name": "reopen: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "reopen: paper rgb(251, 249, 245), and its button row",
+  "ok": true,
+  "got": "rgb(251, 249, 245) / rgb(251, 249, 245)"
+ },
+ {
+  "name": "reopen: the top shadow and the hairline",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)"
+ },
+ {
+  "name": "reopen: its box is the baseline's, 2px shorter for the 40px buttons (v164), within 1px",
+  "ok": true,
+  "got": "[0,382,524,302] → [0,384,524,300]"
+ },
+ {
+  "name": "offer: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "offer: paper rgb(251, 249, 245), and its button row",
+  "ok": true,
+  "got": "rgb(251, 249, 245) / rgb(251, 249, 245)"
+ },
+ {
+  "name": "offer: the top shadow and the hairline",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.28) 0px -18px 30px -18px · rgb(230, 221, 208)"
+ },
+ {
+  "name": "offer: its box is the baseline's, 2px shorter for the 40px buttons (v164), within 1px",
+  "ok": true,
+  "got": "[0,214,524,470] → [0,216,524,468]"
+ }
+]

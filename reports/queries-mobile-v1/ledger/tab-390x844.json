@@ -1,0 +1,494 @@
+[
+ {
+  "lock": "pop",
+  "where": "390x844 the phone page renders",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 five chips",
+  "ok": true,
+  "detail": "{\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13,\"all\":52}"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 sent equals All",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 active equals All less Closed",
+  "ok": true,
+  "detail": "39 vs 39"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 the four sets sum to All",
+  "ok": true,
+  "detail": "{\"you\":16,\"agent\":6,\"quiet\":17,\"closed\":13,\"all\":52}"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 the tab bar's Queries item is chosen, navy",
+  "ok": true,
+  "detail": "{\"key\":\"queries\",\"bg\":\"rgb(42, 58, 82)\",\"badge\":\"16\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 the Queries badge is the Your-move count",
+  "ok": true,
+  "detail": "16 vs 16"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 you: the header line does not follow the chip",
+  "ok": true,
+  "detail": "{\"sent\":52,\"active\":39}"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 you: rows shown = the chip's count",
+  "ok": true,
+  "detail": "16 vs 16"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 you: every row belongs to the set",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 you: search and sort absent",
+  "ok": true,
+  "detail": "0/0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: no StatusDot in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: a late row says how late",
+  "ok": true,
+  "detail": "24 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: a late row says how late",
+  "ok": true,
+  "detail": "24 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: a late row says how late",
+  "ok": true,
+  "detail": "24 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: a late row says how late",
+  "ok": true,
+  "detail": "11 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: a late row says how late",
+  "ok": true,
+  "detail": "10 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: a late row says how late",
+  "ok": true,
+  "detail": "9 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 you: a late row says how late",
+  "ok": true,
+  "detail": "1 day late"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 you: navy and pink elements found",
+  "ok": true,
+  "detail": "{\"navy\":16,\"pink\":20}"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 you: text on navy is white, on pink is ink, no rust fill",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L11",
+  "where": "390x844 you: no image twice",
+  "ok": true,
+  "detail": "[\"/images/query-centre/desk-hawk.webp\",\"/images/qc/qc-list-flight.png\"]"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 agent: the header line does not follow the chip",
+  "ok": true,
+  "detail": "{\"sent\":52,\"active\":39}"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 agent: rows shown = the chip's count",
+  "ok": true,
+  "detail": "6 vs 6"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 agent: every row belongs to the set",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 agent: search and sort absent",
+  "ok": true,
+  "detail": "0/0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 agent: no StatusDot in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 agent: navy and pink elements found",
+  "ok": true,
+  "detail": "{\"navy\":8,\"pink\":8}"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 agent: text on navy is white, on pink is ink, no rust fill",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L11",
+  "where": "390x844 agent: no image twice",
+  "ok": true,
+  "detail": "[\"/images/query-centre/desk-hawk.webp\",\"/images/query-centre/waiting-hourglass.webp\"]"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 quiet: the header line does not follow the chip",
+  "ok": true,
+  "detail": "{\"sent\":52,\"active\":39}"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 quiet: rows shown = the chip's count",
+  "ok": true,
+  "detail": "17 vs 17"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 quiet: every row belongs to the set",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 quiet: search and sort absent",
+  "ok": true,
+  "detail": "0/0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: no StatusDot in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "300 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "300 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "240 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "150 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "79 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "60 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "50 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "46 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "45 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "42 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "40 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "39 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "37 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "35 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "30 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "29 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 quiet: a late row says how late",
+  "ok": true,
+  "detail": "28 days late"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 quiet: navy and pink elements found",
+  "ok": true,
+  "detail": "{\"navy\":19,\"pink\":19}"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 quiet: text on navy is white, on pink is ink, no rust fill",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L11",
+  "where": "390x844 quiet: no image twice",
+  "ok": true,
+  "detail": "[\"/images/query-centre/desk-hawk.webp\"]"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 closed: the header line does not follow the chip",
+  "ok": true,
+  "detail": "{\"sent\":52,\"active\":39}"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 closed: rows shown = the chip's count",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "L4",
+  "where": "390x844 closed: every row belongs to the set",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 closed: search and sort absent",
+  "ok": true,
+  "detail": "0/0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 closed: no StatusDot in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 closed: navy and pink elements found",
+  "ok": true,
+  "detail": "{\"navy\":2,\"pink\":2}"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 closed: text on navy is white, on pink is ink, no rust fill",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L11",
+  "where": "390x844 closed: no image twice",
+  "ok": true,
+  "detail": "[\"/images/query-centre/desk-hawk.webp\"]"
+ },
+ {
+  "lock": "L3",
+  "where": "390x844 all: the header line does not follow the chip",
+  "ok": true,
+  "detail": "{\"sent\":52,\"active\":39}"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 all: search and sort present",
+  "ok": true,
+  "detail": "1/1"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 all: no StatusDot in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 all: a late row says how late",
+  "ok": true,
+  "detail": "25 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 all: a late row says how late",
+  "ok": true,
+  "detail": "24 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 all: a late row says how late",
+  "ok": true,
+  "detail": "300 days late"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 all: a late row says how late",
+  "ok": true,
+  "detail": "300 days late"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 all: navy and pink elements found",
+  "ok": true,
+  "detail": "{\"navy\":8,\"pink\":8}"
+ },
+ {
+  "lock": "L2",
+  "where": "390x844 all: text on navy is white, on pink is ink, no rust fill",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L11",
+  "where": "390x844 all: no image twice",
+  "ok": true,
+  "detail": "[\"/images/query-centre/desk-hawk.webp\"]"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 Your move drew its top card",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 the fixture has a late row",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 All: four sections in order",
+  "ok": true,
+  "detail": "[{\"key\":\"you\",\"n\":16,\"tag\":\"DIV\"},{\"key\":\"agent\",\"n\":6,\"tag\":\"DIV\"},{\"key\":\"quiet\",\"n\":17,\"tag\":\"DIV\"},{\"key\":\"closed\",\"n\":13,\"tag\":\"BUTTON\"}]"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 All: the sections sum to sent",
+  "ok": true,
+  "detail": "52 vs 52"
+ },
+ {
+  "lock": "L5",
+  "where": "390x844 All: Closed is folded (one row, no list)",
+  "ok": true,
+  "detail": "BUTTON · 0"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 a left swipe exposes swipe-response",
+  "ok": true,
+  "detail": "{\"swipe\":\"left\",\"exposed\":true,\"w\":84,\"tries\":1}"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 swipe-response opens the resp journey",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 a left swipe exposes swipe-nudge",
+  "ok": true,
+  "detail": "{\"swipe\":\"left\",\"exposed\":true,\"w\":84,\"tries\":1}"
+ },
+ {
+  "lock": "L6",
+  "where": "390x844 swipe-nudge opens the nudge journey",
+  "ok": true,
+  "detail": "true"
+ }
+]

@@ -1,0 +1,109 @@
+== red-first: L1, L3–L7 against the stacked v41 build (8e8437f6, index-mbz5BdaC.js), 1512 ==
+  ✗ L1-1512 · retired: [data-pk41="list"] — 1 in the DOM
+  ✗ L1-1512 · retired: [data-pk41="list-bar"] — 1 in the DOM
+  ✗ L1-1512 · retired: [data-pk41-tab] — 4 in the DOM
+[L1-1512] 15/18 green
+  ✗ L3-1512 · exactly one navy panel above the results — ["header","list-bar","p93-bh"]
+  ✗ L3-1512 · the rail head is not navy — null
+  ✗ L3-1512 · the builder band is not navy — rgb(45, 58, 80)
+[L3-1512] 6/9 green
+  ✗ L6-1512 · pk40-std: the stripe is its colour, 5px — none
+  ✗ L6-1512 · pk40-std: the band is an 11% wash of it — rgb(45, 58, 80) / color(srgb 0.927961 0.91502 0.928824)
+  ✗ L6-1512 · pk40-ready: the stripe is its colour, 5px — none
+  ✗ L6-1512 · pk40-ready: the band is an 11% wash of it — rgb(45, 58, 80) / color(srgb 0.909843 0.927098 0.918039)
+[L6-1512] 27/31 green
+  ✗ L7-1512 · the preview is under the steps — preview top 336.796875 / last step bottom 693.359375
+[L7-1512] 6/7 green
+    Error: expect(received).toEqual(expected) // deep equality
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    Error: expect(received).toEqual(expected) // deep equality
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    Error: locator.getAttribute: Test timeout of 300000ms exceeded.
+      225 |     await page.locator(`${pg} [data-pk41-row="pk40-draft"]`).click(); await page.waitForTimeout(500);
+      226 |     await page.locator(`${pg} [data-pk41="batch-open"]`).click(); await page.waitForTimeout(800);
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+    Error: expect(received).toEqual(expected) // deep equality
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    Error: expect(received).toEqual(expected) // deep equality
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  6 failed
+  1 passed (6.6m)
+== mutation L1 on the final build (a767eb92d), 1512 ==
+  ✗ L1-1512 · ground: the gradient — none
+  ✗ L1-1512 · ground: the pattern over it — none
+[L1-1512] 16/18 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (31.9s)
+== mutation L2 on the final build (a767eb92d), 1512 ==
+  ✗ L2-1512 · folder tab takes the strip's colour — rgb(251, 249, 245)
+  ✗ L2-1512 · its curved foot too — rgb(251, 249, 245)
+[L2-1512] 13/15 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (43.7s)
+== mutation L3 on the final build (a767eb92d), 1512 ==
+  ✗ L3-1512 · exactly one navy panel above the results — ["header","rail-head"]
+  ✗ L3-1512 · the rail head is not navy — rgb(45, 58, 80)
+[L3-1512] 7/9 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (32.4s)
+== mutation L4 on the final build (a767eb92d), 1512 ==
+  ✗ L4-1512 · flush left ±1 — 30
+  ✗ L4-1512 · flush right ±1 — 22
+[L4-1512] 13/15 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (43.0s)
+== mutation L5 on the final build (a767eb92d), 1512 ==
+  ✗ L5-1512 · width 300 ±2 — 340
+  ✗ L5-1512 · pk40-std: a 3px left edge in its colour — 3px rgb(45, 58, 80)
+  ✗ L5-1512 · pk40-ready: a 3px left edge in its colour — 3px rgb(45, 58, 80)
+  ✗ L5-1512 · after scrolling 600: the rail is at the scroller's top (14 ±1) — -327.875
+[L5-1512] 22/26 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (43.0s)
+== mutation L6 on the final build (a767eb92d), 1512 ==
+  ✗ L6-1512 · builder: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · totals: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · best: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · most: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · prove: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · tpk: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · tpc: a 7 ±1 white rim — 0,0,0,0 rgb(255, 255, 255)
+  ✗ L6-1512 · pk40-std: the stripe is its colour, 5px — rgb(45, 58, 80) 0px 5px 0px 0px inset
+  ✗ L6-1512 · pk40-ready: the stripe is its colour, 5px — rgb(45, 58, 80) 0px 5px 0px 0px inset
+[L6-1512] 22/31 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    Error: Command failed: node tests/e2e/pk41Fixture.mjs --show-banner
+    FirebaseError: Firebase: Exceeded quota for verifying passwords. (auth/quota-exceeded).
+      code: 'auth/quota-exceeded',
+== mutation L7 on the final build (a767eb92d), 1512 ==
+    Error: expect(locator).toHaveCount(expected) failed
+  1 failed
+== mutation L8 on the final build (a767eb92d), 1512 ==
+  ✗ L8-1512 · 212 ±2 tall — 260
+  ✗ L8-1512 · clear of the content column — left 1181.640625 / content right 1354
+  ✗ L8-1512 · overlaps no element in the content column — ["p41-ws","p41-build","p41-fr p41-bld","p41-fi","p93-b"]
+  ✗ L8-1512 · after scrolling 600: overlaps nothing — ["p41-ws","p41-build","p41-fr p41-bld","p41-fi","p93-b"]
+[L8-1512] 6/10 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (31.9s)
+== mutation L9 on the final build (a767eb92d), 1512 ==
+  ✗ L9-1512 · five steps with the exact titles — ["Make a package","Drag them into the package","Set your current batch","Log a query with it","See what’s working"]
+  ✗ L9-1512 · no “Drag them into the package” — still there
+[L9-1512] 4/6 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (33.7s)
+== mutation L7 on the final build (a767eb92d), 1512 — rerun after the sign-in quota ==
+  ✗ L7-1512 · the preview is under the steps — preview top 590.5625 / last step bottom 947.125
+  ✗ L7-1512 · “Make a copy” inside the preview well — 1171.109375–1392 in 991–1322
+  ✗ L7-1512 · “Log a query with it” inside the preview well — 1400–1624.6875 in 991–1322
+[L7-1512] 4/7 green
+      53 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+  1 failed
+  1 passed (33.3s)

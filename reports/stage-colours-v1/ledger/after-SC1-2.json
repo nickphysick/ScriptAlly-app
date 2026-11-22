@@ -1,0 +1,7 @@
+[
+ {
+  "name": "Offer: band rgb(239, 205, 201) under the sheen at 260% 100%",
+  "ok": true,
+  "got": "{\"image\":\"linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%), none\",\"size\":\"260% 100%, auto\",\"color\":\"rgb(239, 205, 201)\"}"
+ }
+]

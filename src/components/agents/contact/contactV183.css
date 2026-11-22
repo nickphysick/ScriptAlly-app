@@ -10,7 +10,7 @@
 .cl17-hd .cl17-acts .cl183-fill { display: inline-flex; align-items: center; gap: 8px; }
 .cl17-hd .cl17-acts .cl183-fill .cl183-fn {
   display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 24px; height: 24px; padding: 0 7px;
-  border-radius: 12px; background: #fbeee8; color: #a2452a; font: 400 12.5px/1 var(--sp-type) !important;
+  border-radius: 12px; background: #fbeee8; color: var(--sp-rust); font: 400 12.5px/1 var(--sp-type) !important;
 }
 
 /* §B.3 · the ring reads as a percentage: the number at 33, "%" at 15 raised 7, at 85% */
@@ -52,7 +52,7 @@
   background: transparent; border: 0; box-shadow: none;
 }
 .cl1833-pk .cl1833-it .cl183-pd {
-  flex: none; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #eef1f6; color: #2d3a50;
+  flex: none; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #eef1f6; color: var(--sp-anthracite);
 }
 .cl1833-pk .cl1833-it .cl183-pd svg { width: 15px; height: 15px; }
 .cl1833-pk .cl1833-it .cl183-pt {
@@ -62,18 +62,18 @@
 .cl1833-pk > .cl1833-it[data-k="email"] { grid-column: 1; margin-left: calc((var(--cl1833-av) - 30px) / 2); gap: calc(var(--cl1833-av) / 2 - 4px); }
 /* the website: What they want, underlined, the 13px navy arrow */
 .cl1833-pk > .cl1833-it[data-k="website"] { grid-column: 2; }
-.cl1833-pk > .cl1833-it[data-k="website"] .cl183-dom { text-decoration: underline; text-decoration-color: rgba(45, 58, 80, 0.35); text-underline-offset: 3px; }
-.cl1833-pk > .cl1833-it[data-k="website"]:hover .cl183-dom { text-decoration-color: #2d3a50; }
-.cl1833-pk .cl183-ext { flex: none; margin-left: -4px; font: 400 13px/1 var(--sp-serif) !important; color: #2d3a50; }
+.cl1833-pk > .cl1833-it[data-k="website"] .cl183-dom { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 3px; }
+.cl1833-pk > .cl1833-it[data-k="website"]:hover .cl183-dom { text-decoration-color: var(--sp-anthracite); }
+.cl1833-pk .cl183-ext { flex: none; margin-left: -4px; font: 400 13px/1 var(--sp-serif) !important; color: var(--sp-anthracite); }
 /* Replies to Query status: the social handle, then the next step on the status cell's right edge, 24px apart */
 .cl1833-pk > .cl1833-tail { grid-column: 3 / -1; display: flex; align-items: center; column-gap: 24px; min-width: 0; }
 .cl1833-pk > .cl1833-tail > .cl1833-it { flex: 0 1 auto; }
 .cl1833-pk > .cl1833-tail > :not(.cl1833-it) { flex: none; margin-left: auto; }
 /* a missing detail */
 .cl1833-pk .cl1833-it.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); color: rgba(28, 19, 15, 0.38); }
-.cl1833-pk .cl1833-it.is-add .cl183-pt { font-style: italic !important; color: rgba(28, 19, 15, 0.48); }
-.cl1833-pk .cl1833-it.is-add:hover .cl183-pt { color: #2d3a50; text-decoration: underline; text-underline-offset: 3px; }
-.cl1833-pk .cl1833-it:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; border-radius: 15px; }
+.cl1833-pk .cl1833-it.is-add .cl183-pt { font-style: italic !important; color: var(--sp-quiet); }
+.cl1833-pk .cl1833-it.is-add:hover .cl183-pt { color: var(--sp-anthracite); text-decoration: underline; text-underline-offset: 3px; }
+.cl1833-pk .cl1833-it:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 15px; }
 /* §C — the email is the copy button: hover/focus turns the disc navy with a cream copy glyph and underlines the address;
    a copy reads "Copied" in green for 1400ms */
 .cl1833-pk .cl1833-em { cursor: pointer; }
@@ -81,8 +81,8 @@
 .cl1833-pk .cl1833-em .cl1833-ic { display: inline-flex; }
 .cl1833-pk .cl1833-em .cl1833-cp, .cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl1833-ic:not(.cl1833-cp) { display: none; }
 .cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl1833-cp { display: inline-flex; }
-.cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl183-pd { background: #2d3a50; color: #fdfaf5; }
-.cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl183-pt { text-decoration: underline; text-decoration-color: rgba(45, 58, 80, 0.35); text-underline-offset: 3px; }
+.cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl183-pd { background: var(--sp-anthracite); color: #fdfaf5; }
+.cl1833-pk .cl1833-em:is(:hover, :focus-visible) .cl183-pt { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 3px; }
 .cl1833-pk .cl1833-em[data-done] .cl183-pd { background: #e3efe7; color: #2f6b4f; }
 .cl1833-pk .cl1833-em[data-done] .cl183-pt { font-style: italic !important; color: #2f6b4f; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) { .cl1833-pk .cl1833-em .cl183-pd { transition: none; } }

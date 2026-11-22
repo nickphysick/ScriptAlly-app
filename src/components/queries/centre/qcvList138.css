@@ -50,7 +50,7 @@
   /* ── the navy top row ── */
   .qc138-sheet .qc138-top {
     position: relative; display: flex; align-items: center; gap: 18px; box-sizing: border-box; min-height: 76px;
-    padding: 20px 22px 20px 24px; background: #2d3a50; border-radius: 20px 20px 0 0; color: #f4eee5;
+    padding: 20px 22px 20px 24px; background: var(--sp-anthracite); border-radius: 20px 20px 0 0; color: #f4eee5;
   }
   .qc138-sheet .qc138-top .qc138-say {
     position: relative; flex: 1 1 auto; min-width: 0; margin: 0; font: 400 17px/1.3 var(--sp-type) !important; color: #f4eee5;
@@ -66,7 +66,7 @@
     margin-left: 14px; padding: 0; border: 0; background: none; cursor: pointer; color: #e7a184;
     font: italic 400 15px/1.2 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px;
   }
-  .qc138-sheet .qc138-say button:focus-visible, .qc138-sheet .qc138-tools button:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
+  .qc138-sheet .qc138-say button:focus-visible, .qc138-sheet .qc138-tools button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
   .qc138-sheet .qc138-gmenu {
     position: absolute; left: 0; top: calc(100% + 12px); z-index: 20; display: flex; flex-direction: column; min-width: 220px; padding: 6px;
     border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 40px -20px rgba(28, 19, 15, 0.45);
@@ -90,7 +90,7 @@
     flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 5px;
     border: 1px solid rgba(244, 238, 229, 0.3); border-radius: 5px; font: 400 11px/1 var(--font-mono) !important; color: rgba(244, 238, 229, 0.6);
   }
-  .qc138-sheet .qc138-tsearch:focus-within { width: 360px; background: #f4eee5; box-shadow: none; color: #2d3a50; }
+  .qc138-sheet .qc138-tsearch:focus-within { width: 360px; background: #f4eee5; box-shadow: none; color: var(--sp-anthracite); }
   /* v138.5 §E — the Filters button: an outlined cream pill, 44 tall, after the search. Open: cream with ink text.
      A rust badge counts the filter groups set. */
   .qc138-sheet .qc138-fb {
@@ -106,7 +106,7 @@
     display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 20px; height: 20px; padding: 0 6px;
     border-radius: 10px; background: #b0603e; color: #fff; font: 500 11px/1 var(--font-mono) !important;
   }
-  .qc138-sheet .qc138-fb:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
+  .qc138-sheet .qc138-fb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
   .qc138-sheet .qc138-fb:disabled { cursor: default; opacity: 0.6; }
   /* the compact sheet (the column grid's own 1180 line, read off the same container): 220 at rest, 260 focused */
   @container qc138sheet (max-width: 1179.98px) {
@@ -124,7 +124,7 @@
     background: none; color: rgba(244, 238, 229, 0.75); cursor: pointer;
   }
   .qc138-sheet .qc138-dens button svg { width: 16px; height: 16px; }
-  .qc138-sheet .qc138-dens button[aria-pressed="true"] { background: #fff; color: #2d3a50; box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.35); }
+  .qc138-sheet .qc138-dens button[aria-pressed="true"] { background: #fff; color: var(--sp-anthracite); box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.35); }
   /* v138.6 §A — the pin is the shared PinListButton (shell/pinListButton.css) */
 
   /* ── the headings: one grid with the rows, sticky under the pinned row ── */
@@ -132,24 +132,24 @@
     position: sticky; top: var(--qc138-pin-h); z-index: 8;
     display: grid; grid-template-columns: var(--qc138-cols); column-gap: var(--qc138-gap); align-items: center;
     box-sizing: border-box; height: var(--qc138-heads-h, 40px); padding: 12px 40px 13px;
-    background: #e9edf3; border-bottom: 1.5px solid rgba(45, 58, 80, 0.28);
+    background: #e9edf3; border-bottom: 1.5px solid rgba(42, 58, 82, 0.28);
   }
   .qc138-sheet .qc138-h { min-width: 0; }
   .qc138-sheet .qc138-h button {
     display: inline-flex; align-items: center; gap: 6px; padding: 0; margin: 0; border: 0; background: none; cursor: pointer;
-    font: 600 10.5px/1.3 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(45, 58, 80, 0.62); white-space: nowrap;
+    font: 600 10.5px/1.3 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(42, 58, 82, 0.62); white-space: nowrap;
   }
   /* a heading may run into its 20px gap rather than truncate: in the narrow grid "First queried" is 101px over a
      92px track (the mock's 1280 has no app sidebar, so its sheet keeps the wide grid) */
   .qc138-sheet .qc138-h button span { font: inherit !important; }
   .qc138-sheet .qc138-h button { position: relative; }
-  .qc138-sheet .qc138-h button i { font-style: normal; color: #a2452a; opacity: 0; }
+  .qc138-sheet .qc138-h button i { font-style: normal; color: var(--sp-rust); opacity: 0; }
   /* an unsorted heading's arrow takes no room: it shows faintly past the label on hover */
   .qc138-sheet .qc138-h:not(.on) button i { position: absolute; left: 100%; margin-left: 4px; }
-  .qc138-sheet .qc138-h.on button { color: #2d3a50; }
+  .qc138-sheet .qc138-h.on button { color: var(--sp-anthracite); }
   .qc138-sheet .qc138-h.on button i { opacity: 1; }
-  .qc138-sheet .qc138-h:not(.on) button:hover i { opacity: 0.35; color: rgba(45, 58, 80, 0.62); }
-  .qc138-sheet .qc138-h button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; border-radius: 3px; }
+  .qc138-sheet .qc138-h:not(.on) button:hover i { opacity: 0.35; color: rgba(42, 58, 82, 0.62); }
+  .qc138-sheet .qc138-h button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
   .qc138-sheet .qc138-h[data-k="agent"] { padding-left: var(--qc138-ind); }
   .qc138-sheet .qc138-h[data-k="due"] { text-align: right; }
   .qc138-sheet .qc138-h[data-k="due"] button { flex-direction: row; }
@@ -170,7 +170,7 @@
   .qc138-sheet[data-density="compact"] .qc138-grp:first-child .qc138-band { margin-top: 10px; }
   .qc138-sheet[data-density="compact"] .qc138-gart { width: 26px; height: 26px; }
   .qc138-sheet[data-density="compact"] .qc138-band .qc138-gt { font-size: 17px !important; }
-  .qc138-sheet .qc138-band--you { --qc138-bg: #f6e2d8; --qc138-c: #a2452a; }
+  .qc138-sheet .qc138-band--you { --qc138-bg: #f6e2d8; --qc138-c: var(--sp-rust); }
   .qc138-sheet .qc138-band--waiting { --qc138-bg: #e2e7ef; --qc138-c: #3d5070; }
   .qc138-sheet .qc138-band--closed { --qc138-bg: #ece8e3; --qc138-c: #7c7168; }
   .qc138-sheet .qc138-gart { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: var(--qc138-c); }
@@ -183,7 +183,7 @@
   .qc138-sheet .qc138-band .qc138-gh { margin-left: auto; font: 500 10px/1 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--qc138-c); }
   .qc138-sheet .qc138-chev { font-size: 11px; color: var(--qc138-c); transition: transform 0.2s; }
   .qc138-sheet .qc138-grp.shut .qc138-chev { transform: rotate(-90deg); }
-  .qc138-sheet .qc138-band:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+  .qc138-sheet .qc138-band:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* ── the rows ── */
   .qc138-sheet .qc138-row {
@@ -191,16 +191,16 @@
     padding: 16px 22px; border-bottom: 1px solid rgba(28, 19, 15, 0.07); cursor: pointer;
   }
   .qc138-sheet .qc138-row:last-child { border-bottom: 0; }
-  .qc138-sheet .qc138-row:focus-visible { outline: none; box-shadow: inset 3px 0 0 #2d3a50; background: #f6f9fc; }
-  .qc138-sheet .qc138-row.kf { box-shadow: inset 3px 0 0 #2d3a50; }
+  .qc138-sheet .qc138-row:focus-visible { outline: none; box-shadow: inset 3px 0 0 var(--sp-anthracite); background: #f6f9fc; }
+  .qc138-sheet .qc138-row.kf { box-shadow: inset 3px 0 0 var(--sp-anthracite); }
   .qc138-sheet .qc138-ag { display: flex; align-items: center; gap: 12px; min-width: 0; }
   /* the circle is AgentDisc's (shared/agentDisc.css); this sheet only scales it on hover (Part F) */
   .qc138-sheet .qc138-agt { display: block; min-width: 0; }
   .qc138-sheet .qc138-agt b { display: block; font: 600 17px/1.3 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .qc138-sheet .qc138-agt small { display: block; font: italic 400 14px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc138-sheet .qc138-agt small { display: block; font: italic 400 14px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-fq { min-width: 0; }
   .qc138-sheet .qc138-fqd { display: block; font: 400 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; }
-  .qc138-sheet .qc138-fqn { display: block; margin-top: 2px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+  .qc138-sheet .qc138-fqn { display: block; margin-top: 2px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; }
   /* the track: four 9px dots 15 apart, joined by 11×2 lines */
   .qc138-sheet .qc138-trk { display: flex; align-items: center; gap: 0; margin-top: 6px; height: 12px; }
   .qc138-sheet .qc138-trk .qc138-td { display: block; flex: none; box-sizing: border-box; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.32); }
@@ -219,18 +219,16 @@
   .qc138-sheet .qc138-dial.you .qc138-dial-tr { stroke: rgba(176, 96, 62, 0.18); }
   .qc138-sheet .qc138-dial.you .qc138-dial-arc { stroke: #b0603e; }
   .qc138-sheet .qc138-dial .qc138-dial-d { position: relative; display: block; font: 400 19px/1 var(--sp-type) !important; color: #1c130f; }
-  .qc138-sheet .qc138-dial .qc138-dial-m { position: relative; display: block; margin-top: 3px; font: 600 7.5px/1 var(--font-mono) !important; font-style: normal; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+  .qc138-sheet .qc138-dial .qc138-dial-m { position: relative; display: block; margin-top: 3px; font: 600 7.5px/1 var(--font-mono) !important; font-style: normal; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
   /* v138.1 §E — overdue: a complete rust ring on white, the day in rust, and a soft halo that breathes */
   .qc138-sheet .qc138-dial.over { background: #fff; animation: qc138-breathe 2.4s ease-in-out infinite; }
   .qc138-sheet .qc138-dial.over .qc138-dial-tr { stroke: rgba(162, 69, 42, 0.18); }
-  .qc138-sheet .qc138-dial.over .qc138-dial-arc { stroke: #a2452a; }
-  .qc138-sheet .qc138-dial.over .qc138-dial-d { color: #a2452a; }
-  .qc138-sheet .qc138-dial.over .qc138-dial-m { color: rgba(162, 69, 42, 0.75); }
+  .qc138-sheet .qc138-dial.over .qc138-dial-arc { stroke: var(--sp-rust); }
   .qc138-sheet .qc138-st { min-width: 0; }
   .qc138-sheet .qc138-ws1 { display: flex; align-items: center; gap: 8px; font: 400 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; }
   .qc138-sheet .qc138-ws1 > span { font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
-  .qc138-sheet .qc138-sub { margin-top: 3px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .qc138-sheet .qc138-sub.hot { font-style: normal !important; font-weight: 600 !important; color: #a2452a; }
+  .qc138-sheet .qc138-sub { margin-top: 3px; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc138-sheet .qc138-sub.hot { font-style: normal !important; font-weight: 600 !important; color: var(--sp-rust); }
   /* v138.5 §F — what you sent, on two lines like the other columns: the package chip (26 tall, as wide as its name
      up to the column, ending in "…" with the full name in its tooltip), then 5 under it the material icons (20px
      squares, radius 5, 12px icons, 4 apart). No package: no chip, and the icons sit on line 1. */
@@ -243,15 +241,15 @@
   .qc138-sheet .qc138-pkg span { min-width: 0; font: inherit !important; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-pkg svg { flex: none; width: 14px; height: 14px; }
   .qc138-sheet .qc138-pkg--on { background: #f6e2d8; color: #8a4a2e; }
-  .qc138-sheet .qc138-pkg--add { color: rgba(28, 19, 15, 0.45); outline: 1.5px dashed rgba(28, 19, 15, 0.25); outline-offset: -1.5px; }
-  .qc138-sheet .qc138-pkg--add:hover, .qc138-sheet .qc138-pkg--add:focus-visible { color: #2a3a52; outline-color: #2a3a52; }
+  .qc138-sheet .qc138-pkg--add { color: var(--sp-quiet); outline: 1.5px dashed rgba(28, 19, 15, 0.25); outline-offset: -1.5px; }
+  .qc138-sheet .qc138-pkg--add:hover, .qc138-sheet .qc138-pkg--add:focus-visible { color: #2a3a52; outline-color: var(--sp-anthracite); }
   .qc138-sheet .qc138-tile {
     flex: none; display: grid; place-items: center; box-sizing: border-box; width: 20px; height: 20px; border-radius: 5px;
     color: rgba(28, 19, 15, 0.2); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);
   }
   .qc138-sheet .qc138-tile.on { color: #2a3a52; background: #f4f1ec; box-shadow: none; }
   .qc138-sheet .qc138-tile svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .qc138-sheet .qc138-tile:focus-visible { outline: 2px solid #2d3a50; outline-offset: 1px; }
+  .qc138-sheet .qc138-tile:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   /* next move: a subgrid over the last two tracks — the action in track 5, the due figure in track 6 */
   .qc138-sheet .qc138-nx {
     position: relative; grid-column: -3 / -1; display: grid; grid-template-columns: subgrid; align-items: center; min-width: 0;
@@ -259,9 +257,9 @@
   .qc138-sheet .qc138-nxm { min-width: 0; transition: opacity 0.15s; }
   .qc138-sheet .qc138-nxt { font: 400 16px/1.3 var(--sp-type) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-due { justify-self: end; text-align: right; min-width: 0; transition: opacity 0.15s; }
-  .qc138-sheet .qc138-dt { font: 400 14px/1.2 var(--sp-serif) !important; font-variant-numeric: tabular-nums; color: rgba(28, 19, 15, 0.7); white-space: nowrap; }
+  .qc138-sheet .qc138-dt { font: 400 14px/1.2 var(--sp-serif) !important; font-variant-numeric: tabular-nums; color: var(--sp-muted); white-space: nowrap; }
   .qc138-sheet .qc138-due[data-tone="soon"] .qc138-dt { color: #b0603e; }
-  .qc138-sheet .qc138-due[data-tone="over"] .qc138-dt { color: #a2452a; font-weight: 600 !important; }
+  .qc138-sheet .qc138-due[data-tone="over"] .qc138-dt { color: var(--sp-rust); font-weight: 600 !important; }
   /* the hover tray: at the cell's right; the due figure fades out under it */
   .qc138-sheet .qc138-tray { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 6px; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
   .qc138-sheet .qc138-row:hover .qc138-tray, .qc138-sheet .qc138-row:focus-within .qc138-tray, .qc138-sheet .qc138-row.kf .qc138-tray { opacity: 1; pointer-events: auto; }
@@ -354,8 +352,8 @@
   .qc138-sheet .qc138-t4b { position: absolute; top: var(--qc138-ty); height: 6px; translate: 0 -50%; border-radius: 3px; background: #c6ccd6; }
   .qc138-sheet .qc138-t4k { position: absolute; top: calc(var(--qc138-ty) + 7px); width: 1px; height: 4px; background: rgba(42, 58, 82, 0.28); }
   .qc138-sheet .qc138-t4a { position: absolute; top: calc(var(--qc138-ty) + 14px); translate: -50% 0; white-space: nowrap; font: 400 10.5px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.38); }
-  .qc138-sheet .qc138-t4a.yr { color: rgba(28, 19, 15, 0.6); font-weight: 600 !important; }
-  .qc138-sheet .qc138-t4d { position: absolute; top: calc(var(--qc138-ty) - 22px); translate: -50% -50%; white-space: nowrap; font: 400 11.5px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.45); }
+  .qc138-sheet .qc138-t4a.yr { color: var(--sp-quiet); font-weight: 600 !important; }
+  .qc138-sheet .qc138-t4d { position: absolute; top: calc(var(--qc138-ty) - 22px); translate: -50% -50%; white-space: nowrap; font: 400 11.5px/1.2 var(--sp-serif) !important; color: var(--sp-quiet); }
   .qc138-sheet .qc138-mk { position: absolute; top: var(--qc138-ty); z-index: 2; display: grid; place-items: center; width: 0; height: 0; translate: 0 0; }
   .qc138-sheet .qc138-mk > * { flex: none; }
   .qc138-sheet .qc138-mk-svg { display: block; width: 22px; height: 22px; margin: -11px; color: #1c130f; border-radius: 50%; background: var(--qc138-pkbg, #fff); box-shadow: 0 0 0 2.5px var(--qc138-pkbg, #fff); }
@@ -367,8 +365,8 @@
   .qc138-sheet .qc138-t4l.c { align-items: center; text-align: center; }
   .qc138-sheet .qc138-t4l.r { align-items: flex-end; text-align: right; }
   .qc138-sheet .qc138-t4l b { font: 600 12.5px/1.25 var(--sp-serif) !important; color: #1c130f; }
-  .qc138-sheet .qc138-t4l small { font: italic 400 12px/1.25 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
-  .qc138-sheet .qc138-t4n { font: 500 9.5px/1.25 var(--font-mono) !important; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+  .qc138-sheet .qc138-t4l small { font: italic 400 12px/1.25 var(--sp-serif) !important; color: var(--sp-quiet); }
+  .qc138-sheet .qc138-t4n { font: 500 9.5px/1.25 var(--font-mono) !important; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sp-quiet); }
 }
 @keyframes qc138-pop { 0% { transform: scale(0.3); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
 @keyframes qc138-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
@@ -381,7 +379,7 @@
 /* ── §G · SELECT SEVERAL ── */
 @media (min-width: 768px) {
   .qc138-sheet .qc138-pick { position: relative; flex: none; display: inline-grid; place-items: center; padding: 0; margin: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
-  .qc138-sheet .qc138-pick:focus-visible { outline: 2px solid #2d3a50; outline-offset: 3px; }
+  .qc138-sheet .qc138-pick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   /* hovering the circle itself (never the rest of the row) shows a tick box over it */
   .qc138-sheet .qc138-pickbox {
     position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.35);
@@ -406,7 +404,7 @@
   .qc138-bulk .qc138-bulk-p { background: #f4eee5; color: #1c130f; }
   .qc138-bulk .qc138-bulk-p:hover { background: #fff; }
   .qc138-bulk .qc138-bulk-x { display: grid; place-items: center; width: 36px; padding: 0; border-radius: 50%; }
-  .qc138-bulk button:focus-visible { outline: 2px solid #e7a184; outline-offset: 2px; }
+  .qc138-bulk button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 }
 @keyframes qc138-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .qc138-bulk { animation: none; } .qc138-sheet .qc138-pickbox { transition: none; } }
@@ -424,7 +422,7 @@
 @media (min-width: 768px) {
   /* v138.3 §D — OUTLINE + WASH replaces v138.2's full tint: a faint wash, a 1px outline in the state's colour, then
      Lift's shadow; the rule between the row and its drawer is solid (§D below) */
-  .qc138-sheet .qc138-row.qc138-row[data-peek="wait"] { background: #f9fafc; box-shadow: 0 0 0 1px rgba(45, 58, 80, 0.45), 0 14px 28px -18px rgba(28, 19, 15, 0.45); --qc138-pkbg: #f9fafc; }
+  .qc138-sheet .qc138-row.qc138-row[data-peek="wait"] { background: #f9fafc; box-shadow: 0 0 0 1px rgba(42, 58, 82, 0.45), 0 14px 28px -18px rgba(28, 19, 15, 0.45); --qc138-pkbg: #f9fafc; }
   .qc138-sheet .qc138-row.qc138-row[data-peek="over"] { background: #fdf8f5; box-shadow: 0 0 0 1px rgba(162, 69, 42, 0.5), 0 14px 28px -18px rgba(28, 19, 15, 0.45); --qc138-pkbg: #fdf8f5; }
   .qc138-sheet .qc138-row.qc138-row[data-peek="closed"] { background: #faf9f7; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.2), 0 14px 28px -18px rgba(28, 19, 15, 0.45); --qc138-pkbg: #faf9f7; }
   .qc138-sheet .qc138-peekw, .qc138-sheet .qc138-peeki { background: none; }
@@ -452,14 +450,14 @@
   .qc138-sheet .qc138-sumc { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
   .qc138-sheet .qc138-sum-h, .qc138-sheet .qc138-sum-l { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc138-sheet .qc138-sum-h { font: 400 18px/1.3 var(--sp-type) !important; color: #1c130f; }
-  .qc138-sheet .qc138-sum-l { font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); }
-  .qc138-sheet .qc138-sum-l.hot { font: normal 600 13.5px/1.35 var(--sp-serif) !important; color: #a2452a; }
+  .qc138-sheet .qc138-sum-l { font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: var(--sp-muted); }
+  .qc138-sheet .qc138-sum-l.hot { font: normal 600 13.5px/1.35 var(--sp-serif) !important; color: var(--sp-rust); }
   .qc138-sheet .qc138-sum-a {
-    margin-top: 3px; font: 400 13px/1.35 var(--sp-serif) !important; color: #2d3a50; white-space: nowrap; /* + the 3px gap = 6 */
-    text-decoration: underline 1px rgba(45, 58, 80, 0.35); text-underline-offset: 3px;
+    margin-top: 3px; font: 400 13px/1.35 var(--sp-serif) !important; color: var(--sp-anthracite); white-space: nowrap; /* + the 3px gap = 6 */
+    text-decoration: underline 1px rgba(42, 58, 82, 0.35); text-underline-offset: 3px;
   }
-  .qc138-sheet .qc138-sum-a:hover { text-decoration-color: #2d3a50; }
-  .qc138-sheet .qc138-sum-a:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; border-radius: 2px; }
+  .qc138-sheet .qc138-sum-a:hover { text-decoration-color: var(--sp-anthracite); }
+  .qc138-sheet .qc138-sum-a:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
   .qc138-sheet .qc138-sum-a[hidden] { display: none; }
 }
 
@@ -549,13 +547,13 @@
   .qc138-sheet .qc138-t4b.past { height: 6px; border-radius: 3px; background: #c6ccd6; }
   .qc138-sheet .qc138-t4b.live.agt { height: 8px; border-radius: 4px; background: #3d5070; }
   .qc138-sheet .qc138-t4b.live.you { height: 8px; border-radius: 4px; background: #b0603e; }
-  .qc138-sheet .qc138-t4b.over { height: 8px; border-radius: 4px; background: repeating-linear-gradient(135deg, #c86a4a 0 3px, #fbe3d6 3px 7px); box-shadow: inset 0 0 0 1.5px #a2452a; }
+  .qc138-sheet .qc138-t4b.over { height: 8px; border-radius: 4px; background: repeating-linear-gradient(135deg, #c86a4a 0 3px, #fbe3d6 3px 7px); box-shadow: inset 0 0 0 1.5px var(--sp-rust); }
   .qc138-sheet .qc138-t4b.ahead { height: 2px; border-radius: 0; background: repeating-linear-gradient(90deg, #c6ccd6 0 5px, transparent 5px 9px); }
   .qc138-sheet .qc138-mk.past .qc138-mk-svg { color: #5d6878; }
   .qc138-sheet .qc138-mk.last .qc138-mk-svg { color: #1c130f; }
   .qc138-sheet .qc138-mk--due .qc138-mk-dot { width: 16px; height: 16px; margin: -8px; background: #fff; box-shadow: inset 0 0 0 2.5px #2a3a52, 0 0 0 2.5px var(--qc138-pkbg, #fff); }
-  .qc138-sheet .qc138-mk--wasdue .qc138-mk-dot { width: 14px; height: 14px; margin: -7px; background: #a2452a; }
-  .qc138-sheet .qc138-mk-tick { background: #a2452a; }
+  .qc138-sheet .qc138-mk--wasdue .qc138-mk-dot { width: 14px; height: 14px; margin: -7px; background: var(--sp-rust); }
+  .qc138-sheet .qc138-mk-tick { background: var(--sp-rust); }
 }
 
 /* ── v138.4 §C · TWO LABEL LANES ────────────────────────────────────────────────────────────────────────────────
@@ -572,16 +570,16 @@
    with — the two must agree or a label is placed for a width it does not have. The summary keeps v138.2's faces. */
 @media (min-width: 768px) {
   .qc138-sheet .qc138-t4l b { font: 400 13.5px/1.25 var(--sp-type) !important; color: #1c130f; }
-  .qc138-sheet .qc138-t4l.past b { color: rgba(28, 19, 15, 0.72); }
-  .qc138-sheet .qc138-t4l.was b { color: #a2452a; }
-  .qc138-sheet .qc138-t4l small { font: 400 12px/1.25 var(--sp-type) !important; color: rgba(28, 19, 15, 0.5); }
-  .qc138-sheet .qc138-t4l.today b { font: 400 12px/1.25 var(--sp-type) !important; letter-spacing: 0.08em; color: #a2452a; }
-  .qc138-sheet .qc138-t4l.today small.ov { font: 400 12.5px/1.25 var(--sp-type) !important; color: #a2452a; }
-  .qc138-sheet .qc138-t4d { font: 400 11.5px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, 0.45); }
-  .qc138-sheet .qc138-t4d.live.agt { color: #2d3a50; }
+  .qc138-sheet .qc138-t4l.past b { color: var(--sp-muted); }
+  .qc138-sheet .qc138-t4l.was b { color: var(--sp-rust); }
+  .qc138-sheet .qc138-t4l small { font: 400 12px/1.25 var(--sp-type) !important; color: var(--sp-quiet); }
+  .qc138-sheet .qc138-t4l.today b { font: 400 12px/1.25 var(--sp-type) !important; letter-spacing: 0.08em; color: var(--sp-rust); }
+  .qc138-sheet .qc138-t4l.today small.ov { font: 400 12.5px/1.25 var(--sp-type) !important; color: var(--sp-rust); }
+  .qc138-sheet .qc138-t4d { font: 400 11.5px/1.2 var(--sp-type) !important; color: var(--sp-quiet); }
+  .qc138-sheet .qc138-t4d.live.agt { color: var(--sp-anthracite); }
   .qc138-sheet .qc138-t4d.live.you { color: #8f4529; }
   .qc138-sheet .qc138-t4a { font: 400 10.5px/1.2 var(--sp-type) !important; letter-spacing: 0.02em; color: rgba(28, 19, 15, 0.38); }
-  .qc138-sheet .qc138-t4a.yr { font-weight: 600 !important; color: rgba(28, 19, 15, 0.6); }
+  .qc138-sheet .qc138-t4a.yr { font-weight: 600 !important; color: var(--sp-quiet); }
 }
 
 /* ── v138.4 §C (follow-up) · THREE LINES MUST FIT A LANE ────────────────────────────────────────────────────────
@@ -604,18 +602,18 @@
 
 /* ── v139 §B — the practice band: white, a rust ring, faint blush stripes, the stamp; and Pip's row ── */
 .qc138-sheet .qc139-pband {
-  cursor: default; --qc138-c: #a2452a; background: #fff;
+  cursor: default; --qc138-c: var(--sp-rust); background: #fff;
   background-image: repeating-linear-gradient(135deg, rgba(247, 227, 218, 0.55) 0 10px, transparent 10px 20px);
   box-shadow: inset 0 0 0 1.5px rgba(162, 69, 42, 0.45);
 }
 .qc138-sheet .qc139-pband .qc138-gart { visibility: hidden; }
 .qc138-sheet .qc139-pband .qc138-gt { color: #8f4529; }
 .qc138-sheet .qc139-stamp {
-  font: 600 9.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: #a2452a;
-  border: 1.5px solid #a2452a; border-radius: 4px; padding: 3px 7px; transform: rotate(-3deg); background: #fff;
+  font: 600 9.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: var(--sp-rust);
+  border: 1.5px solid var(--sp-rust); border-radius: 4px; padding: 3px 7px; transform: rotate(-3deg); background: #fff;
 }
 .qc138-sheet .qc139-practice .qc138-row { background: #fffaf6; box-shadow: inset 0 0 0 1.5px rgba(162, 69, 42, 0.25); }
-.qc138-sheet .qc139-practice .qc138-disc { background: #fff !important; color: #a2452a !important; box-shadow: inset 0 0 0 1.5px #a2452a; }
+.qc138-sheet .qc139-practice .qc138-disc { background: #fff !important; color: var(--sp-rust) !important; box-shadow: inset 0 0 0 1.5px var(--sp-rust); }
 .qc138-sheet .qc139-practice { animation: qc139-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 .qc138-sheet .qc139-practice.out { animation: none; transition: opacity 0.35s, transform 0.35s; opacity: 0; transform: translateY(-8px); }
 @keyframes qc139-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }

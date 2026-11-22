@@ -23,9 +23,9 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { QueryEmptyCard, EMPTY_COPY, TEMPLATE_HREF } from "./QueryEmptyCard";
+import { QueryEmptyCard, EMPTY_COPY } from "./QueryEmptyCard";
 import { sliceBetween } from "../../test/sliceBetween";
 
 const REF = readFileSync(join(process.cwd(), "design-refs/query-grid-enhancements-v1.html"), "utf8");
@@ -79,10 +79,13 @@ describe("the card draws its own moment", () => {
     expect(bare, "the way back went too").toContain(esc(EMPTY_COPY.filtered.alt));
   });
 
-  it("the import template's constant survives the retirement — its consumer moved, it did not go", () => {
-    /* ⚠️ ASSERTED HERE BECAUSE THIS FILE IS WHERE THE CONSTANT LIVES; that the HERO renders it is
-       the empty page's own locks (`QcEmpty`, living headers §3)'s claim. Two halves of one route, each asserted where it is. */
-    expect(TEMPLATE_HREF).toBe("/QueryHawk-pipeline-import-template.xlsx");
+  it("the import template is no longer offered from here, but its file still serves (overnight fixes v1, 14 Nov)", () => {
+    /* ⚠️ RE-POINTED: this lock used to keep TEMPLATE_HREF alive for the day-one panel's "use our template" link. The
+       ruling of 14 Nov drops the template as a way in, so the constant went with its last consumer. An old link to
+       the file must not 404, so the asset itself stays in public/. */
+    const card = readFileSync(join(process.cwd(), "src/components/queries/QueryEmptyCard.tsx"), "utf8");
+    expect(card).not.toContain("TEMPLATE_HREF");
+    expect(existsSync(join(process.cwd(), "public/QueryHawk-pipeline-import-template.xlsx"))).toBe(true);
   });
 });
 
@@ -93,9 +96,10 @@ describe("the page puts each card only in the slot the selector names", () => {
     expect(branch).not.toContain("QueryEmptyCard");
     /* what it draws instead is the empty page's own locks (`QcEmpty`, living headers §3)'s claim, not this file's — bounded,
        because a tag name is a prefix of every longer one */
-    /* v138 §I re-point: on the desktop the branch opens on QcEmpty138 (the phone's QcEmpty follows it), and the
-       slice's end anchor is now that fork's own ") : (" — the claim, an empty page and never this card, is unchanged */
-    expect(branch).toMatch(/<QcEmpty138[\s/>]/);
+    /* v155 §2 re-point: the desktop's day one is QcPage151's own panel, so this branch is the phone's and opens on
+       QcEmpty alone (v138's QcEmpty138 is retired); the claim, an empty page and never this card, is unchanged */
+    expect(branch).toMatch(/<QcEmpty[\s/>]/);
+    expect(branch).not.toMatch(/<QcEmpty138[\s/>]/);
   });
 
   it("the view slot is the selector's `filtered`, then `nomatch` — the card, then the plain line", () => {

@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "F1",
+  "where": "before",
+  "ok": true,
+  "detail": "no resume card before a review is left"
+ },
+ {
+  "lock": "F1",
+  "where": "deck",
+  "ok": true,
+  "detail": "the deck opens on 1 of 31"
+ },
+ {
+  "lock": "F1",
+  "where": "kept",
+  "ok": true,
+  "detail": "{\"file\":\"fv2-tracker-31.xlsx\",\"a\":\"23/31\",\"step\":\"agents\",\"parts\":1}"
+ },
+ {
+  "lock": "F1",
+  "where": "card",
+  "ok": true,
+  "detail": "agents tile: Agents23 of 31 checked"
+ },
+ {
+  "lock": "F1",
+  "where": "card",
+  "ok": true,
+  "detail": "queries tile: Queriesnot started"
+ },
+ {
+  "lock": "F1",
+  "where": "card",
+  "ok": true,
+  "detail": "the file's name"
+ },
+ {
+  "lock": "F1",
+  "where": "card",
+  "ok": true,
+  "detail": "it takes the set-up card's place"
+ },
+ {
+  "lock": "F1",
+  "where": "card",
+  "ok": true,
+  "detail": "first in the middle column (119.75 vs 119.75)"
+ },
+ {
+  "lock": "F1",
+  "where": "resume",
+  "ok": true,
+  "detail": "the deck reopens on 1 of 8 (the 8 still to check)"
+ },
+ {
+  "lock": "F1",
+  "where": "resume",
+  "ok": true,
+  "detail": "on the 24th row (a-t25 vs a-t25)"
+ },
+ {
+  "lock": "F1",
+  "where": "resume",
+  "ok": true,
+  "detail": "not on a row already answered"
+ },
+ {
+  "lock": "F1",
+  "where": "discard",
+  "ok": true,
+  "detail": "discarding deletes the draft"
+ },
+ {
+  "lock": "F1",
+  "where": "finish",
+  "ok": true,
+  "detail": "kept before finishing: {\"file\":\"fv2-tracker-1.xlsx\",\"a\":\"1/1\",\"step\":\"agents\",\"parts\":1}"
+ },
+ {
+  "lock": "F1",
+  "where": "finish",
+  "ok": true,
+  "detail": "finishing the import deletes the draft"
+ }
+]

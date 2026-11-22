@@ -50,11 +50,13 @@ describe("D5 — opening read, through the sample and never through the package"
     expect(openingRead(q("gone"), PKGS, MATS, BV)).toBeNull();
   });
 
-  it("⚠️ reads no version field off a package — there is none, and there must not be", () => {
+  /* ⚠️ VERSIONS v2 (D4) — RETARGETED: packages DO carry a version now, and this lock asserts the new law instead: the
+     reading pane's line goes through the one resolver, so it cannot disagree with the Versions page. */
+  it("⚠️ reads the version through the shared resolver, never a route of its own", () => {
     const src = readFileSync(join(__dirname, "queryVersions.ts"), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(src).toContain("pkg?.samplePagesVersionId");
-    expect(src).not.toMatch(/\bpkg\??\.bookVersionId\b/);
+    expect(src).toContain("resolveQueryVersion(query as Query");
+    expect(src).not.toMatch(/\bpkg\??\.(bookVersionId|samplePagesVersionId)\b/);
   });
 });
 
@@ -109,8 +111,13 @@ describe("⚠️ D9 — an unknown is never folded into a known", () => {
 
 describe("D8 — the list chip", () => {
   const full = q("p-a") as Query;
-  it("⚠️ HELD wins over READ — the more recent fact answers 'what have they got'", () => {
-    expect(listVersion(full, PKGS, MATS, [send("bv-b", "2026-07-01")], BV)?.name).toBe("Worldbuilding-first");
+  /* ⚠️ VERSIONS v2 (D4) — REVERSED: the chip and the filter read the resolver, so a later send's version does not
+     replace the version the query went with. What they hold is the reading pane's own line (`manuscriptHeld`). */
+  it("⚠️ the version the query went with, not what a later send carried", () => {
+    expect(listVersion(full, PKGS, MATS, [send("bv-b", "2026-07-01")], BV)?.name).toBe("Prologue-first");
+  });
+  it("the query's own recorded version wins over its package's (D4.1)", () => {
+    expect(listVersion({ ...full, bookVersionId: "bv-b" } as Query, PKGS, MATS, [], BV)?.name).toBe("Worldbuilding-first");
   });
   it("falls back to what they read when nothing has been sent", () => {
     expect(listVersion(full, PKGS, MATS, [], BV)?.name).toBe("Prologue-first");

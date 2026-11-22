@@ -1,0 +1,52 @@
+[
+ {
+  "name": "1920 day one: \"No queries yet\" on the navy panel",
+  "ok": true,
+  "got": "No queries yet"
+ },
+ {
+  "name": "1920 day one: the Views card dimmed, inert, every view at 0",
+  "ok": true,
+  "got": "{\"title\":\"No queries yet\",\"op\":\"0.4\",\"inert\":true,\"counts\":[\"0\",\"0\",\"0\",\"0\",\"0\"]}"
+ },
+ {
+  "name": "1920 quiet: v155's panel is drawn",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1920 loading: the panel and the card are there before the data (week held)",
+  "ok": true,
+  "got": "{\"header\":\"198,143.8,1596,242.9\",\"week\":\"1384,165.8,380,198.9\",\"views\":\"198,416.6,268,703\",\"toolbar\":\"494,404.6,1300,92\"}"
+ },
+ {
+  "name": "1920 loading: nothing moves when the data lands",
+  "ok": true,
+  "got": "{\"header\":\"198,143.8,1596,242.9\",\"week\":\"1384,165.8,380,198.9\",\"views\":\"198,416.6,268,703\",\"toolbar\":\"494,404.6,1300,92\"} → {\"header\":\"198,143.8,1596,242.9\",\"week\":\"1384,165.8,380,198.9\",\"views\":\"198,416.6,268,703\",\"toolbar\":\"494,404.6,1300,92\"}"
+ },
+ {
+  "name": "1440 day one: \"No queries yet\" on the navy panel",
+  "ok": true,
+  "got": "No queries yet"
+ },
+ {
+  "name": "1440 day one: the Views card dimmed, inert, every view at 0",
+  "ok": true,
+  "got": "{\"title\":\"No queries yet\",\"op\":\"0.4\",\"inert\":true,\"counts\":[\"0\",\"0\",\"0\",\"0\",\"0\"]}"
+ },
+ {
+  "name": "1440 quiet: v155's panel is drawn",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1440 loading: the panel and the card are there before the data (week held)",
+  "ok": true,
+  "got": "{\"header\":\"112,143.8,1288,242.9\",\"week\":\"990,165.8,380,198.9\",\"views\":\"112,416.6,268,703\",\"toolbar\":\"408,404.6,992,92\"}"
+ },
+ {
+  "name": "1440 loading: nothing moves when the data lands",
+  "ok": true,
+  "got": "{\"header\":\"112,143.8,1288,242.9\",\"week\":\"990,165.8,380,198.9\",\"views\":\"112,416.6,268,703\",\"toolbar\":\"408,404.6,992,92\"} → {\"header\":\"112,143.8,1288,242.9\",\"week\":\"990,165.8,380,198.9\",\"views\":\"112,416.6,268,703\",\"toolbar\":\"408,404.6,992,92\"}"
+ }
+]

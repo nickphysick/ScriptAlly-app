@@ -1,0 +1,368 @@
+
+Running 13 tests using 1 worker
+
+[1/13] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/13] [measure] › tests/e2e/dashFeedV1.measure.ts:94:1 › DF1-A1 · three columns at 1512, 417 / 511 / 417, no header band
+[measure] › tests/e2e/dashFeedV1.measure.ts:94:1 › DF1-A1 · three columns at 1512, 417 / 511 / 417, no header band
+  ✗ A1 · population: three columns found — {"left":null,"feed":null,"right":null,"header":true}
+
+  ✗ A1 · no navy header band — true
+
+  1) [measure] › tests/e2e/dashFeedV1.measure.ts:94:1 › DF1-A1 · three columns at 1512, 417 / 511 / 417, no header band 
+
+    Error: A1: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 7
+    Received:    2
+
+      38 |     writeFileSync(`${DIR}/ledger/${this.name}${MUT ? `.mut-${MUT}` : ""}.json`, JSON.stringify(this.rows, null, 1));
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+    > 40 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      41 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+      42 |   }
+      43 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:40:77)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:110:5
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--49852--417-511-417-no-header-band-measure/error-context.md
+
+
+[3/13] [measure] › tests/e2e/dashFeedV1.measure.ts:113:1 › DF1-A2 · the feed column is pinned; the cards scroll; the feed scrolls inside itself
+  2) [measure] › tests/e2e/dashFeedV1.measure.ts:113:1 › DF1-A2 · the feed column is pinned; the cards scroll; the feed scrolls inside itself 
+
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+        at eval (eval at evaluate (:311:30), <anonymous>:4:58)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:4:58)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:119:31
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--18da5--feed-scrolls-inside-itself-measure/error-context.md
+
+
+[4/13] [measure] › tests/e2e/dashFeedV1.measure.ts:141:1 › DF1-A3 · two columns at 1280 and 1512 expanded, the feed in column 2, the cards in order
+[measure] › tests/e2e/dashFeedV1.measure.ts:141:1 › DF1-A3 · two columns at 1280 and 1512 expanded, the feed in column 2, the cards in order
+  ✗ A3 · 1280x800 population: every card found — 0/8
+
+  ✗ A3 · 1280x800 every card in one column — 
+
+  ✗ A3 · 1280x800 the feed is column 2 — feed undefined
+
+  ✗ A3 · 1280x800 the footer is last — 
+
+  ✗ A3 · 1512x982 population: every card found — 0/8
+
+  ✗ A3 · 1512x982 every card in one column — 
+
+  ✗ A3 · 1512x982 the feed is column 2 — feed undefined
+
+  ✗ A3 · 1512x982 the footer is last — 
+
+  3) [measure] › tests/e2e/dashFeedV1.measure.ts:141:1 › DF1-A3 · two columns at 1280 and 1512 expanded, the feed in column 2, the cards in order 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   "A3 · 1280x800 population: every card found — 0/8",
+    +   "A3 · 1280x800 every card in one column — ",
+    +   "A3 · 1280x800 the feed is column 2 — feed undefined",
+    +   "A3 · 1280x800 the footer is last — ",
+    +   "A3 · 1512x982 population: every card found — 0/8",
+    +   "A3 · 1512x982 every card in one column — ",
+    +   "A3 · 1512x982 the feed is column 2 — feed undefined",
+    +   "A3 · 1512x982 the footer is last — ",
+    + ]
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 41 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      42 |   }
+      43 | }
+      44 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:41:95)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:158:5
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--07dfe-column-2-the-cards-in-order-measure/error-context.md
+
+
+[5/13] [measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles
+[measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles
+  ✗ B1 · 1512x982c population: card and sheet — {"book":null,"goal":null,"ring":null}
+
+  ✗ B1 · 1512x982c the sheet's top is the card's bottom ±1 — null / null
+
+  ✗ B1 · 1512x982c the ring says the goals code's count of its target — null vs 0/8
+
+  ✗ B1 · 1280x800 population: card and sheet — {"book":null,"goal":null,"ring":null}
+
+  ✗ B1 · 1280x800 the sheet's top is the card's bottom ±1 — null / null
+
+  ✗ B1 · 1280x800 the ring says the goals code's count of its target — null vs 0/8
+
+  ✗ B1 · no goal: Set a weekly goal shows — null
+
+  ✗ B1 · no goal: the tiles and the streak still render — {"set":null,"sent":false,"added":false,"streak":false}
+
+  4) [measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   "B1 · 1512x982c population: card and sheet — {\"book\":null,\"goal\":null,\"ring\":null}",
+    +   "B1 · 1512x982c the sheet's top is the card's bottom ±1 — null / null",
+    +   "B1 · 1512x982c the ring says the goals code's count of its target — null vs 0/8",
+    +   "B1 · 1280x800 population: card and sheet — {\"book\":null,\"goal\":null,\"ring\":null}",
+    +   "B1 · 1280x800 the sheet's top is the card's bottom ±1 — null / null",
+    +   "B1 · 1280x800 the ring says the goals code's count of its target — null vs 0/8",
+    +   "B1 · no goal: Set a weekly goal shows — null",
+    +   "B1 · no goal: the tiles and the streak still render — {\"set\":null,\"sent\":false,\"added\":false,\"streak\":false}",
+    + ]
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 41 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      42 |   }
+      43 | }
+      44 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:41:95)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:194:5
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--22567--goal-still-shows-the-tiles-measure/error-context.md
+
+
+[6/13] [measure] › tests/e2e/dashFeedV1.measure.ts:197:1 › DF1-C1 · Active on load, a 224px body, the switch moves nothing, the grain spills toward the hawk
+  5) [measure] › tests/e2e/dashFeedV1.measure.ts:197:1 › DF1-C1 · Active on load, a 224px body, the switch moves nothing, the grain spills toward the hawk 
+
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+        at eval (eval at evaluate (:311:30), <anonymous>:3:68)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:3:68)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:239:29
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--6b540-rain-spills-toward-the-hawk-measure/error-context.md
+
+
+[7/13] [measure] › tests/e2e/dashFeedV1.measure.ts:253:1 › DF1-C2 · the founding card is last in the left column, its line, nothing clipped
+[measure] › tests/e2e/dashFeedV1.measure.ts:253:1 › DF1-C2 · the founding card is last in the left column, its line, nothing clipped
+  ✗ C2 · 1512x982c population: the card and its descendants — 0 elements
+
+  ✗ C2 · 1512x982c the left column's last card — {"inLeft":false,"last":false}
+
+  ✗ C2 · 1512x982c its footer line — null
+
+  ✗ C2 · 1512x982c no descendant is clipped — no card
+
+  ✗ C2 · 1280x800 population: the card and its descendants — 0 elements
+
+  ✗ C2 · 1280x800 the left column's last card — {"inLeft":false,"last":false}
+
+  ✗ C2 · 1280x800 its footer line — null
+
+  ✗ C2 · 1280x800 no descendant is clipped — no card
+
+  6) [measure] › tests/e2e/dashFeedV1.measure.ts:253:1 › DF1-C2 · the founding card is last in the left column, its line, nothing clipped 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   "C2 · 1512x982c population: the card and its descendants — 0 elements",
+    +   "C2 · 1512x982c the left column's last card — {\"inLeft\":false,\"last\":false}",
+    +   "C2 · 1512x982c its footer line — null",
+    +   "C2 · 1512x982c no descendant is clipped — no card",
+    +   "C2 · 1280x800 population: the card and its descendants — 0 elements",
+    +   "C2 · 1280x800 the left column's last card — {\"inLeft\":false,\"last\":false}",
+    +   "C2 · 1280x800 its footer line — null",
+    +   "C2 · 1280x800 no descendant is clipped — no card",
+    + ]
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 41 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      42 |   }
+      43 | }
+      44 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:41:95)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:275:5
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--a367c-mn-its-line-nothing-clipped-measure/error-context.md
+
+
+[8/13] [measure] › tests/e2e/dashFeedV1.measure.ts:278:1 › DF1-D1 · the switch, a full request's big card, a query sent's mini row
+  7) [measure] › tests/e2e/dashFeedV1.measure.ts:278:1 › DF1-D1 · the switch, a full request's big card, a query sent's mini row 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: page.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-df1-sw="in"]')
+
+
+      294 |     const all = await dirs();
+      295 |     L.check("D1", `${tag(vp)} population: entries by agents and by you`, all.includes("in") && all.includes("out"), JSON.stringify({ in: all.filter((d) => d === "in").length, out: all.filter((d) => d === "out").length }));
+    > 296 |     await page.click('[data-df1-sw="in"]');
+          |                ^
+      297 |     const inn = await dirs();
+      298 |     L.check("D1", `${tag(vp)} Agents: non-zero, none by you`, inn.length > 0 && inn.every((d) => d === "in"), JSON.stringify(inn));
+      299 |     await page.click('[data-df1-sw="out"]');
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:296:16
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--0d64e-ard-a-query-sent-s-mini-row-measure/error-context.md
+
+
+[9/13] [measure] › tests/e2e/dashFeedV1.measure.ts:326:1 › DF1-D2 · no floating feed tab and no feed drawer on the dashboard
+[measure] › tests/e2e/dashFeedV1.measure.ts:326:1 › DF1-D2 · no floating feed tab and no feed drawer on the dashboard
+  ✗ D2 · 1512x982c population: the dashboard drew — {"cols":false,"tab":1,"drawer":0}
+
+  ✗ D2 · 1512x982c no tab and no drawer — {"cols":false,"tab":1,"drawer":0}
+
+  ✗ D2 · 1280x800 population: the dashboard drew — {"cols":false,"tab":1,"drawer":0}
+
+  ✗ D2 · 1280x800 no tab and no drawer — {"cols":false,"tab":1,"drawer":0}
+
+  8) [measure] › tests/e2e/dashFeedV1.measure.ts:326:1 › DF1-D2 · no floating feed tab and no feed drawer on the dashboard 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "D2 · 1512x982c population: the dashboard drew — {\"cols\":false,\"tab\":1,\"drawer\":0}",
+    +   "D2 · 1512x982c no tab and no drawer — {\"cols\":false,\"tab\":1,\"drawer\":0}",
+    +   "D2 · 1280x800 population: the dashboard drew — {\"cols\":false,\"tab\":1,\"drawer\":0}",
+    +   "D2 · 1280x800 no tab and no drawer — {\"cols\":false,\"tab\":1,\"drawer\":0}",
+    + ]
+
+      39 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      40 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 41 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      42 |   }
+      43 | }
+      44 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:41:95)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:334:5
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--aebd6-eed-drawer-on-the-dashboard-measure/error-context.md
+
+
+[10/13] [measure] › tests/e2e/dashFeedV1.measure.ts:337:1 › DF1-E1 · the tick box goes where Do this task goes, and completes nothing
+  9) [measure] › tests/e2e/dashFeedV1.measure.ts:337:1 › DF1-E1 · the tick box goes where Do this task goes, and completes nothing 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: page.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('.df1-tkb:not(.is-ghost) [data-df1="task-box"]')
+
+
+      345 |     /* where each one leads: the URL and whatever panel or drawer it opened */
+      346 |     const where = async (sel: string) => {
+    > 347 |       await page.click(sel);
+          |                  ^
+      348 |       await page.waitForTimeout(900);
+      349 |       const w = await page.evaluate(() => ({
+      350 |         path: location.pathname + location.search,
+        at where (/Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:347:18)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:360:26
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--30ba5--goes-and-completes-nothing-measure/error-context.md
+
+
+[11/13] [measure] › tests/e2e/dashFeedV1.measure.ts:373:1 › DF1-E2 · the tip: its art inside the card, one height, a 7s turn that holds on hover, › restarts, reduced motion still
+  10) [measure] › tests/e2e/dashFeedV1.measure.ts:373:1 › DF1-E2 · the tip: its art inside the card, one height, a 7s turn that holds on hover, › restarts, reduced motion still 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.scrollIntoViewIfNeeded: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-df1="tip"]')
+
+
+      375 |   for (const vp of [W1512, W1280]) {
+      376 |     await openDash(page, vp);
+    > 377 |     await page.locator('[data-df1="tip"]').scrollIntoViewIfNeeded();
+          |                                            ^
+      378 |     const r = await page.evaluate(() => {
+      379 |       const card = document.querySelector('[data-df1="tip"]')!.getBoundingClientRect();
+      380 |       const art = document.querySelector('[data-df1="tip"] .art-real')?.getBoundingClientRect();
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:377:44
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--9fd78-starts-reduced-motion-still-measure/error-context.md
+
+
+[12/13] [measure] › tests/e2e/dashFeedV1.measure.ts:435:1 › DF1-E3 · the Scout: a soft pink band, an example nothing can focus, a request that survives a reload
+  11) [measure] › tests/e2e/dashFeedV1.measure.ts:435:1 › DF1-E3 · the Scout: a soft pink band, an example nothing can focus, a request that survives a reload 
+
+    Error: page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+        at eval (eval at evaluate (:311:30), <anonymous>:6:17)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:6:17)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:441:28
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--cfae2-uest-that-survives-a-reload-measure/error-context.md
+
+
+[13/13] [measure] › tests/e2e/dashFeedV1.measure.ts:462:1 › DF1-F1 · every footer link renders its page, and Give feedback opens the dock
+  12) [measure] › tests/e2e/dashFeedV1.measure.ts:462:1 › DF1-F1 · every footer link renders its page, and Give feedback opens the dock 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: page.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-df1="give-feedback"]')
+
+
+      465 |   const links = await page.evaluate(() => [...document.querySelectorAll<HTMLAnchorElement>('[data-df1="foot-link"]')].map((a) => a.getAttribute("href") ?? ""));
+      466 |   L.check("F1", "population: the footer's links", links.length >= 5, JSON.stringify(links));
+    > 467 |   await page.click('[data-df1="give-feedback"]');
+          |              ^
+      468 |   await page.waitForTimeout(600);
+      469 |   const dock = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-fb="panel"]')].some((e) => e.getBoundingClientRect().height > 0));
+      470 |   L.check("F1", "Give feedback opens FeedbackDock", dock, String(dock));
+        at /Users/nickphysick/ScriptAlly-dashfeed/tests/e2e/dashFeedV1.measure.ts:467:14
+
+    Error Context: test-results/dashFeedV1.measure.ts-DF1--bcf15-ive-feedback-opens-the-dock-measure/error-context.md
+
+
+  12 failed
+    [measure] › tests/e2e/dashFeedV1.measure.ts:94:1 › DF1-A1 · three columns at 1512, 417 / 511 / 417, no header band 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:113:1 › DF1-A2 · the feed column is pinned; the cards scroll; the feed scrolls inside itself 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:141:1 › DF1-A3 · two columns at 1280 and 1512 expanded, the feed in column 2, the cards in order 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:161:1 › DF1-B1 · the goal sheet sits under the card; the ring is the goals code's; no goal still shows the tiles 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:197:1 › DF1-C1 · Active on load, a 224px body, the switch moves nothing, the grain spills toward the hawk 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:253:1 › DF1-C2 · the founding card is last in the left column, its line, nothing clipped 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:278:1 › DF1-D1 · the switch, a full request's big card, a query sent's mini row 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:326:1 › DF1-D2 · no floating feed tab and no feed drawer on the dashboard 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:337:1 › DF1-E1 · the tick box goes where Do this task goes, and completes nothing 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:373:1 › DF1-E2 · the tip: its art inside the card, one height, a 7s turn that holds on hover, › restarts, reduced motion still 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:435:1 › DF1-E3 · the Scout: a soft pink band, an example nothing can focus, a request that survives a reload 
+    [measure] › tests/e2e/dashFeedV1.measure.ts:462:1 › DF1-F1 · every footer link renders its page, and Give feedback opens the dock 
+  1 passed (22.5m)

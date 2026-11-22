@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D2",
+  "where": "genre = model",
+  "ok": true,
+  "detail": "[[\"Book club fiction\",7,27]]"
+ },
+ {
+  "lock": "D2",
+  "where": "genre = sample",
+  "ok": false,
+  "detail": "[[\"Book club fiction\",7,27]]"
+ },
+ {
+  "lock": "D2",
+  "where": "note = sample",
+  "ok": true,
+  "detail": "[[\"With a personal note\",5,11],[\"Without one\",2,16]]"
+ },
+ {
+  "lock": "D2",
+  "where": "no genre under 3",
+  "ok": true,
+  "detail": "[[\"Book club fiction\",7,27]]"
+ },
+ {
+  "lock": "D2",
+  "where": "foot = unqueried",
+  "ok": true,
+  "detail": "\"61 agents on your list\" · 61"
+ },
+ {
+  "lock": "D2",
+  "where": "unqueried holds the eight who take it",
+  "ok": false,
+  "detail": "61"
+ },
+ {
+  "lock": "D2",
+  "where": "no genres: population Everyday",
+  "ok": true,
+  "detail": "everyday"
+ },
+ {
+  "lock": "D2",
+  "where": "no genres: the one line, no rows, no foot",
+  "ok": true,
+  "detail": "{\"genre\":[],\"note\":[[\"With a personal note\",5,11],[\"Without one\",2,16]],\"foot\":null,\"none\":true}"
+ }
+]

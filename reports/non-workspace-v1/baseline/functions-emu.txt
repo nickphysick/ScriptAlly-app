@@ -1,0 +1,152 @@
+
+> react-example@0.0.0 test:functions
+> node scripts/emu-guard.mjs firebase emulators:exec --only firestore --project demo-scriptally-test 'npx vitest run --config vitest.config.emulator.ts'
+
+[heavy-slot] sweep (on acquire): nothing left over.
+[emu-guard] 45.8 GB free. Debug logs: /dev/null.
+i  emulators: Starting emulators: firestore
+i  emulators: Detected demo project ID "demo-scriptally-test", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: npx vitest run --config vitest.config.emulator.ts
+
+ RUN  v3.2.7 /Users/nickphysick/ScriptAlly-nwv1
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > a note with no status is waiting; setting a status makes it a contribution
+{"event":"founding.stats","writers":1,"feedback":1,"places":0}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > a note with no status is waiting; setting a status makes it a contribution
+{"event":"founding.flags","already":0,"set":0,"capped":0,"cap":50}
+
+stdout | functions/src/importDrafts.emulator.spec.ts > importDraftsCleanup > deletes a draft 8 days old with its parts, and keeps one 6 days old
+{"event":"importDrafts.cleared","count":1}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > a note with no status is waiting; setting a status makes it a contribution
+{"event":"founding.stats","writers":1,"feedback":1,"places":0}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > a note with no status is waiting; setting a status makes it a contribution
+{"event":"founding.flags","already":0,"set":0,"capped":0,"cap":50}
+
+ ✓ functions/src/importDrafts.emulator.spec.ts (1 test) 1296ms
+   ✓ importDraftsCleanup > deletes a draft 8 days old with its parts, and keeps one 6 days old  1295ms
+stderr | functions/src/aiRateLimit.emulator.spec.ts > a failed run still costs its slot > assistAgentData: a model failure is counted
+assistAgentData: Anthropic call failed: Error: upstream failed
+    at [90m/Users/nickphysick/ScriptAlly-nwv1/[39mfunctions/src/aiRateLimit.emulator.spec.ts:128:40
+    at file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:155:11
+    at file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:752:26
+    at file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1863:10)
+    at runTest (file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1574:12)
+    at runSuite (file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1729:8)
+    at runSuite (file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1729:8)
+    at runFiles (file:///Users/nickphysick/ScriptAlly-app/node_modules/[4m@vitest/runner[24m/dist/chunk-hooks.js:1787:3)
+
+ ✓ functions/src/aiRateLimit.emulator.spec.ts (11 tests) 1645ms
+   ✓ assistAgentData: 10 runs a UTC day, claimed before the model call > the first call passes and reaches the model  1113ms
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > built is worth four, and the level never falls when a status is taken back
+{"event":"founding.stats","writers":1,"feedback":1,"places":0}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > built is worth four, and the level never falls when a status is taken back
+{"event":"founding.flags","already":0,"set":0,"capped":0,"cap":50}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > built is worth four, and the level never falls when a status is taken back
+{"event":"founding.stats","writers":1,"feedback":1,"places":0}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > built is worth four, and the level never falls when a status is taken back
+{"event":"founding.flags","already":0,"set":0,"capped":0,"cap":50}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > counted:false excludes a note, and the writers are each written
+{"event":"founding.stats","writers":2,"feedback":2,"places":0}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > counted:false excludes a note, and the writers are each written
+{"event":"founding.flags","already":0,"set":0,"capped":0,"cap":50}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the founding number (DB105) > a writer whose email holds a verified place gets that number, even with no feedback yet
+{"event":"founding.stats","writers":2,"feedback":1,"places":1}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the founding number (DB105) > a writer whose email holds a verified place gets that number, even with no feedback yet
+{"event":"founding.flags","already":0,"set":1,"capped":0,"cap":50}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the founding number (DB105) > lastSentAt is the newest note's createdAt
+{"event":"founding.stats","writers":1,"feedback":2,"places":0}
+
+stdout | functions/src/foundingStats.emulator.spec.ts > foundingStats — the founding number (DB105) > lastSentAt is the newest note's createdAt
+{"event":"founding.flags","already":1,"set":0,"capped":0,"cap":50}
+
+ ❯ functions/src/foundingStats.emulator.spec.ts (5 tests | 1 failed) 3310ms
+   ✓ foundingStats — the recompute > a note with no status is waiting; setting a status makes it a contribution  1214ms
+   ✓ foundingStats — the recompute > built is worth four, and the level never falls when a status is taken back  2004ms
+   × foundingStats — the recompute > counted:false excludes a note, and the writers are each written 31ms
+     → expected { contributions: 4, waiting: +0, …(9) } to match object { contributions: 1, tier: 'fledgling' }
+(13 matching properties omitted from actual)
+   ✓ foundingStats — the founding number (DB105) > a writer whose email holds a verified place gets that number, even with no feedback yet 35ms
+   ✓ foundingStats — the founding number (DB105) > lastSentAt is the newest note's createdAt 24ms
+ ✓ functions/src/smartImportClaim.emulator.spec.ts (10 tests) 4324ms
+   ✓ Smart Import: claim, then call > five parallel calls: exactly one reaches the model, the rest are told it is in progress  4189ms
+stdout | functions/src/waitlist.emulator.spec.ts > the retention job deletes nothing until it is armed > a dry run reports what it would delete and deletes nothing
+{"event":"waitlist.retention","mode":"dry-run","dormant":1,"unsubscribed":1,"released":1,"scanned":3,"promoted":0}
+
+stdout | functions/src/waitlist.emulator.spec.ts > the retention job deletes nothing until it is armed > a live run deletes, and a deleted verified member releases exactly one place
+{"event":"waitlist.retention","mode":"live","dormant":1,"unsubscribed":0,"released":1,"scanned":2,"promoted":0}
+
+stdout | functions/src/waitlist.emulator.spec.ts > the retention job deletes nothing until it is armed > deleting an unsubscribed document releases nothing further
+{"event":"waitlist.retention","mode":"live","dormant":0,"unsubscribed":1,"released":0,"scanned":1,"promoted":0}
+
+stdout | functions/src/waitlist.emulator.spec.ts > the retention job deletes nothing until it is armed > a dormant pending document goes without touching the counter
+{"event":"waitlist.retention","mode":"live","dormant":1,"unsubscribed":0,"released":0,"scanned":1,"promoted":0}
+
+stdout | functions/src/waitlist.emulator.spec.ts > the retention job deletes nothing until it is armed > an empty collection is a quiet no-op, not an error
+{"event":"waitlist.retention","mode":"live","dormant":0,"unsubscribed":0,"released":0,"scanned":0,"promoted":0}
+
+stdout | functions/src/waitlist.emulator.spec.ts > PROMO-1 · a freed founding place promotes the next confirmed waiting writer > the retention job's release promotes too, and gives back the dormant writer's number
+{"event":"waitlist.retention","mode":"live","dormant":1,"unsubscribed":0,"released":1,"scanned":52,"promoted":1}
+
+ ✓ functions/src/waitlist.emulator.spec.ts (55 tests) 35185ms
+   ✓ the cap holds under a race > eight simultaneous verifications at cap−1 produce exactly one founding place  8290ms
+   ✓ the cap holds under a race > and the same race through joins, with verification off  3348ms
+   ✓ founding numbers are assigned once, atomically, and never held twice > two simultaneous confirmations at 99: exactly one is No. 100, the other is reserve No. 1  3344ms
+   ✓ founding numbers are assigned once, atomically, and never held twice > two simultaneous confirmations at 98: Nos. 99 and 100, never the same number twice  3547ms
+   ✓ founding numbers are assigned once, atomically, and never held twice > everyone who misses the cap gets a distinct reserve number, in a single queue  11991ms
+   ✓ PROMO-1 · a freed founding place promotes the next confirmed waiting writer > two concurrent unsubscribes promote two different writers, and never one twice  3430ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  functions/src/foundingStats.emulator.spec.ts > foundingStats — the recompute > counted:false excludes a note, and the writers are each written
+AssertionError: expected { contributions: 4, waiting: +0, …(9) } to match object { contributions: 1, tier: 'fledgling' }
+(13 matching properties omitted from actual)
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "contributions": 1,[39m
+[32m-   "tier": "fledgling",[39m
+[31m+   "contributions": 4,[39m
+[31m+   "tier": "archivist",[39m
+[2m  }[22m
+
+ ❯ functions/src/foundingStats.emulator.spec.ts:68:32
+     66|     expect(await recomputeFoundingStats(db, NO_ACCOUNTS)).toBe(2);
+     67|     expect(await stats("carol")).toMatchObject({ contributions: 0, tie…
+     68|     expect(await stats("dan")).toMatchObject({ contributions: 1, tier:…
+       |                                ^
+     69|   });
+     70| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 81 passed (82)
+   Start at  22:07:51
+   Duration  35.65s (transform 265ms, setup 0ms, collect 1.66s, tests 45.76s, environment 0ms, prepare 182ms)
+
+⚠  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+
+Error: Script "npx vitest run --config vitest.config.emulator.ts" exited with code 1

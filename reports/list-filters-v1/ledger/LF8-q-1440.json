@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the menu's choice is the button's field, in its natural order",
+  "ok": true,
+  "got": "Agent · A to Z"
+ },
+ {
+  "name": "the order switch flips the rows",
+  "ok": true,
+  "got": "seed-query-12 → cv25-q-08"
+ },
+ {
+  "name": "the button's arrow follows",
+  "ok": true,
+  "got": ""
+ }
+]

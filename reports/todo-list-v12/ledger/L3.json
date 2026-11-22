@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L3",
+  "where": "the probe task (due today) is a Needs you now card",
+  "ok": true,
+  "detail": "zz-td12-now-mvtrdkj9"
+ },
+ {
+  "lock": "L3",
+  "where": "…and has no tray row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "pressing the card puts its task on the desk",
+  "ok": true,
+  "detail": "zz-td12-now-mvtrdkj9"
+ },
+ {
+  "lock": "L3",
+  "where": "the desk says \"From Needs you now\"",
+  "ok": true,
+  "detail": "From Needs you now"
+ },
+ {
+  "lock": "L3",
+  "where": "the page scrolls to the workspace",
+  "ok": true,
+  "detail": "10.0"
+ },
+ {
+  "lock": "L3",
+  "where": "the card is marked as the one on the desk",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "its button finishes it (the own task's journey is the tick): the card leaves",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "the tick's toast, with Undo",
+  "ok": true,
+  "detail": "Done — “Zz td12 now probe”Undo"
+ },
+ {
+  "lock": "L3",
+  "where": "Undo",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "a Your move card to press",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "the button starts the journey on the desk card",
+  "ok": true,
+  "detail": "{\"work\":true,\"key\":\"task-offer-cv25-q-08\",\"row\":\"Task in progressStep 2 of 5\"}"
+ },
+ {
+  "lock": "L3",
+  "where": "the toolbar says \"Task in progress\"",
+  "ok": true,
+  "detail": "Task in progressStep 2 of 5"
+ }
+]

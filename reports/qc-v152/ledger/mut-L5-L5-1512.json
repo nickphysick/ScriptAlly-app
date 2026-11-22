@@ -1,0 +1,22 @@
+[
+ {
+  "where": "reading: rotate 1.6° ±0.1",
+  "ok": true,
+  "detail": "1.6deg"
+ },
+ {
+  "where": "population: an editing view is open",
+  "ok": true,
+  "detail": "no flat view"
+ },
+ {
+  "where": "editing: 0°",
+  "ok": false,
+  "detail": "1.6deg"
+ },
+ {
+  "where": "reduced motion: no transition and no slide",
+  "ok": true,
+  "detail": "{\"t\":\"0s\",\"a\":\"none\"}"
+ }
+]

@@ -1,0 +1,86 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.7s)
+PL-2 @390 {"tab":"true","nav":60,"tabsTop":60,"tabsBottom":139.515625,"card":-372.984375,"focus":null,"want":"12","checked":["12"]}
+  ✘  2 [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @390: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view (2.3s)
+PL-2 @375 {"tab":"true","nav":60,"tabsTop":60,"tabsBottom":139.515625,"card":-461.984375,"focus":null,"want":"12","checked":["12"]}
+  ✘  3 [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @375: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view (2.4s)
+
+
+  1) [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @390: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+
+    Error: the Pro card starts below the pinned tabs
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 138.515625
+    Received:    -372.984375
+
+      201 |     expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+      202 |     expect.soft(Math.abs(st.tabsTop - st.nav), "the tabs are pinned under the nav").toBeLessThan(1);
+    > 203 |     expect.soft(st.card, "the Pro card starts below the pinned tabs").toBeGreaterThanOrEqual(st.tabsBottom - 1);
+          |                                                                       ^
+      204 |     expect.soft(st.card, "…close under them, in view").toBeLessThan(st.tabsBottom + 40);
+      205 |     expect.soft(st.focus, "focus is on the checked row").toBe(want);
+      206 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:203:71
+
+    Error: focus is on the checked row
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "12"
+    Received: null
+
+      203 |     expect.soft(st.card, "the Pro card starts below the pinned tabs").toBeGreaterThanOrEqual(st.tabsBottom - 1);
+      204 |     expect.soft(st.card, "…close under them, in view").toBeLessThan(st.tabsBottom + 40);
+    > 205 |     expect.soft(st.focus, "focus is on the checked row").toBe(want);
+          |                                                          ^
+      206 |   });
+      207 | }
+      208 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:205:58
+
+    Error Context: test-results/pricingLadder.measure.ts-P-9fa0e-row-and-brings-it-into-view-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @375: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+
+    Error: the Pro card starts below the pinned tabs
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 138.515625
+    Received:    -461.984375
+
+      201 |     expect.soft(r.filter((x) => x.flag).map((x) => [x.m, x.flag]), "exactly one row flagged, the estimate's").toEqual([[want, "Fits your campaign"]]);
+      202 |     expect.soft(Math.abs(st.tabsTop - st.nav), "the tabs are pinned under the nav").toBeLessThan(1);
+    > 203 |     expect.soft(st.card, "the Pro card starts below the pinned tabs").toBeGreaterThanOrEqual(st.tabsBottom - 1);
+          |                                                                       ^
+      204 |     expect.soft(st.card, "…close under them, in view").toBeLessThan(st.tabsBottom + 40);
+      205 |     expect.soft(st.focus, "focus is on the checked row").toBe(want);
+      206 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:203:71
+
+    Error: focus is on the checked row
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "12"
+    Received: null
+
+      203 |     expect.soft(st.card, "the Pro card starts below the pinned tabs").toBeGreaterThanOrEqual(st.tabsBottom - 1);
+      204 |     expect.soft(st.card, "…close under them, in view").toBeLessThan(st.tabsBottom + 40);
+    > 205 |     expect.soft(st.focus, "focus is on the checked row").toBe(want);
+          |                                                          ^
+      206 |   });
+      207 | }
+      208 |
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:205:58
+
+    Error Context: test-results/pricingLadder.measure.ts-P-992a6-row-and-brings-it-into-view-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @390: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+    [measure] › tests/e2e/pricingLadder.measure.ts:169:3 › PL-2 @375: "See it in the plans" opens Pro, checks and flags the fitting row, and brings it into view 
+  1 passed (24.0s)

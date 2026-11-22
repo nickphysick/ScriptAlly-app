@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "PA3-11",
+  "where": "dashboard DOM",
+  "ok": true,
+  "detail": "515121 chars, identical"
+ },
+ {
+  "lock": "PA3-11",
+  "where": "dashboard pixels",
+  "ok": true,
+  "detail": "0 of 1484784 pixels differ; the base against itself: up to 4,891"
+ },
+ {
+  "lock": "PA3-11",
+  "where": "queries DOM",
+  "ok": true,
+  "detail": "512571 chars, identical"
+ },
+ {
+  "lock": "PA3-11",
+  "where": "queries pixels",
+  "ok": true,
+  "detail": "36 of 1484784 pixels differ (box 80,75–602,425); the base against itself: up to 4,891"
+ },
+ {
+  "lock": "PA3-11",
+  "where": "agents DOM",
+  "ok": true,
+  "detail": "513204 chars, identical"
+ },
+ {
+  "lock": "PA3-11",
+  "where": "agents pixels",
+  "ok": true,
+  "detail": "7 of 1484784 pixels differ (box 504,551–541,552); the base against itself: up to 4,891"
+ },
+ {
+  "lock": "PA3-11",
+  "where": "todo DOM",
+  "ok": true,
+  "detail": "510285 chars, identical"
+ },
+ {
+  "lock": "PA3-11",
+  "where": "todo pixels",
+  "ok": true,
+  "detail": "0 of 1484784 pixels differ; the base against itself: up to 4,891"
+ }
+]

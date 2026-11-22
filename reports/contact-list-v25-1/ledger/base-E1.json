@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "53 rows, 6 headings, 0 closed-to-queries"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 no Submissions",
+  "ok": false,
+  "detail": "agent · genres · replies in · submissions · your query · added"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 the tag and no Log a query",
+  "ok": true,
+  "detail": "0 tagged rows with a Log a query"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 no door text",
+  "ok": false,
+  "detail": "53 rows with a door"
+ },
+ {
+  "lock": "E1",
+  "where": "1512 last column",
+  "ok": false,
+  "detail": "last heading \"added\""
+ },
+ {
+  "lock": "E1",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "53 rows, 4 headings, 0 closed-to-queries"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 no Submissions",
+  "ok": false,
+  "detail": "agent · genres · submissions · your query"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 the tag and no Log a query",
+  "ok": true,
+  "detail": "0 tagged rows with a Log a query"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 no door text",
+  "ok": false,
+  "detail": "53 rows with a door"
+ },
+ {
+  "lock": "E1",
+  "where": "1280 last column",
+  "ok": true,
+  "detail": "last heading \"your query\""
+ }
+]

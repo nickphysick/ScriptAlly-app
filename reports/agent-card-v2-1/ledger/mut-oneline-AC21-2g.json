@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, a country of the three: the city's top is below the country control's bottom",
+  "ok": false,
+  "detail": "control 501.3–537.3 · city top 499.3"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, a country of the three: the city runs the full width",
+  "ok": false,
+  "detail": "111.9 of 522.0"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, a country of the three: the pills are one line",
+  "ok": true,
+  "detail": "[501,501,501,501]"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, Elsewhere chosen: the city's top is below the country control's bottom",
+  "ok": false,
+  "detail": "control 500.3–542.3 · city top 501.3"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, Elsewhere chosen: the city runs the full width",
+  "ok": false,
+  "detail": "24.0 of 522.0"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, Elsewhere chosen: the pills are one line",
+  "ok": true,
+  "detail": "[503,503,503,503]"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, Elsewhere chosen: its search sits on the pills' line, after them",
+  "ok": true,
+  "detail": "pills 503.3–539.3 r 1313.2 · search 500.3–542.3 l 1321.2 w 105.8"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "580px card, Elsewhere's list: 280px wide and inside the card",
+  "ok": true,
+  "detail": "{\"w\":280,\"l\":239,\"r\":61}"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, a country of the three: the city's top is below the country control's bottom",
+  "ok": false,
+  "detail": "control 451.3–487.3 · city top 449.3"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, a country of the three: the city runs the full width",
+  "ok": false,
+  "detail": "71.9 of 482.0"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, a country of the three: the pills are one line",
+  "ok": true,
+  "detail": "[451,451,451,451]"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, Elsewhere chosen: the city's top is below the country control's bottom",
+  "ok": false,
+  "detail": "control 450.3–492.3 · city top 451.3"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, Elsewhere chosen: the city runs the full width",
+  "ok": false,
+  "detail": "24.0 of 482.0"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, Elsewhere chosen: the pills are one line",
+  "ok": true,
+  "detail": "[453,453,453,453]"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, Elsewhere chosen: its search sits on the pills' line, after them",
+  "ok": true,
+  "detail": "pills 453.3–489.3 r 1089.9 · search 450.3–492.3 l 1097.9 w 97.1"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "540px card, Elsewhere's list: 280px wide and inside the card",
+  "ok": true,
+  "detail": "{\"w\":280,\"l\":199,\"r\":61}"
+ },
+ {
+  "lock": "AC21-2g",
+  "where": "the two cards are 580 and 540 wide",
+  "ok": true,
+  "detail": "[580,540]"
+ }
+]

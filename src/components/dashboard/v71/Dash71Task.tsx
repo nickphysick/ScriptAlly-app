@@ -1,0 +1,384 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD v71 — THE TASK CARD (ref design-refs/dashboard-v71/ `.nx`).
+ *
+ * One card, the full height of its row, cycling through the plan's items in the plan's order:
+ * 7s each, with one progress segment per item. Hover or focus inside the card holds it (the
+ * current segment shows full and stops); leaving starts that item's dwell again. ‹ › step by hand
+ * and restart the dwell. Under reduced motion it never advances on its own.
+ *
+ * ⚠️ THE DASHBOARD NEVER COMPLETES A TASK. "View task →" opens where the task is done properly
+ * (`viewTask` in Dash58) and writes nothing.
+ * ⚠️ THE DASHED EDGE MEANS "NOT HAPPENED YET" — the step chip still to do, and nothing else on the
+ * card. (The Query Centre timeline's grammar.)
+ * ⚠️ THE CHANGE OF ITEM IS NOT ANNOUNCED: the region's `aria-live` is off, so a screen reader is not
+ * interrupted every seven seconds.
+ */
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { ListAction, ListItem, ListPlan } from "../../../lib/dashList";
+import { DWELL_MS, segmentWindow, taskCardModel, type TaskCardModel, type TaskCtx } from "../../../lib/dashTaskCard";
+import "../v116/dash116Frame.css";
+
+/** The card's one button, for every kind (v59). */
+export const VIEW_TASK = "View task";
+
+/** The page after this one, or null on the last (Part C: never the first again). */
+export const thenIndex = (n: number, at: number): number | null => (at + 1 < n ? at + 1 : null);
+/** "2 of 4" — the pager's words, the ref's (first visit v1), at every size. */
+export const posText = (at: number, n: number): string => `${at + 1} of ${n}`;
+
+/** v60.1's caught-up line, in the same card */
+export const CAUGHT_UP = "No dates are set on your live queries yet. Add an agent to keep the list moving.";
+
+/**
+ * DASHBOARD v77 — THE FIXED SHAPE (a window ≥901px tall and ≥1100px wide, while querying): the task card is
+ * its NATURAL height, so every item of the cycle is rendered into ONE grid cell and the card is the tallest
+ * item's height by construction — it never changes height as it cycles. Below that the card fills its row
+ * and renders only the item on show, exactly as v71 (DB71's probes read the first matching element).
+ * ⚠️ THIS ONLY DECIDES WHETHER TO STACK. The height is the grid's, never a measurement.
+ */
+export const FIXED_SHAPE_QUERY = "(min-height: 901px) and (min-width: 1100px)";
+function useMatches(query: string): boolean {
+  const get = () => typeof window !== "undefined" && !!window.matchMedia?.(query).matches;
+  const [m, setM] = useState(get);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const mq = window.matchMedia(query);
+    const on = () => setM(mq.matches);
+    on();
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, [query]);
+  return m;
+}
+
+const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * v93 — THE "Expected" LABEL IS PLACED BY MEASURING, because it shares a 13px row with "Queried …" (left) and
+ * "Today · …" (right). Centred on its point where there is room; slid to sit just clear of either end label where
+ * there is not; hidden only when the row cannot hold all three. (An expected date still in the future clamps its
+ * point to today, which is exactly where "Today" is drawn — found by DB93 A3.)
+ */
+const LABEL_GAP = 10;
+function placeExpected(row: HTMLElement | null) {
+  const e = row?.querySelector<HTMLElement>(".d71-wexp");
+  if (!row || !e) return;
+  const start = row.querySelector<HTMLElement>("span:first-child");
+  const today = row.querySelector<HTMLElement>(".d71-wtoday");
+  const W = row.clientWidth, ew = e.offsetWidth;
+  const lo = (start?.offsetWidth ?? 0) + LABEL_GAP, hi = W - (today?.offsetWidth ?? 0) - LABEL_GAP - ew;
+  const x = Math.min(Math.max(Number(e.dataset.at ?? 0) * W - ew / 2, lo), hi);
+  const fits = W > 0 && hi >= lo;
+  e.style.left = `${x}px`;
+  e.style.visibility = fits ? "" : "hidden";
+}
+
+const Bar: React.FC<{ m: TaskCardModel; probe: boolean }> = ({ m, probe }) => {
+  const b = m.bar!;
+  const pct = (x: number) => `${(x * 100).toFixed(3)}%`;
+  const rowRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    placeExpected(row);
+    if (!row || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(() => placeExpected(row));
+    ro.observe(row);
+    return () => ro.disconnect();
+  });
+  return (
+    <div className="d71-win" data-d71={probe ? "bar" : undefined} {...(probe ? { "data-sent": b.sentMs, "data-expected": b.expectedMs ?? "", "data-close": b.closeMs ?? "", "data-today": b.todayMs } : {})}>
+      <div className="d71-wbar">
+        <i className="d71-ok" data-d71={probe ? "bar-solid" : undefined} style={{ width: pct(b.solid) }} />
+        <i className="d71-ov" data-d71={probe ? "bar-over" : undefined} style={{ width: pct(1 - b.solid) }} />
+        {b.close != null && (
+          <span className={`d71-cmark${b.close > 0.72 ? " is-end" : b.close < 0.28 ? " is-start" : ""}`} data-d71={probe ? "close-mark" : undefined} style={{ left: pct(b.close) }}>
+            {b.closeLabel && <em>{b.closeLabel}</em>}
+          </span>
+        )}
+      </div>
+      <div className="d71-wlab" ref={rowRef}>
+        <span data-d71={probe ? "bar-sent" : undefined}>{b.sentLabel}</span>
+        {b.expectedLabel && <span className="d71-wexp" data-d71={probe ? "bar-expected" : undefined} data-at={b.solid} style={{ left: pct(b.solid) }}>{b.expectedLabel}</span>}
+        <span className="d71-wtoday" data-d71={probe ? "bar-today" : undefined}>{b.todayLabel}</span>
+      </div>
+    </div>
+  );
+};
+
+const Body: React.FC<{ m: TaskCardModel; probe?: boolean }> = ({ m, probe = true }) => (
+  <>
+    <div className="d71-who">
+      {m.date ? (
+        <div className="d58-cal d71-cal" aria-hidden="true"><small>{m.date.dow}</small><b>{m.date.day}</b>{m.date.mon && <span className="d71-calmon" data-d71="cal-month">{m.date.mon}</span>}</div>
+      ) : (
+        <span className={`d71-av d71-av--${m.kind}`} aria-hidden="true">{m.initials}</span>
+      )}
+      <div className="d71-whot">
+        <h3 className="d71-title" data-d71={probe ? "title" : undefined}>{m.pre}{m.who && <b>{m.who}</b>}{m.post}</h3>
+        {m.sub && <small className="d71-sub" data-d71={probe ? "sub" : undefined}>{m.sub}</small>}
+      </div>
+    </div>
+    {m.line && <p className="d71-line" data-d71={probe ? "line" : undefined}>{m.line}</p>}
+    {m.bar && <Bar m={m} probe={probe} />}
+    {m.steps && (
+      <div className="d71-steps" data-d71={probe ? "steps" : undefined}>
+        {m.steps.map((s, i) => (
+          <React.Fragment key={`${s.label}-${i}`}>
+            {i > 0 && <b aria-hidden="true">›</b>}
+            <span className={s.done ? "d71-step is-done" : "d71-step is-todo"} data-d71={probe ? (s.done ? "step-done" : "step-todo") : undefined}>
+              {s.label} <small>{s.date}</small>
+            </span>
+          </React.Fragment>
+        ))}
+      </div>
+    )}
+  </>
+);
+
+
+export const Dash71Task: React.FC<{
+  loading: boolean;
+  plan: ListPlan;
+  ctx: TaskCtx;
+  /** opens where the task is completed, never writes */
+  onView: (a: ListAction) => void;
+  innerRef?: React.Ref<HTMLElement>;
+  /** Dashboard feed v1 (Part E): "next" is the right column's "Your next task" card; absent → the kind band (every
+   *  other mount, the first-visit page included). The plan, the models and `onView` are the same in both. */
+  look?: "band" | "next";
+  /** Dashboard first visit v2 (Part A): the "next" look's last page names this as what comes after it ("finish getting
+   *  started") while the Getting started sheet is open. Absent → the last page has no "Then:". */
+  thenLast?: string;
+}> = ({ loading, plan, ctx, onView, innerRef, look = "band", thenLast }) => {
+  const items: ListItem[] = plan.items;
+  const labelOf = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const g of plan.groups) for (const it of g.items) map.set(it.key, g.label);
+    return map;
+  }, [plan]);
+  const models = useMemo(() => items.map((it) => taskCardModel(it, labelOf.get(it.key) ?? "", ctx)), [items, labelOf, ctx]);
+  const n = models.length;
+  /* the plan's group counts, for the order lock (DB58 R2) */
+  const counts = useMemo(() => JSON.stringify(Object.fromEntries(plan.groups.map((g) => [g.key, g.items.length]))), [plan]);
+
+  const stack = useMatches(FIXED_SHAPE_QUERY);
+  const [index, setIndex] = useState(0);
+  const at = n ? Math.min(index, n - 1) : 0;
+  /* a plan that shrinks under the reader never leaves the card pointing past its end */
+  useEffect(() => { if (index !== at) setIndex(at); }, [index, at]);
+  const [held, setHeld] = useState(false);
+  /* bumped on every manual step and on every release of a hold: the dwell starts again */
+  const [run, setRun] = useState(0);
+  const cardRef = useRef<HTMLElement | null>(null);
+
+  /* the "next" look steps by its pager only: it has no progress segments to say a page is about to turn */
+  const auto = look === "band" && n > 1 && !held && !reduced();
+  useEffect(() => {
+    if (!auto || loading) return undefined;
+    const t = window.setTimeout(() => { setIndex((i) => (i + 1) % n); setRun((r) => r + 1); }, DWELL_MS);
+    return () => window.clearTimeout(t);
+  }, [auto, loading, n, at, run]);
+
+  const step = (d: number) => { setIndex((i) => ((i + d) % n + n) % n); setRun((r) => r + 1); };
+  const hold = () => setHeld(true);
+  const release = () => { setHeld(false); setRun((r) => r + 1); };
+  const onBlur = (e: React.FocusEvent) => {
+    if (cardRef.current && !cardRef.current.contains(e.relatedTarget as Node | null) && !cardRef.current.matches(":hover")) release();
+  };
+  const onLeave = () => { if (!cardRef.current?.contains(document.activeElement)) release(); };
+
+  const setRefs = (el: HTMLElement | null) => {
+    cardRef.current = el;
+    if (typeof innerRef === "function") innerRef(el);
+    else if (innerRef) (innerRef as React.MutableRefObject<HTMLElement | null>).current = el;
+  };
+
+  if (look === "next") return <NextTask loading={loading} models={models} items={items} at={at} step={step} onView={onView} setRefs={setRefs} counts={counts} thenLast={thenLast} />;
+
+  if (loading) {
+    return (
+      <section className="d71-task is-loading d58-skcard" data-sk="card" data-d71="task" data-loading="1" aria-hidden="true">
+        <div className="d71-th"><span className="d71-bandttl">Loading</span></div>
+        <div className="d71-tb" />
+        <div className="d71-tf" />
+      </section>
+    );
+  }
+
+  if (n === 0) {
+    return (
+      <section className="d71-task" data-d71="task" data-loading="0" data-kind="none" data-counts={counts} role="region" aria-label="Your tasks" aria-live="off" ref={setRefs}>
+        <div className="d71-tb d71-tb--none"><p className="d58-quietline" data-d58="focus-none">{CAUGHT_UP}</p></div>
+      </section>
+    );
+  }
+
+  const m = models[at];
+  /* ⚠️ THE LAST PAGE HAS NO "Then:" (first visit v1, Part C): it used to wrap round and name the first page as
+     what came next, so the last of four housekeeping pages read "Then: add typical reply times…" — the page the
+     writer had started on. */
+  const next = thenIndex(n, at) !== null ? models[thenIndex(n, at)!] : null;
+  const win = segmentWindow(n, at);
+  return (
+    <section
+      ref={setRefs}
+      className="d71-task"
+      data-d71="task"
+      data-loading="0"
+      data-kind={m.kind}
+      data-key={m.key}
+      data-group={items[at].group}
+      data-counts={counts}
+      data-query={m.queryId ?? undefined}
+      data-index={at}
+      data-label={m.bandTitle}
+      data-held={held ? "1" : "0"}
+      role="region"
+      aria-label="Your tasks"
+      aria-live="off"
+      style={{ ["--d71-band" as string]: m.band, ["--d71-band-ink" as string]: m.bandInk, ["--d71-accent" as string]: m.accent, ["--d71-pager" as string]: m.pager, ...(m.past ? { ["--d71-past" as string]: m.past, ["--d71-past-op" as string]: 1 } : {}) } as React.CSSProperties}
+      onMouseEnter={hold}
+      onMouseLeave={onLeave}
+      onFocus={hold}
+      onBlur={onBlur}
+    >
+      {/* v93: the head is the kind band — its title, and the pager at the right */}
+      <div className="d71-th" data-d71="band" data-ink={m.bandInk === "#ffffff" ? "light" : "dark"}>
+        <span className="d71-bandttl" data-d71="band-title">{m.bandTitle}</span>
+        {n > 1 && (
+          <span className="d71-pos" data-d71="pos">
+            <button type="button" aria-label="Previous task" data-d71="prev" onClick={() => step(-1)}>‹</button>
+            <span data-d71="pos-text">{posText(at, n)}</span>
+            <button type="button" aria-label="Next task" data-d71="next" onClick={() => step(1)}>›</button>
+          </span>
+        )}
+      </div>
+      {n > 1 && (
+        <div className="d71-prog" data-d71="segments" aria-hidden="true">
+          {Array.from({ length: win.count }, (_, k) => {
+            const i = win.start + k;
+            return (
+              <i key={i} className={i < at ? "is-past" : i === at ? "is-now" : undefined} data-d71="segment">
+                {i === at && <b key={`${at}-${run}`} className={auto ? "is-running" : "is-full"} style={{ animationDuration: `${DWELL_MS}ms` }} />}
+              </i>
+            );
+          })}
+        </div>
+      )}
+      {stack && n > 1 ? (
+        /* every item in one cell: the card is the tallest item's height and never jumps (v77) */
+        <div className="d71-tbstack" data-d71="stack">
+          {models.map((x, i) => i === at ? (
+            <div className="d71-tb" key={`${x.key}-${at}`} data-d71="body" data-kind={x.kind}>
+              <Body m={x} />
+            </div>
+          ) : (
+            <div className="d71-tb is-ghost" key={`ghost-${x.key}`} data-kind={x.kind} aria-hidden="true" inert={true} style={{ visibility: "hidden" }}>
+              <Body m={x} probe={false} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="d71-tb" key={`${m.key}-${at}`} data-d71="body" data-kind={m.kind}>
+          <Body m={m} />
+        </div>
+      )}
+      <div className="d71-tf" data-d71="foot">
+        <button type="button" className="d71-view" data-d71="view" onClick={() => onView(items[at].action)}>{VIEW_TASK} →</button>
+        {next && <span className="d71-then" data-d71="then">Then: {next.plain}</span>}
+      </div>
+    </section>
+  );
+};
+
+/** "To do · Consider closing" — the task's kind, the band's own title */
+export const todoChip = (m: TaskCardModel): string => `To do · ${m.bandTitle}`;
+/** The task in words: the model's title, without the question mark the kind band asked it with */
+const taskLine = (m: TaskCardModel) => ({ pre: m.pre, who: m.who, post: m.post.replace(/\?$/, "") });
+export const DO_THIS_TASK = "Do this task";
+
+/**
+ * DASHBOARD FEED v1 — "YOUR NEXT TASK" (Part E; ref design-refs/dashboard-feed-v1/ screen 01, top right).
+ *
+ * A grey header with the pager; a tick box, the "To do · {kind}" chip, the task, a muted reason, a full-width navy
+ * "Do this task →", and "Then: …" under it. Every page of the plan is drawn in one cell, so the card is the tallest
+ * page's height and paging moves nothing below it.
+ * ⚠️ NOT `.d71-task`: that class carries the kind band's rim, inner frame and paddings (dash71/dash116Frame), and this
+ * card has none of them. `data-d71="task"` stays, so the locks that find the card still do.
+ * ⚠️ THE TICK BOX COMPLETES NOTHING. It does exactly what "Do this task" does — opens the place the task is done — and
+ * says so in its accessible name. The dashboard never completes a task.
+ */
+const NextTask: React.FC<{
+  loading: boolean;
+  models: TaskCardModel[];
+  items: ListItem[];
+  at: number;
+  step: (d: number) => void;
+  onView: (a: ListAction) => void;
+  setRefs: (el: HTMLElement | null) => void;
+  counts: string;
+  thenLast?: string;
+}> = ({ loading, models, items, at, step, onView, setRefs, counts, thenLast }) => {
+  const n = models.length;
+  if (loading) {
+    return (
+      <section className="df1-task is-loading d58-skcard" data-sk="card" data-d71="task" data-loading="1" aria-hidden="true">
+        <div className="df1-tkh"><span className="df1-tkttl">Your next task</span></div>
+        <div className="df1-tkb" />
+      </section>
+    );
+  }
+  if (n === 0) {
+    return (
+      <section ref={setRefs} className="df1-task" data-d71="task" data-loading="0" data-kind="none" data-counts={counts} role="region" aria-label="Your tasks">
+        <div className="df1-tkh"><span className="df1-tkttl">Your next task</span></div>
+        <div className="df1-tkb"><p className="d58-quietline" data-d58="focus-none">{CAUGHT_UP}</p></div>
+      </section>
+    );
+  }
+  const m = models[at];
+  return (
+    <section ref={setRefs} className="df1-task" data-d71="task" data-loading="0" data-kind={m.kind} data-key={m.key} data-group={items[at].group}
+      data-counts={counts} data-query={m.queryId ?? undefined} data-index={at} role="region" aria-label="Your tasks">
+      <div className="df1-tkh" data-d71="band">
+        <span className="df1-tkttl">Your next task</span>
+        {n > 1 && (
+          <span className="df1-pg" data-d71="pos">
+            <button type="button" aria-label="Previous task" data-d71="prev" onClick={() => step(-1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg></button>
+            <span data-d71="pos-text">{posText(at, n)}</span>
+            <button type="button" aria-label="Next task" data-d71="next" onClick={() => step(1)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></button>
+          </span>
+        )}
+      </div>
+      <div className="df1-tkstack" data-d71="stack">
+        {models.map((x, i) => {
+          const on = i === at;
+          const next = thenIndex(n, i) !== null ? models[thenIndex(n, i)!] : null;
+          const line = taskLine(x);
+          const words = `${line.pre}${line.who}${line.post}`;
+          return (
+            <div key={x.key} className={`df1-tkb${on ? "" : " is-ghost"}`} data-d71={on ? "body" : undefined} data-kind={x.kind}
+              aria-hidden={on ? undefined : true} inert={on ? undefined : true}>
+              <>
+                  <div className="df1-tkrow">
+                    <button type="button" className="df1-box" data-df1={on ? "task-box" : undefined} aria-label={`${DO_THIS_TASK}: ${words}`} onClick={() => onView(items[i].action)} />
+                    <div className="df1-tkw">
+                      <span className="df1-todo" data-df1={on ? "task-chip" : undefined}>{todoChip(x)}</span>
+                      <h3 className="df1-tkline" data-d71={on ? "title" : undefined}>{line.pre}{line.who && <b>{line.who}</b>}{line.post}</h3>
+                      {x.line && <p className="df1-tkwhy" data-d71={on ? "line" : undefined}>{x.line}</p>}
+                    </div>
+                  </div>
+                  <button type="button" className="df1-go" data-d71={on ? "view" : undefined} onClick={() => onView(items[i].action)}>{DO_THIS_TASK} →</button>
+                  {next ? <p className="df1-then" data-d71={on ? "then" : undefined}>Then: {next.plain}</p>
+                    : thenLast ? <p className="df1-then" data-d71={on ? "then" : undefined}>Then: {thenLast}</p> : null}
+              </>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+};

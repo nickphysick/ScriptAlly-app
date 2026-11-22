@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "pop",
+  "where": "1512 /import: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /import: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /import: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /plans: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /plans: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /plans: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /help: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /help: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /help: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /account/profile: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /account/profile: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /account/profile: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /dashboard: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /dashboard: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /dashboard: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1512 /queries: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /queries: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1512 /queries: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /import: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /import: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /import: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /plans: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /plans: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /plans: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /help: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /help: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /help: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /account/profile: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /account/profile: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /account/profile: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /dashboard: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /dashboard: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 16 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /dashboard: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "1280 /queries: two or more base captures and a head capture",
+  "ok": true,
+  "detail": "base,base2 / head,head2"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /queries: pixels within the base's own variation",
+  "ok": true,
+  "detail": "head 0 px vs base-to-base 0 px"
+ },
+ {
+  "lock": "S9",
+  "where": "1280 /queries: DOM-identical to the base",
+  "ok": true,
+  "detail": ""
+ }
+]

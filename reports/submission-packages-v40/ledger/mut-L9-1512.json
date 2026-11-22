@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L9-1512",
+  "where": "the shelf is 1160px wide (±1)",
+  "ok": false,
+  "detail": "{\"b\":{\"l\":296,\"r\":1504,\"w\":1208},\"want\":1160}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the shelf is centred (±1)",
+  "ok": false,
+  "detail": "{\"b\":{\"l\":296,\"r\":1504,\"w\":1208},\"sheet\":{\"l\":248,\"w\":1256}}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the workbench frame is 1160px wide (±1)",
+  "ok": true,
+  "detail": "{\"b\":{\"l\":296,\"r\":1456,\"w\":1160},\"want\":1160}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the workbench frame is centred (±1)",
+  "ok": true,
+  "detail": "{\"b\":{\"l\":296,\"r\":1456,\"w\":1160},\"sheet\":{\"l\":248,\"w\":1256}}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the tracking body is 1160px wide (±1)",
+  "ok": true,
+  "detail": "{\"b\":{\"l\":296,\"r\":1456,\"w\":1160},\"want\":1160}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the tracking body is centred (±1)",
+  "ok": true,
+  "detail": "{\"b\":{\"l\":296,\"r\":1456,\"w\":1160},\"sheet\":{\"l\":248,\"w\":1256}}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the workbench header's art sits left of its title",
+  "ok": true,
+  "detail": "{\"art\":{\"l\":324,\"r\":420,\"w\":96},\"ttl\":{\"l\":442,\"r\":1082,\"w\":640}}"
+ }
+]

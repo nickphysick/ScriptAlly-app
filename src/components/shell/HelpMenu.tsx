@@ -19,6 +19,7 @@
  */
 import React from "react";
 import { GuideRing } from "./guide/GuideRing";
+import { SHOW_ME_ROUND } from "../../lib/dashTour";
 import { setGuidesOff, useGuideHub, useGuidesOff } from "../../lib/guideHub";
 import { HELP_ARTICLES, PAGE_ARTICLES, articleHref, markWhatsNewSeen, whatsNewUnseen } from "../../lib/helpArticles";
 import { menuRows } from "../../lib/menuKeys";
@@ -43,6 +44,8 @@ export interface HelpMenuProps {
   /** a page on the older one-card guide (lib/pageGuide) offers it here instead */
   legacyGuide: boolean;
   onLegacyGuide: () => void;
+  /** Dashboard first visit v2 (Part D): "Show me round again" — offered while the dashboard registers its tour's replay */
+  onTour?: () => void;
   /** close the menu; `focusHelp` returns focus to the "?" */
   onClose: (focusHelp: boolean) => void;
   onGo: (path: string) => void;
@@ -75,7 +78,7 @@ export function menuKey(e: React.KeyboardEvent, menu: HTMLElement | null): boole
   return true;
 }
 
-export const HelpMenu: React.FC<HelpMenuProps> = ({ pageName, legacyGuide, onLegacyGuide, onClose, onGo, onFeedback, menuRef, style }) => {
+export const HelpMenu: React.FC<HelpMenuProps> = ({ pageName, legacyGuide, onLegacyGuide, onTour, onClose, onGo, onFeedback, menuRef, style }) => {
   const hub = useGuideHub();
   const off = useGuidesOff();
   const guide = hub && pageName && hub.status.page === pageName ? hub : null;
@@ -114,6 +117,12 @@ export const HelpMenu: React.FC<HelpMenuProps> = ({ pageName, legacyGuide, onLeg
     head = (
       <button type="button" role="menuitem" className="hm-row hm-again" data-hm="restore" onClick={() => { onClose(false); onLegacyGuide(); }}>
         {HM_ICONS.again}<span className="t">Show the page guide again</span>
+      </button>
+    );
+  } else if (onTour) {
+    head = (
+      <button type="button" role="menuitem" className="hm-row hm-again" data-hm="tour" onClick={() => { onClose(false); onTour(); }}>
+        {HM_ICONS.again}<span className="t">{SHOW_ME_ROUND}</span>
       </button>
     );
   }

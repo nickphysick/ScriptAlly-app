@@ -18,15 +18,15 @@
   content: ""; position: absolute; top: 12px; bottom: 12px; width: 1.5px; background: rgba(28, 19, 15, 0.14);
   left: calc(var(--qlg-date) + var(--qlg-gap) + var(--qlg-mark) / 2 - 0.75px);
 }
-.qlg > .qlg-d { grid-column: 1; padding-top: 3px; text-align: right; font-family: var(--sp-type); font-weight: 400; font-size: 14px; line-height: 1.3; color: rgba(28, 19, 15, 0.55); }
+.qlg > .qlg-d { grid-column: 1; padding-top: 3px; text-align: right; font-family: var(--sp-type); font-weight: 400; font-size: 14px; line-height: 1.3; color: var(--sp-quiet); }
 .qlg > .qlg-d small { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 12px; line-height: 1.2; color: rgba(28, 19, 15, 0.38); }
 .qlg > .qlg-g { grid-column: 2; position: relative; z-index: 1; width: 26px; height: 26px; border-radius: 50%; background: #fbf9f5; display: grid; place-items: center; }
 .qlg > .qlg-c { grid-column: 3; position: relative; min-width: 0; padding: 0 36px 26px 0; }
 .qlg .qlg-c .qlg-t { margin: 2px 0 0; font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 18px; line-height: 1.3; color: #1c130f; }
-.qlg .qlg-c .qlg-t em { font-style: italic; color: rgba(28, 19, 15, 0.55); }
-.qlg .qlg-c--quiet .qlg-t { font-size: 16px; color: rgba(28, 19, 15, 0.62); }
-.qlg .qlg-c .qlg-from { margin: 4px 0 0; font-family: var(--sp-serif); font-style: italic; font-size: 15px; line-height: 1.45; color: rgba(28, 19, 15, 0.62); }
-.qlg > .qlg-c--on { background: linear-gradient(90deg, rgba(45, 58, 80, 0.06), transparent); border-radius: 8px; }
+.qlg .qlg-c .qlg-t em { font-style: italic; color: var(--sp-quiet); }
+.qlg .qlg-c--quiet .qlg-t { font-size: 16px; color: var(--sp-muted); }
+.qlg .qlg-c .qlg-from { margin: 4px 0 0; font-family: var(--sp-serif); font-style: italic; font-size: 15px; line-height: 1.45; color: var(--sp-muted); }
+.qlg > .qlg-c--on { background: linear-gradient(90deg, rgba(42, 58, 82, 0.06), transparent); border-radius: 8px; }
 @keyframes qlgFresh { from { background-color: rgba(217, 150, 122, 0.28); } to { background-color: rgba(217, 150, 122, 0); } }
 .qlg > .qlg-c--fresh { animation: qlgFresh 1.4s ease-out backwards; border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) { .qlg > .qlg-c--fresh { animation: none; } }
@@ -34,11 +34,11 @@
 /* the correction's ···: at the right of the entry's text, shown on hover or focus */
 .qlg .qlg-fix {
   position: absolute; right: 0; top: -2px; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer;
-  color: rgba(28, 19, 15, 0.45); font-family: var(--sp-serif); font-weight: 700; font-size: 15px; line-height: 1; letter-spacing: 1px; opacity: 0; transition: opacity 0.12s;
+  color: var(--sp-quiet); font-family: var(--sp-serif); font-weight: 700; font-size: 15px; line-height: 1; letter-spacing: 1px; opacity: 0; transition: opacity 0.12s;
 }
 .qlg .qlg-c:hover .qlg-fix, .qlg .qlg-fix:focus-visible, .qlg .qlg-c--on .qlg-fix { opacity: 1; }
 .qlg .qlg-fix:hover { background: #efe9e1; color: #1c130f; }
-.qlg .qlg-fix:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.qlg .qlg-fix:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (hover: none) { .qlg .qlg-fix { opacity: 1; } }
 
 /* the inline delete confirm takes the entry's place, across all three columns */
@@ -47,7 +47,7 @@
 /* what went: the white slip, or the dashed one */
 .qlg .qlg-slip { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 10px 20px -16px rgba(28, 19, 15, 0.4); }
 .qlg .qlg-slip--none { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: transparent; box-shadow: none; border: 1.5px dashed rgba(28, 19, 15, 0.25); }
-.qlg .qlg-slip--none b { font-family: var(--sp-serif); font-weight: 400; font-size: 15.5px; line-height: 1.35; color: rgba(28, 19, 15, 0.62); }
+.qlg .qlg-slip--none b { font-family: var(--sp-serif); font-weight: 400; font-size: 15.5px; line-height: 1.35; color: var(--sp-muted); }
 .qlg .qlg-slipadd {
   flex: none; padding: 0; border: 0; border-bottom: 1.5px solid rgba(42, 58, 82, 0.35); background: none; cursor: pointer; white-space: nowrap;
   font-family: var(--sp-type); font-weight: 400; font-size: 14.5px; line-height: 1.3; color: #2a3a52;
@@ -56,7 +56,7 @@
 .qlg .qlg-slipadd:hover { border-bottom-color: #2a3a52; }
 .qlg .qlg-sh b, .qlg .qlg-slipname { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 16px; line-height: 1.25; color: #1c130f; }
 .qlg .qlg-slipname { padding: 0; border: 0; background: none; cursor: pointer; text-align: left; text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.25); text-underline-offset: 3px; }
-.qlg .qlg-sh span { display: block; margin-top: 2px; font-family: var(--sp-serif); font-style: italic; font-size: 14px; line-height: 1.4; color: rgba(28, 19, 15, 0.55); }
+.qlg .qlg-sh span { display: block; margin-top: 2px; font-family: var(--sp-serif); font-style: italic; font-size: 14px; line-height: 1.4; color: var(--sp-quiet); }
 .qlg .qlg-slip ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .qlg .qlg-slip li { min-height: 28px; display: inline-flex; align-items: center; gap: 7px; padding: 0 11px; border-radius: 14px; background: #f4f0ea; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.3; }
 .qlg .qlg-slip li i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: #2a3a52; }
@@ -74,8 +74,8 @@
 .qlg .qsc .qsc-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .qlg .qsc .qsc-h b { min-width: 0; font-family: var(--sp-type); font-weight: 400; font-size: 22px; line-height: 1.15; color: #1c130f; }
 .qlg .qsc .qsc-h span { flex: none; font-family: var(--sp-type); font-weight: 400; font-size: 14px; line-height: 1.3; white-space: nowrap; color: var(--qsc-c); }
-.qlg .qsc .qsc-h span.hot { color: #a2452a; }
-.qlg .qsc p { margin: 8px 0 0; font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, 0.78); }
+.qlg .qsc .qsc-h span.hot { color: var(--sp-rust); }
+.qlg .qsc p { margin: 8px 0 0; font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 16px; line-height: 1.5; color: var(--sp-muted); }
 .qlg .qsc p i { font-style: italic; }
 /* ruling 3 — the quiet links under the paragraph: Source Serif 15, navy, an underline rule */
 .qlg .qsc .qsc-links { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 10px; }
@@ -84,13 +84,13 @@
   font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 15px; line-height: 1.4; color: #2a3a52; cursor: pointer;
 }
 .qlg .qsc .qsc-link:hover { border-bottom-color: #2a3a52; }
-.qlg .qsc .qsc-link:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.qlg .qsc .qsc-link:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qlg .qsc .qsc-set { margin-top: 12px; }
 /* the slider's own sheet (f12.css) reads tokens the panel does not carry, so its card, its label and its
    two buttons are stated here; the track and thumb stay WeekSlider's */
 .qlg .qsc .qsc-set .tl-setwin { padding: 12px 14px; border: 1px solid rgba(28, 19, 15, 0.14); border-radius: 10px; background: #fffefb; }
-.qlg .qsc .qsc-set .tl-setwin .sa-label { font-family: var(--sp-serif); font-size: 14px; letter-spacing: 0; text-transform: none; color: rgba(28, 19, 15, 0.7); }
-.qlg .qsc .qsc-set .tl-setwin-val { margin-top: 8px; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; color: rgba(28, 19, 15, 0.6); }
+.qlg .qsc .qsc-set .tl-setwin .sa-label { font-family: var(--sp-serif); font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--sp-muted); }
+.qlg .qsc .qsc-set .tl-setwin-val { margin-top: 8px; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; color: var(--sp-quiet); }
 .qlg .qsc .qsc-set .tl-setwin-cancel, .qlg .qsc .qsc-set .tl-setwin .qn-send {
   height: 32px; padding: 0 14px; border-radius: 999px; font-family: var(--sp-type); font-size: 13px; cursor: pointer;
 }
@@ -99,6 +99,6 @@
 .qlg .qsc .qsc-set .tl-setwin .qn-send:disabled { opacity: 0.45; cursor: default; }
 .qlg .qsc .qsc-bar { position: relative; height: 6px; margin-top: 14px; border-radius: 3px; background: rgba(28, 19, 15, 0.1); overflow: hidden; }
 .qlg .qsc .qsc-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--qsc-c); }
-.qlg .qsc .qsc-bar.hot i { background: repeating-linear-gradient(-45deg, #a2452a 0 6px, #c0674a 6px 12px); }
-.qlg .qsc .qsc-bl { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; line-height: 1.4; color: rgba(28, 19, 15, 0.55); }
+.qlg .qsc .qsc-bar.hot i { background: repeating-linear-gradient(-45deg, var(--sp-rust) 0 6px, #c0674a 6px 12px); }
+.qlg .qsc .qsc-bl { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; line-height: 1.4; color: var(--sp-quiet); }
 .qlg .qsc .qsc-bl span { font-style: italic; }

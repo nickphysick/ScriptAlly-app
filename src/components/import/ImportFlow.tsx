@@ -15,7 +15,19 @@
  * fork, the Import page's tiles); while the flow is `idle` it renders only its two file pickers,
  * which the host opens through the ref.
  */
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { isUsedRefusal } from "../../lib/smartImportEntitlement";
+import { armMentorIntro, disarmMentorIntro } from "../../lib/mentorIntro";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { DraftMeta } from "../../lib/importDraft";
+/* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase with it, and this flow is mounted by suites and labs that
+   have no Firebase to load */
+const draftStore = () => import("../../lib/importDraft");
+import { draftCounts, type DraftPayload, type ReviewSnapshot } from "../../lib/importDraftModel";
+import { eventPath, logEvent } from "../../lib/events";
+import { useLocation } from "react-router-dom";
+
+/** First visit v2 (Part F): a draft is saved this long after the review's last change. */
+export const DRAFT_SAVE_MS = 800;
 import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
@@ -24,13 +36,16 @@ import { applyImportUpdate, PROGRESS_START, type LoaderProgress } from "../../li
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { agentAgencyLine } from "../../lib/agentDisplay";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
+import { clearWin, noteFirstWin } from "../../lib/firstWin";
+import { isFirstQueryWin, winCopy } from "../../lib/dashFirstVisit";
 import { SmartImportReview } from "../onboarding/SmartImportReview";
 import { ImportOverview } from "../onboarding/ImportOverview";
 import { ImportingLoader } from "../onboarding/ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "../onboarding/ScatterSettleLoader";
-import { fmtDate } from "../../lib/smartImportReviewModel";
+import { fmtDate, reviewTallies } from "../../lib/smartImportReviewModel";
+import { summaryModel } from "../../lib/importSummary";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
-import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
+import { readRouteOfFile } from "../../lib/importReadRoute";
 import { buildImportNotice, saveImportNotice } from "../../lib/importNotice";
 import { splitDuplicates, ALREADY_REASON } from "../../lib/importDuplicates";
 
@@ -40,7 +55,7 @@ import { ConfirmScreen } from "../onboarding/ConfirmScreen";
 import { PhotosScreen } from "../onboarding/PhotosScreen";
 import { MAX_PAGES, PHOTOS_WORDS, createUrlRegistry, isImageFile, movePage, type ReviewPhoto } from "../../lib/photoImport";
 import { preparePhoto, fitPhotos } from "../../lib/photoPrepare";
-import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "../onboarding/DeadEnd";
+import { UsedFree, Unreadable, NothingImported, Unloaded } from "../onboarding/DeadEnd";
 import { aiRefusalReason, IMPORT_IN_PROGRESS_MESSAGE } from "../../lib/aiRefusal";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
@@ -51,15 +66,14 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 export type ImportFlowScreen = "idle" | "confirm" | "photos" | "blocked" | "reading" | "overview" | "review" | "fallback" | "importing" | "done";
 
 /** A blocked Smart Import attempt — the structured reason the gate (or the pre-check) surfaced. */
-type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string };
+/* plan rules v1: one Smart Import per account on every plan — the one way to be blocked is to have used it */
+type Blocked = { reason: "used" };
 
 /** What the host can ask of the flow while it is idle. */
 export interface ImportFlowHandle {
-  /** Open the Smart Import file picker. */
+  /** Open the import's one file picker. The file's headings decide how it is read (lib/importReadRoute). */
   chooseFile: () => void;
-  /** Open the template file picker. */
-  chooseTemplate: () => void;
-  /** A file dropped on the host's drop zone: the Smart Import path. */
+  /** A file dropped on the host's drop zone: the same as the picker's choice. */
   dropFile: (file: File) => void;
   /** "Use photos" (smart-import-photos-v1.1): the photos screen, empty. It never opens the picker:
    *  that opens only from the screen's own "Choose photos" or "Add a page", in their click. */
@@ -67,8 +81,11 @@ export interface ImportFlowHandle {
   /** Images dropped on the host's drop zone. */
   dropPhotos: (files: File[]) => void;
   /** Drop the file that was read and everything answered about it, and go back to idle. Nothing has
-   *  been written at any point before the import, so there is nothing to undo. */
+   *  been written at any point before the import, so there is nothing to undo — except the kept draft
+   *  (Dashboard first visit v2, Part F), which a discard deletes. */
   reset: () => void;
+  /** Dashboard first visit v2 (Part F): reopen a kept review at the step and row it was left on. */
+  resume: (d: { meta: DraftMeta; payload: DraftPayload }) => void;
 }
 
 export interface ImportFlowProps {
@@ -86,8 +103,6 @@ export interface ImportFlowProps {
   onAddByHand: () => void;
   /** The flow has gone back to `idle` — "Back" from its first screen, or a dead end's way out. */
   onBackToStart?: () => void;
-  /** "Use the template instead", from the Smart-Import-already-used screen. */
-  onUseTemplate?: () => void;
   /** Import committed and the loader has finished: the host opens the dashboard. */
   onImportComplete: (outcome: CommitOutcome, destination: "dashboard") => void;
   /** The flow's current screen, reported so the host can set its frame around it. */
@@ -106,9 +121,9 @@ export interface ImportFlowProps {
 }
 
 export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function ImportFlow({
-  manuscriptTitle, manuscriptId, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onUseTemplate, onImportComplete, onScreen, onHandoff, onCancel, lab,
+  manuscriptTitle, manuscriptId, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onImportComplete, onScreen, onHandoff, onCancel, lab,
 }, ref) {
-  const { currentUser, agents, queries, addAgent, addQuery } = useScriptAllyDb();
+  const { currentUser, agents, queries, addAgent, addQuery, manuscripts } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
 
   const [screen, setScreen] = useState<ImportFlowScreen>(lab ? "overview" : "idle");
@@ -136,7 +151,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [blocked, setBlocked] = useState<Blocked | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const templateInputRef = useRef<HTMLInputElement>(null);
 
   /* ── Photos (smart-import-photos-v1) ─────────────────────────────────────────────────────────
      The writer's own pages, held in memory for the flow and NOWHERE else: never uploaded but to
@@ -198,7 +212,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   /* Photos chosen (or dropped) → the same client gate as a file; then the photos screen. */
   const photosAllowed = (): boolean => {
     if (entitlement.allowed) return true;
-    setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
+    setBlocked({ reason: "used" });
     setScreen("blocked");
     return false;
   };
@@ -214,12 +228,69 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   /** Cells the template parser could not read. Each date flag is also a reason on its own query,
    *  which is what the review renders. */
   const [, setTemplateFlags] = useState<TemplateFlag[]>([]);
-  /** The file's row count, when it is known without reading the file again: the template parse
-   *  returns it; a Smart import does not (its sample is capped at eight rows). */
-  const [rowsRead, setRowsRead] = useState<number | null>(null);
   /** Rows of the file the account already holds (same agent, manuscript and sent day). They are
    *  taken out before the summary, so the summary and the review count only what will be written. */
   const [already, setAlready] = useState<AlreadyRow[]>([]);
+
+  /* ── Dashboard first visit v2 (Part F): the review, kept as a draft while it is open ──
+     Every change the review reports is saved (debounced) to `importDrafts/{uid}`: the file's name, the read, every
+     decision so far, the step and counts — never the file. Finishing the import, or discarding it, deletes it. A save
+     that fails is logged and the review carries on. Never in the lab, and never without a writer. */
+  const [resumeSnap, setResumeSnap] = useState<ReviewSnapshot | undefined>(undefined);
+  const draftStarted = useRef<string | null>(null);
+  const draftTimer = useRef(0);
+  const draftLive = useRef(false);
+  const uid = currentUser?.id ?? null;
+  /* Part I: the import's events — the path is the writer's, the counts the review's own (`draftCounts`) */
+  const lastSnap = useRef<ReviewSnapshot | null>(null);
+  const evPath = () => eventPath(currentUser, manuscripts.find((m) => m.id === manuscriptId) ?? null);
+  const evCounts = (snap: ReviewSnapshot | null) => {
+    if (!snap) return {};
+    const c = draftCounts(snap);
+    return { step: snap.screen, agents: c.agentsChecked, queries: c.queriesChecked };
+  };
+  const keepDraft = useCallback((snap: ReviewSnapshot) => {
+    lastSnap.current = snap;
+    if (lab || !uid || !validated) return;
+    if (!draftStarted.current) {
+      draftStarted.current = new Date().toISOString();
+      logEvent(uid, "import_started", evPath(), evCounts(snap));
+    }
+    draftLive.current = true;
+    window.clearTimeout(draftTimer.current);
+    const input = { uid, fileName, source: importSource, manuscriptId: manuscriptId ?? null, startedAt: draftStarted.current,
+      payload: { result: validated.result, review: snap, already } };
+    draftTimer.current = window.setTimeout(() => {
+      if (!draftLive.current) return;
+      void draftStore().then((m) => m.saveDraft(input)).catch((e) => console.error("Import draft not kept:", e));
+    }, DRAFT_SAVE_MS);
+  }, [lab, uid, validated, fileName, importSource, manuscriptId, already]);
+  const dropDraft = () => {
+    window.clearTimeout(draftTimer.current);
+    draftLive.current = false;
+    draftStarted.current = null;
+    if (uid && !lab) void draftStore().then((m) => m.deleteDraft(uid)).catch(() => { /* nothing kept, or already gone */ });
+  };
+  useEffect(() => () => window.clearTimeout(draftTimer.current), []);
+  /* Part I: the page left while a review is open (another route, or the tab closed) — the moment a draft matters */
+  const where = useLocation().pathname;
+  const whereWas = useRef(where);
+  const leftLogged = useRef(false);
+  useEffect(() => {
+    const moved = whereWas.current !== where;
+    whereWas.current = where;
+    if (screen !== "review") { leftLogged.current = false; return; }
+    if (moved && !leftLogged.current && !lab) { leftLogged.current = true; logEvent(uid, "import_left", evPath(), evCounts(lastSnap.current)); }
+    if (!moved) leftLogged.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [where, screen]);
+  useEffect(() => {
+    if (screen !== "review" || lab) return undefined;
+    const hide = () => { if (!leftLogged.current) { leftLogged.current = true; logEvent(uid, "import_left", evPath(), evCounts(lastSnap.current)); } };
+    window.addEventListener("pagehide", hide);
+    return () => window.removeEventListener("pagehide", hide);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, uid]);
 
   /**
    * Take the file as read, set aside what is already in the account, and show what is left.
@@ -246,12 +317,21 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   };
   const [nothingNew, setNothingNew] = useState(false);
 
-  // File chosen → gate it on the client first. If already used, go straight to the blocked screen
-  // (no wasted call); otherwise hold the file and ask for an explicit confirm before spending it.
+  /* File chosen (two-door import v1) → its first sheet's headings decide the reader, BEFORE anything
+     else. QueryHawk's own headings go straight to the template parser: no confirm, no entitlement
+     check, no charge. Anything else is the Smart Import path below, exactly as before. */
+  const pickFile = (file: File) => { void routeFile(file); };
+  const routeFile = async (file: File) => {
+    if ((await readRouteOfFile(file)) === "headings") { await pickTemplateFile(file); return; }
+    pickSmartFile(file);
+  };
+
+  // A Smart Import file → gate it on the client first. If already used, go straight to the blocked
+  // screen (no wasted call); otherwise hold the file and ask for an explicit confirm before spending it.
   // The server re-checks regardless — this is UX, not the enforcement.
-  const pickFile = (file: File) => {
+  const pickSmartFile = (file: File) => {
     if (!entitlement.allowed) {
-      setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
+      setBlocked({ reason: "used" });
       setScreen("blocked");
       return;
     }
@@ -266,7 +346,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   };
 
   /**
-   * The template path — parsed HERE, in the browser, with no call to anything.
+   * The headings path — parsed HERE, in the browser, with no call to anything. Reached from the one
+   * picker when the file's headings are the template's (two-door import v1); there is no picker of its own.
    *
    * ⚠️ IT DOES NOT TOUCH THE ENTITLEMENT, AND THAT IS THE PROMISE THE FORK MAKES IN WORDS. No
    * gate check, no confirm beat, no spend: the columns are set, so reading them needs no model.
@@ -284,7 +365,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     try {
       const parsed = await readTemplateFile(file);
       setTemplateFlags(parsed.flags);
-      setRowsRead(parsed.rowsRead);
       if (takeRead(parsed.result) === "fresh") setScreen("overview");
     } catch (e) {
       console.error("Template parse failed:", e);
@@ -293,7 +373,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   };
 
   const runMapping = async (file: File) => {
-    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setRawSample([]); setExtractComplete(false); setValidated(null);
     setImportSource("smart");
     setConfirmNote(null);
     setScreen("reading"); // the scatter-settle loader takes over from here
@@ -311,8 +391,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       // UI shows the right thing, not a raw error. (Covers a client/server race: client thought it was
       // allowed but the server had already consumed it.)
       const reason = e?.details?.reason;
-      if (reason === "free_used" || reason === "pro_month_used") {
-        setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
+      if (isUsedRefusal(reason)) {
+        setBlocked({ reason: "used" });
         setScreen("blocked");
         return;
       }
@@ -338,7 +418,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     setPhotoBusy(false);
     if (!fitted) { setPhotoMessage(PHOTOS_WORDS.tooLarge); return; }
     setReadPhotos(ready.map((p) => ({ shown: photos.indexOf(p) + 1, url: p.url!, width: p.width, height: p.height })));
-    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setRawSample([]); setExtractComplete(false); setValidated(null);
     setImportSource("smart");
     setScreen("reading");
     try {
@@ -352,8 +432,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       setExtractComplete(true);
     } catch (e: any) {
       const reason = e?.details?.reason;
-      if (reason === "free_used" || reason === "pro_month_used") {
-        setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
+      if (isUsedRefusal(reason)) {
+        setBlocked({ reason: "used" });
         setScreen("blocked");
         return;
       }
@@ -376,6 +456,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     setManuscriptFailed(false);
     setImportComplete(false);
     setScreen("importing"); // the loader shows the instant Import is pressed
+    armMentorIntro(); // v1.1: the dashboard's hawk plays his one sequence on the load that follows
     try {
       // Create (or reuse) the manuscript from the held details — the single deferred write — then
       // attach this import's queries to it. Idempotent: a retry after a failed commit reuses the id.
@@ -385,6 +466,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
            shows that when it is the limit, and the plain sentence for anything else. */
         setManuscriptFailed(true);
         setScreen("review");
+        disarmMentorIntro();
         return;
       }
       // Run the commit and a 5s UX floor together. The floor never hides an error: if the commit
@@ -401,6 +483,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         delay(lab?.floorMs ?? 5000),
       ]);
       setOutcome(committed);
+      /* first visit v2 (Part F): the import is finished, so the kept review goes */
+      dropDraft();
+      if (!lab) logEvent(uid, "import_finished", evPath(), { step: lastSnap.current?.screen, agents: committed.agentsCreated, queries: committed.queriesImported });
       /* ⚠️ THE SKIPPED ROWS ARE KEPT FOR THE DASHBOARD HERE, when the commit returns and before the
          loader completes. The validation is of the result the REVIEW handed back — the one that was
          committed — not of the first read. A commit that skipped nothing clears any older notice. */
@@ -413,11 +498,19 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       // Never route on a false success: if nothing actually landed, surface the outcome screen
       // instead of the loader's completion + dashboard route.
       if (committed.queriesImported === 0) { setScreen("done"); return; }
+      /* Dashboard first visit v1 (Part B): an import that brings a manuscript its first queries is the dashboard's
+         first-win stamp — one for the file. The agents it created are part of that import, not a first agent of
+         their own, so a "first agent" the commit raised is taken back. */
+      if (!lab && currentUser && isFirstQueryWin(queries, mId, false)) {
+        clearWin({ uid: currentUser.id, kind: "agent", msId: null });
+        noteFirstWin({ kind: "import", uid: currentUser.id, msId: mId, ...winCopy.import(committed.queriesImported) });
+      }
       // Genuine success → let the loader play its completion beat, then it calls onProceed to route.
       setImportComplete(true);
     } catch (e) {
       console.error("Smart Import commit failed:", e);
       setCommitError("Something went wrong bringing your pipeline in — nothing is lost. Try again, or use the Import desk.");
+      disarmMentorIntro();
       setScreen("review");
     }
   };
@@ -425,21 +518,32 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
 
   useImperativeHandle(ref, () => ({
     chooseFile: () => fileInputRef.current?.click(),
-    chooseTemplate: () => templateInputRef.current?.click(),
     dropFile: pickFile,
     openPhotos,
     dropPhotos: pickPhotos,
     reset: () => {
       endPhotos();
+      dropDraft();
+      setResumeSnap(undefined);
       setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
-      setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
+      setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setFileName("");
       setAlready([]); setNothingNew(false);
       setScreen("idle");
     },
+    resume: ({ meta, payload }) => {
+      draftStarted.current = meta.startedAt;
+      logEvent(uid, "import_resumed", evPath(), evCounts({ ...payload.review }));
+      setFileName(meta.fileName);
+      setImportSource(meta.source);
+      setAlready(payload.already ?? []);
+      setValidated(validateSmartImport(payload.result));
+      setResumeSnap(payload.review);
+      setScreen("review");
+    },
   }));
 
-  /* The two pickers. One element each, rendered by whichever screen can open one — the fork, and
-     the confirm's "Change" — so a press always has an input to click. */
+  /* The pickers: the one file picker and the two photo pickers. One element each, rendered by whichever
+     screen can open one — the fork, and the confirm's "Change" — so a press always has an input to click. */
   const pickers = (
     <>
       <input
@@ -449,14 +553,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         style={{ display: "none" }}
         data-picker="smart"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ""; }}
-      />
-      <input
-        ref={templateInputRef}
-        type="file"
-        accept=".csv,.xlsx,.xls"
-        style={{ display: "none" }}
-        data-picker="template"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickTemplateFile(f); e.target.value = ""; }}
       />
       {/* Photos: images only, several at once, and NO `capture` attribute — so a phone offers the
           camera and the library both. */}
@@ -520,24 +616,23 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
 
   if (screen === "blocked" && blocked) {
     const backToFork = () => { setBlocked(null); toStart(); };
-    if (blocked.reason === "free_used") {
-      return (
-        <UsedFree
-          onBack={backToFork}
-          onAddByHand={onAddByHand}
-          /* Back to the start, where the template tile is: what the writer
-             has just been told they can still do. */
-          onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}
-        />
-      );
-    }
-    const nextLabel = blocked.nextAvailable
-      ? new Date(`${blocked.nextAvailable}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
-      : "next month";
-    return <UsedProMonth nextLabel={nextLabel} onBack={backToFork} onAddByHand={onAddByHand} />;
+    return (
+      <UsedFree
+        onBack={backToFork}
+        onAddByHand={onAddByHand}
+        /* overnight fixes v1: "Upload a file" — the same picker as the doors (a headings file is still read free).
+           Back to the start first, so a cancelled picker leaves the writer on the doors. */
+        onUpload={() => { setBlocked(null); toStart(); fileInputRef.current?.click(); }}
+      />
+    );
   }
 
   if (screen === "reading") {
+    /* The phone's two piles end on the overview's own totals (set-up on phones v1): the same
+       `summaryModel` → `reviewTallies` the overview reads, once the result is in. Read only. */
+    const readPiles = validated
+      ? (() => { const m = summaryModel(validated.result); const t = reviewTallies(m.agents, m.queries); return { agents: t.agents.total, queries: t.queries.total }; })()
+      : null;
     const resultQueries = validated?.result.queries ?? [];
     const resultAgents = validated?.result.agents ?? [];
     const cards: LoaderCard[] = rawSample.map((r, i) => {
@@ -557,6 +652,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         onProceed={() => setScreen("overview")}
         onTimeout={() => setScreen("fallback")}
         progress={readProgress}
+        fileName={fileName}
+        piles={readPiles}
       />
     );
   }
@@ -584,8 +681,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         result={validated.result}
         manuscriptTitle={manuscriptTitle}
         fileName={fileName}
-        rowCount={rowsRead}
+        source={importSource}
         onContinue={() => setScreen("review")}
+        onImport={handleImport}
         onCancel={onCancel}
       />
     );
@@ -602,6 +700,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         error={manuscriptFailed ? manuscriptErrorLine(hostError) : commitError}
         onImport={handleImport}
         onCancel={onCancel}
+        resume={resumeSnap}
+        onChange={keepDraft}
         photos={readPhotos}
       />
     );
@@ -630,11 +730,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     <Unreadable
       onBack={() => toStart()}
       onAddByHand={onAddByHand}
-      /* ⚠️ THE SAME FILE THE FORK HANDS OUT, by the same call. This card used to fetch
-         `QueryHawk-pipeline-import-template.xlsx` — the three-tab workbook the Query Centre's and
-         the Contact list's empty states link to — so a writer told "use the template" on the fork
-         and here was given two different sheets. */
-      onDownload={() => { void downloadTemplate(TEMPLATE_FILENAME); }}
+      /* overnight fixes v1: "Upload a file" — the doors' own picker, for another file. It used to hand out the
+         template, which stopped being a way in on 14 Nov. */
+      onUpload={() => { toStart(); fileInputRef.current?.click(); }}
     />
   );
 });

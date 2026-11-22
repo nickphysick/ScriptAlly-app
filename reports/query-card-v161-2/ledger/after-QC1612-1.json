@@ -1,0 +1,57 @@
+[
+ {
+  "name": "population: the drawer is \"What did Rufus say?\"",
+  "ok": true,
+  "got": "What did Rufus say?"
+ },
+ {
+  "name": "population: frames sampled over the 6s",
+  "ok": true,
+  "got": "359"
+ },
+ {
+  "name": "the frame's scale passes above 1.008 at least twice",
+  "ok": true,
+  "got": "2 peaks"
+ },
+ {
+  "name": "and returns below 1.002 between",
+  "ok": true,
+  "got": "1 dips"
+ },
+ {
+  "name": "it never exceeds 1.011",
+  "ok": true,
+  "got": "1.01"
+ },
+ {
+  "name": "it starts 300ms after the drawer's 320ms entrance (no sooner than 600ms after the press)",
+  "ok": true,
+  "got": "1011ms"
+ },
+ {
+  "name": "one breathing animation at most in any frame",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "it animates scale only, never transform",
+  "ok": true,
+  "got": "[\"1\"]"
+ },
+ {
+  "name": "it is the rim that breathes (the frame's ::before)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the frame itself never scales: scale 1 in every frame",
+  "ok": true,
+  "got": "[1]"
+ },
+ {
+  "name": "nothing clickable moves: every button in the drawer has one box throughout",
+  "ok": true,
+  "got": "1 distinct"
+ }
+]

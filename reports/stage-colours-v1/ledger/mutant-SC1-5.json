@@ -1,0 +1,57 @@
+[
+ {
+  "name": "Partial Requested card · agent \"Partial Requested\" bubble is rgb(228, 235, 242) with edge rgb(203, 215, 228)",
+  "ok": true,
+  "got": "rgb(228, 235, 242) rgb(203, 215, 228) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Full Requested card · agent \"Partial Requested\" bubble is rgb(228, 235, 242) with edge rgb(203, 215, 228)",
+  "ok": true,
+  "got": "rgb(228, 235, 242) rgb(203, 215, 228) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Full Requested card · agent \"Full Requested\" bubble is rgb(183, 201, 222) with edge rgb(157, 180, 207)",
+  "ok": false,
+  "got": "rgb(228, 235, 242) rgb(203, 215, 228) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Revise & Resubmit card · agent \"Partial Requested\" bubble is rgb(228, 235, 242) with edge rgb(203, 215, 228)",
+  "ok": true,
+  "got": "rgb(228, 235, 242) rgb(203, 215, 228) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Revise & Resubmit card · agent \"Revise & Resubmit\" bubble is rgb(183, 201, 222) with edge rgb(157, 180, 207)",
+  "ok": true,
+  "got": "rgb(183, 201, 222) rgb(157, 180, 207) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Offer card · agent \"Partial Requested\" bubble is rgb(228, 235, 242) with edge rgb(203, 215, 228)",
+  "ok": true,
+  "got": "rgb(228, 235, 242) rgb(203, 215, 228) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Offer card · agent \"Full Requested\" bubble is rgb(183, 201, 222) with edge rgb(157, 180, 207)",
+  "ok": false,
+  "got": "rgb(228, 235, 242) rgb(203, 215, 228) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Offer card · agent \"Offer\" bubble is rgb(239, 205, 201) with edge rgb(223, 177, 172)",
+  "ok": true,
+  "got": "rgb(239, 205, 201) rgb(223, 177, 172) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Rejected card · agent \"Rejected\" bubble is rgb(236, 234, 230) with edge rgb(222, 219, 213)",
+  "ok": true,
+  "got": "rgb(236, 234, 230) rgb(222, 219, 213) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Full Sent card · agent \"Full Requested\" bubble is rgb(183, 201, 222) with edge rgb(157, 180, 207)",
+  "ok": false,
+  "got": "rgb(228, 235, 242) rgb(203, 215, 228) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "agent bubbles seen for partial, full and closed",
+  "ok": true,
+  "got": "them:Partial Requested, them:Full Requested, them:Revise & Resubmit, them:Offer, them:Rejected"
+ }
+]

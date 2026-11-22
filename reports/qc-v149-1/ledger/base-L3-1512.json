@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: an open query",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "it ends with the next step, faint (italic)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "…which is the rule's own: the revision is owed",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "…with a one-line reason from the record",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "population: a closed query",
+  "ok": true,
+  "detail": "{\"card\":true,\"next\":false}"
+ },
+ {
+  "where": "a closed query has no next step",
+  "ok": true,
+  "detail": "{\"card\":true,\"next\":false}"
+ }
+]

@@ -2,8 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Terms and Privacy copy — verbatim from design-refs/scriptally-terms.html and
- * design-refs/scriptally-privacy.html.
+ * Terms and Privacy copy. Privacy is privacy page v1's (2 Nov; design-refs/privacy-v1.html). The Terms
+ * are drawn in the privacy page's layout (12 Nov) with the wording they had before it, sentence for
+ * sentence (13 Nov): the lede, then ten numbered sections.
  *
  * ⚠️ THE TERMS ARE A WORKING DRAFT AND SAY SO ON THE PAGE. `LEGAL_COPY_REVIEWED` is false; the ribbon
  * renders because of that one flag. The PRIVACY policy left that state on 2 Nov (privacy page v1): it
@@ -34,12 +35,12 @@ import {
 } from "../lib/companyInfo";
 
 /**
- * ⚠️ ONE FLAG, ONE EFFECT. False = both documents carry the working-draft ribbon. Setting it true
- * takes the ribbon away and touches nothing else.
+ * ⚠️ ONE FLAG, ONE EFFECT. False = the Terms carry the working-draft ribbon (Privacy is `ribbonOff`).
+ * Setting it true takes the ribbon away and touches nothing else.
  */
 export const LEGAL_COPY_REVIEWED = false;
 
-/** The ribbon's mono tag, shared by both documents. */
+/** The ribbon's tag. */
 export const DRAFT_TAG = "Working draft";
 
 export type LegalDocumentKey = "terms" | "privacy";
@@ -56,14 +57,13 @@ export interface LegalSection {
 
 export interface LegalDocument {
   documentTitle: string;
-  eyebrow: string;
   title: string;
   lastUpdated: string;
   /** The sentence on the working-draft ribbon. */
   draftBody: string;
-  /** The plain-English summary above the numbered sections. */
-  lede: string;
-  /** Privacy only (privacy page v1): "The short version" as ticks, drawn in place of the lede. */
+  /** Terms only: the plain-English summary, in the navy drawer under the date. */
+  lede?: string;
+  /** Privacy only (privacy page v1): "The short version" as ticks, in the navy drawer under the date. */
   shortVersion?: string[];
   /** Privacy only: true = no working-draft ribbon, whatever `LEGAL_COPY_REVIEWED` says. */
   ribbonOff?: boolean;
@@ -87,11 +87,9 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
      are not read here any more; the Terms still read the first two. */
   privacy: {
     documentTitle: "Privacy Policy — QueryHawk",
-    eyebrow: "",
     title: "Privacy",
     lastUpdated: PRIVACY_LAST_UPDATED,
     draftBody: "",
-    lede: "",
     shortVersion: [
       "Your querying records and your writing belong to you.",
       "We collect only what the app needs to work.",
@@ -184,6 +182,14 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
             "outside the UK, it is protected by recognised safeguards such as the UK Addendum to " +
             "the EU Standard Contractual Clauses.",
           ),
+          /* Crash reporting v1 (8 Nov): every claim below is enforced in lib/sentryScrub.ts — the page
+             without its query string, the error, the browser's name and version, and the Firebase uid. */
+          p(
+            "We use Sentry (Functional Software, Inc.) to tell us when something in QueryHawk breaks. " +
+            "When an error happens, Sentry receives the page it happened on, the error itself, your " +
+            "browser type and a random account ID, and stores them in the EU. It never receives what " +
+            "you've written, your email address or your IP address.",
+          ),
         ],
       },
       {
@@ -263,10 +269,14 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
     ],
   },
 
+  /* ⚠️ THE TERMS' WORDING IS plan-rules-v1's, SENTENCE FOR SENTENCE (13 Nov, Nick): the page took
+     Privacy's layout on 12 Nov, and the words go back exactly as they were. Only the title is
+     "Terms" (was "Terms of Service"), and the mono eyebrow "Legal · Terms" is not drawn (no small
+     uppercase labels). The lede renders in the navy drawer under the date. `legalPage.test.tsx`
+     holds every section's text against the old copy. Still a working draft (`LEGAL_COPY_REVIEWED`). */
   terms: {
     documentTitle: "Terms of Service — QueryHawk",
-    eyebrow: "Legal · Terms",
-    title: "Terms of Service",
+    title: "Terms",
     lastUpdated: LEGAL_LAST_UPDATED,
     draftBody:
       "These terms are a working draft and have not yet been legally reviewed. Bracketed items " +

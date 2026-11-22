@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L8-1280",
+  "where": "the founding strip is shown",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…on one line (≤ 60 tall)",
+  "ok": true,
+  "detail": "57"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…its text not cut",
+  "ok": true,
+  "detail": "492 / 492"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the folder tab takes the strip's pink",
+  "ok": true,
+  "detail": "rgb(251, 239, 233)"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the hawk is pinned (fixed)",
+  "ok": true,
+  "detail": "fixed"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…212 ±2 tall",
+  "ok": true,
+  "detail": "212"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…on the viewport's foot ±1",
+  "ok": true,
+  "detail": "832 / 832"
+ }
+]

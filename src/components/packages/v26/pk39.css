@@ -1,0 +1,191 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v39 — the hand-written rules beside pk39.generated.css (design-refs/submission-packages-v39/).
+ *   A. the header: the Contact list v25's card values, stated for `.pk39-hd` (contactV25.css / qcv150.css name only
+ *      their own pages), with this page's highlighter and Pro stamp;
+ *   C. every rule a package's colour drives (`--pc`; the capture normalised colours to Harbour);
+ *   …  and the rest of each part as it lands.
+ * Desktop only, like the Contact list's: below 768px the shared card keeps its own defaults.
+ */
+
+/* the page's scroller is the ref's `sheet` container: its 1200px rules are container queries on p9sheet */
+@media (min-width: 768px) {
+  .pk39-wpg > .wpg-scroll { container: p9sheet / inline-size; }
+}
+
+/* ══ A · the header (the Contact list's: min(sheet − 48, 1200) wide, centred, 24 below the sheet's top) ══ */
+@media (min-width: 768px) {
+  .p6 > .pk39-hd {
+    --pk39-hd-w: min(calc(var(--hsheet-w) - 48px), 1200px);
+    box-sizing: border-box; width: var(--pk39-hd-w); margin: 24px 0 56px calc(50% - var(--pk39-hd-w) / 2);
+  }
+  .pk39-hd .pk39-card.phc.phc { padding: 22px 36px 24px; grid-template-columns: minmax(0, 1fr) 160px; }
+  .pk39-hd .pk39-card.phc.phc.phc h1 { font-size: 40px; line-height: 44px; }
+  .pk39-hd .pk39-card .phc-tx > p { margin-top: 14px; }
+  .pk39-hd .pk39-card .phc-art { height: 140px; }
+  .pk39-hd .pk39-card .phc-art img { width: 160px; height: 140px; object-fit: contain; object-position: right center; }
+  /* the highlighter: the Contact list's shape, pale Harbour */
+  .pk39-hd .pk39-card.pk39-card .hl {
+    padding: 0 5px; margin: 0 -5px;
+    background: linear-gradient(transparent 50%, #cfe1ea 50%, #cfe1ea 96%, transparent 96%);
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    /* brand.tsx names bare spans as the body sans: the highlighter's span takes the title's typewriter */
+    font-family: inherit !important; font-size: inherit !important; line-height: inherit !important;
+  }
+}
+/* the Pro stamp (ref `.pro-st`): a navy pill, mono capitals, the sidebar PRO pill's terracotta dot. The card's own
+   `.phc-tag` wrapper is unset so the stamp is the one box the tooltip belongs to. */
+.pk39-hd .pk39-card .phc-tag { all: unset; display: inline-flex; margin-left: 4px; }
+.pk39-hd .pk39-card .pk39-pro {
+  display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px 0 8px; border-radius: 12px;
+  background: #2a3a52; color: #f4eee5; font: 500 10.5px/1 "JetBrains Mono", monospace !important; letter-spacing: 0.16em;
+  text-transform: uppercase; cursor: default; white-space: nowrap;
+}
+.pk39-hd .pk39-card .pk39-pro::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e0a188; }
+@container p9sheet (max-width: 1200px) {
+  .pk39-hd .pk39-card .pk39-pro { height: 22px; }
+}
+
+/* ══ C · a package's colour: one variable, `--pc` (lib/packagesV39.pcStyle), drives every place a package shows. The
+   capture normalised every package to Harbour, so the generated sheet holds Harbour literals; these restate each
+   colour-driven value with `--pc`, from the ref's own rules (v39.3 / v39.4 / v39.8). ══ */
+/* the labels (ref `.pkl-b:not(.pkl-new)`): the full colour under a soft gloss */
+.p9-pkl .p9-pkl-row .p9-pkl-b { background-color: var(--pc, var(--sp-anthracite)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 1px 2px rgba(28, 19, 15, 0.12), 0 8px 16px -10px var(--pc, var(--sp-anthracite)) !important; }
+/* selected: lifted 2px, a page-coloured gap and a ring in its own colour (ref `.pkl-b.on`) */
+.p9-pkl .p9-pkl-row .p9-pkl-b.p9-on {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.18), 0 0 0 2px var(--ws-page, #f2ede6), 0 0 0 4px var(--pc, var(--sp-anthracite)), 0 14px 22px -12px var(--pc, var(--sp-anthracite)) !important; }
+.p9-pkl .p9-pkl-b .p9-shc-ic,
+.p9-pkl .p9-pkl-row .p9-pkl-b > em { color: var(--pc, var(--sp-anthracite)) !important; }
+/* the ring on a label: white on the colour (ref `.pkl-b:not(.pkl-new) .rg circle`) */
+.p9-rg svg { transform: rotate(-90deg); }
+.p9-rg circle { fill: none; stroke-width: 6; }
+.p9-pkl .p9-pkl-b .p9-rg circle { stroke: rgba(255, 255, 255, 0.28); }
+.p9-pkl .p9-pkl-b .p9-rg circle.p9-v { stroke: #fff; stroke-linecap: round; }
+.p9-pkl .p9-pkl-b .p9-rg.p9-early circle.p9-v { stroke-linecap: butt; }
+/* the package drawer's header (ref `.dh.dpk`) and its icon disc */
+.p8-dh.p8-dpk { background: var(--pc, var(--sp-anthracite)) !important; }
+.p8-dh.p8-dpk .p8-ddisc { color: var(--pc, var(--sp-anthracite)) !important; }
+
+/* ══ B · the labels: v40's ruling that this page carries no small mono capitals — the "Active" tab reads in the
+   typewriter, sentence case (as v38's label tab did); the two exceptions v39 names are the Pro stamp and the
+   builder's label ══ */
+.p9-pkl .p9-pkl-row .p9-pkl-b > em,
+.p9-pkl .p9-pkl-row .p9-on.p9-pkl-b[aria-pressed="true"] > em { font: 400 11.5px/18px var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-pkl .p9-pkl-k .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+
+/* ══ D · the builder (Pk26Builder): the section, the colour, and what no captured state shows ══ */
+/* the section's own box (the ref's `.pb-build` under v39.2/v39.9: no panel, 14 / 48 / 96) */
+/* the ref's 96 below the builder is carried by v40's guidelines, which sit 24 under the cards */
+.p9-pkc > .p9-pb-build { box-sizing: border-box; margin: 14px 48px 24px; padding: 0; background: none; border: 0; box-shadow: none; }
+/* the package's header in its colour, and the icon's ink on the cream tile (ref `.po-h`, `.po-ic`) */
+.p9-pb-grid.p9-v39 .p9-pk-open .p9-po-h { background: var(--pc, var(--sp-anthracite)) !important; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic { color: var(--pc, var(--sp-anthracite)) !important; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic:focus-visible .p9-po-icx { opacity: 1; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic[disabled] { cursor: default; }
+.p9-pb-grid.p9-v39 .p9-po-h .p9-po-ic[disabled] .p9-po-icx { display: none; }
+/* Edit and ✕ show on row hover and focus, and always on touch (ref `.mr-ac`) */
+.p9-pb-grid.p9-v39 .p9-mf .p9-mr .p9-mr-ac:focus-within { opacity: 1; }
+@media (hover: none) { .p9-pb-grid.p9-v39 .p9-mf .p9-mr .p9-mr-ac { opacity: 1; } }
+/* the padlock after "Out with agents" (Nick, 28 Oct: the lock moves from the name to the stage) */
+.p9-pb-grid.p9-v39 .p9-stg .p9-stg-lk { display: inline-grid; place-items: center; margin-left: -2px; color: rgba(255, 255, 255, 0.75); cursor: default; }
+.p9-pb-grid.p9-v39 .p9-stg .p9-stg-lk svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+/* "Add a note: who is this for?" is the note line itself, pressable (v26.1's "+ Add a note", in the ref's words) */
+.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote { all: unset; cursor: pointer; font: inherit; color: inherit; }
+.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
+.p9-pb-grid.p9-v39 .p9-po-tt > small { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* rename in place: the keyboard focus state of the dashed underline (ref `.po-nm[contenteditable]:focus`) */
+.p9-pb-grid.p9-v39 .p9-po-tt .p9-po-nm:not(.p9-locked):focus { outline: 0; background: rgba(255, 255, 255, 0.12); border-bottom-color: #fff; }
+/* copied from (v40): one quiet line under the header */
+.p9-pb-grid.p9-v39 .p9-pk-open .p9-lc-from { padding: 12px 26px 0; font: italic 400 14px/1.45 var(--sp-serif); color: var(--sp-muted); }
+/* a locked slot that went empty (v38): the empty box's grammar, solid rather than dashed */
+.p9-pb-grid.p9-v39 .p9-mr .p9-mr-em.p9-mr-em--lk { outline: 0; background: rgba(28, 19, 15, 0.03); font-style: italic; font-weight: 400; color: var(--sp-quiet); }
+/* the foot's links (Make a copy and Retire on a locked package, beside "Note, copy or delete…") */
+.p9-pb-grid.p9-v39 .p9-po-foot .p9-po-lkb { display: inline-flex; gap: 16px; flex: none; }
+/* dragging (ref v26 `.dragging .mf .slt` / `.slt.over`, `.lr.ghost`): the matching row lights, the rest dim */
+.p9-pk-open.p9-dragging .p9-mf .p9-slt { opacity: 0.4 !important; }
+.p9-pk-open.p9-dragging .p9-mf .p9-slt.p9-ok { opacity: 1 !important; }
+.p9-pk-open.p9-dragging .p9-mf .p9-slt.p9-ok :is(.p9-mr-em, .p9-mr-it) { outline: 2px dashed #1d4b63; outline-offset: 4px; border-radius: 12px; }
+.p9-pk-open .p9-mf .p9-slt.p9-over :is(.p9-mr-em, .p9-mr-it) { background: #e9f1f4; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-ghost { opacity: 0.4; }
+/* put-away materials in Your materials (v38): quieter, opened rather than dragged */
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr--away { opacity: 0.62; cursor: default; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr.p9-lr--away .p9-lr-g { visibility: hidden; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lr .p9-lr-add.p9-lr-open { font-style: normal; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lib-away { display: block; margin: 10px 10px 2px; }
+.p9-pb-grid.p9-v39 .p9-lib-list .p9-lib-empty { margin: 14px 10px; font: italic 400 14px/1.45 var(--sp-serif); color: var(--sp-quiet); }
+/* v40's guidelines and start card, under the page root with no panel */
+.p6 > .p9-gl { margin: 0 48px 96px; background: none; box-shadow: none; }
+
+/* ══ E · the icon-and-colour picker (ref `.icp`, one block, ported by hand) ══ */
+.p9-icp { position: fixed; z-index: 80; box-sizing: border-box; width: 300px; padding: 16px; border-radius: 14px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 20px 40px -16px rgba(28, 19, 15, 0.4); font-family: var(--sp-serif); color: #1c130f; }
+/* the ref's mono capitals ("ICON", "COLOUR") read in the typewriter, sentence case (v40's ruling) */
+.p9-icp .p9-icp-k { margin: 0 0 8px; font: 400 13px/1.2 var(--sp-type); color: var(--sp-quiet); }
+.p9-icp .p9-icp-ics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 16px; }
+.p9-icp .p9-icp-ics button { height: 38px; padding: 0; border: 0; border-radius: 8px; background: #f6f2ec; color: #1c130f; cursor: pointer; display: grid; place-items: center; }
+.p9-icp .p9-icp-ics button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.p9-icp .p9-icp-ics button[aria-pressed="true"] { background: var(--pc, var(--sp-anthracite)); color: #fff; }
+.p9-icp button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.p9-icp .p9-icp-f { margin: 14px 0 0; font: italic 400 12.5px/1.45 var(--sp-serif); color: var(--sp-quiet); }
+
+/* ══ D · the empty slot, for every slot: the capture only ever saw an empty Synopsis, so the generated rule names
+   `.p9-t-syn`; this is the same rule (v39.2 `.v39 .mr-em`) for all three ══ */
+.p9-pb-grid.p9-v39 .p9-mr.p9-slt .p9-mr-em {
+  display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 14px; border-radius: 12px;
+  outline: 1.5px dashed rgba(28, 19, 15, 0.16); outline-offset: -1.5px;
+  font: 600 13.5px/normal var(--sp-serif); letter-spacing: 0.01em; color: rgba(28, 19, 15, 0.42);
+}
+
+/* ══ D · v40's ruling, carried: no small mono capitals. The slot labels, the stage words and the art placeholders read
+   in the typewriter, sentence case. The two mono labels v39 names are kept: "Build, view and edit" and the Pro stamp. ══ */
+.p9-pb-grid.p9-v39 .p9-mr .p9-mr-l > span { font: 400 14px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--sp-muted) !important; }
+.p9-pb-grid.p9-v39 .p9-stg .p9-stg-s { font-family: var(--sp-type) !important; font-size: 12.5px; font-weight: 400 !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-pb-grid.p9-v39 .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-pb-grid.p9-v39 .p9-po-tt .p9-po-act { font: 400 11.5px/1.3 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+@container p9sheet (max-width: 1200px) {
+  .p9-pb-grid.p9-v39 .p9-stg .p9-stg-s:not(.p9-on) { font-size: 0; }
+}
+
+/* ══ H · Results: what the capture cannot see, and the colour ══ */
+/* the showcase card's header and the full list's tile in the package's colour (ref `.ac-pk .ac-h`, `.rl-ic`) */
+.p9-agg3 .p9-ac-pk .p9-ac-h { background: var(--pc, var(--sp-anthracite)) !important; }
+.p9-agg3 .p9-ac-pk .p9-ac-h .p9-shc-ic { color: var(--pc, var(--sp-anthracite)) !important; }
+.p9-agg3 .p9-rl-r .p9-rl-n .p9-rl-ic { background: var(--pc, var(--sp-anthracite)) !important; color: #fff !important; }
+/* the two list panels' grounds: #f8f5f0 under Packages, #f3eee7 inside the pieces band (ref v39.11) */
+.p9-agg3 .p9-ag3-row .p9-rlw { background-color: #f8f5f0 !important; }
+.p9-agg3 .p9-ag3-row + .p9-ag3-row .p9-rlw { background-color: #f3eee7 !important; }
+/* a kind with nothing ranked (ref `.ac-m.ghost`, `.ag3.none`): the hatched placeholder card */
+.p9-agg3 .p9-ag2-v .p9-ac-m.p9-ghost {
+  position: absolute; left: 0; top: 0; width: 250px; height: 150px; border-radius: 12px; transform: rotate(-1deg);
+  background: repeating-linear-gradient(135deg, #f4f0ea 0 6px, #efeae2 6px 12px); box-shadow: none;
+}
+.p9-agg3 .p9-ag3.p9-none .p9-ag2-v { cursor: default; }
+.p9-agg3 .p9-ag3.p9-none > h3 .p9-o { font-style: italic; color: var(--sp-quiet); }
+/* the empty Results (v38's message, unchanged) */
+.p9-agg3 .p9-id-aggMain .p9-rs-empty { padding: 28px; border-radius: 18px; outline: 1.5px dashed rgba(28, 19, 15, 0.16); outline-offset: -1.5px; text-align: center; font-family: var(--sp-serif); }
+.p9-agg3 .p9-id-aggMain .p9-rs-empty > b { display: block; font: 400 18px/normal var(--sp-type); }
+.p9-agg3 .p9-id-aggMain .p9-rs-empty > span { display: block; max-width: 520px; margin: 6px auto 0; font: 400 15px/22.5px var(--sp-serif); color: var(--sp-quiet); }
+/* a tab's focus ring (ref `.rl-tabs button:focus-visible`) */
+.p9-agg3 .p9-rl-tabs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
+/* v40's ruling, carried: the showcase kickers, the card tags, the list headings and the art placeholders in the
+   typewriter, sentence case */
+.p9-agg3 .p9-ag3 .p9-ag3-k { font: 400 16px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-ac-h .p9-a,
+.p9-agg3 .p9-ac-pk .p9-ac-h > em:not(.p9-a) { font: 400 12px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-ac-m .p9-am-h span > small,
+.p9-agg3 .p9-ov .p9-ov-k { font: 400 12px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-rl .p9-rl-hd > span { font: 400 13px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+.p9-agg3 .p9-ill > i { font: 400 10px/1 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }
+/* the ref's 1200px rules for the full lists (v39.8 / v39.9 / v39.11). The generator's 1280 pass could not map the panel
+   (its selector is deepened over the two grounds), so these are stated by hand: one column, 18 apart, 56 down, 28 in. */
+@container p9sheet (max-width: 1200px) {
+  .p9-agg3 .p9-ag3-row .p9-rlw { grid-template-columns: minmax(0, 1fr) !important; gap: 18px !important; margin-top: 56px !important; padding: 28px !important; }
+  .p9-agg3 .p9-rlw .p9-rl-side { padding-top: 0 !important; max-width: 560px; }
+  .p9-agg3 .p9-rl-r .p9-rl-v { grid-template-columns: 1fr 62px !important; }
+}
+
+/* ══ G · How it works (Pk39HowItWorks) is RETIRED by v41: v42's Pk42HowItWorks (packages/v42) replaces it, styled in pk42.css. ══ */

@@ -1,0 +1,32 @@
+[
+ {
+  "where": "1512 the row is in the page",
+  "ok": true,
+  "detail": "has=true, 3 controls"
+ },
+ {
+  "where": "1512 at the top: not visible",
+  "ok": false,
+  "detail": "visible=true"
+ },
+ {
+  "where": "1512 at the top: inert and aria-hidden, no control focusable",
+  "ok": false,
+  "detail": "inert=false hidden=false focusable=3"
+ },
+ {
+  "where": "1280 the row is in the page",
+  "ok": true,
+  "detail": "has=true, 3 controls"
+ },
+ {
+  "where": "1280 at the top: not visible",
+  "ok": false,
+  "detail": "visible=true"
+ },
+ {
+  "where": "1280 at the top: inert and aria-hidden, no control focusable",
+  "ok": false,
+  "detail": "inert=false hidden=false focusable=3"
+ }
+]

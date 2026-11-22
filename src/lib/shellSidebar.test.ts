@@ -3,6 +3,7 @@
  * their own deep locks (todoBoard/todoHousekeeping tests) — here it gets an all-empty smoke so
  * the composition itself is exercised; the display helpers get behavioural locks.
  */
+import { resolveEntitlement, type Entitlement } from "./entitlements";
 import { describe, it, expect } from "vitest";
 import {
   SHELL_PRO_COPY,
@@ -72,12 +73,31 @@ describe("deskNotice — recovered at 6d64b75; the surface is the MOBILE dashboa
   });
 });
 
-describe("planLine — the folded upsell (panel-foot treatment 1)", () => {
+const CREATED = Date.parse("2026-11-01T00:00:00Z");
+/** The real resolver, driven to each basis (so the test cannot restate the rule). */
+const resolveFixture = (basis: Entitlement["basis"]): Entitlement => resolveEntitlement({
+  founding: basis === "pending" ? null : basis === "founding",
+  plan: basis === "pro" ? UserPlan.PRO : UserPlan.FREE,
+  createdMs: CREATED,
+  nowMs: basis === "trial" ? CREATED + 86_400_000 : CREATED + 30 * 86_400_000,
+});
+
+describe("planLine — the folded upsell (panel-foot treatment 1), read from the resolver (plan rules v1)", () => {
+  const e = (basis: Entitlement["basis"]): Entitlement => resolveFixture(basis);
   it("free: the plan is stated as fact and the upsell is a link in that same line", () => {
-    expect(planLine(undefined)).toEqual({ label: "Free plan", upgrade: true });
+    expect(planLine(e("free"))).toEqual({ label: "Free plan", upgrade: true });
+  });
+  it("trial: named as a trial, and the upsell may show", () => {
+    expect(planLine(e("trial"))).toEqual({ label: "Pro trial", upgrade: true });
   });
   it("PRO: the plan, and NO link — a paying user is never sold to", () => {
-    expect(planLine(UserPlan.PRO)).toEqual({ label: "Pro plan", upgrade: false });
+    expect(planLine(e("pro"))).toEqual({ label: "Pro plan", upgrade: false });
+  });
+  it("founding: told so, and never sold to", () => {
+    expect(planLine(e("founding"))).toEqual({ label: "Founding writer", upgrade: false });
+  });
+  it("pending: nothing claimed and nothing sold before the entitlement loads", () => {
+    expect(planLine(e("pending"))).toEqual({ label: "", upgrade: false });
   });
 });
 

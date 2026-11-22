@@ -10,6 +10,7 @@
  *
  * The server-side gate in extractFromEmail is the real enforcement; this just reflects entitlement.
  */
+import { canUse } from "../../lib/entitlements";
 import React, { useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
@@ -27,8 +28,9 @@ interface PasteEmailButtonProps {
 }
 
 export const PasteEmailButton: React.FC<PasteEmailButtonProps> = ({ manuscriptId, onNavigate, onSuccessToast, style }) => {
-  const { currentUser } = useScriptAllyDb();
-  const isPro = currentUser?.plan === UserPlan.PRO;
+  const { entitlement } = useScriptAllyDb();
+  /* plan rules v1: Smart email drop through the one resolver (founding, Pro or trial) */
+  const isPro = canUse(entitlement, "emailDrop");
 
   const [flowOpen, setFlowOpen] = useState(false);
   const [upsellOpen, setUpsellOpen] = useState(false);

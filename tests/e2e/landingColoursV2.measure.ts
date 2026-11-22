@@ -58,6 +58,8 @@ const MUTATIONS: Record<string, string> = {
   N2p: ".mk-lg{background:#e8b4a3!important}",
   N3p: "@media (max-width:760px){.mk-scope .mk-nav{height:72px!important}}",
   S1p: ".mk-sheet{border-top-left-radius:18px!important;border-top-right-radius:18px!important}",
+  /* pricing v4: the founding box's counter line turned cream on its light ground — F2's /pricing block alone. */
+  F2pricing: ".mk-fbcount .mk-fmmeta,.mk-pvcount .mk-fmmeta{color:#f4eee5!important}",
 };
 
 async function mutate(page: Page) {
@@ -316,7 +318,10 @@ test.describe("LC2", () => {
         expect(w.btnFg).toBe("rgb(27, 36, 51)");
       }
       if (vp.width <= 1080) await page.click(".mk-burger");
-      const links = await inks(page, vp.width <= 1080 ? ".mk-navpanel button" : ".mk-links button, .mk-login");
+      /* RETARGET (public pages on phones v1, 29 Oct): the phone menu now ends on a filled pink
+         "Become a founding writer" button, the join bar's own primary. It is a button on its own fill,
+         not a link on ink, so it is excluded here; P7 of publicPhonePolish.measure.ts holds it. */
+      const links = await inks(page, vp.width <= 1080 ? ".mk-navpanel button:not(.mk-navjoin)" : ".mk-links button, .mk-login");
       console.log(`LC2 N2 @${vp.width}`, links.map((l) => `${l.text} ${l.ratio.toFixed(2)}`).join(" · "));
       expect(links.length, "nav links measured").toBeGreaterThanOrEqual(5);
       for (const l of links) {
@@ -382,14 +387,27 @@ test.describe("LC2", () => {
          into its top, so the sheet's top arcs AND the point 20px in are ink there (still 18px corners,
          just ink against ink); only the bottom is read as light-inside-ink, and the top is held ink. */
       const navyLanding = route === "/" && vp.width >= 900;
-      expect(s!.radii, `${route} @${vp.width}`).toEqual(phoneLanding ? ["0px", "0px", "18px", "18px"] : ["18px", "18px", "18px", "18px"]);
+      /* RETARGET (pricing on phones, 25 Oct; ref pricing-page-mobile-v1): at ≤760px /pricing renders its
+         phone tree, whose sheet takes the ref's 20px top corners; its bottom corners stay the shell's 18. */
+      /* RETARGET (public pages on phones v1, 29 Oct; Nick's pick 7B): /contact on a phone opens in
+         Pricing's grammar — the same `.mk-pvm` card over the navy, so the same 20px top corners and the
+         same box laid across the sheet's top edge, read in the side gutter below. */
+      const phonePricing = (route === "/pricing" || route === "/contact") && vp.width <= PHONE;
+      /* RETARGET (public pages on phones v1, 29 Oct; Nick's pick 10C): at ≤760px /about opens all ink,
+         so the point 20px inside its top is ink against ink, as the navy landing's is; the top arcs are
+         still held ink and the bottom is still read light-inside-ink. */
+      const inkAbout = route === "/about" && vp.width <= PHONE;
+      expect(s!.radii, `${route} @${vp.width}`).toEqual(phoneLanding ? ["0px", "0px", "18px", "18px"]
+        : phonePricing ? ["20px", "20px", "18px", "18px"] : ["18px", "18px", "18px", "18px"]);
       expect(s!.overflow, `${route} @${vp.width}: horizontal overflow`).toBeLessThanOrEqual(0);
       expect(Math.abs(s!.footTop - s!.docBottom), "the footer starts where the sheet ends").toBeLessThanOrEqual(0.5);
       const L = s!.left, R = s!.right - 1;
-      /* ⚠️ /pricing OPENS ON A NAVY BAND INSET INTO THE SHEET (pricing v3, 21 Oct; ref pricing-page-v1):
-         18px of oat round it, 10px below 640. At 390 the "20px in" point is inside the band, so on that
-         page the sheet's own ground is read in its side gutter, 5px in and 60px down — past the arc. */
-      const inset: [number, number][] = route === "/pricing" ? [[L + 5, s!.top + 60], [R - 5, s!.top + 60]] : [[L + 20, s!.top + 20], [R - 20, s!.top + 20]];
+      /* ⚠️ /pricing OPENS ON THE FOUNDING BOX, LAID ACROSS THE SHEET'S TOP EDGE (pricing v4, 24 Oct; ref
+         pricing-page-v2): the sheet starts lower on that page and the box rises above it, inset 18px
+         each side (10px below 640). At 390 the "20px in" point is inside the box, so on that page the
+         sheet's own ground is read in its side gutter, 5px in and 60px down — past the arc. The four
+         corners themselves are still the shell's and still ink-against-oat, which this lock reads. */
+      const inset: [number, number][] = route === "/pricing" || (route === "/contact" && vp.width <= PHONE) ? [[L + 5, s!.top + 60], [R - 5, s!.top + 60]] : [[L + 20, s!.top + 20], [R - 20, s!.top + 20]];
       const topPx = await pixels(page, [[L + 2, s!.top + 2], [R - 2, s!.top + 2], ...inset]);
       /* Bring the sheet's bottom edge into the middle of the viewport, then read its corners. */
       await page.evaluate((y) => window.scrollTo(0, y - window.innerHeight / 2), s!.docBottom);
@@ -397,7 +415,8 @@ test.describe("LC2", () => {
       const by = await page.evaluate(() => document.querySelector(".mk-sheet")!.getBoundingClientRect().bottom);
       const botPx = await pixels(page, [[L + 2, by - 3], [R - 2, by - 3], [L + 20, by - 21], [R - 20, by - 21]]);
       if (navyLanding) expect(topPx.every((p) => near(p, INK, 2)), `${route} @${vp.width} the top is the navy carrying on: ${JSON.stringify(topPx)}`).toBe(true);
-      for (const [name, px] of (phoneLanding || navyLanding ? [["bottom", botPx]] : [["top", topPx], ["bottom", botPx]]) as Array<readonly [string, number[][]]>) {
+      if (inkAbout) expect(topPx.every((p) => near(p, INK, 2)), `${route} @${vp.width} the top is the ink opening: ${JSON.stringify(topPx)}`).toBe(true);
+      for (const [name, px] of (phoneLanding || navyLanding || inkAbout ? [["bottom", botPx]] : [["top", topPx], ["bottom", botPx]]) as Array<readonly [string, number[][]]>) {
         expect(near(px[0], INK, 2) && near(px[1], INK, 2), `${route} @${vp.width} ${name} arcs are ink: ${JSON.stringify(px.slice(0, 2))}`).toBe(true);
         expect(lum(px[2]) > 0.7 && lum(px[3]) > 0.7, `${route} @${vp.width} ${name} 20px in is light: ${JSON.stringify(px.slice(2))}`).toBe(true);
       }
@@ -522,8 +541,22 @@ test.describe("LC2", () => {
       expect(btn.length).toBe(1);
       expect(btn[0].ratio, "the hero's submit: its label on its own fill").toBeGreaterThanOrEqual(4.5);
       expect(near(btn[0].ground, [42, 58, 82]), "on a light ground the submit stays the navy button").toBe(true);
-      /* ⚠️ RETIRED HERE (pricing v3, 21 Oct): /pricing's tally sits on the founding band's NAVY now,
-         so it is no longer a light mount. Its contrast on navy is asserted in pricingV3.measure.ts. */
+    }
+    /* ⚠️ RE-ADDED (pricing v4, 24 Oct): /pricing's counter and form sit on the founding box's LIGHT
+       ground again (pricing v3 had put them on navy and taken them out of this lock). */
+    for (const vp of VPS) {
+      await open(page, "/pricing", vp, "count");
+      /* RETARGET (pricing on phones, 25 Oct): at ≤760px the box is the phone tree's `.mk-pvbox`, whose
+         counter and form sit in `.mk-pvin` — the same shared parts on the same light ground. */
+      const B = vp.width <= PHONE ? ".mk-pvin " : ".mk-fbtext ";
+      await light("pricing box", B + "input[type=email]");
+      await light("pricing box", B + "input[type=email]", 3, "::placeholder");
+      await light("pricing box", B + ".mk-betanote, " + B + ".mk-betanote .mk-doclink");
+      await light("pricing box", B + ".mk-fmmeta");
+      const btn = await inks(page, B + "button[type=submit]");
+      expect(btn.length).toBe(1);
+      expect(btn[0].ratio, "the box's submit: its label on its own fill").toBeGreaterThanOrEqual(4.5);
+      expect(near(btn[0].ground, [42, 58, 82]), "on a light ground the submit stays the navy button").toBe(true);
     }
     expect(n).toBeGreaterThan(20);
   });

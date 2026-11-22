@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "G1",
+  "where": "setup",
+  "ok": true,
+  "detail": "an account that never chose: {\"weeklyDigest\":true}"
+ },
+ {
+  "lock": "G1",
+  "where": "ask",
+  "ok": true,
+  "detail": "Want an email when a nudge is due?If Ottoline hasn't replied in time, we'll email you so you can follow up. Only when th"
+ },
+ {
+  "lock": "G1",
+  "where": "ask",
+  "ok": true,
+  "detail": "in the feed"
+ },
+ {
+  "lock": "G1",
+  "where": "answered",
+  "ok": true,
+  "detail": "one line"
+ },
+ {
+  "lock": "G1",
+  "where": "write",
+  "ok": true,
+  "detail": "nudges true"
+ },
+ {
+  "lock": "G1",
+  "where": "write",
+  "ok": false,
+  "detail": "weeklyDigest kept (undefined)"
+ },
+ {
+  "lock": "G1",
+  "where": "write",
+  "ok": true,
+  "detail": "discover kept (undefined)"
+ },
+ {
+  "lock": "G1",
+  "where": "write",
+  "ok": false,
+  "detail": "no other key: {\"nudges\":true}"
+ },
+ {
+  "lock": "G1",
+  "where": "once",
+  "ok": true,
+  "detail": "never shown again"
+ },
+ {
+  "lock": "G1",
+  "where": "restore",
+  "ok": true,
+  "detail": "restored {\"nudges\":true,\"weeklyDigest\":true}"
+ }
+]

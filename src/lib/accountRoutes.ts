@@ -25,37 +25,38 @@
 
 export type AccountSectionId =
   | "profile"
-  | "security"
-  | "plan"
-  | "notifications"
   | "preferences"
-  | "tasks"
+  | "emails"
+  | "plan"
   | "data";
 
 export interface AccountRoute {
   id: AccountSectionId;
-  /** The rail's label — the same words the section card heads with. */
+  /** The rail's label. */
   label: string;
   path: string;
 }
 
 /**
- * The rail's order, top to bottom. SEVEN sections — the rail is the whole list.
- *
- * ⚠️ `tasks` IS A SECTION AGAIN, AND IT IS NOW THE ONLY FORM FOR ITS FIELDS. It was briefly a link
- * row inside Preferences pointing at `TaskSettingsSheet`; that sheet is retired and this page
- * replaces it, owning all four `todoPrefs` values and the muted-rule list. A link row to a sibling
- * section from inside Preferences would be clutter, so it is deleted rather than re-pointed.
+ * ⚠️ FIVE SECTIONS, IN THE REF'S ORDER (non-workspace v1, Phase 2; design-refs/settings-v2.html `SECTIONS`):
+ * You, Preferences, Emails, Plan, Your data. "You" keeps the `/account/profile` address so every link already
+ * out there still lands on it; Sign-in & security moved into You, Tasks into Preferences, Notifications became
+ * Emails. The three retired addresses redirect (`ACCOUNT_LEGACY`).
  */
 export const ACCOUNT_ROUTES: AccountRoute[] = [
-  { id: "profile", label: "Profile", path: "/account/profile" },
-  { id: "security", label: "Sign-in & security", path: "/account/security" },
-  { id: "plan", label: "Plan & billing", path: "/account/plan" },
-  { id: "notifications", label: "Notifications", path: "/account/notifications" },
+  { id: "profile", label: "You", path: "/account/profile" },
   { id: "preferences", label: "Preferences", path: "/account/preferences" },
-  { id: "tasks", label: "Tasks", path: "/account/tasks" },
+  { id: "emails", label: "Emails", path: "/account/emails" },
+  { id: "plan", label: "Plan", path: "/account/plan" },
   { id: "data", label: "Your data", path: "/account/data" },
 ];
+
+/** Retired section addresses and where they live now. */
+export const ACCOUNT_LEGACY: Readonly<Record<string, string>> = {
+  "/account/security": "/account/profile",
+  "/account/notifications": "/account/emails",
+  "/account/tasks": "/account/preferences",
+};
 
 /** The bare route. Kept as its own constant because three checks below compare against it. */
 export const ACCOUNT_ROOT = "/account";
@@ -84,7 +85,8 @@ export function accountSectionForPath(pathname: string): AccountSectionId | null
 export function accountRedirectFor(pathname: string): string | null {
   const ours = pathname === ACCOUNT_ROOT || pathname.startsWith(`${ACCOUNT_ROOT}/`);
   if (!ours) return null;
-  return accountSectionForPath(pathname) ? null : ACCOUNT_DEFAULT_PATH;
+  if (accountSectionForPath(pathname)) return null;
+  return ACCOUNT_LEGACY[pathname] ?? ACCOUNT_DEFAULT_PATH;
 }
 
 /**

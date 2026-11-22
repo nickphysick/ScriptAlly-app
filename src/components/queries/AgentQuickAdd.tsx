@@ -94,7 +94,7 @@ export const AgentQuickAdd: React.FC<AgentQuickAddProps> = ({
         />
         {/* ⚠️ THE WRITER'S OWN RATING, NOT THE APP'S. The no-stars rule banned the app ORDERING or
             scoring agents; recording what you think of one is the opposite of that. */}
-        <div className="qc-qastars" role="radiogroup" aria-label="Star rating">
+        <div className="qc-qastars" role="radiogroup" aria-label="Agent fit">
           {[1, 2, 3, 4, 5].map((s) => (
             <button
               key={s}

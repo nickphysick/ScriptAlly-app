@@ -51,6 +51,9 @@ import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { Dash58 } from "./dashboard/v58/Dash58";
+import { useLoadFailure } from "./notes/useLoadFailure";
+import { TodayV5 } from "./phone/v5/TodayV5";
+import { useIsMobile } from "./shell/mobileChrome";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import "./dashboard/dashboardV37.css";
 import { dataNeedTarget, openAgentCard } from "../lib/agentCardStore";
@@ -475,6 +478,8 @@ export const Dashboard: React.FC<{
   setSearchQuery
 }) => {
   const openEditQuery = useOpenEditQuery();
+  /* overnight fixes v1, Part 2 — a failed read, for Dash58 to draw in its grid's place */
+  const loadFailure = useLoadFailure();
   const {
     currentUser,
     collectionsReady,
@@ -501,6 +506,8 @@ export const Dashboard: React.FC<{
     updateUserTask,
     deleteUserTask,
     updateUserProfile,
+    updateUserPaths,
+    updateManuscriptQuiet,
     smartImportUsage,
   } = useScriptAllyDb();
 
@@ -653,6 +660,9 @@ export const Dashboard: React.FC<{
   const leftColumnRef = React.useRef<HTMLDivElement>(null);
   const [leftColumnHeight, setLeftColumnHeight] = useState<number | null>(null);
   const [isMobileLayout, setIsMobileLayout] = useState(false);
+  /* Dashboard on the phone v1: below 768px the phone page renders in Dash58's place; at 768px and wider this is
+     false and the desktop render is unchanged. */
+  const phone = useIsMobile();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -1515,8 +1525,14 @@ export const Dashboard: React.FC<{
           the diary, the pipeline, the to-do card, the guided empty state and the bottom Pro
           banner all leave this page. Day one is §9's job now; loading is §8's per-card
           skeletons, passed down rather than gated up here. */}
+      {phone ? (
+      /* Phone app v5: below 768px the dashboard is Today, the hub (TodayV5); at 768px and up nothing here changes */
+      <TodayV5 loading={!collectionsReady}
+      />
+      ) : (
       <Dash58
         loading={!collectionsReady}
+        loadFailure={loadFailure}
         queries={queries}
         agents={agents}
         manuscripts={manuscripts}
@@ -1529,7 +1545,19 @@ export const Dashboard: React.FC<{
         versions={versions}
         smartImportUsage={smartImportUsage}
         onNavigate={onNavigate}
+        onFoundingSeen={(tier) => updateUserProfile({ foundingSeenTier: tier })}
+        onPrefs={updateUserPaths}
+        onGoal={(patch) => updateUserProfile(patch)}
+        /* first visit v2 (Part B): the dashboard's answer writes the fields sign-up wrote; the status write makes no
+           feed entry (`updateManuscriptQuiet`) — changing an answer is not a querying event */
+        onAnswer={async (msId, w) => {
+          await Promise.all([
+            updateUserProfile({ queryingStage: w.queryingStage }),
+            w.status ? updateManuscriptQuiet(msId, { status: w.status }) : Promise.resolve(),
+          ]);
+        }}
       />
+      )}
 
       {/* Slide-In Tasks Panel (Part 3) */}
       <AnimatePresence>
@@ -1610,7 +1638,7 @@ export const Dashboard: React.FC<{
                           <div className="space-y-3">
                             <div className="flex items-center gap-1.5 text-[#a86a52] font-bold text-[10px] uppercase tracking-wider mb-2 select-none">
                               <Clock className="w-4 h-4 text-[#a86a52]" />
-                              <span>Overdue</span>
+                              <span>Past expected</span>
                             </div>
                             <div className="flex flex-col gap-3">
                               {overdueList.map(t => (

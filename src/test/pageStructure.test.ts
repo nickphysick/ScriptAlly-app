@@ -36,6 +36,8 @@ export const PAGE_SOURCES = [
   "components/AccountSettings.tsx",
   "components/PlansPage.tsx",
   "components/HelpCentre.tsx",
+  "components/help/HelpHome.tsx", // non-workspace v1, Phase 7 — the Help centre home, also signed out
+  "components/help/HelpArticlePage.tsx", // non-workspace v1, Phase 7 — one article, also signed out
   // funnel MVP phase 1: Pricing.tsx left this census by being deleted — it was a developer
   // sandbox on a public route. TODO(phase-5): the real public pricing page rejoins here.
   "components/Auth.tsx",
@@ -43,11 +45,16 @@ export const PAGE_SOURCES = [
   "components/todo/ToDoPage.tsx",
   // tasks-consolidation P1 (9 Aug): TodoTodayPage left this census by being deleted
   // tasks-pages P3/P4: the placeholder retired with its last consumer; the real pages join
-  "components/todo/TodoCalendarPage.tsx",
+  // the Calendar page (TodoCalendarPage.tsx) left this census by being deleted (29 Oct)
   "components/todo/TodoNoteboardPage.tsx",
   "marketing/Landing.tsx",
   "marketing/MarketingShell.tsx",
   "components/shell/AppShell.tsx",
+  // Phone app v5, Phase A: the phone's Today (the hub), To do and Materials tabs
+  "components/phone/v5/TodayV5.tsx",
+  "components/phone/v5/TodoV5.tsx",
+  "components/phone/v5/MaterialsV5.tsx",
+  "components/NotFoundCard.tsx", // non-workspace v1, Phase 1 — the in-app not-found screen
 ];
 
 const read = (rel: string) => readFileSync(resolve(__dirname, "..", rel), "utf8");

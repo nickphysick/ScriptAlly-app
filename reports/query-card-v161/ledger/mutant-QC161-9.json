@@ -1,0 +1,142 @@
+[
+ {
+  "name": "q152-agent: population — the reply drawer is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-agent: no chip row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-agent: the line under the title",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-agent: one tile per answer, in the order given",
+  "ok": true,
+  "got": "[\"req\",\"offer\",\"rr\",\"passed\",\"more\"]"
+ },
+ {
+  "name": "q152-agent · req: the label and the second line (Rufus)",
+  "ok": true,
+  "got": "Asked for the partial / You send the pages next"
+ },
+ {
+  "name": "q152-agent · req: the disc is its stage's Band (partial)",
+  "ok": true,
+  "got": "rgb(228, 235, 242) none"
+ },
+ {
+  "name": "q152-agent · offer: the label and the second line (Rufus)",
+  "ok": true,
+  "got": "Made an offer / Record it and when Rufus needs an answer"
+ },
+ {
+  "name": "q152-agent · offer: the disc is its stage's Band (offer)",
+  "ok": true,
+  "got": "rgb(239, 205, 201) linear-gradient(112deg, rgba(2"
+ },
+ {
+  "name": "q152-agent · rr: the label and the second line (Rufus)",
+  "ok": true,
+  "got": "Revise & resubmit / Rufus wants changes, then another look"
+ },
+ {
+  "name": "q152-agent · rr: the disc is its stage's Band (full)",
+  "ok": true,
+  "got": "rgb(183, 201, 222) none"
+ },
+ {
+  "name": "q152-agent · passed: the label and the second line (Rufus)",
+  "ok": true,
+  "got": "Passed / Closes this query"
+ },
+ {
+  "name": "q152-agent · passed: the disc is its stage's Band (closed)",
+  "ok": true,
+  "got": "rgb(236, 234, 230) none"
+ },
+ {
+  "name": "q152-agent · more: the label and the second line (Rufus)",
+  "ok": true,
+  "got": "Something else / A question, a call, more pages"
+ },
+ {
+  "name": "q152-agent · more: the disc is its stage's Band (queried)",
+  "ok": true,
+  "got": "rgb(239, 230, 214) none"
+ },
+ {
+  "name": "q152-agent: Something else spans both columns, 46px high",
+  "ok": true,
+  "got": "{\"v\":\"more\",\"label\":\"Something else\",\"line\":\"A question, a call, more pages\",\"bg\":\"rgb(239, 230, 214)\",\"img\":\"none\",\"wide\":true,\"h\":46}"
+ },
+ {
+  "name": "q152-long: population — the reply drawer is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-long: no chip row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-long: the line under the title",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-long: one tile per answer, in the order given",
+  "ok": true,
+  "got": "[\"offer\",\"rr\",\"passed\",\"more\"]"
+ },
+ {
+  "name": "q152-long · offer: the label and the second line (Jonathan)",
+  "ok": true,
+  "got": "Made an offer / Record it and when Jonathan needs an answer"
+ },
+ {
+  "name": "q152-long · offer: the disc is its stage's Band (offer)",
+  "ok": true,
+  "got": "rgb(239, 205, 201) linear-gradient(112deg, rgba(2"
+ },
+ {
+  "name": "q152-long · rr: the label and the second line (Jonathan)",
+  "ok": true,
+  "got": "Revise & resubmit / Jonathan wants changes, then another look"
+ },
+ {
+  "name": "q152-long · rr: the disc is its stage's Band (full)",
+  "ok": true,
+  "got": "rgb(183, 201, 222) none"
+ },
+ {
+  "name": "q152-long · passed: the label and the second line (Jonathan)",
+  "ok": true,
+  "got": "Passed / Closes this query"
+ },
+ {
+  "name": "q152-long · passed: the disc is its stage's Band (closed)",
+  "ok": true,
+  "got": "rgb(236, 234, 230) none"
+ },
+ {
+  "name": "q152-long · more: the label and the second line (Jonathan)",
+  "ok": true,
+  "got": "Something else / A question, a call, more pages"
+ },
+ {
+  "name": "q152-long · more: the disc is its stage's Band (full)",
+  "ok": true,
+  "got": "rgb(183, 201, 222) none"
+ },
+ {
+  "name": "q152-long: Something else spans both columns, 46px high",
+  "ok": true,
+  "got": "{\"v\":\"more\",\"label\":\"Something else\",\"line\":\"A question, a call, more pages\",\"bg\":\"rgb(183, 201, 222)\",\"img\":\"none\",\"wide\":true,\"h\":46}"
+ }
+]

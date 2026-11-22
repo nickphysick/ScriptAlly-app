@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"rows\":70,\"heads\":4}"
+ },
+ {
+  "where": "a track on every row",
+  "ok": false,
+  "detail": "0/70"
+ },
+ {
+  "where": "no disc",
+  "ok": false,
+  "detail": "70"
+ },
+ {
+  "where": "headings transparent",
+  "ok": false,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "urgency groups",
+  "ok": true,
+  "detail": "Overdue|Upcoming|Watch and wait|No date"
+ },
+ {
+  "where": "Group menu",
+  "ok": false,
+  "detail": "{\"opts\":[]}"
+ },
+ {
+  "where": "Sort menu",
+  "ok": false,
+  "detail": "{\"opts\":[]}"
+ },
+ {
+  "where": "Closed tab: Nothing on the timeline",
+  "ok": false,
+  "detail": "{\"back\":false}"
+ }
+]

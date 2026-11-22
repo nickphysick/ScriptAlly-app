@@ -1,0 +1,16 @@
+
+Running 11 tests using 1 worker
+
+[1/11] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:78:3 › QM1 · the tab · 390x844
+[3/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:78:3 › QM1 · the tab · 360x780
+[4/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:182:3 › QM1 · a query · 390x844
+[5/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:182:3 › QM1 · a query · 360x780
+[6/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:236:1 › QM1 · Coming up · 390x844
+[7/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:281:3 › QM1 · the + sheet · 390x844
+[8/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:281:3 › QM1 · the + sheet · 360x780
+[9/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:310:1 › QM1 · the celebration · 390x844
+[10/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:368:1 › QM1 · L1 desktop capture
+[11/11] [measure] › tests/e2e/queriesMobileV1.measure.ts:381:1 › QM1 · L1 desktop compare
+  2 skipped
+  9 passed (3.8m)

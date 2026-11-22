@@ -227,8 +227,9 @@ export const LOCKED_PACKAGE_FIELDS = [
 export const LOCKED_NOTE = "Locked — this package has been sent";
 /* ⚠️ IN STEP WITH THE CARD'S LOCK LINE (packages v2, lib/packagesPage.lockLine): same reason, same
    way on. The card adds the date; this is the date-free form updatePackage's refusal quotes. */
+/* ⚠️ v40: A LOCKED PACKAGE NEVER CHANGES. Editions are switched off; the way on is a new package made from it. */
 export const LOCKED_WHY =
-  "What went out stays as it went, so your records stay true. Editing its contents starts a new edition.";
+  "What went out stays as it went, so your records stay true. To try something different, make a new package from it.";
 
 /** The name a duplicate takes (D-D2). `Standard UK` → `Standard UK v2`, then v3, v4… */
 export function duplicateName(name: string, existing: readonly string[]): string {

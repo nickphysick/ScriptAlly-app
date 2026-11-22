@@ -1,0 +1,434 @@
+[
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip due first · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip due first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Due\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip due first · the same order in both views",
+  "ok": true,
+  "detail": "first cards thin-q-close,msv12-q-1,msv12-q-7 · rows thin-q-close,msv12-q-1,msv12-q-7"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip due reversed · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip due reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Due\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip due reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards seed-cal-bang-q,seed-cal-soon-q,probe-goalstress-today · rows seed-cal-bang-q,seed-cal-soon-q,probe-goalstress-today"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip agent first · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip agent first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Agent\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip agent first · the same order in both views",
+  "ok": true,
+  "detail": "first cards seed-cal-near-q,seed-cal-soon-q,seed-cal-passed20-q · rows seed-cal-near-q,seed-cal-soon-q,seed-cal-passed20-q"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip agent reversed · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip agent reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Agent\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip agent reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards seed-query-5,thin-q-close,thin-q-cohort-1 · rows seed-query-5,thin-q-close,thin-q-cohort-1"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip first first · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip first first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"First queried\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip first first · the same order in both views",
+  "ok": true,
+  "detail": "first cards thin-q-close,seed-query-19,thin-q-cohort-1 · rows thin-q-close,seed-query-19,thin-q-cohort-1"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip first reversed · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip first reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"First queried\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip first reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards cv25-q-13,cv25-q-14,probe-goalstress-today · rows cv25-q-13,cv25-q-14,probe-goalstress-today"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip stage first · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip stage first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Where it stands\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip stage first · the same order in both views",
+  "ok": true,
+  "detail": "first cards cor-move-b,cv25-q-03,cv25-q-04 · rows cor-move-b,cv25-q-03,cv25-q-04"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip stage reversed · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip stage reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Where it stands\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip stage reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards cor-move-b,cv25-q-03,cv25-q-04 · rows cor-move-b,cv25-q-03,cv25-q-04"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip sent first · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip sent first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"What you sent\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip sent first · the same order in both views",
+  "ok": true,
+  "detail": "first cards msv12-q-1,msv12-q-2,seed-pkgq-7 · rows msv12-q-1,msv12-q-2,seed-pkgq-7"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip sent reversed · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip sent reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"What you sent\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip sent reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards seed-pkgq-1,cv25-q-13,cv25-q-03 · rows seed-pkgq-1,cv25-q-13,cv25-q-03"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip next first · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip next first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Next move\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip next first · the same order in both views",
+  "ok": true,
+  "detail": "first cards cv25-q-03,cv25-q-04,msv12-q-1 · rows cv25-q-03,cv25-q-04,msv12-q-1"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip next reversed · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip next reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Next move\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip next reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards cv25-q-13,cv25-q-14,probe-dangling-pkg · rows cv25-q-13,cv25-q-14,probe-dangling-pkg"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip changed first · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip changed first · the List heading",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip changed first · the same order in both views",
+  "ok": true,
+  "detail": "first cards thin-q-close,seed-query-19,thin-q-cohort-1 · rows thin-q-close,seed-query-19,thin-q-cohort-1"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip changed reversed · population",
+  "ok": true,
+  "detail": "cards 87 · rows 87"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip changed reversed · the List heading",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · chip changed reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards cv25-q-13,cv25-q-14,probe-goalstress-today · rows cv25-q-13,cv25-q-14,probe-goalstress-today"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · heading Due → the chip",
+  "ok": true,
+  "detail": "[{\"label\":\"Due\",\"sort\":\"ascending\"}] → {\"field\":\"Due date\",\"reversed\":\"false\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · heading Agent → the chip",
+  "ok": true,
+  "detail": "[{\"label\":\"Agent\",\"sort\":\"ascending\"}] → {\"field\":\"Agent\",\"reversed\":\"false\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Query Centre · heading First queried → the chip",
+  "ok": true,
+  "detail": "[{\"label\":\"First queried\",\"sort\":\"ascending\"}] → {\"field\":\"First queried\",\"reversed\":\"false\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip surname first · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip surname first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Agent\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip surname first · the same order in both views",
+  "ok": true,
+  "detail": "first cards msv12-agent-4,seed-cal-near,cv25-agent-12 · rows msv12-agent-4,seed-cal-near,cv25-agent-12"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip surname reversed · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip surname reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Agent\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip surname reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards seed-agent-5,cv25-agent-01,msv12-agent-3 · rows seed-agent-5,cv25-agent-01,msv12-agent-3"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip added first · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip added first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Date added\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip added first · the same order in both views",
+  "ok": true,
+  "detail": "first cards clv181-bare,clv-fx-reopen,clv-fx-stub0 · rows clv181-bare,clv-fx-reopen,clv-fx-stub0"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip added reversed · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip added reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Date added\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip added reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards msv12-agent-3,msv12-agent-2,msv12-agent-6 · rows msv12-agent-3,msv12-agent-2,msv12-agent-6"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip reply first · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip reply first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Replies\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip reply first · the same order in both views",
+  "ok": true,
+  "detail": "first cards seed-cal-passed20,seed-cal-passed865,thin-ag-chase · rows seed-cal-passed20,seed-cal-passed865,thin-ag-chase"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip reply reversed · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip reply reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Replies\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip reply reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards seed-cal-bang,seed-cal-soon,thin-ag-gap · rows seed-cal-bang,seed-cal-soon,thin-ag-gap"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip status first · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip status first · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Query status\",\"sort\":\"ascending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip status first · the same order in both views",
+  "ok": true,
+  "detail": "first cards cv25-agent-08,cv25-agent-10,cv25-agent-09 · rows cv25-agent-08,cv25-agent-10,cv25-agent-09"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip status reversed · population",
+  "ok": true,
+  "detail": "cards 52 · rows 52"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip status reversed · the List heading",
+  "ok": true,
+  "detail": "[{\"label\":\"Query status\",\"sort\":\"descending\"}]"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · chip status reversed · the same order in both views",
+  "ok": true,
+  "detail": "first cards cv25-agent-01,cv25-agent-02,cv25-agent-12 · rows cv25-agent-01,cv25-agent-02,cv25-agent-12"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · heading Agent → the chip",
+  "ok": true,
+  "detail": "[{\"label\":\"Agent\",\"sort\":\"ascending\"}] → {\"field\":\"Surname\",\"reversed\":\"false\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · heading Date added → the chip",
+  "ok": true,
+  "detail": "[{\"label\":\"Date added\",\"sort\":\"ascending\"}] → {\"field\":\"Date added\",\"reversed\":\"false\"}"
+ },
+ {
+  "lock": "L6",
+  "where": "Contact list · heading Replies → the chip",
+  "ok": true,
+  "detail": "[{\"label\":\"Replies\",\"sort\":\"ascending\"}] → {\"field\":\"Reply time\",\"reversed\":\"false\"}"
+ }
+]

@@ -27,11 +27,14 @@ export interface WeekSliderProps {
    * can forget. Pass `id` only where something outside needs to address this input by name.
    */
   id?: string;
+  /** Add agent v1 — the label is drawn by the caller above the slider (the add journey and the card's edit sections);
+   *  it stays for screen readers. */
+  hideLabel?: boolean;
 }
 
 /**
  * Response-window slider (Form 11): a styled range input with a live mono readout and a
- * burgundy-filled track. Native <input type="range"> so it's keyboard-operable for free.
+ * navy-filled track (Add agent v1: navy, never burgundy — every slider in the app). Native <input type="range"> so it's keyboard-operable for free.
  * Supports an optional "Unknown" state for the Edit Agent drawer.
  */
 export const WeekSlider: React.FC<WeekSliderProps> = ({
@@ -43,18 +46,19 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
   onUnknown,
   unknownHint,
   id,
+  hideLabel = false,
 }) => {
   const auto = useId();
   const inputId = id ?? `sa-wk-${auto}`;
   const unknown = value === null;
   const pos = unknown ? min : value;
   const pct = ((pos - min) / (max - min)) * 100;
-  const fill = `linear-gradient(90deg,#7c3a2a 0%,#7c3a2a ${pct}%,#e7ddd0 ${pct}%,#e7ddd0 100%)`;
+  const fill = `linear-gradient(90deg,#2a3a52 0%,#2a3a52 ${pct}%,#e7ddd0 ${pct}%,#e7ddd0 100%)`;
 
   return (
     <div className="sa-fld">
       <div className="sa-wk-head">
-        <label className="sa-label" htmlFor={inputId} style={{ marginBottom: 0 }}>
+        <label className={`sa-label${hideLabel ? " sr-only" : ""}`} htmlFor={inputId} style={{ marginBottom: 0 }}>
           {label}
         </label>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>

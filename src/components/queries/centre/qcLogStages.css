@@ -1,0 +1,386 @@
+/* ══ Log a query v1.1 (design-refs/log-a-query-v1-1/log-a-query-v1-1.html) — the staged journey ═══════════════════
+   Values are the reference's, scoped under `.laq`. The panel portals to document.body, so no page token reaches it:
+   the faces are the shell's `--sp-*` (declared at :root) and every colour is a literal.
+   ⚠️ THE PREFIX IS `laq-`, NEVER `qls-`. v1 used `qls-`, which the old log sheet (queries/queryLogSheet.css, still
+      imported by Queries.tsx) also uses for GLOBAL rules: its `.qls-in` gave this flow's inner box a 10/13 padding, a
+      9px corner, 13px type and a brown ink, which is why v1 looked inset and smaller than the reference.
+   ⚠️ brand.tsx names a body face on bare `p, span, div, button, input` (0-0-1) and forces h1–h3 with !important, so
+      everything inside inherits the serif back (0-1-1), and the one heading states the typewriter with !important. */
+
+/* THE PANEL'S SURFACE IS THE REFERENCE CARD: 540 wide (504 at ≤1400, the query card's own step), the 7px white mat
+   and 20px corners, over the shell's bar as the query card is (z 68). It replaces SidePanel's 520/560 and the borrowed
+   `.qc149f` surface.
+   v1.2 — OVER THE PAGE, AS THE REFERENCE PUTS IT THERE (`body.inapp .card`): 16px from the window's top, right and
+   bottom, over the dimmed page. v1.1's placement (760 at most, centred, 40 in) was the reference's card beside its notes;
+   in the app the journey is always over a page. The height comes from the two insets, never from a viewport constant. */
+.spanel.qsp.qsp:has(> .spanel-own > .laq) {
+  top: 16px; bottom: 16px; right: 16px; left: auto;
+  width: 540px; height: auto; box-sizing: border-box;
+  padding: 7px; border-radius: 20px; background: #fff; overflow: visible; z-index: 68;
+  box-shadow: 0 30px 60px -30px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.06);
+}
+@media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > .laq) { width: 504px; } }
+@media (max-width: 899.98px) {
+  .spanel.qsp.qsp:has(> .spanel-own > .laq) { top: 0; right: 0; bottom: 0; left: 0; width: auto; height: auto; padding: 0; border-radius: 0; box-shadow: none; }
+}
+
+.laq {
+  --laq-ink: #1c130f; --laq-mut: #6f645b; --laq-mut2: #9a8f84; --laq-paper: #f6f3ee; --laq-line: #e2d9cc;
+  --laq-navy: #2a3a52; --laq-harbour: #2f4a5c; --laq-rust: var(--sp-rust);
+  /* materials fork v1 — the packages/materials object colour */
+  --laq-ochre: #9a7233; --laq-ochre-ink: #7a5a22; --laq-ochre-tint: #f6efe2;
+  --laq-tw: var(--sp-type); --laq-se: var(--sp-serif); --laq-mono: var(--sp-mono);
+  position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; text-align: left;
+  font: 400 16px/1.5 var(--laq-se); color: var(--laq-ink);
+}
+.laq :is(span, p, div, button, input, textarea, label, b, em, small, i, u, strong) { font-family: inherit; }
+/* the inner frame: a 1px #d9c8ba line at 14px, drawn inside (a border would take a pixel from every part) */
+.laq .laq-in {
+  position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+  box-sizing: border-box; padding: 0; margin: 0; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px #d9c8ba;
+}
+.laq .laq-in.is-bump { animation: laq-bump .32s .22s both; }
+@keyframes laq-bump { 30% { transform: translateY(2px); } 60% { transform: translateY(-1px); } }
+
+/* the FlowHead in this flow: flush to the inner frame, and its foot handed to the track (the reference's `.flh`) */
+.laq .flh { padding: 18px 18px 8px 24px; border-bottom: 0; }
+.laq .flh .flh-rt { margin-top: 0; }
+.laq .flh p.flh-l { margin-top: 7px; font: italic 400 15.5px/1.45 var(--sp-serif) !important; }
+
+/* the track (option C), the reference's `.ltrk`: on the FlowHead's ground, under the title and line */
+.laq .laq-trk { flex: none; display: flex; align-items: flex-start; margin: 0; padding: 2px 26px 14px; background: #f3eee8; border-bottom: 1px solid #e7dfd4; list-style: none; }
+.laq .laq-si { position: relative; flex: 1 1 0; min-width: 0; display: flex; justify-content: center; }
+.laq .laq-si:not(:last-child)::after { content: ""; position: absolute; top: 16px; left: calc(50% + 20px); right: calc(-50% + 20px); height: 2px; border-radius: 1px; background: #d8cfc3; transition: background .3s; }
+.laq .laq-si:has(> .is-d):not(:last-child)::after { background: var(--laq-navy); }
+.laq .laq-s { all: unset; box-sizing: border-box; position: relative; min-width: 0; max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.laq .laq-nd { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #f3eee8; box-shadow: inset 0 0 0 1.5px #cfc4b5; color: #a59a90; font: 400 13px var(--laq-tw) !important; transition: background .25s, box-shadow .25s, width .25s, height .25s, margin .25s; }
+.laq .laq-s.is-d { cursor: pointer; }
+.laq .laq-s.is-d .laq-nd { background: var(--laq-navy); box-shadow: none; color: #fff; }
+.laq .laq-s.is-d:hover .laq-nd { box-shadow: 0 0 0 3px rgba(42, 58, 82, .18); }
+.laq .laq-s.is-n .laq-nd { width: 40px; height: 40px; margin-top: -4px; background: #fff; box-shadow: 0 2px 6px -2px rgba(28, 19, 15, .3), inset 0 0 0 2px var(--laq-navy); color: var(--laq-ink); }
+.laq .laq-l { font: 400 12.5px var(--laq-se); color: #a59a90; max-width: 96px; }
+.laq .laq-s.is-d .laq-l, .laq .laq-s.is-n .laq-l { color: var(--laq-ink); }
+.laq .laq-s.is-d .laq-l b { display: block; font: italic 400 12.5px var(--laq-se); color: var(--laq-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.laq .laq-s.is-d:hover .laq-l { text-decoration: underline; text-underline-offset: 3px; }
+.laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .laq .laq-nd, .laq .laq-si::after { transition: none; } }
+
+/* v1.2 — THE NAVY HEADER (the reference's `.ci.hc` rules, chosen over "as built" and "warm sand"). The FlowHead and the
+   track share one navy ground; the body below stays white. Scoped to `.laq`: FlowHead elsewhere is untouched. */
+.laq .flh, .laq .laq-trk { background: var(--laq-navy); }
+.laq .laq-trk { border-bottom-color: var(--laq-navy); }
+.laq .flh h3.flh-t { color: #fff; }
+.laq .flh p.flh-l { color: rgba(255, 255, 255, .78); }
+.laq .flh .flh-x { color: #fff; }
+.laq .flh .flh-x:hover { background: rgba(255, 255, 255, .12); }
+.laq .flh .flh-x:focus-visible { outline-color: #f4eee5; }
+.laq .laq-trk .laq-nd { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .35); color: rgba(255, 255, 255, .55); }
+.laq .laq-trk .laq-si:not(:last-child)::after { background: rgba(255, 255, 255, .22); }
+.laq .laq-trk .laq-si:has(> .is-d):not(:last-child)::after { background: #fff; }
+.laq .laq-trk .laq-s.is-d .laq-nd { background: #fff; box-shadow: none; color: var(--laq-navy); }
+.laq .laq-trk .laq-s.is-d:hover .laq-nd { box-shadow: 0 0 0 3px rgba(255, 255, 255, .25); }
+.laq .laq-trk .laq-s.is-n .laq-nd { background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .2); color: var(--laq-ink); }
+.laq .laq-trk .laq-l { color: rgba(255, 255, 255, .5); }
+.laq .laq-trk .laq-s.is-d .laq-l, .laq .laq-trk .laq-s.is-n .laq-l { color: #fff; }
+.laq .laq-trk .laq-s.is-d .laq-l b { color: rgba(255, 255, 255, .7); }
+.laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #f4eee5; }
+
+/* the stage body */
+.laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 20px 20px 12px; display: flex; flex-direction: column; }
+.laq .laq-sb > * { flex: none; }
+.laq .laq-sb.is-in { animation: laq-slide .28s cubic-bezier(.2,.8,.2,1) both; }
+.laq .laq-sb.is-back { animation: laq-slideb .28s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes laq-slide { from { opacity: 0; transform: translateX(18px); } }
+@keyframes laq-slideb { from { opacity: 0; transform: translateX(-18px); } }
+.laq h2.laq-qh { margin: 0 0 4px; font: 400 22px/1.25 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq p.laq-qs { margin: 0 0 16px; font: italic 400 var(--sp-body-size)/1.45 var(--laq-se); color: var(--laq-mut); }
+
+/* big choices */
+.laq .laq-big { display: grid; gap: 8px; }
+.laq .laq-big > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; background: #fff; }
+.laq .laq-big > button:hover, .laq .laq-big > button.is-hi { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-big > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
+.laq .laq-big > button.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); background: #f7f5f1; }
+.laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 12px var(--laq-mono) !important; color: var(--sp-muted); }
+.laq .laq-g.is-pkg { border-radius: 9px; background: var(--laq-harbour); }
+.laq .laq-tx { flex: 1 1 auto; min-width: 0; }
+.laq .laq-tx b { display: block; font: 500 16.5px/1.25 var(--laq-se); }
+.laq .laq-tx span { display: block; font: 400 13.5px/1.4 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-tag { flex: none; font: italic 400 13px var(--laq-se); color: var(--laq-mut); }
+.laq .laq-tag.is-y { color: var(--laq-ink); font-style: normal; }
+.laq .laq-tag.is-closed { color: var(--laq-rust); }
+.laq .laq-ar { flex: none; display: inline-flex; color: #b3a89b; }
+.laq .laq-big > button.is-quiet { box-shadow: none; background: transparent; padding: 8px 14px; }
+.laq .laq-big > button.is-quiet:hover { background: #f6f2ec; }
+.laq .laq-big > button.is-quiet .laq-tx b { font-weight: 400; color: var(--laq-navy); text-decoration: underline; text-underline-offset: 3px; font-size: 15px; }
+
+/* who */
+.laq .laq-srch { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border-radius: 10px; background: #f5f1ea; box-shadow: inset 0 1px 2px rgba(28,19,15,.08); margin-bottom: 6px; }
+.laq .laq-srch:focus-within { background: #fff; box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-srch input { all: unset; flex: 1 1 auto; min-width: 0; font: 400 17px var(--laq-se); color: var(--laq-ink); }
+.laq .laq-srch input::placeholder { font-style: italic; color: #9a948b; }
+.laq .laq-grp { display: flex; align-items: baseline; gap: 8px; margin: 14px 4px 6px; font: 400 15px var(--laq-se); color: var(--laq-mut); }
+.laq .laq-grp > span { color: var(--laq-mut2); }
+.laq .laq-busy { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: #faf8f4; box-shadow: inset 0 0 0 1px #ece5da; font: 400 14.5px var(--laq-se); color: var(--laq-mut); }
+.laq .laq-busy:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-faces { display: flex; }
+.laq .laq-faces i { display: grid; place-items: center; width: 24px; height: 24px; margin-left: -6px; border-radius: 50%; background: var(--laq-paper); box-shadow: 0 0 0 2px #faf8f4, inset 0 0 0 1px var(--laq-line); font: 500 8px var(--laq-mono) !important; font-style: normal; color: var(--sp-muted); }
+.laq .laq-faces i:first-child { margin-left: 0; }
+.laq .laq-busy u { margin-left: auto; color: var(--laq-navy); text-underline-offset: 3px; }
+.laq .laq-off { display: flex; align-items: center; gap: 12px; padding: 8px 14px; opacity: .55; }
+.laq .laq-off .laq-g { width: 30px; height: 30px; font-size: 10px; }
+.laq .laq-off b { font: 500 15px var(--laq-se); }
+.laq .laq-off > span:last-child { margin-left: auto; font: italic 400 13px var(--laq-se); }
+.laq .laq-none { margin: 10px 0; padding: 16px; border-radius: 12px; background: #faf8f4; text-align: center; font: 400 15px var(--laq-se); color: var(--laq-mut); }
+.laq .laq-lk { all: unset; cursor: pointer; color: var(--laq-navy); text-decoration: underline; text-underline-offset: 3px; }
+.laq .laq-lk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
+
+/* the inline calendar */
+.laq .laq-cal { margin-top: 10px; padding: 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; animation: laq-fadein .2s both; }
+@keyframes laq-fadein { from { opacity: 0; transform: translateY(-3px); } }
+.laq .laq-calh { display: flex; align-items: center; margin: 0 2px 8px; }
+.laq .laq-calh b { flex: 1 1 auto; text-align: center; font: 400 16px var(--laq-tw); }
+.laq .laq-calh button { all: unset; cursor: pointer; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--sp-muted); }
+.laq .laq-calh button:hover { background: #f6f2ec; }
+.laq .laq-calh button:disabled { opacity: .25; pointer-events: none; }
+.laq .laq-calg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.laq .laq-calg > span { font: 400 12px var(--laq-se); color: var(--laq-mut2); padding: 2px 0 4px; }
+.laq .laq-calg > button { all: unset; cursor: pointer; height: 32px; border-radius: 50%; font: 400 14px var(--laq-se); }
+.laq .laq-calg > button:hover { background: #f6f2ec; }
+.laq .laq-calg > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
+.laq .laq-calg > button.is-today { box-shadow: inset 0 0 0 1px #cfc4b5; }
+.laq .laq-calg > button.is-on { background: var(--laq-navy); color: #fff; }
+.laq .laq-calg > button:disabled { color: #d3cbc0; pointer-events: none; }
+
+/* pieces */
+/* v1.3 A — ONE COLUMN THAT MAY SHRINK. An unsized grid column grows to its widest unwrappable content (v1.2's Version
+   seg, three long names on one line), and every row widened with it, off the panel. */
+.laq .laq-vt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.laq .laq-ask { margin: 12px 2px 0; font: 400 13.5px/1.45 var(--laq-se); color: var(--laq-mut); }
+
+/* v1.2 — WHAT {FIRST} ASKS FOR (the reference's `.asks`): Queried sand, the asks as one wrapping row, a foot under a rule */
+.laq .laq-asks { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: #efe7da; animation: laq-fadein .25s ease-out both; }
+.laq .laq-ah { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
+.laq .laq-ah b { font: 600 var(--sp-body-size) var(--laq-se); }
+.laq .laq-ah span { margin-left: auto; font: italic 400 13px var(--laq-se); color: #7d7268; }
+.laq .laq-asks ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.laq .laq-asks li { display: flex; align-items: center; gap: 7px; }
+.laq .laq-asks li b { font: 400 15.5px/1.35 var(--laq-se); }
+.laq .laq-mk { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font: 600 12px var(--laq-se); box-shadow: inset 0 0 0 1.5px #b9ad9e; background: #f6f1e9; color: transparent; }
+.laq .laq-asks.is-pkg .laq-mk { width: 6px; height: 6px; box-shadow: none; background: #8e8274; }
+.laq .laq-asks li.is-ok .laq-mk { background: var(--laq-navy); box-shadow: none; color: #fff; }
+.laq .laq-asks li.is-diff .laq-mk { background: #fff; box-shadow: inset 0 0 0 1.5px var(--laq-rust); color: var(--laq-rust); }
+.laq .laq-af { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #e0d4c3; font: 400 14px/1.4 var(--laq-se); color: var(--sp-muted); }
+.laq .laq-af.is-ok { color: var(--laq-ink); }
+.laq .laq-af .laq-why { display: block; color: var(--laq-rust); }
+.laq .laq-af .laq-xtra { display: block; font-style: italic; }
+.laq .laq-btn.is-xs { height: 32px; padding: 0 14px; font-size: 13.5px; margin-top: 8px; }
+.laq .laq-asks.is-nil { background: none; box-shadow: inset 0 0 0 1.2px #ddd3c6; border-radius: 12px; padding: 10px 14px; }
+.laq .laq-asks.is-nil p { margin: 0; font: italic 400 14.5px/1.45 var(--laq-se); color: var(--laq-mut); }
+
+/* v1.2 — THE OPENING PAGES OPEN INTO THE APP'S SAMPLE CONTROL: the row and the control are one block with a navy ring,
+   the control under a dashed rule, 12px in. The control is `SampleControl` unchanged; this only takes off its frame
+   (`.qad-samp`'s ring and padding) and hands its parts the typewriter back from `.laq`'s inherit rule. */
+.laq .laq-pcw { border-radius: 14px; }
+.laq .laq-pcw.is-open { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-qsamp { margin: 0 12px; padding: 14px 2px; border-top: 1px dashed rgba(28,19,15,.18); animation: laq-fadein .2s ease-out both; }
+.laq .laq-qsamp .qad-samp { margin: 0; padding: 0; border-radius: 0; box-shadow: none; }
+.laq .laq-qsamp :is(.qad-srow b, .qad-seg button, .qad-step b, .qad-step button, .qad-unitl, .qad-chip, .qad-sectline) { font-family: var(--laq-tw); }
+/* the reference sets these with the `font` shorthand, which resets the line height to normal; here they would inherit
+   `.laq`'s 1.5 and stand taller than the reference's */
+.laq .laq-qsamp :is(.qad-srow b, .qad-step b, .qad-unitl, .qad-sectline) { line-height: normal; }
+.laq .laq-qsamp .qad-step button { font-family: inherit; }
+/* the stepper's middle keeps the control's own width here: since To-do v54 it holds a typed box (an input), whose
+   intrinsic width would otherwise stretch it to ~266px */
+.laq .laq-qsamp .qad-step b { width: 74px; }
+.laq .laq-qsamp .qad-step.sm b { width: 64px; }
+/* v1.3 B — the sample control's Done line */
+.laq .laq-sdone { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(28,19,15,.12); }
+.laq .laq-sdone p { flex: 1; min-width: 0; margin: 0; font: italic 400 14px/1.4 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-sdone p b { font-style: normal; font-weight: 500; color: var(--laq-ink); }
+.laq .laq-btn.is-sd { height: 34px; padding: 0 14px; font-size: 13.5px; }
+
+/* the check: the preview slip */
+.laq .laq-pv { position: relative; }
+.laq .laq-pv .sa-slip { cursor: default; }
+/* the slip is the list's own (QcSlip153 under the list's root classes, so its rules and its 2×2 container query apply);
+   here it is fitted to the drawer as the ref draws it: no page padding, the facts under the whole header, the status
+   word above the track, and no lift (it is not a control) */
+.laq .laq-pvw.qc151.qc153 { padding-top: 0; width: 100%; font: inherit; }
+.laq .laq-pvw.qc151.qc153 .qc153-slip { margin-bottom: 0; }
+.laq .laq-pvw.qc151.qc153 .qc153-slip:hover { transform: none; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32); }
+.laq .laq-pvw.qc151.qc153 .qc153-facts { padding: 0 12px 12px; gap: 8px; }
+.laq .laq-pvw.qc151.qc153 .qc153-st { flex-direction: column-reverse; align-items: flex-end; gap: 9px; }
+.laq .laq-pvtag { position: absolute; top: -9px; right: 18px; z-index: 5; padding: 1px 9px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9; font: italic 400 12.5px var(--laq-se); color: var(--laq-mut); }
+.laq .laq-nt { display: flex; justify-content: flex-end; margin-top: 14px; }
+/* Consistency roll-out v1.1, Phase 6: the note box takes the text field (primitives.css `.sp-fld`): radius 9 → 10, the 1px
+   edge inside (it was a 1px #d9cfc2 border, so the padding gains that 1px and the text does not move), 14.5 → 16, and the
+   1.5px navy edge at focus. A textarea keeps its own height: 58, stated, since two rows of 16 would make it 62.4. */
+.laq .laq-nt textarea { box-sizing: border-box; width: 100%; min-height: 58px; height: 58px; resize: vertical; font: 400 16px/1.45 var(--laq-se); padding: 8px 11px; border-radius: var(--sp-fld-r); border: 0; box-shadow: var(--sp-fld-edge); outline: none; color: var(--laq-ink); background: #fff; }
+.laq .laq-nt textarea:focus { box-shadow: var(--sp-fld-focus); }
+.laq p.laq-qs.is-foot { margin: auto 0 0; padding-top: 14px; text-align: center; }
+
+/* the footer */
+.laq .laq-cf { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px 14px; border-top: 1px solid #f0ebe3; background: #fff; }
+.laq .laq-sp { flex: 1 1 auto; }
+.laq .laq-hint { font: italic 400 13px var(--laq-se); color: var(--laq-mut2); }
+.laq .laq-btn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 17px; border-radius: 21px; font: 600 14.5px var(--laq-se); white-space: nowrap; transition: filter .15s, transform .1s; background: var(--laq-navy); color: #fff; }
+.laq .laq-btn:active { transform: scale(.97); }
+.laq .laq-btn:hover { filter: brightness(1.12); }
+.laq .laq-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.laq .laq-btn.is-ghost { background: #fff; color: var(--laq-navy); box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-btn.is-sm { height: 36px; padding: 0 14px; font-size: 14px; }
+.laq .laq-btn:disabled { opacity: .38; pointer-events: none; }
+.laq .laq-lnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--laq-se); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.laq .laq-lnk:hover { color: var(--laq-navy); }
+.laq .laq-lnk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
+.laq .laq-lnk:disabled { opacity: .38; pointer-events: none; }
+
+/* v1.2 — the leave check, in the footer's place */
+.laq .laq-cf.is-leave { background: #faf6f0; }
+.laq .laq-lv { font: 400 14.5px/1.35 var(--laq-se); color: var(--sp-muted); }
+.laq .laq-lv b { font-weight: 600; color: var(--laq-ink); }
+
+/* the batch toast */
+.laq .laq-toast { position: absolute; left: 50%; bottom: 84px; transform: translate(-50%, 10px); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 16px; border-radius: 999px; background: var(--laq-ink); color: #fff; font: 400 14.5px var(--laq-se); white-space: nowrap; opacity: 0; pointer-events: none; transition: .25s; z-index: 25; }
+.laq .laq-toast.is-on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.laq .laq-toast button { all: unset; cursor: pointer; padding: 4px 11px; border-radius: 999px; background: rgba(255,255,255,.14); font-weight: 600; }
+
+/* the stamp */
+.laq .laq-stamp { position: absolute; right: 44px; top: 104px; z-index: 6; padding: 6px 12px 5px; border: 2.5px double var(--laq-navy); border-radius: 8px; color: var(--laq-navy); background: rgba(255,255,255,.55); font: 400 19px/1 var(--laq-tw) !important; letter-spacing: .06em; transform: rotate(-8deg); mix-blend-mode: multiply; pointer-events: none; text-align: center; }
+.laq .laq-stamp small { display: block; margin-top: 3px; font-size: 11.5px; letter-spacing: .1em; text-align: center; }
+.laq .laq-stamp.is-thump { animation: laq-thump .42s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes laq-thump { 0% { opacity: 0; transform: rotate(-8deg) scale(1.9); } 60% { opacity: 1; transform: rotate(-8deg) scale(.94); } 100% { transform: rotate(-8deg) scale(1); } }
+
+/* the celebration */
+.laq .laq-yay { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; padding: 20px 22px 14px; text-align: center; background: radial-gradient(120% 60% at 50% 0%, #f6efe3 0%, #fff 62%); }
+.laq .laq-yay > * { flex: none; }
+.laq .laq-yay .qi-slot { animation: laq-rise .55s .05s cubic-bezier(.2,1.2,.4,1) both; }
+@keyframes laq-rise { from { opacity: 0; transform: translateY(16px) scale(.94); } }
+.laq h2.laq-yh { margin: 14px 0 6px; min-height: 35px; font: 400 30px/1.15 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq .laq-cur { display: inline-block; width: 2px; height: 26px; margin-left: 2px; vertical-align: -3px; background: var(--laq-ink); animation: laq-blink .8s steps(1) infinite; }
+@keyframes laq-blink { 50% { opacity: 0; } }
+.laq p.laq-yl { margin: 0 0 4px; max-width: 400px; font: italic 400 15.5px/1.5 var(--laq-se); color: var(--sp-muted); animation: laq-fade .4s .7s both; }
+@keyframes laq-fade { from { opacity: 0; } }
+.laq .laq-cnt { display: inline-flex; align-items: baseline; gap: 6px; margin: 6px 0 14px; animation: laq-fade .4s .8s both; font: 400 14.5px var(--laq-se); color: var(--laq-mut); }
+.laq .laq-odo { display: inline-block; height: 1.15em; overflow: hidden; vertical-align: bottom; font: 400 22px/1.15 var(--laq-tw) !important; color: var(--laq-ink); }
+.laq .laq-odo > span { display: block; transition: transform .7s 1.1s cubic-bezier(.3,1.3,.5,1); }
+.laq .laq-odo.is-go > span { transform: translateY(-50%); }
+.laq .laq-odo b { display: block; font-weight: 400; font-family: inherit; }
+.laq .laq-ms { display: inline-block; margin: -6px 0 14px; padding: 4px 12px; border-radius: 999px; background: var(--laq-navy); color: #fff; font: 400 13.5px var(--laq-se); animation: laq-rise .4s 1.6s both; }
+.laq .laq-slipw { position: relative; width: 100%; text-align: left; animation: laq-rise .5s .45s both; }
+.laq .laq-conf { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 4; }
+.laq .laq-conf i { position: absolute; top: -14px; width: 8px; height: 11px; border-radius: 2px; opacity: .9; }
+.laq .laq-conf i.is-dot { width: 5px; height: 5px; border-radius: 50%; }
+/* the celebration's slip carries no preview tag, and the stamp sits on its facts */
+.laq .laq-yay .laq-pvtag { display: none; }
+.laq .laq-yay .laq-stamp { top: 96px; }
+.laq .qi-slot { display: flex; align-items: center; justify-content: center; flex: none; background: repeating-linear-gradient(135deg, rgba(58,28,20,.05) 0 6px, transparent 6px 12px); border: 1px dashed rgba(58,28,20,.22); border-radius: 14px; }
+.laq .qi-ph { color: var(--sp-quiet); font: 400 8px/1.5 var(--laq-mono) !important; letter-spacing: .12em; text-transform: uppercase; }
+
+@media (prefers-reduced-motion: reduce) {
+  .laq *, .laq *::before, .laq *::after { animation: none !important; transition: none !important; }
+}
+
+/* ── v1.3 — the Nudge stage (design-refs/log-a-query-v1-3, "Nudge, with a response time") ─────────────────────────── */
+.laq h3.laq-qh.is-q2 { margin: 20px 0 10px; font: var(--sp-h-card) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq .laq-wkb { padding: 14px 16px 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; margin-bottom: 6px; }
+.laq .laq-wkb .sa-fld { margin: 0; }
+/* the app's WeekSlider, as the agent card draws it; its label speaks in the stage's serif, never a mono eyebrow */
+.laq .laq-wkb .sa-wk-head { justify-content: flex-start; gap: 10px; }
+/* the readout and the Unknown pill sit on the label's baseline, 10px apart (the slider sets centre and 8 inline) */
+.laq .laq-wkb .sa-wk-head > span { margin-left: auto; align-items: baseline !important; gap: 10px !important; }
+.laq .laq-wkb .sa-label { margin: 0; font: 500 16px var(--laq-se); letter-spacing: 0; text-transform: none; color: var(--laq-ink); }
+.laq .laq-wkb .sa-wk-slider { margin: 0; }
+/* the readout, the Unknown pill and the ends are the slider's own mono; brand.tsx names bare spans as the page face, so
+   they are named here (two classes and !important, as the brand rule needs) */
+.laq .laq-wkb .sa-wk-read { font: 500 13px var(--laq-mono) !important; color: var(--laq-navy); }
+.laq .laq-wkb .sa-wk-read.muted { font: italic 400 13px var(--laq-mono) !important; color: #a89a8a; }
+.laq .laq-wkb .sa-wk-unkbtn { font: 400 9px var(--laq-mono) !important; letter-spacing: .04em; text-transform: uppercase; line-height: normal; }
+.laq .laq-wkb .sa-wk-ends, .laq .laq-wkb .sa-wk-ends span { font: 400 9px var(--laq-mono) !important; letter-spacing: .04em; color: #bcae9e; line-height: normal; }
+.laq p.laq-wkx { margin: 10px 0 0; font: italic 400 14.5px/1.4 var(--laq-se); color: var(--laq-mut); }
+.laq p.laq-wkx b { font-style: normal; font-weight: 500; color: var(--laq-ink); }
+.laq .laq-svk { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #efe7da; cursor: pointer; }
+.laq .laq-svk:focus-within { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-bx3 { flex: none; display: grid; place-items: center; width: 20px; height: 20px; margin-top: 1px; border-radius: 6px; box-shadow: inset 0 0 0 1.5px #b9ad9e; background: #fff; color: #fff; font-size: 13px; }
+.laq .laq-svk.is-on .laq-bx3 { background: var(--laq-navy); box-shadow: none; }
+.laq .laq-svk b { display: block; font: 500 15px/1.35 var(--laq-se); }
+.laq .laq-svk i { display: block; font: italic 400 13.5px/1.35 var(--laq-se); color: #7d7268; }
+.laq .laq-nopts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.laq .laq-nopt { border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; }
+.laq .laq-nopt.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-nopt > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; }
+.laq .laq-nopt > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
+.laq .laq-rd { flex: none; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ad9e; }
+.laq .laq-nopt.is-on .laq-rd { box-shadow: inset 0 0 0 5.5px var(--laq-navy); }
+.laq .laq-nopt .laq-tx { flex: 1; min-width: 0; }
+.laq .laq-nopt .laq-tx b { display: block; font: 500 16px var(--laq-se); }
+.laq .laq-nopt .laq-tx span { display: block; font: italic 400 13.5px/1.35 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-ntag { flex: none; max-width: 44%; text-align: right; font: italic 400 12.5px/1.3 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-nopt.is-dis { opacity: .5; }
+.laq .laq-nopt.is-dis > button { cursor: default; }
+.laq .laq-nch { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px 44px; }
+.laq .laq-chip { all: unset; cursor: pointer; font: 400 13px/1.3 var(--laq-tw); padding: 6px 11px; border-radius: 18px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.22); background: #fff; }
+.laq .laq-chip.is-on { background: var(--laq-navy); color: #fff; box-shadow: none; }
+.laq .laq-chip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.laq .laq-ncal { margin: 0 14px 12px 44px; }
+
+/* materials fork v1 (design-refs/log-query-materials-fork-v1/) — THE FORK, THE PIECES' GROUPS. The ochre is the
+   packages/materials object colour; selection is the ring's filled centre as well as the ochre, never colour alone.
+   The tiles sit side by side while the panel is wide (540) and stack below about 520 of panel (the 504 panel); the
+   query is on the body's own width, never the viewport's. */
+.laq .laq-sb[data-qls="body"] { container-type: inline-size; }
+.laq .laq-fork { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.laq .laq-tile { all: unset; box-sizing: border-box; cursor: pointer; min-height: 248px; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px;
+  border-radius: 16px; background: #fdf9f5; box-shadow: inset 0 0 0 1.5px #ddd3c6; }
+.laq .laq-tile:hover { box-shadow: inset 0 0 0 1.5px var(--laq-ochre); }
+.laq .laq-tile:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.laq .laq-ti { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 11px; background: var(--laq-ochre); color: #fff; }
+.laq .laq-tt { font: 400 21px/1.2 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); }
+.laq .laq-td { font: 400 15px/1.45 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-tm { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; font: italic 400 14.5px var(--laq-se); color: var(--laq-ochre-ink); }
+@container (max-width: 470px) {
+  .laq .laq-fork { grid-template-columns: minmax(0, 1fr); }
+  .laq .laq-tile { min-height: 0; }
+}
+.laq .laq-grps { display: flex; flex-direction: column; gap: 18px; }
+.laq .laq-gh { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.laq .laq-gh b { font: 400 16px/1.3 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); }
+.laq .laq-gh span { flex: none; font: italic 400 13.5px var(--laq-se); color: var(--laq-mut); }
+.laq .laq-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@container (max-width: 360px) { .laq .laq-opts { grid-template-columns: minmax(0, 1fr); } }
+.laq .laq-opt { all: unset; box-sizing: border-box; cursor: pointer; min-height: 52px; padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+  border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1.5px #ddd3c6; font: 400 15.5px/1.3 var(--laq-se); color: var(--laq-ink); }
+.laq .laq-opt:hover { box-shadow: inset 0 0 0 1.5px var(--laq-ochre); }
+.laq .laq-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.laq .laq-opt.is-on { background: var(--laq-ochre-tint); box-shadow: inset 0 0 0 2px var(--laq-ochre); }
+.laq .laq-on { min-width: 0; overflow-wrap: anywhere; }
+.laq .laq-rdo { flex: none; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; border: 2px solid #8c8177; background: #fff; box-shadow: inset 0 0 0 3px #fff; }
+.laq .laq-opt.is-on .laq-rdo { border-color: var(--laq-ochre); background: var(--laq-ochre); }
+.laq .laq-sline { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.laq .laq-sline p { flex: 1; min-width: 0; margin: 0; font: italic 400 14px/1.4 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-sline p b { font-style: normal; font-weight: 500; color: var(--laq-ink); }
+.laq .laq-sline .laq-lk { flex: none; min-height: 44px; display: inline-flex; align-items: center; font: 400 14.5px var(--laq-se); }
+.laq .laq-pcw .laq-qsamp { margin: 6px 0 0; padding: 14px 2px 0; }
+/* the footer's right side: the tip and Carry on share one slot of the button's height, so the swap moves nothing */
+.laq .laq-slot { display: inline-flex; align-items: center; justify-content: flex-end; min-height: 42px; }
+.laq .laq-grps + .laq-ask, .laq .laq-big + .laq-ask { margin-top: 12px; }
+.laq .laq-ask .laq-lk { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.laq .laq-btn:hover:not(:disabled) { filter: none; background: var(--sp-navy-hover); }
+.laq .laq-btn.is-ghost:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
+.laq .laq-busy:hover { background: #f8f4ed; }
+
+/* Consistency roll-out v2, Phase 6 (ruling 11): the one focus ring for this component's buttons. They are `all: unset`, which
+   also unsets the shell's zero-specificity ring, so the ring is stated here — (0,2,0), below every rule that names its own. */
+.laq :where(button, [role="button"], [role="radio"], a[href]):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .laq .laq-faces i { width: 36px; height: 36px; font-size: 12px !important; }
+  .laq .laq-wkb .sa-wk-ends, .laq .laq-wkb .sa-wk-ends span { font-size: 12px !important; }
+  .laq .laq-wkb .sa-wk-unkbtn { font-size: 12px !important; }
+}

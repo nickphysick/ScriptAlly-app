@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L12-1280",
+  "where": "population: Who replied? with items",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L12-1280",
+  "where": "each live query once",
+  "ok": true,
+  "detail": "duplicates"
+ },
+ {
+  "lock": "L12-1280",
+  "where": "every live query: All less Closed",
+  "ok": true,
+  "detail": "0 vs 0"
+ },
+ {
+  "lock": "L12-1280",
+  "where": "the waiting heading counts its items",
+  "ok": false,
+  "detail": "undefined vs 0"
+ },
+ {
+  "lock": "L12-1280",
+  "where": "the you heading counts its items",
+  "ok": false,
+  "detail": "undefined vs 0"
+ },
+ {
+  "lock": "L12-1280",
+  "where": "a pick opens that query's card in respond mode",
+  "ok": false,
+  "detail": "not in respond"
+ }
+]

@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "AC21-2d",
+  "where": "the opening sample stores the encoder's answer (Words, one step)",
+  "ok": true,
+  "detail": "[\"Query letter\",\"Synopsis\",\"5,500 words\"] vs [\"Query letter\",\"Synopsis\",\"5,500 words\"]"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "its label reads as on the card",
+  "ok": true,
+  "detail": "First 5500 words"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "the reading list shows it after the tick",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "the wishlist's tick stores the wishlist",
+  "ok": true,
+  "detail": "Thrillers with a moral knot, and AC21."
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "…and leaves the stored genres alone",
+  "ok": true,
+  "detail": "[\"Thriller\",\"Crime\"] vs [\"Thriller\",\"Crime\"]"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "…and the genre draft is still on screen",
+  "ok": true,
+  "detail": "{\"open\":true,\"chips\":[\"Thriller\",\"Crime\",\"Romance\"]}"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "Contact details · stored as the patch stores it",
+  "ok": true,
+  "detail": "{\"email\":\"eda.new@pryce.example\"}"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "How · stored as the patch stores it",
+  "ok": true,
+  "detail": "{\"submissionMethod\":\"Online Form\"} (Online Form)"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "Genres · stored as the patch stores it",
+  "ok": true,
+  "detail": "[\"Thriller\",\"Crime\",\"Horror\"]"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "the snackbar names the section",
+  "ok": true,
+  "detail": " | Saved how they work for EdaUNDO✕Saved genres for EdaUNDO✕ | Saved how they work for EdaUNDO✕ | Saved genres for EdaUNDO✕"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "the cross closes its section with its fields as stored",
+  "ok": true,
+  "detail": "{\"wishOpen\":false,\"quote\":\"Thrillers with a moral knot, and AC21.\",\"chips\":[\"Thriller\",\"Crime\",\"Horror\",\"Satire\"]}"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "…and leaves the other open section's draft alone",
+  "ok": true,
+  "detail": "[\"Thriller\",\"Crime\",\"Horror\",\"Satire\"]"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "…the snackbar: “Changes to the wishlist discarded”",
+  "ok": true,
+  "detail": " | Saved how they work for EdaUNDO✕Saved genres for EdaUNDO✕Changes to the wishlist discardedUNDO✕ | Saved how they work for EdaUNDO✕ | Saved genres for EdaUNDO✕ | Changes to the wishlist discardedUNDO✕"
+ },
+ {
+  "lock": "AC21-2d",
+  "where": "its Undo reopens the section with the changes back",
+  "ok": true,
+  "detail": "Crossed out."
+ }
+]

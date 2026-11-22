@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "PA5-12",
+  "where": "packages (population 4, 3 sent)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-12",
+  "where": "every package's result = packageMetrics",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-12",
+  "where": "the header's package = the one new queries go out with (cv25-ms)",
+  "ok": true,
+  "detail": "{\"hd\":{\"id\":null,\"none\":true,\"sent\":null,\"req\":null,\"ms\":\"cv25-ms\"},\"act\":null}"
+ },
+ {
+  "lock": "PA5-12",
+  "where": "a package chosen to go out: the header shows it, with packageMetrics' result",
+  "ok": true,
+  "detail": "{\"h2\":{\"id\":\"seed-pkg-3\",\"sent\":2,\"req\":2},\"act\":\"seed-pkg-3\",\"m\":[2,2]}"
+ },
+ {
+  "lock": "PA5-12",
+  "where": "put back: the book's package going out is as it was",
+  "ok": true,
+  "detail": "pkg-h22iuu9vx → pkg-h22iuu9vx"
+ },
+ {
+  "lock": "PA5-12",
+  "where": "Versions as the account stands: the phone's gate = the desktop's",
+  "ok": true,
+  "detail": "{\"ph\":{\"locked\":false,\"open\":true},\"deskLocked\":false}"
+ },
+ {
+  "lock": "PA5-12",
+  "where": "Versions with the review aid (locked): the phone's gate = the desktop's",
+  "ok": true,
+  "detail": "{\"ph\":{\"locked\":true,\"open\":false},\"deskLocked\":true}"
+ }
+]

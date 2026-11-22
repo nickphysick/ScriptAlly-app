@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C13",
+  "where": "starts inside",
+  "ok": true,
+  "detail": "the paper"
+ },
+ {
+  "lock": "C13",
+  "where": "Tab stays",
+  "ok": true,
+  "detail": "24 presses"
+ },
+ {
+  "lock": "C13",
+  "where": "Shift+Tab stays",
+  "ok": true,
+  "detail": "8 presses"
+ },
+ {
+  "lock": "C13",
+  "where": "Escape closes, focus returns",
+  "ok": true,
+  "detail": "new-note"
+ },
+ {
+  "lock": "C14",
+  "where": "no stale modal but the Dashboard's known one",
+  "ok": true,
+  "detail": "stale: [\"d105-how\"] — d105-how neutralised for this lock (base trap, reported)"
+ },
+ {
+  "lock": "C14",
+  "where": "N opens",
+  "ok": true,
+  "detail": "new note"
+ },
+ {
+  "lock": "C14",
+  "where": "/ focuses Find a note",
+  "ok": true,
+  "detail": "find"
+ },
+ {
+  "lock": "C14",
+  "where": "N and / stand down in the field",
+  "ok": true,
+  "detail": "\"n/\""
+ },
+ {
+  "lock": "C14",
+  "where": "Esc clears the find",
+  "ok": true,
+  "detail": "cleared"
+ }
+]

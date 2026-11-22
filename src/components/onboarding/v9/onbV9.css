@@ -68,7 +68,7 @@
 .sf .o9-acklbl { display: grid; gap: 2px; min-width: 0; }
 .sf .o9-acklbl small {
   font-family: var(--sp-mono); font-size: 9.5px; line-height: 1.4; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(28, 19, 15, .5);
+  color: var(--sp-quiet);
 }
 .sf .o9-acklbl b { font-family: var(--sp-type); font-weight: 400; font-size: clamp(28px, 3vw, 40px); line-height: 1.3; color: var(--ink-on-light); }
 .sf .o9-ackchange { margin: 0 0 6px 6px; align-self: flex-end; color: var(--sf-ink72); }
@@ -78,7 +78,7 @@
    Your campaign is underway." on one line. The old 60ch sat on the container, so it was 60ch of the
    container's 16px and broke the 27px lead over two lines. */
 .sf .o9-beats { display: grid; gap: 10px; cursor: default; }
-.sf .o9-beat { margin: 0; font-family: var(--sp-serif); font-size: 18.5px; line-height: 1.5; color: rgba(28, 19, 15, .78); max-width: 60ch; }
+.sf .o9-beat { margin: 0; font-family: var(--sp-serif); font-size: 18.5px; line-height: 1.5; color: var(--sp-muted); max-width: 60ch; }
 .sf .o9-beat--lead { font-family: var(--sp-type); font-size: 27px; line-height: 1.3; color: var(--ink-on-light); max-width: 30em; }
 .sf .o9-beat em { font-style: italic; font-weight: 600; color: var(--ink-on-light); }
 .sf .o9-beat span { font: inherit; color: inherit; }
@@ -110,9 +110,9 @@
 .sf .o9-byline { margin: 8px 0 0; width: 100%; max-width: 520px; display: flex; align-items: center; gap: 12px; }
 .sf .o9-byline::before { content: ""; flex: none; width: 34px; height: 1px; background: rgba(28, 19, 15, .45); }
 .sf .o9-byline::after { content: ""; flex: 1 1 0; height: 1px; background: rgba(28, 19, 15, .15); }
-.sf .o9-byline > span { font-family: var(--sp-serif); font-style: italic; font-size: 18px; line-height: 25px; color: rgba(28, 19, 15, .62); white-space: nowrap; }
+.sf .o9-byline > span { font-family: var(--sp-serif); font-style: italic; font-size: 18px; line-height: 25px; color: var(--sp-muted); white-space: nowrap; }
 .sf .o9-late.is-rise { opacity: 1; animation: o9-rise .5s ease-out both; }
-.sf .o9-small { font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); margin: 0; }
+.sf .o9-small { font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: var(--sp-muted); margin: 0; }
 .sf .o9-cardsub { margin: 6px 0 22px; }
 .sf .o9-fields { display: grid; gap: 20px; }
 .sf .o9-late.is-in .o9-fields > * { animation: o9-rise .45s ease-out both; }
@@ -130,7 +130,7 @@
   font-family: var(--sp-type); font-size: 14.5px; line-height: 1; color: var(--ink-on-light);
 }
 .sf .o9-pill:hover { box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .75); }
-.sf .o9-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* picked: white, a 2px navy ring and a tick */
 .sf .o9-pill.is-on { box-shadow: inset 0 0 0 2px var(--hpanel-bg); }
 /* the primary, and the one age category picked: navy fill, cream text */
@@ -140,7 +140,7 @@
   font-family: var(--sp-mono); font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; margin-left: 9px;
   padding: 3px 5px 2px; border-radius: 4px; background: rgba(244, 238, 229, .18); color: inherit;
 }
-.sf .o9-gsum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); }
+.sf .o9-gsum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: var(--sp-muted); }
 .sf .o9-gsum b { font-weight: 600; color: var(--ink-on-light); }
 .sf .o9-gsum span { font: inherit; color: inherit; }
 /* the search: a dashed rule, and a list that FLOATS over the fields below */
@@ -171,9 +171,9 @@
 }
 .sf .o9-drop button:hover, .sf .o9-drop button:focus-visible { background: var(--sf-note); outline: 0; }
 .sf .o9-drop button b { font-weight: 600; }
-.sf .o9-dropfoot { margin: 4px 0 0; padding: 9px 12px 6px; border-top: 1px solid rgba(28, 19, 15, .08); font-family: var(--sp-serif); font-size: 13.5px; line-height: 1.4; color: rgba(28, 19, 15, .6); }
+.sf .o9-dropfoot { margin: 4px 0 0; padding: 9px 12px 6px; border-top: 1px solid rgba(28, 19, 15, .08); font-family: var(--sp-serif); font-size: 13.5px; line-height: 1.4; color: var(--sp-quiet); }
 .sf .o9-desc { margin-top: 12px; padding: 13px 16px 14px; border-radius: 11px; background: var(--sf-note); display: grid; gap: 5px; max-width: 62ch; animation: o9-rise .35s ease-out both; }
-.sf .o9-desceye { font-family: var(--sp-mono); font-size: 9px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(28, 19, 15, .5); }
+.sf .o9-desceye { font-family: var(--sp-mono); font-size: 9px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--sp-quiet); }
 .sf .o9-desc p { margin: 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .82); }
 .sf .o9-desc p i { font-style: italic; }
 @media (max-width: 1439px) { .sf .o9-byline > span { font-size: 16.5px; line-height: 23px; } }
@@ -189,10 +189,23 @@
 .sf .o9-waylist { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 5px; }
 .sf .o9-waylist li {
   display: flex; gap: 10px; align-items: baseline; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.35;
-  color: rgba(28, 19, 15, .78);
+  color: var(--sp-muted);
 }
 .sf .o9-waylist li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--sp-anthracite); transform: translateY(-2px); }
 .sf .o9-wayacts { flex-direction: row; flex-wrap: wrap; margin: auto 0 0; }
+/* Two-door import v1 (ref design-refs/two-door-import-v1/, screen 1): two doors at the mock's
+   measure, door one's caption under its buttons, and the quiet headings line under the doors. */
+.sf .sf-tiles.sf-doors { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; max-width: 1040px; }
+.sf .sf-doors .o9-wayslot { aspect-ratio: auto; height: 190px; }
+.sf .sf-cap { font-family: var(--sp-serif); font-size: 15px; line-height: 1.45; color: var(--sf-ink58); margin: 10px 0 0; }
+.sf .sf-quiet {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px;
+  max-width: 1040px; margin: 22px 0 0; padding: 14px 18px; border-radius: 12px; background: var(--sf-note);
+  font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: var(--sp-muted);
+}
+@media (max-width: 1079.98px) { .sf .sf-tiles.sf-doors { grid-template-columns: minmax(0, 1fr); } }
+/* brand.tsx names a bare <span> as sans on every route: the line's sentence inherits the serif */
+.sf .sf-quiet > span { font-family: inherit; }
 
 /* ── the Smart Import hand-off: the card, and what happens next beside it ── */
 .sf .o9-conf { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 28px; align-items: start; max-width: 1140px; }
@@ -202,7 +215,7 @@
 .sf .o9-conf .sf-stepcard { min-width: 0; }
 .o9-d2 { animation-delay: .2s; }
 .sf .o9-how { display: grid; gap: 14px; min-width: 0; }
-.sf .o9-howeye { margin: 0; font-family: var(--sp-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .24em; line-height: 14px; text-transform: uppercase; color: rgba(28, 19, 15, .5); }
+.sf .o9-howeye { margin: 0; font-family: var(--sp-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .24em; line-height: 14px; text-transform: uppercase; color: var(--sp-quiet); }
 .sf .o9-howlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: o9how; }
 .sf .o9-howlist li {
   counter-increment: o9how; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center;
@@ -211,8 +224,8 @@
 .sf .o9-howslot { width: 96px; height: 96px; border-radius: 10px; }
 .sf .o9-howtx { display: block; min-width: 0; }
 .sf .o9-howtx b { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 18px; line-height: 1.15; color: var(--ink-on-light); }
-.sf .o9-howtx b::before { content: counter(o9how) " · "; color: rgba(28, 19, 15, .45); }
-.sf .o9-howtx > span { display: block; margin-top: 3px; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.4; color: rgba(28, 19, 15, .66); }
+.sf .o9-howtx b::before { content: counter(o9how) " · "; color: var(--sp-quiet); }
+.sf .o9-howtx > span { display: block; margin-top: 3px; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.4; color: var(--sp-muted); }
 @media (max-width: 1099.98px) { .sf .o9-conf { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── 5 · success marks. Sage is for these and the "all answered" band, and nothing else. ── */
@@ -244,7 +257,7 @@
   margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: clamp(30px, 3.1vw, 44px); line-height: 1.06;
   color: var(--ink-on-light); max-width: none;
 }
-.sf .o9-mtxt > span { font-family: var(--sp-serif); font-size: 18px; line-height: 1.4; color: rgba(28, 19, 15, .7); }
+.sf .o9-mtxt > span { font-family: var(--sp-serif); font-size: 18px; line-height: 1.4; color: var(--sp-muted); }
 
 /* the summary: the mark first, then the paragraph, then the two cards */
 .sf .im-sum .o9-markrow { grid-column: 1; }
@@ -263,7 +276,7 @@
 .sf .o9-alldone > div { display: grid; gap: 3px; min-width: 0; }
 .sf .o9-alldone b { font-family: var(--sp-type); font-weight: 400; font-size: 23px; line-height: 1.2; color: var(--ink-on-light); }
 .sf .o9-alldone span { font-family: var(--sp-serif); font-size: 16px; line-height: 1.4; color: var(--go-ink); }
-.sf .o9-barhint { margin: 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .62); max-width: 62ch; }
+.sf .o9-barhint { margin: 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: var(--sp-muted); max-width: 62ch; }
 
 /* ── 6 · the answer deck: one question at a time, then the rows that are ready ── */
 .sf .o9-deck {
@@ -283,7 +296,7 @@
 .sf .o9-dot::after { content: ""; position: absolute; inset: -8px; }
 .sf .o9-dot.is-on { background: var(--im-stamp); }
 .sf .o9-dot.is-done { background: rgba(244, 238, 229, .85); }
-.sf .o9-dot:focus-visible { outline: 2px solid var(--im-cream); outline-offset: 3px; }
+.sf .o9-dot:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .sf .o9-deckfaq { padding: 6px 22px 10px; background: var(--im-pill); border-bottom: 1px solid rgba(28, 19, 15, .08); }
 .sf .o9-deckfaq .im-faq .im-faqh { display: none; }
 .sf .o9-deckbody { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: stretch; }
@@ -297,13 +310,16 @@
 .sf .o9-qwho { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .sf .o9-qwho > div { min-width: 0; }
 .sf .o9-qwho b { display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 18px; line-height: 1.2; color: var(--ink-on-light); overflow-wrap: anywhere; }
-.sf .o9-qwho small { display: block; margin-top: 4px; font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(28, 19, 15, .56); }
+.sf .o9-qwho small { display: block; margin-top: 4px; font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--sp-quiet); }
 .sf .o9-qwho .im-chip { margin-left: auto; flex: none; }
 .sf .o9-q, .sf .o9-answered { display: grid; gap: 18px; min-width: 0; }
 .sf .o9-ask { margin: 0; font-family: var(--sp-type); font-size: 23px; line-height: 1.25; color: var(--ink-on-light); }
 .sf .o9-ask--said { font-size: 20px; }
 .sf .o9-raw { font-family: var(--sp-mono); font-size: 15px; background: var(--im-pill); padding: 2px 7px; border-radius: 5px; }
-.sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); max-width: 62ch; }
+/* two-door import v1: the sheet's own date cells above a date question (the mock's .raws) */
+.sf .o9-raws { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+.sf .o9-raws .o9-raw { font-size: 14px; overflow-wrap: anywhere; }
+.sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: var(--sp-muted); max-width: 62ch; }
 .sf .o9-ans { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
 .sf .o9-ans .o9-ansfld { flex: 1 1 260px; margin: 0; }
 .sf .o9-esc { flex-basis: 100%; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -313,12 +329,12 @@
   font-family: var(--sp-type); font-size: 15.5px; color: var(--ink-on-light); display: inline-flex; align-items: center; gap: 10px;
 }
 .sf .o9-pick:hover { background: var(--im-pill); }
-.sf .o9-pick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-pick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* v1.2: the reading a page's own key gives, chosen before the writer confirms it (the pill's own ring) */
 .sf .o9-pick.is-on { box-shadow: inset 0 0 0 2px var(--hpanel-bg); }
 .sf .o9-q--built .im-reason { display: grid; gap: 14px; }
 .sf .o9-q--built .im-fixq { margin: 0; font-family: var(--sp-type); font-size: 21px; line-height: 1.3; color: var(--ink-on-light); }
-.sf .o9-upnext { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-family: var(--sp-serif); font-size: 14.5px; color: rgba(28, 19, 15, .62); animation-delay: .4s; }
+.sf .o9-upnext { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-family: var(--sp-serif); font-size: 14.5px; color: var(--sp-muted); animation-delay: .4s; }
 .sf .o9-upnext .im-chip { text-transform: none; letter-spacing: .06em; font-size: 11px; }
 .sf .o9-ready { animation-delay: .45s; }
 .sf .o9-ready [data-im="rows"] > .im-rw { animation: o9-rise .4s ease-out both; }
@@ -366,4 +382,95 @@
   .sf .o9-gomark path { animation: none; stroke-dashoffset: 0; }
   .sf .o9-ready [data-im="rows"] > .im-rw, .sf .o9-bar { animation: none; }
   .sf [class*="o9-"], .sf [class*="o9-"]::before, .sf [class*="o9-"]::after { animation: none !important; }
+}
+
+/* ═══ Set-up on phones v1 (30 Oct; ref design-refs/setup-import-phone-v1/, board 1) ═══════════════
+   Below 768px only, last in the file, at each overridden rule's own specificity.
+   3B — the welcome panel loses its picture slot, so the four options start on the first screen.
+   4B — "Your list": each way is a short card, no picture, its first line only, then its button and fact.
+   5B — "What happens next" keeps its numbers (the steps are a sequence) and loses its picture slots.
+   7B — the "We've read your file" mark is navy with a white tick. Sage stays on the desktop; S1's
+   sage sweep exempts the phone by name.
+   2B — the v9 small capitals become sentence case in the body face, weight 600, at least 13px. */
+@media (max-width: 767.98px) {
+  .sf .o9-panel .o9-slot { display: none; }
+  .sf .o9-panel { padding-bottom: 22px; }
+  /* 3B — Welcome's four options start above the pinned foot at 390 × 844 (S3). The panel and the
+     option cards give up about 70px between them; measured 830 → under 770. */
+  .sf .o9-welv { row-gap: 14px; }
+  .sf .o9-welv .o9-panel { padding: 20px 18px 18px; }
+  .sf .o9-welv .o9-panel .o9-panelh { font-size: 26px; }
+  .sf .o9-welv .sf-stepcard { padding-top: 16px; }
+  .sf .o9-welv .sf-opts { gap: 8px; }
+  .sf .o9-welv .sf-opt { padding: 10px 14px 9px; }
+
+  .sf .o9-wayslot { display: none; }
+  .sf .o9-waylist { margin: 4px 0 12px; }
+  .sf .o9-waylist li:not(:first-child) { display: none; }
+  .sf .sf-tile { min-height: 0; }
+  .sf .o9-waybody .sf-tileh { font-size: 1.3rem; }
+
+  .sf .o9-howslot { display: none; }
+
+  .sf .o9-gomark { background: var(--sp-anthracite); }
+  .sf .o9-gomark::before { border-color: var(--sp-anthracite); }
+  .sf .o9-gomark path { stroke: #fff; }
+
+  .sf .o9-eyebrow, .sf .o9-bookeye, .sf .o9-desceye, .sf .o9-howeye {
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600; line-height: 1.3; letter-spacing: 0; text-transform: none;
+  }
+  .sf .o9-acklbl small, .sf .o9-pilltag, .sf .o9-qwho small {
+    font-family: var(--font-sans); font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none;
+  }
+}
+
+/* ── D: the deck on a phone, and one question per screen (board 2 2B + 3B; DOCS.headB, askB) ──
+   The compact card on the step, then the full-screen question: a navy band holding the row as a card,
+   the sheet with the question's own body, and Skip / Save and next pinned at the foot. The question's
+   own save button is kept (Save and next presses it) and drawn out of sight; its escape answers are
+   list rows. Portalled to the frame's root, so the `.sf` rules reach every part. */
+@media (max-width: 767.98px) {
+  .sf .o9-pdeck { margin: 0 0 18px; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, .07), 0 8px 18px -12px rgba(28, 19, 15, .25); }
+  .sf .o9-pdeckh { display: flex; justify-content: space-between; padding: 12px 14px; background: var(--sp-anthracite); color: #fff; font-family: var(--font-sans); font-weight: 600; font-size: 15px; }
+  .sf .o9-pdeckh b { font-weight: 600; }
+  .sf .o9-pdeckrow { display: flex; gap: 12px; align-items: center; padding: 14px; }
+  .sf .o9-pdeckrow b { display: block; font-family: var(--font-sans); font-weight: 600; font-size: 16px; color: var(--ink-on-light); }
+  .sf .o9-pdeckrow small { display: block; font-family: var(--font-sans); font-size: 14px; color: var(--sf-ink58); }
+  .sf .o9-pdeckgo { padding: 0 14px 14px; }
+  .sf .o9-pdeckgo .sf-btn { width: 100%; height: 44px; }
+
+  .sf .o9-ql { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--ink-shell, #1b2433); }
+  .sf .o9-qlband { flex: none; padding: 8px 18px 0; color: #fff; }
+  .sf .o9-qlrow { display: flex; justify-content: space-between; align-items: center; min-height: 52px; }
+  .sf .o9-qlback { min-height: 44px; padding: 0; border: 0; background: none; color: #fff; cursor: pointer; font-family: var(--font-sans); font-weight: 600; font-size: 15px; }
+  .sf .o9-qlpos { font-family: var(--font-sans); font-weight: 600; font-size: 15px; opacity: .9; }
+  .sf .o9-qlcard { margin-bottom: -4px; border-radius: 16px; overflow: hidden; background: #fff; color: var(--ink-on-light); }
+  .sf .o9-qlcb { display: flex; justify-content: space-between; padding: 8px 14px; background: #f5e6df; color: #5a3027; font-family: var(--font-sans); font-weight: 600; font-size: 13px; }
+  .sf .o9-qlca { display: flex; gap: 12px; align-items: center; padding: 12px 14px; }
+  .sf .o9-qlca b { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 19px; }
+  .sf .o9-qlgap { display: inline-block; margin-top: 3px; padding: 2px 10px; border: 1.5px dashed #cdbfb3; border-radius: 999px; font-family: var(--font-sans); font-weight: 600; font-size: 13px; color: var(--sf-ink58); }
+  .sf .o9-qlcf { padding: 9px 14px; border-top: 1px solid var(--im-stone, #e6dfd6); font-family: var(--font-sans); font-size: 13.5px; color: var(--sf-ink58); }
+  .sf .o9-qlsheet { flex: 1 1 auto; min-height: 0; overflow: auto; margin-top: 14px; padding: 22px 18px 24px; border-radius: 20px 20px 0 0; background: #fbf9f5; color: var(--ink-on-light); }
+  .sf .o9-qlchips { display: flex; gap: 6px; margin-bottom: 14px; }
+  .sf .o9-qlchips span { padding: 6px 12px; border-radius: 999px; background: #ece7de; font-family: var(--font-sans); font-weight: 600; font-size: 13.5px; }
+  .sf .o9-qlchips span.is-on { background: var(--sp-anthracite); color: #fff; }
+  .sf .o9-qlbody .o9-ask { margin: 0 0 6px; font-family: var(--sp-type); font-weight: 400; font-size: 26px; line-height: 1.15; color: var(--ink-on-light); }
+  .sf .o9-qlbody .o9-why { margin: 0 0 16px; font-family: var(--sp-serif); font-size: 16px; line-height: 1.45; color: var(--sf-ink72); }
+  .sf .o9-qlbody .o9-ans { display: grid; gap: 12px; }
+  .sf .o9-qlbody .o9-ans > .sf-btn {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .sf .o9-qlbody .o9-esc {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 14px; border-radius: 16px; background: #fff; text-align: left;
+    box-shadow: 0 0 0 1px rgba(28, 19, 15, .07), 0 8px 18px -12px rgba(28, 19, 15, .25);
+  }
+  .sf .o9-qlbody .o9-esc .sf-link { align-self: flex-start; min-height: 32px; font-family: var(--font-sans); font-weight: 600; font-size: 16px; text-decoration: none; }
+  .sf .o9-qlbody .o9-esc .o9-small { font-family: var(--font-sans); font-size: 14px; color: var(--sf-ink58); }
+  .sf .o9-qlbody .o9-pick { min-height: 48px; }
+  .sf .o9-qlpin {
+    flex: none; display: flex; gap: 12px; align-items: center; background: #fff;
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -10px 22px -16px rgba(0, 0, 0, .35);
+  }
+  .sf .o9-qlpin .sf-link { flex: none; min-height: 44px; white-space: nowrap; }
+  .sf .o9-qlpin .sf-btn { flex: 1 1 auto; height: 50px; border-radius: 25px; }
 }

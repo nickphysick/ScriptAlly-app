@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "CB16",
+  "where": "1512x982 start-pile-btn",
+  "ok": true,
+  "detail": "the pop-up opened"
+ },
+ {
+  "lock": "CB16",
+  "where": "1512x982 start-pile-btn nothing ticked",
+  "ok": true,
+  "detail": "ticked []"
+ },
+ {
+  "lock": "CB16",
+  "where": "1512x982 ghost-pile",
+  "ok": true,
+  "detail": "the pop-up opened"
+ },
+ {
+  "lock": "CB16",
+  "where": "1512x982 ghost-pile nothing ticked",
+  "ok": true,
+  "detail": "ticked []"
+ },
+ {
+  "lock": "CB16",
+  "where": "1512x982 menu",
+  "ok": true,
+  "detail": "the pop-up opened from New pile…"
+ },
+ {
+  "lock": "CB16",
+  "where": "1512x982 menu pre-tick",
+  "ok": false,
+  "detail": "ticked [] (want cb2seed-n2)"
+ },
+ {
+  "lock": "CB16",
+  "where": "1280x800 start-pile-btn",
+  "ok": true,
+  "detail": "the pop-up opened"
+ },
+ {
+  "lock": "CB16",
+  "where": "1280x800 start-pile-btn nothing ticked",
+  "ok": true,
+  "detail": "ticked []"
+ },
+ {
+  "lock": "CB16",
+  "where": "1280x800 ghost-pile",
+  "ok": true,
+  "detail": "the pop-up opened"
+ },
+ {
+  "lock": "CB16",
+  "where": "1280x800 ghost-pile nothing ticked",
+  "ok": true,
+  "detail": "ticked []"
+ },
+ {
+  "lock": "CB16",
+  "where": "1280x800 menu",
+  "ok": true,
+  "detail": "the pop-up opened from New pile…"
+ },
+ {
+  "lock": "CB16",
+  "where": "1280x800 menu pre-tick",
+  "ok": false,
+  "detail": "ticked [] (want cb2seed-n2)"
+ }
+]

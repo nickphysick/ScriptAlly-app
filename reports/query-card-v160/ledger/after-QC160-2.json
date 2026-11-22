@@ -1,0 +1,47 @@
+[
+ {
+  "name": "population: Undo was pressed",
+  "ok": true,
+  "got": "79"
+ },
+ {
+  "name": "undo: exactly one pop, at most one press, and no other scale animation on the frame",
+  "ok": true,
+  "got": "[{\"uid\":5,\"id\":\"qc1611-press\",\"props\":[\"scale\"],\"dur\":120,\"peak\":1,\"low\":0.985,\"play\":\"running\"},{\"uid\":6,\"id\":\"qc160-bump\",\"props\":[\"scale\"],\"dur\":620,\"peak\":1,\"low\":0.975,\"play\":\"running\"}]"
+ },
+ {
+  "name": "undo: they animate scale only, never transform",
+  "ok": true,
+  "got": "[[\"scale\"],[\"scale\"]]"
+ },
+ {
+  "name": "undo: the bump is 620ms (v163)",
+  "ok": true,
+  "got": "620"
+ },
+ {
+  "name": "undo: it sinks to 0.975 and never rises above 1 (v163)",
+  "ok": true,
+  "got": "0.975 1"
+ },
+ {
+  "name": "undo: population — frames with the bump running",
+  "ok": true,
+  "got": "37"
+ },
+ {
+  "name": "undo: the frame's rotate is unchanged during it (frames where the lean's own return is not running)",
+  "ok": true,
+  "got": "37 frames: [\"1.6deg\"]"
+ },
+ {
+  "name": "undo: the frame's translate is unchanged during it",
+  "ok": true,
+  "got": "[\"none\"]"
+ },
+ {
+  "name": "undo: transform is never set on the frame",
+  "ok": true,
+  "got": "[\"none\"]"
+ }
+]

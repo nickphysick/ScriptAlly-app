@@ -1,0 +1,370 @@
+{
+ "R-1280": {
+  "workspace": 1128,
+  "tray": 340,
+  "desk": 760,
+  "side": 390,
+  "zoom": 0.71627,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "0.62"
+  },
+  "bandOpacity": "0.8",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Playfair Display\", Garamond, Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "none",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 1,
+   "n": 3,
+   "gtc": "274px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "R-1440": {
+  "workspace": 1288,
+  "tray": 340,
+  "desk": 920,
+  "side": 390,
+  "zoom": 0.668519,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "0.62"
+  },
+  "bandOpacity": "0.8",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Playfair Display\", Garamond, Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "none",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 2,
+   "n": 3,
+   "gtc": "212px 212px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "R-1717": {
+  "workspace": 1565,
+  "tray": 340,
+  "desk": 1197,
+  "side": 390,
+  "zoom": 0.668519,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "0.62"
+  },
+  "bandOpacity": "0.8",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Playfair Display\", Garamond, Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "none",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 3,
+   "n": 3,
+   "gtc": "206.656px 206.672px 206.672px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "R-1920": {
+  "workspace": 1596,
+  "tray": 340,
+  "desk": 1228,
+  "side": 390,
+  "zoom": 0.668519,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "0.62"
+  },
+  "bandOpacity": "0.8",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Playfair Display\", Garamond, Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "none",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 3,
+   "n": 3,
+   "gtc": "206.656px 206.672px 206.672px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "M6-pop": {
+  "span": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+  "head": "\"Source Serif 4\", Georgia, serif"
+ },
+ "M8": {
+  "off": {
+   "fig": "visible",
+   "acts": [
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 0,
+     "h": 0
+    },
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 0,
+     "h": 0
+    }
+   ]
+  },
+  "on": {
+   "fig": "visible",
+   "acts": [
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 30,
+     "h": 30
+    },
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 30,
+     "h": 30
+    }
+   ]
+  }
+ },
+ "M11": {
+  "base": "b9226fc5e",
+  "out": ""
+ }
+}

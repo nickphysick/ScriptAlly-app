@@ -1,0 +1,17 @@
+[
+ {
+  "where": "population: both queries listed",
+  "ok": true,
+  "detail": "{\"qc1491-q1\":null,\"qc1491-q4\":\"RESUBMISSION\"}"
+ },
+ {
+  "where": "the requery reads RESUBMISSION",
+  "ok": true,
+  "detail": "{\"qc1491-q1\":null,\"qc1491-q4\":\"RESUBMISSION\"}"
+ },
+ {
+  "where": "the first query has no tag",
+  "ok": true,
+  "detail": "{\"qc1491-q1\":null,\"qc1491-q4\":\"RESUBMISSION\"}"
+ }
+]

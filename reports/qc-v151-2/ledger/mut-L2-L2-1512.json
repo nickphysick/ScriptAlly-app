@@ -1,0 +1,82 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[[\"you\",22],[\"agent\",10],[\"quiet\",38],[\"closed\",18]]"
+ },
+ {
+  "where": "you: rows share the header's edges ±1",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "you: 0 between rows",
+  "ok": false,
+  "detail": "[8]"
+ },
+ {
+  "where": "you: outer corners 18 ±1",
+  "ok": true,
+  "detail": "18px 18px 18px 18px"
+ },
+ {
+  "where": "agent: rows share the header's edges ±1",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "agent: 0 between rows",
+  "ok": false,
+  "detail": "[8]"
+ },
+ {
+  "where": "agent: outer corners 18 ±1",
+  "ok": true,
+  "detail": "18px 18px 18px 18px"
+ },
+ {
+  "where": "quiet: rows share the header's edges ±1",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "quiet: 0 between rows",
+  "ok": false,
+  "detail": "[8]"
+ },
+ {
+  "where": "quiet: outer corners 18 ±1",
+  "ok": true,
+  "detail": "18px 18px 18px 18px"
+ },
+ {
+  "where": "closed: rows share the header's edges ±1",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "closed: 0 between rows",
+  "ok": false,
+  "detail": "[8]"
+ },
+ {
+  "where": "closed: outer corners 18 ±1",
+  "ok": true,
+  "detail": "18px 18px 18px 18px"
+ },
+ {
+  "where": "you → agent: 22 ±2",
+  "ok": false,
+  "detail": "38.0"
+ },
+ {
+  "where": "agent → quiet: 22 ±2",
+  "ok": false,
+  "detail": "38.0"
+ },
+ {
+  "where": "quiet → closed: 22 ±2",
+  "ok": false,
+  "detail": "38.0"
+ }
+]

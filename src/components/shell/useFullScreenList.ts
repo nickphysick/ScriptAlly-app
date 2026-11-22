@@ -41,13 +41,13 @@ export interface FullScreenList {
 }
 
 /** v138.6 — the two pinnable lists, and where each remembers its pin (localStorage, per device) */
-/* To-do v5.2 §E — the To-do list joins as a third page key (its only generalisation: the hook is otherwise unchanged) */
-export type PinPage = "queries" | "agents" | "todo";
-export const PIN_KEYS: Record<PinPage, string> = { queries: "sa.pinList.queries", agents: "sa.pinList.agents", todo: "sa.pinList.todo" };
+/* To-do v5.2 §E added the To-do list as a third page key; To-do list v51 (the task workspace) has no pin, so it left again */
+export type PinPage = "queries" | "agents";
+export const PIN_KEYS: Record<PinPage, string> = { queries: "sa.pinList.queries", agents: "sa.pinList.agents" };
 /** the Contact list's v16 key, read once so a list pinned before v138.6 stays pinned */
 const LEGACY_PIN_KEYS: Partial<Record<PinPage, string>> = { agents: "sa.contactsFull" };
 /** each page's F, as the shortcut sheet lists it (one entry per page's scope; this one hook binds both) */
-const PIN_SHORTCUT = { queries: SHORTCUTS.qcPin, agents: SHORTCUTS.contactsFull, todo: SHORTCUTS.todoPin } as const;
+const PIN_SHORTCUT = { queries: SHORTCUTS.qcPin, agents: SHORTCUTS.contactsFull } as const;
 
 const remembered = (key: string): boolean => {
   try { return localStorage.getItem(key) === "1"; } catch { return false; }

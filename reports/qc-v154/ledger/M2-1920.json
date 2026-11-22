@@ -1,0 +1,207 @@
+[
+ {
+  "name": "seed-pkgq-10 overdue: Next · Response overdue · Send nudge now",
+  "ok": true,
+  "got": "Next · Response overdue · Send nudge now"
+ },
+ {
+  "name": "seed-pkgq-10 overdue: no bar",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "seed-pkgq-10 overdue: sits in Nudge due",
+  "ok": true,
+  "got": "nudge"
+ },
+ {
+  "name": "msv12-q-5 overdue: Next · Response overdue · Send nudge now",
+  "ok": true,
+  "got": "Next · Response overdue · Send nudge now"
+ },
+ {
+  "name": "msv12-q-5 overdue: no bar",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "msv12-q-5 overdue: sits in Nudge due",
+  "ok": true,
+  "got": "nudge"
+ },
+ {
+  "name": "msv12-q-2 overdue: Next · Response overdue · Send nudge now",
+  "ok": true,
+  "got": "Next · Response overdue · Send nudge now"
+ },
+ {
+  "name": "msv12-q-2 overdue: no bar",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "msv12-q-2 overdue: sits in Nudge due",
+  "ok": true,
+  "got": "nudge"
+ },
+ {
+  "name": "seed-query-2 overdue: Next · Response overdue · Send nudge now",
+  "ok": true,
+  "got": "Next · Response overdue · Send nudge now"
+ },
+ {
+  "name": "seed-query-2 overdue: no bar",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "seed-query-2 overdue: sits in Nudge due",
+  "ok": true,
+  "got": "nudge"
+ },
+ {
+  "name": "thin-q-gap-solo overdue: Next · Response overdue · Send nudge now",
+  "ok": true,
+  "got": "Next · Response overdue · Send nudge now"
+ },
+ {
+  "name": "thin-q-gap-solo overdue: no bar",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "thin-q-gap-solo overdue: sits in Nudge due",
+  "ok": true,
+  "got": "nudge"
+ },
+ {
+  "name": "cor-pair overdue: Next · Response overdue · Send nudge now",
+  "ok": true,
+  "got": "Next · Response overdue · Send nudge now"
+ },
+ {
+  "name": "cor-pair overdue: no bar",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "cor-pair overdue: sits in Nudge due",
+  "ok": true,
+  "got": "nudge"
+ },
+ {
+  "name": "seed-query-23 overdue: Next · Response overdue · Send nudge now",
+  "ok": true,
+  "got": "Next · Response overdue · Send nudge now"
+ },
+ {
+  "name": "seed-query-23 overdue: no bar",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "seed-query-23 overdue: sits in Nudge due",
+  "ok": true,
+  "got": "nudge"
+ },
+ {
+  "name": "seed-query-8 waiting: Reply expected by · a date",
+  "ok": true,
+  "got": "Reply expected by · 14 Nov · "
+ },
+ {
+  "name": "seed-query-8 waiting: the bar",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "seed-query-8 waiting: nothing under the bar, or the planned nudge",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "probe-dangling-pkg waiting: Reply expected by · a date",
+  "ok": true,
+  "got": "Reply expected by · 15 Nov · "
+ },
+ {
+  "name": "probe-dangling-pkg waiting: the bar",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "probe-dangling-pkg waiting: nothing under the bar, or the planned nudge",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "probe-un-noms waiting: Reply expected by · a date",
+  "ok": true,
+  "got": "Reply expected by · 15 Nov · "
+ },
+ {
+  "name": "probe-un-noms waiting: the bar",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "probe-un-noms waiting: nothing under the bar, or the planned nudge",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "seed-pkgq-4 waiting: Reply expected by · a date",
+  "ok": true,
+  "got": "Reply expected by · 15 Nov · "
+ },
+ {
+  "name": "seed-pkgq-4 waiting: the bar",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "seed-pkgq-4 waiting: nothing under the bar, or the planned nudge",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "probe-goalstress-today waiting: Reply expected by · a date",
+  "ok": true,
+  "got": "Reply expected by · 18 Nov · "
+ },
+ {
+  "name": "probe-goalstress-today waiting: the bar",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "probe-goalstress-today waiting: nothing under the bar, or the planned nudge",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "qc150l9-q waiting: Reply expected by · a date",
+  "ok": true,
+  "got": "Reply expected by · 7 Jan 2027 · "
+ },
+ {
+  "name": "qc150l9-q waiting: the bar",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "qc150l9-q waiting: nothing under the bar, or the planned nudge",
+  "ok": true,
+  "got": "null"
+ },
+ {
+  "name": "no card says 'counts as a pass' or 'Nudge reminder: now'",
+  "ok": true,
+  "got": "checked"
+ },
+ {
+  "name": "states present (population)",
+  "ok": true,
+  "got": "wait 6 · over 7 · other 20"
+ }
+]

@@ -3,6 +3,7 @@
  * string — what is drawn, in what order, and in which words. Geometry and what a press does are on
  * the rendered page (tests/e2e/onbV5.measure.ts, S1–S4).
  */
+import { AGE_CATEGORIES } from "../../lib/manuscripts";
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { readFileSync } from "fs";
@@ -137,10 +138,17 @@ describe("S3 the manuscript fields kept every label, option and placeholder", ()
     it(`${name}: the text sets equal the baseline`, () => {
       const now = read(renderToStaticMarkup(node));
       expect(was[name].options.length, "the baseline holds real options").toBeGreaterThan(10);
-      /* the shared age list gained "New Adult" (onboarding v9), between Young Adult and Adult;
-         every other label, option and placeholder is the baseline's */
-      const withNew = { ...was[name], options: was[name].options.flatMap((o: string) => (o === "Adult" && was[name].options.includes("Young Adult") ? ["New Adult", "Adult"] : [o])) };
-      expect(now.options.filter((o: string) => o === "New Adult").length, "New Adult is offered once").toBe(1);
+      /* the shared age list gained "New Adult" (onboarding v9), and Manuscripts v28 Part E replaced it with the UK list,
+         in sentence case and in its own order (Adult first): the baseline's age options give way to AGE_CATEGORIES at the
+         place the first of them stood. Every other label, option and placeholder is the baseline's. */
+      const OLD_AGES = ["Picture Book", "Early Reader", "Middle Grade", "Young Adult", "New Adult", "Adult"];
+      /* the age block is the run starting at "Picture Book" (genre options also carry "Young Adult" and "Middle Grade") */
+      const opts: string[] = was[name].options;
+      const at = opts.indexOf("Picture Book");
+      let end = at;
+      while (at >= 0 && end < opts.length && OLD_AGES.includes(opts[end])) end += 1;
+      const withNew = { ...was[name], options: at < 0 ? opts : [...opts.slice(0, at), ...AGE_CATEGORIES, ...opts.slice(end)] };
+      expect(now.options.filter((o: string) => o === "New adult").length, "New adult is offered once").toBe(1);
       expect(now).toEqual(withNew);
     });
   }

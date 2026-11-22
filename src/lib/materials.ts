@@ -15,6 +15,8 @@
  * legacy string[] query never "upgrades" or rewrites it.
  */
 import type { QueryMaterial } from "../types";
+import { capFirst, sampleName } from "./queryActions/sample";
+import { isSampleItem, sampleOfItem } from "./sentSample";
 
 export type MaterialType = "pages" | "words" | "chapters" | "other";
 
@@ -186,6 +188,12 @@ export function formatQueryMaterial(item: string | QueryMaterial): string {
 
   if (!type || !hasQty) return formatLegacyMaterial(material); // unquantified → just the label
   if (type === "other") return String(quantity); // free text, verbatim
+
+  /* To-do list v54 (D7): a sample is named by THE one wording function, `sampleName`, read through THE one parser —
+     so "pages 40–89" here (the card's paperclip, the pill, the timeline) is the picker's "Reads as" word for word. A
+     sample from the opening reads as it always has ("First 3 chapters", "First chapter"). */
+  const sample = isSampleItem(item) ? sampleOfItem(item) : null;
+  if (sample) return capFirst(sampleName(sample));
 
   // Numeric quantity + unit → run through the same vocabulary as legacy strings so the two
   // render identically (commas for words, "First N pages/chapters", etc.).

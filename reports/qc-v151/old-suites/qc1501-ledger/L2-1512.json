@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population",
+  "ok": false,
+  "detail": "{\"g\":null,\"y\":null,\"extra\":[\"no section\"]}"
+ },
+ {
+  "where": "At a glance text",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "Your queries text",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "28px both",
+  "ok": false,
+  "detail": "undefined / undefined"
+ },
+ {
+  "where": "one family",
+  "ok": false,
+  "detail": "undefined / undefined"
+ },
+ {
+  "where": "no subheading",
+  "ok": false,
+  "detail": "[\"no section\"]"
+ }
+]

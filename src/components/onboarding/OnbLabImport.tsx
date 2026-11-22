@@ -21,6 +21,7 @@
  * reached no build at all. Nothing here writes: `onImport` records its result on
  * `window.__onbLab.result`, where lock V4 reads it.
  */
+import { armMentorIntro } from "../../lib/mentorIntro";
 import React, { useEffect, useState } from "react";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
@@ -28,10 +29,12 @@ import { validateSmartImport } from "../../lib/smartImport";
 import { applyImportUpdate, PROGRESS_START, type LoaderProgress } from "../../lib/importEstimate";
 import { CommitOutcome } from "../../lib/smartImportCommit";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
+import { summaryModel } from "../../lib/importSummary";
+import { reviewTallies } from "../../lib/smartImportReviewModel";
 import { ImportingLoader } from "./ImportingLoader";
 import { ImportOverview } from "./ImportOverview";
 import { SmartImportReview } from "./SmartImportReview";
-import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR, REVIEW_FIXTURE_GATE, REVIEW_FIXTURE_NAMELESS, REVIEW_FIXTURE_TIMELINE, REVIEW_FIXTURE_V12 } from "./SmartImportReviewFixture";
+import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR, REVIEW_FIXTURE_GATE, REVIEW_FIXTURE_NAMELESS, REVIEW_FIXTURE_TIMELINE, REVIEW_FIXTURE_V12, REVIEW_FIXTURE_TWODOOR } from "./SmartImportReviewFixture";
 
 declare global {
   interface Window { __onbLab?: { calls: Array<{ name: string; arg?: unknown }>; result?: unknown } }
@@ -42,8 +45,15 @@ const spy = (name: string) => (arg?: unknown) => {
 };
 
 export const LAB_FILE = "my agents FINAL v3.csv";
+/** The phone's reading piles, for the lab's reading mocks: the default fixture's own overview totals
+ *  (the real flow, `s=flow`, reads them from its own result through `ImportFlow`). */
+const labPiles = (complete: boolean) => {
+  if (!complete) return null;
+  const m = summaryModel(REVIEW_FIXTURE); const t = reviewTallies(m.agents, m.queries);
+  return { agents: t.agents.total, queries: t.queries.total };
+};
 export const labFixture = (fx: string | null): SmartImportResult =>
-  fx === "dupes" ? REVIEW_FIXTURE_DUPES : fx === "clear" ? REVIEW_FIXTURE_CLEAR : fx === "gate" ? REVIEW_FIXTURE_GATE : fx === "nameless" ? REVIEW_FIXTURE_NAMELESS : fx === "timeline" ? REVIEW_FIXTURE_TIMELINE : fx === "v12" ? REVIEW_FIXTURE_V12 : REVIEW_FIXTURE;
+  fx === "dupes" ? REVIEW_FIXTURE_DUPES : fx === "clear" ? REVIEW_FIXTURE_CLEAR : fx === "gate" ? REVIEW_FIXTURE_GATE : fx === "nameless" ? REVIEW_FIXTURE_NAMELESS : fx === "timeline" ? REVIEW_FIXTURE_TIMELINE : fx === "v12" ? REVIEW_FIXTURE_V12 : fx === "twodoor" ? REVIEW_FIXTURE_TWODOOR : REVIEW_FIXTURE;
 
 const SAMPLE: { messy: string; name: string; agency: string; date: string; status: QueryStatus }[] = [
   { messy: 'J. Carter · Carter & Vale · "replied, wants pages" · 44621', name: "Jamal Carter", agency: "Carter & Vale", date: "1 Mar 2022", status: QueryStatus.PARTIAL_REQUESTED },
@@ -82,7 +92,7 @@ const LabReadingStream: React.FC<{ rows: number; speed: number; hold: string | n
     return () => timers.forEach(clearTimeout);
   }, [rows, speed, hold, silent]);
   const cards: LoaderCard[] = SAMPLE.map((s) => (complete ? { ...s } : { messy: s.messy }));
-  return <ScatterSettleLoader cards={cards} complete={complete} total={rows} onProceed={spy("proceed")} onTimeout={spy("timeout")} progress={progress} />;
+  return <ScatterSettleLoader cards={cards} complete={complete} total={rows} onProceed={spy("proceed")} onTimeout={spy("timeout")} progress={progress} fileName={LAB_FILE} piles={labPiles(complete)} />;
 };
 
 const LabReadingLoop: React.FC<{ hold: string | null }> = ({ hold }) => {
@@ -97,7 +107,7 @@ const LabReadingLoop: React.FC<{ hold: string | null }> = ({ hold }) => {
     return () => { clearInterval(id); clearTimeout(inner); };
   }, [hold]);
   const cards: LoaderCard[] = SAMPLE.map((s) => (complete ? { ...s } : { messy: s.messy }));
-  return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={spy("proceed")} onTimeout={spy("timeout")} />;
+  return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={spy("proceed")} onTimeout={spy("timeout")} fileName={LAB_FILE} piles={labPiles(complete)} />;
 };
 
 /** A stand-in commit for the lab's whole run: it writes nothing and reports an outcome shaped by the
@@ -116,7 +126,9 @@ export const labCommit = (opts: { skip: number; none: boolean }) => async (resul
 };
 export const LAB_UID = "onb-lab";
 
-export const LabImporting: React.FC<{ done: boolean; loop: boolean }> = ({ done, loop }) => {
+export const LabImporting: React.FC<{ done: boolean; loop: boolean; intro?: boolean }> = ({ done, loop, intro }) => {
+  /* `intro=1`: as after a real commit, the hawk plays his sequence on this loading page */
+  useState(() => { if (intro) armMentorIntro(); return null; });
   const [complete, setComplete] = useState(done);
   useEffect(() => {
     if (!loop) return;
@@ -126,8 +138,9 @@ export const LabImporting: React.FC<{ done: boolean; loop: boolean }> = ({ done,
   return <ImportingLoader complete={complete} onProceed={spy("proceed")} />;
 };
 
-export const LabOverview: React.FC<{ fx: string | null; title: string; rows?: number | null }> = ({ fx, title, rows }) => (
-  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} rowCount={rows ?? null} onContinue={spy("continue")} />
+/* two-door import v1: `read=headings` shows the headings route's line; the bar's import is a spy */
+export const LabOverview: React.FC<{ fx: string | null; title: string; read?: "smart" | "template" }> = ({ fx, title, read }) => (
+  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} source={read ?? "smart"} onContinue={spy("continue")} onImport={spy("import")} />
 );
 
 /* The timeline fixture's two pages, drawn plain, so "See the whole page" has a page to open. */

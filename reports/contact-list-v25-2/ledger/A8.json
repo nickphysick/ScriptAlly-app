@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "A8",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows, 52 with a gap"
+ },
+ {
+  "lock": "A8",
+  "where": "1512 none at rest",
+  "ok": true,
+  "detail": "0 rows show \"+ Add\""
+ },
+ {
+  "lock": "A8",
+  "where": "1512 on hover",
+  "ok": true,
+  "detail": "CB Clara Beaumont HARBOUR LANE ✓ Thriller —+ Add Partial requested DAY 54 Send the partial No wishlist yet + Add their w"
+ },
+ {
+  "lock": "A8",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows, 51 with a gap"
+ },
+ {
+  "lock": "A8",
+  "where": "1280 none at rest",
+  "ok": true,
+  "detail": "0 rows show \"+ Add\""
+ },
+ {
+  "lock": "A8",
+  "where": "1280 on hover",
+  "ok": true,
+  "detail": "CB Clara Beaumont HARBOUR LANE ✓ Thriller Partial requested DAY 54 Send the partial No wishlist yet + Add their wishlist"
+ }
+]

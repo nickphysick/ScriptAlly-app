@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "C3",
+  "where": "1512 Contact list",
+  "ok": true,
+  "detail": "Filters label \"Filters\""
+ },
+ {
+  "lock": "C3",
+  "where": "1512 Query Centre",
+  "ok": true,
+  "detail": "Filters label \"Filters\""
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Contact list",
+  "ok": true,
+  "detail": "Filters label \"null\""
+ },
+ {
+  "lock": "C3",
+  "where": "1280 Query Centre",
+  "ok": true,
+  "detail": "Filters label \"null\""
+ }
+]

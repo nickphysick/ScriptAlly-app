@@ -91,6 +91,8 @@ const ms = (iso?: string): number => (iso ? new Date(iso).getTime() : NaN);
  * OVERDUE group came from here, a row could sit under OVERDUE reading "27 DAYS LEFT" — two clocks,
  * both defensible, contradicting each other three pixels apart.
  */
+const AWAITING: ReadonlySet<QueryStatus> = new Set([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
+
 export function replyDeadlineMs(inp: ReplyTaskInput): number {
   const { status, responseTimeWeeks } = inp;
   const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED;
@@ -132,9 +134,8 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
      legitimately appear. */
   if (inp.reminderScheduled) return "none";
 
-  const deadlineMs = replyDeadlineMs(inp);
-  // Not an awaiting status, no window recorded, or undated — nothing to place in time.
-  if (Number.isNaN(deadlineMs)) return "none";
+  /* Log a query v1.3 — not an awaiting status is still "none" first, as the NaN below used to say */
+  if (!AWAITING.has(inp.status as QueryStatus)) return "none";
 
   /**
    * ⚠️ THE WRITER'S OWN REMINDER IS CHECKED BEFORE THE WINDOW, AND THAT IS THE WHOLE POINT
@@ -150,8 +151,11 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
    * ⚠️ AND IT MUST NOT FIRE INTO A WORLD THAT HAS MOVED ON. Three cancellations, each a fact already
    * in hand: a REPLY since the reminder date, a SEND since, or a CHASE already sent since. A writer
    * who has acted has answered the reminder by doing the thing. A status that is no longer the
-   * agent's turn returned "none" above, at the `NaN`.
+   * agent's turn returned "none" above, at the awaiting check.
    */
+  /* ⚠️ Log a query v1.3 · AND IT NEEDS NO WINDOW. It was checked after the "no window recorded" return, so a nudge the
+     writer booked on a query whose agent states no reply time (the journey's Unknown, or a time not saved to the card)
+     never reached the to-do list. A booked date is a date: it fires on its day, window or none. */
   const nudgeDueMs = ms(inp.writerNudgeDate);
   if (!Number.isNaN(nudgeDueMs) && now >= nudgeDueMs) {
     const sentAt = ms(inp.dateSent);
@@ -161,6 +165,10 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
       || (!Number.isNaN(chasedAt) && chasedAt > nudgeDueMs);
     if (!moved) return "nudge";
   }
+
+  const deadlineMs = replyDeadlineMs(inp);
+  // No window recorded, or undated — nothing more to place in time.
+  if (Number.isNaN(deadlineMs)) return "none";
 
   /* ⚠️ QUERY ACTIONS v1 (K4) — THE WRITER'S PLAN OUTRANKS THE ARITHMETIC. A nudge planned for a
      day not yet reached means nothing is overdue ("NUDGE PLANNED 18 DEC" rather than a count); a

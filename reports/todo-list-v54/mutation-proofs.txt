@@ -1,0 +1,12 @@
+L1 · red · page: the workspace 80px taller than the window · Error: L1 · the page scrolls by no more than the header's height
+L2 · red · page: the questions box stops scrolling, so the footer is pushed off · Error: L2 · first task: the footer's bottom on the desk's
+L3 · red · page: the table view gets its 16px top padding back · Error: L3 · TH. in DIV.tws-wq: flush with the box's top
+L4 · red · page: the armchair hawk on a grey box · Error: L4 · the new asset
+L5 · red · page: the legend says 99 nudges · Error: L5 · need you = waiting + nudges + quiet
+L6 · red · source: src/lib/todoBatch54.ts · Error: L6 · 14 queries, no saved choice: all at once
+L7 · red · source: src/lib/todoBatch54.ts · Error: L7 · pre-filled from the guidelines
+L8 · red · source: src/lib/todoBatch54.ts · Error: L8 · pre-ticked = same week or same asks, and only those
+L9 · red · source: src/lib/sentSample.ts · Error: L9 · saved as 37 pages from page 40
+L10 · red · source: src/lib/todoBatch54.ts · Error: L10 · a filled row is never overwritten
+L11 · red · source: src/lib/todoBatch54.ts · Error: L11 · the note under the picker
+L12 · red · page: a v54 header part injected into the phone page · Error: L12 · no v54 parts on the phone

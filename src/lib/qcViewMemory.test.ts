@@ -37,8 +37,15 @@ describe("the view — per device (qh.qc.view)", () => {
     expect(QC_VISIT_KEY).toBe("qh.qc.filters");
   });
   /* v141 §C — the default grouping moved from "Who it's with" (attention) to Status */
-  it("a first visit: Status, due first, comfortable", () => {
-    expect(readQcView()).toEqual({ group: "status", sort: { key: "due", reversed: false }, density: "comfortable" });
+  /* v151 §5 — the first visit groups by "Who it's with" again (the Group button is navy only when it is not) */
+  it("a first visit: Who it's with, due first, comfortable, List (v151 §5; was Status from v142 §A)", () => {
+    expect(readQcView()).toEqual({ group: "attention", sort: { key: "due", reversed: false }, density: "comfortable" });
+  });
+  it("v149 B5 — list only: a record still carrying v142's view keeps its other fields and is never written back", () => {
+    g.window!.localStorage.setItem(QC_VIEW_KEY, JSON.stringify({ v: 1, group: "action", sort: { key: "due", reversed: false }, density: "compact", view: "cards" }));
+    expect(readQcView()).toEqual({ group: "action", sort: { key: "due", reversed: false }, density: "compact" });
+    writeQcView({ density: "comfortable" });
+    expect(JSON.parse(g.window!.localStorage.getItem(QC_VIEW_KEY)!)).not.toHaveProperty("view");
   });
   it("round-trips grouping, sort and density", () => {
     /* v141 §C — Status is the default now, so the round trip saves a grouping that is not (a saved choice is honoured) */

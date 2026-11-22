@@ -1,0 +1,4989 @@
+{
+ "load-1512": {
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": true,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "154 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "80 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "73 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "72 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "63 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "58 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "64 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "40 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "21 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "462 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "256 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "244 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "235 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "140 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "125 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "122 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "120 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "117 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "115 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "110 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "109 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "105 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "102 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "61 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "59 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "52 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "36 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "34 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "29 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "26 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   }
+  ],
+  "heads": [
+   {
+    "id": "wait",
+    "h": 40,
+    "gapAbove": 2,
+    "first": true,
+    "bg": "rgb(255, 255, 255)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "nudge",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 231, 218)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "quiet",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgba(0, 0, 0, 0)",
+    "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(241, 236, 229) 55%, rgb(255, 255, 255))",
+    "rule": null
+   },
+   {
+    "id": "house",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(228, 235, 241)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "yours",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 230, 210)",
+    "bgImage": "none",
+    "rule": null
+   }
+  ],
+  "chip": "154 days past expected",
+  "hawk": {
+   "bg": "rgb(248, 226, 216)",
+   "bgImage": "none",
+   "edge": "none",
+   "ink": "rgb(61, 42, 34)",
+   "w": 441.8
+  },
+  "deskTitle": "Send Marcus your full"
+ },
+ "nudge-1512": {
+  "title": "Nudge Marcus",
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "154 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "80 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "73 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "72 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "63 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "58 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": true,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "64 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "40 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "21 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "462 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "256 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "244 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "235 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "140 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "125 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "122 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "120 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "117 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "115 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "110 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "109 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "105 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "102 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "61 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "59 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "52 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "36 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "34 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "29 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "26 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   }
+  ],
+  "heads": [
+   {
+    "id": "wait",
+    "h": 40,
+    "gapAbove": -784,
+    "first": true,
+    "bg": "rgb(255, 255, 255)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "nudge",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 231, 218)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "quiet",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgba(0, 0, 0, 0)",
+    "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(241, 236, 229) 55%, rgb(255, 255, 255))",
+    "rule": null
+   },
+   {
+    "id": "house",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(228, 235, 241)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "yours",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 230, 210)",
+    "bgImage": "none",
+    "rule": null
+   }
+  ],
+  "chip": "78 days past expected",
+  "hawk": {
+   "bg": "rgb(248, 226, 216)",
+   "bgImage": "none",
+   "edge": "none",
+   "ink": "rgb(61, 42, 34)",
+   "w": 441.8
+  },
+  "deskTitle": "Nudge Marcus"
+ },
+ "load-1280": {
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": true,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "154 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "80 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "73 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "72 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "63 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "58 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "64 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "40 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "21 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "462 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "256 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "244 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "235 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "140 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "125 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "122 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "120 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "117 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "115 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "110 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "109 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "105 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "102 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "61 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "59 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "52 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "36 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "34 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "29 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "26 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   }
+  ],
+  "heads": [
+   {
+    "id": "wait",
+    "h": 40,
+    "gapAbove": 2,
+    "first": true,
+    "bg": "rgb(255, 255, 255)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "nudge",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 231, 218)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "quiet",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgba(0, 0, 0, 0)",
+    "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(241, 236, 229) 55%, rgb(255, 255, 255))",
+    "rule": null
+   },
+   {
+    "id": "house",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(228, 235, 241)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "yours",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 230, 210)",
+    "bgImage": "none",
+    "rule": null
+   }
+  ],
+  "chip": "154 days past expected",
+  "hawk": {
+   "bg": "rgb(248, 226, 216)",
+   "bgImage": "none",
+   "edge": "none",
+   "ink": "rgb(61, 42, 34)",
+   "w": 268
+  },
+  "deskTitle": "Send Marcus your full"
+ },
+ "nudge-1280": {
+  "title": "Nudge Marcus",
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "154 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "80 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "73 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "72 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "70 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "63 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "58 days waiting",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "",
+     "display": "block",
+     "colour": null
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": true,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "78 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "64 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "48 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "40 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "21 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "462 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "256 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "244 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "235 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "173 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "140 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "125 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "122 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "120 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "117 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "115 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "110 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "109 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "105 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "102 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "94 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "91 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "glyph",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(227, 219, 207) 0px 0px 0px 1px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "61 days quiet",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "59 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "52 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 59,
+    "titleLines": 1,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "37 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "36 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "34 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "32 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "29 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 77.8,
+    "titleLines": 2,
+    "av": {
+     "k": "own",
+     "w": 36,
+     "h": 36,
+     "bg": "rgb(255, 255, 255)",
+     "bgImage": "none",
+     "edge": "rgb(185, 174, 159) 0px 0px 0px 1.6px inset"
+    },
+    "stage": null,
+    "fig": {
+     "text": "26 days late",
+     "display": "block",
+     "colour": "rgb(58, 51, 45)"
+    },
+    "bar": null
+   }
+  ],
+  "heads": [
+   {
+    "id": "wait",
+    "h": 40,
+    "gapAbove": -984,
+    "first": true,
+    "bg": "rgb(255, 255, 255)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "nudge",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 231, 218)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "quiet",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgba(0, 0, 0, 0)",
+    "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(241, 236, 229) 55%, rgb(255, 255, 255))",
+    "rule": null
+   },
+   {
+    "id": "house",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(228, 235, 241)",
+    "bgImage": "none",
+    "rule": null
+   },
+   {
+    "id": "yours",
+    "h": 40,
+    "gapAbove": 14,
+    "first": false,
+    "bg": "rgb(239, 230, 210)",
+    "bgImage": "none",
+    "rule": null
+   }
+  ],
+  "chip": "78 days past expected",
+  "hawk": {
+   "bg": "rgb(248, 226, 216)",
+   "bgImage": "none",
+   "edge": "none",
+   "ink": "rgb(61, 42, 34)",
+   "w": 268
+  },
+  "deskTitle": "Nudge Marcus"
+ },
+ "hover": {
+  "rest": {
+   "h": 59.046875,
+   "t": 206.71875
+  },
+  "hov": {
+   "h": 59.046875,
+   "t": 206.71875
+  },
+  "vis": {
+   "du": "hidden",
+   "qact": "flex"
+  }
+ },
+ "sends": [
+  {
+   "key": "task-full-seed-pkgq-3",
+   "title": "Send Marcus your full",
+   "fig": "154days waiting"
+  },
+  {
+   "key": "task-full-seed-query-9",
+   "title": "Send Ana your full",
+   "fig": "94days waiting"
+  },
+  {
+   "key": "task-partial-seed-query-20",
+   "title": "Send David your partial",
+   "fig": "94days waiting"
+  },
+  {
+   "key": "task-partial-seed-query-7",
+   "title": "Send Rachel your partial",
+   "fig": "94days waiting"
+  },
+  {
+   "key": "task-partial-cv25-q-06",
+   "title": "Send Clara your partial",
+   "fig": "80days waiting"
+  },
+  {
+   "key": "task-full-rj-dupe",
+   "title": "Send Tobias your full",
+   "fig": "73days waiting"
+  },
+  {
+   "key": "task-partial-cv25-q-07",
+   "title": "Send Marcus your partial",
+   "fig": "72days waiting"
+  },
+  {
+   "key": "task-full-rj-send",
+   "title": "Send Imogen your full",
+   "fig": "70days waiting"
+  },
+  {
+   "key": "task-partial-msv12-q-3",
+   "title": "Send Edda your partial",
+   "fig": "70days waiting"
+  },
+  {
+   "key": "task-full-msv12-q-4",
+   "title": "Send Theo your full",
+   "fig": "63days waiting"
+  },
+  {
+   "key": "task-full-cv25-q-09",
+   "title": "Send Jonathan your full",
+   "fig": "58days waiting"
+  },
+  {
+   "key": "task-full-seed-cal-passed865-q",
+   "title": "Send Ottoline your full",
+   "fig": ""
+  },
+  {
+   "key": "task-partial-cor-move-a",
+   "title": "Send Marcus your partial",
+   "fig": ""
+  }
+ ]
+}

@@ -9,7 +9,7 @@
  * than a literal that agrees with it today.
  */
 import React from "react";
-import { NoteColour, TagDef, User, UserTask } from "../types";
+import { LegacyNoteColour, NoteColour, StoredNoteColour, TagDef, User, UserTask } from "../types";
 import { NOTE_EXAMPLES } from "../components/todo/noteboardExamples";
 import { isNoteTask } from "./todoBoard";
 
@@ -29,18 +29,43 @@ export const NOTEBOARD_SUBTITLE =
 export const noteFilterLabel = (shown: number, total: number): string => `${shown} of ${total} notes`;
 
 /**
- * The three papers, in the order the composer offers them. Typed as the app's own `NoteColour`,
- * so adding a fourth to that union fails to compile here until this list says where it sits.
+ * THE FIVE PAPERS (Corkboard v2; ref design-refs/corkboard-v13/), in the order every picker offers them, with the
+ * name the writer reads and the hex the ref draws (its `COLOURS`). This is the ONE colour table for a note on the
+ * Corkboard: the board, the pop-up, the header's swatches, the To-do composer's Note mode and the To-do list all read
+ * it. Typed as `NoteColour`, so adding a sixth fails to compile here until this table says where it sits.
  */
-export const NOTE_COLOURS: readonly NoteColour[] = ["yellow", "pink", "sage"];
+export const NOTE_PAPERS: readonly { v: NoteColour; name: string; hex: string }[] = [
+  { v: "butter", name: "Butter", hex: "#faf0cf" },
+  { v: "blush", name: "Blush", hex: "#f5e2d8" },
+  { v: "powder", name: "Powder", hex: "#e2e7ef" },
+  { v: "sand", name: "Sand", hex: "#f0e5d4" },
+  { v: "stone", name: "Stone", hex: "#ece8e3" },
+];
+export const NOTE_COLOURS: readonly NoteColour[] = NOTE_PAPERS.map((p) => p.v);
 
 /**
- * ⚠️ ABSENCE IS YELLOW, AND THE DEFAULT LIVES HERE — at the READ, once. Every note written before
- * the field existed has no colour; writing one to each of them would be inventing a choice the
- * writer never made. It is also what makes the write path safe to degrade: when the rules deploy
- * has not landed and the colour write is denied, the note simply reads yellow.
+ * ⚠️ THE OLD THREE ARE MAPPED WHEN READ, NEVER REWRITTEN. A note stored `yellow` reads Butter, `pink` Blush and
+ * `sage` Powder, and its document is left exactly as it is: rewriting every old note on load would be a write the
+ * writer never asked for (lock CB1 counts the writes on load). Sage goes because the brand has no green.
  */
-export const noteColour = (t: Pick<UserTask, "colour">): NoteColour => t.colour ?? "yellow";
+export const LEGACY_PAPER: Readonly<Record<LegacyNoteColour, NoteColour>> = { yellow: "butter", pink: "blush", sage: "powder" };
+
+/** Any stored value (new, old or absent) → one of the five. Absence is Butter. */
+export const paperOf = (c: StoredNoteColour | string | null | undefined): NoteColour => {
+  if (!c) return "butter";
+  if ((NOTE_COLOURS as readonly string[]).includes(c)) return c as NoteColour;
+  return LEGACY_PAPER[c as LegacyNoteColour] ?? "butter";
+};
+export const paperHex = (c: StoredNoteColour | string | null | undefined): string =>
+  NOTE_PAPERS.find((p) => p.v === paperOf(c))!.hex;
+export const paperName = (c: StoredNoteColour | string | null | undefined): string =>
+  NOTE_PAPERS.find((p) => p.v === paperOf(c))!.name;
+
+/**
+ * ⚠️ ABSENCE IS BUTTER, AND THE DEFAULT LIVES HERE — at the READ, once. Every note written before the field existed
+ * has no colour; writing one to each of them would be inventing a choice the writer never made.
+ */
+export const noteColour = (t: Pick<UserTask, "colour">): NoteColour => paperOf(t.colour);
 
 /**
  * What the Noteboard shows, newest pinned first. There is no stored order — a position is a fact
@@ -79,7 +104,7 @@ export interface NoteDraft {
   tag: string;
 }
 
-export const emptyDraft = (): NoteDraft => ({ body: "", colour: "yellow", tag: "" });
+export const emptyDraft = (): NoteDraft => ({ body: "", colour: "butter", tag: "" });
 
 /**
  * ⚠️ CHANGING THE PAPER REPAINTS; IT DOES NOT START AGAIN. The swatch is pressed mid-sentence more
@@ -148,9 +173,9 @@ export const noteMatchesSearch = (n: UserTask, q: string): boolean => {
  * ⚠️ IT SEEDS, IT DOES NOT WRITE. Nothing reaches the board until Pin it is pressed — an example
  * that pinned itself would put words there that nobody decided to keep.
  */
-export const draftFromExample = (ex: { body: string; colour: NoteColour; tag: string }): NoteDraft => ({
+export const draftFromExample = (ex: { body: string; colour: StoredNoteColour; tag: string }): NoteDraft => ({
   body: ex.body,
-  colour: ex.colour,
+  colour: paperOf(ex.colour),
   tag: ex.tag,
 });
 

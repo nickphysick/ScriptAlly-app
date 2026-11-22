@@ -12,7 +12,7 @@
 .af {
   box-sizing: border-box;
   --af-ink: #3a1c14;
-  --af-mute: #8a7a6c;
+  --af-mute: var(--sp-quiet);
   position: relative;
   margin-top: 40px;
   padding: 0 0 26px;
@@ -28,10 +28,10 @@
 .af-brand img { width: 38px; height: 38px; display: block; }
 /* ⚠️ PLAYFAIR 600 IS LOADED FOR THIS ONE WORDMARK (index.html requests the weight). */
 .af .af-brand span { font-family: "Playfair Display", Georgia, serif; font-weight: 600; font-size: 25px; line-height: 1.3; letter-spacing: -0.3px; color: var(--sp-ink, #1c130f); }
-.af .af-tag { margin: 16px 0 0; max-width: 17.66em; font-size: 16px; line-height: 1.6; color: var(--af-mute); }
+.af .af-tag { margin: 16px 0 0; max-width: 17.66em; font-size: 16px; line-height: 1.6; color: var(--sp-quiet); }
 .af-glyphs { display: flex; gap: 14px; margin-top: 22px; color: var(--af-mute); }
 .af-glyphs svg { width: 19px; height: 19px; display: block; }
-.af .af-col h4 { margin: 0 0 18px; font-family: var(--sp-type) !important; font-weight: 400; font-size: 15px; line-height: 1; color: #8a4a3c; }
+.af .af-col h4 { margin: 0 0 18px; font-family: var(--sp-type) !important; font-weight: 400; font-size: 15px; line-height: 1; color: var(--sp-rust); }
 .af-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12.6px; }
 .af .af-link {
   margin: 0; padding: 0 0 2px; border: 0; background: none; cursor: pointer;
@@ -40,10 +40,10 @@
   transition: text-decoration-color 0.15s;
 }
 .af .af-link:hover, .af .af-link:focus-visible { text-decoration-color: currentColor; }
-.af-base { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-top: 50px; padding-top: 22px; border-top: 1px solid rgba(28, 19, 15, 0.1); font-size: 14px; color: var(--af-mute); }
+.af-base { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-top: 50px; padding-top: 22px; border-top: 1px solid rgba(28, 19, 15, 0.1); font-size: 14px; color: var(--sp-quiet); }
 .af-base p { margin: 0; }
 .af-made { display: flex; align-items: center; gap: 8px; }
-.af-made svg { width: 16px; height: 16px; flex: none; color: #8a4a3c; }
+.af-made svg { width: 16px; height: 16px; flex: none; color: var(--sp-rust); }
 .af .af-mail { justify-self: end; font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { .af .af-link { transition: none; } }
 @media (max-width: 1100px) {

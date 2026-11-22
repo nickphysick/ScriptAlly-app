@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "S4",
+  "where": "360x780 /queries/analytics: the page band with a back arrow",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Analytics\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /queries/analytics: no tab bar",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Analytics\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /queries/analytics: no book chip",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Analytics\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /queries/analytics: titled Analytics",
+  "ok": true,
+  "detail": "Analytics"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /help: the page band with a back arrow",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Help centre\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /help: no tab bar",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Help centre\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /help: no book chip",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Help centre\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /account: the page band with a back arrow",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Settings\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /account: no tab bar",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Settings\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 /account: no book chip",
+  "ok": true,
+  "detail": "{\"variant\":\"page\",\"back\":true,\"chip\":false,\"bar\":false,\"title\":\"Settings\"}"
+ },
+ {
+  "lock": "S4",
+  "where": "360x780 back returns to Home",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/dashboard"
+ }
+]

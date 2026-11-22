@@ -34,7 +34,7 @@ const shell = (collapsed = false) => {
     return renderToStaticMarkup(
       <MemoryRouter initialEntries={["/queries"]}>
         <WorkspaceShell
-          sections={[{ id: "workspace", label: "Workspace", def: "dash", children: [{ id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" }] }]}
+          sections={[{ id: "workspace", label: "Workspace", def: "dash", noHeading: true, children: [{ id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" }] }]}
           icons={{ dash: <svg /> }}
           onNavigatePath={() => {}}
           onOpenSearch={() => {}}
@@ -122,7 +122,11 @@ describe("SB4 — the eyebrows are ruled (source half; rendered half in the meas
     expect(CSS).toMatch(/\.ws-glabel::after \{ content: ""; flex: 1; height: 1px; background: var\(--shell-rule\); \}/);
     expect(CSS).toMatch(/\.ws-glabel \{[^}]*margin: 20px 8px 6px;/);
     const html = shell();
-    expect(html).toContain('<div class="ws-glabel">Workspace</div>');
+    /* sidebar rail v1: Dashboard has no heading (one row on its own, as on the rail). This fixture holds
+       only the Dashboard section, so it renders no eyebrow at all; the ruled eyebrows over the other
+       sections are workspaceTasksNav.test.tsx's full-nav render. */
+    expect(html).not.toContain('<div class="ws-glabel">Workspace</div>');
+    expect(html).toContain(">Dashboard<");
   });
 });
 
@@ -141,7 +145,8 @@ describe("SB9 — no key opens the menu", () => {
       expect(sc.scope, `${sc.bound} binds \`n\` everywhere — a global n would collide with the capture menu's own keys`).not.toBe("Everywhere");
       expect(sc.bound, "a shell file binds `n`").not.toMatch(/components\/shell\//);
     }
-    expect(nBound.map((sc) => sc.bound).sort()).toEqual(["src/components/agents/discover1/DvPicks.tsx", "src/components/manuscripts/ComparableTitlesPage.tsx", "src/components/todo/v5/TodoTray.tsx"]);
+    /* Corkboard v2 adds its own page-scoped `n` (New note) */
+    expect(nBound.map((sc) => sc.bound).sort()).toEqual(["src/components/agents/discover1/DvPicks.tsx", "src/components/manuscripts/ComparableTitlesPage.tsx", "src/components/todo/TodoNoteboardPage.tsx", "src/components/todo/ws/TodoWorkspace.tsx"]);
   });
   it("the component binds no global key and advertises none", () => {
     expect(SRC).not.toMatch(/aria-keyshortcuts|matchesShortcut|SHORTCUTS/);

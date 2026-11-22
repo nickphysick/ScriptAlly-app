@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "B4",
+  "where": "egg no-preference the title thanks them by first name",
+  "ok": true,
+  "detail": "Thank you, harness."
+ },
+ {
+  "lock": "B4",
+  "where": "egg no-preference the body",
+  "ok": true,
+  "detail": "Your note is with us, and your egg is starting to crack. It hatches as soon as we’ve read it, usually within a few days."
+ },
+ {
+  "lock": "B4",
+  "where": "egg no-preference Send another",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "egg no-preference the crack is drawn (dashoffset 0)",
+  "ok": false,
+  "detail": "60px"
+ },
+ {
+  "lock": "B4",
+  "where": "egg no-preference Send another returns to idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "egg reduce the title thanks them by first name",
+  "ok": true,
+  "detail": "Thank you, harness."
+ },
+ {
+  "lock": "B4",
+  "where": "egg reduce the body",
+  "ok": true,
+  "detail": "Your note is with us, and your egg is starting to crack. It hatches as soon as we’ve read it, usually within a few days."
+ },
+ {
+  "lock": "B4",
+  "where": "egg reduce Send another",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "egg reduce the crack is drawn (dashoffset 0)",
+  "ok": true,
+  "detail": "0px"
+ },
+ {
+  "lock": "B4",
+  "where": "egg reduce Send another returns to idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "mentor no-preference the title thanks them by first name",
+  "ok": true,
+  "detail": "Thank you, harness."
+ },
+ {
+  "lock": "B4",
+  "where": "mentor no-preference the body",
+  "ok": true,
+  "detail": "Your note is with us, and it counts once we’ve read it."
+ },
+ {
+  "lock": "B4",
+  "where": "mentor no-preference Send another",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "mentor no-preference the tier's head with a tick",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "mentor no-preference Send another returns to idle",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "mentor reduce the title thanks them by first name",
+  "ok": true,
+  "detail": "Thank you, harness."
+ },
+ {
+  "lock": "B4",
+  "where": "mentor reduce the body",
+  "ok": true,
+  "detail": "Your note is with us, and it counts once we’ve read it."
+ },
+ {
+  "lock": "B4",
+  "where": "mentor reduce Send another",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "mentor reduce the tier's head with a tick",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "B4",
+  "where": "mentor reduce Send another returns to idle",
+  "ok": true,
+  "detail": ""
+ }
+]

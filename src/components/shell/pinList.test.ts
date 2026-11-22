@@ -17,14 +17,28 @@ describe("QC138.6 A1 · one pin for both lists", () => {
   for (const [page, file] of Object.entries(PAGES)) {
     it(`${page}: uses usePinList("${page}") and PinListButton`, () => {
       const src = code(file) + (page === "queries" ? code("src/components/queries/centre/QcList138.tsx") : "");
-      expect(src).toMatch(new RegExp(`usePinList\\("${page}"`));
-      /* RETARGETED (Contact list v19 §A): the Contact list's pin is the toolbar's own navy "Pin list" / "Unpin" button
-         (ContactListHead), drawn by the page's one head component */
+      /* RE-POINTED by Contact list v26 B: full screen is RETIRED on the Contact list (the page is one list in one card), so
+         it has no pin at all — the law "one pin, the shared hook" now holds for the Query Centre alone, and the Contact
+         list is held to having none (no hook, no pin button, no address book). */
       if (page === "agents") {
-        expect(src).toMatch(/<ContactListHead\b/);
-        const head = code("src/components/agents/contact/ContactListHead.tsx");
-        expect(head).toMatch(/data-pin-list=""/);
-        expect(head).toMatch(/aria-pressed=\{pinned\}/);
+        expect(src).not.toMatch(/usePinList\(/);
+        expect(src).not.toMatch(/<ContactAddressBook24\b/);
+        expect(src).toMatch(/<ContactSheet26\b/);
+        expect(code("src/components/agents/contact/ContactSheet26.tsx")).not.toMatch(/data-pin-list/);
+        return;
+      }
+      expect(src).toMatch(new RegExp(`usePinList\\("${page}"`));
+      /* RETARGETED (Contact list v24 B1/D2): the Contact list's pin is the list sheet's "Full screen" button in its navy
+         bar (ContactSheet24) and full screen's "Exit full screen" in the cream row (ContactAddressBook24). The
+         navy-bar v1 box that carried both (book/ContactBook) is deleted. The law is unchanged: one pin, the shared hook. */
+      if (page === "agents") {
+        expect(src).toMatch(/<ContactSheet24\b/);
+        expect(src).toMatch(/<ContactAddressBook24\b/);
+        const sheet = code("src/components/agents/contact/ContactSheet24.tsx");
+        expect(sheet).toMatch(/data-pin-list=""/);
+        expect(sheet).toMatch(/aria-pressed=\{p\.full\}/);
+        const book = code("src/components/agents/contact/ContactAddressBook24.tsx");
+        expect(book).toMatch(/data-pin-list=""/);
       } else {
         /* RETARGETED (Query Centre v140 §A/§B): the Query Centre's pin is the toolbar's own cream "Pin list" / "Unpin"
            button (QcToolbar140), drawn by the list's one toolbar component, as the Contact list's is */

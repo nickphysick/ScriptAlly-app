@@ -45,6 +45,14 @@ export interface AgentCardOptions {
    * editor is left or saved. Everything it writes, and how, is the card's own.
    */
   host?: "panel";
+  /**
+   * RETIRE THE ADD-AGENT POP-UP — a flow WAITING on the new agent (Log a query's "+ Add … as a new agent"): called once,
+   * with the created agent's id, when the new-agent editor saves. Never on a cancel. One mechanism: the request carries
+   * it, `completeNewAgent` runs it.
+   */
+  onCreated?: (agentId: string) => void;
+  /** the new-agent panel opens OVER the query drawer (z and Escape both rise above it) */
+  over?: "drawer";
 }
 
 export interface AgentCardRequest extends AgentCardOptions {
@@ -60,7 +68,40 @@ let seq = 0;
 const listeners = new Set<Listener>();
 const notify = () => listeners.forEach((l) => l(current));
 
+/**
+ * FOCUS RETURNS TO THE OPENER: the element that had focus when a new-agent session opened (the button pressed) gets it
+ * back when the session ends, on a cancel or a save alike — when it is still on the page. An opener that has gone (a
+ * menu row, the palette's field) is left alone rather than guessed at.
+ */
+let returnFocus: HTMLElement | null = null;
+const takeOpener = (): HTMLElement | null => {
+  if (typeof document === "undefined") return null;
+  const el = document.activeElement;
+  return el instanceof HTMLElement && el !== document.body ? el : null;
+};
+const giveFocusBack = () => {
+  const el = returnFocus;
+  returnFocus = null;
+  if (!el || typeof window === "undefined") return;
+  window.requestAnimationFrame(() => { if (el.isConnected) el.focus(); });
+};
+
+/**
+ * Contact list v25.2 C3 — ON THE CONTACT LIST, AN EDIT OPENS IN THE PAGE'S OWN CARD. While that page is on screen it
+ * registers here; a request asking for an editor (a tab, a field or carried answers) goes to it, so the agent's card
+ * turns into the editor there instead of a second panel opening over it. Elsewhere — and for a plain open — the
+ * app-level host answers as before.
+ */
+type EditInterceptor = (agentId: string, opts: AgentCardOptions) => boolean;
+let interceptor: EditInterceptor | null = null;
+export function setAgentEditInterceptor(fn: EditInterceptor | null): () => void {
+  interceptor = fn;
+  return () => { if (interceptor === fn) interceptor = null; };
+}
+
 export function openAgentCard(agentId: string, opts: AgentCardOptions = {}): void {
+  if (interceptor && (opts.tab || opts.focus || opts.prefill) && interceptor(agentId, opts)) return;
+  returnFocus = null;
   current = { ...opts, agentId, seq: ++seq };
   notify();
 }
@@ -78,13 +119,36 @@ const NEED_TARGET: Record<AgentDataNeed, { tab: AgentCardTab; focus: AgentCardFi
 export function dataNeedTarget(needs: readonly AgentDataNeed[]): { tab: AgentCardTab; focus: AgentCardField } | null {
   return needs.length ? NEED_TARGET[needs[0]] : null;
 }
-export function openNewAgentCard(opts: Pick<AgentCardOptions, "originRect" | "from" | "host"> = {}): void {
+/**
+ * THE one way to add an agent (retire the add-agent pop-up): every door — the Dashboard, the top bar's capture menu,
+ * the search palette, the Import page, the Contact list, Log a query's picker — calls this with `host: "panel"`, and
+ * the app-level host draws the slide-in panel over whatever page is on screen. `prefill` carries what the writer has
+ * already typed (a name into the log-a-query picker); `onCreated` hands the new agent's id back to the flow waiting.
+ */
+export function openNewAgentCard(opts: Pick<AgentCardOptions, "originRect" | "from" | "host" | "prefill" | "onCreated" | "over"> = {}): void {
+  returnFocus = takeOpener();
   current = { ...opts, agentId: null, seq: ++seq };
   notify();
 }
 export function closeAgentCard(): void {
+  const was = current;
   current = null;
   notify();
+  if (was?.agentId === null) giveFocusBack();
+}
+/**
+ * A new agent was saved: the session closes, the page hears "added" (the Contact list's ring, its panel), and the flow
+ * that opened the editor — if one is waiting — is handed the id, once. A call with no new-agent session open does
+ * nothing.
+ */
+export function completeNewAgent(agentId: string, how: "done" | "handoff" = "done"): void {
+  const was = current;
+  if (!was || was.agentId !== null) return;
+  current = null;
+  notify();
+  emitAgentCardEvent({ type: "added", agentId, how });
+  was.onCreated?.(agentId);
+  giveFocusBack();
 }
 /**
  * ‹ › — the SAME session moves to the next agent in its order. The seq does not move, so the card
@@ -118,7 +182,9 @@ export type AgentCardEvent =
   /* `undo` is the card's whole-document Undo — the SAME closure the card's foot offers, so the list's
      notice can offer it too and the two cannot restore different things; it runs once */
   | { type: "saved"; agentId: string; before: Agent; after: Agent; undo?: () => Promise<unknown> }
-  | { type: "added"; agentId: string }
+  /* `how`: "done" — the add journey's own finish (Done); "handoff" — finished on the way to another surface (the finish
+     screen's edit doors, a flow waiting on the new agent), which then opens its own card */
+  | { type: "added"; agentId: string; how: "done" | "handoff" }
   /* a save's Undo ran (from either place) — the list drops its notice's Undo */
   | { type: "undone"; agentId: string }
   /* a delete is under way: the card has shrunk into the row, which collapses (240ms) */

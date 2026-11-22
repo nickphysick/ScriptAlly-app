@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "F1",
+  "where": "population: the footer's links",
+  "ok": true,
+  "detail": "[\"/help\",\"/help#whats-new\",\"/pricing\",\"/about\",\"/contact\",\"/privacy\",\"/terms\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "Give feedback opens FeedbackDock",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F1",
+  "where": "/help renders its own route (no 404, no redirect)",
+  "ok": true,
+  "detail": "/help · 3037 chars"
+ },
+ {
+  "lock": "F1",
+  "where": "/help#whats-new renders its own route (no 404, no redirect)",
+  "ok": true,
+  "detail": "/help · 3037 chars"
+ },
+ {
+  "lock": "F1",
+  "where": "/pricing renders its own route (no 404, no redirect)",
+  "ok": true,
+  "detail": "/pricing · 2904 chars"
+ },
+ {
+  "lock": "F1",
+  "where": "/about renders its own route (no 404, no redirect)",
+  "ok": true,
+  "detail": "/about · 2537 chars"
+ },
+ {
+  "lock": "F1",
+  "where": "/contact renders its own route (no 404, no redirect)",
+  "ok": true,
+  "detail": "/contact · 1436 chars"
+ },
+ {
+  "lock": "F1",
+  "where": "/privacy renders its own route (no 404, no redirect)",
+  "ok": true,
+  "detail": "/privacy · 4000 chars"
+ },
+ {
+  "lock": "F1",
+  "where": "/terms renders its own route (no 404, no redirect)",
+  "ok": true,
+  "detail": "/terms · 4000 chars"
+ }
+]

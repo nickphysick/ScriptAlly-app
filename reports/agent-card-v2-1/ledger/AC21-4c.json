@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "AC21-4c",
+  "where": "population: an agent whose query is at Full requested",
+  "ok": true,
+  "detail": "cv25-agent-09"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "Full requested: the border breathes in v163's rim for Full (#557aa3)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(85, 122, 163)\",\"running\":true}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "no query: the border breathes in slate, rgb(94, 113, 137)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(94, 113, 137)\",\"running\":true}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "the cross: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": true,
+  "detail": "{\"live\":[],\"tint\":0,\"before\":1}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "a tick with nothing changed: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": true,
+  "detail": "{\"live\":[],\"tint\":0,\"before\":1}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "Esc: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": true,
+  "detail": "{\"live\":[],\"tint\":0,\"before\":1}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "the rust bar's Discard: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": true,
+  "detail": "{\"live\":[],\"tint\":0,\"before\":1}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "reduced motion: no animation on the card",
+  "ok": true,
+  "detail": "[]"
+ }
+]

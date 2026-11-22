@@ -136,7 +136,9 @@ describe("⚠️ no class the calendar renders is already owned by another sheet
    * sweep rather than a memory: every class the calendar RENDERS is checked against every class
    * `f12.css` DECLARES.
    */
-  const page = readFileSync(join(process.cwd(), "src/components/todo/TodoCalendarPage.tsx"), "utf8");
+  /* RE-POINTED (Calendar page retired 29 Oct): what the calendar renders is the shared board's two files now. */
+  const page = ["src/components/shared/timeline/TimelineBoard.tsx", "src/components/shared/timeline/boardParts.tsx"]
+    .map((f) => readFileSync(join(process.cwd(), f), "utf8")).join("\n");
   const f12 = readFileSync(join(process.cwd(), "src/components/shell/f12.css"), "utf8");
 
   it("every tl- class the calendar renders is its own", () => {
@@ -381,7 +383,9 @@ describe("the calendar's bar path states no vertical literal", () => {
  */
 describe("the scrawl is gone from the calendar", () => {
   const CAL = [
-    "src/components/todo/TodoCalendarPage.tsx",
+    /* the Calendar page was retired 29 Oct; the board's two files took its place in the sweep */
+    "src/components/shared/timeline/TimelineBoard.tsx",
+    "src/components/shared/timeline/boardParts.tsx",
     "src/components/todo/todoCalendar.css",
     "src/lib/timelineCopy.ts",
   ];
@@ -434,7 +438,7 @@ describe("the scrawl is gone from the calendar", () => {
          this census has held through four retargets. The app's own hand is still untouched. */
       .toEqual([".tl-actlab", ".tl-cccv", ".tl-dwar .cv"].sort());
     /* the page and the copy module may not set it at all — a flag's deed is styled, never inlined */
-    for (const f of ["src/components/todo/TodoCalendarPage.tsx", "src/lib/timelineCopy.ts"]) {
+    for (const f of ["src/components/shared/timeline/TimelineBoard.tsx", "src/components/shared/timeline/boardParts.tsx", "src/lib/timelineCopy.ts"]) {
       const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
       expect(src, `${f} sets Caveat inline`).not.toMatch(/Caveat/i);
     }
@@ -444,7 +448,7 @@ describe("the scrawl is gone from the calendar", () => {
   });
 
   it("the earn-it predicate is orphaned nowhere — it does not exist", () => {
-    for (const f of [...CAL, "src/lib/timelineCopy.test.ts", "tests/e2e/calFade55.measure.ts"]) {
+    for (const f of [...CAL, "src/lib/timelineCopy.test.ts"]) { // calFade55.measure.ts retired with the Calendar page (29 Oct)
       const src = stripAll(readFileSync(join(process.cwd(), f), "utf8"));
       expect(src, `${f} still references scrawlEarns`).not.toMatch(/scrawlEarns/);
     }

@@ -1,0 +1,37 @@
+[
+ {
+  "name": "population: three To-do tasks' query cards",
+  "ok": true,
+  "got": "[\"seed-pkgq-3\",\"seed-query-9\",\"seed-query-20\"]"
+ },
+ {
+  "name": "seed-pkgq-3: population — the Query Centre's card",
+  "ok": true,
+  "got": "[\"Marcus asked for your full manuscript\",\"You sent Marcus your query\",\"You sent Marcus your full manuscript\"]"
+ },
+ {
+  "name": "seed-pkgq-3: the To-do desk's card draws the same thread",
+  "ok": true,
+  "got": "To-do [\"Marcus asked for your full manuscript\",\"You sent Marcus your query\",\"You sent Marcus your full manuscript\"] · Query Centre [\"Marcus asked for your full manuscript\",\"You sent Marcus your query\",\"You sent Marcus your full manuscript\"]"
+ },
+ {
+  "name": "seed-query-9: population — the Query Centre's card",
+  "ok": true,
+  "got": "[\"You sent Ana your query\",\"Ana asked for a partial\",\"You sent Ana your partial\",\"Ana asked for your full manuscript\"]"
+ },
+ {
+  "name": "seed-query-9: the To-do desk's card draws the same thread",
+  "ok": true,
+  "got": "To-do [\"You sent Ana your query\",\"Ana asked for a partial\",\"You sent Ana your partial\",\"Ana asked for your full manuscript\"] · Query Centre [\"You sent Ana your query\",\"Ana asked for a partial\",\"You sent Ana your partial\",\"Ana asked for your full manuscript\"]"
+ },
+ {
+  "name": "seed-query-20: population — the Query Centre's card",
+  "ok": true,
+  "got": "[\"You sent David your query\",\"David asked for a partial\"]"
+ },
+ {
+  "name": "seed-query-20: the To-do desk's card draws the same thread",
+  "ok": true,
+  "got": "To-do [\"You sent David your query\",\"David asked for a partial\"] · Query Centre [\"You sent David your query\",\"David asked for a partial\"]"
+ }
+]

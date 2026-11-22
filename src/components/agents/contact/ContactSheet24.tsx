@@ -1,0 +1,366 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list v24 Part B (design-refs/contact-list-v24/, screens 01–03, 06) — THE LIST SHEET: one white sheet under the
+ * view row, opening on the Query Centre v149's navy bar.
+ *
+ *   the bar      List / Cards on the left (a segmented control on the navy); Filters · Grouped by · Sorted by · Full
+ *                screen on the right (icon-only, prefixes dropped, at a window of 1440 or less, as on the Query Centre)
+ *   List         a contacts table grouped by where each agent stands (Your move, Querying, Not queried, Closed), the
+ *                column headings sticky under the bar and each group heading under them
+ *   Cards        the AgentPaperCard `framed` grid of Contact list v20, three across from a sheet of 1,100px, else two
+ *
+ * ⚠️ ONE LIST, TWO DRAWINGS: both views draw exactly the agents handed in (`pool`, already filtered and sorted), under
+ *    the same groups, so a card's order is its row's order.
+ * ⚠️ THE ROW OR CARD OPENS THE AGENT CARD (`onOpen`); its own links and "+ Add" buttons answer their own clicks.
+ * ⚠️ THE SHEET CLIPS (`overflow: clip`), NEVER HIDES: `hidden` would make it a scroll container and every sticky
+ *    would pin to it instead of the page.
+ */
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { StatusDot } from "../../StatusDot";
+import { QueryStatus } from "../../../types";
+import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
+import { type AgentFacts, type ContactFilters, type SortKey, addedLabel, genreList } from "../../../lib/contactList";
+import { STAGE_NAME } from "../../../lib/qcSummary";
+import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
+import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
+import { usePopover } from "../../shell/ListPills";
+import { FULL_ICON } from "../../shell/ViewTitleRow";
+import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
+import { FilterMenu } from "./ContactFilters24";
+import { AgentPaperCard, type PaperAddKey } from "../../shared/AgentPaperCard";
+import { paperDataOf } from "../../../lib/contactCards";
+import type { PersonalGenre } from "../../../lib/genres";
+import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
+import { agentsWord, cardsAcross, setGroups, SET_LABEL, type SetKey } from "../../../lib/contactV24";
+import type { ContactView } from "../../../lib/contactListMemory";
+import "./contactV24.css";
+import { GenrePills, NIB, Tally } from "../../shared/agentRowParts";
+import "./contactV252.css";
+import "./contactV253.css";
+import "./contactV254.css";
+import "./contactV255.css";
+import "./contactV256.css";
+import { profileLink, queryLine } from "../../../lib/contactRow254";
+import { hasMissingDetails } from "../../../lib/contactList";
+
+export const SET_GLYPH: Record<SetKey, QueryStatus | null> = {
+  you: QueryStatus.PARTIAL_REQUESTED, agent: QueryStatus.QUERIED, none: null, closed: QueryStatus.REJECTED,
+};
+/** the dotted ring for "Not queried" (a set, not a status: no StatusDot names it) */
+export const NQ_RING = (
+  <svg className="cl24-nq" viewBox="0 0 14 14" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="1.6 2" /></svg>
+);
+/** v25.5 D — "Your move" as a GROUP or SUMMARY is the rust "!" disc used on the agent icons (17px; 14 in full screen's
+ *  band). A single stage keeps its own StatusDot. */
+export const YourMoveMark: React.FC<{ size?: number }> = ({ size = 17 }) => (
+  <span className="cl255-ym" data-cl255="ym" aria-hidden="true" style={{ "--ym": `${size}px` } as React.CSSProperties}>!</span>
+);
+export const SetGlyph: React.FC<{ k: SetKey; size?: number }> = ({ k, size = 17 }) => {
+  if (k === "you") return <YourMoveMark size={size} />;
+  const s = SET_GLYPH[k];
+  return s ? <StatusDot status={s} overrideSize={size} /> : NQ_RING;
+};
+/** the state disc: dashed navy ring (not queried) · navy (querying) · navy with a rust "!" (your move, v25.2 B) · grey (closed) */
+export const StateDisc: React.FC<{ x: AgentFacts; size?: number; className?: string }> = ({ x, size, className }) => (
+  <span className={`cl24-dsc cl24-dsc--${x.stand}${className ? ` ${className}` : ""}`} data-cl24="disc" data-k={x.stand} aria-hidden="true"
+    style={size ? ({ "--d": `${size}px` } as React.CSSProperties) : undefined}>{agentInitials(x.agent).slice(0, 2)}</span>
+);
+
+const I = {
+  filt: <svg className="cl24-ic" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>,
+  cv: <svg className="cl24-cv" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>,
+  mail: <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.4" /><path d="m2.5 4.3 5.5 4.4 5.5-4.4" /></svg>,
+  web: <svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>,
+  plus: <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M8 3v10M3 8h10" /></svg>,
+};
+
+export interface ContactSheet24Props {
+  pool: readonly AgentFacts[];
+  all: readonly AgentFacts[];
+  view: ContactView;
+  grouped: boolean;
+  onGrouped: (g: boolean) => void;
+  sortKey: SortKey;
+  reversed: boolean;
+  onSort: (v: { key: SortKey; reversed: boolean }) => void;
+  filters: ContactFilters;
+  onFilters: (f: ContactFilters) => void;
+  onClearAll: () => void;
+  full: boolean;
+  onFull: () => void;
+  genreWord: (raw: string) => string;
+  genreHit: (raw: string) => boolean;
+  personalGenres: PersonalGenre[];
+  nowMs: number;
+  openId: string | null;
+  onOpen: (id: string) => void;
+  onLog: (id: string) => void;
+  onEdit: (id: string, tab: AgentCardTab, focus?: AgentCardField) => void;
+  onExport: (rows: readonly AgentFacts[]) => void;
+  /** Contact list v25.4 C — the sparse-profile link's door: the card's edit mode at the agent's first missing field
+   *  (v25.3's order). The row has no gap action of its own any more (v25.4 D). */
+  onFillGaps?: (agentId: string) => void;
+  search: string;
+  /** v25 A3 — Find is the navy bar's own search well, first in the bar */
+  onSearch: (v: string) => void;
+}
+
+/* v25.1 E1/E3/E4 — every heading a sort. v25.4 A — the order is Agent · What they want · Replies in · Agent fit ·
+   Your query, and at ≤1440 of window Agent fit drops. `col` is the cell's `data-col`: Agent fit keeps 5 (the
+   column that drops), Your query is 4. */
+const COLS: { key: SortKey; label: string; col: number }[] = [
+  { key: "surname", label: "Agent", col: 1 }, { key: "fit", label: "What they want", col: 2 }, { key: "reply", label: "Replies in", col: 3 },
+  { key: "rating", label: "Agent fit", col: 5 }, { key: "urgency", label: "Your query", col: 4 },
+];
+
+export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
+  const pop = usePopover<"filters" | "group" | "sort">();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
+  const groups = useMemo(() => (p.grouped ? setGroups(p.pool) : [{ key: null as SetKey | null, label: "", ids: p.pool.map((x) => x.agent.id) }]), [p.grouped, p.pool]);
+
+  /* v25.1 C3 — the bar folds at 1440 of WINDOW, the Query Centre's rule (contactV24.css's media query); v25's
+     sheet-measured `data-s1440` is retired */
+
+  /* Cards: three across from a sheet of 1,100px, measured before paint and on every resize */
+  const [across, setAcross] = useState(3);
+  useLayoutEffect(() => {
+    const el = sheetRef.current;
+    if (!el) return undefined;
+    const read = () => { if (el.offsetWidth > 0) setAcross(cardsAcross(el.offsetWidth)); };
+    read();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const filterN = p.filters.genres.length + (p.filters.open === "open" ? 1 : 0);
+  const allGenres = useMemo(
+    () => genreList(p.all, (k, raw) => p.genreWord(raw) || k).sort((a, b) => a.label.localeCompare(b.label)),
+    [p.all, p], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const openN = p.all.filter((x) => x.openKey === "open").length;
+  const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
+
+  return (
+    <div className="cl24-sheet" data-cl24="sheet" data-view={p.view} ref={sheetRef}>
+      {/* v25.6 A — the bar pins 12px below the sheet's top: a page-coloured strip holds the gap and fills behind the bar's
+          rounded corners, so scrolled rows never show above it. At rest the strip sits under the sheet's own clip. */}
+      <div className="cl256-pin" data-cl256="pin">
+      <div className="cl24-bar" data-cl24="bar" ref={barRef}>
+        <label className="qc150-bfind" data-cl24="find" data-cl25="find" data-nb1="find">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
+          <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
+        </label>
+        {/* v25 C — the List | Cards switch moved out of the bar, to the list's title row (ContactListTitle25) */}
+        <button type="button" className="cl24-ch cl24-ch--fil" data-cl24="filters" data-nb1="filters" aria-haspopup="dialog" aria-expanded={pop.open === "filters"}
+          aria-label={filterN ? `Filters: ${filterN} applied` : "Filters"} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
+          {I.filt}<span className="cl24-cl">Filters</span>{filterN ? <em className="cl24-n" data-cl24="filters-n">{filterN}</em> : null}
+        </button>
+        <button type="button" className="cl24-ch" data-cl24="group" aria-haspopup="menu" aria-expanded={pop.open === "group"}
+          aria-label={p.grouped ? "Grouped by Status. Change the grouping" : "Not grouped. Group the list"} data-cl25="group" onClick={(e) => pop.toggle("group", e.currentTarget)}>
+          {GROUP_ICON150}<b>{p.grouped ? "Status" : "Group"}</b>{I.cv}
+        </button>
+        <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="cl24-ch cl24-sort" ns="cl24"
+          onToggle={(a) => pop.toggle("sort", a)} toolbar={() => barRef.current} />
+        <button type="button" className="cl24-fs" data-cl24="full" data-nb1="full" data-pin-list="" aria-pressed={p.full} aria-keyshortcuts="F" aria-label="Full screen" onClick={p.onFull}>
+          {FULL_ICON}<span className="cl24-fslb">Full screen</span>
+        </button>
+      </div>
+      </div>
+
+      {p.pool.length === 0 ? (
+        <div className="cl24-none" data-cl24="none" role="status">
+          No agents match{p.search.trim() ? ` “${p.search.trim()}”` : ""}.
+          <button type="button" data-cl24="reset" onClick={p.onClearAll}>Clear search and filters</button>
+        </div>
+      ) : p.view === "list" ? (
+        <div className="cl24-tbl" data-cl24="table" role="table" aria-label="Agents">
+          <div className="cl24-th" role="row" data-cl24="heads">
+            {COLS.map((c) => (
+              <span key={c.label} role="columnheader" data-col={c.col} data-key={c.key}
+                aria-sort={c.key === p.sortKey ? (p.reversed ? "descending" : "ascending") : "none"}>
+                {/* v25.1 E4 — every heading sorts: a first click in its first direction, a second reverses it */}
+                <button type="button" className={c.key === p.sortKey ? "on" : undefined} data-cl251="head" data-key={c.key} onClick={() => sortBy(c.key)}>
+                  <span>{c.label}</span><i aria-hidden="true">{c.key === p.sortKey && p.reversed ? "↑" : "↓"}</i>
+                </button>
+              </span>
+            ))}
+          </div>
+          {groups.map((g) => (
+            <div key={g.key ?? "all"} className="cl24-grp" role="rowgroup" data-cl24="group" data-k={g.key ?? "all"}>
+              {g.key ? (
+                <div className="cl24-gh" data-cl24="group-head" data-k={g.key}>
+                  <SetGlyph k={g.key} /><b>{SET_LABEL[g.key]}</b><small>{agentsWord(g.ids.length)}</small>
+                </div>
+              ) : null}
+              {g.ids.map((id) => { const x = byId.get(id); return x ? <Row key={id} x={x} p={p} /> : null; })}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="cl24-cg" data-cl24="cards" style={{ "--cols": across } as React.CSSProperties} data-cols={across}>
+          {groups.map((g) => (
+            <section key={g.key ?? "all"} className="cl24-cgs" data-cl24="card-group" data-k={g.key ?? "all"}>
+              {g.key ? (
+                <div className="cl24-rh" data-cl24="card-head" data-k={g.key}>
+                  <SetGlyph k={g.key} size={g.key === "you" ? 17 : 18} /><b>{SET_LABEL[g.key]}</b><small>{agentsWord(g.ids.length)}</small><hr />
+                </div>
+              ) : null}
+              <div className="cl24-grid">
+                {g.ids.map((id) => { const x = byId.get(id); return x ? <Card key={id} x={x} p={p} /> : null; })}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+
+      {pop.open === "filters" && pop.anchor ? (
+        <FilterMenu anchor={pop.anchor} filters={p.filters} onFilters={p.onFilters} genres={allGenres} openN={openN}
+          missingN={p.all.filter(hasMissingDetails).length}
+          showing={p.pool.length} total={p.all.length} onExport={() => p.onExport(p.pool)} />
+      ) : null}
+      {pop.open === "sort" && pop.anchor ? (
+        <SortChipMenu anchor={pop.anchor} fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} ns="cl24" heading="Sort by" note={null}
+          onChange={(v) => p.onSort(v as { key: SortKey; reversed: boolean })} />
+      ) : null}
+      {pop.open === "group" && pop.anchor ? (
+        <GroupMenu anchor={pop.anchor} options={GROUP24} value={p.grouped ? "status" : "none"} onPick={(g) => { p.onGrouped(g === "status"); pop.close(); }} />
+      ) : null}
+    </div>
+  );
+};
+
+/* ── the Group by menu ─────────────────────────────────────────────────────────────────────────────────────── */
+/* Contact list v26 E — EXTENDED IN PLACE: the menu takes its options (a bold name and a line each) and the chosen key, so
+   v24's two (Status, No grouping) and v26's three (Letter, Status, No grouping) are one component. */
+export interface GroupMenuOption<K extends string> { key: K; label: string; line: string }
+export function GroupMenu<K extends string>({ anchor, options, value, onPick, className, divideBefore }: {
+  anchor: HTMLElement; options: readonly GroupMenuOption<K>[]; value: K; onPick: (k: K) => void; className?: string;
+  /** List filters v1 — a hairline before this option ("No grouping") */
+  divideBefore?: K;
+}) {
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  useLayoutEffect(() => {
+    const r = anchor.getBoundingClientRect();
+    setPos({ top: r.bottom + 8, left: Math.max(12, Math.min(r.right - 300, window.innerWidth - 312)) });
+  }, [anchor]);
+  return (
+    <div className={`lpop cl24-gpop${className ? ` ${className}` : ""}`} data-lpop="group" data-cl24="group-menu" role="menu" aria-label="Group by" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
+      <h6>Group by</h6>
+      {options.map((o) => (
+        <React.Fragment key={o.key}>
+          {divideBefore === o.key ? <hr className="cl24-ghr" role="separator" /> : null}
+          <button type="button" role="menuitemradio" aria-checked={value === o.key} className="cl24-gopt" data-cl24="group-opt" data-v={o.key} onClick={() => onPick(o.key)}>
+            <i aria-hidden="true">{value === o.key ? "●" : ""}</i><span><b>{o.label}</b><small>{o.line}</small></span>
+          </button>
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+const GROUP24: readonly GroupMenuOption<"status" | "none">[] = [
+  { key: "status", label: "Status", line: "Your move, querying, not queried, closed" },
+  { key: "none", label: "No grouping", line: "One list, in the order you sort by" },
+];
+
+/* ── a List row ─────────────────────────────────────────────────────────────────────────────────────────────── */
+/* v25.2 A — the QueryHawk row: the typewriter name over agency · city in mono; the genre pills; replies in; the tally
+   bars; and, as a second grid row spanning every column from the name's left edge, the wishlist behind the nib.
+   v25.3 — A ROW DOES NOT ADVERTISE WHAT IS MISSING: an empty cell is blank and a row with no wishlist has no wishlist
+   line. The pills fit their cell: whole pills only, then "+n".
+   v25.4 — SIMPLER ROWS: Agent fit comes before Your query; Your query is ONE line (the stage's StatusDot and
+   "Queried" or "Queried · {stage}"; "Not queried" with the dotted ring) — the status pill, day count, track and next
+   step are gone from the row, the disc's "!" carries urgency; an agent with no genres shows one link, "Fill in
+   {first}'s profile →", spanning Replies in too when there is no reply time; and the row has no hover actions but
+   "Log a query" on a not-queried agent (the gaps button and the copy / website icons are gone: the card's contact
+   rows hold those, and gaps live in the card, Housekeeping and the Missing details filter). */
+const Row: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
+  const a = x.agent;
+  const name = agentPrimary(a);
+  const agency = (a.name ?? "").trim() ? (a.agency ?? "").trim() : "";
+  const sub = [agency, x.loc].filter(Boolean).join(" · ");
+  const genres = a.genres ?? [];
+  const weeks = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
+  const rule = a.noResponseMeansNo === true ? "no reply means no" : a.noResponseMeansNo === false ? "always replies" : null;
+  const wish = (a.mswlNotes ?? "").trim();
+  const rated = typeof a.starRating === "number" && a.starRating > 0;
+  const q = x.q;
+  const queried = !!q && x.stand !== "none";
+  const line = queried ? queryLine(q!.status) : null;
+  const link = profileLink(a);
+  const on = p.openId === a.id;
+  const open = () => p.onOpen(a.id);
+  const fill = () => (p.onFillGaps ? p.onFillGaps(a.id) : p.onEdit(a.id, "want", "genres"));
+  return (
+    <div role="row" tabIndex={0} className={`cl24-tr cl252-tr${wish ? "" : " cl253-nowl"}`} data-cl24="row" data-nb1="name-row" data-id={a.id} data-k={x.stand} aria-current={on ? "true" : undefined}
+      aria-label={`${name}${agency ? `, ${agency}` : ""}`}
+      onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; open(); }}
+      onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
+      <span role="cell" className="cl24-who">
+        <StateDisc x={x} />
+        <span className="cl24-whot cl252-whot"><b data-cl252="name">{name}</b>{sub ? <small data-cl252="agency">{sub}</small> : null}</span>
+      </span>
+      {link ? (
+        <span role="cell" className={`cl24-gen cl254-pl${link.span2 ? " cl254-span2" : ""}`} data-cl24="genres" data-total={0} data-cl254="profile-cell" data-span={link.span2 ? 2 : 1}>
+          <button type="button" className="cl254-fillp" data-cl254="profile-link" onClick={fill}>{link.words}</button>
+        </span>
+      ) : (
+        <span role="cell" className="cl24-gen cl252-gen" data-cl24="genres" data-total={genres.length}>
+          <GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} max={Infinity} empty={null} fit />
+        </span>
+      )}
+      {link?.span2 ? null : (
+        <span role="cell" className="cl24-c2 cl252-rep" data-col="3" data-cl252="replies">
+          {weeks ? <><b>~{weeks} {weeks === 1 ? "wk" : "wks"}</b>{rule ? <small>{rule}</small> : null}</> : null}
+        </span>
+      )}
+      <span role="cell" className="cl24-ad cl252-rate" data-col="5" data-cl251="rating" data-n={rated ? a.starRating : 0}>
+        {rated ? <Tally n={a.starRating} /> : null}
+      </span>
+      <span role="cell" className="cl24-qs cl252-qs cl254-qs" data-col="4" data-cl24="query">
+        {!queried ? (
+          x.door === "closed" ? <span className="cl24-shut cl251-shut" data-cl251="closed-tag">Closed to queries</span>
+            : <span className="cl254-q cl254-q--nq" data-cl254="query-line" data-status="none">{NQ_RING}<em>Not queried</em>
+              <button type="button" className="cl252-hlog" data-cl24="log" onClick={() => p.onLog(a.id)}>{I.plus}Log a query</button></span>
+        ) : (
+          <span className="cl254-q" data-cl254="query-line" data-status={q!.status}>
+            <StatusDot status={q!.status} overrideSize={15} />
+            <span className="cl254-qt">{line!.head}{line!.stage ? <><i className="cl254-dot"> · </i>{line!.stage}</> : null}</span>
+          </span>
+        )}
+      </span>
+      {wish ? (
+        <span className="cl252-wl" data-cl252="wishlist" role="cell">
+          {NIB}
+          <span className="cl252-wq" data-cl252="wish-text"><i aria-hidden="true">“</i>{wish}<i aria-hidden="true">”</i></span>
+        </span>
+      ) : null}
+    </div>
+  );
+};
+
+/* ── a card ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+const ADD_TARGET: Record<PaperAddKey, { tab: AgentCardTab; focus: AgentCardField }> = {
+  website: { tab: "who", focus: "website" }, email: { tab: "who", focus: "email" },
+  genres: { tab: "want", focus: "genres" }, wishlist: { tab: "want", focus: "wishlist" }, materials: { tab: "want", focus: "materials" },
+};
+const Card: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => {
+  const data = paperDataOf(x, p.genreHit, p.personalGenres);
+  const open = () => p.onOpen(x.agent.id);
+  return (
+    <div role="button" tabIndex={0} className="cl24-card" data-cl24="card" data-id={x.agent.id} data-k={x.stand} aria-current={p.openId === x.agent.id || undefined}
+      aria-label={`${data.name}${data.agency ? `, ${data.agency}` : ""}. ${data.statusLabel}`}
+      onClick={(e) => { if ((e.target as HTMLElement).closest("a, button")) return; open(); }}
+      onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
+      {/* v20 §F — a card whose next step is the writer's wears the app's pink band */}
+      <AgentPaperCard variant="framed" data={data} tone={x.stand === "you" ? "pink" : undefined} yourMove={x.stand === "you"}
+        onAdd={(k) => { const t = ADD_TARGET[k]; p.onEdit(x.agent.id, t.tab, t.focus); }} />
+    </div>
+  );
+};
+

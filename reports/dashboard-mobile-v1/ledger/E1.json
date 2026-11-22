@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "E1",
+  "where": "390x844 population: the phone page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "390x844 no the desktop page",
+  "ok": true,
+  "detail": "[data-d58=\"page\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "390x844 no the header's Log a query / Record a response",
+  "ok": true,
+  "detail": "[data-d58=\"buttons\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "390x844 no the Closed ring card",
+  "ok": true,
+  "detail": "[data-d60=\"closed-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "390x844 no the Agents ring card",
+  "ok": true,
+  "detail": "[data-d60=\"agents-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "390x844 no the task pager card",
+  "ok": true,
+  "detail": "[data-d71=\"task\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "390x844 no the v37 desk line",
+  "ok": true,
+  "detail": ".sa-mdeskline"
+ },
+ {
+  "lock": "E1",
+  "where": "390x844 no the v37 To-do doorway",
+  "ok": true,
+  "detail": ".sa-mtodo"
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 population: the phone page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 no the desktop page",
+  "ok": true,
+  "detail": "[data-d58=\"page\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 no the header's Log a query / Record a response",
+  "ok": true,
+  "detail": "[data-d58=\"buttons\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 no the Closed ring card",
+  "ok": true,
+  "detail": "[data-d60=\"closed-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 no the Agents ring card",
+  "ok": true,
+  "detail": "[data-d60=\"agents-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 no the task pager card",
+  "ok": true,
+  "detail": "[data-d71=\"task\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 no the v37 desk line",
+  "ok": true,
+  "detail": ".sa-mdeskline"
+ },
+ {
+  "lock": "E1",
+  "where": "375x667 no the v37 To-do doorway",
+  "ok": true,
+  "detail": ".sa-mtodo"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x900 no phone page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "1512x900 the desktop page still renders",
+  "ok": true,
+  "detail": "[data-d58=\"page\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x900 the header's Log a query / Record a response still renders",
+  "ok": true,
+  "detail": "[data-d58=\"buttons\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x900 the Closed ring card still renders",
+  "ok": true,
+  "detail": "[data-d60=\"closed-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x900 the Agents ring card still renders",
+  "ok": true,
+  "detail": "[data-d60=\"agents-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x900 the task pager card still renders",
+  "ok": true,
+  "detail": "[data-d71=\"task\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 no phone page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 the desktop page still renders",
+  "ok": true,
+  "detail": "[data-d58=\"page\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 the header's Log a query / Record a response still renders",
+  "ok": true,
+  "detail": "[data-d58=\"buttons\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 the Closed ring card still renders",
+  "ok": true,
+  "detail": "[data-d60=\"closed-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 the Agents ring card still renders",
+  "ok": true,
+  "detail": "[data-d60=\"agents-hoop\"]"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 the task pager card still renders",
+  "ok": true,
+  "detail": "[data-d71=\"task\"]"
+ }
+]

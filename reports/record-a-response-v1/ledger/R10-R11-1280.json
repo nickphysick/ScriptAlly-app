@@ -1,0 +1,47 @@
+[
+ {
+  "where": "R11 no arrows on the picker",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "R11 a set of one (opened from the dashboard): no arrows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "R10 the card is still open, on that query",
+  "ok": true,
+  "detail": "{\"panel\":\"cv25-q-03\",\"pill\":\"Partial requested\",\"undo\":true,\"composer\":false}"
+ },
+ {
+  "where": "R10 on the new status",
+  "ok": true,
+  "detail": "Partial requested"
+ },
+ {
+  "where": "R10 Undo is showing",
+  "ok": true,
+  "detail": "{\"panel\":\"cv25-q-03\",\"pill\":\"Partial requested\",\"undo\":true,\"composer\":false}"
+ },
+ {
+  "where": "R10 the composer has closed",
+  "ok": true,
+  "detail": "{\"panel\":\"cv25-q-03\",\"pill\":\"Partial requested\",\"undo\":true,\"composer\":false}"
+ },
+ {
+  "where": "R10 the Undo restores Queried (nothing kept)",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "where": "R11 the list's set: arrows on the band",
+  "ok": true,
+  "detail": "1 · opened seed-query-12"
+ },
+ {
+  "where": "R11 › steps to the next query",
+  "ok": true,
+  "detail": "seed-query-12 → cv25-q-08"
+ }
+]

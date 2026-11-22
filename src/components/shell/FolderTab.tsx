@@ -225,3 +225,291 @@ export const FolderTab: React.FC<FolderTabProps> = ({ group, name, siblings, onG
     </>
   );
 };
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   SHELL NAV v3 (13 Nov) → SHELL TABS v2 (16 Nov; ref design-refs/shell-tabs-v2.html, `.tab`) — THE TAB STRIP.
+   The bar's tabs: every page of the current section, in nav order, which NEVER changes. ONE TAB SHAPE: every tab has
+   the same metrics (the typewriter face at 17px, 40 tall, 20px sides, 2px apart, the first 24px in from the sheet), so
+   nothing moves or resizes when the current page changes. The current page is the only shape: the fill of the sheet
+   beneath it (`--ink-tab`), ink text, 11px top corners and a 10px concave curve into the sheet on BOTH sides. The
+   other pages are words on the ink, with no ground at rest. No group label.
+
+   ⚠️ THE CURVES ARE SVG, NEVER A RADIAL GRADIENT (INK4: a gradient corner is anti-aliased differently from the tab's own
+   border-radius and shows a seam at 3×). The ref draws them as `radial-gradient` pseudo-elements; the shape is the
+   ref's, the drawing is ours. Each curve overlaps the tab body by 1px so no ink can show between them.
+
+   ⚠️ THE FIT KEEPS FolderTab's ORDER OF RETREAT — full names, then icons, then "+N" — with two rules of its own: the
+   current tab is never icon-only and never in "+N", and resting tabs give way first FROM THE RIGHT. Re-fitting is
+   measured before paint and unanimated.
+
+   ⚠️ TABS ARE BUTTONS THAT NAVIGATE, SO THEY ARE NOT ARIA TABS: a nav landmark, no `role="tablist"`, and
+   `aria-current="page"` on the current one. Every desktop mount renders this: the workspace bar and SetupFrame
+   (onboarding and the account screens). `FolderTab` above survives only for SetupFrame on a phone, where
+   onboarding.css styles it alone.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+export interface StripTab {
+  id: string;
+  /** The page's full name — the aria-label and the "+N" menu. */
+  label: string;
+  /** The name the tab prints (`tabLabel ?? label`). */
+  short: string;
+  path: string;
+  icon: React.ReactNode;
+  /** A Pro page this account is not entitled to: the tab carries the small PRO tag after its name. */
+  locked?: boolean;
+}
+
+export type StripMode = "cur" | "full" | "ic" | "hid";
+
+/** Between tabs (the ref's `.tabs` gap). */
+const STRIP_GAP = 2;
+/** The bar's search field, open and folded to its icon (inkShell.css `.ws-sfield`, `.ws-sfield[data-fold]`;
+ *  `searchFold.test.ts` holds the two equal to the CSS). */
+export const SEARCH_W = 168;
+export const SEARCH_FOLD_W = 38;
+
+/** The guide pill folded to its icon (drawn in inkShell.css `.ws-pageslot[data-fold] .pck-pill`;
+ *  `searchFold.test.ts` holds the two equal). */
+export const PILL_FOLD_W = 38;
+
+/**
+ * Shell tabs v2 Phase 3, v2.1 Phase 1 — WHEN SPACE RUNS SHORT THE BAR GIVES UP ROOM IN ORDER: search folds to its icon,
+ * then the guide pill folds to its icon, and only then may a tab lose its name. `rooms[k]` is the room the strip would
+ * have with the first k controls folded (rooms[0]: nothing folded). The level is the first k at which every tab keeps
+ * its name; if none does, the last level, planned with the old order of retreat (icons, then "+N"). Pure, so it is
+ * unit-tested; `TabStrip` feeds it measured widths. Unfolding is the same reading as the window widens, so the pill's
+ * label comes back before the field's.
+ */
+export function planWithFolds(rest: number[], icon: number[], current: number, cur: number, more: number, rooms: number[]): { modes: StripMode[]; level: number } {
+  for (let k = 0; k < rooms.length - 1; k++) {
+    const modes = planStrip(rest, icon, current, cur, more, rooms[k]);
+    if (modes.every((m) => m === "cur" || m === "full")) return { modes, level: k };
+  }
+  return { modes: planStrip(rest, icon, current, cur, more, rooms[rooms.length - 1]), level: rooms.length - 1 };
+}
+
+/**
+ * The fit, as a pure function of measured widths. `rest[i]` / `icon[i]` are tab i's resting widths named and
+ * icon-only; `cur` is the current tab's width (the same metrics as a resting tab, measured separately so a PRO tag or a
+ * future difference can never be miscounted); `more` the "+N" tab's width; `limit` the room
+ * from the strip's left edge. Resting tabs turn to icons from the right, then leave for "+N" from the right.
+ */
+export function planStrip(rest: number[], icon: number[], current: number, cur: number, more: number, limit: number): StripMode[] {
+  const modes: StripMode[] = rest.map((_, i) => (i === current ? "cur" : "full"));
+  const width = () => {
+    const shown = modes.map((m, i) => (m === "cur" ? cur : m === "full" ? rest[i] : m === "ic" ? icon[i] : -1)).filter((w) => w >= 0);
+    const hidden = modes.some((m) => m === "hid");
+    const n = shown.length + (hidden ? 1 : 0);
+    return shown.reduce((a, b) => a + b, 0) + (hidden ? more : 0) + Math.max(0, n - 1) * STRIP_GAP;
+  };
+  const fromRight = rest.map((_, i) => rest.length - 1 - i).filter((i) => i !== current);
+  for (const i of fromRight) { if (width() <= limit) return modes; modes[i] = "ic"; }
+  for (const i of fromRight) { if (width() <= limit) return modes; modes[i] = "hid"; }
+  return modes;
+}
+
+export interface TabStripProps {
+  /** The section's pages, in nav order (one tab for a one-page section or an off-nav page). */
+  tabs: StripTab[];
+  /** The current page's id. */
+  current: string;
+  onGo: (path: string) => void;
+  /** The search field — the fit limit is 24px short of its left edge. */
+  limitRef: React.RefObject<HTMLElement | null>;
+  /** The workspace bar only: `limitRef` is the search field, which may fold to its icon to keep the tabs named, and
+   *  after it the guide pill in the bar's page slot. The strip reports the fold level it needs (0 none, 1 search,
+   *  2 search and the pill); the bar draws it. */
+  onFold?: (level: number) => void;
+}
+
+const PRO_TAG = <span className="ws-qpro ws-ftpro" data-shell="pro" aria-label="Pro">PRO</span>;
+
+/** The current tab's curve into the sheet, 10px: a 1px column over the tab body, then the concave quarter (the circle's
+ *  centre is the curve box's top-right). Drawn for the right side; the left one is the same path mirrored in CSS. */
+const fillet = (side: "r" | "l") => (
+  <svg className={side === "r" ? "ws-ftfl" : "ws-ftfl-l"} viewBox="0 0 11 10" width="11" height="10" aria-hidden="true" focusable="false">
+    <path d="M0 0H1A10 10 0 0 0 11 10H0Z" />
+  </svg>
+);
+
+export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRef, onFold }) => {
+  const stripRef = useRef<HTMLElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const curIdx = Math.max(0, tabs.findIndex((t) => t.id === current));
+  const key = tabs.map((t) => t.id).join("|");
+  const [modes, setModes] = useState<StripMode[]>(() => tabs.map((_, i) => (i === curIdx ? "cur" : "full")));
+  const [menuOpen, setMenuOpen] = useState(false);
+  const moreRef = useRef<HTMLSpanElement>(null);
+  const moreBtnRef = useRef<HTMLButtonElement>(null);
+  const moreMenuRef = useRef<HTMLSpanElement>(null);
+  /* the guide pill's slot width when open, and which pill it was measured from */
+  const pillOpenRef = useRef<{ el: Element; w: number } | null>(null);
+
+  const fit = useCallback(() => {
+    const strip = stripRef.current;
+    const bar = strip?.parentElement;
+    const meas = measureRef.current;
+    if (!strip || !bar || !meas) return;
+    const b = bar.getBoundingClientRect();
+    if (b.width <= 0) return;
+    const lim = limitRef.current;
+    const limBox = lim && lim.getBoundingClientRect().width > 0 ? lim.getBoundingClientRect() : null;
+    const limR = limBox ? limBox.left - b.left : b.width;
+    const left = strip.getBoundingClientRect().left - b.left;
+    const w = (sel: string) => meas.querySelector<HTMLElement>(sel)?.getBoundingClientRect().width ?? 0;
+    const rest = tabs.map((t) => w(`[data-ftm="${t.id}"]`));
+    const icon = tabs.map((t) => w(`[data-ftm-ic="${t.id}"]`) || 37);
+    /* the current tab: no lanes any more — its curves sit over the 2px gap and the neighbour's foot, as in the ref */
+    const cur = w(`[data-ftm-cur="${tabs[curIdx]?.id}"]`);
+    const more = w("[data-ftm-more]") || 58;
+    let next: StripMode[];
+    if (onFold && limBox && lim) {
+      /* ⚠️ THE FIELD'S RIGHT EDGE IS FIXED BY WHAT STANDS TO ITS RIGHT, so every room is read from it and never from its
+         left, which is where the fold itself moves it. The guide pill stands to its right: folding the pill moves the
+         field's right edge right by the width the pill gives up, so the rooms are read as if the pill were open
+         (`rightOpen`) or folded (`rightFolded`), whichever it is now. */
+      const right = limBox.right - b.left;
+      const slot = lim.closest<HTMLElement>(".ws-bright")?.querySelector<HTMLElement>('[data-shell="page-slot"]') ?? null;
+      const pill = slot?.firstElementChild as HTMLElement | null | undefined;
+      const slotW = slot ? slot.getBoundingClientRect().width : 0;
+      const pillW = pill ? pill.getBoundingClientRect().width : 0;
+      const slotFolded = !!slot?.hasAttribute("data-fold");
+      /* the open pill's slot width, kept from the last time it was seen open (folded, its words are not laid out) */
+      if (pillOpenRef.current && pillOpenRef.current.el !== pill) pillOpenRef.current = null;
+      if (pill && !slotFolded && slotW > 0) pillOpenRef.current = { el: pill, w: slotW };
+      const openW = slotFolded ? (pillOpenRef.current?.w ?? slotW) : slotW;
+      const foldedW = slotFolded ? slotW : slotW - pillW + PILL_FOLD_W;
+      const rightOpen = right + (slotW - openW);
+      const rightFolded = right + (slotW - foldedW);
+      const rooms = [rightOpen - SEARCH_W - LIMIT_GAP - left, rightOpen - SEARCH_FOLD_W - LIMIT_GAP - left];
+      if (pill && slotW > 0) rooms.push(rightFolded - SEARCH_FOLD_W - LIMIT_GAP - left);
+      const plan = planWithFolds(rest, icon, curIdx, cur, more, rooms);
+      next = plan.modes;
+      onFold(plan.level);
+    } else {
+      next = planStrip(rest, icon, curIdx, cur, more, limR - LIMIT_GAP - left);
+    }
+    setModes((m) => (m.join() === next.join() ? m : next));
+  }, [key, curIdx, limitRef, onFold]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useLayoutEffect(() => { fit(); }, [fit]);
+  useEffect(() => {
+    const bar = stripRef.current?.parentElement;
+    if (!bar || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(bar);
+    if (limitRef.current) ro.observe(limitRef.current);
+    /* ⚠️ THE SEARCH FIELD MOVES WITHOUT RESIZING when a page's guide pill (or any page-slot control) arrives late: the
+       bar's right group grows, so it is observed too — the field's own size never changes */
+    const right = limitRef.current?.closest<HTMLElement>(".ws-bright");
+    if (right) ro.observe(right);
+    window.addEventListener("resize", fit);
+    document.fonts?.ready.then(() => fit()).catch(() => {});
+    return () => { ro.disconnect(); window.removeEventListener("resize", fit); };
+  }, [fit, limitRef]);
+
+  /* the "+N" menu: the house dismissal idiom — pointerdown outside, Escape; any navigation closes it */
+  useEffect(() => { setMenuOpen(false); }, [current]);
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const away = (e: PointerEvent) => { if (!moreRef.current?.contains(e.target as Node)) setMenuOpen(false); };
+    const keyDown = (e: KeyboardEvent) => { if (e.key === "Escape") { setMenuOpen(false); moreBtnRef.current?.focus(); } };
+    document.addEventListener("pointerdown", away, true);
+    document.addEventListener("keydown", keyDown);
+    return () => { document.removeEventListener("pointerdown", away, true); document.removeEventListener("keydown", keyDown); };
+  }, [menuOpen]);
+
+  /* a stale plan (the tab list changed and the layout effect has not run yet) reads every tab as named */
+  const modeOf = (i: number): StripMode => (i === curIdx ? "cur" : modes.length === tabs.length && modes[i] !== "cur" ? modes[i] : "full");
+  const hidden = tabs.filter((_, i) => modeOf(i) === "hid");
+
+  return (
+    <>
+      <nav className="ws-fttabs" ref={stripRef} aria-label="Pages" data-shell="tabs">
+        {tabs.map((t, i) => {
+          const m = modeOf(i);
+          if (m === "hid") return null;
+          if (m === "cur") {
+            return (
+              <button
+                type="button" key={t.id}
+                className="ws-ftab ws-fttab is-cur"
+                data-shell="tab" data-tab={t.id} aria-current="page" aria-label={t.label}
+              >
+                <b className="ws-ftn" data-page-name="">{t.short}</b>
+                {t.locked && PRO_TAG}
+                {fillet("l")}
+                {fillet("r")}
+              </button>
+            );
+          }
+          const ic = m === "ic";
+          return (
+            <button
+              type="button" key={t.id}
+              className={`ws-fttab${ic ? " ws-fttab--ic" : ""}`}
+              data-tab={t.id} data-sib={t.id} data-mode={ic ? "ic" : "full"}
+              title={ic ? t.label : undefined} aria-label={t.label}
+              onClick={() => onGo(t.path)}
+            >
+              {ic ? t.icon : <span className="ws-fttl">{t.short}</span>}
+              {!ic && t.locked && PRO_TAG}
+            </button>
+          );
+        })}
+        {hidden.length > 0 && (
+          <span className="ws-ftmore-wrap" ref={moreRef}>
+            <button
+              ref={moreBtnRef}
+              type="button"
+              className="ws-fttab ws-ftmore"
+              data-sib="more"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label={`${hidden.length} more pages`}
+              onClick={(e) => {
+                const viaKeys = e.detail === 0;
+                setMenuOpen((o) => !o);
+                if (viaKeys) requestAnimationFrame(() => moreMenuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus());
+              }}
+            >
+              +{hidden.length}
+            </button>
+            {menuOpen && (
+              <span
+                ref={moreMenuRef}
+                className="ws-ftmenu sa-pop" role="menu" aria-label="More pages" data-shell="tab-more-menu"
+                onKeyDown={(e) => { moveInMenu(e, moreMenuRef.current); }}
+              >
+                {hidden.map((t) => (
+                  <button type="button" role="menuitem" className="sa-mi" key={t.id} data-sib={t.id}
+                    onClick={() => { setMenuOpen(false); onGo(t.path); }}>
+                    {t.icon}<span>{t.label}</span>{t.locked && PRO_TAG}
+                  </button>
+                ))}
+              </span>
+            )}
+          </span>
+        )}
+      </nav>
+      {/* the measurer: every tab resting (named and icon-only), the current one risen, and a "+N" — seen by nothing.
+          ⚠️ IT CARRIES NONE OF THE LIVE TAB'S HOOKS (`.ws-ftab`, `.ws-ftn`, `data-tab`): its boxes are real, so a probe
+          that lists every sized `.ws-ftn` read the current page's name twice. */}
+      <span className="ws-fttabs ws-ftmeasure" ref={measureRef} aria-hidden="true">
+        {tabs.map((t) => (
+          <React.Fragment key={t.id}>
+            <span className="ws-fttab" data-ftm={t.id}><span className="ws-fttl">{t.short}</span>{t.locked && PRO_TAG}</span>
+            <span className="ws-fttab ws-fttab--ic" data-ftm-ic={t.id}>{t.icon}</span>
+          </React.Fragment>
+        ))}
+        {tabs[curIdx] && (
+          <span className="ws-fttab is-cur" data-ftm-cur={tabs[curIdx].id}>
+            <span className="ws-fttl">{tabs[curIdx].short}</span>{tabs[curIdx].locked && PRO_TAG}
+          </span>
+        )}
+        <span className="ws-fttab ws-ftmore" data-ftm-more="">+9</span>
+      </span>
+    </>
+  );
+};

@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "L14",
+  "where": "1512: the example column is aria-hidden",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "L14",
+  "where": "1512: …and inert",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L14",
+  "where": "1512: …nothing in it takes focus",
+  "ok": false,
+  "detail": "-1"
+ },
+ {
+  "lock": "L14",
+  "where": "1512: \"How this page works\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L14",
+  "where": "1512: the three steps",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L14",
+  "where": "1512: \"+ Add a task\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L14",
+  "where": "1512: the example draws none of the writer's agents",
+  "ok": true,
+  "detail": "53 names; leaked []"
+ },
+ {
+  "lock": "L14",
+  "where": "1512: the old empty page's parts are gone",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L14",
+  "where": "1280: the example column is aria-hidden",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "L14",
+  "where": "1280: …and inert",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L14",
+  "where": "1280: …nothing in it takes focus",
+  "ok": false,
+  "detail": "-1"
+ },
+ {
+  "lock": "L14",
+  "where": "1280: \"How this page works\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L14",
+  "where": "1280: the three steps",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L14",
+  "where": "1280: \"+ Add a task\"",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L14",
+  "where": "1280: the example draws none of the writer's agents",
+  "ok": true,
+  "detail": "53 names; leaked []"
+ },
+ {
+  "lock": "L14",
+  "where": "1280: the old empty page's parts are gone",
+  "ok": false,
+  "detail": ""
+ }
+]

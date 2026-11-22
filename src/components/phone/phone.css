@@ -1,0 +1,12 @@
+/* ── PHONE APP v2 — shared phone parts (Part 1; ref design-refs/phone-app-v2/src/app.css). Below 768px only. ── */
+@media (max-width: 767.98px) {
+  /* a status disc (ref `disc()`): the glyph centred in its status fill */
+  .pa-disc { display: inline-grid; place-items: center; flex: none; border-radius: 50%; color: var(--pa-ink); }
+  .pa-disc svg { display: block; }
+  .pa-fill-sand { background: var(--pa-st-sand); }
+  .pa-fill-sage { background: var(--pa-st-sage); }
+  .pa-fill-pink { background: var(--pa-st-pink); }
+  .pa-fill-slate { background: var(--pa-st-slate); }
+  .pa-fill-grey { background: var(--pa-st-grey); }
+  .pa-artph { display: block; flex: none; }
+}

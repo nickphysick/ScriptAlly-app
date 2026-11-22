@@ -1,0 +1,7 @@
+[
+ {
+  "where": "no uppercase mono text under 12px",
+  "ok": true,
+  "detail": ""
+ }
+]

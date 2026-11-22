@@ -1,0 +1,7 @@
+[
+ {
+  "name": "one action, text that fits: footer, pill, text and button equal the baseline",
+  "ok": true,
+  "got": "{\"f\":[[0,0,524,79],[14,13,323,52],[67,21,159,36]],\"b\":[[0,0,524,79],[14,13,323,52],[67,21,159,36]]}"
+ }
+]

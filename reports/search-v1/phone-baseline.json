@@ -1,0 +1,26 @@
+{
+  "visibility": "hidden",
+  "box": [
+    0,
+    844,
+    273
+  ],
+  "ink": false,
+  "frame": [
+    "rgb(255, 255, 255)",
+    "14px"
+  ],
+  "rows": [
+    "sp-grp|29|Start something",
+    "sp-res|44|Log a query",
+    "sp-res|44|Record a response",
+    "sp-res|44|Add an agent",
+    "sp-grp|29|Go to",
+    "sp-res|44|Dashboard",
+    "sp-res|44|Query Centre",
+    "sp-res|44|Responses",
+    "sp-res|44|Analytics"
+  ],
+  "foot": "↑↓ Navigate↵ OpenESC Close",
+  "placeholder": "Search agents, queries and pages, or start something"
+}

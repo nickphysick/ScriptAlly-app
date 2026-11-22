@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "A1",
+  "where": "pre 1512",
+  "ok": false,
+  "detail": "the middle column's first card: empty-feed"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1512",
+  "ok": false,
+  "detail": "card 268,520.15625 · column 855.3125,119.75"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1512",
+  "ok": true,
+  "detail": "Getting started's top 222.9375 · the book's bottom 222.9375"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1512",
+  "ok": true,
+  "detail": "no queries card"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1512",
+  "ok": true,
+  "detail": "no buttons on the book"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1512",
+  "ok": true,
+  "detail": "no task card before a task"
+ },
+ {
+  "lock": "A1",
+  "where": "first query 1512",
+  "ok": true,
+  "detail": "the queries card"
+ },
+ {
+  "lock": "A1",
+  "where": "first query 1512",
+  "ok": true,
+  "detail": "Getting started still in the goal slot (283.9375 vs 283.9375)"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1280",
+  "ok": false,
+  "detail": "the middle column's first card: empty-feed"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1280",
+  "ok": false,
+  "detail": "card 268,520.15625 · column 745.875,119.75"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1280",
+  "ok": true,
+  "detail": "Getting started's top 222.9375 · the book's bottom 222.9375"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1280",
+  "ok": true,
+  "detail": "no queries card"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1280",
+  "ok": true,
+  "detail": "no buttons on the book"
+ },
+ {
+  "lock": "A1",
+  "where": "pre 1280",
+  "ok": true,
+  "detail": "no task card before a task"
+ },
+ {
+  "lock": "A1",
+  "where": "first query 1280",
+  "ok": true,
+  "detail": "the queries card"
+ },
+ {
+  "lock": "A1",
+  "where": "first query 1280",
+  "ok": true,
+  "detail": "Getting started still in the goal slot (283.9375 vs 283.9375)"
+ }
+]

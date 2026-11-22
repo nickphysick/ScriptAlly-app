@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the seeded undated query",
+  "ok": true,
+  "detail": "{\"row\":true,\"sub\":\"Sent, not dated\",\"first\":\"Not dated\",\"link\":false}"
+ },
+ {
+  "where": "its sub-line reads 'Sent, add date', the last two words a link",
+  "ok": false,
+  "detail": "{\"row\":true,\"sub\":\"Sent, not dated\",\"first\":\"Not dated\",\"link\":false}"
+ },
+ {
+  "where": "First queried reads 'Add date'",
+  "ok": false,
+  "detail": "{\"row\":true,\"sub\":\"Sent, not dated\",\"first\":\"Not dated\",\"link\":false}"
+ },
+ {
+  "where": "the hover summary reads 'No dates yet'",
+  "ok": false,
+  "detail": "Out, not dated\nNo date set\nOpen the full timeline →\nsame day\nPartial sent\n25 Oct"
+ },
+ {
+  "where": "…its steps evenly spaced, without a scale",
+  "ok": false,
+  "detail": "{\"text\":\"Out, not dated\\nNo date set\\nOpen the full timeline →\\nsame day\\nPartial sent\\n25 Oct\\n+1 SAME DAY\\nTODAY\",\"even\":false,\"axis\":0,\"stops\":2}"
+ },
+ {
+  "where": "no 'Not dated' / 'No date set' on the list",
+  "ok": false,
+  "detail": "[\"No date set\",\"No date set\",\"No date set\",\"No date set\"]"
+ },
+ {
+  "where": "…nor in the card",
+  "ok": false,
+  "detail": "[\"No date set\",\"No date set\",\"No date set\",\"No date set\"]"
+ }
+]

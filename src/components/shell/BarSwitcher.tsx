@@ -24,7 +24,8 @@
  */
 import { menuRows } from "../../lib/menuKeys";
 import "./shellMenus.css";
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import "./manuscriptSpine.css";
+import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Manuscript, Query } from "../../types";
 import { isWithYou } from "../../lib/qcSummary";
@@ -35,6 +36,7 @@ import { queryingSince } from "../../lib/manuscriptSummary";
 import { dayMonth } from "../../lib/dates";
 import { SHORTCUTS, matchesShortcut, shortcutBlocked, shortcutLabel } from "../../lib/shortcuts";
 import { useOptionalToast } from "../toast/ToastProvider";
+import { SpineLabel } from "./SpineLabel";
 
 /** `StagePage` listens for this and replays its entrance — the existing animation, not a new one. */
 export const STAGE_REPLAY_EVENT = "sa:stage-replay";
@@ -47,6 +49,14 @@ export function switcherMeta(ms: { genre?: string; wordCount?: number }): string
   return bits.join(" · ");
 }
 
+/**
+ * ⚠️ ADDING A SECOND MANUSCRIPT IS SWITCHED OFF IN THE BETA. The spine's label (manuscript spine v1) reads this
+ * and ends with "Add a manuscript · coming soon" while it is true. The menu's "Add a manuscript" row is the same
+ * condition but is drawn disabled and tagged SOON unconditionally today: switching adding on means flipping this
+ * AND enabling that row, in one change.
+ */
+export const ADD_MANUSCRIPT_SOON = true;
+
 /** The tile's second line: where the book stands — `lib/manuscriptStanding`, shared with the dashboard's eyebrow. */
 export { switcherStanding } from "../../lib/manuscriptStanding";
 
@@ -57,6 +67,20 @@ export function switcherFacts(msQueries: readonly Pick<Query, "dateSent">[]): st
   const count = `${n} ${n === 1 ? "query" : "queries"}`;
   const since = queryingSince(msQueries);
   return since ? `Querying since ${dayMonth(since)} · ${count}` : count;
+}
+
+/**
+ * The spine label's facts (manuscript spine v1): "28 queries since 5 Dec", "1 query since 5 Dec", "3 queries" when
+ * nothing has a sent date, or "No queries yet". The same derivations as `switcherFacts` (the book's queries,
+ * `queryingSince`, `dayMonth`) in the label's own order; the menu keeps `switcherFacts`.
+ */
+export function spineFacts(msQueries: readonly Pick<Query, "dateSent">[]): string {
+  const n = msQueries.length;
+  if (n === 0) return "No queries yet";
+  const count = `${n} ${n === 1 ? "query" : "queries"}`;
+  const since = queryingSince(msQueries);
+  const day = since ? dayMonth(since) : "";
+  return day ? `${count} since ${day}` : count;
 }
 
 /**
@@ -100,20 +124,54 @@ export interface BarSwitcherProps {
    * that the menu is PORTALLED: the sidebar clips (`overflow: hidden`), so a menu inside it would be cut
    * off at the panel's edge. Default `"bar"` keeps any other mount as it was.
    */
-  placement?: "bar" | "side";
+  placement?: "bar" | "side" | "rail";
+  /** Side placement (sidebar rail v1): the initials tile the full sidebar's picker wears in place of the cover.
+   *  ⚠️ The rail no longer reads it (manuscript spine v1): the collapsed rail is always the cloth spine. */
+  railTileFor?: (title: string | null) => React.ReactNode;
   /** The sidebar is collapsed: the tile shows its cover only, and the menu opens to its right. */
   collapsed?: boolean;
 }
 
-export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries = [], activeId, onPick, onAdd, onOpenActive, placement = "bar", collapsed = false }) => {
-  const side = placement === "side";
+export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries = [], activeId, onPick, onAdd, onOpenActive, placement = "bar", collapsed = false, railTileFor }) => {
+  /* the rail's spine is the side switcher's menu and data with its own button (manuscript spine v1) */
+  const rail = placement === "rail";
+  const side = placement === "side" || rail;
+  const active = manuscripts.find((m) => m.id === activeId) ?? null;
+  /* ⚠️ ONE MANUSCRIPT ON THE RAIL (the beta): the spine is a door to that book's page, not a menu. Click,
+     Enter, Space and M all call `onOpenActive`; with two or more they open the menu as before. */
+  const railSingle = rail && !!active && manuscripts.length === 1;
+  const railSingleRef = useRef(railSingle);
+  railSingleRef.current = railSingle;
+  const openActiveRef = useRef(onOpenActive);
+  openActiveRef.current = onOpenActive;
   const [open, setOpen] = useState(false);
   /* the portalled menu's place — measured from the tile when it opens, and on resize */
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
+  /* the empty spine's own ref: `btnRef` is what M looks for, and with no book there is no menu for M to open */
+  const emptyRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const notify = useOptionalToast();
+  /* ⚠️ BELOW `open`: it reads `open` during render (TDZ, CLAUDE.md) */
+  /* the spine's cloth label (manuscript spine v1): shown on pointer hover and on :focus-visible; hidden at once on
+     pointer leave, blur, Escape, click, and whenever the menu is open */
+  const labelId = `ms-spine-label-${useId().replace(/:/g, "")}`;
+  const [tip, setTip] = useState(false);
+  const showTip = rail && tip && !open;
+  useEffect(() => {
+    if (!showTip) return undefined;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setTip(false); };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [showTip]);
+  const tipProps = {
+    "aria-describedby": labelId,
+    onPointerEnter: () => setTip(true),
+    onPointerLeave: () => setTip(false),
+    onFocus: (e: React.FocusEvent<HTMLElement>) => { if (e.currentTarget.matches(":focus-visible")) setTip(true); },
+    onBlur: () => setTip(false),
+  };
 
   /* rows a person can choose — Add a manuscript (SOON) is never an arrow-key stop */
   const items = () => menuRows(menuRef.current);
@@ -145,12 +203,19 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
     const place = () => {
       const r = btnRef.current?.getBoundingClientRect();
       if (!r) return;
+      /* manuscript spine v1: on the rail the menu stands on the spine's foot and grows upwards, 10px right
+         of the spine's button, and never closer than 8px to the window's top */
+      if (rail) {
+        const h = menuRef.current?.offsetHeight ?? 0;
+        setAt({ left: r.right + 10, top: Math.max(8, r.bottom - h) });
+        return;
+      }
       setAt(collapsed ? { left: r.right + 10, top: r.top } : { left: r.left, top: r.bottom + 8 });
     };
     place();
     window.addEventListener("resize", place);
     return () => window.removeEventListener("resize", place);
-  }, [side, open, collapsed]);
+  }, [side, open, collapsed, rail]);
 
   /* the state flips between expanded and collapsed: whatever was open belongs to the other shape */
   useEffect(() => { setOpen(false); }, [collapsed]);
@@ -160,7 +225,10 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
     const onKey = (e: KeyboardEvent) => {
       if (open || !matchesShortcut(SHORTCUTS.switchManuscript, e) || shortcutBlocked(e)) return;
       if (!btnRef.current || btnRef.current.getBoundingClientRect().width === 0) return;
+      /* ⚠️ both sidebar layers stay mounted (sidebar rail v1): the hidden one is `inert`, and has a box */
+      if (btnRef.current.closest("[inert]")) return;
       e.preventDefault();
+      if (railSingleRef.current) { openActiveRef.current(); return; }
       openMenu();
     };
     window.addEventListener("keydown", onKey);
@@ -169,6 +237,11 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
 
   const onBtnKey = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") { e.preventDefault(); openMenu(); }
+  };
+  /* the spine, with two or more books: ArrowUp opens it too, since the menu grows upwards from it */
+  const onSpineKey = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowUp") { e.preventDefault(); openMenu(); return; }
+    onBtnKey(e);
   };
   const onMenuKey = (e: React.KeyboardEvent) => {
     const list = items();
@@ -182,10 +255,20 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
     else if (e.key === "Tab") close(false);
   };
 
-  const active = manuscripts.find((m) => m.id === activeId) ?? null;
-
   /* ⚠️ NO BOOK YET: the switcher is the door to adding one. */
   if (!active) {
+    if (rail) {
+      /* manuscript spine v1, THE EMPTY SPINE: a dashed outline with a plus, standing on the shelf */
+      return (
+        <div className="ws-ms ws-ms--rail ms-shelfwrap" data-shell="switcher" data-placement={placement}>
+          <button ref={emptyRef} type="button" className="ms-spine-btn" data-ms="spine-empty" aria-label="Add a manuscript" {...tipProps} onClick={() => { setTip(false); onAdd(); }}>
+            <span className="ms-spine ms-spine--empty" aria-hidden="true">+</span>
+          </button>
+          <span className="ms-shelf" aria-hidden="true" />
+          <SpineLabel id={labelId} anchor={emptyRef} show={showTip} title="Add your manuscript" lines={[]} soon={false} />
+        </div>
+      );
+    }
     return (
       <div className={`ws-ms${side ? " ws-ms--side" : ""}`} data-shell="switcher" data-placement={placement}>
         <button type="button" className="ws-ms-btn" onClick={onAdd}>
@@ -230,40 +313,7 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
     );
   };
 
-  return (
-    <div className={`ws-ms${side ? " ws-ms--side" : ""}${open ? " is-open" : ""}`} data-shell="switcher" data-placement={placement} ref={rootRef}>
-      <button
-        ref={btnRef}
-        type="button"
-        className="ws-ms-btn"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={`Manuscript: ${active.title}`}
-        title={`Switch manuscript (${shortcutLabel("switchManuscript")})`}
-        aria-keyshortcuts={shortcutLabel("switchManuscript")}
-        onClick={() => (open ? close(true) : openMenu())}
-        onKeyDown={onBtnKey}
-      >
-        <Cover ms={active} size="tile" titlePage={side} />
-        <span className="ws-ms-tx">
-          <b className="ws-ms-t">{active.title}</b>
-          {standing.status && (
-            <small className="ws-ms-m" data-ms="standing">
-              {standing.status}
-              {standing.withYou !== null && <> · <em>{standing.withYou} with you</em></>}
-            </small>
-          )}
-        </span>
-        <span className="ws-ms-chev" aria-hidden="true">
-          {side ? (
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4" /></svg>
-          ) : (
-            <svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8l4 4 4-4" /></svg>
-          )}
-        </span>
-      </button>
-      {(() => {
-        const menu = (
+  const menu = (
       <div
         className={`ws-ms-menu${side ? " ws-ms-menu--port sa-pop" : ""}`}
         role="menu" aria-label="Your manuscripts" ref={menuRef} onKeyDown={onMenuKey}
@@ -293,9 +343,81 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
         </button>
         <p className="ws-ms-hint">↑ ↓ TO MOVE · ↵ TO SWITCH · {shortcutLabel("switchManuscript")} TO OPEN THIS MENU</p>
       </div>
-        );
-        return side && typeof document !== "undefined" ? createPortal(menu, document.body) : menu;
-      })()}
+  );
+  const menuNode = side && typeof document !== "undefined" ? createPortal(menu, document.body) : menu;
+
+  /* ══ MANUSCRIPT SPINE v1 (ref design-refs/shell/manuscript-spine-v1.html): on the collapsed rail the book is a navy
+     cloth spine standing on a shelf line above Feedback. It is always cloth — an uploaded cover is not drawn here.
+     The full title is the accessible name; a long one is cut off with an ellipsis on the spine itself. With one
+     manuscript there is no menu at all. */
+  if (rail) {
+    return (
+      <div className={`ws-ms ws-ms--rail ms-shelfwrap${open ? " is-open" : ""}`} data-shell="switcher" data-placement={placement} ref={rootRef}>
+        <button
+          ref={btnRef}
+          type="button"
+          className="ms-spine-btn"
+          data-ms="spine"
+          aria-label={`Manuscript: ${active.title}`}
+          aria-keyshortcuts={shortcutLabel("switchManuscript")}
+          {...(railSingle ? {} : { "aria-haspopup": "menu" as const, "aria-expanded": open })}
+          {...tipProps}
+          onClick={() => { setTip(false); if (railSingle) onOpenActive(); else if (open) close(true); else openMenu(); }}
+          onKeyDown={railSingle ? undefined : onSpineKey}
+        >
+          <span className="ms-spine" aria-hidden="true">
+            <span className="ms-spine-title">{active.title}</span>
+            <span className="ms-spine-orn" />
+          </span>
+        </button>
+        <span className="ms-shelf" aria-hidden="true" />
+        <SpineLabel
+          id={labelId}
+          anchor={btnRef}
+          show={showTip}
+          title={active.title}
+          lines={[switcherMeta(active), spineFacts(byMs(active.id))].filter(Boolean)}
+          soon={ADD_MANUSCRIPT_SOON}
+        />
+        {railSingle ? null : menuNode}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`ws-ms${side ? " ws-ms--side" : ""}${open ? " is-open" : ""}`} data-shell="switcher" data-placement={placement} ref={rootRef}>
+      <button
+        ref={btnRef}
+        type="button"
+        className="ws-ms-btn"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Manuscript: ${active.title}`}
+        title={`Switch manuscript (${shortcutLabel("switchManuscript")})`}
+        aria-keyshortcuts={shortcutLabel("switchManuscript")}
+        onClick={() => (open ? close(true) : openMenu())}
+        onKeyDown={onBtnKey}
+      >
+        {/* sidebar rail v1: the full sidebar's picker wears the rail's initials tile */}
+        {side && railTileFor ? railTileFor(active.title) : <Cover ms={active} size="tile" titlePage={side} />}
+        <span className="ws-ms-tx">
+          <b className="ws-ms-t">{active.title}</b>
+          {standing.status && (
+            <small className="ws-ms-m" data-ms="standing">
+              {standing.status}
+              {standing.withYou !== null && <> · <em>{standing.withYou} with you</em></>}
+            </small>
+          )}
+        </span>
+        <span className="ws-ms-chev" aria-hidden="true">
+          {side ? (
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 9 4-4 4 4M8 15l4 4 4-4" /></svg>
+          ) : (
+            <svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8l4 4 4-4" /></svg>
+          )}
+        </span>
+      </button>
+      {menuNode}
     </div>
   );
 };

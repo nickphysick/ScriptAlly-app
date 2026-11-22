@@ -91,5 +91,11 @@ export function useAgentNotes(agent: Agent | null, uid: string | null, writeAgen
     return storedNotes.filter((x) => x.id !== n.id);
   }), [noteWrite, storedNotes]);
 
-  return { storedNotes, onAddNote, onEditNote, onDeleteNote };
+  /** Agent card v2 — a deleted note put back as it was (its id, words and date): the Delete's Undo */
+  const onRestoreNote = useCallback((n: AgentNote) => noteWrite(OperationType.WRITE, async (uid, orig) => {
+    await setDoc(doc(collection(db, "users", uid, "agents", orig.id, "notes"), n.id), { text: n.text, createdAt: n.createdAt });
+    return [...storedNotes.filter((x) => x.id !== n.id), n];
+  }), [noteWrite, storedNotes]);
+
+  return { storedNotes, onAddNote, onEditNote, onDeleteNote, onRestoreNote };
 }

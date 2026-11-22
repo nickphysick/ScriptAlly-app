@@ -1,0 +1,12 @@
+CL262 mutation proofs (1512 × 900, emulator, one build). Each lock run under CL262_MUTATE=<lock>; the first red reading:
+J1: J1-1512 · you · panel background — rgb(255, 255, 255)
+J2: J2-1512 · rest −1.2° — 0
+J3: J3-1512 · you · nothing else coloured (25 read) — apc-sec cl262-sec:rgb(246, 227, 218), apc-sec cl262-sec:
+J4: J4-1512 · genres · one + Add — 0
+J5: J5-1512 · genres pen → genres only — 
+J6: J6-1512 · door Closed reveals Reopens — 
+J7: J7-1512 · an Also note shows (0) — 1 change · also changes 3 things elsewhere
+J8: J8-1512 · stepping ×3 holds How — 274.96875 → 535.96875
+J9: J9-1512 · 40 characters typed in one go — 1
+J10: J10-1512 · ✕ asks — 
+J11: J11-1512 · one Saved toast — []

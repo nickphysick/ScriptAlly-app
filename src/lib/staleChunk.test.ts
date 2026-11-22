@@ -80,7 +80,7 @@ describe("STALE-1 · the page reloads once when a chunk fails", () => {
 describe("BLUR-1 · no backdrop-filter on the public pages", () => {
   // Chrome's Graphite renderer (Mac) left the landing half-drawn below a backdrop-filter inside an
   // overflow:hidden band (2 Nov). The blur sat on flat navy and showed nothing; it stays out.
-  for (const f of ["consentBar", "heroCard", "marketing", "privacy", "public", "waitlist", "welcome"]) {
+  for (const f of ["heroCard", "marketing", "privacy", "public", "waitlist", "welcome"]) {
     it(`${f}.css`, () => {
       const css = readFileSync(join(process.cwd(), `src/marketing/${f}.css`), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(css).not.toMatch(/backdrop-filter/);

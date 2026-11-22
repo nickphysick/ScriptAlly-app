@@ -1,0 +1,7 @@
+[
+ {
+  "where": "no uppercase mono text under 12px",
+  "ok": false,
+  "detail": "H5 “Genres sought” 10px · H5 “Manuscript wishlist” 10px · H5 “Materials requested” 10px · H5 “How Theo works” 10px"
+ }
+]

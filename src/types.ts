@@ -85,6 +85,16 @@ export interface User {
      entry, one write path, one place to look. Readers go through todoPrefs(), which is total. */
   todoPrefs?: {
     staleMonths?: number; goodDay?: number; rollForward?: boolean;
+    /* v52 (7 Nov): when each rule in `mutedTaskRules` was switched off — rule → ISO time. A preference, never a source:
+       a rule switched off before it existed simply has no date. Same unconstrained map, so NO rules change. */
+    switchedOffAt?: Record<string, string>;
+    /* To-do list v54 (D9): how a housekeeping batch opens once the writer has picked — "one" (one at a time) or "table"
+       (all at once). Absent: under 8 queries opens one at a time, 8 or more the table. One leaf, NO rules change. */
+    batchView?: "one" | "table";
+    /* To-do list v55 (D6): the tray's grouping and whether it is collapsed to its strip. Absent: Category, open. One leaf
+       each, beside batchView; the same unconstrained map, so NO rules change. Filters and search are never saved. */
+    trayGrouping?: "category" | "urgency" | "when" | "agent" | "none";
+    trayCollapsed?: boolean;
     /* The Noteboard's own preferences (paper run, Phase 2) — the map already carries nested
        sub-maps in live data (the To-do list's view prefs write `listView` here), so a page-scoped
        sub-map follows an established precedent. `dismissedExamples` = example-paper ids sent away
@@ -98,7 +108,14 @@ export interface User {
        `corkPrefs` (lib/corkboard), which is total. */
     noteboard?: {
       dismissedExamples?: string[]; order?: string[];
-      layout?: Record<string, { x: number; y: number }>; view?: "free" | "tidy";
+      layout?: Record<string, { x: number; y: number }>;
+      /* Corkboard v2: "board" | "piles" ("free"/"tidy" are v1's and read as "board"); `sort` absent reads "new".
+         `layout` and `dismissedExamples` are no longer read (left in place, not deleted). */
+      view?: "free" | "tidy" | "board" | "piles";
+      sort?: "mine" | "new" | "old" | "colour";
+      /* Corkboard v2.1: tag ids of piles started here with no notes yet, so an empty pile stays listed. A tag id
+         leaves when its pile gains a note or the writer removes the pile; the tag definition itself is never deleted. */
+      started?: string[];
     };
     /* The Manuscripts landing's promo tiles, following the Noteboard's precedent exactly:
        `todoPrefs` is `is map` and unconstrained, so this page-scoped sub-map ships with NO rules
@@ -116,6 +133,9 @@ export interface User {
        written ONLY by its dotted-path builders (lib/contactPrefs). `later` keys are
        "{agentId}:{gap}" → "YYYY-MM-DD"; `settled` holds "{agentId}:reply" ("Say it's not stated"). */
     contacts?: { later?: Record<string, string>; settled?: string[]; wishlistEvery?: number; wishlistNextOn?: string };
+    /* Submission packages v41 — the founding writer strip's dismissal, on the user so it stays hidden on every device;
+       the same unconstrained map, NO rules change, written as one leaf (lib/packagesV41 FOUNDING_NOTE_PATH) */
+    packages?: { foundingNoteHidden?: boolean };
   };
   /**
    * ⚠️ LEGACY, AND READ BY NOTHING. Superseded by `queryingGoals` below. Left in place rather
@@ -124,6 +144,8 @@ export interface User {
    * destructive write for no gain; reading them would resurrect a cadence that no longer exists.
    */
   goalTarget?: number;
+  /** Dashboard v105: the founding rank last celebrated (0 Egg … 5 QueryHawk); the celebration plays when the shown rank is higher. */
+  foundingSeenTier?: number;
   goalPeriod?: "quarter" | "month" | "year";
   /**
    * Querying goals — an APPEND-ONLY list of intents, and the only thing about a goal that is
@@ -145,7 +167,9 @@ export interface User {
   /* Settings → Notifications. ONE MAP (the todoPrefs precedent): one allowlist entry, one write
      path. Readers go through `notifyPrefs()`, which is total. Nothing sends email yet — see
      lib/accountPrefs. */
-  notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean; discover?: boolean };
+  /* Dashboard feed v1: `scout` — "Tell me when it's ready" on the dashboard's Scout card, one leaf (no rules change) */
+  /* Comparable titles v30: `comps` — "Tell me when it's ready" on the comps page's Scout section, one leaf (no rules change) */
+  notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean; discover?: boolean; scout?: boolean; comps?: boolean };
   /* Discover v1: the Scout's tuning — a lens and three switches, written leaf by leaf. Read through
      `discoverPrefs()` (lib/scout), which is total. */
   discoverPrefs?: { lens?: string; openOnly?: boolean; notOnList?: boolean; ukIreland?: boolean };
@@ -157,7 +181,8 @@ export interface User {
   /* Settings → Preferences. IANA zone only; date format and week-start are deliberately absent —
      they would be display claims against 93 call sites that all render en-GB (lib/accountPrefs).
      Resolved at READ time (`resolveTimeZone`), never backfilled. */
-  workspacePrefs?: { timezone?: string };
+  /** `clock`: a query's clock, in weeks (non-workspace v1, Phase 3 — read only through lib/queryClock). */
+  workspacePrefs?: { timezone?: string; clock?: { replyWeeks?: number; nudgeAfterWeeks?: number; checkBackWeeks?: number; quietWeeks?: number } };
   /* Settings → Your data. The scheduled-deletion window: when it was asked for, and the date
      after which a purge job may run. ⚠️ NO SUCH JOB EXISTS — this records the request and the
      cancel path only (see lib/accountDeletion). */
@@ -194,6 +219,13 @@ export interface GenreSuggestion {
 export interface SmartImportUsage {
   smartImportFreeUsed?: boolean;        // lifetime free-once flag (Free tier)
   smartImportLastUsedMonth?: string;    // "YYYY-MM" (UTC) of the most recent Pro import
+  /** Plan rules v1 — a founding writer: everything, no trial clock, no upgrade prompts. Server-written only (foundingStats'
+   *  backstop, scripts/founding-flag.mjs, the dev backfill). Absent reads as not founding; `false` is an explicit unmark. */
+  founding?: boolean;
+  /** When the flag was set (a Firestore server timestamp). */
+  foundingSince?: unknown;
+  /** Who set it: "invite" | "waitlist" | "admin" | "backfill". */
+  foundingSource?: string;
 }
 
 export enum ManuscriptStatus {
@@ -309,6 +341,22 @@ export interface BookVersion {
   /** The book's length at this version, where the writer gave one (manuscripts v21). Absent on every
    *  version saved before it, and never restated from the manuscript's own count. */
   wordCount?: number;
+  /* ══ Versions v2 (design-refs/versions-v2, D1) — additive; an old record keeps reading (lib/bookVersions
+     `readVersions`): no `num` reads as its save order, no `parentId` as the version saved before, and a `note`
+     with no `changes` as `changes: [note]`. `kind` is still stored and is read by no Versions v2 surface. ══ */
+  /** The display number: Original is 0, the rest 1, 2, 3… in save order. NEVER reused, even after a delete. */
+  num?: number;
+  /** The version this one starts from. Absent only on Original (and on a pre-v2 first version). One parent each,
+   *  so the versions are always a tree. */
+  parentId?: string;
+  /** "What changed": 1–8 items of 1–80 characters. Required on every version except Original. */
+  changes?: string[];
+  /** The auto-created Original: exactly one per manuscript once any v2 version exists. */
+  original?: true;
+  /** Archived: off the list and out of comparisons; its queries and totals stay. */
+  archived?: true;
+  /** Date-only "YYYY-MM-DD", London calendar. Present only with `archived`. */
+  archivedDate?: string;
 }
 
 export interface Manuscript {
@@ -399,6 +447,22 @@ export interface Manuscript {
    * limit (D6) — orderings of one book are one book. Locked in bookVersions.test.ts.
    */
   bookVersions?: BookVersion[];
+  /** Submission packages v26 — the named extras its packages can send (see `PackageExtra`). Absent = none yet. */
+  extras?: PackageExtra[];
+  /**
+   * Versions v2 (D2) — the version new queries go out with ("In use"). Exactly one once any version exists, set in
+   * ONE write that replaces the previous value. Absent on a pre-v2 manuscript; `lib/versionsV2.inUseId` then reads
+   * the active package's version, else the newest live version.
+   */
+  inUseBookVersionId?: string;
+  /**
+   * Query letters v1 (6 Nov) — the letter new queries go out with when they are not sent as a package. Absent until the
+   * writer chooses one; `lib/queryLetters.inUseLetter` then reads the active package's letter, else the newest live
+   * letter. No backfill. Rules: `isValidId`, and the manuscript update allowlist.
+   */
+  inUseLetterId?: string;
+  /** Versions v2 (D1) — the highest version number ever given, so a number is never reused after a delete. */
+  bookVersionSeq?: number;
 }
 
 export enum ComponentType {
@@ -496,6 +560,13 @@ export interface ManuscriptVersion {
    * never a zero placeholder).
    */
   wordCount?: number;
+  /**
+   * Query letters v1 (6 Nov), letters only: the letter this one was written from ("A copy of …"), and what is different
+   * from it, as one to eight short lines (as Versions' `BookVersion.parentId` / `changes`). Both absent on a letter
+   * written before the page, and on a letter started from a blank page or a file (no parent).
+   */
+  parentId?: string;
+  changes?: string[];
 }
 
 /**
@@ -527,6 +598,42 @@ export interface PackageEdition {
   synopsisVersionId: string;
   bookVersionId?: string;
   otherMaterials?: string;
+  /** Submission packages v26 — the named extras it held (ids on the manuscript's `extras`). Their NAMES are in
+   *  `otherMaterials` and in `summary`, frozen with the edition. Absent on an edition written before extras. */
+  extraIds?: string[];
+}
+
+/**
+ * Submission packages v26 — the twelve icons a package can wear, so it can be spotted in the Query Centre.
+ * Outside the slot freeze, like the name and the note: an icon is filing, not a claim about what went.
+ */
+export const PACKAGE_ICONS = ["box", "crown", "globe", "flag", "feather", "flask", "star", "bolt", "heart", "compass", "pen", "key"] as const;
+export type PackageIcon = typeof PACKAGE_ICONS[number];
+/** Submission packages v39 — a package's colour, by key (lib/packagesV39 holds the names and hexes). The rules hold the same eight. */
+export const PACKAGE_COLOUR_KEYS = ["harbour", "lake", "teal", "pine", "indigo", "plum", "slate", "charcoal"] as const;
+export type PackageColour = typeof PACKAGE_COLOUR_KEYS[number];
+
+/**
+ * Submission packages v26 — a named extra: whatever an agency asks for that is not a letter, a synopsis or pages
+ * ("Author bio", "Marketing plan"). Saved on the MANUSCRIPT so every one of its packages can tick it.
+ * ⚠️ It replaces `SubmissionPackage.otherMaterials` as free text: a package ticks extras by id, and its
+ *    `otherMaterials` is kept as the ticked extras' NAMES, joined — the one string the send flow, the edition
+ *    engine and every query's frozen summary already read. So a query records which extras went, by name, as
+ *    they were called on the day, and ticking one on a sent package starts its next edition.
+ * `files` waits for Firebase Storage on dev (Phase 5 is stopped): absent until then.
+ */
+export interface PackageExtra {
+  id: string;
+  name: string;
+  files?: MaterialFile[];
+}
+
+/** An attached file (Submission packages v26, Phase 5 — not yet live: Storage is not set up on dev). */
+export interface MaterialFile {
+  name: string;
+  size: number;
+  path: string;
+  addedAt: string;
 }
 
 export interface SubmissionPackage {
@@ -539,9 +646,10 @@ export interface SubmissionPackage {
    * `isValidPackage` requires all three to be present. Single source: `UNFILLED_SLOT` /
    * `isSlotFilled` in `lib/packageMetrics.ts`.
    *
-   * ⚠️ ONLY THE COVERING LETTER IS REQUIRED. Letter-only and letter-plus-synopsis are real
-   * submission shapes, so the other two may be `""` by the writer's stated choice. The rule
-   * enforces `queryLetterVersionId.size() >= 1`; the other two only enforce the key's presence.
+   * ⚠️ NONE IS REQUIRED TO EXIST (Submission packages v26, 25 Oct). A package can start empty ("Start from:
+   * Empty") and be filled by dragging pieces in; it reads "Needs a letter" until it has one, and "Ready" once it
+   * has a letter and a version. Letter-only and letter-plus-synopsis are still real submission shapes. The rule
+   * used to require `queryLetterVersionId.size() >= 1` on create; it now only enforces the keys' presence.
    */
   queryLetterVersionId: string;
   synopsisVersionId: string;
@@ -601,6 +709,12 @@ export interface SubmissionPackage {
    */
   firstSentAt?: string;
   /**
+   * SUBMISSION PACKAGES v40: the package this one was made from ("New package from this"). Set on create only — the
+   * rules keep it out of every update — so a copy and its original stay a pair, and Tracking & performance's Tests
+   * can compare them. Absent on every package made from scratch.
+   */
+  copiedFromId?: string;
+  /**
    * PACKAGE EDITIONS (docs/contracts/package-editions.md §C2, Part B 28 Sep). `edition` is the
    * current one, from 1; `editions` keeps every one oldest first, for ever, so a past edition can be
    * shown and offered in corrections. A change to a SENT package's contents — its letter, its
@@ -625,6 +739,14 @@ export interface SubmissionPackage {
    * `undefined`, and a stored `""` would be a claim that the writer answered the question.
    */
   otherMaterials?: string;
+  /** Submission packages v26 — the named extras it sends, by id (the manuscript's `extras`). Contents, so frozen
+   *  with the slots once sent; `otherMaterials` carries their names. Absent = written before extras. */
+  extraIds?: string[];
+  /** Submission packages v26 — its icon. Absent reads as "box". */
+  icon?: PackageIcon;
+  /** Submission packages v39 — its colour, by key. Absent reads as "harbour" (lib/packagesV39.colourOf). Filing, like the
+   *  name and the icon: outside the lock. */
+  colour?: PackageColour;
   status: RecordStatus;
   createdDate: string; // ISO String
 }
@@ -640,6 +762,8 @@ export enum SubmissionMethod {
   ONLINE_FORM = "Online Form",
   QUERY_MANAGER = "Query Manager",
   POST = "Post",
+  /** Add agent v1 — any other way in ("Agency portal", …): the words are `Agent.submissionMethodOther` */
+  OTHER = "Other",
 }
 
 /** One repeatable social handle on an agent — platform label + handle/URL. */
@@ -653,6 +777,9 @@ export interface Agent {
   userId: string;
   name: string;
   agency: string;
+  /** Add agent v1 — the writer has said they can't find the agency: set only on a named agent with no agency, and
+   *  cleared when an agency is typed. Absent is the ordinary case. Never `false`: absence says it. */
+  agencyUnknown?: true;
   email: string;
   website: string;
   // Optional location — simple stored fields (added in the v12 Edit Agent revision). The flag-icon
@@ -676,6 +803,8 @@ export interface Agent {
   // Absent = not stated; true = no response means rejection/close; false = they reply either way.
   noResponseMeansNo?: boolean;
   submissionMethod: SubmissionMethod;
+  /** Add agent v1 — the words for `SubmissionMethod.OTHER` ("Agency portal"), up to 40 characters; absent = not given */
+  submissionMethodOther?: string;
   materialsWanted: string[]; // e.g. ["Query Letter", "Synopsis", "First 10 pages"]
   dateAdded: string; // ISO String
   lastCheckedDate: string; // ISO string — when the writer last VERIFIED these details are still
@@ -768,6 +897,11 @@ export interface QueryMaterial {
   material: string; // canonical name, e.g. "Query Letter" | "Synopsis" | "Sample Pages"
   type?: "pages" | "words" | "chapters" | "other";
   quantity?: number | string; // number for pages/words/chapters; free text when type === "other"
+  /** To-do list v54 (D7): a sample from further in — where it started, and in which unit. ABSENT for a sample from the
+   *  opening, so every earlier record and every new opening sample are the same shape. Read and written only through
+   *  lib/sentSample (`sampleOfMaterials`, `sampleToMaterial`). */
+  from?: number;
+  fromUnit?: "chapter" | "page" | "word";
 }
 
 export enum QueryStatus {
@@ -839,6 +973,8 @@ export interface Query {
   sendReminderDate?: any; // Timestamp | string — self-reminder to send materials / resubmit
   offerDate?: any; // Timestamp | string
   offerResponseDeadline?: any; // Timestamp | string
+  /** v152.2 §7 — a pass taken off as recorded by mistake: the reply date restarts from this day (YYYY-MM-DD), not the send */
+  replyRestartedOn?: string;
   offerNotes?: string;
   closingReason?: string; // internal token: noResponseAfterWindow | withdrew | agentClosedSubmissions | other
   closingNotes?: string;
@@ -860,6 +996,15 @@ export interface Query {
   /* ⚠️ QUERY ACTIONS v1 (27 Sep) — every field below is written by the query drawer and is FLAT,
      because a nested map meets the nested-allowlist denial in firestore.rules. Absent means "not
      recorded", never a default. See reports/query-actions-v1/RECON.md §2. */
+  /**
+   * Versions v2 (D3) — the BOOK version recorded for this query: stamped when it is logged (the package's version,
+   * else the manuscript's in-use one), or set by "Which version went?" / Change. Absent on every query logged before
+   * v2 and on imports; `lib/versionsV2.resolveQueryVersion` then works it out (D4) or reports it unrecorded.
+   *
+   * ⚠️ REVERSES "NOTHING HERE IS STORED ON A QUERY" (queryVersions.ts D5), by the Versions v2 ruling. And it is
+   * PAYLOAD, NEVER A DETERMINANT: `recomputeQuery` does not read it.
+   */
+  bookVersionId?: string;
   /** What went out, as it went out (P4): never read back from the live package. */
   sentPackageId?: string;
   sentMaterials?: string;
@@ -919,6 +1064,8 @@ export type EventKey =
   | "partial_requested" | "full_requested" | "rr_requested"
   | "partial_sent" | "full_sent" | "resubmitted"
   | "pass" | "offer" | "offer_call" | "offer_accepted" | "offer_declined" | "signed"
+  /** Query Centre v152.1: you told other agents about an offer (a step, never a status; Nick wants it in the feed) */
+  | "offer_told"
   | "nudge_sent"
   | "closed_no_reply" | "withdrawn" | "withdrawn_on_offer" | "closed_agent_gone"
   | "late_reply_reopened" | "entry_corrected"
@@ -993,13 +1140,21 @@ export interface JournalEntry {
  *  · createdAt / updatedAt / doneAt — full ISO datetime strings (new Date().toISOString()).
  * Every ACTIVE (not-done) note lives on the desk — there is no separate "pinned" flag.
  */
-export type NoteColour = "pink" | "sage" | "yellow";
+/* ⚠️ THE DASHBOARD DESK NOTES (`Note`, the separate `notes` collection, NotesLab) keep their own three papers: their
+   rules require one of these three on every write. Corkboard v2 gave the Corkboard's notes (`UserTask`) five new
+   papers; the old three are kept here as `LegacyNoteColour` and read through lib/noteboard's one mapping. */
+export type LegacyNoteColour = "pink" | "sage" | "yellow";
+export type DeskNoteColour = LegacyNoteColour;
+/** Corkboard v2: the five papers, Butter · Blush · Powder · Sand · Stone. No green: the brand has none. */
+export type NoteColour = "butter" | "blush" | "powder" | "sand" | "stone";
+/** What a stored note may carry: a new paper, or one of the old three (mapped when read, never rewritten). */
+export type StoredNoteColour = NoteColour | LegacyNoteColour;
 
 export interface Note {
   id: string;
   userId: string;
   text: string;
-  colour: NoteColour;
+  colour: DeskNoteColour;
   dueDate: string | null; // "YYYY-MM-DD" — optional; with a date the note is also a task
   done: boolean;
   doneAt: string | null; // full ISO datetime, stamped on completion
@@ -1131,7 +1286,9 @@ export interface UserTask {
      and yellow is applied when it is READ (lib/noteboard.noteColour) rather than written to it —
      a migration would be inventing a choice the writer never made. Meaningless on a dated task;
      nothing outside the Noteboard reads it. */
-  colour?: NoteColour;
+  colour?: StoredNoteColour;
+  /* Corkboard v2: kept first on the Corkboard, in every sort and on top of its pile. Optional; absent = not pinned. */
+  pinned?: boolean;
   /* board-optimise P7: minutes from the fixed ladder (lib/todoEstimate) — the pack's one
      addition to user-facing task state, justified in that file's head. Optional; absent means
      absent, and the Today head sums only what carries one. */
@@ -1145,4 +1302,11 @@ export interface UserTask {
   // document (never a taskFlag — those are stances on DERIVED tasks). Set = committed to that day's
   // list (rolls over once if the day passes); absent = not committed. Input, never derived.
   committedDate?: string;
+  /* To-do list v50 — the task's checklist, in order: each step's words and whether it is ticked. Optional; absent
+     means no steps. The workspace's "Add a step" appends, a tick flips `done`, and the footer counts them. The whole
+     list is written each time (a list, never a map keyed by index, so an order change cannot corrupt it). */
+  steps?: TaskStep[];
 }
+
+/** To-do list v50 — one step on an own task's checklist */
+export interface TaskStep { text: string; done: boolean }

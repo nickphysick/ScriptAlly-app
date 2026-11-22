@@ -1,0 +1,22 @@
+[
+ {
+  "name": "a three-action query in the fixture",
+  "ok": true,
+  "got": "seed-cal-near-q"
+ },
+ {
+  "name": "at 504px the three actions are one line",
+  "ok": true,
+  "got": "84,84,84"
+ },
+ {
+  "name": "no label is cut",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "the row stays inside the footer (nothing pushed past its edge)",
+  "ok": true,
+  "got": "[[14,74,57,20],[243,61,124,46],[375,61,99,46]]"
+ }
+]

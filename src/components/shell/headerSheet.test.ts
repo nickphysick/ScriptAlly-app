@@ -15,7 +15,7 @@ const decls = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 
 describe("which routes have a header sheet, and which a panel", () => {
   it("header panel v2: every workspace route has a panel and no sheet; Help, Plans and Import keep the sheet", () => {
-    for (const r of ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard"]) {
+    for (const r of ["/queries", "/queries/analytics", "/agents", "/agents/discover", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/corkboard"]) {
       expect(hasHeaderPanel(r), r).toBe(true);
       expect(hasHeaderSheet(r), r).toBe(false);
     }
@@ -26,7 +26,7 @@ describe("which routes have a header sheet, and which a panel", () => {
   });
   it("the two lists are what they say", () => {
     expect(NO_HEADER_SHEET_ROUTES).toEqual(["/dashboard", "/account"]);
-    expect(HEADER_PANEL_ROUTES.length).toBe(11); // ten, and the Import page since onboarding v5 part 3
+    expect(HEADER_PANEL_ROUTES.length).toBe(10); // ten with the Import page (onboarding v5 part 3), less the Calendar page (retired 29 Oct)
     expect(hasHeaderSheet("/accounting")).toBe(true);
   });
 });
@@ -48,8 +48,9 @@ describe("the tokens", () => {
     expect(ink).toContain(".ws-app:has([data-header-sheet]:not([data-stage-off] *)) .ws-main { --ink-tab: var(--ws-sheet); }");
     expect(ink).not.toContain("sheet-mode");
     expect(read("src/components/shell/AppShell.tsx")).toContain('data-stage-off={active ? undefined : ""}');
-    expect(ink).toMatch(/\.ws-ftab \{[^}]*background: var\(--ink-tab\);/);
-    expect(ink).toMatch(/\.ws-ftfl \{[^}]*fill: var\(--ink-tab\);/);
+    /* shell tabs v2: the current tab and both its curves */
+    expect(ink).toMatch(/\.ws-fttabs \.ws-fttab\.is-cur,\s*\.ws-ftmeasure \.ws-fttab\.is-cur \{[^}]*background: var\(--ink-tab\);/);
+    expect(ink).toMatch(/\.ws-fttab \.ws-ftfl,\s*\.ws-fttab \.ws-ftfl-l \{[^}]*fill: var\(--ink-tab\);/);
     /* the page sheet itself is still the page's colour */
     expect(ink).toMatch(/\.ws-window \{[^}]*background: var\(--ink-sheet\);/);
   });

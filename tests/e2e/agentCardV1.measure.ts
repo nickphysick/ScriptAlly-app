@@ -94,6 +94,13 @@ async function closeCard(page: Page) {
   await page.waitForSelector(CARD, { state: "detached" });
 }
 
+/* Agent card v2 — every door to an existing agent outside the dev lab now opens the one card (AgentCard262 through
+   HostAgentCard), so the cases that open Agent card v1's quick view through the store over a real page are retired; the
+   lab's cases (its in-memory cast keeps the quick view) stand. These two also read `[data-clv="row"]`, a row the Contact
+   list retired before this pack. */
+const RETIRED_BY_ACV2 = [/^opened through the store over the Query Centre/, /^the ⋯ menu names only what the card can do/];
+test.beforeEach(({}, info) => { test.skip(RETIRED_BY_ACV2.some((r) => r.test(info.title)), "retired by Agent card v2 (see the note above)"); });
+
 test.describe("phase 1 — the card is app-level", () => {
   test("opened through the store over the Query Centre, it renders that agent's card — and Escape closes it", async ({ page }) => {
     await openRoute(page, "/agents", { width: 1440, height: 900 });

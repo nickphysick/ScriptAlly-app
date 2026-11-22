@@ -1,0 +1,49 @@
+{
+ "open0": {
+  "tray": 340,
+  "desk": 920,
+  "foot": {
+   "gap": 0,
+   "onScreen": true
+  },
+  "strip": {},
+  "legend": {
+   "wait": 16,
+   "nudge": 11,
+   "quiet": 16,
+   "house": 52
+  }
+ },
+ "slim": {
+  "tray": 64,
+  "desk": 1196,
+  "foot": {
+   "gap": 0,
+   "onScreen": true
+  },
+  "strip": {
+   "wait": {
+    "n": 16,
+    "title": "Agents are waiting"
+   },
+   "nudge": {
+    "n": 11,
+    "title": "Nudges"
+   },
+   "quiet": {
+    "n": 16,
+    "title": "Gone quiet"
+   },
+   "house": {
+    "n": 52,
+    "title": "Housekeeping"
+   }
+  },
+  "legend": {
+   "wait": 16,
+   "nudge": 11,
+   "quiet": 16,
+   "house": 52
+  }
+ }
+}

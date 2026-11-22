@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "PK26-M",
+  "where": "the long letter is listed",
+  "ok": true,
+  "detail": "[\"The longer comps-forward letter for agents in London, Dublin and Edinburgh\",\"Letter B\",\"Letter A\"]"
+ },
+ {
+  "lock": "PK26-M",
+  "where": "…its name is one line",
+  "ok": false,
+  "detail": "{\"name\":\"The longer comps-forward letter for agents in London, Dublin and Edinburgh\",\"title\":null,\"oneLine\":false,\"small\":\"Query letter\"}"
+ },
+ {
+  "lock": "PK26-M",
+  "where": "…with the full name as its title",
+  "ok": false,
+  "detail": "{\"name\":\"The longer comps-forward letter for agents in London, Dublin and Edinburgh\",\"title\":null,\"oneLine\":false,\"small\":\"Query letter\"}"
+ },
+ {
+  "lock": "PK26-M",
+  "where": "every name is one line",
+  "ok": false,
+  "detail": "[{\"name\":\"The longer comps-forward letter for agents in London, Dublin and Edinburgh\",\"title\":null,\"oneLine\":false,\"small\":\"Query letter\"}]"
+ },
+ {
+  "lock": "PK26-M",
+  "where": "no summary is the type",
+  "ok": false,
+  "detail": "[\"Query letter\",\"Query letter\",\"Query letter · sent 2\"]"
+ }
+]

@@ -33,7 +33,8 @@ describe("the desk card's month-on-month line (K3)", () => {
     const css = readFileSync("src/components/shell/desk/desk.css", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(css).toMatch(/\.dsk-mom\.is-up\s*\{\s*color:\s*#4f7a4b/);
     expect(css).toMatch(/\.dsk-mom\.is-down\s*\{\s*color:\s*#a0633f/);
-    expect(css).toMatch(/\.dsk-mom\.is-none\s*\{\s*color:\s*rgba\(28, 19, 15, 0\.45\)/);
+    /* Consistency roll-out v2, Phase 2 (ruling 2): ink at 45% is the quiet muted colour now */
+    expect(css).toMatch(/\.dsk-mom\.is-none\s*\{\s*color:\s*var\(--sp-quiet\)/);
   });
 });
 

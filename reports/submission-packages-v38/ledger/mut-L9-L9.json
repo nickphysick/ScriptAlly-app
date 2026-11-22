@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "L9",
+  "where": "pk40-std: open",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std: locked",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std: no ✕",
+  "ok": false,
+  "detail": "{\"id\":\"pk40-std\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std: no extra to tick and no + Add",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std: no Add in Your materials, nothing draggable",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std: the lock line",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std2: open",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std2\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std2: locked",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std2\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std2: no ✕",
+  "ok": false,
+  "detail": "{\"id\":\"pk40-std2\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std2: no extra to tick and no + Add",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std2\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std2: no Add in Your materials, nothing draggable",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std2\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-std2: the lock line",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-std2\",\"locked\":true,\"x\":1,\"ticks\":0,\"addX\":0,\"line\":1,\"libAdd\":0,\"draggable\":0}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-ready: open",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-ready\",\"locked\":false,\"x\":3,\"ticks\":1,\"addX\":1,\"line\":0,\"libAdd\":1,\"draggable\":2}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-ready: not locked",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-ready\",\"locked\":false,\"x\":3,\"ticks\":1,\"addX\":1,\"line\":0,\"libAdd\":1,\"draggable\":2}"
+ },
+ {
+  "lock": "L9",
+  "where": "pk40-ready: Add and drag are live",
+  "ok": true,
+  "detail": "{\"id\":\"pk40-ready\",\"locked\":false,\"x\":3,\"ticks\":1,\"addX\":1,\"line\":0,\"libAdd\":1,\"draggable\":2}"
+ }
+]

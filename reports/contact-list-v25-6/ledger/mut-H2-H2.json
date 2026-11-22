@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms population: four cells, a book id",
+  "ok": true,
+  "detail": "4 cells, cv25-ms"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms the four cells are equal (±1)",
+  "ok": true,
+  "detail": "300 300 300 300"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms none: the foot says 8",
+  "ok": true,
+  "detail": "8 want thrillers (want 8)"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms querying: the foot says 4",
+  "ok": true,
+  "detail": "4 waiting on you (want 4)"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms closed: the foot says 3",
+  "ok": true,
+  "detail": "3 passed (want 3)"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms the zero case is exercised on the empty book",
+  "ok": true,
+  "detail": "querying 4"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms-empty population: four cells, a book id",
+  "ok": true,
+  "detail": "4 cells, cv25-ms-empty"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms-empty the four cells are equal (±1)",
+  "ok": true,
+  "detail": "300 300 300 300"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms-empty none: the foot says 22",
+  "ok": true,
+  "detail": "22 want thrillers (want 22)"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms-empty querying: a zero foot is absent",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms-empty closed: a zero foot is absent",
+  "ok": false,
+  "detail": "0 passed"
+ },
+ {
+  "lock": "H2",
+  "where": "1512 cv25-ms-empty the zero case is exercised on the empty book",
+  "ok": true,
+  "detail": "querying 0"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms population: four cells, a book id",
+  "ok": true,
+  "detail": "4 cells, cv25-ms"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms the four cells are equal (±1)",
+  "ok": true,
+  "detail": "244 244 244 244"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms none: the foot says 8",
+  "ok": true,
+  "detail": "8 want thrillers (want 8)"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms querying: the foot says 4",
+  "ok": true,
+  "detail": "4 waiting on you (want 4)"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms closed: the foot says 3",
+  "ok": true,
+  "detail": "3 passed (want 3)"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms the zero case is exercised on the empty book",
+  "ok": true,
+  "detail": "querying 4"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms-empty population: four cells, a book id",
+  "ok": true,
+  "detail": "4 cells, cv25-ms-empty"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms-empty the four cells are equal (±1)",
+  "ok": true,
+  "detail": "244 244 244 244"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms-empty none: the foot says 22",
+  "ok": true,
+  "detail": "22 want thrillers (want 22)"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms-empty querying: a zero foot is absent",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms-empty closed: a zero foot is absent",
+  "ok": false,
+  "detail": "0 passed"
+ },
+ {
+  "lock": "H2",
+  "where": "1280 cv25-ms-empty the zero case is exercised on the empty book",
+  "ok": true,
+  "detail": "querying 0"
+ }
+]

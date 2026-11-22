@@ -1,0 +1,34 @@
+[
+ {
+  "sel": "TH.",
+  "box": "DIV.tws-wq",
+  "gap": 0,
+  "topAt": "TH.",
+  "owned": true,
+  "scrolled": 220
+ },
+ {
+  "sel": "TH.c",
+  "box": "DIV.tws-wq",
+  "gap": 0,
+  "topAt": "TH.c",
+  "owned": true,
+  "scrolled": 220
+ },
+ {
+  "sel": "TH.c",
+  "box": "DIV.tws-wq",
+  "gap": 0,
+  "topAt": "TH.c",
+  "owned": true,
+  "scrolled": 220
+ },
+ {
+  "sel": "TH.sc",
+  "box": "DIV.tws-wq",
+  "gap": 0,
+  "topAt": "TH.sc",
+  "owned": true,
+  "scrolled": 220
+ }
+]

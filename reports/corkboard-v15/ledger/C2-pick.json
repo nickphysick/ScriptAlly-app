@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C2",
+  "where": "few population",
+  "ok": true,
+  "detail": "3 notes"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 few",
+  "ok": true,
+  "detail": "{\"title\":\"3 notes\",\"figs\":[],\"pick\":\"Pick a colour\",\"swatches\":5}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 few",
+  "ok": true,
+  "detail": "{\"title\":\"3 notes\",\"figs\":[],\"pick\":\"Pick a colour\",\"swatches\":5}"
+ },
+ {
+  "lock": "C2",
+  "where": "zero hidden (everyday)",
+  "ok": true,
+  "detail": "[{\"k\":\"linked\",\"n\":7,\"words\":\"linked to agents\",\"pressed\":\"false\"},{\"k\":\"onTodo\",\"n\":2,\"words\":\"on your to-do list\",\"pressed\":\"false\"},{\"k\":\"pinned\",\"n\":2,\"words\":\"pinned to top\",\"pressed\":\"false\"}]"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x982 empty",
+  "ok": true,
+  "detail": "{\"title\":\"No notes yet\",\"figs\":[],\"pick\":\"Pick a colour to start\",\"swatches\":5}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 empty",
+  "ok": true,
+  "detail": "{\"title\":\"No notes yet\",\"figs\":[],\"pick\":\"Pick a colour to start\",\"swatches\":5}"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "H4",
+  "where": "1512 rows (population)",
+  "ok": true,
+  "detail": "53"
+ },
+ {
+  "lock": "H4",
+  "where": "1512 order",
+  "ok": true,
+  "detail": "[\"count\",\"find\",\"group\",\"sort\"]"
+ },
+ {
+  "lock": "H4",
+  "where": "1512 navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H4",
+  "where": "1512 no List / Cards switch",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H4",
+  "where": "1512 no Full screen",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H4",
+  "where": "1512 count = rows drawn",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "lock": "H4",
+  "where": "1280 rows (population)",
+  "ok": true,
+  "detail": "53"
+ },
+ {
+  "lock": "H4",
+  "where": "1280 order",
+  "ok": true,
+  "detail": "[\"count\",\"find\",\"group\",\"sort\"]"
+ },
+ {
+  "lock": "H4",
+  "where": "1280 navy",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "lock": "H4",
+  "where": "1280 no List / Cards switch",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H4",
+  "where": "1280 no Full screen",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H4",
+  "where": "1280 count = rows drawn",
+  "ok": true,
+  "detail": "53 vs 53"
+ }
+]

@@ -1,0 +1,806 @@
+[
+ {
+  "lock": "PA3-1",
+  "where": "rest /dashboard @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /dashboard @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /dashboard @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /dashboard @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /dashboard @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-2",
+  "where": "/dashboard @390x844",
+  "ok": true,
+  "detail": "first task at 373px (< 420)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard @390x844",
+  "ok": true,
+  "detail": "574 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/dashboard @390x844",
+  "ok": true,
+  "detail": "3451 chars swept"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /queries @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /queries @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /queries @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /queries @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /queries @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-2",
+  "where": "/queries @390x844",
+  "ok": true,
+  "detail": "first query row at 188px (< 300)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries @390x844",
+  "ok": true,
+  "detail": "828 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/queries @390x844",
+  "ok": true,
+  "detail": "4877 chars swept"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /agents @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /agents @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /agents @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /agents @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /agents @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents @390x844",
+  "ok": true,
+  "detail": "580 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/agents @390x844",
+  "ok": true,
+  "detail": "2884 chars swept"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /you @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /you @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /you @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /you @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /you @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/you @390x844",
+  "ok": true,
+  "detail": "164 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/you @390x844",
+  "ok": true,
+  "detail": "257 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/analytics @390x844",
+  "ok": true,
+  "detail": "214 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/queries/analytics @390x844",
+  "ok": true,
+  "detail": "581 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/responses @390x844",
+  "ok": true,
+  "detail": "264 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/queries/responses @390x844",
+  "ok": true,
+  "detail": "1015 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/packages @390x844",
+  "ok": true,
+  "detail": "293 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/queries/packages @390x844",
+  "ok": true,
+  "detail": "1552 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/goals @390x844",
+  "ok": true,
+  "detail": "228 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/goals @390x844",
+  "ok": true,
+  "detail": "426 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/manuscripts @390x844",
+  "ok": true,
+  "detail": "193 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/manuscripts @390x844",
+  "ok": true,
+  "detail": "428 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/account @390x844",
+  "ok": true,
+  "detail": "211 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/account @390x844",
+  "ok": true,
+  "detail": "485 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/help @390x844",
+  "ok": true,
+  "detail": "290 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/help @390x844",
+  "ok": true,
+  "detail": "912 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/import @390x844",
+  "ok": true,
+  "detail": "176 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/import @390x844",
+  "ok": true,
+  "detail": "560 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/todo/corkboard @390x844",
+  "ok": true,
+  "detail": "252 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/todo/corkboard @390x844",
+  "ok": true,
+  "detail": "1015 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents/discover @390x844",
+  "ok": true,
+  "detail": "151 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/agents/discover @390x844",
+  "ok": true,
+  "detail": "360 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries → qrow @390x844",
+  "ok": true,
+  "detail": "870 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/queries → qrow @390x844",
+  "ok": true,
+  "detail": "5176 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → arow @390x844",
+  "ok": true,
+  "detail": "621 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/agents → arow @390x844",
+  "ok": true,
+  "detail": "3145 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus @390x844",
+  "ok": true,
+  "detail": "594 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/dashboard → plus @390x844",
+  "ok": true,
+  "detail": "3612 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext @390x844",
+  "ok": true,
+  "detail": "606 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext @390x844",
+  "ok": true,
+  "detail": "3590 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext › fnext › fnext @390x844",
+  "ok": true,
+  "detail": "618 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext › fnext › fnext @390x844",
+  "ok": true,
+  "detail": "3835 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-reply › reply-opt › fnext @390x844",
+  "ok": true,
+  "detail": "619 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/dashboard → plus › plus-reply › reply-opt › fnext @390x844",
+  "ok": true,
+  "detail": "3680 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → addagent @390x844",
+  "ok": true,
+  "detail": "628 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/agents → addagent @390x844",
+  "ok": true,
+  "detail": "3208 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → arow › editagent › fnext › fnext @390x844",
+  "ok": true,
+  "detail": "648 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/agents → arow › editagent › fnext › fnext @390x844",
+  "ok": true,
+  "detail": "3305 chars swept"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → search @390x844",
+  "ok": true,
+  "detail": "605 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/dashboard → search @390x844",
+  "ok": true,
+  "detail": "3520 chars swept"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /dashboard @360x740",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /dashboard @360x740",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /dashboard @360x740",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /dashboard @360x740",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /dashboard @360x740",
+  "ok": true,
+  "detail": "bottom 740/740 left 0 right 360/360 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard @360x740",
+  "ok": true,
+  "detail": "574 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /queries @360x740",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /queries @360x740",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /queries @360x740",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /queries @360x740",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /queries @360x740",
+  "ok": true,
+  "detail": "bottom 740/740 left 0 right 360/360 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries @360x740",
+  "ok": true,
+  "detail": "828 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /agents @360x740",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /agents @360x740",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /agents @360x740",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /agents @360x740",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /agents @360x740",
+  "ok": true,
+  "detail": "bottom 740/740 left 0 right 360/360 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents @360x740",
+  "ok": true,
+  "detail": "580 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /you @360x740",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /you @360x740",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /you @360x740",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /you @360x740",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /you @360x740",
+  "ok": true,
+  "detail": "bottom 740/740 left 0 right 360/360 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/you @360x740",
+  "ok": true,
+  "detail": "164 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/analytics @360x740",
+  "ok": true,
+  "detail": "214 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/responses @360x740",
+  "ok": true,
+  "detail": "264 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/packages @360x740",
+  "ok": true,
+  "detail": "293 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/goals @360x740",
+  "ok": true,
+  "detail": "228 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/manuscripts @360x740",
+  "ok": true,
+  "detail": "193 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/account @360x740",
+  "ok": true,
+  "detail": "211 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/help @360x740",
+  "ok": true,
+  "detail": "290 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/import @360x740",
+  "ok": true,
+  "detail": "176 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/todo/corkboard @360x740",
+  "ok": true,
+  "detail": "252 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents/discover @360x740",
+  "ok": true,
+  "detail": "151 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries → qrow @360x740",
+  "ok": true,
+  "detail": "870 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → arow @360x740",
+  "ok": true,
+  "detail": "621 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus @360x740",
+  "ok": true,
+  "detail": "594 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext @360x740",
+  "ok": true,
+  "detail": "606 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext › fnext › fnext @360x740",
+  "ok": true,
+  "detail": "618 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-reply › reply-opt › fnext @360x740",
+  "ok": true,
+  "detail": "619 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → addagent @360x740",
+  "ok": true,
+  "detail": "628 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → arow › editagent › fnext › fnext @360x740",
+  "ok": true,
+  "detail": "648 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → search @360x740",
+  "ok": true,
+  "detail": "605 elements, widest 360/360"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard @414x896",
+  "ok": true,
+  "detail": "574 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries @414x896",
+  "ok": true,
+  "detail": "828 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents @414x896",
+  "ok": true,
+  "detail": "580 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/you @414x896",
+  "ok": true,
+  "detail": "164 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/analytics @414x896",
+  "ok": true,
+  "detail": "214 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/responses @414x896",
+  "ok": true,
+  "detail": "264 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/packages @414x896",
+  "ok": true,
+  "detail": "293 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/goals @414x896",
+  "ok": true,
+  "detail": "228 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/manuscripts @414x896",
+  "ok": true,
+  "detail": "193 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/account @414x896",
+  "ok": true,
+  "detail": "211 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/help @414x896",
+  "ok": true,
+  "detail": "290 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/import @414x896",
+  "ok": true,
+  "detail": "176 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/todo/corkboard @414x896",
+  "ok": true,
+  "detail": "252 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents/discover @414x896",
+  "ok": true,
+  "detail": "151 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries → qrow @414x896",
+  "ok": true,
+  "detail": "870 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → arow @414x896",
+  "ok": true,
+  "detail": "621 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus @414x896",
+  "ok": true,
+  "detail": "594 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext @414x896",
+  "ok": true,
+  "detail": "606 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-log › agent-opt › fnext › fnext › fnext @414x896",
+  "ok": true,
+  "detail": "618 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → plus › plus-reply › reply-opt › fnext @414x896",
+  "ok": true,
+  "detail": "619 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → addagent @414x896",
+  "ok": true,
+  "detail": "628 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents → arow › editagent › fnext › fnext @414x896",
+  "ok": true,
+  "detail": "648 elements, widest 414/414"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard → search @414x896",
+  "ok": true,
+  "detail": "605 elements, widest 414/414"
+ }
+]

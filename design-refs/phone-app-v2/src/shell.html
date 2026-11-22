@@ -1,0 +1,34 @@
+<title>QueryHawk Phone Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>/*CSS*/</style>
+<div class="chrome">
+  <div class="nm"><img src="/*LOGO*/" alt="">QueryHawk on the phone</div>
+  <div class="views" role="group" aria-label="View"><button data-view="proto" aria-pressed="true">Prototype</button><button data-view="screens" aria-pressed="false">Screens</button><button data-view="rules" aria-pressed="false">Rulebook</button></div>
+  <span class="sp"></span>
+  <label class="toggle"><input type="checkbox" id="emptyToggle"> Show a brand-new account</label>
+  <button class="btn sec sm" id="resetBtn">Reset</button>
+</div>
+<section class="view" data-view-panel="proto">
+  <div class="proto">
+    <div class="device" id="phone"></div>
+    <div class="notes">
+      <h2>Try these</h2>
+      <ol>
+        <li>Tap a query on <b>Queries</b>, then drag the sheet up and down.</li>
+        <li>Swipe a query row left or right.</li>
+        <li>Tap the pink <b>+</b> and log a query, one question at a time.</li>
+        <li>Tap the + again and choose <b>An agent replied</b>. Pick “Asked for the full”.</li>
+        <li>On <b>To-do</b>, tap a task’s circle, or swipe it left for Later.</li>
+        <li>Tap your initials, top right, for everything else.</li>
+        <li>On Home, switch the chart between Active, Sent, Replies and Requests.</li>
+        <li>Scroll Home and watch the tab bar tuck away.</li>
+      </ol>
+      <div class="tip">Open this page on your phone and the prototype fills the screen. Swipes and sheet drags work with a finger there and with a mouse here. Everything is example data; nothing is saved. Press Reset to start again.</div>
+    </div>
+  </div>
+</section>
+<section class="view" data-view-panel="screens" hidden><div class="gallery" id="gallery"></div></section>
+<section class="view" data-view-panel="rules" hidden><div class="rules" id="rules"></div></section>
+<script>
+/*JS*/
+</script>

@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1272,\"w\":1024},\"list\":{\"l\":280,\"r\":1240,\"w\":960},\"title\":{\"l\":280,\"r\":1240,\"w\":960},\"card\":{\"l\":304,\"r\":1216,\"w\":912},\"cards\":{\"l\":304,\"r\":1216,\"w\":912}}"
+ },
+ {
+  "where": "list width",
+  "ok": false,
+  "detail": "960.0 vs 984"
+ },
+ {
+  "where": "list centred",
+  "ok": true,
+  "detail": "32.0 / 32.0"
+ },
+ {
+  "where": "title edges",
+  "ok": true,
+  "detail": "280.0–1240.0 vs 280.0–1240.0"
+ },
+ {
+  "where": "header v149.2",
+  "ok": true,
+  "detail": "912.0 vs 912"
+ },
+ {
+  "where": "cards v149.2",
+  "ok": true,
+  "detail": "912.0 vs 912"
+ }
+]

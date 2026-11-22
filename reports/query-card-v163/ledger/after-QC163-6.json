@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the undo landed (back to queried)",
+  "ok": true,
+  "got": "queried"
+ },
+ {
+  "name": "one qc163-light",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "it rotates from 40deg to −320deg (anticlockwise)",
+  "ok": true,
+  "got": "40deg → -320deg"
+ },
+ {
+  "name": "mirrored: scale −1 1",
+  "ok": true,
+  "got": "[\"-1 1\"]"
+ },
+ {
+  "name": "coloured for the stage returned TO (queried: #bfa87e → #f3ead9)",
+  "ok": true,
+  "got": "conic-gradient(rgba(0, 0, 0, 0) 0deg, rgba(0, 0, 0, 0) 58%, rgb(191, 168, 126) 84%, rgb(243, 234, 217) 93%, rgba(0, 0, 0, 0) 100%)"
+ }
+]

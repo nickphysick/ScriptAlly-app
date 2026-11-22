@@ -103,14 +103,19 @@ describe("the founder's note and the sign-off", () => {
    * ⚠️ THE HAIRLINE IS ITS OWN ELEMENT — never a border or a pseudo-element on either label, which
    * would drift the moment either label's length changed. `IdentityLine` carries the same law.
    */
-  it("draws the rule as a sibling element", () => {
-    expect(html()).toMatch(/["\s`]mk-signrule["\s`]/);
+  /* RE-POINTED (public sweep v1): the note is signed "Nick" with the role under it. The surname, the
+     separate name label and the rule between them are gone; no small label sits above the heading. */
+  it("signs as Nick with the role under it, no surname and no rule", () => {
+    const page = html();
+    expect(page).toMatch(/<p class="mk-notesig" aria-hidden="true">Nick<\/p>\s*<p class="mk-signoff mk-signrole">Founder, QueryHawk<\/p>/);
+    expect(page).not.toMatch(/Physick/);
+    expect(page).not.toMatch(/["\s`]mk-signrule["\s`]/);
   });
 
-  it("names the role and the person separately, and offers a way to say hello", () => {
+  it("puts nothing above the note's heading, and offers a way to say hello", () => {
     const page = html();
-    expect(page).toContain("Nick Physick");
-    expect(page).toContain("Founder");
+    expect(page).toMatch(/<div class="mk-notecol"><h2 id="mk-note-h"/);
+    expect(page).not.toContain("A note from the founder");
     expect(page).toContain("Say hello");
   });
 

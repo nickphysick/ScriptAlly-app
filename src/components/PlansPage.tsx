@@ -2,242 +2,263 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * PlansPage — the presentational Free-vs-Pro plans page. VISUAL LAYER ONLY: no billing, no Stripe,
- * no entitlement/gating, no plan state, no Firestore. The price is display copy. There is
- * deliberately NO plan-selection control: no payment path exists, so each card's foot states
- * "coming soon" honestly (the AccountSettings ComingSoonPill pattern) instead of presenting a
- * button that does nothing. Self-serve upgrade is a separate decision — do not wire upgradeToPro
- * here (it would hollow out every plan gate in the app). Reuses the shared MountPanel clipping
- * card, the dashboard page-ground token, the uniform band-header pieces, and the existing
- * colour/font tokens.
+ * The Plans page — inside Settings (plans v3; ref: design-refs/plans-v3.html, the sheet only). A header, three plan
+ * cards, and closed rows under them. Four viewers: a founding writer (today's only real one), and after launch an
+ * account in its first days of Pro, one on Free, one on Pro.
+ *
+ * ⚠️ ONE LEAD CARD PER VIEWER — the plan being offered. It is tilted and raised, and its pill carries the page's one ✨ (the brief's "only emoji in the
+ *    app" was not so: To-do's Housekeeping already had two — see plansPageV3.test). Cards that are not available step back. `plansModel` decides both; the render only draws.
+ * ⚠️ PRICES ARE `lib/planRules`'; ROWS ARE `lib/planComparison`'; the comparison is the one `PlanTable`, unchanged.
+ * ⚠️ NO BUY CONTROL WHILE `PLANS_ON_SALE` IS OFF (there is no payment path). "Choose Pro" exists only when selling is
+ *    on; with it off, the "Not on sale yet" chip stands in its place.
+ * ⚠️ NOTHING HERE STATES A PURCHASE. No payment exists, so the Pro viewer has no bought length, end date or receipt —
+ *    its headline and card say only what the app holds.
  */
-import React from "react";
-import { MountPanel } from "./MountPanel";
-import { PageHeader } from "./shell/PageHeader";
-import { PlanComparison } from "./plans/PlanComparison";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, ChevronDown, ChevronLeft } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
-import { isProUser } from "../lib/suggestComps";
-import {
-  parchment,
-  sageBandGradient,
-  sageBandRule,
-  pinkBandGradient,
-  pinkBandRule,
-  statusSageFill,
-  burgundy,
-  headingInk,
-  bodyInk,
-  mutedInk,
-  sageText,
-  FONT_SERIF,
-  FONT_SANS,
-  FONT_MONO,
-} from "../lib/designTokens";
-import { BookOpen, Star, Heart, List, Check, X } from "lucide-react";
+import { DAY_MS } from "../lib/entitlements";
+import { PRO_PLANS, PRO_FROM, PLAN_LENGTHS_LINE, perMonth, planMonths, ROLL_ON_PRICE, FREE_PRICE, TRIAL_DAYS, type ProPlan } from "../lib/planRules";
+import { PLANS_ON_SALE } from "../lib/selling";
+import { PlanTable } from "./plans/PlanTable";
+import "./settings/settings.css";
+import "./plans/plansPage.css";
 
-const AMBER = "#b98a4e";
+/** The length the picker opens on (the ref's `len=6`). */
+const OPEN_MONTHS = 6;
+/** The founding pass's size. ⚠️ NO CLIENT CONSTANT EXISTED (the live cap is a Firestore counter; Auth and Settings type
+ *  the number into their own sentences), and `planRules` is out of this run's reach — so this page names it once, and every "50" on
+ *  the page reads it. */
+export const FOUNDING_CAP = 50;
 
-/* ── Uniform band header: burgundy rule + Playfair title + (strapline | mono sub) + far-right emblem.
- *    Reuses the dashboard panel-header pieces; `variant` swaps the sage band for the pink one. ── */
-const BandHeader: React.FC<{
-  title: string;
-  Emblem: React.ComponentType<any>;
-  variant?: "sage" | "pink";
-  strapline?: string;
-  mono?: string;
-}> = ({ title, Emblem, variant = "sage", strapline, mono }) => {
-  const pink = variant === "pink";
-  const twoLine = !!(strapline || mono);
+/** Who is looking. `pending` (founding not yet known) is drawn as founding, as plans v2 did. */
+export type PlansViewer = "founding" | "trial" | "free" | "pro";
+export type PlanId = "free" | "pro" | "founding";
+
+export const PLANS_COPY = {
+  crumb: "Plan",
+  head: {
+    founding: ["The early bird gets the worm.", "Founding writers pay nothing. We only ask for your feedback."] as const,
+    trial: (n: number) => [`You have ${n} day${n === 1 ? "" : "s"} of Pro left.`, "After that you're on Free. Nothing you've made is deleted."] as const,
+    free: ["You're on Free.", "Pro adds letters, versions, packages and The Scout."] as const,
+    /* ⚠️ WORDS WRITTEN FOR THIS RUN: the ref's "until 19 May" is a bought end date the app does not hold. */
+    pro: ["You're on Pro.", `When it ends it rolls on monthly at £${ROLL_ON_PRICE}, until you stop it.`] as const,
+  },
+  name: { free: "Free", pro: "Pro", founding: "Founding writer" } as Record<PlanId, string>,
+  tag: {
+    free: "Everything you need to start querying.",
+    pro: "The full toolkit, for as long as your campaign runs.",
+    founding: `Everything in QueryHawk, on us, for our first ${FOUNDING_CAP} writers.`,
+  } as Record<PlanId, string>,
+  pill: { openNow: "Open now", atLaunch: "Opens at launch", open: "Open", taken: `All ${FOUNDING_CAP} places taken` },
+  freeSub: "For as long as you like.",
+  freeList: [
+    "One manuscript",
+    "Unlimited agents and queries",
+    "Response tracking, to-do list and reminders",
+    "Smart Import, to bring your list across",
+    `${TRIAL_DAYS} days of full Pro to start`,
+  ],
+  freeTrialFoot: `Yours once your ${TRIAL_DAYS} days of Pro end.`,
+  proLead: "Everything in Free, plus:",
+  proList: ["Query letters", "Manuscript versions", "Submission packages, and which win requests", "Comparable titles", "The Scout", "Smart email drop"],
+  proFrom: `From £${PRO_FROM}`,
+  aMonth: "a month",
+  proLengths: `For ${PLAN_LENGTHS_LINE}.`,
+  foundingUnit: { yours: "for your whole campaign", closed: "for a whole campaign" },
+  foundingSub: "No card, nothing to cancel.",
+  foundingLead: "Everything in Pro, plus:",
+  foundingList: ["Free for your whole querying campaign", "A direct line to our founder", "A say in what gets built next"],
+  foundingFoot: "Thank you for helping us get this right.",
+  yourPlan: "Your plan",
+  notOnSale: "Not on sale yet",
+  choosePro: "Choose Pro",
+  lengthQ: "How long do you need Pro for?",
+  compare: "Compare every feature",
+  questions: "Questions",
+} as const;
+
+const priceLine = (p: ProPlan) => (p.saving === null ? `One month of Pro.` : `£${perMonth(p)} a month. You save ${p.saving}%.`);
+
+/** The existing after-launch questions (plans v2's `faq(false)`), carried across unchanged. */
+export function afterLaunchQuestions(selling: boolean): [string, string][] {
+  return [
+    ["Will anything here charge me today?", selling ? "Only if you choose a plan. Nothing changes on your account until you do." : "No. Plans aren't on sale yet."],
+    ["What happens when my plan ends?", `It rolls on to monthly at £${ROLL_ON_PRICE} so you don't lose Pro mid-campaign. We email you a week before, and stopping it takes one click, here on this page.`],
+    ["What if I sign with an agent before it ends?", "Congratulations. Your plan simply runs to its end date. Your records stay yours, on any plan."],
+    ["What happens to my Pro work if I go back to Free?", "Nothing is deleted. Your versions and packages are kept and open again if you come back to Pro."],
+    ["Why can I only add one manuscript right now?", "Adding a second manuscript is coming soon."],
+  ];
+}
+
+/* ══════════════ the model — pure, so every viewer is tested without a browser ══════════════ */
+export type PriceMode = "free" | "from" | "length" | "founding";
+export type CardFoot = "none" | "trialFree" | "founding" | "buy" | "notOnSale";
+export interface PlanCardModel {
+  id: PlanId;
+  /** The plan being offered: tilted, raised, its pill navy with the ✨. Exactly one per viewer. */
+  lead: boolean;
+  /** Not available: stepped back. */
+  wait: boolean;
+  /** The founding pass after launch: stepped back further — paler, its text faded. */
+  closed: boolean;
+  pill: string;
+  yours: boolean;
+  price: PriceMode;
+  picker: boolean;
+  foot: CardFoot;
+}
+export interface PlansModel {
+  head: readonly [string, string];
+  cards: PlanCardModel[];
+  /** Closed rows under the cards, in order. */
+  rows: ("compare" | "questions")[];
+}
+
+export function plansModel(viewer: PlansViewer, trialDaysLeft: number | null, selling: boolean): PlansModel {
+  const P = PLANS_COPY;
+  switch (viewer) {
+    case "founding":
+      return {
+        head: P.head.founding,
+        cards: [
+          { id: "free", lead: false, wait: true, closed: false, pill: P.pill.atLaunch, yours: false, price: "free", picker: false, foot: "none" },
+          { id: "founding", lead: true, wait: false, closed: false, pill: P.pill.openNow, yours: true, price: "founding", picker: false, foot: "founding" },
+          { id: "pro", lead: false, wait: true, closed: false, pill: P.pill.atLaunch, yours: false, price: "from", picker: false, foot: "none" },
+        ],
+        rows: ["compare"],
+      };
+    case "trial":
+    case "free":
+    case "pro": {
+      const onPro = viewer === "pro";
+      const free: PlanCardModel = { id: "free", lead: false, wait: false, closed: false, pill: P.pill.open, yours: !onPro, price: "free", picker: false, foot: viewer === "trial" ? "trialFree" : "none" };
+      const pro: PlanCardModel = onPro
+        /* ⚠️ No stop-rolling-on control exists in the app, so this card has no foot (the brief: "if one exists;
+           otherwise no foot"); and no bought length is held, so it shows the from-price, not the ref's bought length and price. */
+        ? { id: "pro", lead: true, wait: false, closed: false, pill: P.pill.open, yours: true, price: "from", picker: false, foot: "none" }
+        : { id: "pro", lead: true, wait: false, closed: false, pill: P.pill.open, yours: false, price: "length", picker: true, foot: selling ? "buy" : "notOnSale" };
+      const founding: PlanCardModel = { id: "founding", lead: false, wait: true, closed: true, pill: P.pill.taken, yours: false, price: "founding", picker: false, foot: "none" };
+      const head = viewer === "trial" ? P.head.trial(trialDaysLeft ?? TRIAL_DAYS) : onPro ? P.head.pro : P.head.free;
+      return { head, cards: [free, pro, founding], rows: ["compare", "questions"] };
+    }
+    default: {
+      const unhandled: never = viewer;
+      return unhandled;
+    }
+  }
+}
+
+/* ══════════════ the render ══════════════ */
+/** 328px copies of the 800px art: the panel draws it at 164, so this is 2x and no more. */
+const ART: Record<PlanId, string> = { free: "/images/tier-free-328.png", pro: "/images/tier-pro-328.png", founding: "/images/tier-founding-328.png" };
+
+const LengthPicker: React.FC<{ len: ProPlan["months"]; setLen: (m: ProPlan["months"]) => void }> = ({ len, setLen }) => {
+  const onKey = (e: React.KeyboardEvent, i: number) => {
+    const n = PRO_PLANS.length;
+    const j = e.key === "ArrowRight" || e.key === "ArrowDown" ? (i + 1) % n : e.key === "ArrowLeft" || e.key === "ArrowUp" ? (i - 1 + n) % n : -1;
+    if (j < 0) return;
+    e.preventDefault();
+    setLen(PRO_PLANS[j].months);
+    (e.currentTarget.parentElement?.children[j] as HTMLElement | undefined)?.focus();
+  };
   return (
-    <div
-      style={{
-        padding: "13px 18px 12px",
-        background: pink ? pinkBandGradient : sageBandGradient,
-        borderBottom: `1px solid ${pink ? pinkBandRule : sageBandRule}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 10,
-      }}
-    >
-      <span style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
-        <span
-          aria-hidden="true"
-          style={{ width: 3, height: twoLine ? 34 : 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }}
-        />
-        <span style={{ minWidth: 0 }}>
-          <span style={{ display: "block", fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.15 }}>{title}</span>
-          {strapline && (
-            <span style={{ display: "block", fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14.5, color: burgundy, lineHeight: 1.25, marginTop: 1 }}>{strapline}</span>
-          )}
-          {mono && (
-            <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk, marginTop: 3 }}>{mono}</span>
-          )}
-        </span>
-      </span>
-      <Emblem style={{ width: 20, height: 20, color: burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
+    <div className="pl-len" role="radiogroup" aria-label={PLANS_COPY.lengthQ}>
+      {PRO_PLANS.map((p, i) => (
+        <button key={p.months} type="button" role="radio" aria-checked={p.months === len} tabIndex={p.months === len ? 0 : -1} onClick={() => setLen(p.months)} onKeyDown={(e) => onKey(e, i)}>
+          <b>{planMonths(p.months)}</b><span>£{p.price}</span>
+        </button>
+      ))}
     </div>
   );
 };
 
-/* ── Feature-inclusion marks (NOT StatusDot — these aren't query statuses). ── */
-const Tick: React.FC = () => (
-  <span
-    aria-label="Included"
-    role="img"
-    style={{ width: 17, height: 17, borderRadius: "50%", background: burgundy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-  >
-    <Check style={{ width: 11, height: 11, color: parchment }} strokeWidth={3} aria-hidden="true" />
-  </span>
-);
+const PlanCard: React.FC<{ c: PlanCardModel; len: ProPlan["months"]; setLen: (m: ProPlan["months"]) => void }> = ({ c, len, setLen }) => {
+  const P = PLANS_COPY;
+  const cur = PRO_PLANS.find((p) => p.months === len)!;
+  const cls = ["pl-tier", c.id === "pro" && "pl-tier--pro", c.id === "founding" && "pl3-found", c.lead && "is-lead", c.wait && "is-wait", c.closed && "is-closed"].filter(Boolean).join(" ");
+  const [price, unit, sub] =
+    c.price === "free" ? [FREE_PRICE, "", P.freeSub]
+    : c.price === "founding" ? [FREE_PRICE, c.closed ? P.foundingUnit.closed : P.foundingUnit.yours, P.foundingSub]
+    : c.price === "from" ? [P.proFrom, P.aMonth, P.proLengths]
+    : [`£${cur.price}`, `for ${planMonths(cur.months)}`, priceLine(cur)];
+  const lead = c.id === "pro" ? P.proLead : c.id === "founding" ? P.foundingLead : null;
+  const list = c.id === "pro" ? P.proList : c.id === "founding" ? P.foundingList : P.freeList;
+  return (
+    <article className={cls} data-plan={c.id} data-lead={c.lead ? "1" : undefined} aria-labelledby={`pl3-h-${c.id}`}>
+      <div className="pl3-art">
+        <span className="pl3-pill" data-plans="pill">{c.lead && <span aria-hidden="true">{"✨ "}</span>}{c.pill}</span>
+        {c.yours && <span className="plt-chip"><Check aria-hidden="true" />{P.yourPlan}</span>}
+        <img src={ART[c.id]} alt="" width={164} height={164} decoding="async" />
+      </div>
+      <div className="pl3-in">
+        <h3 id={`pl3-h-${c.id}`}>{P.name[c.id]}</h3>
+        <p className="pl3-tag">{P.tag[c.id]}</p>
+        <div className="pl-price"><b>{price}</b>{unit && <span>{unit}</span>}</div>
+        <p className="pl-sub">{sub}</p>
+        {c.picker && <LengthPicker len={len} setLen={setLen} />}
+        <hr />
+        <ul className="pl-feat">
+          {lead && <li className="pl-lead">{lead}</li>}
+          {list.map((t) => <li key={t}><Check aria-hidden="true" /><span>{t}</span></li>)}
+        </ul>
+        {c.foot !== "none" && (
+          <div className="pl3-foot">
+            {c.foot === "trialFree" ? P.freeTrialFoot
+              : c.foot === "founding" ? P.foundingFoot
+              : c.foot === "buy" ? <button type="button" className="plt-cream">{P.choosePro}</button>
+              : <span className="plt-chip plt-chip--navy">{P.notOnSale}</span>}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+};
 
-const NoMark: React.FC = () => (
-  <span
-    aria-label="Not included"
-    role="img"
-    style={{ width: 17, height: 17, borderRadius: "50%", border: "1.5px solid #c4bcae", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-  >
-    <X style={{ width: 10, height: 10, color: "#b3a99a" }} strokeWidth={3} aria-hidden="true" />
-  </span>
-);
-
-/* ── The AccountSettings ComingSoonPill pattern (same styles) — an honest non-interactive marker
- *    for a control that does not exist yet. ── */
-const ComingSoonPill: React.FC = () => (
-  <span
-    style={{
-      fontFamily: FONT_MONO,
-      fontSize: 9,
-      letterSpacing: "0.08em",
-      textTransform: "uppercase",
-      color: mutedInk,
-      background: "rgba(124,58,42,0.06)",
-      border: "0.5px solid rgba(124,58,42,0.16)",
-      borderRadius: 999,
-      padding: "3px 8px",
-      whiteSpace: "nowrap",
-    }}
-  >
-    Coming soon
-  </span>
-);
-
-/* ── Plan card ────────────────────────────────────────────────────────────── */
-/* ⚠️ `PlanProps`, `PlanCard`, `Row`, `Cell`, `GROUPS`, `FOOTNOTES`, `cell` and `CompareCard` ARE
-   ALL DELETED. Between them they stated what the plans include FOUR times on one page — two hero
-   cards with their own feature arrays, and a grouped matrix with a third list under them — and
-   quoted a price (£3.99 / £35) that no code path in this app can charge. The rows now live in
-   `lib/planComparison`, the price comes from the locked `PRICING_TIERS`, and both this page and
-   the settings card render the one `PlanComparison`.
-
-   Two of the deleted matrix's claims were also wrong: it listed "Submission package builder" and
-   "Agent matching & community access" as Pro-only, and neither is gated anywhere in the code. */
-
-/* ── Founding-writers card (pink band) ───────────────────────────────────── */
-const FounderCard: React.FC = () => (
-  <MountPanel>
-    {/* ⚠️ "writers", NOT "members". The landing banner, /founders and /pricing all say founding
-        WRITERS; this card was the last surface still saying members, and one offer with two nouns
-        across two tiers of the app is how a reader starts wondering whether they are the same
-        thing. Found by grepping the DEPLOYED bundle for the retired word rather than the source —
-        a marketing-scoped sweep would never have looked at /plans. */}
-    <BandHeader title="Founding writers" Emblem={Heart} variant="pink" />
-    <div style={{ padding: 22, display: "flex", flexDirection: "column" }}>
-      <div className="founder-row" style={{ display: "flex", gap: 22, alignItems: "stretch" }}>
-        {/* handwritten note */}
-        <div style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
-          <p style={{ fontFamily: "'Caveat', cursive", fontSize: 25, fontWeight: 600, color: burgundy, lineHeight: 1.25, margin: 0 }}>
-            Free Pro through beta —<br />
-            {/* ⚠️ "for as long as you need it", NOT "for life". The landing banner, /founders and
-                /pricing all say the softer form; this was one of the two surfaces still promising
-                a permanent rate, and one offer worded two ways across two tiers of the app is how
-                a reader starts wondering which one binds. */}
-            <span style={{ color: sageText }}>then half price for as long as you need it.</span>
-          </p>
+/** The page body for one viewer — plain props, so the lab and the tests draw every state the route cannot reach. */
+export const PlansView: React.FC<{ viewer: PlansViewer; trialDaysLeft: number | null; selling: boolean; onBack: () => void }> = ({ viewer, trialDaysLeft, selling, onBack }) => {
+  const [len, setLen] = useState<ProPlan["months"]>(OPEN_MONTHS);
+  const m = plansModel(viewer, trialDaysLeft, selling);
+  const [h, d] = m.head;
+  return (
+    <div className="acct-page pl-page" data-plans-state={viewer}>
+      <div className="acct-plane"><div className="acct-grid">
+      <div className="acct-work pl-work">
+        <button type="button" className="pl-crumb" onClick={onBack}><ChevronLeft aria-hidden="true" />{PLANS_COPY.crumb}</button>
+        <header className="sc-ttl sc-ttl--live" data-plans="headline">
+          <h1 className="sc-ttl-h">{h}</h1>
+          <p className="sc-ttl-d">{d}</p>
+        </header>
+        <div className="pl3" data-plans="cards">
+          {m.cards.map((c) => <PlanCard key={c.id} c={c} len={len} setLen={setLen} />)}
         </div>
-        {/* divider */}
-        <div className="founder-divider" style={{ width: 1, background: "#e6dccf", flexShrink: 0 }} aria-hidden="true" />
-        {/* detail */}
-        <div style={{ minWidth: 0 }}>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: mutedInk, lineHeight: 1.5, margin: "0 0 12px" }}>
-            The first 50 sign-ups get full Pro free during the beta in exchange for occasional light feedback. When pricing goes live, founders keep Pro permanently discounted — a soft landing, not a billing cliff.
-          </p>
-          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 7 }}>
-            {[
-              "Full Pro, no card required, throughout beta",
-              "A couple of feedback questions now and then + a direct channel",
-              /* ⚠️ THE "e.g. 50%" WENT WITH THE "for life", AND IT WAS THE WORSE OF THE TWO. It is
-                 an invented figure on a page about what something costs — the same class as the
-                 £7/mo and £3.50/mo this repo deliberately refuses to print, and worse for carrying
-                 an "e.g." that reads as an illustration while a reader takes it as the number.
-                 Half price is the rate the other three surfaces state, so this states it too. */
-              "Founder rate once Pro launches — half price, for as long as you need it",
-            ].map((b) => (
-              <li key={b} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                <span aria-hidden="true" style={{ color: AMBER, fontFamily: FONT_MONO, fontSize: 13, lineHeight: 1.5, flexShrink: 0 }}>→</span>
-                <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: bodyInk, lineHeight: 1.5 }}>{b}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="pl3-more">
+          {m.rows.map((r) => (
+            <details key={r} data-plans={r}>
+              <summary>{r === "compare" ? PLANS_COPY.compare : PLANS_COPY.questions}<ChevronDown aria-hidden="true" /></summary>
+              {r === "compare"
+                ? <PlanTable viewer={viewer === "founding" ? "founding" : viewer === "pro" ? "pro" : "free"} />
+                : afterLaunchQuestions(selling).map(([q, a]) => (
+                    <details key={q} className="pl-q"><summary>{q}<ChevronDown aria-hidden="true" /></summary><p>{a}</p></details>
+                  ))}
+            </details>
+          ))}
         </div>
       </div>
+      </div></div>
     </div>
-  </MountPanel>
-);
+  );
+};
+
+/** The entitlement's basis → the viewer. `pending` is drawn as founding, as plans v2 did. */
+export const plansViewerOf = (basis: string): PlansViewer =>
+  basis === "founding" || basis === "pending" ? "founding" : basis === "pro" ? "pro" : basis === "trial" ? "trial" : "free";
 
 export const PlansPage: React.FC = () => {
-  const { currentUser } = useScriptAllyDb();
-  return (
-  // No bespoke ground (capsule law — fixes P5 re-homing): the page inherits the content capsule.
-  <div className="min-h-screen pb-16 font-sans" style={{ color: bodyInk }}>
-
-    {/* scoped CSS: the founder row stacks below 640px (inline can't express media queries) */}
-    <style>{`
-      @media (max-width: 639px) {
-        .founder-row { flex-direction: column; }
-        .founder-divider { width: 100% !important; height: 1px; }
-      }
-    `}</style>
-
-    <div className="relative" style={{ zIndex: 1, maxWidth: 880, margin: "0 auto", padding: "12px 16px 0" }}>
-      {/* The standard page header (capsule fixes P5 — re-homed from the DELETED FocusShell):
-          full variant replaces the centred italic hero; the mono "QueryHawk · two tiers"
-          strapline is dropped, not restyled (rollout report). */}
-      <PageHeader
-        /* §3.3 (page header v1) — compact: `full` is the OPEN header now, and this page is not one
-           of the two that opens with one. */
-        variant="workspace"
-        title="Choose your plan"
-        description="Free covers the tracking; Pro adds the tools that think alongside you." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-      />
-
-      {/* ⚠️ ONE COMPARISON, SHARED WITH THE SETTINGS CARD (`components/plans/PlanComparison`).
-          What stood here was TWO hardcoded plan cards — "£3.99 / month", "or £35/year · save ~27%"
-          and a four-item feature list each — above a separate `GROUPS` matrix with a THIRD list of
-          features. Four statements of what Pro includes, on one page, none of them reading the
-          same source.
-          ⚠️ AND THE PRICE THAT STOOD HERE WAS FICTION. The £3.99/£35 was a figure nobody could
-          pay, invented for a card. It stays deleted rather than revived now that a REAL one exists
-          (£4.99, set 16 Sep in the locked marketing copy): the point was never that there was no
-          price, it was that this page must not be a second place one is typed.
-          ⚠️ AND A PRICE IS STILL NOT A PAYMENT PATH. There is no Stripe, no checkout, and
-          `firestore.rules` denies a client-side plan change as its central guard, so every surface
-          goes on saying Pro is not on sale. Two different facts; collapsing them is how a page
-          starts implying something can be bought.
-          No `onSeePlans` here — the CTA would point at this page, so the slot states the tier's
-          own locked action word. */}
-      <div style={{ marginBottom: 20 }}>
-        <PlanComparison currentPlan={isProUser(currentUser) ? "pro" : "free"} />
-      </div>
-
-      {/* founding members */}
-      <div style={{ marginBottom: 20 }}>
-        <FounderCard />
-      </div>
-
-      {/* ⚠️ NO SECOND MATRIX. `CompareCard`, `GROUPS`, `FOOTNOTES`, `PlanCard` and `cell` are all
-          deleted — the comparison above is the page's one statement of what the plans include. */}
-    </div>
-  </div>
-  );
+  const { entitlement } = useScriptAllyDb();
+  const navigate = useNavigate();
+  const viewer = plansViewerOf(entitlement.basis);
+  const trialDaysLeft = entitlement.trialEndsMs ? Math.max(1, Math.ceil((entitlement.trialEndsMs - Date.now()) / DAY_MS)) : null;
+  return <PlansView viewer={viewer} trialDaysLeft={trialDaysLeft} selling={PLANS_ON_SALE} onBack={() => navigate("/account/plan")} />;
 };

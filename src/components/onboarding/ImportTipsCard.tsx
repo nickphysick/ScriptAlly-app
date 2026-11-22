@@ -10,10 +10,12 @@
  * ⚠️ There is no "carry on" or "leave" anywhere on this card, or on the screen it sits on (Nick's
  * ruling): the read finishes, and the screen moves on by itself.
  */
+import { useIsMobile } from "../shell/mobileChrome";
 import React, { useEffect, useState } from "react";
 import { IMPORT_TIPS, IMPORT_TIP_ART, TIP_EVERY_MS } from "../../lib/importTips";
 
 export const ImportTipsCard: React.FC<{ reduced: boolean }> = ({ reduced }) => {
+  const isMobile = useIsMobile();
   const [at, setAt] = useState(0);
   /* Bumped by Next tip so the auto-advance clock restarts even when the index ends where it began. */
   const [press, setPress] = useState(0);
@@ -34,7 +36,8 @@ export const ImportTipsCard: React.FC<{ reduced: boolean }> = ({ reduced }) => {
       </div>
       <div className="im-tip-main">
         <div className="im-tip-head">
-          <span className="im-tip-kick">DID YOU KNOW?</span>
+          {/* Sentence case on a phone (set-up on phones v1, 2B); the desktop's capitals unchanged. */}
+          <span className="im-tip-kick">{isMobile ? "Did you know?" : "DID YOU KNOW?"}</span>
           <span className="im-tip-num" data-im="tip-num">{at + 1} / {n}</span>
         </div>
         <div className="im-tip-stack" data-im="tip-stack" aria-live="polite">

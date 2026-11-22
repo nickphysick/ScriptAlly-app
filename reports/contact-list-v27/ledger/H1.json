@@ -1,0 +1,92 @@
+[
+ {
+  "where": "1512 header found",
+  "ok": true,
+  "detail": "no header"
+ },
+ {
+  "where": "1512 three columns",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "1512 on the page's ground",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "1512 art | title block | List health, left to right",
+  "ok": true,
+  "detail": "[{\"l\":112,\"r\":272,\"t\":135.75,\"b\":292.375,\"w\":160},{\"l\":306,\"r\":1117.5,\"t\":146.484375,\"b\":281.625,\"w\":811.5},{\"l\":1109.5,\"r\":1430,\"t\":152.0625,\"b\":276.0625,\"w\":320.5},-42]"
+ },
+ {
+  "where": "1512 the binoculars bird",
+  "ok": true,
+  "detail": "/images/contact/discover-binoculars-bird.webp 160"
+ },
+ {
+  "where": "1512 mirrored",
+  "ok": true,
+  "detail": "matrix(-1, 0, 0, 1, 0, 0)"
+ },
+ {
+  "where": "1512 title",
+  "ok": true,
+  "detail": "53 agents on file · \"Special Elite\", \"Co 36px"
+ },
+ {
+  "where": "1512 the subheader",
+  "ok": true,
+  "detail": "39 not yet queried"
+ },
+ {
+  "where": "1512 one button (header v2), its hooks kept; Add is navy",
+  "ok": true,
+  "detail": "1/0 rgb(42, 58, 82)"
+ },
+ {
+  "where": "1280 header found",
+  "ok": true,
+  "detail": "no header"
+ },
+ {
+  "where": "1280 three columns",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "1280 on the page's ground",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "1280 art | title block | List health, left to right",
+  "ok": true,
+  "detail": "[{\"l\":112,\"r\":272,\"t\":135.75,\"b\":292.375,\"w\":160},{\"l\":306,\"r\":885.5,\"t\":146.484375,\"b\":281.625,\"w\":579.5},{\"l\":877.5,\"r\":1198,\"t\":152.0625,\"b\":276.0625,\"w\":320.5},-42]"
+ },
+ {
+  "where": "1280 the binoculars bird",
+  "ok": true,
+  "detail": "/images/contact/discover-binoculars-bird.webp 160"
+ },
+ {
+  "where": "1280 mirrored",
+  "ok": true,
+  "detail": "matrix(-1, 0, 0, 1, 0, 0)"
+ },
+ {
+  "where": "1280 title",
+  "ok": true,
+  "detail": "53 agents on file · \"Special Elite\", \"Co 36px"
+ },
+ {
+  "where": "1280 the subheader",
+  "ok": true,
+  "detail": "39 not yet queried"
+ },
+ {
+  "where": "1280 one button (header v2), its hooks kept; Add is navy",
+  "ok": true,
+  "detail": "1/0 rgb(42, 58, 82)"
+ }
+]

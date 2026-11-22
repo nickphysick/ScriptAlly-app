@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L2",
+  "where": "1280 · population: search, Full screen and the list card",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1070,\"bLeft\":1189.71875,\"fH\":60,\"bH\":33.84375,\"fTop\":458.59375,\"bTop\":384.75,\"joint\":849,\"sheetC\":760,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · search and Full screen are adjacent",
+  "ok": false,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1070,\"bLeft\":1189.71875,\"fH\":60,\"bH\":33.84375,\"fTop\":458.59375,\"bTop\":384.75,\"joint\":849,\"sheetC\":760,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · both 60 tall (±1)",
+  "ok": false,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1070,\"bLeft\":1189.71875,\"fH\":60,\"bH\":33.84375,\"fTop\":458.59375,\"bTop\":384.75,\"joint\":849,\"sheetC\":760,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · their joint centre is the list card's (±2)",
+  "ok": false,
+  "detail": "849 vs 760"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · no keycap visible on the page (the sheet)",
+  "ok": true,
+  "detail": "0 visible kbd"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · population: search, Full screen and the list card",
+  "ok": true,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1186,\"bLeft\":1421.71875,\"fH\":60,\"bH\":33.84375,\"fTop\":458.59375,\"bTop\":384.75,\"joint\":1023,\"sheetC\":876,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · search and Full screen are adjacent",
+  "ok": false,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1186,\"bLeft\":1421.71875,\"fH\":60,\"bH\":33.84375,\"fTop\":458.59375,\"bTop\":384.75,\"joint\":1023,\"sheetC\":876,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · both 60 tall (±1)",
+  "ok": false,
+  "detail": "{\"f\":true,\"b\":true,\"s\":true,\"fRight\":1186,\"bLeft\":1421.71875,\"fH\":60,\"bH\":33.84375,\"fTop\":458.59375,\"bTop\":384.75,\"joint\":1023,\"sheetC\":876,\"kbd\":0}"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · their joint centre is the list card's (±2)",
+  "ok": false,
+  "detail": "1023 vs 876"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · no keycap visible on the page (the sheet)",
+  "ok": true,
+  "detail": "0 visible kbd"
+ }
+]

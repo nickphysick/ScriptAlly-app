@@ -1,0 +1,43 @@
+✓ 4070 modules transformed.
+✓ built in 14.22s
+[emu-guard] 38.4 GB free. Debug logs: /dev/null.
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.9s)
+QC163-1 ✓ queried: population — the drawer opened — 
+QC163-1 ✓ queried: an animation qc163-tint runs on the rim layer's tint — [["tint","running"]]
+QC163-1 ✗ queried: its colour is the stage's rim (#bfa87e) — ["rgb(42, 58, 82)"]
+QC163-1 ✓ queried: it rises above 0.5 and never above 0.72 — 0.719929
+QC163-1 ✓ partial: population — the drawer opened — 
+QC163-1 ✓ partial: an animation qc163-tint runs on the rim layer's tint — [["tint","running"]]
+QC163-1 ✗ partial: its colour is the stage's rim (#6f8fb3) — ["rgb(42, 58, 82)"]
+QC163-1 ✓ partial: it rises above 0.5 and never above 0.72 — 0.719929
+  ✘  2 [measure] › tests/e2e/qc163.measure.ts:223:15 › QC163-1 · the tint breathes in the current stage's rim (a queried and a partial card) (21.6s)
+QC163-3 ✓ population: the drawer has a field to type in — 
+QC163-3 ✓ population: the keys were seen in the drawer — 25
+QC163-3 ✗ from 200ms after the first key to the last, the tint is at rest (below 0.02) — ["0.453","0.464","0.475","0.486","0.498","0.509"]
+QC163-3 ✗ and stays so until 2s after the last key — 
+QC163-3 ✓ then it breathes again — max 0.696362
+  ✘  3 [measure] › tests/e2e/qc163.measure.ts:264:15 › QC163-3 · typing rests the tint; it returns 2s after the last key (13.5s)
+QC163-5 ✓ population: the save landed (queried → a partial asked for) — 
+QC163-5 ✓ one qc163-light, on the light — ["light"]
+QC163-5 ✓ it rotates from −40deg to 320deg — -40deg → 320deg
+QC163-5 ✓ 1300ms, opacity 0 → 1 (14%) → 1 (76%) → 0 — [{"offset":"null","easing":"linear","opacity":"0","rotate":"-40deg"},{"offset":"0.14","easing":"linear","opacity":"1"},{"offset":"0.76","easing":"linear","opacity":"1"},{"offset":"null","easing":"linear","opacity":"0","rotate":"320deg"}]
+QC163-5 ✓ with scale 1 1 (not mirrored) — ["1"]
+QC163-5 ✗ coloured for the stage moved TO (partial: #6f8fb3 → #d6e1ee) — conic-gradient(rgba(0, 0, 0, 0) 0deg, rgba(0, 0, 0, 0) 58%, rgb(191, 168, 126) 84%, rgb(243, 234, 217) 93%, rgba(0, 0, 0, 0) 100%)
+QC163-7 ✓ save: population — frames with the pop running — 60
+QC163-7 ✓ save: the pop's keyframes peak at 1.03 (42%), 620ms — [{"offset":"null","easing":"linear","scale":"0.985"},{"offset":"0.42","easing":"linear","scale":"1.03"},{"offset":"null","easing":"linear","scale":"1"}]
+QC163-7 ✓ save: the painted peak is above 1.025, never above 1.03 — 1.02944
+QC163-6 ✓ population: the undo landed (back to queried) — queried
+QC163-6 ✓ one qc163-light — 1
+QC163-6 ✓ it rotates from 40deg to −320deg (anticlockwise) — 40deg → -320deg
+QC163-6 ✓ mirrored: scale −1 1 — ["-1 1"]
+QC163-6 ✗ coloured for the stage returned TO (queried: #bfa87e → #f3ead9) — conic-gradient(rgba(0, 0, 0, 0) 0deg, rgba(0, 0, 0, 0) 58%, rgb(111, 143, 179) 84%, rgb(214, 225, 238) 93%, rgba(0, 0, 0, 0) 100%)
+QC163-7 ✓ undo: population — frames with the bump running — 56
+QC163-7 ✓ undo: the bump's keyframes dip to 0.975 (30%), 620ms, none above 1 — [{"offset":"null","easing":"linear","scale":"0.985"},{"offset":"0.3","easing":"linear","scale":"0.975"},{"offset":"null","easing":"linear","scale":"1"}]
+QC163-7 ✓ undo: the frame never exceeds 1 from the press to rest — 1
+  ✘  4 [measure] › tests/e2e/qc163.measure.ts:341:39 › QC163-5/6/7 · save: the light clockwise in the new stage, the pop; undo: mirrored, back, the old stage, the sink (15.1s)
+QC163-8 ✓ population: the breath, the tint's hold and fade, and the light were all seen — ["qc1612-breath","qc1612-rest","qc163-light","qc163-rim-breath","qc163-rim-rest","qc163-tint","qc163-tint-fade","qc163-tint-hold"]
+QC163-8 ✗ every one animates only opacity, rotate or scale — [["qc163-tint-fade",["opacity","boxShadow"]],["qc163-tint-fade",["opacity","boxShadow"]],["qc163-tint-fade",["opacity","boxShadow"]]]
+QC163-8 ✓ none is on the frame's own box (the paper is its ::before) — []
+  ✘  5 [measure] › tests/e2e/qc163.measure.ts:390:15 › QC163-8 · the breath, the hold, the fade and the light change only opacity, rotate and scale (16.3s)
+  4 failed
+  1 passed (1.7m)

@@ -1,0 +1,43 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Stage colours v1, Phase 2 (design-refs/stage-colours-v1/slide-out-card.html) — the slide-out query card in the stage
+ * colours. QcCard152 publishes its stage's four colours on the card (--band, --tint, --edge, --mark, and --fdisc for the
+ * footer disc) from lib/stageColours; this sheet only places them. Colours only: no box here changes size or place,
+ * except the label pill, whose 30px height and 14px / 600 word are the reference's.
+ *
+ * ⚠️ COLOUR IS THE STAGE. Navy is the agent's seal and the "needs you" button, never a stage. Every mark is ink.
+ * ⚠️ The offer's sheen is written once, in lib/stageColours OFFER_SHEEN; the bubble's restates it, and
+ *    stageColours.test.ts asserts the two are equal.
+ * ⚠️ THE CARD PORTALS WITH THE PANEL, so no page token reaches it: colours are literals or the card's own variables.
+ */
+
+/* the strip: ink on the band (the band itself is the inline background); its buttons on white discs */
+.qc152 .qc152-band[data-stage] { color: #1c130f; }
+.qc152 .qc152-band[data-stage] .qc152-x,
+.qc152 .qc152-band[data-stage] .qc152-bkto { background: rgba(255, 255, 255, 0.7); color: #1c130f; }
+.qc152 .qc152-band[data-stage] .qc152-x:hover,
+.qc152 .qc152-band[data-stage] .qc152-bkto:hover { background: #fff; }
+
+/* the agent's seal: navy, paper initials in the typewriter, as on the grid card; the header seal ringed white then navy */
+.qc152 .qc152-disc { background: #2a3a52; color: #f4eee5; font: 400 13px/1 var(--sp-type) !important; box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(42, 58, 82, 0.35); }
+.qc152 .qc152-av { background: #2a3a52; color: #f4eee5; font: 400 12px/1 var(--sp-type) !important; }
+
+/* the label: the stage's Tint, the mark in ink with nothing behind it, then the word */
+.qc152 .qc152-pill[data-stage] { height: 30px; background: var(--tint); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.09); font: 600 14px/1 var(--sp-serif); color: #1c130f; }
+.qc152 .qc152-pill[data-stage] .qc152-cap { height: 30px; background: none; }
+
+/* the thread: only the agent's bubbles are coloured (QcBubble152 sets --bt / --be from the stage the reply moved to);
+   an offer's carries the sheen; on full and offer the stamp darkens to read */
+.qc152 .qc152-m.them[data-status="Offer"]:not(.qc1522-draft) .qc152-bx {
+  background:
+    linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
+    #efcdc9;
+}
+.qc152 .qc152-m.them:is([data-status="Full Requested"], [data-status="Revise & Resubmit"], [data-status="Offer"]) .qc152-ts { color: var(--sp-quiet); }
+
+/* the footer: the disc behind its mark is the card's Band (fading to white when quiet), the mark in ink */
+.qc152 .qc152-rb .qc152-fg, .qc152 .qc152-rb .qc152-fc { background: var(--fdisc, #fff); }
+.qc152 .qc152-rb .qc152-fg:not(.grey), .qc152 .qc152-rb:not(.late) .qc152-fc { color: #1c130f; }
+.qc152[data-quiet] .qc152-rb .qc152-fg, .qc152[data-quiet] .qc152-rb .qc152-fc { box-shadow: inset 0 0 0 1px #ece4d6; }

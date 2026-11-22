@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "AC21-2f",
+  "where": "contact · the pencil: 0 at rest, 1 on hover, 1 on focus; 28px",
+  "ok": false,
+  "detail": "0 · 1 · 0 · 28.5802001953125"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "how · the pencil: 0 at rest, 1 on hover, 1 on focus; 28px",
+  "ok": false,
+  "detail": "0 · 1 · 0 · 28.5802001953125"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "wishlist · the pencil: 0 at rest, 1 on hover, 1 on focus; 28px",
+  "ok": false,
+  "detail": "0 · 1 · 0 · 28.580322265625"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "genres · the pencil: 0 at rest, 1 on hover, 1 on focus; 28px",
+  "ok": false,
+  "detail": "0 · 1 · 0 · 28.580322265625"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "materials · the pencil: 0 at rest, 1 on hover, 1 on focus; 28px",
+  "ok": false,
+  "detail": "0 · 1 · 0 · 28.5802001953125"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "clicking the how value opens only how",
+  "ok": true,
+  "detail": "[\"how\"]"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "clicking the wishlist value opens only wishlist",
+  "ok": true,
+  "detail": "[\"wishlist\"]"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "clicking the genres value opens only genres",
+  "ok": true,
+  "detail": "[\"genres\"]"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "clicking the materials value opens only materials",
+  "ok": true,
+  "detail": "[\"materials\"]"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "Tab reaches the contact pencil",
+  "ok": true,
+  "detail": "pen:contact pen:how pen:wishlist pen:genres pen:materials"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "Tab reaches the how pencil",
+  "ok": true,
+  "detail": "pen:contact pen:how pen:wishlist pen:genres pen:materials"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "Tab reaches the wishlist pencil",
+  "ok": true,
+  "detail": "pen:contact pen:how pen:wishlist pen:genres pen:materials"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "Tab reaches the genres pencil",
+  "ok": true,
+  "detail": "pen:contact pen:how pen:wishlist pen:genres pen:materials"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "Tab reaches the materials pencil",
+  "ok": true,
+  "detail": "pen:contact pen:how pen:wishlist pen:genres pen:materials"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "Tab reaches wishlist's cross and tick",
+  "ok": true,
+  "detail": "cross:wishlist tick:wishlist cross:genres tick:genres"
+ },
+ {
+  "lock": "AC21-2f",
+  "where": "Tab reaches genres's cross and tick",
+  "ok": true,
+  "detail": "cross:wishlist tick:wishlist cross:genres tick:genres"
+ }
+]

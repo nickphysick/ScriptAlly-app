@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "PK26-T-1512",
+  "where": "the page scrolled and the bar is stuck at the top",
+  "ok": true,
+  "detail": "{\"restTop\":253.875,\"top\":0,\"scrolled\":396,\"sheet\":[248,1504],\"band\":[248,1504],\"tabL\":72}"
+ },
+ {
+  "lock": "PK26-T-1512",
+  "where": "its ground starts at the sheet's left edge (±1)",
+  "ok": true,
+  "detail": "248 vs 248"
+ },
+ {
+  "lock": "PK26-T-1512",
+  "where": "…and ends at its right edge (±1)",
+  "ok": true,
+  "detail": "1504 vs 1504"
+ },
+ {
+  "lock": "PK26-T-1512",
+  "where": "the tabs are still 72px in (±1)",
+  "ok": true,
+  "detail": "72.0"
+ }
+]

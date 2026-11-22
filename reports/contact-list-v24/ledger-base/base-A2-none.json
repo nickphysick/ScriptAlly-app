@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "A2-none",
+  "where": "population: the header drew",
+  "ok": false,
+  "detail": "{\"header\":false,\"banner\":false}"
+ },
+ {
+  "lock": "A2-none",
+  "where": "no banner at no gaps",
+  "ok": true,
+  "detail": "{\"header\":false,\"banner\":false}"
+ }
+]

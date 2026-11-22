@@ -28,8 +28,16 @@ import { bookVersionsOf, latestVersion } from "./bookVersions";
 type PkgEdge = Pick<SubmissionPackage, "id" | "bookVersionId">;
 type QEdge = Pick<Query, "id" | "packageId" | "status">;
 
-/** The version a query's package states, or null — the ONLY route from a query to a version. */
-export const queryVersionId = (q: Pick<Query, "packageId">, packages: readonly PkgEdge[]): string | null => {
+/**
+ * The version a query went with, or null.
+ *
+ * ⚠️ VERSIONS v2 (D3/D4) — THE QUERY'S OWN RECORDED VERSION COMES FIRST, then its package's. It is the first two steps
+ * of `resolveQueryVersion` (lib/versionsV2); the third (Original by date) needs the manuscript's versions, which this
+ * signature does not carry and whose callers are the Manuscripts page's (another stream's files). Escalated in
+ * reports/versions-v2.md rather than widened here.
+ */
+export const queryVersionId = (q: Pick<Query, "packageId"> & { bookVersionId?: string }, packages: readonly PkgEdge[]): string | null => {
+  if (q.bookVersionId) return q.bookVersionId;
   if (!q.packageId) return null;
   const p = packages.find((x) => x.id === q.packageId);
   return p?.bookVersionId || null;

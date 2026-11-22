@@ -24,6 +24,7 @@ import {
 import type { WishlistEvery } from "../../../lib/contactPrefs";
 import { POINTS, POINTS_LINE, POINTS_ORDER, agentPct, appliesTo, minutesFor, taskOrder, type Health } from "../../../lib/listHealth";
 import { bookGenreHit } from "../../../lib/genreMatch";
+import { healthTone, ringColours } from "../../../lib/contactV256";
 import { encodeMats, matsOf, matsRows, type CardMats } from "../../../lib/cardDraft";
 import { materialRowsFromAgent, summaryFromRows, validateMaterials } from "../../../lib/agentMaterials";
 import { agentInitials } from "../../../lib/agentDisplay";
@@ -75,6 +76,7 @@ export const QUESTION: Record<GapKey, (first: string) => string> = {
   genres: (f) => `Which genres does ${f} take?`,
   wishlist: (f) => `What is ${f} hoping to find?`,
   reopen: (f) => `When does ${f} reopen to queries?`,
+  agency: (f) => `Which agency is ${f} with?`,
 };
 export const UNLOCK: Record<GapKey, string> = {
   reply: "Due dates and follow-ups on every query you send.",
@@ -82,10 +84,11 @@ export const UNLOCK: Record<GapKey, string> = {
   genres: "Ticks the agents who take what you write, before you query.",
   wishlist: "Their own words, to judge fit and tailor your letter.",
   reopen: "A reminder on your to-do list when a closed agent reopens.",
+  agency: "A warning before you query two agents at one agency.",
 };
 const DETAIL_NAME = GAP_DETAIL;
 /** v18.2 §D.5 — "Saved {first}'s {detail}." */
-const SAVED_WORD: Record<GapKey, string> = { reply: "reply time", materials: "materials", genres: "genres", wishlist: "wishlist", reopen: "reopening date" };
+const SAVED_WORD: Record<GapKey, string> = { reply: "reply time", materials: "materials", genres: "genres", wishlist: "wishlist", reopen: "reopening date", agency: "agency" };
 export const HK_FOOT_V18 = "We only ask for details that make QueryHawk more useful to you.";
 const nameOf = (a: Agent) => (a.name ?? "").trim() || (a.agency ?? "").trim();
 /** the agent's stored website as a link (the panel's own reading of the field), or null */
@@ -116,11 +119,13 @@ const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(p
 
 const HeadRing: React.FC<{ pct: number; bump: number; ringRef: React.Ref<HTMLSpanElement> }> = ({ pct, bump, ringRef }) => {
   const r = 46, c = 2 * Math.PI * r, p = Math.max(0, Math.min(100, pct));
+  const col = ringColours(p, "navy");
   return (
-    <span key={bump} className={`hk8-ring${bump ? " is-bump" : ""}`} data-hk8="ring" ref={ringRef}>
+    <span key={bump} data-tone={healthTone(p)} className={`hk8-ring${bump ? " is-bump" : ""}`} data-hk8="ring" ref={ringRef}>
       <svg viewBox="0 0 104 104" aria-hidden="true">
-        <circle cx="52" cy="52" r={r} fill="none" stroke="#d9734f" strokeWidth="8" />
-        {p > 0 ? <circle cx="52" cy="52" r={r} fill="none" stroke="#f4eee5" strokeWidth="8" strokeLinecap="butt" strokeDasharray={`${(c * p) / 100} ${c}`} transform="rotate(-90 52 52)" /> : null}
+        {/* v25.6 C — the header is ink, so the ring takes healthTone's on-navy colours */}
+        <circle data-hk8="ring-track" cx="52" cy="52" r={r} fill="none" style={{ stroke: col.track }} strokeWidth="8" />
+        {p > 0 ? <circle data-hk8="ring-arc" cx="52" cy="52" r={r} fill="none" style={{ stroke: col.arc }} strokeWidth="8" strokeLinecap="butt" strokeDasharray={`${(c * p) / 100} ${c}`} transform="rotate(-90 52 52)" /> : null}
       </svg>
       <span className="hk8-ring-h"><img src={`${HK_HAWK.src}?v=${HK_HAWK.version}`} alt="" /></span>
     </span>
@@ -160,7 +165,7 @@ const Flights: React.FC<{ list: Flight[]; onLand: (id: number) => void }> = ({ l
 
 const matsOk = (m: CardMats) => (m.ql || m.syn.on || m.smp.on || m.oth.on) && !(m.oth.on && !m.oth.text.trim());
 
-const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: readonly Agent[]; onAnswer: (fix: HkFix | null) => void }> = ({ item, book, today, agents, onAnswer }) => {
+export const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: readonly Agent[]; onAnswer: (fix: HkFix | null) => void }> = ({ item, book, today, agents, onAnswer }) => {
   const a = item.agent;
   const [weeks, setWeeks] = useState<number | null>(null);
   const [mats, setMats] = useState<CardMats>(() => matsOf([]));
@@ -245,6 +250,13 @@ const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: re
         </div>
       );
     }
+    case "agency":
+      return (
+        <div className="hk8-field" data-hk8="field" data-gap="agency">
+          <input className="hk8-ta hk8-in" data-hk8="agency" value={wish} aria-label={QUESTION.agency(firstNameOf(a))} placeholder="e.g. Fenwick & Rowe" autoComplete="off"
+            onChange={(e) => { setWish(e.target.value); onAnswer(e.target.value.trim() ? { kind: "agency", agency: e.target.value.trim() } : null); }} />
+        </div>
+      );
     default: {
       const unhandled: never = item.gap;
       return unhandled;

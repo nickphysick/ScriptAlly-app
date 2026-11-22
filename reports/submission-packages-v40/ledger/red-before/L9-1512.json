@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L9-1512",
+  "where": "the shelf is 1160px wide (±1)",
+  "ok": false,
+  "detail": "{\"b\":null,\"want\":1160}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the shelf is centred (±1)",
+  "ok": false,
+  "detail": "{\"b\":null,\"sheet\":{\"l\":248,\"w\":1256}}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the workbench frame is 1160px wide (±1)",
+  "ok": false,
+  "detail": "{\"b\":null,\"want\":1160}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the workbench frame is centred (±1)",
+  "ok": false,
+  "detail": "{\"b\":null,\"sheet\":{\"l\":248,\"w\":1256}}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the tracking body is 1160px wide (±1)",
+  "ok": false,
+  "detail": "{\"b\":null,\"want\":1160}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the tracking body is centred (±1)",
+  "ok": false,
+  "detail": "{\"b\":null,\"sheet\":{\"l\":248,\"w\":1256}}"
+ },
+ {
+  "lock": "L9-1512",
+  "where": "the workbench header's art sits left of its title",
+  "ok": false,
+  "detail": "{\"art\":null,\"ttl\":null}"
+ }
+]

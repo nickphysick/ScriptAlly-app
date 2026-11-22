@@ -1,0 +1,98 @@
+[
+ {
+  "lock": "CB17",
+  "where": "1512x982 chosen",
+  "ok": true,
+  "detail": "\"2 notes chosen\""
+ },
+ {
+  "lock": "CB17",
+  "where": "1512x982 toast",
+  "ok": true,
+  "detail": "toast \"Started #agents with 2 notesUndo\""
+ },
+ {
+  "lock": "CB17",
+  "where": "1512x982 minted",
+  "ok": true,
+  "detail": "def {\"id\":\"tag-0vmx0shh\",\"label\":\"agents\",\"colour\":\"parchment\"} (newTag ids start \"tag-\")"
+ },
+ {
+  "lock": "CB17",
+  "where": "1512x982 f1",
+  "ok": true,
+  "detail": "f1 [\"tag-0vmx0shh\"]"
+ },
+ {
+  "lock": "CB17",
+  "where": "1512x982 f3 keeps the rest",
+  "ok": true,
+  "detail": "f3 [\"tag-0vmx0shh\",\"cb2seed-tag-strategy\"] (was [\"cb2seed-tag-calls\",\"cb2seed-tag-strategy\"])"
+ },
+ {
+  "lock": "CB17",
+  "where": "1512x982 opens the pile",
+  "ok": true,
+  "detail": "the new pile is open"
+ },
+ {
+  "lock": "CB17",
+  "where": "1512x982 undo f1",
+  "ok": true,
+  "detail": "f1 []"
+ },
+ {
+  "lock": "CB17",
+  "where": "1512x982 undo f3",
+  "ok": true,
+  "detail": "f3 [\"cb2seed-tag-calls\",\"cb2seed-tag-strategy\"]"
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 chosen",
+  "ok": true,
+  "detail": "\"2 notes chosen\""
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 toast",
+  "ok": true,
+  "detail": "toast \"Started #agents with 2 notesUndo\""
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 minted",
+  "ok": true,
+  "detail": "def {\"id\":\"tag-l843d89j\",\"label\":\"agents\",\"colour\":\"parchment\"} (newTag ids start \"tag-\")"
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 f1",
+  "ok": true,
+  "detail": "f1 [\"tag-l843d89j\"]"
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 f3 keeps the rest",
+  "ok": true,
+  "detail": "f3 [\"tag-l843d89j\",\"cb2seed-tag-strategy\"] (was [\"cb2seed-tag-calls\",\"cb2seed-tag-strategy\"])"
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 opens the pile",
+  "ok": true,
+  "detail": "the new pile is open"
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 undo f1",
+  "ok": true,
+  "detail": "f1 []"
+ },
+ {
+  "lock": "CB17",
+  "where": "1280x800 undo f3",
+  "ok": true,
+  "detail": "f3 [\"cb2seed-tag-calls\",\"cb2seed-tag-strategy\"]"
+ }
+]

@@ -9,7 +9,7 @@
  *
  *   #/onb-lab?s=frame&form=setup&flow=B&at=list&ms=1
  *   #/onb-lab?s=frame&form=account&mode=signin
- *   #/onb-lab?s=import-page&ent=free_available|free_used|pro_available|pro_month_used
+ *   #/onb-lab?s=import-page&ent=available|used
  *   #/onb-lab?s=photos — the real ImportFlow behind the fork, for photos (smart-import-photos-v1):
  *     choose files on [data-picker="photos"]; set window.__SA_SMART_IMPORT_MOCK to read them.
  *
@@ -31,7 +31,7 @@ import type { V9Stage } from "../../lib/onboardingV9";
 import { BranchB } from "./BranchB";
 import { CaptureFork } from "./CaptureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
-import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
+import { UsedFree, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
 import { emptyManuscriptFields } from "./ManuscriptFields";
 import { ManuscriptStatus } from "../../types";
 import { LabReading, LabImporting, LabOverview, LabReview, labCommit, labFixture, LAB_FILE, LAB_UID } from "./OnbLabImport";
@@ -119,7 +119,7 @@ const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorM
         <BranchB
           lab={lab}
           onSkip={labSpy("skip")} onExit={labSpy("back")} onSaveBook={async () => false} onEnsureManuscript={async () => "lab-ms"}
-          onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
+          onAddByHand={labSpy("byhand")}
           onExitMode={setExit} onImporting={setImporting} onHandoff={() => setHandingOff(true)}
           onImportComplete={(_o, destination) => { labSpy("importComplete")(destination); setArrived(true); }}
         />
@@ -141,11 +141,9 @@ const LabPhotos: React.FC = () => {
       />
       {screen === "idle" && (
         <CaptureFork
-          tier="free"
           onChooseFile={() => flowRef.current?.chooseFile()} onDropFile={(f) => flowRef.current?.dropFile(f)}
           onUsePhotos={() => flowRef.current?.openPhotos()} onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
-          onUploadTemplate={labSpy("templatePicker")} onAddByHand={labSpy("byhand")} onBack={labSpy("back")}
-          onNothingYet={labSpy("later")} onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
+          onBack={labSpy("back")} onNothingYet={labSpy("later")} onDownloadTemplate={labSpy("download")}
         />
       )}
     </LabSetup>
@@ -232,10 +230,8 @@ export const OnbLab: React.FC = () => {
     return (
       <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
         <CaptureFork
-          tier={tier}
-          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUsePhotos={labSpy("usePhotos")} onDropPhotos={labSpy("pickPhotos")} onUploadTemplate={labSpy("templatePicker")}
-          onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
-          onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
+          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUsePhotos={labSpy("usePhotos")} onDropPhotos={labSpy("pickPhotos")}
+          onBack={labSpy("back")} onNothingYet={labSpy("skip")} onDownloadTemplate={labSpy("download")}
         />
       </LabSetup>
     );
@@ -244,9 +240,8 @@ export const OnbLab: React.FC = () => {
 
   /* The dead ends of "Your list" — each its own screen, each handler a spy. */
   const dead: Record<string, React.ReactNode> = {
-    "used-free": <UsedFree onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUseTemplate={labSpy("useTemplate")} />,
-    "used-pro": <UsedProMonth nextLabel="1 November 2026" onBack={labSpy("back")} onAddByHand={labSpy("byhand")} />,
-    unreadable: <Unreadable onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onDownload={labSpy("download")} />,
+    "used-free": <UsedFree onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUpload={labSpy("upload")} />,
+    unreadable: <Unreadable onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUpload={labSpy("upload")} />,
     nothing: (
       <NothingImported
         outcome={{ queriesImported: 0, agentsCreated: 0, agentsMerged: 0, queriesSkipped: 3, errors: q.get("errs") === "1" ? ["Row 4: no agent or agency name.", "Row 9: the date could not be read."] : [] }}
@@ -255,7 +250,7 @@ export const OnbLab: React.FC = () => {
     ),
     unloaded: <Unloaded onAddByHand={labSpy("byhand")} onRestart={labSpy("restart")} />,
   };
-  if (dead[s]) return <LabSetup flow="B" at="list" manuscript plan={s === "used-pro" ? UserPlan.PRO : UserPlan.FREE}>{dead[s]}</LabSetup>;
+  if (dead[s]) return <LabSetup flow="B" at="list" manuscript plan={UserPlan.FREE}>{dead[s]}</LabSetup>;
 
   /* The import's steps (part 2). Each sits where `Onboarding` puts it: on "Your list", with the
      manuscript card showing. */
@@ -265,13 +260,8 @@ export const OnbLab: React.FC = () => {
   /* The Import page (part 3): its tiles in each entitlement state, every press a spy. The flow's
      own screens are the ones above; on the real route they render in the app's sheet. */
   if (s === "import-page") {
-    const reason = (q.get("ent") ?? "free_available") as SmartImportEntitlement["reason"];
-    const ent: SmartImportEntitlement = {
-      allowed: reason === "free_available" || reason === "pro_available",
-      reason,
-      tier: reason.startsWith("pro") ? "pro" : "free",
-      ...(reason === "pro_month_used" ? { nextAvailable: "2026-11-01" } : {}),
-    } as SmartImportEntitlement;
+    const reason: SmartImportEntitlement["reason"] = q.get("ent") === "used" ? "used" : "available";
+    const ent: SmartImportEntitlement = { allowed: reason === "available", reason };
     /* `fx=` mounts the shared flow on its summary over a fixture, with a stand-in commit, so the
        in-app Cancel and the end of an import can be driven without an account. `live=1` leaves the
        tiles' real handlers on (the lab has no manuscript, so a press opens the book step). */
@@ -286,10 +276,10 @@ export const OnbLab: React.FC = () => {
   }
 
   if (s === "reading") return imp(<LabReading hold={q.get("hold")} rows={Number(q.get("rows")) || null} speed={Number(q.get("speed")) || 1} stream={q.get("stream")} />, "none");
-  if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} /></LabSetup>;
+  if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} intro={q.get("intro") === "1"} /></LabSetup>;
   if (s === "photos") return <LabPhotos />;
   if (s === "flow") return <LabFlow fx={q.get("fx")} skip={Number(q.get("skip") ?? 0)} none={q.get("none") === "1"} floorMs={Number(q.get("floor") ?? 600)} />;
-  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} rows={q.get("rows") ? Number(q.get("rows")) : null} />, "ask");
+  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} read={q.get("read") === "headings" ? "template" : "smart"} />, "ask");
   if (s === "review") return imp(<LabReview fx={q.get("fx")} />, "ask");
 
   if (s === "frame" && q.get("form") === "account") {

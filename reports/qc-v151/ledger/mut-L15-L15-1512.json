@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"rows\":70,\"heads\":4}"
+ },
+ {
+  "where": "a track on every row",
+  "ok": true,
+  "detail": "70/70"
+ },
+ {
+  "where": "no disc",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "headings transparent",
+  "ok": false,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "urgency groups",
+  "ok": true,
+  "detail": "Overdue|Upcoming|Watch and wait|No date"
+ },
+ {
+  "where": "Group menu",
+  "ok": true,
+  "detail": "{\"title\":\"Group Birds-eye by\",\"opts\":[\"Urgency·Overdue, upcoming, watch and wait\",\"Status·Where each query stands\",\"None·One timeline\"]}"
+ },
+ {
+  "where": "Sort menu",
+  "ok": true,
+  "detail": "{\"title\":\"Sort within groups by\",\"opts\":[\"Due date·Soonest first\",\"Waiting longest·Oldest query first\",\"Agent A–Z·By name\"]}"
+ },
+ {
+  "where": "Closed tab: Nothing on the timeline",
+  "ok": true,
+  "detail": "{\"t\":\"Nothing on the timeline\",\"back\":true}"
+ }
+]

@@ -64,7 +64,7 @@
 .mlib-book:focus-visible {
   box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 12px 30px rgba(58, 28, 20, 0.09);
 }
-.mlib-book:focus-visible { outline: 2px solid var(--msv-hue); outline-offset: 2px; }
+.mlib-book:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* A shelved book is kept, not gone — dimmed on the shelf, full on hover so it can still be read. */
 .mlib-book.shelved { opacity: 0.62; }
@@ -157,7 +157,7 @@
   transition: border-color 0.15s, background 0.15s;
 }
 .mlib-add:hover, .mlib-add:focus-visible { border-color: var(--msv-hue); background: var(--msv-card); }
-.mlib-add:focus-visible { outline: 2px solid var(--msv-hue); outline-offset: 2px; }
+.mlib-add:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .mlib-addl {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px; letter-spacing: 0.17em; text-transform: uppercase;

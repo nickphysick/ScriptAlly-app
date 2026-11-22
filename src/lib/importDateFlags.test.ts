@@ -49,7 +49,9 @@ describe("D3 · every date flag reaches the review as an open reason on its row"
     expect(byRaw("23/04/2026").sentDate?.slice(0, 10)).toBe("2026-04-23");
     expect(openDate(byRaw("23/04/2026"))).toEqual([]);
     expect(queryStatusOf(byRaw("23/04/2026"))).toBe("captured");
-    expect(reviewTallies(r.agents, r.queries).queries.sharpen).toBe(1);
+    /* RE-POINTED (two-door import v1): Marianne Webb's row (Full Sent, with a last response) now also
+       asks "Outcome missing" — a reply after the full was sent that the sheet never names. */
+    expect(reviewTallies(r.agents, r.queries).queries.sharpen).toBe(2);
     expect(r.queries.filter((q) => q.sentDate).length, "the other four dates were read").toBe(4);
   });
 });

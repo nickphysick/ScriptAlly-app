@@ -36,10 +36,11 @@ describe("C1 · one count everywhere, for template-mixed.csv", () => {
     expect(openAgentQuestions(review.agents).map((q) => q.ask).sort(), "the nameless row and the agent with no agency are asked").toEqual(["nameless", "no-agency"]);
 
     // the summary, as rendered
-    const html = renderToStaticMarkup(<ImportOverview result={parsed.result} manuscriptTitle="The Salt Road" fileName="template-mixed.csv" rowCount={parsed.rowsRead} onContinue={() => {}} />);
+    const html = renderToStaticMarkup(<ImportOverview result={parsed.result} manuscriptTitle="The Salt Road" fileName="template-mixed.csv" source="template" onContinue={() => {}} />);
     expect(num(html, "card-agents"), "the summary's agents").toBe(liveAgents);
     expect(num(html, "card-queries"), "the summary's queries").toBe(liveQueries);
-    expect(html).toContain("4 rows, read and sorted. Nothing is saved yet.");
+    /* RE-POINTED (two-door import v1): the row count line gave way to the line saying how it was read */
+    expect(html).toContain("Your headings matched ours, so it was read straight in and checked against QueryHawk&#x27;s rules. No wait.");
 
     // …and its sums still hold over the totals (OB2 S1's rule)
     const key = agentKey(review.agents, review.queries);

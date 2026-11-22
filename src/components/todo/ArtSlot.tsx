@@ -36,7 +36,14 @@ export type ArtSlotName =
   | "agent-unknown"     // Query Centre: the agent context panel with nothing on file to report
   | "no-quick-picks"    // Query Centre stage 1: no unqueried contacts to suggest
   | "pane-unselected"   // Query Centre: the reading pane before a query is chosen
-  | "package-mark";     // the submission-package group's mark — ONE mark for every package
+  | "package-mark"      // the submission-package group's mark — ONE mark for every package
+  | "dash-mentor-standing"   // Dashboard first visit v1: the Mentor beside the top tip
+  | "dash-courier-letter"    // Dashboard first visit v1: the set-up card's "Yes" path
+  | "dash-scout-binoculars"  // Dashboard first visit v1: the set-up card's "Not yet" path
+  | "dash-mentor-pointing"   // Dashboard feed v1: the Mentor and the chick, pointing, in the Top tip's header
+  /* Workspace headers v1 (14 Nov): the navy header's drawing on six more workspace pages (the Corkboard reuses
+     "corkboard-header") — placeholders until the cut-outs arrive */
+  | "responses-header" | "analytics-header" | "discover-header" | "comps-header" | "versions-header" | "manuscripts-header";
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -141,6 +148,69 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "A squared-up stack of papers tied with a ribbon",
     w: 40, h: 40,
     alt: "A small stack of prepared papers, tied",
+  },
+  /* DASHBOARD FIRST VISIT v1 (ref design-refs/dashboard-first-visit-v1/). The three drawings the pre-query
+     dashboard is waiting for — ⚠️ PLACEHOLDERS UNTIL NICK SUPPLIES THEM; each box is the ref's, so nothing moves
+     when they land. Never an image already on the page (the chart's Mentor, the Closed card's Archivist). */
+  "dash-mentor-standing": {
+    caption: "The Mentor, standing, beside the top tip.",
+    w: 110, h: 140,
+    alt: "The Mentor hawk, standing",
+  },
+  "dash-courier-letter": {
+    caption: "The courier hawk carrying a letter.",
+    w: 140, h: 118,
+    alt: "The courier hawk carrying a letter",
+  },
+  /* Dashboard feed v1 · the Top tip card's yellow header: the Mentor pointing, the chick beside him, standing on the
+     header's bottom edge. Supplied with the pack (design-refs/dashboard-feed-v1/art/mentor-pointing.png, already
+     flipped), resized to 317×260 — 2.5× the 104px it is drawn at. */
+  "dash-mentor-pointing": {
+    caption: "The Mentor pointing, with the chick beside him, in the Top tip's header.",
+    w: 317, h: 260,
+    src: "/images/dash/mentor-pointing.png?v=1",
+    alt: "The Mentor hawk pointing, with a chick beside him",
+  },
+  /* Workspace headers v1 (14 Nov): the shared navy header's drawing (shell/WorkspaceNavyHeader), in the Query Centre
+     header's art column. ⚠️ HEADER SLOTS, against this file's "NOT in page headers" — Nick's ruling for the navy
+     headers (as Query letters v2.4's was), which postdates that rule. 190 × 142 (4:3), the box each drawing will fill.
+     When one lands, give its brief a `src` and nothing else moves. */
+  "responses-header": {
+    caption: "The Responses header — the wall-building hawk, cut out, for the navy panel beside the page title.",
+    w: 190, h: 142,
+    alt: "The hawk building a wall of replies",
+  },
+  "analytics-header": {
+    caption: "The Analytics header — the Archivist with his ledger, cut out, for the navy panel.",
+    w: 190, h: 142,
+    /* Analytics v26 §A: the Archivist enrolled at design-refs/analytics-v21/analytics-archivist.webp (same bytes) */
+    src: "/images/analytics/analytics-archivist.webp?v=1",
+    alt: "The Archivist hawk reading his ledger",
+  },
+  "discover-header": {
+    caption: "The Discover header — the Scout with his binoculars, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Scout hawk looking through binoculars",
+  },
+  "comps-header": {
+    caption: "The Comparable titles header — the Archivist carrying books, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Archivist hawk carrying a stack of books",
+  },
+  "versions-header": {
+    caption: "The Versions header — the Scribe writing in his book, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Scribe hawk writing in a book",
+  },
+  "manuscripts-header": {
+    caption: "The Manuscripts header — the Scribe with his quill, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Scribe hawk holding a quill",
+  },
+  "dash-scout-binoculars": {
+    caption: "The scout hawk with binoculars.",
+    w: 140, h: 118,
+    alt: "The scout hawk looking through binoculars",
   },
   "pane-unselected": {
     caption: "A letter rack, filed and waiting for one to be drawn out",

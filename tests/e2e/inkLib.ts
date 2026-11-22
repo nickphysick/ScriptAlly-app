@@ -86,17 +86,17 @@ const DOM_MUTATIONS: Record<string, string> = {
   "ms2-swap": `(() => { const a = document.querySelector('.ws-cap--bar .ws-capr'); const h = document.querySelector('[data-shell="help"]');
     h && h.addEventListener('click', (e) => { if (e.isTrusted) { e.stopImmediatePropagation(); a && a.click(); } }, true); })()`,
   /* Add a manuscript re-enabled: the disabled mark taken off every entry as it appears */
-  "ms4-enable": `(() => { const strip = () => document.querySelectorAll('[data-cap="manuscript"], [data-ms="add"], .sp-res--soon').forEach((e) => e.removeAttribute('aria-disabled'));
+  "ms4-enable": `(() => { const strip = () => document.querySelectorAll('[data-cap="manuscript"], [data-ms="add"], .sp-res--soon, .sv1-row--soon').forEach((e) => e.removeAttribute('aria-disabled'));
     strip(); new MutationObserver(strip).observe(document.body, { subtree: true, childList: true, attributes: true }); })()`,
   /* "Queries Hub" put back in search */
-  "ms8-hub": `(() => { const fix = () => document.querySelectorAll('.sp-pal .sp-t1').forEach((e) => { if (e.textContent === 'Query Centre') e.textContent = 'Queries Hub'; });
+  "ms8-hub": `(() => { const fix = () => document.querySelectorAll('.sp-pal .sp-t1, .sp-pal .sv1-t1').forEach((e) => { if (e.textContent === 'Query Centre') e.textContent = 'Queries Hub'; });
     new MutationObserver(fix).observe(document.body, { subtree: true, childList: true, characterData: true }); })()`,
   /* the generic grid on every Go-to row */
   "ms9-grid": `(() => { const G = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>';
-    const fix = () => document.querySelectorAll('.sp-res[data-kind="page"] .sp-ic').forEach((e) => { if (!e.hasAttribute('data-mut')) { e.setAttribute('data-mut', '1'); e.innerHTML = G; } });
+    const fix = () => document.querySelectorAll('.sp-res[data-kind="page"] .sp-ic, .sv1-row[data-kind="page"] .sv1-tile').forEach((e) => { if (!e.hasAttribute('data-mut')) { e.setAttribute('data-mut', '1'); e.innerHTML = G; } });
     new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); })()`,
   /* a keycap for a key nothing binds */
-  "ms10-j": `(() => { const fix = () => { const r = document.querySelector('.sp-res .sp-k'); if (r && !r.querySelector('[data-mut]')) { const k = document.createElement('span'); k.className = 'sp-kc'; k.setAttribute('data-mut', '1'); k.textContent = '⌘J'; r.appendChild(k); } };
+  "ms10-j": `(() => { const fix = () => { const r = document.querySelector('.sv1-row .sv1-rt'); if (r && !r.querySelector('[data-mut]')) { const k = document.createElement('span'); k.className = 'sv1-key'; k.setAttribute('data-mut', '1'); k.textContent = '⌘J'; r.appendChild(k); } };
     new MutationObserver(fix).observe(document.body, { subtree: true, childList: true }); })()`,
   /* v131: a header above the desk */
   "qc1-header": `(() => { const d = document.querySelector('[data-qcv="courts"]'); if (!d) return; const h = document.createElement('h3'); h.setAttribute('data-mut', 'qc1'); h.textContent = 'At a glance'; h.style.cssText = 'margin:22px 0 0;font-size:24px'; d.parentElement.insertBefore(h, d); })()`,

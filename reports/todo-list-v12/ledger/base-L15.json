@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "L15",
+  "where": "1512: pinned",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1512: the header is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1512: Needs you now is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1512: Everything else is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1512: find in the toolbar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1512: the pin in the toolbar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1512: the row does not overflow (scrollWidth ≤ clientWidth)",
+  "ok": true,
+  "detail": "1200 / 1200"
+ },
+ {
+  "lock": "L15",
+  "where": "1280: pinned",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1280: the header is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1280: Needs you now is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1280: Everything else is hidden",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1280: find in the toolbar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1280: the pin in the toolbar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L15",
+  "where": "1280: the row does not overflow (scrollWidth ≤ clientWidth)",
+  "ok": true,
+  "detail": "1156 / 1156"
+ }
+]

@@ -51,7 +51,7 @@ const Bars: React.FC<{ weeks: readonly GlanceWeek[]; loading: boolean }> = ({ we
         /* an empty week is a 1px tick; this week's is rust even when it is empty, so the last mark is always "now" */
         if (w.n === 0) return <rect key={w.start} data-cl16="strip-bar" data-n="0" data-last={last ? "true" : "false"} x={x} y={39} width={bw} height={1} fill={last ? "#a2452a" : "rgba(28, 19, 15, 0.15)"}><title>{w.tip}</title></rect>;
         const h = Math.max(3, (w.n / max) * 38);
-        return <rect key={w.start} data-cl16="strip-bar" data-n={w.n} data-last={last ? "true" : "false"} x={x} y={40 - h} width={bw} height={h} rx={1.2} fill={last ? "#a2452a" : "#2d3a50"}><title>{w.tip}</title></rect>;
+        return <rect key={w.start} data-cl16="strip-bar" data-n={w.n} data-last={last ? "true" : "false"} x={x} y={40 - h} width={bw} height={h} rx={1.2} fill={last ? "#a2452a" : "#2a3a52"}><title>{w.tip}</title></rect>;
       })}
     </svg>
   );

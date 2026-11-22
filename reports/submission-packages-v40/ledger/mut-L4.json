@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L4",
+  "where": "the shelf has tiles",
+  "ok": true,
+  "detail": "[\"pk40-old\",\"pk40-std\",\"pk40-std2\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "the selector has buttons",
+  "ok": true,
+  "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "the shelf is exactly Out + Retired",
+  "ok": true,
+  "detail": "[\"pk40-old\",\"pk40-std\",\"pk40-std2\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "the selector is exactly Draft + Ready",
+  "ok": false,
+  "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "active first, retired last",
+  "ok": true,
+  "detail": "[\"pk40-std\",\"pk40-std2\",\"pk40-old\"]"
+ }
+]

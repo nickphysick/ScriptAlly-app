@@ -31,8 +31,8 @@ export const SIZES = [
 /** Every workspace route the shell renders (routeTiers' WORKSPACE_PATHS). */
 export const BAR_ROUTES = [
   "/dashboard", "/queries", "/queries/analytics", "/agents", "/agents/discover",
-  "/manuscripts", "/manuscripts/comps", "/manuscripts/packages",
-  "/todo", "/todo/calendar", "/todo/corkboard", "/import", "/account/profile", "/plans", "/help",
+  "/manuscripts", "/manuscripts/comps", "/queries/packages",
+  "/todo", "/todo/corkboard", "/import", "/account/profile", "/plans", "/help",
 ] as const;
 
 export async function openApp(page: Page, path: string, vp: { width: number; height: number }) {
@@ -176,9 +176,9 @@ export async function readFull(page: Page, sidePanelSel: string) {
     const hd = vis('[data-probe="page-header"][data-size="full"]');
     const bar = vis('[data-probe="navrow"]');
     if (!hd || !bar) return null;
-    /* the content column: the nearest ancestor carrying v1's 1360 cap, measured at its CONTENT box */
+    /* the content column: the nearest ancestor carrying the shared cap (page width v1: 1256 + 2 × 40), at its CONTENT box */
     let col: HTMLElement | null = hd.parentElement;
-    while (col && getComputedStyle(col).maxWidth !== "1360px") col = col.parentElement;
+    while (col && getComputedStyle(col).maxWidth !== "1336px") col = col.parentElement;
     const cr = col?.getBoundingClientRect(); const cs = col ? getComputedStyle(col) : null;
     const colL = cr && cs ? cr.left + parseFloat(cs.paddingLeft) : NaN;
     const colR = cr && cs ? cr.right - parseFloat(cs.paddingRight) : NaN;
@@ -318,7 +318,7 @@ export function judgeFull(L: Ledger, r: NonNullable<Awaited<ReturnType<typeof re
 /** The six living routes (living headers v3; src/lib/livingRoutes.ts — restated, because a Playwright file
  *  cannot import a module tree that reaches CSS). Their full header takes the v3 ref's geometry, has no
  *  eyebrow, and the bar carries their name from first paint. */
-export const LIVING_ROUTES: readonly string[] = ["/queries", "/agents", "/todo", "/manuscripts/packages", "/manuscripts/comps", "/queries/analytics"];
+export const LIVING_ROUTES: readonly string[] = ["/queries", "/agents", "/todo", "/queries/packages", "/manuscripts/comps", "/queries/analytics"];
 
 /** The header's three tops, absolute, for the §4.4 comparison between pages. */
 export async function readTops(page: Page) {

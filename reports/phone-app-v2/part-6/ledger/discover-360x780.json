@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "A4",
+  "where": "360x780 gate off: the coming-soon face, no cards",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 gate off: no \"{n} new\" on the switch",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 gate off: the desktop says the same (its coming-soon face)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "pop",
+  "where": "360x780 Discover cards",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 the switch's \"{n} new\" is the number of cards the Scout put up",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-diane-osei: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-diane-osei: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-aoife-murphy: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-aoife-murphy: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-georgina-tate: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-georgina-tate: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-isobel-grant: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-isobel-grant: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-patrick-doherty: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-patrick-doherty: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-priya-anand: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-priya-anand: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-simone-laurent: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-simone-laurent: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-valentina-cruz: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-valentina-cruz: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-helena-marsh: the slate band, \"Verified by the Scout\"",
+  "ok": true,
+  "detail": "rgb(215, 224, 232)"
+ },
+ {
+  "lock": "A4",
+  "where": "360x780 ca-helena-marsh: no dash and no \"Unknown\"; the door never Open for a door not stated",
+  "ok": true,
+  "detail": "Open to submissions"
+ },
+ {
+  "lock": "A6",
+  "where": "360x780 Discover: white on navy, no green or red",
+  "ok": true,
+  "detail": "navy 15"
+ },
+ {
+  "lock": "A6",
+  "where": "360x780 Discover: no image twice",
+  "ok": true,
+  "detail": "[]"
+ }
+]

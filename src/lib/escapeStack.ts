@@ -24,7 +24,7 @@
  * else (the "+ Other" genre input's lost draft in the retired pop-up form was exactly that).
  * With no layers it does nothing at all, so pages that own Escape for themselves keep it.
  */
-import { useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 
 export const ESC_LEVEL = {
   /** a page's own MODE (a full-screen list): Escape leaves it last, after every popover, drawer and dialog */
@@ -39,6 +39,9 @@ export const ESC_LEVEL = {
   card: 10,
   /** anything open INSIDE the card: a combobox, the calendar, the ⋯ menu */
   cardPopup: 20,
+  /** sidebar rail v1 — the full sidebar FLOATING over the page: above a page's own layers and a card's popup,
+   *  below a drawer (which a floating sidebar never sits over: a dialog opening puts it away). */
+  sidebarFloat: 25,
   /** the query drawer, which stacks over a docked card */
   drawer: 30,
   /** the docked card shown above its chip (v13 §7) — folds before the drawer hears the key, after a
@@ -52,6 +55,9 @@ export const ESC_LEVEL = {
   trayBulk: 46,
   /** To-do v5.2 — a dial's reschedule menu, the topmost layer on the page */
   dialMenu: 47,
+  /** the dashboard's first-visit tour (Dashboard first visit v2, Part D): its dim covers everything on screen, so Escape
+   *  is the tour's before anything under it */
+  tour: 60,
 } as const;
 
 interface Layer { level: number; order: number; handle: () => void }
@@ -98,11 +104,19 @@ const stack = (): EscapeStack | null => {
  *  while any is (the Contact list's keyboard rows read it, v14 §7.7). */
 export const escapeDepth = (): number => stack()?.depth() ?? 0;
 
+/**
+ * A RAISED SUBTREE — the new-agent panel opened OVER the query drawer (Log a query's "+ Add … as a new agent"). Every
+ * layer inside it, the editor and its own popups alike, sits this many levels higher, so the editor hears Escape
+ * before the drawer underneath it and its popups still close before the editor. 0 everywhere else.
+ */
+export const EscapeRaise = createContext(0);
+
 export function useEscapeLayer(active: boolean, handle: () => void, level: number = ESC_LEVEL.card): void {
   const latest = useRef(handle);
   latest.current = handle;
+  const raised = level + useContext(EscapeRaise);
   useEffect(() => {
     if (!active) return;
-    return stack()?.push(() => latest.current(), level);
-  }, [active, level]);
+    return stack()?.push(() => latest.current(), raised);
+  }, [active, raised]);
 }

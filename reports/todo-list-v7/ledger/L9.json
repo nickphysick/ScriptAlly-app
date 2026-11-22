@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L9",
+  "where": "1512: the heading line",
+  "ok": true,
+  "detail": "Done today · nothing cleared yet"
+ },
+ {
+  "lock": "L9",
+  "where": "1512: no slips",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L9",
+  "where": "1280: the heading line",
+  "ok": true,
+  "detail": "Done today · nothing cleared yet"
+ },
+ {
+  "lock": "L9",
+  "where": "1280: no slips",
+  "ok": true,
+  "detail": "0"
+ }
+]

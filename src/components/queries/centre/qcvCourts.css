@@ -59,7 +59,7 @@
 .qcv-half:hover .qcv-half-lab,
 .qcv-half.is-on .qcv-half-lab { color: var(--qcv-ink); }
 .qcv-half.is-on .qcv-half-num { color: var(--qcv-ink); }
-.qcv-half:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: -3px; }
+.qcv-half:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qcv-half:disabled { cursor: default; }
 .qcv-half--sk { cursor: default; }
 
@@ -143,7 +143,7 @@
 /* v138 §J — the faces are AgentDisc (shared/agentDisc.css paints them); this rule only sizes and stacks them */
 .qcv-half-who .qcv-face { width: 24px; height: 24px; margin-left: -7px; border: 2px solid #fff; font-size: 8px; }
 .qcv-half-who .qcv-face:first-child, .qcv-half-who .qcv-disc:first-child .qcv-face { margin-left: 0; }
-.qcv-half-who .qcv-disc:hover .qcv-face, .qcv-half-who .qcv-disc:focus-visible .qcv-face { outline: 2px solid var(--qcv-ink); }
+.qcv-half-who .qcv-disc:hover .qcv-face, .qcv-half-who .qcv-disc:focus-visible .qcv-face { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qcv-half-when {
   margin-left: auto;
   font-size: 13.5px;
@@ -163,7 +163,7 @@
  */
 .qcv-half.qcv-half--grp { position: relative; cursor: default; }
 .qcv-half-hit { position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.qcv-half-hit:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: -3px; }
+.qcv-half-hit:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qcv-half-hit:disabled { cursor: default; }
 .qcv-half--grp > :not(.qcv-half-hit) { position: relative; z-index: 1; pointer-events: none; }
 .qcv-half-who .qcv-disc { pointer-events: auto; margin: 0 0 0 -7px; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }

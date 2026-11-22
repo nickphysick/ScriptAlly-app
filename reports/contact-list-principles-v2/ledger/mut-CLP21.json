@@ -1,0 +1,17 @@
+[
+ {
+  "where": "header ring arc #2a3a52",
+  "ok": false,
+  "detail": "rgb(78, 125, 96)"
+ },
+ {
+  "where": "header ring track #ecc0ae",
+  "ok": true,
+  "detail": "rgb(236, 192, 174)"
+ },
+ {
+  "where": "the score: ink, no badge behind it",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"}"
+ }
+]

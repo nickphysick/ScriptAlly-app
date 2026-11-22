@@ -1,0 +1,62 @@
+[
+ {
+  "where": "no row carries the '!'",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "population: two nudges",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "where": "nudge 1 is on your side",
+  "ok": true,
+  "detail": "me"
+ },
+ {
+  "where": "nudge 1 quotes the query: Following up · Query sent · {date}",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "nudge 1's glyph is the '!'",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "nudge 1 says by email",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "nudge 2 is on your side",
+  "ok": true,
+  "detail": "me"
+ },
+ {
+  "where": "nudge 2 quotes the query: Following up · Query sent · {date}",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "nudge 2's glyph is the '!'",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "nudge 2 says by email",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "the 2nd says 2nd nudge, the 1st nothing",
+  "ok": false,
+  "detail": "[\"\",\"\"]"
+ },
+ {
+  "where": "no Birds-eye bar or row carries the '!'",
+  "ok": true,
+  "detail": ""
+ }
+]

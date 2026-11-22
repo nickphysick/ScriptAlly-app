@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L4-1512",
+  "where": "population: five chips and rows",
+  "ok": false,
+  "detail": "{}"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "they sum to All",
+  "ok": false,
+  "detail": "0 vs undefined"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "All is the list's own count",
+  "ok": false,
+  "detail": "undefined vs 87 rows"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "you: the count is its set's size",
+  "ok": false,
+  "detail": "87 vs undefined"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "you: exactly that set (ids)",
+  "ok": false,
+  "detail": "ids differ"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "you: one chip pressed",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "agent: the count is its set's size",
+  "ok": false,
+  "detail": "87 vs undefined"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "agent: exactly that set (ids)",
+  "ok": false,
+  "detail": "ids differ"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "agent: one chip pressed",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "quiet: the count is its set's size",
+  "ok": false,
+  "detail": "87 vs undefined"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "quiet: exactly that set (ids)",
+  "ok": false,
+  "detail": "ids differ"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "quiet: one chip pressed",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "closed: the count is its set's size",
+  "ok": false,
+  "detail": "87 vs undefined"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "closed: exactly that set (ids)",
+  "ok": false,
+  "detail": "ids differ"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "closed: one chip pressed",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "pressing the chosen chip again restores All",
+  "ok": true,
+  "detail": "87"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "population: a status was chosen in Filters",
+  "ok": false,
+  "detail": "Queried · false"
+ },
+ {
+  "lock": "L4-1512",
+  "where": "With you ∩ that status",
+  "ok": false,
+  "detail": "87 rows vs 39"
+ }
+]

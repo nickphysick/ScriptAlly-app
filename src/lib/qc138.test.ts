@@ -80,7 +80,7 @@ describe("v138.2 · the summary reads the peek's own dates", () => {
     expect(peekSummary({ sent: d(-20), due: d(9), closedAt: null, closed: false, yours: true, now }).line).toBe("9 days until your send-by date");
     expect(peekSummary({ sent: d(-938), due: d(-882), closedAt: null, closed: false, yours: true, now })).toEqual({ head: "Out 2 yrs 7 mo", line: `${gapWords(882)} past the date`, hot: true });
     expect(peekSummary({ sent: d(-49), due: null, closedAt: d(-3), closed: true, yours: false, now })).toEqual({ head: "Closed", line: "closed 7 weeks after you queried", hot: false });
-    expect(peekSummary({ sent: d(-10), due: null, closedAt: null, closed: false, yours: false, now }).line).toBe("No date set");
+    expect(peekSummary({ sent: d(-10), due: null, closedAt: null, closed: false, yours: false, now }).line).toBe("No reply date yet");
   });
   it("its overdue test is the tint's and the track's", () => {
     for (const n of [-30, -1, 0, 1, 30]) {

@@ -39,7 +39,8 @@ describe("the confirm step names the file it is about to spend an import on", ()
    */
   it("records the filename in pickFile, before the confirm screen mounts", () => {
     const branchB = src("../components/import/ImportFlow.tsx"); // where the handlers live since part 3
-    const anchor = "const pickFile = (file: File) => {";
+    /* RE-POINTED (two-door import v1): pickFile routes by headings first; the Smart Import half is pickSmartFile */
+    const anchor = "const pickSmartFile = (file: File) => {";
     expect(branchB).toContain(anchor);
 
     const fromPick = branchB.slice(branchB.indexOf(anchor));

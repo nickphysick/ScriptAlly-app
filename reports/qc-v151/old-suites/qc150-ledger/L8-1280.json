@@ -1,0 +1,117 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "2846 nodes, 71 cells, 140 marked"
+ },
+ {
+  "where": "step 1 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 1 one offset",
+  "ok": true,
+  "detail": "6579–6579 (was 6609)"
+ },
+ {
+  "where": "step 2 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 2 one offset",
+  "ok": true,
+  "detail": "6549–6549 (was 6579)"
+ },
+ {
+  "where": "step 3 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 3 one offset",
+  "ok": true,
+  "detail": "6519–6519 (was 6549)"
+ },
+ {
+  "where": "step 4 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 4 one offset",
+  "ok": true,
+  "detail": "6489–6489 (was 6519)"
+ },
+ {
+  "where": "step 5 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 5 one offset",
+  "ok": true,
+  "detail": "6459–6459 (was 6489)"
+ },
+ {
+  "where": "step 6 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 6 one offset",
+  "ok": true,
+  "detail": "6429–6429 (was 6459)"
+ },
+ {
+  "where": "step 7 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 7 one offset",
+  "ok": true,
+  "detail": "6399–6399 (was 6429)"
+ },
+ {
+  "where": "step 8 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 8 one offset",
+  "ok": true,
+  "detail": "6369–6369 (was 6399)"
+ },
+ {
+  "where": "step 9 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 9 one offset",
+  "ok": true,
+  "detail": "6339–6339 (was 6369)"
+ },
+ {
+  "where": "step 10 no rebuild",
+  "ok": true,
+  "detail": "2846/2846 nodes, 140/140 the same elements"
+ },
+ {
+  "where": "step 10 one offset",
+  "ok": true,
+  "detail": "6309–6309 (was 6339)"
+ },
+ {
+  "where": "momentum ≥3 frames",
+  "ok": true,
+  "detail": "6029 → 5997 → 5968 → 5942 → 5918"
+ },
+ {
+  "where": "a drag opens nothing",
+  "ok": true,
+  "detail": ""
+ }
+]

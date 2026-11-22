@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 switch to cards — a switch exists",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 ruled headings to measure (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 offer: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 offer: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1458 vs 1458"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 offer: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 fs: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 fs: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1458 vs 1458"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 fs: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 fr: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 fr: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1458 vs 1458"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 fr: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 ps: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 ps: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1458 vs 1458"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 ps: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 switch to cards — a switch exists",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 ruled headings to measure (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 offer: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 offer: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1226 vs 1226"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 offer: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 fs: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 fs: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1226 vs 1226"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 fs: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 fr: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 fr: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1226 vs 1226"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 fr: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 ps: the label is Special Elite 21",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace 21"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 ps: the hairline ends within 2px of the grid's content edge",
+  "ok": true,
+  "detail": "1226 vs 1226"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 ps: the heading's left is the first card's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ }
+]

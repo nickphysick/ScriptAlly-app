@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 top: the toolbar exists (population)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 top: no pin, switch or full screen in the toolbar",
+  "ok": false,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 top: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 scrolled 1400: the switch and \"Full screen\" are in the toolbar",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 scrolled 1400: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 full screen: \"Exit full screen\" and the switch",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 full screen: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status top: the toolbar exists (population)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status top: no pin, switch or full screen in the toolbar",
+  "ok": false,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status top: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status scrolled 1400: the switch and \"Full screen\" are in the toolbar",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status scrolled 1400: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status full screen: \"Exit full screen\" and the switch",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1512 grouped by Status full screen: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 top: the toolbar exists (population)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 top: no pin, switch or full screen in the toolbar",
+  "ok": false,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 top: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 scrolled 1400: the switch and \"Full screen\" are in the toolbar",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 scrolled 1400: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 full screen: \"Exit full screen\" and the switch",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 full screen: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status top: the toolbar exists (population)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status top: no pin, switch or full screen in the toolbar",
+  "ok": false,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status top: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status scrolled 1400: the switch and \"Full screen\" are in the toolbar",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status scrolled 1400: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status full screen: \"Exit full screen\" and the switch",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ },
+ {
+  "lock": "CL20-C1",
+  "where": "@1280 grouped by Status full screen: one line (52 ±1)",
+  "ok": true,
+  "detail": "{\"h\":52,\"over\":0,\"pin\":1,\"sw\":2,\"fs\":\"Exit full screen\"}"
+ }
+]

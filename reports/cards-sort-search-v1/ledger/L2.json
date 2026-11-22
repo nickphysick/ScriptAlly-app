@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L2",
+  "where": "1280 · population: the strip's count",
+  "ok": true,
+  "detail": "87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · unfiltered: \"Export all {N} queries\"",
+  "ok": true,
+  "detail": "↓ Export all 87 queries · 87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · unfiltered: the CSV has N rows",
+  "ok": true,
+  "detail": "87 vs 87"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · filtered: \"Export {v} queries\", v the strip's own",
+  "ok": true,
+  "detail": "↓ Export 27 queries · 27 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1280 · filtered: the CSV has v rows",
+  "ok": true,
+  "detail": "27 vs 27"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · population: the strip's count",
+  "ok": true,
+  "detail": "87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · unfiltered: \"Export all {N} queries\"",
+  "ok": true,
+  "detail": "↓ Export all 87 queries · 87 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · unfiltered: the CSV has N rows",
+  "ok": true,
+  "detail": "87 vs 87"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · filtered: \"Export {v} queries\", v the strip's own",
+  "ok": true,
+  "detail": "↓ Export 27 queries · 27 of 87 showing"
+ },
+ {
+  "lock": "L2",
+  "where": "1512 · filtered: the CSV has v rows",
+  "ok": true,
+  "detail": "27 vs 27"
+ }
+]

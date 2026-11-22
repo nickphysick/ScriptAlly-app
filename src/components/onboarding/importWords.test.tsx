@@ -17,55 +17,37 @@ import { SkipSetupConfirm, SKIP_ASK } from "./SkipSetupConfirm";
 import { READY_TXT } from "./ScatterSettleLoader";
 import { IMPORTING_HEAD, IMPORTING_DONE_LINE, IMPORTING_MESSAGES } from "./ImportingLoader";
 import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR } from "./SmartImportReviewFixture";
-import { TIER_TEXT, TIER_NAME, SUMMARY_TITLE, SUMMARY_PRIMARY, stepCaption, IMPORT_STEP_LABEL } from "../../lib/importSummary";
+import { SUMMARY_TITLE, IMPORT_STEP_LABEL } from "../../lib/importSummary";
 import { dupNoteMerged, dupNoteOpen, dupNoteKept, keepBothLabel, keptClusterLabel, MAPPING_NOTE, parseModel } from "../../lib/smartImportReviewModel";
 import { noticeHeadline, noticeWhy, noticeToggle, NOTICE_DISMISS, NO_NAME_REASON } from "../../lib/importNotice";
 
 const text = (el: React.ReactElement): string =>
   renderToStaticMarkup(el).replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/\s+/g, " ");
 const noop = () => {};
-const overview = (r: typeof REVIEW_FIXTURE) => text(<ImportOverview result={r} manuscriptTitle="The Salt Road" fileName="queries.csv" rowCount={24} onContinue={noop} />);
+const overview = (r: typeof REVIEW_FIXTURE) => text(<ImportOverview result={r} manuscriptTitle="The Salt Road" fileName="queries.csv" onContinue={noop} />);
 const review = (r: typeof REVIEW_FIXTURE) => text(<SmartImportReview result={r} manuscriptTitle="The Salt Road" onBack={noop} error={null} onImport={noop as never} />);
 
 describe("W1 · the words that changed, as literals, on their screens", () => {
   it("the reading loader ends on Ready", () => { expect(READY_TXT).toBe("Ready"); });
 
-  it("the summary", () => {
+  /* REWRITTEN (two-door import v1): the summary is "We've read your file" (screen 2 of the mock).
+     The paragraph, the tiers, the stepper and the row-count line are gone with their words. */
+  it("the read screen", () => {
     const t = overview(REVIEW_FIXTURE_DUPES);
-    expect(SUMMARY_TITLE).toBe("We've read your file.");
-    expect(t).toContain("We've read your file.");
-    expect(t).toContain("Most of it's ready to go. ");
-    expect(t).toContain("for your contact list");
-    expect(t).toMatch(/for\s+The Salt Road/);
-    expect(t).toContain("with agents");
-    expect(t).toContain("Step 1");
-    /* v9: nothing flagged is optional; the tier is "Need an answer" */
-    expect(overview(REVIEW_FIXTURE)).not.toMatch(/Optional|Chances to sharpen/);
-    expect(overview(REVIEW_FIXTURE)).toContain("Need an answer");
-    expect(overview(REVIEW_FIXTURE)).toContain("24 rows, read and sorted. Nothing is saved yet.");
-    expect(t).toContain("Let's work through it");
-    for (const gone of ["Top tip", "Why sharpen", "Skip setup", "→", "Here's what we found"]) expect(t).not.toContain(gone);
-    for (const l of ["Duplicates", "Agents", "Queries", "Import"]) expect(t).toContain(l);
+    expect(SUMMARY_TITLE).toBe("We've read your file");
+    expect(t).toContain("We've read your file");
+    expect(t).toContain("queries.csv");
+    expect(t).toContain("Read by Smart Import, then checked against QueryHawk's rules.");
+    expect(text(<ImportOverview result={REVIEW_FIXTURE} manuscriptTitle="The Salt Road" fileName="queries.csv" source="template" onContinue={noop} />))
+      .toContain("Your headings matched ours, so it was read straight in and checked against QueryHawk's rules. No wait.");
+    expect(t).toMatch(/\d+ agents/);
+    expect(t).toMatch(/\d+ queries \d+ still open, \d+ closed/);
+    expect(t).toMatch(/\d+ questions? for you Answer (them|it)/);
+    for (const gone of ["Top tip", "Why sharpen", "Skip setup", "→", "Here's what we found", "Most of it's ready to go", "Let's work through it", "Need an answer", "read and sorted"]) expect(t).not.toContain(gone);
     expect(Object.values(IMPORT_STEP_LABEL)).toEqual(["Duplicates", "Agents", "Queries", "Import"]);
     const clear = overview(REVIEW_FIXTURE_CLEAR);
-    expect(clear).toContain("It all read cleanly. Your history's ready to come straight in.");
-    expect(clear).toContain("Bring it in");
-    expect(SUMMARY_PRIMARY).toEqual({ work: "Let's work through it", clear: "Bring it in" });
-  });
-
-  it("the tier sentences and the stepper captions", () => {
-    expect(TIER_TEXT.agentsReady).toBe("Read cleanly. Good to import as they are.");
-    expect(TIER_TEXT.agentsFix(1)).toBe("1 possible duplicate set to merge. Sorted on the duplicates step.");
-    expect(TIER_TEXT.agentsFix(3)).toBe("3 possible duplicate sets to merge. Sorted on the duplicates step.");
-    expect(TIER_TEXT.queriesReady).toBe("Dates read, statuses clear. Good to import as they are.");
-    const n = { sets: 1, agentsOpen: 3, queriesOpen: 0 };
-    expect(stepCaption("duplicates", n)).toBe("1 set");
-    expect(stepCaption("duplicates", { ...n, sets: 4 })).toBe("4 sets");
-    expect(stepCaption("agents", n)).toBe("3 to answer");
-    expect(stepCaption("queries", n)).toBe("Ready to go");
-    expect(stepCaption("import", n)).toBe("You confirm");
-    const t = overview(REVIEW_FIXTURE);
-    expect(t).toMatch(/dates? (to confirm|missing)[^.]*\. One pick each\./);
+    expect(clear, "with no questions the bar imports at once").toMatch(/Import \d+ agents? and \d+ quer(y|ies)/);
+    expect(clear).not.toContain("questions for you");
   });
 
   it("the duplicates step", () => {
@@ -178,6 +160,5 @@ describe("W1 · the words that did not change, verbatim from their modules", () 
     expect(IMPORTING_HEAD).toEqual({ working: "Setting up your dashboard", done: "You're all set" });
     expect(IMPORTING_DONE_LINE).toBe("Opening your dashboard…");
     expect(IMPORTING_MESSAGES).toHaveLength(6);
-    expect(TIER_NAME).toEqual({ ready: "Ready to go", fix: "A quick fix", ask: "Need an answer" });
   });
 });

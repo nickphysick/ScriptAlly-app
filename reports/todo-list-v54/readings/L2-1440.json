@@ -1,0 +1,30 @@
+{
+ "first task": {
+  "gap": 0,
+  "onScreen": true
+ },
+ "send": {
+  "gap": 0,
+  "onScreen": true
+ },
+ "batch table": {
+  "gap": 0,
+  "onScreen": true
+ },
+ "one at a time · what went": {
+  "gap": 0,
+  "onScreen": true
+ },
+ "one at a time · the same": {
+  "gap": 0,
+  "onScreen": true
+ },
+ "all at once": {
+  "gap": 0,
+  "onScreen": true
+ },
+ "all at once · sample panel": {
+  "gap": 0,
+  "onScreen": true
+ }
+}

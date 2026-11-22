@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "F1",
+  "where": "population: the page's text",
+  "ok": true,
+  "detail": "chars 5388"
+ },
+ {
+  "lock": "F1",
+  "where": "no Pin or Unpin on the Contact list",
+  "ok": true,
+  "detail": "hits 0"
+ },
+ {
+  "lock": "F1",
+  "where": "add: the item is listed",
+  "ok": true,
+  "detail": "missing item"
+ },
+ {
+  "lock": "F1",
+  "where": "add: the spotlight finds its target",
+  "ok": true,
+  "detail": "no spotlight"
+ },
+ {
+  "lock": "F1",
+  "where": "search: the item is listed",
+  "ok": true,
+  "detail": "missing item"
+ },
+ {
+  "lock": "F1",
+  "where": "search: the spotlight finds its target",
+  "ok": true,
+  "detail": "no spotlight"
+ },
+ {
+  "lock": "F1",
+  "where": "pin: the item is listed",
+  "ok": true,
+  "detail": "missing item"
+ },
+ {
+  "lock": "F1",
+  "where": "pin: the spotlight finds its target",
+  "ok": true,
+  "detail": "no spotlight"
+ },
+ {
+  "lock": "F1",
+  "where": "open: the item is listed",
+  "ok": true,
+  "detail": "missing item"
+ },
+ {
+  "lock": "F1",
+  "where": "open: the spotlight finds its target",
+  "ok": true,
+  "detail": "no spotlight"
+ },
+ {
+  "lock": "F1",
+  "where": "edit: the item is listed",
+  "ok": true,
+  "detail": "missing item"
+ },
+ {
+  "lock": "F1",
+  "where": "edit: the spotlight finds its target",
+  "ok": true,
+  "detail": "no spotlight"
+ },
+ {
+  "lock": "F1",
+  "where": "hk: the item is listed",
+  "ok": true,
+  "detail": "missing item"
+ },
+ {
+  "lock": "F1",
+  "where": "hk: the spotlight finds its target",
+  "ok": true,
+  "detail": "no spotlight"
+ }
+]

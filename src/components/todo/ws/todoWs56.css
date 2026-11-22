@@ -1,0 +1,63 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v56 (design-refs/todo-list-v56/todo-navy-header-v1.html, "Ring and words" + "Slim bar"). Desktop only
+ * (768px and up); the phone To-do has its own sheets and none of this reaches it.
+ *
+ * ⚠️ THE PANEL IS THE QUERY CENTRE'S. Its navy, radius, margins, padding, shadow, title, "for" line, buttons and grid are
+ *    qcv156.css §1 and qcv1534.css §2–3, whose selectors name `.tws56-hdw` beside `.qc151.qc153` and `.cl27` at the same
+ *    specificity, so the pages cannot drift. THIS SHEET HOLDS ONLY WHAT IS THE TO-DO'S OWN: the wrapper put back, the
+ *    third column's width, the cut-out, the ring block ("What needs doing"), the slim bar's place and the workspace's pin.
+ * ⚠️ brand.tsx names a face on h1 and bare spans at runtime: every face here carries `!important` or names its element.
+ */
+
+/* ── Phase 1 · the navy header ─────────────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  /* `.qc151` is the Query Centre page's root class: it brings 30px of top padding and a container of its own; here it
+     only carries the header's scoped rules, so both are put back */
+  .tws .qc151.tws56-hdw { flex: none; padding-top: 0; container-type: normal; color: var(--tw-ink); font-family: var(--tw-serif); }
+  /* …but the 30 above the header is the Query Centre's distance from the sheet's top, so it comes back
+     (workspace-headers-v1.1: To-do's header sat at 8, every other navy header at 38). `--wsh11` marks the rule for T1. */
+  .tws .qc151.tws56-hdw.tws56-hdw { padding-top: 30px; --wsh11: 1; }
+  /* the ref's grid: the Query Centre's 268 and 28px gap, the third column as wide as its block */
+  .qc151.tws56-hdw > .qc1531-hd.tws56-hd { grid-template-columns: 268px minmax(0, 1fr) auto; }
+  /* the cut-out on nothing: no disc, no box */
+  .tws56-hdw .tws56-art img { background: none; border-radius: 0; }
+
+  /* L1 · THE HEADER IS THE QUERY CENTRE'S HEIGHT. On the served line (v156.1) that height is set by the Query Centre's
+     DRAWING, not its "this week" block: the armchair hawk (qc-armchair-hawk.png, 360 × 347) at 190 wide is 183.14 tall,
+     taller than its line block (161.4) and its title block, so its panel is 22 + 183.14 + 22. (The ref and the Contact
+     list hold 198.875 in the right-hand column, v156's line block, which v156.1 shortened: that would make this header
+     15.8px too tall.) So the cut-out's cell holds the armchair hawk's height and the 190 × 190 cut-out centres in it;
+     the ring block (140) is shorter still. wsHeader56.test.tsx reads the png's size against this calc, and
+     todoV56.measure.ts L1 measures both headers. */
+  .tws56-hdw .tws56-art { height: calc(190px * 347 / 360); display: flex; align-items: center; }
+  .tws56-hdw .tws56-rc { display: flex; align-items: center; gap: 20px; margin: 0 12px 0 0; }
+  .tws56-ring { flex: none; width: 140px; height: 140px; }
+  .tws56-ring svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .tws56-seg { cursor: pointer; outline: none; transition: opacity 0.15s; }
+  .tws56-ring svg:hover .tws56-seg:not(:hover) { opacity: 0.45; }
+  .tws56-seg:focus-visible { stroke-width: 36; }
+  .tws56-midn { font: 400 60px var(--sp-type); fill: #fbf7f0; pointer-events: none; }
+  .tws56-midl { font: italic 400 19px var(--sp-serif); fill: rgba(244, 238, 229, 0.78); pointer-events: none; }
+  /* the words: a title and one italic line, the figures in the typewriter (the Contact list's List health wording) */
+  .tws56-words { display: flex; flex-direction: column; align-items: flex-start; }
+  .tws56-hdw .tws56-words b { font: 400 24px/1.2 var(--sp-type) !important; color: #f4eee5; white-space: nowrap; }
+  .tws56-hdw .tws56-words small { margin-top: 6px; font: italic 400 17px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.75); white-space: nowrap; }
+  .tws56-hdw .tws56-words small em { font: 400 17px/1 var(--sp-type) !important; font-style: normal !important; color: #e8bdb4; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) { .tws56-seg { transition: none; } }
+
+/* ── Phase 2 · the slim bar (WsSlim56: the Query Centre's bar, qcv156.css §3, through shell/SlimBar) ─────────────── */
+@media (min-width: 768px) {
+  /* on the scroller's own top: the Query Centre's sits under its toolbar's lip (`--pin-cover`, 12px); this page has no
+     lip, so the bar is at 0 and the workspace 12px under its foot (todoWs54.css D2: 72px) */
+  .tws.tws56 > .qc156-slim.qc156-slim { top: 0; }
+}
+/* a narrow header (under 1200 wide: the full sidebar pinned at 1440): the ring alone, so the title is never crowded. The
+   header is the container (qcv1561.css names `.tws56-hdw > .qc1531-hd` beside the Query Centre's). */
+@container (max-width: 1199.98px) {
+  .tws56-hdw .tws56-words { display: none; }
+  .tws56-hdw .tws56-rc { margin-right: 8px; }
+}

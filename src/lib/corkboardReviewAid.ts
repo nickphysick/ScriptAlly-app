@@ -5,7 +5,7 @@
  * corkboardReviewAid — a DEV-ONLY review aid for the Corkboard. It narrows INPUT and fabricates nothing:
  * `window.__SA_CB_ONLY = "cbseed-"` hands the page only the user tasks whose id starts with that prefix, so
  * a lock about "eight notes" or "one note" or "no notes" can be measured on the shared harness account
- * without deleting what other sessions keep there (tests/e2e/seedCorkboard.mjs writes the `cbseed-*` set).
+ * without deleting what other sessions keep there (tests/e2e/seedCorkboardV2.mjs writes the `cb2seed-*` set).
  * Every count, chip and position is still derived by the page's own functions from real documents.
  *
  * ⚠️ THE GATE IS AT THE CALL SITE (`TodoNoteboardPage.tsx`), where a statically replaced

@@ -1,0 +1,41 @@
+[
+ {
+  "where": "long: population — a thread with messages",
+  "ok": false
+ },
+ {
+  "where": "long: the last divider says today",
+  "ok": false
+ },
+ {
+  "where": "long: opens scrolled to the bottom",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "materials: population — a thread with messages",
+  "ok": false
+ },
+ {
+  "where": "materials: the last divider says today",
+  "ok": false
+ },
+ {
+  "where": "materials: opens scrolled to the bottom",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "where": "closed: population — a thread with messages",
+  "ok": false
+ },
+ {
+  "where": "closed: no today divider",
+  "ok": true
+ },
+ {
+  "where": "closed: opens scrolled to the bottom",
+  "ok": false,
+  "detail": "undefined"
+ }
+]

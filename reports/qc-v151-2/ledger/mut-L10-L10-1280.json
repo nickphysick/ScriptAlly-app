@@ -1,0 +1,17 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "where": "current bars: the status colour",
+  "ok": false,
+  "detail": "[[\"Queried\",\"overdue\",\"rgb(244, 238, 228)\"],[\"Queried\",\"overdue\",\"rgb(244, 238, 228)\"],[\"Queried\",\"overdue\",\"rgb(244, 238, 228)\"]]"
+ },
+ {
+  "where": "past bars grey",
+  "ok": true,
+  "detail": "[\"rgb(233, 233, 228)\"]"
+ }
+]

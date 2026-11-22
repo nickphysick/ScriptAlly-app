@@ -1,0 +1,16 @@
+{
+ "legend": 0,
+ "need": 99,
+ "groups": {
+  "wait": 16,
+  "nudge": 11,
+  "quiet": 17,
+  "house": 52
+ },
+ "late": 0,
+ "house": 52,
+ "lateRows": 20,
+ "rowsDrawn": 52,
+ "slimLate": 31,
+ "line": "0 late · 52 to tidy"
+}

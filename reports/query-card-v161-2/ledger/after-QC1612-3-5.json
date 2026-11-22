@@ -1,0 +1,22 @@
+[
+ {
+  "name": "stepping to another query: population — breathing before it",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "stepping to another query: population — the action reached the page",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "stepping to another query: the frame is at scale 1 within 200ms, and stays there",
+  "ok": true,
+  "got": "77 frames: [1]"
+ },
+ {
+  "name": "stepping to another query: no breathing animation remains",
+  "ok": true,
+  "got": "[\"rotate:running\"]"
+ }
+]

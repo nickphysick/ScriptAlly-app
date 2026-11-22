@@ -10,7 +10,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
 import { FOUNDING_FULL, PRICING_TIERS } from "./landingCopy";
-import { PV3_H1 } from "./pricingCopy";
+import { PV4_H1 } from "./pricingCopy";
 import { FOUNDERS_LEDE } from "./foundersCopy";
 import { ABOUT_CLOSE_BODY } from "./aboutCopy";
 
@@ -26,7 +26,7 @@ describe("the founding cap is one value", () => {
     expect(Number(m![1])).toBe(FOUNDING_CAP);
   });
   it("every string that states the cap states this one", () => {
-    expect(PV3_H1).toBe(`A free QueryHawk campaign for our first ${FOUNDING_CAP} writers.`);
+    expect(PV4_H1).toBe(`A free QueryHawk campaign for our first ${FOUNDING_CAP} writers.`);
     expect(FOUNDING_FULL.startsWith(`All ${FOUNDING_CAP_WORD} founding places have gone`)).toBe(true);
     const founding = PRICING_TIERS.find((t) => t.key === "founding")!;
     expect(founding.tag).toBe(`Available now · ${FOUNDING_CAP} places`);

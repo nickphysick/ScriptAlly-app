@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 the toolbar's switch shows once scrolled (precondition)",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 toolbar Cards — the control exists",
+  "ok": false,
+  "detail": "no visible [data-cl20='view-tb'] [data-view='cards']"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 the title row's pill now reads Cards",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 pill List — the control exists",
+  "ok": false,
+  "detail": "no visible [data-cl20='view-pill'] [data-view='list']"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1512 the toolbar's switch now reads List",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 the toolbar's switch shows once scrolled (precondition)",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 toolbar Cards — the control exists",
+  "ok": false,
+  "detail": "no visible [data-cl20='view-tb'] [data-view='cards']"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 the title row's pill now reads Cards",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 pill List — the control exists",
+  "ok": false,
+  "detail": "no visible [data-cl20='view-pill'] [data-view='list']"
+ },
+ {
+  "lock": "CL20-C2",
+  "where": "@1280 the toolbar's switch now reads List",
+  "ok": false,
+  "detail": "null"
+ }
+]

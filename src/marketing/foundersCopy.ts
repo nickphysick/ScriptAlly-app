@@ -24,7 +24,6 @@ import { FOUNDING_CAP_WORD } from "./foundingCap";
 export const FOUNDERS_DOCUMENT_TITLE = "Founding Writers — QueryHawk";
 
 /* ══════════════ Hero ══════════════ */
-export const FOUNDERS_EYEBROW = "For founding writers";
 export const FOUNDERS_H1 = "Help get things off the ground.";
 /**
  * ⚠️ IT NO LONGER SAYS "totally free of charge", AND THE LOCK ON THOSE COMMAS WENT WITH THE PHRASE.
@@ -66,7 +65,6 @@ export const FOUNDERS_ART_ALT =
 /* ══════════════ The deal ══════════════ */
 export interface DealCard {
   key: string;
-  kicker: string;
   heading: string;
   body: string;
 }
@@ -89,19 +87,16 @@ export interface DealCard {
 export const FOUNDERS_DEAL: DealCard[] = [
   {
     key: "deal",
-    kicker: "The deal",
     heading: "A free campaign",
     body: "Full QueryHawk Pro, free for your entire querying campaign. No card needed.",
   },
   {
     key: "sweetener",
-    kicker: "For your friends",
     heading: "An Early Bird discount",
     body: "An exclusive discount for the friends and fellow writers you invite when we launch.",
   },
   {
     key: "line",
-    kicker: "A direct line",
     heading: "You shape what's built",
     body:
       "Straight to the founder. Tell us what's missing, what's wrong, and what you'd build " +

@@ -43,6 +43,9 @@ export interface AgentEditPatch {
   reopensOn?: string | null;
   /** v11: the documented card cache, recomputed when the pop-up adds a note (now allowlisted). */
   notePreview?: string;
+  /** Agent card v2 — the writer's note pinned to the top of the card's Notes (an id in the agent's `notes` subcollection, or
+   *  "__flat__" for the old notes string); null unpins (the key is deleted) */
+  pinnedNoteId?: string | null;
   /** v11: when the wishlist was last checked; stamped by the editor on a wishlist edit. null =
    *  clear — the Undo of a FIRST stamp, which has to leave the field absent, as it was. */
   mswlCheckedAt?: string | null;
@@ -63,6 +66,10 @@ export interface AgentEditPatch {
   /** null = back to unstated — only ever an Undo; the editor itself has no road back (decision 9) */
   noResponseMeansNo?: boolean | null;
   submissionMethod?: string;
+  /** Add agent v1 — the words for an "Other" method; null = clear */
+  submissionMethodOther?: string | null;
+  /** Add agent v1 — "Agency unknown"; null = clear (an agency was typed, or it was taken back) */
+  agencyUnknown?: true | null;
   materialsWanted?: string[];
 }
 
@@ -126,6 +133,18 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
     fields[k] = v;
   }
 
+  /* Add agent v1 — "Agency unknown" (true, or cleared by deletion) and the words for an Other method */
+  if (patch.agencyUnknown === null) deletes.push("agencyUnknown");
+  else if (patch.agencyUnknown !== undefined) {
+    if (patch.agencyUnknown !== true) errors.push("agencyUnknown is true or absent.");
+    else fields.agencyUnknown = true;
+  }
+  if (patch.submissionMethodOther === null) deletes.push("submissionMethodOther");
+  else if (patch.submissionMethodOther !== undefined) {
+    if (typeof patch.submissionMethodOther !== "string" || patch.submissionMethodOther.length > 40) errors.push("submissionMethodOther is a short string.");
+    else fields.submissionMethodOther = patch.submissionMethodOther;
+  }
+
   // Social handles list — { platform, handle } entries, capped at 30 (mirrors the Firestore rule).
   if (patch.socials === null) deletes.push("socials");
   else if (patch.socials !== undefined) {
@@ -178,6 +197,11 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
     if (patch.reopensOn === null) deletes.push("reopensOn");
     else if (typeof patch.reopensOn !== "string" || patch.reopensOn.length > 64) errors.push("reopensOn must be a date string.");
     else fields.reopensOn = patch.reopensOn.trim();
+  }
+  if (patch.pinnedNoteId === null) deletes.push("pinnedNoteId");
+  else if (patch.pinnedNoteId !== undefined) {
+    if (typeof patch.pinnedNoteId !== "string" || !patch.pinnedNoteId || patch.pinnedNoteId.length > 128) errors.push("pinnedNoteId must be a short string.");
+    else fields.pinnedNoteId = patch.pinnedNoteId;
   }
   if (patch.notePreview !== undefined) {
     if (typeof patch.notePreview !== "string" || patch.notePreview.length > 512) errors.push("notePreview must be a short string.");

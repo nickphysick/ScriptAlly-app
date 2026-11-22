@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "H1",
+  "where": "before",
+  "ok": true,
+  "detail": "the list: 4 of 5 done · Hide"
+ },
+ {
+  "lock": "H1",
+  "where": "before",
+  "ok": true,
+  "detail": "Then: Then: finish getting started"
+ },
+ {
+  "lock": "H1",
+  "where": "finish",
+  "ok": true,
+  "detail": "That's you set up"
+ },
+ {
+  "lock": "H1",
+  "where": "finish",
+  "ok": true,
+  "detail": "the note"
+ },
+ {
+  "lock": "H1",
+  "where": "finish",
+  "ok": true,
+  "detail": "in the goal slot, on the card's bottom (283.9375 vs 283.9375)"
+ },
+ {
+  "lock": "H1",
+  "where": "then",
+  "ok": true,
+  "detail": "Then: no longer names it (Then: send your full to Tobias Hark | Then: send your full to Imogen Vale | Then: send your full to Ottoline Frayn | Then: send your full to Marcus Reed | Then: send your full to Ana Duarte | Then: send your partial to Marcus Reed | Then: send your revision to Iris Kwan | Then: send your partial to David Marsh | Then: send your partial to Rachel Lin | Then: nudge Tom Ellery | Then: nudge Ana Duarte | Then: nudge Joan Whitfield | Then: nudge Sam Okoro | Then: nudge Alasdair Crewe | Then: nudge Wren Ashcombe | Then: nudge Cormac Bligh | Then: nudge Hester Blaine | Then: nudge Bea Halloran | Then: nudge Marcus Reed | Then: nudge David Marsh | Then: close your query to Priya Nair? | Then: close your query to Elinor Hale? | Then: close your query to Sam Okoro? | Then: close your query to Tamsin Probewell? | Then: close your query to Peter Vance? | Then: close your query to Rachel Lin? | Then: close your query to Ana Duarte? | Then: close your query to Rufus Oyelaran? | Then: add typical reply times for 20 agents | Then: add what 3 agents ask for | Then: add genres for Wren Tallis | Then: add wishlists for 51 agents | Then: add reopening dates for 4 agents)"
+ },
+ {
+  "lock": "H1",
+  "where": "closed",
+  "ok": true,
+  "detail": "the goal sheet has the slot"
+ },
+ {
+  "lock": "H1",
+  "where": "closed",
+  "ok": false,
+  "detail": "still the goal sheet after a reload"
+ },
+ {
+  "lock": "H1",
+  "where": "closed",
+  "ok": false,
+  "detail": "the flag is stored"
+ },
+ {
+  "lock": "H1",
+  "where": "restore",
+  "ok": true,
+  "detail": "restored {\"comps\":0,\"versions\":[\"Sample Pages\",\"Query Letter\",\"Synopsis\"],\"hidden\":null,\"closed\":null}"
+ }
+]

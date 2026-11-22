@@ -1,0 +1,71 @@
+[
+ {
+  "where": "population: the §3 form's every option",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "check 3 · a send needs its request: Sent the full refused",
+  "ok": false
+ },
+ {
+  "where": "check 6 · no nudge while it's your move",
+  "ok": false
+ },
+ {
+  "where": "check 7 · no closed: no response while it's your move",
+  "ok": false
+ },
+ {
+  "where": "check 8 · no pass while a request to you is open",
+  "ok": false
+ },
+ {
+  "where": "check 4 · no duplicate: Asked for a partial refused",
+  "ok": false
+ },
+ {
+  "where": "Sent the partial fits",
+  "ok": false
+ },
+ {
+  "where": "check 9 · the calendar greys tomorrow (in the future)",
+  "ok": true
+ },
+ {
+  "where": "the calendar greys days before the latest step",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "population: Fix a mistake lists the long thread's steps",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "check 1 · a second Query sent refused",
+  "ok": false
+ },
+ {
+  "where": "check 2 · Full sent here would put the order out",
+  "ok": false
+ },
+ {
+  "where": "check 5 · a pass here would leave steps after a close",
+  "ok": false
+ },
+ {
+  "where": "check 4 · a second Partial requested is already on the timeline",
+  "ok": false
+ },
+ {
+  "where": "removing Partial requested names Partial sent as depending on it",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "…and offers Remove 2 steps",
+  "ok": false,
+  "detail": ""
+ }
+]

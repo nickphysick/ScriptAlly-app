@@ -1,0 +1,116 @@
+{
+ "green": [
+  {
+   "where": "OpenHeader's frame: art, main, ring in a .qc151.qc153 wrapper",
+   "ok": true,
+   "detail": "[\"qc1531-art\",\"qc1531-main\",\"qc1531-rc\"]"
+  },
+  {
+   "where": "height",
+   "ok": true,
+   "detail": "227.1 vs 227.1"
+  },
+  {
+   "where": "left",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "where": "right",
+   "ok": true,
+   "detail": "1677 vs 1677"
+  },
+  {
+   "where": "top",
+   "ok": true,
+   "detail": "143.8 vs 143.8"
+  },
+  {
+   "where": "radius",
+   "ok": true,
+   "detail": "20px vs 20px"
+  },
+  {
+   "where": "ground",
+   "ok": true,
+   "detail": "rgb(42, 58, 82) vs rgb(42, 58, 82)"
+  },
+  {
+   "where": "title size",
+   "ok": true,
+   "detail": "54px vs 54px"
+  },
+  {
+   "where": "title left",
+   "ok": true,
+   "detail": "408 vs 408"
+  },
+  {
+   "where": "two buttons, each the Query Centre's height",
+   "ok": true,
+   "detail": "[46,46] vs 46"
+  },
+  {
+   "where": "headline",
+   "ok": true,
+   "detail": "4 packages"
+  }
+ ],
+ "red": [
+  {
+   "where": "OpenHeader's frame: art, main, ring in a .qc151.qc153 wrapper",
+   "ok": false,
+   "detail": "null"
+  },
+  {
+   "where": "height",
+   "ok": false,
+   "detail": "100 vs 227.1"
+  },
+  {
+   "where": "left",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "where": "right",
+   "ok": true,
+   "detail": "1677 vs 1677"
+  },
+  {
+   "where": "top",
+   "ok": false,
+   "detail": "109.8 vs 143.8"
+  },
+  {
+   "where": "radius",
+   "ok": true,
+   "detail": "20px vs 20px"
+  },
+  {
+   "where": "ground",
+   "ok": false,
+   "detail": "rgb(45, 58, 80) vs rgb(42, 58, 82)"
+  },
+  {
+   "where": "title size",
+   "ok": false,
+   "detail": "34px vs 54px"
+  },
+  {
+   "where": "title left",
+   "ok": false,
+   "detail": "142 vs 408"
+  },
+  {
+   "where": "two buttons, each the Query Centre's height",
+   "ok": false,
+   "detail": "[40,40] vs 46"
+  },
+  {
+   "where": "headline",
+   "ok": false,
+   "detail": "Your packages"
+  }
+ ]
+}

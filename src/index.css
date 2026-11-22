@@ -197,6 +197,9 @@
   --ws-page: rgb(var(--ws-page-rgb));
   --ws-sheet: #fbf9f5;
   --ws-band: #fbf9f5;
+  /* the cool off-white ground with the doodle tile (Query letters; the Query Centre v153.4 before it). A token since
+     shell tabs v2 (16 Nov) so the bar's tab can read the same value the page paints (inkShell.css). */
+  --ws-ground-cool: #f5f5f3;
   /* ══ THE INK SHELL (ink shell v1, 6 Oct; ref design-refs/shell/ink-shell-v1.html) ══════════════════
      The frame, the sidebar and the bar are one ink ground; the sheet is the only light surface. These
      tokens are NEW and are the only values the ink chrome reads — every older shell token keeps its
@@ -214,8 +217,12 @@
   --ink-cream-66: rgba(244, 238, 229, 0.66);
   --ink-cream-42: rgba(244, 238, 229, 0.42);
   --ink-cream-12: rgba(244, 238, 229, 0.12);
+  /* shell tabs v2: a resting tab's hover ground is white at 8% (the ref's own lift) */
+  --ink-white-rgb: 255, 255, 255;
   --ink-terra: #d9967a;
   --ink-terra-rgb: 217, 150, 122;
+  /* Manuscripts v27 Part E — the sidebar's "PRO" tag: the rose of the ref's tag and its 4px dot */
+  --ink-rose: #e0a38f;
   /* the full-strength text the ref writes as #fffaf3 — cream at its brightest, on ink */
   --ink-bright: #fffaf3;
   /* the ink figures and labels that sit ON cream or terracotta (Log a query, the to-do pill) */
@@ -231,8 +238,8 @@
   --ink-paper: #fffdf9;
   --ink-paper-2: #f7f4ef;
   --ink-terra-deep: #9a5638;
-  --ink-band: #2d3a50;
-  --ink-band-rgb: 45, 58, 80;
+  --ink-band: #2a3a52; /* consistency roll-out v1, ruling 3: the app's one navy (--sp-anthracite) */
+  --ink-band-rgb: 42, 58, 82;
   /* ⚠️ THE SECTION RHYTHM (Contact list v13, 5 Oct): 40px between a band and the section under it,
      and between sections — the Query Centre v126 rhythm, stated once. The Query Centre still writes
      its own 40s (`.qcv-deskw`, `.qcv-cz`, `.qcv-lbw`); adopting this token there is its follow-up. */
@@ -306,6 +313,9 @@
   /* ⚠️ THE WORKING AREA'S CAP, READ BY THE DASHBOARD AND BY QUERY CENTRE. It was a literal in
      oneScreen.css; two pages agreeing by hand is two pages that agree until one is edited. */
   --work-max: 1660px;
+  /* Workspace width v2 (8 Nov): the ONE gutter of the workspace column, read with `--work-max` by the content column,
+     the masthead and the folded bar (workspacePageGrid.css) and by every workspace page outside that grid. */
+  --work-gutter: 32px;
   /**
    * THE TIMELINE'S RHYTHM (six fixes §6) — the marker's size and the ONE gap between events.
    *
@@ -396,13 +406,16 @@
   --shell-side: #e6e4e0;                  /* "Stone": the sidebar surface — greige since v126 */
   --shell-rule: rgba(28, 19, 15, 0.10);   /* THE one hairline — sidebar edge + under the top bar */
   --shell-side-w: 248px;
+  /* sidebar rail v1: the full sidebar's own width. `--shell-side-w` is the sidebar's LAYOUT footprint —
+     WorkspaceShell publishes 80px on the rail and while floating, 248px only when pinned. */
+  --shell-full-w: 248px;
   --shell-side-w-collapsed: 68px;
   --shell-top-h: 64px;
   --shell-active-bg: var(--sp-anthracite);  /* the anthracite highlight (= the mock's --btn) */
   --shell-active-fg: #fdf9f5;
   --shell-hover-bg: rgba(255, 255, 255, 0.45);
   --shell-hairline: rgba(28, 19, 15, 0.12); /* the ref's --hair: switcher ring, user-row rule, avatar ring */
-  --shell-mute: rgba(28, 19, 15, 0.58);     /* the ref's --muted: meta, counts */
+  --shell-mute: var(--sp-quiet);     /* the ref's --muted: meta, counts */
   --shell-label: rgba(28, 19, 15, 0.45);    /* the sidebar's section labels (v126) */
   --shell-ring: rgba(28, 19, 15, 0.28);     /* the outline ring: Give feedback, Upgrade, the circles' hover */
   --shell-btn-hover: rgba(255, 255, 255, 0.6); /* the outline buttons' hover wash */

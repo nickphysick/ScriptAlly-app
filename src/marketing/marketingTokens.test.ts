@@ -243,7 +243,9 @@ const LOWER_READERS = [
      About left this group on 21 Oct: its hero sits directly on a navy band, so it has no lower
      ground to fade into and paints its own flat ground (`.mk-ahero::before`). */
   /* Pricing left this group on 21 Oct (pricing v3): it opens on a navy band, like About. */
-  ".mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
+  /* The legal pages left this group on 12 Nov: `.mk-docplane` is deleted with the document card, and
+     both now open on privacy.css's navy drawer. */
+  ".mk-fwhero::before, .mk-contact::before",
   /* the lower surface itself. (The status band and the carded desktop hero were readers until both were
      retired by waitlist v1, 31 Oct; the new hero's band is in waitlist.css and reads the token there.) */
   ".mk-lower",
@@ -486,8 +488,8 @@ describe("the lower surface's one repaint is the vision band (was: the banner, t
     expect(cream.length, "the panel restates them (the sweep is not vacuous)").toBeGreaterThan(8);
     for (const m of cream) {
       for (const sel of m[1].split(",")) {
-        /* Two navy panels now: the banner card and /pricing's founding band (21 Oct). */
-        expect(sel.trim(), "starts at a navy panel").toMatch(/^(?:\.mk-claimcard|\.mk-pv3 \.mk-pv3band)\s/);
+        /* One navy panel again: /pricing's founding band became a light box (pricing v4, 24 Oct). */
+        expect(sel.trim(), "starts at a navy panel").toMatch(/^\.mk-claimcard\s/);
       }
     }
   });
@@ -620,7 +622,8 @@ describe("the waiting-list hero is a white card over the navy (ref design-refs/l
   });
   it("the strap is the hand face, in rust", () => {
     expect(rule(".mk-dh-strap")).toMatch(/var\(--mk-f-hand\)/);
-    expect(rule(".mk-dh-strap")).toMatch(/#a2452a/);
+    /* Consistency roll-out v2, Phase 2 (ruling 9): the public rust is named once, --mk-rust (#a2452a) */
+    expect(rule(".mk-dh-strap")).toMatch(/var\(--mk-rust\)/);
   });
 });
 
@@ -719,9 +722,15 @@ describe("the hero grid aligns per item, and overlaps by construction", () => {
       /* both sentinels cancel their own height so they occupy no space */
       ".mk-navsentinel--condense",
       ".mk-navsentinel--release",
-      /* /pricing's two tiers hanging over the founding band's foot (21 Oct, ref pricing-page-v1):
-         the band's 128px of bottom padding is the room they hang into. */
-      ".mk-pv3 .mk-pv3soon",
+      /* /pricing's founding box laid across the join between the ink and the sheet (pricing v4,
+         24 Oct, ref pricing-page-v2): the sheet starts 150px lower on that page to make the room. */
+      ".mk-pv4 .mk-fb",
+      /* the same box on a phone (pricing on phones, 25 Oct, ref pricing-page-mobile-v1): −116px into
+         the 150px of ink the sheet starts below, so it straddles the join as the desktop box does. */
+      ".mk-pvm .mk-pvbox",
+      /* the phone's pinned Free / Pro tabs reaching past the sheet's 14px gutter to the screen's edges,
+         so the oat behind them hides what scrolls under (26 Oct, ref pricing-phone-plans-v1, layout A) */
+      ".mk-pvm .mk-pvtabs",
       /* each vision point is a card drawn OUTWARD: its padding is paid back by an equal negative
          margin, so the picture, heading and body keep their column (landing colours v2) */
       ".mk-vpoint",
@@ -762,8 +771,9 @@ describe("every specific rule on /founders outranks the generic one beside it", 
    * The lesson is the one this repo already records about symptom reports: scan for the fault
    * CLASS, do not treat the element you were pointed at as the search space.
    */
+  /* RE-POINTED (public sweep v1): the cards' kicker is deleted, so `.mk-fwcard .mk-fwk` left this
+     list; the last case below asserts it stays gone, scoped or bare. */
   const SCOPED = [
-    ".mk-fwcard .mk-fwk",
     ".mk-fwhonest .mk-fwmark", ".mk-fwhonest .mk-fwlead", ".mk-fwhonest .mk-fwsign",
   ];
 
@@ -784,6 +794,11 @@ describe("every specific rule on /founders outranks the generic one beside it", 
         `${bare} must not be declared unscoped — .mk-fwhonest p would outrank it`,
       ).toBe(false);
     }
+  });
+
+  it("the cards' kicker and the hero's eyebrow are declared nowhere (public sweep v1)", () => {
+    expect(marketing).not.toMatch(/\.mk-fwk\b/);
+    expect(marketing).not.toMatch(/\.mk-fweyebrow\b/);
   });
 
   /** The generic rules that do the outranking are still there — not a licence to delete them. */
@@ -1037,6 +1052,8 @@ describe("the feature rows set their own type, and nothing else uses its familie
     expect(ruleOwners("Special Elite").sort()).toEqual([
       ".mk-claimband .mk-claimh2",
       ".mk-contact .mk-ch1",
+      /* RE-POINTED (12 Nov): Contact's three reasons became two headed lines, `.mk-cways`. */
+      ".mk-cways .mk-wayh",
       ".mk-footcol h4",
       ".mk-formcard .mk-formh2",
       ".mk-frow h3",
@@ -1061,7 +1078,6 @@ describe("the feature rows set their own type, and nothing else uses its familie
       ".mk-sechead h2",
       ".mk-vh3",
       ".mk-visionh2",
-      ".mk-way .mk-wayh",
     ]);
     expect(ruleOwners("Source Serif 4").sort())
       /* About's body copy joined on 21 Oct, for the same reason as the headings above. */

@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "C1",
+  "where": "population",
+  "ok": true,
+  "detail": "14 notes, 3 figures expected"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 figures",
+  "ok": true,
+  "detail": "drawn [[\"linked\",7],[\"onTodo\",2],[\"pinned\",2]] · want [[\"linked\",7],[\"onTodo\",2],[\"pinned\",2]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 linked filter",
+  "ok": true,
+  "detail": "7 shown · want 7 · pressed true · chip 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 linked clears",
+  "ok": true,
+  "detail": "14 after the second press"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 onTodo filter",
+  "ok": true,
+  "detail": "2 shown · want 2 · pressed true · chip 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 onTodo clears",
+  "ok": true,
+  "detail": "14 after the second press"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 pinned filter",
+  "ok": true,
+  "detail": "2 shown · want 2 · pressed true · chip 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 pinned clears",
+  "ok": true,
+  "detail": "14 after the second press"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 title and buttons hold",
+  "ok": true,
+  "detail": "{\"titleH\":56.6875,\"lh\":56.7,\"rowGap\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x982 linked = agent or query",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 figures",
+  "ok": true,
+  "detail": "drawn [[\"linked\",7],[\"onTodo\",2],[\"pinned\",2]] · want [[\"linked\",7],[\"onTodo\",2],[\"pinned\",2]]"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 linked filter",
+  "ok": true,
+  "detail": "7 shown · want 7 · pressed true · chip 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 linked clears",
+  "ok": true,
+  "detail": "14 after the second press"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 onTodo filter",
+  "ok": true,
+  "detail": "2 shown · want 2 · pressed true · chip 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 onTodo clears",
+  "ok": true,
+  "detail": "14 after the second press"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 pinned filter",
+  "ok": true,
+  "detail": "2 shown · want 2 · pressed true · chip 1"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 pinned clears",
+  "ok": true,
+  "detail": "14 after the second press"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 title and buttons hold",
+  "ok": true,
+  "detail": "{\"titleH\":56.6875,\"lh\":56.7,\"rowGap\":0}"
+ },
+ {
+  "lock": "C1",
+  "where": "1280x800 linked = agent or query",
+  "ok": true,
+  "detail": "7"
+ }
+]

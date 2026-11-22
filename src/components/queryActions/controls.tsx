@@ -7,6 +7,7 @@
  * and the agent card. Every journey composes these and nothing else, so one control never looks two
  * ways in two journeys.
  */
+import { typedWhole } from "../../lib/sentSample";
 import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   addDays, dayDiff, fmt, fmtY, isWeekend, MONL, rel, sameDay, SHIFT_NOTE, up, type Anchor,
@@ -71,9 +72,29 @@ export function Toggle({ on, onClick, children, small, style, testId }: { on: bo
   );
 }
 
+/**
+ * Overnight fixes v1, Part 7 — an accessible name from the VISIBLE label. A field's label here is the `Fl` just above
+ * it (a div, not a <label>), so a control names itself after the nearest preceding `.qad-fl` in its own container
+ * (`aria-labelledby`, an id given on the spot). No call site changes, no new words, nothing drawn.
+ */
+let flSeq = 0;
+function labelFromFl(el: HTMLElement | null): void {
+  if (!el || el.hasAttribute("aria-labelledby") || el.hasAttribute("aria-label")) return;
+  for (let n: Element | null = el, hop = 0; n && hop < 3; n = n.parentElement, hop++) {
+    for (let p = n.previousElementSibling; p; p = p.previousElementSibling) {
+      const fl = p.classList.contains("qad-fl") ? p : null;
+      if (fl) {
+        if (!fl.id) fl.id = `qad-fl-${++flSeq}`;
+        el.setAttribute("aria-labelledby", fl.id);
+        return;
+      }
+    }
+  }
+}
+
 export function Radios<K extends string>({ options, value, onPick }: { options: { k: K; title: React.ReactNode; sub: React.ReactNode; tag?: React.ReactNode; tagGo?: boolean }[]; value: K | null; onPick: (k: K) => void }) {
   return (
-    <div className="qad-rads" role="radiogroup">
+    <div className="qad-rads" role="radiogroup" ref={labelFromFl}>
       {options.map((o) => (
         <button key={o.k} type="button" role="radio" aria-checked={value === o.k} className={`qad-rad${value === o.k ? " on" : ""}`} onClick={() => onPick(o.k)} data-qad-rad={o.k}>
           <i /><span><b>{o.title}</b><small>{o.sub}</small></span>
@@ -95,7 +116,9 @@ export function Seg<K extends string>({ options, value, onPick, wide, sm, style 
 }
 
 export function TextBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return <textarea className="qad-fta" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />;
+  /* Part 7: named after its Fl; with none above it, after its placeholder (the only words it shows) */
+  return <textarea className="qad-fta" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)}
+    ref={(el) => { labelFromFl(el); if (el && !el.hasAttribute("aria-labelledby") && !el.hasAttribute("aria-label") && placeholder) el.setAttribute("aria-label", placeholder); }} />;
 }
 
 /** A value that animates up or down when it changes (`.qad-tick`). */
@@ -207,6 +230,19 @@ function Calendar({ value, dir, onPick }: { value: Date | null; dir: DateDir; on
 
 /* ---------- the sample control ---------- */
 
+/** v54 (D7): a typed whole number in a stepper's middle; the shown value keeps its comma, and a typed one is committed
+ *  on blur or Enter (rewriting the box mid-keystroke would throw the caret about) */
+function TypedWhole({ value, show, cls, label, onSet }: { value: number; show: string; cls?: string; label: string; onSet: (n: number) => void }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  useEffect(() => { setDraft(null); }, [value]);
+  const commit = () => { if (draft == null) return; const n = typedWhole(draft); setDraft(null); if (n != null && n !== value) onSet(n); };
+  return (
+    <input className={`qad-typed${cls ? ` ${cls}` : ""}`} type="text" inputMode="numeric" aria-label={label} value={draft ?? show}
+      onChange={(e) => setDraft(e.target.value)} onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } else if (e.key === "Escape" && draft != null) { e.stopPropagation(); setDraft(null); } }} />
+  );
+}
+
 export function SampleControl({ sample, onChange, book, allowNone, name }: { sample: Sample; onChange: (s: Sample) => void; book: Book; allowNone?: boolean; name?: string }) {
   const units: SampleUnit[] = ["pages", "words", "chapters", ...(allowNone ? (["none"] as SampleUnit[]) : [])];
   const s = sample;
@@ -225,7 +261,8 @@ export function SampleControl({ sample, onChange, book, allowNone, name }: { sam
           <div className="qad-amt">
             <span className="qad-step">
               <button type="button" aria-label="Less" onClick={() => onChange(bump(s, -1, book))}>−</button>
-              <b data-qad-amount><span className={tick} key={s.amt}>{n0(s.amt)}</span></b>
+              {/* v54 (D7): the amount is a box you can type any whole number into, committed on blur or Enter */}
+              <b data-qad-amount><TypedWhole value={s.amt} show={n0(s.amt)} cls={tick} label="How much of the sample" onSet={(n) => onChange({ ...s, amt: n })} /></b>
               <button type="button" aria-label="More" onClick={() => onChange(bump(s, 1, book))}>+</button>
             </span>
             <span className="qad-unitl">{s.amt === 1 ? U.one : U.many}</span>
@@ -242,7 +279,7 @@ export function SampleControl({ sample, onChange, book, allowNone, name }: { sam
                 <Seg value={fu} onPick={(u) => onChange(setFromUnit(s, u, book))} options={[["chapter", "Chapter"], ["page", "Page"], ["word", "Word"]]} />
                 <span className="qad-step sm">
                   <button type="button" aria-label="Earlier" onClick={() => onChange(bumpFrom(s, -1, book))}>−</button>
-                  <b>{n0(s.from)}</b>
+                  <b data-qad-from><TypedWhole value={s.from} show={n0(s.from)} label="Where the section started" onSet={(n) => onChange({ ...s, from: n })} /></b>
                   <button type="button" aria-label="Later" onClick={() => onChange(bumpFrom(s, 1, book))}>+</button>
                 </span>
               </div>

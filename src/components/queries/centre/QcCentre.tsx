@@ -209,11 +209,13 @@ export const QcCentre: React.FC<{
   v131?: boolean;
   /** v138 — the centred light header (desktop); replaces v133's open header */
   header138?: React.ReactNode;
+  /** v151 — the desktop page is the header slot alone (QcPage151): the open banner, the workspace and the foot are not drawn */
+  bodyless?: boolean;
   /** v138 §C — full screen: the header goes and the pinned row stays */
   full?: boolean;
   /** v138 §H — the page-load entrance is running */
   enter138?: boolean;
-}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false, header138, full = false, enter138 = false }) => {
+}> = ({ loading, blank = false, headLine, living, onLog, onRecord, logDisabled = false, logRef, sent = null, msTitle = null, withYou = null, sentence, courts, sticky, carousel, footer, overlay, onClearSelection, body, hasOpen = false, docked, onDocked, onStep, onExport, canExport, entering, v131 = false, header138, full = false, enter138 = false, bodyless = false }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   usePinnedControls(groupRef, v131 && !header138);
   /**
@@ -313,6 +315,7 @@ export const QcCentre: React.FC<{
     {/* v137 §C — THE LIST IS THE PAGE: the "View the full list" link (v136 §C), "Recently updated" and the banner
         (v134 §3) are no longer drawn on the populated page. `viewFullList` and `QC_BANNER_LINES` are kept. */}
     {carousel}
+    {bodyless ? null : (
     <div className={`qcv-page qcv-own${v131 ? " qcw" : ""}${docked === false ? " qcv-page--narrow" : ""}${loading ? " qcv-page--loading" : ""}${loading && blank ? " qcv-page--blank" : ""}${entering && !header138 ? " qcv-page--enter" : ""}`}
       role="region" aria-label="Query Centre" aria-busy={loading} data-qcv="page" data-ws={v131 ? "true" : undefined}>
 
@@ -366,6 +369,7 @@ export const QcCentre: React.FC<{
         {loading ? "" : "Queries loaded"}
       </div>
     </div>
+    )}
     {footer}
     {overlay}
     </div>

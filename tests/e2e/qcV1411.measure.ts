@@ -86,14 +86,15 @@ const rows = (page: Page) => page.evaluate((next) => {
 }, NEXT);
 const ids = async (page: Page) => (await rows(page)).map((r) => r.id).sort();
 const counts = (page: Page, sel: string, key: string) => page.evaluate(([s, k]) => Object.fromEntries([...document.querySelectorAll<HTMLElement>(s)].filter((e) => e.getBoundingClientRect().height > 0 || !!e.closest("[data-qc140='filter-menu']")).map((e) => [e.dataset[k as "k"], Number(e.dataset.n)])), [sel, key] as const);
-const total = (page: Page) => page.evaluate(() => Number([...document.querySelectorAll<HTMLElement>("[data-qc138='title-n']")].find((e) => e.getBoundingClientRect().height > 0)?.textContent));
+/* v149 (QC149 L13) — RE-POINTED: the breakdown card is gone; the four sets are the view chips above the list, and the total is the All chip's. The law is the same. */
+const total = (page: Page) => page.evaluate(() => Number([...document.querySelectorAll<HTMLElement>("[data-qc149='view'][data-k='all']")].find((e) => e.getBoundingClientRect().height > 0)?.dataset.n ?? NaN));
 const same = (a: string[], b: string[]) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 const diff = (a: string[], b: string[]) => `only left: ${a.filter((x) => !b.includes(x)).slice(0, 6).join(" ")} · only right: ${b.filter((x) => !a.includes(x)).slice(0, 6).join(" ")}`;
 /** the list's ids with one where-set on, through the card's own row */
 async function setIds(page: Page, k: string) {
-  await press(page, `[data-qc141='card-row'][data-k='${k}']`); await page.waitForTimeout(700);
+  await press(page, `[data-qc149='view'][data-k='${k}']`); await page.waitForTimeout(700);
   const out = await ids(page);
-  await press(page, `[data-qc141='card-row'][data-k='${k}']`); await page.waitForTimeout(500);
+  await press(page, `[data-qc149='view'][data-k='${k}']`); await page.waitForTimeout(500);
   return out;
 }
 
@@ -115,7 +116,7 @@ test.describe("Query Centre v141.1", () => {
     await press(page, "[data-qc140='filter-clear']"); await press(page, "[data-qc140='filter-close']"); await page.waitForTimeout(500);
     L.check("L1", "the quick pick's ids are the card's With you ids", pickSet.length > 0 && same(pickSet, youSet), `${pickSet.length} vs ${youSet.length}; ${diff(pickSet, youSet)}`);
     L.check("L1", "…and the rows': the writer's court plus every agent-court row whose Next move is Nudge", same(youSet, fromRows), `${youSet.length} vs ${fromRows.length}; ${diff(youSet, fromRows)}`);
-    const card = await counts(page, "[data-qc141='card-row']", "k");
+    const card = await counts(page, "[data-qc149='view']:not([data-k='all'])", "k");
     await pin(page, true);
     const band = await counts(page, "[data-qc141='band-set']", "k");
     await pin(page, false);
@@ -174,7 +175,7 @@ test.describe("Query Centre v141.1", () => {
     await open(page, W1512);
     const all = (await ids(page));
     const t = await total(page);
-    const card = await counts(page, "[data-qc141='card-row']", "k");
+    const card = await counts(page, "[data-qc149='view']:not([data-k='all'])", "k");
     L.check("L4", "population", all.length > 0 && t === all.length, `${all.length} rows · total ${t}`);
     L.check("L4", "the card's four sum to the total", KEYS.reduce((a, k) => a + card[k], 0) === t, `${JSON.stringify(card)} vs ${t}`);
     const seen = new Map<string, string[]>();

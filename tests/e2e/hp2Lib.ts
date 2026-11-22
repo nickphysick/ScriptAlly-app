@@ -22,15 +22,18 @@ export const OPEN_HEADER = ["/queries"] as const;
  */
 /* v138 (14 Oct): /queries joins — its centred light header is held by qcV138 A1 */
 /* To-do list v5 (15 Oct): /todo's desktop header is the light header (TD5 A1); its PHONE page keeps the v2 panel, so P7 at
-   390 still reads it. */
+   390 still reads it. RE-POINTED (To-do list v51, 6 Nov): the desktop header is the task workspace's own navy header
+   (`[data-tws="header"]`, held by todoWs.measure.ts); the tray's `data-td5` probes are gone with the tray. */
 /* Analytics v21 (16 Oct): /queries/analytics joins — its desktop header is the centred light header (AN21 A1); its PHONE
    page keeps v17's band in the v2 panel, so P7 at 390 still reads it. */
 export const LIGHT_HEADER: readonly string[] = ["/agents", "/queries", "/todo", "/queries/analytics"];
-export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"], [data-qc138="header"], [data-qc138="empty-header"], [data-td5="header"], [data-td5="empty-panel"], [data-a21="header"], [data-a21="empty-panel"]';
+/* RE-POINTED (Workspace headers v1, 14 Nov): Analytics' desktop header (populated and day one) is the shared navy header
+   (`[data-wsnh-page="analytics"]`); `[data-a21="header"]` and `[data-a21="empty-panel"]` are gone */
+export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"], [data-qc138="header"], [data-qc138="empty-header"], [data-tws="header"], [data-wsnh-page="analytics"]';
 /* RE-POINTED (Discover v1, 18 Oct): /agents/discover LEFT this list — its header is page-local (OWN_HEADER_ROUTES), the
    light two-state header or the navy panel, never the shared panel P1 measures; DV1 B1 holds it. It contributed 26 of the
    base run's 351 readings, so the floor (320) still stands at 325 without it. */
-export const WORKSPACE = ["/queries/analytics", "/agents", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/todo/calendar", "/todo/corkboard"] as const;
+export const WORKSPACE = ["/queries/analytics", "/agents", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/todo/corkboard"] as const;
 /** routes that must not change */
 export const OUT_OF_SCOPE = ["/dashboard", "/account", "/help", "/plans"] as const; // "/import" left this list with onboarding v5 part 3: its page was rebuilt (lock IP1 D1 holds it now)
 export const PANEL_BG = "rgb(45, 58, 80)";

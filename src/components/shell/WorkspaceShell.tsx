@@ -31,17 +31,21 @@ import {
   Book, ChevronDown, ChevronsUpDown,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
+import { activeManuscriptOf, eventPath, logEvent } from "../../lib/events";
+import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { planLine, resolveScopedManuscript } from "../../lib/shellSidebar";
 import {
-  ShellSection, barPageName, openForHit, sectionClick, sectionRowState, shellHitFor,
+  ShellSection, barPageName, openForHit, sectionClick, sectionRowState, shellHitFor, sidebarLabel,
 } from "../../lib/workspaceShell";
 import { searchShortcut } from "./primitives";
-import { FolderTab, TabSibling } from "./FolderTab";
+import { TabStrip, StripTab } from "./FolderTab";
+import { isPageLocked, tabLabelOf } from "../../lib/workspaceNav";
 import { inkTabAid } from "./inkTabAid";
 import { markPinnedToolbars } from "./pinnedToolbar";
 import { BarSwitcher } from "./BarSwitcher";
-import { BETA_MODE, BETA_PILL, FEEDBACK_FAB } from "../../lib/beta";
-import { useSidebarCollapsed } from "./useSidebarCollapsed";
+import { FEEDBACK_FAB } from "../../lib/beta";
+import { useSidebarState, SidebarMode } from "./useSidebarState";
+import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { formatSidebarName, getInitials } from "../../lib/displayName";
 import { DeskTooltip } from "../dashboard/DeskTooltip";
 import { Rect as TipRect } from "../../lib/deskTooltip";
@@ -62,11 +66,16 @@ import "./inkShell.css";
 import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
-import { setBarSlot } from "../../lib/barSlot";
+import { subscribeTourReplay, tourReplay as readTourReplay } from "../../lib/dashTour";
+import { setBarSlot, setBarSlotFolded } from "../../lib/barSlot";
 import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
 import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
 import { HelpMenu } from "./HelpMenu";
 import { registerFeedbackAnchor, setFeedbackPage } from "../../lib/feedbackStore";
+import { SidebarRail } from "./SidebarRail";
+import { railTile } from "../../lib/railTile";
+import { railCountAid } from "../../lib/railReviewAid";
+import { navLockedFor, planColumn } from "../../lib/entitlements";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -100,6 +109,8 @@ export interface WorkspaceShellProps {
   onOpenFeedback?: () => void;
   /** True while that panel is open — the pill reports it, as the dock's button did. */
   feedbackOpen?: boolean;
+  /** Your notes v1: replies on Your notes the writer has not seen — the card link's "{k} new" and the rail's dot */
+  newReplies?: number;
   /** Opens the account menu, and hands it the element to anchor against (it is portalled). */
   onOpenAccount?: (anchor: HTMLElement) => void;
   onUpgrade?: () => void;
@@ -160,13 +171,23 @@ const FEEDBACK_ICON = (
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   sections, icons, onNavigatePath, onOpenSearch, searchAnchorRef, onOpenHelp, onOpenFeedback,
-  feedbackOpen = false, onOpenAccount, onUpgrade,
+  feedbackOpen = false, newReplies = 0, onOpenAccount, onUpgrade,
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
   /* Help Centre v1 — the trail the Help Centre reads to ring the page the writer came from */
   useEffect(() => { noteRoute(pathname); }, [pathname]);
-  const { manuscripts, queries, agents, currentUser, updateUserProfile } = useScriptAllyDb();
+  const { manuscripts, queries, agents, currentUser, updateUserProfile, entitlement } = useScriptAllyDb();
+  /* Dashboard first visit v2 (Part I): the first app load of each calendar day (Europe/London), per writer, per device */
+  useEffect(() => {
+    const uid = currentUser?.id;
+    if (!uid) return;
+    const day = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
+    const key = `sa.openedApp.${uid}`;
+    try { if (window.localStorage.getItem(key) === day) return; window.localStorage.setItem(key, day); } catch { return; }
+    logEvent(uid, "opened_app", eventPath(currentUser, activeManuscriptOf(manuscripts)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.id]);
 
   const hit = useMemo(() => shellHitFor(sections, pathname, search), [sections, pathname, search]);
 
@@ -176,7 +197,184 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      that rail left a state with no UI, so the state went too. This is a different shape: ONE
      sidebar whose width narrows to an icon rail — every row keeps existing, labels collapse in
      place, the toggle lives in the pagebar at the seam. There is no second component to drift. */
-  const sidebar = useSidebarCollapsed();
+  const sidebar = useSidebarState();
+  /**
+   * SIDEBAR RAIL v1 — RAIL · FLOAT · PINNED (useSidebarState). The full sidebar shows when floating or
+   * pinned. Both layers stay mounted; switching is a class and `inert`, never a remount.
+   */
+  const wide = sidebar.mode !== "rail";
+  const sidebarModeRef = useRef(sidebar.mode);
+  sidebarModeRef.current = sidebar.mode;
+  const wideRef = useRef(wide);
+  wideRef.current = wide;
+  /**
+   * ⚠️ `--shell-side-w` IS THE SIDEBAR'S LAYOUT FOOTPRINT, published on `<html>`, and it is written only
+   * when it CHANGES. Setting a property on the root re-styles the whole page; doing it on every render
+   * was a measured whole-page recalc in the mock.
+   */
+  const sideVar = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    /* 80px on the rail AND while floating — a floating sidebar lies over the page and takes no room */
+    const v = sidebar.mode === "pinned" ? "248px" : "80px";
+    if (sideVar.current === v) return;
+    sideVar.current = v;
+    document.documentElement.style.setProperty("--shell-side-w", v);
+  }, [sidebar.mode]);
+
+  /* ══ THE MOTION (ref: setWide · openFloat · pin + glidePage · toRail · applyPinned · snapMargin) ══════
+     ⚠️ WIDTH AND MARGIN ARE SET ON THE PANEL IMPERATIVELY, in a layout effect, because two of the moves
+     need a step React cannot express: a margin that changes with its transition switched OFF (one
+     re-layout, then nothing re-lays out while the rest animates).
+       RAIL → FLOAT    width 80→248 and margin 0→−168 together: the footprint stays 80, the page never moves.
+       FLOAT → RAIL    the reverse.
+       FLOAT → PINNED  the margin snaps to 0 (the page makes room in ONE re-layout), then `.ws-main` glides
+                       in from translateX(−168px) — a transform, so nothing re-lays out while it moves.
+       PINNED → RAIL   the margin snaps to −168 first (the page takes the width back underneath, hidden),
+                       then width and margin animate back to 80/0 together.
+     Anything else (the first paint, a narrow window, a page's hold) is instant. */
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const prevMode = useRef<SidebarMode | null>(null);
+  const prevNarrow = useRef(sidebar.narrow);
+  useLayoutEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const prev = prevMode.current;
+    const next = sidebar.mode;
+    const narrowFlip = prevNarrow.current !== sidebar.narrow;
+    prevMode.current = next;
+    prevNarrow.current = sidebar.narrow;
+    if (prev === next && !narrowFlip && el.style.width) return;
+    const geo: Record<SidebarMode, [string, string]> = { rail: ["80px", "0px"], float: ["248px", "-168px"], pinned: ["248px", "0px"] };
+    const [w, m] = geo[next];
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const animate = prev !== null && sidebar.ready && !narrowFlip && !reduce;
+    const snapMargin = (v: string) => {
+      el.classList.add("sr-nomargin");
+      el.style.marginRight = v;
+      void el.offsetWidth;
+      el.classList.remove("sr-nomargin");
+    };
+    if (!animate || (prev === "rail" && next === "pinned") || (prev === "pinned" && next === "float")) {
+      el.classList.add("sr-instant");
+      el.style.width = w;
+      el.style.marginRight = m;
+      void el.offsetWidth;
+      el.classList.remove("sr-instant");
+      return;
+    }
+    if (prev === "float" && next === "pinned") {
+      el.style.width = w;
+      snapMargin("0px");
+      const main = el.parentElement?.querySelector<HTMLElement>(":scope > .ws-main");
+      if (!main) return;
+      main.style.transition = "none";
+      main.style.transform = "translateX(-168px)";
+      void main.offsetWidth;
+      main.style.transition = "transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1)";
+      main.style.transform = "";
+      window.setTimeout(() => { main.style.transition = ""; }, 300);
+      return;
+    }
+    if (prev === "pinned" && next === "rail") snapMargin("-168px");
+    el.style.width = w;
+    el.style.marginRight = m;
+  }, [sidebar.mode, sidebar.narrow, sidebar.ready]);
+
+  /* ══ FLOAT GOES AWAY (ref: the pointerdown, Escape and dialog rules) ══════════════════════════════
+     A click on the page, Escape, or a dialog opening puts a floating sidebar back to the rail. Clicks
+     inside what the sidebar itself opened — the manuscript menu, the account menu, the feedback panel,
+     any menu, listbox or dialog — are not "the page". ⚠️ The search palette has no aria-modal, so the
+     dialog rule reads `role="dialog"` and a visible box, never aria-modal. Escape is taken in the
+     capture phase and marked handled, so the settings mode's own Escape (bubble phase, which checks
+     `defaultPrevented`) does not also leave settings. A PINNED sidebar ignores all of this. */
+  const toRailRef = useRef(sidebar.toRail);
+  toRailRef.current = sidebar.toRail;
+  useEffect(() => {
+    if (sidebar.mode !== "float") return undefined;
+    const panel = panelRef.current;
+    const MENUS = '[role="menu"], [role="listbox"], [role="dialog"], .ws-ms-menu--port, .fb-panel';
+    const OWN_DIALOGS = ".ws-ms-menu--port, .fb-panel";
+    const away = (e: PointerEvent) => {
+      const t = e.target as Element | null;
+      if (!t || panel?.contains(t) || t.closest?.(MENUS)) return;
+      toRailRef.current();
+    };
+    /* ⚠️ "UP" MEANS SHOWN, NOT LAID OUT. Some dialogs stay mounted with their box while closed — the dashboard's
+       How-it-works modal is opacity 0, `aria-hidden` and `inert` on every route — and a box-only test read them as
+       open, so the float shut on the first DOM change anywhere. */
+    const shown = (d: HTMLElement) => {
+      if (d.offsetWidth === 0 || d.offsetHeight === 0) return false;
+      if (d.closest('[aria-hidden="true"], [inert]')) return false;
+      const cs = getComputedStyle(d);
+      return cs.visibility !== "hidden" && parseFloat(cs.opacity) > 0.05;
+    };
+    const dialogUp = () => [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].some((d) =>
+      !panel?.contains(d) && !d.closest(OWN_DIALOGS) && shown(d));
+    /* a dialog that fades in is at opacity 0 when it mounts, and its fade makes no mutation: look again shortly after */
+    let again = 0;
+    const mo = new MutationObserver(() => {
+      if (dialogUp()) { toRailRef.current(); return; }
+      window.clearTimeout(again);
+      again = window.setTimeout(() => { if (dialogUp()) toRailRef.current(); }, 220);
+    });
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class", "hidden"] });
+    document.addEventListener("pointerdown", away, true);
+    return () => {
+      window.clearTimeout(again);
+      mo.disconnect();
+      document.removeEventListener("pointerdown", away, true);
+    };
+  }, [sidebar.mode]);
+
+  /* ⚠️ ESCAPE IS A LAYER ON THE APP'S ONE ESCAPE STACK (lib/escapeStack), at `sidebarFloat`: the stack takes the
+     key on window in the capture phase, so a listener of the shell's own would hear it only when no page layer was
+     open. The layer stands down while focus is inside a menu the sidebar opened (the manuscript menu, the account
+     menu — both take focus when they open), so their own Escape closes them first; the next Escape closes the
+     float. The settings mode's Escape (bubble phase) reads `defaultPrevented`, which the stack sets. */
+  const [menuFocus, setMenuFocus] = useState(false);
+  useEffect(() => {
+    if (sidebar.mode !== "float") { setMenuFocus(false); return undefined; }
+    const on = (e: FocusEvent) => setMenuFocus(!!(e.target as Element | null)?.closest?.('[role="menu"]'));
+    document.addEventListener("focusin", on);
+    return () => document.removeEventListener("focusin", on);
+  }, [sidebar.mode]);
+  useEscapeLayer(sidebar.mode === "float" && !menuFocus, () => toRailRef.current(), ESC_LEVEL.sidebarFloat);
+
+  /* ══ FOCUS: opening FLOAT moves focus to the current page's row; going back to the rail returns it to
+     the expand control, when focus was inside the full sidebar. ══ */
+  const expandRef = useRef<HTMLButtonElement | null>(null);
+  const focusPrev = useRef<SidebarMode | null>(null);
+  /* ⚠️ RECORDED AS IT HAPPENS: by the time the effect below runs the full layer is already `inert`, and
+     the browser has taken focus off it — so "was focus in the full sidebar" cannot be asked afterwards */
+  const focusInFull = useRef(false);
+  useEffect(() => {
+    const on = (e: FocusEvent) => {
+      focusInFull.current = !!panelRef.current?.querySelector(".ws-pin")?.contains(e.target as Node);
+    };
+    document.addEventListener("focusin", on);
+    return () => document.removeEventListener("focusin", on);
+  }, []);
+  useEffect(() => {
+    const prev = focusPrev.current;
+    focusPrev.current = sidebar.mode;
+    const panel = panelRef.current;
+    if (!panel || prev === null) return undefined;
+    if (prev === "rail" && sidebar.mode === "float") {
+      const t = window.setTimeout(() => {
+        const row = panel.querySelector<HTMLElement>('.ws-pin .ws-ni[aria-current="page"]')
+          ?? panel.querySelector<HTMLElement>(".ws-pin .ws-ni")
+          ?? panel.querySelector<HTMLElement>(".ws-pin button:not([disabled])");
+        row?.focus({ preventScroll: true });
+      }, 60);
+      return () => window.clearTimeout(t);
+    }
+    if (sidebar.mode === "rail" && focusInFull.current) {
+      focusInFull.current = false;
+      expandRef.current?.focus({ preventScroll: true });
+    }
+    return undefined;
+  }, [sidebar.mode]);
+  useEffect(() => () => { document.documentElement.style.removeProperty("--shell-side-w"); sideVar.current = null; }, []);
 
   /* ══ SETTINGS MODE ════════════════════════════════════════════════════════════════════════
      ⚠️ THE MODE IS DERIVED FROM THE ROUTE, NEVER HELD AS STATE. A boolean would have to be set on
@@ -188,7 +386,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      ⚠️ AND IT IS THE ONE CONDITION FOR ALL THREE CHANGES — the nav layer, the window's surface and
      the top bar's controls. Three booleans would be three things to get out of step; the class on
      `.ws-app` is what the stylesheet keys every one of them off. */
-  const settingsMode = isAccountPath(pathname);
+  /* non-workspace v1, Phase 4: the Plans page sits inside settings mode, with Plan lit in the rail */
+  const settingsMode = isAccountPath(pathname) || pathname === "/plans";
   /**
    * ⚠️ THE DASHBOARD IS A MODE TOO, AND IT IS THE SETTINGS MODE'S PATTERN RATHER THAN A SECOND ONE.
    * One condition, DERIVED from the route and never held as state — a boolean would have to be
@@ -224,7 +423,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    * with `:has()`, is the cover itself: no signal travels upward, and there is nothing to forget to
    * send.
    */
-  const settingsSection: AccountSectionId | null = accountSectionForPath(pathname);
+  const settingsSection: AccountSectionId | null = accountSectionForPath(pathname) ?? (pathname === "/plans" ? "plan" : null);
 
   /* ⚠️ THE EXIT GOES TO THE DASHBOARD, NOT `history.back()`. Back is where you CAME from, which on
      a deep link into `/account/security` from an email is outside the app entirely — and on a
@@ -254,6 +453,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   useEffect(() => {
     if (!settingsMode) return;
     const id = requestAnimationFrame(() => {
+      /* on the 80px rail the heading is in the hidden layer: the rail's current settings row takes focus */
+      if (!wideRef.current) {
+        document.querySelector<HTMLElement>('.wsr-setni[aria-current="page"]')?.focus({ preventScroll: true });
+        return;
+      }
       document.getElementById(SETTINGS_RAIL_HEADING_ID)?.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(id);
@@ -293,6 +497,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    */
   const [helpOpen, setHelpOpen] = useState(false);
   const [guidePage, setGuidePage] = useState<string | null>(registeredPageGuide());
+  /* Dashboard first visit v2 (Part D): the dashboard's tour replay, while it registers one. Read on subscribe as well
+     as on notification — a child's effect registers before this one subscribes. */
+  const [tourReplay, setTourReplay] = useState<(() => void) | null>(() => readTourReplay());
+  useEffect(() => {
+    setTourReplay(() => readTourReplay());
+    return subscribeTourReplay(() => setTourReplay(() => readTourReplay()));
+  }, []);
   const helpWrapRef = useRef<HTMLSpanElement>(null);
   const helpBtnRef = useRef<HTMLButtonElement>(null);
   const helpMenuRef = useRef<HTMLDivElement>(null);
@@ -332,7 +543,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     setRailTip(null);
   }, []);
   /* Expanding while a tip is open (the `[` key) would strand it beside a full-width sidebar. */
-  useEffect(() => { hideTip(); }, [sidebar.collapsed, hideTip]);
+  useEffect(() => { hideTip(); }, [sidebar.mode, hideTip]);
   /**
    * Handlers for one rail anchor. `when` gates rows to the collapsed state — the pack suppresses
    * rail tips entirely when expanded; the toggle passes `true` and its own 250ms. Copy is the
@@ -363,6 +574,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const go = useCallback((path: string) => {
     onNavigatePath(path);
   }, [onNavigatePath]);
+  /* a page picked from the FLOATING full sidebar puts it away (ref: 120ms after the navigation) */
+  const pickPage = useCallback((path: string) => {
+    go(path);
+    if (sidebarModeRef.current === "float") window.setTimeout(() => toRailRef.current(), 120);
+  }, [go]);
 
   /** ⚠️ THE ACCORDION SURVIVES, THE COLLAPSE DOES NOT. A section row is still a destination AND a
       disclosure, so `sectionClick`'s open/go limbs are read; its `expand`/`collapse` limbs named
@@ -567,28 +783,21 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   /* the search field is both the palette's anchor (the host's ref) and the folder tab's fit limit */
   const searchFieldRef = useRef<HTMLButtonElement | null>(null);
+  /* shell tabs v2 / v2.1: the strip's fit says how far the bar must fold (TabStrip `onFold`): 1 folds search to its
+     icon, 2 also folds the guide pill in the page slot. The level is published for the pill's tooltip. */
+  const [foldLevel, setFoldLevel] = useState(0);
+  const searchFolded = foldLevel >= 1;
+  const slotFolded = foldLevel >= 2;
+  useEffect(() => { setBarSlotFolded(slotFolded); }, [slotFolded]);
   const setSearchRefs = useCallback((el: HTMLButtonElement | null) => {
     searchFieldRef.current = el;
     if (typeof searchAnchorRef === "function") searchAnchorRef(el);
     else if (searchAnchorRef) (searchAnchorRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
   }, [searchAnchorRef]);
 
-  /* the folder tab: the page's group label and its OTHER pages, in the sidebar's order */
+  /* SHELL NAV v3 — the tab strip: every page of the current section, in nav order (built below, once the Pro locks
+     are known). Off the nav (Settings, Plans, Help, Import, Your notes) it is the page's one tab. */
   const tabSection = hit ? sections.find((sx) => sx.id === hit.section) ?? null : null;
-  const tabSiblingsBase: TabSibling[] = useMemo(
-    () => (tabSection?.children ?? [])
-      .filter((ch) => ch.id !== hit?.child)
-      .map((ch) => ({ id: ch.id, label: ch.label, path: ch.path, icon: icons[ch.icon ?? ch.id] ?? icons[tabSection!.id] })),
-    [tabSection, hit?.child, icons],
-  );
-  /* ⚠️ THE REVIEW AID IS GATED HERE, AT THE CALL SITE, so a production build drops the module entirely
-     (`import.meta.env.MODE` is replaced statically and the branch is dead). It injects hypothetical
-     pages into the current group for INK6's "lots of pages" overflow; it fabricates INPUT, never output. */
-  const tabSiblings = useMemo(
-    () => (import.meta.env.MODE !== "production" ? inkTabAid(tabSiblingsBase) : tabSiblingsBase),
-    [tabSiblingsBase],
-  );
-  const tabGroup = tabSection ? tabSection.label : null;
 
   /**
    * INK1 — THE BROWSER'S OWN CHROME TAKES THE SHELL'S INK, WHILE THE SHELL IS ON SCREEN AND ONLY AT
@@ -612,9 +821,52 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     };
   }, []);
 
-  const plan = planLine(currentUser?.plan);
+  /* the rail's manuscript tile: the book's initials on a cream title page, a stack for every book, the
+     Library glyph for a title with no letters (lib/railTile) */
+  const railTileNode = (title: string | null) => {
+    const t = railTile(title);
+    if (t.kind === "initials") return <span className="wsr-init" aria-hidden="true">{t.text}</span>;
+    return (
+      <span className={`wsr-init wsr-init--${t.kind}`} aria-hidden="true">
+        {t.kind === "stack" ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="m2 17 10 5 10-5" /><path d="m2 12 10 5 10-5" /></svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="m16 6 4 14" /><path d="M12 6v14" /><path d="M8 8v12" /><path d="M4 4v16" /></svg>
+        )}
+      </span>
+    );
+  };
+  const plan = planLine(entitlement);
+  /* the To-do board's total — the only count in the nav, carried on the To-do list row */
+  const boardCount = sections.find((sx) => sx.id === "tasks")?.children?.find((c) => c.id === "list")?.count ?? 0;
+  /* ⚠️ the review aid is gated HERE, at the call site, so a production build drops the module */
+  const todoCount = import.meta.env.MODE !== "production" ? railCountAid(boardCount) : boardCount;
+  /* the nav entitlements this account does NOT have (sidebar materials v1): empty while every switch is open to all.
+     ⚠️ the review aid is gated HERE, at the call site, so a production build drops it */
+  const proLocked = useMemo(
+    () => navLockedFor(entitlement),
+    [entitlement],
+  );
   const name = currentUser?.name ?? "";
   const pageName = barPageName(sections, hit, pathname);
+  const stripBase: StripTab[] = useMemo(() => {
+    const kids = tabSection?.children ?? [];
+    if (hit?.child && kids.some((c) => c.id === hit.child)) {
+      return kids.map((ch) => ({
+        id: ch.id, label: ch.label, short: tabLabelOf(ch), path: ch.path,
+        icon: icons[ch.icon ?? ch.id] ?? icons[tabSection!.id], locked: isPageLocked(ch, proLocked),
+      }));
+    }
+    return pageName ? [{ id: "__page", label: pageName.name, short: pageName.name, path: pathname, icon: null }] : [];
+  }, [tabSection, hit?.child, icons, proLocked, pageName?.name, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* ⚠️ THE REVIEW AID IS GATED HERE, AT THE CALL SITE, so a production build drops the module entirely
+     (`import.meta.env.MODE` is replaced statically and the branch is dead). It injects hypothetical
+     pages into the current section for the "lots of pages" overflow; it fabricates INPUT, never output. */
+  const stripTabs = useMemo(
+    () => (import.meta.env.MODE !== "production" ? inkTabAid(stripBase) : stripBase),
+    [stripBase],
+  );
+  const stripCurrent = hit?.child && stripBase.some((t) => t.id === hit.child) ? hit.child : "__page";
   useEffect(() => { setFeedbackPage(pageName?.name ?? null); }, [pageName?.name]);
 
   return (
@@ -622,7 +874,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
        `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
        selector, and a page that wants to redistribute the width the panel gave back has nothing to
        key on. Same boolean, second mount, on the common ancestor. */
-    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}${sheetWide ? " sheet-wide" : ""}`}>
+    <div className={`ws-app${sidebar.mode !== "pinned" ? " sb-shut" : ""}${settingsMode ? " set-mode" : ""}${dashMode ? " dash-mode" : ""}${groundMode ? " ground-mode" : ""}${sheetWide ? " sheet-wide" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition
@@ -630,9 +882,51 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           arrives two rAFs after mount; until then, state changes are instant. */}
       <div
         id="ws-sidebar"
-        className={`ws-panel${sidebar.collapsed ? " sb-collapsed" : ""}${sidebar.ready ? " sb-ready" : ""}`}
+        ref={panelRef}
+        className={`ws-panel${wide ? " sr-wide" : ""}${sidebar.mode === "float" ? " sr-float" : ""}${sidebar.ready ? " sb-ready" : ""}`}
+        data-sidebar={sidebar.mode}
       >
-        <div className="ws-pin">
+        {/* SIDEBAR RAIL v1 — the 80px rail, the first of the box's two layers */}
+        <div className="wsr-host" inert={wide}>
+          <SidebarRail
+            sections={sections}
+            icons={icons}
+            hit={hit}
+            todoCount={todoCount}
+            locked={proLocked}
+            onGo={go}
+            onExpand={sidebar.openFloat}
+            expandRef={expandRef}
+            expanded={wide}
+            markSrc={artUrl(APP_MARK)}
+            switcher={
+              <BarSwitcher
+                placement="rail"
+                manuscripts={manuscripts}
+                queries={queries}
+                activeId={activeMs?.id ?? null}
+                onPick={pickMs}
+                onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
+                onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
+              />
+            }
+            settingsMode={settingsMode}
+            settingsSection={settingsSection}
+            onSettings={(id) => onNavigatePath(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
+            onBack={leaveSettings}
+            onFeedback={onOpenFeedback}
+            feedbackOpen={feedbackOpen}
+            newReplies={newReplies}
+            feedbackRef={fbAnchor}
+            onAccount={onOpenAccount}
+            initials={getInitials(name)}
+            who={formatSidebarName(name)}
+            planLabel={plan.label}
+            tip={(t, sub, kbd) => railTipFor(t, sub, kbd, kbd ? 250 : 120, !wide)}
+            toggleKbd={toggleKbd}
+          />
+        </div>
+        <div className="ws-pin" inert={!wide}>
 
           {/* ⚠️ THE BRAND SITS ABOVE THE MANUSCRIPT SELECTOR (app-shell-v2). It used to be the
               rail's ink tile; with the rail gone the sidebar is the leftmost chrome, so this is
@@ -664,28 +958,40 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           <div className="ws-logo" data-shell="logo">
             {/* ⚠️ THE MARK IS ARTWORK; THE WORDMARK IS TYPE (audit pack P4) — the hawk-head roundel,
                 bare on the ground, and "QueryHawk" set in type. The mark doubles as the route home. */}
-            <button type="button" className="ws-brand" onClick={() => go("/dashboard")} aria-label="QueryHawk — go to dashboard">
+            <button type="button" className="ws-brand" onClick={() => pickPage("/dashboard")} aria-label="QueryHawk — go to dashboard">
               <img className="ws-bmark" src={artUrl(APP_MARK)} width={APP_MARK.width} height={APP_MARK.height} alt="" aria-hidden="true" />
               <span className="ws-bwm">QueryHawk</span>
             </button>
-            {/* ⚠️ THE BETA STRIP RETIRES AT ≥768px (ink shell v1, Phase 1) and this chip says what it said.
-                Its other job — "tell us when you find one" — is the sidebar's feedback card now. */}
-            {BETA_MODE && <span className="ws-beta" data-shell="beta">{BETA_PILL.toUpperCase()}</span>}
-            {/* the collapse toggle — `[` and ⌘\ ride `aria-keyshortcuts` and the shortcuts registry */}
-            <button
-              type="button"
-              className="sb-toggle ws-tbcol"
-              onClick={sidebar.toggle}
-              aria-expanded={!sidebar.collapsed}
-              aria-controls="ws-sidebar"
-              aria-keyshortcuts="Meta+Backslash Control+Backslash BracketLeft"
-              aria-label={sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              {...railTipFor(sidebar.collapsed ? "Expand sidebar" : "Collapse sidebar", undefined, toggleKbd, 250, true)}
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-                <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M9.5 4.5v15" />
-              </svg>
-            </button>
+            {/* SIDEBAR RAIL v1 — the header's right: the pin, then the panel (close) control. The BETA chip
+                left this row with the redesign. */}
+            <span className="ws-acts">
+              <button
+                type="button"
+                className="ws-pinbtn"
+                onClick={() => (sidebar.mode === "pinned" ? sidebar.toRail() : sidebar.pin())}
+                aria-pressed={sidebar.mode === "pinned"}
+                aria-label={sidebar.mode === "pinned" ? "Unpin: back to the rail" : "Keep the sidebar open"}
+                title={sidebar.mode === "pinned" ? "Unpin" : sidebar.narrow ? "Pinning needs a wider window" : "Pin open"}
+                disabled={sidebar.narrow && sidebar.mode !== "pinned"}
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="sb-toggle ws-tbcol"
+                onClick={sidebar.toRail}
+                aria-expanded={wide}
+                aria-controls="ws-sidebar"
+                aria-keyshortcuts="BracketLeft Meta+Backslash Control+Backslash"
+                aria-label="Close sidebar"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                  <rect x="3.5" y="4.5" width="17" height="15" rx="2.5" /><path d="M9.5 4.5v15" />
+                </svg>
+              </button>
+            </span>
           </div>
 
           {/* ══ THE MANUSCRIPT SELECTOR, moved here from the bar (ink shell v1). It switches exactly as it
@@ -693,7 +999,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               group and "Now showing…" are the switcher's own. Its menu portals past the panel's clip. */}
           <BarSwitcher
             placement="side"
-            collapsed={sidebar.collapsed}
+            collapsed={false}
             manuscripts={manuscripts}
             queries={queries}
             activeId={activeMs?.id ?? null}
@@ -701,6 +1007,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
             /* the active book's own page — the existing route and its `?m=` view param */
             onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
+            railTileFor={railTileNode}
           />
 
           {/* ⚠️ "LOG A QUERY" HAS LEFT THE SIDEBAR FOR THE BAR (ink shell v1, Phase 2) — see the bar below.
@@ -717,7 +1024,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               labels are hidden by opacity/max-width and stay in the tree — never display:none —
               so a screen reader walks the same nav either way; the name must not change with the
               width. */}
-          <nav className="ws-nav" aria-label="Main">
+          {/* ⚠️ THE NAV SCROLLS IN ITS OWN REGION, WITH THE APP'S ONE EDGE FADE (25 Oct). It always did scroll —
+              `flex: 1; min-height: 0; overflow-y: auto` — but with the scrollbar hidden and no fade, a row cut at the
+              region's foot read as a row the feedback card was covering, and the rows below it as gone. The fade is
+              `EdgeFadeScroll`'s (the shell had none), in the sidebar's own ground, and the scroll element stays a <nav>. */}
+          <EdgeFadeScroll fade="var(--ink-shell, #1b2433)" outerClassName="ws-navwrap" scrollClassName="ws-nav" scrollAs="nav" aria-label="Main" scrollProbe="navscroll">
             {sections.map((sec) => (
               <React.Fragment key={sec.id}>
                 {/* ⚠️ EVERY GROUP GETS ITS HEADING NOW, DASHBOARD'S INCLUDED (sidebar metrics pass) —
@@ -727,7 +1038,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     capture, then ruled groups all the way down, and the first rule is what separates
                     the button from the nav — so WORKSPACE is no longer a heading doing nothing.
                     The rule is the label's own `::after`, so the markup stays one text node. */}
-                <div className="ws-glabel">{sec.label}</div>
+                {/* Dashboard has no heading (25 Oct): one row on its own, as on the rail */}
+                {sec.noHeading ? null : (
+                  /* shell nav v3: no section carries a Pro mark — the marks are the rows' own */
+                  <div className="ws-glabel">{sec.label}</div>
+                )}
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
                   /* ⚠️ A ROW WITH A LIVE COUNT ("needs you") GOES BOLD AND FULL-STRENGTH, and its count is a
@@ -745,8 +1060,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                          The tooltip is the portalled rail tip below, not a native `title` — two
                          tooltips on one hover would be one too many. */
                       aria-label={ch.label}
-                      onClick={() => go(ch.path)}
-                      {...railTipFor(ch.label, undefined, undefined, 120, sidebar.collapsed)}
+                      onClick={() => pickPage(ch.path)}
+                      {...railTipFor(sidebarLabel(ch), undefined, undefined, 120, false)}
                     >
                       <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id]}</span>
                       {/* ⚠️ A SPAN, SO THE LABEL CAN COLLAPSE (sidebar-collapse pack, Phase 2). A
@@ -755,14 +1070,16 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                           pixel-identical expanded, and collapsing to zero WITH the label, where a
                           flex gap beside a zero-width child would hold itself open and park the
                           icon 5px off the rail's centre. */}
-                      <span className="ws-lbl">{ch.label}</span>
-                      {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} to do`}>{inkCount(ch.count!)}</span>}
+                      <span className="ws-lbl">{sidebarLabel(ch)}</span>
+                      {/* sidebar rail v1: the PRO tag is DORMANT — drawn only for an account not entitled to the page */}
+                      {ch.pro && proLocked.has(ch.pro) ? <span className="ws-qpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
+                      {att && <span className="ws-ct" data-shell="count" aria-label={`${ch.count} need you now`} title={`${ch.count} need you now`}>{inkCount(ch.count!)}</span>}
                     </button>
                   );
                 })}
               </React.Fragment>
             ))}
-          </nav>
+          </EdgeFadeScroll>
 
           {/* ⚠️ POLISH §3 — THE COLLAPSE CONTROL IS A NAV-FOOT ROW NOW. It sat as a « ghost beside
               the manuscript pill, where it competed with the pill for the head's attention and
@@ -803,9 +1120,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
           <SettingsRail
             live={settingsMode}
             active={settingsSection}
-            onSelect={(id) => onNavigatePath(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
+            onSelect={(id) => pickPage(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
             onExit={leaveSettings}
-            plan={currentUser?.plan === UserPlan.PRO ? "pro" : "free"}
+            plan={planColumn(entitlement)}
           />
           {onOpenFeedback && (
             <div className="ws-fbk" data-shell="feedback">
@@ -816,6 +1133,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 <button ref={fbAnchor} type="button" className="ws-fbtn" data-probe="feedback" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
                   {FEEDBACK_ICON}<span>Give feedback</span>
                 </button>
+                {/* Your notes v1 — the way to the record of every note, with the replies not yet seen */}
+                <button type="button" className="ws-fblink" data-probe="your-notes" onClick={() => onNavigatePath("/your-notes")}>
+                  <span>See your notes</span>{newReplies > 0 ? <i data-probe="your-notes-new">{newReplies} new</i> : null}
+                </button>
               </div>
               <button ref={fbAnchor} type="button" className="ws-fbb" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
                 {FEEDBACK_ICON}<span className="ws-fbb-l">Give feedback</span><em>BETA</em>
@@ -823,7 +1144,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               <button
                 ref={fbAnchor} type="button" className="ws-fbi" onClick={onOpenFeedback} aria-expanded={feedbackOpen}
                 aria-label={FEEDBACK_FAB}
-                {...railTipFor(FEEDBACK_FAB, undefined, undefined, 120, sidebar.collapsed)}
+                {...railTipFor(FEEDBACK_FAB, undefined, undefined, 120, false)}
               >
                 {FEEDBACK_ICON}<i aria-hidden="true" />
               </button>
@@ -886,7 +1207,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       full width (the starvation that split the row out was the pill sharing the name's
                       line). It stops propagation because it sits inside the row that opens the account
                       menu; that menu and Settings remain the other ways to the upgrade. */}
-                  {plan.upgrade && !sidebar.collapsed && (
+                  {plan.upgrade && (
                     <>
                       <span className="ws-pldot" aria-hidden="true"> · </span>
                       <button
@@ -902,8 +1223,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 </span>
               </span>
             </div>
-            {!sidebar.collapsed && (
-              <button
+            <button
                 type="button"
                 className="ws-gear"
                 aria-label="Settings"
@@ -914,7 +1234,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" />
                 </svg>
               </button>
-            )}
             </div>
             {/* ⚠️ THE FULL-WIDTH UPGRADE ROW (`.ws-upgrow`) IS RETIRED by ink shell v1 — see the plan line
                 above, where "Upgrade" now sits. */}
@@ -970,30 +1289,27 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               it hides nothing; the paths that DO report failures keep their own toasts and inline
               errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
           <header ref={barRef} className="ws-pagebar" data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"}>
-              {/* ══ THE FOLDER TAB (ink shell v1) — the current page as paper growing out of the sheet, its
-                  group's other pages as recessed tabs. It names the page; the breadcrumb, the page-name
-                  fade and the bar's hairline are retired with it. */}
-              {pageName && (
-                <FolderTab
-                  /* off-nav routes name their group from barPageName — Settings reads ACCOUNT · Settings */
-                  group={tabGroup ?? pageName.section}
-                  name={pageName.name}
-                  siblings={tabSiblings}
-                  onGo={go}
-                  limitRef={searchFieldRef}
-                />
+              {/* ══ THE TAB STRIP (shell nav v3; ink shell v1's folder tab before it) — the section's pages in nav
+                  order, the current one risen as paper growing out of the sheet. It names the page; the
+                  breadcrumb, the page-name fade and the bar's hairline are retired with it. */}
+              {stripTabs.length > 0 && (
+                <TabStrip tabs={stripTabs} current={stripCurrent} onGo={go} limitRef={searchFieldRef} onFold={setFoldLevel} />
               )}
               <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
               {/* the right: the workspace group (search · Log a query), then Help, set apart. Spacing is
                   per-child `margin-left`, so a control that leaves in settings mode takes its space. */}
               <div className="ws-bright">
-                {/* ⚠️ A FIXED 168px FIELD THAT NEVER MOVES (fit rule 5). It opens the existing palette, the
-                    same as ⌘K (bound in `usePalette`); the ref is still the palette's anchor. */}
+                {/* ⚠️ A 168px FIELD WHOSE RIGHT EDGE NEVER MOVES (fit rule 5). It opens the existing palette, the
+                    same as ⌘K (bound in `usePalette`); the ref is still the palette's anchor.
+                    ⚠️ SHELL TABS v2: WHEN THE TABS WOULD NOT KEEP THEIR NAMES, SEARCH FOLDS FIRST to a 38px icon button
+                    (`data-fold`, set by the strip's own fit — `planWithFolds`); the tabs and "Log a query" keep their
+                    size. Its aria-label already names it, so the folded button loses nothing for a screen reader. */}
                 <span className="ws-appctl">
                   <button
                     ref={setSearchRefs}
                     type="button"
                     className="ws-search ws-sfield"
+                    data-fold={searchFolded ? "" : undefined}
                     data-probe="search"
                     onClick={onOpenSearch}
                     aria-label="Search (⌘K)"
@@ -1034,8 +1350,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   */}
                 <span className="ws-helpwrap" ref={helpWrapRef}>
                   {/* v18.3 §F.1 — THE PAGE SLOT: a page may portal one control here, left of the "?" (`lib/barSlot`). The
-                      shell names no page; an empty slot takes no width. */}
-                  <span className="ws-pageslot" data-shell="page-slot" ref={setBarSlot} />
+                      shell names no page; an empty slot takes no width.
+                      ⚠️ SHELL TABS v2.1: IT FOLDS SECOND. When even the folded search leaves the tabs short, the slot's
+                      control (the guide pill) folds to a 38px icon (`data-fold`; inkShell.css), and only then may a tab
+                      lose its name. "Log a query" and Help never fold. */}
+                  <span className="ws-pageslot" data-shell="page-slot" data-fold={slotFolded ? "" : undefined} ref={setBarSlot} />
                   {/* ⚠️ "?" ALWAYS OPENS THE HELP MENU NOW (follow-up 2, 1c) — Help centre, the page guide
                       where the page has one, and Keyboard shortcuts (the existing ShortcutsSheet, through
                       its own event). It was a direct link to /help on every page without a guide. */}
@@ -1067,6 +1386,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       pageName={pageName?.name ?? null}
                       legacyGuide={!!guidePage}
                       onLegacyGuide={requestPageGuide}
+                      onTour={tourReplay ?? undefined}
                       onClose={(focusHelp) => { setHelpOpen(false); if (focusHelp) helpBtnRef.current?.focus(); }}
                       onGo={go}
                       onFeedback={onOpenFeedback}

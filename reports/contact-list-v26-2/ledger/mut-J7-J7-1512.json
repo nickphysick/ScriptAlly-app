@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "J7-1512",
+  "where": "an Also note shows (0)",
+  "ok": false,
+  "detail": "1 change · also changes 3 things elsewhere"
+ },
+ {
+  "lock": "J7-1512",
+  "where": "the bar's count is the notes'",
+  "ok": false,
+  "detail": "3 vs 0 · 1 change · also changes 3 things elsewhere"
+ }
+]

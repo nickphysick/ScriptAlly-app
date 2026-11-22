@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "F1",
+  "where": "390x844 population: tap targets",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "lock": "F1",
+  "where": "390x844 no sideways scroll (document)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "390x844 no sideways scroll (the page's scroller)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "390x844 the page is the window's width",
+  "ok": true,
+  "detail": "390"
+ },
+ {
+  "lock": "F1",
+  "where": "390x844 every tap target ≥ 40px",
+  "ok": false,
+  "detail": "[{\"name\":\"Search\",\"w\":30,\"h\":30},{\"name\":\"Feedback\",\"w\":30,\"h\":30},{\"name\":\"Add\",\"w\":30,\"h\":30}]"
+ },
+ {
+  "lock": "F1",
+  "where": "375x667 population: tap targets",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "lock": "F1",
+  "where": "375x667 no sideways scroll (document)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "375x667 no sideways scroll (the page's scroller)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "F1",
+  "where": "375x667 the page is the window's width",
+  "ok": true,
+  "detail": "375"
+ },
+ {
+  "lock": "F1",
+  "where": "375x667 every tap target ≥ 40px",
+  "ok": false,
+  "detail": "[{\"name\":\"Search\",\"w\":30,\"h\":30},{\"name\":\"Feedback\",\"w\":30,\"h\":30},{\"name\":\"Add\",\"w\":30,\"h\":30}]"
+ }
+]

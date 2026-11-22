@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "L5",
+  "where": "1512: the row is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L5",
+  "where": "1512: the row is 60 tall (±1)",
+  "ok": true,
+  "detail": "60.0"
+ },
+ {
+  "lock": "L5",
+  "where": "1512: the find input",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1512: Filters",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1512: the sort reads \"Most urgent first\"",
+  "ok": true,
+  "detail": "Most urgent first"
+ },
+ {
+  "lock": "L5",
+  "where": "1512: the pin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1512: no kbd in the row or the tray",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "1512: no sentence in the row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1512: nothing navy in the row",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "1280: the row is white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L5",
+  "where": "1280: the row is 60 tall (±1)",
+  "ok": true,
+  "detail": "60.0"
+ },
+ {
+  "lock": "L5",
+  "where": "1280: the find input",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1280: Filters",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1280: the sort reads \"Most urgent first\"",
+  "ok": true,
+  "detail": "Most urgent first"
+ },
+ {
+  "lock": "L5",
+  "where": "1280: the pin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1280: no kbd in the row or the tray",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "1280: no sentence in the row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "1280: nothing navy in the row",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L5",
+  "where": "Filters opens the strip under the row, with the pills",
+  "ok": true,
+  "detail": "{\"strip\":true,\"pills\":4,\"bg\":\"rgb(245, 226, 218)\"}"
+ },
+ {
+  "lock": "L5",
+  "where": "…and is pink while open",
+  "ok": true,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "L5",
+  "where": "pressed again, it closes",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5",
+  "where": "the sort opens its menu",
+  "ok": true,
+  "detail": ""
+ }
+]

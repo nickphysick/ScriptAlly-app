@@ -107,9 +107,14 @@ export async function bringBack(uid: string, caId: string): Promise<void> {
 /** Undo an add: the agent, its AGENT_ADDED feed row (addAgent's own id), and the decision as it was. */
 export async function undoAdd(uid: string, agentId: string, caId: string, before: ScoutDecision | undefined): Promise<void> {
   cancelIncrement(caId);
+  await undoAgentAdd(uid, agentId);
+  await restoreDecision(uid, caId, before);
+}
+
+/** Undo any `addAgent`: exactly what it created — the agent and its AGENT_ADDED feed row (Phone app v3 shares this) */
+export async function undoAgentAdd(uid: string, agentId: string): Promise<void> {
   await deleteDoc(doc(db, "users", uid, "agents", agentId));
   await deleteDoc(doc(db, "users", uid, "activities", `act-added-agent-${agentId}`));
-  await restoreDecision(uid, caId, before);
 }
 
 /* ── The held +1 ─────────────────────────────────────────────────────────── */

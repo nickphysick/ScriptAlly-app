@@ -1,0 +1,182 @@
+[
+ {
+  "lock": "F1",
+  "where": "390x844 log opens on its first step",
+  "ok": true,
+  "detail": "{\"open\":true,\"steps\":[\"Agent and book\"],\"at\":\"Agent and book\",\"question\":\"Who did you query?\"}"
+ },
+ {
+  "lock": "pop",
+  "where": "390x844 log has its five steps once an agent is chosen",
+  "ok": true,
+  "detail": "Agent and book | Sending | What you sent | Response expectations | If they don't reply"
+ },
+ {
+  "lock": "F1",
+  "where": "390x844 log: the questions walked are the journey's own steps, in order, then the check",
+  "ok": true,
+  "detail": "[\"Agent and book\",\"Sending\",\"What you sent\",\"Response expectations\",\"If they don't reply\",\"CHECK\"]"
+ },
+ {
+  "lock": "F2",
+  "where": "390x844 the live card fills a slot for each answer after the first",
+  "ok": true,
+  "detail": "[1,2,3,4]"
+ },
+ {
+  "lock": "F2",
+  "where": "390x844 a filled slot returns to its question",
+  "ok": true,
+  "detail": "Sending"
+ },
+ {
+  "lock": "F3",
+  "where": "390x844 the check card lists every answer",
+  "ok": true,
+  "detail": "[\"Agent and book\",\"Sending\",\"What you sent\",\"Response expectations\",\"If they don't reply\"]"
+ },
+ {
+  "lock": "F3",
+  "where": "390x844 a check row returns to its question, the answer kept",
+  "ok": true,
+  "detail": "Sending on=2"
+ },
+ {
+  "lock": "F3",
+  "where": "390x844 back at the check, the answer is unchanged",
+  "ok": true,
+  "detail": "Thu 29 Oct · Email → Thu 29 Oct · Email"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 the flow: white on navy, ink on blush, no green or red",
+  "ok": true,
+  "detail": "navy 1"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 the flow: no image twice",
+  "ok": true,
+  "detail": "[\"/images/responses/responses-wall-hawk.webp\"]"
+ },
+ {
+  "lock": "F4",
+  "where": "390x844 the log wrote something",
+  "ok": true,
+  "detail": "queries/zzOdXYtfVm1H97NyVPcw added, activities/act-1nb3bocde added"
+ },
+ {
+  "lock": "F4",
+  "where": "390x844 after Undo the account is as it was, document by document",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F5",
+  "where": "390x844 partial: the celebration shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F6",
+  "where": "390x844 partial: the stamp reads \"Partial requested\"",
+  "ok": true,
+  "detail": "Partial requested"
+ },
+ {
+  "lock": "F5",
+  "where": "390x844 partial: Undo is on top of the celebration",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 partial: the celebration's colours (burgundy only on the stamp)",
+  "ok": true,
+  "detail": "navy 3"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 partial: the only burgundy is the stamp",
+  "ok": true,
+  "detail": "[\"cele-stamp\"]"
+ },
+ {
+  "lock": "F4",
+  "where": "390x844 partial: after Undo the account is as it was",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F5",
+  "where": "390x844 full: the celebration shows",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F6",
+  "where": "390x844 full: the stamp reads \"Full requested\"",
+  "ok": true,
+  "detail": "Full requested"
+ },
+ {
+  "lock": "F5",
+  "where": "390x844 full: Undo is on top of the celebration",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 full: the celebration's colours (burgundy only on the stamp)",
+  "ok": true,
+  "detail": "navy 3"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 full: the only burgundy is the stamp",
+  "ok": true,
+  "detail": "[\"cele-stamp\"]"
+ },
+ {
+  "lock": "F4",
+  "where": "390x844 full: after Undo the account is as it was",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "F5",
+  "where": "390x844 pass: no celebration",
+  "ok": false,
+  "detail": "true"
+ },
+ {
+  "lock": "F6",
+  "where": "390x844 pass: the stamp reads \"null\"",
+  "ok": false,
+  "detail": "Partial requested"
+ },
+ {
+  "lock": "F5",
+  "where": "390x844 pass: Undo is on top of the celebration",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 pass: the celebration's colours (burgundy only on the stamp)",
+  "ok": true,
+  "detail": "navy 3"
+ },
+ {
+  "lock": "F8",
+  "where": "390x844 pass: the only burgundy is the stamp",
+  "ok": true,
+  "detail": "[\"cele-stamp\"]"
+ },
+ {
+  "lock": "F4",
+  "where": "390x844 pass: after Undo the account is as it was",
+  "ok": true,
+  "detail": ""
+ }
+]

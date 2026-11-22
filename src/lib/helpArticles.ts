@@ -5,9 +5,10 @@
  * Help system v1 — THE ARTICLE MAP: the help articles this pack links to, which three a page offers under "On this
  * page" in the Help menu, which one each guide item's "Learn more" opens, and the What's new entries.
  *
- * Help Centre v1 — THE INDEX IS BUILT FROM THE ARTICLES THEMSELVES (`content/help/articles.ts`): every written article
- *    is live, its read time is computed from its words, and a slug a guide item or the Help menu names must be one of
- *    them (lock HC1-C5). A link to a slug that is not written goes to /help, never to a route that 404s.
+ * Help Centre v1 — THE INDEX IS BUILT FROM THE ARTICLES THEMSELVES (`content/help/articles.ts`): every PUBLISHED
+ *    article is live (non-workspace v1, Phase 7: a draft is not), its read time is computed from its words, and a slug
+ *    a guide item or the Help menu names must be written (lock HC1-C5). A link to a slug that is not published goes to
+ *    /help, never to the not-found screen: the Help menu leaves a draft out, and "Learn more" opens the Help centre.
  */
 import { HELP_ARTICLE_LIST } from "../content/help/articles";
 import { readTime } from "../content/help/model";
@@ -23,7 +24,7 @@ export const HELP_ARTICLES: Record<string, HelpArticle> = Object.fromEntries(
   HELP_ARTICLE_LIST.map((a) => [a.slug, { slug: a.slug, title: a.title, read: readTime(a) }]),
 );
 
-/** The slugs with a page in the Help Centre: every article written. */
+/** The slugs with a page in the Help Centre: every article published. */
 export const LIVE_ARTICLES: ReadonlySet<string> = new Set<string>(HELP_ARTICLE_LIST.map((a) => a.slug));
 
 /** Where an article link goes: its page if it exists, else the Help Centre. */
@@ -39,7 +40,7 @@ export const PAGE_ARTICLES: Record<string, readonly string[]> = {
 
 /** Each guide item's "Learn more", by page and item key. */
 export const ITEM_ARTICLES: Record<string, Record<string, string>> = {
-  "Contact list": { add: "add-an-agent", search: "find-an-agent", pin: "pin-the-list", open: "open-an-agent", edit: "edit-an-agent", hk: "list-health" },
+  "Contact list": { add: "add-an-agent", search: "find-an-agent", pin: "go-full-screen", open: "open-an-agent", edit: "edit-an-agent", hk: "list-health" },
   "Query Centre": { log: "log-a-query", find: "find-a-query", pin: "pin-the-list", open: "open-a-query", resp: "record-a-response", birds: "birds-eye-view" },
 };
 
@@ -50,13 +51,18 @@ export interface WhatsNewEntry {
   /** ISO date it shipped */
   date: string;
   title: string;
+  /** The line under it on the Help home ("Fixed 6 Nov, after a founding writer's note"). */
+  line: string;
 }
 
-/** Newest first. Facts about what shipped, in the writer's words. */
+/**
+ * In the ref's order (not by date — the badge reads dates, not order). Facts about what shipped, in the writer's words.
+ * ⚠️ ONE LIST (non-workspace v1.1, 7c): the Help home's "New in QueryHawk" (help-centre-v1 ref) and the Help menu's
+ * badge both read this, so the badge never counts entries the page does not show.
+ */
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
-  { id: "help-system", date: "2026-10-19", title: "Help on every page: definitions, page guides and a quicker way to send feedback" },
-  { id: "pin-lists", date: "2026-10-18", title: "Pin the list on the Contact list and the Query Centre to give it the whole page" },
-  { id: "list-health", date: "2026-10-14", title: "List health on the Contact list, and Housekeeping to fill the gaps one at a time" },
+  { id: "agency-caps-import", date: "2026-11-06", title: "Agency names survive an import in capitals", line: "Fixed 6 Nov, after a founding writer's note" },
+  { id: "query-letters-page", date: "2026-11-12", title: "Query letters has its own page", line: "Added 12 Nov" },
 ];
 
 export const WHATS_NEW_SEEN_KEY = "sa.whatsNew.seen";

@@ -53,3 +53,8 @@ export const StageGlyph: React.FC<{ k: StageKey | "key"; className?: string; das
     </svg>
   );
 };
+
+/* status marks v3 — `TrackNode` (the four-step track's nodes) is DELETED: the track draws every step with StatusDot
+   (QcSlip153 `Track153`). What remains here is drawn only by components the desktop page does not render
+   (QcList138's peek and bands, QcHeader138's unmounted GlyphRow, QcAppliedRow140); statusMarksV3Sources.test.ts
+   pins that set. */

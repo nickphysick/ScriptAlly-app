@@ -1,0 +1,669 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v152 §2 (design-refs/query-centre-v152/, screens 04, 05, 06, 12, 14–16, 25, 26) — THE QUERY CARD'S
+ * DESKTOP READING VIEW, drawn by QcQueryCard149 (the one card, Nick's ruling) when it is not on a phone: the band in
+ * the query's state, the head, the book, the tabs, the TRACKING THREAD (each step a message, the waits between them),
+ * the Agent and Materials tabs, Notes unchanged, and the reply box as the footer.
+ *
+ * ⚠️ THE CARD WRITES NOTHING. The reply box's button, the pencil and each bubble's ✎ Edit hand back to the page; the
+ *    derivations are lib/qcThread152 (pure). The phone's card is QcQueryCard149's own and is not touched.
+ * ⚠️ IT PORTALS WITH THE PANEL (document.body), so no page token reaches it: colours are literals and the faces are
+ *    the `:root` --sp-* tokens. The tips are portalled again, to body, as fixed boxes — the panel leans, and a rotated
+ *    ancestor would be the containing block of anything fixed inside it.
+ */
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { QueryStatus } from "../../../types";
+import { type QcRow } from "../../../lib/qcSummary";
+import { type QueryState } from "../../../lib/queryState";
+import { STAGE_COLOURS, STAGE_INK, bandBackground, quietBackground, stageOf } from "../../../lib/stageColours";
+import { isQuietCard } from "../../../lib/qc154";
+import {
+  askChips, buildThread, dayLabel, materialGroups, replyBox, viaKind,
+  type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
+} from "../../../lib/qcThread152";
+import "./qcv152card.css";
+import "./qcv1522card.css";
+import "./qcv153thread.css";
+import { footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
+import { waitWords } from "../../../lib/qc1522";
+import { PopCtx, useOutsideClose } from "./QcEdit152";
+import { Bubble, StepGlyph } from "./QcBubble152";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
+import {
+  AgentEditPane, ASK_POOL, Ed, EdMenu, EditStrip, LeaveAsk, METHODS, MenuItem, NotesEditPane, SaveBar, useEditLayer,
+  type CardEditData, type CardEdits,
+} from "./QcCardEdit152";
+import "./qcv152inplace.css";
+/* Stage colours v1 — last, so the stage colours sit over every earlier layer of the card */
+import "./sc1card.css";
+/* Query card v158 — the Agent, Materials and Notes tab bodies */
+import "./qcv158.css";
+import { AgentTab158 } from "./QcAgent158";
+import { MaterialsTab158 } from "./QcMaterials158";
+import { Foot } from "./QcFoot1581";
+/* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
+import { breatheClose, bump, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
+import "./qcv160.css";
+import { useLanding160, type Motion160 } from "./useLanding160";
+/* Query card v164 — the strip carries the track and the status name; the type, the bubbles and the toast to the rules */
+import { Track153 } from "./QcSlip153";
+import { bookLine164, stripStatus164 } from "../../../lib/qc164";
+import "./qcv164.css";
+
+export interface QcCard152Data {
+  state: QueryState;
+  /** the stamped reply date */
+  replyMs: number | null;
+  /** the offer's deadline or the send-by date */
+  dueMs: number | null;
+  closedMs: number | null;
+  steps: ThreadStepIn[];
+  agentWeeks: number | null;
+  /** "no reply means no" (true), "always replies" (false), or not known */
+  nrmn: boolean | null;
+  /** Free accounts see no versions and no packages (the dev switch proves it) */
+  free: boolean;
+  queriedVia: string | null;
+  asks: string[];
+  sentLabels: string[];
+  lastHeardMs: number | null;
+  how: string | null;
+  /** v152.1 §3 the footer: the quiet window (weeks) and a close's reason */
+  quietWeeks?: number;
+  reason?: string | null;
+  nudged?: boolean;
+  /** v152.2 §3.2 the footer's facts (lib/qcFoot1522) */
+  foot?: Omit<FootCtx, "state" | "status" | "first" | "nowMs">;
+}
+export type CardTab152 = "tracking" | "agent" | "materials" | "notes";
+
+export interface QcCard152Props {
+  row: QcRow;
+  nowMs: number;
+  d: QcCard152Data;
+  first: string | null;
+  msTitle: string | null;
+  bookChips: string[];
+  packageName: string | null;
+  wishlist: string;
+  email: string;
+  website: string;
+  websiteHref: string | null;
+  tab: CardTab152;
+  onTab: (t: CardTab152) => void;
+  notes: React.ReactNode;
+  onClose: () => void;
+  onPencil: () => void;
+  onEditStep: (activityId: string | null) => void;
+  onReply: (act: ReplyAct) => void;
+  onAgentField: (field: "wishlist" | "email" | "website" | "method" | "reply" | "materials" | null) => void;
+  onCopyEmail: () => void;
+  /** §3–§4: the view the card shows — the reading card, or an editing or recording view (`editBody`) under the same
+   *  band and head; any view but "read" straightens the lean (§2.1) */
+  view?: "read" | "record" | "fork" | "fix" | "details";
+  editBody?: React.ReactNode;
+  /** Escape in an editing view: an open menu or calendar closes first, then the view steps back one level (§4.7) */
+  onBack?: () => void;
+  /** the step just added: its bubble slides in from its own side (§3.2) */
+  freshKey?: string | null;
+  /** v152.2 §3 — the composer, open at the foot in place of the footer, and the draft it shows in the thread */
+  composer?: React.ReactNode;
+  draft?: ThreadStepIn | null;
+  /** v152.2 §2.4 — the bubble being edited in place (its activity id), and the form drawn in its place */
+  editingId?: string | null;
+  editNode?: React.ReactNode;
+  /** v152.2 §3.1 — the undo toast */
+  toast?: { msg: string; onUndo: (() => void) | null } | null;
+  /** v152.2 §6.1 — the accept burst */
+  burst?: number | null;
+  /** v152.2 §3.2 — a footer control: its composer */
+  onFoot?: (a: FootAct) => void;
+  /** To-do list v53 (D8) — the To-do desk's dress, opt-in (the Query Centre passes none): the book as one row; typing dots
+   *  where the new step will go; the step being checked (a soft pulsing ring and "Checking"); the step just logged
+   *  (a "Logged" stamp); a send of several things as "your materials" with a paperclip */
+  desk?: { bookRow?: boolean; typing?: boolean; checkKey?: string | null; stampKey?: string | null; clip?: { key: string; items: string[]; version: string | null } | null };
+  /** Log a query v1.1 — editing in place: the pencil's edit mode (the agent, the agent's details, the notes) */
+  editData?: CardEditData;
+  onSaveEdits?: (e: CardEdits) => Promise<boolean>;
+  /** Record a response v1, Phase 5 — the grid is behind the dim now, so the band carries ‹ › through the set the card was
+   *  opened from (the ← → keys' set). Absent, or a set of one: no arrows. */
+  stepCard?: { at: number; of: number; go: (d: 1 | -1) => void } | null;
+  /** Record a response v1 — opened from an agent's card, which this card replaced: the band's way back to it */
+  backTo?: { label: string; onBack: () => void } | null;
+  /** Query card v160 — a save has started, or Undo was pressed (a new `n` each time): the card moves when it lands */
+  motion?: Motion160 | null;
+}
+
+const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
+
+
+const CLIP = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.6 1.6 0 0 0 2.3 2.3l5-5a3 3 0 0 0-4.3-4.3L3.6 7.4a4.2 4.2 0 0 0 6 6l3.4-3.4" /></svg>;
+const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
+
+/** the queries this page session has already opened: the thread builds in only the first time */
+const built = new Set<string>();
+
+/** one dark tip at a time, portalled to body (§2.4) */
+function useTip() {
+  const [tip, setTip] = useState<{ x: number; y: number; head: string | null; body: string } | null>(null);
+  const show = (el: Element, body: string, head: string | null = null) => {
+    const r = el.getBoundingClientRect();
+    setTip({ x: r.left + r.width / 2, y: r.top, head, body });
+  };
+  const hide = () => setTip(null);
+  const node = tip ? createPortal(<TipBox {...tip} />, document.body) : null;
+  return { show, hide, node, on: !!tip };
+}
+const TipBox: React.FC<{ x: number; y: number; head: string | null; body: string }> = ({ x, y, head, body }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const left = Math.max(8, Math.min(x - w / 2, window.innerWidth - w - 8));
+    const top = y - h - 8 < 8 ? y + 26 : y - h - 8;
+    setPos({ left, top });
+  }, [x, y, head, body]);
+  return (
+    <div ref={ref} className="qc152-pop" role="tooltip" data-qc152="tip" style={pos ? { left: pos.left, top: pos.top } : { left: -9999, top: -9999 }}>
+      {head ? <b>{head}</b> : null}{body}
+    </div>
+  );
+};
+
+/** v152.1 §2.8 — a thread with more than five steps folds its earliest into one button; the last three always show */
+const PREV = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>;
+const NEXT = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg>;
+
+/** v160 — what the strip, the label and the footer looked like, read off the page */
+interface Snap160 { bg: string; img: string; word: string; cur: string; foot: string; footH: number | null }
+function readSnap160(root: HTMLElement): Snap160 {
+  const band = root.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc152='band']");
+  /* v164 — the label is gone; its mark's place is the track's current step (which step, and what it draws) */
+  const cur = root.querySelector<HTMLElement>("[data-qc164='track'] [data-qc153='node'][data-state='cur']");
+  const ft = root.querySelector<HTMLElement>("[data-qc152='reply']");
+  const bs = band ? getComputedStyle(band) : null;
+  return {
+    bg: bs?.backgroundColor ?? "", img: bs?.backgroundImage ?? "none", word: band?.querySelector("[data-qc152='band-word']")?.textContent ?? "",
+    cur: cur ? `${cur.getAttribute("title") ?? ""}|${cur.innerHTML}` : "",
+    foot: ft ? `${ft.dataset.rows ?? ""}|${ft.textContent ?? ""}` : "", footH: ft ? ft.offsetHeight : null,
+  };
+}
+
+export const FOLD_OVER = 5;
+export const FOLD_KEEP = 3;
+
+export const QcCard152: React.FC<QcCard152Props> = (p) => {
+  const { row: r, nowMs, d } = p;
+  const first = p.first || "the agent";
+  /* Stage colours v1 — the strip is the card's stage Band in ink (the sheen on an offer); gone quiet (the grid card's
+     own test, lib/qc154 `isQuietCard`) fades that band to white. Its words are v152.2's. The card publishes its stage's
+     four colours as --band / --tint / --edge / --mark for the pill, the footer disc and the draft outline. */
+  /* v164 — the strip's status: the track and the status's own name (lib/qc164) */
+  const ss = stripStatus164(r);
+  const stage = stageOf(r.status);
+  const quiet = stage !== "offer" && isQuietCard(r, nowMs);
+  const bandBg = quiet ? quietBackground(stage) : bandBackground(stage);
+  const sc = STAGE_COLOURS[stage];
+  const stageVars = { ["--band" as string]: sc.band, ["--tint" as string]: sc.tint, ["--edge" as string]: sc.edge, ["--mark" as string]: sc.mark,
+    ["--fdisc" as string]: quiet ? `linear-gradient(90deg, ${sc.band}, #fff)` : sc.band } as React.CSSProperties;
+  const jOpen = !!p.composer || !!p.editingId;
+  const tip = useTip();
+  const view = p.view ?? "read";
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [popOpen, setPopOpen] = useState<string | null>(null);
+  const [rootEl, setRootEl] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => { setRootEl(rootRef.current); }, []);
+  const pop = { root: rootEl, open: popOpen, setOpen: setPopOpen };
+  useOutsideClose(pop);
+  useEffect(() => { setPopOpen(null); }, [view, r.id]);
+  /* ONE Escape handler for the editing views: the open popover first, then one level back */
+  useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  /* v1.1 — the edit layer: the pencil, or a double-click on a value, enters it; Esc closes a menu, then asks */
+  const ed = useEditLayer(p.editData, p.onSaveEdits, r.id);
+  const inRef = useRef<HTMLDivElement>(null);
+  useEscapeLayer(ed.on, () => {
+    if (ed.open) ed.setOpen(null);
+    else if (ed.leave) ed.keep();
+    else ed.ask();
+  }, ESC_LEVEL.pageModal);
+  const queryStepId = d.steps.find((x) => x.status === QueryStatus.QUERIED && !x.kind)?.activityId ?? null;
+  const openStep = (id: string | null) => { p.onTab("tracking"); p.onEditStep(id); };
+  const edAgent = ed.on && ed.dr ? p.editData?.agents.find((a) => a.id === ed.dr!.agentId) ?? null : null;
+  const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
+  const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs, steps: d.steps, quietWeeks: d.quietWeeks, reason: d.reason ?? null, nudged: d.nudged });
+  const [buildId, setBuildId] = useState<string | null>(null);
+  /* §2.8 the fold opens for this card only, and folds again when the card reopens */
+  const [unfold, setUnfold] = useState(false);
+  useEffect(() => { setUnfold(false); }, [r.id]);
+  useLayoutEffect(() => { if (!built.has(r.id)) { built.add(r.id); setBuildId(r.id); } else setBuildId(null); }, [r.id]);
+
+  /* the thread opens scrolled to the end, on every query and every return to Tracking.
+     v164 — ⚠️ not when the only change is the thread LOSING a step (an undo): v160's fold is still drawing the step that
+     left, and with the toast now in the layout the thread's box is a row shorter, so the fold's last frames overflow it
+     and a scroll to the end jumps the bubbles above by 10px for two frames (QC160-7, 22 Nov). The fold shrinks in place. */
+  const lastScroll = useRef<{ k: string; n: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    const k = `${r.id}|${p.tab}|${!!p.composer}|${p.draft?.status}|${p.draft?.kind}`, was = lastScroll.current;
+    lastScroll.current = { k, n: thread.length };
+    if (was && was.k === k && thread.length < was.n) return;
+    if (el && p.tab === "tracking") el.scrollTop = el.scrollHeight;
+    else if (el) el.scrollTop = 0;
+  }, [r.id, p.tab, thread.length, !!p.composer, p.draft?.status, p.draft?.kind]);
+  /* v164 — the toast takes its own row above the footer, so the thread's box shortens when it arrives: the thread stays
+     at its end (only on arriving — on leaving, the box grows and nothing needs to move) */
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (el && p.toast && p.tab === "tracking") el.scrollTop = el.scrollHeight;
+  }, [!!p.toast]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* a chip's tip closes on any click elsewhere */
+  useEffect(() => {
+    if (!tip.on) return undefined;
+    const off = (e: MouseEvent) => { if (!(e.target as Element).closest?.(".qc152-ch")) tip.hide(); };
+    document.addEventListener("click", off);
+    return () => document.removeEventListener("click", off);
+  }, [tip.on]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ══ v160 — WHEN A SAVE OR AN UNDO LANDS (lib: ./useLanding160, ./qcMotion160) ══════════════════════════════════
+     The landing is the first frame the card's drawing changes; everything below starts in it. The frame bumps once.
+     A draft showing for the save stays on screen until its step arrives, and the step takes the draft's place in the
+     same element (its React key is the draft's), where it settles. A step that arrives without a draft enters with
+     `.new` at once; a wait line that appears fades in. The strip and the label ease when the stage or the word moves;
+     the footer's new contents rise in. */
+  const sig160 = JSON.stringify([r.status, d.state, d.foot?.phase ?? null, thread.filter((x) => x.t === "msg").map((x) => x.key)]);
+  const lastDraft = useRef<ThreadStepIn | null>(null);
+  const draftSeq = useRef(0);
+  const alias = useRef<{ id: string; map: Map<string, string>; col: Map<string, string> }>({ id: r.id, map: new Map(), col: new Map() });
+  if (alias.current.id !== r.id) alias.current = { id: r.id, map: new Map(), col: new Map() };
+  const keysAtStart = useRef<Set<string> | null>(null);
+  const snap160 = useRef<Snap160 | null>(null);
+  const [enter, setEnter] = useState<string[]>([]);
+  /* v161 Phase 2 — a held landing (its count), released on the first quiet frame after the page says the save is done */
+  const [heldN, setHeldN] = useState(0);
+  /* Phase 3 — the steps an undo (or a delete) took away, still drawn while they fold: each with the keys that stood
+     before it, so it is drawn where it was */
+  type Leaving = { item: ThreadItem; before: string[] };
+  const lastThread = useRef<{ id: string; items: ThreadItem[] }>({ id: r.id, items: thread });
+  const [leaving, setLeaving] = useState<Leaving[]>([]);
+  const landing = useLanding160(p.motion, sig160, r.id, {
+    start: () => {
+      const root = rootRef.current;
+      /* a motion still running ends at once (Undo pressed while the confirm runs): no half-drawn step */
+      finishAll(root);
+      if (leaving.length) setLeaving([]);
+      snap160.current = root ? readSnap160(root) : null;
+      keysAtStart.current = new Set(thread.map((x) => x.key));
+    },
+    land: (kind, first) => {
+      const root = rootRef.current;
+      if (!root) return;
+      /* a motion still running ends at once — before anything new is made, and never what is held for this landing */
+      if (!reduced() && !isHeld(root)) finishAll(root);
+      /* v161 — the motion of this landing is held until the page has finished drawing it (the release below) */
+      if (first && !reduced()) { hold(root); setHeldN((n) => n + 1); }
+      if (first) bump(root.closest<HTMLElement>(".spanel"), root, kind);
+      const start = keysAtStart.current ?? new Set<string>();
+      keysAtStart.current = new Set(thread.map((x) => x.key));
+      if (settledNow) { draftSeq.current += 1; lastDraft.current = null; }
+      if (reduced()) { snap160.current = readSnap160(root); return; }
+      /* (the fold's elements are drawn by this render: goneNow, below) */
+      const was = snap160.current, now = readSnap160(root);
+      snap160.current = now;
+      const el = (k: string) => root.querySelector<HTMLElement>(`[data-qc152='thread'] > [data-rk="${CSS.escape(alias.current.map.get(k) ?? k)}"]`);
+      const fresh = thread.filter((x) => !start.has(x.key));
+      const entering: string[] = [];
+      for (const it of fresh) {
+        const e = el(it.key);
+        if (!e) continue;
+        if (it.t === "wait") { if (!(kind === "save" && it.key === settledWait)) fadeIn(root, e); continue; }
+        if (kind === "save" && it.key === settledNow) settle(root, e, alias.current.col.get(it.key) ?? "#b9ad9e");
+        else entering.push(it.key);
+      }
+      if (entering.length) { setEnter(entering); window.setTimeout(() => setEnter((x) => x.filter((k) => !entering.includes(k))), 700); }
+      /* Phase 3 — the steps that went fold away: opacity first, then their height and top margin */
+      if (goneNow.length) {
+        setLeaving((x) => [...x.filter((l) => !goneNow.some((g) => g.item.key === l.item.key)), ...goneNow]);
+        const els = goneNow.map((g) => el(g.item.key)).filter((e): e is HTMLElement => !!e);
+        const keys = goneNow.map((g) => g.item.key);
+        fold(root, els, () => setLeaving((x) => x.filter((l) => !keys.includes(l.item.key))));
+      }
+      if (was && (was.word !== now.word || was.bg !== now.bg || was.img !== now.img || was.cur !== now.cur)) {
+        const band = root.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc152='band']");
+        if (band) stripIn(root, band, was);
+        /* v164 — the motion follows the move: the strip's word was the status name's, the label's mark is the track's
+           current mark (the label, and its colour ease, are gone with it) */
+        words(root, [band?.querySelector<HTMLElement>("[data-qc152='band-word']") ?? null]);
+        markPop(root, band?.querySelector<HTMLElement>("[data-qc164='track'] [data-qc153='node'][data-state='cur'] > span") ?? null);
+      }
+      const ft = root.querySelector<HTMLElement>("[data-qc152='reply']");
+      if (ft && was && was.foot !== now.foot) footIn(root, ft, was.footH);
+    },
+  });
+  /* the draft is held while its save is under way (the page clears it as the save starts) */
+  const saving = landing.started() === "save";
+  const draftIn = p.draft ?? (saving ? lastDraft.current : null);
+  const draftKey = `__draft:${draftSeq.current}`;
+  const draftCol = (m: { side: string; status: QueryStatus | null }) => (m.side === "me" || !m.status ? "#b9ad9e" : STAGE_COLOURS[stageOf(m.status)].mark);
+  /* the step that arrived for it takes its key */
+  let settledNow: string | null = null, settledWait: string | null = null;
+  if (saving && !p.draft && draftIn && keysAtStart.current) {
+    const start = keysAtStart.current;
+    const tgt = thread.filter((x): x is Extract<ThreadItem, { t: "msg" }> => x.t === "msg" && !start.has(x.key)).pop();
+    if (tgt) {
+      if (!alias.current.map.has(tgt.key)) {
+        alias.current.map.set(tgt.key, draftKey);
+        alias.current.col.set(tgt.key, draftCol(tgt));
+        const w = thread[thread.indexOf(tgt) - 1];
+        if (w && w.t === "wait" && !start.has(w.key)) alias.current.map.set(w.key, `${draftKey}:w`);
+      }
+      settledNow = tgt.key;
+      const w = thread[thread.indexOf(tgt) - 1];
+      settledWait = w && w.t === "wait" && alias.current.map.get(w.key) === `${draftKey}:w` ? w.key : null;
+    }
+  }
+  const showDraft = !!draftIn && !settledNow;
+  /* Phase 3 — the steps this render took away, found in the render that drops them, so their elements are kept (and the
+     thread's scroll-to-end sees them still there) */
+  const goneNow: Leaving[] = (() => {
+    const start = keysAtStart.current;
+    if (!landing.started() || !start || lastThread.current.id !== r.id || reduced()) return [];
+    const now = new Set(thread.map((x) => x.key));
+    const old = lastThread.current.items;
+    return old.flatMap((it, i) => (!now.has(it.key) && start.has(it.key) && !leaving.some((l) => l.item.key === it.key) ? [{ item: it, before: old.slice(0, i).map((x) => x.key) }] : []));
+  })();
+  const rk = (k: string) => alias.current.map.get(k) ?? k;
+  useLayoutEffect(() => { if (p.draft) lastDraft.current = p.draft; lastThread.current = { id: r.id, items: thread }; });
+  useLayoutEffect(() => { setLeaving([]); }, [r.id]);
+  /* v161 Phase 2 — RELEASE: once the page says the save or the undo is done (its write acknowledged, so the page's own
+     re-render of it has run), wait for three quick frames in a row (≤ 40ms apart: nothing long is running) and play the
+     held motion. 4s after the landing it plays regardless. */
+  const motionDone = !!p.motion?.done;
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !isHeld(root)) return undefined;
+    const cap = window.setTimeout(() => release(root), 4000);
+    if (!motionDone) return () => window.clearTimeout(cap);
+    let raf = 0, last = performance.now(), quiet = 0;
+    const tick = (t: number) => {
+      quiet = t - last <= 40 ? quiet + 1 : 0;
+      last = t;
+      if (quiet >= 3) release(root); else raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => { window.cancelAnimationFrame(raf); window.clearTimeout(cap); };
+  }, [heldN, motionDone]);
+  useEffect(() => () => release(rootRef.current), [r.id]);
+  /* v161.1 — nothing landed: the page withdrew the motion (the save failed or was refused), or the save finished and drew
+     nothing within 1.5s. The frame eases back to 1 with no pop. (The press's own 4s net is the last resort.) */
+  const motionN = p.motion?.n ?? null;
+  useEffect(() => {
+    const frame = rootRef.current?.closest<HTMLElement>(".spanel") ?? null;
+    if (!p.motion) { pressBack(frame); return undefined; }
+    if (!motionDone) return undefined;
+    const t = window.setTimeout(() => { const root = rootRef.current; if (isPressed(frame) && !isHeld(root)) pressBack(frame); }, 1500);
+    return () => window.clearTimeout(t);
+  }, [motionN, motionDone, !p.motion]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* v164 — what went is ONE LINE: a paperclip, then each item in Source Serif, joined by " · ". Each item is still its
+     own button and does what its chip did (the tip, with its detail). */
+  const chips = (cs: ThreadChip[], key: string) => cs.length ? (
+    <span className="qc152-chs qc164-went" data-qc152="chips">
+      {CLIP}
+      {cs.map((c, i) => (
+        <React.Fragment key={`${key}-${i}`}>
+          {i ? <span className="qc164-sep" aria-hidden="true"> · </span> : null}
+          <button type="button" className="qc152-ch" data-qc152="chip"
+            onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
+            onBlur={() => tip.hide()}>{c.label}</button>
+        </React.Fragment>
+      ))}
+    </span>
+  ) : null;
+
+  /* v152.2 §3.1 — the draft: the same derivation as a real step, after its own wait line, with a dashed edge in its colour */
+  const draftNode: React.ReactNode[] = (() => {
+    if (!showDraft || !draftIn) return [];
+    const all = buildThread([...d.steps, draftIn], { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
+    const at = all.findIndex((x) => x.t === "msg" && x.key === "__draft");
+    const m = all[at];
+    if (!m || m.t !== "msg") return [];
+    const prevMs = [...d.steps].filter((x) => x.ms != null).map((x) => x.ms!).sort((a, b) => a - b).pop() ?? null;
+    const gap = prevMs != null && draftIn.ms != null ? Math.max(0, Math.round((new Date(draftIn.ms).setHours(0, 0, 0, 0) - new Date(prevMs).setHours(0, 0, 0, 0)) / 86_400_000)) : null;
+    /* a draft keeps its dashed outline: the writer's in v152.2's stone, the agent's in the Mark of the stage it moves to */
+    const col = draftCol(m);
+    /* v160 — keyed beside the thread's own steps, so the step that arrives for it can take its element */
+    return [
+      gap != null ? <div key={`${draftKey}:w`} className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait" data-rk={`${draftKey}:w`}>{waitWords(gap)}</div> : null,
+      <React.Fragment key={draftKey}><Bubble wordsFirst side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
+        chips={m.chips.length ? <span className="qc152-chs qc164-went">{CLIP}{m.chips.map((c, k) => <React.Fragment key={k}>{k ? <span className="qc164-sep" aria-hidden="true"> · </span> : null}<span className="qc152-ch">{c.label}</span></React.Fragment>)}</span> : null}
+        via={m.via} quote={m.quote} follows={m.follows} nth={null} sub={m.sub} className="qc1522-draft" stamp={m.stamp} viaIcon={m.side === "me" ? viaKind(m.via) : null}
+        outer={{ "data-qc152": "msg", "data-qc1522": "draft", "data-side": m.side, "data-rk": draftKey, style: { ["--dr" as string]: col } }} /></React.Fragment>,
+    ];
+  })();
+
+  const desk = p.desk ?? {};
+  /* v160 — the toast leaving: what it said, held for its 220ms */
+  const prevToast = useRef<{ msg: string; undo: boolean; id: string } | null>(null);
+  const [toastGone, setToastGone] = useState<{ msg: string; undo: boolean; k: number } | null>(null);
+  useLayoutEffect(() => {
+    const was = prevToast.current, now = p.toast ? { msg: p.toast.msg, undo: !!p.toast.onUndo, id: r.id } : null;
+    if (was && was.id === r.id && (!now || now.msg !== was.msg) && !reduced()) setToastGone({ msg: was.msg, undo: was.undo, k: performance.now() });
+    prevToast.current = now;
+  }, [p.toast?.msg, !!p.toast, r.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* v158: no day pill above a day's first message (each bubble's stamp is its date) and no status line under the newest
+     one (the footer says where the query stands); the wait between two messages is "N days later" at the side */
+  const clipChip = (c: { items: string[]; version: string | null }) => (
+    <span className="qc153-clip" data-qc153="clip" tabIndex={0}>{CLIP}{c.items.length}
+      <span className="qc153-clippop" role="tooltip" data-qc153="clip-pop">{c.items.map((x) => <span key={x}>{x}</span>)}{c.version ? <span>{c.version}</span> : null}</span>
+    </span>
+  );
+  /* §2.8 the fold: with more than five steps, everything before the last three sits behind one button */
+  const msgIdx = thread.map((it, i) => (it.t === "msg" ? i : -1)).filter((i) => i >= 0);
+  const folded = !unfold && msgIdx.length > FOLD_OVER ? msgIdx.length - FOLD_KEEP : 0;
+  const shown0 = folded ? thread.slice(msgIdx[folded]) : thread;
+  /* v160 — the leaving steps, each after the nearest step that stood before it and is still drawn */
+  const outKeys = new Set([...leaving, ...goneNow].map((l) => l.item.key));
+  const shown = [...leaving.filter((l) => !goneNow.some((g) => g.item.key === l.item.key)), ...goneNow].reduce<ThreadItem[]>((acc, l) => {
+    const at = (() => { for (let j = l.before.length - 1; j >= 0; j--) { const ix = acc.findIndex((x) => x.key === l.before[j]); if (ix >= 0) return ix + 1; } return 0; })();
+    return [...acc.slice(0, at), l.item, ...acc.slice(at)];
+  }, shown0);
+  const trackingPane = (
+    <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread" data-steps={msgIdx.length}>
+      {ed.on ? <div className="qc152-trknote" data-qc152="track-note">Steps are edited one at a time: hover a message for ✎ Edit</div> : null}
+      {folded ? (
+        <button type="button" className="qc152-coll" data-qc152="fold" onClick={() => setUnfold(true)}>{folded} earlier {folded === 1 ? "step" : "steps"} · show</button>
+      ) : null}
+      {[...shown.map((it, i) => {
+        if (it.t === "wait") {
+          /* v152.2 §2.2 — one italic line on the side of the next message; never a pill or a hairline */
+          if (folded && i === 0) return null;
+          const out = outKeys.has(it.key);
+          return <div key={rk(it.key)} className={`qc1522-lt ${it.side}${out ? " qc160-out" : ""}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} data-rk={rk(it.key)} title={it.tip ?? undefined}
+            data-leaving={out ? "" : undefined} aria-hidden={out || undefined} inert={out || undefined}>{it.label}</div>;
+        }
+        if (p.editingId && it.activityId === p.editingId && p.editNode) return <React.Fragment key={it.key}>{p.editNode}</React.Fragment>;
+        const out = outKeys.has(it.key);
+        const clip = desk.clip && (it.activityId === desk.clip.key || it.key === desk.clip.key) ? desk.clip : null;
+        const checking = !!desk.checkKey && (it.activityId === desk.checkKey || it.key === desk.checkKey);
+        const stamped = !!desk.stampKey && (it.activityId === desk.stampKey || it.key === desk.stampKey);
+        return (
+          <React.Fragment key={rk(it.key)}>
+            <Bubble wordsFirst side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
+              stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
+              tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
+              className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : "", out ? "qc160-out" : ""].filter(Boolean).join(" ") || undefined}
+              mark={checking ? <span className="qc153-chkw" data-qc153="checking">Checking</span> : stamped ? <span className="qc153-stamp" data-qc153="logged">Logged</span> : null}
+              outer={{ "data-qc152": "msg", "data-rk": rk(it.key), "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId, "data-field": it.key === "field-nudge" ? "" : undefined,
+                ...(out ? { "data-leaving": "", "aria-hidden": true, inert: true } : {}), style: { animationDelay: `${i * 45}ms` } }}
+              /* v161 — a nudge drawn from the query's field has no activity to edit */
+              after={it.key === "field-nudge" ? null : <button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
+                onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
+          </React.Fragment>
+        );
+      }), ...draftNode]}
+      {desk.typing ? (
+        /* v53 (D8): while the To-do's questions are open, the writer is "typing" where the new step will go */
+        <div className="qc152-m me qc153-typing" data-qc153="typing"><div className="qc152-bx" data-qc152="bubble"><span className="qc153-dots" aria-label="Being logged"><i /><i /><i /></span></div></div>
+      ) : null}
+    </div>
+  );
+
+  /* §2.6 the Agent tab */
+  const ask = askChips(d.asks, d.sentLabels);
+  const agentStrip = (
+      <div className="qc152-agq" data-qc152="agent-strip">
+        <div><small>Queried</small><b>{r.sentMs != null ? dayLabel(r.sentMs, nowMs) : "Not dated"}</b><em>{d.queriedVia ?? "how not recorded"}</em></div>
+        {d.free
+          ? <div><small>What went</small><b>{d.sentLabels.length} {d.sentLabels.length === 1 ? "thing" : "things"}</b><em>with the query</em></div>
+          : <div><small>Package</small><b>{p.packageName ?? "None"}</b><em>{d.sentLabels.length ? `${d.sentLabels.length} ${d.sentLabels.length === 1 ? "thing" : "things"} sent` : "nothing recorded"}</em></div>}
+        <div><small>Last heard</small><b>{d.lastHeardMs != null ? dayLabel(d.lastHeardMs, nowMs) : "Not yet"}</b>
+          <em>{d.lastHeardMs != null ? `${Math.max(0, Math.round((nowMs - d.lastHeardMs) / 86_400_000))} days ago` : r.sentMs != null ? `since ${dayLabel(r.sentMs, nowMs)}` : ""}</em></div>
+      </div>
+  );
+  /* a double-click on a detail outside edit mode enters it (with that detail's menu open, where it has one) */
+  const dbl = (k: "weeks" | "asks" | "method" | "wishlist" | "email" | "website") => p.editData ? {
+    "data-ed-r": k,
+    onDoubleClick: (e: React.MouseEvent<HTMLElement>) => { if (ed.on) return; ed.start(k === "asks" || k === "method" ? k : null, e.currentTarget); },
+  } : {};
+  /* v158 §3 — the Agent tab, facts first: three fact boxes, contact, what the agent asks for, the wishlist, two links.
+     Every value is the agent's own record (lib/qcCardView); an unrecorded one is a link that opens the agent's card at it.
+     Double-click on a box or row enters edit mode at that detail, as before. The agent is always named, never a pronoun. */
+  const agentPane = ed.on && ed.dr ? (
+    <AgentEditPane layer={ed} first={(edAgent?.name ?? p.first ?? "the agent").split(/\s+/)[0]} strip={agentStrip}
+      onQueryStep={queryStepId ? () => openStep(queryStepId) : null} />
+  ) : (
+    <AgentTab158 first={first} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
+      sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
+      wishlist={p.wishlist} email={p.email} website={p.website} websiteHref={p.websiteHref ?? null}
+      onCopyEmail={p.onCopyEmail} onField={p.onAgentField} onEdit={() => (p.editData ? ed.start() : p.onPencil())} dbl={dbl} />
+  );
+
+  /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
+     the same step editor the per-block Edit opened, on the latest sent step. */
+  const groups = materialGroups(d.steps, { nowMs });
+  const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
+  const matPane = (
+    <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null}
+      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null} />
+  );
+
+  return (
+    <PopCtx.Provider value={pop}>
+    <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
+      data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
+      data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" style={stageVars}>
+      <div ref={inRef} className="qc152-in">
+        {ed.on ? (
+        <div className="qc152-band is-ed" data-qc152="band" data-edit="">
+          <EditStrip n={ed.keys.length} onStop={() => ed.ask()} />
+        </div>
+        ) : (
+        <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined} style={{ background: bandBg, color: STAGE_INK }}>
+          {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
+          {/* v164 — the four-step track and the status name; the footer says whose move it is */}
+          <span className="qc164-st" data-qc164="status" role="img" aria-label={ss.label}>
+            <span className="qc164-trk" data-qc164="track" aria-hidden="true"><Track153 t={ss.track} status={r.status} /></span>
+            <span className="qc164-w" data-qc152="band-word" aria-hidden="true">{ss.name}</span>
+          </span>
+          <span className="qc164-sp" aria-hidden="true" />
+          {p.stepCard && p.stepCard.of > 1 ? <>
+            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(-1); }}>{PREV}</button>
+            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(1); }}>{NEXT}</button>
+          </> : null}
+          <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query"
+            onClick={() => (p.editData ? ed.start() : p.onPencil())}>{PEN}</button>
+          <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={p.onClose}>✕</button>
+        </div>
+        )}
+        <div className="qc152-agent">
+          <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
+          <div className="qc152-who">{p.editData ? (
+            <Ed k="agent" layer={ed} changed={ed.keys.includes("agent")} label="The agent this query is to"><span className="qc152-nm qcv-open-nm" data-qc149c="name">{edAgent?.name ?? r.agentName}</span></Ed>
+          ) : <div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div>}<div className="qc152-ag" data-qc164="agency">{(edAgent ? edAgent.agency : r.agency) || ""}</div></div>
+          {/* v164 — no status label (the strip names it); the day sits at the row's end, by the strip's old rule */}
+          {d.state !== "closed" && r.dayN != null ? <span className="qc164-day" data-qc164="day">Day {r.dayN}</span> : null}
+        </div>
+        {view !== "read" ? p.editBody : <>
+        {desk.bookRow ? (
+          /* v53 (D8): the To-do card's book is one row — its height goes to Tracking */
+          <div className="qc153-bkrow" data-qc152="book" data-qc153="book-row"><span>Querying</span><b>{p.msTitle ?? "No manuscript"}</b></div>
+        ) : (
+        <div className="qc152-ms" data-qc152="book">
+          <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
+          {/* v164 — no "QUERYING" label; the title in --sp-h-card; genre and word count one sentence-case line */}
+          <div><b>{p.msTitle ?? "No manuscript"}</b>
+            {p.bookChips.length ? <div className="qc164-bkl" data-qc164="book-line">{bookLine164(p.bookChips)}</div> : null}</div>
+        </div>
+        )}
+        <div className="qc152-tabs" role="tablist" aria-label="The query">
+          {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
+            <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
+              {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
+              {ed.on && ((t === "agent" && ed.keys.some((k) => k !== "agent" && k !== "notes")) || (t === "notes" && ed.keys.includes("notes")))
+                ? <span className="qc152-dot" data-qc152="tab-dot" aria-label="unsaved changes" /> : null}
+            </button>
+          ))}
+        </div>
+        <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
+          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
+        </div>
+        {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
+          : p.composer ? p.composer : d.foot ? (() => {
+          /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link. v158.1: with more than one action it is
+             two rows (Foot, below) */
+          const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
+          const primary = ft.button ? { label: ft.button.label, tone: ft.button.tone, act: ft.button.act as string, run: () => p.onFoot?.(ft.button!.act), hook: { "data-qc152": "reply-btn" } } : null;
+          const linkA = ft.link ? { label: ft.link.label, act: ft.link.act as string, run: () => p.onFoot?.(ft.link!.act), hook: { "data-qc1522": "foot-link" } } : null;
+          const repliedA = ft.replied ? { label: ft.replied.label, act: "resp", run: () => p.onFoot?.("resp"), hook: { "data-qc1522": "foot-replied" } } : null;
+          return <Foot late={ft.late} icon={ft.icon} lead={ft.lead} sub={ft.sub} primary={primary} others={[linkA, repliedA]}
+            outer={{ "data-qc1522": "footer", "data-act": ft.button?.act ?? "none" }} />;
+        })() : (
+          <Foot late={box.late} icon={box.icon} lead={box.lead} sub={box.sub}
+            primary={{ label: box.button, tone: box.tone, act: box.act, arrow: true, run: () => p.onReply(box.act), hook: { "data-qc152": "reply-btn" } }}
+            others={[box.second ? { label: box.second.label, act: box.second.act, run: () => p.onReply(box.second!.act), hook: { "data-qc152": "reply-second" } } : null]}
+            outer={{ "data-act": box.act }} />
+        )}
+        </>}
+        {ed.on && ed.leave ? <LeaveAsk n={ed.keys.length} busy={ed.busy} onLose={ed.lose} onKeep={ed.keep} onSave={() => void ed.save()} /> : null}
+        {ed.on && ed.open && ed.dr && p.editData ? (
+          <EdMenu root={inRef.current} anchor={ed.anchor} onClose={() => ed.setOpen(null)}>
+            {ed.open === "agent" ? <>
+              <div className="ph">Who’s this query to?</div>
+              {p.editData.agents.map((a) => <MenuItem key={a.id} data={a.id} on={ed.dr!.agentId === a.id} label={a.name} sub={a.agency} onPick={() => { ed.setAgent(a.id); ed.setOpen(null); }} />)}
+              <div className="pf">Moves this query to another agent. Their details come with them.</div>
+            </> : ed.open === "asks" ? <>
+              <div className="ph">What they ask for</div>
+              {[...new Set([...ASK_POOL, ...ed.dr.details.asks])].map((a) => {
+                const on = ed.dr!.details.asks.includes(a);
+                return <MenuItem key={a} data={a} on={on} label={a} onPick={() => ed.patch({ asks: on ? ed.dr!.details.asks.filter((x) => x !== a) : [...ed.dr!.details.asks, a] })} />;
+              })}
+              <div className="pf">Tick as many as apply.</div>
+            </> : ed.open === "method" ? <>
+              <div className="ph">How they take queries</div>
+              {METHODS.map((m) => <MenuItem key={m.v} data={m.v} on={ed.dr!.details.method === m.v} label={m.label} onPick={() => { ed.patch({ method: m.v }); ed.setOpen(null); }} />)}
+            </> : null}
+          </EdMenu>
+        ) : null}
+        {toastGone ? (
+          /* v160 — the toast that timed out or was replaced leaves over 220ms (a copy: the live one is already gone) */
+          <div key={toastGone.k} className="qc1522-toast qc160-tout" aria-hidden="true" data-qc160="toast-out"
+            ref={(el) => { if (el && !el.dataset.out) { el.dataset.out = "1"; const k = toastGone.k; toastOut(el, () => setToastGone((g) => (g && g.k === k ? null : g))); } }}>
+            <span>{toastGone.msg}</span>{toastGone.undo ? <button type="button" tabIndex={-1}>Undo</button> : null}
+          </div>
+        ) : null}
+        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const u = p.toast?.onUndo; if (u) pressThen(e.currentTarget.closest<HTMLElement>(".spanel"), u, true); }}>Undo</button> : null}</div> : null}
+        {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}
+      </div>
+      {tip.node}
+    </div>
+    </PopCtx.Provider>
+  );
+};

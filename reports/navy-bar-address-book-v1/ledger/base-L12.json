@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L12",
+  "where": "1280 · two ticks show \"2 selected\" and the bulk actions",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L12",
+  "where": "1280 · population: Export in Filters",
+  "ok": false,
+  "detail": "null · 0"
+ },
+ {
+  "lock": "L12",
+  "where": "1280 · population: an agent with no email",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · two ticks show \"2 selected\" and the bulk actions",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · population: Export in Filters",
+  "ok": false,
+  "detail": "null · 0"
+ },
+ {
+  "lock": "L12",
+  "where": "1512 · population: an agent with no email",
+  "ok": false,
+  "detail": ""
+ }
+]

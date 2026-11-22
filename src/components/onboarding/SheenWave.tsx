@@ -17,7 +17,7 @@ export const SHEEN_WAVE_CSS = `
 .sa-sheen-wave::before{
   content:""; position:absolute; inset:0; border-radius:inherit; padding:var(--sheen-w,1.5px); pointer-events:none; z-index:1;
   background:
-    linear-gradient(110deg, transparent 28%, rgba(45,58,80,.95) 50%, transparent 72%),
+    linear-gradient(110deg, transparent 28%, rgba(42, 58, 82,.95) 50%, transparent 72%),
     linear-gradient(#c9d1dc,#c9d1dc);
   background-size:220% 100%, 100% 100%; background-repeat:no-repeat;
   -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;

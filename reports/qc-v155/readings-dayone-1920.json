@@ -1,0 +1,89 @@
+{
+ "title": "No queries yet",
+ "forLine": null,
+ "btns": [
+  "+ Log a query",
+  "Record a response"
+ ],
+ "count": "0 queries",
+ "heads": 0,
+ "cards": 0,
+ "listKids": [
+  "panel"
+ ],
+ "panel": {
+  "bg": "rgb(255, 255, 255)",
+  "r": "16px",
+  "sh": "rgb(230, 223, 212) 0px 0px 0px 1px",
+  "pad": "34px 30px",
+  "mt": "14px",
+  "mb": "18px",
+  "w": 960,
+  "listW": 960
+ },
+ "head": {
+  "t": "No queries yet.",
+  "f": "\"Special Elite\", \"Courier New\", Courier, monospace",
+  "s": "26px",
+  "w": "400",
+  "c": "rgb(28, 19, 15)",
+  "mb": "8px"
+ },
+ "body": {
+  "t": "Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import or use our template.",
+  "f": "\"Source Serif 4\", Georgia, serif",
+  "s": "16px",
+  "lh": "24px",
+  "c": "rgb(91, 79, 71)",
+  "mw": "498.559px"
+ },
+ "links": [
+  {
+   "t": "Bring it in with Smart import",
+   "href": "/import",
+   "dl": false,
+   "c": "rgb(42, 58, 82)",
+   "w": "600",
+   "off": "3px"
+  },
+  {
+   "t": "use our template",
+   "href": "/QueryHawk-pipeline-import-template.xlsx",
+   "dl": true,
+   "c": "rgb(42, 58, 82)",
+   "w": "600",
+   "off": "3px"
+  }
+ ],
+ "rail": {
+  "op": "0.4",
+  "pe": "none",
+  "inert": true,
+  "nums": [
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0",
+   "0"
+  ]
+ },
+ "chart": {
+  "head": null,
+  "text": "0 of 3 this week3 more to hit your goal this week.your goal · 3 a weekJulAugSepOctNov"
+ },
+ "img": 0,
+ "filledBtn": 0,
+ "ch": 8.3125
+}

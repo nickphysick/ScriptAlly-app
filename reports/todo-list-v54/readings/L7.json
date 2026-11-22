@@ -1,0 +1,21 @@
+{
+ "a1": "seed-cal-passed865",
+ "a2": "seed-agent-7",
+ "first": {
+  "agent": "seed-cal-passed865",
+  "pressed": [
+   "ql",
+   "samp",
+   "syn"
+  ],
+  "note": "first 3 chapters",
+  "asks": "From Frayn Agency’s guidelines"
+ },
+ "second": {
+  "pressed": [],
+  "noAsks": 1,
+  "add": 1,
+  "startFrom": 0,
+  "hawk": "Lin Literary’s guidelines aren’t saved, so I can’t fill this in for you."
+ }
+}

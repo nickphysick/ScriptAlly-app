@@ -2,119 +2,96 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * To-do list v5.2 — the report's shots, beside each `design-refs/todo-list-v5-2/screens/*` at 1512 × 900 and 1280 × 800,
- * plus /todo pinned and unpinned at 1920 and 1024. `TD52_SHOTS=1` only. Writes nothing to the account except screen 11,
- * which clears the explainer's stored fact for the shot and puts the user document back (the guard).
+ * To-do list v52 — the report's screens, beside design-refs/todo-list-v52/screens/01–17, at 1512 × 982 and 1280 × 800.
+ * Reads only, except 05 (the celebration): it logs a send and presses Undo in the same run.
+ * Run against the emulator with `npm run dev:emu` serving; writes to reports/todo-list-v52/screens/.
  */
-import { test } from "@playwright/test";
-import { doc, setDoc } from "firebase/firestore";
+import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
-import { harnessDb } from "./harnessDocs";
-import { leaveDesk, openTodo, restoreDocs, snapDocs } from "./td52Lib";
+import { openRoute } from "./measure";
 
-const OUT = "reports/todo-list-v5-2/shots";
-type W = { __td5: () => { r: HTMLElement; sc: HTMLElement; q: (s: string) => HTMLElement | null; qa: (s: string) => HTMLElement[] } };
-test.skip(process.env.TD52_SHOTS !== "1", "TD52_SHOTS=1 writes the report's shots");
-test.setTimeout(900_000);
+const OUT = "reports/todo-list-v52/screens";
+mkdirSync(OUT, { recursive: true });
+const PG = '[data-tws="page"]:visible';
 
-const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }];
-const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-const toTop = (page: import("@playwright/test").Page) => page.evaluate(() => { (window as unknown as W).__td5().sc.scrollTop = 0; });
-const toSheet = (page: import("@playwright/test").Page) => page.evaluate(() => { const { sc, q } = (window as unknown as W).__td5(); sc.scrollTop += q(".td5-sheet")!.getBoundingClientRect().top - sc.getBoundingClientRect().top - 10; });
-const snap = (page: import("@playwright/test").Page, name: string, w: number) => page.screenshot({ path: `${OUT}/${name}-${w}.png` });
-const startSend = async (page: import("@playwright/test").Page) => {
-  const k = await page.evaluate(() => ((window as unknown as W).__td5().qa('[data-td5="row"][data-task-type="partial_requested"]')[0] ?? (window as unknown as W).__td5().qa('[data-td5="row"][data-task-type="full_requested"]')[0])?.dataset.td5Row ?? null);
-  if (!k) return null;
-  await page.locator(`[data-todo-v5] [data-td5-row="${k}"]`).first().click(); await page.waitForTimeout(300);
-  await page.locator('[data-todo-v5] [data-td5="act"]').click();
-  await page.locator("[data-td5-slot] [data-qad-drawer]").first().waitFor({ timeout: 10_000 });
-  return k;
-};
+async function open(page: Page, vp: { width: number; height: number }) {
+  await page.addInitScript(() => { try { localStorage.removeItem("sa.todoTraySlim"); } catch { /* */ } });
+  await openRoute(page, "/todo", vp);
+  await expect(page.locator(`${PG} [data-tws-row]`).first()).toBeVisible({ timeout: 30_000 });
+  await page.waitForTimeout(600);
+}
+const prim = (page: Page) => page.locator(`${PG} [data-tws="primary"]`);
+const row = (page: Page, re: RegExp) => page.locator(`${PG} [data-tws-row]`).filter({ hasText: re }).first();
 
-for (const vp of SIZES) test(`shots @${vp.width}`, async ({ page }) => {
-  mkdirSync(OUT, { recursive: true });
-  const w = vp.width;
-  await openTodo(page, vp, { motion: true });
-  await page.evaluate(() => document.fonts.ready);
-  await snap(page, "01-calendar-today", w);
-  const cells = await page.evaluate((t) => { const { qa } = (window as unknown as W).__td5(); const c = qa('[data-td52="day-cell"]');
-    return { fut: c.find((x) => x.dataset.ymd! > t && x.querySelector('[data-td52="dot"]:not(.faint)'))?.dataset.ymd, past: c.find((x) => x.dataset.ymd! < t && /\bopen\b/.test(x.className))?.dataset.ymd, clear: c.find((x) => x.dataset.ymd! > t && !x.querySelector('[data-td52="dot"]'))?.dataset.ymd }; }, today());
-  for (const [name, ymd] of [["02-calendar-future-day", cells.fut], ["03-calendar-past-day", cells.past], ["04-calendar-clear-day", cells.clear]] as const) {
-    if (!ymd) continue;
-    await page.locator(`[data-todo-v5] [data-td52="day-cell"][data-ymd="${ymd}"]`).click(); await page.waitForTimeout(500);
-    await snap(page, name, w);
-    await page.locator('[data-todo-v5] [data-td52="back-today"]').click().catch(() => {}); await page.waitForTimeout(300);
-  }
-  await page.locator('[data-todo-v5] [data-td52="cal-row"][data-f="overdue"]').click(); await page.waitForTimeout(600);
-  await snap(page, "05-overdue-filter", w);
-  await page.locator('[data-todo-v5] [data-td52="cal-row"][data-f="overdue"]').click(); await page.waitForTimeout(300);
-  await page.locator('[data-todo-v5] [data-td52="open-drawer"]').click(); await page.waitForTimeout(900);
-  await snap(page, "06-calendar-drawer", w);
-  await page.keyboard.press("Escape"); await page.waitForTimeout(500);
-  await toSheet(page); await page.waitForTimeout(500);
-  await snap(page, "07-tray", w);
-  await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"][data-task-type="nudge_overdue"] .td52-press')[0]?.click()); await page.waitForTimeout(500);
-  await snap(page, "08-dial-reschedule", w);
-  await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-  await page.evaluate(() => (window as unknown as W).__td5().q('[data-td5="group-block"][data-g="quiet"]')?.scrollIntoView({ block: "start" })); await page.waitForTimeout(400);
-  /* three Gone quiet rows ticked: the checkboxes, the tint, the bar — nothing is written (no Close press) */
-  await page.evaluate(() => { const c = (window as unknown as W).__td5().qa('[data-td52="bulk-check"]'); c.slice(0, 3).forEach((x) => x.click()); });
-  await page.waitForTimeout(500);
-  await snap(page, "09-bulk-close", w);
-  await page.keyboard.press("Escape"); await page.waitForTimeout(300);
-  await page.locator('[data-todo-v5] [data-td5="find"] input').first().fill("zzqq nothing like this"); await page.waitForTimeout(600);
-  await toSheet(page); await page.waitForTimeout(300);
-  await snap(page, "10-empty-filter", w);
-  await page.locator('[data-todo-v5] [data-td52="empty-clear"]').click(); await page.waitForTimeout(400);
-  /* 11 · the explainer: cleared for the shot, the user document put back after */
-  const before = await snapDocs([""]);
-  try {
-    const { db, uid } = await harnessDb();
-    const prefs = (before.get("") as { todoPrefs?: Record<string, unknown> } | null)?.todoPrefs ?? {};
-    await setDoc(doc(db, "users", uid), { todoPrefs: { ...prefs, tray: {} } }, { merge: true });
+for (const vp of [{ width: 1512, height: 982 }, { width: 1280, height: 800 }]) {
+  test(`the screens at ${vp.width}`, async ({ page }) => {
+    test.setTimeout(300_000);
+    const shot = async (n: string) => { await page.waitForTimeout(450); await page.screenshot({ path: `${OUT}/${n}-${vp.width}.png` }); };
+    await open(page, vp);
+    /* 01–05 · a send */
+    await row(page, /^Send .* your full/).click();
+    await shot("01-workspace");
+    await page.locator(`${PG} .tws-q .tws-tile`).last().click();
+    await shot("02-option-picked");
+    await prim(page).click();
+    await page.waitForTimeout(250);
+    if (!(await prim(page).isEnabled())) await page.locator(`${PG} .tws-q .tws-tile`).first().click();
+    await prim(page).click();
+    await page.waitForTimeout(250);
+    await page.locator(`${PG} .tws-q [aria-label="An older date"]`).click();
+    await shot("03-date-calendar");
+    await prim(page).click();
+    await shot("04-summary-log-it");
+    await prim(page).click();
+    await expect(page.locator(`${PG} [data-tws="yay"]`)).toBeVisible({ timeout: 15_000 });
+    await shot("05-logged");
+    await page.locator(`${PG} [data-tws="yay"]`).getByRole("button", { name: "Undo" }).click();
     await page.waitForTimeout(1500);
-    await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"][data-task-type="nudge_overdue"]')[0]?.click()); await page.waitForTimeout(400);
-    await page.locator('[data-todo-v5] [data-td5="desk-aside"]').first().click(); await page.waitForTimeout(600);
-    await snap(page, "11-set-aside-explainer", w);
+    /* 06–07 · gone quiet */
+    await row(page, /gone quiet/).click();
+    await shot("06-gone-quiet");
+    await page.locator(`${PG} .tws-q .tws-tile`).filter({ hasText: /nudge/i }).first().click();
+    await prim(page).click();
+    await shot("07-gone-quiet-nudge");
+    /* 08 · an offer */
+    await row(page, /^Answer .* offer/).click();
+    await shot("08-offer");
+    /* 09 · a reply time, set to 10 weeks */
+    const more = page.locator(`${PG} .tws-more`);
+    if (await more.count()) await more.first().click();
+    await row(page, /take to reply/).click();
+    const r = page.locator(`${PG} .tws-q input[type="range"]`);
+    await r.focus(); await page.keyboard.press("Home");
+    for (let i = 1; i < 10; i++) await page.keyboard.press("ArrowRight");
+    await shot("09-reply-time");
+    /* 10 · your own task */
+    const own = page.locator(`${PG} [data-tws-row]`).filter({ has: page.locator('[data-k="own"]') }).first();
+    await own.click();
+    await shot("10-own-task");
+    /* 11 · the tray collapsed */
+    await row(page, /^Send .* your full/).click();
+    await page.locator(`${PG} [data-tws="collapse"]`).click();
+    await shot("11-tray-collapsed");
+    await page.locator(`${PG} [data-tws="expand"]`).click();
+    /* 12–13 · the pop-ups */
+    await page.locator(`${PG} [data-tws="footer"] .tws-sb`).first().click();
+    await shot("12-snooze");
     await page.keyboard.press("Escape");
-  } finally { await restoreDocs(before); }
-  /* 12–13 · pinned, and its drawer */
-  await page.keyboard.press("f"); await page.waitForTimeout(900);
-  await snap(page, "12-pinned", w);
-  await page.locator('[data-todo-v5] [data-td52="pin-day"]').click(); await page.waitForTimeout(900);
-  await snap(page, "13-pinned-drawer", w);
-  await page.keyboard.press("Escape"); await page.waitForTimeout(500);
-  /* 20 · pinned, mid-task */
-  if (await startSend(page)) { await page.waitForTimeout(2600); await snap(page, "20-task-pinned", w); await leaveDesk(page); }
-  await page.keyboard.press("f"); await page.waitForTimeout(800);
-  await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } });
-  /* 16–19 · a task starting, in progress, at step 2, hovering another */
-  await openTodo(page, vp, { motion: true });
-  await toSheet(page); await page.waitForTimeout(300);
-  if (await startSend(page)) {
-    await page.waitForTimeout(260); await snap(page, "16-task-starting", w);
-    await page.waitForTimeout(2400); await snap(page, "17-task-in-progress", w);
-    await page.locator("[data-td5-slot] [data-qad-primary]").first().click(); await page.waitForTimeout(900);
-    await snap(page, "18-task-step-2", w);
-    await page.locator("[data-td5-slot] .qad-body button", { hasText: /^\+$/ }).first().click().catch(() => {}); await page.waitForTimeout(400);
-    const other = await page.evaluate(() => (window as unknown as W).__td5().qa('[data-td5="row"]:not([data-live])').find((r) => r.getBoundingClientRect().top > 300 && r.getBoundingClientRect().bottom < innerHeight)?.dataset.td5Row);
-    if (other) { await page.locator(`[data-todo-v5] [data-td5-row="${other}"]`).first().hover(); await page.waitForTimeout(500); await snap(page, "19-task-hover-another", w); }
-    await page.mouse.move(5, 5);
-    await leaveDesk(page);
-    await page.evaluate(() => sessionStorage.removeItem("qh.parkedJourney"));
-  }
-  await openTodo(page, vp, { state: "caught" }); await snap(page, "14-caught-up", w);
-  await openTodo(page, vp, { state: "nothing", want: "nothing" }); await snap(page, "15-empty", w);
-});
-
-for (const width of [1920, 1024]) test(`/todo pinned and unpinned @${width}`, async ({ page }) => {
-  mkdirSync(OUT, { recursive: true });
-  await openTodo(page, { width, height: width === 1920 ? 1080 : 800 });
-  await page.evaluate(() => document.fonts.ready);
-  await toTop(page); await page.waitForTimeout(300);
-  await page.screenshot({ path: `${OUT}/todo-unpinned-${width}.png` });
-  await page.keyboard.press("f"); await page.waitForTimeout(900);
-  await page.screenshot({ path: `${OUT}/todo-pinned-${width}.png` });
-  await page.keyboard.press("f"); await page.waitForTimeout(600);
-  await page.evaluate(() => { try { localStorage.removeItem("sa.pinList.todo"); } catch { /* */ } });
-});
+    await page.locator(`${PG} [data-tws="footer"] .tws-sb`).nth(1).click();
+    await shot("13-dismiss");
+    await page.keyboard.press("Escape");
+    /* 14 · housekeeping */
+    await page.locator(`${PG} [data-tws="list"]`).evaluate((l: HTMLElement) => { const h = l.querySelector<HTMLElement>('.tws-gb[data-band="house"]'); if (h) l.scrollTop = h.offsetTop - l.offsetTop - 10; });
+    await shot("14-housekeeping");
+    /* 15–16 · the tabs */
+    await page.locator(`${PG} .tws-seg button`, { hasText: "Snoozed" }).click();
+    await shot("15-snoozed-tab");
+    await page.locator(`${PG} .tws-seg button`, { hasText: "Done" }).click();
+    await shot("16-done-tab");
+    await page.locator(`${PG} .tws-seg button`, { hasText: "To do" }).click();
+    /* 17 · hovering the preview */
+    await row(page, /^Send .* your full/).click();
+    await page.locator(`${PG} [data-tws="preview"]`).hover();
+    await shot("17-preview-hover");
+  });
+}

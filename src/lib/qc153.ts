@@ -1,0 +1,230 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v153 (design-refs/query-centre-v153.html) — the slip's pure parts: the header's stage colour, the
+ * arrow on the current step (did something come in, go out, or end), the four-step track with skipped steps, and the
+ * facts row's words.
+ *
+ * ⚠️ THE COLOUR IS THE STAGE, NOT THE GROUP. v157: the slate ladder (lib/stageColours) — Queried sand, partial, full
+ *    (with R&R and Resubmitted) and offer (with Signed) three deepening blues, every closed status its own grey.
+ *    `slipTone` returns those five stage names. The v153 names (sand/rose/blue/heather) survive only as
+ *    `legacyTone153`, for the surfaces that keep their colours this pack: the log-a-query slip preview and Birds-eye.
+ * ⚠️ NO RED. Nothing here returns a rust or late colour: a late Next box is a fill (`hot`), its text stays ink.
+ */
+import { QueryStatus } from "../types";
+import { STAGE_NAME, type QcRow } from "./qcSummary";
+import { CLOSED_STATUSES, isClosedRow, lastHeardMs, liveLevel, shortDate } from "./qc151";
+import { nextNum, type NextNum } from "./qc1512";
+import { stateOf } from "./queryState";
+import { MONTHS_SHORT } from "./dates";
+import { STAGE_COLOURS, stageOf, type Stage } from "./stageColours";
+
+/* ── the header's colour ─────────────────────────────────────────────────────────────────────────────────────── */
+
+/** v157 — the card's tone is its stage (lib/stageColours), and its fill that stage's band */
+export type SlipTone = Stage;
+export const SLIP_TONE_FILL: Record<SlipTone, string> = {
+  queried: STAGE_COLOURS.queried.band, partial: STAGE_COLOURS.partial.band, full: STAGE_COLOURS.full.band,
+  offer: STAGE_COLOURS.offer.band, closed: STAGE_COLOURS.closed.band,
+};
+export const slipTone = (status: QueryStatus | string): SlipTone => stageOf(status);
+
+/** the v153 tone names and fills: since Stage colours v1 read only by the stage ring's RING_FILL (lib/qc1531), whose
+ *  one drawer, QcStageRing1531, no route renders (design-refs/stage-colours-v1/AUDIT.md). Every drawn surface reads
+ *  the stage (slipTone, lib/stageColours). */
+export type LegacyTone153 = "sand" | "rose" | "blue" | "heather";
+export const LEGACY_TONE_FILL_153: Record<LegacyTone153, string> = { sand: "#efe7da", rose: "#ecd6d2", blue: "#d9e1ea", heather: "#e7d6dc" };
+
+/* ── the arrow ───────────────────────────────────────────────────────────────────────────────────────────────── */
+
+export type SlipDir = "in" | "out" | "end";
+const CAME_IN: ReadonlySet<string> = new Set([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.SIGNED]);
+/** something came in (the agent asked, R&R, an offer, signed), went out (queried, sent, resubmitted), or it ended */
+export function slipDir(status: QueryStatus | string): SlipDir {
+  if (CLOSED_STATUSES.includes(status as QueryStatus)) return "end";
+  return CAME_IN.has(status) ? "in" : "out";
+}
+
+/* ── the status word ─────────────────────────────────────────────────────────────────────────────────────────── */
+
+const CLOSED_SHORT: Partial<Record<string, string>> = { [QueryStatus.NO_RESPONSE]: "No reply" };
+/** the status's own name; No Response in the filter's short words ("No reply") */
+export const standWords = (r: Pick<QcRow, "status">): string => CLOSED_SHORT[r.status] ?? STAGE_NAME[r.status];
+
+/* ── the four-step track ─────────────────────────────────────────────────────────────────────────────────────── */
+
+export type NodeState = "reached" | "skip" | "cur" | "fut";
+export type LinkState = "done" | "skip" | "fut";
+export type EndGlyph = "rj" | "nr" | "wd";
+export interface SlipTrack {
+  /** four nodes: queried, partial, full, offer */
+  nodes: NodeState[];
+  /** three connectors, each the line INTO node k+1 */
+  links: LinkState[];
+  cur: number;
+  ended: boolean;
+  /** the closed glyph on the current step, for a closed query */
+  end: EndGlyph | null;
+  dir: SlipDir;
+}
+const FURTHEST_LEVEL: Record<QcRow["furthest"], number> = { query: 0, partial: 1, full: 2 };
+const END_GLYPH: Partial<Record<string, EndGlyph>> = { [QueryStatus.REJECTED]: "rj", [QueryStatus.NO_RESPONSE]: "nr", [QueryStatus.WITHDRAWN]: "wd" };
+
+/**
+ * The track. A step before the current one is REACHED when the history holds a live span at that level (a query is
+ * always reached), otherwise SKIPPED (query straight to full). The line into a skipped step is dotted; the line into
+ * a reached step, or into the current one, is done. A closed query stops at its furthest stage, greyed.
+ */
+export function slipTrack(r: Pick<QcRow, "status" | "furthest" | "history">): SlipTrack {
+  const ended = isClosedRow(r);
+  const cur = ended ? FURTHEST_LEVEL[r.furthest] ?? 0 : liveLevel(r.status);
+  const seen = new Set<number>([0]);
+  for (const s of r.history.spans) if (!CLOSED_STATUSES.includes(s.status)) seen.add(liveLevel(s.status));
+  const nodes: NodeState[] = [0, 1, 2, 3].map((i) => (i === cur ? "cur" : i > cur ? "fut" : seen.has(i) ? "reached" : "skip"));
+  const links: LinkState[] = [1, 2, 3].map((i) => (i > cur ? "fut" : nodes[i] === "skip" ? "skip" : "done"));
+  return { nodes, links, cur, ended, end: ended ? END_GLYPH[r.status] ?? "rj" : null, dir: slipDir(r.status) };
+}
+
+/* ── the facts row ───────────────────────────────────────────────────────────────────────────────────────────── */
+
+const DAY = 86_400_000;
+const sod = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const ago = (ms: number, nowMs: number): number => Math.max(0, Math.round((sod(nowMs) - sod(ms)) / DAY));
+
+export interface Fact { value: string; line: string | null; soft?: boolean }
+/** Queried: the date, and "over a year ago" / "N days ago" */
+export function queriedFact(r: Pick<QcRow, "sentMs">, nowMs: number): Fact {
+  if (r.sentMs == null) return { value: "—", line: null };
+  const n = ago(r.sentMs, nowMs);
+  return { value: shortDate(r.sentMs, nowMs), line: n > 365 ? "over a year ago" : n === 0 ? "today" : n === 1 ? "1 day ago" : `${n} days ago` };
+}
+/** Last heard: the date and the event in lower case, or "No reply yet" */
+export function heardFact(r: Pick<QcRow, "history">, nowMs: number): Fact {
+  const ms = lastHeardMs(r);
+  if (ms == null) return { value: "No reply yet", line: null, soft: true };
+  /* the AGENT's move on that day: a query sent the same day shares the date and must not name it */
+  const span = r.history.spans.find((s) => s.startMs === ms && (slipDir(s.status) === "in" || s.status === QueryStatus.REJECTED));
+  return { value: shortDate(ms, nowMs), line: span ? standWords(span).toLowerCase() : null };
+}
+/** Next: the existing Next wording (lib/qc1512 `nextNum`), joined onto one value */
+export function nextWords(n: NextNum): string {
+  if (n.kind === "dash") return "—";
+  if (n.kind === "text") return n.text;
+  return `${n.n} ${n.label[0]} ${n.label[1]}`;
+}
+export interface NextFact { label: string; value: string; hot: boolean; bar: number | null; line: string | null }
+/**
+ * The Next box: hot (the `#f6eee8` fill and the navy dot) when it is the writer's move or past its date; a
+ * reply-window bar for Watch and wait (with the agent, inside the window), the share of the window gone.
+ */
+export function nextFact(r: QcRow, nowMs: number): NextFact {
+  const n = nextNum(r, nowMs);
+  const yours = r.court === "you" || r.court === "offer" || r.withYou;
+  const hot = yours || (n.kind !== "dash" && n.tone === "late");
+  let bar: number | null = null;
+  const waiting = r.court === "agent" && !r.pastExpected && (stateOf(r) === "agent" || stateOf(r) == null);
+  if (!hot && waiting && r.expectedMs != null && r.stageStartMs != null && r.expectedMs > r.stageStartMs) {
+    bar = Math.min(1, Math.max(0, (nowMs - r.stageStartMs) / (r.expectedMs - r.stageStartMs)));
+  }
+  /* v1.3 D — waiting on the agent and not late: the reply date under its own heading, and what is planned */
+  if (r.court === "agent" && !r.withYou && !hot) {
+    const st = stateOf(r);
+    const due = st ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
+    if (due != null && sod(due) >= sod(nowMs)) return { label: "Reply expected by", value: nextDay(due, nowMs), hot, bar, line: planLine(r, nowMs) };
+    if (due == null) {
+      const nudge = scheduledNudgeMs(r, nowMs);
+      return nudge != null
+        ? { label: "Nudge scheduled for", value: nextDay(nudge, nowMs), hot, bar: null, line: "no reply date set" }
+        : { label: "Next", value: "No reply date", hot, bar: null, line: "add a response time" };
+    }
+  }
+  return { label: "Next", value: nextWords(n), hot, bar, line: nextLine(r, nowMs) };
+}
+
+/** a date ahead, as the slip says it: "4 Jan" within the coming year, with its year beyond that */
+export function nextDay(ms: number, nowMs: number): string {
+  const d = new Date(ms);
+  const near = ms - nowMs < 330 * 864e5;
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}${near ? "" : ` ${d.getFullYear()}`}`;
+}
+const AUTO_CLOSE = "Mark as no response automatically";
+const dayMs = (v: unknown): number | null => {
+  if (typeof v !== "string" || !v) return null;
+  const t = new Date(v.length === 10 ? `${v}T12:00:00` : v).getTime();
+  return Number.isNaN(t) ? null : t;
+};
+/** the writer's own nudge reminder, when its day is still to come (a passed one is NOT a nudge: it makes the query nudge
+ *  due, lib/queryState `remindedMs`; only a logged nudge counts, `nudgeMsOf` — Query card v161) */
+export function scheduledNudgeMs(r: Pick<QcRow, "query">, nowMs: number): number | null {
+  const t = dayMs((r.query as { nudgeDate?: string } | null)?.nudgeDate);
+  return t != null && sod(t) >= sod(nowMs) ? t : null;
+}
+/**
+ * v1.3 D — the Next box's line under "Reply expected by": the nudge the writer booked, else the close they chose (the
+ * day `responseDeadline` falls on, which is when the auto-close fires), else none. Retires "reply by …".
+ */
+export function planLine(r: Pick<QcRow, "query">, nowMs: number): string {
+  const nudge = scheduledNudgeMs(r, nowMs);
+  if (nudge != null) return `Nudge scheduled for ${nextDay(nudge, nowMs)}`;
+  const q = r.query as { ifNoResponse?: string; responseDeadline?: string } | null;
+  const close = q?.ifNoResponse === AUTO_CLOSE ? dayMs(q.responseDeadline) : null;
+  if (close != null) return `Closes ${nextDay(close, nowMs)} if no reply`;
+  return "No nudge planned";
+}
+
+/**
+ * v153.2 — the Next box's second line, the ref's four (design-refs/query-centre-v153-2.html): an offer says "answer the
+ * offer"; your move says when it was asked; with the agent it says the reply date, or "time for a nudge" once that has
+ * passed. Gone quiet and closed say nothing more (the value already does). The reply date is the one `nextNum` counts
+ * to, so the two lines cannot disagree. It was never built in v153, which drew the value alone.
+ */
+export function nextLine(r: QcRow, nowMs: number): string | null {
+  if (isClosedRow(r) || r.court === "closed") return null;
+  if (r.court === "offer") return "answer the offer";
+  if (r.court === "you" || r.withYou) {
+    if (r.stageStartMs == null) return null;
+    const d = ago(r.stageStartMs, nowMs);
+    return d === 0 ? "asked today" : `asked ${d} ${d === 1 ? "day" : "days"} ago`;
+  }
+  const st = stateOf(r);
+  if (st === "quiet") return null;
+  const due = st && r.court === "agent" ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
+  if (due == null) return null;
+  return sod(due) < sod(nowMs) ? "time for a nudge" : `reply by ${shortDate(due, nowMs)}`;
+}
+
+/* ── group headings and folds (List view) ────────────────────────────────────────────────────────────────────── */
+
+/** Action's four open groups, each with its swatch and one line (the ref's); Gone quiet and Closed fold */
+export const ACTION_WHY_153: Partial<Record<string, string>> = {
+  offer: "Waiting on your answer", materials: "Agents want pages", nudge: "Past their reply date", agent: "With agents, not yet due",
+};
+/** v157 — the slate ladder's bands; Gone quiet keeps its own pale stone (#f4efe6), which is no stage's */
+const ACTION_SWATCH: Partial<Record<string, string>> = {
+  offer: STAGE_COLOURS.offer.band, materials: STAGE_COLOURS.partial.band, nudge: STAGE_COLOURS.queried.band, agent: STAGE_COLOURS.queried.band,
+  quiet: "#f4efe6", closed: STAGE_COLOURS.closed.band,
+};
+/** a heading's swatch: Action's own colours; a Status group takes its stage's band; anything else Queried's */
+export function sectionSwatch(group: string, key: string): string {
+  if (group === "attention") return ACTION_SWATCH[key] ?? SLIP_TONE_FILL.queried;
+  if (group === "status") return key === "closed" ? SLIP_TONE_FILL.closed : SLIP_TONE_FILL[slipTone(key)];
+  return SLIP_TONE_FILL.queried;
+}
+/** the groups that fold into one row: Gone quiet and Closed */
+export const isFoldKey = (group: string, key: string): boolean => (group === "attention" && (key === "quiet" || key === "closed")) || (group === "status" && key === "closed");
+export const FOLD_LINE: Record<"quiet" | "closed", string> = {
+  quiet: "No reply after their window. Worth a nudge, or closing?",
+  closed: "Passes and no-replies you’ve closed.",
+};
+/** the fold's stack: up to `max` initials, then "+N" for the rest */
+export function foldInitials(rows: readonly Pick<QcRow, "id" | "initials">[], max = 4): { shown: { id: string; initials: string }[]; more: number } {
+  return { shown: rows.slice(0, max).map((r) => ({ id: r.id, initials: r.initials })), more: Math.max(0, rows.length - max) };
+}
+
+/* ── the slim bar ────────────────────────────────────────────────────────────────────────────────────────────── */
+
+/** the search's words: it matches the agent's name and agency (lib/qcSummary `matchesFind`), nothing else */
+export const FIND_PLACEHOLDER = "Find an agent or agency";
+/* the bar's four fixed sorts (BAR_SORTS, barSortOf) retired in List filters v1: Sort is the shared SortChip over
+   lib/cardsSort QC_LIST_SORT_FIELDS, on the same Sort151 */

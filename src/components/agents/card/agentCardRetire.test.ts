@@ -51,8 +51,10 @@ describe("lock 10 — the old agent drawer is gone", () => {
     expect(click).toMatch(/openAgentCard\(task\.relatedRecordId,\s*\{[^}]*dataNeedTarget\(agentDataQualityNeeds\(ag\)\)[^}]*from: "task"/);
   });
 
-  it("the Query Centre's Edit agent opens the card from the QC", () => {
-    expect(code(read("components/Queries.tsx"))).toMatch(/onEditAgent=\{\(\) => openAgentCard\(activeAgent\.id, \{ from: "qc" \}\)\}/);
+  /* re-pointed (Contact list v25.2 C3): the QC's "Edit agent ›" still goes through the card's one door, now asking for
+     the editor, which is the agent panel in edit mode (the centred editor is retired) */
+  it("the Query Centre's Edit agent opens the card from the QC, in edit mode", () => {
+    expect(code(read("components/Queries.tsx"))).toMatch(/onEditAgent=\{\(\) => openAgentCard\(activeAgent\.id, \{ tab: "who", host: "panel", from: "qc" \}\)\}/);
   });
 });
 

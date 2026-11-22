@@ -1,0 +1,27 @@
+[
+ {
+  "where": "reading: no input[type=date], no select, no prompt()",
+  "ok": true,
+  "detail": "{\"date\":0,\"select\":0,\"prompts\":0}"
+ },
+ {
+  "where": "record: no input[type=date], no select, no prompt()",
+  "ok": true,
+  "detail": "{\"date\":0,\"select\":0,\"prompts\":0}"
+ },
+ {
+  "where": "fork: no input[type=date], no select, no prompt()",
+  "ok": true,
+  "detail": "{\"date\":0,\"select\":0,\"prompts\":0}"
+ },
+ {
+  "where": "fix: no input[type=date], no select, no prompt()",
+  "ok": true,
+  "detail": "{\"date\":0,\"select\":0,\"prompts\":0}"
+ },
+ {
+  "where": "details: no input[type=date], no select, no prompt()",
+  "ok": false,
+  "detail": "{\"date\":0,\"select\":1,\"prompts\":0}"
+ }
+]

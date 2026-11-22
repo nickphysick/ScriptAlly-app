@@ -239,9 +239,10 @@ describe("the workspace variant", () => {
    * fault with a receipt, which is the most this pack can honestly leave behind.
    */
   it("every mark key is accepted and NONE is drawn — the prop has no reader left", () => {
-    const KEYS = ["queries", "todo", "calendar", "contacts", "packages", "analytics",
+    /* "calendar" left the census with the Calendar page (retired 29 Oct) and with its MarkName key. */
+    const KEYS = ["queries", "todo", "contacts", "packages", "analytics",
       "noteboard", "discover", "settings"] as const;
-    expect(KEYS.length, "the mark census shrank").toBeGreaterThan(8);
+    expect(KEYS.length, "the mark census shrank").toBeGreaterThan(7);
     for (const m of KEYS) {
       const out = renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />);
       expect(out, `${m} threw or failed to render`).toContain('class="ph ph--compact hsheet-host"');

@@ -13,6 +13,7 @@
  *   cd functions && npm install && npm run build
  *   firebase deploy --only functions:extractFromEmail
  */
+import { hasPro, resolveBasis } from "./entitlement";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
@@ -31,11 +32,8 @@ import {
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 
 /* ── Plan gate ─────────────────────────────────────────────────────────────
- *  The real entitlement field EXISTS on the user doc: User.plan === "Pro" (UserPlan.PRO in
- *  src/types.ts). This master switch lets the whole feature be opened to all tiers in one line if
- *  ever needed — but it must never ship ungated, so it defaults to true. ── */
-const EMAIL_IMPORT_REQUIRES_PRO = true;
-const PRO_PLAN = "Pro"; // mirrors UserPlan.PRO
+ *  Plan rules v1: Smart email drop is a Pro feature, and who has Pro is `entitlement.ts`'s answer — founding flag,
+ *  then plan, then the 14-day trial. This file keeps no condition of its own. ── */
 
 /* Caps to keep the model payload small. */
 const MAX_AGENTS = 60;
@@ -65,10 +63,9 @@ export const extractFromEmail = onCall(
     if (!emailText.trim()) throw new HttpsError("invalid-argument", "No email text.");
     if (emailText.length > MAX_EMAIL_CHARS) throw new HttpsError("invalid-argument", "Email too long.");
 
-    // 2. Plan gate (server-side, not just the UI)
-    const userSnap = await db.doc(`users/${uid}`).get();
-    const plan = userSnap.get("plan");
-    if (EMAIL_IMPORT_REQUIRES_PRO && plan !== PRO_PLAN) {
+    // 2. Plan gate (server-side, not just the UI) — the one resolver (entitlement.ts)
+    const [userSnap, entSnap] = await Promise.all([db.doc(`users/${uid}`).get(), db.doc(`users/${uid}/private/entitlement`).get()]);
+    if (!hasPro(await resolveBasis(uid, userSnap, entSnap))) {
       throw new HttpsError("permission-denied", "Email import is a Pro feature.");
     }
 

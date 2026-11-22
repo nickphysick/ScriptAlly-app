@@ -1,0 +1,320 @@
+[
+ {
+  "lock": "A1",
+  "where": "population: the plot",
+  "ok": true,
+  "detail": "{\"x\":327,\"y\":334.84375,\"width\":570,\"height\":244.109375}"
+ },
+ {
+  "lock": "A1",
+  "where": "no callout at rest",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "population: weeks swept",
+  "ok": true,
+  "detail": "9 weeks: 31 Aug, 7 Sep, 14 Sep, 21 Sep, 28 Sep, 5 Oct, 12 Oct, 19 Oct, 26 Oct"
+ },
+ {
+  "lock": "A1",
+  "where": "the week popup never shows with the callout",
+  "ok": true,
+  "detail": "0 readings"
+ },
+ {
+  "lock": "A1",
+  "where": "31 Aug delta",
+  "ok": true,
+  "detail": "no change vs no change (34→34)"
+ },
+ {
+  "lock": "A1",
+  "where": "31 Aug rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":20},{\"g\":\"partial\",\"n\":5},{\"g\":\"full\",\"n\":5},{\"g\":\"undated\",\"n\":4}] vs 34"
+ },
+ {
+  "lock": "A1",
+  "where": "31 Aug bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":20,\"w\":102.34375},{\"g\":\"partial\",\"n\":5,\"w\":25.59375},{\"g\":\"full\",\"n\":5,\"w\":25.59375},{\"g\":\"undated\",\"n\":4,\"w\":20.46875}] off 0.01,0.01,0.01,0.00"
+ },
+ {
+  "lock": "A1",
+  "where": "31 Aug 10px from the guide",
+  "ok": true,
+  "detail": "right gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "31 Aug inside the card",
+  "ok": true,
+  "detail": "right 547.0 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "7 Sep delta",
+  "ok": true,
+  "detail": "▲ 1 on last week vs ▲ 1 on last week (34→35)"
+ },
+ {
+  "lock": "A1",
+  "where": "7 Sep rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":20},{\"g\":\"partial\",\"n\":4},{\"g\":\"full\",\"n\":7},{\"g\":\"undated\",\"n\":4}] vs 35"
+ },
+ {
+  "lock": "A1",
+  "where": "7 Sep bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":20,\"w\":99.421875},{\"g\":\"partial\",\"n\":4,\"w\":19.890625},{\"g\":\"full\",\"n\":7,\"w\":34.796875},{\"g\":\"undated\",\"n\":4,\"w\":19.890625}] off 0.01,0.00,0.00,0.00"
+ },
+ {
+  "lock": "A1",
+  "where": "7 Sep 10px from the guide",
+  "ok": true,
+  "detail": "right gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "7 Sep inside the card",
+  "ok": true,
+  "detail": "right 617.5 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "14 Sep delta",
+  "ok": true,
+  "detail": "▲ 4 on last week vs ▲ 4 on last week (35→39)"
+ },
+ {
+  "lock": "A1",
+  "where": "14 Sep rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22},{\"g\":\"partial\",\"n\":4},{\"g\":\"full\",\"n\":9},{\"g\":\"undated\",\"n\":4}] vs 39"
+ },
+ {
+  "lock": "A1",
+  "where": "14 Sep bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22,\"w\":98.15625},{\"g\":\"partial\",\"n\":4,\"w\":17.84375},{\"g\":\"full\",\"n\":9,\"w\":40.15625},{\"g\":\"undated\",\"n\":4,\"w\":17.84375}] off 0.00,0.00,0.00,0.00"
+ },
+ {
+  "lock": "A1",
+  "where": "14 Sep 10px from the guide",
+  "ok": true,
+  "detail": "right gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "14 Sep inside the card",
+  "ok": true,
+  "detail": "right 688.0 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "21 Sep delta",
+  "ok": true,
+  "detail": "▲ 1 on last week vs ▲ 1 on last week (39→40)"
+ },
+ {
+  "lock": "A1",
+  "where": "21 Sep rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":23},{\"g\":\"partial\",\"n\":4},{\"g\":\"full\",\"n\":9},{\"g\":\"undated\",\"n\":4}] vs 40"
+ },
+ {
+  "lock": "A1",
+  "where": "21 Sep bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":23,\"w\":100.046875},{\"g\":\"partial\",\"n\":4,\"w\":17.390625},{\"g\":\"full\",\"n\":9,\"w\":39.15625},{\"g\":\"undated\",\"n\":4,\"w\":17.40625}] off 0.00,0.01,0.01,0.01"
+ },
+ {
+  "lock": "A1",
+  "where": "21 Sep 10px from the guide",
+  "ok": true,
+  "detail": "right gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "21 Sep inside the card",
+  "ok": true,
+  "detail": "right 758.5 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "28 Sep delta",
+  "ok": true,
+  "detail": "no change vs no change (40→40)"
+ },
+ {
+  "lock": "A1",
+  "where": "28 Sep rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22},{\"g\":\"partial\",\"n\":4},{\"g\":\"full\",\"n\":10},{\"g\":\"undated\",\"n\":4}] vs 40"
+ },
+ {
+  "lock": "A1",
+  "where": "28 Sep bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22,\"w\":95.6875},{\"g\":\"partial\",\"n\":4,\"w\":17.40625},{\"g\":\"full\",\"n\":10,\"w\":43.5},{\"g\":\"undated\",\"n\":4,\"w\":17.40625}] off 0.01,0.01,0.00,0.01"
+ },
+ {
+  "lock": "A1",
+  "where": "28 Sep 10px from the guide",
+  "ok": true,
+  "detail": "right gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "28 Sep inside the card",
+  "ok": true,
+  "detail": "right 829.0 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "5 Oct delta",
+  "ok": true,
+  "detail": "no change vs no change (40→40)"
+ },
+ {
+  "lock": "A1",
+  "where": "5 Oct rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22},{\"g\":\"partial\",\"n\":4},{\"g\":\"full\",\"n\":10},{\"g\":\"undated\",\"n\":4}] vs 40"
+ },
+ {
+  "lock": "A1",
+  "where": "5 Oct bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22,\"w\":95.6875},{\"g\":\"partial\",\"n\":4,\"w\":17.40625},{\"g\":\"full\",\"n\":10,\"w\":43.5},{\"g\":\"undated\",\"n\":4,\"w\":17.40625}] off 0.01,0.01,0.00,0.01"
+ },
+ {
+  "lock": "A1",
+  "where": "5 Oct 10px from the guide",
+  "ok": true,
+  "detail": "right gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "5 Oct inside the card",
+  "ok": true,
+  "detail": "right 899.5 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "12 Oct delta",
+  "ok": true,
+  "detail": "no change vs no change (40→40)"
+ },
+ {
+  "lock": "A1",
+  "where": "12 Oct rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22},{\"g\":\"partial\",\"n\":4},{\"g\":\"full\",\"n\":10},{\"g\":\"undated\",\"n\":4}] vs 40"
+ },
+ {
+  "lock": "A1",
+  "where": "12 Oct bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22,\"w\":95.6875},{\"g\":\"partial\",\"n\":4,\"w\":17.40625},{\"g\":\"full\",\"n\":10,\"w\":43.5},{\"g\":\"undated\",\"n\":4,\"w\":17.40625}] off 0.01,0.01,0.00,0.01"
+ },
+ {
+  "lock": "A1",
+  "where": "12 Oct 10px from the guide",
+  "ok": true,
+  "detail": "right gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "12 Oct inside the card",
+  "ok": true,
+  "detail": "right 970.0 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "19 Oct delta",
+  "ok": true,
+  "detail": "no change vs no change (40→40)"
+ },
+ {
+  "lock": "A1",
+  "where": "19 Oct rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22},{\"g\":\"partial\",\"n\":4},{\"g\":\"full\",\"n\":10},{\"g\":\"undated\",\"n\":4}] vs 40"
+ },
+ {
+  "lock": "A1",
+  "where": "19 Oct bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":22,\"w\":95.6875},{\"g\":\"partial\",\"n\":4,\"w\":17.40625},{\"g\":\"full\",\"n\":10,\"w\":43.5},{\"g\":\"undated\",\"n\":4,\"w\":17.40625}] off 0.01,0.01,0.00,0.01"
+ },
+ {
+  "lock": "A1",
+  "where": "19 Oct 10px from the guide",
+  "ok": true,
+  "detail": "left gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "19 Oct inside the card",
+  "ok": true,
+  "detail": "right 812.5 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "26 Oct delta",
+  "ok": true,
+  "detail": "no change vs no change (40→40)"
+ },
+ {
+  "lock": "A1",
+  "where": "26 Oct rows sum to the count",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":20},{\"g\":\"partial\",\"n\":8},{\"g\":\"full\",\"n\":12}] vs 40"
+ },
+ {
+  "lock": "A1",
+  "where": "26 Oct bars proportional ±1px",
+  "ok": true,
+  "detail": "[{\"g\":\"queried\",\"n\":20,\"w\":88},{\"g\":\"partial\",\"n\":8,\"w\":35.203125},{\"g\":\"full\",\"n\":12,\"w\":52.796875}] off 0.00,0.00,0.00"
+ },
+ {
+  "lock": "A1",
+  "where": "26 Oct 10px from the guide",
+  "ok": true,
+  "detail": "left gap off by 0.0"
+ },
+ {
+  "lock": "A1",
+  "where": "26 Oct inside the card",
+  "ok": true,
+  "detail": "right 883.0 frame 990.0"
+ },
+ {
+  "lock": "A1",
+  "where": "both sides exercised (the last week flips)",
+  "ok": true,
+  "detail": "31 Aug:R 7 Sep:R 14 Sep:R 21 Sep:R 28 Sep:R 5 Oct:R 12 Oct:R 19 Oct:L 26 Oct:L"
+ },
+ {
+  "lock": "A1",
+  "where": "the guide runs the plot's height, dashed",
+  "ok": true,
+  "detail": "{\"top\":0.0546875,\"h\":244,\"ph\":244.109375,\"dash\":\"4 4\"}"
+ },
+ {
+  "lock": "A1",
+  "where": "population: a pin",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "A1",
+  "where": "a pin's popup wins over the callout",
+  "ok": true,
+  "detail": "{\"pop\":true,\"callout\":false}"
+ }
+]

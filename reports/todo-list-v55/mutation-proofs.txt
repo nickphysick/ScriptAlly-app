@@ -1,0 +1,12 @@
+L1 · icons wrap to a second line RED (1 failed, 0 passed) — Error: L1 · they share one row
+L2 · '/' never reaches the page RED (1 failed, 0 passed) — Error: L2 · '/' opens the search field
+L3 · the dot is hidden RED (1 failed, 0 passed) — Error: L3 · the rust dot is on the icon
+L4 · the count changes under Agent RED (1 failed, 0 passed) — Error: L4 · agent: the To do count is unchanged
+L5 · the strip is 112 wide RED (1 failed, 0 passed) — Error: L5 · the strip is 64px
+L7 · Jonathan's figure reads 0 RED (1 failed, 0 passed) — Error: L7 · Jonathan's row: its true days waiting
+L8 · a 'To-do list' label in the tray RED (1 failed, 0 passed) — Error: L8 · at rest
+L6 (source: the collapse is not saved) RED (1 failed, 0 passed) — Error: L6 · both are written to the account's prefs
+L7 (source: trayItem's waitMs gone (the now fallback counts)) RED (1 failed, 0 passed) — Error: L7 · no request reads 0 days waiting
+L7 (source: a full request reads its request date only) RED (1 failed, 0 passed) — Error: L7 · Jonathan's row: its true days waiting
+L10 (source: a phone file touched) RED (1 failed, 0 passed) — Error: L10 · no phone file differs from the base
+L2 (source: the search filters nothing) RED (1 failed, 0 passed) — Error: L2 · to fewer rows

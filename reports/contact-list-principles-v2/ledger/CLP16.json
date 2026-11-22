@@ -1,0 +1,17 @@
+[
+ {
+  "where": "the list has unrated rows",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "where": "no unrated row draws stars (no ★, no ☆, no “Not set”)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "every rated row does",
+  "ok": true,
+  "detail": "29/29"
+ }
+]

@@ -1,0 +1,78 @@
+{
+ "n": 104,
+ "sample": [
+  {
+   "name": "Marcus",
+   "what": "Full",
+   "when": "140d late",
+   "title": "Send Marcus your full"
+  },
+  {
+   "name": "Ana",
+   "what": "Full",
+   "when": "80d late",
+   "title": "Send Ana your full"
+  },
+  {
+   "name": "David",
+   "what": "Partial",
+   "when": "80d late",
+   "title": "Send David your partial"
+  },
+  {
+   "name": "Rachel",
+   "what": "Partial",
+   "when": "80d late",
+   "title": "Send Rachel your partial"
+  },
+  {
+   "name": "Tom",
+   "what": "Offer",
+   "when": "77d late",
+   "title": "Answer Tom’s offer"
+  },
+  {
+   "name": "Tobias",
+   "what": "Full",
+   "when": "59d late",
+   "title": "Send Tobias your full"
+  },
+  {
+   "name": "Imogen",
+   "what": "Full",
+   "when": "56d late",
+   "title": "Send Imogen your full"
+  },
+  {
+   "name": "Edda",
+   "what": "Partial",
+   "when": "56d late",
+   "title": "Send Edda your partial"
+  },
+  {
+   "name": "Theo",
+   "what": "Full",
+   "when": "49d late",
+   "title": "Send Theo your full"
+  },
+  {
+   "name": "Noah",
+   "what": "Offer",
+   "when": null,
+   "title": "Answer Noah’s offer"
+  },
+  {
+   "name": "Jonathan",
+   "what": "Full",
+   "when": null,
+   "title": "Send Jonathan your full"
+  },
+  {
+   "name": "Ottoline",
+   "what": "Full",
+   "when": null,
+   "title": "Send Ottoline your full"
+  }
+ ],
+ "withWhen": 45
+}

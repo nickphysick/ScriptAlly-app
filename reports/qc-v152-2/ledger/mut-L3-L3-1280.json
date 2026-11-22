@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: rows",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "at most four",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "no chips",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no old pink in the banner",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "the row opens that query's card",
+  "ok": true,
+  "detail": "q152-offertold"
+ }
+]

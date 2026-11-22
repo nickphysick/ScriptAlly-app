@@ -1,0 +1,232 @@
+[
+ {
+  "where": "S2 population",
+  "ok": true,
+  "detail": "35 slips"
+ },
+ {
+  "where": "S2 Noah Bright, Bright Literary, Offer",
+  "ok": true,
+  "detail": "button · heather rgb(231, 214, 220) · 4 facts"
+ },
+ {
+  "where": "S2 Tom Ellery, Ellery & Finch, Offer",
+  "ok": true,
+  "detail": "button · heather rgb(231, 214, 220) · 4 facts"
+ },
+ {
+  "where": "S2 Rachel Lin, Lin Literary, Partial requested",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Iris Kwan, Kwan & Hall, Revise & resubmit",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Ana Duarte, Duarte Words, Full requested",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Clara Beaumont, Harbour Lane, Partial requested",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 David Marsh, Marsh & Co, Partial requested",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Edda Voss, Voss Literary, Partial requested",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Imogen Vale, Vale & Wick, Full requested",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Jonathan Marsh, The Marsh Agency, Full requested",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Marcus Reed, Reed & Partners, Partial requested",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Marcus Reed, Bloomsbury Quill, Partial requested",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Marcus Reed, Reed & Partners, Full requested",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Ottoline Frayn, Frayn Agency, Full requested",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Theo Abara, Abara Grant Agency, Full requested",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Tobias Hark, Hark Literary, Full requested",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Ana Duarte, Duarte Words, Full sent",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Peter Vance, Vance Associates, Partial sent",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Sun-hee Park, Meridian Line, Full sent",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Douglas Renner, Renner & Frost, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Tom Ellery, Curtis Vane, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Devendra Rao, Rao Agency, Partial sent",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Elinor Hale, Cavendish & Roe, Partial sent",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Rufus Oyelaran, Oyelaran Books, Partial sent",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 David Marsh, Marsh & Co, Partial sent",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Elinor Hale, Cavendish & Roe, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Elinor Hale, Cavendish & Roe, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Priya Nair, Northbank Literary, Partial sent",
+  "ok": true,
+  "detail": "button · rose rgb(236, 214, 210) · 4 facts"
+ },
+ {
+  "where": "S2 Elinor Hale, Cavendish & Roe, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Hester Blaine, Blaine & Vole, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Wren Calloway, Calloway & Hart, Full sent",
+  "ok": true,
+  "detail": "button · blue rgb(217, 225, 234) · 4 facts"
+ },
+ {
+  "where": "S2 Agent not recorded, , Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Agent not recorded, , Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Fenella Strand, Brightwater Books, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S2 Nadia Hussain, Northgate Literary, Queried",
+  "ok": true,
+  "detail": "button · sand rgb(239, 231, 218) · 4 facts"
+ },
+ {
+  "where": "S1 the page can scroll",
+  "ok": true,
+  "detail": "max scroll 8160"
+ },
+ {
+  "where": "S1 the bar spans the list column",
+  "ok": true,
+  "detail": "bar 960.0×54.0 · column 960.0"
+ },
+ {
+  "where": "S1 the search takes the remaining width",
+  "ok": true,
+  "detail": "search 437.4"
+ },
+ {
+  "where": "S1 it scrolled",
+  "ok": true,
+  "detail": "scrollTop 900"
+ },
+ {
+  "where": "S1 the bar sits on the lip",
+  "ok": true,
+  "detail": "bar 117.8 vs 117.8 (was 392.7)"
+ },
+ {
+  "where": "S1 the rail stays on screen",
+  "ok": true,
+  "detail": "rail 129.8 (was 392.7)"
+ },
+ {
+  "where": "S3 CTA hidden at rest, shown on hover",
+  "ok": true,
+  "detail": "rest 0 · hover 1"
+ },
+ {
+  "where": "S4 the open slip carries the ring",
+  "ok": true,
+  "detail": "is-sel true"
+ },
+ {
+  "where": "S4 focus returns to the slip",
+  "ok": true,
+  "detail": "active query-row-seed-query-12"
+ },
+ {
+  "where": "S5 no rust text in List",
+  "ok": true,
+  "detail": ""
+ }
+]

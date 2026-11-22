@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L4-1280",
+  "where": "both cards measured",
+  "ok": true,
+  "detail": "{\"lib\":{\"x\":272,\"y\":791.34375,\"w\":280,\"h\":414,\"top\":791.34375,\"bottom\":1205.34375},\"open1\":{\"x\":576,\"y\":791.34375,\"w\":672,\"h\":518.265625,\"top\":791.34375,\"bottom\":1309.609375}}"
+ },
+ {
+  "lock": "L4-1280",
+  "where": "the headers are the same height (±0.5)",
+  "ok": true,
+  "detail": "84 vs 84"
+ },
+ {
+  "lock": "L4-1280",
+  "where": "…and level (equal tops)",
+  "ok": true,
+  "detail": "791.34375 vs 791.34375"
+ },
+ {
+  "lock": "L4-1280",
+  "where": "the cards are 24 ± 1 apart",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "L4-1280",
+  "where": "Your materials is 280 wide",
+  "ok": true,
+  "detail": "280"
+ },
+ {
+  "lock": "L4-1280",
+  "where": "no outer panel around the two cards",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"shadow\":\"none\",\"kids\":2}"
+ },
+ {
+  "lock": "L4-1280",
+  "where": "no stepper row",
+  "ok": true,
+  "detail": "stepper"
+ },
+ {
+  "lock": "L4-1280",
+  "where": "exactly one status pill and no stage",
+  "ok": true,
+  "detail": "status"
+ }
+]

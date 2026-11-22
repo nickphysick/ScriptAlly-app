@@ -1,0 +1,100 @@
+
+Running 5 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.5s)
+PL-4 @1440 [[".mk-pv4plans",1],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",0],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✘  2 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1440: no Pro plans container, no plan tiles, no swipe track (886ms)
+PL-4 @1280 [[".mk-pv4plans",1],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",0],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✘  3 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1280: no Pro plans container, no plan tiles, no swipe track (794ms)
+PL-4 @390 [[".mk-pv4plans",0],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",1],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✘  4 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @390: no Pro plans container, no plan tiles, no swipe track (868ms)
+PL-4 @375 [[".mk-pv4plans",0],[".mk-pv4pgrid",0],[".mk-pv4ptile",0],[".mk-pvplans",0],[".mk-pvpgrid",0],[".mk-pvpt",0],[".mk-pvtrack",1],[".mk-pvseg",0],[".mk-pvtier",0]]
+  ✘  5 [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @375: no Pro plans container, no plan tiles, no swipe track (824ms)
+
+
+  1) [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1440: no Pro plans container, no plan tiles, no swipe track 
+
+    Error: .mk-pv4plans is gone
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      250 |     });
+      251 |     console.log(`PL-4 @${vp.width}`, JSON.stringify(found.counts));
+    > 252 |     for (const [s, n] of found.counts) expect.soft(n, `${s} is gone`).toBe(0);
+          |                                                                       ^
+      253 |     expect.soft(found.text, "the Pro plans box's subline is gone").not.toContain("Every Pro feature, for as long as your campaign runs.");
+      254 |     expect.soft(await page.locator(".mk-ladder").count(), "the population: the ladder is there").toBeGreaterThan(0);
+      255 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:252:71
+
+    Error Context: test-results/pricingLadder.measure.ts-P-5d09b-o-plan-tiles-no-swipe-track-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1280: no Pro plans container, no plan tiles, no swipe track 
+
+    Error: .mk-pv4plans is gone
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      250 |     });
+      251 |     console.log(`PL-4 @${vp.width}`, JSON.stringify(found.counts));
+    > 252 |     for (const [s, n] of found.counts) expect.soft(n, `${s} is gone`).toBe(0);
+          |                                                                       ^
+      253 |     expect.soft(found.text, "the Pro plans box's subline is gone").not.toContain("Every Pro feature, for as long as your campaign runs.");
+      254 |     expect.soft(await page.locator(".mk-ladder").count(), "the population: the ladder is there").toBeGreaterThan(0);
+      255 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:252:71
+
+    Error Context: test-results/pricingLadder.measure.ts-P-7eb84-o-plan-tiles-no-swipe-track-measure/error-context.md
+
+  3) [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @390: no Pro plans container, no plan tiles, no swipe track 
+
+    Error: .mk-pvtrack is gone
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      250 |     });
+      251 |     console.log(`PL-4 @${vp.width}`, JSON.stringify(found.counts));
+    > 252 |     for (const [s, n] of found.counts) expect.soft(n, `${s} is gone`).toBe(0);
+          |                                                                       ^
+      253 |     expect.soft(found.text, "the Pro plans box's subline is gone").not.toContain("Every Pro feature, for as long as your campaign runs.");
+      254 |     expect.soft(await page.locator(".mk-ladder").count(), "the population: the ladder is there").toBeGreaterThan(0);
+      255 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:252:71
+
+    Error Context: test-results/pricingLadder.measure.ts-P-575f6-o-plan-tiles-no-swipe-track-measure/error-context.md
+
+  4) [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @375: no Pro plans container, no plan tiles, no swipe track 
+
+    Error: .mk-pvtrack is gone
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      250 |     });
+      251 |     console.log(`PL-4 @${vp.width}`, JSON.stringify(found.counts));
+    > 252 |     for (const [s, n] of found.counts) expect.soft(n, `${s} is gone`).toBe(0);
+          |                                                                       ^
+      253 |     expect.soft(found.text, "the Pro plans box's subline is gone").not.toContain("Every Pro feature, for as long as your campaign runs.");
+      254 |     expect.soft(await page.locator(".mk-ladder").count(), "the population: the ladder is there").toBeGreaterThan(0);
+      255 |   });
+        at /Users/nickphysick/ScriptAlly-ladder/tests/e2e/pricingLadder.measure.ts:252:71
+
+    Error Context: test-results/pricingLadder.measure.ts-P-f6419-o-plan-tiles-no-swipe-track-measure/error-context.md
+
+  4 failed
+    [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1440: no Pro plans container, no plan tiles, no swipe track 
+    [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @1280: no Pro plans container, no plan tiles, no swipe track 
+    [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @390: no Pro plans container, no plan tiles, no swipe track 
+    [measure] › tests/e2e/pricingLadder.measure.ts:245:3 › PL-4 @375: no Pro plans container, no plan tiles, no swipe track 
+  1 passed (23.7s)

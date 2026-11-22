@@ -1,0 +1,6 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/hr1.measure.ts:141:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs
+  2 passed (2.8m)

@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population: the v151 page",
+  "ok": true,
+  "detail": "page drawn"
+ },
+ {
+  "where": "no glance",
+  "ok": true,
+  "detail": "0 drawn"
+ },
+ {
+  "where": "no navy",
+  "ok": true,
+  "detail": "0 drawn"
+ },
+ {
+  "where": "no yourQueries",
+  "ok": true,
+  "detail": "0 drawn"
+ },
+ {
+  "where": "no full",
+  "ok": true,
+  "detail": "0 drawn"
+ },
+ {
+  "where": "no listCard",
+  "ok": true,
+  "detail": "0 drawn"
+ },
+ {
+  "where": "full-screen code kept",
+  "ok": true,
+  "detail": "QcToolbar140 carries the full-screen button"
+ },
+ {
+  "where": "pin hook inert",
+  "ok": true,
+  "detail": "QC_FULL_SCREEN"
+ }
+]

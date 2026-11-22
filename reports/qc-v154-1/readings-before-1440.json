@@ -1,0 +1,205 @@
+{
+ "page": {
+  "bg": "rgb(245, 245, 243)",
+  "img": "linear-gradient(rgba(245, 245, 243, 0.45), rgba(245, 245, 243, 0.45)), url(\"http://127.0.0.1:4321/images/qc/doodle-tile.svg\")"
+ },
+ "fade": "linear-gradient(rgb(245, 245, 243) 0px, rgb(245, 245, 243) calc(100% - 22px), rgba(245, 245, 243, 0))",
+ "queried": {
+  "bg": "rgb(239, 231, 218)",
+  "shadow": "none"
+ },
+ "partial": {
+  "bg": "rgb(236, 214, 210)",
+  "shadow": "none"
+ },
+ "full": {
+  "bg": "rgb(217, 225, 234)",
+  "shadow": "none"
+ },
+ "others": [
+  {
+   "st": "Offer",
+   "tone": "heather",
+   "bg": "rgb(231, 214, 220)"
+  },
+  {
+   "st": "Offer",
+   "tone": "heather",
+   "bg": "rgb(231, 214, 220)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Revise & Resubmit",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Sent",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Sent",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  }
+ ],
+ "seal": {
+  "bg": "rgb(42, 58, 82)",
+  "color": "rgb(244, 238, 229)",
+  "shadow": "rgb(255, 255, 255) 0px 0px 0px 2.5px, rgba(42, 58, 82, 0.35) 0px 0px 0px 3.5px",
+  "font": "\"Special Elite\", \"Courier New\", Courier, monospace",
+  "w": 32,
+  "h": 32
+ },
+ "rail": {
+  "body": {
+   "bg": "rgb(255, 255, 255)",
+   "shadow": "rgb(232, 225, 214) 0px 0px 0px 1px",
+   "pl": "6px",
+   "pr": "6px"
+  },
+  "secs": [
+   {
+    "k": "quick",
+    "bb": "0px solid rgb(28, 19, 15)",
+    "pb": "0px"
+   },
+   {
+    "k": "where",
+    "bb": "0px solid rgb(28, 19, 15)",
+    "pb": "0px"
+   },
+   {
+    "k": "sent",
+    "bb": "0px solid rgb(28, 19, 15)",
+    "pb": "0px"
+   },
+   {
+    "k": "more",
+    "bb": "0px solid rgb(28, 19, 15)",
+    "pb": "0px"
+   }
+  ],
+  "pos": "relative"
+ },
+ "bar": {
+  "bg": "rgb(255, 255, 255)",
+  "shadow": "rgb(227, 213, 201) 0px 0px 0px 1px, rgba(28, 19, 15, 0.4) 0px 12px 24px -18px",
+  "blur": "none",
+  "pl": "7px",
+  "pr": "7px",
+  "h": 54,
+  "left": 0,
+  "firstBtn": 10,
+  "lastBtn": 7
+ },
+ "find": {
+  "bg": "rgb(247, 243, 238)",
+  "shadow": "none"
+ },
+ "chart": {
+  "pill": "0-week streak",
+  "line": "3 more keeps the streak going.",
+  "head": "0 of 3 this week"
+ },
+ "cool": [
+  "wpg-scroll",
+  "wpg-scroll",
+  "qc154-tbw"
+ ]
+}

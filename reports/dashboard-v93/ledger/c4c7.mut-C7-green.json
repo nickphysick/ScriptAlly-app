@@ -1,0 +1,356 @@
+[
+ {
+  "lock": "C4",
+  "where": "6: population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "6: the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "6: How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "6: kicker",
+  "ok": true,
+  "detail": "\"FOUNDING WRITER · LEVEL 2 OF 5\""
+ },
+ {
+  "lock": "C4",
+  "where": "6: title",
+  "ok": true,
+  "detail": "\"The Archivist\""
+ },
+ {
+  "lock": "C4",
+  "where": "6: line",
+  "ok": true,
+  "detail": "\"Keeps the record straight.\""
+ },
+ {
+  "lock": "C4",
+  "where": "6: stat",
+  "ok": true,
+  "detail": "\"6 contributions · top 15% of founding writers. 2 more and you become a Scout.\""
+ },
+ {
+  "lock": "C4",
+  "where": "6: no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): kicker",
+  "ok": true,
+  "detail": "\"FOUNDING WRITER · LEVEL 3 OF 5\""
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): title",
+  "ok": true,
+  "detail": "\"The Scout\""
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): line",
+  "ok": true,
+  "detail": "\"Spots what others miss.\""
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): stat",
+  "ok": true,
+  "detail": "\"11 contributions. 4 more and you become a Mentor.\""
+ },
+ {
+  "lock": "C4",
+  "where": "11 (topPct null): no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "2 (an Archivist): population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "2 (an Archivist): the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "2 (an Archivist): How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "2 (an Archivist): title",
+  "ok": true,
+  "detail": "\"The Fledgling\""
+ },
+ {
+  "lock": "C4",
+  "where": "2 (an Archivist): stat",
+  "ok": true,
+  "detail": "\"2 contributions. 1 more and you become an Archivist.\""
+ },
+ {
+  "lock": "C4",
+  "where": "2 (an Archivist): no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "1: population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "1: the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "1: How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "1: title",
+  "ok": true,
+  "detail": "\"The Fledgling\""
+ },
+ {
+  "lock": "C4",
+  "where": "1: line",
+  "ok": true,
+  "detail": "\"Just hatched, and already helping.\""
+ },
+ {
+  "lock": "C4",
+  "where": "1: stat",
+  "ok": true,
+  "detail": "\"Your first contribution. Welcome to the flock. 2 more and you become an Archivist.\""
+ },
+ {
+  "lock": "C4",
+  "where": "1: no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "0: population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "0: the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "0: How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "0: kicker",
+  "ok": true,
+  "detail": "\"FOUNDING WRITER\""
+ },
+ {
+  "lock": "C4",
+  "where": "0: title",
+  "ok": true,
+  "detail": "\"Your first contribution makes you a Fledgling\""
+ },
+ {
+  "lock": "C4",
+  "where": "0: line",
+  "ok": true,
+  "detail": "\"Use Give feedback in the sidebar. Anything useful counts.\""
+ },
+ {
+  "lock": "C4",
+  "where": "0: no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "16 (Mentor): population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "16 (Mentor): the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "16 (Mentor): How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "16 (Mentor): title",
+  "ok": true,
+  "detail": "\"The Mentor\""
+ },
+ {
+  "lock": "C4",
+  "where": "16 (Mentor): line",
+  "ok": true,
+  "detail": "\"Helps shape how every writer queries.\""
+ },
+ {
+  "lock": "C4",
+  "where": "16 (Mentor): stat",
+  "ok": true,
+  "detail": "\"16 contributions · top 10% of founding writers. 9 more and you become a QueryHawk.\""
+ },
+ {
+  "lock": "C4",
+  "where": "16 (Mentor): no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "25: population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "25: the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "25: How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "25: kicker",
+  "ok": true,
+  "detail": "\"FOUNDING WRITER · LEVEL 5 OF 5\""
+ },
+ {
+  "lock": "C4",
+  "where": "25: title",
+  "ok": true,
+  "detail": "\"The QueryHawk\""
+ },
+ {
+  "lock": "C4",
+  "where": "25: line",
+  "ok": true,
+  "detail": "\"Top of the tree.\""
+ },
+ {
+  "lock": "C4",
+  "where": "25: stat",
+  "ok": true,
+  "detail": "\"25 contributions · top 5% of founding writers. You’ve reached the top.\""
+ },
+ {
+  "lock": "C4",
+  "where": "25: no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C4",
+  "where": "6 + waiting: population",
+  "ok": true,
+  "detail": "Full"
+ },
+ {
+  "lock": "C4",
+  "where": "6 + waiting: the band",
+  "ok": true,
+  "detail": "You’re a QueryHawk founding writer"
+ },
+ {
+  "lock": "C4",
+  "where": "6 + waiting: How it works",
+  "ok": true,
+  "detail": "How it works"
+ },
+ {
+  "lock": "C4",
+  "where": "6 + waiting: stat",
+  "ok": true,
+  "detail": "\"6 contributions · top 15% of founding writers. 2 more and you become a Scout. 3 waiting to be read.\""
+ },
+ {
+  "lock": "C4",
+  "where": "6 + waiting: no \"Nick\" in the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C7",
+  "where": "population: the task card, the founding card and the panel",
+  "ok": true,
+  "detail": "3 roots · 33 colours"
+ },
+ {
+  "lock": "C7",
+  "where": "no colour with hue 80°–170° and saturation over 15%",
+  "ok": false,
+  "detail": "rgb(92, 138, 79)"
+ },
+ {
+  "lock": "C4",
+  "where": "the panel names no Nick",
+  "ok": true,
+  "detail": ""
+ }
+]

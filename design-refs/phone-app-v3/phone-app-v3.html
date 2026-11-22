@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk phone app – prototype v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#f8f6f2;--card:#fff;--navy:#2a3a52;--navy2:#364a66;--navyd:#1f2c40;--blush:#e8c8bc;--wash:#f5e6df;
+  --ink:#1f2633;--ink2:#3a3f4a;--muted:#6b6f78;--faint:#9a9ca3;--rule:#e8e2d8;--fill:#ece7de;
+  --sand:#f7efe3;--pink:#f5e6df;--slate:#d7e0e8;--grey:#e4e1db;--rust:#8a4a3c;
+  --type:"Special Elite","Courier New",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --sh:0 1px 2px rgba(31,38,51,.05),0 6px 18px rgba(31,38,51,.07);
+  --spring:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:#e9e6e0;font-family:var(--sans);color:var(--ink);font-synthesis:none;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+input,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+
+/* stage: phone in a frame on a computer, full screen on a real phone */
+#stage{min-height:100%;display:flex;gap:40px;justify-content:center;align-items:center;padding:24px}
+#guide{width:300px;flex:none}
+#guide h1{font:400 26px/1.15 var(--type);margin:0 0 6px}
+#guide p{margin:0 0 18px;color:var(--muted);font-size:14px;line-height:1.5}
+#guide h2{font:600 13px/1 var(--sans);color:var(--muted);margin:22px 0 10px}
+#guide .j{display:flex;gap:12px;align-items:center;width:100%;padding:11px 14px;background:#fff;border-radius:12px;margin-bottom:8px;box-shadow:var(--sh);font-size:14px;font-weight:500}
+#guide .j:hover{background:#fdfcfa}
+#guide .j b{flex:none;width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font:400 13px/24px var(--type);text-align:center}
+#guide .j span{display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:1px}
+#guide .reset{font-size:13px;color:var(--navy);text-decoration:underline;margin-top:6px}
+#phone{position:relative;width:390px;height:844px;max-height:calc(100vh - 48px);flex:none;background:var(--page);border-radius:40px;overflow:hidden;box-shadow:0 0 0 10px #1b1f27,0 30px 70px rgba(0,0,0,.28);display:flex;flex-direction:column}
+#sbar{flex:none;height:38px;background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:flex-end;padding:0 26px 6px;font:600 14px var(--sans)}
+#sbar i{display:flex;gap:5px;align-items:center}
+#sbar i b{display:block;width:16px;height:10px;border-radius:2px;background:#fff}
+#sbar i b+b{width:22px;border:1.5px solid #fff;background:linear-gradient(90deg,#fff 70%,transparent 70%)}
+@media (max-width:760px){
+  #stage{padding:0;display:block;height:100%}
+  #guide,#sbar{display:none}
+  #phone{width:100%;height:100%;max-height:none;border-radius:0;box-shadow:none}
+}
+
+/* shell */
+#view{flex:1;overflow-y:auto;overflow-x:hidden;background:linear-gradient(var(--navy) 0,var(--navy) 260px,var(--page) 260px);scrollbar-width:none;overscroll-behavior:contain}
+#view::-webkit-scrollbar,.sheet::-webkit-scrollbar,.full .body::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
+.hd{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:16px 20px 14px;transition:padding .2s}
+.hd h1{flex:1;margin:0;font:400 30px/1.1 var(--type);transition:font-size .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:4px}
+.hd.sm{padding:9px 20px 9px}
+.hd.sm h1{font-size:19px}
+.hd.sub h1{font-size:21px}
+.ib{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.ib:active{background:rgba(255,255,255,.12)}
+.ib svg,.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.av{flex:none;width:34px;height:34px;border-radius:50%;background:#fff;color:var(--navy);font:600 14px/34px var(--sans);text-align:center}
+.hero{background:var(--navy);color:#fff;padding:2px 20px 22px}
+.page{background:var(--page);border-radius:22px 22px 0 0;min-height:calc(100% - 60px);padding:22px 16px 28px}
+#tabs{flex:none;display:flex;background:#fff;border-top:1px solid var(--rule);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+#tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--faint);padding:4px 0;min-height:48px}
+#tabs button svg{width:24px;height:24px}
+#tabs button.on{color:var(--navy);font-weight:600}
+#tabs button.on .tw{background:#e3e8ef}
+#tabs .tw{width:52px;height:28px;border-radius:14px;display:grid;place-items:center;position:relative}
+#tabs .bd{position:absolute;top:-3px;right:4px;min-width:17px;height:17px;border-radius:9px;background:var(--blush);color:var(--ink);font:600 10.5px/17px var(--sans);text-align:center;padding:0 4px}
+#tabs .plus{flex:none;width:64px;justify-content:center}
+#tabs .plus span{width:50px;height:50px;border-radius:50%;background:var(--blush);color:var(--ink);display:grid;place-items:center;box-shadow:0 4px 12px rgba(138,74,60,.22)}
+#tabs .plus:active span{transform:scale(.95)}
+
+/* type and common parts */
+.sec{display:flex;align-items:baseline;gap:8px;margin:26px 4px 10px}
+.sec:first-child{margin-top:2px}
+.sec h2{margin:0;font:400 18px/1.2 var(--type)}
+.sec .n{color:var(--muted);font-size:14px}
+.sec .more{margin-left:auto;font-size:14px;font-weight:500;color:var(--navy)}
+.card{background:var(--card);border-radius:16px;box-shadow:var(--sh);overflow:hidden}
+.row{display:flex;gap:12px;align-items:center;width:100%;padding:13px 14px;min-height:64px;position:relative}
+.row+.row::before{content:"";position:absolute;top:0;left:66px;right:0;height:1px;background:var(--rule)}
+.row:active{background:#faf8f5}
+.row .tx{flex:1;min-width:0;display:block}
+.row .t,.row .s{display:block}
+.row .t.w{white-space:normal}
+.row .t{font-size:16px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font-size:13.5px;color:var(--muted);line-height:1.35;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s b{color:var(--ink);font-weight:600}
+.row .r{flex:none;text-align:right;font-size:12.5px;color:var(--muted)}
+.gl{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#1c130f}
+.gl svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}
+.seal{flex:none;width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;font:600 13.5px/40px var(--sans);text-align:center;letter-spacing:.02em}
+.seal.lt{background:var(--fill);color:var(--ink2)}
+.pill{flex:none;height:34px;padding:0 15px;border-radius:17px;background:var(--navy);color:#fff;font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+.pill.q{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--rule)}
+.pill.b{background:var(--blush);color:var(--ink)}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;height:52px;border-radius:26px;background:var(--navy);color:#fff;font-size:16.5px;font-weight:600}
+.btn.q{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--rule)}
+.btn[disabled]{background:#c9ccd3;cursor:default}
+.btn:active:not([disabled]){transform:scale(.985)}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 14px;padding:0 16px;scrollbar-width:none}
+.chip{flex:none;height:36px;padding:0 14px;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--rule);font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip i{font-style:normal;color:var(--muted);font-weight:400}
+.chip.on{background:var(--navy);color:#fff;box-shadow:none}
+.chip.on i{color:#c5cedb}
+.seg{display:flex;background:var(--fill);border-radius:12px;padding:3px;margin-bottom:14px}
+.seg button{flex:1;height:36px;border-radius:9px;text-align:center;font-size:14.5px;font-weight:500;color:var(--ink2)}
+.seg button.on{background:#fff;font-weight:600;color:var(--ink);box-shadow:0 1px 3px rgba(31,38,51,.12)}
+.note{font-size:13.5px;color:var(--muted);line-height:1.45;margin:10px 4px 0}
+.empty{text-align:center;padding:34px 20px;color:var(--muted);font-size:14.5px;line-height:1.5}
+.empty img{width:84px;height:84px;display:block;margin:0 auto 12px}
+.empty b{display:block;font:400 19px var(--type);color:var(--ink);margin-bottom:4px}
+
+/* today hero */
+.hero .tg{display:inline-flex;background:rgba(255,255,255,.1);border-radius:16px;padding:3px;margin-bottom:12px}
+.hero .tg button{height:28px;padding:0 13px;border-radius:14px;font-size:13px;font-weight:500;color:#d5dbe5}
+.hero .tg button.on{background:#fff;color:var(--navy);font-weight:600}
+.hero .big{display:flex;align-items:flex-end;gap:10px}
+.hero .big b{font:400 50px/.85 var(--type)}
+.hero .big span{font-size:15px;color:#d5dbe5;padding-bottom:3px}
+.hero svg.sp{display:block;width:100%;height:54px;margin-top:10px}
+.split{display:flex;gap:3px;height:8px;margin-top:14px}
+.split i{border-radius:4px;min-width:6px}
+.legend{display:flex;margin-top:9px}
+.legend button{flex:1;color:#fff;font-size:12.5px;line-height:1.3}
+.legend b{display:block;font:400 20px/1.1 var(--type)}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+.legend span{color:#c5cedb}
+.feed .row{min-height:54px;padding:10px 14px}
+.feed .gl{width:32px;height:32px}.feed .gl svg{width:18px;height:18px}
+.feed .row+.row::before{left:58px}
+.feed .t{font-size:14.5px;font-weight:500;white-space:normal}
+.beta{display:flex;gap:10px;align-items:center;margin-top:26px;padding:12px 14px;border-radius:14px;background:var(--wash);font-size:13.5px;line-height:1.4;width:100%}
+.beta b{flex:none;font:600 10.5px/1 var(--sans);letter-spacing:.08em;border:1.5px solid var(--rust);color:var(--rust);border-radius:10px;padding:4px 7px}
+
+/* birds-eye */
+.be{padding:13px 14px}.be+.be{border-top:1px solid var(--rule)}
+.be .top{display:flex;justify-content:space-between;font-size:14.5px;font-weight:600}
+.be .top span{font-weight:400;color:var(--muted);font-size:13px}
+.be .bar{height:8px;border-radius:4px;background:var(--fill);margin-top:8px;overflow:hidden}
+.be .bar i{display:block;height:100%;border-radius:4px;background:var(--navy)}
+.be .bar i.past{background:var(--blush)}
+
+/* library */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:#fff;border-radius:16px;box-shadow:var(--sh);padding:14px;min-height:104px;display:flex;flex-direction:column}
+.tile .ic{color:var(--navy);margin-bottom:auto}
+.tile b{font-size:15.5px;font-weight:600;margin-top:12px}
+.tile span{font-size:13px;color:var(--muted);margin-top:1px}
+.lrow .icw{flex:none;width:40px;height:40px;border-radius:12px;background:var(--fill);display:grid;place-items:center;color:var(--navy)}
+.chev{flex:none;color:var(--faint);width:18px;height:18px}
+.book{display:flex;gap:14px;align-items:center;padding:14px;width:100%}
+.cover{flex:none;width:52px;height:76px;border-radius:3px 6px 6px 3px;background:var(--navy);box-shadow:inset 4px 0 0 rgba(255,255,255,.12),2px 3px 8px rgba(31,38,51,.25);color:#fff;font:400 8.5px/1.2 var(--type);padding:12px 6px 0 10px}
+.show{background:var(--navy);border-radius:16px;padding:14px 14px 0;color:#fff;box-shadow:var(--sh);display:block;width:100%}
+.show small{font-size:13px;color:#c5cedb}
+.show .in{background:#fff;color:var(--ink);border-radius:12px 12px 0 0;margin-top:12px;padding:14px}
+.show .in b{display:block;font:400 21px/1.2 var(--type)}
+.show .in span{font-size:13.5px;color:var(--muted)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;font-size:14.5px}
+.kv+.kv{border-top:1px solid var(--rule)}
+.kv span{color:var(--muted)}.kv b{font-weight:500;text-align:right}
+.paper{background:#fff;border-radius:6px;box-shadow:var(--sh);padding:22px 20px;font:15px/1.6 Georgia,serif;color:var(--ink2);white-space:pre-wrap}
+textarea.paper{display:block;width:100%;min-height:340px;border:2px solid var(--navy);outline:0;resize:none}
+.wall{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:6px 4px}
+.wall div{background:#fffdf8;box-shadow:var(--sh);padding:14px 12px;font-size:13px;line-height:1.4;color:var(--ink2);position:relative}
+.wall div::before{content:"";position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;background:var(--rust);margin-left:-5px}
+.wall div:nth-child(odd){transform:rotate(-1.6deg)}.wall div:nth-child(even){transform:rotate(1.4deg)}
+.wall b{display:block;font:400 15px var(--type);color:var(--ink);margin-bottom:4px}
+.cols{display:flex;align-items:flex-end;gap:5px;height:110px;padding:14px 14px 0}
+.cols i{flex:1;background:var(--navy);border-radius:3px 3px 0 0;min-height:3px}
+.cols i.z{background:var(--fill)}
+.colx{display:flex;justify-content:space-between;padding:6px 14px 12px;font-size:11.5px;color:var(--muted)}
+.fun{padding:12px 14px}.fun+.fun{border-top:1px solid var(--rule)}
+.fun .l{display:flex;justify-content:space-between;font-size:14.5px}.fun .l b{font:400 17px var(--type)}
+.fun .bar{height:10px;border-radius:5px;background:var(--navy);margin-top:7px;min-width:6px}
+.ring{display:flex;gap:16px;align-items:center;padding:16px}
+.dots{display:flex;gap:8px;padding:0 16px 16px}.dots i{flex:1;height:30px;border-radius:8px;background:var(--fill)}.dots i.on{background:var(--navy)}
+
+/* overlays */
+#layer{position:absolute;inset:0;z-index:20;pointer-events:none}
+#layer>*{pointer-events:auto}
+.scrim{position:absolute;inset:0;background:rgba(20,26,36,.45);animation:fade .2s}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow-y:auto;background:var(--page);border-radius:24px 24px 0 0;box-shadow:0 -10px 30px rgba(31,38,51,.16);scrollbar-width:none;overscroll-behavior:contain}
+.sheet.in,.full.in{animation:up .32s var(--spring)}
+.sheet .grab{position:sticky;top:0;z-index:3;height:22px;display:grid;place-items:center}
+.sheet .grab::after{content:"";width:38px;height:5px;border-radius:3px;background:rgba(31,38,51,.2)}
+.sheet .pad{padding:0 16px 22px}
+.sheet h3{font:400 23px/1.2 var(--type);margin:4px 4px 4px}
+.sheet .lead{font-size:14.5px;color:var(--muted);margin:0 4px 16px;line-height:1.45}
+.full{position:absolute;inset:0;background:var(--page);display:flex;flex-direction:column}
+.full .top{flex:none;background:var(--navy);color:#fff;padding:8px 12px 14px}
+.full .top .bar{display:flex;align-items:center;gap:6px;min-height:44px}
+.full .top .bar span{flex:1;text-align:center;font-size:14.5px;font-weight:600}
+.prog{display:flex;gap:5px;padding:4px 8px 0}.prog i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.22)}.prog i.on{background:#fff}
+.sofar{display:flex;gap:6px;flex-wrap:wrap;padding:12px 8px 0}
+.sofar button{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:28px;padding:0 11px;border-radius:14px;background:rgba(255,255,255,.14);font-size:12.5px;color:#fff;font-weight:500}
+.full .body{flex:1;overflow-y:auto;padding:22px 16px 16px;scrollbar-width:none}
+.full .body h3{font:400 25px/1.2 var(--type);margin:0 4px 6px}
+.full .body .lead{font-size:14.5px;color:var(--muted);margin:0 4px 18px;line-height:1.45}
+.full .foot{flex:none;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--page);border-top:1px solid var(--rule)}
+.field{color:var(--ink);min-width:0;display:flex;align-items:center;gap:10px;height:50px;padding:0 14px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--rule);margin-bottom:12px}
+.field:focus-within{box-shadow:inset 0 0 0 2px var(--navy)}
+.field input{flex:1;min-width:0;border:0;outline:0;background:none;font-size:16px}
+.field .ic{color:var(--faint)}
+.opt{display:flex;gap:12px;align-items:center;width:100%;min-height:58px;padding:10px 14px;background:#fff;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--rule);margin-bottom:9px;font-size:16px;font-weight:500}
+.opt small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:1px}
+.opt .tx{flex:1}
+.opt.on{box-shadow:inset 0 0 0 2px var(--navy);background:#f3f6fa}
+.opt .ck{flex:none;width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #c9ccd3;display:grid;place-items:center;color:#fff}
+.opt.on .ck{background:var(--navy);box-shadow:none}
+.opt .ck svg{width:15px;height:15px;stroke-width:2.6}
+.opt.sq .ck{border-radius:7px}
+.wk{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tip{background:var(--wash);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.45;margin-bottom:14px;display:flex;gap:10px;align-items:center}
+.tip .tx{flex:1}
+.sw{flex:none;width:50px;height:30px;border-radius:15px;background:#c9ccd3;position:relative;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--navy)}.sw.on::after{transform:translateX(20px)}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:40px;background:none;margin:6px 0 0;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--navy) var(--p,30%),var(--fill) var(--p,30%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.3),inset 0 0 0 2px var(--navy);margin-top:-12px}
+input[type=range]::-moz-range-track{height:8px;border-radius:4px;background:var(--fill)}
+input[type=range]::-moz-range-progress{height:8px;border-radius:4px;background:var(--navy)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid var(--navy)}
+.rt{background:#fff;border-radius:16px;box-shadow:var(--sh);padding:16px 16px 12px;margin-bottom:14px}
+.rt .v{font:400 30px/1 var(--type)}
+.rt .ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.spk{background:#fff;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--rule);padding:12px;margin:-3px 0 10px}
+.spk .seg{margin-bottom:12px}
+.stp{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.stp>button{flex:none;width:48px;height:48px;border-radius:50%;background:var(--page);box-shadow:inset 0 0 0 1.5px var(--rule);text-align:center;font-size:24px;line-height:1}
+.stp .field{flex:1;margin:0}
+.stp .field input{text-align:right;font:400 22px/1 var(--type);padding-top:4px}
+.stp .field span{flex:1;color:var(--muted);font-size:15px}
+.stars{display:flex;align-items:center;gap:2px;margin:0 0 4px}
+.stars button{font-size:32px;line-height:1;color:#d4cec3;padding:2px 3px}
+.stars button.on{color:var(--navy)}
+.stars span{margin-left:10px;font-size:14px;color:var(--muted)}
+.lab{font-size:14px;font-weight:600;color:var(--ink2);margin:18px 4px 8px}
+.lab:first-of-type{margin-top:4px}
+.lab small{font-weight:400;color:var(--muted)}
+.txt{display:block;width:100%;border:0;outline:0;resize:none;background:#fff;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--rule);padding:12px 14px;font-size:16px;margin-bottom:12px}
+.txt:focus{box-shadow:inset 0 0 0 2px var(--navy)}
+.later{display:block;width:100%;text-align:center;padding:12px 0 2px;font-size:14.5px;font-weight:500;color:var(--navy);text-decoration:underline;text-underline-offset:3px}
+
+/* query sheet */
+.qh{padding:6px 18px 16px;margin-top:-22px;padding-top:28px}
+.qh .who{display:flex;gap:12px;align-items:center}
+.qh .who b{display:block;font:400 23px/1.15 var(--type)}
+.qh .who span{font-size:14px;color:var(--ink2)}
+.qh .x{margin-left:auto;color:var(--ink);background:rgba(255,255,255,.55)}
+.trk{display:flex;align-items:center;margin-top:16px}
+.trk .nd{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;color:var(--ink2);width:48px}
+.trk .nd i{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(28,19,15,.3);display:grid;place-items:center;color:#fff}
+.trk .nd.on i{background:#1c130f;box-shadow:none}
+.trk .nd.on{font-weight:600;color:var(--ink)}
+.trk .nd svg{width:13px;height:13px;stroke-width:3}
+.trk .ln{flex:1;height:2px;background:rgba(28,19,15,.2);margin:0 -8px 17px}
+.trk .ln.on{background:#1c130f}
+.stline{margin-top:14px;font-size:14.5px}.stline b{font-weight:600}
+.next{margin:14px 0 4px;background:#fff;border-radius:16px;box-shadow:var(--sh);padding:14px}
+.next small{font-size:12.5px;font-weight:600;color:var(--rust)}
+.next b{display:block;font-size:17px;line-height:1.3;margin:3px 0 2px}
+.next p{margin:0 0 12px;font-size:14px;color:var(--muted);line-height:1.4}
+.next .acts{display:flex;gap:8px}.next .acts .pill{height:42px;border-radius:21px;flex:1}
+.th{display:flex;flex-direction:column;gap:6px;padding:4px 2px}
+.bub{max-width:82%;padding:9px 12px 7px;border-radius:16px;font-size:14.5px;line-height:1.35;background:#fff;box-shadow:0 1px 1px rgba(31,38,51,.08);align-self:flex-end;border-bottom-right-radius:5px}
+.bub.them{align-self:flex-start;border-radius:16px;border-bottom-left-radius:5px}
+.bub small{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+.bub time{display:block;text-align:right;font-size:11px;color:var(--muted);margin-top:2px}
+.gap{font-size:12px;color:var(--muted);padding:2px 6px}
+.gap.r{text-align:right}
+.links{display:flex;gap:18px;margin:14px 4px 0;font-size:14.5px;font-weight:500;color:var(--navy)}
+.links button{text-decoration:underline;text-underline-offset:3px}
+.links .dz{color:var(--rust);margin-left:auto}
+
+/* agent sheet header */
+.ah{background:var(--navy);color:#fff;margin-top:-22px;padding:30px 18px 16px}
+.ah .who b{display:block;font:400 23px/1.15 var(--type)}.ah .who span{font-size:14px;color:#c5cedb}
+.ah .who{display:flex;gap:12px;align-items:center}
+.ah .who .seal{background:#fff;color:var(--navy);font-size:13.5px}
+.facts{display:flex;gap:8px;margin-top:14px}
+.facts div{flex:1;background:rgba(255,255,255,.1);border-radius:12px;padding:9px 10px;font-size:12px;color:#c5cedb}
+.facts b{display:block;color:#fff;font-size:14.5px;font-weight:600;margin-top:1px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{height:28px;padding:0 11px;border-radius:14px;background:var(--fill);font-size:13px;display:inline-flex;align-items:center}
+.disc{background:#fff;border-radius:16px;box-shadow:var(--sh);overflow:hidden;margin-bottom:12px}
+.disc .band{background:var(--slate);padding:8px 14px;font-size:12.5px;font-weight:600;color:#2c3e55}
+.disc .in{padding:14px}
+
+/* snackbar and celebration */
+#snack{position:absolute;left:14px;right:14px;bottom:86px;z-index:40;background:var(--navyd);color:#fff;border-radius:26px;height:52px;display:flex;align-items:center;gap:10px;padding:0 8px 0 10px;font-size:14.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:up .3s var(--spring)}
+#snack img{width:34px;height:34px;border-radius:50%;background:#fff}
+#snack span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#snack button{color:var(--blush);font-weight:600;padding:8px 12px}
+.cele{position:absolute;inset:0;background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;animation:fade .25s}
+.cele img{width:128px;height:128px;border-radius:50%;background:#fff;animation:pop .5s var(--spring)}
+.cele h3{font:400 30px/1.15 var(--type);margin:24px 0 8px}
+.cele p{margin:0 0 6px;font-size:15.5px;color:#d5dbe5;line-height:1.45;max-width:290px}
+.cele .mini{background:#fff;color:var(--ink);border-radius:16px;width:100%;margin:20px 0 26px;text-align:left}
+.cele .btn{background:#fff;color:var(--navy);margin-bottom:10px}
+.cele .btn.q{background:none;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <aside id="guide">
+    <h1>QueryHawk on a phone</h1>
+    <p>Prototype v1. Everything is tappable and the numbers update as you log things. Try the six journeys the phone is for:</p>
+    <button class="j" data-j="1"><b>1</b><div>What needs me today?<span>Today lists your next moves, most pressing first</span></div></button>
+    <button class="j" data-j="2"><b>2</b><div>An agent replied<span>Plus button, pick the query, say what they said</span></div></button>
+    <button class="j" data-j="3"><b>3</b><div>I've just sent a query<span>Five short questions, then it's on your list</span></div></button>
+    <button class="j" data-j="4"><b>4</b><div>Where does this one stand?<span>Queries, then tap any row for the whole story</span></div></button>
+    <button class="j" data-j="5"><b>5</b><div>Who's next on my list?<span>Agents still to query, what they ask for</span></div></button>
+    <button class="j" data-j="6"><b>6</b><div>How's it going?<span>You: your progress, then everything you send</span></div></button>
+    <button class="reset" data-j="0">Start again with fresh data</button>
+  </aside>
+  <div id="phone">
+    <div id="sbar"><span>9:41</span><i><b></b><b></b></i></div>
+    <div id="view"></div>
+    <nav id="tabs"></nav>
+    <div id="layer"></div>
+  </div>
+</div>
+<script>
+const HAWK="data:image/webp;base64,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";
+const TODAY=new Date(2026,10,11);
+const D=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const days=(a,b)=>Math.round((b-a)/864e5);
+const ago=s=>{const n=days(D(s),TODAY);return n<=0?"today":n===1?"yesterday":n<14?n+" days ago":n<70?Math.round(n/7)+" weeks ago":Math.round(n/30.4)+" months ago"};
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const dm=s=>{const d=D(s);return d.getDate()+" "+MON[d.getMonth()]};
+const addDays=(s,n)=>{const d=D(s);d.setDate(d.getDate()+n);return iso(d)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const first=n=>n.split(" ")[0];
+const inits=n=>n.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+
+const IC={
+today:"M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11.5 6H20M11.5 12H20M11.5 18H20",
+queries:"M21 3L3 10.5l7 2.5 2.5 7zM10 13L21 3",
+agents:"M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M21 20v-1.5a4 4 0 0 0-3-3.85M15.5 3.65a3.5 3.5 0 0 1 0 6.7",
+library:"M12 6.5C10.5 5 8 4.5 4 4.5v14c4 0 6.500.5 8 2 1.5-1.5 4-2 8-2v-14c-4 0-6.5.5-8 2zM12 6.5v14",
+plus:"M12 5v14M5 12h14",x:"M6 6l12 12M18 6L6 18",chev:"M9 6l6 6-6 6",back:"M15 6l-6 6 6 6",
+search:"M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14M16.5 16.5L21 21",
+eye:"M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5",
+list:"M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01",
+mail:"M3 6h18v12H3zM3 7l9 6 9-6",chart:"M5 20V10M12 20V4M19 20v-7",
+box:"M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9",
+file:"M7 3h7l4 4v14H7zM14 3v4h4M10 12h5M10 16h5",book:"M6 3h12v18H6zM9 7h6",
+pin:"M9 3h6l-1 6 3 3H7l3-3zM12 12v9",flame:"M12 3c1 3 4 4.5 4 8.500a4 4 0 0 1-8 0c0-1.500.5-2.500 1.500-3.500 0 1.500.5 2 1.500 2 0-2.500 0-4.500 1-7z",
+wall:"M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
+help:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M9.5 9.5a2.5 2.5 0 1 1 3.500 2.300c-.7.400-1 .900-1 1.700M12 17h.01",
+chat:"M4 5h16v11H9l-5 4z",upload:"M12 16V4M7 9l5-5 5 5M4 20h16",
+gear:"M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900l2.100 2.100M17 17l2.100 2.100M4.900 19.100L7 17M17 7l2.100-2.100",
+check:"M5 12.500l4.500 4.500L19 7.500",compass:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M15.500 8.500l-2 5-5 2 2-5z",
+note:"M5 4h14v11l-5 5H5zM14 20v-5h5",user:"M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0",
+copy:"M9 9h11v11H9zM5 15H4V4h11v1",task:"M5 5h14v14H5zM9 12l2 2 4-4",out:"M10 4H5v16h5M15 8l4 4-4 4M19 12H9"
+};
+IC.youtab=IC.user;const ic=(n,c)=>`<svg class="${c||"ic"}" viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n]}"/></svg>`;
+
+/* the status glyph: the app's own ring set */
+const SPEC={"Queried":["s","n"],"Partial requested":["d","h"],"Partial sent":["s","h"],"Full requested":["d","f"],"Full sent":["s","f"],"Revise & resubmit":["d","n"],"Offer":["doc"],"Signed":["docf"],"Passed":["s","b"],"No response":["s","b"],"Withdrawn":["s","b"],"Nudge":["nudge"]};
+function glyphSvg(st){const s=SPEC[st]||SPEC.Queried;
+  if(s[0]==="doc")return'<path d="M7 3.5h7l4 4V20.5H7z" stroke-linejoin="round"/><path d="M10 12h5M10 15.5h5" stroke-linecap="round"/>';
+  if(s[0]==="docf")return'<path d="M7 3.5h7l4 4V20.5H7z" stroke-linejoin="round"/><circle cx="12.5" cy="13.5" r="3.4" fill="currentColor" stroke="none"/>';
+  if(s[0]==="nudge")return'<circle cx="12" cy="12" r="10"/><path d="M12 7v6.5M12 16.8v.2" stroke-linecap="round"/>';
+  return`<circle cx="12" cy="12" r="10"${s[0]==="d"?' stroke-dasharray="6 4"':""}/>`+(s[1]==="h"?'<path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none"/>':s[1]==="f"?'<circle cx="12" cy="12" r="6.5" fill="currentColor" stroke="none"/>':s[1]==="b"?'<path d="M7.5 12h9" stroke-linecap="round"/>':"")}
+const CLOSED=["Passed","No response","Withdrawn","Signed"];
+const fillOf=st=>CLOSED.includes(st)?"var(--grey)":st==="Offer"?"var(--slate)":/requested|Revise|Nudge/.test(st)?"var(--pink)":"var(--sand)";
+const gl=(st,bg)=>`<span class="gl" style="background:${bg||fillOf(st)}" role="img" aria-label="${st}"><svg viewBox="0 0 24 24">${glyphSvg(st)}</svg></span>`;
+
+/* sample data: invented agents */
+const SEED={agents:[
+["a1","Noah Bright","Bright & Lowe",8,["Query letter","Synopsis","First 3 chapters"],"By email"],
+["a2","Marcus Reed","Reed & Partners",6,["Query letter","First 50 pages"],"By email"],
+["a3","Rachel Lin","Lin Literary",8,["Query letter","Synopsis","First 10 pages"],"Online form"],
+["a4","Elinor Hale","Cavendish & Roe",8,["Query letter","Synopsis","First 3 chapters"],"By email"],
+["a5","David Marsh","Marsh & Co",10,["Query letter","First 3 chapters"],"By email"],
+["a6","Ana Duarte","Duarte Words",8,["Query letter","Synopsis"],"By email"],
+["a7","Tom Ellery","Ellery & Finch",12,["Query letter","First 50 pages"],"Online form"],
+["a8","Imogen Farr","Farr & Boyd",8,["Query letter","Synopsis","First 3 chapters"],"By email"],
+["a9","Priya Nair","Nair Associates",6,["Query letter","First 10 pages"],"By email"],
+["a10","Mira Kovic","Old Harbour Literary",8,["Query letter","Synopsis"],"By email"],
+["a11","Rosalind Vale","Vale & Marchetti",12,["Query letter","First 3 chapters"],"By email"],
+["a12","Hugo Penn","Penn Street Agency",6,["Query letter"],"Online form"],
+["a13","Clara Whit","Whitlow Books",8,["Query letter","Synopsis","First 3 chapters"],"By email"],
+["a14","Sam Okafor","Okafor & Dale",8,["Query letter","First 50 pages"],"By email"],
+["a15","Imogen Vale","Vale & Winter Literary",8,["Query letter","Synopsis","First 3 chapters"],"By email"],
+["a16","Tomas Keller","Keller Rights",8,["Query letter","First 50 pages"],"Online form"],
+["a17","Ingrid Marsh","Marsh & Weir",10,["Query letter","Synopsis"],"By email"],
+["a18","Leo Castell","Castell Agency",0,[],"By email"],
+["a19","Beatrix Shaw","Shaw & Finch",6,["Query letter","First 10 pages"],"By email"]
+].map(a=>({id:a[0],name:a[1],agency:a[2],weeks:a[3],asks:a[4],how:a[5],email:first(a[1]).toLowerCase()+"@example.com"})),
+queries:[
+{id:"q1",a:"a1",ev:[["you","Queried","2026-06-02","Query letter, synopsis, first 3 chapters"],["them","Partial requested","2026-06-30"],["you","Partial sent","2026-07-01","First 100 pages"],["them","Full requested","2026-08-20"],["you","Full sent","2026-08-21","Full manuscript"],["them","Offer","2026-11-06"]]},
+{id:"q2",a:"a2",ev:[["you","Queried","2026-09-22","Query letter, first 50 pages"],["them","Full requested","2026-11-05"]]},
+{id:"q3",a:"a3",ev:[["you","Queried","2026-10-01","Query letter, synopsis, first 10 pages"],["them","Partial requested","2026-11-08"]]},
+{id:"q4",a:"a4",ev:[["you","Queried","2026-09-01","Query letter, synopsis, first 3 chapters"]]},
+{id:"q5",a:"a5",ev:[["you","Queried","2026-08-25","Query letter, first 3 chapters"]]},
+{id:"q6",a:"a6",ev:[["you","Queried","2026-08-11","Query letter, synopsis"],["them","Partial requested","2026-10-12"],["you","Partial sent","2026-10-14","First 50 pages"]]},
+{id:"q7",a:"a7",ev:[["you","Queried","2026-07-06","Query letter, first 50 pages"],["them","Full requested","2026-10-19"],["you","Full sent","2026-10-20","Full manuscript"]]},
+{id:"q8",a:"a8",ev:[["you","Queried","2026-10-06","Query letter, synopsis, first 3 chapters"]]},
+{id:"q9",a:"a9",ev:[["you","Queried","2026-10-20","Query letter, first 10 pages"]]},
+{id:"q10",a:"a10",ev:[["you","Queried","2026-05-04","Query letter, synopsis"],["you","Nudge","2026-07-10"]]},
+{id:"q11",a:"a11",ev:[["you","Queried","2026-04-12","Query letter, first 3 chapters"],["you","Nudge","2026-07-20"]]},
+{id:"q12",a:"a12",ev:[["you","Queried","2026-07-14","Query letter"],["them","Passed","2026-09-02"]]},
+{id:"q13",a:"a13",ev:[["you","Queried","2026-06-16","Query letter, synopsis, first 3 chapters"],["them","Partial requested","2026-07-28"],["you","Partial sent","2026-07-29","First 50 pages"],["them","Passed","2026-09-15"]]},
+{id:"q14",a:"a14",ev:[["you","Queried","2026-03-09","Query letter, first 50 pages"],["you","No response","2026-08-01"]]}
+].map(q=>({id:q.id,a:q.a,ev:q.ev.map(e=>({who:e[0],t:e[1],d:e[2],m:e[3]||""}))})),
+letters:[{id:"l1",name:"Hook-first",sent:7,more:3,text:"Dear [agent],\n\nWhen the salt road floods for the first time in forty years, Wren Addy is the only carter left who remembers the old way across.\n\nTHE SALT ROAD is a 92,000-word literary historical novel…\n\n[Your letter sits here. On a phone you can read it and fix the wording; it saves as a new version once it has gone out to agents.]"},
+{id:"l2",name:"Comp-led",sent:5,more:1,text:"Dear [agent],\n\nFor readers of quiet, place-soaked historical fiction, THE SALT ROAD follows…"},
+{id:"l3",name:"Short and plain",sent:2,more:0,text:"Dear [agent],\n\nI'm seeking representation for THE SALT ROAD…"}],
+packages:[{id:"p1",name:"Autumn round",letter:"Hook-first",syn:"One-page synopsis",ver:"Draft 6",sent:7,more:3,active:true},{id:"p2",name:"Summer round",letter:"Comp-led",syn:"One-page synopsis",ver:"Draft 5",sent:5,more:1},{id:"p3",name:"First batch",letter:"Short and plain",syn:"Two-page synopsis",ver:"Draft 5",sent:2,more:0}],
+notes:["Check Keller Rights' submission window reopens in January","Ask writing group about the synopsis ending","Festival agent one-to-ones: book by 30 Nov"]
+};
+let S,undoSnap=null,ui;
+function reset(){S=JSON.parse(JSON.stringify(SEED));ui={tab:"today",stack:[],ov:null,qf:"all",qview:"list",af:"all",aseg:"list",hero:"active",scroll:{},snack:null,goneQuietWeeks:4,nudgeEmails:true}}
+const A=id=>S.agents.find(a=>a.id===id);
+const Q=id=>S.queries.find(q=>q.id===id);
+const qOf=aid=>S.queries.find(q=>q.a===aid);
+
+/* everything a screen says about a query comes from here, so screens never disagree */
+function info(q){
+  const a=A(q.a),ev=q.ev,last=ev[ev.length-1],sent=ev[0].d;
+  const stEv=[...ev].reverse().find(e=>e.t!=="Nudge"),st=stEv.t;
+  const nudge=[...ev].reverse().find(e=>e.t==="Nudge");
+  const closed=CLOSED.includes(st),weeks=a.weeks||8;
+  const o={q,a,st,sent,last,closed,day:days(D(sent),TODAY),stDate:stEv.d,nudged:nudge&&nudge.d>=stEv.d?nudge.d:null};
+  o.short=closed?dm(stEv.d):ago(stEv.d);o.stage=closed?(st==="Signed"?3:-1):st==="Offer"?3:/Full|Revise/.test(st)?2:/Partial/.test(st)?1:0;
+  if(closed){o.court="closed";o.line=st==="Signed"?"Signed "+dm(stEv.d):st+" · "+dm(stEv.d)}
+  else if(st==="Offer"){o.court="you";o.kind="offer";o.verb="Answer";o.task=`Answer ${first(a.name)}'s offer`;o.line="Offer made "+ago(stEv.d);o.step=`${first(a.name)} has offered to represent you.`;o.stepSub="Take the time you need. Record your answer here when you've decided."}
+  else if(/requested|Revise/.test(st)){const what=st==="Revise & resubmit"?"revision":st.split(" ")[0].toLowerCase();o.court="you";o.kind="send";o.verb="Send";o.task=`Send ${first(a.name)} your ${what}`;o.line="Asked "+ago(stEv.d);o.step=`${first(a.name)} asked for ${st==="Revise & resubmit"?"a revision":"the "+what} ${ago(stEv.d)}.`;o.stepSub="Send it from your email, then mark it sent here."}
+  else{const base=o.nudged||stEv.d,exp=addDays(base,weeks*7),left=days(TODAY,D(exp));o.exp=exp;o.left=left;o.span=weeks*7;
+    if(left>=0){o.short="Reply expected by "+dm(exp);o.court="agent";o.line="Reply expected by "+dm(exp);o.step="Nothing to do for now.";o.stepSub=`Reply expected by ${dm(exp)}. A nudge reminder is set for ${dm(addDays(exp,1))}.`}
+    else if(!o.nudged&&-left<=(ui.goneQuietWeeks+4)*7){o.court="you";o.kind="nudge";o.verb="Nudge";o.task=`Nudge ${first(a.name)}`;o.line=`Usual reply time passed ${dm(exp)}`;o.step=`It's been ${Math.round(days(D(stEv.d),TODAY)/7)} weeks without a reply.`;o.stepSub=`Send ${first(a.name)} a nudge, then log it here. It goes to ${a.email}.`}
+    else{o.short=o.nudged?"quiet since "+dm(o.nudged):Math.round(o.day/7)+" weeks ago";o.court="quiet";o.kind="quiet";o.verb="Decide";o.task=`${first(a.name)} has gone quiet`;o.line=o.nudged?"Quiet since your nudge on "+dm(o.nudged):"No reply since "+dm(stEv.d);o.step=o.nudged?`No reply since you nudged on ${dm(o.nudged)}.`:`No reply for ${Math.round(o.day/7)} weeks.`;o.stepSub="Many agents don't reply to say no. Close it, or leave it open a while longer."}}
+  return o}
+const all=()=>S.queries.map(info);
+const ORDER={offer:0,send:1,nudge:2,quiet:3};
+function tasks(){return all().filter(i=>i.kind).sort((x,y)=>ORDER[x.kind]-ORDER[y.kind]||x.stDate.localeCompare(y.stDate))}
+function counts(){const c={you:0,agent:0,quiet:0,closed:0,all:S.queries.length};all().forEach(i=>c[i.court]++);c.active=c.all-c.closed;return c}
+
+/* ---------- screens ---------- */
+const $=s=>document.querySelector(s);
+function hd(title,opt){opt=opt||{};return`<header class="hd${opt.sub?" sub":""}">${opt.sub?`<button class="ib" data-act="back" aria-label="Back" style="margin-left:-10px">${ic("back")}</button>`:""}<h1>${title}</h1>${opt.extra||""}${opt.sub?"":`<button class="ib" data-act="search" aria-label="Search" style="margin-right:-8px">${ic("search")}</button>`}</header>`}
+function qRow(i,act){return`<button class="row" data-act="query" data-id="${i.q.id}">${gl(i.st)}<span class="tx"><span class="t">${i.a.name}</span><span class="s">${i.a.agency}</span><span class="s">${i.court==="you"?`<b>${i.st}</b>`:i.st} · ${i.short}</span></span>${act&&i.kind?`<span class="pill${i.kind==="quiet"?" q":i.kind==="offer"?" b":""}" data-act="do" data-id="${i.q.id}" role="button">${i.verb}</span>`:""}</button>`}
+function taskRow(i){return`<button class="row" data-act="query" data-id="${i.q.id}">${gl(i.kind==="nudge"?"Nudge":i.st)}<span class="tx"><span class="t w">${i.task}</span><span class="s">${i.a.agency} · ${i.short}</span></span><span class="pill${i.kind==="quiet"?" q":i.kind==="offer"?" b":""}" data-act="do" data-id="${i.q.id}" role="button">${i.verb}</span></button>`}
+
+function spark(arr){const w=350,h=54,mx=Math.max(...arr,1),pts=arr.map((v,k)=>[k*w/(arr.length-1),h-6-(v/mx)*(h-14)]);const p=pts.map(q=>q[0].toFixed(1)+","+q[1].toFixed(1)).join(" ");const l=pts[pts.length-1];return`<svg class="sp" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,${h} ${p} ${w},${h}" fill="rgba(255,255,255,.09)"/><polyline points="${p}" fill="none" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${l[0]-4}" cy="${l[1]}" r="4" fill="#e8c8bc"/></svg>`}
+function series(kind){const out=[];for(let w=30;w>=0;w--){const d=iso(new Date(TODAY-w*7*864e5));let n=0;S.queries.forEach(q=>{const sent=q.ev[0].d,cl=q.ev.find(e=>CLOSED.includes(e.t));if(kind==="sent"){if(sent<=d)n++}else if(kind==="replies"){n+=q.ev.filter(e=>e.who==="them"&&e.d<=d).length}else if(sent<=d&&!(cl&&cl.d<=d))n++});out.push(n)}return out}
+
+function vToday(){const c=counts(),t=tasks(),sr=series(ui.hero),num=sr[sr.length-1];
+  const lab={active:"active queries",sent:"queries sent",replies:"replies from agents"}[ui.hero];
+  const grp=[["offer","An offer to answer"],["send","Agents are waiting on you"],["nudge","Time for a nudge"],["quiet","Gone quiet"]];
+  let body="";
+  if(!t.length)body=`<div class="card"><div class="empty"><img src="${HAWK}" alt=""><b>You're all caught up.</b>Nothing needs you today. When an agent replies, tap the plus button to log it.</div></div>`;
+  else grp.forEach(g=>{const rows=t.filter(i=>i.kind===g[0]);if(rows.length)body+=`<div class="sec"><h2>${g[1]}</h2><span class="n">${rows.length}</span></div><div class="card">${rows.map(taskRow).join("")}</div>`});
+  const feed=S.queries.flatMap(q=>q.ev.map(e=>({e,a:A(q.a),q}))).sort((x,y)=>y.e.d.localeCompare(x.e.d)).slice(0,4);
+  const say=f=>f.e.who==="them"?(f.e.t==="Passed"?`${f.a.name} passed`:f.e.t==="Offer"?`${f.a.name} made an offer`:`${f.a.name} asked for ${/Partial/.test(f.e.t)?"a partial":/Full/.test(f.e.t)?"your full manuscript":"a revision"}`):f.e.t==="Queried"?`You queried ${f.a.name}`:f.e.t==="Nudge"?`You nudged ${f.a.name}`:f.e.t==="No response"?`You closed ${f.a.name} as no response`:f.e.t==="Withdrawn"?`You withdrew from ${f.a.name}`:f.e.t==="Signed"?`You signed with ${f.a.name}`:`You sent ${f.a.name} your ${/Partial/.test(f.e.t)?"partial":"full manuscript"}`;
+  return hd("Today")+`<div class="hero"><div class="tg" role="tablist">${["active","sent","replies"].map(k=>`<button class="${ui.hero===k?"on":""}" data-act="hero" data-k="${k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join("")}</div>
+  <div class="big"><b>${num}</b><span>${lab}</span></div>${spark(sr)}
+  <div class="split"><i style="flex:${c.you};background:var(--blush)"></i><i style="flex:${c.agent};background:#8fa3bf"></i><i style="flex:${c.quiet};background:#c9c1b4"></i></div>
+  <div class="legend"><button data-act="qfilter" data-f="you"><b>${c.you}</b><i style="background:var(--blush)"></i><span>With you</span></button><button data-act="qfilter" data-f="agent"><b>${c.agent}</b><i style="background:#8fa3bf"></i><span>With the agent</span></button><button data-act="qfilter" data-f="quiet"><b>${c.quiet}</b><i style="background:#c9c1b4"></i><span>Gone quiet</span></button></div></div>
+  <div class="page">${body}
+  <div class="sec"><h2>Lately</h2><button class="more" data-act="page" data-p="responses">All replies</button></div>
+  <div class="card feed">${feed.map(f=>`<button class="row" data-act="query" data-id="${f.q.id}">${gl(f.e.t)}<span class="tx"><span class="t">${say(f)}</span><span class="s">${f.a.agency}</span></span><span class="r">${dm(f.e.d)}</span></button>`).join("")}</div>
+  <div class="sec"><h2>Corkboard</h2><span class="n">${S.notes.length}</span><button class="more" data-act="page" data-p="cork">Open</button></div>
+  <div class="card">${S.notes.slice(0,2).map(n=>`<button class="row" style="min-height:50px" data-act="page" data-p="cork"><span style="color:var(--rust);flex:none">${ic("pin")}</span><span class="tx"><span class="t" style="font-weight:500;font-size:14.5px">${esc(n)}</span></span></button>`).join("")||'<div class="empty">Nothing pinned.</div>'}</div>
+  <button class="beta" data-act="feedback"><b>BETA</b><span>You're using QueryHawk before it's finished. Found a rough edge? Tell us.</span></button></div>`}
+
+function vQueries(){const c=counts(),f=ui.qf,list=all().filter(i=>f==="all"||i.court===f);
+  const chips=[["all","All",c.all],["you","With you",c.you],["agent","With the agent",c.agent],["quiet","Gone quiet",c.quiet],["closed","Closed",c.closed]];
+  const G=[["you","With you"],["agent","With the agent"],["quiet","Gone quiet"],["closed","Closed"]];
+  const extra=`<button class="ib" data-act="qview" aria-label="${ui.qview==="list"?"Birds-eye view":"List view"}">${ic(ui.qview==="list"?"eye":"list")}</button>`;
+  let body="";
+  if(ui.qview==="bird"){const w=all().filter(i=>i.exp).sort((x,y)=>x.left-y.left);
+    body=`<p class="note" style="margin:0 4px 12px">How far each query is through the agent's usual reply time.</p><div class="card">${w.map(i=>{const pct=Math.max(4,Math.min(100,Math.round((1-i.left/i.span)*100)));return`<button class="be" style="display:block;width:100%" data-act="query" data-id="${i.q.id}"><div class="top">${i.a.name}<span>${i.left>=0?(i.left<14?i.left+" days":Math.round(i.left/7)+" weeks")+" to go":"past "+dm(i.exp)}</span></div><div class="bar"><i class="${i.left<0?"past":""}" style="width:${pct}%"></i></div></button>`}).join("")||'<div class="empty">Nothing is waiting on a reply.</div>'}</div>`}
+  else if(!list.length)body=`<div class="card"><div class="empty"><b>Nothing here</b>No queries match this filter.</div></div>`;
+  else G.forEach(g=>{const rows=list.filter(i=>i.court===g[0]).sort((x,y)=>(ORDER[x.kind]??9)-(ORDER[y.kind]??9)||y.stDate.localeCompare(x.stDate));if(rows.length)body+=(f==="all"?`<div class="sec"><h2>${g[1]}</h2><span class="n">${rows.length}</span></div>`:"")+`<div class="card">${rows.map(i=>qRow(i,true)).join("")}</div>`});
+  return hd("Queries",{extra})+`<div class="page">${ui.qview==="list"?`<div class="chips">${chips.map(x=>`<button class="chip${f===x[0]?" on":""}" data-act="qfilter" data-f="${x[0]}">${x[1]} <i>${x[2]}</i></button>`).join("")}</div>`:""}${body}</div>`}
+
+function aRow(a){const q=qOf(a.id),i=q&&info(q);return`<button class="row" data-act="agent" data-id="${a.id}"><span class="seal${q?"":" lt"}">${inits(a.name)}</span><span class="tx"><span class="t">${a.name}</span><span class="s">${a.agency}</span><span class="s">${i?`${i.st} · ${i.closed?dm(i.stDate):"day "+i.day}`:(a.weeks?`Replies in ${a.weeks} weeks`:"No reply time saved")}</span></span>${q?gl(i.st):`<span class="pill q" data-act="logto" data-id="${a.id}" role="button">Log query</span>`}</button>`}
+const DISC=[["Freya Lund","Lund & Hart","Open to submissions",["Historical","Literary","Book club"],"Looking for quiet, character-led historical fiction with a strong sense of place."],["Oscar Vance","Vance Literary","Open to submissions",["Upmarket","Crime","Historical"],"Keen on debut voices and novels set outside London."],["Nell Aubrey","Aubrey Agency","Opens January",["Literary","Speculative"],"Wants ambitious structure and prose that takes risks."]];
+function vAgents(){const tq=S.agents.filter(a=>!qOf(a.id)),qd=S.agents.filter(a=>qOf(a.id));
+  const seg=`<div class="seg"><button class="${ui.aseg==="list"?"on":""}" data-act="aseg" data-k="list">Your list</button><button class="${ui.aseg==="disc"?"on":""}" data-act="aseg" data-k="disc">Discover</button></div>`;
+  if(ui.aseg==="disc")return hd("Agents")+`<div class="page">${seg}<p class="note" style="margin:0 4px 14px">Agents checked by the Scout that match your book.</p>${DISC.map((d,k)=>{const has=S.agents.some(a=>a.name===d[0]);return`<div class="disc"><div class="band">Verified by the Scout · ${d[2]}</div><div class="in"><div style="display:flex;gap:12px;align-items:center"><span class="seal lt">${inits(d[0])}</span><span class="tx" style="flex:1"><b style="font-size:16.5px">${d[0]}</b><br><span style="font-size:13.5px;color:var(--muted)">${d[1]}</span></span></div><p style="font-size:14px;line-height:1.45;color:var(--ink2);margin:12px 0">${d[4]}</p><div class="tags" style="margin-bottom:14px">${d[3].map(t=>`<span class="tag">${t}</span>`).join("")}</div><button class="btn${has?" q":""}" style="height:44px" data-act="adddisc" data-k="${k}"${has?" disabled":""}>${has?"On your list":"Add to your list"}</button></div></div>`}).join("")}</div>`;
+  const f=ui.af,chips=[["all","All",S.agents.length],["tq","To query",tq.length],["qd","Queried",qd.length]];
+  return hd("Agents",{extra:`<button class="ib" data-act="addagent" aria-label="Add an agent">${ic("plus")}</button>`})+`<div class="page">${seg}<div class="chips">${chips.map(x=>`<button class="chip${f===x[0]?" on":""}" data-act="afilter" data-f="${x[0]}">${x[1]} <i>${x[2]}</i></button>`).join("")}</div>
+  ${f!=="qd"?`<div class="sec"><h2>To query</h2><span class="n">${tq.length}</span></div><div class="card">${tq.map(aRow).join("")||'<div class="empty">Everyone on your list has been queried.</div>'}</div>`:""}
+  ${f!=="tq"?`<div class="sec"><h2>Queried</h2><span class="n">${qd.length}</span></div><div class="card">${qd.map(aRow).join("")}</div>`:""}</div>`}
+
+function stats(){const n=S.queries.length,inf=all();const req=S.queries.filter(q=>q.ev.some(e=>e.who==="them"&&/requested|Offer|Revise/.test(e.t))).length;const rep=S.queries.filter(q=>q.ev.some(e=>e.who==="them")).length;return{n,req,rep,passes:inf.filter(i=>i.st==="Passed").length,partial:S.queries.filter(q=>q.ev.some(e=>/Partial requested/.test(e.t))).length,full:S.queries.filter(q=>q.ev.some(e=>/Full requested/.test(e.t))).length,offer:S.queries.filter(q=>q.ev.some(e=>e.t==="Offer")).length}}
+const lrow=(icn,t,s,p)=>`<button class="row lrow" data-act="page" data-p="${p}"><span class="icw">${ic(icn)}</span><span class="tx"><span class="t">${t}</span><span class="s">${s}</span></span>${ic("chev","ic chev")}</button>`;
+function vLibrary(){const s=stats(),ap=S.packages.find(p=>p.active),y=ui.yseg||"progress";
+  const seg=`<div class="seg"><button class="${y==="progress"?"on":""}" data-act="yseg" data-k="progress">Progress</button><button class="${y==="materials"?"on":""}" data-act="yseg" data-k="materials">Materials</button></div>`;
+  const top=hd("You",{extra:`<button class="ib" data-act="page" data-p="account" aria-label="Settings">${ic("gear")}</button>`});
+  if(y==="progress")return top+`<div class="page">${seg}
+  <button class="show" data-act="page" data-p="analytics"><small>How it's going</small><div class="in"><b>${s.req} ${s.req===1?"request":"requests"} from ${s.n} queries</b><span>${s.rep} agents have replied so far. See the full picture.</span></div></button>
+  <div class="tiles" style="margin-top:12px"><button class="tile" data-act="page" data-p="responses">${ic("mail")}<b>Responses</b><span>${s.rep} replies</span></button><button class="tile" data-act="page" data-p="analytics">${ic("chart")}<b>Analytics</b><span>${Math.round(s.req/s.n*100)}% asked for more</span></button><button class="tile" data-act="page" data-p="wall">${ic("wall")}<b>Wall of no</b><span>${s.passes} ${s.passes===1?"pass":"passes"} pinned</span></button><button class="tile" data-act="page" data-p="goals">${ic("flame")}<b>Streaks and goals</b><span>3-week streak</span></button></div></div>`;
+  return top+`<div class="page">${seg}
+  <div class="card"><button class="book" data-act="page" data-p="manuscript"><span class="cover">The Salt Road</span><span class="tx" style="flex:1"><span style="font:400 19px var(--type);display:block">The Salt Road</span><span style="font-size:13.5px;color:var(--muted)">Literary historical · 92,000 words<br>Draft 6 is going out</span></span>${ic("chev","ic chev")}</button></div>
+  <div class="sec"><h2>Going out with new queries</h2></div>
+  ${ap?`<button class="show" data-act="page" data-p="package" data-id="${ap.id}"><b style="font-size:16px">${ap.name}</b><br><small>${ap.letter} · ${ap.syn} · ${ap.ver}</small><div class="in"><b>${ap.more} ${ap.more===1?"request":"requests"} from ${ap.sent}</b><span>Sent to ${ap.sent} agents</span></div></button>`:`<div class="card"><div class="empty">No package is set for new queries.</div></div>`}
+  <div class="sec"><h2>Everything you send</h2></div>
+  <div class="card">${lrow("box","Packages",S.packages.length+" sets of letter, synopsis and version","materials")}${lrow("file","Query letters",S.letters.length+" letters","letters")}${lrow("note","Synopses and comps","2 synopses · 4 comparable titles","materials")}</div></div>`}
+
+const PAGES={
+responses(){const ev=S.queries.flatMap(q=>q.ev.filter(e=>e.who==="them").map(e=>({e,q,a:A(q.a)}))).sort((x,y)=>y.e.d.localeCompare(x.e.d));const req=ev.filter(x=>x.e.t!=="Passed"),pas=ev.filter(x=>x.e.t==="Passed");const r=x=>`<button class="row" data-act="query" data-id="${x.q.id}">${gl(x.e.t)}<span class="tx"><span class="t">${x.a.name}</span><span class="s">${x.a.agency}</span><span class="s"><b>${x.e.t}</b> · ${dm(x.e.d)}</span></span></button>`;
+  return hd("Responses",{sub:1})+`<div class="page"><div class="sec"><h2>Asked for more</h2><span class="n">${req.length}</span></div><div class="card">${req.map(r).join("")}</div><div class="sec"><h2>Passed</h2><span class="n">${pas.length}</span><button class="more" data-act="page" data-p="wall">Wall of no</button></div><div class="card">${pas.map(r).join("")||'<div class="empty">No passes logged.</div>'}</div></div>`},
+analytics(){const s=stats(),wk=[];for(let w=11;w>=0;w--){const a=iso(new Date(TODAY-(w+1)*7*864e5)),b=iso(new Date(TODAY-w*7*864e5));wk.push(S.queries.filter(q=>q.ev[0].d>a&&q.ev[0].d<=b).length)}const mx=Math.max(...wk,1);const f=(l,n)=>`<div class="fun"><div class="l"><span>${l}</span><b>${n}</b></div><div class="bar" style="width:${Math.max(3,n/s.n*100)}%"></div></div>`;
+  return hd("Analytics",{sub:1})+`<div class="hero"><div class="big"><b>${Math.round(s.req/s.n*100)}%</b><span>of your queries drew a request</span></div></div><div class="page"><div class="sec"><h2>Where your ${s.n} queries got to</h2></div><div class="card">${f("Queried",s.n)}${f("Partial requested",s.partial)}${f("Full requested",s.full)}${f("Offer",s.offer)}</div><div class="sec"><h2>Queries sent each week</h2></div><div class="card"><div class="cols">${wk.map(n=>`<i class="${n?"":"z"}" style="height:${n?n/mx*100:3}%"></i>`).join("")}</div><div class="colx"><span>12 weeks ago</span><span>This week</span></div></div><p class="note">The full set of charts is on a computer, where there's room to read them.</p></div>`},
+wall(){const p=all().filter(i=>i.st==="Passed"||i.st==="No response");return hd("Wall of no",{sub:1})+`<div class="page"><p class="note" style="margin:0 4px 18px">Every no is proof you asked. ${p.length} so far.</p><div class="wall">${p.map(i=>`<div><b>${i.a.name}</b>${i.a.agency}<br>${i.st} · ${dm(i.stDate)}</div>`).join("")}</div></div>`},
+goals(){return hd("Streaks and goals",{sub:1})+`<div class="page"><div class="card"><div class="ring"><svg width="84" height="84" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="34" fill="none" stroke="#ece7de" stroke-width="9"/><circle cx="42" cy="42" r="34" fill="none" stroke="#2a3a52" stroke-width="9" stroke-linecap="round" stroke-dasharray="142 214" transform="rotate(-90 42 42)"/></svg><div><b style="font:400 22px var(--type)">2 of 3 this week</b><br><span style="font-size:14px;color:var(--muted)">Your goal is three queries a week</span></div></div><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div><p class="note">A 3-week streak. Goals are optional and you can switch them off in your account.</p></div>`},
+cork(){return hd("Corkboard",{sub:1})+`<div class="page"><div class="wall">${S.notes.map(n=>`<div>${esc(n)}</div>`).join("")}</div><button class="btn q" style="margin-top:22px" data-act="addnote">Pin a new note</button></div>`},
+materials(){return hd("Packages",{sub:1})+`<div class="page"><p class="note" style="margin:0 4px 16px">A package is the set you send: a letter, a synopsis and a version of your book. Tap one to see how it's doing or to use it for new queries.</p>${S.packages.map(p=>`<button class="show" style="margin-bottom:12px;${p.active?"":"background:var(--navy2)"}" data-act="page" data-p="package" data-id="${p.id}"><b style="font-size:16px">${p.name}</b>${p.active?' <small>· going out with new queries</small>':""}<br><small>${p.letter} · ${p.syn} · ${p.ver}</small><div class="in"><b>${p.more?`${p.more} ${p.more===1?"request":"requests"} from ${p.sent}`:`No requests from ${p.sent}`}</b><span>Sent to ${p.sent} agents</span></div></button>`).join("")}<div class="sec"><h2>Also here</h2></div><div class="card">${lrow("file","Query letters",S.letters.length+" letters","letters")}<div class="kv"><span>Synopses</span><b>One-page · Two-page</b></div><div class="kv"><span>Comparable titles</span><b>4 saved</b></div></div><p class="note">Building a new package is easier on a computer. Everything you build there shows up here.</p></div>`},
+package(id){const p=S.packages.find(x=>x.id===id);return hd(p.name,{sub:1})+`<div class="hero"><div class="big"><b>${p.more}</b><span>${p.more===1?"request":"requests"} from ${p.sent} queries</span></div></div><div class="page"><div class="sec"><h2>What an agent receives</h2></div><div class="card"><div class="kv"><span>Query letter</span><b>${p.letter}</b></div><div class="kv"><span>Synopsis</span><b>${p.syn}</b></div><div class="kv"><span>Manuscript version</span><b>${p.ver}</b></div></div><div style="margin-top:20px">${p.active?'<button class="btn q" disabled style="background:#fff;color:var(--muted)">Going out with new queries</button>':`<button class="btn" data-act="usepkg" data-id="${p.id}">Use for new queries</button>`}</div></div>`},
+letters(){return hd("Query letters",{sub:1})+`<div class="page"><div class="card">${S.letters.map(l=>`<button class="row lrow" data-act="page" data-p="letter" data-id="${l.id}"><span class="icw">${ic("file")}</span><span class="tx"><span class="t">${l.name}</span><span class="s">${l.more?`${l.more} ${l.more===1?"request":"requests"} from ${l.sent}`:`No requests from ${l.sent}`}</span></span>${ic("chev","ic chev")}</button>`).join("")}</div></div>`},
+letter(id){const l=S.letters.find(x=>x.id===id),ed=ui.editing===id;return hd(l.name,{sub:1,extra:`<button class="pill ${ed?"b":"q"}" style="height:34px" data-act="${ed?"saveletter":"editletter"}" data-id="${id}">${ed?"Save":"Edit"}</button>`})+`<div class="page">${ed?`<textarea class="paper" id="ltxt">${esc(l.text)}</textarea><p class="note">This letter has gone to ${l.sent} agents, so your changes save as a new version and the original stays as sent.</p>`:`<div class="paper">${esc(l.text)}</div>`}</div>`},
+manuscript(){return hd("Your book",{sub:1})+`<div class="page"><div class="card"><div class="book"><span class="cover">The Salt Road</span><span class="tx"><span style="font:400 21px var(--type);display:block">The Salt Road</span><span style="font-size:13.5px;color:var(--muted)">Literary historical</span></span></div><div class="kv"><span>Word count</span><b>92,000</b></div><div class="kv"><span>Age category</span><b>Adult</b></div><div class="kv"><span>Version going out</span><b>Draft 6</b></div><div class="kv"><span>Earlier versions</span><b>Draft 5 · Draft 4</b></div></div><p class="note">The beta tracks one book. Adding a second is coming.</p></div>`},
+import(){return hd("Import queries",{sub:1})+`<div class="page"><div class="card"><div class="empty"><b>Bring your list across</b>Smart Import reads your spreadsheet and sorts it into agents and queries. It works best on a computer, where your file is.</div></div><button class="btn" style="margin-top:16px" data-act="toast" data-m="Link sent to your email">Email me a link to do it later</button></div>`},
+help(){return hd("Help centre",{sub:1})+`<div class="page"><div class="card">${["Logging your first query","Recording an agent's reply","What 'Gone quiet' means","How nudge reminders work","Packages and what they track"].map(t=>`<button class="row" style="min-height:54px" data-act="toast" data-m="Guides open here in the app"><span class="tx"><span class="t" style="font-weight:500">${t}</span></span>${ic("chev","ic chev")}</button>`).join("")}</div></div>`},
+account(){return hd("Settings",{sub:1})+`<div class="page"><div class="card"><div class="row"><span class="seal">N</span><span class="tx"><span class="t">Nick</span><span class="s">Founding writer · everything included</span></span></div></div><div class="sec"><h2>Reminders</h2></div><div class="card"><div class="kv" style="align-items:center"><span style="color:var(--ink)">Nudge reminders by email</span><button class="sw${ui.nudgeEmails?" on":""}" data-act="swn" aria-label="Nudge reminders by email"></button></div><div class="kv" style="align-items:center"><span style="color:var(--ink)">Call a query gone quiet after</span><b><button class="pill q" style="height:32px" data-act="gq">${ui.goneQuietWeeks} weeks</button></b></div></div><div class="sec"><h2>Help and tools</h2></div><div class="card">${lrow("upload","Import queries","Bring a spreadsheet across","import")}${lrow("help","Help centre","Guides for every page","help")}<button class="row lrow" data-act="feedback"><span class="icw">${ic("chat")}</span><span class="tx"><span class="t">Give feedback</span><span class="s">It goes straight to us</span></span>${ic("chev","ic chev")}</button><button class="row lrow" data-act="toast" data-m="Signed out (not in this prototype)"><span class="icw">${ic("out")}</span><span class="tx"><span class="t">Sign out</span></span></button></div></div>`}
+};
+
+/* ---------- overlays ---------- */
+function oQuery(o){const i=info(Q(o.id)),a=i.a,stages=["Queried","Partial","Full","Offer"];
+  let th="",prev=null;i.q.ev.forEach(e=>{if(prev){const g=days(D(prev.d),D(e.d));if(g>6)th+=`<div class="gap${e.who==="you"?" r":""}">${g<14?g+" days":Math.round(g/7)+" weeks"} later</div>`}
+    const txt=e.who==="them"?(e.t==="Passed"?`${first(a.name)} passed`:e.t==="Offer"?`${first(a.name)} offered representation`:`${first(a.name)} asked for ${/Partial/.test(e.t)?"a partial":/Full/.test(e.t)?"your full manuscript":"a revision"}`):e.t==="Queried"?`You sent a query to ${first(a.name)}`:e.t==="Nudge"?"You sent a nudge":e.t==="No response"?"You closed this as no response":e.t==="Withdrawn"?"You withdrew this query":e.t==="Signed"?`You accepted ${first(a.name)}'s offer`:`You sent your ${/Partial/.test(e.t)?"partial":"full manuscript"}`;
+    th+=`<div class="bub${e.who==="them"?" them":""}"${e.who==="them"?` style="background:${fillOf(e.t)}"`:""}>${txt}${e.m?`<small>${esc(e.m)}</small>`:""}<time>${dm(e.d)}</time></div>`;prev=e});
+  const acts=i.kind==="send"?`<button class="pill" data-act="do" data-id="${i.q.id}">Mark sent</button>`:i.kind==="nudge"?`<button class="pill" data-act="do" data-id="${i.q.id}">I've nudged</button><button class="pill q" data-act="close" data-id="${i.q.id}">Close it</button>`:i.kind==="quiet"?`<button class="pill" data-act="close" data-id="${i.q.id}">Close it</button><button class="pill q" data-act="do" data-id="${i.q.id}" data-force="nudge">${i.nudged?"Nudge again":"Nudge"}</button>`:i.kind==="offer"?`<button class="pill b" data-act="do" data-id="${i.q.id}">Record your answer</button>`:"";
+  return`<div class="scrim" data-act="closeov"></div><div class="sheet${o.fresh?" in":""}" style="height:92%"><div class="grab"></div>
+  <div class="qh" style="background:${fillOf(i.st)}"><div class="who">${gl(i.st,"rgba(255,255,255,.6)")}<div><b>${a.name}</b><span>${a.agency}</span></div><button class="ib x" data-act="closeov" aria-label="Close">${ic("x")}</button></div>
+  ${i.closed&&i.st!=="Signed"?"":`<div class="trk">${stages.map((s,k)=>`${k?`<span class="ln${k<=i.stage?" on":""}"></span>`:""}<span class="nd${k<=i.stage?" on":""}"><i>${k<=i.stage?ic("check",""):""}</i>${s}</span>`).join("")}</div>`}
+  <div class="stline"><b>${i.st}</b> · ${i.closed?dm(i.stDate):"day "+i.day+" · queried "+dm(i.sent)}</div></div>
+  <div class="pad">${i.closed?"":`<div class="next"><small>Your next step</small><b>${i.step}</b><p>${i.stepSub}</p>${acts?`<div class="acts">${acts}</div>`:`<div class="acts"><button class="pill q" data-act="reply" data-id="${i.q.id}">${first(a.name)} replied</button></div>`}</div>`}
+  <div class="sec"><h2>The story so far</h2></div><div class="th">${th}</div>
+  ${i.closed?"":`<div class="links"><button data-act="reply" data-id="${i.q.id}">Log a reply</button><button data-act="agent" data-id="${a.id}">About ${first(a.name)}</button>${i.kind?"":`<button class="dz" data-act="close" data-id="${i.q.id}">Close query</button>`}</div>`}
+  ${i.closed?`<div class="links"><button data-act="agent" data-id="${a.id}">About ${first(a.name)}</button></div>`:""}</div></div>`}
+
+function oAgent(o){const a=A(o.id),q=qOf(a.id),i=q&&info(q);
+  return`<div class="scrim" data-act="closeov"></div><div class="sheet${o.fresh?" in":""}"><div class="grab"></div><div class="ah"><div class="who"><span class="seal">${inits(a.name)}</span><div><b>${a.name}</b><span>${a.agency}</span></div><button class="ib" style="margin-left:auto" data-act="closeov" aria-label="Close">${ic("x")}</button></div>
+  <div class="facts"><div>Replies in<b>${a.weeks?wk(a.weeks):"Not saved"}</b></div><div>Submissions<b>${a.how}</b></div><div>Your query<b>${i?i.st:"Not sent"}</b></div></div></div>
+  <div class="pad" style="padding-top:18px">${a.fit||(a.genres&&a.genres.length)?`<div class="sec"><h2>Fit</h2></div>${a.fit?`<div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=a.fit?"on":""}" style="font-size:22px" tabindex="-1">★</button>`).join("")}<span>${FIT[a.fit]}</span></div>`:""}${a.genres&&a.genres.length?`<div class="tags" style="margin-top:8px">${a.genres.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`:""}${a.wishlist?`<p class="note" style="margin:10px 2px 0">${esc(a.wishlist)}</p>`:""}`:""}<div class="sec"><h2>What ${first(a.name)} asks for</h2></div>${a.asks.length?`<div class="tags">${a.asks.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`:'<p class="note" style="margin-top:0">Nothing saved yet.</p>'}
+  <div class="sec"><h2>Contact</h2></div><div class="card"><div class="kv"><span>Email</span><b>${esc(a.email)}</b></div>${a.website?`<div class="kv"><span>Website</span><b>${esc(a.website)}</b></div>`:""}${a.door?`<div class="kv"><span>Taking queries?</span><b>${a.door}</b></div>`:""}${a.nrn?`<div class="kv"><span>If they don't reply</span><b>${a.nrn}</b></div>`:""}</div><div class="links"><button data-act="editagent" data-id="${a.id}">Edit details</button></div>
+  <div style="margin-top:20px">${q?`<button class="btn q" data-act="query" data-id="${q.id}">Open your query</button>`:`<button class="btn" data-act="logto" data-id="${a.id}">Log a query to ${first(a.name)}</button>`}</div></div></div>`}
+
+function oPlus(o){return`<div class="scrim" data-act="closeov"></div><div class="sheet${o.fresh?" in":""}"><div class="grab"></div><div class="pad"><h3>What happened?</h3><p class="lead">Log it now and Today stays accurate.</p>
+  <button class="opt" data-act="startlog">${gl("Queried")}<span class="tx">I sent a query<small>Five short questions</small></span>${ic("chev","ic chev")}</button>
+  <button class="opt" data-act="startreply">${gl("Partial requested")}<span class="tx">An agent replied<small>A request, a pass or an offer</small></span>${ic("chev","ic chev")}</button>
+  <div class="wk" style="margin-top:14px"><button class="chip" data-act="addagent">${ic("agents")} Add an agent</button><button class="chip" data-act="addnote">${ic("pin")} Pin a note</button></div></div></div>`}
+
+const UNIT={Chapters:{step:1,min:1,def:3},Pages:{step:5,min:1,def:10},Words:{step:500,min:500,def:5000}};
+const parseSample=x=>{const m=/(\d[\d,]*)\s*(chapters|pages|words)/i.exec(x||"");return m?{unit:m[2][0].toUpperCase()+m[2].slice(1).toLowerCase(),amount:+m[1].replace(/,/g,""),from:"start",fromText:""}:null};
+const blankSample=()=>({unit:"Chapters",amount:3,from:"start",fromText:""});
+const fmtSample=x=>{const n=x.amount.toLocaleString("en-GB"),u=x.amount===1?x.unit.slice(0,-1).toLowerCase():x.unit.toLowerCase();return x.from==="start"?`First ${n} ${u}`:`${n} ${u} from ${x.fromText.trim()||"later in the book"}`};
+const matsText=f=>[...f.mats].map(m=>m==="Opening sample"?fmtSample(f.sample):m==="Something else"?(f.other||"").trim()||"Something else":m).join(", ");
+function samplePicker(x,sent){return`<div class="spk"><div class="seg">${Object.keys(UNIT).map(u=>`<button class="${x.unit===u?"on":""}" data-act="sunit" data-v="${u}">${u}</button>`).join("")}</div>
+<div class="stp"><button data-act="sstep" data-v="-1" aria-label="Fewer">&minus;</button><label class="field"><input id="samt" inputmode="numeric" value="${x.amount}" aria-label="How many ${x.unit.toLowerCase()}"><span>${x.unit.toLowerCase()}</span></label><button data-act="sstep" data-v="1" aria-label="More">+</button></div>
+${sent?`<div class="wk" style="margin:0"><button class="chip${x.from==="start"?" on":""}" data-act="sfrom" data-v="start">From the start</button><button class="chip${x.from!=="start"?" on":""}" data-act="sfrom" data-v="else">From somewhere else</button></div>${x.from!=="start"?`<label class="field" style="margin:10px 0 0"><input id="sfromt" data-f="sample.fromText" placeholder="Where from? Chapter 12, say" value="${esc(x.fromText)}" autocomplete="off"></label>`:""}`:`<p class="note" style="margin:0 2px">Type any amount, or use the buttons.</p>`}</div>`}
+const wk=w=>w+(w===1?" week":" weeks");
+function slider(w){return`<div class="rt"><div class="v" id="wkv">${wk(w)}</div><input type="range" id="fweeks" min="1" max="26" step="1" value="${w}" style="--p:${(w-1)/25*100}%" aria-label="Response time in weeks"><div class="ends"><span>1 week</span><span>6 months</span></div></div>`}
+const WHEN=[["today","Today"],["yest","Yesterday"],["pick","Another day"]];
+const whenDate=f=>f.when==="today"?iso(TODAY):f.when==="yest"?addDays(iso(TODAY),-1):(f.date||iso(TODAY));
+const whenOpts=f=>WHEN.map(w=>`<button class="opt${f.when===w[0]?" on":""}" data-act="fset" data-k="when" data-v="${w[0]}"><span class="tx">${w[1]}${w[0]==="today"?`<small>${dm(iso(TODAY))}</small>`:""}</span><span class="ck">${ic("check","")}</span></button>`).join("")+(f.when==="pick"?`<label class="field"><input type="date" id="fdate" value="${f.date||iso(TODAY)}" max="${iso(TODAY)}" aria-label="Date"></label>`:"");
+const opt=(on,act,attrs,t,s,g)=>`<button class="opt${on?" on":""}" data-act="${act}" ${attrs}>${g||""}<span class="tx">${t}${s?`<small>${s}</small>`:""}</span><span class="ck">${ic("check","")}</span></button>`;
+
+/* small one-or-two question sheets: mark sent, nudge, close, answer an offer, add agent, note, feedback */
+function oAct(o){const i=o.id&&info(Q(o.id)),a=i&&i.a,f=o;let h="",btn="",ok=true;
+  if(o.kind==="send"){const what=i.st==="Revise & resubmit"?"revision":i.st.split(" ")[0].toLowerCase();h=`<h3>Sent ${first(a.name)} your ${what}?</h3><p class="lead">When did it go?</p>${whenOpts(f)}`;btn="Mark as sent"}
+  else if(o.kind==="nudge"){h=`<h3>Nudge ${first(a.name)}</h3><div class="tip"><span class="tx">Send a short, polite follow-up from your own email, then log it here.<br><b>${a.email}</b></span><button class="pill q" data-act="toast" data-m="Email address copied">Copy</button></div><p class="lead">When did you send it?</p>${whenOpts(f)}`;btn="I've nudged"}
+  else if(o.kind==="close"){h=`<h3>Close this query?</h3><p class="lead">${a.name} moves to Closed. You can reopen it later.</p>${[["No response","I never heard back"],["Passed",first(a.name)+" said no"],["Withdrawn","I'm withdrawing it"]].map(x=>opt(f.why===x[0],"fset",`data-k="why" data-v="${x[0]}"`,x[1])).join("")}`;btn="Close query";ok=!!f.why}
+  else if(o.kind==="offer"){h=`<h3>${first(a.name)}'s offer</h3><p class="lead">What did you decide?</p>${[["Signed","I accepted","You'll sign with "+a.agency],["Withdrawn","I turned it down",""],["later","I'm still deciding","Keep it on Today"]].map(x=>opt(f.ans===x[0],"fset",`data-k="ans" data-v="${x[0]}"`,x[1],x[2])).join("")}`;btn="Save";ok=!!f.ans}
+  else if(o.kind==="agent"){h=`<h3>Add an agent</h3><p class="lead">Just the basics. You can add the rest later.</p><label class="field"><input id="an" placeholder="Agent's name" value="${esc(f.name||"")}" autocomplete="off"></label><label class="field"><input id="ag" placeholder="Agency" value="${esc(f.agency||"")}" autocomplete="off"></label>`;btn="Add to your list"}
+  else if(o.kind==="note"){h=`<h3>Pin a note</h3><p class="lead">It goes on your Corkboard, at the bottom of Today.</p><label class="field" style="height:auto;padding:12px 14px"><textarea id="nt" rows="3" style="flex:1;border:0;outline:0;resize:none;background:none;font-size:16px" placeholder="Something to remember"></textarea></label>`;btn="Pin it"}
+  else if(o.kind==="feedback"){h=`<h3>Tell us what you think</h3><p class="lead">Rough edges, ideas, anything. It goes straight to us.</p><label class="field" style="height:auto;padding:12px 14px"><textarea id="nt" rows="4" style="flex:1;border:0;outline:0;resize:none;background:none;font-size:16px" placeholder="What's on your mind?"></textarea></label>`;btn="Send feedback"}
+  return`<div class="scrim" data-act="closeov"></div><div class="sheet${o.fresh?" in":""}"><div class="grab"></div><div class="pad">${h}<div id="err" style="color:var(--rust);font-size:13.5px;margin:0 4px 8px" hidden></div><button class="btn" data-act="actgo"${ok?"":" disabled"}>${btn}</button></div></div>`}
+
+/* the two full-screen journeys */
+function flowShell(o,title,n,sofar,body,btn,ok,extra){return`<div class="full${o.fresh?" in":""}"><div class="top"><div class="bar"><button class="ib" data-act="${o.step?"fback":"closeov"}" aria-label="${o.step?"Back":"Close"}">${ic(o.step?"back":"x")}</button><span>${title}</span><button class="ib" data-act="closeov" aria-label="Close" style="visibility:${o.step?"visible":"hidden"}">${ic("x")}</button></div><div class="prog">${Array.from({length:n},(_,k)=>`<i class="${k<=o.step?"on":""}"></i>`).join("")}</div>${sofar.length?`<div class="sofar">${sofar.map(s=>`<button data-act="fjump" data-s="${s[0]}">${esc(s[1])}</button>`).join("")}</div>`:""}</div><div class="body">${body}</div><div class="foot"><button class="btn" data-act="fnext"${ok?"":" disabled"}>${btn}</button>${extra||""}</div></div>`}
+const MATS=["Query letter","Synopsis","Opening sample","Something else"];
+function agentPick(f){const term=(f.term||"").toLowerCase(),list=S.agents.filter(a=>!qOf(a.id)&&(a.name+" "+a.agency).toLowerCase().includes(term));
+  return list.map(a=>opt(f.aid===a.id,"fset",`data-k="aid" data-v="${a.id}"`,a.name,a.agency+(a.weeks?" · about "+a.weeks+" weeks":""),`<span class="seal lt">${inits(a.name)}</span>`)).join("")+(term&&!list.some(a=>a.name.toLowerCase()===term)?`<button class="opt" data-act="fnewagent"><span class="seal lt">${ic("plus")}</span><span class="tx">Add "${esc(f.term)}" as a new agent<small>You can fill in the details later</small></span></button>`:"")||'<div class="empty">Everyone on your list has a query. Type a name to add someone new.</div>'}
+const nudgeTxt=f=>{const exp=addDays(whenDate(f),f.weeks*7);return`<b>Remind me to nudge</b><br>Reply expected by ${dm(exp)}. ${f.nudge?`Nudge reminder on ${dm(addDays(exp,1))}.`:"No reminder."}`};
+function oLog(o){const f=o,a=f.aid&&A(f.aid),sofar=[];if(a&&o.step>0)sofar.push([0,a.name]);if(o.step>1)sofar.push([1,matsText(f)||"Nothing attached"]);if(o.step>2)sofar.push([2,dm(whenDate(f))]);if(o.step>3)sofar.push([3,wk(f.weeks)+(f.nudge?", nudge on":"")]);
+  let b="",ok=true,btn="Continue";
+  if(o.step===0){b=`<h3>Who did you query?</h3><label class="field">${ic("search")}<input id="fterm" data-live="agents" placeholder="Search your list or type a new name" value="${esc(f.term||"")}" autocomplete="off"></label><div id="live">${agentPick(f)}</div>`;ok=!!a}
+  else if(o.step===1){const asks=a.asks.length;b=`<h3>What did you send?</h3>${asks?`<div class="tip"><span class="tx">${first(a.name)} asks for <b>${a.asks.join(", ").toLowerCase()}</b>. We've filled that in, so change anything that went differently.</span></div>`:`<p class="lead">Tick everything that went with it.</p>`}${MATS.map(m=>{const on=f.mats.has(m);return`<button class="opt sq${on?" on":""}" data-act="fmat" data-v="${m}"><span class="tx">${m}${m==="Opening sample"&&on?`<small>${fmtSample(f.sample)}</small>`:""}</span><span class="ck">${ic("check","")}</span></button>`+(on&&m==="Opening sample"?samplePicker(f.sample,true):on&&m==="Something else"?`<label class="field"><input data-f="other" placeholder="What else went? Author bio, say" value="${esc(f.other||"")}" autocomplete="off"></label>`:"")}).join("")}`}
+  else if(o.step===2){b=`<h3>When did you send it?</h3>${whenOpts(f)}`}
+  else if(o.step===3){b=`<h3>How long does ${first(a.name)} usually take?</h3><p class="lead">${a.weeks?`${a.agency} says about ${wk(a.weeks)}. Drag to change it.`:"Drag to set it. The agency's submissions page usually says."}</p>${slider(f.weeks)}<div class="tip"><span class="tx" id="wkt">${nudgeTxt(f)}</span><button class="sw${f.nudge?" on":""}" data-act="fset" data-k="nudge" data-v="toggle" aria-label="Remind me to nudge"></button></div>`}
+  else{const exp=addDays(whenDate(f),f.weeks*7);b=`<h3>Check it, then log it</h3><p class="lead">Tap anything above to change it.</p><div class="card"><div class="row">${gl("Queried")}<span class="tx"><span class="t">${a.name}</span><span class="s">${a.agency}</span><span class="s">Queried · Reply expected by ${dm(exp)}</span></span></div><div class="kv"><span>Sent</span><b>${dm(whenDate(f))}</b></div><div class="kv"><span>With it</span><b>${matsText(f)||"Nothing attached"}</b></div><div class="kv"><span>Nudge reminder</span><b>${f.nudge?dm(addDays(exp,1)):"Off"}</b></div></div>`;btn="Log this query"}
+  return flowShell(o,"New query",5,sofar,b,btn,ok)}
+const OUTCOMES=[["Partial requested","Asked for a partial","They want to read more"],["Full requested","Asked for the full manuscript",""],["Offer","Offered representation",""],["Revise & resubmit","Asked for a revision","Revise and resubmit"],["Passed","Passed","A no, with or without notes"]];
+function replyPick(f){const term=(f.term||"").toLowerCase();return all().filter(i=>!i.closed&&(i.a.name+" "+i.a.agency).toLowerCase().includes(term)).sort((x,y)=>(x.court==="you")-(y.court==="you")).map(i=>opt(f.qid===i.q.id,"fset",`data-k="qid" data-v="${i.q.id}"`,i.a.name,i.a.agency+" · "+i.st,gl(i.st))).join("")||'<div class="empty">No open query matches that name.</div>'}
+function oReply(o){const f=o,i=f.qid&&info(Q(f.qid)),sofar=[];if(i&&o.step>0)sofar.push([0,i.a.name]);if(o.step>1)sofar.push([1,OUTCOMES.find(x=>x[0]===f.out)[1]]);
+  let b="",ok=true,btn="Continue";
+  if(o.step===0){b=`<h3>Who replied?</h3><label class="field">${ic("search")}<input id="fterm" data-live="replies" placeholder="Search your open queries" value="${esc(f.term||"")}" autocomplete="off"></label><div id="live">${replyPick(f)}</div>`;ok=!!i}
+  else if(o.step===1){b=`<h3>What did ${first(i.a.name)} say?</h3>${OUTCOMES.map(x=>opt(f.out===x[0],"fset",`data-k="out" data-v="${x[0]}"`,x[1],x[2],gl(x[0]))).join("")}`;ok=!!f.out}
+  else{b=`<h3>When did you hear?</h3>${whenOpts(f)}`;btn="Log this reply"}
+  return flowShell(o,"An agent replied",3,sofar,b,btn,ok)}
+
+const FIT=["","Poor fit","Worth a try","Good fit","Great fit","Dream agent"],GENRES=["Literary","Historical","Upmarket","Book club","Crime","Thriller","Speculative","Romance","Non-fiction"];
+const newAdd=x=>Object.assign({type:"add",step:0,name:"",agency:"",noAgency:false,country:"UK",fit:0,genres:new Set(),wishlist:"",door:"",method:"",mats:new Set(),sample:blankSample(),other:"",weeks:8,weeksSet:false,nrn:"",email:"",website:""},x||{});
+const addOk=f=>!!f.name.trim()&&(!!f.agency.trim()||f.noAgency);
+const pick=(f,k,list)=>`<div class="wk" style="margin-bottom:4px">${list.map(v=>`<button class="chip${f[k]===v?" on":""}" data-act="fset" data-k="${k}" data-v="${v}">${v}</button>`).join("")}</div>`;
+function oAdd(o){const f=o,sofar=[];if(o.step>0)sofar.push([0,f.name.trim()+(f.agency.trim()?", "+f.agency.trim():"")]);if(o.step>1&&f.genres.size)sofar.push([1,[...f.genres].slice(0,2).join(", ")+(f.genres.size>2?" +"+(f.genres.size-2):"")]);if(o.step>2&&(f.mats.size||f.weeksSet))sofar.push([2,(f.mats.size?matsText(f):"")+(f.mats.size&&f.weeksSet?" · ":"")+(f.weeksSet?wk(f.weeks):"")]);
+  let b="";const inp=(k,ph,extra)=>`<label class="field"><input data-f="${k}" placeholder="${ph}" value="${esc(f[k])}" autocomplete="off" ${extra||""}></label>`;
+  if(o.step===0)b=`<h3>Who are they?</h3><p class="lead">Only the name and agency are needed. Add as much of the rest as you can.</p><div class="lab">Name</div>${inp("name","Agent's full name")}<div class="lab">Agency</div>${f.noAgency?"":inp("agency","Where they work")}<button class="opt sq${f.noAgency?" on":""}" data-act="fset" data-k="noAgency" data-v="toggle" style="min-height:48px;font-size:15px"><span class="tx">I don't know the agency<small>Having it on file helps you avoid querying two agents at the same agency.</small></span><span class="ck">${ic("check","")}</span></button><div class="lab">Based in</div>${pick(f,"country",["UK","Ireland","US","Elsewhere"])}<div class="lab">Agent fit <small>· how right are they for this book?</small></div><div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=f.fit?"on":""}" data-act="fset" data-k="fit" data-v="${n}" aria-label="${n} of 5">★</button>`).join("")}<span>${FIT[f.fit]||"Not rated"}</span></div>`;
+  else if(o.step===1)b=`<h3>What does ${first(f.name)} want?</h3><p class="lead">Skip anything you don't know yet.</p><div class="lab">Genres</div><div class="wk">${GENRES.map(g=>`<button class="chip${f.genres.has(g)?" on":""}" data-act="fgen" data-v="${g}">${g}</button>`).join("")}</div><div class="lab">Wishlist</div><textarea class="txt" rows="4" data-f="wishlist" placeholder="What they've said they're looking for">${esc(f.wishlist)}</textarea>`;
+  else if(o.step===2)b=`<h3>How do you query ${first(f.name)}?</h3><div class="lab">Taking queries?</div>${pick(f,"door",["Open","Closed","Not sure"])}<div class="lab">How they take them</div>${pick(f,"method",["By email","Online form","By post","Other"])}<div class="lab">What to send <small>· pick all that apply</small></div>${MATS.map(m=>{const on=f.mats.has(m);return`<button class="opt sq${on?" on":""}" data-act="fmat" data-v="${m}" style="min-height:50px"><span class="tx">${m}${m==="Opening sample"&&on?`<small>${fmtSample(f.sample)}</small>`:""}</span><span class="ck">${ic("check","")}</span></button>`+(on&&m==="Opening sample"?samplePicker(f.sample,false):on&&m==="Something else"?inp("other","What else do they ask for?"):"")}).join("")}<div class="lab">Response time</div>${f.weeksSet?slider(f.weeks)+`<button class="later" style="padding:0 0 8px" data-act="fset" data-k="weeksSet" data-v="toggle">They don't say</button>`:`<button class="opt" data-act="fset" data-k="weeksSet" data-v="toggle" style="min-height:50px"><span class="tx">Set a response time<small>Used for your reply dates and nudge reminders</small></span>${ic("chev","ic chev")}</button>`}<div class="lab">If they don't reply</div>${pick(f,"nrn",["It means no","They always reply","Not sure"])}`;
+  else b=`<h3>Where do you find ${first(f.name)}?</h3><p class="lead">All optional. The email is where your nudges will go.</p><div class="lab">Email</div>${inp("email","name@agency.co.uk",'inputmode="email"')}<div class="lab">Website</div>${inp("website","agency.co.uk",'inputmode="url"')}<div class="sec"><h2>How ${first(f.name)} will look</h2></div><div class="card"><div class="row"><span class="seal lt">${inits(f.name.trim()||"?")}</span><span class="tx"><span class="t">${esc(f.name.trim())}</span><span class="s">${esc(f.agency.trim()||"Agency unknown")}</span><span class="s">${f.weeksSet?"Replies in "+wk(f.weeks):"No reply time saved"}${f.fit?" · "+FIT[f.fit]:""}</span></span></div></div>`;
+  return flowShell(o,f.editId?"Edit agent":"Add an agent",4,sofar,b,o.step===3?(f.editId?"Save changes":"Add to your list"):"Continue",addOk(f),o.step<3?`<button class="later" id="later" data-act="addsave"${addOk(f)?"":" hidden"}>${f.editId?"Save now":"Save now and finish later"}</button>`:"")}
+function oSearch(o){return`<div class="full${o.fresh?" in":""}"><div class="top"><div class="bar" style="gap:8px"><label class="field" style="flex:1;margin:0;height:44px">${ic("search")}<input id="fterm" data-live="search" placeholder="Agents, agencies, pages" value="${esc(o.term||"")}" autocomplete="off"></label><button data-act="closeov" style="flex:none;color:#fff;font-weight:600;padding:10px 6px">Cancel</button></div></div><div class="body" id="live">${searchRes(o)}</div></div>`}
+const PLIST=[["Responses","responses","mail"],["Analytics","analytics","chart"],["Packages","materials","box"],["Query letters","letters","file"],["Wall of no","wall","wall"],["Corkboard","cork","pin"],["Your book","manuscript","book"],["Streaks and goals","goals","flame"],["Help centre","help","help"],["Settings","account","gear"],["Import queries","import","upload"]];
+function searchRes(o){const t=(o.term||"").toLowerCase();if(!t)return`<div class="sec"><h2>Jump to</h2></div><div class="card">${PLIST.slice(0,5).map(p=>lrow(p[2],p[0],"",p[1])).join("")}</div>`;
+  const ag=S.agents.filter(a=>(a.name+" "+a.agency).toLowerCase().includes(t)),pg=PLIST.filter(p=>p[0].toLowerCase().includes(t));
+  return(ag.length?`<div class="sec"><h2>Agents and queries</h2></div><div class="card">${ag.map(a=>{const q=qOf(a.id);return q?qRow(info(q)):aRow(a)}).join("")}</div>`:"")+(pg.length?`<div class="sec"><h2>Pages</h2></div><div class="card">${pg.map(p=>lrow(p[2],p[0],"",p[1])).join("")}</div>`:"")||`<div class="empty"><b>No matches</b>Try a name or an agency.</div>`}
+function oCele(o){return`<div class="cele"><img src="${HAWK}" alt=""><h3>${o.h}</h3><p>${o.p}</p>${o.mini?`<div class="mini">${o.mini}</div>`:'<div style="height:26px"></div>'}<button class="btn" data-act="closeov">Done</button>${o.again?`<button class="btn q" data-act="startlog">Log another</button>`:o.qid?`<button class="btn q" data-act="query" data-id="${o.qid}">Open the query</button>`:""}</div>`}
+const OV={add:oAdd,query:oQuery,agent:oAgent,plus:oPlus,act:oAct,log:oLog,reply:oReply,search:oSearch,cele:oCele};
+
+/* ---------- render ---------- */
+function key(){const p=ui.stack[ui.stack.length-1];return p?p.p+(p.id||""):ui.tab}
+function render(keep){const v=$("#view");if(keep!==false)ui.scroll[ui._key]=v.scrollTop;const p=ui.stack[ui.stack.length-1];
+  v.innerHTML=p?PAGES[p.p](p.id):{today:vToday,queries:vQueries,agents:vAgents,library:vLibrary}[ui.tab]();
+  ui._key=key();v.scrollTop=ui.scroll[ui._key]||0;onScroll();
+  const n=tasks().length,T=[["today","Today"],["queries","Queries"],null,["agents","Agents"],["library","You"]];
+  $("#tabs").innerHTML=T.map(t=>t?`<button class="${ui.tab===t[0]?"on":""}" data-act="tab" data-t="${t[0]}"${ui.tab===t[0]?' aria-current="page"':""}><span class="tw">${ic(t[0]==="library"?"user":t[0])}${t[0]==="today"&&n?`<span class="bd">${n}</span>`:""}</span>${t[1]}</button>`:`<button class="plus" data-act="plus" aria-label="Log something"><span>${ic("plus")}</span></button>`).join("");
+  renderOv()}
+function renderOv(){const L=$("#layer"),o=ui.ov;const keepScroll=L.querySelector(".sheet,.body");const st=keepScroll&&!(o&&o.fresh)?keepScroll.scrollTop:0;
+  L.innerHTML=(o?OV[o.type](o):"")+(ui.snack?`<div id="snack"><img src="${HAWK}" alt=""><span>${esc(ui.snack.m)}</span>${ui.snack.undo?'<button data-act="undo">Undo</button>':""}</div>`:"");
+  const ns=L.querySelector(".sheet,.body");if(ns&&st)ns.scrollTop=st;if(o)o.fresh=false}
+function onScroll(){const h=$("#view .hd");if(h&&!h.classList.contains("sub"))h.classList.toggle("sm",$("#view").scrollTop>18)}
+function open(o){ui.snack=null;o.fresh=true;ui.ov=o;renderOv()}
+let snackT;function snack(m,undo){ui.snack={m,undo};clearTimeout(snackT);snackT=setTimeout(()=>{ui.snack=null;renderOv()},5000)}
+function snap(){undoSnap=JSON.stringify(S)}
+function go(tab){ui.tab=tab;ui.stack=[];ui.ov=null;render()}
+const newFlow=(type,x)=>Object.assign({type,step:0,when:"today",mats:new Set(),sample:blankSample(),weeks:8,nudge:true},x||{});
+function pickAgent(f,aid){const a=A(aid);f.aid=aid;f.mats=new Set(a.asks.map(x=>parseSample(x)?"Opening sample":MATS.includes(x)?x:"Something else"));f.other=a.asks.find(x=>!parseSample(x)&&!MATS.includes(x))||"";f.sample=a.asks.map(parseSample).find(Boolean)||blankSample();f.weeks=a.weeks||8}
+
+const ACT={
+tab(d){ui.scroll[d.t]=ui.tab===d.t&&!ui.stack.length?0:ui.scroll[d.t];if(ui.tab===d.t&&!ui.stack.length){ui.tab=d.t;ui._key=null;render(false)}else go(d.t)},
+back(){ui.editing=null;ui.stack.pop();render()},
+page(d){ui.ov=null;ui.stack.push({p:d.p,id:d.id});ui.scroll[d.p+(d.id||"")]=0;render()},
+plus(){open({type:"plus"})},search(){open({type:"search"})},
+closeov(){ui.ov=null;render()},
+query(d){open({type:"query",id:d.id})},
+agent(d){open({type:"agent",id:d.id})},
+hero(d){ui.hero=d.k;render()},yseg(d){ui.yseg=d.k;ui._key=null;render(false)},
+qfilter(d){ui.qf=d.f;ui.qview="list";ui.scroll.queries=0;if(ui.tab!=="queries"||ui.stack.length)go("queries");else{ui._key=null;render(false)}},
+qview(){ui.qview=ui.qview==="list"?"bird":"list";ui._key=null;render(false)},
+afilter(d){ui.af=d.f;render()},aseg(d){ui.aseg=d.k;ui._key=null;render(false)},
+adddisc(d){const x=DISC[d.k];snap();S.agents.push({id:"n"+Date.now(),name:x[0],agency:x[1],weeks:8,asks:["Query letter","Synopsis","First 3 chapters"],how:"By email",email:first(x[0]).toLowerCase()+"@example.com"});snack(x[0]+" added to your list",true);render()},
+do(d){const i=info(Q(d.id));open({type:"act",kind:d.force||(i.kind==="quiet"?"close":i.kind),id:d.id,when:"today"})},
+close(d){open({type:"act",kind:"close",id:d.id})},
+reply(d){open(newFlow("reply",{qid:d.id,step:1}))},
+startlog(){open(newFlow("log"))},startreply(){open(newFlow("reply"))},
+logto(d){const f=newFlow("log",{step:1});pickAgent(f,d.id);open(f)},
+addagent(){open(newAdd())},
+editagent(d){const a=A(d.id),f=newAdd({editId:a.id,name:a.name,agency:/unknown|not added/i.test(a.agency)?"":a.agency,noAgency:/unknown|not added/i.test(a.agency),country:a.country||"UK",fit:a.fit||0,genres:new Set(a.genres||[]),wishlist:a.wishlist||"",door:a.door||"",method:a.how||"",weeks:a.weeks||8,weeksSet:!!a.weeks,nrn:a.nrn||"",email:/@/.test(a.email)?a.email:"",website:a.website||""});f.mats=new Set(a.asks.map(x=>parseSample(x)?"Opening sample":MATS.includes(x)?x:"Something else"));f.sample=a.asks.map(parseSample).find(Boolean)||blankSample();f.other=a.asks.find(x=>!parseSample(x)&&!MATS.includes(x))||"";open(f)},
+addsave(){const f=ui.ov;if(!addOk(f))return;snap();const rec={name:f.name.trim(),agency:f.agency.trim()||"Agency unknown",weeks:f.weeksSet?f.weeks:0,asks:[...f.mats].map(m=>m==="Opening sample"?fmtSample(f.sample):m==="Something else"?(f.other.trim()||null):m).filter(Boolean),how:f.method||"By email",email:f.email.trim()||"not saved",website:f.website.trim(),fit:f.fit,genres:[...f.genres],wishlist:f.wishlist.trim(),door:f.door,nrn:f.nrn,country:f.country};let id=f.editId;if(id)Object.assign(A(id),rec);else{id="n"+Date.now();S.agents.push(Object.assign({id},rec))}ui.ov=null;ui.aseg="list";ui.af="all";ui.tab="agents";ui.stack=[];render();open({type:"agent",id});ui.snack={m:f.editId?"Changes saved":rec.name+" added to your list",undo:true};clearTimeout(snackT);snackT=setTimeout(()=>{ui.snack=null;renderOv()},5000);renderOv()},
+fgen(d){const g=ui.ov.genres;g.has(d.v)?g.delete(d.v):g.add(d.v);renderOv()},
+sunit(d){const x=ui.ov.sample;x.unit=d.v;x.amount=UNIT[d.v].def;renderOv()},
+sstep(d){const x=ui.ov.sample,c=UNIT[x.unit],n=x.amount+(+d.v)*c.step;x.amount=Math.max(c.min,+d.v>0?Math.floor(n/c.step)*c.step:Math.ceil(n/c.step)*c.step||c.min);renderOv()},
+sfrom(d){ui.ov.sample.from=d.v;renderOv()},addnote(){open({type:"act",kind:"note"})},feedback(){open({type:"act",kind:"feedback"})},
+toast(d){snack(d.m);renderOv()},
+fset(d){const f=ui.ov;if(d.v==="toggle")f[d.k]=!f[d.k];else if(d.k==="fit")f.fit=f.fit===+d.v?0:+d.v;else if(d.k==="weeks")f.weeks=+d.v;else if(d.k==="aid")pickAgent(f,d.v);else f[d.k]=d.v;renderOv()},
+fmat(d){const m=ui.ov.mats;m.has(d.v)?m.delete(d.v):m.add(d.v);renderOv()},
+fnewagent(){const f=ui.ov,id="n"+Date.now();S.agents.push({id,name:f.term.trim(),agency:"Agency not added yet",weeks:0,asks:[],how:"By email",email:"not saved"});pickAgent(f,id);f.term="";f.step=1;renderOv()},
+fback(){ui.ov.step--;ui.ov.fresh=false;renderOv();$("#layer .body").scrollTop=0},
+fjump(d){ui.ov.step=+d.s;renderOv();$("#layer .body").scrollTop=0},
+fnext(){const f=ui.ov,last=f.type==="log"?4:f.type==="add"?3:2;if(f.type==="add"&&f.step===last)return ACT.addsave();if(f.step<last){f.step++;renderOv();$("#layer .body").scrollTop=0;return}
+  snap();const d=whenDate(f);
+  if(f.type==="log"){const a=A(f.aid);a.weeks=f.weeks;S.queries.push({id:"q"+Date.now(),a:f.aid,ev:[{who:"you",t:"Queried",d,m:matsText(f)}]});const n=S.queries.length,exp=addDays(d,f.weeks*7);ui.ov=null;render();open({type:"cele",h:`Query ${n} is out.`,p:`${a.name} at ${a.agency}. Reply expected by ${dm(exp)}.`,again:true,mini:`<div class="row">${gl("Queried")}<span class="tx"><span class="t">${a.name}</span><span class="s">${a.agency}</span><span class="s">Queried · ${dm(d)}</span></span></div>`})}
+  else{const q=Q(f.qid),a=A(q.a);q.ev.push({who:"them",t:f.out,d,m:""});ui.ov=null;render();
+    if(f.out==="Passed"){snack(`Logged. ${a.name} moves to Closed.`,true);renderOv()}
+    else open({type:"cele",qid:q.id,h:f.out==="Offer"?"An offer. Congratulations.":f.out==="Revise & resubmit"?`${first(a.name)} wants to see it again.`:`${first(a.name)} wants to read more.`,p:f.out==="Offer"?`${a.name} has offered to represent you. It's on Today for when you've decided.`:`It's at the top of Today so you don't lose track of sending it.`})}},
+actgo(){const o=ui.ov,err=m=>{const e=$("#err");e.textContent=m;e.hidden=false};
+  if(o.kind==="agent"){const n=$("#an").value.trim(),g=$("#ag").value.trim();if(!n)return err("Add the agent's name first.");snap();S.agents.push({id:"n"+Date.now(),name:n,agency:g||"Agency not added yet",weeks:0,asks:[],how:"By email",email:"not saved"});ui.ov=null;ui.aseg="list";snack(n+" added to your list",true);return go("agents")}
+  if(o.kind==="note"||o.kind==="feedback"){const t=$("#nt").value.trim();if(!t)return err(o.kind==="note"?"Write the note first.":"Write a few words first.");if(o.kind==="note"){snap();S.notes.unshift(t);snack("Pinned to your Corkboard",true)}else snack("Thank you. In the app this goes straight to us.");ui.ov=null;return render()}
+  snap();const q=Q(o.id),i=info(q),a=i.a,d=whenDate(o);let m;
+  if(o.kind==="send"){const t=i.st==="Revise & resubmit"?"Full sent":i.st.replace("requested","sent");q.ev.push({who:"you",t,d,m:/Partial/.test(t)?"Partial manuscript":"Full manuscript"});m=`${t} to ${a.name}`}
+  else if(o.kind==="nudge"){q.ev.push({who:"you",t:"Nudge",d,m:""});m=`Nudge to ${a.name} logged`}
+  else if(o.kind==="close"){q.ev.push({who:o.why==="Passed"?"them":"you",t:o.why,d:iso(TODAY),m:""});m=`${a.name} moved to Closed`}
+  else if(o.kind==="offer"){if(o.ans==="later"){ui.ov=null;undoSnap=null;snack("No rush. It stays on Today.");return render()}q.ev.push({who:"you",t:o.ans,d:iso(TODAY),m:""});if(o.ans==="Signed"){ui.ov=null;render();return open({type:"cele",h:"You have an agent.",p:`You're signing with ${a.name} at ${a.agency}. Remember to let the other agents know.`,qid:q.id})}m="Offer turned down"}
+  ui.ov=null;snack(m,true);render()},
+undo(){if(undoSnap){S=JSON.parse(undoSnap);undoSnap=null}ui.snack=null;ui.ov=null;render()},
+usepkg(d){snap();S.packages.forEach(p=>p.active=p.id===d.id);snack("New queries will go out with this package",true);render()},
+editletter(d){ui.editing=d.id;render()},
+saveletter(d){const l=S.letters.find(x=>x.id===d.id);snap();S.letters.unshift({id:"l"+Date.now(),name:l.name+" v2",sent:0,more:0,text:$("#ltxt").value});ui.editing=null;ui.stack.pop();snack(`Saved as ${l.name} v2`,true);render()},
+swn(){ui.nudgeEmails=!ui.nudgeEmails;render()},
+gq(){ui.goneQuietWeeks=ui.goneQuietWeeks===4?8:ui.goneQuietWeeks===8?12:4;render()}
+};
+document.addEventListener("click",e=>{const j=e.target.closest("[data-j]");if(j)return journey(+j.dataset.j);const el=e.target.closest("[data-act]");if(!el||el.disabled)return;e.preventDefault();const fn=ACT[el.dataset.act];if(fn)fn(el.dataset)});
+document.addEventListener("input",e=>{const t=e.target;if(t.dataset.live){ui.ov.term=t.value;if(t.dataset.live!=="search"){ui.ov[t.dataset.live==="agents"?"aid":"qid"]=null;const b=$("#layer .foot .btn");if(b)b.disabled=true}$("#live").innerHTML={agents:agentPick,replies:replyPick,search:searchRes}[t.dataset.live](ui.ov)}else if(t.id==="fdate"){ui.ov.date=t.value||iso(TODAY)}
+  else if(t.id==="samt"){const n=parseInt(t.value.replace(/\D/g,""),10);if(n>0){ui.ov.sample.amount=n;const sm=t.closest(".spk").previousElementSibling.querySelector("small");if(sm)sm.textContent=fmtSample(ui.ov.sample)}}
+  else if(t.id==="fweeks"){const f=ui.ov;f.weeks=+t.value;t.style.setProperty("--p",(f.weeks-1)/25*100+"%");$("#wkv").textContent=wk(f.weeks);const x=$("#wkt");if(x)x.innerHTML=nudgeTxt(f)}
+  else if(t.dataset.f){const k=t.dataset.f;if(k==="sample.fromText"){ui.ov.sample.fromText=t.value;const sm=t.closest(".spk").previousElementSibling.querySelector("small");if(sm)sm.textContent=fmtSample(ui.ov.sample)}else ui.ov[k]=t.value;if(ui.ov.type==="add"){const ok=addOk(ui.ov),b=$("#layer .foot .btn"),l=$("#later");if(b)b.disabled=!ok;if(l)l.hidden=!ok}}});
+document.addEventListener("change",e=>{if(e.target.id==="samt"){const x=ui.ov.sample;if(!(parseInt(e.target.value.replace(/\D/g,""),10)>0))x.amount=UNIT[x.unit].def;renderOv()}});
+$("#view").addEventListener("scroll",onScroll,{passive:true});
+function journey(n){if(n===0){reset();return render(false)}ui.ov=null;ui.stack=[];ui.qf="all";ui.qview="list";ui.aseg="list";
+  if(n===1)go("today");else if(n===2){go("today");ACT.startreply()}else if(n===3){go("today");ACT.startlog()}else if(n===4)go("queries");else if(n===5){ui.af="tq";go("agents")}else go("library")}
+reset();render(false);
+</script>
+</body>
+</html>

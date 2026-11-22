@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "PA41-8",
+  "where": "a group over five (population: overdue 42, upcoming 19, watch 3, nodate 6)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-8",
+  "where": "overdue: 42 shows 5 and \"Show 37 more\"",
+  "ok": true,
+  "detail": "{\"k\":\"overdue\",\"n\":42,\"shown\":5,\"more\":\"Show 37 more\"}"
+ },
+ {
+  "lock": "PA41-8",
+  "where": "overdue: tapping shows all 42",
+  "ok": true,
+  "detail": "42"
+ },
+ {
+  "lock": "PA41-13",
+  "where": "the view's words (population)",
+  "ok": true,
+  "detail": "2981 chars"
+ },
+ {
+  "lock": "PA41-13",
+  "where": "no overdue, no late",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-9",
+  "where": "a horizontal drag moves the track, not the page",
+  "ok": true,
+  "detail": "x -4039→-4257, page 398→398"
+ },
+ {
+  "lock": "PA41-9",
+  "where": "a vertical drag scrolls the page, not the track",
+  "ok": true,
+  "detail": "x -4257→-4257, page 398→623"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "states to open (population quiet, materials, nudge, agent, offer)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-10",
+  "where": "quiet: one row open, one navy button, the next step",
+  "ok": true,
+  "detail": "{\"open\":1,\"name\":\"Rosalind Vale\",\"state\":\"quiet\",\"ctas\":[{\"t\":\"Close this query\",\"bg\":\"rgb(42, 58, 82)\",\"h\":56}]} vs Close this query"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "quiet: tapping again closes it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "materials: one row open, one navy button, the next step",
+  "ok": true,
+  "detail": "{\"open\":1,\"name\":\"Rachel Lin\",\"state\":\"materials\",\"ctas\":[{\"t\":\"Mark partial sent\",\"bg\":\"rgb(42, 58, 82)\",\"h\":56}]} vs Mark (partial|full|revision) sent"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "materials: tapping again closes it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "nudge: one row open, one navy button, the next step",
+  "ok": true,
+  "detail": "{\"open\":1,\"name\":\"Peter Vance\",\"state\":\"nudge\",\"ctas\":[{\"t\":\"I’ve nudged Peter\",\"bg\":\"rgb(42, 58, 82)\",\"h\":56}]} vs I’ve nudged Peter"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "nudge: tapping again closes it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "agent: one row open, one navy button, the next step",
+  "ok": true,
+  "detail": "{\"open\":1,\"name\":\"David Marsh\",\"state\":\"agent\",\"ctas\":[{\"t\":\"Log David’s reply\",\"bg\":\"rgb(42, 58, 82)\",\"h\":56}]} vs Log David’s reply"
+ },
+ {
+  "lock": "PA41-10",
+  "where": "agent: tapping again closes it",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "PA41-7",
+  "where": "open queries on both (population 70 phone, 70 desktop)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-7",
+  "where": "every current bar's start and end, and every earlier stage, equal the desktop's",
+  "ok": true,
+  "detail": ""
+ }
+]

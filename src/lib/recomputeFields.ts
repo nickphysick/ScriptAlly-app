@@ -107,3 +107,23 @@ export function computeRecomputedFields(raw: RawActivityDoc[]): RecomputedFields
   };
 }
 
+
+/**
+ * Query Centre v152 — the same ten fields as a PATCH a batched writer folds into its one write (lib/qc152Write):
+ * `undefined` where recomputeQuery writes `deleteField()`. The single-writer law holds: the keys live here, in the
+ * derivation's own file, and the page's writer only carries the result.
+ */
+export function recomputedPatch(f: RecomputedFields): Record<string, unknown> {
+  return {
+    status: f.status,
+    partialRequestedDate: f.partialRequestedDate ?? undefined,
+    partialSentDate: f.partialSentDate ?? undefined,
+    fullRequestedDate: f.fullRequestedDate ?? undefined,
+    fullSentDate: f.fullSentDate ?? undefined,
+    revisionRound: f.revisionRound,
+    hasAgentResponded: f.hasAgentResponded,
+    responseReceivedAt: f.responseReceivedAt ?? undefined,
+    rejectedDate: f.rejectedDate ?? undefined,
+    lastStatusChange: f.lastStatusChange ?? undefined,
+  };
+}

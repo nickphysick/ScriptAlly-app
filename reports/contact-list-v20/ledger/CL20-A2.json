@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "CL20-A2",
+  "where": "@1512 the four boxes exist (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1512 the count's left is the toolbar's first control's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1512 the pill shares the count's centre ±1",
+  "ok": true,
+  "detail": "382.75 vs 382.75"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1512 Full screen shares the count's centre ±1",
+  "ok": true,
+  "detail": "382.75 vs 382.75"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1512 Full screen starts 10 after the pill ±1",
+  "ok": true,
+  "detail": "698.203125 vs 698.203125"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1280 the four boxes exist (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1280 the count's left is the toolbar's first control's ±1",
+  "ok": true,
+  "detail": "294 vs 294"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1280 the pill shares the count's centre ±1",
+  "ok": true,
+  "detail": "382.75 vs 382.75"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1280 Full screen shares the count's centre ±1",
+  "ok": true,
+  "detail": "382.75 vs 382.75"
+ },
+ {
+  "lock": "CL20-A2",
+  "where": "@1280 Full screen starts 10 after the pill ±1",
+  "ok": true,
+  "detail": "698.203125 vs 698.203125"
+ }
+]

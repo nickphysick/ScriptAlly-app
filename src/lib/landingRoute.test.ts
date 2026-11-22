@@ -65,14 +65,15 @@ describe("Phase 4 · a first-ever load with empty persistence", () => {
     expect(PATH_FOR).toMatch(/default:\s*return "\/dashboard";/);
   });
 
-  it("resolves to Dashboard on an unknown path", () => {
+  it("an unknown path shows the not-found screen (non-workspace v1, Phase 1 — re-pointed from the Dashboard redirect)", () => {
     /* the guard sits below every early return, so this is the last word for any path the
        workspace does not name. Help Centre v1 retarget: the guard asks `routeBase(path)` so an article
        (`/help/{slug}`) is the Help Centre; the law (an unnamed path lands on the Dashboard) is unchanged. */
     const G = "if (!WORKSPACE_PATHS.has(routeBase(path))) {";
     expect(code).toContain(G);
     const guard = code.slice(code.indexOf(G));
-    expect(guard.slice(0, 120)).toContain('<Navigate to="/dashboard" replace />');
+    expect(guard.slice(0, 600)).toContain("<NotFoundCard onNavigate={handleNavigate} />");
+    expect(guard.slice(0, 120)).not.toContain('<Navigate to="/dashboard" replace />');
   });
 
   it("resolves to Dashboard once auth completes on a marketing route", () => {
@@ -119,8 +120,9 @@ describe("Phase 4 · the hatch that actually sends a new account elsewhere", () 
        B's manual add) now write no hatch at all, because the dashboard is the absence of one. */
     const agents = onboarding.match(new RegExp(`sessionStorage\\.setItem\\("${KEY}", "agents"\\)`, "g")) ?? [];
     expect(agents.length, "no exit writes the Contact-list hatch").toBe(0);
-    /* and the other two go elsewhere, so "the hatch always means agents" is not the claim */
-    expect(onboarding).toContain(`sessionStorage.setItem("${KEY}", "import")`);
+    /* RE-POINTED (two-door import v1): the import desk's exit went with the fork's matcher
+       footnote, so no set-up exit writes a hatch now — every one ends on the dashboard. */
+    expect(onboarding).not.toContain(`sessionStorage.setItem("${KEY}", "import")`);
     /* RE-POINTED (onboarding v5, baked decision 4): the "Smart Import already used" card no longer
        offers Upgrade — it leads with the template — so set-up has no exit to the plans page and
        this hatch value is gone with the prop that wrote it. */
@@ -135,8 +137,9 @@ describe("Phase 4 · the hatch that actually sends a new account elsewhere", () 
        dashboard silently, which is the one failure mode this key has */
     const values = [...onboarding.matchAll(new RegExp(`setItem\\("${KEY}", "([^"]+)"\\)`, "g"))]
       .map((m) => m[1]);
-    /* v60: only the import desk's exit writes one now */
-    expect(values.length).toBeGreaterThan(0);
+    /* RE-POINTED (two-door import v1): the import desk's exit was the last writer, and it went
+       with the fork's matcher footnote. Should one come back, every value must still resolve. */
+    expect(values).toEqual([]);
     /* the bridge's own case labels — a hatch value with no case falls through to the dashboard
        silently, which is the one failure mode this key has */
     for (const v of new Set(values)) {

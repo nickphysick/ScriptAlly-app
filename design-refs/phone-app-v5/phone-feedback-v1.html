@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QueryHawk phone – feedback, list health, past-date bars</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{--page:#f8f6f2;--navy:#2a3a52;--navyd:#1f2c40;--blush:#e8c8bc;--pink:#f5e6df;--rust:#8a4a3c;--ink:#1f2633;--body:#4a4f5a;--muted:#676b74;--on:#c9d2df;--rule:#e6e0d6;--fill:#ece7de;--type:'Special Elite','Courier New',monospace}
+*{box-sizing:border-box;margin:0}body{background:#e9e6e0;font:16px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink);padding-bottom:48px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;text-align:left}
+h1{font:400 28px/1.2 var(--type);margin:32px 32px 8px}h1+p{margin:0 32px;color:var(--body);max-width:820px}
+h2{font:400 22px/1.3 var(--type);margin:40px 32px 4px}h2+p{margin:0 32px 16px;color:var(--body);max-width:820px;font-size:15px}
+.rowx{display:flex;gap:32px;padding:8px 32px;flex-wrap:wrap;align-items:flex-start}
+.opt{width:343px}.opt h3{font:400 17px/1.3 var(--type);margin-bottom:4px}.opt>p{font-size:14px;color:var(--body);margin-bottom:12px;min-height:60px}
+.T{font-family:var(--type)}.s{font-size:14px;line-height:20px;color:var(--muted)}.h{font-size:20px;line-height:1.3;font-weight:600}
+.card{background:#fff;border-radius:24px;box-shadow:0 1px 2px rgba(31,38,51,.06),0 8px 24px rgba(31,38,51,.08);padding:24px}
+.cta{display:block;width:100%;height:56px;border-radius:28px;background:var(--navy);color:#fff;font-weight:600;font-size:17px;text-align:center}
+.link{display:block;width:100%;min-height:48px;font-weight:600;color:var(--navy);text-align:center}
+.ph{position:relative;width:343px;height:640px;background:var(--page);border-radius:32px;box-shadow:0 0 0 8px #141a24;overflow:hidden}
+.dim{position:absolute;inset:0;background:rgba(20,26,36,.5)}.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--page);border-radius:24px 24px 0 0;padding:8px 16px 20px}
+.grab{width:40px;height:4px;border-radius:2px;background:rgba(31,38,51,.22);margin:4px auto 16px}
+.seg{display:flex;gap:8px;margin-bottom:12px}.seg span{flex:1;height:48px;border-radius:24px;display:grid;place-items:center;font-weight:600;font-size:15px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--rule)}.seg .on{background:var(--navy);color:#fff;box-shadow:none}
+.ta{background:#fff;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--rule);padding:14px 16px;min-height:120px;color:var(--ink)}
+.stamp{width:96px;height:96px;border-radius:50%;border:2.500px solid var(--rust);color:var(--rust);display:grid;place-content:center;text-align:center;transform:rotate(-10deg);margin:8px auto 16px;font:400 16px/18px var(--type)}
+/* list health */
+.cards{display:flex;gap:3px;align-items:flex-end;height:64px;margin:16px 0 4px;padding:0 4px;border-bottom:6px solid #c9b79c;border-radius:0 0 4px 4px}
+.cards i{flex:1;height:52px;border-radius:3px 3px 0 0;background:var(--navy);position:relative}.cards i.g{background:#fffdf8;box-shadow:inset 0 0 0 1.5px var(--blush);height:44px}.cards i.t{height:60px}
+.led{display:flex;align-items:center;gap:12px;min-height:52px;border-top:1px solid var(--rule);width:100%}.led .x{flex:1}.led b{font:400 18px/1 var(--type)}
+.dots{display:flex;gap:3px}.dots i{width:8px;height:8px;border-radius:50%;background:var(--navy)}.dots i.o{background:none;box-shadow:inset 0 0 0 1.5px #c9b9ae}
+.ring{position:relative;width:92px;height:92px;flex:none}.ring svg{width:100%;height:100%}.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 26px/1 var(--type)}
+/* past-date */
+.tl{position:relative;padding:28px 0 4px}.tl .now{position:absolute;top:18px;bottom:0;left:calc(72px + (100% - 72px) * .74);width:1.500px;background:var(--navy);opacity:.6}
+.tl .pill{position:absolute;top:0;left:calc(72px + (100% - 72px) * .74);transform:translateX(-50%);height:18px;padding:0 6px;border-radius:9px;background:var(--navy);color:#fff;font:400 14px/19px var(--type)}
+.r{display:flex;align-items:center;height:30px;border-bottom:1px solid #f0ebe2}.r b{flex:none;width:72px;font-size:14px;font-weight:600}.tk{flex:1;position:relative;height:12px}
+.tk i{position:absolute;top:0;height:12px;border-radius:4px;background:#efe3d0;box-shadow:inset 0 0 0 1px rgba(31,38,51,.12)}
+.tk s{position:absolute;top:-2px;width:2px;height:16px;margin-left:-1px;background:rgba(31,38,51,.55)}
+.chip{position:absolute;top:-5px;height:22px;padding:0 7px;border-radius:11px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--navy);font:400 14px/22px var(--type);white-space:nowrap}
+</style></head><body>
+<h1>Feedback, list health and past-date bars</h1><p>Three answers in pictures. Sample data throughout.</p>
+
+<h2>1 · The feedback journey</h2><p>The speech-bubble button opens a sheet over whatever you're looking at. Three taps at most: pick a kind, say it, send.</p>
+<div class="rowx">
+<div class="opt"><h3>Say it</h3><p>Opens on "An idea". It notes which screen you were on so you don't have to explain. Founding writers see what the note counts towards.</p><div class="ph"><div class="dim"></div><div class="sheet"><div class="grab"></div><div class="h" style="margin:0 8px 4px">Tell us what you think</div><div class="s" style="margin:0 8px 16px">About: Today · Birds-eye view</div><div class="seg"><span>I like</span><span>I don't like</span><span class="on">An idea</span></div><div class="ta">Let me pin a query to the top of the Birds-eye view<span style="display:inline-block;width:2px;height:18px;background:var(--navy);vertical-align:-3px;margin-left:1px"></span></div><div class="s" style="margin:12px 8px 16px">Two more notes and you're an Archivist.</div><button class="cta">Send</button></div></div></div>
+<div class="opt"><h3>Sent</h3><p>The stamp confirms it. One link goes to "Your notes" (on Profile), where each note shows whether it's been read or is now in the app.</p><div class="ph"><div class="dim"></div><div class="sheet"><div class="grab"></div><div class="stamp">Sent<br>12 Nov</div><div class="h" style="text-align:center;margin-bottom:4px">Thank you.</div><p style="text-align:center;color:var(--body);margin:0 16px 20px">Every note is read. You'll see on Your notes when this one is, and if it makes it into the app.</p><button class="cta">Done</button><button class="link">See your notes</button></div></div></div>
+</div>
+
+<h2>2 · List health, on-brand</h2><p>Three takes. All show the same thing: 82%, 14 gaps across 9 of 19 agents.</p>
+<div class="rowx">
+<div class="opt"><h3>A · The card drawer</h3><p>The Archivist's file box: one index card per agent. Navy cards are complete; pale shorter ones have gaps. You see which share of the list needs work.</p><div class="card"><div style="display:flex;align-items:baseline;gap:12px"><div style="flex:1"><div class="h">List health</div><div class="s">10 of 19 cards complete</div></div><b class="T" style="font-size:34px;font-weight:400">82%</b></div><div class="cards">${"x"}</div><div class="s" style="margin:8px 0 16px">14 gaps across 9 agents</div><button class="link" style="border-top:1px solid var(--rule)">Fill in the gaps</button></div></div>
+<div class="opt"><h3>B · The ledger</h3><p>A typed ledger: each kind of detail on its own ruled line, with a dot per agent, filled when you have it. Tap a line to fill that kind.</p><div class="card" style="padding-bottom:8px"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:12px"><div style="flex:1"><div class="h">List health</div><div class="s">14 gaps across 9 agents</div></div><b class="T" style="font-size:34px;font-weight:400">82%</b></div>LEDGER<button class="link" style="border-top:1px solid var(--rule)">Fill in the gaps</button></div></div>
+<div class="opt"><h3>C · The ring, in your colours</h3><p>The desktop ring kept, but navy on blush with a typewriter figure, so it matches the phone's no-green palette.</p><div class="card"><div style="display:flex;align-items:center;gap:20px"><span class="ring"><svg viewBox="0 0 95 95"><circle cx="47.500" cy="47.500" r="42.500" fill="none" stroke="#f1d9cf" stroke-width="10"/><circle cx="47.500" cy="47.500" r="42.500" fill="none" stroke="#2a3a52" stroke-width="10" stroke-linecap="round" stroke-dasharray="219 267" transform="rotate(-90 47.500 47.500)"/></svg><b>82<span style="font-size:14px;margin-top:-10px">%</span></b></span><div><div class="h">List health</div><div class="s">14 gaps across 9 agents</div></div></div><button class="link" style="border-top:1px solid var(--rule);margin-top:16px">Fill in the gaps</button></div></div>
+</div>
+
+<h2>3 · A query past its date</h2><p>How other apps show "beyond the limit", applied to the same two queries. None use red or the word overdue.</p>
+<div class="rowx">PAST</div>
+<script>
+document.body.innerHTML=document.body.innerHTML.replace('${"x"}',Array.from({length:19},(_,i)=>`<i class="${[2,5,6,9,11,13,14,16,18].includes(i)?"g":i%4===0?"t":""}"></i>`).join(""))
+.replace("LEDGER",[["Reply times",13],["What to send",15],["Genres and wishlist",16],["Reopening dates",18]].map(x=>`<button class="led"><span class="x"><span style="display:block;font-weight:600">${x[0]}</span><span class="dots">${Array.from({length:19},(_,i)=>`<i class="${i<x[1]?"":"o"}"></i>`).join("")}</span></span><b>${x[1]}/19</b></button>`).join(""))
+.replace("PAST",[["A · Line and ring (now)","Like a flight tracker's delay: the bar stops at its date and a thin line runs on to today, ending in a ring.",(e)=>`<i style="left:8%;width:${e-8}%"></i><u style="position:absolute;top:5px;height:2px;background:var(--navy);left:${e}%;width:${74-e}%"></u><em style="position:absolute;top:0;left:74%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 3px var(--navy)"></em>`],
+["B · The bar carries on, deeper","Like a budgeting app past its limit: the notch marks the date and the bar keeps going to today in a deeper tone. Reads as one thing that's run over.",(e)=>`<i style="left:8%;width:${e-8}%;border-radius:4px 0 0 4px"></i><i style="left:${e}%;width:${74-e}%;background:#c9a98a;border-radius:0 4px 4px 0"></i><s style="left:${e}%"></s>`],
+["C · A dotted trail","Like a map's route beyond the known road: dots run from the date to today. Lighter than a line; says \"still waiting\".",(e)=>`<i style="left:8%;width:${e-8}%"></i><u style="position:absolute;top:4px;height:4px;left:${e+1}%;width:${73-e}%;background:radial-gradient(circle,var(--navy) 1.500px,transparent 2px) 0 0/8px 4px repeat-x"></u>`],
+["D · A time chip","Like a delivery app's \"+10 min\": the bar stops at its date and a small chip at today says how far past.",(e,w)=>`<i style="left:8%;width:${e-8}%"></i><s style="left:${e}%"></s><span class="chip" style="left:calc(74% - 30px)">+${w} wks</span>`]].map(o=>`<div class="opt"><h3>${o[0]}</h3><p>${o[1]}</p><div class="card" style="padding:16px 16px 12px"><div class="tl"><span class="pill">Today</span><i class="now"></i><div class="r"><b>Marsh</b><span class="tk">${o[2](46,3)}</span></div><div class="r"><b>Hale</b><span class="tk">${o[2](56,2)}</span></div><div class="r"><b>Farr</b><span class="tk"><i style="left:30%;width:62%;opacity:.45"></i><i style="left:30%;width:44%"></i><s style="left:92%"></s></span></div></div></div></div>`).join(""));
+</script></body></html>

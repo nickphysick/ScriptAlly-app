@@ -1,0 +1,150 @@
+{
+ "route": "/queries",
+ "idleS": 60,
+ "loadedMs": 3470,
+ "totals": {
+  "opens": 3,
+  "adds": 23,
+  "removes": 5,
+  "commits": 0
+ },
+ "samples": [
+  {
+   "s": 0,
+   "opens": 3,
+   "adds": 23,
+   "removes": 5,
+   "commits": 0
+  },
+  {
+   "s": 10,
+   "opens": 3,
+   "adds": 23,
+   "removes": 5,
+   "commits": 0
+  },
+  {
+   "s": 20,
+   "opens": 3,
+   "adds": 23,
+   "removes": 5,
+   "commits": 0
+  },
+  {
+   "s": 30,
+   "opens": 3,
+   "adds": 23,
+   "removes": 5,
+   "commits": 0
+  },
+  {
+   "s": 40,
+   "opens": 3,
+   "adds": 23,
+   "removes": 5,
+   "commits": 0
+  },
+  {
+   "s": 50,
+   "opens": 3,
+   "adds": 23,
+   "removes": 5,
+   "commits": 0
+  },
+  {
+   "s": 60,
+   "opens": 3,
+   "adds": 23,
+   "removes": 5,
+   "commits": 0
+  }
+ ],
+ "top": [
+  [
+   "doc:users/*",
+   4
+  ],
+  [
+   "doc:test/*",
+   2
+  ],
+  [
+   "doc:users/*/private/*",
+   1
+  ],
+  [
+   "users/*/manuscripts",
+   1
+  ],
+  [
+   "users/*/versions",
+   1
+  ],
+  [
+   "users/*/attachments",
+   1
+  ],
+  [
+   "users/*/packages",
+   1
+  ],
+  [
+   "users/*/agents",
+   1
+  ],
+  [
+   "users/*/queries",
+   1
+  ],
+  [
+   "users/*/activities",
+   1
+  ],
+  [
+   "users/*/journalEntries",
+   1
+  ],
+  [
+   "users/*/notes",
+   1
+  ],
+  [
+   "users/*/tasks",
+   1
+  ],
+  [
+   "users/*/dismissedTasks",
+   1
+  ],
+  [
+   "users/*/taskFlags",
+   1
+  ],
+  [
+   "communityAgents",
+   1
+  ],
+  [
+   "doc:foundingStats/*",
+   1
+  ],
+  [
+   "betaFeedback",
+   1
+  ],
+  [
+   "doc:importDrafts/*",
+   1
+  ]
+ ],
+ "requests": {
+  "POST /google.firestore.v1.Firestore/Listen/channel": 12,
+  "GET /google.firestore.v1.Firestore/Listen/channel": 4
+ },
+ "opensAt": [
+  515,
+  649,
+  872
+ ],
+ "commitsAt": []
+}

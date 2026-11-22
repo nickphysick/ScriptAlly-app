@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "H5",
+  "where": "1512 list population: the bar's children",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 list no list health element in the bar",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 list the bar's first child is the search well",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "H5",
+  "where": "1512 list the bar is one line",
+  "ok": true,
+  "detail": "673 673 673 673 673 673 · 52"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 cards population: the bar's children",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 cards no list health element in the bar",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 cards the bar's first child is the search well",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "H5",
+  "where": "1512 cards the bar is one line",
+  "ok": true,
+  "detail": "673 673 673 673 673 673 · 52"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 pinned population: the bar's children",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 pinned population: the bar has pinned",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 pinned no list health element in the bar",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "lock": "H5",
+  "where": "1512 pinned the bar's first child is the search well",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "H5",
+  "where": "1512 pinned the bar is one line",
+  "ok": true,
+  "detail": "144 144 144 144 144 144 · 52"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 list population: the bar's children",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 list no list health element in the bar",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 list the bar's first child is the search well",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "H5",
+  "where": "1280 list the bar is one line",
+  "ok": true,
+  "detail": "669 669 669 669 669 669 · 52"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 cards population: the bar's children",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 cards no list health element in the bar",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 cards the bar's first child is the search well",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "H5",
+  "where": "1280 cards the bar is one line",
+  "ok": true,
+  "detail": "669 669 669 669 669 669 · 52"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 pinned population: the bar's children",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 pinned population: the bar has pinned",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 pinned no list health element in the bar",
+  "ok": false,
+  "detail": "3"
+ },
+ {
+  "lock": "H5",
+  "where": "1280 pinned the bar's first child is the search well",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "H5",
+  "where": "1280 pinned the bar is one line",
+  "ok": true,
+  "detail": "144 144 144 144 144 144 · 52"
+ }
+]

@@ -331,7 +331,7 @@
   background: var(--ct-taupe-bd); transition: width .24s ease, background .24s ease;
 }
 .ct-caro-dot.on { width: 22px; background: var(--ct-mocha); }
-.ct-caro-dot:focus-visible { outline: 2px solid var(--ct-accent); outline-offset: 3px; }
+.ct-caro-dot:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .ct-caro-dot { transition: none; } }
 
 /* ══ MANAGING YOUR COMPS — the three stages (v3 §3) ══ */

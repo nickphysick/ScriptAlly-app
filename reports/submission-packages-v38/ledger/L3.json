@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "L3",
+  "where": "pk40-std: Figures opens the drawer for the open package",
+  "ok": true,
+  "detail": "pk40-std"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: the rate is packageReplies' (40%)",
+  "ok": true,
+  "detail": "40%"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std: \"{q} of {s} agents asked for more\"",
+  "ok": true,
+  "detail": "2 of 5 agents asked for more · you average 30%"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std2: Figures opens the drawer for the open package",
+  "ok": true,
+  "detail": "pk40-std2"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std2: the rate is packageReplies' (Too early)",
+  "ok": true,
+  "detail": "Too early"
+ },
+ {
+  "lock": "L3",
+  "where": "pk40-std2: \"{q} of {s} agents asked for more\"",
+  "ok": true,
+  "detail": "1 of 4 agents asked for more"
+ },
+ {
+  "lock": "L3",
+  "where": "a showcase opens its package's drawer",
+  "ok": true,
+  "detail": "std drawer"
+ },
+ {
+  "lock": "L3",
+  "where": "Edit in the builder closes the drawer",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "L3",
+  "where": "…and loads the package",
+  "ok": true,
+  "detail": "pk40-std"
+ }
+]

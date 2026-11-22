@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "ADD1-A4",
+  "where": "the bundle is there (precondition)",
+  "ok": true,
+  "detail": "dist/assets"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "it holds scripts (precondition)",
+  "ok": true,
+  "detail": "6 files"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "the eyebrow \"Building your list\" is in no built file",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "the line \"The right agent is out there\" is in no built file",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "the component name AddAgentFocusForm is in no built file",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "ADD1-A4",
+  "where": "and nowhere in src",
+  "ok": true,
+  "detail": ""
+ }
+]

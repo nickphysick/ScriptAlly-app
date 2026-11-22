@@ -200,7 +200,7 @@ for (const vp of SIZES) {
 
 /* PH5 · every other full header, and QcEmpty, keeps today's geometry */
 const PH5_PAGES: { key: string; route: string; empty?: boolean }[] = [
-  { key: "contact", route: "/agents" }, { key: "packages", route: "/manuscripts/packages" },
+  { key: "contact", route: "/agents" }, { key: "packages", route: "/queries/packages" },
   { key: "comps", route: "/manuscripts/comps" }, { key: "todo", route: "/todo" }, { key: "qc-empty", route: "/queries", empty: true },
 ];
 async function readHeader(page: Page) {

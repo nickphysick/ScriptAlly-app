@@ -287,9 +287,9 @@ describe("§8.3 · the three sorts, as sequences", () => {
 describe("§8.3 · the groups", () => {
   it("Attention — the three in order, headings by name, empty groups dropped", () => {
     const gs = groupRows(ROWS, view(), NOW);
-    expect(gs.map((g) => g.label)).toEqual(["Overdue", "Upcoming", "Watch and wait"]);
+    expect(gs.map((g) => g.label)).toEqual(["Past expected", "Upcoming", "Watch and wait"]);
     expect(gs.map((g) => g.count)).toEqual([2, 2, 1]);
-    expect(gs.map((g) => ATTENTION_LABEL[g.key as never])).toEqual(["Overdue", "Upcoming", "Watch and wait"]);
+    expect(gs.map((g) => ATTENTION_LABEL[g.key as never])).toEqual(["Past expected", "Upcoming", "Watch and wait"]);
     /* one court, one group left, and it STILL carries its heading */
     const you = groupRows(ROWS, view({ court: "you" }), NOW);
     expect(you.map((g) => g.label)).toEqual(["Upcoming"]);

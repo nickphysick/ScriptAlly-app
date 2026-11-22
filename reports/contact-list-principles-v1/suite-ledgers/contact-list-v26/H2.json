@@ -1,0 +1,164 @@
+[
+ {
+  "lock": "H2",
+  "where": "93 arc colour",
+  "ok": true,
+  "detail": "rgb(78, 125, 96)"
+ },
+ {
+  "lock": "H2",
+  "where": "93 arc length ∝ score (±1%)",
+  "ok": true,
+  "detail": "0.93"
+ },
+ {
+  "lock": "H2",
+  "where": "93 pill",
+  "ok": true,
+  "detail": "93%"
+ },
+ {
+  "lock": "H2",
+  "where": "93 pill ink on cream",
+  "ok": true,
+  "detail": "rgb(28, 19, 15) on rgb(244, 238, 229)"
+ },
+ {
+  "lock": "H2",
+  "where": "93 ring 124",
+  "ok": true,
+  "detail": "124"
+ },
+ {
+  "lock": "H2",
+  "where": "93 no disc behind the archivist",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) / rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "H2",
+  "where": "93 archivist 100 wide, centred",
+  "ok": true,
+  "detail": "100 at 1213.5 vs 1213.5"
+ },
+ {
+  "lock": "H2",
+  "where": "93 archivist's foot 24 above the ring's",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "H2",
+  "where": "93 archivist reaches the ring (top within 2px of the stroke's inner edge)",
+  "ok": true,
+  "detail": "182.625 vs 182.4232336956522"
+ },
+ {
+  "lock": "H2",
+  "where": "72 arc colour",
+  "ok": true,
+  "detail": "rgb(201, 118, 93)"
+ },
+ {
+  "lock": "H2",
+  "where": "72 arc length ∝ score (±1%)",
+  "ok": true,
+  "detail": "0.72"
+ },
+ {
+  "lock": "H2",
+  "where": "72 pill",
+  "ok": true,
+  "detail": "72%"
+ },
+ {
+  "lock": "H2",
+  "where": "72 pill ink on cream",
+  "ok": true,
+  "detail": "rgb(28, 19, 15) on rgb(244, 238, 229)"
+ },
+ {
+  "lock": "H2",
+  "where": "72 ring 124",
+  "ok": true,
+  "detail": "124"
+ },
+ {
+  "lock": "H2",
+  "where": "72 no disc behind the archivist",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) / rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "H2",
+  "where": "72 archivist 100 wide, centred",
+  "ok": true,
+  "detail": "100 at 1213.5 vs 1213.5"
+ },
+ {
+  "lock": "H2",
+  "where": "72 archivist's foot 24 above the ring's",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "H2",
+  "where": "72 archivist reaches the ring (top within 2px of the stroke's inner edge)",
+  "ok": true,
+  "detail": "182.625 vs 182.4232336956522"
+ },
+ {
+  "lock": "H2",
+  "where": "44 arc colour",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "lock": "H2",
+  "where": "44 arc length ∝ score (±1%)",
+  "ok": true,
+  "detail": "0.44"
+ },
+ {
+  "lock": "H2",
+  "where": "44 pill",
+  "ok": true,
+  "detail": "44%"
+ },
+ {
+  "lock": "H2",
+  "where": "44 pill ink on cream",
+  "ok": true,
+  "detail": "rgb(28, 19, 15) on rgb(244, 238, 229)"
+ },
+ {
+  "lock": "H2",
+  "where": "44 ring 124",
+  "ok": true,
+  "detail": "124"
+ },
+ {
+  "lock": "H2",
+  "where": "44 no disc behind the archivist",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0) / rgba(0, 0, 0, 0)"
+ },
+ {
+  "lock": "H2",
+  "where": "44 archivist 100 wide, centred",
+  "ok": true,
+  "detail": "100 at 1213.5 vs 1213.5"
+ },
+ {
+  "lock": "H2",
+  "where": "44 archivist's foot 24 above the ring's",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "H2",
+  "where": "44 archivist reaches the ring (top within 2px of the stroke's inner edge)",
+  "ok": true,
+  "detail": "182.625 vs 182.4232336956522"
+ }
+]

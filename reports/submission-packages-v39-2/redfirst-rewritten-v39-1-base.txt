@@ -1,0 +1,11 @@
+== PK26-M on the v39.1 build
+  ✗ PK26-M · …its name shows in full (scrollWidth ≤ clientWidth) — {"name":"The longer comps-forward letter for agents in London, Dublin and Edinburgh","whole":false,"cut":true,"small":null}
+  ✗ PK26-M · …and is never ellipsised — {"name":"The longer comps-forward letter for agents in London, Dublin and Edinburgh","whole":false,"cut":true,"small":null}
+  ✗ PK26-M · every name shows in full — [{"name":"The longer comps-forward letter for agents in London, Dublin and Edinburgh","whole":false,"cut":true,"small":null},{"name":"Letter B","whole":true,"cut":true,"small"
+  1 failed
+  1 passed (28.2s)
+== pk39 L4 on the v39.1 build
+  ✗ L4-1512 · Your materials is 340 wide (v39.2) — 320
+  ✗ L4-1280 · Your materials is 300 wide (v39.2) — 280
+  2 failed
+  1 passed (38.2s)

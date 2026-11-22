@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L8",
+  "where": "pk40-ms · pk: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · let: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · syn: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · New package dialog opened",
+  "ok": true,
+  "detail": ".p6-pdlg"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · New package dialog: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · How it works opened",
+  "ok": true,
+  "detail": "[data-pk26=\"hwm\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · How it works: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the material drawer opened",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the material drawer: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the shelf drawer: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-ms · the shelf drawer opened",
+  "ok": true,
+  "detail": "drawer"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · pk: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · let: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · syn: no mono capitals",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · New package dialog opened",
+  "ok": true,
+  "detail": ".p6-pdlg"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · New package dialog: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · How it works opened",
+  "ok": true,
+  "detail": "[data-pk26=\"hwm\"]"
+ },
+ {
+  "lock": "L8",
+  "where": "pk40-new · How it works: no mono capitals",
+  "ok": false,
+  "detail": "[\"P.: THE WORKBENCH\"]"
+ }
+]

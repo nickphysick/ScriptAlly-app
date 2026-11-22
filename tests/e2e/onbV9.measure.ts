@@ -556,26 +556,23 @@ test.describe("S1", () => {
     expect(m!.size).toEqual([84, 84]);
     expect(m!.bg, "the mark is --go").toBe(GO);
     expect(m!.drawn, "under reduced motion the tick is drawn").toBe("0px");
-    expect(s.title).toBe("We've read your file.");
-    expect(s.line).toBe("34 rows, read and sorted. Nothing is saved yet.");
+    /* RE-POINTED (two-door import v1): the summary is the read screen. The mark, its colour and the sweep
+       below are this lock's own and unchanged; the title lost its full stop, and the row-count line, the
+       paragraph, the tiers and the stepper went with the screen they described. */
+    expect(s.title).toBe("We've read your file");
+    expect(s.line).toBe("Read by Smart Import, then checked against QueryHawk's rules.");
     expect(s.markFirst, "the mark comes before the cards").toBe(true);
-    expect(s.file, "the chip is the file's name alone").not.toMatch(/rows?/);
-    const ask = s.tiers.filter((t) => t.tone === "ask");
-    expect(ask.length, "both cards have a tier that needs an answer").toBe(2);
-    for (const t of ask) expect(t.name.trim()).toBe("Need an answer");
-    expect(ask.map((t) => t.chip)).toEqual(["Step 1", "Step 2"]);
-    expect(s.captions.filter(([id]) => id === "agents" || id === "queries").map(([, c]) => c)).toEqual(ask.map((t) => `${t.n} to answer`));
-    expect(s.lead).toMatch(/^Most of it's ready to go\. .* Each one is a quick pick, and then everything lands at once\.$/);
-    expect(s.bold).toEqual([`${ask[0].n} agents need an answer`, `${ask[1].n} queries need an answer`]);
+    expect(s.file, "the file's name alone").not.toMatch(/rows?/);
+    expect(s.tiers, "no tiers on the read screen").toEqual([]);
     const text = await reviewText(page);
     expect(text).not.toMatch(/optional/i);
     expect(text).not.toMatch(/chances to sharpen|to sharpen/i);
     const hits = await sage(page);
     expect(hits.filter((h) => h.mark).length, "the sweep sees the mark").toBeGreaterThan(0);
     expect(hits.filter((h) => !h.mark), "nothing but the mark is sage").toEqual([]);
-    /* without a row count the line states none */
-    await lab(page, "s=overview&fx=review", WIDE, { motion: "reduce" });
-    expect(await page.locator('[data-im="read-line"]').textContent()).toBe("Read and sorted. Nothing is saved yet.");
+    /* the headings route's line (two-door import v1) */
+    await lab(page, "s=overview&fx=review&read=headings", WIDE, { motion: "reduce" });
+    expect(await page.locator('[data-im="read-line"]').textContent()).toBe("Your headings matched ours, so it was read straight in and checked against QueryHawk's rules. No wait.");
   });
 
   test("S1 duplicates: Continue lights only when every set is decided, then the mark", async ({ page }) => {
@@ -643,9 +640,9 @@ test.describe("S1", () => {
     const parts = a.line.replace(/\.$/, "").split(", ");
     expect(parts.length).toBeGreaterThan(1);
     for (const p of parts) expect(p).toMatch(/^\d+ (dates? confirmed|dates? added|left blank on purpose|status(es)? set|details? checked)$/);
-    expect(a.line, "an undated answer is accounted for").toMatch(/\d+ left blank on purpose/);
+    /* RE-POINTED (two-door import v1): a missing sent date is settled, not asked, so no answer is "left blank" */
     expect(a.hint).toMatch(/^\d+ agents and \d+ queries will be written\. The dashboard opens when it's done\.$/);
-    expect(a.primary).toBe("Import and get started");
+    expect(a.primary, "two-door import v1: the primary names what it writes").toMatch(/^Import \d+ agents? and \d+ quer(y|ies)$/);
     expect(a.sub).toBe("Every question answered. Nothing is saved yet.");
     expect((await sage(page)).filter((h) => !h.mark)).toEqual([]);
     expect(await reviewText(page)).not.toMatch(/optional/i);
@@ -900,8 +897,9 @@ test.describe("G", () => {
     await lab(page, "s=review&fx=gate", PHONE, { motion: "reduce" });
     await noOverflow(page, "agents 400");
     expect(await page.locator('[data-im="deck-prev"]').isVisible(), "arrows hide below 820").toBe(false);
-    await page.locator('[data-im="deck-dots"] .o9-dot').nth(1).click();
-    expect((await state(page)).name, "the dots move the deck").toBe("Tom Rafferty");
+    /* Set-up on phones v1 (30 Oct): below 768px the deck is a compact card with "Answer this", one
+       question per screen (board 2, 3B) — there are no dots to move. SIP1 S6 holds it. */
+    expect(await page.locator('[data-im="deck-answer"]').isVisible(), "the phone deck offers Answer this").toBe(true);
     await answerAgents(page);
     await primary(page).click();
     await page.locator('[data-im="review"][data-step="queries"]').waitFor();

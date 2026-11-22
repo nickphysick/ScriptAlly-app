@@ -18,6 +18,8 @@ export interface ChecklistItem<K extends string = string> {
   key: K;
   title: string;
   line: string;
+  /** Versions v2 — a line the item's done note adds beneath its count (optional; no other page sets one) */
+  tip?: string;
 }
 
 export type DoneMap<K extends string = string> = Partial<Record<K, boolean>>;
@@ -80,8 +82,11 @@ export type ContactGuideKey = "add" | "search" | "pin" | "open" | "edit" | "hk";
 export const CONTACT_CHECKLIST: readonly ChecklistItem<ContactGuideKey>[] = [
   { key: "add", title: "Add an agent", line: "One you'd love to query is a good start." },
   { key: "search", title: "Search for an agent", line: "Find anyone on your list by name or agency." },
-  /* Contact list v19 §K — the third of six: its spotlight is the toolbar's Pin button, and it ticks when the list is pinned */
-  { key: "pin", title: "Pin the list", line: "Turn the list into the whole page while you work." },
+  /* Contact list v19 §K, v20 §G, v24 F — the third of six: "Go full screen". Its spotlight is the list's navy bar's Full
+     screen button, and it ticks when the list goes full screen. The key stays "pin", so a tick already earned is kept. */
+  /* Contact list v26 C — full screen is retired, so the third item is the index row: "Jump through the list". The key
+     stays "pin", so a tick already earned is kept; it ticks when an index entry is used. */
+  { key: "pin", title: "Jump through the list", line: "Use the row under the bar to jump to a letter, a week or a month." },
   { key: "open", title: "Open an agent's card", line: "Everything you know about them, in one place." },
   { key: "edit", title: "Edit an agent", line: "Fix a detail, or add what they're looking for." },
   { key: "hk", title: "Do some housekeeping", line: "Fill in one gap and watch List health climb." },
@@ -113,11 +118,14 @@ export type QcGuideKey = "log" | "find" | "pin" | "open" | "resp" | "birds";
 export const QC_CHECKLIST: readonly ChecklistItem<QcGuideKey>[] = [
   { key: "log", title: "Log a query", line: "Who you sent it to, and when." },
   { key: "find", title: "Find a query", line: "Search by agent or agency, or press Filters and tick a status." },
-  /* Query Centre v140 §G — the third of six: its spotlight is the toolbar's Pin button, and it ticks when the list is pinned */
-  { key: "pin", title: "Pin the list", line: "Turn the list into the whole page while you work." },
+  /* Query Centre v140 §G, v142 §A — the third of six: "Go full screen" (the Contact list v20 wording). Its spotlight is the
+     title row's Full screen button, and it ticks when the list goes full screen. The key stays `pin`, so a tick already
+     earned stays earned. */
+  { key: "pin", title: "Go full screen", line: "Turn the list into the whole page while you work." },
   { key: "open", title: "Open a query", line: "Its whole story, in one panel." },
   { key: "resp", title: "Record a response", line: "Try it on a practice query. Nothing is saved." },
-  { key: "birds", title: "See the Birds-eye view", line: "Every live query on one timeline. Press B." },
+  /* v150 D — on the desktop it is the list's second view (the switch above the list); the phone keeps the drawer and B */
+  { key: "birds", title: "See the Birds-eye view", line: "Every live query on one timeline." },
 ];
 
 /** With no queries yet, the items that need one (§A): the practice query does not, so "resp" is never here. */
@@ -147,6 +155,31 @@ export const QC_GUIDE_HIDDEN_PATH: UserPaths = { [`${QC_BASE}.hidden`]: true };
 /** Help system v1 B — "Show the page guide again" */
 export const QC_GUIDE_UNHIDE_PATH: UserPaths = { [`${QC_BASE}.hidden`]: false };
 export const QC_GUIDE_FINISHED_PATH: UserPaths = { [`${QC_BASE}.finished`]: true };
+
+/* ── Manuscripts v27 Part D — the Manuscripts page's state ──
+   ⚠️ ITS DONE FLAGS ARE NOT STORED: they are read from the saved manuscript (`lib/manuscriptV27.msGuideDone`). Only
+      `seen` and `hidden` live here, per account, written by leaf like the other two pages'.
+   ⚠️ NOT IN `GUIDE_PAGES` (yet): adding it changes the Help Centre's guide cards and every other page's "Your next
+      guide is …", which are outside this pack. */
+
+export type MsGuideKey = "details" | "logline" | "pitch" | "synopsis";
+
+export const MS_CHECKLIST: readonly ChecklistItem<MsGuideKey>[] = [
+  { key: "details", title: "Check your book's details", line: "Genre, age category and word count." },
+  { key: "logline", title: "Write your logline", line: "The hook in a single sentence." },
+  { key: "pitch", title: "Add an elevator pitch", line: "The 30-second version, said out loud." },
+  { key: "synopsis", title: "Add a synopsis", line: "The whole story, ending included." },
+];
+
+const MS_BASE = "todoPrefs.manuscripts.guide";
+
+export function msGuideOf(user: User | null | undefined): { seen: boolean; hidden: boolean } {
+  const g = (user?.todoPrefs as { manuscripts?: { guide?: { seen?: unknown; hidden?: unknown } } } | undefined)?.manuscripts?.guide;
+  return { seen: g?.seen === true, hidden: g?.hidden === true };
+}
+export const MS_GUIDE_SEEN_PATH: UserPaths = { [`${MS_BASE}.seen`]: true };
+export const MS_GUIDE_HIDDEN_PATH: UserPaths = { [`${MS_BASE}.hidden`]: true };
+export const MS_GUIDE_UNHIDE_PATH: UserPaths = { [`${MS_BASE}.hidden`]: false };
 
 /* ── Help system v1 C.4 — the pages with a guide, in sidebar order, for the last note's "Your next guide is …" ──
    Help Centre v1 — and for the Help Centre's guide cards: each page's route, its sidebar group, its items, and what is
@@ -226,3 +259,42 @@ export function nextGuideAfter(page: string, user: User | null | undefined, skip
   for (const g of GUIDE_PAGES) if (g.page !== page && !g.finished(user, skippedOf(g.page))) return g.page;
   return null;
 }
+
+/* ── the Versions page's state (Versions v2 §GUIDE; design-refs/versions-v2 S19–S21, S28) ── */
+
+export type VersionsGuideKey = "add" | "edit" | "use" | "check";
+
+export const VERSIONS_CHECKLIST: readonly ChecklistItem<VersionsGuideKey>[] = [
+  { key: "add", title: "Add a version", line: "Name it and list what changed.", tip: "A new version becomes the one in use. You can change that any time." },
+  { key: "edit", title: "Edit a version", line: "Rename it, or add a change you missed." },
+  { key: "use", title: "Change which version is in use", line: "The one new queries go out with." },
+  { key: "check", title: "Check how a version is performing", line: "How far it gets, and every query it went with." },
+];
+
+/** What each step's spotlight card says (the ref's `ins`). */
+export const VERSIONS_STEP_TEXT: Record<VersionsGuideKey, string> = {
+  add: "Press New version. Name it, list what changed, and choose which version it starts from.",
+  edit: "Press the pencil on any version to change its name, its changes or its word count.",
+  use: "Press this on another version. New queries will go out with it from now on.",
+  check: "Click any version that’s gone out.",
+};
+
+/** The line a locked step shows instead of its own (the ref's `lock`). */
+export const VERSIONS_LOCKED: Record<Exclude<VersionsGuideKey, "add">, string> = {
+  edit: "Unlocks after your first version",
+  use: "Unlocks once you have two versions",
+  check: "Unlocks once a version has gone out",
+};
+
+const VER_BASE = "todoPrefs.versions.guide";
+
+export function versionsGuideOf(user: User | null | undefined): GuideState<VersionsGuideKey> {
+  const g = (user?.todoPrefs as { versions?: { guide?: { done?: Record<string, unknown>; seen?: unknown; hidden?: unknown } } } | undefined)?.versions?.guide;
+  const done: DoneMap<VersionsGuideKey> = {};
+  for (const it of VERSIONS_CHECKLIST) if (g?.done?.[it.key] === true) done[it.key] = true;
+  return { done, seen: g?.seen === true, hidden: g?.hidden === true };
+}
+export const versionsGuideDonePath = (k: VersionsGuideKey): UserPaths => ({ [`${VER_BASE}.done.${k}`]: true });
+export const VERSIONS_GUIDE_SEEN_PATH: UserPaths = { [`${VER_BASE}.seen`]: true };
+export const VERSIONS_GUIDE_HIDDEN_PATH: UserPaths = { [`${VER_BASE}.hidden`]: true };
+export const VERSIONS_GUIDE_UNHIDE_PATH: UserPaths = { [`${VER_BASE}.hidden`]: false };

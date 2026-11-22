@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B3",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "cards 54 rows 54"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 card order = row order",
+  "ok": true,
+  "detail": "cards cv25-agent-09,cv25-agent-06,cv25-agent-07,cv25-agent-10,cv25-agent-05 rows cv25-agent-09,cv25-agent-06,cv25-agent-07,cv25-agent-10,cv25-agent-05"
+ },
+ {
+  "lock": "B3",
+  "where": "1512 3 across",
+  "ok": true,
+  "detail": "across 3"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "cards 54 rows 54"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 card order = row order",
+  "ok": true,
+  "detail": "cards cv25-agent-09,cv25-agent-06,cv25-agent-07,cv25-agent-10,cv25-agent-05 rows cv25-agent-09,cv25-agent-06,cv25-agent-07,cv25-agent-10,cv25-agent-05"
+ },
+ {
+  "lock": "B3",
+  "where": "1280 2 across",
+  "ok": true,
+  "detail": "across 2"
+ }
+]

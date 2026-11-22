@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "G4",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "3 never queried"
+ },
+ {
+  "lock": "G4",
+  "where": "1512 clv-fx-reopen the dashed panel, no timeline",
+  "ok": false,
+  "detail": "false  \"\" 0"
+ },
+ {
+  "lock": "G4",
+  "where": "1512 clv-fx-stub0 the dashed panel, no timeline",
+  "ok": false,
+  "detail": "false  \"\" 0"
+ },
+ {
+  "lock": "G4",
+  "where": "1512 clv-fx-stale the dashed panel, no timeline",
+  "ok": false,
+  "detail": "false  \"\" 0"
+ },
+ {
+  "lock": "G4",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "3 never queried"
+ },
+ {
+  "lock": "G4",
+  "where": "1280 clv-fx-reopen the dashed panel, no timeline",
+  "ok": false,
+  "detail": "false  \"\" 0"
+ },
+ {
+  "lock": "G4",
+  "where": "1280 clv-fx-stub0 the dashed panel, no timeline",
+  "ok": false,
+  "detail": "false  \"\" 0"
+ },
+ {
+  "lock": "G4",
+  "where": "1280 clv-fx-stale the dashed panel, no timeline",
+  "ok": false,
+  "detail": "false  \"\" 0"
+ }
+]

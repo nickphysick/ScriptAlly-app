@@ -1,0 +1,12 @@
+/*
+ * Contact list v25.3 (design-refs/contact-list-v25-3/) — the List row stops advertising what is missing: empty cells are
+ * blank, and a row with no wishlist has no wishlist line (and is one line shorter). Its hover "Fill in {n} gaps" action
+ * and the ≤1440 track reserved for it are retired by v25.4 (contactV254.css).
+ */
+@media (min-width: 768px) {
+  .cl24-tr.cl252-tr.cl253-nowl { min-height: 76px; }
+}
+@media (min-width: 768px) {
+  /* the "Closed to queries" tag hugs its words: Your query is a flex column (v25.2), which stretched it across the cell */
+  .cl252-qs > .cl251-shut { align-self: flex-start; }
+}

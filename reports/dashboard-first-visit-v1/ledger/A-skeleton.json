@@ -1,0 +1,8 @@
+[
+ {
+  "lock": "A8",
+  "where": "loading, and the pre-query shape",
+  "ok": true,
+  "detail": "{\"loading\":\"1\",\"mode\":\"pre\",\"setup\":true,\"b\":[]}"
+ }
+]

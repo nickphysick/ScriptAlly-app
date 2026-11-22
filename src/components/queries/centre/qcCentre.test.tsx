@@ -104,7 +104,10 @@ describe("one derived list, one control that narrows it", () => {
   it("every view hands a selection to the page's one onOpenQuery", () => {
     const at = page.indexOf("<QcCentre");
     expect(at).toBeGreaterThan(-1);
-    const mount = page.slice(at, page.indexOf("FORM MODE", at) > 0 ? page.indexOf("FORM MODE", at) : at + 6000);
+    /* RE-POINTED (overnight fixes v1, Part 2): "FORM MODE" is in a comment, which decls() strips, so the window is the
+       fixed fallback; it was 6000 with the second onOpenQuery 20 characters inside the edge, and Part 2's two
+       `|| qcLoadFail` (26 characters) pushed it out. 6100 restores the margin; the claim is unchanged. */
+    const mount = page.slice(at, page.indexOf("FORM MODE", at) > 0 ? page.indexOf("FORM MODE", at) : at + 6100);
     expect(mount.split("onOpenQuery?.(").length - 1, "a view selects through something other than the page's onOpenQuery").toBeGreaterThanOrEqual(2);
     expect(mount).not.toMatch(/setSelectedQueryId\(/);
   });
@@ -124,7 +127,16 @@ describe("⚠️ one house — the open query is the side panel, and its tab bod
     expect(page.split("<QueryPanelHost").length - 1).toBe(1);
     /* v139 — retargeted, same law: the ONE host's condition gained the practice query (Pip's panel uses this host
        rather than a second one), so it is still one mount for a chosen query, the picker, or Pip */
-    expect(page).toContain("{(pipShown || (qcOpenCardNode && cardQueryId) || picking) && (");
+    /* v149 — retargeted, same law: the one host's condition gained the header's two flows (a new query, "Who
+       replied?"), which open in this host rather than a second one */
+    /* Queries on a phone v1 (28 Oct) — retargeted, same law: the one host is built once as `queryPanelHost` so the phone
+       return and the desktop tree place the SAME element; its desktop condition is unchanged, and on the phone page it
+       serves only other pages' requests and the practice walk */
+    expect(page).toContain("const queryPanelOn = qmPhone");
+    /* Record a response v1 (16 Nov) — retargeted, same law: the old picker (`picking`) is gone; "Who replied?" is one of
+       the host's flows (`qcFlowNode`), in the same one host */
+    expect(page).toContain(": !!(pipShown || (qcOpenCardNode && cardQueryId) || qcFlowNode);");
+    expect(page.split("{queryPanelHost}").length - 1).toBe(2);
     expect(page).not.toContain("<QcQueryModal");
     expect(page).not.toContain("qcDocked === false && (");
   });
@@ -385,7 +397,8 @@ describe("the sheet", () => {
     expect([...new Set(bad)], "read across sheets from a scope a portal may not be inside").toEqual([]);
   });
   it("every var() the sheet reads resolves — to a token it declares, to an app :root token, or to a PUBLISHED measurement", () => {
-    const APP = ["--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb", "--ws-page-rgb"];
+    /* --sp-muted / --sp-quiet: consistency roll-out v2, Phase 2 — the two muted text colours, :root in shell/primitives.css */
+    const APP = ["--sp-muted", "--sp-quiet", "--sp-anthracite", "--sp-navy-hover", "--sp-btn-line-hov" /* roll-out v2, Phase 6: the focus ring and hovers */, "--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb", "--ws-page-rgb"];
     /**
      * ⚠️ A MEASUREMENT PUBLISHED FROM JS IS LEGITIMATELY ABSENT FROM THE SHEET, and its FALLBACK is
      * what renders until it lands — the one case CLAUDE.md names for a fallback ("a token that might

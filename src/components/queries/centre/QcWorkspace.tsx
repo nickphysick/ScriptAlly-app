@@ -159,7 +159,7 @@ export const QcWorkspaceHead: React.FC<{
       {label} <sup>{fig(count(f))}</sup>
     </button>
   );
-  const chips = [chip("court:you", "Your move", "you"), chip("past", "Overdue", "past"), chip("offers", "Offers", "offers"), chip("closed", "Closed", "closed")];
+  const chips = [chip("court:you", "Your move", "you"), chip("past", "Past expected", "past"), chip("offers", "Offers", "offers"), chip("closed", "Closed", "closed")];
   const visibleChips = folded ? chips.slice(0, chips.length - folded) : chips;
   const stageBtn = (
     <button type="button" className="qcw-chip" data-qcv="ws-chip" data-k="stage" aria-pressed={onStage} aria-haspopup="menu" aria-expanded={pop === "stage"}

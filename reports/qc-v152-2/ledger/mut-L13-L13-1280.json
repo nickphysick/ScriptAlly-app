@@ -1,0 +1,67 @@
+[
+ {
+  "where": "exactly the five replies",
+  "ok": false,
+  "detail": "[\"Asked for the partial\",\"Passed\",\"Revise & resubmit\",\"Made an offer\",\"Something else\",\"You nudged\"]"
+ },
+ {
+  "where": "no step of yours offered",
+  "ok": false,
+  "detail": "[\"Asked for the partial\",\"Passed\",\"Revise & resubmit\",\"Made an offer\",\"Something else\",\"You nudged\"]"
+ },
+ {
+  "where": "the button waits for a choice",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "req: When, Their deadline, Their words",
+  "ok": true,
+  "detail": "[\"When\",\"Their deadline\",\"Their words\"]"
+ },
+ {
+  "where": "passed: When, What kind of no, Their words",
+  "ok": true,
+  "detail": "[\"When\",\"What kind of no\",\"Their words\"]"
+ },
+ {
+  "where": "rr: When, Resubmit by, Their words",
+  "ok": true,
+  "detail": "[\"When\",\"Resubmit by\",\"Their words\"]"
+ },
+ {
+  "where": "offer: When, Answer by, Their words",
+  "ok": true,
+  "detail": "[\"When\",\"Answer by\",\"Their words\"]"
+ },
+ {
+  "where": "more: When, What they asked for, Their words",
+  "ok": true,
+  "detail": "[\"When\",\"What they asked for\",\"Their words\"]"
+ },
+ {
+  "where": "the toast shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "population: the pass step",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "its kind is personal",
+  "ok": true,
+  "detail": "detailed"
+ },
+ {
+  "where": "open to more work is saved",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "kept off the Wall of no",
+  "ok": true,
+  "detail": "true"
+ }
+]

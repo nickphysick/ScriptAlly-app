@@ -346,7 +346,7 @@
 /* (todo rebuild P1) The rows view's TINTED SECTION CONTAINERS and their sticky header bars are
    DELETED — both views now sit under the same typographic heading, on the bare capsule. */
 .tdb-lsec { padding: 0; margin: 0; border: 0; background: none; }
-.tdb-lsech:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.tdb-lsech:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tdb-lst { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; color: var(--ink); }
 .tdb-lscc { font-family: var(--f12-mono); font-size: 8px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; color: var(--ink-2); }
 .tdb-lsfold { margin-left: auto; font-size: 10px; color: var(--muted); }
@@ -479,7 +479,7 @@
 .tdb-askcard p { font-size: 13px; line-height: 1.55; color: var(--ink-2); }
 .tdb-askrow { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 .tdb-rows > .tdb-lrow:last-child { border-bottom: 0; }
-.tdb-lrow:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.tdb-lrow:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the leading roundel: the family dot at rest; the TICK face on row hover/focus (units +
    notes; offers and batches keep the plain dot) */
 .tdb-ldot { width: 9px; height: 9px; border-radius: 50%; }
@@ -573,7 +573,7 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tile.hov, .tdb-gcard.hov { box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); transform: translateY(-2px); } /* the z raise rides the CELL (detail P1) */
 /* the default ring dies; keyboard focus = a 2px ink outline riding the surface's radius */
 .tdb-tile:focus, .tdb-gcard:focus { outline: none; }
-.tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tdb-frame { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: var(--white, #fff); border-radius: 11px; overflow: hidden; }
 .tdb-band { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 5px; min-height: 27px; padding: 0 12px; border-bottom: 1px solid var(--line); border-radius: 11px 11px 0 0; }
 .tdb-bandl { display: flex; align-items: center; gap: 4px; min-width: 0; }
@@ -1028,7 +1028,7 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-ffwrap .tdb-ffsheet { width: 100%; }
 .tdb-ffx { position: absolute; top: -16px; right: -16px; z-index: 2; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--paper); border: 1.5px solid var(--ink); color: var(--ink); box-shadow: 0 4px 14px rgba(20, 8, 4, 0.3); cursor: pointer; transition: transform 0.12s; }
 .tdb-ffx:hover { transform: scale(1.06); }
-.tdb-ffx:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
+.tdb-ffx:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tdb-ffx svg { width: 16px; height: 16px; }
 @media (prefers-reduced-motion: reduce) { .tdb-ffx { transition: none; } }
 @media (max-width: 760px) { .tdb-ffx { top: 12px; right: 12px; } }
@@ -1229,7 +1229,7 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tsettagpal { display: inline-flex; gap: 4px; margin-left: auto; }
 .tdb-tsettagc { width: 15px; height: 15px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; padding: 0; }
 .tdb-tsettagc.on { outline: 1.5px solid #2a1a13; outline-offset: 1px; }
-.tdb-tsettagdel { background: transparent; border: 0; font: inherit; font-size: 11px; color: #8a7a6c; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.tdb-tsettagdel { background: transparent; border: 0; font: inherit; font-size: 11px; color: var(--sp-quiet); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .tdb-tsettagdel.armed { color: #7c3a2a; font-weight: 700; }
 .tdb-nc-tags { display: block; width: 100%; margin-top: 8px; }
 /* ⚠️ SUPERSEDED BY `todoDock.css` (pane faults, Phase 5) — this had no horizontal padding, and the

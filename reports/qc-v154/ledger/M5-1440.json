@@ -1,0 +1,52 @@
+[
+ {
+  "name": "the stage ring is gone",
+  "ok": true,
+  "got": "false false"
+ },
+ {
+  "name": "headline [n] of [goal] this week",
+  "ok": true,
+  "got": "0 of 3 this week"
+ },
+ {
+  "name": "streak pill [k]-week streak",
+  "ok": true,
+  "got": "0-week streak"
+ },
+ {
+  "name": "encouragement line",
+  "ok": true,
+  "got": "3 more keeps the streak going."
+ },
+ {
+  "name": "2px navy rule under the headline",
+  "ok": true,
+  "got": "2px solid rgb(42, 58, 82)"
+ },
+ {
+  "name": "twenty weeks",
+  "ok": true,
+  "got": "20"
+ },
+ {
+  "name": "right-aligned to the list's right edge (±1)",
+  "ok": true,
+  "got": "1384 · 1384"
+ },
+ {
+  "name": "header no taller than v153.4's 218",
+  "ok": true,
+  "got": "198.2"
+ },
+ {
+  "name": "a bar's tooltip: w/c [date] · [n] sent",
+  "ok": true,
+  "got": "w/c 9 Nov · 0 sent"
+ },
+ {
+  "name": "this week's tooltip stays inside the chart",
+  "ok": true,
+  "got": "{\"ok\":true,\"t\":[1262.125,1382.5],\"g\":[1004,1384]}"
+ }
+]

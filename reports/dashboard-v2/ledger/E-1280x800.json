@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "E1",
+  "where": "population",
+  "ok": true,
+  "detail": "feed 1456.859375"
+ },
+ {
+  "lock": "E1",
+  "where": "ends level with the founding card",
+  "ok": true,
+  "detail": "feed 1736.1 founding 1736.1 mid 1736.1"
+ },
+ {
+  "lock": "E1",
+  "where": "starts at the grid's top",
+  "ok": true,
+  "detail": "feed 279.2 mid 279.2"
+ },
+ {
+  "lock": "E1",
+  "where": "switch populations",
+  "ok": true,
+  "detail": "{\"All activity\":{\"n\":124,\"dirs\":[\"out\",\"in\"]},\"Agents\":{\"n\":4,\"dirs\":[\"in\"]},\"You\":{\"n\":120,\"dirs\":[\"out\"]}}"
+ },
+ {
+  "lock": "E1",
+  "where": "Agents shows agents' and You shows yours",
+  "ok": true,
+  "detail": "{\"All activity\":{\"n\":124,\"dirs\":[\"out\",\"in\"]},\"Agents\":{\"n\":4,\"dirs\":[\"in\"]},\"You\":{\"n\":120,\"dirs\":[\"out\"]}}"
+ },
+ {
+  "lock": "E1",
+  "where": "scrolls inside itself, never growing",
+  "ok": true,
+  "detail": "auto 50128/1409, box 1456.9 → 1456.9"
+ }
+]

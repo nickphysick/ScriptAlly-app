@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "AC21-2a",
+  "where": "the band holds no pencil",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "no “Edit these details”",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "wishlist · no tinted box, a 1.5px navy outline 9px out",
+  "ok": true,
+  "detail": "{\"top\":116,\"h\":116,\"bg\":\"rgba(0, 0, 0, 0)\",\"sh\":\"none\",\"ol\":\"solid\",\"olw\":\"1px\",\"decl\":\"1.5px\",\"olo\":\"9px\",\"col\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "wishlist · its heading is in view after any reveal",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "wishlist · no Close, no is-edit box, no save bar",
+  "ok": true,
+  "detail": "{\"close\":0,\"isEdit\":0,\"bar\":0}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "wishlist · the top edge holds still in the card's flow (±2px)",
+  "ok": true,
+  "detail": "116.0 → 116.0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "wishlist · the heading holds still in the card's flow (±2px)",
+  "ok": true,
+  "detail": "116.0 → 116.0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "genres · no tinted box, a 1.5px navy outline 9px out",
+  "ok": true,
+  "detail": "{\"top\":213,\"h\":213,\"bg\":\"rgba(0, 0, 0, 0)\",\"sh\":\"none\",\"ol\":\"solid\",\"olw\":\"1px\",\"decl\":\"1.5px\",\"olo\":\"9px\",\"col\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "genres · its heading is in view after any reveal",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "genres · no Close, no is-edit box, no save bar",
+  "ok": true,
+  "detail": "{\"close\":0,\"isEdit\":0,\"bar\":0}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "genres · the top edge holds still in the card's flow (±2px)",
+  "ok": true,
+  "detail": "213.0 → 213.0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "genres · the heading holds still in the card's flow (±2px)",
+  "ok": true,
+  "detail": "213.0 → 213.0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "materials · no tinted box, a 1.5px navy outline 9px out",
+  "ok": true,
+  "detail": "{\"top\":297,\"h\":297,\"bg\":\"rgba(0, 0, 0, 0)\",\"sh\":\"none\",\"ol\":\"solid\",\"olw\":\"1px\",\"decl\":\"1.5px\",\"olo\":\"9px\",\"col\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "materials · its heading is in view after any reveal",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "materials · no Close, no is-edit box, no save bar",
+  "ok": true,
+  "detail": "{\"close\":0,\"isEdit\":0,\"bar\":0}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "materials · the top edge holds still in the card's flow (±2px)",
+  "ok": true,
+  "detail": "297.0 → 297.0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "materials · the heading holds still in the card's flow (±2px)",
+  "ok": true,
+  "detail": "297.0 → 297.0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "how · no tinted box, a 1.5px navy outline 9px out",
+  "ok": true,
+  "detail": "{\"top\":14,\"h\":14,\"bg\":\"rgba(0, 0, 0, 0)\",\"sh\":\"none\",\"ol\":\"solid\",\"olw\":\"1px\",\"decl\":\"1.5px\",\"olo\":\"9px\",\"col\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "how · its heading is in view after any reveal",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "how · no Close, no is-edit box, no save bar",
+  "ok": true,
+  "detail": "{\"close\":0,\"isEdit\":0,\"bar\":0}"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "how · the top edge holds still in the card's flow (±2px)",
+  "ok": true,
+  "detail": "14.0 → 14.0"
+ },
+ {
+  "lock": "AC21-2a",
+  "where": "the footer stays in view while a section is open (measured)",
+  "ok": true,
+  "detail": ""
+ }
+]

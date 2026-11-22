@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L3-1512",
+  "where": "population: the banner and the With you chip",
+  "ok": false,
+  "detail": "n NaN · chip undefined"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "its n is the With you chip's count",
+  "ok": false,
+  "detail": "NaN vs undefined"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "one to five faces",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "Show them presses With you",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "…and the list is exactly the With you set",
+  "ok": false,
+  "detail": "87 rows, 87 not you"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "…which the All view tagged the same",
+  "ok": false,
+  "detail": "ids differ"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "drawn because n > 0",
+  "ok": false,
+  "detail": "NaN"
+ }
+]

@@ -148,7 +148,7 @@ describe("F-N — nothing aggregates the free-text line", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe("the rule — the letter is required on CREATE and only on create", () => {
+describe("the rule — a package may start empty (v26), and no update requires a letter", () => {
   const rules = decls(read("firestore.rules"));
 
   it("isValidPackage does NOT require a filled letter", () => {
@@ -164,8 +164,12 @@ describe("the rule — the letter is required on CREATE and only on create", () 
     expect(body).not.toContain("data.queryLetterVersionId.size() >= 1");
   });
 
-  it("the create rule requires one", () => {
-    expect(rules).toContain("incoming().queryLetterVersionId.size() >= 1");
+  /* RETARGETED (Submission packages v26, 25 Oct): "Start from: Empty" makes a package the writer fills by dragging
+     pieces in, so the create rule no longer requires a letter. Nothing goes out without one: the send drawer reads
+     `ql`, and the builder's pill says "Needs a letter". */
+  it("the create rule does not require one either: a package may start empty", () => {
+    expect(rules).not.toContain("incoming().queryLetterVersionId.size() >= 1");
+    expect(rules).toMatch(/allow create: if isOwner\(userId\) && isValidId\(packageId\) && isValidPackage\(incoming\(\), userId\);/);
   });
 
   it("all three slot keys are still required to be PRESENT", () => {

@@ -75,6 +75,9 @@ const DB_DATA: Record<string, unknown> = {
   authReady: true,
   collectionsReady: true,
   smartImportUsage: null,
+  /* plan rules v1: the resolved entitlement every gate reads — a founding writer, as every dev account is after the
+     backfill, so the smoke sees each page in full (the Free states have their own locks) */
+  entitlement: { basis: "founding", pro: true, prompts: false, trialEndsMs: null },
   manuscripts: [],
   versions: [],
   packages: [],
@@ -209,13 +212,35 @@ export const signedOutDbStub: Record<string, unknown> = new Proxy(
  */
 let seeded = false;
 let signedOut = false;
+/** Extra records merged over the seeded state for one render (`renderPageSeededWith`). */
+let extra: Record<string, unknown> | null = null;
+const withExtra = (more: Record<string, unknown>): Record<string, unknown> => new Proxy(
+  { ...DB_DATA, manuscripts: [SEED_MANUSCRIPT], agents: [SEED_AGENT], queries: [SEED_QUERY], ...more },
+  {
+    get(target, key) {
+      if (typeof key === "symbol") return undefined;
+      if (key in target) return target[key as string];
+      return asyncNoop;
+    },
+    has: () => true,
+  },
+);
 
 /** Render as a logged-out visitor until `restoreSmokeUser()`. Pair them in beforeEach/afterEach. */
 export const useSignedOutDb = () => { signedOut = true; };
-export const restoreSmokeUser = () => { signedOut = false; };
+export const restoreSmokeUser = () => { signedOut = false; freeWriter = false; };
+
+/** Plan rules v1: render as a day-15 Free writer (upgrade prompts, read-only Pro pages) until `restoreSmokeUser()`. */
+let freeWriter = false;
+export const useFreeWriterDb = () => { freeWriter = true; };
+const FREE_ENTITLEMENT = { basis: "free", pro: false, prompts: true, trialEndsMs: null };
+const asFree = (db: Record<string, unknown>) => new Proxy(db, { get: (t, k) => (k === "entitlement" ? FREE_ENTITLEMENT : (t as Record<string | symbol, unknown>)[k]) });
 
 export const dbMock = () => ({
-  useScriptAllyDb: () => (signedOut ? signedOutDbStub : seeded ? seededDbStub : dbStub),
+  useScriptAllyDb: () => {
+    const db = signedOut ? signedOutDbStub : seeded ? (extra ? withExtra(extra) : seededDbStub) : dbStub;
+    return freeWriter ? asFree(db) : db;
+  },
   DbProvider: ({ children }: { children?: React.ReactNode }) => children as React.ReactElement,
 });
 
@@ -226,6 +251,8 @@ export const dbMock = () => ({
  */
 export const toastMock = () => ({
   useToast: () => ({ showToast: () => {}, showConfirm: () => {} }),
+  /* Responses v15: the page reads the optional form (null outside a provider) */
+  useOptionalToast: () => ({ showToast: () => {}, showConfirm: () => {} }),
   ToastProvider: ({ children }: { children?: React.ReactNode }) => children as React.ReactElement,
 });
 
@@ -264,6 +291,22 @@ export function renderPageSeeded(node: React.ReactNode, route = "/dashboard"): s
     return renderToStaticMarkup(<MemoryRouter initialEntries={[route]}>{node}</MemoryRouter>);
   } finally {
     seeded = false;
+  }
+}
+
+/**
+ * Render against the seeded state PLUS some records of the caller's (a page whose populated path needs a
+ * collection the shared seed leaves empty — Submission packages needs a letter). Reset in a `finally`, like the
+ * flag above, so it cannot leak into a later file. The shared seed itself is unchanged for every other page.
+ */
+export function renderPageSeededWith(node: React.ReactNode, route: string, more: Record<string, unknown>): string {
+  seeded = true;
+  extra = more;
+  try {
+    return renderToStaticMarkup(<MemoryRouter initialEntries={[route]}>{node}</MemoryRouter>);
+  } finally {
+    seeded = false;
+    extra = null;
   }
 }
 

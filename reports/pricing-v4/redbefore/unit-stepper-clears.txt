@@ -1,0 +1,858 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-pricing4
+
+ ❯ src/marketing/campaignEstimate.test.ts (818 tests | 1 failed) 57ms
+   ✓ estimateCampaign agrees with the ref, case for case > the ref file is the full sweep (not vacuous) 1ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/s · don't know · unsure 1ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/m · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 65 · brisk 2ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · novel/l · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · nonfic · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · prep · pb · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/s · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/m · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · novel/l · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · nonfic · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · ready · pb · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/s · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/m · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · novel/l · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · nonfic · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-10-24 · already · pb · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/s · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/m · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · novel/l · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · nonfic · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · prep · pb · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/s · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/m · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · novel/l · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · nonfic · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · ready · pb · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/s · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/m · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · novel/l · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · nonfic · don't know · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 5 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 5 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 5 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 15 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 15 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 15 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 20 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 20 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 20 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 40 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 40 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 40 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 60 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 60 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 60 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 65 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 65 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 65 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 100 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 100 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 100 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 150 · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 150 · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · 150 · unsure 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · don't know · steady 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · don't know · brisk 0ms
+   ✓ estimateCampaign agrees with the ref, case for case > 2026-06-15 · already · pb · don't know · unsure 0ms
+   ✓ the pack's named cases, today fixed at 24 Oct 2026 > (a) Getting ready, a novel of 80–110k, I don't know, Not sure yet 0ms
+   ✓ the pack's named cases, today fixed at 24 Oct 2026 > (b) Ready to start, non-fiction, 40 agents, bigger batches 0ms
+   ✓ the parts > the fit thresholds are 1.25, 3.5 and 7 months — including the one-month plan the sweep never reaches 0ms
+   ✓ the parts > each slow season is counted once, in the order the campaign meets it 0ms
+   ✓ the parts > the agents stepper runs 5 to 150 0ms
+   × the parts > I don't know sets 40; a stepper press clears it; pressing it again clears it too 4ms
+     → expected { stage: null, kind: null, …(4) } to match object { agentsUnknown: false, agents: 45 }
+(4 matching properties omitted from actual)
+   ✓ the parts > Not sure yet is estimated at the steady pace, said to be a guess 0ms
+ ✓ src/marketing/pricingCounter.test.tsx (1 test) 8ms
+ ✓ src/marketing/pricingPage.test.tsx (12 tests) 31ms
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 830 passed (831)
+   Start at  14:28:20
+   Duration  332ms (transform 127ms, setup 0ms, collect 314ms, tests 96ms, environment 0ms, prepare 100ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/marketing/campaignEstimate.test.ts > the parts > I don't know sets 40; a stepper press clears it; pressing it again clears it too
+AssertionError: expected { stage: null, kind: null, …(4) } to match object { agentsUnknown: false, agents: 45 }
+(4 matching properties omitted from actual)
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "agents": 45,[22m
+[32m-   "agentsUnknown": false,[39m
+[31m+   "agentsUnknown": true,[39m
+[2m  }[22m
+
+ ❯ src/marketing/campaignEstimate.test.ts:101:32
+     99|     const idk = toggleUnknown(at60);
+    100|     expect(idk).toMatchObject({ agentsUnknown: true, agents: 40 });
+    101|     expect(stepAgents(idk, 5)).toMatchObject({ agentsUnknown: false, a…
+       |                                ^
+    102|     expect(stepAgents(idk, -5)).toMatchObject({ agentsUnknown: false, …
+    103|     expect(toggleUnknown(idk)).toMatchObject({ agentsUnknown: false, a…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

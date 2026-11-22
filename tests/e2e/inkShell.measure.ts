@@ -24,7 +24,7 @@ async function vp(page: Page) {
 test.describe("ink shell", () => {
 
   /* ── INK1 · frame ─────────────────────────────────────────────────────────────────────────────── */
-  test("INK1 · the frame is ink, the sheet inset 0/8/8 with a square top-left, theme-color, three themes", async ({ page }) => {
+  test("INK1 · the frame is ink, the sheet inset 0/8/8 with a 14px top-left (shell tabs v2), theme-color, three themes", async ({ page }) => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/queries", w, { scope: "ink1" });
       for (const theme of ["t-capp", "t-bold", "t-edn"]) {
@@ -50,7 +50,8 @@ test.describe("ink shell", () => {
       expect(near(v.h - win.b, 8), `sheet bottom inset ${v.h - win.b}`).toBe(true);
       expect(near(win.x, panel.r), "sheet starts at the sidebar's edge").toBe(true);
       const rad = (await css(page, ".ws-window", ["border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius"]))!;
-      expect(rad["border-top-left-radius"]).toBe("0px");
+      /* shell tabs v2 (16 Nov): the top-left corner is round again, 14px — the tabs start 24px in (ST2-A2) */
+      expect(rad["border-top-left-radius"]).toBe("14px");
       for (const k of ["border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius"]) expect(rad[k], k).toBe("12px");
       const meta = await page.evaluate(() => document.querySelector('meta[name="theme-color"]')?.getAttribute("content"));
       expect(meta).toBe("#1b2433");
@@ -64,15 +65,22 @@ test.describe("ink shell", () => {
         await inkOpen(page, route, w, { scope: "ink2" });
         const tab = await css(page, ".ws-ftab", ["background-color"]);
         const fl = await css(page, ".ws-ftfl", ["fill"]);
+        const flL = await css(page, ".ws-ftfl-l", ["fill"]);
         const win = await css(page, ".ws-window", ["background-color"]);
         expect(tab, `${route}: a tab is drawn`).not.toBeNull();
         expect(fl, `${route}: the fillet is drawn`).not.toBeNull();
+        /* RE-POINTED (shell tabs v2, 16 Nov): the tab and BOTH its curves are one colour, and that colour is the ground
+           directly beneath it — which on the Dashboard, Goals, Packages and Letters is the page's own, not the window's.
+           The equality with what is painted under the bar is ST2-B4 (pixels, every route); this lock keeps the parts
+           in step with each other, and with the window where nothing paints over it. */
+        expect(flL?.fill, `${route} ${w}: left curve vs tab`).toBe(tab?.["background-color"]);
+        expect(fl!.fill, `${route} ${w}: fillet vs tab`).toBe(tab!["background-color"]);
+        if (["/dashboard", "/goals", "/queries/packages", "/materials/letters"].includes(route)) continue;
         /* RE-POINTED (app shell v2, 9 Oct): the tab and its fillet are still one colour, but on a route whose header
            sits on the header sheet that colour is the SHEET's (#fbf9f5), not the page sheet's — the tab joins the
            header. Elsewhere it is still the page sheet's. SH2 S6 holds the same thing over the whole census. */
         const want = hasHeaderSheet(route) ? "rgb(251, 249, 245)" : win!["background-color"];
         expect(tab!["background-color"], `${route} ${w}: the tab`).toBe(want);
-        expect(fl!.fill, `${route} ${w}: fillet vs tab`).toBe(tab!["background-color"]);
       }
     }
   });
@@ -85,78 +93,16 @@ test.describe("ink shell", () => {
         const tab = (await rect(page, ".ws-ftab"))!;
         const win = (await rect(page, ".ws-window"))!;
         expect(tab, "the tab is drawn").not.toBeNull();
-        expect(near(tab.x, win.x), `tab ${tab.x} vs sheet ${win.x} at ${w} ${collapsed ? "collapsed" : "expanded"}`).toBe(true);
+        /* RE-POINTED (shell tabs v2): the first tab starts 24px in from the sheet's left edge (ST2-B1) */
+        expect(near(tab.x, win.x + 24), `tab ${tab.x} vs sheet ${win.x} + 24 at ${w} ${collapsed ? "collapsed" : "expanded"}`).toBe(true);
         expect(near(tab.b, win.y + 1), "the tab overlaps the sheet by 1px").toBe(true);
       }
     }
   });
 
-  /* ── INK6 · tab fit ───────────────────────────────────────────────────────────────────────────── */
-  /* ⚠️ RETARGETED FROM THE BRIEF'S "full names fit for every group at 1280" — a FALSE PREMISE, measured:
-     on all three Materials pages the row needs 643–656px of a 597px limit (bar-relative) with the
-     sidebar expanded, so its last sibling drops to an icon (the fit rule working). The lock asserts
-     what holds and is stronger: full names everywhere at 1440 and 1710, and at 1280 a sibling is named
-     EXACTLY when the measured row fits — the rule checked against its own arithmetic. */
-  test("INK6 · full names at 1440 and 1710 for every group (and by the arithmetic at 1280); an eight-page group goes names → icons → +N", async ({ page }) => {
-    const report: string[] = [];
-    for (const w of WIDTHS) {
-      for (const route of [...ROUTES, "/manuscripts", "/manuscripts/packages", "/queries/analytics", "/agents/discover", "/todo/calendar", "/todo/corkboard"]) {
-        await inkOpen(page, route, w, { scope: "ink6" });
-        const r = await page.evaluate(() => {
-          const bar = document.querySelector(".ws-pagebar")!.getBoundingClientRect();
-          const tab = document.querySelector(".ws-ftab")?.getBoundingClientRect();
-          const lim = document.querySelector(".ws-sfield")!.getBoundingClientRect().left - bar.left - 24;
-          const meas = [...document.querySelectorAll<HTMLElement>(".ws-ftmeasure [data-ftm]")].filter((e) => e.dataset.ftm !== "__icon").map((e) => e.getBoundingClientRect().width);
-          const modes = [...document.querySelectorAll(".ws-ftsibs:not(.ws-ftmeasure) > [data-sib], .ws-ftsibs:not(.ws-ftmeasure) .ws-ftmore")].map((x) => (x.classList.contains("ws-ftmore") ? "more" : x.getAttribute("data-mode")!));
-          const need = tab ? tab.right - bar.left + 16 + meas.reduce((a, b) => a + b + 6, 0) - (meas.length ? 6 : 0) : 0;
-          return { modes, need, lim };
-        });
-        const allFull = r.modes.every((m) => m === "full");
-        report.push(`${w} ${route}: ${r.modes.join(",") || "—"} (need ${Math.round(r.need)} / limit ${Math.round(r.lim)})`);
-        if (w >= 1440) expect(allFull, `${w} ${route}: ${r.modes.join(",")}`).toBe(true);
-        else expect(allFull, `${w} ${route}: named iff it fits (need ${r.need}, limit ${r.lim})`).toBe(r.need <= r.lim);
-      }
-    }
-    console.log(report.join("\n"));
-    await page.addInitScript(() => { (window as unknown as { __SA_INK_TABS: number }).__SA_INK_TABS = 5; });
-    const seen = new Set<string>();
-    for (const [w, collapsed] of [[1710, true], [1440, false], [1280, false], [1100, false], [960, false], [860, false]] as [number, boolean][]) {
-      await inkOpen(page, "/manuscripts", w, { collapsed });
-      const sib = page.locator(".ws-ftsibs:not(.ws-ftmeasure) > [data-sib], .ws-ftsibs:not(.ws-ftmeasure) .ws-ftmore");
-      const modes = await sib.evaluateAll((e) => e.map((x) => (x.classList.contains("ws-ftmore") ? "more" : x.getAttribute("data-mode")!)));
-      const seq = modes.join(" ");
-      expect(seq, `${w}: ${seq}`).toMatch(/^(full ?)*(ic ?)*(more)?$/);
-      modes.forEach((m) => seen.add(m));
-      /* the order and the current page — the visible tabs, then the menu, are the sidebar's order less the page */
-      const name = await page.locator(".ws-ftn").innerText();
-      const visible = await page.locator(".ws-ftsibs:not(.ws-ftmeasure) > [data-sib]").evaluateAll((e) => e.map((x) => x.getAttribute("aria-label")!));
-      let menu: string[] = [];
-      if (modes.includes("more")) {
-        await page.locator(".ws-ftmore").click();
-        await applyMutation(page, "ink6");
-        if (MUTATE === "ink6-current") {
-          await page.evaluate((n) => { const m = document.querySelector(".ws-ftmenu"); const b = document.createElement("button"); b.setAttribute("role", "menuitem"); b.textContent = n; m?.appendChild(b); }, name);
-        }
-        menu = await page.locator(".ws-ftmenu [role='menuitem']").allInnerTexts();
-        await page.keyboard.press("Escape");
-      }
-      expect([...visible, ...menu], `${w}: the current page is never among the siblings`).not.toContain(name);
-      const nav = await page.locator("#ws-sidebar .ws-nav").evaluate((n) => {
-        const out: string[] = []; let grp = false;
-        for (const el of [...n.children]) {
-          if (el.classList.contains("ws-glabel")) grp = /materials/i.test(el.textContent ?? "");
-          else if (grp) out.push(el.getAttribute("aria-label")!);
-        }
-        return out;
-      });
-      const sidebarOrder = nav.filter((l) => l !== name);
-      const tabs = [...visible, ...menu].filter((l) => sidebarOrder.includes(l));
-      expect(tabs, `${w}: the real pages keep the sidebar's order`).toEqual(sidebarOrder);
-    }
-    expect([...seen].sort(), "the eight-page group exercised every branch").toEqual(["full", "ic", "more"]);
-  });
+  /* ── INK6 · tab fit — RETIRED by shell nav v3 (13 Nov): the sibling row is replaced by the tab strip, whose fit
+     (current never icon or "+N", resting tabs give way from the right) is SNV3-F1/F2 in shellNavV3.measure.ts. ── */
 
-  /* ── INK7 · search ────────────────────────────────────────────────────────────────────────────── */
   test("INK7 · search is 168px, 12px before Log a query, at one x on every route; a click opens the palette", async ({ page }) => {
     for (const w of WIDTHS) {
       const xs: number[] = [];
@@ -277,10 +223,12 @@ test.describe("ink shell", () => {
   });
 
   /* ── INK13 · feedback ─────────────────────────────────────────────────────────────────────────── */
-  /* ⚠️ AMENDED TWICE (7 Oct): the fold stays at 920px, and — superseding the filled version of the earlier
+  /* ⚠️ RE-DERIVED 25 OCT: the fold is now below 967px (the full card is up only where every nav row fits —
+     sidebarNav.measure.ts SB4); 1000 still shows the card and 900/800 the button, so these readings hold.
+     ⚠️ AMENDED TWICE (7 Oct): the fold stayed at 920px, and — superseding the filled version of the earlier
      follow-up — the folded state is the reference's `.fbb`: no fill, a 1.5px terracotta ring, a cream
      label, a terracotta icon, the BETA tag on an 18% wash. Asserted at 900 (inside the fold) and 800. */
-  test("INK13 · the card opens FeedbackDock; below 920px the outlined .fbb; collapsed, the icon with its dot", async ({ page }) => {
+  test("INK13 · the card opens FeedbackDock; below 967px the outlined .fbb; collapsed, the icon with its dot", async ({ page }) => {
     await inkOpen(page, "/queries", 1440, { height: 1000, scope: "ink13" });
     await expect(page.locator(".ws-fbc"), "the card at 1000px tall").toBeVisible();
     await expect(page.locator(".ws-fbb")).toBeHidden();
@@ -338,7 +286,7 @@ test.describe("ink shell", () => {
 
   /* ── INK15 · clean edge ───────────────────────────────────────────────────────────────────────── */
   test("INK15 · no fade at the sheet's edges on any route, at rest or scrolled; a pinned toolbar gains its hairline after 3px", async ({ page }) => {
-    for (const route of [...ROUTES, "/queries/analytics", "/agents/discover", "/manuscripts/packages"]) {
+    for (const route of [...ROUTES, "/queries/analytics", "/agents/discover", "/queries/packages"]) {
       await inkOpen(page, route, 1440, { scope: "ink15" });
       for (const state of ["rest", "scrolled"]) {
         if (state === "scrolled") {
@@ -486,6 +434,10 @@ test.describe("ink shell", () => {
       return;
     }
     const ref = JSON.parse(readFileSync(refPath, "utf8"));
+    /* ⚠️ RE-POINTED BY DASHBOARD ON THE PHONE v1 (28 Oct): on Home the shell's generic phone bar is hidden, because the
+       phone dashboard draws its own top bar (mark, manuscript, Search, Feedback, +), which DM1-A1 locks. That one
+       element on that one route leaves this comparison; every other element on every route is still held to main. */
+    for (const o of [out, ref] as Record<string, Record<string, unknown>>[]) delete o["/dashboard"]?.[".ws-mobilebar"];
     expect(out, "the phone's shell against main's").toEqual(ref);
   });
 });
@@ -508,7 +460,11 @@ test.describe("ink shell at 3×", () => {
     }
   });
 
-  test("INK4 · the tab at a forced 220px with its label hidden matches the golden within 0.5%", async ({ page }) => {
+  /* ⚠️ RETIRED (shell tabs v2, 16 Nov): the golden is the v1 tab — 41 tall, 12px corners, one 13px fillet on the right.
+     The v2 tab is 40 tall with 11px corners and a 10px curve on both sides, so no capture of it can match; the curves'
+     shape is ST2-B5 (pixels at both feet, a middle tab current). Skipped rather than deleted so the golden's notes stay
+     with it; delete the test and the golden together once v2 is accepted. */
+  test.skip("INK4 · the tab at a forced 220px with its label hidden matches the golden within 0.5%", async ({ page }) => {
     await inkOpen(page, "/todo", 1710, { scope: "ink4" });
     await page.addStyleTag({ content: `
       .ws-ftab { width: 220px !important; }

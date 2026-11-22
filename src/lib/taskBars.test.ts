@@ -76,7 +76,7 @@ describe("a task as a bar", () => {
   });
 
   it("the holder is the board's own vocabulary", () => {
-    expect(taskHolder(true)).toBe("Overdue");
+    expect(taskHolder(true)).toBe("Past expected");
     expect(taskHolder(false)).toBe("With you");
   });
 });

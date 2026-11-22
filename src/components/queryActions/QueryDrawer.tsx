@@ -32,11 +32,16 @@ import { DrawerContext, initialsOf } from "./controls";
 import { peekOffered, setDockPeek, useDockPeek } from "../../lib/queryActions/dockPeek";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { DrawerShell, type ShellState } from "./DrawerShell";
+import { PhoneFlowShell, type LiveFacts } from "./PhoneFlowShell";
+import { useIsMobile } from "../shell/mobileChrome";
+import { buildQcRows, whereItStands } from "../../lib/qcSummary";
+import { PA2_CHIP_LABEL } from "../../lib/queriesPhone";
 import { panelStepWords } from "../../lib/queryActions/entry";
 import { SIDE_SLOT } from "../shell/SidePanel";
 import { ParkedChip } from "./ParkedChip";
 import type { JourneyView } from "./journey";
 import { LogJourney } from "./journeys/LogJourney";
+import { LogStagesPanel } from "../queries/centre/LogStagesPanel";
 import { ResponseJourney } from "./journeys/ResponseJourney";
 import { SentJourney } from "./journeys/SentJourney";
 import { NudgeJourney } from "./journeys/NudgeJourney";
@@ -85,6 +90,7 @@ const agentIdOf = (r: OpenRequest, queries: { id: string; agentId: string }[], a
 
 export function QueryDrawer() {
   const db = useScriptAllyDb();
+  const phone = useIsMobile();
   const [req, setReq] = useState<OpenRequest | null>(currentDrawerRequest());
   const [parked, setParked] = useState<ParkedJourney | null>(currentParked());
   const [clash, setClash] = useState<OpenRequest | null>(currentClash());
@@ -193,7 +199,7 @@ export function QueryDrawer() {
     }
     parkQueryDrawer({
       req: r, step: st.step, seen: st.seen, of: st.of, answers,
-      title: journeyTitle(r.mode, q?.status), doing: journeyDoing(r.mode, q?.status),
+      title: journeyTitle(r.mode, q), doing: journeyDoing(r.mode, q),
       name: (a?.name || a?.agency || "").trim(),
     });
     /* the instance is hidden by now; take the shrink off it so a resume slides in from the side */
@@ -307,7 +313,7 @@ export function QueryDrawer() {
     const q = clash.queryId ? db.queries.find((x) => x.id === clash.queryId) : undefined;
     const aid = agentIdOf(clash, db.queries);
     const a = aid ? db.agents.find((x) => x.id === aid) : undefined;
-    return { doing: journeyDoing(clash.mode, q?.status), name: (a?.name || a?.agency || "").trim() };
+    return { doing: journeyDoing(clash.mode, q), name: (a?.name || a?.agency || "").trim() };
   }, [clash, db.queries, db.agents]);
 
   const chip = parked && !req ? <ParkedChip key={parked.req.instance ?? "restored"} parked={parked} clash={clash} next={next} /> : null;
@@ -316,6 +322,37 @@ export function QueryDrawer() {
   if (isPracticeId(active.queryId) && active.mode !== "resp") return chip;
   const J = JOURNEYS[active.mode];
   if (!J) return chip;
+  /* Log a query v1.2 — ONE JOURNEY EVERYWHERE: on a desktop, "log" is the staged journey in the side panel over a dimmed
+     page (LogStagesPanel), whichever door asked. The phone keeps LogJourney below for now. Only an open request is
+     handed over: the staged journey is never parked. */
+  if (active.mode === "log" && !phone) {
+    return (
+      <>
+        {req ? <LogStagesPanel key={req.instance ?? 0} req={req} onClose={() => { const r = currentDrawerRequest(); closeQueryDrawer(); r?.onCancel?.(); }} /> : null}
+        {chip}
+      </>
+    );
+  }
+  /* PHONE APP v2, PART 4 — on a phone the same journey walks in the flow layout (PhoneFlowShell), never in the panel */
+  const flowPhone = phone && !(!!active?.panel && !!slot && slot.isConnected);
+  const liveFor = (view: { live?: { name: string; agency: string; book: string | null } | null }): LiveFacts => {
+    const q = active.queryId ? db.queries.find((x) => x.id === active.queryId) : undefined;
+    if (!q) {
+      const lv = view.live ?? null;
+      return { court: { label: "New query", tone: "new" }, day: 0, name: lv?.name ?? null, agency: lv?.agency ?? "", book: lv?.book ?? null };
+    }
+    const a = db.agents.find((x) => x.id === q.agentId);
+    const m = db.manuscripts.find((x) => x.id === q.manuscriptId);
+    const now = Date.now();
+    const row = buildQcRows([q], db.agents, [], now)[0];
+    const where = row ? whereItStands(row, now) : "agent";
+    const sent = q.dateSent ? Date.parse(String(q.dateSent)) : NaN;
+    return {
+      court: { label: PA2_CHIP_LABEL[where], tone: where },
+      day: Number.isFinite(sent) ? Math.max(0, Math.floor((now - sent) / 86_400_000)) : null,
+      name: (a?.name || a?.agency || "").trim() || null, agency: a?.name ? (a?.agency ?? "") : "", book: m?.title ?? null,
+    };
+  };
 
   const inPanel = !!active?.panel && !!slot && slot.isConnected;
   const pq = inPanel && req?.queryId ? db.queries.find((x) => x.id === req.queryId) : undefined;
@@ -339,6 +376,12 @@ export function QueryDrawer() {
                 viewRef.current = view;
                 /* v139 §B — the practice query's act header says so: "Recording a response · practice" */
                 const shown = isPracticeId(active.queryId) ? { ...view, eyebrow: "Recording a response · practice" } : view;
+                if (flowPhone) return (
+                  <PhoneFlowShell view={shown} mode={active.mode} open={open && !hidden && !parkedAway} live={liveFor(shown)}
+                    initialStep={active.resume?.step ?? initialStep ?? active.preset?.step} initialSeen={active.resume?.seen}
+                    from={req?.dock?.name ?? null} stateRef={shellRef}
+                    onCancel={close} onPark={() => void park()} onSave={() => runSave(view)} />
+                );
                 return (
                   <DrawerShell view={shown} mode={active.mode} open={open && !hidden && !parkedAway}
                     initialStep={active.resume?.step ?? initialStep ?? active.preset?.step} initialSeen={active.resume?.seen}

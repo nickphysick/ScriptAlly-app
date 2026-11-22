@@ -1,0 +1,27 @@
+[
+ {
+  "where": "the first thing in the nav is the Dashboard row",
+  "ok": true,
+  "detail": "{\"first\":\"ws-ni on\",\"firstName\":\"Dashboard\",\"heads\":[\"Queries\",\"Agents\",\"Your book\",\"Tasks\"],\"above\":11,\"below\":15}"
+ },
+ {
+  "where": "no WORKSPACE heading",
+  "ok": true,
+  "detail": "[\"Queries\",\"Agents\",\"Your book\",\"Tasks\"]"
+ },
+ {
+  "where": "the four group headings, in order",
+  "ok": true,
+  "detail": "[\"Queries\",\"Agents\",\"Your book\",\"Tasks\"]"
+ },
+ {
+  "where": "Dashboard sits 11px under the manuscript selector (±1)",
+  "ok": true,
+  "detail": "11"
+ },
+ {
+  "where": "the first heading sits 15px under Dashboard (±1)",
+  "ok": true,
+  "detail": "15"
+ }
+]

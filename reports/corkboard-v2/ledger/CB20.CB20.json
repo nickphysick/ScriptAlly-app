@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "CB20",
+  "where": "1512x982 suggestions",
+  "ok": true,
+  "detail": "suggested letter, ideas, research, to-check"
+ },
+ {
+  "lock": "CB20",
+  "where": "1512x982 clash line",
+  "ok": false,
+  "detail": "clash \"null\""
+ },
+ {
+  "lock": "CB20",
+  "where": "1512x982 disabled",
+  "ok": false,
+  "detail": "the button is enabled on a clash"
+ },
+ {
+  "lock": "CB20",
+  "where": "1512x982 clear",
+  "ok": true,
+  "detail": "a fresh name still clashes or stays disabled"
+ },
+ {
+  "lock": "CB20",
+  "where": "1280x800 suggestions",
+  "ok": true,
+  "detail": "suggested letter, ideas, research, to-check"
+ },
+ {
+  "lock": "CB20",
+  "where": "1280x800 clash line",
+  "ok": false,
+  "detail": "clash \"null\""
+ },
+ {
+  "lock": "CB20",
+  "where": "1280x800 disabled",
+  "ok": false,
+  "detail": "the button is enabled on a clash"
+ },
+ {
+  "lock": "CB20",
+  "where": "1280x800 clear",
+  "ok": true,
+  "detail": "a fresh name still clashes or stays disabled"
+ }
+]

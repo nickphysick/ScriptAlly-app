@@ -1,0 +1,22 @@
+[
+ {
+  "name": "the sidebar is open (its 80px rail drawn)",
+  "ok": true,
+  "got": "80px"
+ },
+ {
+  "name": "every bar control on one line (centres ±1)",
+  "ok": true,
+  "got": "428.1, 428.1, 428.1, 428.1, 428.1, 428.1 (fit: short)"
+ },
+ {
+  "name": "every box control (Find, the chips, Export, the switch) shares one top edge (±1)",
+  "ok": true,
+  "got": "408.1, 408.1, 408.1, 408.1, 408.1"
+ },
+ {
+  "name": "nothing overflows the bar",
+  "ok": true,
+  "got": "0px"
+ }
+]

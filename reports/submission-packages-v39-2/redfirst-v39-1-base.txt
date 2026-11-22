@@ -1,0 +1,254 @@
+
+Running 6 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L1-1280 · it has a ::before — none
+  ✗ L1-1280 · its background is the packages tile — none
+  ✗ L1-1280 · the tile is 240 × 240 — auto
+  ✗ L1-1280 · at the Contact list's opacity, 0.085 (±0.001) — 1
+  ✗ L1-1280 · faded in from the left (transparent at 0, full from 55%) — none
+  ✗ L1-1280 · behind the content (absolute, z-index -1, in an isolated card) — static auto auto
+[L1-1280] 6/12 green
+removed 22
+
+  ✘  2 [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1280 (6.8s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L1-1512 · it has a ::before — none
+  ✗ L1-1512 · its background is the packages tile — none
+  ✗ L1-1512 · the tile is 240 × 240 — auto
+  ✗ L1-1512 · at the Contact list's opacity, 0.085 (±0.001) — 1
+  ✗ L1-1512 · faded in from the left (transparent at 0, full from 55%) — none
+  ✗ L1-1512 · behind the content (absolute, z-index -1, in an isolated card) — static auto auto
+[L1-1512] 6/12 green
+removed 22
+
+  ✘  3 [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1512 (6.8s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L2 · exactly three typewriter headings, besides the tab — [{"tag":"SPAN","cls":"hl","head":true,"text":"Submission packages"},{"tag":"SPAN","cls":"p9-po-nm","head":true,"text":"Standard"}]
+  ✗ L2 · …Your packages — [{"tag":"SPAN","cls":"hl","head":true,"text":"Submission packages"},{"tag":"SPAN","cls":"p9-po-nm","head":true,"text":"Standard"}]
+  ✗ L2 · the one exception is the materials tab's label — []
+  ✗ L2 · Your packages: Special Elite 30px/1.1 ink, no capitals — {"tag":"H2","ff":"\"JetBrains Mono\", monospace","fs":"11px","lh":"13.2px","col":"rgba(28, 19, 15, 0.6)","tt":"uppercase","txt":"Your packages"}
+  ✗ L2 · under it: 'Open one to change it below', serif italic 15px at ink 60% — null
+  ✗ L2 · …4px down (±1) — undefined
+  ✗ L2 · the art sits to the left, centred on the pair (±1) — null
+[L2] 3/10 green
+removed 22
+
+  ✘  4 [measure] › tests/e2e/pk392.measure.ts:112:1 › L2 exactly three headings are set in the typewriter; the materials tab's label is the one exception (7.3s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L7-1280 · the tab is #5e2f3a — rgb(251, 249, 245)
+  ✗ L7-1280 · the tab is 40 tall (±1) — 84
+  ✗ L7-1280 · the materials card starts 40 under the tab's top (±1) — 791.34375 vs 791.34375
+  ✗ L7-1280 · …in full: scrollWidth ≤ clientWidth — {"name":"Comps-forward, for agents who ask for it","sw":283,"cw":101,"to":"ellipsis","ws":"nowrap","edge":"none","add":{"vis":true,"op":"0"},"meta":null}
+  ✗ L7-1280 · …and never ellipsised — {"name":"Comps-forward, for agents who ask for it","sw":283,"cw":101,"to":"ellipsis","ws":"nowrap","edge":"none","add":{"vis":true,"op":"0"},"meta":null}
+  ✗ L7-1280 · exactly one row has the berry edge — [["Comps-forward, for agents who ask for it","none"],["Hook-first","none"]]
+  ✗ L7-1280 · …it is the row in this package, and says so first — undefined
+  ✗ L7-1280 · …and it has no Add — undefined
+  ✗ L7-1280 · every row has its meta line (Sent n / Not sent yet) — [null,null]
+  ✗ L7-1280 · Add is hidden at rest — [{"vis":true,"op":"0"},{"vis":true,"op":"1"}]
+  ✗ L7-1280 · Add shows on focus — 0
+[L7-1280] 6/17 green
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+removed 22
+
+  ✘  5 [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1280 (13.6s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L7-1512 · the tab is #5e2f3a — rgb(251, 249, 245)
+  ✗ L7-1512 · the tab is 40 tall (±1) — 84
+  ✗ L7-1512 · the materials card starts 40 under the tab's top (±1) — 709.34375 vs 709.34375
+  ✗ L7-1512 · exactly one row has the berry edge — [["Comps-forward, for agents who ask for it","none"],["Hook-first","none"]]
+  ✗ L7-1512 · …it is the row in this package, and says so first — undefined
+  ✗ L7-1512 · …and it has no Add — undefined
+  ✗ L7-1512 · every row has its meta line (Sent n / Not sent yet) — [null,null]
+  ✗ L7-1512 · Add is hidden at rest — [{"vis":true,"op":"0"},{"vis":true,"op":"1"}]
+  ✗ L7-1512 · Add shows on focus — 0
+[L7-1512] 5/14 green
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+removed 22
+
+  ✘  6 [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1512 (13.2s)
+
+
+  1) [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1280 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "it has a ::before — none",
+    +   "its background is the packages tile — none",
+    +   "the tile is 240 × 240 — auto",
+    +   "at the Contact list's opacity, 0.085 (±0.001) — 1",
+    +   "faded in from the left (transparent at 0, full from 55%) — none",
+    +   "behind the content (absolute, z-index -1, in an isolated card) — static auto auto",
+    + ]
+
+      43 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      44 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 45 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      46 |   }
+      47 | }
+      48 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:45:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:107:7
+
+    Error Context: test-results/pk392.measure.ts-L1-the-he-4d3ae--title-is-unchanged-at-1280-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L1-the-he-4d3ae--title-is-unchanged-at-1280-measure/error-context.md
+
+  2) [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1512 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "it has a ::before — none",
+    +   "its background is the packages tile — none",
+    +   "the tile is 240 × 240 — auto",
+    +   "at the Contact list's opacity, 0.085 (±0.001) — 1",
+    +   "faded in from the left (transparent at 0, full from 55%) — none",
+    +   "behind the content (absolute, z-index -1, in an isolated card) — static auto auto",
+    + ]
+
+      43 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      44 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 45 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      46 |   }
+      47 | }
+      48 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:45:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:107:7
+
+    Error Context: test-results/pk392.measure.ts-L1-the-he-ee0d0--title-is-unchanged-at-1512-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L1-the-he-ee0d0--title-is-unchanged-at-1512-measure/error-context.md
+
+  3) [measure] › tests/e2e/pk392.measure.ts:112:1 › L2 exactly three headings are set in the typewriter; the materials tab's label is the one exception 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 9
+
+    - Array []
+    + Array [
+    +   "exactly three typewriter headings, besides the tab — [{\"tag\":\"SPAN\",\"cls\":\"hl\",\"head\":true,\"text\":\"Submission packages\"},{\"tag\":\"SPAN\",\"cls\":\"p9-po-nm\",\"head\":true,\"text\":\"Standard\"}]",
+    +   "…Your packages — [{\"tag\":\"SPAN\",\"cls\":\"hl\",\"head\":true,\"text\":\"Submission packages\"},{\"tag\":\"SPAN\",\"cls\":\"p9-po-nm\",\"head\":true,\"text\":\"Standard\"}]",
+    +   "the one exception is the materials tab's label — []",
+    +   "Your packages: Special Elite 30px/1.1 ink, no capitals — {\"tag\":\"H2\",\"ff\":\"\\\"JetBrains Mono\\\", monospace\",\"fs\":\"11px\",\"lh\":\"13.2px\",\"col\":\"rgba(28, 19, 15, 0.6)\",\"tt\":\"uppercase\",\"txt\":\"Your packages\"}",
+    +   "under it: 'Open one to change it below', serif italic 15px at ink 60% — null",
+    +   "…4px down (±1) — undefined",
+    +   "the art sits to the left, centred on the pair (±1) — null",
+    + ]
+
+      43 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      44 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 45 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      46 |   }
+      47 | }
+      48 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:45:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:145:5
+
+    Error Context: test-results/pk392.measure.ts-L2-exactl-d5bd7--label-is-the-one-exception-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L2-exactl-d5bd7--label-is-the-one-exception-measure/error-context.md
+
+  4) [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1280 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 13
+
+    - Array []
+    + Array [
+    +   "the tab is #5e2f3a — rgb(251, 249, 245)",
+    +   "the tab is 40 tall (±1) — 84",
+    +   "the materials card starts 40 under the tab's top (±1) — 791.34375 vs 791.34375",
+    +   "…in full: scrollWidth ≤ clientWidth — {\"name\":\"Comps-forward, for agents who ask for it\",\"sw\":283,\"cw\":101,\"to\":\"ellipsis\",\"ws\":\"nowrap\",\"edge\":\"none\",\"add\":{\"vis\":true,\"op\":\"0\"},\"meta\":null}",
+    +   "…and never ellipsised — {\"name\":\"Comps-forward, for agents who ask for it\",\"sw\":283,\"cw\":101,\"to\":\"ellipsis\",\"ws\":\"nowrap\",\"edge\":\"none\",\"add\":{\"vis\":true,\"op\":\"0\"},\"meta\":null}",
+    +   "exactly one row has the berry edge — [[\"Comps-forward, for agents who ask for it\",\"none\"],[\"Hook-first\",\"none\"]]",
+    +   "…it is the row in this package, and says so first — undefined",
+    +   "…and it has no Add — undefined",
+    +   "every row has its meta line (Sent n / Not sent yet) — [null,null]",
+    +   "Add is hidden at rest — [{\"vis\":true,\"op\":\"0\"},{\"vis\":true,\"op\":\"1\"}]",
+    +   "Add shows on focus — 0",
+    + ]
+
+      43 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      44 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 45 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      46 |   }
+      47 | }
+      48 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:45:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:205:9
+
+    Error Context: test-results/pk392.measure.ts-L7-the-ma-25f5d-ever-cut-a-name-off-at-1280-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L7-the-ma-25f5d-ever-cut-a-name-off-at-1280-measure/error-context.md
+
+  5) [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1512 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 11
+
+    - Array []
+    + Array [
+    +   "the tab is #5e2f3a — rgb(251, 249, 245)",
+    +   "the tab is 40 tall (±1) — 84",
+    +   "the materials card starts 40 under the tab's top (±1) — 709.34375 vs 709.34375",
+    +   "exactly one row has the berry edge — [[\"Comps-forward, for agents who ask for it\",\"none\"],[\"Hook-first\",\"none\"]]",
+    +   "…it is the row in this package, and says so first — undefined",
+    +   "…and it has no Add — undefined",
+    +   "every row has its meta line (Sent n / Not sent yet) — [null,null]",
+    +   "Add is hidden at rest — [{\"vis\":true,\"op\":\"0\"},{\"vis\":true,\"op\":\"1\"}]",
+    +   "Add shows on focus — 0",
+    + ]
+
+      43 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      44 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 45 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      46 |   }
+      47 | }
+      48 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:45:83)
+        at /Users/nickphysick/ScriptAlly-pk392/tests/e2e/pk392.measure.ts:205:9
+
+    Error Context: test-results/pk392.measure.ts-L7-the-ma-c93dd-ever-cut-a-name-off-at-1512-measure/error-context.md
+
+    Error Context: test-results/pk392.measure.ts-L7-the-ma-c93dd-ever-cut-a-name-off-at-1512-measure/error-context.md
+
+  5 failed
+    [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1280 
+    [measure] › tests/e2e/pk392.measure.ts:77:3 › L1 the header card carries the packages pattern; nothing overflows; the title is unchanged, at 1512 
+    [measure] › tests/e2e/pk392.measure.ts:112:1 › L2 exactly three headings are set in the typewriter; the materials tab's label is the one exception 
+    [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1280 
+    [measure] › tests/e2e/pk392.measure.ts:150:3 › L7 the materials folder tab, and rows that never cut a name off, at 1512 
+  1 passed (1.4m)

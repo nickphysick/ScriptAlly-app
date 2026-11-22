@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: q152-nudge is nudge due",
+  "ok": true,
+  "got": "No reply from Priya yet Reply was due 15 Nov · 7 days ago Priya replied Close it Nudge"
+ },
+ {
+  "name": "population: the nudge was logged",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the footer says \"Nudged today\"",
+  "ok": true,
+  "got": "Waiting on Priya Nudged today · goes quiet on 20 Dec Record a response"
+ },
+ {
+  "name": "the thread gained a nudge step",
+  "ok": true,
+  "got": "[\"You sent Priya your query\",\"You nudged Priya\"]"
+ },
+ {
+  "name": "the reply date moved to the nudge plus the quiet window (goes quiet on 20 Dec)",
+  "ok": true,
+  "got": "Waiting on Priya Nudged today · goes quiet on 20 Dec Record a response"
+ }
+]

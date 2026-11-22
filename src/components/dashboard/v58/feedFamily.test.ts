@@ -90,3 +90,12 @@ describe("feed drawer v2 — the row (FD2 B3, B4, B5)", () => {
     expect(h).toContain("<time>1:05pm</time>");
   });
 });
+
+describe("Query Centre v152.1 — telling other agents about an offer", () => {
+  it("has no status, and is the offer's family, never closed", () => {
+    const e = { app: false, activityType: ActivityType.STATUS_CHANGED, status: null, eventKey: "offer_told" };
+    expect(feedFamily(e)).toBe("offer");
+    expect(fellToClosed(e)).toBe(false);
+    expect(feedFamily({ ...e, eventKey: null })).toBe("closed");
+  });
+});

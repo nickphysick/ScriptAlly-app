@@ -1,0 +1,52 @@
+[
+ {
+  "where": "1440: the tip is up",
+  "ok": true,
+  "detail": "Agent fitQueryHawk is about finding the "
+ },
+ {
+  "where": "1440: inside the viewport",
+  "ok": true,
+  "detail": "{\"left\":12,\"right\":292,\"top\":753.1875,\"bottom\":888,\"w\":1440,\"h\":900,\"clipped\":[],\"text\":\"Agent fitQueryHawk is about finding the right agent, not just any agent. Rate how well they fit you and your book, and your Contact list and query suggestions put your best fits first.\"}"
+ },
+ {
+  "where": "1440: clipped by no ancestor",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "1440: hovering 2 says Worth a try",
+  "ok": true,
+  "detail": "Worth a try"
+ },
+ {
+  "where": "4 reads Great fit",
+  "ok": true,
+  "detail": "Great fit"
+ },
+ {
+  "where": "starRating: 4 stored",
+  "ok": true,
+  "detail": "{\"id\":\"agent-d1q24nnid\",\"name\":\"Rowan Runf3lis\",\"agency\":\"Fitt & Co\",\"starRating\":4,\"weeks\":null,\"agencyUnknown\":null,\"submissionMethod\":\"Email\",\"submissionMethodOther\":null}"
+ },
+ {
+  "where": "1280: the tip is up",
+  "ok": true,
+  "detail": "Agent fitQueryHawk is about finding the "
+ },
+ {
+  "where": "1280: inside the viewport",
+  "ok": true,
+  "detail": "{\"left\":12,\"right\":292,\"top\":653.1875,\"bottom\":788,\"w\":1280,\"h\":800,\"clipped\":[],\"text\":\"Agent fitQueryHawk is about finding the right agent, not just any agent. Rate how well they fit you and your book, and your Contact list and query suggestions put your best fits first.\"}"
+ },
+ {
+  "where": "1280: clipped by no ancestor",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "1280: hovering 2 says Worth a try",
+  "ok": true,
+  "detail": "Worth a try"
+ }
+]

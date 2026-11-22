@@ -1,0 +1,170 @@
+[
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · population: the strip",
+  "ok": true,
+  "detail": "{\"sT\":169.75,\"sL\":272,\"sR\":1248,\"stB\":169.75,\"shL\":272,\"shR\":1248}"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · it opens below the toolbar",
+  "ok": true,
+  "detail": "strip 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · it spans the list card",
+  "ok": true,
+  "detail": "left 0.0 · right 0.0"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · a choice applies at once, the strip still open",
+  "ok": true,
+  "detail": "All 87 queries | 87 of 87 showing → 27 of 87 queries | 27 of 87 showing"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · no Show button",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · exactly one Clear all",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 unpinned · Export is in the applied row",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · population: the strip",
+  "ok": true,
+  "detail": "{\"sT\":249.75,\"sL\":92,\"sR\":1248,\"stB\":249.75,\"shL\":68,\"shR\":1272}"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · it opens below the toolbar",
+  "ok": true,
+  "detail": "strip 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · it spans the list card, inset 24",
+  "ok": true,
+  "detail": "left 24.0 · right 24.0"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · a choice applies at once, the strip still open",
+  "ok": true,
+  "detail": "87 of 87 showing → 27 of 87 showing"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · no Show button",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · exactly one Clear all",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "L7",
+  "where": "1280 full screen · Export is in the applied row",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · population: the strip",
+  "ok": true,
+  "detail": "{\"sT\":169.75,\"sL\":272,\"sR\":1480,\"stB\":169.75,\"shL\":272,\"shR\":1480}"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · it opens below the toolbar",
+  "ok": true,
+  "detail": "strip 169.8 · toolbar 169.8"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · it spans the list card",
+  "ok": true,
+  "detail": "left 0.0 · right 0.0"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · a choice applies at once, the strip still open",
+  "ok": true,
+  "detail": "All 87 queries | 87 of 87 showing → 27 of 87 queries | 27 of 87 showing"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · no Show button",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · exactly one Clear all",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 unpinned · Export is in the applied row",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · population: the strip",
+  "ok": true,
+  "detail": "{\"sT\":249.75,\"sL\":92,\"sR\":1480,\"stB\":249.75,\"shL\":68,\"shR\":1504}"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · it opens below the toolbar",
+  "ok": true,
+  "detail": "strip 249.8 · toolbar 249.8"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · it spans the list card, inset 24",
+  "ok": true,
+  "detail": "left 24.0 · right 24.0"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · a choice applies at once, the strip still open",
+  "ok": true,
+  "detail": "87 of 87 showing → 27 of 87 showing"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · no Show button",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · exactly one Clear all",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "lock": "L7",
+  "where": "1512 full screen · Export is in the applied row",
+  "ok": true,
+  "detail": "true"
+ }
+]

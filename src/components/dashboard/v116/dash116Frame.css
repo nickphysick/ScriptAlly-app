@@ -1,0 +1,44 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD v116 — the task card's inner frame (ref design-refs/dashboard-v116/dashboard-v116.html).
+ *
+ * ⚠️ EVERY TEXT ELEMENT NAMES ITS FAMILY. `lib/brand.tsx` injects a family on bare `span`/`div`/`b` at
+ * runtime; a class outranks it, inheritance does not. And the stacks are PORTALLED to `<body>`, outside
+ * `.d58`, so they read the `:root` faces (`--sp-type`, `--sp-serif`) and state their colours as literals.
+ */
+
+/* ── E · the task card's inner frame (Nick's ruling: the stone band of Consider closing never blends into the page) ──
+   The hoop cards' own frame, read from the same tokens: 6px of the card's white (the rim), then a 1px burgundy
+   line at an 11px radius. The task card had no rim, so it gains one, and its band takes the frame's top corners. */
+.d58 .d71-task { padding: var(--dash-rim, 6px); }
+.d58 .d71-task > .d71-th { border-radius: var(--dash-frame-radius, 11px) var(--dash-frame-radius, 11px) 0 0; }
+.d58 .d71-task::after {
+  content: "";
+  position: absolute;
+  inset: var(--dash-rim, 6px);
+  z-index: 3;
+  border: 1px solid var(--dash-frame, #7c3a2a);
+  border-radius: var(--dash-frame-radius, 11px);
+  pointer-events: none;
+}
+/* ⚠️ THE RIM IS PAID FROM THE CARD'S OWN PADDING, NOT FROM ITS CONTENT. Six pixels on every side would otherwise
+   take 12 off the body's height and width, and the 254px card (v93) would scroll by 2–12px: measured, DB93 A3
+   "d71-tb 135/133". Each padding below is v71/v93's own value less the rim, in the same steps, so the band, the
+   body and the foot keep their content boxes exactly. */
+.d58 .d71-task > .d71-th { padding: 10px 8px 10px 16px; }
+.d58 .d71-task :is(.d71-tb) { padding: 12px 16px 6px; }
+.d58 .d71-task > .d71-tf { padding: 12px 14px 8px; }
+.d58 .d71-task .d71-tb--none { padding-bottom: 12px; }
+@media (max-width: 1439px) {
+  .d58 .d71-task > .d71-th { padding: 9px 6px 9px 12px; }
+}
+@media (max-height: 900px) {
+  .d58 .d71-task :is(.d71-tb) { padding: 4px 14px 4px; }
+  .d58 .d71-task > .d71-tf { padding: 9px 10px 4px; }
+}
+@media (max-height: 760px) {
+  .d58 .d71-task :is(.d71-tb) { padding: 6px 12px 4px; }
+  .d58 .d71-task > .d71-tf { padding: 8px 10px 4px; }
+}

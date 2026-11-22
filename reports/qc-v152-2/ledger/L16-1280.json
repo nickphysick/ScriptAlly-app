@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the full request",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "one form, in place",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "only that bubble is replaced",
+  "ok": true,
+  "detail": "4 → 3"
+ },
+ {
+  "where": "the scroll does not jump",
+  "ok": true,
+  "detail": "20 → 20"
+ },
+ {
+  "where": "no control changes the step's type",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no whole-history form",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Delete names its dependants (\"Delete this step? Sent the full depends on it, so it goes too. Rhea’s card goes back to Revise & resubmit.\nKeep it\nDelete\")",
+  "ok": true,
+  "detail": "Delete this step? Sent the full depends on it, so it goes too. Rhea’s card goes back to Revise & resubmit.\nKeep it\nDelete"
+ }
+]

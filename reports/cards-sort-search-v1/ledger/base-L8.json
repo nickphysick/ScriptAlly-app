@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L8",
+  "where": "1280 cards · population: Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 cards · Date added shows months",
+  "ok": false,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 cards · back to Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 list · population: Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 list · Date added shows months",
+  "ok": false,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1280 list · back to Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 cards · population: Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 cards · Date added shows months",
+  "ok": false,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 cards · back to Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 list · population: Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 list · Date added shows months",
+  "ok": false,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ },
+ {
+  "lock": "L8",
+  "where": "1512 list · back to Surname shows letters",
+  "ok": true,
+  "detail": "{\"nav\":\"az\",\"mode\":null,\"letters\":26,\"jumps\":[]}"
+ }
+]

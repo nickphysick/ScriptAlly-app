@@ -1,0 +1,152 @@
+[
+ {
+  "name": "Queried: outer",
+  "ok": false,
+  "got": "0,0,537.28,497.35 vs 0,0,536.76,478.75"
+ },
+ {
+  "name": "Queried: strip",
+  "ok": false,
+  "got": "11.62,0,525.66,81.21 vs 11.62,0,525.14,62.61"
+ },
+ {
+  "name": "Queried: pill right edge and centre held (size is the reference's)",
+  "ok": false,
+  "got": "403.61,98.67,113.23,33.13 vs 401.3,79.01,115.57,35.19"
+ },
+ {
+  "name": "Queried: footer",
+  "ok": false,
+  "got": "0,403.75,526,93.6 vs 0,385.15,526,93.6"
+ },
+ {
+  "name": "Queried: 1 bubbles",
+  "ok": false,
+  "got": "[[222.6,323.68,287.82,47.99]]"
+ },
+ {
+  "name": "Partial Requested: outer",
+  "ok": false,
+  "got": "0,0,540.3,605.46 vs 0,0,539.78,586.86"
+ },
+ {
+  "name": "Partial Requested: strip",
+  "ok": false,
+  "got": "14.64,0,525.66,81.21 vs 14.64,0,525.14,62.61"
+ },
+ {
+  "name": "Partial Requested: pill right edge and centre held (size is the reference's)",
+  "ok": false,
+  "got": "345.17,96.96,174.69,34.84 vs 340.48,77.22,179.4,36.97"
+ },
+ {
+  "name": "Partial Requested: footer",
+  "ok": false,
+  "got": "0,511.86,526,93.6 vs 0,493.26,526,93.6"
+ },
+ {
+  "name": "Partial Requested: 2 bubbles",
+  "ok": false,
+  "got": "[[206.45,323.15,306.98,48.53],[52.58,440.41,238.96,65.48]]"
+ },
+ {
+  "name": "Full Requested: outer",
+  "ok": true,
+  "got": "0,0,542.89,698.36 vs 0,0,542.89,698.36"
+ },
+ {
+  "name": "Full Requested: strip",
+  "ok": false,
+  "got": "17.24,0,525.66,81.21 vs 17.76,0,525.14,62.61"
+ },
+ {
+  "name": "Full Requested: pill right edge and centre held (size is the reference's)",
+  "ok": false,
+  "got": "366.78,97.49,155.67,34.31 vs 363.01,77.77,159.99,36.43"
+ },
+ {
+  "name": "Full Requested: footer",
+  "ok": true,
+  "got": "0,604.76,526,93.6 vs 0,604.76,526,93.6"
+ },
+ {
+  "name": "Full Requested: 4 bubbles",
+  "ok": true,
+  "got": "[[239.45,192.95,280.24,47.78],[59.36,309.46,260.31,47.22],[232.02,435.83,280.88,47.8],[52.57,552.37,354.2,49.85]]"
+ },
+ {
+  "name": "Offer: outer",
+  "ok": true,
+  "got": "0,0,542.89,698.36 vs 0,0,542.89,698.36"
+ },
+ {
+  "name": "Offer: strip",
+  "ok": false,
+  "got": "17.24,0,525.66,81.21 vs 17.76,0,525.14,62.61"
+ },
+ {
+  "name": "Offer: pill right edge and centre held (size is the reference's)",
+  "ok": false,
+  "got": "429.38,99.24,93.07,32.56 vs 428.35,79.59,94.65,34.61"
+ },
+ {
+  "name": "Offer: footer",
+  "ok": true,
+  "got": "0,604.76,526,93.6 vs 0,604.76,526,93.6"
+ },
+ {
+  "name": "Offer: 3 bubbles",
+  "ok": true,
+  "got": "[[59.36,309.51,356.57,49.91],[160.66,433.89,352.25,49.79],[52.57,552.42,199.88,45.54]]"
+ },
+ {
+  "name": "Rejected: outer",
+  "ok": false,
+  "got": "0,0,539.77,586.6 vs 0,0,539.25,567.99"
+ },
+ {
+  "name": "Rejected: strip",
+  "ok": false,
+  "got": "14.12,0,525.66,81.21 vs 14.12,0,525.14,62.61"
+ },
+ {
+  "name": "Rejected: pill right edge and centre held (size is the reference's)",
+  "ok": false,
+  "got": "414.36,98.9,104.97,32.9 vs 412.43,79.25,106.93,34.95"
+ },
+ {
+  "name": "Rejected: footer",
+  "ok": false,
+  "got": "0,493,526,93.6 vs 0,474.39,526,93.6"
+ },
+ {
+  "name": "Rejected: 2 bubbles",
+  "ok": false,
+  "got": "[[55.97,318.96,188.04,45.21],[209.83,444.8,299.69,48.32]]"
+ },
+ {
+  "name": "Queried (quiet): outer",
+  "ok": false,
+  "got": "0,0,536.96,486.03 vs 0,0,536.44,467.42"
+ },
+ {
+  "name": "Queried (quiet): strip",
+  "ok": false,
+  "got": "11.31,0,525.66,81.21 vs 11.31,0,525.14,62.61"
+ },
+ {
+  "name": "Queried (quiet): pill right edge and centre held (size is the reference's)",
+  "ok": false,
+  "got": "403.29,98.67,113.23,33.13 vs 400.98,79.01,115.57,35.19"
+ },
+ {
+  "name": "Queried (quiet): footer",
+  "ok": false,
+  "got": "0,392.43,526,93.6 vs 0,373.82,526,93.6"
+ },
+ {
+  "name": "Queried (quiet): 1 bubbles",
+  "ok": false,
+  "got": "[[182.04,322.58,328.06,69.98]]"
+ }
+]

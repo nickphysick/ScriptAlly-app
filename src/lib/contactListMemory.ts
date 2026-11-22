@@ -4,7 +4,8 @@
  *
  * contactListMemory — what the Contact list remembers, and for how long (v19 §G).
  *
- *   - PER DEVICE (localStorage, `qh.cl.view`): the grouping, the sort, its direction, and whether the list is pinned.
+ *   - PER DEVICE (localStorage, `qh.cl.view`): the grouping, the sort, its direction, whether the list is in full screen
+ *     (v19 called it pinned; the field keeps that name) and, from v20, the view (Cards or List).
  *   - FOR THE VISIT (sessionStorage, `sa.contactList.v5`): the filters, the "At a glance" group, the search and the
  *     scroll position. Coming back within the visit restores them; a new visit starts at the top, unfiltered.
  *
@@ -22,7 +23,7 @@
  */
 import {
   type ContactFilters, emptyContactFilters, GROUP_OPTIONS, type GroupKey, OPEN_CHOICES, type OpenChoice,
-  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, type SortKey, STATUS_CHOICES, type StatusKey,
+  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, HEADING_SORTS, type SortKey, STATUS_CHOICES, type StatusKey,
 } from "./contactList";
 import { GLANCE_KEYS, type GlanceKey } from "./contactGlance";
 
@@ -32,6 +33,10 @@ export type Density = "comfortable" | "compact";
 const oneOf = <T extends string>(v: unknown, keys: readonly T[], fallback: T): T =>
   (typeof v === "string" && (keys as readonly string[]).includes(v) ? (v as T) : fallback);
 
+/** Contact list v20 — how the agents are drawn: as paper cards in a grid, or as the list's rows */
+export type ContactView = "cards" | "list";
+export const CONTACT_VIEWS: readonly ContactView[] = ["cards", "list"];
+
 /* ── per device: the view ─────────────────────────────────────────────────────────────────────────────────────── */
 
 export const LIST_VIEW_VERSION = 1;
@@ -39,8 +44,18 @@ export const LIST_VIEW_KEY = "qh.cl.view";
 /** v138.6's pin key for this page, and v16's before it — read once, when `qh.cl.view` has no record, then removed */
 export const OLD_PIN_KEYS = ["sa.pinList.agents", "sa.contactsFull"] as const;
 
-export interface ListView { group: GroupKey; sort: SortKey; reversed: boolean; pinned: boolean }
-export const DEFAULT_LIST_VIEW = (): ListView => ({ group: "none", sort: "surname", reversed: false, pinned: false });
+/* v20 §G — `view` joins version 1 rather than bumping it: a record without it reads List (the first-visit view), so
+   nobody's grouping, sort or full screen is thrown away for the sake of a new field */
+/* v24 B1 — `byStatus` joins version 1 too: whether the list is grouped by where each agent stands (Status) or not. A record
+   without it reads grouped, the v24 default — every record written before v24 carries `group: "none"` (the address
+   book wrote its default on every visit), so reading `group` would have opened everyone ungrouped. `group` itself is
+   kept as written and no longer read by the page. */
+/* Contact list v26 — `group26` joins version 1: the page's own grouping (Letter, Status or none). Absent reads Letter, the
+   v26 default (`group` and `byStatus` stay as written; the page no longer reads them). */
+export type Group26Key = "letter" | "status" | "none";
+export const GROUP26_KEYS: readonly Group26Key[] = ["letter", "status", "none"];
+export interface ListView { group: GroupKey; sort: SortKey; reversed: boolean; pinned: boolean; view: ContactView; byStatus: boolean; group26: Group26Key }
+export const DEFAULT_LIST_VIEW = (): ListView => ({ group: "none", sort: "surname", reversed: false, pinned: false, view: "list", byStatus: true, group26: "letter" });
 
 /** a stored view made safe — null when it is not this version's shape at all */
 export function sanitiseListView(raw: unknown): ListView | null {
@@ -50,14 +65,18 @@ export function sanitiseListView(raw: unknown): ListView | null {
   const d = DEFAULT_LIST_VIEW();
   return {
     group: oneOf<GroupKey>(r.group, GROUP_OPTIONS.map((g) => g.key), d.group),
-    sort: oneOf<SortKey>(r.sort, SORT_OPTIONS.map((s) => s.key), d.sort),
+    /* v25.1 E4 — only the five heading sorts are remembered; an older key (status, added…) reads as A to Z */
+    sort: oneOf<SortKey>(r.sort, HEADING_SORTS, d.sort),
     reversed: r.reversed === true,
     pinned: r.pinned === true,
+    view: oneOf<ContactView>(r.view, CONTACT_VIEWS, d.view),
+    byStatus: r.byStatus !== false,
+    group26: oneOf<Group26Key>(r.group26, GROUP26_KEYS, d.group26),
   };
 }
 
 export const serialiseListView = (m: ListView): string =>
-  JSON.stringify({ v: LIST_VIEW_VERSION, group: m.group, sort: m.sort, reversed: m.reversed, pinned: m.pinned });
+  JSON.stringify({ v: LIST_VIEW_VERSION, group: m.group, sort: m.sort, reversed: m.reversed, pinned: m.pinned, view: m.view, byStatus: m.byStatus, group26: m.group26 });
 
 /**
  * The device's view. Absent or unreadable reads as the defaults — except that a device with no `qh.cl.view` yet but a
@@ -125,6 +144,7 @@ export function sanitiseListVisit(raw: unknown): ListVisit | null {
     always: sf.always === true,
     genres: Array.isArray(sf.genres) ? [...new Set(sf.genres.filter((x): x is string => typeof x === "string" && x.trim().length > 0 && x.length <= 80))].slice(0, 20) : [],
     genreMode: sf.genreMode === "all" ? "all" : "any",
+    missing: sf.missing === true,
   };
   const scroll = typeof r.scroll === "number" && Number.isFinite(r.scroll) && r.scroll > 0 ? Math.min(Math.round(r.scroll), 1_000_000) : d.scroll;
   return {

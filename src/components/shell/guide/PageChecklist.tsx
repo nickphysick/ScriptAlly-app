@@ -30,12 +30,13 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { useBarSlot } from "../../../lib/barSlot";
+import { useBarSlot, useBarSlotFolded } from "../../../lib/barSlot";
 import {
   type ChecklistItem, type DoneMap, cardPlace, dimPath, doneCount, holeFor, nextUndone, scrollDelta,
 } from "../../../lib/pageChecklist";
 import "./pageChecklist.css";
 import { GuideRing } from "./GuideRing";
+import { SpotCard } from "./SpotCard";
 import {
   autoOpenedThisSession, clearGuide, markAutoOpened, publishGuide, readSkipped, stampLearned, stampVisit, takeGuideRequest, takeRestart,
   useGuideRequest, useGuidesOff, writeSkipped,
@@ -75,9 +76,17 @@ export interface FlowCard {
   onEscape: () => void;
   /** presses outside the hole reach the page (the log journey's card: the drawer's own Cancel stays live) */
   passThrough?: boolean;
+  /** Manuscripts v27 — the hole and the card move with the target every frame it moves (a field in a scrolling form).
+   *  Omitted, the card is placed once its target has settled and stays there (the Query Centre's cards, unchanged). */
+  follow?: boolean;
+  /** Manuscripts v27 — the dim, hole and card sit above the app's dialogs (z 210), for a target inside one */
+  above?: boolean;
 }
 
 export interface PageChecklistProps<K extends string> {
+  /** Manuscripts v28 Part G: also close the popover when focus moves outside it and the pill (Tab away). Opt-in, so
+   *  the pages that already mount the checklist keep exactly their behaviour. */
+  closeOnFocusOut?: boolean;
   /** the page's name: "Contact list" */
   page: string;
   items: readonly ChecklistItem<K>[];
@@ -98,8 +107,9 @@ export interface PageChecklistProps<K extends string> {
   art?: string;
   /** Query Centre v139 — items that cannot be done yet, and the line each shows instead (no arrow, not pressable) */
   disabled?: Partial<Record<K, string>>;
-  /** Query Centre v139 — with all done, the header says so and the pill stays (sage) for the rest of the visit */
-  allDone?: { title: string; line: string };
+  /** Query Centre v139 — with all done, the header says so and the pill stays (sage) for the rest of the visit.
+   *  Manuscripts v27 — `after`: what follows the list once all are done (the page's next links) */
+  allDone?: { title: string; line: string; after?: React.ReactNode };
   /** Query Centre v139 — the page's own card for a walkthrough of several presses (see `FlowCard`) */
   flow?: FlowCard | null;
   /** Query Centre v139 — an item the page walks through itself: return true and the checklist only closes */
@@ -118,6 +128,10 @@ export interface PageChecklistProps<K extends string> {
   onUnhide?: () => void;
   /** Help system v1 C.4 — the next unfinished guide, in sidebar order, for the last note ("Your next guide is …") */
   nextGuide?: string | null;
+  /** Manuscripts v27 — a class on the pill (the page's own narrow-window rule) */
+  pillClass?: string;
+  /** Manuscripts v27 — the last item's note in the page's own words; omitted, the built "{Page} learned" note */
+  finalNote?: { kicker: string; title: string; line: string; actions: { label: string; onClick: () => void; attrs?: Record<string, string> }[] };
 }
 
 const AUTO_OPEN_MS = 1200;
@@ -137,9 +151,11 @@ const replay = (el: HTMLElement | null, cls: string, ms: number) => {
 
 export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React.ReactElement | null {
   const slot = useBarSlot();
+  /* shell tabs v2.1: folded to its icon by the bar, the pill names itself in a tooltip */
+  const slotFolded = useBarSlotFolded();
   const navigate = useNavigate();
   const off = useGuidesOff();
-  const { items, done, page } = p;
+  const { items, done, page, closeOnFocusOut = false } = p;
 
   /* ── C.5 skips: per page, on this device; a real save outranks a skip ── */
   const [skipped, setSkipped] = useState<string[]>(() => readSkipped(page));
@@ -273,10 +289,19 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
       closePop(false);
     };
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopImmediatePropagation(); e.preventDefault(); closePop(true); } };
+    const focus = (e: FocusEvent) => {
+      const t = e.target as Node;
+      if (popRef.current?.contains(t) || pillRef.current?.contains(t)) return;
+      closePop(false);
+    };
     window.addEventListener("pointerdown", down, true);
     window.addEventListener("keydown", key, true);
-    return () => { window.removeEventListener("pointerdown", down, true); window.removeEventListener("keydown", key, true); };
-  }, [open, closing, closePop]);
+    if (closeOnFocusOut) window.addEventListener("focusin", focus, true);
+    return () => {
+      window.removeEventListener("pointerdown", down, true); window.removeEventListener("keydown", key, true);
+      window.removeEventListener("focusin", focus, true);
+    };
+  }, [open, closing, closePop, closeOnFocusOut]);
   /* C.6 — the checklist is a dialog: focus moves in when it opens */
   useEffect(() => { if (open && !closing) requestAnimationFrame(() => popRef.current?.focus({ preventScroll: true })); }, [open, closing]);
 
@@ -405,59 +430,9 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
   /* the card's own size is known after its first paint: place it once more then */
   useLayoutEffect(() => { if (spot && geo && !cardAt) draw(); }, [spot, geo, cardAt, draw]);
 
-  /* ── the page's own card (Query Centre v139) ──
-     ⚠️ PLACED ONLY ONCE ITS TARGET HAS STOPPED MOVING. A panel slides in over ~300ms; a card placed on the first frame
-     lands on top of the moving panel (the mock's own fix). The target's box is read every frame, and the card waits
-     until two frames agree; after that it follows the target (scroll, resize, a panel growing). */
+  /* ── the page's own card (Query Centre v139) ── drawn by `SpotCard`, the spotlight's page-driven card (lifted out of
+     this file by Dashboard first visit v2, Part D, so the dashboard's tour is the same spotlight). */
   const { flow } = p;
-  const flowRef = useRef<HTMLDivElement | null>(null);
-  const [fgeo, setFgeo] = useState<{ path: string; hole: { left: number; top: number; width: number; height: number; r: number } } | null>(null);
-  const [fcard, setFcard] = useState<{ left: number; top: number; up: boolean; side: boolean } | null>(null);
-  useLayoutEffect(() => {
-    setFgeo(null); setFcard(null);
-    if (!flow) return undefined;
-    let raf = 0; let last = ""; let still = 0; let shownOnce = false;
-    const tick = () => {
-      raf = requestAnimationFrame(tick);
-      const el = flow.target();
-      const b = el ? boxOf(el) : null;
-      if (!b || b.width === 0) { last = ""; still = 0; return; }
-      const sig = `${Math.round(b.left)},${Math.round(b.top)},${Math.round(b.width)},${Math.round(b.height)},${window.innerWidth},${window.innerHeight}`;
-      if (sig === last) still += 1; else { still = 0; last = sig; if (shownOnce) return; }
-      if (!shownOnce && still < 2) return;
-      if (shownOnce && still !== 0) return;
-      shownOnce = true;
-      const hole = holeFor(b);
-      setFgeo({ path: dimPath(window.innerWidth, window.innerHeight, hole), hole });
-      const c = flowRef.current;
-      const cw = c?.offsetWidth ?? 320; const ch = c?.offsetHeight ?? 160;
-      if (flow.place === "left") {
-        const left = Math.max(12, hole.left - 14 - cw);
-        const top = Math.max(12, Math.min(hole.top + 40, window.innerHeight - 12 - ch));
-        setFcard({ left, top, up: false, side: true });
-      } else {
-        setFcard({ ...cardPlace(hole, { width: cw, height: ch }, window.innerWidth, window.innerHeight), side: false });
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    /* Escape is the page's; a press outside the card and the hole is swallowed unless the card passes it through */
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopImmediatePropagation(); e.preventDefault(); flow.onEscape();
-    };
-    window.addEventListener("keydown", key, true);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("keydown", key, true); };
-  }, [flow]);
-  /* the card's size is known after its first paint: placed once more then */
-  const flowId = flow?.id;
-  useLayoutEffect(() => {
-    if (!flow || !fgeo || !flowRef.current) return;
-    const c = flowRef.current, hole = fgeo.hole;
-    if (flow.place === "left") {
-      setFcard({ left: Math.max(12, hole.left - 14 - c.offsetWidth), top: Math.max(12, Math.min(hole.top + 40, window.innerHeight - 12 - c.offsetHeight)), up: false, side: true });
-    } else setFcard({ ...cardPlace(hole, { width: c.offsetWidth, height: c.offsetHeight }, window.innerWidth, window.innerHeight), side: false });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowId, fgeo?.path]);
 
 
   /* ── Part B: what the Help menu knows about this guide, and what it can ask of it ── */
@@ -533,12 +508,13 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
 
   /* ── C.1 the pill: the ring, "{Page} guide", "{n} of {N}"; finished this visit: sage, "{Page}: Learned ✓" ── */
   const pill = (
-    <button ref={pillRef} type="button" className={`pck-pill${open && !closing ? " open" : ""}${finished ? " all" : ""}`} data-pck="pill"
+    <button ref={pillRef} type="button" className={`pck-pill${open && !closing ? " open" : ""}${finished ? " all" : ""}${p.pillClass ? ` ${p.pillClass}` : ""}`} data-pck="pill"
       data-state={finished ? "done" : "live"}
       aria-haspopup="dialog" aria-expanded={open && !closing}
       aria-label={finished ? `${page} guide: learned` : `${page} guide, ${n} of ${items.length} done`}
+      title={slotFolded ? (finished ? `${page}: Learned ✓` : `${page} guide · ${n} of ${items.length}`) : undefined}
       onClick={() => { setNote(null); if (open && closing) cancelShrink(); else if (open) closePop(false); else { setSure(false); setOpen(true); } }}>
-      <GuideRing n={n} total={items.length} size={24} colour={finished ? "#4b6151" : "#a2452a"} track="#ffffff" className="pck-ring" />
+      <GuideRing n={n} total={items.length} size={18} stroke={2.7} colour={finished ? "#4b6151" : "#a2452a"} track="#ffffff" className="pck-ring" />
       {finished
         ? <span className="pck-pt"><b>{page}:</b> Learned</span>
         : <span className="pck-pt"><b>{page}</b> guide</span>}
@@ -602,6 +578,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
                 );
               })}
             </ul>
+            {finished && p.allDone?.after ? <div className="pck-after" data-pck="after">{p.allDone.after}</div> : null}
             <p className="pck-n"><i>{n} of {items.length} done</i>
               <button type="button" className="pck-off" data-pck="off" onClick={() => setSure(true)}>Don't show this again</button></p>
           </>
@@ -629,31 +606,41 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
 
   /* the page's own card: the same dim and hole, its own words, dots and buttons */
   const flowEl = flow ? (
-    <div className={`pck-spot${flow.passThrough ? " pck-thru" : ""}`} data-pck="flow" data-flow={flow.id}>
-      <div className="pck-dim" data-pck="dim" style={fgeo ? { clipPath: `path(evenodd, "${fgeo.path}")` } : { opacity: 0 }}
-        data-hole={fgeo ? JSON.stringify(fgeo.hole) : undefined} />
-      <div ref={flowRef} className={`pck-card${fcard?.up ? " up" : ""}${fcard?.side ? " side" : ""}`} role="status" data-pck="card" data-flow-card={flow.id}
-        style={fcard ? { left: fcard.left, top: fcard.top } : { visibility: "hidden", left: 0, top: 0 }}>
-        <span className="pck-ck">{flow.kicker}</span>
-        <b>{flow.title}</b>
-        <span className="pck-ci">{flow.body}</span>
-        <span className="pck-cf">
-          {flow.action
-            ? <button type="button" className="pck-cta" data-pck="flow-action" {...(flow.action.attrs ?? {})} onClick={flow.action.onClick}>{flow.action.label}</button>
-            : <button type="button" className="pck-back" data-pck="back" onClick={flow.onBack}>← Back to checklist</button>}
-          {flow.dots ? (
-            <span className="pck-dots" aria-label={`${flow.dots.k} of ${flow.dots.n}`}>
-              {Array.from({ length: flow.dots.n }, (_, i) => <i key={i} className={i < flow.dots!.k ? "on" : undefined} />)}
-            </span>
-          ) : null}
-        </span>
-      </div>
-    </div>
+    <SpotCard
+      spec={flow}
+      kicker={flow.kicker}
+      title={flow.title}
+      body={flow.body}
+      foot={<>
+        {flow.action
+          ? <button type="button" className="pck-cta" data-pck="flow-action" {...(flow.action.attrs ?? {})} onClick={flow.action.onClick}>{flow.action.label}</button>
+          : <button type="button" className="pck-back" data-pck="back" onClick={flow.onBack}>← Back to checklist</button>}
+        {flow.dots ? (
+          <span className="pck-dots" aria-label={`${flow.dots.k} of ${flow.dots.n}`}>
+            {Array.from({ length: flow.dots.n }, (_, i) => <i key={i} className={i < flow.dots!.k ? "on" : undefined} />)}
+          </span>
+        ) : null}
+      </>}
+    />
   ) : null;
 
   const noteItem = note ? items.find((i) => i.key === note.key) : null;
   const noteEl = note ? (
-    note.final ? (
+    note.final && p.finalNote ? (
+      <div ref={noteRef} className={`pck-note pck-note--final${leaving ? " leave" : ""}${reduced() ? " pck-still" : ""}`} role="status" data-pck="note"
+        data-final="true" style={notePlace.style}>
+        <span className="pck-ok" aria-hidden="true">✓</span>
+        <span className="pck-nt"><small>{p.finalNote.kicker}</small><b>{p.finalNote.title}</b>
+          <small className="pck-nl">{p.finalNote.line}</small>
+          <span className="pck-nb">
+            {p.finalNote.actions.map((a) => (
+              <button key={a.label} type="button" {...(a.attrs ?? {})} onClick={() => { setNote(null); a.onClick(); }}>{a.label}</button>
+            ))}
+          </span>
+        </span>
+        <button type="button" className="pck-nx" aria-label="Close" data-pck="note-close" onClick={() => setNote(null)}>✕</button>
+      </div>
+    ) : note.final ? (
       <div ref={noteRef} className={`pck-note pck-note--final${leaving ? " leave" : ""}${reduced() ? " pck-still" : ""}`} role="status" data-pck="note"
         data-final="true" style={notePlace.style}>
         <span className="pck-ok" aria-hidden="true">✓</span>
@@ -671,7 +658,8 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
         onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); setNote(null); pillRef.current?.focus(); } }}>
         <span className="pck-ok" aria-hidden="true">✓</span>
         <span className="pck-nt"><b>{noteItem?.title}</b>
-          <small>{page} · {n} of {items.length} done</small></span>
+          <small>{page} · {n} of {items.length} done</small>
+          {noteItem?.tip ? <small className="pck-tip" data-pck="tip">{noteItem.tip}</small> : null}</span>
         {after ? (
           <button type="button" data-pck="next" onClick={() => { const k = after.key; setNote(null); startSpot(k); }}>Next: {after.title} →</button>
         ) : <span className="pck-all" data-pck="all-done">All done</span>}
@@ -685,7 +673,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
     <>
       {createPortal(<>{pill}<span className="pck-sr" role="status" aria-live="polite" data-pck="live">{said}</span></>, slot)}
       {(popover || noteEl) && <AnchoredPortal>{popover}{noteEl}</AnchoredPortal>}
-      {(spotlight || flowEl) && createPortal(<div className={`pck-layer${reduced() ? " pck-still" : ""}`}>{spotlight}{flowEl}</div>, document.body)}
+      {(spotlight || flowEl) && createPortal(<div className={`pck-layer${reduced() ? " pck-still" : ""}${flow?.above ? " pck-layer--above" : ""}`}>{spotlight}{flowEl}</div>, document.body)}
     </>
   );
 }

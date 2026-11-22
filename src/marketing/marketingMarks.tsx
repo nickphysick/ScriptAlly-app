@@ -6,8 +6,8 @@
  *
  * ⚠️ THEY ARE STROKE-ONLY AND TAKE THEIR COLOUR FROM CSS. Every path here is `fill: none` with the
  * stroke set by the plate rule (`.mk-docplate svg`), so a mark cannot carry a hex of its own and a
- * future retint is one stylesheet change. (One exception, noted at `STATUS_GLYPHS`: its discs fill
- * with `currentColor`, which is still CSS's colour and never a hex.) This is the opposite of
+ * future retint is one stylesheet change. (One exception, noted at `STATUS_GLYPHS`: its discs and
+ * the offer's seal fill with `currentColor`, which is still CSS's colour and never a hex.) This is the opposite of
  * `manuscriptMarks.tsx`, whose fills are baked on purpose — those are illustrations that must read
  * identically in three themes; these are chrome inside a single-palette tier.
  *
@@ -21,62 +21,19 @@ import React from "react";
    bands, which now draw page-local brush-wash plates in the landing's unframed style; the dashed
    rim and tinted ground it existed to draw are retired with `.mk-illo*`. */
 
-/** Which mark a contact-page tile carries — the address, or one of the three reasons to write. */
-export type ContactTileKind = "mail" | "questions" | "broken" | "privacy";
-
-/* ⚠️ WHOLE CLASS STRINGS, NOT AN INTERPOLATED TONE. A class built as `mk-ctile--${tone}` is
-   invisible to every search for it, and a dead-class sweep then reports three live rules as dead.
-   The tone belongs to the kind: rose for writing to us, grey for a fault, slate for your data. */
-const TILE_CLASS: Record<ContactTileKind, string> = {
-  mail: "mk-ctile mk-ctile--rose mk-ctile--mail",
-  questions: "mk-ctile mk-ctile--rose",
-  broken: "mk-ctile mk-ctile--grey",
-  privacy: "mk-ctile mk-ctile--slate",
-};
-
 /**
- * The rounded tiles on the contact page (17 Sep). They replace the ref's plates, and the
- * speech bubble gains the tail the old open circle never had.
- */
-export const ContactTile: React.FC<{ kind: ContactTileKind }> = ({ kind }) => (
-  <span className={TILE_CLASS[kind]} aria-hidden="true">
-    <svg viewBox="0 0 24 24">
-      {kind === "mail" ? (
-        <>
-          <rect x="3" y="5.5" width="18" height="13" rx="2" />
-          <path d="M3.8 7l8.2 6.2L20.2 7" />
-        </>
-      ) : kind === "questions" ? (
-        <>
-          <path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7.5L7 21v-3.5H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" />
-          <path d="M7.5 10h9M7.5 13.2h6" />
-        </>
-      ) : kind === "broken" ? (
-        <>
-          <path d="M10.3 4.2 3.3 17a2 2 0 0 0 1.7 3h14a2 2 0 0 0 1.7-3l-7-12.8a2 2 0 0 0-3.4 0z" />
-          <path d="M12 9v4M12 16.5v.5" />
-        </>
-      ) : (
-        <>
-          <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z" />
-          <path d="M9.2 12.2l2 2 3.6-4" />
-        </>
-      )}
-    </svg>
-  </span>
-);
-
-/**
- * The six states a query passes through, in pipeline order: outline → half-disc → full disc, with
- * the solid ring for what came back and the page for an offer. Drawn for the status band's
- * carousel and repeated, dimmed, under the footer's strapline.
+ * The six states a query passes through, in pipeline order: the ring, the half and full centres
+ * (dashed while the agent asks, solid once sent), and the star seal for an offer. Drawn for the
+ * status band and in the app's footer.
  *
  * ⚠️ THE ONE PLACE IN THIS FILE THAT FILLS ANYTHING — and still no hex: every fill and stroke is
- * `currentColor`, so the colour is set once on the row in CSS and the active carousel mark can
- * take a different one without eleven values following it.
+ * `currentColor`, so the colour is set once on the row in CSS.
  *
- * ⚠️ NOT `StatusDot`'s VOCABULARY. The app's dot is a tinted disc with a plane, chevron or star
- * inside; nothing was reused because there was nothing to reuse, and `StatusDot` is untouched.
+ * ⚠️ THE SAME DRAWINGS AS `StatusDot`, COPIED RATHER THAN IMPORTED. The public pages load their own
+ * bundle (PublicRoot) and do not pull in the app's status component; the paths are the app's own,
+ * on its 24 viewBox. The sixth, the offer, is status marks v3's star seal (SEAL_SOLID from
+ * design-refs/status-marks-v3.html, one path, fill-rule evenodd, the star cut out of it), which
+ * replaced the page. statusGlyphSeal.test.tsx holds it to the reference.
  */
 /* ⚠️ EXPORTED SO A LOCK CAN RECONCILE `STATUS_GLYPH_COUNT` AGAINST IT (18 Sep). The footer's row
    used to be reconciled against `STATUS_STEPS` — the status band's six descriptions — which was a
@@ -101,12 +58,13 @@ export const STATUS_GLYPHS: React.ReactNode[] = [
     <circle cx={12} cy={12} r={10} />
     <circle cx={12} cy={12} r={6.5} fill="currentColor" stroke="none" />
   </>,
-  <>
-    <path d="M5.5 2.5h9l4.5 4.5v14.5h-13.5z" strokeLinejoin="round" />
-    <path d="M14 2.5V7.5h5" strokeLinejoin="round" />
-    <path d="M8.5 12h7M8.5 15.5h7" strokeLinecap="round" />
-    <path d="M8.5 18.8c1.5-1.6 2.6 1.4 4-.2 1-1.1 2 .6 3 .2" strokeWidth={1.7} strokeLinecap="round" />
-  </>,
+  <path
+    d="M12.00 2.40A2.78 2.78 0 0 1 16.80 3.69A2.78 2.78 0 0 1 20.31 7.20A2.78 2.78 0 0 1 21.60 12.00A2.78 2.78 0 0 1 20.31 16.80A2.78 2.78 0 0 1 16.80 20.31A2.78 2.78 0 0 1 12.00 21.60A2.78 2.78 0 0 1 7.20 20.31A2.78 2.78 0 0 1 3.69 16.80A2.78 2.78 0 0 1 2.40 12.00A2.78 2.78 0 0 1 3.69 7.20A2.78 2.78 0 0 1 7.20 3.69A2.78 2.78 0 0 1 12.00 2.40ZM12.00 6.70L13.41 10.36L17.33 10.57L14.28 13.04L15.29 16.83L12.00 14.70L8.71 16.83L9.72 13.04L6.67 10.57L10.59 10.36Z"
+    fill="currentColor"
+    fillRule="evenodd"
+    stroke="none"
+    key="seal"
+  />,
 ];
 
 /** How many states there are — the carousel and the footer both walk exactly this many. */
@@ -130,17 +88,3 @@ export const PaperPlane: React.FC = () => (
 /* ⚠️ `IdeaBulb` and `CommitmentTick` ARE DELETED. The bulb's only consumer was About's turn line;
    the tick's was About's three promises, removed 21 Oct with `.mk-ctick`. */
 
-/** Privacy = a shield with a tick. Terms = a document. Straight from the two refs. */
-export const LegalPlate: React.FC<{ doc: "terms" | "privacy" }> = ({ doc }) =>
-  doc === "privacy" ? (
-    <svg viewBox="0 0 24 24">
-      <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z" />
-      <path d="M9.2 12.2l2 2 3.6-4" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24">
-      <path d="M6 3.5h9l4 4v13H6z" />
-      <path d="M15 3.5V8h4" />
-      <path d="M9 12h7M9 15.5h7" />
-    </svg>
-  );

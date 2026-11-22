@@ -115,7 +115,7 @@
 /* ── Two-column section bodies ──────────────────────────────────────────────
    ⚠️ ONLY WHERE THE CONTENT IS TWO INDEPENDENT GROUPS. Profile is name | country, Security is
    email | password, Notifications is querying | marketing, Preferences is workspace | tasks, Your
-   data is export+retention | deletion. Plan is NOT in here: `PlanComparison` is already two
+   data is export+retention | deletion. Plan is NOT in here: the plan table is already two
    columns of its own, and nesting a two-column comparison inside a two-column body would give
    four columns of 250px and a table nobody can read across. */
 /* ⚠️ `.acct-two` AND ITS DIVIDER ARE GONE (settings-mode pack, Phase 2). Sections used to split
@@ -169,7 +169,7 @@
 .acct-note {
   font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
   font-size: 12.5px;
-  color: #8a7a6c;
+  color: var(--sp-quiet);
   line-height: 1.5;
   margin: var(--acct-s-note) 0 0;
 }

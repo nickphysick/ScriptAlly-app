@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "L9",
+  "where": "1280 added · population: sections",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 added · month headings (\"Aug 2026\")",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 added · the index is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · population: sections",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · letter headings",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1280 surname · the index is shown",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · population: sections",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · month headings (\"Aug 2026\")",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 added · the index is hidden",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · population: sections",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · letter headings",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L9",
+  "where": "1512 surname · the index is shown",
+  "ok": false,
+  "detail": "false"
+ }
+]

@@ -360,11 +360,13 @@ test.describe("Query Centre v138", () => {
     L.check("D1", "no 'No reply yet' group", !r.bands.some((b) => /no reply yet|past the date/i.test(b)), r.bands.join(" | "));
     /* the To-do list's Your move count is task cards, not queries (see the report): read and recorded, not asserted equal.
        RE-POINTED (To-do list v5): the v2 tiles became the header card's three rows.
-       RE-POINTED (To-do list v5.2): the populated header card is the calendar; its today rows are read instead. */
+       RE-POINTED (To-do list v5.2): the populated header card is the calendar; its today rows are read instead.
+       RE-POINTED (To-do list v51): the tray is the task workspace; its "Agents are waiting" heading (task cards the agents
+       are waiting on you for) is read instead. Still a note, never an equality. */
     await openRoute(page, "/todo", vp);
     await page.waitForTimeout(2500);
-    const todo = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-td52="cal-row"], [data-td52="mix"]')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()).slice(0, 3));
-    L.note("D1", "to-do v5 card rows", `${JSON.stringify(todo)} against the Query Centre's "${r.you}"`);
+    const todo = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-tws="page"] .tws-gb')].filter((e) => e.getBoundingClientRect().height > 0).map((e) => (e.textContent ?? "").replace(/\s+/g, " ").replace("⌄", "").trim()).slice(0, 3));
+    L.note("D1", "to-do workspace headings", `${JSON.stringify(todo)} against the Query Centre's "${r.you}"`);
     L.done(5);
   });
 
@@ -628,7 +630,8 @@ test.describe("Query Centre v138", () => {
     await openRoute(page, "/dashboard", SIZES[0]);
     await page.waitForTimeout(1500);
     await liftMotionSuppression(page);
-    await page.getByRole("button", { name: "Query Centre", exact: true }).first().click();
+    /* the sidebar names the Query Centre "Queries" (short labels, 25 Oct) */
+    await page.getByRole("button", { name: "Queries", exact: true }).first().click();
     const row = page.locator('.qcv-group[data-v138] [data-qcv="row"]').first();
     await row.waitFor({ state: "attached", timeout: 30_000 });
     const t0 = Date.now();

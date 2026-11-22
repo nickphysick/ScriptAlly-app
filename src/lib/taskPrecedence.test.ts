@@ -250,6 +250,15 @@ describe("⚠️ a stored reminder becomes a nudge", () => {
     }), agent, NOW)).toBe("none");
   });
 
+  /* Log a query v1.3 — a nudge booked on a query whose agent states no reply time (the journey's Unknown) */
+  it("a booked nudge fires on its day even when the agent states no window", () => {
+    const base = { status: QueryStatus.QUERIED, dateSent: new Date(NOW - 50 * DAY).toISOString(), responseTimeWeeks: undefined, noResponseMeansNo: false, now: NOW };
+    expect(replyTask({ ...base, writerNudgeDate: new Date(NOW - DAY).toISOString() })).toBe("nudge");
+    expect(replyTask({ ...base, writerNudgeDate: new Date(NOW + DAY).toISOString() })).toBe("none");
+    expect(replyTask(base)).toBe("none");
+    expect(replyTask({ ...base, status: QueryStatus.NO_RESPONSE, writerNudgeDate: new Date(NOW - DAY).toISOString() })).toBe("none");
+  });
+
   it("a closed query raises nothing, whatever the reminder says", () => {
     expect(replyTaskFor(q({
       status: QueryStatus.REJECTED, nudgeDate: new Date(NOW - DAY).toISOString(),

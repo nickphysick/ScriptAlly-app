@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "H3",
+  "where": "the ring opens Housekeeping",
+  "ok": true,
+  "detail": "no drawer"
+ },
+ {
+  "lock": "H3",
+  "where": "Open opens Housekeeping",
+  "ok": true,
+  "detail": "no drawer"
+ },
+ {
+  "lock": "H3",
+  "where": "Open does not filter",
+  "ok": true,
+  "detail": "the applied row is up"
+ },
+ {
+  "lock": "H3",
+  "where": "Housekeeping has agents with gaps (population)",
+  "ok": true,
+  "detail": "52"
+ },
+ {
+  "lock": "H3",
+  "where": "Show me who applies Missing details",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "H3",
+  "where": "shown = Housekeeping's agents with gaps",
+  "ok": true,
+  "detail": "52 rows, count 52, Housekeeping 52"
+ },
+ {
+  "lock": "H3",
+  "where": "the list card is brought into view",
+  "ok": true,
+  "detail": "117.53125"
+ }
+]

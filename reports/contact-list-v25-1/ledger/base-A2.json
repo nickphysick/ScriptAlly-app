@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows, 11 querying"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 querying rows",
+  "ok": false,
+  "detail": "{\"you\":4,\"agent\":7,\"none\":39,\"closed\":3} want 11"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 pressed wash",
+  "ok": false,
+  "detail": "background undefined"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 pressed bar",
+  "ok": false,
+  "detail": "shadow undefined"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 all again",
+  "ok": true,
+  "detail": "after a second press"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 List health opens Housekeeping",
+  "ok": false,
+  "detail": "Housekeeping not open"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows, 11 querying"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 querying rows",
+  "ok": false,
+  "detail": "{\"you\":4,\"agent\":7,\"none\":39,\"closed\":3} want 11"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 pressed wash",
+  "ok": false,
+  "detail": "background undefined"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 pressed bar",
+  "ok": false,
+  "detail": "shadow undefined"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 all again",
+  "ok": true,
+  "detail": "after a second press"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 List health opens Housekeeping",
+  "ok": false,
+  "detail": "Housekeeping not open"
+ }
+]

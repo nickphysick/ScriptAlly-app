@@ -1,0 +1,76 @@
+{
+ "total": 103,
+ "out": {
+  "urgency": [
+   "Needs you now",
+   "Housekeeping",
+   "Yours"
+  ],
+  "when": [
+   "Overdue",
+   "Not dated"
+  ],
+  "agent": [
+   "Marcus Reed",
+   "Ana Duarte",
+   "David Marsh",
+   "Rachel Lin",
+   "Tom Ellery",
+   "Clara Beaumont",
+   "Joan Whitfield",
+   "Tobias Hark",
+   "Imogen Vale",
+   "Edda Voss",
+   "Imogen Farr",
+   "Theo Abara",
+   "Yours",
+   "Jonathan Marsh",
+   "Bea Halloran",
+   "Wren Ashcombe",
+   "Alasdair Crewe",
+   "Hester Blaine",
+   "Devendra Rao",
+   "Douglas Renner",
+   "Rosalind Vale",
+   "Mira Kovic",
+   "Elinor Hale",
+   "Tamsin Probewell",
+   "Sam Okoro",
+   "Tobias Quint",
+   "Peter Vance",
+   "Priya Nair",
+   "Cormac Bligh",
+   "Rufus Oyelaran",
+   "Noah Bright",
+   "Ottoline Frayn",
+   "Iris Kwan",
+   "Edda Kron",
+   "Eleanor Whitfield",
+   "William Tan",
+   "Priya Raman",
+   "Daniel O’Rourke",
+   "Sophie Dunn",
+   "Aisha Kapoor",
+   "Hester Quinn",
+   "George Ashworth",
+   "Nadia Hussain",
+   "Fenella Strand",
+   "Sun-hee Park",
+   "Rosa Quintana",
+   "Wren Calloway",
+   "Imogen Rackham",
+   "Tomas Keller",
+   "Wren Tallis"
+  ],
+  "none": [
+   "Everything"
+  ],
+  "category": [
+   "Agents are waiting",
+   "Nudges",
+   "Gone quiet",
+   "Housekeeping",
+   "Your tasks"
+  ]
+ }
+}

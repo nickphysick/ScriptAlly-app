@@ -1,0 +1,1286 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "53 rows"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-06 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-06 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-08 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-08 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-09 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-09 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-07 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-07 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-05 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-05 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-13 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-13 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-10 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-10 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-04 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-04 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-11 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-11 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-03 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-03 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-14 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-14 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-4 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-4 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-near name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-near agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-soon name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-soon agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-passed20 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-passed20 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-12 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-12 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 qc150l9-ag name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 qc150l9-ag agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-bang name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-bang agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-9 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-9 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-remind name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-remind agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-passed865 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-cal-passed865 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-nowin-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-nowin-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rj-agent-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rj-agent-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-reopen name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-reopen agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-stub0 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-stub0 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-11 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-11 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-7 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-7 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-8 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-8 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-stale name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-stale agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-4 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-4 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-6 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-6 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-nowin-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-nowin-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-5 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-5 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rj-agent-3 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rj-agent-3 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-chase name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-chase agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-6 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-6 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rej-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rej-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-gap name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-gap agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-3 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-3 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv181-bare name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv181-bare agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-never name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 clv-fx-never agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rj-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 rj-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-close name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 thin-ag-close agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-10 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-10 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-3 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 msv12-agent-3 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-5 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 seed-agent-5 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-12 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-12 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-02 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-02 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-01 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 cv25-agent-01 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "53 rows"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-06 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-06 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-08 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-08 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-09 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-09 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-07 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-07 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-05 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-05 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-13 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-13 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-10 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-10 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-04 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-04 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-11 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-11 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-03 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-03 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-14 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-14 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-4 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-4 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-near name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-near agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-soon name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-soon agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-passed20 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-passed20 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-12 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-12 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 qc150l9-ag name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 qc150l9-ag agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-bang name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-bang agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-9 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-9 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-remind name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-remind agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-passed865 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-cal-passed865 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-nowin-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-nowin-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rj-agent-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rj-agent-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-reopen name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-reopen agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-stub0 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-stub0 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-11 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-11 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-7 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-7 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-8 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-8 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-stale name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-stale agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-4 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-4 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-6 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-6 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-nowin-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-nowin-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-5 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-5 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rj-agent-3 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rj-agent-3 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-chase name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-chase agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-6 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-6 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rej-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rej-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-gap name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-gap agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-3 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-3 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-2 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-2 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv181-bare name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv181-bare agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-never name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 clv-fx-never agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rj-agent-1 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 rj-agent-1 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-close name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 thin-ag-close agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-10 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-10 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-3 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 msv12-agent-3 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-5 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 seed-agent-5 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-12 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-12 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-02 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-02 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-01 name",
+  "ok": false,
+  "detail": "\"Special Elite\" stroke 0"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 cv25-agent-01 agency",
+  "ok": true,
+  "detail": "\"JetBrains Mono\" uppercase"
+ }
+]

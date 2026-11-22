@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the bump ran on save",
+  "ok": true,
+  "got": "{\"frames\":19,\"scales\":17,\"longs\":[{\"start\":122,\"dur\":91}],\"span\":533,\"start\":8900.7}"
+ },
+ {
+  "name": "at least 24 frames painted while the bump ran",
+  "ok": false,
+  "got": "19 frames over 533ms"
+ },
+ {
+  "name": "the frame's scale took at least 10 distinct values above 1",
+  "ok": true,
+  "got": "17"
+ },
+ {
+  "name": "no long task over 50ms overlaps it",
+  "ok": false,
+  "got": "[{\"start\":122,\"dur\":91}]"
+ },
+ {
+  "name": "the draft's settle ran with it (the fill painted on 10+ frames)",
+  "ok": true,
+  "got": "16"
+ }
+]

@@ -15,13 +15,6 @@ export const TILE_SMART = {
   text: "Any layout, any wording. QueryHawk reads the sheet and shows you everything before anything is saved.",
   action: "Import a spreadsheet",
 } as const;
-export const TILE_TEMPLATE = {
-  title: "Our template.",
-  text: "Set columns, read exactly. Use it as often as you like to add agents and queries in bulk.",
-  download: "Download the template",
-  upload: "Upload my sheet",
-  fact: "Always free · No limit",
-} as const;
 export const TILE_MATCH = {
   title: "Match your own columns.",
   text: "Keep a sheet with unusual columns? Tell QueryHawk which column is which.",
@@ -33,12 +26,10 @@ export const TILE_MATCH = {
  * The Smart import tile's fact line, from the entitlement.
  *   allowed                 → "1 Smart Import available"
  *   free, already used      → "Smart Import already used"
- *   Pro, this month's used  → "Available {date}" (the entitlement's `nextAvailable`), or
- *                             "Available next month" when the entitlement carries no date.
+ *   used (any plan)         → "Smart Import already used" — once per account (plan rules v1)
  */
-export function smartFactLine(e: Pick<SmartImportEntitlement, "allowed" | "reason" | "nextAvailable">, shortDate: (iso: string) => string): string {
+export function smartFactLine(e: Pick<SmartImportEntitlement, "allowed">): string {
   if (e.allowed) return "1 Smart Import available";
-  if (e.reason === "pro_month_used") return e.nextAvailable ? `Available ${shortDate(e.nextAvailable)}` : "Available next month";
   return "Smart Import already used";
 }
 

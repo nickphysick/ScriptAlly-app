@@ -1,0 +1,85 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Responses v5 (`/queries/responses`; ref design-refs/responses-v5/responses-v5.html). Every value here is read from
+ * the reference's own stylesheet; its class is named beside each block.
+ *
+ * ⚠️ Responses v15 retired every section v5 drew (the glance cards, the insights band and showcase, How long agents
+ *    took, the quote masonry, the wall and its list): their rules went with them. What is left is the page frame, the
+ *    sheet's ground, and the answer panel's contents (RspPanel). v15's own rules are responses15.css.
+ *
+ * ⚠️ THE PAGE IS ONE COLUMN: the workspace grid's (max 1360, the gutter inside the cap), which is the reference's
+ *    `.col` (`width: min(100%, 1360px); padding-inline: clamp(20px, 3.2vw, 52px)`). The full-width bands keep their
+ *    content in that column and reach the sheet's edges with a spread shadow clipped to their own height (the Contact
+ *    list v15 band's method), so nothing here has to know the sheet's width.
+ * ⚠️ THE SHARED PIECES KEEP THEIR OWN STYLESHEETS (qcv150.css; the header's are the Query Centre's). The rules below only size them to
+ *    this page, scoped under `.rsp5`, as the Query Centre and the Contact list scope their own.
+ * ⚠️ brand.tsx forces h1–h3 into its serif with !important and names bare spans as the body sans: each face is stated
+ *    with two classes and !important.
+ */
+.rsp5, .rsp5-layer {
+  --r5-ink: #1c130f; --r5-i72: rgba(28, 19, 15, 0.72); --r5-i58: rgba(28, 19, 15, 0.58); --r5-i45: rgba(28, 19, 15, 0.45);
+  --r5-i16: rgba(28, 19, 15, 0.16); --r5-i10: rgba(28, 19, 15, 0.1); --r5-i06: rgba(28, 19, 15, 0.06);
+  --r5-shell: #1b2433; --r5-cr: #f4eee5; --r5-cr66: rgba(244, 238, 229, 0.66); --r5-cr42: rgba(244, 238, 229, 0.42);
+  --r5-page: #f2eee8; --r5-paper: #fbf9f5; --r5-navy: #2a3a52; --r5-harbour: #1f4a66; --r5-rust: var(--sp-rust);
+  --r5-blush: #f5e2da; --r5-blush-d: #e8c8bc;
+  --r5-q: #f7efe3; --r5-q-d: #e7d9bd; --r5-ag: #e0e5dd; --r5-you: #f5e6df; --r5-you-d: #e8c9bb; --r5-of: #d7e0e8;
+  --r5-cl: #e4e1db; --r5-cl-d: #cfc9c1;
+  --r5-machine: var(--sp-type); --r5-serif: var(--sp-serif); --r5-mono: var(--font-mono);
+  color: var(--r5-ink); font-family: var(--r5-serif);
+}
+.rsp5 { box-sizing: border-box; min-width: 0; padding-bottom: 8px; }
+
+/* the sheet's doodle ground (the reference's `.sheet` tile = the Query Centre v150's `doodle-tile.svg`) */
+@media (min-width: 768px) {
+  .rsp5-wpg > .wpg-scroll {
+    background-color: #f2eee8; background-image: url("/images/qc/doodle-tile.svg"); background-repeat: repeat;
+    background-size: 340px 360px; background-attachment: local;
+  }
+}
+
+/* ═════ the sections' headings (`.sec`, `.h2row`, `.h2`, `.art`) ═════ */
+.rsp5 [data-rsp5-sec] { scroll-margin-top: 20px; }
+.rsp5-disc { flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--r5-navy); color: #fff; font: 500 11px var(--r5-mono) !important; }
+.rsp5-sb { height: 38px; padding: 0 14px; border: 0; border-radius: 10px; background: var(--r5-navy); color: #fff; font: 400 14px var(--r5-machine) !important; white-space: nowrap; cursor: pointer; }
+.rsp5-sb.rsp5-sb--w { background: #fff; color: var(--r5-ink); box-shadow: inset 0 0 0 1px var(--r5-i16); }
+
+/* ═════ the answer panel's contents (the reference's drawer: `.dmh`, `.dst`, `.dbody`, `.dfacts`, `.djo`, `.dfoot`) ═════
+   The box is query panel v2's (`SidePanel` + `.qsp`); everything inside is page-local. */
+.rsp5-layer .rsp5-drw { box-sizing: border-box; display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; border-radius: 14px; background: var(--r5-paper); color: var(--r5-ink); font-family: var(--r5-serif); }
+.rsp5-layer .rsp5-dmh { flex: none; display: flex; align-items: flex-start; gap: 14px; padding: 18px 20px 16px; background: var(--r5-navy); color: #fff; }
+.rsp5-layer .rsp5-disc--w { background: #fff; color: var(--r5-navy); }
+.rsp5-layer .rsp5-dwho { min-width: 0; flex: 1; }
+.rsp5-layer .rsp5-dwho b { display: block; font: 400 22px/1.2 var(--r5-machine) !important; }
+.rsp5-layer .rsp5-dwho i { display: block; font: italic 15px/1.3 var(--r5-serif) !important; color: var(--r5-cr66); }
+.rsp5-layer .rsp5-dnav { display: flex; gap: 4px; }
+.rsp5-layer .rsp5-dnav button { width: 28px; height: 28px; border: 0; border-radius: 8px; background: rgba(244, 238, 229, 0.1); color: var(--r5-cr); font-size: 14px; cursor: pointer; }
+.rsp5-layer .rsp5-dnav button:disabled { opacity: 0.35; cursor: default; }
+.rsp5-layer .rsp5-dx { border: 0; background: none; color: var(--r5-cr66); font-size: 22px; line-height: 1; cursor: pointer; padding: 2px 4px; }
+.rsp5-layer .rsp5-dst { flex: none; display: flex; align-items: center; gap: 10px; padding: 13px 20px; font: 400 16px var(--r5-machine) !important; }
+/* Stage colours v1 — the strip is the stage's Band in ink (lib/stageColours); an offer carries the sheen */
+.rsp5-layer .rsp5-dst[data-tone] { color: #1c130f; }
+.rsp5-layer .rsp5-dst[data-tone="queried"] { background: #efe6d6; }
+.rsp5-layer .rsp5-dst[data-tone="partial"] { background: #e4ebf2; }
+.rsp5-layer .rsp5-dst[data-tone="full"] { background: #b7c9de; }
+.rsp5-layer .rsp5-dst[data-tone="offer"] {
+  background:
+    linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
+    #efcdc9;
+}
+.rsp5-layer .rsp5-dst[data-tone="closed"] { background: #eceae6; }
+/* workspace width v2 (8 Nov): actions follow the content — the body hugs, the footer sits under it */
+.rsp5-layer .rsp5-dbody { flex: 0 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 18px; padding: 18px 20px 20px; }
+.rsp5-layer .rsp5-dbody h5 { margin: 0 0 8px; font: 600 14px/1.3 var(--r5-serif) !important; }
+.rsp5-layer .rsp5-dq { margin: 0; padding: 14px 16px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--r5-i10); font: italic 16.5px/1.5 var(--r5-serif) !important; }
+.rsp5-layer .rsp5-dplain { margin: 0; font: 400 16px/1.5 var(--r5-serif); color: var(--sp-muted); }
+.rsp5-layer .rsp5-dfacts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; overflow: hidden; border-radius: 12px; background: var(--r5-i10); box-shadow: inset 0 0 0 1px var(--r5-i10); }
+.rsp5-layer .rsp5-dfacts div { padding: 10px 14px; background: #fff; }
+.rsp5-layer .rsp5-dfacts small { display: block; font: italic 13px/1.3 var(--r5-serif) !important; color: var(--sp-quiet); }
+.rsp5-layer .rsp5-dfacts b { font: 400 16px var(--r5-machine) !important; }
+.rsp5-layer .rsp5-djo { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+.rsp5-layer .rsp5-djo li { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--r5-i10); font: 400 15px/1.3 var(--r5-serif); }
+.rsp5-layer .rsp5-djo li small { font: 500 10px var(--r5-mono) !important; color: var(--sp-quiet); }
+.rsp5-layer .rsp5-dfoot { flex: none; display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--r5-i10); background: #fff; }
+.rsp5-layer .rsp5-sb:disabled { opacity: 0.45; cursor: default; }

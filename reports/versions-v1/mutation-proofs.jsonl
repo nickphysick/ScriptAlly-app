@@ -1,0 +1,13 @@
+{"lock": "A1", "mutation": "M-A1 drop the icon", "width": 1512, "result": "GREEN", "failed": [], "reading": []}
+{"lock": "A2", "mutation": "M-A2 invert the predicate", "width": 1512, "result": "RED", "failed": [["1512", "A2"]], "reading": ["Error: Pro: no lock", "Expected: 0", "Received: 1"]}
+{"lock": "B1", "mutation": "M-B1 restore the stat on the card", "width": 1512, "result": "RED", "failed": [["1512", "B1"]], "reading": ["Error: no % on the card", "Expected pattern: not /%/", "Received string:      \"ACTIVE VERSION"]}
+{"lock": "B2", "mutation": "M-B2 remove the outside-press handler", "width": 1512, "result": "GREEN", "failed": [], "reading": []}
+{"lock": "B3", "mutation": "M-B3 fold the unrecorded queries into the latest version", "width": 1512, "result": "RED", "failed": [["1512", "B3"]], "reading": ["Error: the banner shows, with the fixture's count", "Expected: \"1\"", "Received: null"]}
+{"lock": "C1", "mutation": "M-C1 change one track of the rows", "width": 1512, "result": "RED", "failed": [["1512", "C1"]], "reading": ["Error: column 1", "Expected: <= 1", "Received:    15.899999999999977"]}
+{"lock": "C2", "mutation": "M-C2 drop the focus return", "width": 1512, "result": "GREEN", "failed": [], "reading": []}
+{"lock": "D1", "mutation": "M-D1 make the leading figure rust", "width": 1512, "result": "RED", "failed": [["1512", "D1"]], "reading": ["Error: no positive figure computes to rust", "- Expected  - 1", "+ Received  + 4"]}
+{"lock": "D2", "mutation": "M-D2 divide the rate by sent", "width": 1512, "result": "RED", "failed": [["1512", "D2"]], "reading": ["Error: sent: rate = replies ÷ answered for ms21-bv-3", "Expected: \"100%\"", "Received: \"50%\""]}
+{"lock": "D3", "mutation": "M-D3 drop one version", "width": 1512, "result": "RED", "failed": [["1512", "D3"]], "reading": ["Error: banner + versions' live = the book's live queries", "Expected: 6", "Received: 2"]}
+{"lock": "A1", "mutation": "M-A1 drop the icon", "width": 1512, "result": "RED", "failed": [["1512", "A1"]], "reading": ["Error: the row carries its icon", "Expected: true", "Received: false"]}
+{"lock": "B2", "mutation": "M-B2 remove the outside-press handler", "width": 1512, "result": "RED", "failed": [["1512", "B2"]], "reading": ["Error: expect(locator).toHaveCount(expected) failed", "Expected: 0", "Received: 1"]}
+{"lock": "C2", "mutation": "M-C2 drop the focus return", "width": 1512, "result": "RED", "failed": [["1512", "C2"]], "reading": ["Error: focus returned to the row", "Expected: \"ms21-bv-3\"", "Received: \"BODY\""]}

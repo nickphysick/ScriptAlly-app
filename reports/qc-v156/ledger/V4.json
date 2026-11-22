@@ -1,0 +1,152 @@
+[
+ {
+  "name": "1920: at rest the bar is hidden, inert and aria-hidden",
+  "ok": true,
+  "got": "{\"shown\":false,\"op\":\"0\",\"vis\":\"hidden\",\"inert\":true}"
+ },
+ {
+  "name": "1920: mid-collapse (panel foot 144 below the line 66) the bar stays hidden",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "1920 @321: shown, 60px, under the lip",
+  "ok": true,
+  "got": "shown true h 60 top 12"
+ },
+ {
+  "name": "1920 @321: the toolbar's top meets the bar's bottom within 1px",
+  "ok": true,
+  "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1920 @321: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
+  "name": "1920 @1400: shown, 60px, under the lip",
+  "ok": true,
+  "got": "shown true h 60 top 12"
+ },
+ {
+  "name": "1920 @1400: the toolbar's top meets the bar's bottom within 1px",
+  "ok": true,
+  "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1920 @1400: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
+  "name": "1920 @2600: shown, 60px, under the lip",
+  "ok": true,
+  "got": "shown true h 60 top 12"
+ },
+ {
+  "name": "1920 @2600: the toolbar's top meets the bar's bottom within 1px",
+  "ok": true,
+  "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1920 @2600: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
+  "name": "1920: the ground spans the sheet; the content is inset to the page's edges",
+  "ok": true,
+  "got": "ground 80–1912 · sheet 80–1912 · content 198–1794 · page 198–1794"
+ },
+ {
+  "name": "1920: the page colour with the #e0d9ce hairline",
+  "ok": true,
+  "got": "rgb(246, 243, 238) rgb(224, 217, 206) 0px -1px 0px 0px inset"
+ },
+ {
+  "name": "1920: the collapsed bar's + Log a query takes focus",
+  "ok": true,
+  "got": "slim-log"
+ },
+ {
+  "name": "1920: back at the top it hides again",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "1440: at rest the bar is hidden, inert and aria-hidden",
+  "ok": true,
+  "got": "{\"shown\":false,\"op\":\"0\",\"vis\":\"hidden\",\"inert\":true}"
+ },
+ {
+  "name": "1440: mid-collapse (panel foot 144 below the line 66) the bar stays hidden",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "1440 @321: shown, 60px, under the lip",
+  "ok": true,
+  "got": "shown true h 60 top 12"
+ },
+ {
+  "name": "1440 @321: the toolbar's top meets the bar's bottom within 1px",
+  "ok": true,
+  "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1440 @321: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
+  "name": "1440 @1400: shown, 60px, under the lip",
+  "ok": true,
+  "got": "shown true h 60 top 12"
+ },
+ {
+  "name": "1440 @1400: the toolbar's top meets the bar's bottom within 1px",
+  "ok": true,
+  "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1440 @1400: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
+  "name": "1440 @2600: shown, 60px, under the lip",
+  "ok": true,
+  "got": "shown true h 60 top 12"
+ },
+ {
+  "name": "1440 @2600: the toolbar's top meets the bar's bottom within 1px",
+  "ok": true,
+  "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1440: the ground spans the sheet; the content is inset to the page's edges",
+  "ok": true,
+  "got": "ground 80–1432 · sheet 80–1432 · content 112–1400 · page 112–1400"
+ },
+ {
+  "name": "1440: the page colour with the #e0d9ce hairline",
+  "ok": true,
+  "got": "rgb(246, 243, 238) rgb(224, 217, 206) 0px -1px 0px 0px inset"
+ },
+ {
+  "name": "1440: back at the top it hides again",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "reduced motion: no slide (transition none)",
+  "ok": true,
+  "got": "0s"
+ },
+ {
+  "name": "Contact list: the slim row is hidden at rest and shown at 800, 48px, writing --pin-cover 60px",
+  "ok": true,
+  "got": "{\"cl0\":{\"h\":48,\"top\":\"12px\",\"shown\":false},\"cl1\":{\"h\":48,\"shown\":true,\"cover\":\"60px\"}}"
+ }
+]

@@ -62,7 +62,8 @@ export const bandFor = (genreId: string | undefined, personal: PersonalGenre[] =
   const canonical = CANONICAL_GENRES.find((g) => g.id === id);
   const label = canonical?.label ?? personal.find((p) => p.id === id)?.label ?? null;
   if (!label) return null;
-  const raw = canonical?.wordCountRange;
+  /* Manuscripts v28 D2: a sub-genre inherits its parent's range */
+  const raw = canonical?.wordCountRange ?? (canonical?.parent ? CANONICAL_GENRES.find((g) => g.id === canonical.parent)?.wordCountRange : undefined);
   const parsed = raw ? parseRange(raw) : null;
   if (raw && !parsed) {
     /* ⚠️ REPORTED, NOT SWALLOWED. A genre whose range cannot be read must not quietly render the

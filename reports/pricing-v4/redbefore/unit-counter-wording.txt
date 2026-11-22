@@ -1,0 +1,33 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-pricing4
+
+ ✓ src/marketing/campaignEstimate.test.ts (818 tests) 57ms
+ ❯ src/marketing/pricingCounter.test.tsx (1 test | 1 failed) 12ms
+   × pricing v4: the counter, with a figure from the store > draws the track and one line reading exactly '{n} places left' 11ms
+     → expected '37/100 places claimed · no card needed' to be '63 places left' // Object.is equality
+ ✓ src/marketing/pricingPage.test.tsx (12 tests) 32ms
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 830 passed (831)
+   Start at  14:28:15
+   Duration  328ms (transform 143ms, setup 0ms, collect 352ms, tests 100ms, environment 0ms, prepare 115ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/marketing/pricingCounter.test.tsx > pricing v4: the counter, with a figure from the store > draws the track and one line reading exactly '{n} places left'
+AssertionError: expected '37/100 places claimed · no card needed' to be '63 places left' // Object.is equality
+
+Expected: [32m"[7m6[27m3 places [7mleft[27m"[39m
+Received: [31m"3[7m7/100[27m places [7mclaimed · no card needed[27m"[39m
+
+ ❯ src/marketing/pricingCounter.test.tsx:34:22
+     32|     const line = /<p class="mk-fmmeta"[^>]*>([^<]*)$/.exec(count);
+     33|     expect(line, "the line renders").toBeTruthy();
+     34|     expect(line![1]).toBe("63 places left");
+       |                      ^
+     35|     expect(box).not.toContain("places claimed</");
+     36|     expect(box).not.toMatch(/no card needed/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

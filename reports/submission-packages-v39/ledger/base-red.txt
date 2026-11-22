@@ -1,0 +1,18 @@
+pk39.measure.ts against the base build (2f611e08, served at 127.0.0.1:4740), before any v39 code:
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.0s)
+  ✘   2 [measure] › tests/e2e/pk39.measure.ts:100:3 › L1 the header card and title equal the Contact list's at 1512; one "Pro" (40.7s)
+  ✘   3 [measure] › tests/e2e/pk39.measure.ts:100:3 › L1 the header card and title equal the Contact list's at 1280; one "Pro" (40.2s)
+  ✘   4 [measure] › tests/e2e/pk39.measure.ts:124:1 › L2 a colour picked reaches the label, both headers, the showcase card and the list tile; no field reads Harbour (35.4s)
+  ✘   5 [measure] › tests/e2e/pk39.measure.ts:161:3 › L3 the labels row spans the content width; none under 200; one ringed at 1512 (35.3s)
+  ✘   6 [measure] › tests/e2e/pk39.measure.ts:161:3 › L3 the labels row spans the content width; none under 200; one ringed at 1280 (35.5s)
+  ✘   7 [measure] › tests/e2e/pk39.measure.ts:184:3 › L4 two cards, 28 apart, headers level and equal; one stage and no stepper at 1512 (35.7s)
+  ✘   8 [measure] › tests/e2e/pk39.measure.ts:184:3 › L4 two cards, 28 apart, headers level and equal; one stage and no stepper at 1280 (35.4s)
+  ✘   9 [measure] › tests/e2e/pk39.measure.ts:204:1 › L5 rename writes once (draft and sent), Escape writes nothing, a sent package's one padlock is in the stage (35.9s)
+  ✘  10 [measure] › tests/e2e/pk39.measure.ts:241:1 › L6 every package once; one piece type at a time; switching keeps scrollTop; rates are packageReplies'; ranked first (35.4s)
+  ✘  11 [measure] › tests/e2e/pk39.measure.ts:280:1 › L7 How it works: both doors, five steps, Escape closes, focus back to the opener, the old dialog gone (35.3s)
+  ✘  12 [measure] › tests/e2e/pk39.measure.ts:304:3 › L8 the pieces band is painted across the sheet's full width at 1512 (35.9s)
+  ✘  13 [measure] › tests/e2e/pk39.measure.ts:304:3 › L8 the pieces band is painted across the sheet's full width at 1280 (35.4s)
+  12 failed
+  1 passed (8.5m)
+
+Each red is the open() timing out on [data-pk39="labels"], which the base does not render: a crude red. The mutation proofs (mutation-proofs.txt) are the meaningful ones.

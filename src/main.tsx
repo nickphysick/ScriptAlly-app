@@ -2,6 +2,11 @@ import {StrictMode, type ComponentType} from 'react';
 import {createRoot} from 'react-dom/client';
 import {reloadOnceForStaleChunk} from './lib/chunkReload';
 import {startAnalytics} from './lib/cfAnalytics';
+import {initSentry} from './lib/sentry';
+
+/* Crash reporting v1: Sentry first, so an error anywhere after this line is reported. It starts only
+   when the build carries a DSN and is not running locally (lib/sentry). */
+initSentry();
 
 /* Cloudflare Web Analytics: on queryhawk.net only, before the router reads the URL (lib/cfAnalytics). */
 startAnalytics();

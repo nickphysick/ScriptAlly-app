@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L10",
+  "where": "the four steps are on the page",
+  "ok": true,
+  "detail": "[{\"k\":\"ver\",\"open\":true,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"let\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"syn\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"ext\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "L10",
+  "where": "an empty package opens on the version step, and only that one",
+  "ok": true,
+  "detail": "[{\"k\":\"ver\",\"open\":true,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"let\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"syn\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"ext\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "L10",
+  "where": "picking a version fills it and opens the letter step",
+  "ok": true,
+  "detail": "[{\"k\":\"ver\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"let\",\"open\":true,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"syn\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"ext\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "L10",
+  "where": "…with ONE write to the package",
+  "ok": true,
+  "detail": "1 writes"
+ },
+ {
+  "lock": "L10",
+  "where": "…through the writer (its toast)",
+  "ok": true,
+  "detail": "Queries loaded | Fast-paced opening added to Draft one.\nUNDO\n✕ | Fast-paced opening added to Draft one.\nUNDO\n✕"
+ },
+ {
+  "lock": "L10",
+  "where": "picking a letter closes every step",
+  "ok": true,
+  "detail": "[{\"k\":\"ver\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"let\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"syn\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"ext\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "L10",
+  "where": "…and shows two green discs (#3e7d5a)",
+  "ok": true,
+  "detail": "[{\"k\":\"ver\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"let\",\"open\":false,\"done\":true,\"disc\":\"rgb(62, 125, 90)\"},{\"k\":\"syn\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"},{\"k\":\"ext\",\"open\":false,\"done\":false,\"disc\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "L10",
+  "where": "…with ONE write to the package",
+  "ok": true,
+  "detail": "1 writes"
+ }
+]

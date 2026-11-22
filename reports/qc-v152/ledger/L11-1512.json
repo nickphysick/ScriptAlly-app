@@ -1,0 +1,87 @@
+[
+ {
+  "where": "population: the partial's sample chip",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "switching to chapters snaps to First 3",
+  "ok": true,
+  "detail": "First 3"
+ },
+ {
+  "where": "chapters step by 1",
+  "ok": true,
+  "detail": "First 4"
+ },
+ {
+  "where": "switching to pages snaps to 10",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "where": "pages step by 5",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "where": "switching to words snaps to 5,000",
+  "ok": true,
+  "detail": "5,000"
+ },
+ {
+  "where": "words step by 500",
+  "ok": true,
+  "detail": "5,500"
+ },
+ {
+  "where": "Free: no package row on Query sent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Free: the full's editor opens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Free: no version on the full",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Free: the pencil's views still open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Pro (before the switch): versions offered where the book has them, or none to offer",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "population: Query sent shows its package, on query",
+  "ok": true,
+  "detail": "Comps-led varianton query"
+ },
+ {
+  "where": "no one-off note while the chips are the package's",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "a changed letter shows the one-off note",
+  "ok": true,
+  "detail": "These aren’t Comps-led variant’s contents any more, so this query will count as a one-off, not in Comps-led variant’s results. Put Comps-led variant back"
+ },
+ {
+  "where": "saving clears the package link",
+  "ok": true,
+  "detail": "{\"sentHow\":\"individual\",\"basedOn\":\"seed-pkg-2\"}"
+ },
+ {
+  "where": "Undo puts the package link back",
+  "ok": true,
+  "detail": ""
+ }
+]

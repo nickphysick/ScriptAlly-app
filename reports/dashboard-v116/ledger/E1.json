@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "E1",
+  "where": "population: the Closed hoop's frame",
+  "ok": true,
+  "detail": "{\"inset\":6,\"top\":6,\"color\":\"rgb(124, 58, 42)\",\"width\":\"1px\",\"radius\":\"11px\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "other: the frame line, drawn",
+  "ok": true,
+  "detail": "rgb(124, 58, 42) 1px 11px vs rgb(124, 58, 42) 1px 11px"
+ },
+ {
+  "lock": "E1",
+  "where": "other: at the hoop's inset",
+  "ok": true,
+  "detail": "6,6,6,6 vs 6"
+ },
+ {
+  "lock": "E1",
+  "where": "other: the band sits inside the frame",
+  "ok": true,
+  "detail": "[6,6,6] (rgb(95, 117, 145))"
+ },
+ {
+  "lock": "E1",
+  "where": "send: the frame line, drawn",
+  "ok": true,
+  "detail": "rgb(124, 58, 42) 1px 11px vs rgb(124, 58, 42) 1px 11px"
+ },
+ {
+  "lock": "E1",
+  "where": "send: at the hoop's inset",
+  "ok": true,
+  "detail": "6,6,6,6 vs 6"
+ },
+ {
+  "lock": "E1",
+  "where": "send: the band sits inside the frame",
+  "ok": true,
+  "detail": "[6,6,6] (rgb(162, 69, 42))"
+ },
+ {
+  "lock": "E1",
+  "where": "nudge: the frame line, drawn",
+  "ok": true,
+  "detail": "rgb(124, 58, 42) 1px 11px vs rgb(124, 58, 42) 1px 11px"
+ },
+ {
+  "lock": "E1",
+  "where": "nudge: at the hoop's inset",
+  "ok": true,
+  "detail": "6,6,6,6 vs 6"
+ },
+ {
+  "lock": "E1",
+  "where": "nudge: the band sits inside the frame",
+  "ok": true,
+  "detail": "[6,6,6] (rgb(42, 58, 82))"
+ },
+ {
+  "lock": "E1",
+  "where": "close: the frame line, drawn",
+  "ok": true,
+  "detail": "rgb(124, 58, 42) 1px 11px vs rgb(124, 58, 42) 1px 11px"
+ },
+ {
+  "lock": "E1",
+  "where": "close: at the hoop's inset",
+  "ok": true,
+  "detail": "6,6,6,6 vs 6"
+ },
+ {
+  "lock": "E1",
+  "where": "close: the band sits inside the frame",
+  "ok": true,
+  "detail": "[6,6,6] (rgb(228, 223, 215))"
+ },
+ {
+  "lock": "E1",
+  "where": "population: every kind on the account, Consider closing among them",
+  "ok": true,
+  "detail": "other,send,nudge,close"
+ }
+]

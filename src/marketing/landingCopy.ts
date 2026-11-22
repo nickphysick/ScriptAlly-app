@@ -13,6 +13,8 @@
  * (repo test convention: node environment, no DOM rendering). UK spelling throughout.
  */
 
+import { FREE_PRICE, FREE_TRIAL_LINE, PLAN_LENGTHS_LINE, PRO_FROM_LINE } from "../lib/planRules";
+import { DIFFERING_ROWS, PLAN_ROWS } from "../lib/planComparison";
 import { CopyRun } from "./CopyRuns";
 import { supportMailto } from "../lib/companyInfo";
 import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
@@ -126,8 +128,8 @@ export const PHONE_STORY = {
    them any more. Dead copy is worse than no copy — it reads as live product wording to whoever
    opens the file next, and the house rule is to trace a symbol to a rendered root before keeping it.
    ⚠️ THE GLYPHS ARE NOT RETIRED AND MUST NOT BE. `StatusGlyph` and `STATUS_GLYPH_COUNT`
-   (`marketingMarks.tsx`) still draw the footer's signature row — six marks, `aria-hidden`. The
-   footer's own lock used to reconcile that count against `STATUS_STEPS.length`; with the copy gone
+   (`marketingMarks.tsx`) still draw the app footer's signature row (`AppFooter.tsx`) — six marks,
+   `aria-hidden`; the public footer dropped its row on 12 Nov. The footer's own lock used to reconcile that count against `STATUS_STEPS.length`; with the copy gone
    it reconciles against the glyph table itself, which is the derivation that actually owns the six.
    Recoverable from the commit that removed them if the states ever want describing again. */
 
@@ -298,6 +300,9 @@ export const foundingRemainingLabel = (claimed: number, cap: number) =>
 
 /** The phone nav's founding pill, beneath its ten segments: a BUILDER, never a number in a string. */
 export const navPlacesLeft = (left: number) => `${left} places left`;
+/** "63 places left" from the two figures the endpoint answered with: /pricing's counter line.
+ *  A builder for the reason the two above are — no subtraction at a render site, and never below 0. */
+export const foundingPlacesLeftLabel = (claimed: number, cap: number) => navPlacesLeft(Math.max(0, cap - claimed));
 /** The places line under each sign-up (waitlist v1): what it says, and what it is read as. */
 export const heroPlacesLabel = (left: number, cap: number) => `${left} of ${cap} founding places left`;
 
@@ -504,7 +509,9 @@ export const CLOSE_NOTE = "All we ask is occasional feedback to help shape Query
  * figure is what something will cost; a payment path is whether it can be bought, and only the
  * first of those exists.
  */
-export const PRO_PRICE_MONTHLY: string | null = "£4.99";
+/* Plan rules v1 (12 Nov): Pro's price is read from `lib/planRules.ts` — "from £3.75 a month" across four lengths, 1 month
+   £7.99 to 12 months £45. The old £4.99 is retired. */
+export const PRO_PRICE_MONTHLY: string | null = PRO_FROM_LINE;
 export const PRO_PRICE_YEARLY: string | null = null;
 export const FOUNDING_RATE_AFTER: string | null = null;
 
@@ -548,35 +555,16 @@ export const PRICING_TIERS: PricingTier[] = [
     key: "free",
     name: "Free",
     illoAlt: "A young hawk perched on a post, holding a single query letter.",
-    price: "£0",
+    price: FREE_PRICE,
     priceUnit: "forever",
+    /* Plan rules v1: Free's line under the price says the trial, from `planRules`. */
+    priceNote: FREE_TRIAL_LINE,
     summary: "Everything you need to run one manuscript's campaign.",
-    after: ["No card, no trial clock. It stays free."],
-    /* ⚠️ TWENTY AGENTS, NOT UNLIMITED — and the comparison table's row moves with it. The two are
-       one fact stated twice, so a change here that stops there makes the page argue with itself. */
-    includes: [
-      "One manuscript",
-      "Up to twenty agents",
-      "Every query tracked end to end",
-      "The full query pipeline",
-      "Agent records",
-      /* ⚠️ "Submission packages" IS RESTORED TO FREE AGAINST THE BRIEF'S LITERAL LIST, BECAUSE THE
-         CODE IS THE FACT AND THE COPY HAS TO AGREE. Packages are deliberately NOT Pro-gated —
-         `planComparison.ts` says so at length, CLAUDE.md records it as a decision, and nothing in
-         `SubmissionPackages.tsx` checks `isProUser`. Dropping it here while Pro's list names it
-         advertises a gate that does not exist, which is exactly what `planComparison.test.ts`
-         exists to catch. The brief's line was previously "Submission packages and comparable
-         titles" and kept only the comps half, so this reads as an oversight rather than a decision
-         to gate them — flagged, and a one-line reversal if the gate is really wanted. */
-      "Submission packages",
-      "Comparable titles",
-      "Notes and your to-do list",
-      "One Smart Import",
-    ],
-    excludes: [
-      { label: "Smart Email Drop", note: "Paste an email, get the update written for you" },
-      { label: "The Comp Scout", note: "Comparable titles suggested from your own manuscript" },
-    ],
+    after: ["No card. It stays free."],
+    /* ⚠️ PLAN RULES v1: BOTH LISTS ARE READ FROM THE PLAN TABLE (`lib/planComparison`), never typed here — what Free
+       includes is every row it has, and what it lacks is the rows Pro adds. No agent cap (none in the code since v1.1; planLimits.test.ts). */
+    includes: PLAN_ROWS.filter((r) => r.free.kind !== "absent").map((r) => r.label),
+    excludes: DIFFERING_ROWS.map((r) => ({ label: r.label, note: r.sub })),
     action: "Available at launch",
     cta: "later",
   },
@@ -614,24 +602,18 @@ export const PRICING_TIERS: PricingTier[] = [
     /* ⚠️ BOTH OF THESE ARE ASSERTED BY `planComparison.test.ts`, which renders them in the app —
        so setting `PRO_PRICE_MONTHLY` reaches the signed-in /plans page from this one line. */
     price: PRO_PRICE_MONTHLY ?? "Price to be confirmed",
-    priceUnit: PRO_PRICE_MONTHLY ? "per month" : undefined,
-    priceNote: PRO_PRICE_MONTHLY ? undefined : "no payment path yet",
-    summary: "For writers running several manuscripts, or querying hard.",
+    priceUnit: undefined,
+    /* Plan rules v1: the four lengths, from `planRules`. Pro still cannot be bought — see `after`. */
+    priceNote: PRO_PRICE_MONTHLY ? PLAN_LENGTHS_LINE : "no payment path yet",
+    summary: "Everything in Free, plus the tools for the submission itself.",
     /* ⚠️ A PRICE IS NOT A PAYMENT PATH, AND THIS SENTENCE IS THE DIFFERENCE. `PRO_PRICE_YEARLY` is
        still null, so the page states what Pro will cost and that it cannot yet be bought — two
        facts, both true, and the second is the one that stops the first reading as a sales page. */
     after: PRO_PRICE_YEARLY
       ? [`Or ${PRO_PRICE_YEARLY} a year. Cancel whenever you like.`]
       : ["Not on sale yet. Nothing here charges you, and nothing changes on your account."],
-    includes: [
-      "Everything in Free",
-      "Unlimited manuscripts",
-      "Unlimited agents",
-      "Submission packages",
-      "Hand over the housekeeping",
-      "Smart email drop",
-      "Comparable title scout",
-    ],
+    /* Plan rules v1: the rows Pro adds, from the plan table. */
+    includes: ["Everything in Free", ...DIFFERING_ROWS.map((r) => r.label)],
     action: "Available at launch",
     cta: "later",
   },
@@ -690,8 +672,8 @@ export const BE_STAGE_RGB: Record<BeStage, readonly [number, number, number]> = 
 /** The window's rows (phones draw all eight, the desktop band the first seven) — [left %, width %, stage,
     sentence, ghost line widths %] — and the one in focus. */
 export const BE_DESK_ROWS: ReadonlyArray<readonly [number, number, BeStage, string, readonly [number, number] | null]> = [
-  [0, 64, "q", "Reply 5 weeks overdue", [78, 52]],
-  [8, 56, "ps", "Reply 12 days overdue", [64, 46]],
+  [0, 64, "q", "Reply expected 5 weeks ago", [78, 52]],
+  [8, 56, "ps", "Reply expected 12 days ago", [64, 46]],
   [30, 42, "fr", "Send the full by 6 Nov", null],
   [42, 34, "o", "Reply to the offer by 9 Nov", [58, 40]],
   [48, 32, "pr", "Send the partial by 12 Nov", [72, 50]],
@@ -731,8 +713,9 @@ export const DETAILS_PILLS: ReadonlyArray<{ label: string; key: FeatureRow["key"
    ⚠️ THE NUMBER IS THE NEXT PLACE FROM THE STORE'S COUNT (claimed + 1), OR THERE IS NONE. Unloaded, the
    stub shows the label alone; with the cap reached it says so ("All fifty taken", founding emails v1,
    the ref's "Places gone" state) and still states no number. */
-export const PASS_LABEL = "Founding writer pass";
-export const PASS_FULL = `All ${FOUNDING_CAP_WORD} taken`;
+/* Plan rules v1 (12 Nov): "place", not "pass" — the word the waitlist already uses ("50 places"). */
+export const PLACE_LABEL = "Founding writer place";
+export const PLACE_FULL = `All ${FOUNDING_CAP_WORD} taken`;
 export const passNumber = (n: number) => `No. ${n}`;
 export const passOf = (cap: number) => `of ${cap}`;
 /** The lead phrase of each of `FOUNDING_GETS`, bolded on the ticket. The strings themselves never change. */

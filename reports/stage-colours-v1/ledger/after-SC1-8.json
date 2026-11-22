@@ -1,0 +1,57 @@
+[
+ {
+  "name": "Queried: header seal navy, initials paper",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(244, 238, 229)\"}"
+ },
+ {
+  "name": "Partial Requested: header seal navy, initials paper",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(244, 238, 229)\"}"
+ },
+ {
+  "name": "Partial Requested: thread seal navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)|rgb(244, 238, 229)"
+ },
+ {
+  "name": "Full Requested: header seal navy, initials paper",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(244, 238, 229)\"}"
+ },
+ {
+  "name": "Full Requested: thread seal navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)|rgb(244, 238, 229)"
+ },
+ {
+  "name": "Full Requested: thread seal navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)|rgb(244, 238, 229)"
+ },
+ {
+  "name": "Offer: header seal navy, initials paper",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(244, 238, 229)\"}"
+ },
+ {
+  "name": "Offer: thread seal navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)|rgb(244, 238, 229)"
+ },
+ {
+  "name": "Offer: thread seal navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)|rgb(244, 238, 229)"
+ },
+ {
+  "name": "Rejected: header seal navy, initials paper",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(244, 238, 229)\"}"
+ },
+ {
+  "name": "Rejected: thread seal navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)|rgb(244, 238, 229)"
+ }
+]

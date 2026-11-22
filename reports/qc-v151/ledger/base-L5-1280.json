@@ -1,0 +1,31 @@
+[
+ {
+  "where": "strip shown",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "one chip per filter + the search",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "removing a chip updates the rows",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "where": "Reset all clears the filters",
+  "ok": true,
+  "detail": "{\"chips\":0,\"badge\":false}"
+ },
+ {
+  "where": "Reset all clears the search",
+  "ok": false
+ },
+ {
+  "where": "Reset all keeps the tab",
+  "ok": false,
+  "detail": "undefined"
+ }
+]

@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: the details view",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no package control in the details view",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "an agent already queried for this manuscript is disabled, saying so",
+  "ok": false,
+  "detail": "{\"id\":\"q152-ag-quiet\",\"off\":false,\"txt\":\"QVQuinn ValeState & Window · already queried for this manuscript\"}"
+ },
+ {
+  "where": "population: an agent to move it to",
+  "ok": true,
+  "detail": "[{\"id\":\"cv25-agent-10\",\"off\":false,\"txt\":\"AKAisha KapoorThe Lantern Agency · not queried yet\"},{\"id\":\"cv25-agent-06\",\"off\":false,\"txt\":\"CBClara BeaumontHarbour Lane · not queried yet\"},{\"id\":\"cv25-agent-04\",\"off\":false,\"txt\":\"DODaniel O’RourkeInkwell & Stone · not queried yet\"},{\"id\":\"thin-ag-gap\",\"off\":false,\"txt\":\"DRDevendra RaoRao Agency · not queried yet\"}]"
+ },
+ {
+  "where": "This also changes: the history moves",
+  "ok": true,
+  "detail": "This also changesThe query moves from Rufus Vale’s history to Aisha Kapoor’s. Its timeline comes with it."
+ },
+ {
+  "where": "This also changes: a reply-expected date when the new agent states a reply time",
+  "ok": true,
+  "detail": "This also changesThe query moves from Rufus Vale’s history to Aisha Kapoor’s. Its timeline comes with it."
+ }
+]

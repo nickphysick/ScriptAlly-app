@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "L7-1512",
+  "where": "without reduced motion: station 4 is not visible at 1s",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "the title",
+  "ok": true,
+  "detail": "How packages work"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "the intro",
+  "ok": true,
+  "detail": "A package is simply what you send an agent. Put one together once, use it as often as you like, and we’ll show you which ones get the best response."
+ },
+ {
+  "lock": "L7-1512",
+  "where": "the four station titles",
+  "ok": true,
+  "detail": "[\"Choose what goes in\",\"Give it a name\",\"Send it with a query\",\"See what’s working\"]"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "no “Step 1 of 5”",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "no “Set your current batch”",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "no “The strip along the bottom of the header”",
+  "ok": true,
+  "detail": "still there"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "…and visible by 13s",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "Play again restarts it (station 4 hidden again at 1s)",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "Escape closes it",
+  "ok": true,
+  "detail": "still open"
+ },
+ {
+  "lock": "L7-1512",
+  "where": "reduced motion: all four stations fully visible at open",
+  "ok": true,
+  "detail": "[1,1,1,1]"
+ }
+]

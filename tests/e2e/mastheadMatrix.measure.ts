@@ -40,12 +40,11 @@ const MATRIX: { route: string; size: "full" | "compact" | "none"; why?: string }
   { route: "/manuscripts", size: "none", why: "out of this build by ruling" },
   { route: "/queries/analytics", size: "compact" },
   { route: "/todo", size: "none", why: "a page-local header since To-do list v5 (TD5 A1 holds it)" },
-  { route: "/todo/calendar", size: "compact" },
   { route: "/todo/corkboard", size: "compact" },
   { route: "/agents/discover", size: "compact" },
   /* comps v2 (27 Sep): the full header, ruled by Nick */
   { route: "/manuscripts/comps", size: "full" },
-  { route: "/manuscripts/packages", size: "full" },
+  { route: "/queries/packages", size: "full" },
   { route: "/import", size: "compact" },
 ];
 

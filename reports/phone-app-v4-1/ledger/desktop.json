@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PA41-14",
+  "where": "dashboard DOM",
+  "ok": true,
+  "detail": "483362 chars, identical"
+ },
+ {
+  "lock": "PA41-14",
+  "where": "dashboard pixels",
+  "ok": true,
+  "detail": "0 pixels differ (v3's measured noise floor 4,891)"
+ },
+ {
+  "lock": "PA41-14",
+  "where": "queries DOM",
+  "ok": true,
+  "detail": "480810 chars, identical"
+ },
+ {
+  "lock": "PA41-14",
+  "where": "queries pixels",
+  "ok": true,
+  "detail": "0 pixels differ (v3's measured noise floor 4,891)"
+ },
+ {
+  "lock": "PA41-14",
+  "where": "birds DOM",
+  "ok": true,
+  "detail": "582563 chars, identical"
+ },
+ {
+  "lock": "PA41-14",
+  "where": "birds pixels",
+  "ok": true,
+  "detail": "0 pixels differ (v3's measured noise floor 4,891)"
+ }
+]

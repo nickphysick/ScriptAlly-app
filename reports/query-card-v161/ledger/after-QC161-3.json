@@ -1,0 +1,17 @@
+[
+ {
+  "name": "thin-q-remind: gone quiet with no logged nudge — Nudge leads, Close it second (unless 8 weeks past the reply date)",
+  "ok": true,
+  "got": "Nudge · No reply from Imogen Reply was due 16 Oct · not nudged yet Imogen replied Close it Nudge"
+ },
+ {
+  "name": "thin-q-remind: \"quiet since\"/\"Reply was due\" counted from the reply date, never the reminder",
+  "ok": true,
+  "got": "No reply from Imogen Reply was due 16 Oct · not nudged yet Imogen replied Close it Nudge"
+ },
+ {
+  "name": "rj-nudge: a logged nudge — the footer says Nudged and Close it leads",
+  "ok": true,
+  "got": "Close it · No reply from Tamsin Nudged 21 Sep · quiet since 19 Oct Tamsin replied Nudge again Close it"
+ }
+]

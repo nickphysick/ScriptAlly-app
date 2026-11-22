@@ -30,7 +30,7 @@ const at = (expectedMs: number | null, stageStartMs: number | null, over: Partia
 describe("§1.9 · the three attention groups", () => {
   it("the order and the words — and Overdue is the only place the app says 'overdue'", () => {
     expect(ATTENTION_ORDER).toEqual(["overdue", "upcoming", "watch"]);
-    expect(ATTENTION_ORDER.map((k) => ATTENTION_LABEL[k])).toEqual(["Overdue", "Upcoming", "Watch and wait"]);
+    expect(ATTENTION_ORDER.map((k) => ATTENTION_LABEL[k])).toEqual(["Past expected", "Upcoming", "Watch and wait"]);
     expect(ATTENTION_ORDER.map((k) => ATTENTION_HINT[k])).toEqual(["to nudge", "next two weeks", "nothing needed"]);
     expect(UPCOMING_DAYS).toBe(14);
   });

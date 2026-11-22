@@ -41,6 +41,14 @@ const NAMES: ArtSlotName[] = [
   "pane-unselected",
   // the submission-package group's mark — ONE for every package (refs 177/178)
   "package-mark",
+  // Dashboard first visit v1: the Mentor beside the top tip, and the set-up card's two paths — placeholders
+  "dash-mentor-standing",
+  "dash-courier-letter",
+  "dash-scout-binoculars",
+  // Dashboard feed v1: the Top tip's header — a real asset
+  "dash-mentor-pointing",
+  // RE-POINTED (Workspace headers v1, 14 Nov): the navy header's drawing on six workspace pages — placeholders, 190 × 142
+  "responses-header", "analytics-header", "discover-header", "comps-header", "versions-header", "manuscripts-header",
 ];
 
 describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {
@@ -103,8 +111,10 @@ describe("⚠️ ONE component, TEN slots — the briefs are the contract", () =
         expect(html, n).toContain(`ART · ${n.toUpperCase()}`);
       }
     }
-    // exactly ONE slot carries an asset today — the plan card's mark
-    expect(NAMES.filter((n) => !!ART_SLOTS[n].src)).toEqual(["seize-the-day"]);
+    // exactly THREE slots carry an asset today — the plan card's mark, (Dashboard feed v1) the Top tip's Mentor, and
+    // (Analytics v26 §A) the Archivist in the Analytics header
+    expect(NAMES.filter((n) => !!ART_SLOTS[n].src)).toEqual(["seize-the-day", "dash-mentor-pointing", "analytics-header"]);
+    expect(ART_SLOTS["analytics-header"].src).toBe("/images/analytics/analytics-archivist.webp?v=1");
     expect(ART_SLOTS["seize-the-day"].src).toBe("/todo-seize-the-day.png");
     // and when one DOES land, an onError flips it back to the caption rather than the glyph
     const src = readFileSync(join(here, "ArtSlot.tsx"), "utf8");
@@ -142,13 +152,13 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
        no slot inside a card, on the board the app actually draws. */
     const taskBoard = readFileSync(join(here, "TaskBoard.tsx"), "utf8");
     expect(taskBoard, "the live board grew art inside a card").not.toContain("ArtSlot");
-    /* RE-POINTED (Corkboard v1): a note is drawn by `noteInner` on an item of `CorkBoard`, so the claim reads
-       both — the note's own content, and the board component that pins it. */
-    const noteCard = sliceBetween(noteboard, "const noteInner = (n: UserTask) => (", "const composeItem");
-    expect(noteCard).not.toContain("ArtSlot");
-    expect(readFileSync(join(here, "CorkBoard.tsx"), "utf8"), "the board grew art inside an item").not.toContain("ArtSlot");
-    const calendar = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
-    expect(calendar).not.toContain("ArtSlot"); // no pip, no cell, nowhere
+    /* RE-POINTED (Corkboard v2): a note is drawn by CbPostIt on CbWall, so the claim reads both. */
+    for (const f of ["corkboard/CbPostIt.tsx", "corkboard/CbWall.tsx"]) expect(readFileSync(join(here, f), "utf8"), f).not.toContain("ArtSlot");
+    expect(noteboard).not.toContain("<ArtSlot");
+    /* the Calendar page's half retired with the page (29 Oct); its board lives on in the shared timeline */
+    for (const f of ["TimelineBoard.tsx", "boardParts.tsx"]) {
+      expect(readFileSync(join(here, "..", "shared", "timeline", f), "utf8"), f).not.toContain("ArtSlot");
+    }
   });
 
   it("the component itself names both rejections, so the next reader inherits the reasoning", () => {
@@ -184,8 +194,13 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
     /* RE-POINTED (Corkboard v1): the page mounts ONE slot now — `corkboard-header`, the panel's drawing, a
        placeholder until it is supplied. `noteboard-empty` is still registered and still unused. */
     expect(noteboard).not.toContain('name="noteboard-empty"');
-    expect([...noteboard.matchAll(/<ArtSlot /g)].length).toBe(1);
-    expect(noteboard).toContain('<ArtSlot name="corkboard-header"');
+    /* RE-POINTED (Corkboard v2, 6 Nov): the header's drawing is the ring's own slot now (lib/corkboard
+       CORKBOARD_RING_ART, null until supplied), so the page mounts no ArtSlot. Both briefs stay registered. */
+    expect([...noteboard.matchAll(/<ArtSlot /g)].length).toBe(0);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the desktop's navy header mounts `corkboard-header` through the shared
+       header (shell/WorkspaceNavyHeader's ArtSlot, boxed at 190 × 142 there); the page itself still mounts none */
+    expect(readFileSync(join(here, "corkboard", "CbHeader.tsx"), "utf8")).toContain('art="corkboard-header"');
+    expect(ART_SLOTS["corkboard-header"]).toBeDefined();
     expect(ART_SLOTS["noteboard-empty"]).toBeDefined();
     expect([ART_SLOTS["corkboard-header"].w, ART_SLOTS["corkboard-header"].h]).toEqual([250, 136]);
     expect(ART_SLOTS["corkboard-header"].src, "the drawing has not been supplied").toBeUndefined();

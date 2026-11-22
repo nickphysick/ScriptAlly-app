@@ -1,0 +1,56 @@
+### natural: PP1 against the build before this pack (4711)
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:134:5 › PP1 public pages on phones › P2 no text under 12px at 360 and 390 (22.4s)
+  ✘  2 [measure] › tests/e2e/publicPhonePolish.measure.ts:134:5 › PP1 public pages on phones › P3 no small capitals under 14px at 360 and 390 (22.7s)
+  ✘  3 [measure] › tests/e2e/publicPhonePolish.measure.ts:165:3 › PP1 public pages on phones › P4 Contact and About match the after state (2.2s)
+  ✘  4 [measure] › tests/e2e/publicPhonePolish.measure.ts:225:3 › PP1 public pages on phones › P5 footer, menu and account frame: every hit box at least 44 × 44, none overlapping (23.4s)
+  ✘  5 [measure] › tests/e2e/publicPhonePolish.measure.ts:269:3 › PP1 public pages on phones › P6 the account tab's name is whole at 320 and 360 (3.4s)
+  ✘  6 [measure] › tests/e2e/publicPhonePolish.measure.ts:298:3 › PP1 public pages on phones › P7 the phone menu: six items in order, then the founding button to the founders flow (1.3s)
+  ✘  7 [measure] › tests/e2e/publicPhonePolish.measure.ts:315:3 › PP1 public pages on phones › P8 sign in and sign up follow the address with no reload (2.1s)
+  ✓  8 [measure] › tests/e2e/publicPhonePolish.measure.ts:333:3 › PP1 public pages on phones › P9 no sideways scroll at 320, 360, 390 and 430 (45.1s)
+    Error: expect(received).toEqual(expected) // deep equality
+    Error: expect(received).toEqual(expected) // deep equality
+    Error: Contact opens on a card
+    Error: footer 360: under 44 × 44
+    Error: 320 /#/signup: name clipped by the tab row
+    Error: page.$eval: Failed to find element matching selector ".mk-navpanel .mk-navjoin"
+    Error: expect(received).toEqual(expected) // deep equality
+### mutation P1
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:99:3 › PP1 public pages on phones › P1 desktop unchanged at 1440 × 900 and 1280 × 800 on all nine pages (2.5m)
+  ✓  2 [measure] › tests/e2e/publicPhonePolish.measure.ts:134:5 › PP1 public pages on phones › P2 no text under 12px at 360 and 390 (22.1s)
+  ✓  3 [measure] › tests/e2e/publicPhonePolish.measure.ts:134:5 › PP1 public pages on phones › P3 no small capitals under 14px at 360 and 390 (22.3s)
+  ✓  4 [measure] › tests/e2e/publicPhonePolish.measure.ts:165:3 › PP1 public pages on phones › P4 Contact and About match the after state (2.3s)
+  ✓  5 [measure] › tests/e2e/publicPhonePolish.measure.ts:225:3 › PP1 public pages on phones › P5 footer, menu and account frame: every hit box at least 44 × 44, none overlapping (29.2s)
+  ✓  6 [measure] › tests/e2e/publicPhonePolish.measure.ts:269:3 › PP1 public pages on phones › P6 the account tab's name is whole at 320 and 360 (3.4s)
+  ✓  7 [measure] › tests/e2e/publicPhonePolish.measure.ts:298:3 › PP1 public pages on phones › P7 the phone menu: six items in order, then the founding button to the founders flow (1.3s)
+  ✓  8 [measure] › tests/e2e/publicPhonePolish.measure.ts:315:3 › PP1 public pages on phones › P8 sign in and sign up follow the address with no reload (2.0s)
+  ✓  9 [measure] › tests/e2e/publicPhonePolish.measure.ts:333:3 › PP1 public pages on phones › P9 no sideways scroll at 320, 360, 390 and 430 (44.0s)
+    Error: pages that changed at a desktop width
+### mutation P2
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:134:5 › PP1 public pages on phones › P2 no text under 12px at 360 and 390 (22.2s)
+    Error: expect(received).toEqual(expected) // deep equality
+### mutation P3
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:134:5 › PP1 public pages on phones › P3 no small capitals under 14px at 360 and 390 (22.1s)
+    Error: expect(received).toEqual(expected) // deep equality
+### mutation P4
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:165:3 › PP1 public pages on phones › P4 Contact and About match the after state (2.5s)
+    Error: Contact opens on a card
+### mutation P5
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:225:3 › PP1 public pages on phones › P5 footer, menu and account frame: every hit box at least 44 × 44, none overlapping (28.5s)
+    Error: footer 360: under 44 × 44
+### mutation P6
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:269:3 › PP1 public pages on phones › P6 the account tab's name is whole at 320 and 360 (3.5s)
+    Error: 320 /#/signup: name clipped by the tab row
+### mutation P7
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:298:3 › PP1 public pages on phones › P7 the phone menu: six items in order, then the founding button to the founders flow (1.4s)
+    Error: expect(received).toEqual(expected) // deep equality
+### mutation P8
+  ✘  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:315:3 › PP1 public pages on phones › P8 sign in and sign up follow the address with no reload (2.1s)
+    Error: expect(received).toEqual(expected) // deep equality
+### mutation P9
+  ✓  1 [measure] › tests/e2e/publicPhonePolish.measure.ts:333:3 › PP1 public pages on phones › P9 no sideways scroll at 320, 360, 390 and 430 (44.6s)
+DONE
+
+### P9, rewritten after the run above showed it vacuous (scrollWidth cannot see an overflow under html/body overflow-x: clip)
+  ✓ new build (4712), clean
+  ✓ build before this pack (4711), clean — P9 was already true; its proof is the mutation
+  ✘ new build, PP1_MUTATE=P9: "320 / mk-footinner 0..520" (and 141 more)

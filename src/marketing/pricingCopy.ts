@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Public pricing-page copy — verbatim from design-refs/pricing-page-v1.html (21 Oct).
+ * Public pricing-page copy — verbatim from design-refs/pricing-page-v2.html (24 Oct), which
+ * supersedes pricing-page-v1.html for this route.
  *
  * ⚠️ THIS IS THE PUBLIC /pricing PAGE'S OWN MODULE, AND THE SIGNED-IN /plans PAGE NEVER READS IT.
  * `/plans` reads `PRICING_TIERS`, `PRO_PRICE_MONTHLY` and `PRO_PRICE_YEARLY` from `landingCopy.ts`,
@@ -13,130 +14,188 @@
  * ⚠️ EDIT THE WORDS HERE AND NOWHERE ELSE, and keep them verbatim against the ref. The same
  * discipline `landingCopy.ts` and `aboutCopy.ts` carry.
  *
- * ⚠️ NOTHING ON THE PAGE CAN BE BOUGHT. Every price below is a planned launch price; there is no
- * payment path, and the page's last question says so in as many words.
+ * ⚠️ NOTHING ON THE PAGE CAN BE BOUGHT. Every price below is a planned launch price, stated under
+ * "Then, once we launch:"; there is no payment path and no buy button.
  */
 
 import { CopyRun } from "./CopyRuns";
 import { FOUNDING_CAP, FOUNDING_CAP_WORD } from "./foundingCap";
 
-export const PRICING_V3_DOCUMENT_TITLE = "Pricing — QueryHawk";
+export const PRICING_DOCUMENT_TITLE = "Pricing — QueryHawk";
 
-/* ══════════════ The founding banner ══════════════ */
-export const PV3_KICKER = "Founding writers";
-export const PV3_H1 = `A free QueryHawk campaign for our first ${FOUNDING_CAP} writers.`;
-export const PV3_SUB = "We're looking for founding writers to put QueryHawk through its paces.";
+/* ══════════════ The founding box ══════════════ */
+export const PV4_KICKER = "Founding writers";
+export const PV4_H1 = `A free QueryHawk campaign for our first ${FOUNDING_CAP} writers.`;
+export const PV4_SUB = "We're looking for founding writers to put QueryHawk through its paces.";
 
-/* ══════════════ The passes — planned launch prices ══════════════
-   ⚠️ ONE TABLE, AND EVERY OTHER FIGURE ON THE PAGE IS READ FROM IT. The per-month figure is DERIVED
-   (price ÷ months, to the penny); the saving is STATED, because the ref's three savings are not one
-   rounding of the arithmetic — 20 / 40 / 53 against a computed 20.7 / 39.5 / 53.1 — and the page
-   prints the ref's words. `pricingCopy.test.ts` holds each stated saving within one point of the
-   arithmetic, so a price that moves without its saving fails there rather than on the page. */
-export interface Pass {
-  months: 1 | 3 | 6 | 12;
-  /** Pounds, as the page prints it: "7.99", "19". */
-  price: string;
-  /** Percentage off twelve single months at the one-month price. Null for the one-month pass. */
-  saving: number | null;
-}
-export const PASSES: Pass[] = [
-  { months: 1, price: "7.99", saving: null },
-  { months: 3, price: "19", saving: 20 },
-  { months: 6, price: "29", saving: 40 },
-  { months: 12, price: "45", saving: 53 },
+/** The toggle at the box's foot: its label closed, and open. */
+export const PV4_MORE = "What founding writers get";
+export const PV4_LESS = "Show less";
+
+/**
+ * The four cards behind the toggle. `icon` names one of the ref's four line drawings, which
+ * `PricingPage.tsx` holds — the words are here, the pictures are markup.
+ */
+export interface Pv4Perk { icon: "gift" | "chat" | "import" | "people"; title: string; body: string }
+export const PV4_PERKS: Pv4Perk[] = [
+  {
+    icon: "gift",
+    title: "The full power of QueryHawk, completely free of charge",
+    body: "Full access to QueryHawk Pro for an entire querying campaign.",
+  },
+  {
+    icon: "chat",
+    title: "A direct line to the founder",
+    body: "You'll shape QueryHawk for future users, and help countless other writers get their story told.",
+  },
+  {
+    icon: "import",
+    title: "Bring your list across",
+    body: "If you're already querying, Smart Import will read your list and turn your agents and queries " +
+      "into a smart QueryHawk database.",
+  },
+  {
+    icon: "people",
+    title: "Discounts for your network on launch",
+    body: "When QueryHawk launches properly, you'll be able to invite friends and fellow writers on board " +
+      "with an exclusive Early Bird discount.",
+  },
 ];
-/** Adding one month to a pass. */
-export const ADD_MONTH_PRICE = "5.99";
+export const PV4_STEPS_H = "How it works";
+export const PV4_STEPS = ["Sign up", "Receive and confirm your invite", "Log in with your unique founder's code"];
 
-/** £ a month for a pass, to the penny: 19 / 3 → "6.33". */
-export const perMonth = (p: Pass): string => (Number(p.price) / p.months).toFixed(2);
-export const passFor = (months: Pass["months"]): Pass => PASSES.find((p) => p.months === months)!;
-/** "£6.33 a month · save 20%", or the one-month pass's own line. */
-export const passPerMonthLine = (p: Pass): string =>
+/* ══════════════ The Pro plans — planned launch prices ══════════════
+   ⚠️ THE PRICES AND LENGTHS LIVE IN `lib/planRules.ts` (plan rules v1), which the app's plan table reads too. They are
+   re-exported here so this page's readers keep their imports. */
+export { PRO_PLANS, perMonth, planFor, PRO_FROM, ROLL_ON_PRICE, planMonths, type ProPlan } from "../lib/planRules";
+import { perMonth, planFor, PRO_FROM, PRO_PLANS, ROLL_ON_PRICE, TRIAL_DAYS, type ProPlan } from "../lib/planRules";
+import { DIFFERING_ROWS } from "../lib/planComparison";
+
+/** "£6.33 a month · save 20%", or the one-month plan's own line — the result card's wording. */
+export const planPerMonthLine = (p: ProPlan): string =>
   p.saving === null ? "One month of Pro" : `£${perMonth(p)} a month · save ${p.saving}%`;
-/** The cheapest month on any pass — Pro's "from" figure. */
-export const PRO_FROM = PASSES.map(perMonth).sort((a, b) => Number(a) - Number(b))[0];
+
+/* ══════════════ The Pro ladder, and the monthly roll-on (26 Oct; ref pricing-plans-ladder-v1.html) ══════════════
+   ⚠️ EVERY PLAN CARRIES ON MONTH BY MONTH AT THE ONE-MONTH PRICE ONCE IT ENDS, UNTIL THE WRITER CANCELS
+   (Nick, 26 Oct). It is said QUIETLY: one line of small print under the lengths, and in full only in the
+   FAQ. It is page copy for a planned launch — there is no payment path and nothing here bills anyone.
+   The price is the table's one-month figure, never a second literal. */
+/** Under "Pro", above the four lengths. */
+export const PRO_CHOOSE = "Choose how long to start with.";
+/** The small print under the lengths — the page's only mention of renewal outside the FAQ. */
+export const LADDER_SMALL = `Renews monthly at £${ROLL_ON_PRICE} once your plan ends. Cancel any time.`;
+/** The ladder's radiogroup name, for screen readers. */
+export const LADDER_LABEL = "Plan length";
+/** A row's mono line, in two runs so the saving can carry its own colour: the one-month plan reads
+ *  "The monthly rate"; the rest "£6.33 a month · " then "save 20%". */
+export const planRungLine = (p: ProPlan): { lead: string; save: string | null } =>
+  p.saving === null ? { lead: "The monthly rate", save: null } : { lead: `£${perMonth(p)} a month · `, save: `save ${p.saving}%` };
+/** The length the ladder selects before any result. */
+export const LADDER_DEFAULT: ProPlan["months"] = 6;
 
 /* ══════════════ Then, once we launch ══════════════ */
-export const PV3_LAUNCH_LINE = "Then, once we launch:";
+export const PV4_LAUNCH_LINE = "Then, once we launch:";
 
-export const PV3_FREE = {
+export const PV4_FREE = {
   name: "Free",
   price: "0",
   sub: "For as long as you like",
   list: [
     "One manuscript",
-    "Up to 20 agents",
-    "Unlimited queries and response tracking",
+    "Unlimited agents and queries",
+    "Response tracking",
     "To-do list",
     "Bring your list across with Smart Import",
+    `Everything in Pro for your first ${TRIAL_DAYS} days`, // non-workspace v1 (public-sweep-v1, Pricing "After")
   ],
 } as const;
 
-export const PV3_PRO = {
+export const PV4_PRO: { name: string; from: string; per: string; plus: string; list: readonly string[] } = {
   name: "Pro",
   from: "from",
   per: "a month",
-  sub: "A pass sized to your campaign. No subscription.",
   plus: "Everything in Free, plus:",
-  list: [
-    "Unlimited agents",
-    "Manuscript versions, one for each draft",
-    "Submission packages and materials tracking",
-    "Smart email drop",
-    "The Scout",
-  ],
-  flex:
-    "Pick 1, 3, 6 or 12 months. Add a month whenever you need one, pause while you revise, and keep " +
-    "unused months if you sign.",
-  link: "How long will I need?",
+  /* Plan rules v1: the rows Pro adds, read from the plan table (lib/planComparison), never typed here. */
+  list: DIFFERING_ROWS.map((r) => r.label),
 } as const;
 
-/* ══════════════ Questions ══════════════ */
-export interface Pv3Question { q: string; a: string }
-export const PV3_FAQ_H2 = "Questions";
-export const PV3_FAQ: Pv3Question[] = [
+/* ══════════════ The questions behind a link ══════════════ */
+/** The link that opens the questions, and what it reads once they are open. */
+export const SUIT_LINK = "Which plan suits me best?";
+export const SUIT_HIDE = "Hide the questions";
+
+/* ══════════════ Questions ══════════════
+   ⚠️ AN ANSWER IS RUNS, NOT A STRING, because one of them carries a link: "Which plan suits me
+   best?" inside an answer is the control that opens the questions, rendered by the page. */
+export type FaqRun = string | { suit: string };
+export interface Pv4Question { q: string; a: FaqRun[] }
+export const PV4_FAQ_H2 = "Questions";
+export const PV4_FAQ: Pv4Question[] = [
   {
-    q: "Will a pass renew without asking?",
-    a: "No. A pass ends on its date. We'll remind you a week before, and you choose whether to extend.",
+    q: "Is it really free for founding writers?",
+    a: ["Yes, completely. Founding writers get the full power of QueryHawk Pro for an entire querying campaign, " +
+        "free of charge. No card, and no catch."],
   },
   {
-    q: "Which pass should I buy?",
-    a: "Most first campaigns run around six months, with a few rounds of sending and waiting. If you're " +
-       "not sure, start there and extend if you need to.",
+    q: "What happens when my founding campaign ends?",
+    a: ["Just drop us a note to let us know you're done. We'd love to hear how it went."],
   },
   {
-    q: "What happens to my months if I sign?",
-    a: "Record your signing and any whole months left are kept as credit. They start again when you " +
-       "begin querying your next book.",
+    q: "What's the difference between Free and Pro?",
+    a: ["Free covers the essentials: one manuscript, as many agents as you like, and every query and response " +
+        "tracked. Pro adds the tools that make querying smarter, from query letters and comparable titles to " +
+        "manuscript versions, submission packages, Smart email drop and The Scout."],
   },
   {
-    q: "Why can I only add one manuscript right now?",
-    a: "Adding a second manuscript is coming soon, on every pass.",
+    q: "Is there a free trial?",
+    a: [`Yes. Every new account has everything in Pro for its first ${TRIAL_DAYS} days. After ` +
+        "that you're on Free, and nothing you made is deleted."],
   },
   {
-    q: `What happens when the ${FOUNDING_CAP_WORD} founding places are gone?`,
-    a: "Founding places close, and QueryHawk opens to everyone on the plans above. Founding writers " +
-       "stay free for their whole campaign.",
+    q: "Is Pro a subscription?",
+    a: ["Yes, but a flexible one. You start with a plan that matches how long you expect to be querying, from " +
+        "one month to twelve. If you're still going when it ends, it carries on month by month at " +
+        `£${ROLL_ON_PRICE} until you cancel. We'll remind you a week before.`],
   },
   {
-    q: "Will anything here charge me today?",
-    a: "No. Passes aren't on sale yet, and nothing changes on your account until you choose to buy one.",
+    q: "Which plan should I choose?",
+    a: [
+      "Querying usually takes longer than writers expect, often six months or more once agents start reading " +
+      "full manuscripts. Answer four quick questions under ",
+      { suit: SUIT_LINK },
+      " and we'll suggest one for you.",
+    ],
+  },
+  {
+    q: "What if my campaign runs longer than planned?",
+    a: ["There's nothing you need to do. Your plan simply carries on month by month, and you'll never lose " +
+        "your data."],
+  },
+  {
+    q: "What if I sign with an agent before my plan runs out?",
+    a: ["Congratulations! Record your signing and we'll offer to stop your renewal there and then. Your plan " +
+        "runs to the end of the months you've paid for."],
+  },
+  {
+    q: "Can I bring across the spreadsheet I already use?",
+    a: ["Yes. Smart Import will read your list and turn your agents and queries into a smart QueryHawk " +
+        "database, so you don't have to start again."],
   },
 ];
+/** An answer's text, the link's words included — for locks and for anything that needs it flat. */
+export const faqText = (a: FaqRun[]): string => a.map((r) => (typeof r === "string" ? r : r.suit)).join("");
 
-/* ══════════════ How long will I need? — one question at a time ══════════════
-   ⚠️ VERBATIM FROM THE REF'S MARKUP AND SCRIPT. The arithmetic is `campaignEstimate.ts`; these are
-   the words around it. */
-export const JY_TITLE = "How long will I need?";
+/* ══════════════ Which plan suits me best? — one question at a time ══════════════
+   ⚠️ VERBATIM FROM THE REF'S MARKUP AND SCRIPT (its `INS` object and `agentsIns`). The arithmetic is
+   `campaignEstimate.ts`; these are the words around it. The notes under the answers carry no label
+   — the ref's v18 retired "Good to know". */
+export const JY_TITLE = SUIT_LINK;
 export const JY_STEPS = 4;
 export const jyStepLabel = (n: number): string => (n < JY_STEPS ? `Question ${n + 1} of ${JY_STEPS}` : "Your plan");
 export const JY_NEXT = "Next";
 export const JY_SEE_PLAN = "See my plan";
 export const JY_BACK = "Back";
 export const JY_AGAIN = "Change my answers";
-export const JY_GOOD_TO_KNOW = "Good to know";
 
 export interface JyOption<V extends string> { v: V; title: string; small?: string }
 
@@ -158,40 +217,45 @@ export const JY_LENGTHS: JyOption<"s" | "m" | "l">[] = [
   { v: "m", title: "80,000 to 110,000" },
   { v: "l", title: "Over 110,000" },
 ];
-export const JY_Q_AGENTS = "How many agents are on your list?";
+export const JY_Q_AGENTS = "How many agents do you plan to query?";
 export const JY_FEWER = "Fewer agents";
 export const JY_MORE = "More agents";
+export const JY_OR = "or";
+export const JY_IDK = "I don't know";
 export const JY_Q_PACE = "How will you send them?";
-export const JY_PACES: JyOption<"steady" | "brisk">[] = [
+export const JY_PACES: JyOption<"steady" | "brisk" | "unsure">[] = [
   { v: "steady", title: "A few at a time", small: "Rounds of about ten" },
   { v: "brisk", title: "Bigger batches", small: "Rounds of fifteen or more" },
+  { v: "unsure", title: "Not sure yet", small: "We'll assume a typical pace" },
 ];
 
-/** "Good to know", per answer. */
+/** The note under each answer. */
 export const JY_INSIGHT = {
   stage: {
-    prep: "Getting ready counts. Most writers spend a month or two building their list and polishing their letter before the first query goes out.",
-    ready: "Good timing. Your first round teaches you the most, so it pays to send it organised.",
-    already: "We'll count from today. Replies to queries you've already sent can keep arriving for up to three months.",
+    prep: "That part takes longer than people expect. Most writers spend a month or two on their list and their letter, so we'll count it in.",
+    ready: "Then you're nearly there. A small first round is a good idea: the replies tell you whether your letter is working.",
+    already: "We'll count from today. Agents can take up to three months to reply, so queries you've already sent may still come back.",
   },
   kind: {
-    nonfic: "Non-fiction usually sells on a proposal, and agents read a proposal faster than a full manuscript.",
-    pb: "Agents read a picture book alongside your query, so decisions tend to come sooner.",
+    nonfic: "Non-fiction usually sells on a proposal rather than a finished book, and agents get through those faster.",
+    pb: "Agents read a picture book with your query, so you tend to hear back sooner.",
   },
   len: {
-    s: "Agents who like your opening ask for the full manuscript. Shorter books get read a little faster.",
-    m: "Agents who like your opening ask for the full manuscript. At this length, reading it usually takes two to three months.",
-    l: "Agents who like your opening ask for the full manuscript. Longer books take longer to read, so allow a few extra weeks.",
+    s: "If an agent likes your opening, they'll ask for the full manuscript. A shorter book gets read a little quicker.",
+    m: "If an agent likes your opening, they'll ask for the full manuscript. At this length they usually take two to three months to read it.",
+    l: "If an agent likes your opening, they'll ask for the full manuscript. A longer book takes them longer to read, so we've allowed a few extra weeks.",
   },
   pace: {
-    steady: "Small rounds give you time to change your letter if the first replies are quiet.",
-    brisk: "Bigger batches finish sooner, but leave less room to improve your letter between rounds.",
+    steady: "Small rounds give you the chance to change your letter if the first replies are quiet.",
+    brisk: "Bigger batches get you through your list sooner, but leave less room to change your letter between rounds.",
+    unsure: "That's fine. We'll assume rounds of about ten, which is what most writers do.",
   },
 } as const;
-export const jyAgentsInsight = (n: number): string =>
-  n < 20 ? "That's a short list. Most writers query more agents than that before they're done, so it's worth building up."
-  : n <= 60 ? "That's in line with most campaigns. Querying writers send around 40 to 50 queries on average."
-  : "A long list. It takes more rounds to get through, so your campaign runs longer.";
+export const jyAgentsInsight = (n: number, unknown: boolean): string =>
+  unknown ? "No problem. We'll go with about 40, which is roughly what most writers end up sending."
+  : n < 20 ? "That's a fairly short list. Most writers end up querying more agents than they first planned."
+  : n <= 60 ? "That's about typical. Most writers send somewhere between 40 and 50 queries."
+  : "That's a long list, so it'll take more rounds to get through. We've allowed for that.";
 
 /* The result screen. */
 export const JY_YOUR_CAMPAIGN = "Your campaign";
@@ -201,21 +265,28 @@ export const JY_PREP_NOTE =
   "packages, so you start querying organised.";
 export const JY_FITS = "Fits your campaign";
 export const JY_INCLUDES = "Every Pro feature: manuscript versions, submission packages, Smart email drop and The Scout.";
-export const JY_ALL_PLANS = "See all plans";
-/** The five tiles under the result. `m` 0 is Free. */
-export const JY_TILES: { m: 0 | 1 | 3 | 6 | 12; name: string; price: string; small: string }[] = [
-  { m: 0, name: "Free", price: "0", small: "No time limit" },
-  ...PASSES.map((p) => ({
-    m: p.months,
-    name: `${p.months} month${p.months > 1 ? "s" : ""}`,
-    price: p.price,
-    small: p.months === 1 ? "Top up any pass" : `£${perMonth(p)} a month`,
-  })),
-];
 
-/* ══════════════ The source note under the journey ══════════════ */
-export const PV3_SOURCE_NOTE: CopyRun[] = [
+/* ══════════════ The source note under the questions ══════════════ */
+export const PV4_SOURCE_NOTE: CopyRun[] = [
   "A rough guide, not a promise, based on typical reply times reported by querying writers (",
   { link: "QueryTracker figures", href: "https://rejectomancy.com/2023/09/28/query-quest-what-are-my-chances-part-ii/" },
   ") and the reply windows agencies state.",
 ];
+
+/* ══════════════ On phones (design-refs/pricing-page-mobile-v1.html, 25 Oct) ══════════════
+   ⚠️ ONLY WHAT THE PHONE SAYS DIFFERENTLY IS NEW HERE. Every other word on the phone page — the box,
+   the perks, the steps, the tiers, the plans, the eight questions, the four journey questions and
+   their notes — is read from the constants above, so the two widths cannot come to disagree. */
+/** The phone's pinned Free / Pro tabs (26 Oct; ref pricing-phone-plans-v1.html, layout A): each tab
+ *  names its plan with its price beneath, so Free is never out of sight. Read from the tables. */
+export const TAB_FREE_SMALL = `£${PV4_FREE.price}`;
+export const TAB_PRO_SMALL = `${PV4_PRO.from} £${PRO_FROM} ${PV4_PRO.per}`;
+/** The three novel lengths as the phone's row of short cards. Same values as `JY_LENGTHS`. */
+export const JY_LENGTHS_SHORT: JyOption<"s" | "m" | "l">[] = [
+  { v: "s", title: "Under 80k" },
+  { v: "m", title: "80k to 110k" },
+  { v: "l", title: "Over 110k" },
+];
+/** The sheet's footer button on the result, and its close control's name. */
+export const JY_SEE_IN_PLANS = "See it in the plans";
+export const JY_CLOSE = "Close";

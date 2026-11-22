@@ -1,0 +1,428 @@
+[
+ {
+  "lock": "A1",
+  "where": "1512x982 population",
+  "ok": true,
+  "detail": "header true · band true · grid true"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 18 under the header",
+  "ok": false,
+  "detail": "638.0px"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 full width",
+  "ok": false,
+  "detail": "band 560.2–1048.0 · header 112.0–1472.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 the columns 22 under the band",
+  "ok": false,
+  "detail": "-846.1px"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 left: Next up, then Agents",
+  "ok": true,
+  "detail": "[\"next\",\"agents-hoop\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 middle: the chart, then Closed",
+  "ok": false,
+  "detail": "[\"active\",\"closed-hoop\",\"founding\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 the feed on the right",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 no founding card in any column",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 the feed starts level with the columns",
+  "ok": true,
+  "detail": "304.8 vs 304.8"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 the feed ends level with the taller column",
+  "ok": true,
+  "detail": "1180.2 vs 1180.2"
+ },
+ {
+  "lock": "A1",
+  "where": "1512x982 column widths (reported)",
+  "ok": true,
+  "detail": "424 / 488 / 400"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 active count 18 from the band's left",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 active toggle 18 from the band's right",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 active vertically centred",
+  "ok": true,
+  "detail": "count 342.8 · toggle 342.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 active band 60 tall",
+  "ok": true,
+  "detail": "60.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 active tablist, active selected",
+  "ok": true,
+  "detail": "active:true sent:false"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 sent count 18 from the band's left",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 sent toggle 18 from the band's right",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 sent vertically centred",
+  "ok": true,
+  "detail": "count 342.8 · toggle 342.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 sent band 60 tall",
+  "ok": true,
+  "detail": "60.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1512x982 sent tablist, sent selected",
+  "ok": true,
+  "detail": "active:false sent:true"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 population",
+  "ok": true,
+  "detail": "15 weeks, 8 non-zero"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 one bar per week of Active's range",
+  "ok": true,
+  "detail": "sent 15 · active 15"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 119 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 120 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 121 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 122 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 124 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 125 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 126 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 week 127 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 this week drawn",
+  "ok": true,
+  "detail": "n 0"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 the header",
+  "ok": true,
+  "detail": "\"52 queries sent\" · want \"52 queries sent\""
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 counts are the derivation's",
+  "ok": true,
+  "detail": "page 3,14,2,2,0,1,1,4,1,0,0,0,0,0,0 · lib 3,14,2,2,0,1,1,4,1,0,0,0,0,0,0"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 headroom 1.15",
+  "ok": true,
+  "detail": "tallest 167.0 · want 167.0"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 hover: count, cumulative, agents",
+  "ok": true,
+  "detail": "{\"n\":\"3\",\"cum\":\"27 sent in all\",\"rows\":3,\"more\":null,\"vline\":true}"
+ },
+ {
+  "lock": "B2",
+  "where": "1512x982 back to Active restores v2.1's chart",
+  "ok": true,
+  "detail": "{\"dots\":15,\"fill\":true,\"bars\":0,\"tip\":false}"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "header true · band true · grid true"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 18 under the header",
+  "ok": false,
+  "detail": "622.0px"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 full width",
+  "ok": false,
+  "detail": "band 468.4–882.0 · header 112.0–1240.0"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the columns 22 under the band",
+  "ok": false,
+  "detail": "-977.5px"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 left: Next up, then Agents",
+  "ok": true,
+  "detail": "[\"next\",\"agents-hoop\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 middle: the chart, then Closed",
+  "ok": false,
+  "detail": "[\"active\",\"closed-hoop\",\"founding\"]"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the feed on the right",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 no founding card in any column",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the feed starts level with the columns",
+  "ok": true,
+  "detail": "304.8 vs 304.8"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 the feed ends level with the taller column",
+  "ok": true,
+  "detail": "1282.4 vs 1282.4"
+ },
+ {
+  "lock": "A1",
+  "where": "1280x800 column widths (reported)",
+  "ok": true,
+  "detail": "338 / 414 / 340"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 active count 18 from the band's left",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 active toggle 18 from the band's right",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 active vertically centred",
+  "ok": true,
+  "detail": "count 342.3 · toggle 342.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 active band 60 tall",
+  "ok": true,
+  "detail": "60.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 active tablist, active selected",
+  "ok": true,
+  "detail": "active:true sent:false"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 sent count 18 from the band's left",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 sent toggle 18 from the band's right",
+  "ok": true,
+  "detail": "18.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 sent vertically centred",
+  "ok": true,
+  "detail": "count 342.3 · toggle 342.8"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 sent band 60 tall",
+  "ok": true,
+  "detail": "60.0"
+ },
+ {
+  "lock": "B1",
+  "where": "1280x800 sent tablist, sent selected",
+  "ok": true,
+  "detail": "active:false sent:true"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 population",
+  "ok": true,
+  "detail": "12 weeks, 5 non-zero"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 one bar per week of Active's range",
+  "ok": true,
+  "detail": "sent 12 · active 12"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 week 122 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 week 124 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 week 125 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 week 126 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 week 127 colour",
+  "ok": true,
+  "detail": "css rgb(45, 58, 80) · pixel rgb(45, 58, 80) · want rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 this week drawn",
+  "ok": true,
+  "detail": "n 0"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 the header",
+  "ok": true,
+  "detail": "\"52 queries sent\" · want \"52 queries sent\""
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 counts are the derivation's",
+  "ok": true,
+  "detail": "page 2,0,1,1,4,1,0,0,0,0,0,0 · lib 2,0,1,1,4,1,0,0,0,0,0,0"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 headroom 1.15",
+  "ok": true,
+  "detail": "tallest 167.0 · want 167.0"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 hover: count, cumulative, agents",
+  "ok": true,
+  "detail": "{\"n\":\"2\",\"cum\":\"45 sent in all\",\"rows\":2,\"more\":null,\"vline\":true}"
+ },
+ {
+  "lock": "B2",
+  "where": "1280x800 back to Active restores v2.1's chart",
+  "ok": true,
+  "detail": "{\"dots\":12,\"fill\":true,\"bars\":0,\"tip\":false}"
+ }
+]

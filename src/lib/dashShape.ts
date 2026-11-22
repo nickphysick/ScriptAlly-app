@@ -16,7 +16,11 @@ export const DASH_SHAPE_KEY = "sa.dash58Shape";
  *  agents — so the loading page draws the state it last saw and the swap never flashes. */
 export interface DashShape { focusH: number; closed: "some" | "none"; today: boolean; pre: boolean; agents: boolean; hoopNeed: number }
 
-export const DEFAULT_SHAPE: DashShape = { focusH: 246, closed: "some", today: false, pre: false, agents: true, hoopNeed: 0 };
+/* ⚠️ `pre: true` (Dashboard first visit v1): with nothing remembered — a writer's very first visit — the loading
+   page is the FIRST-VISIT skeleton, not the querying one, so a new writer never sees Log / Record / Add flash and
+   vanish. Once anything is remembered the cached shape wins, so a returning writer on a new device is the only
+   case that swaps (pre skeleton → querying page). `agents: false` with it: a first visit has none. */
+export const DEFAULT_SHAPE: DashShape = { focusH: 246, closed: "some", today: false, pre: true, agents: false, hoopNeed: 0 };
 
 export function readShape(): DashShape {
   try {
@@ -27,8 +31,8 @@ export function readShape(): DashShape {
       focusH: typeof v.focusH === "number" && v.focusH >= 80 && v.focusH <= 600 ? v.focusH : DEFAULT_SHAPE.focusH,
       closed: v.closed === "none" ? "none" : "some",
       today: v.today === true,
-      pre: v.pre === true,
-      agents: v.agents !== false,
+      pre: typeof v.pre === "boolean" ? v.pre : DEFAULT_SHAPE.pre,
+      agents: typeof v.agents === "boolean" ? v.agents : DEFAULT_SHAPE.agents,
       /* v60: the last measured width the two hoop cards needed — the loading page's left-column floor */
       hoopNeed: typeof v.hoopNeed === "number" && v.hoopNeed >= 0 && v.hoopNeed <= 2000 ? v.hoopNeed : 0,
     };

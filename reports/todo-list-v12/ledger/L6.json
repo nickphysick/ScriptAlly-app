@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L6",
+  "where": "no role=tablist in the tray",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L6",
+  "where": "the Set aside view shows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L6",
+  "where": "the toolbar reads \"Set aside: n tasks waiting to come back\"",
+  "ok": true,
+  "detail": "Set aside: 2 tasks waiting to come back"
+ },
+ {
+  "lock": "L6",
+  "where": "…at 19px",
+  "ok": true,
+  "detail": "19px"
+ },
+ {
+  "lock": "L6",
+  "where": "…with Back to your tray, and nothing else on the left",
+  "ok": true,
+  "detail": "{\"say\":\"Set aside: 2 tasks waiting to come back\",\"fs\":\"19px\",\"back\":true,\"list\":true,\"find\":false}"
+ },
+ {
+  "lock": "L6",
+  "where": "Back returns to the tray",
+  "ok": true,
+  "detail": "{\"list\":false,\"rows\":24,\"say\":false}"
+ }
+]

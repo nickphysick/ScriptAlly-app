@@ -1,0 +1,17 @@
+[
+ {
+  "where": "agency line 14px",
+  "ok": false,
+  "detail": "11px"
+ },
+ {
+  "where": "agency line sentence case (text-transform none)",
+  "ok": false,
+  "detail": "uppercase"
+ },
+ {
+  "where": "agency line Source Serif, no letter-spacing, #5b4f47",
+  "ok": true,
+  "detail": "\"Source Serif 4\", Georgi normal rgb(91, 79, 71)"
+ }
+]

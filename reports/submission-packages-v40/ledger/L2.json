@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L2",
+  "where": "the drawer offers New package from this",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L2",
+  "where": "a new package was made",
+  "ok": true,
+  "detail": "[\"Draft one\",\"Old one\",\"Ready one\",\"Standard\",\"Standard 2\",\"Standard 3\"]"
+ },
+ {
+  "lock": "L2",
+  "where": "…named Standard 3 (the next free number)",
+  "ok": true,
+  "detail": "Standard 3"
+ },
+ {
+  "lock": "L2",
+  "where": "…copied from Standard",
+  "ok": true,
+  "detail": "pk40-std"
+ },
+ {
+  "lock": "L2",
+  "where": "…and not sent",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L2",
+  "where": "the original is byte-for-byte unchanged",
+  "ok": true,
+  "detail": "same"
+ },
+ {
+  "lock": "L2",
+  "where": "the toast says so",
+  "ok": true,
+  "detail": "Made Standard 3 from Standard. Standard stays as it was.\nUNDO\n✕"
+ },
+ {
+  "lock": "L2",
+  "where": "the copy is the open package",
+  "ok": true,
+  "detail": "pkg-27wiugo3b vs pkg-27wiugo3b"
+ }
+]

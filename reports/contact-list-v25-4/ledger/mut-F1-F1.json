@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "F1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "5 headings"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 order",
+  "ok": false,
+  "detail": "Agent · What they want · Replies in · Your query · Your rating"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Agent sorts",
+  "ok": true,
+  "detail": "descending"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 What they want sorts",
+  "ok": true,
+  "detail": "ascending"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Replies in sorts",
+  "ok": true,
+  "detail": "ascending"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Your query sorts",
+  "ok": true,
+  "detail": "ascending"
+ },
+ {
+  "lock": "F1",
+  "where": "1512 Your rating sorts",
+  "ok": true,
+  "detail": "ascending"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "4 headings"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 order",
+  "ok": true,
+  "detail": "Agent · What they want · Replies in · Your query"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Agent sorts",
+  "ok": true,
+  "detail": "descending"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 What they want sorts",
+  "ok": true,
+  "detail": "ascending"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Replies in sorts",
+  "ok": true,
+  "detail": "ascending"
+ },
+ {
+  "lock": "F1",
+  "where": "1280 Your query sorts",
+  "ok": true,
+  "detail": "ascending"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "C11",
+  "where": "the three",
+  "ok": true,
+  "detail": "[\"Check each agent’s submission guidelines before you send. They all ask for something slightly different.\",\"Send queries in small batches, five or so at a time. Then you can change the letter if it isn’t landing.\",\"Address each agent by name, and say in a line why you chose them.\"]"
+ },
+ {
+  "lock": "C11",
+  "where": "tagged Example",
+  "ok": true,
+  "detail": "Example,Example,Example"
+ },
+ {
+  "lock": "C11",
+  "where": "heading",
+  "ok": true,
+  "detail": "A few to get you goingGeneral querying advice to start your board. Keep any you like, or write your own."
+ },
+ {
+  "lock": "C11",
+  "where": "how",
+  "ok": true,
+  "detail": "What you can do with a note"
+ },
+ {
+  "lock": "C11",
+  "where": "keep",
+  "ok": true,
+  "detail": "1 · blush · Kept. It’s your note now."
+ },
+ {
+  "lock": "C11",
+  "where": "keep undo",
+  "ok": true,
+  "detail": "gone"
+ },
+ {
+  "lock": "C12",
+  "where": "quiet: how shown, no about",
+  "ok": true,
+  "detail": "few"
+ },
+ {
+  "lock": "C12",
+  "where": "not quiet: no how, about shown",
+  "ok": true,
+  "detail": "everyday"
+ }
+]

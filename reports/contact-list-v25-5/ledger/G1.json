@@ -1,0 +1,230 @@
+[
+ {
+  "lock": "G1",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "6 agents"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-near sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-near nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-near scale",
+  "ok": true,
+  "detail": "8/12 for 8 — \"1 WK 12 WKS Replies in about 8 weeks · always replies\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-soon sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-soon nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-soon scale",
+  "ok": true,
+  "detail": "12/12 for 12 — \"1 WK 12 WKS Replies in about 12 weeks · always replies\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-passed20 sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-passed20 nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-passed20 scale",
+  "ok": true,
+  "detail": "4/12 for 4 — \"1 WK 12 WKS Replies in about 4 weeks · always replies\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-06 sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-06 nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-06 no reply time",
+  "ok": true,
+  "detail": "\"Reply time not known yet\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-08 sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-08 nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 cv25-agent-08 no reply time",
+  "ok": true,
+  "detail": "\"Reply time not known yet\""
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-bang sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-bang nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1512 seed-cal-bang scale",
+  "ok": true,
+  "detail": "12/12 for 16 — \"1 WK 12 WKS Replies in about 16 weeks · always replies\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "6 agents"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-near sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-near nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-near scale",
+  "ok": true,
+  "detail": "8/12 for 8 — \"1 WK 12 WKS Replies in about 8 weeks · always replies\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-soon sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-soon nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-soon scale",
+  "ok": true,
+  "detail": "12/12 for 12 — \"1 WK 12 WKS Replies in about 12 weeks · always replies\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-passed20 sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-passed20 nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-passed20 scale",
+  "ok": true,
+  "detail": "4/12 for 4 — \"1 WK 12 WKS Replies in about 4 weeks · always replies\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-06 sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-06 nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-06 no reply time",
+  "ok": true,
+  "detail": "\"Reply time not known yet\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-08 sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-08 nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 cv25-agent-08 no reply time",
+  "ok": true,
+  "detail": "\"Reply time not known yet\""
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-bang sections",
+  "ok": true,
+  "detail": "how,reach also false (colleagues false)"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-bang nothing about the query",
+  "ok": true,
+  "detail": "0 stage glyphs; \"You and\" false"
+ },
+ {
+  "lock": "G1",
+  "where": "1280 seed-cal-bang scale",
+  "ok": true,
+  "detail": "12/12 for 16 — \"1 WK 12 WKS Replies in about 16 weeks · always replies\""
+ }
+]

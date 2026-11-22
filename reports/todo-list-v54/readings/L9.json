@@ -1,0 +1,11 @@
+{
+ "qid": "seed-cal-passed865-q",
+ "before": null,
+ "sample": {
+  "material": "Sample Pages",
+  "type": "pages",
+  "quantity": 37,
+  "from": 40,
+  "fromUnit": "page"
+ }
+}

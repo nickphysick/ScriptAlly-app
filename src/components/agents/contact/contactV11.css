@@ -210,7 +210,7 @@
   margin: 0;
   font-family: var(--clv-serif);
   font-size: 10px; letter-spacing: .11em; text-transform: uppercase;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
 }
 .clv-tray-c b { font-weight: 700; color: var(--clv-ink); }
 
@@ -238,7 +238,7 @@
   /* Special Elite's metrics inflate the inline box past its size (the shared header's .ph-ms
      fix, same face, same cure) — lh 1 is what lands the mock's 37px toggle */
   line-height: 1;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
   padding: 8px 0;
   white-space: nowrap;
 }
@@ -263,7 +263,7 @@
   padding: 1px 6px;
   border-radius: 999px;
   background: var(--clv-p3);
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
 }
 .clv-hkwhy {
   margin: 4px 0 6px;
@@ -271,7 +271,7 @@
   font-style: italic;
   font-size: 13px;
   line-height: 1.35;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
 }
 .clv-hklist { list-style: none; margin: 0; padding: 0; }
 .clv-hkrow {
@@ -300,7 +300,7 @@
   display: block;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 8px; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--clv-ink-45);
+  color: var(--sp-quiet);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .clv-hklive { font-style: normal; color: var(--clv-rust); font-weight: 700; }
@@ -326,7 +326,7 @@
   display: inline-flex; align-items: center; gap: 4px;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 9px; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
 }
 .clv-hkwk input {
   width: 26px;
@@ -356,7 +356,7 @@
   cursor: pointer;
   font-family: var(--clv-serif);
   font-size: 11.5px;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
 }
 .clv-hkchip:hover { border-color: var(--clv-ink-45); color: var(--clv-ink); }
 .clv-hkempty {
@@ -364,7 +364,7 @@
   font-family: var(--clv-serif);
   font-style: italic;
   font-size: 13px;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
 }
 
 /* living headers §3 — the empty account: the header takes row 1 across both tracks, as on the
@@ -404,7 +404,7 @@
 .clv-ixtab.has i {
   font: 400 7px var(--font-mono, "JetBrains Mono", monospace);
   font-style: normal;
-  color: var(--clv-ink-45);
+  color: var(--sp-quiet);
   margin-top: 2px;
 }
 .clv-ixtab.has:hover { background: var(--clv-p2); }
@@ -423,11 +423,11 @@
 
 /* ══ v12 P5 — the empty state: the three ways in, the banner, and the two live previews ══════ */
 
-/* the ways (the mock's .ways4/.cd): three doors below the header's rule. The bare `cd` class
+/* the ways (the mock's .ways4/.cd): two doors below the header's rule (the template's went, 14 Nov). The bare `cd` class
    rides alongside for §10.7, collision-checked against the whole bundle. */
 .clv-ways {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin: 22px 0 0;
 }
@@ -497,7 +497,7 @@
   margin: 6px 0 0;
   font-size: 14px;
   line-height: 1.45;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
   min-height: 60px;
 }
 .clv-cdgo {
@@ -524,7 +524,7 @@
   font: 400 8.5px var(--font-mono, "JetBrains Mono", monospace);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--clv-ink-45);
+  color: var(--sp-quiet);
 }
 
 /* the banner (the mock's .ban), inside the exhibition so the band starts on screen (LH8) */
@@ -596,7 +596,7 @@
   font-family: var(--clv-serif);
   font-size: 16.5px;
   line-height: 1.6;
-  color: var(--clv-ink-70);
+  color: var(--sp-muted);
 }
 
 /* ⚠️ brand.tsx FORCES HEADING FACES (the P4 lesson, measured there): every machine heading in

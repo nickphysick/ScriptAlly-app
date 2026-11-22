@@ -1,0 +1,37 @@
+[
+ {
+  "where": "no \"Your move\" in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "no \"Nudge due\" in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "no \"Gone quiet\" in any row",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "population: rows",
+  "ok": true,
+  "detail": "9367"
+ },
+ {
+  "where": "quiet: row \"Nudge\" = footer \"Nudge\"",
+  "ok": true,
+  "detail": "Nudge\n→ | Nudge"
+ },
+ {
+  "where": "nrmn: row \"Nudge\" = footer \"Nudge\"",
+  "ok": true,
+  "detail": "Nudge\n→ | Nudge"
+ },
+ {
+  "where": "nudgedquiet: row \"Close it\" = footer \"Close it\"",
+  "ok": true,
+  "detail": "Close it\n→ | Close it"
+ }
+]

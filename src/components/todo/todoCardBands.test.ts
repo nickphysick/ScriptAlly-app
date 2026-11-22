@@ -84,7 +84,8 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
   });
   it("focus: the default ring dies; :focus-visible = 2px ink outline at 2px offset; reduced motion = no lift, instant", () => {
     expect(css).toContain(".tdb-tile:focus, .tdb-gcard:focus { outline: none; }");
-    expect(css).toContain(".tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }");
+    /* consistency roll-out v2, Phase 6 (ruling 11): the one focus ring is navy, not ink */
+    expect(css).toContain(".tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }");
     expect(css).toContain(".tdb-tile.hov, .tdb-gcard.hov { transform: none; }");
   });
   it("the batch progress: #ece5d8 track, ink fill, mono meta", () => {

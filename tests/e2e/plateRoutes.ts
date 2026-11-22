@@ -34,7 +34,9 @@ export const BAND_ROUTES: readonly string[] = [];
  * the Archivist in the flow at the column's right edge. Its geometry belongs to `manuscriptsV21` H1/H2.
  */
 /* /manuscripts/comps joined with Comparable titles v25 (12 Oct): its title panel is page-local (`data-own-header`), CV25 B1 holds it. */
-/* /manuscripts/packages joined with Submission packages v4 (14 Oct): the centred light header is page-local (`data-own-header`),
+/* Submission packages v26 (25 Oct): the page moved to /queries/packages, and its navy card (and the empty state's promise)
+   is page-local (`data-own-header`); PK26-W holds its insets. Before that, at /manuscripts/packages, Submission packages
+   v4 (14 Oct): the centred light header was page-local (`data-own-header`),
    and its empty page's navy panel too; PK4 A1 and F1 hold them. */
 /* /todo joined with To-do list v5 (15 Oct): the Contact list v17.1 centred light header, page-local (`data-own-header`),
    and its empty page's navy panel; TD5 A1 and G1 hold them (tests/e2e/todoV5.measure.ts). */
@@ -42,7 +44,7 @@ export const BAND_ROUTES: readonly string[] = [];
    its empty page's navy panel too; AN21 A1 and I1 hold them. The phone keeps v17's band. */
 /* /agents/discover joined with Discover v1 (18 Oct): the light two-state header when live and the navy panel while coming
    soon, both page-local (`data-own-header`); DV1 B1 and E1 hold them (tests/e2e/discoverV1.measure.ts). */
-export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/todo", "/queries/analytics", "/agents/discover"];
+export const OWN_HEADER_ROUTES: readonly string[] = ["/agents", "/queries", "/manuscripts", "/manuscripts/comps", "/queries/packages", "/todo", "/queries/analytics", "/agents/discover"];
 /**
  * The band routes whose band is Query Centre v131's COMPACT HERO CARD (`PageHeader band card compact`): a
  * fixed 178px card that centres its text vertically and stacks its pills in a column right of the text. The

@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "E3",
+  "where": "population",
+  "ok": true,
+  "detail": "clv181-bare:reply thin-ag-gap:materials seed-cal-bang:wishlist"
+ },
+ {
+  "lock": "E3",
+  "where": "clv181-bare edit mode",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "E3",
+  "where": "clv181-bare focus in reply",
+  "ok": false,
+  "detail": "div "
+ },
+ {
+  "lock": "E3",
+  "where": "thin-ag-gap edit mode",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "E3",
+  "where": "thin-ag-gap focus in materials",
+  "ok": false,
+  "detail": "div "
+ },
+ {
+  "lock": "E3",
+  "where": "seed-cal-bang edit mode",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "E3",
+  "where": "seed-cal-bang focus in wishlist",
+  "ok": false,
+  "detail": "div "
+ }
+]

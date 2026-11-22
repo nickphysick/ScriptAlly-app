@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L4",
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "87 cards"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 · j rings the first card",
+  "ok": false,
+  "detail": "{\"i\":-1,\"id\":null,\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 · j again moves to the next",
+  "ok": false,
+  "detail": "{\"i\":-1,\"id\":null,\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1280 · Enter opens that query",
+  "ok": false,
+  "detail": "null vs null"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · population",
+  "ok": true,
+  "detail": "87 cards"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · j rings the first card",
+  "ok": false,
+  "detail": "{\"i\":-1,\"id\":null,\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · j again moves to the next",
+  "ok": false,
+  "detail": "{\"i\":-1,\"id\":null,\"n\":87,\"second\":\"msv12-q-1\"}"
+ },
+ {
+  "lock": "L4",
+  "where": "1512 · Enter opens that query",
+  "ok": false,
+  "detail": "null vs null"
+ }
+]

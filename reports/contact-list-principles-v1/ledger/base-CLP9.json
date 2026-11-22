@@ -1,0 +1,37 @@
+[
+ {
+  "where": "Tab reaches a row",
+  "ok": true,
+  "detail": "{\"row\":true,\"id\":\"msv12-agent-4\",\"ring\":\"none 3px rgb(72, 68, 63)\"}"
+ },
+ {
+  "where": "a visible 2px navy focus ring",
+  "ok": false,
+  "detail": "none 3px rgb(72, 68, 63)"
+ },
+ {
+  "where": "↓ moves focus to the next row",
+  "ok": false,
+  "detail": "[\"msv12-agent-4\",\"msv12-agent-4\"]"
+ },
+ {
+  "where": "↑ moves it back",
+  "ok": true,
+  "detail": "[\"msv12-agent-4\",\"msv12-agent-4\"]"
+ },
+ {
+  "where": "Enter opens the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Esc closes it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "focus is back on its row",
+  "ok": true,
+  "detail": "[\"msv12-agent-4\",\"msv12-agent-4\"]"
+ }
+]

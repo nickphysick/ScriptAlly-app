@@ -1,0 +1,1268 @@
+{
+ "qc-1440-type": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "24px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim subline": null,
+  "slim right figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "18px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim right words": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "italic"
+  },
+  "slim button": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  }
+ },
+ "qc-1440-slim": {
+  "cls": "qc156-slim",
+  "h": 60,
+  "titleSize": "24px",
+  "btnH": 40,
+  "groundLeft": 80,
+  "groundRight": 1432,
+  "sheetLeft": 80,
+  "sheetRight": 1432,
+  "_gl": 80
+ },
+ "qc-1440-slimType": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "24px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim subline": null,
+  "slim right figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "18px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim right words": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "italic"
+  },
+  "slim button": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  }
+ },
+ "cl-1440-type": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": null,
+  "slim subline": null,
+  "slim right figure": null,
+  "slim right words": null,
+  "slim button": null
+ },
+ "cl-1440-slim": {
+  "cls": "clh2-slim",
+  "h": 48,
+  "titleSize": "19px",
+  "btnH": 34,
+  "groundLeft": 98,
+  "groundRight": 1414,
+  "sheetLeft": 80,
+  "sheetRight": 1432,
+  "_gl": 98
+ },
+ "cl-1440-slimType": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": null,
+  "slim subline": null,
+  "slim right figure": null,
+  "slim right words": null,
+  "slim button": null
+ },
+ "cl-1440-beside": {
+  "col": {
+   "x": 408,
+   "y": -183.375,
+   "r": 1400,
+   "b": 3837.625,
+   "w": 992,
+   "h": 4021
+  },
+  "strip": {
+   "x": 408,
+   "y": 153.75,
+   "r": 1400,
+   "b": 245.75,
+   "w": 992,
+   "h": 92
+  },
+  "heads": {
+   "x": 419,
+   "y": 270.75,
+   "r": 1389,
+   "b": 312.75,
+   "w": 970,
+   "h": 42
+  },
+  "ground": [
+   242,
+   238,
+   232
+  ],
+  "rows": [
+   "y=154 L(242,238,232) R(242,238,232)",
+   "y=158 L(242,238,232) R(242,238,232)",
+   "y=162 L(242,238,232) R(242,238,232)",
+   "y=166 L(215,210,205) R(215,210,205)",
+   "y=170 L(215,210,205) R(215,210,205)",
+   "y=174 L(215,210,205) R(215,210,205)",
+   "y=178 L(215,210,205) R(215,210,205)",
+   "y=182 L(215,210,205) R(215,210,205)",
+   "y=186 L(215,210,205) R(215,210,205)",
+   "y=190 L(215,210,205) R(215,210,205)",
+   "y=194 L(215,210,205) R(215,210,205)",
+   "y=198 L(215,210,205) R(215,210,205)",
+   "y=202 L(215,210,205) R(215,210,205)",
+   "y=206 L(215,210,205) R(215,210,205)",
+   "y=210 L(215,210,205) R(215,210,205)",
+   "y=214 L(215,210,205) R(215,210,205)",
+   "y=218 L(215,210,205) R(215,210,205)",
+   "y=222 L(215,210,205) R(215,210,205)",
+   "y=226 L(215,210,205) R(215,210,205)",
+   "y=230 L(215,210,205) R(215,210,205)",
+   "y=234 L(215,210,205) R(215,210,205)",
+   "y=238 L(215,210,205) R(215,210,205)",
+   "y=242 L(215,210,205) R(215,210,205)",
+   "y=246 L(215,210,205) R(215,210,205)",
+   "y=250 L(215,210,205) R(215,210,205)",
+   "y=254 L(215,210,205) R(215,210,205)",
+   "y=258 L(215,210,205) R(215,210,205)",
+   "y=262 L(215,210,205) R(215,210,205)",
+   "y=266 L(215,210,205) R(215,210,205)",
+   "y=270 L(215,210,205) R(215,210,205)"
+  ]
+ },
+ "qc-1717-type": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "24px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim subline": null,
+  "slim right figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "18px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim right words": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "italic"
+  },
+  "slim button": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  }
+ },
+ "qc-1717-slim": {
+  "cls": "qc156-slim",
+  "h": 60,
+  "titleSize": "24px",
+  "btnH": 40,
+  "groundLeft": 80,
+  "groundRight": 1709,
+  "sheetLeft": 80,
+  "sheetRight": 1709,
+  "_gl": 80
+ },
+ "qc-1717-slimType": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "24px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim subline": null,
+  "slim right figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "18px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim right words": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "italic"
+  },
+  "slim button": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  }
+ },
+ "cl-1717-type": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": null,
+  "slim subline": null,
+  "slim right figure": null,
+  "slim right words": null,
+  "slim button": null
+ },
+ "cl-1717-slim": {
+  "cls": "clh2-slim",
+  "h": 48,
+  "titleSize": "19px",
+  "btnH": 34,
+  "groundLeft": 98,
+  "groundRight": 1691,
+  "sheetLeft": 80,
+  "sheetRight": 1709,
+  "_gl": 98
+ },
+ "cl-1717-slimType": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": null,
+  "slim subline": null,
+  "slim right figure": null,
+  "slim right words": null,
+  "slim button": null
+ },
+ "cl-1717-beside": {
+  "col": {
+   "x": 408,
+   "y": -183.375,
+   "r": 1677,
+   "b": 3837.625,
+   "w": 1269,
+   "h": 4021
+  },
+  "strip": {
+   "x": 408,
+   "y": 153.75,
+   "r": 1677,
+   "b": 245.75,
+   "w": 1269,
+   "h": 92
+  },
+  "heads": {
+   "x": 419,
+   "y": 270.75,
+   "r": 1666,
+   "b": 312.75,
+   "w": 1247,
+   "h": 42
+  },
+  "ground": [
+   242,
+   238,
+   232
+  ],
+  "rows": [
+   "y=154 L(242,238,232) R(242,238,232)",
+   "y=158 L(242,238,232) R(242,238,232)",
+   "y=162 L(242,238,232) R(242,238,232)",
+   "y=166 L(215,210,205) R(215,210,205)",
+   "y=170 L(215,210,205) R(215,210,205)",
+   "y=174 L(215,210,205) R(215,210,205)",
+   "y=178 L(215,210,205) R(215,210,205)",
+   "y=182 L(215,210,205) R(215,210,205)",
+   "y=186 L(215,210,205) R(215,210,205)",
+   "y=190 L(215,210,205) R(215,210,205)",
+   "y=194 L(215,210,205) R(215,210,205)",
+   "y=198 L(215,210,205) R(215,210,205)",
+   "y=202 L(215,210,205) R(215,210,205)",
+   "y=206 L(215,210,205) R(215,210,205)",
+   "y=210 L(215,210,205) R(215,210,205)",
+   "y=214 L(215,210,205) R(215,210,205)",
+   "y=218 L(215,210,205) R(215,210,205)",
+   "y=222 L(215,210,205) R(215,210,205)",
+   "y=226 L(215,210,205) R(215,210,205)",
+   "y=230 L(215,210,205) R(215,210,205)",
+   "y=234 L(215,210,205) R(215,210,205)",
+   "y=238 L(215,210,205) R(215,210,205)",
+   "y=242 L(215,210,205) R(215,210,205)",
+   "y=246 L(215,210,205) R(215,210,205)",
+   "y=250 L(215,210,205) R(215,210,205)",
+   "y=254 L(215,210,205) R(215,210,205)",
+   "y=258 L(215,210,205) R(215,210,205)",
+   "y=262 L(215,210,205) R(215,210,205)",
+   "y=266 L(215,210,205) R(215,210,205)",
+   "y=270 L(215,210,205) R(215,210,205)"
+  ]
+ }
+}

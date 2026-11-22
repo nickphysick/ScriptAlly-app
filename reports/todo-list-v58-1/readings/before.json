@@ -1,0 +1,4514 @@
+{
+ "load-1512": {
+  "trayW": 394.4,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": true,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "154 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "80 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "73 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "72 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "63 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "58 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "64 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "40 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "21 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "462 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "256 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "244 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "235 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "140 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "125 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "122 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "120 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "117 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "115 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "110 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "109 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "105 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "102 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "61 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "59 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "52 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "36 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "34 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "29 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "26 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   }
+  ],
+  "header": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Send Marcus your full"
+  },
+  "chip": {
+   "text": "154 days waiting",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.14)"
+  },
+  "openRow": {
+   "key": "task-full-seed-pkgq-3",
+   "focused": false,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "visible",
+   "qact": "none"
+  },
+  "quickFill": {
+   "ruleRight": 468.4,
+   "qfbLeft": 375.5,
+   "qfbRight": 460.4
+  }
+ },
+ "wraps-1512": {
+  "wraps": 8,
+  "of": 53,
+  "trayW": 394.4
+ },
+ "send-1512": {
+  "title": "Send Marcus your full",
+  "trayW": 394.4,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": true,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "154 days waiting",
+     "dir": "row",
+     "vis": "hidden"
+    }
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "80 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "73 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "72 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "63 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "58 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "64 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "40 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "21 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "462 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "256 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "244 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "235 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "140 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "125 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "122 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "120 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "117 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "115 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "110 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "109 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "105 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "102 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "61 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "materials-batch",
+    "kind": "batch",
+    "open": false,
+    "h": 58,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_responseTime|clv-fx-stub0",
+    "kind": "fix",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-01",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-02",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "59 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "52 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "36 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "34 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "29 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "26 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   }
+  ],
+  "header": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Send Marcus your full"
+  },
+  "chip": {
+   "text": "154 days waiting",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.14)"
+  },
+  "openRow": {
+   "key": "task-full-seed-pkgq-3",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  },
+  "quickFill": {
+   "ruleRight": 468.4,
+   "qfbLeft": 375.5,
+   "qfbRight": 460.4
+  }
+ },
+ "nudge-1512": {
+  "title": "Nudge Marcus",
+  "trayW": 394.4,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "154 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "80 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "73 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "72 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "63 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "58 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": true,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "hidden"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "64 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "40 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "21 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "462 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "256 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "244 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "235 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "140 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "125 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "122 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "120 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "117 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "115 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "110 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "109 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "105 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "102 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "61 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "materials-batch",
+    "kind": "batch",
+    "open": false,
+    "h": 58,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_responseTime|clv-fx-stub0",
+    "kind": "fix",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-01",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-02",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "59 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "52 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "36 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "34 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "29 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "26 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   }
+  ],
+  "header": {
+   "band": "nudge",
+   "cls": "tws-wh",
+   "bg": "rgb(197, 208, 221)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Nudge Marcus"
+  },
+  "chip": {
+   "text": "78 days past expected",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.55)"
+  },
+  "openRow": {
+   "key": "task-nudge-seed-query-3",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  },
+  "quickFill": {
+   "ruleRight": 468.4,
+   "qfbLeft": 375.5,
+   "qfbRight": 460.4
+  }
+ },
+ "quiet-1512": {
+  "title": "Rosalind’s gone quiet",
+  "header": {
+   "band": "quiet",
+   "cls": "tws-wh",
+   "bg": "rgba(0, 0, 0, 0)",
+   "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(239, 233, 224) 60%, rgb(247, 243, 238))",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Rosalind’s gone quiet"
+  },
+  "chip": {
+   "text": "462 days quiet",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.7)"
+  },
+  "openRow": {
+   "key": "task-no-res-close-thin-q-close",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "offer-1512": {
+  "title": "Answer Tom’s offer",
+  "header": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Answer Tom’s offer"
+  },
+  "chip": {
+   "text": "91 days past expected",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.14)"
+  },
+  "openRow": {
+   "key": "task-offer-cv25-q-08",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "own-1512": {
+  "title": "Chase the Blaine partial",
+  "header": {
+   "band": "yours",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 230, 210)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Chase the Blaine partial"
+  },
+  "chip": {
+   "text": "59 days past expected",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.7)"
+  },
+  "openRow": {
+   "key": "seed-cal-carried",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "fix-1512": {
+  "title": "How long does Edda take to reply?",
+  "header": {
+   "band": "house",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 233, 223)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "How long does Edda take to reply?"
+  },
+  "chip": null,
+  "openRow": {
+   "key": "sweep-dq_responseTime|clv-fx-stub0",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "batch-1512": {
+  "title": "Fill in what you sent · 63 queries",
+  "header": {
+   "band": "batch",
+   "cls": "tws-wh tws54-band",
+   "bg": "rgb(228, 235, 241)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Fill in what you sent"
+  },
+  "chip": null,
+  "openRow": {
+   "key": "materials-batch",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "headers-1512": {
+  "send": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Send Marcus your full"
+  },
+  "nudge": {
+   "band": "nudge",
+   "cls": "tws-wh",
+   "bg": "rgb(197, 208, 221)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Nudge Marcus"
+  },
+  "quiet": {
+   "band": "quiet",
+   "cls": "tws-wh",
+   "bg": "rgba(0, 0, 0, 0)",
+   "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(239, 233, 224) 60%, rgb(247, 243, 238))",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Rosalind’s gone quiet"
+  },
+  "offer": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Answer Tom’s offer"
+  },
+  "own": {
+   "band": "yours",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 230, 210)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Chase the Blaine partial"
+  },
+  "fix": {
+   "band": "house",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 233, 223)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "How long does Edda take to reply?"
+  },
+  "batch": {
+   "band": "batch",
+   "cls": "tws-wh tws54-band",
+   "bg": "rgb(228, 235, 241)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Fill in what you sent"
+  },
+  "newTask": {
+   "band": "yours",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 230, 210)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "A new task"
+  }
+ },
+ "housekeeping-1512": {
+  "ruleRight": 468.4,
+  "qfbLeft": 375.5,
+  "qfbRight": 460.4
+ },
+ "load-1280": {
+  "trayW": 340,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": true,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "154 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "91 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "80 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "73 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "72 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "63 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "58 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "64 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "40 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "21 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "462 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "256 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "244 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "235 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "140 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "125 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "122 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "120 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "117 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "115 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "110 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "109 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "105 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "102 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "61 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "59 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "52 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "36 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "34 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "29 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "26 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   }
+  ],
+  "header": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Send Marcus your full"
+  },
+  "chip": {
+   "text": "154 days waiting",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.14)"
+  },
+  "openRow": {
+   "key": "task-full-seed-pkgq-3",
+   "focused": false,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "visible",
+   "qact": "none"
+  },
+  "quickFill": {
+   "ruleRight": 414,
+   "qfbLeft": 321.2,
+   "qfbRight": 406
+  }
+ },
+ "wraps-1280": {
+  "wraps": 26,
+  "of": 53,
+  "trayW": 340
+ },
+ "send-1280": {
+  "title": "Send Marcus your full",
+  "trayW": 340,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": true,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "154 days waiting",
+     "dir": "row",
+     "vis": "hidden"
+    }
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "91 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "80 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "73 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "72 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "63 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "58 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "64 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "40 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "21 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "462 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "256 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "244 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "235 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "140 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "125 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "122 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "120 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "117 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "115 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "110 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "109 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "105 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "102 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "61 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "materials-batch",
+    "kind": "batch",
+    "open": false,
+    "h": 58,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_responseTime|clv-fx-stub0",
+    "kind": "fix",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-01",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-02",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "59 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "52 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "36 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "34 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "29 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "26 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   }
+  ],
+  "header": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Send Marcus your full"
+  },
+  "chip": {
+   "text": "154 days waiting",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.14)"
+  },
+  "openRow": {
+   "key": "task-full-seed-pkgq-3",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  },
+  "quickFill": {
+   "ruleRight": 414,
+   "qfbLeft": 321.2,
+   "qfbRight": 406
+  }
+ },
+ "nudge-1280": {
+  "title": "Nudge Marcus",
+  "trayW": 340,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "154 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "94 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "91 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "80 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "73 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "72 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "70 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "63 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "58 days waiting",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "open": true,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "hidden"
+    }
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "78 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "64 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "48 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "40 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "21 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "462 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "256 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "244 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "235 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "173 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "140 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "125 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "122 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "120 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "117 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "115 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "110 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "109 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "105 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "102 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "94 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "91 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": {
+     "text": "61 days quiet",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "materials-batch",
+    "kind": "batch",
+    "open": false,
+    "h": 58,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_responseTime|clv-fx-stub0",
+    "kind": "fix",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-01",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "sweep-dq_mswl|cv25-agent-02",
+    "kind": "fix",
+    "open": false,
+    "h": 58,
+    "titleLines": 1,
+    "fig": null
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "59 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "52 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "37 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "36 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "34 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "32 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "29 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "open": false,
+    "h": 73.8,
+    "titleLines": 2,
+    "fig": {
+     "text": "26 days past expected",
+     "dir": "row",
+     "vis": "visible"
+    }
+   }
+  ],
+  "header": {
+   "band": "nudge",
+   "cls": "tws-wh",
+   "bg": "rgb(197, 208, 221)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Nudge Marcus"
+  },
+  "chip": {
+   "text": "78 days past expected",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.55)"
+  },
+  "openRow": {
+   "key": "task-nudge-seed-query-3",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  },
+  "quickFill": {
+   "ruleRight": 414,
+   "qfbLeft": 321.2,
+   "qfbRight": 406
+  }
+ },
+ "quiet-1280": {
+  "title": "Rosalind’s gone quiet",
+  "header": {
+   "band": "quiet",
+   "cls": "tws-wh",
+   "bg": "rgba(0, 0, 0, 0)",
+   "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(239, 233, 224) 60%, rgb(247, 243, 238))",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Rosalind’s gone quiet"
+  },
+  "chip": {
+   "text": "462 days quiet",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.7)"
+  },
+  "openRow": {
+   "key": "task-no-res-close-thin-q-close",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "offer-1280": {
+  "title": "Answer Tom’s offer",
+  "header": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Answer Tom’s offer"
+  },
+  "chip": {
+   "text": "91 days past expected",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.14)"
+  },
+  "openRow": {
+   "key": "task-offer-cv25-q-08",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "own-1280": {
+  "title": "Chase the Blaine partial",
+  "header": {
+   "band": "yours",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 230, 210)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Chase the Blaine partial"
+  },
+  "chip": {
+   "text": "59 days past expected",
+   "edge": "rgb(201, 118, 93) 0px 0px 0px 1px inset",
+   "bg": "rgba(255, 255, 255, 0.7)"
+  },
+  "openRow": {
+   "key": "seed-cal-carried",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "fix-1280": {
+  "title": "How long does Edda take to reply?",
+  "header": {
+   "band": "house",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 233, 223)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "How long does Edda take to reply?"
+  },
+  "chip": null,
+  "openRow": {
+   "key": "sweep-dq_responseTime|clv-fx-stub0",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "batch-1280": {
+  "title": "Fill in what you sent · 63 queries",
+  "header": {
+   "band": "batch",
+   "cls": "tws-wh tws54-band",
+   "bg": "rgb(228, 235, 241)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Fill in what you sent"
+  },
+  "chip": null,
+  "openRow": {
+   "key": "materials-batch",
+   "focused": true,
+   "outline": "none rgb(28, 19, 15)",
+   "figVis": "hidden",
+   "qact": "flex"
+  }
+ },
+ "headers-1280": {
+  "send": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Send Marcus your full"
+  },
+  "nudge": {
+   "band": "nudge",
+   "cls": "tws-wh",
+   "bg": "rgb(197, 208, 221)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Nudge Marcus"
+  },
+  "quiet": {
+   "band": "quiet",
+   "cls": "tws-wh",
+   "bg": "rgba(0, 0, 0, 0)",
+   "bgImage": "linear-gradient(90deg, rgb(227, 219, 207), rgb(239, 233, 224) 60%, rgb(247, 243, 238))",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Rosalind’s gone quiet"
+  },
+  "offer": {
+   "band": "wait",
+   "cls": "tws-wh",
+   "bg": "rgb(42, 58, 82)",
+   "bgImage": "none",
+   "ink": "rgb(255, 255, 255)",
+   "title": "Answer Tom’s offer"
+  },
+  "own": {
+   "band": "yours",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 230, 210)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Chase the Blaine partial"
+  },
+  "fix": {
+   "band": "house",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 233, 223)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "How long does Edda take to reply?"
+  },
+  "batch": {
+   "band": "batch",
+   "cls": "tws-wh tws54-band",
+   "bg": "rgb(228, 235, 241)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "Fill in what you sent"
+  },
+  "newTask": {
+   "band": "yours",
+   "cls": "tws-wh",
+   "bg": "rgb(239, 230, 210)",
+   "bgImage": "none",
+   "ink": "rgb(28, 19, 15)",
+   "title": "A new task"
+  }
+ },
+ "housekeeping-1280": {
+  "ruleRight": 414,
+  "qfbLeft": 321.2,
+  "qfbRight": 406
+ },
+ "keyboard": {
+  "kb": {
+   "focused": false,
+   "fv": false,
+   "outline": "none rgb(28, 19, 15) 3px",
+   "qact": "none",
+   "du": "visible"
+  },
+  "inner": {
+   "inSnooze": false,
+   "label": "Dismiss",
+   "qact": "none"
+  },
+  "inner2": {
+   "label": null,
+   "qact": "flex"
+  }
+ }
+}

@@ -1,0 +1,45 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.7s)
+LC2 S1 routes x widths 21
+  ✓  2 [measure] › tests/e2e/landingColoursV2.measure.ts:412:3 › LC2 › S1 one light sheet with four 18px corners between the ink nav and the ink footer (8.7s)
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 pricing box · .mk-fbtext input[type=email] · 18.27
+LC2 F2 pricing box · .mk-fbtext input[type=email]::placeholder · 3.25
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 5.12
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 6.14
+LC2 F2 pricing box · .mk-fbtext .mk-fmmeta · 18.27
+LC2 F2 pricing box · .mk-fbtext input[type=email] · 18.27
+LC2 F2 pricing box · .mk-fbtext input[type=email]::placeholder · 3.25
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 5.12
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 6.14
+LC2 F2 pricing box · .mk-fbtext .mk-fmmeta · 18.27
+LC2 F2 pricing box · .mk-pvin input[type=email] · 18.27
+LC2 F2 pricing box · .mk-pvin input[type=email]::placeholder · 3.25
+LC2 F2 pricing box · .mk-pvin .mk-betanote, .mk-pvin .mk-betanote .mk-doclink · 5.12
+LC2 F2 pricing box · .mk-pvin .mk-betanote, .mk-pvin .mk-betanote .mk-doclink · 6.14
+LC2 F2 pricing box · .mk-pvin .mk-fmmeta · 18.27
+  ✓  3 [measure] › tests/e2e/landingColoursV2.measure.ts:540:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment (2.9s)
+
+  3 passed (30.5s)

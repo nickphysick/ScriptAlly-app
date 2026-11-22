@@ -63,7 +63,7 @@
   font-size: 13px; line-height: 1; cursor: pointer;
 }
 .qcv-be-ex:hover { background: var(--be-soft); }
-.qcv-be-ex:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+.qcv-be-ex:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qcv-be-ex:disabled { cursor: default; opacity: 0.5; }
 
 /**
@@ -86,7 +86,7 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .qcv-be-focus button[aria-pressed="true"] { background: #fff; color: var(--qcv-ink); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.12); }
-.qcv-be-focus button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }
+.qcv-be-focus button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qcv-be-focus button:disabled { cursor: default; }
 
 /* the rows: the only thing that scrolls */
@@ -160,7 +160,7 @@
 .qcv-be-row--fade { opacity: 0.22; }
 .qcv-be-row--fade:hover { opacity: 0.6; }
 .qcv-be-row:hover { background: var(--qcv-parchment); }
-.qcv-be-row:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: -2px; }
+.qcv-be-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the name line: who, what stage, and how far away — all on one baseline */
 .qcv-be-nm { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; white-space: nowrap; min-width: 0; }

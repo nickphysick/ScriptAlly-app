@@ -467,7 +467,7 @@ export async function recordQueryResponse(
  * Builds the description/details for the legacy global `activities` doc, mirroring the strings
  * the old updateQueryStatus produced so the slide-in panel's timeline renders them correctly.
  */
-function buildLegacyActivity(
+export function buildLegacyActivity(
   newStatus: QueryStatus,
   agent: { name?: string; agency?: string; responseTimeWeeks?: number } | null
 ): { description: string; details: string } {

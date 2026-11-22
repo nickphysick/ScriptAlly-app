@@ -31,13 +31,14 @@ import { hrefFor } from "./quickAdd";
 import { doorOf } from "./agentList";
 import type { AgentEditPatch } from "./saveAgentEdits";
 import { draftFromAgentRecord, type ContactDraft } from "./contactEdit";
+import { CREATE_QTY, floorCopy } from "./createQty";
 
 export type CardTab = "who" | "want" | "work" | "notes";
 
 /** The four material rows, as the editor holds them (§5). */
 export interface CardMats {
   ql: boolean;
-  /** `len` is pages, 1–10; null reads "Any length" */
+  /** `len` is pages, 1–20; null reads "Any length" */
   syn: { on: boolean; len: number | null };
   smp: { on: boolean; unit: SampleUnit; qty: number };
   /** capped at 40 when typed; a longer stored value is kept as it is (ruling 8) */
@@ -47,6 +48,8 @@ export interface CardMats {
 export interface CardDraft {
   name: string;
   agency: string;
+  /** Add agent v1 — "Agency unknown": offered only on a named agent, cleared when an agency is typed */
+  agencyUnknown: boolean;
   /** an ISO code, or "" for none */
   country: string;
   city: string;
@@ -63,35 +66,61 @@ export interface CardDraft {
   nrn: boolean | null;
   /** null is nothing chosen — no stored method, or a stored "Other" */
   method: SubmissionMethod | null;
+  /** Add agent v1 — the words for an Other method (40 characters) */
+  methodOther: string;
   /** null is "not known" — an imported agent nobody has set; the editor shows neither chosen and
    *  only ever writes Open or Closed */
   door: "open" | "closed" | null;
   /** an ISO date, or "" — not announced */
   reopens: string;
+  /** Contact list v25.2 C — your rating, 1–5; null is unrated (the origin, never written back) */
+  rating: number | null;
+  /** v25.2 C — the agency's submission form, kept as a `socials` entry ({ platform: "Submission form" }): the record
+   *  has no field of its own for it, and a social entry needs no rules change */
+  form: string;
+  /** v25.2 C — the agent's social: a platform from the app's list and a handle */
+  social: { platform: string; handle: string };
 }
 
 /** Every field the editor edits, by the tab it lives on. */
 export const TAB_FIELDS: Record<Exclude<CardTab, "notes">, (keyof CardDraft)[]> = {
-  who: ["name", "agency", "country", "city", "email", "website", "mswl"],
+  who: ["name", "agency", "agencyUnknown", "country", "city", "email", "website", "mswl", "rating", "form", "social"],
   want: ["genres", "wishlist", "mats"],
-  work: ["weeks", "nrn", "method", "door", "reopens"],
+  work: ["weeks", "nrn", "method", "methodOther", "door", "reopens"],
 };
 export const tabOf = (k: keyof CardDraft): Exclude<CardTab, "notes"> =>
   (Object.keys(TAB_FIELDS) as Exclude<CardTab, "notes">[]).find((t) => TAB_FIELDS[t].includes(k))!;
 
 /* ── reading a record ────────────────────────────────────────────────────────────────────── */
 
-/** The enum value a stored method means (ruling 2) — null for "Other", nothing, or anything else. */
+/** The enum value a stored method means (ruling 2) — "Other" is its own value since Add agent v1; null for nothing or
+ *  anything else. */
 export function methodOf(stored: string | undefined | null): SubmissionMethod | null {
   const v = (stored ?? "").trim().toLowerCase().replace(/\s+/g, "");
   if (v === "email") return SubmissionMethod.EMAIL;
   if (v === "querymanager") return SubmissionMethod.QUERY_MANAGER;
   if (v === "onlineform" || v === "agencyform") return SubmissionMethod.ONLINE_FORM;
   if (v === "post") return SubmissionMethod.POST;
+  if (v === "other") return SubmissionMethod.OTHER;
   return null;
 }
 
 const isMswl = (s: AgentSocial | undefined) => (s?.platform ?? "").trim().toLowerCase() === "mswl";
+/** v25.2 C — the platform a submission form is kept under in `socials` */
+export const FORM_PLATFORM = "Submission form";
+export const isFormSocial = (s: AgentSocial | undefined) => (s?.platform ?? "").trim().toLowerCase() === FORM_PLATFORM.toLowerCase();
+/** the platforms mirrored into a discrete field the agent database still reads */
+const MIRROR: Record<string, "twitter" | "bluesky" | "instagram"> = { "X / Twitter": "twitter", Bluesky: "bluesky", Instagram: "instagram" };
+/** The agent's social as the card reads it: the first `socials` entry that is neither the MSWL link nor the
+ *  submission form, else a mirrored discrete handle (X, Bluesky, Instagram), else none. */
+export function socialOfAgent(a: Pick<Agent, "socials" | "twitter" | "bluesky" | "instagram">): { platform: string; handle: string } {
+  const s = (a.socials ?? []).find((x) => !isMswl(x) && !isFormSocial(x) && (x.handle ?? "").trim());
+  if (s) return { platform: s.platform, handle: s.handle.trim() };
+  if ((a.twitter ?? "").trim()) return { platform: "X / Twitter", handle: a.twitter!.trim() };
+  if ((a.bluesky ?? "").trim()) return { platform: "Bluesky", handle: a.bluesky!.trim() };
+  if ((a.instagram ?? "").trim()) return { platform: "Instagram", handle: a.instagram!.trim() };
+  return { platform: "", handle: "" };
+}
 
 /** The four rows, from the one parser. Legacy records holding two sample units keep the first. */
 export function matsOf(materialsWanted: readonly string[] | undefined): CardMats {
@@ -103,7 +132,7 @@ export function matsOf(materialsWanted: readonly string[] | undefined): CardMats
   const qty = parseInt(smp.amount, 10);
   return {
     ql: rows.some((r) => r.key === "queryLetter" && r.on),
-    syn: { on: syn.on, len: Number.isFinite(len) && len > 0 ? Math.min(10, len) : null },
+    syn: { on: syn.on, len: Number.isFinite(len) && len > 0 ? Math.min(20, len) : null },
     smp: { on: smp.on, unit: smp.unit, qty: Number.isFinite(qty) && qty > 0 ? qty : UNIT_CFG[smp.unit].def },
     oth: { on: oth.on, text: oth.text },
   };
@@ -115,6 +144,7 @@ export function draftOf(a: Agent, personal: PersonalGenre[] = []): CardDraft {
   return {
     name: a.name ?? "",
     agency: a.agency ?? "",
+    agencyUnknown: a.agencyUnknown === true && !(a.agency ?? "").trim(),
     country: normaliseCountry(a.country) ?? "",
     city: a.city ?? "",
     email: a.email ?? "",
@@ -126,8 +156,12 @@ export function draftOf(a: Agent, personal: PersonalGenre[] = []): CardDraft {
     weeks: typeof w === "number" && w > 0 ? w : null,
     nrn: typeof a.noResponseMeansNo === "boolean" ? a.noResponseMeansNo : null,
     method: methodOf(a.submissionMethod),
+    methodOther: (a.submissionMethodOther ?? "").trim(),
     door: ((k) => (k === "unknown" ? null : k))(doorOf(a)),
     reopens: (a.reopensOn ?? "").trim(),
+    rating: typeof a.starRating === "number" && a.starRating > 0 ? a.starRating : null,
+    form: (a.socials ?? []).find(isFormSocial)?.handle ?? "",
+    social: socialOfAgent(a),
   };
 }
 
@@ -140,10 +174,11 @@ export function draftOf(a: Agent, personal: PersonalGenre[] = []): CardDraft {
  */
 export function emptyCardDraft(): CardDraft {
   return {
-    name: "", agency: "", country: "", city: "", email: "", website: "", mswl: "",
+    name: "", agency: "", agencyUnknown: false, country: "", city: "", email: "", website: "", mswl: "",
     genres: [], wishlist: "",
     mats: { ql: false, syn: { on: false, len: null }, smp: { on: false, unit: "Chapters", qty: UNIT_CFG.Chapters.def }, oth: { on: false, text: "" } },
-    weeks: null, nrn: null, method: null, door: "open", reopens: "",
+    weeks: null, nrn: null, method: null, methodOther: "", door: null, reopens: "",
+    rating: null, form: "", social: { platform: "", handle: "" },
   };
 }
 
@@ -206,21 +241,28 @@ export function hostOf(v: string): string {
     return "";
   }
 }
+/** the first word of a name, capitalised — "{First}" in the agency rule's words */
+const firstWordOf = (name: string): string => { const f = name.trim().split(/\s+/)[0] ?? ""; return f ? f[0].toUpperCase() + f.slice(1) : "them"; };
 export const emailOk = (v: string): boolean => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
 
-export type CardProblemKey = "name" | "email" | "website" | "mswl" | "oth";
+export type CardProblemKey = "name" | "agency" | "email" | "website" | "mswl" | "form" | "oth" | "smp";
 /** The draft's problems, in the order the foot names the first. Save waits on any of them. */
 export function problemsOf(d: CardDraft): Partial<Record<CardProblemKey, string>> {
   const p: Partial<Record<CardProblemKey, string>> = {};
   if (!d.name.trim() && !d.agency.trim()) p.name = "A name or an agency is needed";
-  if (!emailOk(d.email)) p.email = "That isn’t an email address yet";
+  /* Add agent v1 — the agency rule: a name with no agency waits for one, or for "Agency unknown" */
+  if (d.name.trim() && !d.agency.trim() && !d.agencyUnknown) p.agency = `Add ${firstWordOf(d.name)}’s agency, or mark it unknown`;
+  if (!emailOk(d.email)) p.email = "That email doesn’t look right";
   if (!linkOk(d.website)) p.website = "That doesn’t look like a link";
   if (!linkOk(d.mswl)) p.mswl = "That doesn’t look like a link";
+  if (!linkOk(d.form)) p.form = "That doesn’t look like a link";
   if (d.mats.oth.on && !d.mats.oth.text.trim()) p.oth = "Say what the other material is, or untick it";
+  /* Add agent v1 — a typed sample under its unit's floor stays visible under its complaint, and saving waits */
+  if (d.mats.smp.on && (!d.mats.smp.qty || d.mats.smp.qty < CREATE_QTY[d.mats.smp.unit].min)) p.smp = `Opening sample: ${floorCopy(d.mats.smp.unit).toLowerCase()}`;
   return p;
 }
 export const PROBLEM_TAB: Record<CardProblemKey, Exclude<CardTab, "notes">> = {
-  name: "who", email: "who", website: "who", mswl: "who", oth: "want",
+  name: "who", agency: "who", email: "who", website: "who", mswl: "who", form: "who", oth: "want", smp: "want",
 };
 
 /* ── the patch a save sends ──────────────────────────────────────────────────────────────── */
@@ -238,6 +280,31 @@ export function socialsWithMswl(socials: readonly AgentSocial[] | undefined, url
   return list;
 }
 
+/** `socials` with the submission form set to `url` (or removed) — every other entry kept, in place. */
+export function socialsWithForm(socials: readonly AgentSocial[], url: string): AgentSocial[] {
+  const list = [...socials];
+  const at = list.findIndex(isFormSocial);
+  const handle = hrefFor(url) ?? "";
+  if (at >= 0) {
+    if (handle) list[at] = { ...list[at], handle };
+    else list.splice(at, 1);
+  } else if (handle) list.push({ platform: FORM_PLATFORM, handle });
+  return list;
+}
+
+/** `socials` with the agent's one social changed: the entry it was read from rewritten (or removed), else added. */
+export function socialsWithSocial(socials: readonly AgentSocial[], was: { platform: string; handle: string }, now: { platform: string; handle: string }): AgentSocial[] {
+  const list = [...socials];
+  const at = list.findIndex((x) => !isMswl(x) && !isFormSocial(x) && x.platform === was.platform && x.handle.trim() === was.handle);
+  const handle = now.handle.trim();
+  const entry = { platform: now.platform || "Other", handle };
+  if (at >= 0) {
+    if (handle) list[at] = entry;
+    else list.splice(at, 1);
+  } else if (handle) list.push(entry);
+  return list;
+}
+
 /**
  * The write for this draft against the record it opened from: ONLY the changed fields. `nowIso`
  * stamps `mswlCheckedAt` when the wishlist changed — editing it IS checking it.
@@ -247,11 +314,34 @@ export function cardPatch(a: Agent, base: CardDraft, d: CardDraft, nowIso: strin
   const patch: AgentEditPatch = {};
   const text = (k: "name" | "agency" | "email" | "website") => { if (changed.has(k)) patch[k] = d[k].trim(); };
   text("name"); text("agency"); text("email");
+  /* Add agent v1 — "Agency unknown" stands only on a named agent with no agency; typing an agency clears it */
+  if (changed.has("agencyUnknown") || changed.has("agency") || changed.has("name")) {
+    const unknown = d.agencyUnknown && !!d.name.trim() && !d.agency.trim();
+    if (unknown && a.agencyUnknown !== true) patch.agencyUnknown = true;
+    else if (!unknown && a.agencyUnknown === true) patch.agencyUnknown = null;
+  }
   if (changed.has("website")) patch.website = hrefFor(d.website) ?? "";
   /* the location law: "not set" is the key OMITTED, never "" */
   if (changed.has("city")) patch.city = d.city.trim() || null;
   if (changed.has("country")) patch.country = d.country || null;
-  if (changed.has("mswl")) patch.socials = socialsWithMswl(a.socials, d.mswl);
+  /* v25.2 C — the MSWL link, the submission form and the social all live in `socials`: one rewrite carries every
+     change, each entry kept in its place byte for byte unless it is the one that changed */
+  if (changed.has("mswl") || changed.has("form") || changed.has("social")) {
+    let list = changed.has("mswl") ? socialsWithMswl(a.socials, d.mswl) : [...(a.socials ?? [])];
+    if (changed.has("form")) list = socialsWithForm(list, d.form);
+    if (changed.has("social")) {
+      const was = socialOfAgent(a);
+      list = socialsWithSocial(list, was, d.social);
+      /* a mirrored platform writes its discrete field too; leaving one clears the old discrete field */
+      const wasKey = MIRROR[was.platform];
+      const nowKey = MIRROR[d.social.platform];
+      if (wasKey && wasKey !== nowKey && (a[wasKey] ?? "").trim()) patch[wasKey] = "";
+      if (nowKey) patch[nowKey] = d.social.handle.trim();
+    }
+    patch.socials = list;
+  }
+  /* Add agent v1 — Agent fit: the chosen star pressed again clears it (the writer's own act, so it is written) */
+  if (changed.has("rating")) patch.starRating = d.rating != null ? Math.max(1, Math.min(5, Math.round(d.rating))) : null;
   if (changed.has("genres")) patch.genres = [...d.genres];
   if (changed.has("wishlist")) {
     patch.mswlNotes = d.wishlist.trim();
@@ -263,6 +353,13 @@ export function cardPatch(a: Agent, base: CardDraft, d: CardDraft, nowIso: strin
   if (changed.has("nrn") && d.nrn != null) patch.noResponseMeansNo = d.nrn;
   /* ruling 2: written only when the writer chose one */
   if (changed.has("method") && d.method != null) patch.submissionMethod = d.method;
+  /* Add agent v1 — an Other method keeps its words; leaving Other clears them */
+  if (changed.has("method") || changed.has("methodOther")) {
+    const words = d.method === SubmissionMethod.OTHER ? d.methodOther.trim().slice(0, 40) : "";
+    const stored = (a.submissionMethodOther ?? "").trim();
+    if (words && words !== stored) patch.submissionMethodOther = words;
+    else if (!words && stored && (d.method !== SubmissionMethod.OTHER || changed.has("methodOther"))) patch.submissionMethodOther = null;
+  }
   if (changed.has("door") && d.door != null) patch.submissionStatus = d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.CLOSED;
   const stored = (a.reopensOn ?? "").trim();
   if (d.door === "open") {

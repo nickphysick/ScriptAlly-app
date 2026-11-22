@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "G2",
+  "where": "population",
+  "ok": true,
+  "detail": "3 with an email, 3 without"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-near rows in order",
+  "ok": true,
+  "detail": "email,website,form,social"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-near email row",
+  "ok": true,
+  "detail": "wren@example.comCopy none"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-near website row",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-near Copy copies the email",
+  "ok": true,
+  "detail": "\"wren@example.com\""
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-soon rows in order",
+  "ok": true,
+  "detail": "email,website,form,social"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-soon email row",
+  "ok": true,
+  "detail": "hester@example.comCopy none"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-soon website row",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-soon Copy copies the email",
+  "ok": true,
+  "detail": "\"hester@example.com\""
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-passed20 rows in order",
+  "ok": true,
+  "detail": "email,website,form,social"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-passed20 email row",
+  "ok": true,
+  "detail": "cormac@example.comCopy none"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-passed20 website row",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "G2",
+  "where": "seed-cal-passed20 Copy copies the email",
+  "ok": true,
+  "detail": "\"cormac@example.com\""
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-06 rows in order",
+  "ok": true,
+  "detail": "email,website,form,social"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-06 email row",
+  "ok": true,
+  "detail": "missing dashed"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-06 website row",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-06 + Add email opens the inline edit",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-08 rows in order",
+  "ok": true,
+  "detail": "email,website,form,social"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-08 email row",
+  "ok": true,
+  "detail": "missing dashed"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-08 website row",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-08 + Add email opens the inline edit",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-09 rows in order",
+  "ok": true,
+  "detail": "email,website,form,social"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-09 email row",
+  "ok": true,
+  "detail": "missing dashed"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-09 website row",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "G2",
+  "where": "cv25-agent-09 + Add email opens the inline edit",
+  "ok": true,
+  "detail": "true"
+ }
+]

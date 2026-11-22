@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "CB3",
+  "where": "1512x982",
+  "ok": true,
+  "detail": "full opacity: cb2seed-n2, cb2seed-n3, cb2seed-n4, cb2seed-n9"
+ },
+ {
+  "lock": "CB3",
+  "where": "1512x982 faded",
+  "ok": true,
+  "detail": "the others at 22%"
+ },
+ {
+  "lock": "CB3",
+  "where": "1512x982 cleared",
+  "ok": true,
+  "detail": "every note back at full"
+ },
+ {
+  "lock": "CB3",
+  "where": "1280x800",
+  "ok": true,
+  "detail": "full opacity: cb2seed-n2, cb2seed-n3, cb2seed-n4, cb2seed-n9"
+ },
+ {
+  "lock": "CB3",
+  "where": "1280x800 faded",
+  "ok": true,
+  "detail": "the others at 22%"
+ },
+ {
+  "lock": "CB3",
+  "where": "1280x800 cleared",
+  "ok": true,
+  "detail": "every note back at full"
+ }
+]

@@ -1,0 +1,113 @@
+{
+  "checks": 42,
+  "fork@1440": {
+    "panelW": 540,
+    "tiles": [
+      {
+        "tag": "BUTTON",
+        "k": "pkg",
+        "top": 304,
+        "left": 921,
+        "w": 237,
+        "h": 248,
+        "foot": "2 saved packages"
+      },
+      {
+        "tag": "BUTTON",
+        "k": "pcs",
+        "top": 304,
+        "left": 1170,
+        "w": 237,
+        "h": 248,
+        "foot": "Choose what went"
+      }
+    ]
+  },
+  "fork@1280": {
+    "panelW": 504,
+    "tiles": [
+      {
+        "tag": "BUTTON",
+        "k": "pkg",
+        "top": 325,
+        "left": 805,
+        "w": 450,
+        "h": 201,
+        "foot": "2 saved packages"
+      },
+      {
+        "tag": "BUTTON",
+        "k": "pcs",
+        "top": 538,
+        "left": 805,
+        "w": 450,
+        "h": 201,
+        "foot": "Choose what went"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "k": "letter",
+      "title": "Query letter",
+      "state": "Pick one"
+    },
+    {
+      "k": "syn",
+      "title": "Synopsis",
+      "state": "Pick one"
+    },
+    {
+      "k": "ver",
+      "title": "Which version is your opening from?",
+      "state": "Pick one"
+    }
+  ],
+  "footer": {
+    "h0": 69,
+    "h1": 69
+  },
+  "savedPackage": [
+    {
+      "sentHow": "package",
+      "sentPackageId": "laq13-pa",
+      "sentPackageEdition": 1,
+      "sentPackageName": "First round",
+      "packageId": "laq13-pa",
+      "materialsWanted": [
+        "Query Letter",
+        "Synopsis",
+        {
+          "material": "Sample Pages",
+          "type": "pages",
+          "quantity": 10
+        }
+      ],
+      "sentMaterials": "First round package: Query letter Letter A · Synopsis One-page synopsis · first 10 pages · Version 2",
+      "sentVersions": [
+        "laq13-la",
+        "laq13-s1"
+      ]
+    }
+  ],
+  "savedPieces": [
+    {
+      "sentHow": "individual",
+      "packageId": "",
+      "materialsWanted": [
+        "Query Letter",
+        "Synopsis",
+        {
+          "material": "Sample Pages",
+          "type": "pages",
+          "quantity": 10
+        }
+      ],
+      "sentMaterials": "Query letter Letter B · Synopsis Two-page synopsis · first 10 pages · Prologue cut, flashback first",
+      "sentVersions": [
+        "laq13-lb",
+        "laq13-s2"
+      ]
+    }
+  ]
+}

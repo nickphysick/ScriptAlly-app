@@ -14,7 +14,7 @@
 .plb:hover { background: rgba(244, 238, 229, 0.1); }
 .plb[aria-pressed="true"], .plb[aria-pressed="true"]:hover { background: #f4eee5; border-color: #f4eee5; color: #2a3a52; }
 .plb[aria-pressed="true"] > svg { rotate: -45deg; }
-.plb:focus-visible { outline: 2px solid #e7a184; outline-offset: 3px; }
+.plb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 /* the label: serif 12.5 on #1c130f, radius 7, then a key cap (JetBrains Mono 600 10.5, cream on cream 14%, a 1px
    cream 30% line with a 2px foot, radius 4, 1 × 6) */
 .plb .plb-tip {

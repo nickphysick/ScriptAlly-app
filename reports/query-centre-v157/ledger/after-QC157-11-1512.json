@@ -1,0 +1,12 @@
+[
+ {
+  "name": "the same cards",
+  "ok": true,
+  "got": "88 vs 88"
+ },
+ {
+  "name": "every card, band, fact box and track node within 0.5px of the baseline",
+  "ok": true,
+  "got": "worst 0.00; "
+ }
+]

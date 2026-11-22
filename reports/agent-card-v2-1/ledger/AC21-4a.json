@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "AC21-4a",
+  "where": "reading: nothing runs on the frame, its rim or its border",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "AC21-4a",
+  "where": "a tab change: nothing runs on the frame, its rim or its border",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "AC21-4a",
+  "where": "a section open 1s: exactly one never-ending animation, on the frame's ::before",
+  "ok": true,
+  "detail": "[{\"id\":\"qc1612-breath\",\"on\":\"before\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"},{\"id\":\"qc163-rim-breath\",\"on\":\"rim\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"},{\"id\":\"qc163-tint\",\"on\":\"rim\",\"inf\":true,\"dur\":3200,\"peak\":1,\"state\":\"running\"}]"
+ },
+ {
+  "lock": "AC21-4a",
+  "where": "…and none on the frame itself",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "AC21-4a",
+  "where": "…its peak 1.01 and duration 3200ms are BREATHE's",
+  "ok": true,
+  "detail": "{\"id\":\"qc1612-breath\",\"on\":\"before\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"}"
+ },
+ {
+  "lock": "AC21-4a",
+  "where": "an ordinary click on a control in the open section lands while it runs",
+  "ok": true,
+  "detail": "32ms"
+ },
+ {
+  "lock": "AC21-4a",
+  "where": "typing: the breath is gone within 300ms",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "AC21-4a",
+  "where": "…and back within 3s of the last key",
+  "ok": true,
+  "detail": "1600ms"
+ }
+]

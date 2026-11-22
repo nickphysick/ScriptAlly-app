@@ -233,3 +233,12 @@ export async function commitQueryEdits(
     return { ok: false, error: e instanceof Error ? e.message : "Couldn’t save the query." };
   }
 }
+
+/**
+ * A package's lock stamp — the moment it went on query and froze. Exported so the Query Centre's batched writer (v152 §4.5,
+ * a draft package picked on "Query sent") puts the same stamp in its own batch without becoming a third writer of it:
+ * the stamp is still made here and nowhere else but `markPackageSent` (packageLock.test.ts, Ruling 2).
+ */
+export function packageLockStamp(): { firstSentAt: string } {
+  return { firstSentAt: new Date().toISOString() };
+}

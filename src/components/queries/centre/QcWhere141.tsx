@@ -17,31 +17,6 @@ export const WhereMark: React.FC<{ k: WhereKey; tone?: "card" | "band" }> = ({ k
   <span className={`qc141-m qc141-m--${k}${tone === "band" ? " qc141-m--b" : ""}`} aria-hidden="true" />
 );
 
-/** the Filters menu's "Where it stands" section: single-select, pressing the chosen set again clears it */
-export const WhereMenuSection: React.FC<{
-  where: WhereKey | null;
-  counts: Record<WhereKey, number>;
-  onWhere: (k: WhereKey | null) => void;
-}> = ({ where, counts, onWhere }) => (
-  <section className="qc141-fw" data-qc141="filter-where">
-    <h4>Where it stands</h4>
-    <div className="qc141-fw-g" role="radiogroup" aria-label="Where it stands">
-      {WHERE_KEYS.map((k) => {
-        const on = where === k;
-        const n = counts[k];
-        return (
-          <button key={k} type="button" className={`qc141-fw-o${on ? " on" : ""}`} data-qc141="where-opt" data-k={k} data-opt={`where:${k}`} data-n={n}
-            role="radio" aria-checked={on} title={WHERE_LABEL[k].title} disabled={!on && n === 0} onClick={() => onWhere(on ? null : k)}>
-            <WhereMark k={k} />
-            <b>{WHERE_LABEL[k].label}</b>
-            <i>{n}</i>
-          </button>
-        );
-      })}
-    </div>
-  </section>
-);
-
 /** the four-part proportion bar: each segment's width in proportion to its count, with a minimum visible width */
 export const WhereBar: React.FC<{ counts: Record<WhereKey, number>; className: string }> = ({ counts, className }) => (
   <div className={className} data-qc141="bar" aria-hidden="true">

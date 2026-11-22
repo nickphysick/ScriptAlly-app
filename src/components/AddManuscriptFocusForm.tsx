@@ -6,8 +6,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { getStageScrollEl } from "../lib/stageScroll";
-import { ManuscriptStatus, UserPlan } from "../types";
-import { AGE_CATEGORIES, genreWordCountRange } from "../lib/manuscripts";
+import { ManuscriptStatus } from "../types";
+import { AGE_CATEGORIES, genreWordCountRange, manuscriptLimitError } from "../lib/manuscripts";
 import { GenrePicker } from "./forms";
 import { genreDisplay } from "../lib/genres";
 import { 
@@ -35,7 +35,8 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
     currentUser,
     manuscripts,
     addManuscript,
-    addPersonalGenre
+    addPersonalGenre,
+    entitlement
   } = useScriptAllyDb();
 
   // Wizard Tab Step (1, 2, 3)
@@ -274,8 +275,9 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
     setFormError(null);
 
     // Free Tier limits check
-    if (currentUser?.plan === UserPlan.FREE && manuscripts.length >= 1) {
-      setFormError("Free Tier limit reached: You can only configure 1 active manuscript profile. Upgrade to Pro for unlimited additions!");
+    const limitErr = manuscriptLimitError(entitlement.pro, manuscripts.length);
+    if (limitErr) {
+      setFormError(limitErr);
       setIsSubmitting(false);
       return;
     }

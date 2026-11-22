@@ -1,0 +1,231 @@
+{
+ "worst": 0,
+ "compared": 924,
+ "over": [],
+ "structure": [
+  {
+   "id": "seed-query-12",
+   "status": "Offer",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "solid"
+  },
+  {
+   "id": "cv25-q-08",
+   "status": "Offer",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "solid"
+  },
+  {
+   "id": "seed-query-7",
+   "status": "Partial Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-query-11",
+   "status": "Revise & Resubmit",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-query-9",
+   "status": "Full Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "cv25-q-06",
+   "status": "Partial Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-query-20",
+   "status": "Partial Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "msv12-q-3",
+   "status": "Partial Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "rj-send",
+   "status": "Full Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "cv25-q-09",
+   "status": "Full Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "cor-move-a",
+   "status": "Partial Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "cv25-q-07",
+   "status": "Partial Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-pkgq-3",
+   "status": "Full Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-cal-passed865-q",
+   "status": "Full Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "msv12-q-4",
+   "status": "Full Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "rj-dupe",
+   "status": "Full Requested",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-query-2",
+   "status": "Queried",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "thin-q-gap-solo",
+   "status": "Partial Sent",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "cor-pair",
+   "status": "Partial Sent",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-query-23",
+   "status": "Partial Sent",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-query-8",
+   "status": "Partial Sent",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "seed-pkgq-4",
+   "status": "Partial Sent",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "probe-goalstress-today",
+   "status": "Queried",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "qc150l9-q",
+   "status": "Full Sent",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "probe-un-both",
+   "status": "Queried",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "probe-un-noagent",
+   "status": "Queried",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "cv25-q-14",
+   "status": "Queried",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  },
+  {
+   "id": "cv25-q-13",
+   "status": "Queried",
+   "nodes": 4,
+   "statusDots": 4,
+   "trackNodes": 0,
+   "fourth": "outline"
+  }
+ ]
+}

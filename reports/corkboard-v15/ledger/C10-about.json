@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C10",
+  "where": "population",
+  "ok": true,
+  "detail": "[[\"Clara Beaumont\",2],[\"Aisha Kapoor\",1],[\"Daniel O’Rourke\",1],[\"Eleanor Whitfield\",1],[\"Jonathan Marsh\",1],[\"Tom Ellery\",1]]"
+ },
+ {
+  "lock": "C10",
+  "where": "cards",
+  "ok": true,
+  "detail": "[[\"Clara Beaumont\",2],[\"Aisha Kapoor\",1],[\"Daniel O’Rourke\",1],[\"Eleanor Whitfield\",1],[\"Jonathan Marsh\",1],[\"Tom Ellery\",1]]"
+ },
+ {
+  "lock": "C10",
+  "where": "squares",
+  "ok": true,
+  "detail": "one square per note, up to five"
+ },
+ {
+  "lock": "C10",
+  "where": "status",
+  "ok": true,
+  "detail": "Partial Requested"
+ },
+ {
+  "lock": "C10",
+  "where": "filter",
+  "ok": true,
+  "detail": "2 · About Clara Beaumont×"
+ },
+ {
+  "lock": "C10",
+  "where": "clears",
+  "ok": true,
+  "detail": "all back"
+ }
+]

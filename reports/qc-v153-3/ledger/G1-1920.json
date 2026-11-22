@@ -1,0 +1,167 @@
+[
+ {
+  "name": "population: headings",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "Offers: typewriter 21",
+  "ok": true,
+  "got": "\"Special Elite\" 21px"
+ },
+ {
+  "name": "Offers: glass chip ≥26 wide, 24 tall, radius 7",
+  "ok": true,
+  "got": "26×24 r7px rgb(231, 214, 220)"
+ },
+ {
+  "name": "Offers: chip count in the typewriter 13.5",
+  "ok": true,
+  "got": "\"Special Elite\" 13.5px"
+ },
+ {
+  "name": "Offers: a 1px hairline fills the width",
+  "ok": true,
+  "got": "{\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.14)\",\"left\":14,\"right\":14}"
+ },
+ {
+  "name": "Offers: name, count, rule, description in order",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "Offers: the description italic, at the right",
+  "ok": true,
+  "got": "0 italic"
+ },
+ {
+  "name": "Offers: all centred",
+  "ok": true,
+  "got": "0.01"
+ },
+ {
+  "name": "Offers: no swatch square",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Materials requested: typewriter 21",
+  "ok": true,
+  "got": "\"Special Elite\" 21px"
+ },
+ {
+  "name": "Materials requested: glass chip ≥26 wide, 24 tall, radius 7",
+  "ok": true,
+  "got": "29.625×24 r7px rgb(236, 214, 210)"
+ },
+ {
+  "name": "Materials requested: chip count in the typewriter 13.5",
+  "ok": true,
+  "got": "\"Special Elite\" 13.5px"
+ },
+ {
+  "name": "Materials requested: a 1px hairline fills the width",
+  "ok": true,
+  "got": "{\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.14)\",\"left\":14,\"right\":14}"
+ },
+ {
+  "name": "Materials requested: name, count, rule, description in order",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "Materials requested: the description italic, at the right",
+  "ok": true,
+  "got": "0 italic"
+ },
+ {
+  "name": "Materials requested: all centred",
+  "ok": true,
+  "got": "0.01"
+ },
+ {
+  "name": "Materials requested: no swatch square",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Nudge due: typewriter 21",
+  "ok": true,
+  "got": "\"Special Elite\" 21px"
+ },
+ {
+  "name": "Nudge due: glass chip ≥26 wide, 24 tall, radius 7",
+  "ok": true,
+  "got": "26×24 r7px rgb(239, 231, 218)"
+ },
+ {
+  "name": "Nudge due: chip count in the typewriter 13.5",
+  "ok": true,
+  "got": "\"Special Elite\" 13.5px"
+ },
+ {
+  "name": "Nudge due: a 1px hairline fills the width",
+  "ok": true,
+  "got": "{\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.14)\",\"left\":14,\"right\":14}"
+ },
+ {
+  "name": "Nudge due: name, count, rule, description in order",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "Nudge due: the description italic, at the right",
+  "ok": true,
+  "got": "0 italic"
+ },
+ {
+  "name": "Nudge due: all centred",
+  "ok": true,
+  "got": "0.01"
+ },
+ {
+  "name": "Nudge due: no swatch square",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Watch and wait: typewriter 21",
+  "ok": true,
+  "got": "\"Special Elite\" 21px"
+ },
+ {
+  "name": "Watch and wait: glass chip ≥26 wide, 24 tall, radius 7",
+  "ok": true,
+  "got": "29.453125×24 r7px rgb(239, 231, 218)"
+ },
+ {
+  "name": "Watch and wait: chip count in the typewriter 13.5",
+  "ok": true,
+  "got": "\"Special Elite\" 13.5px"
+ },
+ {
+  "name": "Watch and wait: a 1px hairline fills the width",
+  "ok": true,
+  "got": "{\"h\":1,\"bg\":\"rgba(28, 19, 15, 0.14)\",\"left\":14,\"right\":14}"
+ },
+ {
+  "name": "Watch and wait: name, count, rule, description in order",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "Watch and wait: the description italic, at the right",
+  "ok": true,
+  "got": "0 italic"
+ },
+ {
+  "name": "Watch and wait: all centred",
+  "ok": true,
+  "got": "0.01"
+ },
+ {
+  "name": "Watch and wait: no swatch square",
+  "ok": true,
+  "got": "false"
+ }
+]

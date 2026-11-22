@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "B1",
+  "where": "population: five cards",
+  "ok": true,
+  "detail": "[\"Next up\",\"Agents on file\",\"Closed queries\",\"Active queries\",\"Founding writer\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "Next up rim",
+  "ok": true,
+  "detail": "7,7,7,7 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "B1",
+  "where": "Next up inner frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "B1",
+  "where": "Next up band",
+  "ok": true,
+  "detail": "rgb(244, 230, 214)"
+ },
+ {
+  "lock": "B1",
+  "where": "Agents on file rim",
+  "ok": true,
+  "detail": "7,7,7,7 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "B1",
+  "where": "Agents on file inner frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "B1",
+  "where": "Agents on file band",
+  "ok": true,
+  "detail": "rgb(226, 230, 224)"
+ },
+ {
+  "lock": "B1",
+  "where": "Closed queries rim",
+  "ok": true,
+  "detail": "7,7,7,7 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "B1",
+  "where": "Closed queries inner frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "B1",
+  "where": "Closed queries band",
+  "ok": true,
+  "detail": "rgb(235, 231, 225)"
+ },
+ {
+  "lock": "B1",
+  "where": "Active queries rim",
+  "ok": true,
+  "detail": "7,7,7,7 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "B1",
+  "where": "Active queries inner frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ },
+ {
+  "lock": "B1",
+  "where": "Active queries band",
+  "ok": true,
+  "detail": "rgb(45, 58, 80)"
+ },
+ {
+  "lock": "B1",
+  "where": "Founding writer rim",
+  "ok": true,
+  "detail": "7,7,7,7 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "B1",
+  "where": "Founding writer inner frame",
+  "ok": true,
+  "detail": "1px rgb(227, 213, 201)"
+ }
+]

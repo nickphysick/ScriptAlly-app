@@ -1,0 +1,52 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1504,\"w\":1256},\"card\":{\"l\":276,\"r\":1476,\"w\":1200},\"glance\":{\"l\":276,\"r\":1476,\"w\":1200},\"title\":{\"l\":276,\"r\":1476,\"w\":1200},\"list\":{\"l\":276,\"r\":1476,\"w\":1200}}"
+ },
+ {
+  "where": "card width",
+  "ok": true,
+  "detail": "1200.0 vs 1200"
+ },
+ {
+  "where": "card edges",
+  "ok": true,
+  "detail": "276.0–1476.0 vs 276.0–1476.0"
+ },
+ {
+  "where": "glance width",
+  "ok": true,
+  "detail": "1200.0 vs 1200"
+ },
+ {
+  "where": "glance edges",
+  "ok": true,
+  "detail": "276.0–1476.0 vs 276.0–1476.0"
+ },
+ {
+  "where": "title width",
+  "ok": true,
+  "detail": "1200.0 vs 1200"
+ },
+ {
+  "where": "title edges",
+  "ok": true,
+  "detail": "276.0–1476.0 vs 276.0–1476.0"
+ },
+ {
+  "where": "list width",
+  "ok": true,
+  "detail": "1200.0 vs 1200"
+ },
+ {
+  "where": "list edges",
+  "ok": true,
+  "detail": "276.0–1476.0 vs 276.0–1476.0"
+ },
+ {
+  "where": "centred",
+  "ok": true,
+  "detail": ""
+ }
+]

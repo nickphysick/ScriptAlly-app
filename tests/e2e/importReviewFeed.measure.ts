@@ -198,7 +198,7 @@ test.describe("IRF-C", () => {
   /** Every card on the page: its key, box, skeleton class and the text it renders. */
   const cards = (page: Page) => page.evaluate(() => {
     const page = [...document.querySelectorAll<HTMLElement>('[data-d58="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-    const els = [...page.querySelectorAll<HTMLElement>(".os-card, .d58-focus, .d60-way, .d59-fw")].filter((e) => e.getBoundingClientRect().height > 0);
+    const els = [...page.querySelectorAll<HTMLElement>(".os-card, .d58-focus, .d71-task, .d105-fw")].filter((e) => e.getBoundingClientRect().height > 0);
     return {
       loading: page.getAttribute("data-loading"),
       cards: els.map((e, i) => {
@@ -220,7 +220,9 @@ test.describe("IRF-C", () => {
       const held = await cards(page);
       await shot(page, `dash-loading-${s.key}-1512`);
       L.check("C0", "the hold is real", held.loading === "1", `${held.loading}`);
-      L.check("C0", "cards to measure", held.cards.length >= 4, `${held.cards.length}`);
+      /* RE-POINTED (Dashboard first visit v1): before the first query the page holds three cards — the set-up card,
+         Getting started and the founding card (the tip bubble is not a card) */
+      L.check("C0", "cards to measure", held.cards.length >= (s.key === "pre" ? 3 : 4), `${held.cards.length}`);
       for (const c of held.cards) {
         L.check("C1", `${c.key} carries the skeleton class`, c.sk, "");
         L.check("C2", `${c.key} renders nothing inside`, c.text === "", JSON.stringify(c.text.slice(0, 80)));

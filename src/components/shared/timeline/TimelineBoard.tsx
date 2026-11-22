@@ -4,7 +4,8 @@
  *
  * The timeline board — the rail and the rows: the `.tl` subtree and nothing else.
  *
- * ⚠️ MOVED VERBATIM FROM `TodoCalendarPage.tsx`, AND THE VERBATIM IS THE PROOF. This is the second
+ * ⚠️ MOVED VERBATIM FROM `TodoCalendarPage.tsx` (retired 29 Oct; the Query Centre is now the only host), AND
+ * THE VERBATIM IS THE PROOF. This is the second
  * half of an extraction, not a redesign: the board renders in Query Centre exactly as it renders in
  * To-do. Every prop below is named for the LOCAL it replaced, so the moved JSX is untouched —
  * `range.days` is still `range.days` — and the byte-identical `outerHTML` diff of this subtree at

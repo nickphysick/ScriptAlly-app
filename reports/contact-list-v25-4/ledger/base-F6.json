@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "F6",
+  "where": "population",
+  "ok": true,
+  "detail": "52 with gaps, 1 without"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-10 line = Housekeeping's 2",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-10 the link opens edit mode at reply",
+  "ok": false,
+  "detail": "{\"edit\":false,\"inField\":false,\"active\":\"DIV.mk-lc-nm qcv-open-nm\"}"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-06 line = Housekeeping's 2",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-04 line = Housekeeping's 2",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "F6",
+  "where": "clv-fx-stale no gaps, no line",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "F6",
+  "where": "Filters has Missing details",
+  "ok": false,
+  "detail": "0"
+ }
+]

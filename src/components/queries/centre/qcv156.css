@@ -1,0 +1,131 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v156 (design-refs/query-centre-v156.html, read from the rendered page at 1920) — the launch look: full
+ * stage colour on the cards, one page colour for tab and sheet, the navy header panel, "this week" as a line, the
+ * collapsing header and the Views panel. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * ⚠️ OVERRIDES WIN ON SPECIFICITY, NOT ON BUNDLE ORDER: each selector is one class (or a repeated class) above the
+ *    v153.4 / v154 / v154.1 rule it replaces. The older sheets are not edited.
+ * ⚠️ qcv156.test.ts reads these rules by their exact selectors.
+ */
+
+/* ── §4 · cards: full stage colour and navy seals (v154.1's quiet Queried band and white seal reversed) ─────────── */
+@media (min-width: 768px) {
+  /* a Queried card's band is its stage's sand (`--tone`, v154's), like every other stage: no white, no edge, no hairline */
+  .qc151.qc153 .qc154-card.qc154-card[data-status="Queried"] .qc154-hd { background: var(--tone); box-shadow: none; }
+  /* the seal: solid navy, cream initials (the typewriter, from v154's rule), the white-then-navy double ring */
+  .qc151.qc153 .qc154-card.qc154-card .qc154-seal.qc154-seal { background: #2a3a52; color: #f4eee5; box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(42, 58, 82, 0.35); }
+}
+@container (max-width: 380px) {
+  .qc151.qc153 .qc154-card.qc154-card .qc154-seal.qc154-seal { box-shadow: 0 0 0 2.5px #fff, 0 0 0 3.5px rgba(42, 58, 82, 0.35); }
+}
+
+/* ── §5 · one page colour. The tab, its fillet and the sheet read `--ws-page` through `--ink-tab` / `--ink-sheet`
+   (inkShell.css), declared on `.ws-main`; the Query Centre retones that token there while its page is the one on
+   screen (decided by what is rendered, as inkShell's own header-sheet rule is: a hidden page's slot carries
+   `data-stage-off`). The scroll area then paints the same token, so tab and sheet are one piece. ──────────────── */
+@media (min-width: 768px) {
+  .ws-window .qc-wpg.qc-wpg--v11.qc-wpg--v11.qc-wpg--v11 > .wpg-scroll.wpg-scroll {
+    background-color: var(--ws-page);
+    background-image: linear-gradient(rgba(var(--ws-page-rgb), 0.45), rgba(var(--ws-page-rgb), 0.45)), url("/images/qc/doodle-tile.svg");
+  }
+
+  /* nothing clips the header panel's shadow: the toolbar's strip reached 12px up over the header's foot and painted the
+     page there at rest. At rest it paints nothing; once stuck (QcPage151 sets `data-qc156-stuck`) it takes the page's
+     colour and its 22px fade, as v154 drew it. */
+  :is(.qc151.qc153, .cl27) .qc154-tbw.qc154-tbw.qc154-tbw { background: none; }
+  :is(.qc151.qc153, .cl27) .qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] {
+    background: linear-gradient(to bottom, var(--ws-page) 0, var(--ws-page) calc(100% - 22px), rgba(var(--ws-page-rgb), 0) 100%);
+  }
+}
+
+/* ── §1 · the navy header panel: one panel across the content width (the filter column and the list column), 8px
+   above and 30px below; 22px top and bottom, 30px right, none on the left (the hawk's 268px column is its margin).
+   v153.4's three-column grid stays: the hawk over the filter column, the title block on the list's left edge, "this
+   week" against the list's right edge. The doodles do not show through: the panel is solid. ────────────────────── */
+@media (min-width: 768px) {
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd {
+    --ink: #fbf7f0; --mut: #f4eee5;
+    margin: 8px 0 30px; padding: 22px 30px 22px 0; border-radius: 20px; background: #2a3a52; color: #f4eee5;
+    box-shadow: 0 22px 34px -22px rgba(28, 19, 15, 0.55);
+  }
+  /* the list's columns sit the panel's 30px below it, the panel's margin alone (v153's 26px top margin would collapse
+     into it on one layout and add to it on another) */
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd + .qc153-cl { margin-top: 0; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd h1.qc1531-t { color: #fbf7f0 !important; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-for i { background: rgba(244, 238, 229, 0.35); }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-for span,
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-for em { color: #f4eee5; }
+  /* the buttons, inverted for navy: "+ Log a query" the page's one filled button, "Record a response" a cream ring */
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b--n { background: #f4eee5; color: #2a3a52; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b--n:hover { background: #fbf7f0; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b--g { background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.6); }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b--g:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); background: rgba(244, 238, 229, 0.06); }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+}
+
+/* ── §2 · "this week" as a line, straight on the navy (QcLine156): the ref's .zalt, 380 wide against the list's right
+   edge. 44px typewriter headline with its italic on the same baseline; a 74px line; the caption 6px under it; the
+   footer 14px under that over a fine rule. ─────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151 .qc156-wk { box-sizing: border-box; width: 380px; max-width: 100%; color: #f4eee5; }
+  .qc151 .qc156-big { display: flex; align-items: baseline; gap: 12px; min-height: 44px; }
+  .qc151 .qc156-big b { font: 400 44px/1 var(--sp-type) !important; color: #fbf7f0; white-space: nowrap; }
+  .qc151 .qc156-big small { font: italic 400 17px/1.2 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.85); white-space: nowrap; }
+  .qc151 .qc156-ln { display: block; width: 100%; height: 74px; margin-top: 10px; overflow: visible; }
+  .qc151 .qc156-cap { display: flex; justify-content: space-between; margin-top: 6px; font: 400 12.5px/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.65); }
+  .qc151 .qc156-ft {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid rgba(244, 238, 229, 0.22); min-height: 34px; box-sizing: border-box;
+  }
+  .qc151 .qc156-ft b { display: flex; align-items: center; gap: 6px; flex: none; font: 600 15px/1.4 var(--sp-serif) !important; color: #fbf7f0; white-space: nowrap; }
+  .qc151 .qc156-ft b svg { flex: none; }
+  .qc151 .qc156-ft em { margin-left: auto; font: italic 400 15px/1.4 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.88); text-align: right; }
+  /* loading: the rows hold their final boxes and show nothing until the data lands (v155 §3) */
+  .qc151 .qc156-wk[data-qc155="goal-hold"] > * { visibility: hidden; }
+}
+
+/* ── §3 · the collapsed header (QcSlim156): a 60px bar sticky under the sheet's lip, taking no space (its height given
+   back below it), on the page's colour across the sheet's full width with a #e0d9ce hairline along its foot; its
+   content inset to the page content's edges. It fades and slides in over 180ms; under reduced motion it simply
+   appears. Above the toolbar (z 30) and every card; under the drawers. ─────────────────────────────────────────── */
+@media (min-width: 768px) {
+  :is(.qc151.qc153, .cl27, .tws56, .pk43, .wsnh) > .qc156-slim {
+    position: sticky; top: var(--pin-cover, 12px); z-index: 40; box-sizing: border-box; height: 60px; margin-bottom: -60px;
+    display: flex; align-items: center; gap: 14px;
+    opacity: 0; transform: translateY(-6px); pointer-events: none; visibility: hidden;
+    transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s linear 180ms;
+  }
+  :is(.qc151.qc153, .cl27, .tws56, .pk43, .wsnh) > .qc156-slim::before {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
+    left: calc(-1 * var(--qc156-bl, 0px)); right: calc(-1 * var(--qc156-br, 0px));
+    background: var(--ws-page); box-shadow: inset 0 -1px 0 #e0d9ce;
+  }
+  :is(.qc151.qc153, .cl27, .tws56, .pk43, .wsnh) > .qc156-slim[data-shown] {
+    opacity: 1; transform: none; pointer-events: auto; visibility: visible;
+    transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s;
+  }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-st { margin: 0; display: flex; align-items: baseline; gap: 14px; min-width: 0; white-space: nowrap; overflow: hidden; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-st b { flex: none; font: 400 24px/1.2 var(--sp-type) !important; color: #1c130f; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-st i { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: italic 400 16px/1.2 var(--sp-serif) !important; color: var(--sp-muted); }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sa { flex: none; margin-left: auto; display: flex; align-items: center; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sw { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sw b { font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sw em { font: italic 400 15px/1 var(--sp-serif) !important; color: var(--sp-muted); }
+  .qc151 .qc156-sk { display: flex; align-items: center; gap: 5px; margin-left: 16px; white-space: nowrap; font: 600 13.5px/1 var(--sp-serif) !important; color: #2a3a52; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 40px; margin-left: 26px; padding: 0 18px;
+    border-radius: 10px; background: #2a3a52; color: #fbf7f0; font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb:hover { background: #334763; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb:disabled { opacity: 0.55; cursor: default; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  :is(.qc151.qc153, .cl27, .tws56, .pk43, .wsnh) > .qc156-slim, :is(.qc151.qc153, .cl27, .tws56, .pk43, .wsnh) > .qc156-slim[data-shown] { transition: none; transform: none; }
+}
+
+/* ── §6 · the Views panel: RETIRED in List filters v1. The filter column's card is shell/FilterPanel, styled by
+   shell/filterPanel.css (and shell/stageFilter.css for Stage). ─────────────────────────────────────────────────── */

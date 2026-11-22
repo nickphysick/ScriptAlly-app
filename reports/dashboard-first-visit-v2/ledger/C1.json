@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "C1",
+  "where": "before",
+  "ok": true,
+  "detail": "[\"manuscript:done\",\"comps:done\",\"agent:done\",\"letter:done\",\"ready:current\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "write",
+  "ok": false,
+  "detail": "status Drafting, stage starting"
+ },
+ {
+  "lock": "C1",
+  "where": "path",
+  "ok": true,
+  "detail": "the ready-not-querying path"
+ },
+ {
+  "lock": "C1",
+  "where": "ticks",
+  "ok": true,
+  "detail": "the ready path's rows: [\"manuscript:done\",\"agent:done\",\"query:current\",\"materials:done\",\"comps:done\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "label",
+  "ok": true,
+  "detail": "the label follows"
+ }
+]

@@ -1,0 +1,27 @@
+[
+ {
+  "where": "1512: the row is in the page (population)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "767 none at the top",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "767 none after scrolling",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "390 none at the top",
+  "ok": false,
+  "detail": "2"
+ },
+ {
+  "where": "390 none after scrolling",
+  "ok": false,
+  "detail": "2"
+ }
+]

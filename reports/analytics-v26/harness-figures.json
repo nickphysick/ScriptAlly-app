@@ -1,0 +1,138 @@
+{
+ "manuscriptId": "seed-ms-1",
+ "state": "everyday",
+ "sent": 52,
+ "replies": 31,
+ "findings": [
+  {
+   "key": "beyond",
+   "n": 14,
+   "slowest": 11
+  },
+  {
+   "key": "typical",
+   "typical": 2,
+   "typicalAsked": 2,
+   "typicalPassed": 2,
+   "quietWeeks": 4
+  },
+  {
+   "key": "bestRound",
+   "best": 0,
+   "asked": 11,
+   "of": 18
+  }
+ ],
+ "rounds": [
+  {
+   "index": 0,
+   "n": 18,
+   "months": "Apr to Jul",
+   "asked": 11,
+   "waiting": 3
+  },
+  {
+   "index": 1,
+   "n": 18,
+   "months": "Jul to Aug",
+   "asked": 8,
+   "waiting": 5
+  },
+  {
+   "index": 2,
+   "n": 16,
+   "months": "Aug to Sep",
+   "asked": 3,
+   "waiting": 11
+  }
+ ],
+ "whoSaysYes": {
+  "byGenre": [
+   {
+    "label": "Literary Fiction",
+    "asked": 22,
+    "sent": 51
+   }
+  ],
+  "byNote": {
+   "withNote": {
+    "label": "With a personal note",
+    "asked": 1,
+    "sent": 1
+   },
+   "without": {
+    "label": "Without one",
+    "asked": 21,
+    "sent": 51
+   }
+  },
+  "lead": "Literary Fiction",
+  "unqueried": 34
+ },
+ "nudgeResults": {
+  "rows": [
+   {
+    "agent": "Tobias Hark",
+    "agency": "Hark Literary",
+    "at": "2026-09-21",
+    "repliedDays": null
+   },
+   {
+    "agent": "Rachel Lin",
+    "agency": "Lin Literary",
+    "at": "2026-09-20",
+    "repliedDays": null
+   },
+   {
+    "agent": "Sam Okoro",
+    "agency": "Okoro Bell",
+    "at": "2026-09-20",
+    "repliedDays": null
+   },
+   {
+    "agent": "Cormac Bligh",
+    "agency": "Bligh & Sons",
+    "at": "2026-09-20",
+    "repliedDays": null
+   },
+   {
+    "agent": "Alasdair Crewe",
+    "agency": "Crewe Literary",
+    "at": "2026-09-20",
+    "repliedDays": null
+   },
+   {
+    "agent": "Ana Duarte",
+    "agency": "Duarte Words",
+    "at": "2026-08-21",
+    "repliedDays": null
+   },
+   {
+    "agent": "Sam Okoro",
+    "agency": "Okoro Bell",
+    "at": "2026-08-21",
+    "repliedDays": null
+   },
+   {
+    "agent": "Joan Whitfield",
+    "agency": "Whitfield Agency",
+    "at": "2026-08-21",
+    "repliedDays": null
+   },
+   {
+    "agent": "Marcus Reed",
+    "agency": "Reed & Partners",
+    "at": "2026-08-21",
+    "repliedDays": null
+   },
+   {
+    "agent": "Tom Ellery",
+    "agency": "Curtis Vane",
+    "at": "2026-08-21",
+    "repliedDays": null
+   }
+  ],
+  "replied": 0,
+  "due": 5
+ }
+}

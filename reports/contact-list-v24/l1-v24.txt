@@ -1,0 +1,493 @@
+
+Running 75 tests using 1 worker
+
+[1/75] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/75] [measure] › tests/e2e/hr1.measure.ts:139:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs
+[measure] › tests/e2e/hr1.measure.ts:139:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs
+  ✗ HR1-2 · contacts 1280 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-2 · contacts 1440 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-2 · contacts 1512 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-2 · contacts 1920 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-3 · contacts 1280 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-3 · contacts 1440 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-3 · contacts 1512 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-3 · contacts 1920 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-6 · contacts 1280 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-6 · contacts 1440 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-6 · contacts 1512 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-6 · contacts 1920 found the hero (header, eyebrow, title, actions) — {"header":false,"ey":false,"title":false,"byline":false,"acts":false,"art":false,"right":false,"content":false}
+
+  ✗ HR1-7 · contacts/discover 1280 both found — 
+
+  ✗ HR1-7 · contacts/discover 1440 both found — 
+
+  ✗ HR1-7 · contacts/discover 1512 both found — 
+
+  ✗ HR1-7 · contacts/discover 1920 both found — 
+
+  1) [measure] › tests/e2e/hr1.measure.ts:139:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs 
+
+    Error: HR1-1: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 28
+    Received:    0
+
+      216 |     for (const l of Object.values(L)) { l.write(); bad.push(...l.bad()); }
+      217 |     for (const x of bad.slice(0, 60)) console.log(`  ✗ ${x}`);
+    > 218 |     expect(L["HR1-1"].rows.length, "HR1-1: fewer readings than it claims").toBeGreaterThanOrEqual(28);
+          |                                                                            ^
+      219 |     expect(L["HR1-3"].rows.length, "HR1-3: fewer readings than it claims").toBeGreaterThanOrEqual(56);
+      220 |     expect(bad).toEqual([]);
+      221 |   });
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/hr1.measure.ts:218:76
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-a4d3b--item-the-gap-and-the-pairs-measure/error-context.md
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-a4d3b--item-the-gap-and-the-pairs-measure/error-context.md
+
+
+[3/75] [measure] › tests/e2e/hr1.measure.ts:223:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base
+  2) [measure] › tests/e2e/hr1.measure.ts:223:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base 
+
+    Error: HR1-8: the reference is older than twelve hours; capture it again
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 43200000
+    Received:   498700094
+
+      254 |     expect(existsSync(REF), "HR1-8: capture the base reference first (HR1_CAPTURE=1 against the base preview)").toBe(true);
+      255 |     const ref = JSON.parse(readFileSync(REF, "utf8")) as { capturedAt: number; got: Record<string, (number[] | null)[]> };
+    > 256 |     expect(Date.now() - ref.capturedAt, "HR1-8: the reference is older than twelve hours; capture it again").toBeLessThan(12 * 3600_000);
+          |                                                                                                              ^
+      257 |     for (const c of cases) {
+      258 |       const a = ref.got[c.name], b = got[c.name];
+      259 |       L.check(`${c.name} found on the base and here`, !!a && !!b && a.every(Boolean) && b.every(Boolean), JSON.stringify({ a, b }));
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/hr1.measure.ts:256:110
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-c0f4a-ages-measure-as-on-the-base-measure/error-context.md
+
+    Error Context: test-results/hr1.measure.ts-Header-rule-c0f4a-ages-measure-as-on-the-base-measure/error-context.md
+
+
+[4/75] [measure] › tests/e2e/nb1.measure.ts:54:1 › NB1-L1 QC bar
+[measure] › tests/e2e/nb1.measure.ts:54:1 › NB1-L1 QC bar
+[L1] 10/10 green
+
+[5/75] [measure] › tests/e2e/nb1.measure.ts:82:1 › NB1-L2 QC pill
+[measure] › tests/e2e/nb1.measure.ts:82:1 › NB1-L2 QC pill
+[L2] 4/4 green
+
+[6/75] [measure] › tests/e2e/nb1.measure.ts:100:1 › NB1-L3 QC full screen
+[measure] › tests/e2e/nb1.measure.ts:100:1 › NB1-L3 QC full screen
+[L3] 16/16 green
+
+[7/75] [measure] › tests/e2e/nb1.measure.ts:125:6 › NB1-L4 QC headings
+[8/75] [measure] › tests/e2e/nb1.measure.ts:186:6 › NB1-L5 CL one view
+[9/75] [measure] › tests/e2e/nb1.measure.ts:213:6 › NB1-L6 CL dock
+[10/75] [measure] › tests/e2e/nb1.measure.ts:264:6 › NB1-L7 CL count
+[11/75] [measure] › tests/e2e/nb1.measure.ts:301:6 › NB1-L8 CL avatars
+[12/75] [measure] › tests/e2e/nb1.measure.ts:340:1 › NB1-L9 CL sections
+[measure] › tests/e2e/nb1.measure.ts:340:1 › NB1-L9 CL sections
+[L9] 12/12 green
+
+[13/75] [measure] › tests/e2e/nb1.measure.ts:370:1 › NB1-L10 CL card
+[measure] › tests/e2e/nb1.measure.ts:370:1 › NB1-L10 CL card
+[L10] 4/4 green
+
+[14/75] [measure] › tests/e2e/nb1.measure.ts:406:6 › NB1-L11 CL full screen
+[15/75] [measure] › tests/e2e/nb1.measure.ts:440:1 › NB1-L12 CL kept functions
+[measure] › tests/e2e/nb1.measure.ts:440:1 › NB1-L12 CL kept functions
+[L12] 10/10 green
+
+[16/75] [measure] › tests/e2e/qc149.measure.ts:41:5 › QC149 @ 1280 › L1 · the header card is the Versions card, 22 below the content top as Versions sits; the hero and breakdown are gone
+[measure] › tests/e2e/qc149.measure.ts:41:5 › QC149 @ 1280 › L1 · the header card is the Versions card, 22 below the content top as Versions sits; the hero and breakdown are gone
+[L1-1280] 15/15 green
+
+[17/75] [measure] › tests/e2e/qc149.measure.ts:70:10 › QC149 @ 1280 › L2 · the header, banner and view row share edges; the list is the inset wider each side
+[18/75] [measure] › tests/e2e/qc149.measure.ts:87:5 › QC149 @ 1280 › L3 · the banner counts the With you set; Show them shows it; at zero it is absent
+[measure] › tests/e2e/qc149.measure.ts:87:5 › QC149 @ 1280 › L3 · the banner counts the With you set; Show them shows it; at zero it is absent
+[L3-1280] 7/7 green
+
+[19/75] [measure] › tests/e2e/qc149.measure.ts:112:5 › QC149 @ 1280 › L4 · each chip is its set, they sum to All, one at a time, and they combine with Filters
+[measure] › tests/e2e/qc149.measure.ts:112:5 › QC149 @ 1280 › L4 · each chip is its set, they sum to All, one at a time, and they combine with Filters
+[L4-1280] 18/18 green
+
+[20/75] [measure] › tests/e2e/qc149.measure.ts:155:5 › QC149 @ 1280 › L5 · the navy bar: heard back, Filters, Group by, Sort, Full screen; no switch, count or jump row; flexible columns
+[measure] › tests/e2e/qc149.measure.ts:155:5 › QC149 @ 1280 › L5 · the navy bar: heard back, Filters, Group by, Sort, Full screen; no switch, count or jump row; flexible columns
+[L5-1280] 15/15 green
+
+[21/75] [measure] › tests/e2e/qc149.measure.ts:190:5 › QC149 @ 1280 › L6 · the hover timeline: one-line summary, nothing past the list card's edges
+[measure] › tests/e2e/qc149.measure.ts:190:5 › QC149 @ 1280 › L6 · the hover timeline: one-line summary, nothing past the list card's edges
+[L6-1280] 7/7 green
+
+[22/75] [measure] › tests/e2e/qc149.measure.ts:231:5 › QC149 @ 1280 › L7 · each group heading is a full-width band, #f6f3ee, with no rule
+[measure] › tests/e2e/qc149.measure.ts:231:5 › QC149 @ 1280 › L7 · each group heading is a full-width band, #f6f3ee, with no rule
+[L7-1280] 31/31 green
+
+[23/75] [measure] › tests/e2e/qc149.measure.ts:252:5 › QC149 @ 1280 › L8 · a row opens the panel holding the query card; its band, tabs, ‹ › and Esc
+[measure] › tests/e2e/qc149.measure.ts:252:5 › QC149 @ 1280 › L8 · a row opens the panel holding the query card; its band, tabs, ‹ › and Esc
+[L8-1280] 13/13 green
+
+[24/75] [measure] › tests/e2e/qc149.measure.ts:291:5 › QC149 @ 1280 › L9 · respond in the card: Save waits for a choice, then the panel stays and everything moves on (undone after)
+[measure] › tests/e2e/qc149.measure.ts:291:5 › QC149 @ 1280 › L9 · respond in the card: Save waits for a choice, then the panel stays and everything moves on (undone after)
+[L9-1280] 10/10 green
+
+[25/75] [measure] › tests/e2e/qc149.measure.ts:327:5 › QC149 @ 1280 › L10 · edit in the card: a step's date and the package persist across a reload; Cancel restores
+[26/75] [measure] › tests/e2e/qc149.measure.ts:405:5 › QC149 @ 1280 › L11 · log from the header: a not-queried agent, logged, in the list and open; queried agents cannot be picked (undone after)
+[27/75] [measure] › tests/e2e/qc149.measure.ts:443:5 › QC149 @ 1280 › L12 · Who replied? lists every live query once, in two groups, and a pick opens it in respond mode
+[measure] › tests/e2e/qc149.measure.ts:443:5 › QC149 @ 1280 › L12 · Who replied? lists every live query once, in two groups, and a pick opens it in respond mode
+[L12-1280] 7/7 green
+
+[28/75] [measure] › tests/e2e/qc149.measure.ts:41:5 › QC149 @ 1512 › L1 · the header card is the Versions card, 22 below the content top as Versions sits; the hero and breakdown are gone
+[measure] › tests/e2e/qc149.measure.ts:41:5 › QC149 @ 1512 › L1 · the header card is the Versions card, 22 below the content top as Versions sits; the hero and breakdown are gone
+[L1-1512] 15/15 green
+
+[29/75] [measure] › tests/e2e/qc149.measure.ts:70:10 › QC149 @ 1512 › L2 · the header, banner and view row share edges; the list is the inset wider each side
+[30/75] [measure] › tests/e2e/qc149.measure.ts:87:5 › QC149 @ 1512 › L3 · the banner counts the With you set; Show them shows it; at zero it is absent
+[measure] › tests/e2e/qc149.measure.ts:87:5 › QC149 @ 1512 › L3 · the banner counts the With you set; Show them shows it; at zero it is absent
+[L3-1512] 7/7 green
+
+[31/75] [measure] › tests/e2e/qc149.measure.ts:112:5 › QC149 @ 1512 › L4 · each chip is its set, they sum to All, one at a time, and they combine with Filters
+[measure] › tests/e2e/qc149.measure.ts:112:5 › QC149 @ 1512 › L4 · each chip is its set, they sum to All, one at a time, and they combine with Filters
+[L4-1512] 18/18 green
+
+[32/75] [measure] › tests/e2e/qc149.measure.ts:155:5 › QC149 @ 1512 › L5 · the navy bar: heard back, Filters, Group by, Sort, Full screen; no switch, count or jump row; flexible columns
+[measure] › tests/e2e/qc149.measure.ts:155:5 › QC149 @ 1512 › L5 · the navy bar: heard back, Filters, Group by, Sort, Full screen; no switch, count or jump row; flexible columns
+[L5-1512] 15/15 green
+
+[33/75] [measure] › tests/e2e/qc149.measure.ts:190:5 › QC149 @ 1512 › L6 · the hover timeline: one-line summary, nothing past the list card's edges
+[measure] › tests/e2e/qc149.measure.ts:190:5 › QC149 @ 1512 › L6 · the hover timeline: one-line summary, nothing past the list card's edges
+[L6-1512] 7/7 green
+
+[34/75] [measure] › tests/e2e/qc149.measure.ts:231:5 › QC149 @ 1512 › L7 · each group heading is a full-width band, #f6f3ee, with no rule
+[measure] › tests/e2e/qc149.measure.ts:231:5 › QC149 @ 1512 › L7 · each group heading is a full-width band, #f6f3ee, with no rule
+[L7-1512] 31/31 green
+
+[35/75] [measure] › tests/e2e/qc149.measure.ts:252:5 › QC149 @ 1512 › L8 · a row opens the panel holding the query card; its band, tabs, ‹ › and Esc
+[measure] › tests/e2e/qc149.measure.ts:252:5 › QC149 @ 1512 › L8 · a row opens the panel holding the query card; its band, tabs, ‹ › and Esc
+[L8-1512] 13/13 green
+
+[36/75] [measure] › tests/e2e/qc149.measure.ts:291:5 › QC149 @ 1512 › L9 · respond in the card: Save waits for a choice, then the panel stays and everything moves on (undone after)
+[measure] › tests/e2e/qc149.measure.ts:291:5 › QC149 @ 1512 › L9 · respond in the card: Save waits for a choice, then the panel stays and everything moves on (undone after)
+[L9-1512] 10/10 green
+
+[37/75] [measure] › tests/e2e/qc149.measure.ts:327:5 › QC149 @ 1512 › L10 · edit in the card: a step's date and the package persist across a reload; Cancel restores
+[measure] › tests/e2e/qc149.measure.ts:327:5 › QC149 @ 1512 › L10 · edit in the card: a step's date and the package persist across a reload; Cancel restores
+[L10-1512] 7/7 green
+
+[38/75] [measure] › tests/e2e/qc149.measure.ts:405:5 › QC149 @ 1512 › L11 · log from the header: a not-queried agent, logged, in the list and open; queried agents cannot be picked (undone after)
+[measure] › tests/e2e/qc149.measure.ts:405:5 › QC149 @ 1512 › L11 · log from the header: a not-queried agent, logged, in the list and open; queried agents cannot be picked (undone after)
+[L11-1512] 9/9 green
+
+[39/75] [measure] › tests/e2e/qc149.measure.ts:443:5 › QC149 @ 1512 › L12 · Who replied? lists every live query once, in two groups, and a pick opens it in respond mode
+[measure] › tests/e2e/qc149.measure.ts:443:5 › QC149 @ 1512 › L12 · Who replied? lists every live query once, in two groups, and a pick opens it in respond mode
+[L12-1512] 7/7 green
+
+[40/75] [measure] › tests/e2e/qc1491.measure.ts:60:5 › QC1491 @ 1280 › L1 · the book block: the tile, a chip per present field, the package chip; no word count means no chip
+[measure] › tests/e2e/qc1491.measure.ts:60:5 › QC1491 @ 1280 › L1 · the book block: the tile, a chip per present field, the package chip; no word count means no chip
+[L1-1280] 7/7 green
+
+[41/75] [measure] › tests/e2e/qc1491.measure.ts:84:5 › QC1491 @ 1280 › L2 · the steps: a request rust, its answer green with a ✓, a note in italics, an undated step's Add date
+[measure] › tests/e2e/qc1491.measure.ts:84:5 › QC1491 @ 1280 › L2 · the steps: a request rust, its answer green with a ✓, a note in italics, an undated step's Add date
+[L2-1280] 6/6 green
+
+[42/75] [measure] › tests/e2e/qc1491.measure.ts:112:5 › QC1491 @ 1280 › L3 · open queries end with a faint next step from the next-move rule; closed ones have none
+[measure] › tests/e2e/qc1491.measure.ts:112:5 › QC1491 @ 1280 › L3 · open queries end with a faint next step from the next-move rule; closed ones have none
+[L3-1280] 6/6 green
+
+[43/75] [measure] › tests/e2e/qc1491.measure.ts:130:5 › QC1491 @ 1280 › L4 · the strip at the pane's foot, tinted by court; its button runs the tray's action; closed has none; no stand block
+[measure] › tests/e2e/qc1491.measure.ts:130:5 › QC1491 @ 1280 › L4 · the strip at the pane's foot, tinted by court; its button runs the tray's action; closed has none; no stand block
+[L4-1280] 7/7 green
+
+[44/75] [measure] › tests/e2e/qc1491.measure.ts:164:5 › QC1491 @ 1280 › L5 · the footer: the status line, then the three links and N / M; no separate primary
+[measure] › tests/e2e/qc1491.measure.ts:164:5 › QC1491 @ 1280 › L5 · the footer: the status line, then the three links and N / M; no separate primary
+[L5-1280] 5/5 green
+
+[45/75] [measure] › tests/e2e/qc1491.measure.ts:184:5 › QC1491 @ 1280 › L6 · the Agent tab: wishlist or its invitation, four facts, every query to the agent, Contact; no 'Not recorded'
+[measure] › tests/e2e/qc1491.measure.ts:184:5 › QC1491 @ 1280 › L6 · the Agent tab: wishlist or its invitation, four facts, every query to the agent, Contact; no 'Not recorded'
+[L6-1280] 10/10 green
+
+[46/75] [measure] › tests/e2e/qc1491.measure.ts:216:5 › QC1491 @ 1280 › L7 · the column header row is white
+[measure] › tests/e2e/qc1491.measure.ts:216:5 › QC1491 @ 1280 › L7 · the column header row is white
+[L7-1280] 3/3 green
+
+[47/75] [measure] › tests/e2e/qc1491.measure.ts:228:5 › QC1491 @ 1280 › L8 · What you sent: nothing at rest when nothing was sent, + Add on hover; only the sent items' icons otherwise
+[measure] › tests/e2e/qc1491.measure.ts:228:5 › QC1491 @ 1280 › L8 · What you sent: nothing at rest when nothing was sent, + Add on hover; only the sent items' icons otherwise
+[L8-1280] 6/6 green
+
+[48/75] [measure] › tests/e2e/qc1491.measure.ts:249:5 › QC1491 @ 1280 › L9 · one wording for a missing date: no 'Not dated' or 'No date set'; the replacements are there
+[measure] › tests/e2e/qc1491.measure.ts:249:5 › QC1491 @ 1280 › L9 · one wording for a missing date: no 'Not dated' or 'No date set'; the replacements are there
+[L9-1280] 7/7 green
+
+[49/75] [measure] › tests/e2e/qc1491.measure.ts:270:5 › QC1491 @ 1280 › L13 · a later query to the same agent for the same book is tagged from the record
+[measure] › tests/e2e/qc1491.measure.ts:270:5 › QC1491 @ 1280 › L13 · a later query to the same agent for the same book is tagged from the record
+[L13-1280] 3/3 green
+
+[50/75] [measure] › tests/e2e/qc1491.measure.ts:60:5 › QC1491 @ 1512 › L1 · the book block: the tile, a chip per present field, the package chip; no word count means no chip
+[measure] › tests/e2e/qc1491.measure.ts:60:5 › QC1491 @ 1512 › L1 · the book block: the tile, a chip per present field, the package chip; no word count means no chip
+[L1-1512] 7/7 green
+
+[51/75] [measure] › tests/e2e/qc1491.measure.ts:84:5 › QC1491 @ 1512 › L2 · the steps: a request rust, its answer green with a ✓, a note in italics, an undated step's Add date
+[measure] › tests/e2e/qc1491.measure.ts:84:5 › QC1491 @ 1512 › L2 · the steps: a request rust, its answer green with a ✓, a note in italics, an undated step's Add date
+[L2-1512] 6/6 green
+
+[52/75] [measure] › tests/e2e/qc1491.measure.ts:112:5 › QC1491 @ 1512 › L3 · open queries end with a faint next step from the next-move rule; closed ones have none
+[measure] › tests/e2e/qc1491.measure.ts:112:5 › QC1491 @ 1512 › L3 · open queries end with a faint next step from the next-move rule; closed ones have none
+[L3-1512] 6/6 green
+
+[53/75] [measure] › tests/e2e/qc1491.measure.ts:130:5 › QC1491 @ 1512 › L4 · the strip at the pane's foot, tinted by court; its button runs the tray's action; closed has none; no stand block
+[measure] › tests/e2e/qc1491.measure.ts:130:5 › QC1491 @ 1512 › L4 · the strip at the pane's foot, tinted by court; its button runs the tray's action; closed has none; no stand block
+[L4-1512] 7/7 green
+
+[54/75] [measure] › tests/e2e/qc1491.measure.ts:164:5 › QC1491 @ 1512 › L5 · the footer: the status line, then the three links and N / M; no separate primary
+[measure] › tests/e2e/qc1491.measure.ts:164:5 › QC1491 @ 1512 › L5 · the footer: the status line, then the three links and N / M; no separate primary
+[L5-1512] 5/5 green
+
+[55/75] [measure] › tests/e2e/qc1491.measure.ts:184:5 › QC1491 @ 1512 › L6 · the Agent tab: wishlist or its invitation, four facts, every query to the agent, Contact; no 'Not recorded'
+[measure] › tests/e2e/qc1491.measure.ts:184:5 › QC1491 @ 1512 › L6 · the Agent tab: wishlist or its invitation, four facts, every query to the agent, Contact; no 'Not recorded'
+[L6-1512] 10/10 green
+
+[56/75] [measure] › tests/e2e/qc1491.measure.ts:216:5 › QC1491 @ 1512 › L7 · the column header row is white
+[measure] › tests/e2e/qc1491.measure.ts:216:5 › QC1491 @ 1512 › L7 · the column header row is white
+[L7-1512] 3/3 green
+
+[57/75] [measure] › tests/e2e/qc1491.measure.ts:228:5 › QC1491 @ 1512 › L8 · What you sent: nothing at rest when nothing was sent, + Add on hover; only the sent items' icons otherwise
+[measure] › tests/e2e/qc1491.measure.ts:228:5 › QC1491 @ 1512 › L8 · What you sent: nothing at rest when nothing was sent, + Add on hover; only the sent items' icons otherwise
+[L8-1512] 6/6 green
+
+[58/75] [measure] › tests/e2e/qc1491.measure.ts:249:5 › QC1491 @ 1512 › L9 · one wording for a missing date: no 'Not dated' or 'No date set'; the replacements are there
+[measure] › tests/e2e/qc1491.measure.ts:249:5 › QC1491 @ 1512 › L9 · one wording for a missing date: no 'Not dated' or 'No date set'; the replacements are there
+[L9-1512] 7/7 green
+
+[59/75] [measure] › tests/e2e/qc1491.measure.ts:270:5 › QC1491 @ 1512 › L13 · a later query to the same agent for the same book is tagged from the record
+[measure] › tests/e2e/qc1491.measure.ts:270:5 › QC1491 @ 1512 › L13 · a later query to the same agent for the same book is tagged from the record
+[L13-1512] 3/3 green
+
+[60/75] [measure] › tests/e2e/qc1491.measure.ts:284:3 › QC1491 · L10 casing, L11 push › L10 · an all-caps name is title-cased by the migration; mixed case is left alone
+[measure] › tests/e2e/qc1491.measure.ts:284:3 › QC1491 · L10 casing, L11 push › L10 · an all-caps name is title-cased by the migration; mixed case is left alone
+
+
+[L10] 4/4 green
+
+[61/75] [measure] › tests/e2e/qc1491.measure.ts:304:8 › QC1491 · L10 casing, L11 push › L11 · at 1920 the open panel pushes the list card; at 1440 it overlays as before
+[62/75] [measure] › tests/e2e/qc1492.measure.ts:52:1 › L1 · the list is min(S − 64, 1136), plus 80 from a 1500 sheet, centred in the sheet
+[measure] › tests/e2e/qc1492.measure.ts:52:1 › L1 · the list is min(S − 64, 1136), plus 80 from a 1500 sheet, centred in the sheet
+[L1] 16/16 green
+
+[63/75] [measure] › tests/e2e/qc1492.measure.ts:70:1 › L2 · the header card, banner and view row share edges, inside the list by the inset
+[measure] › tests/e2e/qc1492.measure.ts:70:1 › L2 · the header card, banner and view row share edges, inside the list by the inset
+[L2] 15/15 green
+
+[64/75] [measure] › tests/e2e/qc1492.measure.ts:87:1 › L3 · the panel overlays the list: its edges don't move; the panel lies over it; the scrim shows during an action
+[measure] › tests/e2e/qc1492.measure.ts:87:1 › L3 · the panel overlays the list: its edges don't move; the panel lies over it; the scrim shows during an action
+[L3] 18/18 green
+
+[65/75] [measure] › tests/e2e/qc149L0.measure.ts:77:3 › QC149-L0 · Versions unchanged by the extraction @ 1280
+[measure] › tests/e2e/qc149L0.measure.ts:77:3 › QC149-L0 · Versions unchanged by the extraction @ 1280
+[L0 @1280] styles compared: 18 parts × 45; differing: 0; pixels differing: 0/1024000 (0.0000%)
+
+[66/75] [measure] › tests/e2e/qc149L0.measure.ts:77:3 › QC149-L0 · Versions unchanged by the extraction @ 1512
+[measure] › tests/e2e/qc149L0.measure.ts:77:3 › QC149-L0 · Versions unchanged by the extraction @ 1512
+[L0 @1512] styles compared: 18 parts × 45; differing: 0; pixels differing: 33/1360800 (0.0024%)
+
+[67/75] [measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton
+[measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton
+  ✗ A1 · agents the toolbar's own pin (v19 §A) — null
+
+  ✗ A1 · agents aria-keyshortcuts F — undefined
+
+  3) [measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "A1 · agents the toolbar's own pin (v19 §A) — null",
+    +   "A1 · agents aria-keyshortcuts F — undefined",
+    + ]
+
+      52 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+      53 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 54 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.lock} · ${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                               ^
+      55 |   }
+      56 | }
+      57 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:54:95)
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:101:7
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-bbad1-th-pages-draw-PinListButton-measure/error-context.md
+
+
+[68/75] [measure] › tests/e2e/qcV1386.measure.ts:104:3 › QC138.6 › A2 · keys: F pins and unpins; not in the search; Esc closes what is open first
+  4) [measure] › tests/e2e/qcV1386.measure.ts:104:3 › QC138.6 › A2 · keys: F pins and unpins; not in the search; Esc closes what is open first 
+
+    Test timeout of 400000ms exceeded.
+
+    Error: locator.click: Test timeout of 400000ms exceeded.
+    Call log:
+      - waiting for locator('.clv-group [data-cl13-find="banner"] input').first()
+
+
+      113 |       L.check("A2", `${p.key} F unpins`, (await pinned(page, p)) === "false", `${await pinned(page, p)}`);
+      114 |       const find = page.locator(vis(p, p.find)).first();
+    > 115 |       await find.click(); await page.keyboard.type("f"); await page.waitForTimeout(500);
+          |                  ^
+      116 |       L.check("A2", `${p.key} F in the search does nothing`, (await pinned(page, p)) === "false" && (await find.inputValue()) === "f", `${await pinned(page, p)} · "${await find.inputValue()}"`);
+      117 |       await find.fill(""); await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      118 |       /* pinned, with the Filters panel open: Esc closes the panel only; a second Esc unpins */
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:115:18
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-7c0ec-c-closes-what-is-open-first-measure/error-context.md
+
+
+[69/75] [measure] › tests/e2e/qcV1386.measure.ts:143:3 › QC138.6 › A3 · remembered per page, restored with no transition
+  5) [measure] › tests/e2e/qcV1386.measure.ts:143:3 › QC138.6 › A3 · remembered per page, restored with no transition 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'click')
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at pressPin (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:86:51)
+        at clickPin (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:87:60)
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:160:13
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-8c4c2-restored-with-no-transition-measure/error-context.md
+
+
+[70/75] [measure] › tests/e2e/qcV1386.measure.ts:180:3 › QC138.6 › A4 · scroll: 1200, pin, unpin → 1200 ±2
+  6) [measure] › tests/e2e/qcV1386.measure.ts:180:3 › QC138.6 › A4 · scroll: 1200, pin, unpin → 1200 ±2 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'click')
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at pressPin (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:86:51)
+        at clickPin (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:87:60)
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:187:13
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-b0bc2-ll-1200-pin-unpin-→-1200-±2-measure/error-context.md
+
+
+[71/75] [measure] › tests/e2e/qcV1386.measure.ts:198:3 › QC138.6 › A5 · tooltip: 'Pin the list' + F; pinned 'Unpin' + F; no title
+  7) [measure] › tests/e2e/qcV1386.measure.ts:198:3 › QC138.6 › A5 · tooltip: 'Pin the list' + F; pinned 'Unpin' + F; no title 
+
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'childNodes')
+        at eval (eval at evaluate (:311:30), <anonymous>:7:24)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:7:24)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at read (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:204:31)
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:211:23
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-9fd18-t-F-pinned-Unpin-F-no-title-measure/error-context.md
+
+
+[72/75] [measure] › tests/e2e/qcV1386.measure.ts:224:3 › QC138.6 › B1 · sticky stack: the navy header 12 under the sheet; the headings and the band under it; nothing shows through
+  8) [measure] › tests/e2e/qcV1386.measure.ts:224:3 › QC138.6 › B1 · sticky stack: the navy header 12 under the sheet; the headings and the band under it; nothing shows through 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'getBoundingClientRect')
+        at eval (eval at evaluate (:311:30), <anonymous>:4:96)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:4:96)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:231:28
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-fa5c5-er-it-nothing-shows-through-measure/error-context.md
+
+
+[73/75] [measure] › tests/e2e/qcV1386.measure.ts:260:3 › QC138.6 › B2 · one bar: no old pinned bar on either page, scrolled or pinned
+  9) [measure] › tests/e2e/qcV1386.measure.ts:260:3 › QC138.6 › B2 · one bar: no old pinned bar on either page, scrolled or pinned 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'click')
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:86)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at pressPin (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:86:51)
+        at clickPin (/Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:87:60)
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:265:22
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-d504d-her-page-scrolled-or-pinned-measure/error-context.md
+
+
+[74/75] [measure] › tests/e2e/qcV1386.measure.ts:273:3 › QC138.6 › B3 · no jitter: stepping 1px through the stick point and back
+  10) [measure] › tests/e2e/qcV1386.measure.ts:273:3 › QC138.6 › B3 · no jitter: stepping 1px through the stick point and back 
+
+    Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+        at eval (eval at evaluate (:311:30), <anonymous>:4:52)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:311:30), <anonymous>:4:52)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:278:32
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-15c73-gh-the-stick-point-and-back-measure/error-context.md
+
+
+[75/75] [measure] › tests/e2e/qcV1386.measure.ts:306:3 › QC138.6 › C1 · letters: clicking M lands the first M row just under the sticky stack
+  11) [measure] › tests/e2e/qcV1386.measure.ts:306:3 › QC138.6 › C1 · letters: clicking M lands the first M row just under the sticky stack 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('.clv-group [data-cl19="letter"][data-l="M"]').first()
+
+
+      311 |       await open(page, p, vp, "C1");
+      312 |       /* RE-POINTED by v19 §B: the only A to Z is the list toolbar's */
+    > 313 |       await page.locator(vis(p, '[data-cl19="letter"][data-l="M"]')).first().click();
+          |                                                                              ^
+      314 |       await page.waitForTimeout(1600);
+      315 |       const r = await page.evaluate((g) => {
+      316 |         const grp = [...document.querySelectorAll<HTMLElement>(g)].find((e) => e.getBoundingClientRect().width > 0)!;
+        at /Users/nickphysick/ScriptAlly-cl24/tests/e2e/qcV1386.measure.ts:313:78
+
+    Error Context: test-results/qcV1386.measure.ts-QC138-6-0cb81-just-under-the-sticky-stack-measure/error-context.md
+
+
+  11 failed
+    [measure] › tests/e2e/hr1.measure.ts:139:3 › Header rules v1.1 › HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs 
+    [measure] › tests/e2e/hr1.measure.ts:223:3 › Header rules v1.1 › HR1-8 · untouched: the pinned layouts, the phone, the out-of-scope and report-only pages measure as on the base 
+    [measure] › tests/e2e/qcV1386.measure.ts:90:3 › QC138.6 › A1 · one hook: both pages draw PinListButton 
+    [measure] › tests/e2e/qcV1386.measure.ts:104:3 › QC138.6 › A2 · keys: F pins and unpins; not in the search; Esc closes what is open first 
+    [measure] › tests/e2e/qcV1386.measure.ts:143:3 › QC138.6 › A3 · remembered per page, restored with no transition 
+    [measure] › tests/e2e/qcV1386.measure.ts:180:3 › QC138.6 › A4 · scroll: 1200, pin, unpin → 1200 ±2 
+    [measure] › tests/e2e/qcV1386.measure.ts:198:3 › QC138.6 › A5 · tooltip: 'Pin the list' + F; pinned 'Unpin' + F; no title 
+    [measure] › tests/e2e/qcV1386.measure.ts:224:3 › QC138.6 › B1 · sticky stack: the navy header 12 under the sheet; the headings and the band under it; nothing shows through 
+    [measure] › tests/e2e/qcV1386.measure.ts:260:3 › QC138.6 › B2 · one bar: no old pinned bar on either page, scrolled or pinned 
+    [measure] › tests/e2e/qcV1386.measure.ts:273:3 › QC138.6 › B3 · no jitter: stepping 1px through the stick point and back 
+    [measure] › tests/e2e/qcV1386.measure.ts:306:3 › QC138.6 › C1 · letters: clicking M lands the first M row just under the sticky stack 
+  11 skipped
+  53 passed (30.5m)

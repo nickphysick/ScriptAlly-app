@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "PA3-1",
+  "where": "rest /dashboard @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /dashboard @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /dashboard @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /dashboard @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /dashboard @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-2",
+  "where": "/dashboard @390x844",
+  "ok": true,
+  "detail": "first task at 373px (< 420)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/dashboard @390x844",
+  "ok": true,
+  "detail": "575 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/dashboard @390x844",
+  "ok": false,
+  "detail": "found “late”"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /queries @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /queries @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /queries @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /queries @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /queries @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-2",
+  "where": "/queries @390x844",
+  "ok": true,
+  "detail": "first query row at 188px (< 300)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries @390x844",
+  "ok": true,
+  "detail": "829 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/queries @390x844",
+  "ok": false,
+  "detail": "found “late”"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /agents @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /agents @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /agents @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /agents @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /agents @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/agents @390x844",
+  "ok": true,
+  "detail": "581 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/agents @390x844",
+  "ok": false,
+  "detail": "found “late”"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "rest /you @390x844",
+  "ok": true,
+  "detail": "header 70.0px at rest"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "chrome /you @390x844",
+  "ok": true,
+  "detail": "{\"chip\":0,\"disc\":0,\"fb\":0,\"band\":0,\"tiles\":0}"
+ },
+ {
+  "lock": "PA3-1",
+  "where": "scrolled /you @390x844",
+  "ok": true,
+  "detail": "header 56.0px after 86px"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "order /you @390x844",
+  "ok": true,
+  "detail": "Today,Queries,+,Agents,You"
+ },
+ {
+  "lock": "PA3-3",
+  "where": "docked /you @390x844",
+  "ok": true,
+  "detail": "bottom 844/844 left 0 right 390/390 rgb(255, 255, 255)"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/you @390x844",
+  "ok": true,
+  "detail": "165 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/you @390x844",
+  "ok": false,
+  "detail": "found “late”"
+ },
+ {
+  "lock": "PA3-6",
+  "where": "/queries/packages @390x844",
+  "ok": true,
+  "detail": "293 elements, widest 390/390"
+ },
+ {
+  "lock": "PA3-10",
+  "where": "/queries/packages @390x844",
+  "ok": true,
+  "detail": "1552 chars swept"
+ }
+]

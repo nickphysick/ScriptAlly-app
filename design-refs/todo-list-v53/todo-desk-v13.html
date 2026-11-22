@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>To-do desk, v13</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#2a3a52;--navy2:#3d4f6b;--oat:#f2eee8;--paper:#fbf9f5;--ink:#1c130f;--ink2:#3a332d;--muted:#7a7066;--rule:#e6dfd4;--blush:#f3dfd6;--blushd:#e8c8bc;--slate:#d7e0e8;--sand:#f2ebe0;--rust:#8a4a3a;
+    --type:"Special Elite","Courier New",monospace;--serif:"Source Serif 4",Georgia,serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--oat);font-family:var(--serif);color:var(--ink)}
+  button{font-family:inherit}
+  /* the switches */
+  .ctl{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:12px 32px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .ctl b{font:400 17px var(--type);margin-right:10px}
+  .sw{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px;cursor:pointer}
+  .sw i{width:28px;height:16px;border-radius:9px;background:rgba(255,255,255,.25);position:relative;transition:.2s}
+  .sw i:after{content:"";position:absolute;left:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:.2s}
+  .sw.on{background:#fff;color:var(--navy);border-color:#fff}
+  .sw.on i{background:var(--navy)}
+  .sw.on i:after{left:14px}
+  .ctl .all{margin-left:auto}
+  .lnk{background:none;border:0;color:#fff;text-decoration:underline;font-size:14px;cursor:pointer;padding:0 6px}
+
+  .page{padding:20px 32px 40px;max-width:1660px;margin:0 auto}
+  .ph{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .ph h1{font:400 30px var(--type);margin:0 8px 0 0}
+  .pill{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;font-size:16px;background:#fff;border:1px solid var(--rule)}
+  .pill.late{background:var(--blush);border-color:transparent;color:var(--rust)}
+  .addb{margin-left:auto;height:46px;padding:0 24px;border-radius:999px;border:0;background:var(--navy);color:#fff;font-size:17px;font-weight:600}
+
+  .frame{background:var(--paper);border:1px solid var(--rule);border-radius:22px;display:grid;grid-template-columns:340px 1fr;min-height:760px;overflow:hidden}
+  /* tray, as built */
+  .tray{border-right:1px solid var(--rule);padding:18px 16px}
+  .seg{display:flex;border:1px solid var(--rule);border-radius:12px;padding:4px;background:#fff}
+  .seg span{flex:1;text-align:center;padding:8px 0;border-radius:9px;font-size:16px}
+  .seg .on{background:var(--navy);color:#fff}
+  .start{margin-top:14px;background:var(--blush);border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:center}
+  .start .q{width:46px;height:58px;border-radius:8px;background:repeating-linear-gradient(45deg,#ead2c7 0 6px,#f3dfd6 6px 12px)}
+  .start small{display:block;color:var(--rust);font-weight:600;font-size:14px}
+  .start b{font:400 18px var(--type)}
+  .gh{margin-top:14px;border-radius:10px;padding:9px 14px;font:400 17px var(--type)}
+  .gh.w{background:#6a7a93;color:#fff}.gh.q{background:linear-gradient(90deg,#e4e1db,#f6f4f0)}.gh.h{background:#e4ebf1}
+  .row{display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;font-size:16px}
+  .row.sel{border:2px solid var(--navy);background:#fff}
+  .row .d{width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);background:#fff;flex:none}
+  .row b{display:block;font-weight:600}
+  .row i{color:var(--muted)}
+  .row em{margin-left:auto;font-style:normal;color:var(--muted);font-size:14px;text-align:right}
+
+  /* the desk */
+  .desk{padding:20px;display:flex;flex-direction:column;min-width:0}
+  .dband{background:var(--navy);color:#fff;border-radius:18px 18px 0 0;padding:18px 24px;display:flex;align-items:baseline;gap:14px}
+  .dband h2{font:400 26px var(--type);margin:0}
+  .dband i{opacity:.8}
+  .dband .nav{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .dband .nav span{opacity:.8;margin-right:6px}
+  .dband .nav b{width:44px;height:44px;border:1px solid rgba(255,255,255,.35);border-radius:10px;display:grid;place-items:center;font-weight:400}
+  .dbody{flex:1;background:#fff;border:1px solid var(--rule);border-top:0;border-radius:0 0 18px 18px;display:grid;grid-template-columns:1fr 400px;min-height:0}
+  body.wide .dbody{grid-template-columns:minmax(0,1fr) minmax(380px,34%)}
+  .work{padding:28px 32px 0;display:flex;flex-direction:column;min-width:0}
+  .hawk{display:flex;gap:16px;align-items:flex-start;margin-bottom:22px}
+  .hawk .h{width:76px;height:96px;flex:none;border-radius:10px;background:repeating-linear-gradient(45deg,#ead2c7 0 6px,#f3dfd6 6px 12px);display:grid;place-items:center;font-size:12px;color:#9b7a6d}
+  .bub{background:var(--blush);border-radius:20px;padding:16px 22px;font-size:19px;line-height:1.45;max-width:760px}
+
+  /* the steps: as built (one open question) or as a rail */
+  .steps{display:flex;flex-direction:column;gap:0}
+  .st{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:16px}
+  .num{width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:16px;font-weight:600;position:relative;z-index:1}
+  .st.todo .num{background:#fff;color:var(--muted);box-shadow:inset 0 0 0 1.5px var(--rule)}
+  .st.done .num{background:var(--slate);color:var(--navy)}
+  .st .line{grid-column:1;justify-self:center;width:2px;background:var(--rule);min-height:14px}
+  .st h3{font:600 24px/1.3 var(--serif);margin:2px 0 4px}
+  .st .hint{font-style:italic;color:var(--ink2);font-size:18px;margin:0 0 16px}
+  .st .ans{font-size:17px;color:var(--ink2);margin:6px 0 16px;cursor:pointer}
+  .st .ans u{text-decoration-color:var(--rule)}
+  .st.todo h3{color:var(--muted);font-weight:400;font-size:19px;margin-top:6px}
+  body:not(.rail) .st.done,body:not(.rail) .st.todo{display:none}
+  body:not(.rail) .st .line{display:none}
+
+  .opts{display:flex;flex-direction:column;gap:12px;max-width:1000px}
+  body.tiles .opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .opt{display:flex;align-items:center;gap:16px;padding:18px 22px;border:1.5px solid var(--rule);border-radius:14px;background:#faf8f4;font-size:19px;cursor:pointer;text-align:left;width:100%}
+  .opt small{display:block;font-size:16px;color:var(--ink2);margin-top:2px}
+  .opt .ic{width:34px;height:34px;border-radius:8px;border:1px solid var(--rule);background:#fff;display:grid;place-items:center;flex:none;font-size:15px;color:var(--muted)}
+  .opt.on{border-color:var(--navy);background:#fff;box-shadow:0 0 0 1px var(--navy)}
+  .opt.on .ic{background:var(--navy);color:#fff;border-color:var(--navy)}
+  body.tiles .opt{flex-direction:column;align-items:flex-start;gap:12px;min-height:84px;padding:12px 16px}
+
+  .foot{margin-top:22px;border-top:1px solid var(--rule);padding:16px 0 18px;display:flex;align-items:center;gap:12px}
+  .gbtn{white-space:nowrap;height:48px;padding:0 18px;border:1px solid var(--rule);border-radius:999px;background:#fff;font-size:18px;display:inline-flex;align-items:center;gap:8px}
+  .gbtn kbd{font:12px monospace;border:1px solid var(--rule);border-radius:4px;padding:1px 5px;color:var(--muted)}
+  .of{white-space:nowrap;margin-left:auto;font-style:italic;color:var(--muted);font-size:19px}
+  .next{white-space:nowrap;height:58px;padding:0 34px;border:0;border-radius:999px;background:var(--navy);color:#fff;font-size:20px;font-weight:600;cursor:pointer}
+  .next:disabled{background:#b6bcc6;cursor:default}
+
+  /* what happens next */
+  .wn{display:none;margin:22px 0 0;border:1px solid var(--rule);border-radius:16px;background:var(--paper);padding:18px 22px;max-width:1000px}
+  body.what .wn{display:block}
+  .wn h4{font:400 19px var(--type);margin:0 0 6px}
+  .wn .sent{font-size:19px;line-height:1.45;margin:0 0 12px}
+  .wn .sent .gap{color:var(--muted);border-bottom:1.5px dashed #c8beb1}
+  .wn ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .wn li{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:10px 12px;font-size:16px;line-height:1.35;display:flex;gap:10px}
+  .wn li span{flex:none;width:24px;height:24px;border-radius:50%;background:var(--slate);display:grid;place-items:center;font-size:13px;color:var(--navy)}
+  .wn li.wait{color:var(--muted)}
+  .wn li.wait span{background:#eee8de;color:var(--muted)}
+
+  /* the preview */
+  .prev{border-left:1px solid var(--rule);padding:22px;background:#fdfcfa;display:flex;flex-direction:column;min-height:0}
+  .qc{border:1px solid var(--rule);border-radius:14px;background:#fff;overflow:hidden;display:flex;flex-direction:column}
+  body.wide .qc{flex:none}
+  .qch{background:var(--navy);color:#fff;display:flex;justify-content:space-between;padding:9px 16px;font:11px monospace;letter-spacing:.12em}
+  .qch b{font:400 16px var(--type);letter-spacing:0}
+  .qcb{padding:16px}
+  .ag{display:flex;align-items:center;gap:12px}
+  .ini{width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);display:grid;place-items:center;font-size:12px;color:var(--muted)}
+  .ag b{font:600 21px var(--serif);display:block}
+  .ag small{font:11px monospace;letter-spacing:.14em;color:var(--muted)}
+  .ag .st2{margin-left:auto;border:1px solid var(--rule);border-radius:999px;padding:5px 12px;font-size:15px;background:#fff}
+  .bk{margin-top:12px;background:var(--sand);border-radius:12px;padding:12px 14px}
+  .bk b{font:400 21px var(--type);display:block}
+  .bk span{font:11px monospace;letter-spacing:.1em;color:var(--muted)}
+  .tabs{display:flex;gap:22px;padding:0 16px;border-bottom:1px solid var(--rule);font-size:17px;color:var(--muted)}
+  .tabs span{padding:10px 0}
+  .tabs .on{color:var(--ink);border-bottom:2px solid var(--ink)}
+  .thr{padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:16px}
+  body.wide .thr{flex:none}
+  .m{max-width:80%;padding:10px 14px;border-radius:14px}
+  .m small{display:block;color:var(--muted);font-size:13px}
+  .me{align-self:flex-end;background:#f6f3ee}
+  .th{align-self:flex-start;background:var(--slate)}
+  .gap2{font-size:13px;color:var(--muted);font-style:italic}
+  .dr{align-self:flex-end;border:1.5px dashed #c8beb1;color:var(--muted);background:#fff}
+  .xfoot{display:none;padding:14px 16px;background:var(--blush);font-size:16px}
+  body.wide .xfoot{display:block}
+  .extra{display:none;margin-top:14px;border:1px solid var(--rule);border-radius:14px;background:#fff;padding:14px 16px;font-size:15.5px;line-height:1.45}
+  body.wide .extra{display:block}
+  .extra h5{font:400 16px var(--type);margin:0 0 6px}
+  .extra p{margin:0;color:var(--ink2)}
+
+.ctl .sep{width:1px;height:24px;background:rgba(255,255,255,.3);margin:0 4px}
+  /* fitting all four on one screen: with the rail on, the hawk tucks down once you're past the first question, and done steps are one line */
+  body.rail .hawk{margin-bottom:14px}
+  body.rail .hawk .h{width:40px;height:50px;font-size:0}
+  body.rail .bub{font-size:16px;padding:10px 16px;border-radius:14px}
+  body.rail .st.done{align-items:center}
+  body.rail .st.done > div:nth-child(2){display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding-top:4px}
+  body.rail .st.done h3{margin:0!important;font-size:17px!important;color:var(--muted);font-weight:400}
+  body.rail .st.done .ans{margin:0 0 10px}
+  body.rail .st.todo h3{font-size:17px!important;margin:6px 0 10px!important}
+  body.rail .st .line{min-height:8px}
+  /* E: keys */
+  .k{display:none;margin-left:auto;font:12px monospace;border:1px solid var(--rule);border-radius:4px;padding:1px 6px;color:var(--muted);background:#fff;align-self:flex-start}
+  body.keys .k{display:inline-block}
+  body.tiles .opt{position:relative}
+  body.tiles.keys .opt .k{position:absolute;top:12px;right:12px}
+  .next kbd{display:none;font:12px monospace;border:1px solid rgba(255,255,255,.5);border-radius:4px;padding:1px 6px;margin-left:8px;opacity:.85}
+  body.keys .next kbd{display:inline}
+  /* F: what's next */
+  .then{display:none;font-size:14px;min-width:0;flex:0 1 220px;color:var(--muted);margin-left:auto;text-align:right;line-height:1.3}
+  .then b{display:block;color:var(--ink2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.nexton .then{display:block}
+  body.nexton .of{margin-left:16px}
+  /* G: how long they've waited */
+  .row em .wt{display:none}
+  body.waited .row em .nd{display:none}
+  body.waited .row em .wt{display:inline}
+  .row em .wt{font-size:13px;line-height:1.25;white-space:nowrap}
+  .row em .wt b{font:400 16px var(--type);color:var(--ink);display:block}
+  /* fits the window */
+  body.fit{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  body.fit .page{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;padding:16px 32px 20px}
+  body.fit.lap .page{flex:none;height:700px}
+  body.fit .frame{flex:1;min-height:0;grid-template-rows:minmax(0,1fr)}
+  body.fit .tray{overflow-y:auto;min-height:0}
+  body.fit .desk{min-height:0}
+  body.fit .dbody{min-height:0;grid-template-rows:minmax(0,1fr)}
+  body.fit .work{min-height:0;padding-bottom:0;height:100%}
+  body.fit .wscroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:6px;margin-right:-6px}
+  body.fit .foot{flex:none;margin-top:0;padding-top:14px;transition:box-shadow .2s}
+  body.fit .foot.over{box-shadow:0 -10px 14px -10px rgba(28,19,15,.18)}
+  body.fit .prev{overflow-y:auto;min-height:0}
+  body.fit .prev .qc{flex:none}
+  .wscroll{display:flex;flex-direction:column}
+  .wn{margin-bottom:10px}
+  body.fit .notes{display:none}
+  body.fit.shownotes .notes{display:grid;position:fixed;left:0;right:0;top:58px;z-index:30;padding:20px 32px;background:rgba(242,238,232,.97);max-width:none;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  /* right-sized: every part of the journey at the size it needs to be, and no bigger */
+  body.trim .ph{margin-bottom:12px}
+  body.trim .ph h1{font-size:26px}
+  body.trim .pill{height:30px;font-size:15px;padding:0 12px}
+  body.trim .addb{height:40px;font-size:16px;padding:0 20px}
+  body.trim .page{padding-top:12px}
+  body.trim .desk{padding:14px}
+  body.trim .dband{padding:12px 20px;border-radius:16px 16px 0 0}
+  body.trim .dband h2{font-size:22px}
+  body.trim .dband i{font-size:15px}
+  body.trim .dband .nav b{width:34px;height:34px;border-radius:9px}
+  body.trim .work{padding:18px 24px 0}
+  body.trim .hawk{gap:12px;margin-bottom:14px}
+  body.trim .hawk .h{width:34px;height:42px;font-size:0;border-radius:8px}
+  body.trim .bub{font-size:15.5px;padding:9px 14px;border-radius:12px;line-height:1.4}
+  body.trim .st{grid-template-columns:30px minmax(0,1fr);column-gap:12px}
+  .st > div{min-width:0}
+  body.trim .num{width:28px;height:28px;font-size:14px}
+  body.trim .st h3{font-size:20px;margin:0 0 2px}
+  body.trim .st .hint{font-size:15.5px;margin:0 0 10px}
+  body.trim.rail .st.done h3,body.trim.rail .st.todo h3{font-size:15.5px!important}
+  body.trim .st .ans{font-size:15.5px}
+  body.trim .opts{gap:8px}
+  body.trim.tiles .opts{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  body.trim .opt{font-size:16.5px;padding:10px 14px;gap:10px;border-radius:12px}
+  body.trim.tiles .opt{flex-direction:row;align-items:center;min-height:56px;padding:10px 14px;gap:10px}
+  body.trim .opt small{font-size:14px;margin-top:0}
+  body.trim .opt .ic{width:26px;height:26px;border-radius:7px;font-size:12px}
+  body.trim .wn{padding:12px 16px;border-radius:14px;margin-top:14px}
+  body.trim .wn h4{font-size:15px;margin-bottom:4px}
+  body.trim .wn .sent{font-size:16px;margin-bottom:8px}
+  body.trim .wn ul{gap:6px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  body.trim .wn li{font-size:14.5px;padding:7px 10px;border-radius:10px;gap:8px}
+  body.trim .wn li span{width:20px;height:20px;font-size:11px}
+  body.trim .foot{padding:12px 0 14px;gap:10px}
+  body.trim .gbtn{height:40px;font-size:16px;padding:0 14px}
+  body.trim .of{font-size:16px}
+  body.trim .next{height:46px;font-size:17px;padding:0 26px}
+  body.trim .prev{padding:16px}
+  body.trim .qcb{padding:12px 14px}
+  body.trim .ag b{font-size:18px}
+  body.trim .ini{width:34px;height:34px}
+  body.trim .ag .st2{font-size:13.5px;padding:4px 10px}
+  body.trim .bk{padding:9px 12px;margin-top:10px}
+  body.trim .bk b{font-size:18px}
+  body.trim .tabs{font-size:15px;gap:18px}
+  body.trim .tabs span{padding:8px 0}
+  body.trim .thr{font-size:14.5px;gap:8px;padding:12px 14px}
+  body.trim .m{padding:8px 12px}
+  body.trim .xfoot{font-size:14.5px;padding:10px 14px}
+  body.trim .extra{font-size:14.5px;padding:12px 14px;margin-top:10px}
+  body.trim .extra h5{font-size:15px}
+  body.trim .tray{padding:14px 12px}
+  body.trim .seg span{font-size:15px;padding:6px 0}
+  body.trim .start{padding:10px 12px;margin-top:10px}
+  body.trim .start .q{width:36px;height:44px}
+  body.trim .gh{font-size:15.5px;padding:7px 12px;margin-top:10px}
+  body.trim .row{font-size:15px;padding:9px 8px;gap:10px}
+  body.trim .row .d{width:32px;height:32px}
+  .st.sum .wn{display:block;margin:2px 0 4px}
+  .st.sum.open .num{background:var(--blushd,#e8c8bc);color:var(--ink)}
+  .st.sum .wn ul{grid-template-columns:1fr 1fr!important}
+  /* header: what needs doing */
+  .need{display:flex;align-items:stretch;gap:8px;margin-left:8px;flex-wrap:wrap}
+  .nd{display:flex;align-items:center;gap:9px;border:0;border-radius:12px;padding:6px 14px 6px 10px;text-align:left;font-size:14.5px;line-height:1.2;color:var(--ink);cursor:pointer;transition:transform .15s}
+  .nd:hover{transform:translateY(-1px)}
+  .nd b{font:400 24px var(--type);min-width:22px;text-align:center}
+  .nd em{display:block;font-size:13px;color:var(--muted)}
+  .nd em.late{color:var(--rust)}
+  .nd.nw{background:#6a7a93;color:#fff}.nd.nw em{color:rgba(255,255,255,.8)}
+  .nd.nn{background:var(--slate)}
+  .nd.nq{background:linear-gradient(90deg,#e4e1db,#f6f4f0)}
+  .nd.nh{background:#e4ebf1}
+  .ndone{align-self:center;margin-left:6px;font-size:14.5px;color:var(--muted)}
+  .ndone b{font:400 18px var(--type);color:var(--ink)}
+  body.trim .ph{align-items:center}
+  /* the summary step */
+  .sumx{display:grid;grid-template-columns:72px 1fr;gap:16px;align-items:start;margin-top:2px}
+  .sumx .ill{width:72px;height:72px;border-radius:14px;background:repeating-linear-gradient(45deg,#ead2c7 0 6px,#f3dfd6 6px 12px);display:grid;place-items:center;font-size:11px;color:#9b7a6d;text-align:center;line-height:1.2}
+  .sumx .lead{font-size:17px;line-height:1.45;margin:2px 0 14px}
+  .tl{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0 0 10px}
+  .tl:before{content:"";position:absolute;left:10px;right:10px;top:53px;height:2px;background:repeating-linear-gradient(90deg,#cfc6b8 0 6px,transparent 6px 11px)}
+  .tl .pt{position:relative;padding-right:14px}
+  .tl .dot{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #cfc6b8;position:relative;z-index:1;margin-bottom:8px}
+  .tl{margin-top:4px}
+  .tl .pt.now .dot{background:var(--navy);border-color:var(--navy)}
+  .tl .pt.now .dot:after{content:"";position:absolute;inset:5px;border-radius:50%;background:#fff}
+  .tl .when{font:400 15px var(--type);color:var(--ink)}
+  .tl .what{font-size:14.5px;line-height:1.35;color:var(--ink2);margin-top:2px}
+  .tl .pt .ph3{margin:0 0 9px;width:46px;height:34px;border-radius:8px;background:repeating-linear-gradient(45deg,#e7e2d9 0 5px,#f3efe8 5px 10px);display:grid;place-items:center;font-size:9px;color:var(--muted)}
+  .after{font-size:14px;color:var(--muted);font-style:italic}
+  /* the card's future state */
+  .flabel{display:none;margin:0 0 8px;font-size:14px;font-style:italic;color:var(--muted)}
+  .fline{display:none;align-self:center;font-size:13.5px;color:var(--muted);font-style:italic;padding:2px 0}
+  body.future .flabel{display:block}
+  body.future .qc{box-shadow:0 0 0 2px var(--navy),0 10px 26px rgba(42,58,82,.12)}
+  body.future .fline{display:block}
+  body.future #draft{border:1.5px solid transparent;background:#f6f3ee;color:var(--ink)}
+  body.future #xfoot{background:var(--sand)}
+  /* the rail: one continuous line from step to step */
+  body.rail .st{position:relative}
+  body.rail .st .line{display:none}
+  body.rail .st:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:-2px;width:2px;background:var(--rule);z-index:0}
+  body.rail:not(.trim) .st:not(:last-child)::before{left:17px;top:36px}
+  body.rail .st.done{padding-bottom:6px}
+  /* the thread, tidied: one bubble size, WhatsApp time stamps */
+  .thr{gap:6px!important;padding:14px 14px 16px!important}
+  .day{align-self:center;font-size:12px;color:var(--muted);background:#f3efe8;border-radius:8px;padding:3px 10px;margin:4px 0 2px}
+  .m{position:relative;max-width:86%;padding:7px 10px 7px 12px!important;border-radius:14px;font-size:15px;line-height:1.35}
+  .me{border-bottom-right-radius:4px}
+  .th{border-bottom-left-radius:4px}
+  .me + .th,.th + .me,.th + .dr,.me + .dr{margin-top:6px}
+  /* the spacer holds room on the last line; the stamp sits on top of it in the corner */
+  .m .sp{display:inline-block;visibility:hidden;font-size:11.5px;padding-left:10px;line-height:1;white-space:nowrap}
+  .m .ts{position:absolute;right:10px;bottom:6px;font-size:11.5px;line-height:1;color:var(--muted);white-space:nowrap}
+  .m .via{font-style:normal;font-size:11px;margin-left:2px}
+  .th .ts{color:#5d6b7c}
+  .fline{margin-top:4px}
+  /* typing dots while you answer */
+  .dr{border:0!important;background:#f6f3ee!important;padding:10px 14px!important;color:var(--ink)}
+  .dots{display:inline-flex;gap:4px;vertical-align:middle}
+  .dots i{width:7px;height:7px;border-radius:50%;background:#a59a8c;animation:bob 1.2s infinite ease-in-out}
+  .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+  @keyframes bob{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+  body.future #draft{padding:7px 10px 7px 12px!important;border-bottom-right-radius:4px}
+  /* the last step: room under its heading */
+  .st.sum.open h3{margin-bottom:14px!important}
+  /* the message being reviewed: a soft pulsing ring and a small label, until Log it */
+  body.future #draft{animation:review 1.8s ease-in-out infinite;box-shadow:0 0 0 2px rgba(42,58,82,.35)}
+  @keyframes review{0%,100%{box-shadow:0 0 0 2px rgba(42,58,82,.35)}50%{box-shadow:0 0 0 6px rgba(42,58,82,.08)}}
+  body.future #draft::before{content:"Checking";position:absolute;left:-2px;top:-9px;transform:translateX(-100%);font-size:11.5px;font-style:italic;color:var(--navy);white-space:nowrap;padding-right:8px;top:50%;margin-top:-7px}
+  @media (prefers-reduced-motion:reduce){body.future #draft{animation:none;box-shadow:0 0 0 2px rgba(42,58,82,.45)}}
+  /* the page header */
+  .ph{display:block!important;margin-bottom:14px!important}
+  .hx{display:flex;align-items:center;gap:20px;min-height:96px}
+  .hart{flex:none;width:92px;height:92px;border-radius:16px;background:repeating-linear-gradient(45deg,#ead2c7 0 7px,#f3dfd6 7px 14px);display:grid;place-items:center;text-align:center;font-size:11.5px;line-height:1.25;color:#9b7a6d}
+  .htxt{flex:none}
+  .htxt h1{font:400 32px/1.15 var(--type)!important;margin:0 0 6px!important}
+  .hsub{margin:0;font-size:16px;color:var(--ink2)}
+  .hsub b{font:400 17px var(--type);color:var(--ink)}
+  .hright{display:none;margin-left:auto}
+  .addb{flex:none}
+  body.ha .hr-a,body.hb .hr-b,body.hc .hr-c,body.hd .hr-d{display:flex}
+  /* A */
+  .hr-a{align-items:center;gap:20px}
+  .ring{width:92px;height:92px;border-radius:50%;background:conic-gradient(#6a7a93 0 40%,#c9d5e0 0 60%,#ddd8cf 0 100%);display:grid;place-items:center;position:relative}
+  .ring:after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--oat) 0 .6%,transparent .6% 39.4%,var(--oat) 39.4% 40.6%,transparent 40.6% 59.4%,var(--oat) 59.4% 60.6%,transparent 60.6% 99.4%,var(--oat) 99.4%)}
+  .hole{width:60px;height:60px;border-radius:50%;background:var(--oat);display:grid;place-items:center;align-content:center;z-index:1;text-align:center}
+  .hole b{font:400 24px/1 var(--type)}
+  .hole span{font-size:11.5px;color:var(--muted)}
+  .leg{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:15px}
+  .leg li{display:flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap}
+  .leg li:hover{text-decoration:underline;text-decoration-color:var(--rule)}
+  .leg i{width:11px;height:11px;border-radius:3px;flex:none}
+  .leg b{font:400 17px var(--type);min-width:22px}
+  .leg em{font-size:13px;color:var(--rust)}
+  .leg .tidy{color:var(--muted)}
+  .leg .tidy i{background:transparent;box-shadow:inset 0 0 0 1.5px #cfc6b8}
+  /* B */
+  .hr-b{flex-direction:column;gap:5px;min-width:420px}
+  .job{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--rule);border-radius:10px;padding:6px 12px;font-size:15px;text-align:left;cursor:pointer}
+  .job:hover{border-color:#cfc6b8}
+  .job .sw2{width:4px;align-self:stretch;border-radius:2px}
+  .job b{font:400 17px var(--type);min-width:20px}
+  .job em{margin-left:auto;font-size:13.5px;color:var(--muted)}
+  .job em.late{color:var(--rust)}
+  .job i{font-style:normal;color:var(--muted)}
+  /* C */
+  .hr-c{flex-direction:column;max-width:560px}
+  .say{margin:0;font-size:19px;line-height:1.45}
+  .say a,.say2 a{cursor:pointer;text-decoration:underline;text-decoration-color:#d9cfc1;text-underline-offset:4px}
+  .say a:hover,.say2 a:hover{text-decoration-color:var(--ink)}
+  .say2{margin:4px 0 0;font-size:15px;color:var(--muted)}
+  .hopt{height:34px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px;cursor:pointer}
+  .hopt.on{background:#fff;color:var(--navy)}
+  /* thin header */
+  .thin{display:flex;align-items:baseline;gap:14px;padding:2px 0 0}
+  .thin h1{font:400 26px/1.2 var(--type)!important;margin:0!important}
+  .tsub{font-size:16px;color:var(--muted)}
+  .thin .addb{margin-left:auto;align-self:center;height:38px!important;font-size:15px!important}
+  .ph{margin-bottom:12px!important}
+  /* breakdown on the list */
+  .bk1,.bk2,.bk3{display:none}
+  body.t1 .bk1{display:flex}body.t2 .bk2{display:block}body.t3 .bk3{display:block}
+  .bk1{flex-wrap:nowrap;gap:5px;justify-content:space-between;margin:10px 0 4px}
+  .fc{flex:1 1 0;min-width:0;justify-content:center;display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 4px;border-radius:999px;border:1px solid var(--rule);background:#fff;font-size:13px;white-space:nowrap;color:var(--ink2);cursor:pointer}
+  .fc b{font:400 14px var(--type);color:var(--ink)}
+  .fc i{flex:none}
+  .fc i{width:8px;height:8px;border-radius:50%}
+  .fc i.o,.bk3 i.o{background:transparent;box-shadow:inset 0 0 0 1.5px #b9b1a5}
+  .fc.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .fc.on b{color:#fff}
+  .bk2{margin:12px 2px 6px}
+  .bar{display:flex;gap:3px;height:10px;border-radius:5px;overflow:hidden}
+  .bar span{cursor:pointer}
+  .bar span:hover{filter:brightness(.92)}
+  .bk2 p{margin:7px 0 0;font-size:14.5px;color:var(--ink2)}
+  .bk2 p b{font:400 16px var(--type);color:var(--ink)}
+  .bk2 .late{color:var(--rust)}
+  .bk2 a{cursor:pointer;color:var(--muted);text-decoration:underline;text-decoration-color:var(--rule)}
+  .bk3{margin:10px 0 2px;border:1px solid var(--rule);border-radius:12px;background:#fff;padding:4px}
+  .bk3 a{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:8px;font-size:14.5px;cursor:pointer}
+  .bk3 a:hover{background:var(--paper)}
+  .bk3 i{width:9px;height:9px;border-radius:3px;flex:none}
+  .bk3 b{margin-left:auto;font:400 16px var(--type)}
+  .bk3 .late{font-size:12.5px;color:var(--rust);margin-left:6px}
+  /* the manuscript as one row; its height goes to the thread */
+  .bk1r{display:flex;align-items:baseline;gap:8px;margin-top:10px;background:var(--sand);border-radius:10px;padding:7px 12px;white-space:nowrap;overflow:hidden}
+  .bk1r span{font-size:14px;color:var(--muted);flex:none}
+  .bk1r b{font:400 16px var(--type);overflow:hidden;text-overflow:ellipsis}
+  /* the query card in the framed-slip format: a 7px white rim, radius 20, the soft lift; a 1px inner line, radius 14 */
+  .qc{padding:7px!important;border:0!important;border-radius:20px!important;background:#fff!important;box-shadow:0 1px 2px rgba(28,19,15,.08),0 22px 40px -22px rgba(28,19,15,.32)!important;overflow:visible!important}
+  .qcin{border:1px solid #e3d5c9;border-radius:14px;overflow:hidden;background:#fff}
+  body.future .qc{box-shadow:0 0 0 2px var(--navy),0 22px 40px -22px rgba(28,19,15,.32)!important}
+  .tg{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:13.5px;cursor:pointer}
+  .tg i{width:24px;height:14px;border-radius:8px;background:rgba(255,255,255,.25);position:relative}
+  .tg i:after{content:"";position:absolute;left:2px;top:2px;width:10px;height:10px;border-radius:50%;background:#fff;transition:.2s}
+  .tg.on{background:#fff;color:var(--navy)}.tg.on i{background:var(--navy)}.tg.on i:after{left:12px}
+  /* 1 glyphs */
+  .row .d .gl{display:none;width:20px;height:20px}
+  .row .d .gl svg{width:100%;height:100%}
+  body.g1 .row .d .gl{display:block}
+  body.g1 .row .d{display:grid;place-items:center}
+  /* 2 Query Centre colours: rose when something came in, sand when it went out, stone gone quiet */
+  body.g2 .gh.w{background:#ecd5cd!important;color:var(--ink)!important}
+  body.g2 #g-n{background:#f2ebe0!important}
+  body.g2 .gh.q{background:linear-gradient(90deg,#e4e1db,#f6f4f0)!important}
+  body.g2 .bar span:nth-child(1){background:#d9b3a7!important}
+  body.g2 .bar span:nth-child(2){background:#e6d7bf!important}
+  /* 3 their policy */
+  .pol{display:none;margin-top:10px;border:1px solid #e3d5c9;border-radius:14px;background:#fff;overflow:hidden}
+  body.g3 .pol{display:block} body.g3 .x0{display:none!important}
+  .polh{font:400 15px var(--type);padding:9px 14px;border-bottom:1px solid var(--rule)}
+  .polg{display:grid;grid-template-columns:1fr 1fr}
+  .polg div{padding:8px 14px;border-bottom:1px solid var(--rule)}
+  .polg div:nth-child(odd){border-right:1px solid var(--rule)}
+  .polg span{display:block;font-size:12.5px;color:var(--muted)}
+  .polg b{font-size:15px;font-weight:600}
+  .polsrc{margin:0;padding:7px 14px;font-size:12.5px;color:var(--muted);font-style:italic}
+  /* 4 paperclip */
+  .clip{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:1px 7px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--rule);font-size:12.5px;position:relative;cursor:default;vertical-align:1px}
+  .clip .pop{display:none;position:absolute;right:0;bottom:calc(100% + 6px);background:var(--navy);color:#fff;border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.5;white-space:nowrap;z-index:5;text-align:left}
+  .clip:hover .pop{display:block}
+  /* 5 no hawk on the check step */
+  body.g5.future .hawk{display:none}
+  /* 6 wording */
+  .w6b{display:none}.w6b b{font:400 15px var(--type);color:var(--ink);display:block}
+  body.g6 .w6a{display:none} body.g6 .w6b{display:inline}
+  /* 7 housekeeping folded */
+  #g-h{display:flex;align-items:center;gap:8px;cursor:pointer}
+  .qf7,.cv7{display:none}
+  body.g7 .qf7{display:inline-block;margin-left:auto;font:400 13px var(--serif);background:#fff;border-radius:999px;padding:3px 10px;border:1px solid var(--rule)}
+  body.g7 .cv7{display:inline-block;font-size:12px;color:var(--muted)}
+  body.g7 .hk7{display:none}
+  body.g7.hkopen .hk7{display:block}
+  body.g7.hkopen .cv7{transform:rotate(90deg)}
+  .notes{max-width:1660px;margin:0 auto 40px;padding:0 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px}
+  .note{background:#fff;border:1px solid var(--rule);border-radius:16px;padding:16px 18px;font-size:16px;line-height:1.5}
+  .note h3{font:400 18px var(--type);margin:0 0 6px}
+  .note p{margin:0;color:var(--ink2)}
+  .rec{border:2px solid var(--navy)}
+</style>
+</head>
+<body class="tiles what rail wide waited fit trim t2 g1 g2 g4 g5 g6 g7">
+<div class="ctl">
+  <b>Improvements</b>
+  <button class="tg on" data-g="g1"><i></i>1 · Glyphs</button>
+  <button class="tg on" data-g="g2"><i></i>2 · QC colours</button>
+  <button class="tg" data-g="g3"><i></i>3 · Their policy</button>
+  <button class="tg on" data-g="g4"><i></i>4 · Paperclip</button>
+  <button class="tg on" data-g="g5"><i></i>5 · No hawk on check</button>
+  <button class="tg on" data-g="g6"><i></i>6 · "days quiet"</button>
+  <button class="tg on" data-g="g7"><i></i>7 · Tidy folded</button>
+  <span class="all"><button class="lnk" onclick="tgAll(1)">All on</button><button class="lnk" onclick="tgAll(0)">All off</button><button class="lnk" onclick="document.body.classList.toggle('shownotes')">Notes</button></span>
+</div>
+
+<div class="page">
+  <div class="ph"><div class="thin">
+    <h1>Your to-do list</h1><span class="tsub">Murphy's Day Out</span>
+    <button class="addb">+ Add a task</button>
+  </div></div>
+  <div class="frame">
+    <aside class="tray">
+      <div class="seg"><span class="on">To do 38</span><span>Snoozed 0</span><span>Done 1</span></div>
+      <!-- 1: filter chips -->
+      <div class="bk1">
+                <button class="fc" onclick="jump('w')"><i style="background:#6a7a93"></i>Waiting <b>2</b></button>
+        <button class="fc" onclick="jump('n')"><i style="background:#c9d5e0"></i>Nudges <b>1</b></button>
+        <button class="fc" onclick="jump('q')"><i style="background:#ddd8cf"></i>Quiet <b>2</b></button>
+        <button class="fc" onclick="jump('h')"><i class="o"></i>Tidy <b>31</b></button>
+      </div>
+      <!-- 2: one bar -->
+      <div class="bk2">
+        <div class="bar"><span style="flex:2;background:#6a7a93" onclick="jump('w')" title="2 agents waiting"></span><span style="flex:1;background:#c9d5e0" onclick="jump('n')" title="1 nudge due"></span><span style="flex:2;background:#ddd8cf" onclick="jump('q')" title="2 gone quiet"></span></div>
+        <p><b>5</b> need you · <span class="late">3 late</span> · <a onclick="jump('h')">31 to tidy</a></p>
+      </div>
+      <!-- 3: contents -->
+      <div class="bk3">
+        <a onclick="jump('w')"><i style="background:#6a7a93"></i>Agents are waiting<b>2</b></a>
+        <a onclick="jump('n')"><i style="background:#c9d5e0"></i>Nudges<span class="late">1 late</span><b>1</b></a>
+        <a onclick="jump('q')"><i style="background:#ddd8cf"></i>Gone quiet<b>2</b></a>
+        <a onclick="jump('h')"><i class="o"></i>Housekeeping<b>31</b></a>
+      </div>
+      <div class="gh w" id="g-w">Agents are waiting 2</div>
+      <div class="row sel"><span class="d"><span class="gl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1f2633" stroke-width="1.8" stroke-dasharray="3 2.2"/><circle cx="12" cy="12" r="4.2" fill="#1f2633"/></svg></span></span><span><b>Send Jonathan your full</b><i>The Marsh Agency</i></span><em><span class="nd">No date</span><span class="wt"><b>951 days</b>waiting</span></em></div>
+      <div class="row"><span class="d"><span class="gl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#1f2633" stroke-width="1.8" stroke-dasharray="3 2.2"/><path d="M12 7.8a4.2 4.2 0 010 8.4z" fill="#1f2633"/></svg></span></span><span><b>Send Daniel your partial</b><i>Inkwell &amp; Stone</i></span><em><span class="nd">No date</span><span class="wt"><b>944 days</b>waiting</span></em></div>
+      <div class="gh n" id="g-n" style="background:var(--slate)">Nudges 1</div>
+      <div class="row"><span class="d"><span class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="#1f2633" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v5M12 16v.5"/></svg></span></span><span><b>Nudge Eleanor</b><i>Greenfield Literary</i></span><em style="color:var(--rust)"><b style="font:400 16px var(--type);color:var(--rust)">78</b> days late</em></div>
+      <div class="gh q" id="g-q">Gone quiet 2</div>
+      <div class="row"><span class="d"><span class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="#9a9086" stroke-width="1.8"><circle cx="12" cy="12" r="8" stroke-dasharray="1.5 2.6"/></svg></span></span><span><b>Eleanor's gone quiet</b><i>Greenfield Literary</i></span><em><span class="w6a">969<br>days in</span><span class="w6b"><b>969 days</b>quiet</span></em></div>
+      <div class="row"><span class="d"><span class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="#9a9086" stroke-width="1.8"><circle cx="12" cy="12" r="8" stroke-dasharray="1.5 2.6"/></svg></span></span><span><b>Aisha's gone quiet</b><i>The Lantern Agency</i></span><em><span class="w6a">949<br>days in</span><span class="w6b"><b>949 days</b>quiet</span></em></div>
+      <div class="gh h" id="g-h"><span>Housekeeping 31</span><span class="qf7">Quick fill</span><span class="cv7">▸</span></div>
+      <div class="hk7">
+      <div class="row"><span class="d"><span class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="#7a7066" stroke-width="1.6"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 9h6M9 13h6"/></svg></span></span><span><b>Fill in what you sent</b><i>12 queries</i></span><em>Quick fill</em></div>
+      <div class="row"><span class="d"><span class="gl"><svg viewBox="0 0 24 24" fill="none" stroke="#7a7066" stroke-width="1.6"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 9h6M9 13h6"/></svg></span></span><span><b>What does Aisha want sent?</b><i>The Lantern Agency</i></span><em>Quick fill</em></div>
+      </div>
+    </aside>
+
+    <section class="desk">
+      <div class="dband"><h2>Send Jonathan your full</h2><i>Jonathan Marsh · The Marsh Agency</i><div class="nav"><span>1/38</span><b>‹</b><b>›</b></div></div>
+      <div class="dbody">
+        <div class="work">
+          <div class="wscroll" id="wscroll">
+          <div class="hawk"><div class="h">hawk</div><div class="bub">Jonathan asked for your full manuscript. Once you've sent it, log it here and I'll work out when Jonathan's reply is due.</div></div>
+          <div class="steps" id="steps"></div>
+          <div id="wn" hidden></div>
+          </div>
+          <div class="foot" id="foot">
+            <button class="gbtn">↻ Snooze <kbd>S</kbd></button>
+            <button class="gbtn">⊘ Dismiss <kbd>D</kbd></button>
+                        <span class="of" id="of">1 of 4</span>
+            <button class="gbtn back" id="back">← Back</button>
+            <button class="next" id="next">Next →</button>
+          </div>
+        </div>
+        <aside class="prev">
+          <p class="flabel" id="flabel">How Jonathan's card will look once you log it</p>
+          <div class="qc" id="qc"><div class="qcin">
+            <div class="qch"><span id="qchT">MATERIALS REQUESTED</span><b id="qday">Day 951</b></div>
+            <div class="qcb">
+              <div class="ag"><span class="ini">JM</span><span><b>Jonathan Marsh</b><small>THE MARSH AGENCY</small></span><span class="st2" id="st2">◉ Full requested</span></div>
+              <div class="bk1r"><span>Querying</span><b>Murphy's Day Out</b></div>
+            </div>
+            <div class="tabs"><span class="on">Tracking</span><span>Agent</span><span>Materials</span><span>Notes</span></div>
+            <div class="thr">
+              <div class="day">2 April 2024</div>
+              <div class="m me">You sent Jonathan your query<span class="sp">2 Apr <i class="via">✉</i></span><span class="ts">2 Apr <i class="via">✉</i></span></div>
+              <div class="m th">Jonathan asked for your full manuscript<span class="sp">2 Apr</span><span class="ts">2 Apr</span></div>
+              <div class="day" id="today" hidden>Today</div>
+              <div class="m dr" id="draft"></div>
+              <div class="fline" id="fline">Waiting for Jonathan · reply expected by 31 Jan</div>
+            </div>
+            <div class="xfoot" id="xfoot"><b>Your move.</b> Jonathan's waiting on your full.</div></div>
+          </div>
+          <div class="extra x0"><h5>Jonathan Marsh</h5><p>Usually replies to a full in about 8 weeks. You've sent Jonathan 1 query, and this is the first request.</p></div>
+          <div class="pol"><div class="polh">Their policy</div><div class="polg"><div><span>Fulls</span><b>8 weeks</b></div><div><span>Queries</span><b>6 weeks</b></div><div><span>No reply means</span><b>No</b></div><div><span>Nudges</span><b>Welcome</b></div></div><p class="polsrc">From Jonathan's contact card</p></div>
+        </aside>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="notes" id="notes">
+  <div class="note"><h3>1 · Glyphs</h3><p>The tray's blank tick circles become each query's status glyph (full, partial, nudge, gone quiet), as on the phone and the Query Centre slips. Housekeeping rows get a small form icon.</p></div>
+  <div class="note"><h3>2 · Query Centre colours</h3><p>Group headers and the bar use the slip colours you settled: rose for "came in" (agents waiting), sand for "went out" (nudges), stone for gone quiet.</p></div>
+  <div class="note"><h3>3 · Their policy</h3><p>The note under the card becomes the slip's "Their policy" box: reply times for queries and fulls, what no reply means, and whether nudges are welcome, taken from the agent's contact card.</p></div>
+  <div class="note"><h3>4 · Paperclip</h3><p>On the check step, when more than one thing went, the new bubble reads "You sent Jonathan your materials" with a paperclip count. Hover it to see the list. Tick two or three things on step 1 to see it.</p></div>
+  <div class="note"><h3>5 · No hawk on the check step</h3><p>On "Check it, then log it" the hawk's bubble hides, since the summary sentence says the same thing.</p></div>
+  <div class="note"><h3>6 · "days quiet"</h3><p>Gone quiet rows read "969 days quiet" to match "951 days waiting".</p></div>
+  <div class="note"><h3>7 · Tidy folded</h3><p>Housekeeping starts closed: just its header, the count and Quick fill. Click the header to open it.</p></div>
+</div>
+
+<script>
+const Q=[
+  {t:"What went with it?",h:"Tick everything you sent.",multi:1,o:[["Query letter",""],["Synopsis",""],["Full manuscript","What Jonathan asked for"]],ic:"▤"},
+  {t:"Which version?",h:"So you can see later which draft he read.",o:[["Draft 4","Your current version"],["Draft 3","Sent to 6 agents"]],ic:"◫"},
+  {t:"When did it go?",h:"Pick a day.",o:[["Today","Sun 8 Nov"],["Yesterday","Sat 7 Nov"],["Older","Pick from the month"]],ic:"▦"}
+];
+let s=0;const A=[[],[],[]];const LAST=Q.length; /* the summary is the step after the last question */
+const words=k=>A[k].map(n=>Q[k].o[n][0]);
+const list=a=>a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+const summaryOn=()=>document.body.classList.contains("what");
+function render(){
+  const steps=summaryOn()?LAST+1:LAST;
+  if(s>=steps)s=steps-1;
+  let h="";
+  for(let k=0;k<steps;k++){
+    const q=Q[k],isSum=k===LAST;
+    const cls=k<s?"done":k===s?"open":"todo";
+    h+=`<div class="st ${cls}${isSum?" sum":""}"><div class="num">${k<s?"✓":k+1}</div><div>`;
+    if(isSum){
+      if(k===s){
+        const what=list(words(0).map(w=>w.toLowerCase())),ver=words(1)[0],day=words(2)[0].toLowerCase();
+        h+=`<h3>Check it, then log it</h3>
+        <div class="sumx"><div class="ill">courier<br>hawk</div><div>
+          <p class="lead">You sent Jonathan your <b>${what}</b> (${ver}) <b>${day}</b>.</p>
+          <div class="tl">
+            <div class="pt now"><div class="ph3">stamp</div><div class="dot"></div><div class="when">${day[0].toUpperCase()+day.slice(1)}</div><div class="what">Your query moves to <b>Full sent</b></div></div>
+            <div class="pt"><div class="ph3">letter</div><div class="dot"></div><div class="when">31 Jan</div><div class="what">Jonathan's reply is expected</div></div>
+            <div class="pt"><div class="ph3">nudge</div><div class="dot"></div><div class="when">14 Feb</div><div class="what">If nothing's come, “Nudge Jonathan” comes onto your list</div></div>
+          </div>
+          <p class="after">This task leaves your list. The card on the right shows how it'll look.</p>
+        </div></div>`;
+      } else h+=`<h3>Check it, then log it</h3>`;
+    }
+    else if(k===s){h+=`<h3>${q.t}</h3><p class="hint">${q.h}</p><div class="opts">`+q.o.map((o,n)=>`<button class="opt${A[k].includes(n)?" on":""}" onclick="pick(${n})"><span class="ic">${A[k].includes(n)?"✓":q.ic}</span><span>${o[0]}${o[1]?`<small>${o[1]}</small>`:""}</span><span class="k">${n+1}</span></button>`).join("")+`</div>`}
+    else if(k<s){h+=`<h3 style="font-size:19px;margin-top:6px">${q.t}</h3><p class="ans" onclick="go(${k})">${list(words(k))} · <u>change</u></p>`}
+    else{h+=`<h3>${q.t}</h3>`}
+    h+=`</div>${k<steps-1?'<div class="line"></div><div></div>':""}</div>`;
+  }
+  document.getElementById("steps").innerHTML=h;
+  document.getElementById("wn").innerHTML="";
+  const what=list(words(0).map(w=>w.toLowerCase()))||null, day=words(2)[0]||null;
+  document.getElementById("draft").innerHTML='<span class="dots" aria-label="Being logged"><i></i><i></i><i></i></span>';
+  document.getElementById("of").textContent=(s+1)+" of "+steps;
+  const atEnd=s===steps-1, onQ=s<LAST;
+  const nb=document.getElementById("next");
+  nb.disabled=onQ&&!A[s].length;
+  nb.innerHTML=atEnd&&(!onQ||A[s].length)?(onQ?"Log it":"Log it"):"Next →";
+  if(!onQ)nb.innerHTML="Log it";else if(s<steps-1)nb.innerHTML="Next →";else nb.innerHTML="Log it";
+  document.getElementById("back").style.visibility=s>0?"visible":"hidden";
+  const fut=summaryOn()&&s===LAST;document.body.classList.toggle("future",fut);
+  document.getElementById("qchT").textContent=fut?"FULL SENT":"MATERIALS REQUESTED";
+  document.getElementById("qday").textContent=fut?"Day 1":"Day 951";
+  document.getElementById("st2").textContent=fut?"◉ Full sent":"◉ Full requested";
+  document.getElementById("xfoot").innerHTML=fut?"<b>With Jonathan.</b> Nothing for you to do until 31 Jan.":"<b>Your move.</b> Jonathan's waiting on your full.";
+  document.getElementById("today").hidden=!fut;document.getElementById("today").textContent=day==="Yesterday"?"Yesterday":"Today";
+  if(fut){const d=(day==="Yesterday"?"7 Nov":"8 Nov")+' <i class="via">✉</i>';const items=words(0);const clipOn=document.body.classList.contains("g4")&&items.length>1;
+    const body=clipOn?'You sent Jonathan your materials<span class="clip">📎 '+items.length+'<span class="pop">'+items.join("<br>")+'<br>Draft 4</span></span>':"You sent Jonathan your "+what+" (Draft 4)";
+    document.getElementById("draft").innerHTML=body+'<span class="sp">'+d+'</span><span class="ts">'+d+'</span>'}
+}
+function pick(n){const q=Q[s];A[s]=q.multi?(A[s].includes(n)?A[s].filter(x=>x!==n):[...A[s],n]):[n];render()}
+function go(k){s=k;render()}
+document.getElementById("next").onclick=()=>{const steps=summaryOn()?LAST+1:LAST;if(s<steps-1){s++;render()}else{const b=document.getElementById("next");b.textContent="Logged ✓";b.disabled=true}};
+document.querySelectorAll(".sw").forEach(b=>b.onclick=()=>{b.classList.toggle("on");document.body.classList.toggle(b.dataset.c,b.classList.contains("on"));render()});
+document.getElementById("back").onclick=()=>{if(s>0){s--;render()}};
+function setAll(on){document.querySelectorAll(".sw").forEach(b=>{const v=!!on;b.classList.toggle("on",v);document.body.classList.toggle(b.dataset.c,v)})}
+function jump(g){const el=document.getElementById('g-'+g);if(!el)return;const t=el.closest('.tray');t.scrollTo({top:el.offsetTop-t.offsetTop-12,behavior:'smooth'});el.animate([{boxShadow:'0 0 0 3px #2a3a52'},{boxShadow:'0 0 0 0 transparent'}],{duration:900})}
+document.querySelectorAll('.fc').forEach(b=>b.addEventListener('click',()=>{const was=b.classList.contains('on');document.querySelectorAll('.fc').forEach(x=>x.classList.remove('on'));if(!was)b.classList.add('on')}));
+document.querySelectorAll('.hopt').forEach(b=>b.onclick=()=>{document.querySelectorAll('.hopt').forEach(x=>{x.classList.remove('on');document.body.classList.remove(x.dataset.h)});b.classList.add('on');document.body.classList.add(b.dataset.h)});
+document.querySelectorAll('.tg').forEach(b=>b.onclick=()=>{b.classList.toggle('on');document.body.classList.toggle(b.dataset.g,b.classList.contains('on'));render()});
+function tgAll(on){document.querySelectorAll('.tg').forEach(b=>{b.classList.toggle('on',!!on);document.body.classList.toggle(b.dataset.g,!!on)});render()}
+document.getElementById('g-h').addEventListener('click',()=>document.body.classList.toggle('hkopen'));
+render();
+function over(){const w=document.getElementById('wscroll'),f=document.getElementById('foot');f.classList.toggle('over',w.scrollHeight>w.clientHeight+2&&w.scrollTop+w.clientHeight<w.scrollHeight-2)}
+document.getElementById('wscroll').addEventListener('scroll',over);window.addEventListener('resize',over);
+new MutationObserver(over).observe(document.body,{subtree:true,childList:true,attributes:true});setTimeout(over,300);
+</script>
+</body>
+</html>

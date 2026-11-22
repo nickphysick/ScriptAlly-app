@@ -1,0 +1,27 @@
+[
+ {
+  "name": "the stored query is restored, byte for byte",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the restore's read and its commit were seen",
+  "ok": true,
+  "got": "[{\"t\":45,\"kind\":\"read\"},{\"t\":84,\"kind\":\"read\"},{\"t\":124,\"kind\":\"read\"},{\"t\":134,\"kind\":\"read\"},{\"t\":468,\"kind\":\"commit\"}]"
+ },
+ {
+  "name": "population: the press was timed by the page",
+  "ok": true,
+  "got": "1795310129994"
+ },
+ {
+  "name": "the restore starts at the press (its read goes out within 100ms)",
+  "ok": true,
+  "got": "{\"t\":45,\"kind\":\"read\"}"
+ },
+ {
+  "name": "the undo's commit is not held for a motion: it goes out before the fold has run (420ms)",
+  "ok": true,
+  "got": "{\"commit\":{\"t\":468,\"kind\":\"commit\"},\"foldFromPress\":708}"
+ }
+]

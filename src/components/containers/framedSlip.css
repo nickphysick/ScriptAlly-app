@@ -1,0 +1,28 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE FRAMED SLIP — the dashboard's rim-and-frame card (`.os-card` / `.os-frame`) at the Query Centre v153 values,
+ * lifted into a shared class so the Query Centre's slips, its filter rail and its Birds-eye card can wear it without
+ * reading the Dashboard's sheet. A 7px white rim, radius 20, the soft lift; inside it a 1px #e3d5c9 line, radius 14,
+ * that clips. The Dashboard's own CSS is untouched and does not read this.
+ *
+ * ⚠️ NOT `FramedCard` (framedCard.css): that copy is the v33 dashboard grammar (6px rim, burgundy line), still read by
+ *    other pages. Two shapes, two classes.
+ */
+.sa-slip {
+  box-sizing: border-box;
+  padding: 7px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
+  min-width: 0;
+}
+.sa-slip-in {
+  box-sizing: border-box;
+  border: 1px solid #e3d5c9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  min-width: 0;
+}

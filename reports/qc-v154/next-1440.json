@@ -1,0 +1,332 @@
+[
+ {
+  "id": "seed-query-12",
+  "grp": "offer",
+  "status": "Offer",
+  "next": "other",
+  "text": "Next · No date yet · answer the offer",
+  "bar": false,
+  "nudge": null,
+  "act": "Answer the offer →"
+ },
+ {
+  "id": "cv25-q-08",
+  "grp": "offer",
+  "status": "Offer",
+  "next": "other",
+  "text": "Next · No date yet · answer the offer",
+  "bar": false,
+  "nudge": null,
+  "act": "Answer the offer →"
+ },
+ {
+  "id": "seed-query-7",
+  "grp": "materials",
+  "status": "Partial Requested",
+  "next": "other",
+  "text": "Next · 38 days late · asked 84 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your partial →"
+ },
+ {
+  "id": "seed-query-11",
+  "grp": "materials",
+  "status": "Revise & Resubmit",
+  "next": "other",
+  "text": "Next · 23 days late · asked 126 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your revision →"
+ },
+ {
+  "id": "seed-query-9",
+  "grp": "materials",
+  "status": "Full Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 84 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your full →"
+ },
+ {
+  "id": "cv25-q-06",
+  "grp": "materials",
+  "status": "Partial Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 70 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your partial →"
+ },
+ {
+  "id": "seed-query-20",
+  "grp": "materials",
+  "status": "Partial Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 84 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your partial →"
+ },
+ {
+  "id": "msv12-q-3",
+  "grp": "materials",
+  "status": "Partial Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 60 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your partial →"
+ },
+ {
+  "id": "rj-send",
+  "grp": "materials",
+  "status": "Full Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 60 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your full →"
+ },
+ {
+  "id": "cv25-q-09",
+  "grp": "materials",
+  "status": "Full Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 48 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your full →"
+ },
+ {
+  "id": "cor-move-a",
+  "grp": "materials",
+  "status": "Partial Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 65 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your partial →"
+ },
+ {
+  "id": "cv25-q-07",
+  "grp": "materials",
+  "status": "Partial Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 62 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your partial →"
+ },
+ {
+  "id": "seed-pkgq-3",
+  "grp": "materials",
+  "status": "Full Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 139 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your full →"
+ },
+ {
+  "id": "seed-cal-passed865-q",
+  "grp": "materials",
+  "status": "Full Requested",
+  "next": "other",
+  "text": "Next · No date yet",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your full →"
+ },
+ {
+  "id": "msv12-q-4",
+  "grp": "materials",
+  "status": "Full Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 53 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your full →"
+ },
+ {
+  "id": "rj-dupe",
+  "grp": "materials",
+  "status": "Full Requested",
+  "next": "other",
+  "text": "Next · No date yet · asked 63 days ago",
+  "bar": false,
+  "nudge": null,
+  "act": "Send your full →"
+ },
+ {
+  "id": "seed-pkgq-10",
+  "grp": "nudge",
+  "status": "Partial Sent",
+  "next": "over",
+  "text": "Next · Response overdue · Send nudge now",
+  "bar": false,
+  "nudge": null,
+  "act": "Nudge →"
+ },
+ {
+  "id": "msv12-q-5",
+  "grp": "nudge",
+  "status": "Full Sent",
+  "next": "over",
+  "text": "Next · Response overdue · Send nudge now",
+  "bar": false,
+  "nudge": null,
+  "act": "Nudge →"
+ },
+ {
+  "id": "msv12-q-2",
+  "grp": "nudge",
+  "status": "Queried",
+  "next": "over",
+  "text": "Next · Response overdue · Send nudge now",
+  "bar": false,
+  "nudge": null,
+  "act": "Nudge →"
+ },
+ {
+  "id": "seed-query-2",
+  "grp": "nudge",
+  "status": "Queried",
+  "next": "over",
+  "text": "Next · Response overdue · Send nudge now",
+  "bar": false,
+  "nudge": null,
+  "act": "Nudge →"
+ },
+ {
+  "id": "thin-q-gap-solo",
+  "grp": "nudge",
+  "status": "Partial Sent",
+  "next": "over",
+  "text": "Next · Response overdue · Send nudge now",
+  "bar": false,
+  "nudge": null,
+  "act": "Nudge →"
+ },
+ {
+  "id": "cor-pair",
+  "grp": "nudge",
+  "status": "Partial Sent",
+  "next": "over",
+  "text": "Next · Response overdue · Send nudge now",
+  "bar": false,
+  "nudge": null,
+  "act": "Nudge →"
+ },
+ {
+  "id": "seed-query-23",
+  "grp": "nudge",
+  "status": "Partial Sent",
+  "next": "over",
+  "text": "Next · Response overdue · Send nudge now",
+  "bar": false,
+  "nudge": null,
+  "act": "Nudge →"
+ },
+ {
+  "id": "seed-query-8",
+  "grp": "agent",
+  "status": "Partial Sent",
+  "next": "wait",
+  "text": "Reply expected by · 14 Nov · ",
+  "bar": true,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "probe-dangling-pkg",
+  "grp": "agent",
+  "status": "Queried",
+  "next": "wait",
+  "text": "Reply expected by · 15 Nov · ",
+  "bar": true,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "probe-un-noms",
+  "grp": "agent",
+  "status": "Queried",
+  "next": "wait",
+  "text": "Reply expected by · 15 Nov · ",
+  "bar": true,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "seed-pkgq-4",
+  "grp": "agent",
+  "status": "Partial Sent",
+  "next": "wait",
+  "text": "Reply expected by · 15 Nov · ",
+  "bar": true,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "probe-goalstress-today",
+  "grp": "agent",
+  "status": "Queried",
+  "next": "wait",
+  "text": "Reply expected by · 18 Nov · ",
+  "bar": true,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "qc150l9-q",
+  "grp": "agent",
+  "status": "Full Sent",
+  "next": "wait",
+  "text": "Reply expected by · 7 Jan 2027 · ",
+  "bar": true,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "probe-un-both",
+  "grp": "agent",
+  "status": "Queried",
+  "next": "other",
+  "text": "Next · No reply date",
+  "bar": false,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "probe-un-noagent",
+  "grp": "agent",
+  "status": "Queried",
+  "next": "other",
+  "text": "Next · No reply date",
+  "bar": false,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "cv25-q-14",
+  "grp": "agent",
+  "status": "Queried",
+  "next": "other",
+  "text": "Next · No reply date",
+  "bar": false,
+  "nudge": null,
+  "act": "Open the card →"
+ },
+ {
+  "id": "cv25-q-13",
+  "grp": "agent",
+  "status": "Queried",
+  "next": "other",
+  "text": "Next · No reply date",
+  "bar": false,
+  "nudge": null,
+  "act": "Open the card →"
+ }
+]

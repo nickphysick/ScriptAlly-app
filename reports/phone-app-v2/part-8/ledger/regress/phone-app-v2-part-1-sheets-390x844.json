@@ -1,0 +1,116 @@
+[
+ {
+  "lock": "S5",
+  "where": "390x844 the + sheet: \"What happened?\", two rows, three pills",
+  "ok": true,
+  "detail": "{\"rows\":2,\"pills\":3,\"title\":\"What happened?\",\"plus\":\"true\"}"
+ },
+ {
+  "lock": "S5",
+  "where": "390x844 the + reads as the close button while open",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "S8",
+  "where": "390x844 the + sheet: colour laws",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S5",
+  "where": "390x844 plus-sent opens the log drawer",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/queries"
+ },
+ {
+  "lock": "S5",
+  "where": "390x844 plus-replied opens the response journey",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/queries"
+ },
+ {
+  "lock": "S5",
+  "where": "390x844 plus-agent opens the add-agent card, in place",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/queries"
+ },
+ {
+  "lock": "S5",
+  "where": "390x844 plus-task opens the task flow",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/queries"
+ },
+ {
+  "lock": "S5",
+  "where": "390x844 plus-import opens /import",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/import"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 eight tiles in the ref's order",
+  "ok": true,
+  "detail": "responses,analytics,goals,manuscript,materials,comps,discover,feedback"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 the you-sheet's rows are all here (import, help, settings, plan/upgrade, sign out)",
+  "ok": true,
+  "detail": "menu-import,menu-help,menu-feedback,menu-settings,menu-plan-row,menu-signout"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 the sign-off carries the wordmark",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 analytics: no number of its own",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 materials: no number of its own",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 discover: no number of its own",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 feedback: no number of its own",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 goals: present and live since Part 7",
+  "ok": true,
+  "detail": "{\"key\":\"goals\",\"line\":null,\"disabled\":false}"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 Responses opens /queries/responses",
+  "ok": true,
+  "detail": "http://127.0.0.1:4391/queries/responses"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 the Responses tile's figure is a whole number",
+  "ok": true,
+  "detail": "31 replies"
+ },
+ {
+  "lock": "S6",
+  "where": "390x844 the Responses page states that figure",
+  "ok": true,
+  "detail": "31"
+ }
+]

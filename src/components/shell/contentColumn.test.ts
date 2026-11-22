@@ -99,7 +99,8 @@ describe("route variants — declared once at the mount", () => {
     }
     /* Import was the one capped slot while it was a plain page. Since onboarding v5 part 3 it is a
        grid page like the rest, so it declares no width kind either: the grid gives it its column. */
-    expect(app).toContain('<StagePage active><ImportPage');
+    /* retargeted (crash reporting v1 named every slot): the law is "Import's slot declares no width kind", not its spelling */
+    expect(app).toMatch(/<StagePage name="import" active><ImportPage/);
     expect(app).not.toContain('contentVariant="read"><Import');
   });
 

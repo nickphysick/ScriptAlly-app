@@ -1,0 +1,32 @@
+[
+ {
+  "where": "the panel closed",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "the new row is in view",
+  "ok": false,
+  "detail": "{\"row\":true,\"inView\":false,\"tint\":false,\"stamp\":null,\"panel\":0,\"toast\":[],\"role\":\"status\"}"
+ },
+ {
+  "where": "the row is tinted",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "where": "the rust postmark over it: ADDED and the date",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "one snackbar: “{Name} added to your list”, with Undo",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "role=status",
+  "ok": true,
+  "detail": "status"
+ }
+]

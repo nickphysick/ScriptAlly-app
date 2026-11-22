@@ -68,7 +68,7 @@ function readTracking() {
 }
 
 async function tracking(page: import("@playwright/test").Page, label: string) {
-  await openRoute(page, "/manuscripts/packages", { width: 1920, height: 1000 });
+  await openRoute(page, "/queries/packages", { width: 1920, height: 1000 });
   await liftMotionSuppression(page);
   await page.waitForTimeout(1500);
   const t = await page.evaluate(readTracking);

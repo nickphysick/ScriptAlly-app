@@ -46,6 +46,8 @@ import {
   deleteField,
   getDocs,
   collection,
+  query,
+  where,
 } from 'firebase/firestore';
 import { beforeAll, afterAll, afterEach, describe, it } from 'vitest';
 
@@ -730,6 +732,27 @@ describe('/users/{userId}/packages', () => {
     );
   });
 
+  // Submission packages v39 (L2): a package's colour is one of eight keys, stored by key, never a hex; filing, so a
+  // package that has gone out can still be re-coloured.
+  it('v39: accepts each of the eight colour keys, and refuses any other value', async () => {
+    const db = aliceCtx().firestore();
+    for (const colour of ['harbour', 'lake', 'teal', 'pine', 'indigo', 'plum', 'slate', 'charcoal']) {
+      await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'packages', `pkg-${colour}`), { ...validPackage(ALICE), id: `pkg-${colour}`, colour }));
+    }
+    for (const colour of ['red', '#1d4b63', 'Harbour', '', 7]) {
+      await assertFails(setDoc(doc(db, 'users', ALICE, 'packages', 'pkg-bad'), { ...validPackage(ALICE), id: 'pkg-bad', colour }));
+    }
+  });
+
+  it('v39: a sent package can be re-coloured, but only to one of the eight', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'packages', 'pkg-1'), { ...validPackage(ALICE), firstSentAt: '2026-10-01T00:00:00.000Z' });
+    });
+    const ref = doc(aliceCtx().firestore(), 'users', ALICE, 'packages', 'pkg-1');
+    await assertSucceeds(updateDoc(ref, { colour: 'plum' }));
+    await assertFails(updateDoc(ref, { colour: 'crimson' }));
+  });
+
   it('blocks cross-user read', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE, 'packages', 'pkg-1'), validPackage(ALICE));
@@ -1391,14 +1414,67 @@ describe('/users/{userId}/tasks', () => {
     );
   });
 
-  it('rejects an update touching queryId (record scope is create-only input)', async () => {
+  /* ⚠️ FLIPPED (To-do list v50, 6 Nov 2026): the link was create-only input; the workspace links and unlinks an existing
+     task ("+ Link an agent or query", the chip's ✕), so queryId and agentId are updatable now. */
+  it('allows an update linking a task to a query and an agent (To-do v50)', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
     });
     const db = aliceCtx().firestore();
-    await assertFails(
-      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { queryId: 'q-9' })
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { queryId: 'q-9', agentId: 'a-9', updatedAt: '2026-11-06T10:00:00.000Z' })
     );
+  });
+
+  it('allows a checklist of steps, and refuses a non-list or more than 50 (To-do v50)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { steps: [{ text: 'Reread it', done: true }, { text: 'Cut the second half', done: false }], updatedAt: '2026-11-06T10:00:00.000Z' })
+    );
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { steps: 'Reread it', updatedAt: '2026-11-06T10:00:00.000Z' })
+    );
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { steps: Array.from({ length: 51 }, (_, i) => ({ text: `Step ${i}`, done: false })), updatedAt: '2026-11-06T10:00:00.000Z' })
+    );
+  });
+
+  /* ⚠️ REVERSED BY CORKBOARD v2 (6 Nov, Nick's ruling): a note's link (agent, query or manuscript) can change after
+     it is made, so the three link fields are updatable. This case used to assert the opposite ("record scope is
+     create-only input"). */
+  it('Corkboard v2: an update may change or clear the link (queryId · agentId · manuscriptId)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), { ...validUserTask(ALICE), agentId: 'a-1' });
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { queryId: 'q-9', agentId: deleteField() }));
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { manuscriptId: 'ms-2', queryId: deleteField() }));
+    await assertFails(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { agentId: 7 }));
+  });
+
+  /* CB14 — the five papers and pin to top, with the old three still valid */
+  it('Corkboard v2: accepts the five papers and the old three, refuses anything else', async () => {
+    const db = aliceCtx().firestore();
+    for (const colour of ['butter', 'blush', 'powder', 'sand', 'stone', 'yellow', 'pink', 'sage']) {
+      await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'tasks', `t-${colour}`), { ...validUserTask(ALICE), id: `t-${colour}`, colour }));
+    }
+    await assertFails(setDoc(doc(db, 'users', ALICE, 'tasks', 't-green'), { ...validUserTask(ALICE), id: 't-green', colour: 'green' }));
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'tasks', 'task-1'), validUserTask(ALICE));
+    });
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { colour: 'powder' }));
+    await assertFails(updateDoc(doc(db, 'users', ALICE, 'tasks', 'task-1'), { colour: 'chartreuse' }));
+  });
+
+  it('Corkboard v2: pinned is a bool, on create and on update', async () => {
+    const db = aliceCtx().firestore();
+    await assertSucceeds(setDoc(doc(db, 'users', ALICE, 'tasks', 't-pin'), { ...validUserTask(ALICE), id: 't-pin', pinned: true }));
+    await assertFails(setDoc(doc(db, 'users', ALICE, 'tasks', 't-pin2'), { ...validUserTask(ALICE), id: 't-pin2', pinned: 'yes' }));
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 't-pin'), { pinned: deleteField() }));
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE, 'tasks', 't-pin'), { pinned: true }));
   });
 
   /**
@@ -1816,5 +1892,189 @@ describe('/betaPulse', () => {
     await assertFails(setDoc(doc(aliceCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`), { uid: ALICE, week: '2026-W42', mood: 4 }));
     await assertFails(setDoc(doc(adminCtx().firestore(), 'betaPulse', `${ALICE}_2026-W42`), { uid: ALICE, week: '2026-W42', mood: 4 }));
     await assertFails(setDoc(doc(unauthed().firestore(), 'betaPulse', 'x_2026-W42'), { uid: 'x', week: '2026-W42', mood: 1 }));
+  });
+});
+
+/* ══ Versions v2 (design-refs/versions-v2, D1–D3, D9) ═════════════════════════════════════════════════════════════ */
+describe('Versions v2 — the new manuscript and query fields', () => {
+  const msDoc = (ctx: RulesTestContext, id = 'ms-1') => doc(ctx.firestore(), 'users', ALICE, 'manuscripts', id);
+  const qDoc = (ctx: RulesTestContext, id = 'q-1') => doc(ctx.firestore(), 'users', ALICE, 'queries', id);
+  const seedMs = () => asAdmin(async (ctx) => { await setDoc(msDoc(ctx), validManuscript(ALICE)); });
+  const seedQ = () => asAdmin(async (ctx) => { await setDoc(qDoc(ctx), { ...validQuery(ALICE), id: 'q-1' }); });
+
+  it('a manuscript may set and clear its in-use version, in one write with its versions', async () => {
+    await seedMs();
+    const ctx = aliceCtx();
+    await assertSucceeds(updateDoc(msDoc(ctx), {
+      bookVersions: [{ id: 'bv-o', name: 'Original', kind: 'initial', createdDate: '2026-10-23', num: 0, original: true }],
+      inUseBookVersionId: 'bv-o', bookVersionSeq: 1,
+    }));
+    await assertSucceeds(updateDoc(msDoc(ctx), { inUseBookVersionId: deleteField(), bookVersionSeq: deleteField() }));
+  });
+
+  it('an in-use id must be an id, and the sequence an int from 0 to 10000', async () => {
+    await seedMs();
+    const ctx = aliceCtx();
+    await assertFails(updateDoc(msDoc(ctx), { inUseBookVersionId: 'not an id!' }));
+    await assertFails(updateDoc(msDoc(ctx), { inUseBookVersionId: 42 }));
+    await assertFails(updateDoc(msDoc(ctx), { bookVersionSeq: -1 }));
+    await assertFails(updateDoc(msDoc(ctx), { bookVersionSeq: 10001 }));
+    await assertFails(updateDoc(msDoc(ctx), { bookVersionSeq: 1.5 }));
+    await assertSucceeds(updateDoc(msDoc(ctx), { bookVersionSeq: 10000 }));
+  });
+
+  it('the version list stays capped at 50 (MAX_BOOK_VERSIONS)', async () => {
+    await seedMs();
+    const v = (i: number) => ({ id: `bv-${i}`, name: `V${i}`, kind: 'revision', createdDate: '2026-10-23', num: i });
+    await assertSucceeds(updateDoc(msDoc(aliceCtx()), { bookVersions: Array.from({ length: 50 }, (_, i) => v(i)) }));
+    await assertFails(updateDoc(msDoc(aliceCtx()), { bookVersions: Array.from({ length: 51 }, (_, i) => v(i)) }));
+  });
+
+  it('a query may be created with, updated to and cleared of a book version', async () => {
+    const ctx = aliceCtx();
+    await assertSucceeds(setDoc(qDoc(ctx, 'q-2'), { ...validQuery(ALICE), id: 'q-2', bookVersionId: 'bv-1' }));
+    await seedQ();
+    await assertSucceeds(updateDoc(qDoc(ctx), { bookVersionId: 'bv-2' }));
+    await assertSucceeds(updateDoc(qDoc(ctx), { bookVersionId: deleteField() }));
+  });
+
+  it('a query book version must be an id', async () => {
+    await seedQ();
+    const ctx = aliceCtx();
+    await assertFails(updateDoc(qDoc(ctx), { bookVersionId: 'bv 1' }));
+    await assertFails(updateDoc(qDoc(ctx), { bookVersionId: 7 }));
+    await assertFails(updateDoc(qDoc(ctx), { bookVersionId: 'x'.repeat(129) }));
+  });
+});
+
+// Dashboard v77 — the founding writer card's record. Written only by the `sendBetaFeedback` callable
+// (Admin SDK); Nick sets `status`, `title` and `statusAt` by hand in the console. A writer reads their
+// OWN feedback (one doc, or a list filtered to their uid); an admin reads all; no client writes.
+describe('/betaFeedback', () => {
+  const seed = async (id: string, uid: string) => asAdmin(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'betaFeedback', id), { uid, kind: 'An idea', message: 'A bulk nudge', createdAt: new Date() });
+  });
+
+  it('the owner can get one of their own', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertSucceeds(getDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
+  });
+
+  it('the owner can list their own, filtered to their uid', async () => {
+    await seed('fb-alice-1', ALICE);
+    await seed('fb-bob-1', BOB);
+    await assertSucceeds(getDocs(query(collection(aliceCtx().firestore(), 'betaFeedback'), where('uid', '==', ALICE))));
+  });
+
+  it('another signed-in writer is denied a get', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertFails(getDoc(doc(bobCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
+  });
+
+  it('another signed-in writer is denied a list (of the collection, or of someone else\'s uid)', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertFails(getDocs(collection(bobCtx().firestore(), 'betaFeedback')));
+    await assertFails(getDocs(query(collection(bobCtx().firestore(), 'betaFeedback'), where('uid', '==', ALICE))));
+  });
+
+  it('an unauthenticated caller can read nothing', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertFails(getDoc(doc(unauthed().firestore(), 'betaFeedback', 'fb-alice-1')));
+    await assertFails(getDocs(collection(unauthed().firestore(), 'betaFeedback')));
+  });
+
+  it('an admin reads any', async () => {
+    await seed('fb-alice-1', ALICE);
+    await assertSucceeds(getDoc(doc(adminCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
+  });
+
+  it('no client writes: not the owner, not an admin, not a stranger', async () => {
+    await assertFails(setDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-new'), { uid: ALICE, kind: 'An idea', message: 'x' }));
+    await assertFails(setDoc(doc(adminCtx().firestore(), 'betaFeedback', 'fb-new'), { uid: ALICE, kind: 'An idea', message: 'x' }));
+    await assertFails(setDoc(doc(unauthed().firestore(), 'betaFeedback', 'fb-new'), { uid: 'x', kind: 'An idea', message: 'x' }));
+    await seed('fb-alice-1', ALICE);
+    await assertFails(updateDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1'), { status: 'built' }));
+    await assertFails(deleteDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1')));
+  });
+});
+
+// Your notes v1 — a note's thread. Written only by callables; the parent note's owner (or an admin) reads it.
+describe('/betaFeedback/{id}/thread', () => {
+  const seed = async () => asAdmin(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'betaFeedback', 'fb-alice-1'), { uid: ALICE, kind: 'An idea', message: 'A bulk nudge', createdAt: new Date() });
+    await setDoc(doc(ctx.firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1'), { from: 'founder', text: 'Thank you', at: new Date() });
+  });
+  it('the owner of the note reads its thread (one message, and the list)', async () => {
+    await seed();
+    await assertSucceeds(getDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1')));
+    await assertSucceeds(getDocs(collection(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+  });
+  it('another writer cannot read it', async () => {
+    await seed();
+    await assertFails(getDoc(doc(bobCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1')));
+    await assertFails(getDocs(collection(bobCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+    await assertFails(getDocs(collection(unauthed().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+  });
+  it('an admin reads it', async () => {
+    await seed();
+    await assertSucceeds(getDocs(collection(adminCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+  });
+  it('no client writes: not the owner, not an admin', async () => {
+    await seed();
+    await assertFails(setDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm2'), { from: 'writer', text: 'x', at: new Date() }));
+    await assertFails(setDoc(doc(adminCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm2'), { from: 'founder', text: 'x', at: new Date() }));
+    await assertFails(updateDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1'), { text: 'edited' }));
+    await assertFails(deleteDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1')));
+  });
+});
+
+// Dashboard v105 — the celebration's seen-mark: the owner may write foundingSeenTier, an integer 0–5, and nothing else may.
+describe('/users foundingSeenTier (DB105 A2)', () => {
+  const seed = () => asAdmin(async (ctx) => { await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE)); });
+  it('the owner writes an integer 0–5', async () => {
+    await seed();
+    for (const v of [0, 1, 5]) await assertSucceeds(updateDoc(doc(aliceCtx().firestore(), 'users', ALICE), { foundingSeenTier: v }));
+  });
+  it('refuses anything else', async () => {
+    await seed();
+    for (const v of [6, -1, 2.5, '2', null, true]) await assertFails(updateDoc(doc(aliceCtx().firestore(), 'users', ALICE), { foundingSeenTier: v }));
+  });
+  it('another writer cannot set it', async () => {
+    await seed();
+    await assertFails(updateDoc(doc(bobCtx().firestore(), 'users', ALICE), { foundingSeenTier: 1 }));
+  });
+});
+
+// Dashboard v93 — the founding card's contributions. Written only by the foundingStats functions (Admin SDK); a writer
+// reads their OWN doc; an admin reads all; no client writes.
+describe('/foundingStats', () => {
+  const statsDoc = (ctx: RulesTestContext, uid: string) => doc(ctx.firestore(), 'foundingStats', uid);
+  const seed = (uid: string) => asAdmin(async (ctx) => {
+    await setDoc(statsDoc(ctx, uid), { contributions: 6, waiting: 1, tier: 'archivist', peakTier: 'archivist', nextTier: 'scout', toNext: 2, topPct: null });
+  });
+
+  it('the owner reads their own', async () => {
+    await seed(ALICE);
+    await assertSucceeds(getDoc(statsDoc(aliceCtx(), ALICE)));
+  });
+  it('another writer cannot read it', async () => {
+    await seed(ALICE);
+    await assertFails(getDoc(statsDoc(bobCtx(), ALICE)));
+    await assertFails(getDocs(collection(bobCtx().firestore(), 'foundingStats')));
+  });
+  it('signed out cannot read it', async () => {
+    await seed(ALICE);
+    await assertFails(getDoc(statsDoc(unauthed(), ALICE)));
+  });
+  it('an admin reads it', async () => {
+    await seed(ALICE);
+    await assertSucceeds(getDoc(statsDoc(adminCtx(), ALICE)));
+  });
+  it('no client writes, not even the owner', async () => {
+    await assertFails(setDoc(statsDoc(aliceCtx(), ALICE), { contributions: 99 }));
+    await seed(ALICE);
+    await assertFails(updateDoc(statsDoc(aliceCtx(), ALICE), { contributions: 99 }));
+    await assertFails(deleteDoc(statsDoc(aliceCtx(), ALICE)));
+    await assertFails(setDoc(statsDoc(adminCtx(), ALICE), { contributions: 99 }));
   });
 });

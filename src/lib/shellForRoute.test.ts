@@ -9,7 +9,7 @@ import { WORKSPACE_PATHS } from "../marketing/routeTiers";
 describe("the map", () => {
   it("pages you WORK IN take the workspace shell", () => {
     for (const p of ["/queries", "/todo", "/agents", "/agents/discover", "/manuscripts",
-      "/manuscripts/packages", "/manuscripts/comps", "/import"]) {
+      "/queries/packages", "/manuscripts/comps", "/import"]) {
       expect(shellForRoute(p, true), p).toBe("workspace");
     }
   });

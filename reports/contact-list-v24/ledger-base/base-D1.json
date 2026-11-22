@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D1",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "band false row false art false"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the archivist breaks out below the band",
+  "ok": false,
+  "detail": "art bottom undefined band bottom undefined"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 the cream row sits under the band",
+  "ok": false,
+  "detail": "row top undefined band bottom undefined"
+ },
+ {
+  "lock": "D1",
+  "where": "1512 Your move filters the book to its agents",
+  "ok": false,
+  "detail": "rows 0 seg undefined sets "
+ },
+ {
+  "lock": "D1",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "band false row false art false"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the archivist breaks out below the band",
+  "ok": false,
+  "detail": "art bottom undefined band bottom undefined"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 the cream row sits under the band",
+  "ok": false,
+  "detail": "row top undefined band bottom undefined"
+ },
+ {
+  "lock": "D1",
+  "where": "1280 Your move filters the book to its agents",
+  "ok": false,
+  "detail": "rows 0 seg undefined sets "
+ }
+]

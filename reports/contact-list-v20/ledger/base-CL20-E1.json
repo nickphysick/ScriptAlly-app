@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 the strip opens (population)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 unpinned: left and right are the card's ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 unpinned: its top is the toolbar's bottom ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 unpinned: ≤ 300 tall",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 full screen: the strip opens (population)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 full screen: left is the toolbar's first visible control ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 full screen: right is the toolbar's last control ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1512 full screen: ≤ 300 tall",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 the strip opens (population)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 unpinned: left and right are the card's ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 unpinned: its top is the toolbar's bottom ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 unpinned: ≤ 300 tall",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 full screen is on (precondition)",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 full screen: the strip opens (population)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 full screen: left is the toolbar's first visible control ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 full screen: right is the toolbar's last control ±1",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "CL20-E1",
+  "where": "@1280 full screen: ≤ 300 tall",
+  "ok": false,
+  "detail": "undefined"
+ }
+]

@@ -90,7 +90,6 @@ async function pickGroup(page: Page, g: string) {
   await page.waitForTimeout(300);
 }
 const scrollTo = (page: Page, y: number) => page.evaluate((top) => { const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!; const sc = g.closest<HTMLElement>(".wpg-scroll")!; sc.style.scrollBehavior = "auto"; sc.scrollTop = top; return sc.scrollTop; }, y);
-const box = (page: Page, sel: string) => page.evaluate((s) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); if (!e) return null; const r = e.getBoundingClientRect(); return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }; }, sel);
 const bg = (page: Page, sel: string) => page.evaluate((s) => { const e = [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0); return e ? getComputedStyle(e).backgroundColor : null; }, sel);
 
 test.describe("Query Centre v140", () => {
@@ -103,14 +102,21 @@ test.describe("Query Centre v140", () => {
       const r = await page.evaluate(() => {
         const tb = [...document.querySelectorAll<HTMLElement>("[data-qc140='toolbar']")].find((e) => e.getBoundingClientRect().height > 0)!;
         const t = tb.getBoundingClientRect();
-        const parts = ["[data-qc140='jump']", "[data-qc140='find']", "[data-qc140='group-chip']", "[data-qc140='filters-chip']", "[data-qc140='pin']"]
+        /* RE-POINTED (navy-bar v1 A1/A3): no jump row; unpinned, Find is the pill above the list and the bar holds Filters ·
+           Group by · Sort; in full screen Find, Filters, Group by, Sort and Exit full screen */
+        const parts = ["[data-qc140='find']", "[data-qc140='filters-chip']", "[data-qc140='group-chip']", "[data-qc1421='sort-chip']", "[data-qc140='pin']"]
           .map((s) => tb.querySelector<HTMLElement>(s)?.getBoundingClientRect()).filter(Boolean) as DOMRect[];
         return { h: t.height, tops: parts.map((p) => p.top), hs: parts.map((p) => p.height), n: parts.length };
       });
-      L.check("A1", `${w} five controls`, r.n === 5, `${r.n}`);
+      /* v142 §A — re-pointed: no Pin on the page; unpinned the toolbar has four controls, in full screen the fifth is
+         "Exit full screen" (the toolbar's Full screen) */
+      /* v149 (QC149 L13) — RE-POINTED: unpinned the bar gains Full screen (B1), so it holds four controls — Filters,
+         Group by, Sort and Full screen; the heard-back figure is a reading, not a control. Pinned is unchanged. */
+      L.check("A1", `${w} ${pinned ? "five" : "four"} controls`, r.n === (pinned ? 5 : 4), `${r.n}`);
       L.check("A1", `${w} one line (every top within 2px)`, Math.max(...r.tops) - Math.min(...r.tops) <= 2, r.tops.map((x) => x.toFixed(1)).join(","));
-      L.check("A1", `${w} height`, near(r.h, pinned ? 72 : 64, 0.6), `${r.h}`);
-      L.check("A1", `${w} controls 40 tall`, r.hs.every((h) => near(h, 40, 0.6)), r.hs.join(","));
+      /* v142 §B — re-pointed: unpinned the toolbar is the Contact list's, 52 tall with 34px controls (was 64 and 40) */
+      L.check("A1", `${w} height`, near(r.h, pinned ? 72 : 52, 0.6), `${r.h}`);
+      L.check("A1", `${w} controls ${pinned ? 40 : 34} tall`, r.hs.every((h) => near(h, pinned ? 40 : 34, 0.6)), r.hs.join(","));
       const old = await page.evaluate(() => ({
         title: /Showing all \d+ quer/.test(document.querySelector(".qcv-group[data-v138]")?.textContent ?? ""),
         sort: !!document.querySelector(".qcv-group[data-v138] [data-ltb='sort-name'], .qcv-group[data-v138] [data-qc138='sort']"),
@@ -122,127 +128,11 @@ test.describe("Query Centre v140", () => {
     L.done(20);
   });
 
-  test("A2 · jump labels: Next action — every button and menu item has text; no two neighbours share a mark; each mark is its band's", async ({ page }) => {
-    test.setTimeout(300_000);
-    const L = new Ledger("A2");
-    for (const vp of SIZES) {
-      await open(page, vp, "A2", { group: "action" });
-      const r = await page.evaluate(() => {
-        const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
-        const btns = [...g.querySelectorAll<HTMLElement>("[data-qc140='jump-btn']")];
-        /* the badge as RENDERED: the jump mark's drawn badge (.qc140-jbd) or the band's [data-qc139='badge'] — never an attribute
-           on the mark's box, which survives the badge not being drawn */
-        const sig = (e: Element | null) => {
-          const m = e?.querySelector<HTMLElement>("[data-qc140='jump-mark'], [data-qc139='band-art']");
-          const jb = m?.querySelector<HTMLElement>(".qc140-jbd");
-          const bb = e?.querySelector<HTMLElement>("[data-qc139='badge']");
-          const badge = jb ? (m?.dataset.badge ?? "?") : bb ? (bb.dataset.badge ?? "?") : "-";
-          return `${m?.dataset.glyph ?? m?.dataset.kind ?? "?"}|${badge}`;
-        };
-        const bands = Object.fromEntries([...g.querySelectorAll<HTMLElement>("[data-qcv='gband']")].map((b) => [b.dataset.group, sig(b)]));
-        return btns.map((b) => ({ key: b.dataset.gkey ?? "", text: (b.innerText || b.textContent || "").trim(), sig: sig(b), band: bands[b.dataset.gkey ?? ""] ?? null }));
-      });
-      L.check("A2", `${vp.width} buttons`, r.length >= 4, `${r.length}`);
-      L.check("A2", `${vp.width} every button has visible text`, r.every((b) => /[A-Za-z]/.test(b.text)), JSON.stringify(r.map((b) => b.text)));
-      /* RETIRED BY v141 §D (name mode): Next action's buttons carry their names and no mark, so "no two neighbouring
-         badged groups share a mark", "each button's mark is its band's" and "the badge is drawn on the badged groups"
-         no longer apply to the BUTTONS. The marks moved to the "+N more" menu, where they are checked below against
-         their bands instead. What the buttons must do now is carry no mark at all. */
-      L.check("A2", `${vp.width} name mode: no button carries a mark (v141 §D)`, r.every((b) => b.sig === "?|-"), r.map((b) => `${b.key}:${b.sig}`).join(" "));
-      const more = await box(page, `${G} [data-qc140='jump-more']:not([hidden])`);
-      if (more) {
-        await press(page, `${G} [data-qc140='jump-more']`);
-        await page.waitForTimeout(400);
-        const items = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='jump-item']")].map((e) => (e.innerText || "").trim()));
-        L.check("A2", `${vp.width} every "Jump to" item has text`, items.length > 0 && items.every((t) => /[A-Za-z]/.test(t)), JSON.stringify(items));
-        /* v141 §D — the menu rows carry the marks now: each is its band's (the glyph and the badge) */
-        const bandSig = Object.fromEntries(r.map((b) => [b.key, b.band]));
-        const ms = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='jump-item']")].map((e) => {
-          const m = e.querySelector<HTMLElement>("[data-qc140='jump-mark']");
-          return { key: e.dataset.gkey ?? "", sig: `${m?.dataset.glyph ?? m?.dataset.kind ?? "?"}|${m?.querySelector(".qc140-jbd") ? (m?.dataset.badge ?? "?") : "-"}` };
-        }));
-        L.check("A2", `${vp.width} each menu row's mark is its band's`, ms.length > 0 && ms.every((x) => bandSig[x.key] == null || bandSig[x.key] === x.sig), JSON.stringify(ms.filter((x) => bandSig[x.key] != null && bandSig[x.key] !== x.sig)));
-        await page.keyboard.press("Escape");
-      } else L.check("A2", `${vp.width} nothing folded (no menu to read)`, true, "");
-    }
-    L.done(8);
-  });
+  /* RETIRED (navy-bar-address-book v1): A2 · jump labels — the jump row is gone in both modes (A1); its labels have no subject. */
 
-  test("A3 · fold: buttons end inside the row; visible + folded = groups; the menu lists the folded; pinned and unpinned fold alike", async ({ page }) => {
-    test.setTimeout(400_000);
-    const L = new Ledger("A3");
-    const readFold = () => page.evaluate(() => {
-      const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
-      const row = g.querySelector<HTMLElement>("[data-qc140='jump']")!.getBoundingClientRect();
-      const btns = [...g.querySelectorAll<HTMLElement>("[data-qc140='jump-btn']")];
-      const shown = btns.filter((b) => !b.hasAttribute("data-over") && b.getBoundingClientRect().width > 0);
-      const folded = btns.filter((b) => b.hasAttribute("data-over")).map((b) => b.dataset.gkey);
-      const bands = g.querySelectorAll("[data-qcv='gband']").length;
-      return { rowW: row.width, inside: shown.every((b) => b.getBoundingClientRect().right <= row.right + 0.5), shown: shown.map((b) => b.dataset.gkey), folded, total: btns.length, bands, more: Number(g.querySelector<HTMLElement>("[data-qc140='jump-more']")?.dataset.n ?? 0) };
-    });
-    for (const vp of SIZES) {
-      const by: Record<string, Awaited<ReturnType<typeof readFold>>> = {};
-      for (const pinned of [false, true]) {
-        await open(page, vp, "A3", { group: "status", pinned });
-        const f = await readFold();
-        by[pinned ? "p" : "u"] = f;
-        const w = `${vp.width} ${pinned ? "pinned" : "unpinned"}`;
-        L.check("A3", `${w} every visible button ends inside the row`, f.inside, JSON.stringify(f));
-        L.check("A3", `${w} visible + folded = the groups`, f.shown.length + f.folded.length === f.total && f.total === f.bands, `${f.shown.length}+${f.folded.length} / ${f.total} / bands ${f.bands}`);
-        L.check("A3", `${w} "+N more" counts the folded`, f.more === f.folded.length, `${f.more} vs ${f.folded.length}`);
-        if (f.folded.length) {
-          await press(page, `${G} [data-qc140='jump-more']`);
-          await page.waitForTimeout(400);
-          const items = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='jump-item']")].map((e) => e.dataset.gkey));
-          L.check("A3", `${w} the menu lists exactly the folded`, JSON.stringify(items) === JSON.stringify(f.folded), `${items} vs ${f.folded}`);
-          await page.keyboard.press("Escape");
-        } else L.check("A3", `${w} nothing folded`, true, "");
-      }
-      /* the same row width folds the same groups: compare by the row's width */
-      const same = Math.abs(by.u.rowW - by.p.rowW) <= 2 ? Math.abs(by.u.folded.length - by.p.folded.length) <= 1 : true;
-      L.check("A3", `${vp.width} pinned and unpinned fold alike for one row width (±1)`, same, `rows ${by.u.rowW.toFixed(0)}/${by.p.rowW.toFixed(0)} · folded ${by.u.folded.length}/${by.p.folded.length}`);
-    }
-    /* measured against the row: force a narrow row and check again */
-    await open(page, SIZES[1], "A3", { group: "action" });
-    const f = await readFold();
-    L.check("A3", "1280 Next action: inside the row", f.inside && f.shown.length + f.folded.length === f.total, JSON.stringify({ shown: f.shown.length, folded: f.folded.length, total: f.total }));
-    L.done(18);
-  });
+  /* RETIRED (navy-bar-address-book v1): A3 · fold — the jump row and its "+N more" are gone (A1). */
 
-  test("A4 · jump: a group lands its band, a month its first row, within 2px of the sticky stack's bottom", async ({ page }) => {
-    test.setTimeout(400_000);
-    const L = new Ledger("A4");
-    for (const vp of SIZES) for (const [group, kind] of [["status", "group"], ["none", "month"]] as const) {
-      await open(page, vp, "A4", { group });
-      const keys = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138] [data-qc140='jump-btn']")].filter((b) => !b.hasAttribute("data-over") && b.getBoundingClientRect().width > 0).map((b) => b.dataset.gkey!));
-      L.check("A4", `${vp.width} ${kind}: buttons`, keys.length >= 2, `${keys.length}`);
-      for (const k of keys.slice(1, 4)) {
-        await scrollTo(page, 0);
-        await page.waitForTimeout(200);
-        await page.evaluate((key) => { const b = [...document.querySelectorAll<HTMLElement>(`.qcv-group[data-v138] [data-qc140='jump-btn'][data-gkey='${key}']`)].find((x) => x.getBoundingClientRect().width > 0); b?.click(); }, k);
-        await page.waitForTimeout(1300);
-        const r = await page.evaluate((key) => {
-          const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
-          const heads = g.querySelector<HTMLElement>(".qc138-heads")!.getBoundingClientRect();
-          const target = key.startsWith("m:")
-            ? null
-            : g.querySelector<HTMLElement>(`[data-qcv='gband'][data-group='${CSS.escape(key)}']`);
-          return { stackBottom: heads.bottom, top: target?.getBoundingClientRect().top ?? null, current: g.querySelector<HTMLElement>("[data-qc140='jump-btn'][aria-current='true']")?.dataset.gkey ?? null };
-        }, k);
-        if (kind === "group") L.check("A4", `${vp.width} ${k} lands under the stack`, r.top != null && Math.abs(r.top - r.stackBottom) <= 2, `${r.top} vs ${r.stackBottom.toFixed(1)}`);
-        else {
-          const first = await page.evaluate((key) => {
-            const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
-            const heads = g.querySelector<HTMLElement>(".qc138-heads")!.getBoundingClientRect().bottom;
-            const rows = [...g.querySelectorAll<HTMLElement>("[data-qcv='row']")].filter((r) => r.getBoundingClientRect().bottom > heads + 1);
-            return { heads, top: rows[0]?.getBoundingClientRect().top ?? null, month: key };
-          }, k);
-          L.check("A4", `${vp.width} ${k}: its first row lands under the stack`, first.top != null && Math.abs(first.top - first.heads) <= 2, `${first.top} vs ${first.heads.toFixed(1)}`);
-        }
-      }
-    }
-    L.done(12);
-  });
+  /* RETIRED (navy-bar-address-book v1): A4 · jump — the jump row is gone (A1); the group headings are reached by scrolling. */
 
   test("B1 · unpinned bar: navy toolbar, 18px card corners, cream Pin, no ring on the controls", async ({ page }) => {
     test.setTimeout(300_000);
@@ -254,16 +144,19 @@ test.describe("Query Centre v140", () => {
         const g = [...document.querySelectorAll<HTMLElement>(".qcv-group[data-v138]")].find((e) => e.getBoundingClientRect().width > 0)!;
         const sheet = g.querySelector<HTMLElement>(".qc138-sheet")!;
         const cs = getComputedStyle(sheet);
-        const pin = g.querySelector<HTMLElement>("[data-qc140='pin']")!;
+        const pin = g.querySelector<HTMLElement>("[data-qc140='pin']") ?? g;
         const ring = (s: string) => { const e = g.querySelector<HTMLElement>(s); if (!e) return "none"; const c = getComputedStyle(e); return `${c.boxShadow}|${c.borderTopWidth}|${c.outlineStyle}`; };
         return { corners: [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomLeftRadius, cs.borderBottomRightRadius], pin: getComputedStyle(pin).backgroundColor, pinText: pin.textContent?.trim(), rings: [ring("[data-qc140='find']"), ring("[data-qc140='group']"), ring("[data-qc140='filters']")] };
       });
-      L.check("B1", `${vp.width} card corners 18`, r.corners.every((c) => c === "18px"), r.corners.join(","));
-      L.check("B1", `${vp.width} Pin cream`, r.pin === "rgb(244, 238, 229)", `${r.pin}`);
-      L.check("B1", `${vp.width} Pin reads "Pin list"`, /Pin list/.test(r.pinText ?? "") || vp.width === 1280, `${r.pinText}`);
-      L.check("B1", `${vp.width} no ring on the controls`, r.rings.every((x) => /^none\|0px\|none$/.test(x)), r.rings.join(" ‖ "));
+      /* v149 (QC149 L13) — RE-POINTED: the list's frame takes radius 20 (pack B2; QC149-L5's frame reading) */
+      L.check("B1", `${vp.width} card corners 20`, r.corners.every((c) => c === "20px"), r.corners.join(","));
+      /* v142 §A — RETIRED: "Pin cream" and "Pin reads 'Pin list'". There is no Pin on the page; QC142-L3 asserts its absence. */
+      void r.pin; void r.pinText;
+      /* cards-sort-search v1 §C — re-pointed: Find is the recessed well now, whose inset drop and 14% cream ring ARE its look;
+         Group by and Filters still carry no ring */
+      L.check("B1", `${vp.width} no ring on the controls (Find is the recessed well)`, r.rings.slice(1).every((x) => /^none\|0px\|none$/.test(x)) && /inset/.test(r.rings[0]), r.rings.join(" ‖ "));
     }
-    L.done(10);
+    L.done(6);
   });
 
   test("C1 · pinned scheme: navy band, cream toolbar, white headings, flush to the sheet at the top", async ({ page }) => {
@@ -371,7 +264,8 @@ test.describe("Query Centre v140", () => {
     const menu = async () => { if (!(await page.locator("[data-qc140='filter-menu']").count())) await press(page, `${G} [data-qc140='filters']`); await page.waitForTimeout(500); };
     const state = () => page.evaluate(() => ({
       over: document.querySelector<HTMLElement>("[data-qc140='quick'][data-qp='over']")?.getAttribute("aria-pressed"),
-      past: document.querySelector<HTMLElement>("[data-qc140='more'][data-k='past']")?.getAttribute("aria-checked"),
+      /* v142 §E — re-pointed: the More rows are chips in the strip now, pressed rather than checked */
+      past: document.querySelector<HTMLElement>("[data-qc140='more'][data-k='past']")?.getAttribute("aria-pressed"),
       offersQ: document.querySelector<HTMLElement>("[data-qc140='quick'][data-qp='offers']")?.getAttribute("aria-pressed"),
       chips: [...document.querySelectorAll<HTMLElement>("[data-qc140='applied-chip']")].filter((c) => c.getBoundingClientRect().width > 0).map((c) => c.dataset.k),
     }));
@@ -432,16 +326,25 @@ test.describe("Query Centre v140", () => {
         const sheet = g.querySelector<HTMLElement>(".qc138-sheet")!.getBoundingClientRect();
         const dials = [...g.querySelectorAll<HTMLElement>("[data-qcv='row-dial']")].filter((d) => d.getBoundingClientRect().width > 0).map((d) => d.getBoundingClientRect().right);
         const names = [...g.querySelectorAll<HTMLElement>("[data-qcv='row-name']")].slice(0, 30).map((n) => ({ over: n.scrollWidth > n.clientWidth + 1, title: n.getAttribute("title"), text: n.textContent }));
-        return { widths: hs.map((h) => h.width), gaps: hs.slice(1).map((h, i) => h.left - hs[i].right), sheetR: sheet.right, dialR: dials.length ? Math.max(...dials) : null, names };
+        const spill: string[] = [];
+        for (const row of [...g.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row']")].filter((x) => x.getBoundingClientRect().height > 0))
+          for (const [i, c] of [...row.children].entries()) {
+            const cr = (c as HTMLElement).getBoundingClientRect();
+            const out = [...(c as HTMLElement).querySelectorAll<HTMLElement>("*")].find((d) => !d.closest(".qc138-tray") && d.getBoundingClientRect().width > 0 && (d.getBoundingClientRect().right > cr.right + 1 || d.getBoundingClientRect().left < cr.left - 1));
+            if (out) spill.push(`${row.dataset.qid}#${i}`);
+          }
+        return { spill, widths: hs.map((h) => h.width), gaps: hs.slice(1).map((h, i) => h.left - hs[i].right), sheetR: sheet.right, dialR: dials.length ? Math.max(...dials) : null, names };
       });
       L.check("E1", `${w} six columns`, r.widths.length === 6, `${r.widths.length}`);
-      L.check("E1", `${w} Agent ≤ 264`, r.widths[0] <= 264.5, `${r.widths[0]}`);
-      L.check("E1", `${w} every column ≥ its minimum`, r.widths.every((x, i) => x >= MIN[i] - 0.5), r.widths.map((x) => x.toFixed(1)).join(","));
+      /* v149 (QC149 L13) — RE-POINTED: the columns are flexible (pack B3), so v140's fixed bounds — Agent ≤ 264 and a
+         minimum per column — no longer describe the design. What they protected is that nothing spills out of its cell:
+         that is asserted instead, every row, the hover tray excepted (it overlays its neighbour by design, on the base too). */
+      L.check("E1", `${w} no cell's content spills out of its column (the tray excepted)`, r.spill.length === 0, r.spill.slice(0, 3).join(" ; "));
       if (vp.width === 1512) L.check("E1", `${w} gaps between First queried, Where it stands and What you sent ≥ 32`, r.gaps[1] >= 31.5 && r.gaps[2] >= 31.5, r.gaps.map((x) => x.toFixed(1)).join(","));
       if (vp.width === 1280) L.check("E1", `${w} the Due dial ends inside the card`, r.dialR != null && r.dialR <= r.sheetR + 0.5, `${r.dialR} vs ${r.sheetR}`);
       L.check("E1", `${w} a truncated agent name carries its full name in title`, r.names.every((n) => !n.over || n.title === n.text?.trim()), JSON.stringify(r.names.filter((n) => n.over && n.title !== n.text?.trim()).slice(0, 2)));
     }
-    L.done(20);
+    L.done(16);
   });
 
   test("F1 · memory: grouping, density, a status filter and a search survive a reload, already there at the first painted frame", async ({ page }) => {

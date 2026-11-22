@@ -5,12 +5,7 @@
  * Manuscripts v21 — the page's three dialogs (design-refs/manuscripts/manuscripts-v21.html, screens
  * 07–09): Edit details, a book version (new, or renamed), and Add your manuscript.
  *
- * EDIT DETAILS carries title · word count · genre · age category · logline · setting · series ·
- * status (the six `ManuscriptStatus` values), plus the shelved reason while Shelved is chosen. There
- * is NO author field: the page shows `User.name`, read-only.
- *
- * ⚠️ ONE MANUSCRIPT WRITE. Every field lands together through `updateManuscript`, the single
- * writer. `setting` and `series` ride the payload only when they changed (`factPatch`).
+ * EDIT DETAILS is not here any more: v28 moved it to the slide-in drawer (manuscripts/v28/MsEditDrawer).
  *
  * A BOOK VERSION is appended through lib/bookVersions (`newBookVersionId`, `appendBookVersion`) and
  * edited through `renameBookVersion` — name and note, the only edit the model permits. A new one may
@@ -23,14 +18,14 @@
  * a dialog rendered inside the page would be sealed with it. Their sheet (msv21.css) reads only
  * `:root` tokens, so nothing is lost by leaving the page's scope.
  */
+import { DEFAULT_AGE } from "../../../lib/ageCategories";
 import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { deleteField, type FieldValue } from "firebase/firestore";
 import { useOverlay } from "../../shell/useOverlay";
 import { useToast } from "../../toast/ToastProvider";
 import { appendBookVersion, bookVersionsOf, newBookVersionId, renameBookVersion } from "../../../lib/bookVersions";
-import { AGE_CATEGORIES, PREDEFINED_GENRES, buildManuscriptPayload } from "../../../lib/manuscripts";
-import { STATUS_ORDER, STATUS_WORDS } from "../../../lib/manuscriptV21";
+import { PREDEFINED_GENRES, buildManuscriptPayload } from "../../../lib/manuscripts";
 import { londonDay } from "../../../lib/queryingGoals";
 import { ManuscriptStatus } from "../../../types";
 import type { BookVersion, Manuscript } from "../../../types";
@@ -57,11 +52,6 @@ export const parseWords = (raw: string): number | null => {
   const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
   return Number.isFinite(n) && n > 0 ? n : null;
 };
-
-/** The list a select offers: the house list, plus the stored value where it is not on it — so
- *  opening and saving never changes what was stored. */
-const withStored = (list: readonly string[], stored: string | undefined): string[] =>
-  !stored || list.includes(stored) ? [...list] : [...list, stored];
 
 const Shell: React.FC<{
   label: string; title: string; sub: string; probe: string; onClose: () => void;
@@ -91,108 +81,7 @@ const Shell: React.FC<{
 
 /* ══ edit details ═════════════════════════════════════════════════════════════════════════════ */
 
-export const Msv21EditDetails: React.FC<{
-  ms: Manuscript;
-  updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
-  onClose: () => void;
-}> = ({ ms, updateManuscript, onClose }) => {
-  const { showToast } = useToast();
-  const [d, setD] = useState({
-    title: ms.title, genre: ms.genre, ageCategory: ms.ageCategory,
-    wordCount: String(ms.wordCount ?? ""), logline: ms.logline ?? "",
-    setting: ms.setting ?? "", series: ms.series ?? "",
-    status: ms.status, shelvedReason: ms.shelvedReason ?? "",
-  });
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const genres = withStored(PREDEFINED_GENRES, ms.genre);
-  const ages = withStored(AGE_CATEGORIES, ms.ageCategory);
-
-  const save = async () => {
-    if (busy) return;
-    if (!d.title.trim()) { setErr("A manuscript needs a title."); return; }
-    setBusy(true);
-    setErr(null);
-    const setting = factPatch(d.setting, ms.setting);
-    const series = factPatch(d.series, ms.series);
-    const payload: Record<string, unknown> = {
-      title: d.title.trim(), genre: d.genre.trim(), ageCategory: d.ageCategory.trim(),
-      wordCount: parseWords(d.wordCount) ?? 0,
-      logline: d.logline, status: d.status, shelvedReason: d.shelvedReason,
-      ...(setting !== null ? { setting } : {}),
-      ...(series !== null ? { series } : {}),
-    };
-    try {
-      await updateManuscript(ms.id, payload as Partial<Manuscript>);
-    } catch {
-      setErr("That didn’t save. Nothing was recorded.");
-      setBusy(false);
-      return;
-    }
-    showToast({ message: "Details saved." });
-    onClose();
-  };
-
-  return (
-    <Shell
-      label="Edit details" title="Edit details" sub="What agents see first: the title, the pitch and the numbers."
-      probe="edit-dialog" onClose={onClose} onSubmit={() => void save()} saveLabel="Save details" busy={busy}
-    >
-      <div className="ms21-fld ms21-fld--w">
-        <label htmlFor="ms21-f-title">Title</label>
-        <input id="ms21-f-title" value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} />
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-words">Word count</label>
-        <input id="ms21-f-words" inputMode="numeric" value={d.wordCount} onChange={(e) => setD({ ...d, wordCount: e.target.value })} />
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-genre">Genre</label>
-        <select id="ms21-f-genre" value={d.genre} onChange={(e) => setD({ ...d, genre: e.target.value })}>
-          {!d.genre ? <option value="">Choose one</option> : null}
-          {genres.map((g) => <option key={g} value={g}>{g}</option>)}
-        </select>
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-age">Age category</label>
-        <select id="ms21-f-age" value={d.ageCategory} onChange={(e) => setD({ ...d, ageCategory: e.target.value })}>
-          {!d.ageCategory ? <option value="">Choose one</option> : null}
-          {ages.map((a) => <option key={a} value={a}>{a}</option>)}
-        </select>
-      </div>
-      <div className="ms21-fld ms21-fld--w">
-        <label htmlFor="ms21-f-logline">Logline</label>
-        <textarea id="ms21-f-logline" value={d.logline} onChange={(e) => setD({ ...d, logline: e.target.value })} />
-        <span className="ms21-hint">One or two sentences.</span>
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-setting">Setting</label>
-        <input id="ms21-f-setting" value={d.setting} onChange={(e) => setD({ ...d, setting: e.target.value })} />
-      </div>
-      <div className="ms21-fld">
-        <label htmlFor="ms21-f-series">Series</label>
-        <input id="ms21-f-series" placeholder="Standalone" value={d.series} onChange={(e) => setD({ ...d, series: e.target.value })} />
-      </div>
-      <div className="ms21-fld ms21-fld--w">
-        <span className="ms21-fl" id="ms21-f-status">Status</span>
-        <div className="ms21-seg" role="group" aria-labelledby="ms21-f-status" data-ms21="status-seg">
-          {STATUS_ORDER.map((s) => (
-            <button type="button" key={s} aria-pressed={d.status === s} className={d.status === s ? "is-on" : undefined} onClick={() => setD({ ...d, status: s })}>
-              {STATUS_WORDS[s]}
-            </button>
-          ))}
-        </div>
-      </div>
-      {d.status === ManuscriptStatus.SHELVED ? (
-        <div className="ms21-fld ms21-fld--w">
-          <label htmlFor="ms21-f-shelved">Shelved reason</label>
-          <input id="ms21-f-shelved" value={d.shelvedReason} onChange={(e) => setD({ ...d, shelvedReason: e.target.value })} />
-        </div>
-      ) : null}
-      {err ? <div className="ms21-derr" role="alert">{err}</div> : null}
-    </Shell>
-  );
-};
+/* Manuscripts v28 Part A: Edit details moved to the slide-in drawer (v28/MsEditDrawer); the centred modal is deleted. */
 
 /* ══ a book version — new, or renamed ═════════════════════════════════════════════════════════ */
 
@@ -306,7 +195,7 @@ export const Msv21AddManuscript: React.FC<{
     };
     const payload = {
       ...buildManuscriptPayload({
-        title, genre: d.genre, ageCategory: "", wordCount: count ?? 0, logline: d.logline,
+        title, genre: d.genre, ageCategory: DEFAULT_AGE /* v28 Part E: Adult by default */, wordCount: count ?? 0, logline: d.logline,
         status: ManuscriptStatus.DRAFTING,
       }),
       bookVersions: appendBookVersion([], first),

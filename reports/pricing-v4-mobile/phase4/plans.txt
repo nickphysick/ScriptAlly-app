@@ -1,0 +1,8 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+  ✓  2 [measure] › tests/e2e/pricingV4.plans.measure.ts:25:3 › /plans renders as it did before the pack @1440 (6.4s)
+  ✓  3 [measure] › tests/e2e/pricingV4.plans.measure.ts:25:3 › /plans renders as it did before the pack @390 (6.5s)
+
+  3 passed (31.0s)

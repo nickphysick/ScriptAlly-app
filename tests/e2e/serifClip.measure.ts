@@ -165,7 +165,7 @@ test("no Playfair in the shell's chrome is cropped by its own box", async ({ pag
    * The precondition caught it immediately, which is the whole reason it is written before the
    * claim: "Contact list" would have passed on a box clipping every descender it never renders.
    */
-  await openRoute(page, "/manuscripts/packages", { width: 1440, height: 900 });
+  await openRoute(page, "/queries/packages", { width: 1440, height: 900 });
   await liftMotionSuppression(page);
   await page.mouse.move(700, 500);
   await page.mouse.wheel(0, 600);
@@ -178,7 +178,7 @@ test("no Playfair in the shell's chrome is cropped by its own box", async ({ pag
   /* the precondition: it actually settled, and the sample actually has a descender in it */
   expect(settled.size, "the chrome did not settle — the check below would be about the resting title").toBe("22px");
   expect(/[gjpqy]/.test(settled.text), `the settled title ("${settled.text}") carries no descender — this would pass on a clipped box`).toBe(true);
-  lines.push("\n══ /manuscripts/packages — settled");
+  lines.push("\n══ /queries/packages — settled");
   check(await measure(page, [".wsh-title"]), [{ sel: ".wsh-title", what: "the settled masthead title" }], lines);
 
   /**

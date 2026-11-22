@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "pop",
+  "where": "360x780 a group to open from",
+  "ok": true,
+  "detail": "{\"n\":6,\"id\":\"probe-dangling-pkg\"}"
+ },
+ {
+  "lock": "L7",
+  "where": "360x780 band, agent, book block, next step, tabs, in that order",
+  "ok": true,
+  "detail": "[126,179,242.1875,377.1875,566.734375]"
+ },
+ {
+  "lock": "L7",
+  "where": "360x780 chip and date text is at least 11px",
+  "ok": true,
+  "detail": "[11,11,11,11,11,11,11]"
+ },
+ {
+  "lock": "L7",
+  "where": "360x780 ‹ N / M › counts the list it came from",
+  "ok": true,
+  "detail": "1 / 6 vs 1 / 6"
+ },
+ {
+  "lock": "L2",
+  "where": "360x780 the query: colour rules",
+  "ok": true,
+  "detail": "navy 2"
+ },
+ {
+  "lock": "L11",
+  "where": "360x780 the query: no image twice",
+  "ok": true,
+  "detail": "[\"/images/qc/qc-inkwell.png\"]"
+ },
+ {
+  "lock": "L7",
+  "where": "360x780 the next step's sentence is the desktop card's",
+  "ok": true,
+  "detail": "Elinor has had your query 5 weeks. vs desktop Elinor has had your query 5 weeks."
+ },
+ {
+  "lock": "L7",
+  "where": "360x780 › steps to the next of the same list",
+  "ok": true,
+  "detail": "2 / 6"
+ }
+]

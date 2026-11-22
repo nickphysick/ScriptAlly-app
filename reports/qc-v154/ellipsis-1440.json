@@ -1,0 +1,53 @@
+{
+ "cardW": 310.7,
+ "named": [
+  {
+   "id": "cv25-q-06",
+   "named": [
+    "ellipsis:Clara Beaumont"
+   ]
+  },
+  {
+   "id": "cv25-q-09",
+   "named": [
+    "ellipsis:Jonathan Marsh"
+   ]
+  },
+  {
+   "id": "msv12-q-4",
+   "named": [
+    "ellipsis:Abara Grant Agency"
+   ]
+  },
+  {
+   "id": "msv12-q-2",
+   "named": [
+    "ellipsis:Douglas Renner"
+   ]
+  },
+  {
+   "id": "seed-query-23",
+   "named": [
+    "ellipsis:Rufus Oyelaran"
+   ]
+  },
+  {
+   "id": "seed-pkgq-4",
+   "named": [
+    "ellipsis:Northbank Literary"
+   ]
+  },
+  {
+   "id": "probe-un-both",
+   "named": [
+    "ellipsis:Agent not recorded"
+   ]
+  },
+  {
+   "id": "probe-un-noagent",
+   "named": [
+    "ellipsis:Agent not recorded"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: the page reports reduced motion",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the save landed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the save started no animation and no transition anywhere in the card",
+  "ok": false,
+  "got": "[\"spanel:qc160-bump\"]"
+ },
+ {
+  "name": "after the save: the strip, label and footer moved on",
+  "ok": true,
+  "got": "{\"w0\":{\"band\":\"MATERIALS REQUESTED\",\"pill\":\"Partial requested\",\"foot\":\"Send the partial by 26 Nov Mark partial sent\",\"steps\":[\"You sent Mira your query\",\"Mira asked for a partial\"]},\"w1\":{\"band\":\"WITH THE AGENT\",\"pill\":\"Partial sent\",\"foot\":\"Waiting on Mira Reply expected by 11 Feb 2027 Record a response\",\"steps\":[\"You sent Mira your query\",\"Mira asked for a partial\",\"You sent Mira your partial\"]}}"
+ },
+ {
+  "name": "after the save: one more step, the one saved",
+  "ok": true,
+  "got": "[\"You sent Mira your query\",\"Mira asked for a partial\",\"You sent Mira your partial\"]"
+ },
+ {
+  "name": "the undo started no animation and no transition anywhere in the card",
+  "ok": false,
+  "got": "[\"spanel:qc160-bump\"]"
+ },
+ {
+  "name": "after the undo: exactly as before the save",
+  "ok": true,
+  "got": "{\"w0\":{\"band\":\"MATERIALS REQUESTED\",\"pill\":\"Partial requested\",\"foot\":\"Send the partial by 26 Nov Mark partial sent\",\"steps\":[\"You sent Mira your query\",\"Mira asked for a partial\"]},\"w2\":{\"band\":\"MATERIALS REQUESTED\",\"pill\":\"Partial requested\",\"foot\":\"Send the partial by 26 Nov Mark partial sent\",\"steps\":[\"You sent Mira your query\",\"Mira asked for a partial\"]}}"
+ },
+ {
+  "name": "no leaving copy of the toast or of a step is left",
+  "ok": true,
+  "got": ""
+ }
+]

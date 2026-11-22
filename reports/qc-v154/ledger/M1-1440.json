@@ -1,0 +1,512 @@
+[
+ {
+  "name": "cards on the page (population)",
+  "ok": true,
+  "got": "33"
+ },
+ {
+  "name": "three columns, 14px gap",
+  "ok": true,
+  "got": "310.656px 310.672px 310.656px · 14px · 960"
+ },
+ {
+  "name": "cards sit in three columns",
+  "ok": true,
+  "got": "0, 324.7, 649.3"
+ },
+ {
+  "name": "seed-query-12: no status word on show",
+  "ok": true,
+  "got": "Offer · NB | Noah Bright | Bright Literary | Sent | 10 Jun | 154 days ago | Next | No date yet | answer the offer | 2"
+ },
+ {
+  "name": "seed-query-12: band in the stage tone",
+  "ok": true,
+  "got": "heather rgb(231, 214, 220)"
+ },
+ {
+  "name": "seed-query-12: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-08: no status word on show",
+  "ok": true,
+  "got": "Offer · TE | Tom Ellery | Ellery & Finch | Sent | 22 Aug | 81 days ago | Next | No date yet | answer the offer | 1"
+ },
+ {
+  "name": "cv25-q-08: band in the stage tone",
+  "ok": true,
+  "got": "heather rgb(231, 214, 220)"
+ },
+ {
+  "name": "cv25-q-08: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-7: no status word on show",
+  "ok": true,
+  "got": "Partial requested · RL | Rachel Lin | Lin Literary | Sent | 5 Aug | 98 days ago | Next | 38 days late | asked 84 days ago | 1"
+ },
+ {
+  "name": "seed-query-7: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "seed-query-7: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-11: no status word on show",
+  "ok": true,
+  "got": "Revise & resubmit · IK | Iris Kwan | Kwan & Hall | Sent | 8 Jul | 126 days ago | Next | 23 days late | asked 126 days ago | 2"
+ },
+ {
+  "name": "seed-query-11: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "seed-query-11: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-9: no status word on show",
+  "ok": true,
+  "got": "Full requested · AD | Ana Duarte | Duarte Words | Sent | 8 Jul | 126 days ago | Next | No date yet | asked 84 days ago | 2"
+ },
+ {
+  "name": "seed-query-9: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "seed-query-9: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-06: no status word on show",
+  "ok": true,
+  "got": "Partial requested · CB | Clara Beaumont | Harbour Lane | Sent | 2 Sep | 70 days ago | Next | No date yet | asked 70 days ago | 1"
+ },
+ {
+  "name": "cv25-q-06: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "cv25-q-06: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-20: no status word on show",
+  "ok": true,
+  "got": "Partial requested · DM | David Marsh | Marsh & Co | Sent | 5 Aug | 98 days ago | Next | No date yet | asked 84 days ago | 1"
+ },
+ {
+  "name": "seed-query-20: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "seed-query-20: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-3: no status word on show",
+  "ok": true,
+  "got": "Partial requested · EV | Edda Voss | Voss Literary | Sent | 6 Sep | 66 days ago | Next | No date yet | asked 60 days ago | 1"
+ },
+ {
+  "name": "msv12-q-3: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "msv12-q-3: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "rj-send: no status word on show",
+  "ok": true,
+  "got": "Full requested · IV | Imogen Vale | Vale & Wick | Sent | 23 Jul | 111 days ago | Next | No date yet | asked 60 days ago | 1"
+ },
+ {
+  "name": "rj-send: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "rj-send: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-09: no status word on show",
+  "ok": true,
+  "got": "Full requested · JM | Jonathan Marsh | The Marsh Agency | Sent | 24 Sep | 48 days ago | Next | No date yet | asked 48 days ago | 1"
+ },
+ {
+  "name": "cv25-q-09: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "cv25-q-09: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cor-move-a: no status word on show",
+  "ok": true,
+  "got": "Partial requested · MR | Marcus Reed | Reed & Partners | Sent | 29 Jul | 105 days ago | Next | No date yet | asked 65 days ago | 1"
+ },
+ {
+  "name": "cor-move-a: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "cor-move-a: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-07: no status word on show",
+  "ok": true,
+  "got": "Partial requested · MR | Marcus Reed | Bloomsbury Quill | Sent | 10 Sep | 62 days ago | Next | No date yet | asked 62 days ago | 1"
+ },
+ {
+  "name": "cv25-q-07: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "cv25-q-07: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-3: no status word on show",
+  "ok": true,
+  "got": "Full requested · MR | Marcus Reed | Reed & Partners | Sent | 25 Jun | 139 days ago | Next | No date yet | asked 139 days ago | 1"
+ },
+ {
+  "name": "seed-pkgq-3: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "seed-pkgq-3: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-cal-passed865-q: no status word on show",
+  "ok": true,
+  "got": "Full requested · OF | Ottoline Frayn | Frayn Agency | Sent | 18 Apr 2024 | over a year ago | Next | No date yet | 1"
+ },
+ {
+  "name": "seed-cal-passed865-q: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "seed-cal-passed865-q: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-4: no status word on show",
+  "ok": true,
+  "got": "Full requested · TA | Theo Abara | Abara Grant Agency | Sent | 7 Sep | 65 days ago | Next | No date yet | asked 53 days ago | 1"
+ },
+ {
+  "name": "msv12-q-4: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "msv12-q-4: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "rj-dupe: no status word on show",
+  "ok": true,
+  "got": "Full requested · TH | Tobias Hark | Hark Literary | Sent | 13 Jul | 121 days ago | Next | No date yet | asked 63 days ago | 1"
+ },
+ {
+  "name": "rj-dupe: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "rj-dupe: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-10: no status word on show",
+  "ok": true,
+  "got": "Partial sent · PV | Peter Vance | Vance Associates | Sent | 24 Jul | 110 days ago | Next | Response overdue | Send nudge now | 1"
+ },
+ {
+  "name": "seed-pkgq-10: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "seed-pkgq-10: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-5: no status word on show",
+  "ok": true,
+  "got": "Full sent · SP | Sun-hee Park | Meridian Line | Sent | 1 Jul | 133 days ago | Next | Response overdue | Send nudge now | 1"
+ },
+ {
+  "name": "msv12-q-5: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "msv12-q-5: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-2: no status word on show",
+  "ok": true,
+  "got": "Queried · DR | Douglas Renner | Renner & Frost | Sent | 8 Sep | 64 days ago | Next | Response overdue | Send nudge now | 1"
+ },
+ {
+  "name": "msv12-q-2: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "msv12-q-2: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-2: no status word on show",
+  "ok": true,
+  "got": "Queried · TE | Tom Ellery | Curtis Vane | Sent | 1 Sep | 71 days ago | Next | Response overdue | Send nudge now"
+ },
+ {
+  "name": "seed-query-2: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "seed-query-2: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "thin-q-gap-solo: no status word on show",
+  "ok": true,
+  "got": "Partial sent · DR | Devendra Rao | Rao Agency | Sent | 6 Aug | 97 days ago | Next | Response overdue | Send nudge now | 1"
+ },
+ {
+  "name": "thin-q-gap-solo: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "thin-q-gap-solo: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cor-pair: no status word on show",
+  "ok": true,
+  "got": "Partial sent · EH | Elinor Hale | Cavendish & Roe | Sent | 8 Aug | 95 days ago | Next | Response overdue | Send nudge now | 1"
+ },
+ {
+  "name": "cor-pair: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "cor-pair: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-23: no status word on show",
+  "ok": true,
+  "got": "Partial sent · RO | Rufus Oyelaran | Oyelaran Books | Sent | 22 Jul | 112 days ago | Next | Response overdue | Send nudge now | 1"
+ },
+ {
+  "name": "seed-query-23: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "seed-query-23: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-8: no status word on show",
+  "ok": true,
+  "got": "Partial sent · DM | David Marsh | Marsh & Co | Sent | 25 Jul | 109 days ago | Reply expected by | 14 Nov | 1"
+ },
+ {
+  "name": "seed-query-8: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "seed-query-8: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "probe-dangling-pkg: no status word on show",
+  "ok": true,
+  "got": "Queried · EH | Elinor Hale | Cavendish & Roe | Sent | 20 Sep | 52 days ago | Reply expected by | 15 Nov"
+ },
+ {
+  "name": "probe-dangling-pkg: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "probe-dangling-pkg: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "probe-un-noms: no status word on show",
+  "ok": true,
+  "got": "Queried · EH | Elinor Hale | Cavendish & Roe | Sent | 20 Sep | 52 days ago | Reply expected by | 15 Nov"
+ },
+ {
+  "name": "probe-un-noms: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "probe-un-noms: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-4: no status word on show",
+  "ok": true,
+  "got": "Partial sent · PN | Priya Nair | Northbank Literary | Sent | 30 Jun | 134 days ago | Reply expected by | 15 Nov | 1"
+ },
+ {
+  "name": "seed-pkgq-4: band in the stage tone",
+  "ok": true,
+  "got": "rose rgb(236, 214, 210)"
+ },
+ {
+  "name": "seed-pkgq-4: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "probe-goalstress-today: no status word on show",
+  "ok": true,
+  "got": "Queried · EH | Elinor Hale | Cavendish & Roe | Sent | 23 Sep | 49 days ago | Reply expected by | 18 Nov"
+ },
+ {
+  "name": "probe-goalstress-today: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "probe-goalstress-today: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "qc150l9-q: no status word on show",
+  "ok": true,
+  "got": "Full sent · WC | Wren Calloway | Calloway & Hart | Sent | 15 Sep | 57 days ago | Reply expected by | 7 Jan 2027 | 1"
+ },
+ {
+  "name": "qc150l9-q: band in the stage tone",
+  "ok": true,
+  "got": "blue rgb(217, 225, 234)"
+ },
+ {
+  "name": "qc150l9-q: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "probe-un-both: no status word on show",
+  "ok": true,
+  "got": "Queried · – | Agent not recorded | Sent | 20 Sep | 52 days ago | Next | No reply date"
+ },
+ {
+  "name": "probe-un-both: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "probe-un-both: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "probe-un-noagent: no status word on show",
+  "ok": true,
+  "got": "Queried · – | Agent not recorded | Sent | 20 Sep | 52 days ago | Next | No reply date"
+ },
+ {
+  "name": "probe-un-noagent: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "probe-un-noagent: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-14: no status word on show",
+  "ok": true,
+  "got": "Queried · FS | Fenella Strand | Brightwater Books | Sent | 28 Sep | 44 days ago | Next | No reply date"
+ },
+ {
+  "name": "cv25-q-14: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "cv25-q-14: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-13: no status word on show",
+  "ok": true,
+  "got": "Queried · NH | Nadia Hussain | Northgate Literary | Sent | 30 Sep | 42 days ago | Next | No reply date | 1"
+ },
+ {
+  "name": "cv25-q-13: band in the stage tone",
+  "ok": true,
+  "got": "sand rgb(239, 231, 218)"
+ },
+ {
+  "name": "cv25-q-13: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ }
+]

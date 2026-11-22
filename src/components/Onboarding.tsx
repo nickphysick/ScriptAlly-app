@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { answerFor } from "../lib/dashFirstVisit";
+import { logEvent } from "../lib/events";
 import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
@@ -135,7 +137,7 @@ export const WelcomeStageScreen: React.FC<{
 };
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-  const { currentUser, manuscripts, addManuscript, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, addManuscript, updateUserProfile, entitlement } = useScriptAllyDb();
 
   const STORAGE_KEY = `scriptally_onboarding_progress_${currentUser?.id || "anon"}`;
 
@@ -243,7 +245,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
   // Returns the new manuscript id, or null when the save didn't land.
   const saveBranchManuscript = async (fields: ManuscriptFieldsState, status: ManuscriptStatus): Promise<string | null> => {
-    const limitErr = manuscriptLimitError(currentUser?.plan, manuscripts.length);
+    const limitErr = manuscriptLimitError(entitlement.pro, manuscripts.length);
     if (limitErr) {
       setBranchError(limitErr);
       return null;
@@ -321,6 +323,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const finishOnboarding = async () => {
     localStorage.removeItem(STORAGE_KEY);
     persistProfile({ onboardingComplete: true });
+    /* Dashboard first visit v2 (Part I): the account's sign-up, with the path its answers chose */
+    const path = answerFor({ stage: queryingStage ?? currentUser?.queryingStage, status: aStart?.status, legacy: null }) ?? "ready";
+    logEvent(currentUser?.id, "signed_up", path, { path });
     onComplete();
   };
 
@@ -418,12 +423,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   setBranchError(null);
                   await finishOnboarding();
                 }
-              }}
-              onOpenImportDesk={async () => {
-                // Escape hatch into the Import desk: create the manuscript first (best-effort), then finish.
-                await ensureBranchBManuscript();
-                sessionStorage.setItem("scriptally_post_onboarding_tab", "import");
-                await finishOnboarding();
               }}
               /* The import ends on the dashboard, which is the absence of a post-onboarding hatch. */
               onImportComplete={() => { void finishOnboarding(); }}

@@ -7,7 +7,8 @@
  * primary+sub genre accessor, and one payload/limit-check helper so onboarding and
  * AddManuscriptFocusForm never diverge into two manuscript writers.
  */
-import { CompTitle, Manuscript, ManuscriptStatus, UserPlan } from "../types";
+import { AGE_LABELS, normaliseAgeCategory } from "./ageCategories";
+import { CompTitle, Manuscript, ManuscriptStatus } from "../types";
 
 export const PREDEFINED_GENRES = [
   "Literary Fiction",
@@ -31,7 +32,8 @@ export const PREDEFINED_GENRES = [
 /* "New Adult" was added with onboarding v9 (ruled 11 Oct), between Young Adult and Adult. It is
    additive: nothing is renamed, and firestore.rules takes any string here (`ageCategory is string`,
    up to 128). Every picker that draws from this list now offers it. */
-export const AGE_CATEGORIES = ["Picture Book", "Early Reader", "Middle Grade", "Young Adult", "New Adult", "Adult"];
+/** Manuscripts v28 Part E — the UK list, in order (lib/ageCategories owns it and its normaliser). */
+export const AGE_CATEGORIES: string[] = [...AGE_LABELS];
 
 /** Common shorthand → canonical PREDEFINED_GENRES. The allow-list above stays authoritative; this
  *  just maps the messy ways writers' spreadsheets spell genres onto it. Unknown → dropped. */
@@ -89,14 +91,15 @@ export const FREE_MANUSCRIPT_LIMIT = 1;
  * Seeded from the existing wordCountFeedback ranges + standard category guidance.
  */
 export function genreWordCountRange(ageCategory?: string, genre?: string): string | null {
-  const age = (ageCategory || "").trim();
+  /* v28 Part E: read through the normaliser, so old and new spellings give the same range */
+  const age = normaliseAgeCategory(ageCategory) ?? (ageCategory || "").trim();
   const g = (genre || "").trim().toLowerCase();
 
   // Age category dominates for young readers — genre barely shifts these.
-  if (age === "Picture Book") return "300 – 800";
-  if (age === "Early Reader") return "5,000 – 10,000";
-  if (age === "Middle Grade" || g === "middle grade") return "30,000 – 55,000";
-  if (age === "Young Adult" || g === "young adult") return "50,000 – 80,000";
+  if (age === "Picture book") return "300 – 800";
+  if (age === "Young fiction") return "5,000 – 10,000";
+  if (age === "Middle grade" || g === "middle grade") return "30,000 – 55,000";
+  if (age === "Young adult" || g === "young adult") return "50,000 – 80,000";
 
   // Adult (and anything unspecified) refines by genre.
   if (!g) return null;
@@ -160,11 +163,18 @@ export function buildManuscriptPayload(
   };
 }
 
-/** FREE-tier manuscript limit message, or null when within limit. Mirrors db.addManuscript. */
-export function manuscriptLimitError(plan: UserPlan | undefined, existingCount: number): string | null {
-  if (plan === UserPlan.FREE && existingCount >= FREE_MANUSCRIPT_LIMIT) {
-    return "Free Tier limit reached: You can only configure 1 active manuscript profile. Upgrade to Pro for unlimited additions!";
-  }
+/** The one Free-plan manuscript limit message. */
+export const MANUSCRIPT_LIMIT_ERROR =
+  "Free Tier limit reached: You can only configure 1 active manuscript profile. Upgrade to Pro for unlimited additions!";
+
+/**
+ * ⚠️ PLAN RULES v1.1 (13 Nov) — THE ONE MANUSCRIPT LIMIT, read off the entitlement resolver, never the stored plan: a
+ * founding writer or a trial whose stored plan says Free is not held to one. `pro` is `Entitlement.pro` (true while
+ * the entitlement is pending, so nothing is refused before it loads). Every caller (db.addManuscript, the add form,
+ * onboarding, import) goes through here. There is no agent limit on any plan.
+ */
+export function manuscriptLimitError(pro: boolean, existingCount: number): string | null {
+  if (!pro && existingCount >= FREE_MANUSCRIPT_LIMIT) return MANUSCRIPT_LIMIT_ERROR;
   return null;
 }
 

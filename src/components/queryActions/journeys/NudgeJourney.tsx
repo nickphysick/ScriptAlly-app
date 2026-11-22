@@ -11,12 +11,11 @@
  * `closePlan`, which `replyTask` reads. The drawer writes NO task or dismissal document — the old
  * `logNudge` wrote a task flag, which is why it is not called here.
  */
+import { queryViaOf } from "../../../lib/queryVia"; /* Add agent v1 — an agent's "Other" method seeds no nudge */
 import React, { useState } from "react";
-import { deleteField, doc, setDoc } from "firebase/firestore";
-import { db as fsdb } from "../../../lib/firebase";
+import { saveNudgeSent } from "../../../lib/queryActions/stepSaves";
 import { useScriptAllyDb } from "../../../lib/db";
 import { ActivityType, SubmissionMethod, type Query } from "../../../types";
-import { buildNudgeWrites } from "../../../lib/logNudge";
 import {
   addDays, dayDiff, dayIso, fmt, futureWeeks, pastAnchors, reminderAnchors, rel, sameDay, toDay, up, type Anchor,
 } from "../../../lib/queryActions/dates";
@@ -49,7 +48,7 @@ export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
   const [tabPick, setTabPick] = useState<Tab | null>(S.tabPick !== undefined ? S.tabPick : (req.preset?.nudgeTab ?? null));
   const [sent, setSent] = useState<Date>(dayIn(S.sent) ?? today);
-  const [via, setVia] = useState<SubmissionMethod>(S.via ?? ((agent?.submissionMethod as SubmissionMethod) || (q?.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL));
+  const [via, setVia] = useState<SubmissionMethod>(S.via ?? (queryViaOf(agent?.submissionMethod) || (q?.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL));
   const [said, setSaid] = useState(S.said ?? "");
   const [thenMode, setThenMode] = useState(S.thenMode ?? "4w");
   const [thenCustom, setThenCustom] = useState<Date | null>(dayIn(S.thenCustom));
@@ -177,14 +176,8 @@ export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
       who: <Who name={agentName(agent)} sub={whoLine(agent, q)} nrmn={nrmn} />,
       dirty: touched, snapshot, touched: () => [q.id],
       commit: async () => {
-        if (!db.currentUser) throw new Error("Signed out");
-        const uid = db.currentUser.id;
-        const w = buildNudgeWrites(q, agent, { checkBackDate: dayIso(then), note: said, eventDate: dayIso(sent) } as never, new Date());
-        const id = "act-" + Math.random().toString(36).slice(2, 11);
-        const details = `${w.activity.details} · via ${viaLabel(via)}`;
-        await setDoc(doc(fsdb, "users", uid, "queries", q.id, "activity", id), { ...w.nested, note: details, eventKey: "nudge_sent" });
-        await setDoc(doc(fsdb, "users", uid, "activities", id), { ...w.activity, details, id, userId: uid, eventKey: "nudge_sent" });
-        await db.updateQuery(q.id, { lastNudgeSentDate: w.queryUpdates.lastNudgeSentDate, closePlan: dayIso(then), nudgeDate: deleteField() } as unknown as Partial<Query>);
+        /* v149 — the write is the shared nudge save (lib/queryActions/stepSaves), the query card's "+ Add a step" too */
+        await saveNudgeSent(db, q, agent, { sent, then, said, via, viaWords: viaLabel(via) });
         return { queryId: q.id, message: `Nudge logged · ${agentName(agent)}`, sub: `CONSIDER CLOSING ${up(then)}`, touched: [q.id] };
       },
     };

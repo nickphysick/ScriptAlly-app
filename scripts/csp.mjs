@@ -80,6 +80,7 @@ export const appPolicy = ({ authDomain, functions }) => [
     "https://www.google.com",                   // waitlist: reCAPTCHA Enterprise's clr call (report-only walk)
     functions,                                  // feedback dock (sendBetaFeedback), Smart Import: callables
     "https://cloudflareinsights.com",           // the Cloudflare beacon's report
+    "https://o4512398078967808.ingest.de.sentry.io", // every page: Sentry error reports (crash reporting v1), EU ingest, this org only
   ]],
   ["frame-src", [
     "https://www.google.com",                   // waitlist: reCAPTCHA Enterprise's frame

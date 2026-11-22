@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the render counter is live and counted the grid",
+  "ok": true,
+  "got": "110"
+ },
+ {
+  "name": "population: 116 other grid cards",
+  "ok": true,
+  "got": "116"
+ },
+ {
+  "name": "not one of them rendered on the save",
+  "ok": false,
+  "got": "[\"q152-offertold: 24 → 29\",\"q152-offer: 24 → 29\",\"q152-offer2: 24 → 29\",\"seed-query-12: 24 → 29\",\"cv25-q-08: 35 → 42\",\"seed-query-7: 24 → 29\",\"seed-query-11: 24 → 29\",\"q152-fullreq: 24 → 29\"]"
+ },
+ {
+  "name": "the saved query's own card did render (the counter counts)",
+  "ok": true,
+  "got": "24 → 29"
+ }
+]

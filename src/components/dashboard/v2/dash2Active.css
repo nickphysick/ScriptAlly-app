@@ -1,0 +1,92 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Dashboard v2 · Active queries and the week card (3 Nov; ref design-refs/dashboard-v2). Scoped to `.d58.d2`; see dash2.css's header for the
+ * brand-font and portal rules every v2 sheet follows.
+ */
+/* ── Part C · Active queries ── */
+.d58.d2 .d2-bpill { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: rgba(255, 250, 243, 0.14); color: #fffaf3; font-weight: 600; font-size: 13.5px; }
+.d58.d2 [data-d2-card="active"] .d2-meta { color: #fffaf3; }
+/* v2.1: no tiles — the card is the band, then the chart (ref design-refs/dashboard-v2-1) */
+.d58.d2 .d2-plot { position: relative; overflow: visible; }
+.d58.d2 .d2-plotsvg { position: absolute; inset: 0; display: block; }
+/* a week: a 9px white dot ringed in ink, centred on the line; 13px on hover or focus. The hit area is a 26px ring
+   round it (::before), so a 9px mark is not a 9px target. */
+.d58.d2 .d2-dot {
+  position: absolute; z-index: 2; box-sizing: border-box; width: 9px; height: 9px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  transform: translate(-50%, -50%); transition: width 0.12s ease, height 0.12s ease;
+  background: #fff; box-shadow: 0 0 0 1.5px #1c130f;
+}
+.d58.d2 .d2-dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%; }
+.d58.d2 .d2-dot:hover, .d58.d2 .d2-dot:focus-visible { width: 13px; height: 13px; outline: none; z-index: 3; }
+/* this week: a 36px navy circle with a white halo and an ink ring, the total in Special Elite 15px cream */
+.d58.d2 .d2-wk {
+  position: absolute; z-index: 2; box-sizing: border-box; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  transform: translate(-50%, -50%); transition: transform 0.15s ease;
+  background: var(--sp-anthracite); color: #fffaf3; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #1c130f;
+  font-family: var(--d58-type) !important; font-size: 15px; line-height: 1; display: grid; place-items: center;
+}
+.d58.d2 .d2-wk:hover, .d58.d2 .d2-wk:focus-visible { transform: translate(-50%, -50%) scale(1.08); outline: none; z-index: 3; }
+.d58.d2 .d2-vline { position: absolute; top: 0; bottom: 0; width: 0; margin-left: -0.75px; border-left: 1.5px dashed rgba(28, 19, 15, 0.45); z-index: 1; pointer-events: none; }
+.d58.d2 .d2-axis { position: absolute; left: 0; right: 0; bottom: 8px; height: 18px; z-index: 1; pointer-events: none; }
+.d58.d2 .d2-axis span { position: absolute; bottom: 0; font-size: 12.5px; line-height: 1.3; color: rgba(255, 250, 243, 0.75); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .d58.d2 .d2-wk, .d58.d2 .d2-dot { transition: none; } }
+
+/* the week card — PORTALLED to <body>: literals and `:root` tokens only (`--sp-type`/`--sp-serif` are primitives.css's :root) */
+.d2-wtip {
+  position: fixed; z-index: 60; box-sizing: border-box; width: 250px; padding: 14px 16px 12px; border-radius: 16px; background: #fff; color: #1c130f;
+  box-shadow: 0 0 0 1px #ece6de, 0 18px 36px -12px rgba(28, 19, 15, 0.3); pointer-events: none;
+  font-family: var(--sp-serif);
+}
+.d2-wtip :is(small, span, b, em, li, div) { font-family: inherit; }
+.d2-wtip small { display: block; font-family: var(--sp-mono) !important; font-weight: 500; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
+.d2-wtip .d2-wdt { display: block; margin-top: 2px; font-family: var(--sp-type) !important; font-size: 19px; line-height: 1.2; }
+.d2-wtip .d2-wbig { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; }
+.d2-wtip .d2-wbig b { font-family: var(--sp-type) !important; font-weight: 400; font-size: 46px; line-height: 1; color: var(--sp-anthracite); }
+.d2-wtip .d2-wbig span { font-size: 15px; line-height: 1.15; color: #3b322c; }
+.d2-wtip .d2-wbig em { margin-left: auto; font-style: normal; font-family: var(--sp-mono) !important; font-size: 12px; color: var(--sp-quiet); text-align: right; }
+.d2-wtip .d2-wbar { display: flex; gap: 3px; height: 9px; margin-bottom: 10px; }
+.d2-wtip .d2-wbar i { display: block; border-radius: 5px; }
+.d2-wtip ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.d2-wtip li { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+.d2-wtip li i { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.d2-wtip li b { margin-left: auto; font-family: var(--sp-type) !important; font-weight: 400; font-size: 17px; }
+
+
+/* ── v2.2 Part B · the band: the count left, the change beside it, the Active / Sent toggle right ── */
+.d58.d2 .d22-chart .os-band { box-sizing: border-box; min-height: 60px; padding: 12px 18px; display: flex; align-items: center; }
+.d58.d2 .d22-chart .os-bandrow { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.d58.d2 .d22-chart h2.os-cardttl { font-size: 20px !important; color: #fffaf3 !important; }
+.d58.d2 .d22-chart .d2-bpill { height: auto; padding: 0; border-radius: 0; background: none; font-weight: 600; font-size: 13px; line-height: 1.3; color: #e8b9a6; white-space: nowrap; }
+.d58.d2 .d22-chart .d2-meta { margin-left: auto; color: #fffaf3; }
+.d58.d2 .d22-tog { display: inline-flex; padding: 3px; border-radius: var(--sp-vsw-r); background: rgba(255, 255, 255, 0.1); }
+.d58.d2 .d22-tog button {
+  height: var(--sp-vsw-opt-h); padding: 0 18px; border: 0; border-radius: var(--sp-vsw-opt-r); cursor: pointer; background: transparent;
+  font-family: var(--d58-serif); font-weight: 600; font-size: 13.5px; line-height: 1; color: rgba(255, 250, 243, 0.75);
+}
+.d58.d2 .d22-tog button[aria-selected="true"] { background: #fffaf3; color: #1c130f; }
+.d58.d2 .d22-tog button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+@media (max-width: 1320px) {
+  .d58.d2 .d22-chart h2.os-cardttl { font-size: 17px !important; }
+  .d58.d2 .d22-tog button { padding: 0 12px; }
+}
+
+/* ── v2.2 Part B · Sent: a bar per week over Active's weeks, on the card's white ── */
+.d58.d2 .d22-grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid rgba(28, 19, 15, 0.08); pointer-events: none; }
+.d58.d2 .d22-col { position: absolute; top: 0; bottom: 0; z-index: 2; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.d58.d2 .d22-col.is-on, .d58.d2 .d22-col:focus-visible { background: rgba(42, 58, 82, 0.06); outline: none; }
+.d58.d2 .d22-bar { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 6px 6px 0 0; background: var(--sp-anthracite); }
+.d58.d2 .d22-col.is-now .d22-bar { background: #a0675a; }
+.d58.d2 .d22-bar.is-zero, .d58.d2 .d22-col.is-now .d22-bar.is-zero { background: rgba(42, 58, 82, 0.18); border-radius: 2px 2px 0 0; }
+.d58.d2 .d22-bn { position: absolute; left: 50%; transform: translate(-50%, -100%); font-family: var(--d58-type) !important; font-size: 13px; line-height: 1; color: #1c130f; white-space: nowrap; }
+.d58.d2 .d22-col.is-now .d22-bn { font-size: 15px; color: #a0675a; }
+.d58.d2 .d22-svline { z-index: 3; }
+.d58.d2 .d2-plot.is-sent .d2-axis span { color: var(--sp-quiet); }
+.d58.d2 .d2-plot.is-sent .d2-axis span.is-today { color: #a0675a; }
+/* the Sent week card (portalled: literals only) */
+.d22-stip .d22-snone { margin: 8px 0 10px; font-size: 15px; line-height: 1.35; color: #3b322c; }
+.d22-stip .d22-scum { margin: 10px 0 0; font-size: 13.5px; line-height: 1.3; color: var(--sp-quiet); }
+.d22-stip li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.d22-stip li i { display: inline-block; vertical-align: -1px; margin-right: 10px; }
+.d22-stip li.d22-smore { color: var(--sp-quiet); padding-left: 21px; }

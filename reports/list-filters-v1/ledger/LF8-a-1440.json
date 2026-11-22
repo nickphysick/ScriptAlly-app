@@ -1,0 +1,22 @@
+[
+ {
+  "name": "the menu's choice sets aria-sort on its heading",
+  "ok": true,
+  "got": "ascending / none"
+ },
+ {
+  "name": "a heading press changes the button's field",
+  "ok": true,
+  "got": "Surname"
+ },
+ {
+  "name": "the order switch flips the rows",
+  "ok": true,
+  "got": "msv12-agent-4 → seed-agent-5"
+ },
+ {
+  "name": "…and the heading's arrow and aria-sort follow",
+  "ok": true,
+  "got": "descending"
+ }
+]

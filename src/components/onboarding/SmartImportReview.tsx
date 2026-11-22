@@ -25,7 +25,8 @@
  * now it must be named or removed. A removed one is listed in the skipped-rows notice exactly as
  * the set-aside one was.
  */
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import type { ReviewSnapshot } from "../../lib/importDraftModel";
 import { queryOriginLine } from "../../lib/importLabels";
 import "./importFlow.css";
 import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
@@ -34,25 +35,33 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
   ReviewAgent, ReviewQuery, CheckReason, openCrossedOthers, applyCrossedAnswer, settleAgentReason,
   resolveReason, fmtDate,
-  dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
+  dupNoteOpen, dupNoteKept, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
   rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse, originalsOf, fullerIdentity,
 } from "../../lib/smartImportReviewModel";
-import { importSteps } from "../../lib/importSummary";
+import { importSteps, ruledModel } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
 import { Chip, Stepper } from "./ImportParts";
-import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged } from "./reviewRows";
+import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged, PhoneDupePick } from "./reviewRows";
 import { Disc, initialsOf } from "./ImportParts";
 import { GoMark } from "./v9/GoMark";
+import { PhonePin } from "./setupParts";
+import { useSetupBand, useSetupFootHost } from "./SetupFrame";
+import { useIsMobile } from "../shell/mobileChrome";
 import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
-import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS, ReadingQuestion, IllegibleAgencyQuestion, StripQuestion } from "./v9/DeckQuestions";
+import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS, ReadingQuestion, IllegibleAgencyQuestion, StripQuestion, OrderQuestion, OutcomeQuestion, DateConfirmQuestion } from "./v9/DeckQuestions";
+import { confirmOrder, answerOutcome, monthFirstReading } from "../../lib/importRules";
+import { localToday } from "../../lib/importTypedDate";
+
+/** The month-first card's chip (two-door import v1): the reason's own pill names a date that is needed. */
+const DATE_TO_CONFIRM = "Date to confirm";
 import { stripEligible, showsStrip, confirmStrip, STRIP_CHIP } from "../../lib/importTimeline";
 import { PhotoLead, PageView } from "./v9/PhotoSnip";
 import type { ReviewPhoto } from "../../lib/photoImport";
 import "./photoImport.css";
 import {
   agentAsk, AgentAsk, AGENT_ASK_CHIP, openAgentQuestions, openQueryQuestions, questionFamily,
-  comingUpAgents, comingUpQueries, reviewSubline, gatePrimary, gateHint,
+  comingUpAgents, comingUpQueries, reviewSubline, gatePrimary, gateHint, questionsHead, QUESTIONS_SUB,
   answerKind, answeredLine, allAnsweredHead, writeHint, duplicatesDoneLine, duplicatesNextHint,
 } from "../../lib/reviewGate";
 import { STAGE_NAME } from "../../lib/qcSummary";
@@ -151,12 +160,18 @@ export interface SmartImportReviewProps {
   onImport?: (result: SmartImportResult, left?: { setAside: { status: string; sentDate: string | null }[] }) => void | Promise<void>;
   /** A host with a way out of its own (the Import page) passes this; set-up passes none and no link is drawn. */
   onCancel?: () => void;
+  /** Dashboard first visit v2 (Part F): start from a kept draft's working model and step, not a fresh read. The
+   *  answer deck then opens on the first row still asking something — where the writer left off. */
+  resume?: ReviewSnapshot;
+  /** Dashboard first visit v2 (Part F): the working model after every change, for the host to keep as a draft */
+  onChange?: (snap: ReviewSnapshot) => void;
 }
 
 type Step = "duplicates" | "agents" | "queries";
 
-export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel, photos }) => {
-  const initial = useMemo(() => parseModel(result), [result]);
+export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel, resume, onChange, photos }) => {
+  /* two-door import v1: the review opens on the model with QueryHawk's rules applied, as the read screen counted it */
+  const initial = useMemo(() => ruledModel(result), [result]);
   /* the names and agencies as the file gave them: a merge fills in the fuller name (v1.2.1) only
      where the writer has changed neither */
   const originals = useMemo(() => originalsOf(initial.agents), [initial]);
@@ -165,13 +180,17 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // v9: nothing is set aside before the review begins. A row with no agent and no agency is
   // asked about on the agents step.
   const seeded = initial;
-  const [agents, setAgents] = useState<ReviewAgent[]>(seeded.agents);
-  const [queries, setQueries] = useState<ReviewQuery[]>(seeded.queries);
+  const [agents, setAgents] = useState<ReviewAgent[]>(resume?.agents ?? seeded.agents);
+  const [queries, setQueries] = useState<ReviewQuery[]>(resume?.queries ?? seeded.queries);
   // Open on the duplicates step only when the import actually has clusters (never empty).
   // `hadDuplicates` is fixed for the session: it keeps the step reachable again via Agents' Back even
   // after every cluster is resolved (so a mistaken merge can be undone).
   const hadDuplicates = useMemo(() => initial.agents.some((a) => a.mergeWith.length > 0 && !a.mergeResolved), [initial]);
-  const [screen, setScreen] = useState<Step>(hadDuplicates ? "duplicates" : "agents");
+  const [screen, setScreen] = useState<Step>(resume?.screen ?? (hadDuplicates ? "duplicates" : "agents"));
+  /* Repeats on a phone: which set is on screen, and each set's held choice (set-up on phones v1). */
+  const [dupAt, setDupAt] = useState(0);
+  const [, setDupTick] = useState(0);
+  const dupApply = useRef<Record<string, (() => void) | null>>({});
   // Per-cluster pre-resolution snapshot (keyed by leader id) — restored verbatim on Undo, so a merge or
   // keep-both can be cleanly reversed (un-delete the removed agent, revert repointed queries).
   const snapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: { id: string; agentRef: string }[] }>>({});
@@ -179,10 +198,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   // "Change this" / reset can revert a collapse. `reconciled` drives the card's working↔sorted state,
   // keyed by the cluster leader id.
   const reconcileSnapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: ReviewQuery[] }>>({});
-  const [reconciled, setReconciled] = useState<Record<string, { keptId: string; kind: "collapsed" | "split" }>>({});
+  const [reconciled, setReconciled] = useState<Record<string, { keptId: string; kind: "collapsed" | "split" }>>(resume?.reconciled ?? {});
   const [openId, setOpenId] = useState<string | null>(null);
   /* Rows whose details the writer changed in the panel: "✓ Details added" and "Edit details". */
-  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const [touched, setTouched] = useState<Set<string>>(() => new Set(resume?.touched ?? []));
+  /* Dashboard first visit v2 (Part F): every change is handed to the host, which keeps it as the draft */
+  useEffect(() => { onChange?.({ agents, queries, reconciled, touched: [...touched], screen }); }, [agents, queries, reconciled, touched, screen, onChange]);
   const touch = (id: string) => setTouched((t) => (t.has(id) ? t : new Set(t).add(id)));
   const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
   const toggleFaq = (i: number) => setOpenFaqs((prev) => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; });
@@ -488,6 +509,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           c.members.forEach((m) => placed.add(m.id));
         } else {
           const bars = byKeeper.get(c.leaderId) ?? [];
+          /* A phone shows a two-agent set as three choices (5B), through the same two handlers. */
+          if (isMobile && c.openMembers.length === 2 && bars.length === 0) {
+            units.push({ sort: at(c.leaderId), node: (
+              <PhoneDupePick key={`open-${c.leaderId}`} a={c.openMembers[0]} b={c.openMembers[1]} queryCount={queryCount}
+                onRemove={removeDuplicate} onKeepBoth={() => keepBoth(c.leaderId)}
+                register={(fn) => { dupApply.current[c.leaderId] = fn; setDupTick((t) => t + 1); }} />) });
+            placed.add(c.leaderId);
+            continue;
+          }
           units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)),
             node: <DupeOpen key={`open-${c.leaderId}`} title={setName(c.openMembers)} leader={c.members[0]} members={c.openMembers} bars={bars} queryCount={queryCount} movedCount={movedCount}
                     onRemove={removeDuplicate} onKeepBoth={() => keepBoth(c.leaderId)} /> });
@@ -616,6 +646,13 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       sub: `${originOf(q)} · ${statusAsk ? (q.sentDate ? fmtDate(q.sentDate) : "Undated") : STAGE_NAME[q.status]}`,
       chip: open ? focusReasonMeta(code).pill : "Answered",
     };
+    /* Two-door import v1: the three questions the rules and the readers raise, each its own card. */
+    if (open && code === "dates-out-of-order") return [{ ...base, body: (
+      <OrderQuestion query={q} onChange={replaceQuery} onConfirm={() => replaceQuery(confirmOrder(q))} />) }];
+    if (open && code === "outcome-missing") return [{ ...base, body: (
+      <OutcomeQuestion query={q} onAnswer={(s) => replaceQuery(answerOutcome(q, s))} />) }];
+    if (open && (code === "unreadable-date" || code === "no-date") && monthFirstReading(q.sentDateRaw, localToday())) return [{ ...base, chip: DATE_TO_CONFIRM, body: (
+      <DateConfirmQuestion query={q} code={code} onResolve={(iso) => resolveQueryReason(q.id, code, { sentDate: iso })} />) }];
     /* A query with a timeline is asked about it whole: one card, the strip, one button. */
     if (showsStrip(q, stripIds.current)) {
       const agent = agents.find((x) => x.id === q.agentRef);
@@ -632,6 +669,17 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
 
   // ── The frame of a step ───────────────────────────────────────────────────────────────────────
   const steps = importSteps(hadDuplicates);
+  /* On a phone (set-up on phones v1, 2B) the band carries the review's progress: "Review: agents",
+     with the review's own steps as its segments. The four-dot stepper is hidden there. */
+  const isMobile = useIsMobile();
+  const footHost = useSetupFootHost();
+  const appSegs = isMobile && !footHost;
+  const BAND_NAME: Record<string, string> = { duplicates: "repeats", agents: "agents", queries: "queries" };
+  useSetupBand(isMobile ? {
+    name: `Review: ${BAND_NAME[screen] ?? screen}`,
+    steps: steps.map((id) => ({ id, label: id })),
+    index: Math.max(0, steps.indexOf(screen)),
+  } : null);
   const title = (manuscriptTitle ?? "").trim();
   /* v9: when the last answer lands on the queries step, the sage band says so and accounts for
      every answer given. Only a step that asked something can be "all answered". */
@@ -646,12 +694,42 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         <p>{DUPLICATES_SUB}</p>
       </header>
     ) : screen === "agents" ? (
+      isMobile ? (
+      /* One line in the typewriter face and one sentence beneath (2B; DOCS.headB), from the review's
+         own numbers and words. */
+      <header className="im-ohead im-ohead--sm im-phead">
+        <h1 className="im-h1" data-im="title"><span data-im="title-n">{active.length}</span> agents for your contact list.</h1>
+        <p data-im="title-sub">{reviewSubline(agentOpen, readyAgents.length, "agents")}</p>
+      </header>
+    ) : (
       <header className="im-ohead im-ohead--sm">
         <h1 className="im-stack" data-im="title">
           <span className="im-num" data-im="title-n">{active.length}</span>
           <span className="im-words">agents for your contact list</span>
           <span className="im-sub" data-im="title-sub">{reviewSubline(agentOpen, readyAgents.length, "agents")}</span>
         </h1>
+      </header>
+    )
+    ) : qNeed > 0 ? (
+      /* two-door import v1 (screen 3): while anything is open the step is headed by the questions left */
+      isMobile ? (
+      <header className="im-ohead im-ohead--sm im-phead">
+        <h1 className="im-h1" data-im="title"><span data-im="title-n">{qNeed}</span> {questionsHead(qNeed)}.</h1>
+        <p data-im="title-sub">{QUESTIONS_SUB}</p>
+      </header>
+    ) : (
+      <header className="im-ohead im-ohead--sm">
+        <h1 className="im-stack" data-im="title">
+          <span className="im-num" data-im="title-n">{qNeed}</span>
+          <span className="im-words">{questionsHead(qNeed)}</span>
+          <span className="im-sub" data-im="title-sub">{QUESTIONS_SUB}</span>
+        </h1>
+      </header>
+    )
+    ) : isMobile ? (
+      <header className="im-ohead im-ohead--sm im-phead">
+        <h1 className="im-h1" data-im="title"><span data-im="title-n">{qActive.length}</span> {title ? <>queries for <i>{title}</i>.</> : "queries for your Query Centre."}</h1>
+        {(qNeed > 0 || queriesDone) && <p data-im="title-sub">{reviewSubline(qNeed, readyQueries.length, "queries")}</p>}
       </header>
     ) : (
       <header className="im-ohead im-ohead--sm">
@@ -667,7 +745,19 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
   const listTitle = isDup ? "Possible repeats" : READY_LIST.head;
   const [showAll, setShowAll] = useState(false);
   const allRows = isDup ? duplicateUnits() : screen === "agents" ? agentRows() : queryRows();
-  const rows = isDup || showAll ? allRows : allRows.slice(0, READY_FIRST);
+  /* Repeats on a phone (5B): one set per screen, paged by the pinned "Next set". */
+  const dupPaged = isMobile && isDup;
+  const dupI = Math.min(dupAt, Math.max(0, allRows.length - 1));
+  const dupKey = String((allRows[dupI] as React.ReactElement | undefined)?.key ?? "");
+  const dupLeader = dupKey.replace(/^[a-z]+-/, "");
+  const dupOpenNow = dupKey.startsWith("open-") || (dupKey.startsWith("recon-") && !reconciled[dupLeader]);
+  const dupApplyNow = dupApply.current[dupLeader] ?? null;
+  const dupNext = () => {
+    if (dupApplyNow) dupApplyNow();
+    if (dupI < allRows.length - 1) setDupAt(dupI + 1);
+  };
+  const showDupNext = dupPaged && (dupOpenNow || dupI < allRows.length - 1);
+  const rows = dupPaged ? allRows.slice(dupI, dupI + 1) : isDup || showAll ? allRows : allRows.slice(0, READY_FIRST);
   const outCount = screen === "agents" ? listAgents.length - readyAgents.length : screen === "queries" ? listQueries.length - readyQueries.length : 0;
   const liveCount = screen === "agents" ? readyAgents.length : readyQueries.length;
   const chips = isDup
@@ -692,6 +782,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
 
   return (
     <div className="im-page" data-im="review" data-screen={`review-${screen}`} data-step={screen} key={screen}>
+      {appSegs && (
+        /* In the app's /import on a phone there is no set-up band: the review's own steps sit at the
+           top of the sheet instead (set-up on phones v1). */
+        <div className="im-appsegs" data-im="app-segs">
+          <small>Review: {BAND_NAME[screen] ?? screen} · step {Math.max(0, steps.indexOf(screen)) + 1} of {steps.length}</small>
+          <div aria-hidden="true">{steps.map((id, k) => <i key={id} className={k <= steps.indexOf(screen) ? "on" : undefined} />)}</div>
+        </div>
+      )}
       {head}
       <Stepper steps={steps} current={screen} label="Review progress" />
       {dupesDone && (
@@ -735,6 +833,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           </section>
         ) : (
           <section className={`im-list${isDup ? "" : " o9-ready o9-rise"}`} data-im={isDup ? "list" : "ready"} aria-label={listTitle}>
+            {dupPaged && allRows.length > 0 && <span className="im-setchip" data-im="dup-chip">Set {dupI + 1} of {allRows.length}</span>}
             <div className={`im-listhead${isDup ? "" : " im-listhead--ready"}`} data-im="list-head">
               {!isDup && (
                 <span className="im-readymark" aria-hidden="true">
@@ -758,10 +857,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
         )}
         <div className="o9-bar" data-im="foot">
           <p className="o9-barhint" data-im="hint">{hint}</p>
+          <PhonePin>
           <div className="o9-bargo">
             <button type="button" className="sf-link" onClick={() => back?.()} data-im="back">‹ Back</button>
             {onCancel && <button type="button" className="sf-link sf-link--quiet" onClick={onCancel} data-im="cancel">Cancel</button>}
-            {isDup && (
+            {showDupNext && (
+              <button type="button" className="sf-btn" onClick={dupNext} disabled={dupOpenNow && !dupApplyNow} data-im="dup-next">Next set</button>
+            )}
+            {isDup && !showDupNext && (
               /* v9: lit only once every set is decided. It was always available, and an undecided
                  set carried through to the agents step. */
               <button type="button" className="sf-btn" onClick={() => switchScreen("agents")} disabled={openSets > 0} data-im="primary">{REVIEW_PRIMARY.duplicates}</button>
@@ -771,9 +874,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
             )}
             {screen === "queries" && (
               /* Commit seam: onImport(modelToResult(...)) → the host's loader. */
-              <button type="button" className="sf-btn" onClick={onImportClick} disabled={!canImport} data-im="primary">{gatePrimary("queries", qNeed)}</button>
+              <button type="button" className="sf-btn" onClick={onImportClick} disabled={!canImport} data-im="primary">{gatePrimary("queries", qNeed, { agents: active.length, queries: qActive.length })}</button>
             )}
           </div>
+          </PhonePin>
         </div>
       </div>
       {toast && <UndoToast msg={toast.msg} onUndo={toast.undo} onClose={dismissToast} />}

@@ -1,0 +1,517 @@
+{
+ "ids": {
+  "1": "qc150l9-q",
+  "2": "seed-query-12",
+  "3": "seed-cal-near-q"
+ },
+ "out": {
+  "1": {
+   "n": 1,
+   "rows": "1",
+   "outer": [
+    0,
+    0,
+    524,
+    79
+   ],
+   "pill": [
+    14,
+    13,
+    323,
+    52
+   ],
+   "text": [
+    67,
+    21,
+    159,
+    36
+   ],
+   "lead": [
+    67,
+    21,
+    159,
+    19
+   ],
+   "sub": [
+    67,
+    40,
+    159,
+    17
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "reply-btn",
+     "act": "resp",
+     "label": "Record a response",
+     "box": [
+      349,
+      13,
+      161,
+      52
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      67,
+      21,
+      159,
+      19
+     ],
+     "in": [
+      14,
+      13,
+      323,
+      52
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      67,
+      40,
+      159,
+      17
+     ],
+     "in": [
+      14,
+      13,
+      323,
+      52
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      349,
+      13,
+      161,
+      52
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      79
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  },
+  "2": {
+   "n": 2,
+   "rows": "2",
+   "outer": [
+    0,
+    0,
+    524,
+    121
+   ],
+   "pill": null,
+   "text": [
+    61,
+    13,
+    445,
+    38
+   ],
+   "lead": [
+    61,
+    13,
+    445,
+    20
+   ],
+   "sub": [
+    61,
+    33,
+    445,
+    18
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "foot-link",
+     "act": "tell",
+     "label": "Tell them",
+     "box": [
+      228,
+      61,
+      99,
+      46
+     ],
+     "cut": false
+    },
+    {
+     "role": "reply-btn",
+     "act": "offer",
+     "label": "Accept or decline",
+     "box": [
+      335,
+      61,
+      175,
+      46
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      61,
+      13,
+      445,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      61,
+      33,
+      445,
+      18
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      228,
+      61,
+      99,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      335,
+      61,
+      175,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  },
+  "3": {
+   "n": 3,
+   "rows": "2",
+   "outer": [
+    0,
+    0,
+    524,
+    121
+   ],
+   "pill": null,
+   "text": [
+    61,
+    13,
+    445,
+    38
+   ],
+   "lead": [
+    61,
+    13,
+    445,
+    20
+   ],
+   "sub": [
+    61,
+    33,
+    445,
+    18
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "foot-replied",
+     "act": "resp",
+     "label": "Wren replied",
+     "box": [
+      14,
+      74,
+      95,
+      20
+     ],
+     "cut": false
+    },
+    {
+     "role": "foot-link",
+     "act": "close",
+     "label": "Close it",
+     "box": [
+      318,
+      61,
+      84,
+      46
+     ],
+     "cut": false
+    },
+    {
+     "role": "reply-btn",
+     "act": "nudge",
+     "label": "Nudge",
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      61,
+      13,
+      445,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      61,
+      33,
+      445,
+      18
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      14,
+      74,
+      95,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      318,
+      61,
+      84,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  },
+  "long": {
+   "n": 3,
+   "rows": "2",
+   "outer": [
+    0,
+    0,
+    524,
+    121
+   ],
+   "pill": null,
+   "text": [
+    61,
+    13,
+    445,
+    38
+   ],
+   "lead": [
+    61,
+    13,
+    445,
+    20
+   ],
+   "sub": [
+    61,
+    33,
+    445,
+    18
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "foot-replied",
+     "act": "resp",
+     "label": "Wren replied",
+     "box": [
+      14,
+      74,
+      95,
+      20
+     ],
+     "cut": false
+    },
+    {
+     "role": "foot-link",
+     "act": "close",
+     "label": "Close it",
+     "box": [
+      318,
+      61,
+      84,
+      46
+     ],
+     "cut": false
+    },
+    {
+     "role": "reply-btn",
+     "act": "nudge",
+     "label": "Nudge",
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      61,
+      13,
+      445,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      61,
+      33,
+      445,
+      18
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      14,
+      74,
+      95,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      318,
+      61,
+      84,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  }
+ }
+}

@@ -158,16 +158,18 @@ describe("the head", () => {
     expect(whereLine({ city: "", country: "", responseTimeWeeks: 0 }).reply, "the quick-add stub is not 'replies at once'").toBe("Reply time unknown");
     expect(whereLine({ city: "", country: "", responseTimeWeeks: undefined }).reply).toBe("Reply time unknown");
   });
-  it("how: the enum's four, the two legacy spellings (ruling 2), and nothing for Other", () => {
+  /* re-pointed (Add agent v1): Other is a method with its own words, "Via Other" when it has none */
+  it("how: the enum's four, the two legacy spellings (ruling 2), and Other in its own words", () => {
     expect(methodPhrase(SubmissionMethod.EMAIL)).toBe("By email");
     expect(methodPhrase(SubmissionMethod.QUERY_MANAGER)).toBe("Via QueryManager");
     expect(methodPhrase(SubmissionMethod.ONLINE_FORM)).toBe("Via their form");
     expect(methodPhrase(SubmissionMethod.POST)).toBe("By post");
     expect(methodPhrase("QueryManager")).toBe("Via QueryManager");
     expect(methodPhrase("Agency form")).toBe("Via their form");
-    expect(methodPhrase("Other")).toBeNull();
+    expect(methodPhrase("Other")).toBe("Via Other");
+    expect(methodPhrase("Other", "Agency portal")).toBe("Via Agency portal");
     expect(howLine({ submissionMethod: SubmissionMethod.EMAIL, noResponseMeansNo: true })).toBe("By email · Silence means no");
-    expect(howLine({ submissionMethod: "Other" as SubmissionMethod, noResponseMeansNo: undefined })).toBeNull();
+    expect(howLine({ submissionMethod: "Other" as SubmissionMethod, noResponseMeansNo: undefined })).toBe("Via Other");
   });
   it("the MSWL link lives in socials and goes through the shared href builder", () => {
     expect(mswlLinkOf({ socials: [{ platform: "X / Twitter", handle: "@x" }, { platform: "MSWL", handle: "manuscriptwishlist.com/mswl-post/ada" }] }))

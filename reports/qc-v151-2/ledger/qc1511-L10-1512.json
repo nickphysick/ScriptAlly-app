@@ -1,0 +1,22 @@
+[
+ {
+  "where": "population: three gaps below the band",
+  "ok": true,
+  "detail": "{\"gaps\":3,\"scrolled\":5363}"
+ },
+ {
+  "where": "gap at y 256: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/1053 off · 233,229,223"
+ },
+ {
+  "where": "gap at y 257: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/1053 off · 233,229,223"
+ },
+ {
+  "where": "gap at y 257: one even colour, the ground under the cards' shadow",
+  "ok": true,
+  "detail": "0/1053 off · 233,229,223"
+ }
+]

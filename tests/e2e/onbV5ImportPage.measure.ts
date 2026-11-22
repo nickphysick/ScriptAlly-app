@@ -27,7 +27,6 @@ const P1_SCREENS: Screen[] = [
   /* v9: set-up no longer shows the v5 book step (OB9 B1–B4); the Import page's is held by F2. */
   /* v9: the fork and the hand-off are redrawn (OB9 F1). */
   { id: "used-free", q: "s=used-free", mode: "full" },
-  { id: "used-pro", q: "s=used-pro", mode: "full" },
   { id: "unreadable", q: "s=unreadable", mode: "full" },
   { id: "nothing", q: "s=nothing", mode: "full" },
   { id: "unloaded", q: "s=unloaded", mode: "full" },
@@ -79,7 +78,11 @@ for (const vp of P1_VIEWPORTS) {
       const before: Record<string, { html: string; boxes: unknown[] }> = !CAPTURE && existsSync(P1_FILE) ? JSON.parse(readFileSync(P1_FILE, "utf8")) : {};
       const now: Record<string, { html: string; boxes: unknown[] }> = {};
       const diffs: string[] = [];
+      /* Phone last screens v1 (2B): below 768px the dead ends' actions moved into the set-up frame's pinned
+         foot by design, so their markup differs from this capture there (PLS1 L2 holds the new shape). */
+      const PHONE_MOVED = new Set(["used-free", "unreadable", "nothing", "unloaded", "flow-nothing"]);
       for (const s of P1_SCREENS) {
+        if (vp.width < 768 && PHONE_MOVED.has(s.id)) continue;
         await reach(page, s);
         const c = await capture(page, '[data-sf="sheet"]', s.mode);
         expect(c, `${s.id}: the sheet is on screen`).toBeTruthy();
@@ -105,7 +108,7 @@ for (const vp of P1_VIEWPORTS) {
         return;
       }
       record("P1", vpName(vp), "screens", { compared: Object.keys(now).length, diffs, clock: P1_CLOCK, gutterLeftOn: !!process.env.IP1_P1_GUTTER });
-      expect(Object.keys(now).length, "every screen was compared").toBe(P1_SCREENS.length);
+      expect(Object.keys(now).length, "every screen was compared").toBe(P1_SCREENS.filter((x) => !(vp.width < 768 && PHONE_MOVED.has(x.id))).length);
       expect(diffs).toEqual([]);
     });
   });
@@ -182,10 +185,11 @@ for (const vp of VIEWPORTS) {
       expect(r!.h1).toBe("Bring your list across.");
       expect(r!.panelButtons, "no button in the panel").toBe(0);
       expect(r!.headerSheets, "no header sheet under the panel").toBe(0);
-      expect(r!.tiles.length, "exactly three tiles").toBe(3);
-      expect(r!.tiles.map((t) => t.id)).toEqual(["smart", "template", "match"]);
+      /* RE-POINTED (two-door import v1): two tiles; the template is the quiet headings line under them */
+      expect(r!.tiles.length, "exactly two tiles").toBe(2);
+      expect(r!.tiles.map((t) => t.id)).toEqual(["smart", "match"]);
       expect(r!.tiles.map((t) => t.title)).toEqual(["Smart import.", "Our template.", "Match your own columns."]);
-      expect(r!.tiles.map((t) => t.buttons)).toEqual([["Import a spreadsheet"], ["Download the template", "Upload my sheet"], ["Match columns"]]);
+      expect(r!.tiles.map((t) => t.buttons)).toEqual([["Import a spreadsheet", "Use photos"], ["Match columns"]]);
       expect(r!.sub).toBe("Agents, queries and dates from the spreadsheet you already keep. You check everything before it's saved.");
       expect(r!.footnote).toBe("An import adds to what you already have. An agent already on your contact list isn't added again.");
       expect(r!.order).toEqual(["header", "tiles", "footnote"]);
@@ -211,11 +215,10 @@ for (const vp of VIEWPORTS) {
 }
 
 /* ════ D2 · each tile's button calls its own handler; the entitlement decides the first ═════════ */
+/* plan rules v1: one Smart Import per account on every plan — two states, no month */
 const ENTITLEMENTS = [
-  { reason: "free_available", fact: "1 Smart Import available", disabled: false },
-  { reason: "free_used", fact: "Smart Import already used", disabled: true },
-  { reason: "pro_available", fact: "1 Smart Import available", disabled: false },
-  { reason: "pro_month_used", fact: "Available 1 Nov", disabled: true },
+  { reason: "available", fact: "1 Smart Import available", disabled: false },
+  { reason: "used", fact: "Smart Import already used", disabled: true },
 ] as const;
 
 test.describe("D2", () => {
@@ -286,7 +289,7 @@ test.describe("D3", () => {
     record("D3", "1440x900", "ways", seen);
     for (const [way, r] of Object.entries(seen)) {
       expect((r as { path: string }).path, way).toBe("/import");
-      expect((r as { tiles: number }).tiles, `${way} lands on the three tiles`).toBe(3);
+      expect((r as { tiles: number }).tiles, `${way} lands on the two tiles`).toBe(2);
     }
   });
 });
@@ -357,7 +360,7 @@ test.describe("F1", () => {
   test("F1 the template tile starts the flow in the app's sheet", async ({ page }) => {
     await openImport(page, { width: 1440, height: 900 });
     const book = await page.evaluate(() => { const id = localStorage.getItem("scriptally_active_manuscript_id"); return id; });
-    await page.locator('.impg input[data-picker="template"]').setInputFiles(FIXTURE("template-iso.csv"));
+    await page.locator('.impg input[data-picker="smart"]').setInputFiles(FIXTURE("template-iso.csv"));
     await page.locator('.impg [data-im="summary"]').waitFor({ timeout: 20_000 });
     if (MUTATE === "F1") {
       /* the named break: the set-up frame mounted in the app */
@@ -381,7 +384,7 @@ test.describe("F1", () => {
     await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length === 3, null, { timeout: 10_000 });
     const back = await flowState(page);
     expect(back.screen).toBe("idle");
-    expect(back.tiles).toBe(3);
+    expect(back.tiles).toBe(2);
   });
 
   test("F1 the Smart import tile opens its confirm step; Back returns to the tiles", async ({ page }) => {
@@ -428,7 +431,7 @@ test.describe("F2", () => {
     await page.getByRole("button", { name: /^Continue$/ }).click();
     await expect(page.getByText("Give it a title")).toBeVisible();
     await page.getByRole("button", { name: /Back/ }).first().click();
-    expect(await tilesShown(page)).toBe(3);
+    expect(await tilesShown(page)).toBe(2);
     expect(await labCalls(page)).toEqual([]);
   });
 });

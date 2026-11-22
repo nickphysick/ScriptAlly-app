@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "L8-1280",
+  "where": "population",
+  "ok": true,
+  "detail": "87"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the panel is today's width (520)",
+  "ok": true,
+  "detail": "520"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "it holds the query card",
+  "ok": true,
+  "detail": "no card"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "its band word is the row's set",
+  "ok": true,
+  "detail": "Gone quiet vs Gone quiet"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the agent tab shows its pane alone",
+  "ok": true,
+  "detail": "[\"agent\"]"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the materials tab shows its pane alone",
+  "ok": true,
+  "detail": "[\"materials\"]"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the notes tab shows its pane alone",
+  "ok": true,
+  "detail": "[\"notes\"]"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the tracking tab shows its pane alone",
+  "ok": true,
+  "detail": "[\"tracking\"]"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "N / M matches the visible order",
+  "ok": true,
+  "detail": "2 / 87 vs 2 / 87"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "› is enabled on a row that has a next",
+  "ok": false,
+  "detail": "enabled false"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "› opens the next row in the visible order",
+  "ok": false,
+  "detail": "msv12-q-1 vs msv12-q-7"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "‹ goes back",
+  "ok": true,
+  "detail": "not back"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "Esc closes it",
+  "ok": true,
+  "detail": "still open"
+ }
+]

@@ -1,0 +1,32 @@
+# green-after: the final run (3a08487fb) — v15 locks, shots, kept v2 locks
+✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.6s)
+✓   2 [measure] › tests/e2e/corkboardV15.measure.ts:63:1 › C1 figures: the header's three figures are figures() of the board, and each filters to exactly its notes (20.1s)
+✓   3 [measure] › tests/e2e/corkboardV15.measure.ts:104:1 › C2 zero figures are not shown; Pick a colour with no figure; Pick a colour to start on an empty board (24.0s)
+✓   4 [measure] › tests/e2e/corkboardV15.measure.ts:130:1 › C3 pinned: Pinned to top holds exactly the pinned notes, first, in every order; Everything else holds none (11.4s)
+✓   5 [measure] › tests/e2e/corkboardV15.measure.ts:152:1 › C4 columns: 4 / 3 / 2 from the wall's width, and note i in column i mod n, row i div n (17.2s)
+✓   6 [measure] › tests/e2e/corkboardV15.measure.ts:175:1 › C5 clamp: only the long note is cut and shows Read all, which opens it (10.1s)
+✓   7 [measure] › tests/e2e/corkboardV15.measure.ts:196:1 › C6 actions: each hover action writes, says so, and its Undo puts the note back (33.6s)
+✓   8 [measure] › tests/e2e/corkboardV15.measure.ts:280:1 › C7 drag: a drop within Everything else writes My order with the note before its target; C8 a drop on a tag files it and keeps its other tags (22.4s)
+✓   9 [measure] › tests/e2e/corkboardV15.measure.ts:318:1 › C9 stacks: one per first tag A to Z then Loose notes; an open stack shows its notes; an empty stack says so (18.8s)
+✓  10 [measure] › tests/e2e/corkboardV15.measure.ts:355:1 › C10 about: one card per agent (query notes under their agent), most first; a card filters to that agent's notes (8.0s)
+✓  11 [measure] › tests/e2e/corkboardV15.measure.ts:382:1 › C11 day one: exactly the three examples, Keep this writes one with Undo; C12 the quiet rule shows What you can do (18.8s)
+✓  12 [measure] › tests/e2e/corkboardV15.measure.ts:412:1 › C13 pop-up: focus starts inside, Tab and Shift+Tab stay inside, Escape closes and focus returns; C14 N and / stand down in fields (7.0s)
+✓  13 [measure] › tests/e2e/corkboardV15.measure.ts:459:1 › C15 words: no pile on the desktop or the phone; C16 no sideways overflow (1280, 1512, 1717, 60 notes); C17 No notes match; C18 targets and focus rings (1.2m)
+✓  14 [measure] › tests/e2e/corkboardV15.measure.ts:540:1 › C19 papers: the five paint their hexes and the old three read as butter, blush and powder, with no write on load; C20 the view and the order survive a reload (18.7s)
+✓  15 [measure] › tests/e2e/corkboardV15Shots.measure.ts:35:1 › shots (1.9m)
+-  16 [measure] › tests/e2e/corkboardV2.measure.ts:40:6 › CB1 colours: the five papers, and the old three mapped when read with no write on load
+-  17 [measure] › tests/e2e/corkboardV2.measure.ts:70:6 › CB2 header: the Contact list's panel, the counts, and no zero glance row
+-  18 [measure] › tests/e2e/corkboardV2.measure.ts:120:6 › CB3 glance filter: linked to agents leaves exactly the linked notes at full opacity, and clears
+-  19 [measure] › tests/e2e/corkboardV2.measure.ts:142:6 › CB4 font: a post-it's words are Special Elite
+-  20 [measure] › tests/e2e/corkboardV2.measure.ts:155:6 › CB5 clamp: a long note shows Read all, a short one does not
+-  21 [measure] › tests/e2e/corkboardV2.measure.ts:170:6 › CB6 pinned: first in every sort and on top of its pile
+-  22 [measure] › tests/e2e/corkboardV2.measure.ts:195:6 › CB7 reorder: one order leaf, My order, and the note lands where the line showed
+-  23 [measure] › tests/e2e/corkboardV2.measure.ts:225:6 › CB8 piles: a drop sets the pile's tag first and keeps the rest; Undo restores; New pile mints
+-  24 [measure] › tests/e2e/corkboardV2.measure.ts:260:6 › CB9 task: Add a task writes what /todo's composer writes; Turn into a task writes only dueDate (and colour if absent)
+-  25 [measure] › tests/e2e/corkboardV2.measure.ts:306:6 › CB10 remember: the view and the sort survive a reload
+-  26 [measure] › tests/e2e/corkboardV2.measure.ts:327:6 › CB11 empty: Pick a colour to start and four examples; Keep this creates a note and leaves the empty state
+✓  27 [measure] › tests/e2e/corkboardV2.measure.ts:350:1 › CB12 phone: at 390, no sideways overflow, one column, nothing draggable (5.9s)
+-  28 [measure] › tests/e2e/corkboardV2.measure.ts:373:6 › CB13 to-do composer: Note mode offers the five papers (retired on the dev line: v51 has no Note mode)
+✓  29 [measure] › tests/e2e/corkboardV2.measure.ts:375:1 › CB14 rules: the five papers, the old three and pinned are accepted; anything else is refused (1.2s)
+12 skipped
+17 passed (7.2m)

@@ -1,0 +1,17 @@
+[
+ {
+  "where": "agency line 14px",
+  "ok": false,
+  "detail": "11px"
+ },
+ {
+  "where": "agency line sentence case (text-transform none)",
+  "ok": false,
+  "detail": "uppercase"
+ },
+ {
+  "where": "agency line Source Serif, no letter-spacing, #5b4f47",
+  "ok": false,
+  "detail": "\"JetBrains Mono\", monosp 1.54px rgba(28, 19, 15, 0.55)"
+ }
+]

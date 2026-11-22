@@ -99,7 +99,7 @@ describe("L3 · with the flag off, the whole app is exactly as before (dev)", ()
     expect(mode.LANDING_ONLY).toBe(false);
   });
 
-  it("the nav offers Log in and the footer Open QueryHawk again", async () => {
+  it("the nav offers Log in again", async () => {
     const { shell, nav } = await withFlag(false);
     expect(nav.marketingNavState(null).showLogIn).toBe(true);
     /* RE-POINTED (waitlist v1, 31 Oct): "/" is the waiting-list page in every build and links nowhere
@@ -107,7 +107,9 @@ describe("L3 · with the flag off, the whole app is exactly as before (dev)", ()
        sign-in screen is still one click away there, and at #/login. */
     const html = renderPage(<shell.MarketingShell user={null} onNavigate={noop} path="/about"><p>page</p></shell.MarketingShell>, "/about");
     expect(html).toContain("Log in");
-    expect(html).toContain("Open QueryHawk");
+    /* RE-POINTED (contact redesign v1, 12 Nov): the public footer no longer carries "Open QueryHawk" in
+       any build (design-refs/contact-terms-unsubscribe-v1.html); the nav's Log in is the way in. */
+    expect(html).not.toContain("Open QueryHawk");
   });
 
   it("a signed-out /dashboard still reaches <Auth/> through App's untouched front door", () => {

@@ -1,0 +1,255 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Manuscripts v28 Part A — EDIT DETAILS IS THE SLIDE-IN DRAWER (design-refs/manuscripts-v28/manuscripts-v28.html).
+ *
+ * It is the shared `HalfDrawer` (shell): the right-hand drawer the Contact list's Housekeeping and the Comparable titles
+ * drawer use. The page supplies the head (a title-page disc, the book's title, "The book's details. Edit anything; save
+ * once."), five numbered sections, and the foot ("Querying since …", Cancel, Save details). Every way in opens it:
+ * the header's Edit, the book view's Edit and "Add one", the logline strip's "Add one", and the guide.
+ *
+ * ⚠️ ONE MANUSCRIPT WRITE. Save sends one `updateManuscript`; Cancel, Escape and the dim discard. Optional text fields
+ *    are omitted when cleared (`deleteField()`), never stored as "".
+ * ⚠️ OPEN-ON-FIELD (v27 Part C) survives: `focus` scrolls its section to the middle of the drawer's body and focuses the
+ *    field with the caret at the end. The sections keep v27's `data-ms21-sect` markers, which the guide's spotlight reads.
+ */
+import React, { useEffect, useRef, useState } from "react";
+import { deleteField, type FieldValue } from "firebase/firestore";
+import { HalfDrawer } from "../../shell/HalfDrawer";
+import { useToast } from "../../toast/ToastProvider";
+import { DEFAULT_AGE, normaliseAgeCategory } from "../../../lib/ageCategories";
+import { AgeField } from "./AgeField";
+import { STATUS_ORDER, STATUS_WORDS } from "../../../lib/manuscriptV21";
+import { sinceDay } from "../../../lib/manuscriptV27";
+import { wordCountHint, pickedFromStored, storedOf, type PickedGenre } from "../../../lib/manuscriptV28";
+import { useScriptAllyDb } from "../../../lib/db";
+import { GenreField } from "./GenreField";
+import { inverseOf, pitchChanged, SAVED, UNDONE, type PitchKey } from "../../../lib/manuscriptV29";
+import { ManuscriptStatus } from "../../../types";
+import type { Manuscript } from "../../../types";
+import "./msv28.css";
+
+/** The sections the drawer can open on (the guide's four steps, the pitch rows' Edit and "Add one"); v29: "wordCount"
+ *  opens on the first section with the word count input focused (the header's "Add a word count"). */
+export type EditField = "basics" | "logline" | "elevatorPitch" | "synopsis" | "wordCount";
+
+export const DRAWER_SUB = "The book’s details. Edit anything; save once.";
+export const PITCH_PLACEHOLDER = "e.g. A ferry skipper races the tide to bring his brother home.";
+export const PITCH_HINT = "What you’d say if someone asked what your book’s about: the hook, then the stakes and what makes it yours. Keep it on the tip of your tongue. You never know when the right person might ask.";
+export const SYNOPSIS_HINT = "The whole story in brief, ending included.";
+export const LOGLINE_HINT = "The hook in a single sentence. It’s the line that opens your query letter.";
+export const LOGLINE_TAG = "one sentence";
+export const PITCH_TAG = "30 seconds, out loud";
+
+/** v28 Part B — the series switch over the existing `series` string. */
+export const SERIES_ON = "Part of a series";
+export const seriesOn = (stored: string | undefined): boolean => !!(stored ?? "").trim();
+export const seriesLine = (on: boolean): string => (on ? "Yes, it’s part of a series" : "No, it’s a standalone");
+/**
+ * What a save writes for the switch: on keeps a stored non-empty value (a writer's own series name) or writes
+ * "Part of a series"; off omits the key. Null when nothing changes.
+ */
+export const seriesPatch = (on: boolean, stored: string | undefined): string | FieldValue | null => {
+  const had = seriesOn(stored);
+  if (on) return had ? null : SERIES_ON;
+  return had ? deleteField() : null;
+};
+
+/** A text field as it belongs in the payload: null when unchanged; `deleteField()` when cleared. */
+export const textPatch = (next: string, prev: string | undefined): string | FieldValue | null => {
+  const t = next.trim();
+  if (t === (prev ?? "").trim()) return null;
+  return t ? t : deleteField();
+};
+/** A typed count as a whole number, or null when the field holds none. */
+export const wordsOf = (raw: string): number | null => {
+  const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+};
+
+/**
+ * Open on a field: the section is scrolled to the middle of the drawer's body and the field takes focus, caret at the
+ * end. Waits a frame for the slide-in's first layout.
+ */
+const useOpenOn = (bodyRef: React.RefObject<HTMLDivElement | null>, field: EditField | undefined) => {
+  useEffect(() => {
+    if (!field) return undefined;
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => {
+        const body = bodyRef.current;
+        const sect = body?.querySelector<HTMLElement>(`[data-ms21-sect="${field === "wordCount" ? "basics" : field}"]`);
+        if (!body || !sect) return;
+        const r = sect.getBoundingClientRect(), v = body.getBoundingClientRect();
+        body.scrollTop += (r.top + r.height / 2) - (v.top + v.height / 2);
+        const el = sect.querySelector<HTMLInputElement | HTMLTextAreaElement>(field === "wordCount" ? "#ms21-f-words" : "textarea, input");
+        if (el) {
+          el.focus({ preventScroll: true });
+          const n = el.value.length;
+          try { el.setSelectionRange(n, n); } catch { /* a field with no caret */ }
+        }
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [bodyRef, field]);
+};
+
+const X = () => (
+  <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2 2 12" /></svg>
+);
+
+const Sect: React.FC<{ n: number; id: string; title: React.ReactNode; tag?: string; optional?: boolean; children: React.ReactNode }> = ({ n, id, title, tag, optional, children }) => (
+  <section className="ms28-sect" data-ms21-sect={id} data-ms28="sect">
+    <h4><span className="ms28-n" aria-hidden="true">{n}</span><span className="ms28-sh" data-ms28="sect-title">{title}</span>{tag ? <span className="ms28-h4s" data-ms28="tag">{tag}</span> : null}{optional ? <em>optional</em> : null}</h4>
+    {children}
+  </section>
+);
+
+export const MsEditDrawer: React.FC<{
+  ms: Manuscript;
+  since: string | null;
+  updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
+  onClose: () => void;
+  /** a save landed (the guide ends its spotlight) */
+  onSaved?: () => void;
+  focus?: EditField;
+  /** v29 Part F: the genuine inverse of a save — given the fields the save changed, as they were (`deleteField()` for
+   *  one that was absent). Present, the saved toast carries Undo. */
+  undo?: (inverse: Record<string, unknown>) => Promise<void>;
+  /** v29 Part F: the pitch pieces whose text the save changed (the page flashes those rows once) */
+  onChanged?: (keys: PitchKey[]) => void;
+}> = ({ ms, since, updateManuscript, onClose, onSaved, focus, undo, onChanged }) => {
+  const { showToast } = useToast();
+  const { addPersonalGenre } = useScriptAllyDb();
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useOpenOn(bodyRef, focus);
+  const [d, setD] = useState({
+    title: ms.title,
+    /* v28 Part E: an old spelling reads as its UK label; nothing stored is Adult, the default */
+    ageCategory: normaliseAgeCategory(ms.ageCategory) ?? ((ms.ageCategory ?? "").trim() || DEFAULT_AGE),
+    wordCount: ms.wordCount > 0 ? ms.wordCount.toLocaleString("en-GB") : "", logline: ms.logline ?? "",
+    elevatorPitch: ms.elevatorPitch ?? "", synopsis: ms.synopsis ?? "",
+    /* v28 Part B: Setting is not in the UI any more; its stored value is left as it is */
+    series: seriesOn(ms.series),
+    status: ms.status, shelvedReason: ms.shelvedReason ?? "",
+  });
+  /* v28 Part D1: one main genre and up to three more, read from the stored labels/ids */
+  const [gx, setGx] = useState<{ main: PickedGenre | null; also: PickedGenre[] }>(() => pickedFromStored(ms.genre, ms.subGenres));
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    if (busy) return;
+    if (!d.title.trim()) { setErr("A manuscript needs a title."); return; }
+    setBusy(true);
+    setErr(null);
+    /* an own genre is registered now, on save, through the one personal-genre path */
+    const resolved: PickedGenre[] = [];
+    for (const p of [gx.main, ...gx.also].filter((x): x is PickedGenre => !!x)) {
+      if (!p.own) { resolved.push(p); continue; }
+      const r = await addPersonalGenre(p.label);
+      /* strictNullChecks is off, so the boolean `ok` does not narrow: test for the reason itself */
+      if ("reason" in r) { setErr(r.reason); setBusy(false); return; }
+      resolved.push(r.id.startsWith("u:") ? { id: null, label: r.label } : { id: r.id, label: r.label });
+    }
+    const [mainG, ...alsoG] = resolved;
+    const patches = {
+      series: seriesPatch(d.series, ms.series),
+      elevatorPitch: textPatch(d.elevatorPitch, ms.elevatorPitch), synopsis: textPatch(d.synopsis, ms.synopsis),
+    };
+    const payload: Record<string, unknown> = {
+      title: d.title.trim(), genre: mainG ? storedOf(mainG) : "", subGenres: alsoG.map(storedOf), ageCategory: d.ageCategory.trim(),
+      wordCount: wordsOf(d.wordCount) ?? 0, logline: d.logline, status: d.status, shelvedReason: d.shelvedReason,
+    };
+    for (const [k, v] of Object.entries(patches)) if (v !== null) payload[k] = v;
+    try {
+      await updateManuscript(ms.id, payload as Partial<Manuscript>);
+    } catch {
+      setErr("That didn’t save. Nothing was recorded.");
+      setBusy(false);
+      return;
+    }
+    /* v29 Part F: Undo puts back exactly what this save changed; a save that changed nothing offers none */
+    const inverse = inverseOf(ms, payload);
+    if (undo && Object.keys(inverse).length) showToast({ message: SAVED, undo: () => undo(inverse), undoneMessage: UNDONE });
+    else showToast({ message: SAVED });
+    onChanged?.(pitchChanged(ms, payload));
+    onSaved?.();
+    onClose();
+  };
+  const day = sinceDay(since);
+  const wcHint = wordCountHint(wordsOf(d.wordCount), gx.main ? storedOf(gx.main) : "");
+
+  return (
+    <HalfDrawer
+      probe="ms-edit" open onClose={onClose} label={`Edit details: ${ms.title}`} width="min(640px, 54vw)" bodyRef={bodyRef}
+      head={(
+        <div className="ms28-dh" data-ms28="drawer-head">
+          <span className="ms28-disc" aria-hidden="true"><i>{ms.title}</i></span>
+          <div className="ms28-tx"><h3 className="ms28-dt">{ms.title}</h3><small>{DRAWER_SUB}</small></div>
+          <button type="button" className="ms28-x" aria-label="Close" data-ms28="drawer-close" onClick={onClose}><X /></button>
+        </div>
+      )}
+      foot={(
+        <div className="ms28-df" data-ms28="drawer-foot">
+          <span>{day ? `Querying since ${day}.` : "Not querying yet."}</span>
+          {err ? <span className="ms28-err" role="alert">{err}</span> : null}
+          <span className="ms28-bt">
+            <button type="button" className="ms28-b g" data-ms21="cancel" onClick={onClose}>Cancel</button>
+            <button type="button" className="ms28-b p" data-ms21="save" disabled={busy} onClick={() => void save()}>Save details</button>
+          </span>
+        </div>
+      )}
+    >
+      <div className="ms28-db" data-ms21="edit-dialog" data-ms28="drawer-body">
+        <Sect n={1} id="basics" title="The book">
+          <label className="ms28-fld"><span>Title <i className="ms28-req">*</i></span>
+            <input id="ms21-f-title" className="big" value={d.title} onChange={(e) => setD({ ...d, title: e.target.value })} /></label>
+          <div className="ms28-fld" data-ms28="genre"><span>Genre</span>
+            <GenreField main={gx.main} also={gx.also} onChange={setGx} /></div>
+          <div className="ms28-frow">
+            <label className="ms28-fld"><span>Word count</span>
+              <input id="ms21-f-words" inputMode="numeric" value={d.wordCount} onChange={(e) => setD({ ...d, wordCount: e.target.value })} /></label>
+            {/* v28 Part C: silent unless the count is 25% outside the main genre's range; it follows the count and genre live */}
+            <p className="ms28-wc" data-ms28="wc-hint" aria-live="polite">{wcHint ? <><b>{wcHint.lead}</b>{wcHint.rest}</> : null}</p>
+          </div>
+          <div className="ms28-fld" data-ms28="age"><span>Age category</span>
+            <AgeField value={d.ageCategory} onChange={(ageCategory) => setD({ ...d, ageCategory })} /></div>
+          <div className="ms28-fld"><span id="ms21-f-status">Where it stands</span>
+            <div className="ms28-type" role="radiogroup" aria-labelledby="ms21-f-status" data-ms21="status-seg">
+              {STATUS_ORDER.map((s) => (
+                <button type="button" role="radio" key={s} aria-checked={d.status === s} onClick={() => setD({ ...d, status: s })}>{STATUS_WORDS[s]}</button>
+              ))}
+            </div>
+          </div>
+          {d.status === ManuscriptStatus.SHELVED ? (
+            <label className="ms28-fld"><span>Shelved reason</span>
+              <input id="ms21-f-shelved" value={d.shelvedReason} onChange={(e) => setD({ ...d, shelvedReason: e.target.value })} /></label>
+          ) : null}
+        </Sect>
+        <Sect n={2} id="logline" title="Logline" tag={LOGLINE_TAG}>
+          <label className="ms28-fld">
+            <textarea id="ms21-f-logline" rows={3} aria-label="Logline" value={d.logline} onChange={(e) => setD({ ...d, logline: e.target.value })} />
+            <p className="ms28-hint" data-ms21="logline-hint">{LOGLINE_HINT}</p></label>
+        </Sect>
+        <Sect n={3} id="elevatorPitch" title="Elevator pitch" tag={PITCH_TAG} optional>
+          <label className="ms28-fld">
+            <textarea id="ms21-f-pitch" rows={3} aria-label="Elevator pitch" data-ms21="pitch" placeholder={PITCH_PLACEHOLDER} value={d.elevatorPitch} onChange={(e) => setD({ ...d, elevatorPitch: e.target.value })} />
+            <p className="ms28-hint" data-ms21="pitch-hint">{PITCH_HINT}</p></label>
+        </Sect>
+        <Sect n={4} id="synopsis" title="Synopsis" optional>
+          <label className="ms28-fld">
+            <textarea id="ms21-f-synopsis" rows={5} aria-label="Synopsis" data-ms21="synopsis" value={d.synopsis} onChange={(e) => setD({ ...d, synopsis: e.target.value })} />
+            <p className="ms28-hint" data-ms21="synopsis-hint">{SYNOPSIS_HINT}</p></label>
+        </Sect>
+        <Sect n={5} id="series" title="Series">
+          <div className="ms28-sr" data-ms28="series">
+            <span><b>Part of a series?</b><small data-ms28="series-line">{seriesLine(d.series)}</small></span>
+            <button type="button" className="ms28-tog" role="switch" aria-checked={d.series} aria-label="Part of a series"
+              data-ms28="series-toggle" onClick={() => setD({ ...d, series: !d.series })}><i /></button>
+          </div>
+        </Sect>
+      </div>
+    </HalfDrawer>
+  );
+};

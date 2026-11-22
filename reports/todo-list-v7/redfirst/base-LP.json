@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "LP",
+  "where": "the probe task is in the tray",
+  "ok": true,
+  "detail": "zz-td7-pick-mvtibda8"
+ },
+ {
+  "lock": "LP",
+  "where": "the date opens the menu",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "LP",
+  "where": "\"Pick a date\" is offered",
+  "ok": false,
+  "detail": "Pick on the calendarDRAG"
+ },
+ {
+  "lock": "LP",
+  "where": "the month is in the popover",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "LP",
+  "where": "today and the past are refused",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "LP",
+  "where": "a pickable day after today",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "LP",
+  "where": "no row is draggable",
+  "ok": false,
+  "detail": ""
+ }
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "D1",
+  "where": "population: the request is open first",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "D1",
+  "where": "once sent, every big event on that query is a collapsed row",
+  "ok": true,
+  "detail": "{\"rows\":1,\"bigs\":0}"
+ }
+]

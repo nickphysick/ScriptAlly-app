@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "PK26-W-1512",
+  "where": "build left",
+  "ok": true,
+  "detail": "28.0 (want 28)"
+ },
+ {
+  "lock": "PK26-W-1512",
+  "where": "build right",
+  "ok": true,
+  "detail": "28.0 (want 28)"
+ }
+]

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { importAgeCategory } from "../lib/ageCategories";
 import React, { useState, useEffect } from "react";
 import "./onboarding/onboarding.css";
 import "./onboarding/importFlow.css";
@@ -103,7 +104,7 @@ function findFuzzyMatch(headers: string[], targetFields: string[]): Record<strin
     website: ["website", "site", "url", "web page", "web", "link"],
     genres: ["genres", "categories", "subjects", "genre list", "tags"],
     mswlNotes: ["mswl", "mswl notes", "manuscript wish list", "wishlist", "interests"],
-    starRating: ["rating", "stars", "star rating", "rank", "importance", "priority"],
+    starRating: ["rating", "stars", "star rating", "agent fit", "fit", "rank", "importance", "priority"],
     notes: ["notes", "comments", "remarks", "memo", "description"],
     
     title: ["title", "book title", "work", "manuscript title", "novel", "manuscript", "story"],
@@ -482,7 +483,8 @@ export const ImportCsv: React.FC<{
           const logline = getMappedValue("logline");
           // Comps column → structured titles-only comps (split on commas / " meets ").
           const comps = parseLegacyComps(getMappedValue("comps"));
-          const ageCategory = getMappedValue("ageCategory");
+          /* v28 Part E: old and new spellings ("Young Adult", "YA", "Young adult") store as the UK label */
+          const ageCategory = importAgeCategory(getMappedValue("ageCategory"));
 
           const msData = {
             title,

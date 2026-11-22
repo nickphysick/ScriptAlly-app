@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C1",
+  "where": "1280x800 the pager states its count",
+  "ok": true,
+  "detail": "{\"text\":\"1 of 35\",\"shown\":true}"
+ },
+ {
+  "lock": "C2",
+  "where": "1280x800 the last page has no Then",
+  "ok": true,
+  "detail": "index 34 of 35 · then null"
+ },
+ {
+  "lock": "D1",
+  "where": "1280x800 no zero rows and no \"0 ready to query\"",
+  "ok": true,
+  "detail": "{\"rows\":[],\"ready\":false}"
+ },
+ {
+  "lock": "C1",
+  "where": "1512x900 the pager states its count",
+  "ok": true,
+  "detail": "{\"text\":\"1 of 35\",\"shown\":true}"
+ },
+ {
+  "lock": "C2",
+  "where": "1512x900 the last page has no Then",
+  "ok": true,
+  "detail": "index 34 of 35 · then null"
+ },
+ {
+  "lock": "D1",
+  "where": "1512x900 no zero rows and no \"0 ready to query\"",
+  "ok": true,
+  "detail": "{\"rows\":[],\"ready\":false}"
+ },
+ {
+  "lock": "C1",
+  "where": "1920x1080 the pager states its count",
+  "ok": true,
+  "detail": "{\"text\":\"1 of 35\",\"shown\":true}"
+ },
+ {
+  "lock": "C2",
+  "where": "1920x1080 the last page has no Then",
+  "ok": true,
+  "detail": "index 34 of 35 · then null"
+ },
+ {
+  "lock": "D1",
+  "where": "1920x1080 no zero rows and no \"0 ready to query\"",
+  "ok": true,
+  "detail": "{\"rows\":[],\"ready\":false}"
+ }
+]

@@ -47,6 +47,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) { html:has(.mk-scope) { scroll-behavior: auto; } }
 
+/* Consistency roll-out v2, Phase 2 (rulings v3, ruling 9): the public pages' brighter rust, named once. The app keeps
+   --sp-rust (#7a3f31). On :root so pages outside .mk-scope read it too. */
+:root { --mk-rust: #a2452a; }
 .mk-scope {
   /* ⚠️ TWO SURFACES, AND THE BOUNDARY IS THE ONLY MARKER. The hero sits on the APP's content-area
      ground; everything from the section break down sits on the brand's warmer desk. There is no
@@ -108,7 +111,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* The primary button on ink: `--hpanel-primary-bg`. Its text is the shell's ink. */
   --mk-cream-btn: #f3eee6;
   /* The founding offer's navy panel: `--ink-band`, the ground of the app's own header panel. */
-  --mk-panel: #2d3a50;
+  --mk-panel: #2a3a52;
   /* A card on a tinted band: the app's `--fc-card`. True white, which `--mk-card` (#fffefb) is not. */
   --mk-white: #ffffff;
   --mk-hero-ground: #fbf9f5;
@@ -117,7 +120,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
   --mk-lower: #f2eee8;
-  --mk-card: #fffefb;
   --mk-parch: #fdfaf5;
   /* The ink at 13% — the one hairline on a light surface. Pre-computed alpha, no `color-mix()`. */
   --mk-hair: rgba(28, 19, 15, .13);
@@ -143,9 +145,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* ⚠️ `--mk-band-a` IS DELETED TOO (landing colours v2). It was About's commitment strip's tan
      fill; that strip is a band holding three cards, which is what the stone band is, so it reads
      `--mk-stone` and the last of the retired parchment band's two stops is gone. */
-  --mk-centre: #f6e4da;
-  --mk-sage: #e9ede6;
-  --mk-sage-t: #5a6e58;
+  /* `--mk-centre`, `--mk-sage`, `--mk-sage-t` and `--mk-card` are deleted (12 Nov): their last readers
+     were the document card and Contact's tiles. */
   --mk-cta: #f5e2da;
   --mk-cta-bd: #e8c8bc;
   --mk-cta-hov: #f8e9e2;
@@ -156,6 +157,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      green build and a green suite. `marketingTokens.test.ts` asserts that every `var(--mk-…)`
      this sheet READS resolves to a declaration; declaring them together here is what makes that
      guard cheap to keep satisfied. */
+  /* /pricing's founding box: the ref's blush (pricing-page-v2 `--blush`) and the step its white
+     fades through on the way there. Its kicker pill is the blush with rust type. */
+  --mk-blush: #f8e8e1;
+  --mk-blush-mid: #fcf4f0;
   --mk-blush-label: rgba(28, 19, 15, .62);
   --mk-blush-note: rgba(28, 19, 15, .62);
   --mk-blush-ph: rgba(28, 19, 15, .48);
@@ -190,7 +195,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      `--mk-ink-hov` is to `--mk-nearblack`. */
   --mk-navy-hov: #1f2c3f;
   /* The accent on LIGHT: the Query Centre's rust. Terracotta (`--mk-terra`) is the accent on ink. */
-  --mk-rust: #a2452a;
+  /* --mk-rust is declared on :root at the top of this file (consistency roll-out v2, Phase 2), so the public pages
+     outside .mk-scope (welcome, privacy, waitlist) read the same named colour */
   /* ── The founding-writers banner ──
      ⚠️ THE BUTTON'S TEXT DELIBERATELY DOES *NOT* GET A TOKEN. The brief asks for #f5f1eb on the
      ink pill; `--mk-cta-ink` is #f7f0e9 and already means "the cream the ink pill prints in".
@@ -207,11 +213,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* The ink pill's hover, shared by the nav's CTA and the contact form's button — one value for
      one job, rather than the same literal typed twice. */
   --mk-ink-hov: #2c1f19;
-  /* The contact page's icon tiles: the grey behind the warning mark, and the pale slate and slate
-     of the privacy mark — the app's own Pro-chip pair. The rose tile reads `--mk-centre`. */
-  --mk-tile-grey: #eceae7;
-  --mk-slate: #6a89a7;
-  --mk-slate-pale: #e7eef3;
+  /* The contact page's tile tokens (`--mk-tile-grey`, `--mk-slate`, `--mk-slate-pale`) are deleted with
+     the tiles (12 Nov). */
   /* The display ink for statement type. `--mk-head` (mocha) is the page-furniture heading colour
      and stays; a 52px+ statement wants the darker end, and the two are not interchangeable. */
   --mk-nearblack: #1c130f;
@@ -224,6 +227,15 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   --mk-f-sans: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
   /* The handwriting: the phone drawer's strapline ("No more winging it."), the ref's Caveat 600. */
   --mk-f-hand: "Caveat", cursive;
+  /* Pricing on phones' two card surfaces, lifted to tokens because Contact and About wear them too
+     on a phone (public pages on phones v1). `--mk-pv-cardline` is the founding box's hairline and
+     `--mk-pv-cardlift` its shadow; `--mk-pv-perklift` is the perk card's ring-and-drop. */
+  --mk-pv-cardline: rgba(28, 19, 15, .08);
+  --mk-pv-cardlift: 0 1px 2px rgba(28, 19, 15, .05), 0 22px 44px -24px rgba(28, 19, 15, .35);
+  --mk-pv-perklift: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 14px -10px rgba(28, 19, 15, .2);
+  /* The join bar's Join pill: the phone's founding primary on ink. A token since the phone menu's
+     closing button wears it too (public pages on phones v1). */
+  --mk-join: #e8b4a3;
   /* Burgundy at low alpha — the illustration slot's placeholder chrome. Pre-computed, per the
      repo's no-colour-mix() rule. */
   --mk-illo-rim: rgba(162, 69, 42, 0.34);
@@ -627,9 +639,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    on the section and a full viewport wide; the sheet clips whatever a scrollbar makes it overhang.
    ⚠️ THE PAIR IS ONE MECHANISM: `z-index: -1` here and `isolation: isolate` on the sheet. Either
    alone is wrong — see the note there.
-   Contact and the two legal pages are one section each, so the whole page is the opening. */
-.mk-fwhero, .mk-contact, .mk-docplane { position: relative; }
-.mk-fwhero::before, .mk-contact::before, .mk-docplane::before {
+   Contact is one section, so the whole page is the opening. (The legal pages left the group on
+   12 Nov: both open on privacy.css's navy drawer, which paints its own ground.) */
+.mk-fwhero, .mk-contact { position: relative; }
+.mk-fwhero::before, .mk-contact::before {
   content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
   left: calc(50% - 50vw); width: 100vw; pointer-events: none;
   background-color: var(--mk-hero-ground);
@@ -662,7 +675,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* `.mk-eyebrow` is DELETED (21 Oct): the old pricing header was its last renderer — checked across
    `src/` after the removal, not from the diff. */
 
-/* The counter: a 5px bar and a mono tally, centred. Live or absent. */
+/* The counter (`FoundingCounter variant="left"`): a 5px bar and one mono line. Live or absent. */
 .mk-fmcount { max-width: 380px; margin: 22px auto 0; }
 .mk-fmbar { height: 5px; border-radius: 999px; background: rgba(162, 69, 42, .16); overflow: hidden; }
 .mk-fmfill {
@@ -679,8 +692,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: "JetBrains Mono", monospace; font-size: .62rem; letter-spacing: .14em;
   text-transform: uppercase; color: var(--mk-blush-label); margin: 8px 0 0;
 }
-.mk-fmtally { color: var(--mk-rust); font-weight: 500; }
-.mk-fmof { opacity: .6; }
 
 
 
@@ -931,10 +942,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   align-items: center; padding: 88px 0 76px;
 }
 .mk-fwcol { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-.mk-fweyebrow {
-  font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .26em;
-  text-transform: uppercase; color: var(--mk-muted); margin: 0 0 22px;
-}
 /* ⚠️ TWO CLASSES AND `!important`, AND BOTH ARE REQUIRED. `src/lib/brand.tsx` injects a rule at
    runtime on every route giving `h1:not(.wsh-title)` the brand heading font with `!important`.
    That selector is 0-1-1; a bare `.mk-fwh1` is 0-1-0, so between two important declarations it
@@ -983,17 +990,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-fwcard {
   display: flex; flex-direction: column;
   background: #fff; border-radius: 14px; padding: 26px 28px 24px;
-}
-/* ⚠️ SCOPED TO `.mk-fwcard`, AND THAT IS THE ONLY REASON IT APPLIES. `.mk-fwcard p` is 0-1-1 — a
-   class and an element — while a bare `.mk-fwk` is 0-1-0, so the generic paragraph rule OUTRANKS
-   the specific one on every property it happens to set. Measured before that was fixed: the
-   kicker rendered at 15.68px in `--mk-muted` where its own rule asked for .55rem in
-   `--mk-kicker`. The mono face, the tracking and the uppercase came through — because the generic
-   rule does not set those — which is exactly why it still looked like a kicker and nobody
-   noticed. A half-applied treatment looks intentional. */
-.mk-fwcard .mk-fwk {
-  font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--mk-claim-accent); margin: 0 0 10px;
 }
 /* Two classes and `!important` for the same reason as the h1 — brand.tsx forces every bare `h2`
    to the brand family, and only a selector of two classes outranks it. */
@@ -1308,279 +1304,360 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      the same inset, in a media query nobody editing the banner would think to look in. */
 }
 
-/* ══════════════ Pricing (public /pricing, ref design-refs/pricing-page-v1.html, 21 Oct) ══════════════
+/* ══════════════ Pricing (public /pricing, ref design-refs/pricing-page-v2.html, 24 Oct) ══════════════
+   Pricing v4 rebuilt this block from v3's (ref pricing-page-v1): the navy band is gone, and the page
+   opens on the founding box laid across the boundary between the ink and the sheet.
    ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED. The three-tier page's `.mk-price*`,
    `.mk-tier*`, `.mk-cmp*` and `.mk-faq*` rules were deleted with it — nothing else in `src/`
    renders any of them (checked after the removal). Every value below is the ref's own, read from
    its stylesheet; where the ref and a marketing token say the same thing, the token is used.
-   ⚠️ EVERY SELECTOR IS `.mk-pv3 .x` (0-2-0) OR `.mk-scope .x` WITH `!important`. brand.tsx injects
+   ⚠️ EVERY SELECTOR IS `.mk-pv4 .x` (0-2-0) OR `.mk-scope .x` WITH `!important`. brand.tsx injects
    `p, span, div, button, input, label { font-family: … }` at 0-0-1 on every route, which beats
    inheritance; the page restates `inherit` on those elements at 0-1-0 (a `:where` list, so it adds
    nothing more) and every face below then wins on specificity rather than on source order. Its
    `h1:not(.wsh-title), h2, h3` rule is `!important`, so the headings take two classes AND the flag.
    ⚠️ SPECIAL ELITE IS WEIGHT 400 ONLY, AND EVERY RULE NAMING IT STATES 400. An `h2` or a `b`
    defaults to bold and would be drawn faux-bold. */
-.mk-pv3 {
-  padding: 18px 18px 0;
+.mk-pv4 {
+  /* The ref's `.sheet` padding: 18px each side, none at the top — the box reaches above it. */
+  padding: 0 18px;
   font-family: var(--mk-f-serif); color: var(--mk-nearblack);
   /* The ref's body states no line-height, so its text sits at \`normal\`; the sheet inherits 1.5,
      which ran every list row ~2.5px taller than the ref (measured at 1440). */
   line-height: normal;
 }
-.mk-pv3 :where(p, span, div, button, input, label, li, a, output, small, b, strong, h1, h2, h3) {
+.mk-pv4 :where(p, span, div, button, input, label, li, a, output, small, b, strong, h1, h2, h3) {
   font-family: inherit;
 }
 
-/* ── The navy band the tiers hang from ── */
-.mk-pv3 .mk-pv3band {
-  position: relative; overflow: hidden; text-align: center;
-  background: var(--mk-navy); color: var(--mk-cream);
-  border-radius: 22px; padding: 44px 40px 128px;
+/* ── The founding box, across the boundary (ref `.fb.fb--a`) ──
+   ⚠️ ON THIS PAGE ALONE THE INK RUNS ON BELOW THE NAV AND THE SHEET STARTS LOWER, so the box can sit
+   across the join: its top half on the ink, the rest on the sheet, the sheet's rounded top corners
+   showing either side. `:has()` scopes it to the page that renders the box, as the landing's phone
+   rule above does — no other page's sheet moves.
+   ⚠️ `overflow: visible` HERE, BECAUSE THE BOX IS MEANT TO LEAVE THE SHEET. The shell's `clip` would
+   cut its top half off at the sheet's edge. Nothing else on this page paints into the sheet's
+   corners (its last element is an empty spacer), so the corners lose nothing to it. */
+.mk-sheet:has(.mk-fb) { margin-top: 150px; overflow: visible; }
+.mk-pv4 .mk-fb {
+  position: relative; z-index: 2; max-width: 1120px; margin: -102px auto 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) 340px;
+  border: 1px solid rgba(28, 19, 15, .08); border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 24px 50px -24px rgba(28, 19, 15, .28);
+  color: var(--mk-nearblack); text-align: left;
+  /* ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND: a gradient that failed to parse would
+     otherwise leave the box see-through, over the ink. White to 42%, through the blush's mid step at
+     62%, to the blush. */
+  background-color: #fff;
+  background-image: linear-gradient(90deg, #fff 0%, #fff 42%, var(--mk-blush-mid) 62%, var(--mk-blush) 100%);
 }
-.mk-pv3 .mk-pv3band::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(1200px 420px at 50% -10%, rgba(255, 255, 255, .07), transparent 60%);
+.mk-pv4 .mk-fbtext { padding: 40px 44px 14px; }
+.mk-pv4 .mk-fb--open .mk-fbtext { padding-bottom: 36px; }
+.mk-pv4 .mk-fbtag {
+  display: inline-block; padding: 5px 12px; border-radius: 999px;
+  background: var(--mk-blush); color: var(--mk-rust);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: 12px; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase;
 }
-/* The band's contents sit above its glow. */
-.mk-pv3 .mk-pv3band > * { position: relative; z-index: 1; }
-.mk-pv3 .mk-pv3kicker {
-  display: inline-block; font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem;
-  letter-spacing: .2em; text-transform: uppercase; line-height: normal;
-  background: var(--mk-cream-btn); color: var(--mk-nearblack); border-radius: 999px; padding: 6px 13px;
-}
-.mk-scope .mk-pv3h1 {
+.mk-scope .mk-fbh1 {
   font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: clamp(1.9rem, 2.8vw, 2.6rem); line-height: 1.14; color: var(--mk-cream);
-  margin: 16px auto 0; max-width: 26ch; text-wrap: balance;
+  font-size: clamp(1.8rem, 2.5vw, 2.35rem); line-height: 1.16; color: var(--mk-nearblack);
+  margin: 14px 0 0; text-wrap: balance;
 }
-.mk-pv3 .mk-pv3sub {
-  font-size: 1.12rem; font-weight: 300; line-height: 1.6; color: rgba(var(--mk-cream-rgb), .78);
-  max-width: 60ch; margin: 14px auto 0; text-wrap: balance;
+.mk-pv4 .mk-fbsub { margin: 12px 0 0; font-size: 1.1rem; line-height: 1.55; color: var(--mk-body); }
+
+/* The counter on the light box: `FoundingCounter`'s `left` shape — a 5px track and one mono line. */
+.mk-pv4 .mk-fbcount { max-width: 380px; margin-top: 24px; }
+.mk-pv4 .mk-fbcount .mk-fmcount { max-width: none; margin: 0; }
+.mk-pv4 .mk-fbcount .mk-fmbar { background: rgba(28, 19, 15, .1); }
+.mk-pv4 .mk-fbcount .mk-fmfill { background: var(--mk-rust); opacity: 1; }
+.mk-pv4 .mk-fbcount .mk-fmmeta {
+  margin: 9px 0 0; font-family: var(--mk-f-mono); font-weight: 600; font-size: .62rem; line-height: 1.2;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--mk-nearblack);
 }
 
-/* The counter, on navy. `FoundingCounter`'s `tally` shape restated for this ground and scoped to
-   the band, so its light-ground treatment elsewhere is untouched. */
-.mk-pv3 .mk-pv3count .mk-fmcount { max-width: 380px; margin: 22px auto 0; }
-.mk-pv3 .mk-pv3count .mk-fmbar { background: rgba(var(--mk-cream-rgb), .18); }
-.mk-pv3 .mk-pv3count .mk-fmfill { background: var(--mk-stamp); opacity: 1; }
-.mk-pv3 .mk-pv3count .mk-fmmeta {
-  font-family: var(--mk-f-mono); margin: 9px 0 0; color: rgba(var(--mk-cream-rgb), .62);
+/* The claim form: a hairlined white field and the navy pill, side by side. */
+.mk-pv4 .mk-fbform { display: flex; gap: 10px; margin-top: 16px; max-width: 520px; }
+.mk-pv4 .mk-fbform input {
+  flex: 1; min-width: 0; height: 50px; border-radius: 999px; border: 1px solid var(--mk-hair);
+  padding: 0 22px; font-size: 1rem; font-weight: 400; color: var(--mk-nearblack); background: #fff;
 }
-.mk-pv3 .mk-pv3count .mk-fmtally { color: var(--mk-cream); font-weight: 600; }
+.mk-pv4 .mk-fbform input::placeholder { color: var(--mk-blush-ph); }
+.mk-pv4 .mk-fbform input:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pv4 .mk-fbform .mk-btn {
+  height: 50px; padding: 0 26px; justify-content: center; font-size: 1.02rem; font-weight: 600;
+}
+.mk-pv4 .mk-fbtext .mk-betanote { margin: 12px 0 0; font-size: .9rem; }
+.mk-pv4 .mk-fbtext .mk-betamsg { margin: 18px 0 0; }
 
-/* The claim form, on navy: a white field and a cream pill, side by side, centred. */
-.mk-pv3 .mk-pv3form { display: flex; gap: 10px; justify-content: center; margin: 18px auto 0; max-width: 520px; }
-.mk-pv3 .mk-pv3form input {
-  flex: 1; min-width: 0; height: 50px; border-radius: 999px; border: 0; padding: 0 22px;
-  font-size: 1rem; font-weight: 400; color: var(--mk-nearblack); background: #fff;
+.mk-pv4 .mk-fbpanel { display: grid; place-items: center; }
+/* Mirrored, so the older hawk points left, towards the words. */
+.mk-pv4 .mk-fbart { display: block; width: 270px; max-width: none; height: auto; transform: scaleX(-1); }
+
+/* What founding writers get: four cards and the three steps, across the box's full width. */
+.mk-pv4 .mk-fbdetail {
+  grid-column: 1 / -1; padding: 28px 44px 20px;
+  background: var(--mk-hero-ground); border-top: 1px dashed var(--mk-hair);
 }
-.mk-pv3 .mk-pv3form input::placeholder { color: var(--mk-blush-ph); }
-.mk-pv3 .mk-pv3form input:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 2px; }
-/* ⚠️ THE SHARED FORM RENDERS ITS SUBMIT AS `.mk-btn--navy`; ON A NAVY BAND THAT IS A BUTTON NOBODY
-   CAN FIND. The ref's cream pill is restated here, scoped to this form — the component is not
-   forked and its other mounts keep their navy. */
-.mk-pv3 .mk-pv3form .mk-btn {
-  height: 50px; padding: 0 26px; white-space: nowrap; justify-content: center;
-  background: var(--mk-cream-btn); border: 0; color: var(--mk-nearblack);
-  border-radius: 999px; font-size: 1.02rem; font-weight: 600; box-shadow: none;
-  transition: transform .18s ease, box-shadow .18s ease;
+.mk-pv4 .mk-fbdetail[hidden] { display: none; }
+.mk-pv4 .mk-fb--open .mk-fbdetail { animation: mkJyRise .35s ease; }
+.mk-pv4 .mk-fbgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mk-pv4 .mk-fbd {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; align-items: start;
+  background: #fff; border-radius: 16px; padding: 20px 22px;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 6px 16px -10px rgba(28, 19, 15, .18);
 }
-.mk-pv3 .mk-pv3form .mk-btn:hover { background: var(--mk-cream-btn); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0, 0, 0, .25); }
-.mk-pv3 .mk-pv3form .mk-btn:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
+.mk-pv4 .mk-fbi { width: 44px; height: 44px; border-radius: 50%; background: var(--mk-blush); display: grid; place-items: center; }
+.mk-pv4 .mk-fbi svg {
+  width: 21px; height: 21px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-scope .mk-fbdh {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.12rem; line-height: 1.3; margin: 2px 0 0; color: var(--mk-nearblack);
+}
+.mk-pv4 .mk-fbdp { margin: 6px 0 0; font-size: .97rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pv4 .mk-fbsteps {
+  display: flex; align-items: center; gap: 26px; margin-top: 22px; padding: 16px 22px;
+  border-radius: 16px; background: var(--mk-navy); color: var(--mk-cream);
+}
+.mk-pv4 .mk-fbstepsh {
+  margin: 0; flex: none; font-family: var(--mk-f-mono); font-weight: 500; font-size: .62rem;
+  line-height: 1.2; letter-spacing: .2em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
+}
+.mk-pv4 .mk-fbsteps ol { list-style: none; margin: 0; padding: 0; display: flex; flex: 1; align-items: center; gap: 12px; }
+.mk-pv4 .mk-fbsteps li { display: flex; align-items: center; gap: 10px; font-size: 1rem; color: #fff; white-space: nowrap; }
+.mk-pv4 .mk-fbsteps li + li::before {
+  content: ""; width: 28px; height: 1px; background: rgba(var(--mk-cream-rgb), .35); margin-right: 2px;
+}
+.mk-pv4 .mk-fbsteps li span {
+  width: 26px; height: 26px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--mk-terra); color: var(--mk-nearblack);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .72rem; line-height: 1;
+}
+
+/* The toggle: mono caps between two 70px hairlines, a rust chevron, centred at the box's foot.
+   ⚠️ OPEN, IT TAKES THE PANEL'S GROUND AND THE BOX'S BOTTOM CORNERS, so no strip of the box's
+   gradient shows between the panel and it — the two are adjacent grid rows with no gap. */
+.mk-pv4 .mk-fbmore {
+  grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 22px 44px 26px; margin: 0; border: 0; background: none; cursor: pointer;
+  color: var(--mk-nearblack); font-family: var(--mk-f-mono); font-weight: 500; font-size: 12px;
+  line-height: 1; letter-spacing: .22em; text-transform: uppercase;
+}
+.mk-pv4 .mk-fbmore::after { content: ""; width: 70px; height: 1px; background: var(--mk-hair); margin-left: 4px; }
+.mk-pv4 .mk-fbmorelbl { display: inline-flex; align-items: center; gap: 14px; }
+.mk-pv4 .mk-fbmorelbl::before { content: ""; width: 70px; height: 1px; background: var(--mk-hair); }
+.mk-pv4 .mk-fbchev {
+  display: block; width: 14px; height: 14px; color: var(--mk-rust); fill: none; stroke: currentColor;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s ease;
+}
+.mk-pv4 .mk-fbmore[aria-expanded="true"] .mk-fbchev { transform: rotate(180deg); }
+.mk-pv4 .mk-fbmore:hover { color: var(--mk-rust); }
+.mk-pv4 .mk-fbmore:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 3px; }
+.mk-pv4 .mk-fb--open .mk-fbmore { padding-top: 6px; background: var(--mk-hero-ground); border-radius: 0 0 20px 20px; }
 @media (prefers-reduced-motion: reduce) {
-  .mk-pv3 .mk-pv3form .mk-btn { transition: none; }
-  .mk-pv3 .mk-pv3form .mk-btn:hover { transform: none; }
+  .mk-pv4 .mk-fbchev { transition: none; }
+  .mk-pv4 .mk-fb--open .mk-fbdetail { animation: none; }
 }
-/* The form's own notes and outcomes, centred and legible on navy. */
-.mk-pv3 .mk-pv3band .mk-betanote { margin: 14px auto 0; font-size: .9rem; color: rgba(var(--mk-cream-rgb), .62); }
-.mk-pv3 .mk-pv3band .mk-betanote a,
-.mk-pv3 .mk-pv3band .mk-betanote button,
-.mk-pv3 .mk-pv3band .mk-betanote .mk-doclink { color: var(--mk-cream); }
-.mk-pv3 .mk-pv3band .mk-betainvalid { margin: 12px auto 0; color: #f2c3ae; }
-.mk-pv3 .mk-pv3band .mk-betamsg { margin: 22px auto 0; text-align: left; }
+@media (max-width: 1100px) {
+  .mk-pv4 .mk-fbsteps { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .mk-pv4 .mk-fbsteps ol { flex-direction: column; align-items: flex-start; }
+  .mk-pv4 .mk-fbsteps li + li::before { display: none; }
+}
+@media (max-width: 980px) {
+  .mk-pv4 .mk-fb {
+    grid-template-columns: 1fr;
+    background-image: linear-gradient(180deg, #fff 0%, #fff 55%, var(--mk-blush) 100%);
+  }
+  .mk-pv4 .mk-fbpanel { padding: 18px 0; }
+  .mk-pv4 .mk-fbart { width: 180px; }
+}
+@media (max-width: 760px) {
+  .mk-pv4 .mk-fbgrid { grid-template-columns: 1fr; }
+  .mk-pv4 .mk-fbdetail { padding: 22px 16px 20px; }
+  .mk-pv4 .mk-fbsteps li { white-space: normal; }
+}
+@media (max-width: 640px) {
+  .mk-sheet:has(.mk-fb) { margin-top: 120px; }
+  .mk-pv4 .mk-fb { margin-top: -100px; }
+  .mk-pv4 .mk-fbtext { padding: 28px 20px 14px; }
+  .mk-pv4 .mk-fb--open .mk-fbtext { padding-bottom: 36px; }
+  .mk-pv4 .mk-fbform { flex-direction: column; }
+  .mk-pv4 .mk-fbform input { flex: none; }
+  .mk-pv4 .mk-fbpanel { display: none; }
+}
 
-/* ── Then, once we launch: the line and two tiers, hanging over the band's foot ──
-   ⚠️ THE NEGATIVE MARGIN IS THE REF'S AND IT IS THE DESIGN: the tiers hang from the band. The
-   band's 128px of bottom padding is the room they hang into. */
-.mk-pv3 .mk-pv3soon { position: relative; z-index: 1; max-width: 1240px; margin: -104px auto 0; padding: 0 22px; }
-.mk-pv3 .mk-pv3launch {
-  max-width: 920px; margin: 0 auto 12px; padding: 0 4px;
-  font-family: var(--mk-f-display); font-weight: 400; font-size: 1.25rem; line-height: 1.3; color: #fff;
+/* ── Then, once we launch: the line and two tiers, on the light sheet ── */
+.mk-pv4 .mk-pv4soon { position: relative; z-index: 1; max-width: 1240px; margin: 44px auto 0; padding: 0 22px; }
+/* ⚠️ ON THE CARDS' MEASURE, NOT THE REF'S FRAME. The ladder ref sets this flush with its review frame,
+   62px left of the cards, because its frame is wider than its 1060px pair; on the page the line starts
+   where the Free card does, as v4's did. Size and spacing are the ref's (`.launch-h`). */
+.mk-pv4 .mk-pv4launch {
+  max-width: 1060px; margin: 0 auto 18px;
+  font-family: var(--mk-f-display); font-weight: 400; font-size: 1.3rem; line-height: 1.3; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3tiers {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start;
-  max-width: 920px; margin: 0 auto;
-}
-.mk-pv3 .mk-pv3tier {
-  background: #fff; border-radius: 20px; padding: 26px 30px 28px; margin: 8px;
-  box-shadow: 0 0 0 7px #fff, 0 0 0 8px rgba(90, 70, 54, .08), 0 18px 40px rgba(28, 19, 15, .10);
-}
-.mk-pv3 .mk-pv3tier--pro { background: var(--mk-navy); color: var(--mk-cream); }
-.mk-scope .mk-pv3tname {
-  font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: 1.4rem; line-height: 1.2; margin: 0; color: var(--mk-nearblack);
-}
-.mk-scope .mk-pv3tier--pro .mk-pv3tname { color: #fff; }
-.mk-pv3 .mk-pv3price { display: flex; align-items: flex-start; gap: 3px; margin: 10px 0 0; }
-.mk-pv3 .mk-pv3amt {
+.mk-pv4 .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin: 10px 0 0; }
+.mk-pv4 .mk-pv4amt {
   font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1;
   letter-spacing: -.02em; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3cur {
+.mk-pv4 .mk-pv4cur {
   font-family: var(--mk-f-display); font-weight: 400; font-size: 1.2rem; line-height: 1;
   margin-top: 6px; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3tier--pro .mk-pv3amt, .mk-pv3 .mk-pv3tier--pro .mk-pv3cur { color: #fff; }
-.mk-pv3 .mk-pv3from, .mk-pv3 .mk-pv3per {
+.mk-pv4 .mk-pv4from, .mk-pv4 .mk-pv4per {
   font-family: var(--mk-f-mono); font-weight: 500; font-size: .66rem; line-height: 1;
   letter-spacing: .14em; text-transform: uppercase; opacity: .75;
 }
-.mk-pv3 .mk-pv3from { margin: 12px 6px 0 0; }
-.mk-pv3 .mk-pv3per { align-self: flex-end; margin: 0 0 6px 8px; }
-.mk-pv3 .mk-pv3tsub { margin: 8px 0 0; font-size: .98rem; color: #5a4636; }
-.mk-pv3 .mk-pv3tier--pro .mk-pv3tsub { color: rgba(var(--mk-cream-rgb), .82); }
-.mk-pv3 .mk-pv3tlist {
-  list-style: none; margin: 18px 0 0; padding: 16px 0 0; border-top: 1px dashed rgba(90, 70, 54, .3);
-  display: grid; gap: 8px; font-size: .98rem; color: #3a2e27;
-}
-.mk-pv3 .mk-pv3tier--pro .mk-pv3tlist { border-top-color: rgba(var(--mk-cream-rgb), .3); color: var(--mk-cream); }
-.mk-pv3 .mk-pv3tlist li { position: relative; padding-left: 22px; }
-.mk-pv3 .mk-pv3tlist li::before {
-  content: ""; position: absolute; left: 2px; top: .55em; width: 8px; height: 8px;
-  border-radius: 50%; background: var(--mk-rust);
-}
-.mk-pv3 .mk-pv3tier--pro .mk-pv3tlist li::before { background: var(--mk-terra); }
-.mk-pv3 .mk-pv3tlist li.mk-pv3plus { padding-left: 0; font-weight: 600; }
-.mk-pv3 .mk-pv3tlist li.mk-pv3plus::before { display: none; }
-.mk-pv3 .mk-pv3flex {
-  margin: 18px 0 0; padding: 12px 14px; border-radius: 12px; background: rgba(var(--mk-cream-rgb), .08);
-  font-size: .92rem; line-height: 1.45; color: rgba(var(--mk-cream-rgb), .88);
-}
-.mk-pv3 .mk-pv3tlink {
-  display: inline-block; margin-top: 14px; color: var(--mk-cream); font-weight: 600;
-  text-decoration: none; border-bottom: 1px solid rgba(var(--mk-cream-rgb), .45);
-}
-.mk-pv3 .mk-pv3tlink::after { content: " ↓"; }
-.mk-pv3 .mk-pv3tlink:hover { border-bottom-color: var(--mk-cream); }
-.mk-pv3 .mk-pv3tlink:focus-visible { outline: 2px solid var(--mk-stamp); outline-offset: 3px; }
+.mk-pv4 .mk-pv4from { margin: 12px 6px 0 0; }
+.mk-pv4 .mk-pv4per { align-self: flex-end; margin: 0 0 6px 8px; }
+/* The FAQ's own link to the questions (ref `.faq-suit`). */
+.mk-pv4 .mk-pv4suitlink { color: var(--mk-rust); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--mk-rust); }
 
 /* ── Sections below the tiers ── */
-.mk-pv3 .mk-pv3sect { max-width: 1240px; margin: 88px auto 0; padding: 0 22px; }
-.mk-scope .mk-pv3h2 {
+.mk-pv4 .mk-pv4sect { max-width: 1240px; margin: 88px auto 0; padding: 0 22px; }
+.mk-scope .mk-pv4h2 {
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 2rem; line-height: 1.25; margin: 0 0 22px; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-pv3faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
-.mk-pv3 .mk-pv3qa { border-top: 1px solid var(--mk-hair); padding: 20px 0; }
-.mk-pv3 .mk-pv3q { font-weight: 600; margin: 0; font-size: 1.04rem; color: var(--mk-nearblack); }
-.mk-pv3 .mk-pv3a { color: rgba(28, 19, 15, .56); margin: 6px 0 0; line-height: 1.6; }
-.mk-pv3 .mk-pv3end { height: 110px; }
+.mk-pv4 .mk-pv4faq { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
+.mk-pv4 .mk-pv4qa { border-top: 1px solid var(--mk-hair); padding: 20px 0; }
+.mk-pv4 .mk-pv4q { font-weight: 600; margin: 0; font-size: 1.04rem; color: var(--mk-nearblack); }
+.mk-pv4 .mk-pv4a { color: rgba(28, 19, 15, .56); margin: 6px 0 0; line-height: 1.6; }
+.mk-pv4 .mk-pv4end { height: 110px; }
 
-/* ── How long will I need? (the ref's `.calc.jy`) ──
-   ⚠️ `scroll-margin-top` COUNTS THE STICKY NAV. The ref's nav scrolls away, so its 24px is the
-   whole margin; here the bar stays, and its full height is what lands the card below it. */
-.mk-pv3 .mk-pv3how { scroll-margin-top: calc(var(--mk-nav-h) + 24px); }
-.mk-pv3 .mk-jy {
-  background: #fff; border-radius: 20px; overflow: hidden;
-  box-shadow: 0 1px 2px rgba(28, 19, 15, .05), 0 30px 60px -40px rgba(28, 19, 15, .45);
+/* ── The link, and "Which plan suits me best?" (the ref's `.suit-link` and `.suit .calc.jy`) ──
+   ⚠️ `scroll-margin-top` COUNTS THE STICKY NAV. The ref's nav scrolls away, so its 20px is the whole
+   margin; here the bar stays, and its full height is what lands the questions below it. */
+/* ⚠️ THE OLD PRO PLANS BOX'S WIDTH, HAIRLINE AND RADIUS (952, `--mk-hair`, 26), NOW HOLDING ONLY THE
+   QUESTIONS, directly beneath the cards (pricing ladder, 26 Oct). */
+.mk-pv4 .mk-pv4how {
+  max-width: 952px; margin: 28px auto 0; padding: 24px 24px 26px; box-sizing: border-box;
+  border: 1px solid var(--mk-hair); border-radius: 26px;
+  scroll-margin-top: calc(var(--mk-nav-h) + 20px);
 }
-.mk-pv3 .mk-jytop {
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap; min-height: 76px;
-  padding: 22px 28px 20px; background: var(--mk-panel); color: var(--mk-cream);
+@media (max-width: 640px) { .mk-pv4 .mk-pv4how { padding: 18px 12px 20px; border-radius: 22px; } }
+.mk-pv4 .mk-pv4how[hidden] { display: none; }
+.mk-pv4 .mk-pv4how:not([hidden]) { animation: mkJyRise .35s ease; }
+.mk-pv4 .mk-jy {
+  background: #fff; border-radius: 22px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 18px 40px -22px rgba(28, 19, 15, .25);
+}
+.mk-pv4 .mk-jytop {
+  position: relative; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 24px 32px 22px; background: #fff; color: var(--mk-nearblack);
 }
 .mk-scope .mk-jytitle {
   font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: 22px; line-height: 1.3; margin: 0; color: var(--mk-cream);
+  font-size: 1.3rem; line-height: 1.3; margin: 0; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-jycount {
-  margin: 0 0 0 auto; font-family: var(--mk-f-mono); font-size: .66rem; letter-spacing: .16em;
-  text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
+.mk-pv4 .mk-jycount {
+  margin: 0 0 0 auto; font-family: var(--mk-f-mono); font-weight: 400; font-size: .66rem; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(28, 19, 15, .56);
 }
-.mk-pv3 .mk-jydots { display: flex; gap: 6px; }
-.mk-pv3 .mk-jydots span {
-  width: 8px; height: 8px; border-radius: 50%; background: rgba(var(--mk-cream-rgb), .25);
-  transition: background .2s, width .2s;
+/* The progress line along the header's foot: a fifth per step. */
+.mk-pv4 .mk-jyprog {
+  position: absolute; left: 32px; right: 32px; bottom: 0; height: 4px;
+  border-radius: 999px; background: rgba(28, 19, 15, .08); overflow: hidden;
 }
-.mk-pv3 .mk-jydots .mk-jydot--done { background: rgba(var(--mk-cream-rgb), .6); }
-.mk-pv3 .mk-jydots .mk-jydot--on { width: 22px; border-radius: 999px; background: var(--mk-terra); }
-.mk-pv3 .mk-jybody { padding: 34px 30px 32px; }
-.mk-pv3 .mk-jystep { max-width: 680px; margin: 0 auto; }
-.mk-pv3 .mk-jystep.mk-jyres { max-width: none; }
+.mk-pv4 .mk-jyprog span { display: block; height: 100%; border-radius: 999px; background: var(--mk-rust); transition: width .35s ease; }
+.mk-pv4 .mk-jybody { padding: 30px 32px; }
 .mk-scope .mk-jyq {
   font-family: var(--mk-f-display) !important; font-weight: 400;
-  font-size: 1.7rem; line-height: 1.25; margin: 0 0 18px; color: var(--mk-nearblack);
+  font-size: 1.55rem; line-height: 1.25; margin: 0 0 20px; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-jyq:focus, .mk-pv3 .mk-jybig:focus { outline: none; }
-.mk-pv3 .mk-jyq:focus-visible, .mk-pv3 .mk-jybig:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 4px; }
-.mk-pv3 .mk-jysub { margin: 22px 0 10px; font-weight: 600; color: var(--mk-nearblack); }
+.mk-pv4 .mk-jyq:focus, .mk-pv4 .mk-jybig:focus { outline: none; }
+.mk-pv4 .mk-jyq:focus-visible, .mk-pv4 .mk-jybig:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 4px; }
+.mk-pv4 .mk-jysub { margin: 22px 0 10px; font-weight: 600; color: var(--mk-nearblack); }
 
-.mk-pv3 .mk-jyopts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.mk-pv3 .mk-jyopts--2 { grid-template-columns: 1fr 1fr; }
-.mk-pv3 .mk-jyopt {
-  text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--mk-hair);
+/* Answers as cards with a radio dot (navy when chosen). */
+.mk-pv4 .mk-jyopts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mk-pv4 .mk-jyopt {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-start;
+  text-align: left; padding: 16px 16px 16px 48px; border-radius: 14px; border: 1px solid var(--mk-hair);
   background: #fff; font-size: 1rem; font-weight: 600; line-height: 1.3; color: var(--mk-nearblack);
   cursor: pointer; transition: border-color .15s, box-shadow .15s, background .15s;
 }
-.mk-pv3 .mk-jyopt small {
+.mk-pv4 .mk-jyopt::before {
+  content: ""; position: absolute; left: 17px; top: 18px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .3); transition: box-shadow .15s;
+}
+.mk-pv4 .mk-jyopt small {
   display: block; margin-top: 3px; font-weight: 400; font-size: .86rem; line-height: 1.35; color: rgba(28, 19, 15, .56);
 }
-.mk-pv3 .mk-jyopt:hover { background: #faf8f4; }
-.mk-pv3 .mk-jyopt[aria-pressed="true"] { border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); background: #f6f7f9; }
-.mk-pv3 .mk-jychips { display: flex; flex-wrap: wrap; gap: 8px; }
-.mk-pv3 .mk-jychip {
-  height: 38px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
-  font-size: .95rem; font-weight: 500; color: var(--mk-body); cursor: pointer;
+.mk-pv4 .mk-jyopt:hover { background: var(--mk-hero-ground); border-color: rgba(28, 19, 15, .22); }
+.mk-pv4 .mk-jyopt[aria-pressed="true"] { background: var(--mk-hero-ground); border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); }
+.mk-pv4 .mk-jyopt[aria-pressed="true"]::before { box-shadow: inset 0 0 0 5px var(--mk-navy); }
+.mk-pv4 .mk-jychips, .mk-contact .mk-jychips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Contact's topic row wears the same chips (role="radio", so `aria-checked` is its pressed state). */
+.mk-pv4 .mk-jychip, .mk-contact .mk-jychip {
+  height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
+  font-size: .95rem; font-weight: 600; color: var(--mk-body); cursor: pointer;
   transition: background .15s, color .15s, border-color .15s;
 }
-.mk-pv3 .mk-jychip:hover { background: #faf8f4; }
-.mk-pv3 .mk-jychip[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
-.mk-pv3 .mk-jystepper { display: inline-flex; align-items: center; height: 38px; border-radius: 999px; border: 1px solid var(--mk-hair); }
-.mk-pv3 .mk-jystepper button {
-  width: 40px; height: 36px; border: 0; background: transparent; color: var(--mk-navy);
-  font-size: 1.15rem; font-weight: 500; cursor: pointer; border-radius: 50%;
+.mk-pv4 .mk-jychip:hover, .mk-contact .mk-jychip:hover { background: #faf8f4; }
+.mk-pv4 .mk-jychip[aria-pressed="true"], .mk-contact .mk-jychip[aria-checked="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
+/* The agents: the stepper, "or", and "I don't know", which dims the stepper while it is chosen. */
+.mk-pv4 .mk-jyagents { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.mk-pv4 .mk-jyor { font-style: italic; color: rgba(28, 19, 15, .56); }
+.mk-pv4 .mk-jychip.mk-jyidk { height: 48px; padding: 0 22px; }
+.mk-pv4 .mk-jystepper { display: inline-flex; align-items: center; height: 48px; border-radius: 999px; border: 1px solid var(--mk-hair); }
+.mk-pv4 .mk-jyagents--idk .mk-jystepper { opacity: .4; }
+.mk-pv4 .mk-jystepper button {
+  width: 48px; height: 46px; border: 0; background: transparent; color: var(--mk-navy);
+  font-size: 1.3rem; font-weight: 500; cursor: pointer; border-radius: 50%;
 }
-.mk-pv3 .mk-jystepper button:hover { background: #f3f1ed; }
-.mk-pv3 .mk-jystepper output { min-width: 56px; text-align: center; font-size: 1.3rem; font-weight: 600; color: var(--mk-nearblack); }
-.mk-pv3 .mk-jy button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pv4 .mk-jystepper button:hover { background: #f3f1ed; }
+.mk-pv4 .mk-jystepper output { min-width: 56px; text-align: center; font-size: 1.3rem; font-weight: 600; color: var(--mk-nearblack); }
+.mk-pv4 .mk-jy button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
 
-.mk-pv3 .mk-jyins {
-  margin-top: 22px; padding: 14px 18px 16px; border-radius: 14px;
-  background: #ebe1d4; border-left: 3px solid var(--mk-rust);
+/* The note under the answers: a blush strip, no label. */
+.mk-pv4 .mk-jyins {
+  margin: 20px 0 0; padding: 14px 18px; border-radius: 14px; background: var(--mk-blush);
+  font-size: 1rem; line-height: 1.55; color: #4a3a30;
   animation: mkJyRise .35s ease;
 }
 @keyframes mkJyRise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.mk-pv3 .mk-jyk {
-  margin: 0; font-family: var(--mk-f-mono); font-size: .6rem; letter-spacing: .18em;
-  text-transform: uppercase; color: rgba(90, 70, 54, .75);
+.mk-pv4 .mk-jynav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 22px; padding-top: 20px; border-top: 1px dashed var(--mk-hair);
 }
-.mk-pv3 .mk-jyinst { margin: 6px 0 0; font-size: 1.02rem; line-height: 1.55; color: var(--mk-body); }
-.mk-pv3 .mk-jynav { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; }
-.mk-pv3 .mk-jy .mk-jynext { padding: 15px 30px; font-size: 1.02rem; font-weight: 600; }
-.mk-pv3 .mk-jy .mk-jynext:disabled { opacity: .35; cursor: default; transform: none; box-shadow: none; }
-.mk-pv3 .mk-jyback, .mk-pv3 .mk-jyagain {
+/* `gap: 0`: `.mk-btn` is a flex row with an 8px gap, which would push the arrow off its word. */
+.mk-pv4 .mk-jy .mk-jynext { padding: 12px 26px; gap: 0; font-size: .98rem; font-weight: 600; }
+.mk-pv4 .mk-jy .mk-jynext:not(:disabled)::after { content: " →"; white-space: pre; }
+.mk-pv4 .mk-jy .mk-jynext:disabled {
+  background: rgba(42, 58, 82, .18); border-color: transparent; color: #fff; opacity: 1;
+  cursor: default; transform: none; box-shadow: none;
+}
+.mk-pv4 .mk-jyback, .mk-pv4 .mk-jyagain {
   background: none; border: 0; padding: 0; font-size: 1rem; font-weight: 600; color: var(--mk-navy);
   cursor: pointer; border-bottom: 1px solid rgba(42, 58, 82, .35);
 }
-.mk-pv3 .mk-jyback::before { content: "← "; }
-.mk-pv3 .mk-jyagain { margin-top: 18px; }
+.mk-pv4 .mk-jyback::before { content: "← "; }
+.mk-pv4 .mk-jyagain { margin-top: 18px; }
 
 /* The result. */
-.mk-pv3 .mk-jyrestop { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 34px; align-items: start; }
+.mk-pv4 .mk-jyrestop { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 26px; align-items: center; }
+.mk-pv4 .mk-jyk {
+  margin: 0; font-family: var(--mk-f-mono); font-size: .6rem; letter-spacing: .18em;
+  text-transform: uppercase; color: rgba(90, 70, 54, .75);
+}
 .mk-scope .mk-jybig {
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 2.4rem; line-height: 1.15; margin: 6px 0 0; color: var(--mk-nearblack);
 }
-.mk-pv3 .mk-jywhy { margin: 12px 0 0; font-size: 1rem; line-height: 1.6; color: var(--mk-body); }
-.mk-pv3 .mk-jyprep {
-  margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: #ebe1d4;
+.mk-pv4 .mk-jywhy { margin: 12px 0 0; font-size: 1rem; line-height: 1.6; color: var(--mk-body); }
+.mk-pv4 .mk-jyprep {
+  margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--mk-blush);
   font-size: .95rem; line-height: 1.55; color: var(--mk-body);
 }
-.mk-pv3 .mk-jyplan {
+.mk-pv4 .mk-jyplan {
   position: relative; background: var(--mk-navy); color: var(--mk-cream); border-radius: 20px;
   padding: 28px 28px 26px; margin: 8px;
   box-shadow: 0 0 0 7px #fff, 0 0 0 8px rgba(90, 70, 54, .1), 0 22px 44px rgba(28, 19, 15, .16);
 }
-.mk-pv3 .mk-jyflag {
+.mk-pv4 .mk-jyflag {
   position: absolute; top: -12px; left: 24px; z-index: 2; white-space: nowrap;
   font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem; letter-spacing: .2em;
   text-transform: uppercase; background: var(--mk-nearblack); color: var(--mk-cta-ink);
@@ -1590,74 +1667,517 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: var(--mk-f-display) !important; font-weight: 400;
   font-size: 1.4rem; line-height: 1.2; margin: 0; color: #fff;
 }
-.mk-pv3 .mk-jyplan .mk-pv3amt { font-size: 2.8rem; color: #fff; }
-.mk-pv3 .mk-jyplan .mk-pv3cur { color: #fff; }
-.mk-pv3 .mk-jypm {
+.mk-pv4 .mk-jyplan .mk-pv4amt { font-size: 2.8rem; color: #fff; }
+.mk-pv4 .mk-jyplan .mk-pv4cur { color: #fff; }
+.mk-pv4 .mk-jypm {
   margin: 8px 0 0; font-family: var(--mk-f-mono); font-size: .66rem; letter-spacing: .14em;
   text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .8);
 }
-.mk-pv3 .mk-jytail {
+.mk-pv4 .mk-jytail {
   margin: 16px 0 0; padding-top: 14px; border-top: 1px dashed rgba(var(--mk-cream-rgb), .3);
   font-size: 1rem; line-height: 1.5;
 }
-.mk-pv3 .mk-jyinc { margin: 10px 0 0; font-size: .92rem; line-height: 1.5; color: rgba(var(--mk-cream-rgb), .75); }
-.mk-pv3 .mk-jyall { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--mk-hair); }
-.mk-pv3 .mk-jyallh { margin: 0 0 12px; font-weight: 600; color: var(--mk-nearblack); }
-.mk-pv3 .mk-jyrow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.mk-pv3 .mk-jymini { border-radius: 14px; padding: 14px 16px; background: #ebe1d4; }
-.mk-pv3 .mk-jymini:first-child { background: #fff; box-shadow: inset 0 0 0 1px var(--mk-hair); }
-.mk-pv3 .mk-jymini p {
-  margin: 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 1rem; line-height: 1.2; color: var(--mk-nearblack);
-}
-.mk-pv3 .mk-jymini b {
-  display: block; margin-top: 6px; font-family: var(--mk-f-display); font-weight: 400;
-  font-size: 1.4rem; line-height: 1; letter-spacing: -.02em; color: var(--mk-nearblack);
-}
-.mk-pv3 .mk-jymini small {
-  display: block; margin-top: 6px; font-family: var(--mk-f-mono); font-size: .6rem;
-  letter-spacing: .12em; text-transform: uppercase; color: #5a4636;
-}
-.mk-pv3 .mk-jymini.mk-jymini--fit { background: var(--mk-navy); }
-.mk-pv3 .mk-jymini.mk-jymini--fit p, .mk-pv3 .mk-jymini.mk-jymini--fit b { color: #fff; }
-.mk-pv3 .mk-jymini.mk-jymini--fit small { color: rgba(var(--mk-cream-rgb), .75); }
-.mk-pv3 .mk-pv3source { margin: 14px 4px 0; font-size: .84rem; color: var(--mk-label); line-height: 1.55; }
-.mk-pv3 .mk-pv3source a { color: inherit; }
+.mk-pv4 .mk-jyinc { margin: 10px 0 0; font-size: .92rem; line-height: 1.5; color: rgba(var(--mk-cream-rgb), .75); }
+.mk-pv4 .mk-pv4source { margin: 12px 4px 0; font-size: .84rem; color: var(--mk-label); line-height: 1.55; }
+.mk-pv4 .mk-pv4source a { color: inherit; text-decoration: underline; }
 
 /* ⚠️ AFTER THE RULES THEY OVERRIDE: a media query confers no specificity, so an earlier override
    loses at equal specificity. */
 @media (prefers-reduced-motion: reduce) {
-  .mk-pv3 .mk-jyins { animation: none; }
-  .mk-pv3 .mk-jydots span, .mk-pv3 .mk-jyopt, .mk-pv3 .mk-jychip { transition: none; }
+  .mk-pv4 .mk-jyins, .mk-pv4 .mk-pv4how:not([hidden]) { animation: none; }
+  .mk-pv4 .mk-jyprog span, .mk-pv4 .mk-jyopt, .mk-pv4 .mk-jyopt::before, .mk-pv4 .mk-jychip, .mk-contact .mk-jychip { transition: none; }
 }
-/* ⚠️ THE REF ALSO STACKS THE THREE-OPTION ROWS AT 1100px — a rule left from its earlier two-column
-   calculator, where the questions shared the card with the answer. One question at a time, the row is
-   680px wide at every desktop width; the pack says options stack at 640, and they do. */
-@media (max-width: 900px) {
-  .mk-pv3 .mk-jyrestop { grid-template-columns: 1fr; }
-  .mk-pv3 .mk-jyrow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
+/* The ref stacks the answer cards at 1100px, as it always has; the result stacks at 900. */
+@media (max-width: 1100px) { .mk-pv4 .mk-jyopts { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .mk-pv4 .mk-jyrestop { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
-  .mk-pv3 .mk-jybody { padding: 24px 18px; }
-  .mk-scope .mk-jyq { font-size: 1.4rem; }
-  .mk-pv3 .mk-jyrow { grid-template-columns: 1fr 1fr; }
-  .mk-pv3 .mk-jyopts, .mk-pv3 .mk-jyopts--2 { grid-template-columns: 1fr; }
-  .mk-pv3 .mk-jycount { margin-left: 0; }
+  .mk-pv4 .mk-jytop { padding: 20px 20px 16px; }
+  .mk-pv4 .mk-jyprog { left: 20px; right: 20px; }
+  .mk-pv4 .mk-jybody { padding: 24px 18px; }
+  .mk-pv4 .mk-jycount { margin-left: 0; }
 }
 
 /* ── Narrow widths: the ref's breakpoints, widening to narrowing ── */
 @media (max-width: 900px) {
-  .mk-pv3 .mk-pv3faq { grid-template-columns: 1fr; }
-}
-@media (max-width: 760px) {
-  .mk-pv3 .mk-pv3tiers { grid-template-columns: 1fr; }
-  .mk-pv3 .mk-pv3tier { padding: 22px 22px 24px; }
+  .mk-pv4 .mk-pv4faq { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .mk-pv3 { padding: 10px 10px 0; }
-  .mk-pv3 .mk-pv3band { padding: 34px 18px 112px; }
-  .mk-pv3 .mk-pv3form { flex-direction: column; }
-  .mk-pv3 .mk-pv3form input { flex: none; }
-  .mk-pv3 .mk-pv3soon, .mk-pv3 .mk-pv3sect { padding: 0 12px; }
+  .mk-pv4 { padding: 0 10px; }
+  .mk-pv4 .mk-pv4soon, .mk-pv4 .mk-pv4sect { padding: 0 12px; }
+}
+
+/* ══════════════ Free and Pro, and the Pro ladder (both widths; ref design-refs/pricing-plans-ladder-v1.html, 26 Oct) ══════════════
+   `PricingPlans.tsx` draws these for the desktop (side by side) and the phone (one at a time under
+   tabs). Values are the ref's own (`.card`, `.price`, `.tlist`, `.suitlink`, `.ladder`, `.rung`,
+   `.fitflag`, `.o3-after`); where it and a token agree, the token is used.
+   ⚠️ EVERY SELECTOR IS `.mk-scope .mk-l…` / `.mk-scope .mk-rung…` (0-2-0 or more), so it beats both trees'
+   own 0-1-0 font resets and is not scoped to either tree: one card, one stylesheet. Headings take the
+   flag as well, because brand.tsx forces h2 with `!important`. */
+.mk-scope .mk-lpair {
+  display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 22px;
+  max-width: 1060px; margin: 0 auto; align-items: start;
+}
+.mk-scope .mk-lcard {
+  background: #fff; border-radius: 22px; padding: 8px; font-family: var(--mk-f-serif); color: var(--mk-nearblack);
+  box-shadow: 0 0 0 1px rgba(28, 19, 15, .08), 0 18px 36px -22px rgba(28, 19, 15, .3);
+}
+.mk-scope .mk-lcardin { border-radius: 16px; padding: 26px 28px; }
+.mk-scope .mk-lcard--pro .mk-lcardin { background: var(--mk-navy); color: var(--mk-cream); }
+.mk-scope .mk-lname {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.45rem; line-height: 1.2; margin: 0; color: inherit;
+}
+.mk-scope .mk-lcard .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin-top: 10px; }
+.mk-scope .mk-lcard .mk-pv4cur {
+  font-family: var(--mk-f-display); font-weight: 400; font-size: 1.2rem; line-height: 1; margin-top: 7px; color: var(--mk-nearblack);
+}
+.mk-scope .mk-lcard .mk-pv4amt {
+  font-family: var(--mk-f-display); font-weight: 400; font-size: 2.9rem; line-height: 1; letter-spacing: -.02em; color: var(--mk-nearblack);
+}
+.mk-scope .mk-lsub { margin: 8px 0 0; font-size: 1rem; line-height: 1.45; color: #5a4636; }
+.mk-scope .mk-lcard--pro .mk-lsub { color: rgba(var(--mk-cream-rgb), .85); }
+.mk-scope .mk-llist {
+  list-style: none; margin: 18px 0 0; padding: 16px 0 0; border-top: 1px dashed rgba(90, 70, 54, .3);
+  display: grid; gap: 9px; font-size: 1rem; color: #3a2e27;
+}
+.mk-scope .mk-lcard--pro .mk-llist { border-top-color: rgba(var(--mk-cream-rgb), .3); color: var(--mk-cream); }
+.mk-scope .mk-llist li { position: relative; padding-left: 21px; line-height: 1.4; }
+.mk-scope .mk-llist li::before {
+  content: ""; position: absolute; left: 2px; top: .52em; width: 7px; height: 7px; border-radius: 50%; background: var(--mk-rust);
+}
+.mk-scope .mk-lcard--pro .mk-llist li::before { background: var(--mk-terra); }
+.mk-scope .mk-llist li.mk-lplus { padding-left: 0; font-weight: 600; }
+.mk-scope .mk-llist li.mk-lplus::before { display: none; }
+
+/* The four lengths (ref `.ladder`, `.rung`). Unchecked: a faint outline on the navy; checked: cream. */
+.mk-scope .mk-ladder { display: grid; gap: 8px; margin-top: 18px; }
+.mk-scope .mk-rung {
+  position: relative; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  width: 100%; padding: 13px 16px; border-radius: 14px; border: 1px solid rgba(var(--mk-cream-rgb), .18);
+  background: rgba(var(--mk-cream-rgb), .05); color: var(--mk-cream); cursor: pointer; text-align: left;
+  font-family: var(--mk-f-serif); box-sizing: border-box;
+}
+.mk-scope .mk-rung::before {
+  content: ""; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(var(--mk-cream-rgb), .5);
+}
+.mk-scope .mk-rung[aria-checked="true"] { background: var(--mk-cream); color: var(--mk-nearblack); border-color: var(--mk-cream); }
+.mk-scope .mk-rung[aria-checked="true"]::before { box-shadow: inset 0 0 0 5.5px var(--mk-navy); }
+.mk-scope .mk-rung:focus-visible { outline: 2px solid var(--mk-terra); outline-offset: 2px; }
+.mk-scope .mk-rungtext { min-width: 0; }
+/* Inline, as the ref's `.rn` is: it sits on the row's own line, whose height the button's serif sets. */
+.mk-scope .mk-rungname { font-family: var(--mk-f-display); font-weight: 400; font-size: 1.1rem; line-height: 1.2; }
+.mk-scope .mk-rungline {
+  display: block; margin-top: 3px; font-family: var(--mk-f-mono); font-weight: 500; font-size: .56rem; line-height: 1.3;
+  letter-spacing: .12em; text-transform: uppercase; opacity: .8;
+}
+.mk-scope .mk-rungline em { font-style: normal; color: #f2c3ae; }
+.mk-scope .mk-rung[aria-checked="true"] .mk-rungline em { color: var(--mk-rust); }
+.mk-scope .mk-rungprice { font-family: var(--mk-f-display); font-weight: 400; font-size: 1.6rem; line-height: 1; letter-spacing: -.02em; }
+/* "Fits your campaign" on the row a result picked (ref `.rung.fit .fitflag`): exactly one row. */
+.mk-scope .mk-rungflag {
+  position: absolute; top: -9px; right: 14px; display: inline-block; padding: 4px 9px; border-radius: 999px;
+  background: var(--mk-terra); color: var(--mk-nearblack);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .52rem; line-height: 1.2; letter-spacing: .14em; text-transform: uppercase;
+}
+/* ⚠️ THE ONLY MENTION OF RENEWAL OUTSIDE THE FAQ, and it is small print on purpose (Nick, 26 Oct). */
+.mk-scope .mk-lsmall { margin: 10px 2px 0; font-size: .8rem; line-height: 1.4; color: rgba(var(--mk-cream-rgb), .55); }
+.mk-scope .mk-lsuitwrap { margin-top: 12px; }
+.mk-scope .mk-lsuit {
+  display: inline-flex; align-items: center; gap: 7px; border: 0; background: none; padding: 0 0 2px; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .98rem; color: #f2c3ae; border-bottom: 1.5px solid currentColor;
+}
+.mk-scope .mk-lsuit svg {
+  width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-scope .mk-lsuit:focus-visible { outline: 2px solid var(--mk-terra); outline-offset: 3px; }
+
+/* ══════════════ Pricing on phones (public /pricing ≤760px, ref design-refs/pricing-page-mobile-v1.html, 25 Oct) ══════════════
+   `PricingPhone.tsx` renders this tree at and below 760px (`usePhone`); above it the v4 block above
+   renders and none of these rules has anything to match — every selector here names a `.mk-pv*`
+   class that only the phone tree emits, or `:has()` of one.
+   ⚠️ VALUES ARE THE REF'S OWN, read from its stylesheet's "the page" section. Where the ref and a
+   marketing token say the same thing the token is used: --mk-ink-shell is its --ink, --mk-lower its
+   --oat, --mk-hero-ground its --paper, --mk-blush-mid its #fcf4f0. Its `rgba(28,19,15,.08)` hairline
+   has no token in the tier and is stated, as the desktop box states it.
+   ⚠️ EVERY SELECTOR IS `.mk-pvm .x` (0-2-0) OR `.mk-scope .x` WITH `!important`, for the reason the
+   v4 block states: brand.tsx names bare `p, span, div, button, input, label` at 0-0-1 and forces
+   `h1, h2, h3` with `!important`. `.mk-pvlayer` is the root of the parts portalled out of the sheet
+   (the questions sheet and the sticky bar) and takes the same reset. */
+
+/* ── The ink runs on 150px under the nav; the sheet starts there with 20px top corners (ref .mtop, .msheet) ──
+   ⚠️ THE SHEET IS A BLOCK FORMATTING CONTEXT (`flow-root`) AND SO IS THE PAGE'S ROOT. The box's −116px
+   margin must lift the box and nothing else: in a block that is not a BFC a first child's negative
+   top margin collapses through its parents, and the oat sheet would rise with it and swallow the ink.
+   The draft of this design had exactly that bug; `pricingMobile.measure.ts` locks the sheet's top.
+   ⚠️ `overflow: visible`, because the box and its perched drawing are meant to leave the sheet. */
+.mk-sheet:has(.mk-pvm) {
+  display: flow-root; margin-top: 150px; overflow: visible;
+  border-top-left-radius: 20px; border-top-right-radius: 20px;
+}
+.mk-pvm {
+  display: flow-root; padding: 0 14px 46px;
+  font-family: var(--mk-f-serif); color: var(--mk-nearblack);
+  /* The ref's body states no line-height, so its text sits at `normal`. */
+  line-height: normal;
+}
+/* ⚠️ `*`, NOT A SECOND `:where(p, span, …)` LIST. 0-1-0 beats brand.tsx's 0-0-1 either way, and the
+   v4 block's element list already names every one of those elements — the sheet-wide "one property
+   per selector" sweep reads a comma as a selector boundary, so a second list would read as each
+   element declaring `font-family` twice. */
+.mk-pvm *, .mk-pvlayer * { font-family: inherit; }
+
+/* ── The founding box (ref .fbx) ── */
+.mk-pvm .mk-pvbox {
+  position: relative; z-index: 2; margin-top: -116px;
+  border: 1px solid var(--mk-pv-cardline); border-radius: 20px;
+  box-shadow: var(--mk-pv-cardlift);
+  /* ⚠️ COLOUR AND IMAGE SEPARATELY, NEVER THE SHORTHAND: a gradient that failed to parse would leave
+     the box see-through over the ink. White to 52%, #fcf4f0 at 74%, blush at 100%, top to bottom. */
+  background-color: #fff;
+  background-image: linear-gradient(180deg, #fff 0%, #fff 52%, var(--mk-blush-mid) 74%, var(--mk-blush) 100%);
+}
+/* Perched on the box's top-right corner, mirrored so the hawks face the headline. Decorative. */
+.mk-pvm .mk-pvart {
+  position: absolute; right: 8px; top: -58px; width: 112px; height: auto; max-width: none;
+  transform: scaleX(-1); pointer-events: none; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .12));
+}
+.mk-pvm .mk-pvin { padding: 24px 20px 4px; }
+.mk-pvm .mk-pvtag {
+  display: inline-block; padding: 5px 11px; border-radius: 999px; background: var(--mk-blush); color: var(--mk-rust);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase;
+}
+.mk-scope .mk-pvh1 {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.85rem; line-height: 1.14; letter-spacing: -.01em; color: var(--mk-nearblack); margin: 16px 0 0;
+}
+.mk-pvm .mk-pvsub { margin: 12px 0 0; font-size: 1.04rem; line-height: 1.5; color: var(--mk-body); }
+
+/* The counter: `FoundingCounter`'s `left` shape — a 5px rust bar and one mono line (ref .cnt). */
+.mk-pvm .mk-pvcount .mk-fmcount { max-width: none; margin: 20px 0 0; }
+.mk-pvm .mk-pvcount .mk-fmbar { background: rgba(28, 19, 15, .1); }
+.mk-pvm .mk-pvcount .mk-fmfill { background: var(--mk-rust); opacity: 1; }
+.mk-pvm .mk-pvcount .mk-fmmeta {
+  margin: 8px 0 0; font-family: var(--mk-f-mono); font-weight: 600; font-size: .62rem; line-height: 1.2;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--mk-nearblack);
+}
+
+/* The claim form: the field, then a full-width 52px button, stacked (ref .form).
+   ⚠️ THE FIELD IS 16px, SO A PHONE DOES NOT ZOOM THE PAGE WHEN IT TAKES FOCUS (iOS zooms below 16). */
+.mk-pvm .mk-pvform { display: grid; gap: 10px; margin-top: 14px; }
+.mk-pvm .mk-pvform input {
+  box-sizing: border-box; width: 100%; height: 52px; border-radius: 999px; border: 1px solid var(--mk-hair);
+  padding: 0 22px; font-family: var(--mk-f-serif); font-weight: 400; font-size: 16px;
+  color: var(--mk-nearblack); background: #fff;
+}
+.mk-pvm .mk-pvform input::placeholder { color: var(--mk-blush-ph); }
+.mk-pvm .mk-pvform input:focus { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvm .mk-pvform .mk-btn {
+  height: 52px; padding: 0; border: 0; justify-content: center;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem;
+}
+/* ⚠️ NO LIFT ON HOVER. A phone keeps `:hover` stuck on whatever was last tapped, so the shared navy
+   button's lift and shadow would stay on after the tap; the ref darkens on `:active` only. */
+.mk-pvm .mk-pvform .mk-btn:hover { background: var(--mk-navy); transform: none; box-shadow: none; }
+.mk-pvm .mk-pvform .mk-btn:active { background: var(--mk-navy-hov); }
+.mk-pvm .mk-pvin .mk-betanote { margin: 10px 0 0; font-size: .85rem; line-height: 1.45; }
+.mk-pvm .mk-pvin .mk-betamsg { margin: 14px 0 0; }
+
+/* ── What founding writers get (ref .more, .detail) ── */
+.mk-pvm .mk-pvmore {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 20px 0 22px; margin: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .62rem; line-height: 1;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvmore::before, .mk-pvm .mk-pvmore::after { content: ""; width: 36px; height: 1px; background: var(--mk-hair); }
+.mk-pvm .mk-pvchev {
+  display: block; width: 13px; height: 13px; fill: none; stroke: var(--mk-rust); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round; transition: transform .25s;
+}
+.mk-pvm .mk-pvmore[aria-expanded="true"] .mk-pvchev { transform: rotate(180deg); }
+.mk-pvm .mk-pvmore:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: -4px; }
+/* ⚠️ OPEN, THE TOGGLE IS ON THE PANEL'S PAPER WITH THE BOX'S BOTTOM CORNERS, so no strip of the box's
+   gradient shows between the panel and it: the two are adjacent boxes with no gap. */
+.mk-pvm .mk-pvbox--open .mk-pvmore { background: var(--mk-hero-ground); border-radius: 0 0 20px 20px; padding-top: 18px; }
+.mk-pvm .mk-pvdetail { background: var(--mk-hero-ground); border-top: 1px dashed var(--mk-hair); padding: 20px 0 6px; }
+.mk-pvm .mk-pvdetail[hidden] { display: none; }
+/* The four points: a scroll-snapped row of cards, 82% wide so the next one peeks in. */
+.mk-pvm .mk-pvperks {
+  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 2px 20px 6px; scroll-padding: 0 20px; scrollbar-width: none;
+}
+.mk-pvm .mk-pvperks::-webkit-scrollbar { display: none; }
+.mk-pvm .mk-pvperk {
+  flex: 0 0 82%; scroll-snap-align: start; background: #fff; border-radius: 16px; padding: 18px;
+  box-shadow: var(--mk-pv-perklift);
+}
+.mk-pvm .mk-pvperki { width: 40px; height: 40px; border-radius: 50%; background: var(--mk-blush); display: grid; place-items: center; }
+.mk-pvm .mk-pvperki svg {
+  width: 19px; height: 19px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.mk-scope .mk-pvperkh {
+  font-family: var(--mk-f-display) !important; font-weight: 400;
+  font-size: 1.08rem; line-height: 1.3; margin: 14px 0 0; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvperkp { margin: 6px 0 0; font-size: .95rem; line-height: 1.5; color: var(--mk-body); }
+/* The current dot widens to a rust pill and follows the swipe. */
+.mk-pvm .mk-pvdots { display: flex; justify-content: center; gap: 6px; margin: 12px 0 0; }
+.mk-pvm .mk-pvdots i {
+  display: block; width: 6px; height: 6px; border-radius: 999px; background: rgba(28, 19, 15, .18);
+  transition: width .2s, background .2s;
+}
+.mk-pvm .mk-pvdots i.mk-on { width: 18px; background: var(--mk-rust); }
+/* How it works: a navy card, the three numbered steps down a thin line. */
+.mk-pvm .mk-pvsteps { margin: 18px 20px 0; padding: 16px 18px 18px; border-radius: 16px; background: var(--mk-navy); color: #fff; }
+.mk-pvm .mk-pvstepsh {
+  margin: 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .2em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .7);
+}
+.mk-pvm .mk-pvsteps ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; position: relative; }
+.mk-pvm .mk-pvsteps ol::before {
+  content: ""; position: absolute; left: 12px; top: 12px; bottom: 12px; width: 1px; background: rgba(var(--mk-cream-rgb), .3);
+}
+.mk-pvm .mk-pvsteps li { position: relative; display: flex; align-items: center; gap: 12px; font-size: 1rem; line-height: 1.35; color: #fff; }
+.mk-pvm .mk-pvsteps li span {
+  width: 25px; height: 25px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--mk-terra); color: var(--mk-nearblack);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .7rem; line-height: 1;
+}
+/* ── Then, once we launch: pinned Free / Pro tabs over one card at a time (26 Oct; ref
+   design-refs/pricing-phone-plans-v1.html, layout A — its `.ptabs`, `.tabpanel` and `.m` card rules) ──
+   The cards themselves are the shared `.mk-l…` block; only the phone's padding differs.
+   ⚠️ THE TABS ARE STICKY UNDER THE PINNED NAV (`top: var(--mk-nav-h)`), on the oat, for as long as this
+   section is on screen. The ref's is `top: -26px` because its phone scrolls inside its own padding;
+   on the page the window scrolls and the nav stays, so the nav's height is the offset.
+   ⚠️ THE OAT IS STATED, NOT `var(--mk-lower)`: that token's readers are locked to the surfaces it
+   defines (marketingTokens), and the tabs only need to match the sheet behind them. */
+.mk-pvm .mk-pvlaunch { margin-top: 38px; }
+.mk-pvm .mk-pvlaunchh {
+  margin: 0 0 18px 4px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.2rem; line-height: 1.3;
+}
+.mk-pvm .mk-pvtabs {
+  position: sticky; top: var(--mk-nav-h); z-index: 3; margin: 0 -14px 14px; padding: 10px 14px; background: #f2eee8;
+}
+.mk-pvm .mk-pvtabsin {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 16px; background: #e6e0d6;
+}
+.mk-pvm .mk-pvtabsthumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 12px; background: #fff;
+  box-shadow: 0 2px 6px rgba(28, 19, 15, .12); transition: transform .28s cubic-bezier(.22, .8, .3, 1);
+}
+.mk-pvm .mk-pvtabsin[data-on="1"] .mk-pvtabsthumb { transform: translateX(100%); }
+.mk-pvm .mk-pvtabsin button {
+  position: relative; z-index: 1; border: 0; background: none; padding: 9px 6px; border-radius: 12px; cursor: pointer; text-align: center;
+}
+.mk-pvm .mk-pvtabsin button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvm .mk-pvtabsin button span {
+  display: block; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.05rem; line-height: 1.2; color: rgba(28, 19, 15, .56);
+}
+.mk-pvm .mk-pvtabsin button small {
+  display: block; margin-top: 3px; font-family: var(--mk-f-mono); font-weight: 500; font-size: .54rem; line-height: 1.2;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--mk-label);
+}
+.mk-pvm .mk-pvtabsin button[aria-selected="true"] span { color: var(--mk-nearblack); }
+.mk-pvm .mk-pvtabsin button[aria-selected="true"] small { color: var(--mk-rust); }
+.mk-pvm .mk-pvpanel[hidden] { display: none; }
+/* A literal keyframe: a `var()` inside `@keyframes` fails silently on this tier. */
+@keyframes mkPvFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.mk-pvm .mk-pvpanel { animation: mkPvFade .25s ease; }
+.mk-scope .mk-pvm .mk-lcardin { padding: 22px 20px; }
+
+/* ── Questions, as an accordion (ref .faq, .qa) ── */
+.mk-pvm .mk-pvfaq { margin-top: 40px; }
+.mk-scope .mk-pvfaqh {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.5rem; line-height: 1.2; margin: 0 4px 12px;
+  color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvqa { border-top: 1px solid var(--mk-hair); }
+.mk-pvm .mk-pvqa:last-child { border-bottom: 1px solid var(--mk-hair); }
+.mk-pvm .mk-pvqa > button {
+  display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 4px;
+  border: 0; background: none; text-align: left; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem; line-height: 1.35; color: var(--mk-nearblack);
+}
+.mk-pvm .mk-pvqa > button:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: -2px; }
+.mk-pvm .mk-pvpm {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px var(--mk-hair);
+  display: grid; place-items: center; transition: transform .25s, background .2s;
+}
+.mk-pvm .mk-pvpm svg { width: 12px; height: 12px; stroke: var(--mk-rust); stroke-width: 2; stroke-linecap: round; }
+.mk-pvm .mk-pvqa--open .mk-pvpm { transform: rotate(45deg); background: var(--mk-blush); }
+.mk-pvm .mk-pvqaa { margin: 0; padding: 0 40px 18px 4px; font-size: 1rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pvm .mk-pvqaa[hidden] { display: none; }
+.mk-pvm .mk-pvsuitlink { color: var(--mk-rust); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--mk-rust); }
+
+/* ── The sticky sign-up (ref .stick), portalled into `.mk-scope` ──
+   ⚠️ `visibility` FOLLOWS THE SLIDE, so a hidden bar cannot be tabbed to or read out. */
+.mk-pvlayer.mk-pvstick {
+  position: fixed; left: 12px; right: 12px; bottom: 14px; z-index: 50; box-sizing: border-box;
+  display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 999px;
+  background: var(--mk-ink-shell); color: var(--mk-cream); box-shadow: 0 14px 30px -10px rgba(0, 0, 0, .45);
+  transform: translateY(140%); visibility: hidden;
+  transition: transform .3s cubic-bezier(.22, .8, .3, 1), visibility 0s linear .3s;
+  font-family: var(--mk-f-serif);
+}
+.mk-pvlayer.mk-pvstick.mk-on { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.22, .8, .3, 1), visibility 0s; }
+.mk-pvlayer.mk-pvstick p {
+  margin: 0; flex: 1; font-family: var(--mk-f-mono); font-weight: 600; font-size: .6rem; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+.mk-pvlayer.mk-pvstick p span { display: block; color: rgba(var(--mk-cream-rgb), .6); font-weight: 500; }
+.mk-pvlayer.mk-pvstick button {
+  height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--mk-cream); color: var(--mk-nearblack);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .95rem; cursor: pointer;
+}
+.mk-pvlayer.mk-pvstick button:focus-visible { outline: 2px solid var(--mk-terra); outline-offset: 2px; }
+/* ⚠️ WHILE THE BAR SHOWS, THE PAGE ENDS 74px LOWER (its 60px plus its 14px inset), so the footer's
+   last link can always be scrolled clear of it. */
+.mk-scope:has(.mk-pvstick.mk-on) { padding-bottom: 74px; }
+
+/* ── Which plan suits me best? — the bottom sheet (ref .scrim, .jsheet), portalled into `.mk-scope` ──
+   ⚠️ CLOSED IT IS STILL MOUNTED, SO ITS ANSWERS SURVIVE — and `visibility` follows the slide (the
+   component also sets `inert`), so nothing in a closed sheet can be reached. Above the nav (60). */
+.mk-pvlayer.mk-pvjs { font-family: var(--mk-f-serif); color: var(--mk-nearblack); line-height: normal; }
+.mk-pvlayer .mk-pvscrim {
+  position: fixed; inset: 0; z-index: 90; background: rgba(17, 22, 32, .45); opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+.mk-pvlayer .mk-pvsheet {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 90%; z-index: 91; box-sizing: border-box;
+  background: #fff; border-radius: 24px 24px 0 0; display: flex; flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, .25);
+  transform: translateY(102%); visibility: hidden;
+  transition: transform .38s cubic-bezier(.22, .8, .3, 1), visibility 0s linear .38s;
+}
+.mk-pvlayer.mk-open .mk-pvscrim { opacity: 1; pointer-events: auto; }
+.mk-pvlayer.mk-open .mk-pvsheet { transform: none; visibility: visible; transition: transform .38s cubic-bezier(.22, .8, .3, 1), visibility 0s; }
+.mk-pvlayer .mk-pvgrab { width: 40px; height: 5px; border-radius: 999px; background: rgba(28, 19, 15, .18); margin: 9px auto 0; flex: none; }
+.mk-pvlayer .mk-pvjshead { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 0 22px; flex: none; }
+.mk-scope .mk-pvjsh {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.08rem; line-height: 1.2; margin: 0;
+  color: var(--mk-nearblack);
+}
+.mk-pvlayer .mk-pvjsx {
+  width: 36px; height: 36px; border-radius: 50%; border: 0; background: #f2eee8; display: grid; place-items: center;
+  cursor: pointer; padding: 0;
+}
+.mk-pvlayer .mk-pvjsx svg { width: 13px; height: 13px; stroke: var(--mk-nearblack); stroke-width: 2; stroke-linecap: round; }
+.mk-pvlayer .mk-pvjsmeta { display: flex; align-items: center; gap: 12px; padding: 14px 22px 0; flex: none; }
+.mk-pvlayer .mk-pvjsprog { flex: 1; height: 4px; border-radius: 999px; background: rgba(28, 19, 15, .08); overflow: hidden; }
+.mk-pvlayer .mk-pvjsprog span { display: block; height: 100%; background: var(--mk-rust); border-radius: 999px; transition: width .35s; }
+.mk-pvlayer .mk-pvjscount {
+  font-family: var(--mk-f-mono); font-weight: 500; font-size: .56rem; line-height: 1; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(28, 19, 15, .56); white-space: nowrap;
+}
+.mk-pvlayer .mk-pvjsbody { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 22px 22px 20px; scrollbar-width: none; }
+.mk-pvlayer .mk-pvjsbody::-webkit-scrollbar { display: none; }
+.mk-pvlayer .mk-pvq { margin: 0 0 18px; font-family: var(--mk-f-display); font-weight: 400; font-size: 1.5rem; line-height: 1.22; }
+.mk-pvlayer .mk-pvq:focus { outline: none; }
+.mk-pvlayer .mk-pvsubq { margin: 22px 0 10px; font-weight: 600; }
+.mk-pvlayer .mk-pvopts { display: grid; gap: 9px; }
+.mk-pvlayer .mk-pvopt {
+  position: relative; display: block; width: 100%; text-align: left; padding: 15px 16px 15px 48px; border-radius: 14px;
+  border: 1px solid var(--mk-hair); background: #fff; color: var(--mk-nearblack); cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem; line-height: 1.3;
+}
+.mk-pvlayer .mk-pvopt small { display: block; margin-top: 3px; font-weight: 400; font-size: .9rem; color: rgba(28, 19, 15, .56); }
+.mk-pvlayer .mk-pvopt::before {
+  content: ""; position: absolute; left: 17px; top: 17px; width: 17px; height: 17px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .3); transition: box-shadow .15s;
+}
+.mk-pvlayer .mk-pvopt[aria-pressed="true"] { border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); background: var(--mk-hero-ground); }
+.mk-pvlayer .mk-pvopt[aria-pressed="true"]::before { box-shadow: inset 0 0 0 5.5px var(--mk-navy); }
+.mk-pvlayer .mk-pvopt:focus-visible { outline: 2px solid var(--mk-navy); outline-offset: 2px; }
+.mk-pvlayer .mk-pvopts--row { grid-template-columns: 1fr 1fr 1fr; }
+.mk-pvlayer .mk-pvopts--row .mk-pvopt { padding: 14px 8px; text-align: center; font-size: .95rem; }
+.mk-pvlayer .mk-pvopts--row .mk-pvopt::before { display: none; }
+.mk-pvlayer .mk-pvagents { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 6px 0 0; }
+.mk-pvlayer .mk-pvstepper { display: flex; align-items: center; gap: 6px; }
+.mk-pvlayer .mk-pvstepper button {
+  width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--mk-hair); background: #fff; padding: 0;
+  font-family: var(--mk-f-sans); font-weight: 400; font-size: 1.6rem; line-height: 1; color: var(--mk-navy); cursor: pointer;
+}
+.mk-pvlayer .mk-pvstepper output {
+  min-width: 100px; text-align: center; font-family: var(--mk-f-display); font-weight: 400; font-size: 3rem; line-height: 1;
+}
+.mk-pvlayer .mk-pvagents--idk .mk-pvstepper { opacity: .35; }
+.mk-pvlayer .mk-pvidk {
+  height: 44px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: .98rem; color: var(--mk-nearblack); cursor: pointer;
+}
+.mk-pvlayer .mk-pvidk[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
+.mk-pvlayer .mk-pvins {
+  margin: 18px 0 0; padding: 14px 16px; border-radius: 14px; background: var(--mk-blush);
+  font-size: 1rem; line-height: 1.5; color: #4a3a30; animation: mkJyRise .35s ease;
+}
+.mk-pvlayer .mk-pvjsfoot {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 18px 26px 22px; border-top: 1px solid rgba(28, 19, 15, .08); background: #fff;
+}
+.mk-pvlayer .mk-pvjsback {
+  border: 0; background: none; padding: 8px 0; cursor: pointer;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; color: var(--mk-navy);
+}
+/* Hidden on the first question and the result, keeping its place so Next does not move. */
+.mk-pvlayer .mk-pvjsback.mk-off { visibility: hidden; }
+.mk-pvlayer .mk-pvjsnext {
+  flex: 1; max-width: 220px; height: 52px; padding: 0; border: 0; justify-content: center;
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1.02rem;
+}
+.mk-pvlayer .mk-pvjsnext:hover { background: var(--mk-navy); transform: none; box-shadow: none; }
+.mk-pvlayer .mk-pvjsnext:active { background: var(--mk-navy-hov); }
+.mk-pvlayer .mk-pvjsnext:disabled { background: rgba(42, 58, 82, .18); border-color: transparent; cursor: default; transform: none; box-shadow: none; }
+
+/* The result: the estimate, the navy plan card, then why (ref .res-*). */
+.mk-pvlayer .mk-pvresk {
+  margin: 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .58rem; line-height: 1.2;
+  letter-spacing: .18em; text-transform: uppercase; color: rgba(28, 19, 15, .56);
+}
+.mk-pvlayer .mk-pvresbig { margin: 6px 0 0; font-family: var(--mk-f-display); font-weight: 400; font-size: 2.15rem; line-height: 1.12; }
+.mk-pvlayer .mk-pvresbig:focus { outline: none; }
+.mk-pvlayer .mk-pvrescard {
+  position: relative; margin: 26px 2px 22px; padding: 22px 20px 20px; border-radius: 18px;
+  background: var(--mk-navy); color: var(--mk-cream);
+  box-shadow: 0 0 0 6px #fff, 0 0 0 7px rgba(28, 19, 15, .08), 0 18px 34px -16px rgba(28, 19, 15, .4);
+}
+.mk-pvlayer .mk-pvresflag {
+  position: absolute; top: -11px; left: 18px; padding: 5px 10px; border-radius: 999px;
+  background: var(--mk-nearblack); color: var(--mk-cream);
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: .54rem; line-height: 1; letter-spacing: .18em; text-transform: uppercase;
+}
+.mk-scope .mk-pvresname {
+  font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.3rem; line-height: 1.2; margin: 0; color: #fff;
+}
+.mk-pvlayer .mk-pv4price { display: flex; align-items: flex-start; gap: 3px; margin-top: 10px; }
+.mk-pvlayer .mk-pv4cur { font-family: var(--mk-f-display); font-weight: 400; font-size: 1.15rem; line-height: 1; margin-top: 6px; color: #fff; }
+.mk-pvlayer .mk-pv4amt { font-family: var(--mk-f-display); font-weight: 400; font-size: 2.6rem; line-height: 1; letter-spacing: -.02em; color: #fff; }
+.mk-pvlayer .mk-pvrespm {
+  margin: 6px 0 0; font-family: var(--mk-f-mono); font-weight: 500; font-size: .6rem; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase; color: rgba(var(--mk-cream-rgb), .8);
+}
+.mk-pvlayer .mk-pvrestail {
+  margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed rgba(var(--mk-cream-rgb), .3); font-size: 1rem; line-height: 1.5;
+}
+.mk-pvlayer .mk-pvreswhy { margin: 8px 0 0; font-size: 1rem; line-height: 1.55; color: var(--mk-body); }
+.mk-pvlayer .mk-pvresprep {
+  margin: 12px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--mk-blush); font-size: .95rem; line-height: 1.5; color: #4a3a30;
+}
+.mk-pvlayer .mk-pvresagain {
+  margin-top: 18px; border: 0; background: none; padding: 0; cursor: pointer; border-bottom: 1px solid rgba(42, 58, 82, .35);
+  font-family: var(--mk-f-serif); font-weight: 600; font-size: 1rem; color: var(--mk-navy);
+}
+.mk-pvlayer .mk-pvressrc { margin: 18px 0 0; font-size: .8rem; line-height: 1.45; color: var(--mk-label); }
+.mk-pvlayer .mk-pvressrc a { color: inherit; text-decoration: underline; }
+
+/* ⚠️ AFTER THE RULES IT OVERRIDES: a media query confers no specificity. Under reduced motion the
+   sheet appears in place, the thumb, chevron and + do not turn or slide, and the notes do not rise. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-pvm .mk-pvchev, .mk-pvm .mk-pvdots i, .mk-pvm .mk-pvtabsthumb, .mk-pvm .mk-pvpm,
+  .mk-pvlayer.mk-pvstick, .mk-pvlayer.mk-pvstick.mk-on,
+  .mk-pvlayer .mk-pvscrim, .mk-pvlayer .mk-pvsheet, .mk-pvlayer.mk-open .mk-pvsheet,
+  .mk-pvlayer .mk-pvjsprog span, .mk-pvlayer .mk-pvopt::before { transition: none; }
+  .mk-pvlayer .mk-pvins, .mk-pvm .mk-pvpanel { animation: none; }
 }
 
 /* ══════════════ Shared footer (every public page) ══════════════
@@ -1692,10 +2212,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-size: 16.5px; line-height: 1.6; color: rgba(var(--mk-cream-rgb), .62);
   margin: 18px 0 0; max-width: 34ch;
 }
-/* The six states as the status band draws them — a signature rather than a control, so the row is
-   hidden from the accessibility tree and dimmed as a group. */
-.mk-footglyphs { display: flex; gap: 14px; margin: 22px 0 0; color: var(--mk-cream); opacity: .5; }
-.mk-footglyphs svg { width: 19px; height: 19px; display: block; flex: none; }
 /* No `!important` needed: brand.tsx forces h1, h2 and h3, and these are h4. */
 .mk-footcol h4 {
   font-family: "Special Elite", cursive; font-weight: 400; font-size: 15px;
@@ -1743,83 +2259,23 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-footmail { justify-self: start; }
 }
 
-/* ══════════════ Document shell (privacy, terms) ══════════════ */
-.mk-docplane { max-width: 860px; margin: 0 auto; padding: 44px 56px 10px; width: 100%; }
-
-/* The ribbon reads as a notice, not as body copy — the reader must not mistake a working draft for
-   finished policy. Same reasoning as the `.mk-legalnotice` it replaces. */
-.mk-draftribbon {
-  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px;
-  padding: 14px 18px; border-radius: 12px;
-  background: var(--mk-parch); border: 1px solid var(--mk-bd);
-}
-.mk-drtag {
-  flex: none; font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mk-rust); font-weight: 500;
-  border: 1px solid rgba(162, 69, 42, 0.28); border-radius: 999px; padding: 5px 10px;
-}
-.mk-draftribbon p { font-size: 12.5px; font-weight: 300; line-height: 1.6; color: var(--mk-muted); }
-
-.mk-doccard {
-  background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
-}
-.mk-docband {
-  display: flex; align-items: center; gap: 16px;
-  padding: 26px 34px; background: var(--mk-parch); border-bottom: 1px solid var(--mk-hair);
-}
-.mk-docplate {
-  flex: none; width: 44px; height: 44px; border-radius: 12px;
-  display: grid; place-items: center;
-  background: var(--mk-centre); border: 1px solid var(--mk-bd);
-}
-.mk-docplate svg { width: 22px; height: 22px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.mk-doceyebrow {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label);
-}
-.mk-doctitle {
-  font-family: "Playfair Display", Georgia, serif; font-size: 30px; font-weight: 500;
-  line-height: 1.15; color: var(--mk-head); margin-top: 6px;
-}
-.mk-docmeta {
-  margin-left: auto; align-self: flex-start; text-align: right;
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mk-label);
-}
-
-.mk-docbody { padding: 30px 34px 36px; }
-.mk-doclede {
-  font-family: "Playfair Display", Georgia, serif; font-size: 17px; font-style: italic;
-  font-weight: 400; line-height: 1.6; color: var(--mk-head);
-  padding-bottom: 22px; border-bottom: 1px solid var(--mk-hair);
-}
-.mk-docsection { margin-top: 28px; }
-.mk-seclabel {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  color: var(--mk-label);
-}
-.mk-sectitle {
-  font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 500;
-  color: var(--mk-head); margin-top: 4px;
-}
-.mk-docsection p { font-size: 14px; font-weight: 300; line-height: 1.75; color: var(--mk-body); margin-top: 10px; }
-.mk-docsection ul { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.mk-docsection li {
-  position: relative; padding-left: 20px; font-size: 14px; font-weight: 300; line-height: 1.7; color: var(--mk-body);
-}
-.mk-docsection li::before {
-  content: ""; position: absolute; left: 2px; top: 10px; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--mk-sage); border: 1px solid var(--mk-sage-t);
-}
-.mk-docsection strong { color: var(--mk-ink); font-weight: 500; }
+/* ══════════════ The legal pages' shared pieces ══════════════
+   The document card (`DocumentShell`) is deleted (12 Nov): Terms and Privacy both draw privacy.css's
+   layout. What stays here is the in-copy link, the working-draft ribbon and the pulled-out clause. */
 .mk-doclink {
   background: none; border: none; padding: 0; cursor: pointer; font: inherit;
   color: var(--mk-rust); text-decoration: underline; text-underline-offset: 2px;
 }
 .mk-doclink:hover { color: var(--mk-head); }
-.mk-docsection a { color: var(--mk-rust); text-decoration: underline; text-underline-offset: 2px; }
+/* The ribbon reads as a notice, not as body copy — the reader must not mistake a working draft for
+   finished terms. It heads the Terms' body, above the contents and the sections. */
+.mk-draftribbon {
+  display: flex; align-items: baseline; gap: 14px; margin: 0 0 36px;
+  padding: 14px 18px; border-radius: 14px;
+  background: var(--mk-parch); border: 1px solid var(--mk-bd);
+}
+.mk-drtag { flex: none; font-family: var(--mk-f-sans); font-size: 14px; font-weight: 600; color: var(--mk-rust); }
+.mk-draftribbon p { margin: 0; font-family: var(--mk-f-sans); font-size: 14px; line-height: 1.55; color: var(--mk-body); }
 
 /* A pulled-out clause — the sentence a reader should not be able to skim past. */
 .mk-callout {
@@ -1828,14 +2284,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-corule { flex: none; width: 3px; border-radius: 2px; background: var(--mk-rust); opacity: .55; }
 .mk-callout p { margin-top: 0; font-size: 13.5px; }
-
-@media (max-width: 760px) {
-  .mk-docplane { padding: 30px 22px 6px; }
-  .mk-docband { padding: 20px 22px; flex-wrap: wrap; }
-  .mk-doctitle { font-size: 25px; }
-  .mk-docmeta { margin-left: 0; width: 100%; text-align: left; }
-  .mk-docbody { padding: 24px 22px 30px; }
-}
 
 /* ══════════════ About (rebuilt 21 Oct; ref claude/about-page-v1.html) ══════════════
    Top to bottom: the aim in large type beside the fireside drawing, the skills gap on a navy band,
@@ -1954,10 +2402,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-aplate.mk-noteart { aspect-ratio: 1 / 1; max-width: 440px; justify-self: center; }
 .mk-noteart .mk-aplatewash { transform: rotate(-8deg) scale(1.1, 1.3); }
 .mk-notecol { min-width: 0; max-width: 560px; }
-.mk-notekick {
-  font-family: "JetBrains Mono", monospace; font-weight: 400; font-size: .72rem;
-  letter-spacing: .24em; text-transform: uppercase; color: var(--mk-muted); margin: 0 0 20px;
-}
 .mk-scope .mk-noteh {
   font-family: "Special Elite", cursive !important; font-weight: 400; font-size: 38px;
   line-height: 1.2; color: var(--mk-nearblack); margin: 0 0 6px;
@@ -1971,14 +2415,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: "Caveat", cursive; font-weight: 600; font-size: 46px; line-height: 1;
   color: var(--mk-rust); margin: 22px 0 0; transform: rotate(-4deg); transform-origin: left center;
 }
-/* The sign-off follows `IdentityLine`'s law without importing it: the hairline is its OWN element,
-   never a border on either label, so it holds its place whatever the two labels do. */
-.mk-signoff { display: flex; align-items: center; justify-content: flex-start; gap: 12px; margin-top: 14px; }
-.mk-signname { font-family: "Playfair Display", Georgia, serif; font-size: 18px; font-weight: 500; color: var(--mk-ink); }
-.mk-signrule { flex: 0 0 auto; width: 1px; height: 15px; background: var(--mk-bd); }
-.mk-signrole {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label);
+/* The role under the signature (public sweep v1): one line of secondary text, no rule beside it. */
+.mk-signoff.mk-signrole {
+  font-family: var(--mk-f-sans); font-size: 14px; color: var(--mk-ink); margin: 14px 0 0;
 }
 
 /* ── The way out: one quiet card, one action ── */
@@ -2036,20 +2475,14 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-sechead h2 { font-size: 23px; }
 }
 
-/* ══════════════ Contact — the address, three reasons, and a form card ══════════════
+/* ══════════════ Contact — the address, the founding route, and a form card (contact redesign v1) ══════════════
    ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED (17 Sep). Every contact rule was
-   deleted and restated here. `.mk-wayplate`, `.mk-cleft h1` and the old `.mk-way strong`/`span`
-   pair went with the markup that rendered them.
-   ⚠️ THE PAGE IS ITS OWN CONTAINER, AND IT IS THE STANDARD ONE — 1180 wide with 56px gutters — so
-   the service line under the two columns shares their edges without restating them. */
+   deleted and restated here. The redesign (12 Nov) deleted the kicker, the email card, the three
+   ways with their tiles and the service line, and restyled the field labels in sentence case.
+   ⚠️ THE PAGE IS ITS OWN CONTAINER, AND IT IS THE STANDARD ONE — 1180 wide with 56px gutters. */
 .mk-contact { max-width: 1180px; margin: 0 auto; padding: 80px 56px 88px; }
 .mk-contactsplit {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: start;
-}
-/* The kicker is About's, value for value — the two company pages open the same way. */
-.mk-ckicker {
-  font-family: "JetBrains Mono", monospace; font-weight: 400; font-size: .72rem;
-  letter-spacing: .24em; text-transform: uppercase; color: var(--mk-muted); margin: 0 0 18px;
 }
 /* ⚠️ TWO CLASSES AND `!important`, HERE AND ON BOTH h2 RULES BELOW. brand.tsx forces every
    `h1:not(.wsh-title)`, `h2` and `h3` into the brand face with `!important`; the h1 selector is
@@ -2061,43 +2494,20 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* `ch` on the element that sets its own size, so the measure tracks the type it measures. */
 .mk-clede { font-size: 19px; line-height: 1.65; color: var(--mk-muted); margin: 20px 0 0; max-width: 42ch; }
 
-.mk-cmailcard {
-  display: flex; align-items: center; gap: 16px; margin: 32px 0 0;
-  background: #fff; border-radius: 14px; padding: 18px 22px;
-  /* White on paper white has no edge of its own; the vision cards' hairline gives it one. */
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, .06);
-}
-.mk-cmaillabel {
-  margin: 0 0 3px; font-size: 12.5px; font-weight: 600; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--mk-muted);
-}
 .mk-cmail {
   font-size: 19px; color: var(--mk-nearblack); overflow-wrap: anywhere;
   text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
 }
 .mk-cmail:hover { color: var(--mk-claim-accent); }
 
-/* The three reasons: a hairline above them, then one row each — the tile, then the words. */
-.mk-ways { margin: 36px 0 0; padding: 32px 0 0; border-top: 1px solid var(--mk-hair); display: grid; gap: 24px; }
-.mk-way { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 24px; align-items: start; }
-.mk-way .mk-wayh {
+/* The address and the founding writers' route: a hairline above them, then two short headed paragraphs. */
+.mk-cways { margin: 32px 0 0; padding: 28px 0 0; border-top: 1px solid var(--mk-hair); }
+.mk-cways .mk-wayh + .mk-waybody + .mk-wayh { margin-top: 26px; }
+.mk-cways .mk-wayh {
   font-family: "Special Elite", cursive !important; font-weight: 400;
   font-size: 20px; line-height: 1.3; color: var(--mk-nearblack); margin: 0; text-wrap: balance;
 }
 .mk-waybody { font-size: 16.5px; line-height: 1.6; color: var(--mk-muted); margin: 6px 0 0; }
-
-/* The icon tiles. The glyphs are stroke-only and take their colour from the tile, per
-   `marketingMarks` — no hex lives in the component. */
-.mk-ctile { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; }
-.mk-ctile svg { width: 20px; height: 20px; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.mk-ctile--mail { width: 44px; height: 44px; border-radius: 12px; }
-.mk-ctile--mail svg { width: 22px; height: 22px; }
-.mk-ctile--rose { background: var(--mk-centre); }
-.mk-ctile--rose svg { stroke: var(--mk-claim-accent); }
-.mk-ctile--grey { background: var(--mk-tile-grey); }
-.mk-ctile--grey svg { stroke: var(--mk-nearblack); }
-.mk-ctile--slate { background: var(--mk-slate-pale); }
-.mk-ctile--slate svg { stroke: var(--mk-slate); }
 
 /* The Archivist — whole, at its own ratio, capped and left-aligned. */
 .mk-cart { display: block; width: 100%; max-width: 300px; height: auto; margin: 40px 0 0; }
@@ -2113,10 +2523,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-csub { font-size: 16px; line-height: 1.55; color: var(--mk-muted); margin: 8px 0 0; }
 .mk-field { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
-.mk-field label {
-  font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--mk-muted);
+.mk-field label, .mk-field .mk-flabel {
+  font-size: 14.5px; font-weight: 600; color: var(--mk-nearblack);
 }
+.mk-foptional { font-weight: 400; color: var(--mk-muted); }
 .mk-field input, .mk-field select, .mk-field textarea {
   font-family: inherit; font-size: 17px; color: var(--mk-ink);
   background: #fff; border: 1px solid var(--mk-bd); border-radius: 10px; padding: 13px 15px;
@@ -2146,8 +2556,17 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-cbtn:disabled:hover { background: var(--mk-nearblack); }
 .mk-cstate { margin: 14px 0 0; font-size: 15px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cstate--bad { color: var(--mk-rust); }
+/* A failed send's offer of the mail app (13 Nov): a link under the notice, never a second filled button. */
+.mk-cstate--mail { margin-top: 6px; }
+.mk-cstate--mail .mk-cmail { font-size: inherit; }
 .mk-cfine { margin: 16px 0 0; font-size: 14px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cfine .mk-doclink { font-size: inherit; }
+/* The topic's note is the legal pages' pulled-out clause, at the form's secondary size. */
+.mk-formcard .mk-callout { margin-top: 18px; }
+.mk-formcard .mk-callout p { font-size: 15px; line-height: 1.55; color: var(--mk-body); }
+/* The sent panel: the form card's heading and lines, then the tier's quiet button at full width. */
+.mk-cdone .mk-csub { margin-top: 12px; }
+.mk-cdone .mk-cagain { display: flex; justify-content: center; width: 100%; margin: 24px 0 0; min-height: 48px; font-size: 16px; }
 /* ⚠️ 17px ON PHONES TOO. mobileShell.css holds every text control at 16px below md with
    `!important` — a floor against iOS zooming on focus. 17 is above that floor, so the brief's size
    keeps the floor's purpose; the selector repeats its `:not()` chain plus this page's class
@@ -2157,11 +2576,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-field textarea,
   .mk-field select { font-size: 17px !important; }
 }
-
-/* Under both columns and above the footer; the hairline is the line's own edge. */
-.mk-svcline { margin: 64px 0 0; padding: 24px 0 0; border-top: 1px solid var(--mk-hair); }
-.mk-svcline p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--mk-muted); }
-.mk-svcline strong { color: var(--mk-ink); font-weight: 600; }
 
 /* ⚠️ WIDENING-TO-NARROWING, AND THE ORDER IS THE CASCADE: all four blocks are equal specificity,
    and a media query confers none. The reduced-motion override sits after the rule it overrides
@@ -2176,7 +2590,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 @media (max-width: 560px) {
   .mk-contact .mk-ch1 { font-size: 33px; }
   .mk-formcard { padding: 24px 20px 22px; }
-  .mk-cmailcard { flex-direction: column; align-items: flex-start; gap: 12px; }
   .mk-cart { max-width: 220px; margin-left: auto; margin-right: auto; }
 }
 
@@ -2184,6 +2597,168 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    The phone page, its founding card and its join bar are styled in `waitlist.css`, one block per
    selector. The v1–v4 feature story, the navy vision carousel, the founding card's pill and link, and
    the page's scroll-snapping were RETIRED with this build (ref design-refs/landing-mobile-v7.html). */
+
+/* ══════════════ Public pages on phones v1 (29 Oct; ref design-refs/public-phone-polish-v1/) ══════════════
+   The logged-out site at ≤760px. Nothing here can reach a wider screen: every rule is inside this
+   query, and `publicPhonePolish.measure.ts` P1 compares 1440 and 1280 against the build before it.
+   ⚠️ LAST IN THE FILE ON PURPOSE. A media query confers no specificity, so each selector restates the
+   specificity of the rule it overrides (`.mk-pvm .x`, `.mk-scope .x`, `.mk-fwcard .x`, `.mk-field label`)
+   and wins on source order. No `!important` — none of the overridden rules carries one.
+
+   ── A: the small capitals ──
+   Four labels go, because the thing beside each already says it: the feature step counter (the
+   progress bars above it), Contact's kicker (the heading), Founders' eyebrow (the heading) and the
+   legal pages' eyebrow (the title). `display: none`, never removed from the DOM: landingMobileV3
+   reads `.mk-s3n`'s text, and contactPage.test reads the kicker on the desktop render.
+   The rest stay and read as sentence case in the body face at a size a phone can read. */
+@media (max-width: 760px) {
+  .mk-s3n { display: none; }
+
+  /* Pills and kickers: 14px, weight 600. Each keeps its own colour. */
+  .mk-ccpill, .mk-claimkicker,
+  .mk-pvm .mk-pvtag, .mk-pvm .mk-pvmorelbl, .mk-pvm .mk-pvstepsh {
+    font-family: var(--mk-f-sans); font-size: 14px; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+  }
+  /* The pill's button carries the mono capitals; the label inside it is what is read. */
+  .mk-pvm .mk-pvmore { letter-spacing: 0; text-transform: none; }
+
+  /* Field labels: 14.5px, weight 600, in ink. */
+  .mk-field label, .mk-field .mk-flabel {
+    font-family: var(--mk-f-sans); font-size: 14.5px; font-weight: 600;
+    letter-spacing: 0; text-transform: none; color: var(--mk-nearblack);
+  }
+
+  /* Small print: 12.5px. */
+  .mk-pvlayer .mk-pvjscount {
+    font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; text-transform: none;
+  }
+
+  /* Pricing's tab sub-lines and plan rows: 13px. */
+  .mk-pvm .mk-pvtabsin button small, .mk-scope .mk-rungline, .mk-scope .mk-rungline em {
+    font-family: var(--mk-f-sans); font-size: 13px; letter-spacing: 0; text-transform: none;
+  }
+
+  /* ⚠️ FOUR MORE THE BRIEF DID NOT LIST, FOUND BY THE CENSUS (P2/P3). Each only shows with a live
+     founding count, which is why the review's shots never had them: the closing card's "38 places
+     left" (11px mono capitals), the join bar's count (11px), and Pricing's counter line (9.9px
+     capitals). (The legal pages' 8px section numbers went with the document card, 12 Nov.) */
+  .mk-ccard .mk-places span, .mk-pvm .mk-pvcount .mk-fmmeta {
+    font-family: var(--mk-f-sans); font-size: 13px; letter-spacing: 0; text-transform: none;
+  }
+  .mk-jbc { font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; }
+  /* And Pricing's sticky founding bar ("38 places left · Founding writers"), mono capitals at .6rem,
+     found by PP1's walk down the page (the bar only shows once the box has scrolled away). */
+  .mk-pvlayer.mk-pvstick p { font-family: var(--mk-f-sans); font-size: 13px; letter-spacing: 0; text-transform: none; }
+}
+
+/* ── B1: the footer and Contact's button ──
+   The footer: the brand block across the full width, then Product, Company and Legal in two columns
+   (Legal wraps to the second row). Every link is a 44px button with no gap between, so the list is
+   one continuous run of tap targets. The rule under each link stays as it is: it is transparent
+   until hover, and on a phone it is the tap's own feedback, so where it lands inside the 44px box is
+   not a thing a reader sees at rest.
+   Contact's "Send message" is the light-ground primary, navy, by the tokens `.mk-btn--navy` reads. */
+@media (max-width: 760px) {
+  .mk-footgrid { grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+  .mk-footbrand { grid-column: 1 / -1; margin-bottom: 12px; }
+  .mk-footcol ul { gap: 0; }
+  .mk-footcol button { min-height: 44px; min-width: 44px; display: flex; align-items: center; box-sizing: border-box; }
+
+  .mk-cbtn { background: var(--mk-navy); color: #fff; }
+  .mk-cbtn:hover { background: var(--mk-navy-hov); }
+  .mk-cbtn:disabled:hover { background: var(--mk-navy); }
+}
+
+/* ── B2: Contact on phones (Nick's picks 7B, 8B, 9B) ──
+   The opener is Pricing's card (see `ContactPage.tsx`): it wears `.mk-pvm`/`.mk-pvbox`/`.mk-pvart`/
+   `.mk-pvh1`/`.mk-pvsub`, so every value up there is Pricing's own rule, not a copy. Only what differs
+   is stated. (Pricing's 46px foot room under the card stays, as the board draws it.) Below the card:
+   the address and the founding writers' route, then the form in Pricing's card dress — the box's
+   radius, hairline and shadow, through the same tokens. */
+@media (max-width: 760px) {
+  .mk-contact { padding-top: 6px; }
+  /* ⚠️ THE SHEET NO LONGER CLIPS HERE, SO THE GROUND MUST NOT REACH ITS CORNERS. `.mk-sheet:has(.mk-pvm)`
+     is `overflow: visible` (the card rises out of it), and Contact's full-bleed ground layer then
+     painted square oat over the sheet's two rounded bottom corners — measured by LC2 S1 on the first
+     run of this block. On a phone `.mk-contact` IS the sheet's width, so the layer takes that width
+     and the sheet's own 18px bottom radius instead of 100vw. */
+  .mk-contact::before { left: 0; width: 100%; border-radius: 0 0 18px 18px; }
+  .mk-cways .mk-wayh { font-size: 1.08rem; }
+
+  .mk-formcard { border-radius: 20px; border: 1px solid var(--mk-pv-cardline); box-shadow: var(--mk-pv-cardlift); }
+  .mk-formcard .mk-formh2 { font-size: 1.6rem; }
+  .mk-field input, .mk-field select, .mk-field textarea {
+    border-radius: 14px; border: 1px solid rgba(28, 19, 15, .16); background: #fff; min-height: 50px;
+  }
+  .mk-cbtn { border-radius: 999px; min-height: 50px; }
+}
+
+/* ── B3: About on phones (Nick's picks 10C, 11B, 12B) ──
+   The opening is all ink: the aim in white in the typewriter face, the armchair drawing beneath it on
+   the ink, running straight into the (unchanged) navy gap band. The hero's full-bleed ground layer
+   takes the ink too, so no paper shows at the sides however wide the phone.
+   "How will we do it?" keeps its heading; each point becomes a white card with a 64px round spot
+   for the illustration (the dashed placeholder until the drawing arrives — the slot keeps its
+   `aria-label`, which names the plate), the heading at 1.35rem and the paragraph at 16px. The
+   01/02/03 go: the three points are not a sequence. The founder's note is one letter card with a
+   72px round photo spot. Card surfaces read Pricing's tokens. */
+@media (max-width: 760px) {
+  .mk-ahero { background-color: var(--mk-ink-shell); padding-bottom: 8px; }
+  .mk-ahero::before { background-color: var(--mk-ink-shell); }
+  .mk-scope .mk-ast { color: #fff; }
+
+  .mk-anum { display: none; }
+  .mk-band {
+    display: block; margin: 0 16px 14px; padding: 20px;
+    background: #fff; border-radius: 18px; box-shadow: var(--mk-pv-perklift);
+  }
+  .mk-band + .mk-band { border-top: 0; }
+  .mk-bandcopy { padding: 0; }
+  .mk-band .mk-aplate, .mk-aplate.mk-noteart {
+    width: 64px; height: 64px; min-height: 0; aspect-ratio: auto; max-width: none;
+    margin: 0 0 12px; padding: 0; overflow: hidden;
+    border: 2px dashed #cdbfb3; border-radius: 50%; background: #f5e6df;
+  }
+  .mk-aplate > * { display: none; }
+  .mk-scope .mk-bandcopy h2 { font-size: 1.35rem; line-height: 1.25; margin: 0 0 8px; }
+  .mk-bandcopy p { font-size: 16px; }
+
+  .mk-note {
+    display: block; margin: 0 16px 20px; padding: 24px 20px;
+    background: #fff; border-radius: 20px; box-shadow: var(--mk-pv-cardlift);
+  }
+  /* Centred, as the board draws it; the letter below it reads left-aligned. */
+  .mk-aplate.mk-noteart { width: 72px; height: 72px; margin: 0 auto 14px; }
+  .mk-notecol { padding: 0; }
+}
+
+/* ── C: tap targets and the phone menu ──
+   Each small link gets a 44px hit area from an empty `::after` centred on it — at least the link's own
+   box, at least 44 × 44 — so nothing it sits beside moves. `publicPhonePolish.measure.ts` P5 samples
+   the hit boxes with `elementFromPoint` (a pseudo-element hits as its element) and fails on any pair
+   that overlaps.
+   ⚠️ NOT THE "Privacy" THAT ENDS THE FOUNDING NOTES (`.mk-betanote .mk-doclink`). It closes a sentence
+   rather than standing on a line, and a 44px area there overlaps the claim button above it by 6px
+   and Pricing's "What founding writers get" below by 9px — measured, then removed.
+   The menu ends with the founding button: the join bar's pill colour, full width, 48px. */
+@media (max-width: 760px) {
+  .mk-nav .mk-brand-link, .mk-lg, .mk-burger, .mk-vlink, .mk-ccmore, .mk-lsuit, .mk-footmail,
+  .mk-cfine .mk-doclink { position: relative; }
+  .mk-nav .mk-brand-link::after, .mk-lg::after, .mk-burger::after, .mk-vlink::after, .mk-ccmore::after, .mk-lsuit::after, .mk-footmail::after,
+  .mk-cfine .mk-doclink::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+  }
+
+  .mk-navjoinwrap { padding: 16px 0 4px; }
+  .mk-navpanel .mk-navjoin {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: 48px;
+    padding: 0 18px; border: 0; border-radius: 999px; background: var(--mk-join); color: #1c130f;
+    font: 600 16px/1.2 var(--mk-f-serif); text-align: center;
+  }
+  .mk-navpanel .mk-navjoin:focus-visible { outline: 2px solid var(--mk-join); outline-offset: 3px; }
+}
 
 /* ── The bare chrome on /welcome and /privacy (MarketingShell): the logo is not a button, the footer
    is one line (welcome page v1, privacy page v1). ── */

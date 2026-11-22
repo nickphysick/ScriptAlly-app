@@ -232,6 +232,7 @@ export const TASK_TYPES = [
   "materials_unrecorded_bulk",
   /* Query actions v1 (K3) — derived from the drawer's flat fields; each opens its journey. */
   "offer_tell",
+  "offer_tell_all",
   "offer_send_full",
   "withdraw_tell",
   "signed_tell",
@@ -306,6 +307,7 @@ export function completionVia(card: BoardCard): CompletionVia {
     /* Query actions v1 (K3) — each of these finishes in the query drawer; the tick opens it and
        writes nothing here. */
     case "offer_tell":
+    case "offer_tell_all":
     case "offer_send_full":
     case "withdraw_tell":
     case "signed_tell":

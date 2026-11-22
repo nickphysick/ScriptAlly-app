@@ -22,7 +22,7 @@
   transition: transform 0.18s cubic-bezier(.2, .8, .2, 1);
 }
 .bvd-tab:hover { transform: translateY(-3px); }
-.bvd-tab:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 3px; }
+.bvd-tab:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .bvd-tab:disabled { cursor: default; opacity: 0.6; }
 .bvd-tab-img { flex: none; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: #3a4a63; display: flex; align-items: flex-end; justify-content: center; }
 .bvd-tab-img img { width: 44px; height: auto; display: block; }
@@ -35,7 +35,8 @@
   box-shadow: inset 0 0 0 1.5px rgba(245, 241, 235, 0.5); font: 400 13px/1 var(--sp-type);
 }
 
-.bvd-dim { position: fixed; inset: 0; z-index: 60; background: rgba(28, 19, 15, 0.28); opacity: 0; transition: opacity 0.28s; }
+/* Record a response v1, Phase 5 — the side panel's own dim (.45), in over 240ms */
+.bvd-dim { position: fixed; inset: 0; z-index: 60; background: rgba(28, 19, 15, 0.45); opacity: 0; transition: opacity 0.24s; }
 .bvd-dim.is-in { opacity: 1; }
 .bvd {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; box-sizing: border-box;
@@ -94,7 +95,7 @@
 /* a pill set to anything but its default fills cream, with ink text */
 .bvd-pill.is-set, .bvd-dir.is-set { background: #f5f1eb; color: #1c130f; box-shadow: none; }
 .bvd-pill.is-set i { opacity: 0.62; }
-.bvd-pill:focus-visible, .bvd-dir:focus-visible, .bvd-x:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 2px; }
+.bvd-pill:focus-visible, .bvd-dir:focus-visible, .bvd-x:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
 .bvd-fline { grid-row: 3; grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font: 400 13px/1.3 var(--sp-serif); color: rgba(245, 241, 235, 0.78); }
 .bvd-fshow b { color: #f5f1eb; font-weight: 600; }
@@ -113,19 +114,19 @@
 /* Feed drawer v2 part A: the drawer clips now, and this popover ran 22px past the viewport's right edge (measured at
    1512 and 1280), so it hangs from its pill's right edge instead of its left. */
 .bvd-pop--sort { width: 270px; padding: 8px; left: auto; right: 0; }
-.bvd-pfind { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); color: rgba(28, 19, 15, 0.45); }
+.bvd-pfind { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 18px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); color: var(--sp-quiet); }
 .bvd-pfind input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font: 400 14px/normal var(--sp-type); color: #1c130f; }
-.bvd-ph { margin: 14px 0 8px; font: 400 9px/1.2 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
+.bvd-ph { margin: 14px 0 8px; font: 400 9px/1.2 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
 .bvd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .bvd-chip {
   display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 0; border-radius: 15px; cursor: pointer;
   background: #f6f3ef; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); font: 400 13px/1 var(--sp-type); color: #1c130f;
 }
-.bvd-chip em { font-style: normal; font: 700 9px/1 var(--font-mono); color: rgba(28, 19, 15, 0.5); }
+.bvd-chip em { font-style: normal; font: 700 9px/1 var(--font-mono); color: var(--sp-quiet); }
 .bvd-chip[aria-pressed="true"] { background: #2a3a52; color: #f5f1eb; box-shadow: none; }
 .bvd-chip[aria-pressed="true"] em { color: rgba(245, 241, 235, 0.75); }
 .bvd-pfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); }
-.bvd-pclear { border: 0; background: none; cursor: pointer; font: 400 13px/1 var(--sp-type); color: rgba(28, 19, 15, 0.7); border-bottom: 1px dashed rgba(28, 19, 15, 0.35); padding: 0 0 2px; }
+.bvd-pclear { border: 0; background: none; cursor: pointer; font: 400 13px/1 var(--sp-type); color: var(--sp-muted); border-bottom: 1px dashed rgba(28, 19, 15, 0.35); padding: 0 0 2px; }
 .bvd-pclear:disabled { opacity: 0.4; cursor: default; }
 .bvd-pdone { height: 30px; padding: 0 16px; border: 0; border-radius: 15px; background: #2a3a52; color: #f5f1eb; cursor: pointer; font: 400 13px/1 var(--sp-type); }
 .bvd-pop hr { border: 0; border-top: 1px solid rgba(28, 19, 15, 0.1); margin: 6px 6px; }
@@ -137,15 +138,15 @@
 .bvd-opt--2 { align-items: flex-start; }
 .bvd-opt--2 span { display: flex; flex-direction: column; gap: 3px; }
 .bvd-opt--2 b { font-weight: 400; }
-.bvd-opt--2 small { font: italic 400 12.5px/1.35 var(--sp-serif); color: rgba(28, 19, 15, 0.6); }
+.bvd-opt--2 small { font: italic 400 12.5px/1.35 var(--sp-serif); color: var(--sp-quiet); }
 .bvd-radio { flex: none; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.4); margin-top: 1px; }
 .bvd-opt[aria-checked="true"] .bvd-radio { box-shadow: inset 0 0 0 4px #2a3a52; }
 
 /* ── the body ───────────────────────────────────────────────────────────────────────────────── */
 .bvd-body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .bvd-body .qcv-tl { flex: 1; min-height: 0; }
-.bvd-foot { flex: none; margin: 0; padding: 10px 18px 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); font: 400 8.5px/1.4 var(--font-mono); letter-spacing: 0.12em; color: rgba(28, 19, 15, 0.45); }
-.bvd-empty { margin: auto; text-align: center; font: 400 16px/1.4 var(--sp-type); color: rgba(28, 19, 15, 0.7); }
+.bvd-foot { flex: none; margin: 0; padding: 10px 18px 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); font: 400 8.5px/1.4 var(--font-mono); letter-spacing: 0.12em; color: var(--sp-quiet); }
+.bvd-empty { margin: auto; text-align: center; font: 400 16px/1.4 var(--sp-type); color: var(--sp-muted); }
 .bvd-empty p { margin: 0 0 12px; }
 .bvd-empty button { height: 32px; padding: 0 16px; border: 0; border-radius: 16px; background: #2a3a52; color: #f5f1eb; cursor: pointer; font: 400 13px/1 var(--sp-type); }
 
@@ -192,12 +193,12 @@
   position: absolute; top: 13px; height: 24px; z-index: 2; pointer-events: none; white-space: nowrap;
   font: 400 11.5px/24px var(--sp-type); color: #1c130f;
 }
-.bvd-words--past { color: rgba(28, 19, 15, 0.7); }
-.bvd-words--out { color: rgba(28, 19, 15, 0.7); }
+.bvd-words--past { color: var(--sp-muted); }
+.bvd-words--out { color: var(--sp-muted); }
 /* the end labels: N DAYS OVER 8px past today; IN 5D 8px past the bar's end */
 .bvd-over, .bvd-in { position: absolute; top: 19px; z-index: 2; white-space: nowrap; pointer-events: none; font: 700 8.5px/12px var(--font-mono); letter-spacing: 0.06em; }
 .bvd-over { color: #2a3a52; }
-.bvd-in { color: rgba(28, 19, 15, 0.55); }
+.bvd-in { color: var(--sp-quiet); }
 
 /* ── the action column: one pill per row, always visible, right-aligned ──────────────────────── */
 .bvd-actcell { display: flex; justify-content: flex-end; align-items: center; min-width: 0; height: 100%; }
@@ -207,7 +208,7 @@
   font: 400 12px/28px var(--sp-type); white-space: nowrap;
 }
 .bvd-act:hover { background: #2a3a52; color: #f5f1eb; box-shadow: none; }
-.bvd-act:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.bvd-act:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .bvd-gdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 .bvd .qcv-tl-band b { font-weight: 400; }
 

@@ -92,6 +92,8 @@ service cloud.firestore {
         // Querying goals (one-screen dashboard §6) — ONLY the target is stored; progress derives.
         // Absent-or-valid: an int target 1–999, a period from the closed set.
         && (!data.keys().hasAny(['goalTarget']) || (data.goalTarget is int && data.goalTarget >= 1 && data.goalTarget <= 999))
+        // Dashboard v105: the founding card's celebration plays once per new rank — the rank last celebrated, 0 (Egg) to 5.
+        && (!data.keys().hasAny(['foundingSeenTier']) || (data.foundingSeenTier is int && data.foundingSeenTier >= 0 && data.foundingSeenTier <= 5))
         && (!data.keys().hasAny(['goalPeriod']) || (data.goalPeriod is string && (data.goalPeriod == 'quarter' || data.goalPeriod == 'month' || data.goalPeriod == 'year')))
         // Querying goals — the APPEND-ONLY list of intents that supersedes the two fields above.
         // Each entry is {target: int 1-999 | null, cadence: 'week'|'fortnight'|'month' | null,
@@ -133,6 +135,8 @@ service cloud.firestore {
         // `synopsisVersionId`. No relationship between the two is asserted anywhere; whether this is
         // their master or a separate scratch copy is an open product question.
         && (!data.keys().hasAny(['synopsis']) || (data.synopsis is string && data.synopsis.size() <= 32768))
+        // Submission packages v26 — the manuscript's named extras ({id, name, files?}), which its packages tick.
+        && (!data.keys().hasAny(['extras']) || (data.extras is list && data.extras.size() <= 60))
         // Manuscripts v12 — the hero's two facts (Nick's ruling, 25 Sep): optional strings at
         // logline's cap, cleared by OMITTING the key like elevatorPitch and synopsis above. Until
         // these two clauses a CREATE carrying either key was accepted with no type check at all.
@@ -160,6 +164,13 @@ service cloud.firestore {
         // ⚠️ THE CAP IS ARTEFACT-LOCKED TO `MAX_BOOK_VERSIONS`. If the constant moves and this does
         // not, the client permits an append this rule denies with no message.
         && (!data.keys().hasAny(['bookVersions']) || (data.bookVersions is list && data.bookVersions.size() <= 50))
+        // VERSIONS v2 (D2, D1) — the version new queries go out with, and the highest number ever given (so a number
+        // is never reused). ⚠️ A RULE CANNOT LOOP OVER A LIST, so each version's own caps (a name of 1–40 characters,
+        // 1–8 changes of 1–80) are the single writer's (lib/bookVersions.ts) and its tests', not this rule's.
+        && (!data.keys().hasAny(['inUseBookVersionId']) || isValidId(data.inUseBookVersionId))
+        // QUERY LETTERS v1 (6 Nov) — the letter new non-package queries go out with. Optional, no backfill.
+        && (!data.keys().hasAny(['inUseLetterId']) || isValidId(data.inUseLetterId))
+        && (!data.keys().hasAny(['bookVersionSeq']) || (data.bookVersionSeq is int && data.bookVersionSeq >= 0 && data.bookVersionSeq <= 10000))
         && data.status is string && (
           data.status == 'Drafting' ||
           data.status == 'Revising' ||
@@ -251,7 +262,11 @@ service cloud.firestore {
       // Rules cannot iterate the list, and cannot tell whether the letter has been sent (that needs a
       // QUERY over the user's queries, which rules cannot run), so "a sent letter's comps are fixed"
       // is enforced by the client (db.tsx updateVersion), not here.
-      && (!data.keys().hasAll(['compIds']) || (data.compIds is list && data.compIds.size() <= 12));
+      && (!data.keys().hasAll(['compIds']) || (data.compIds is list && data.compIds.size() <= 12))
+      // Query letters v1 (6 Nov): the letter this one was written from, and what changed (1–8 short lines; each line's
+      // length is the client's, as Versions' changes are). Both optional, letters only by the client.
+      && (!data.keys().hasAny(['parentId']) || (data.parentId is string && data.parentId.size() <= 128))
+      && (!data.keys().hasAny(['changes']) || (data.changes is list && data.changes.size() <= 8));
     }
 
     function isValidPackage(data, userId) {
@@ -292,6 +307,10 @@ service cloud.firestore {
         // but cannot QUERY for the queries that hold this package: the derived form is not
         // expressible in the one place enforcement has to happen.
         && (!data.keys().hasAny(['firstSentAt']) || (data.firstSentAt is string && data.firstSentAt.size() <= 64))
+        // ⚠️ SUBMISSION PACKAGES v40: WHICH PACKAGE THIS ONE WAS MADE FROM ("New package from this"). Optional, set on
+        // CREATE only: it is not in the update rule's allowlist below, so it can never be added, changed or removed later.
+        && (!data.keys().hasAny(['copiedFromId'])
+            || (data.copiedFromId is string && data.copiedFromId.size() >= 1 && data.copiedFromId.size() <= 128))
         // ⚠️ FREE TEXT, OPTIONAL, AND ABSENT WHEN EMPTY. `hasAny` rather than `is string` because an
         // unanswered question has no key at all; a stored `""` would claim the writer answered it.
         && (!data.keys().hasAny(['otherMaterials']) || (data.otherMaterials is string && data.otherMaterials.size() <= 512))
@@ -300,6 +319,14 @@ service cloud.firestore {
         && (!data.keys().hasAny(['edition']) || (data.edition is int && data.edition >= 1 && data.edition <= 1000))
         && (!data.keys().hasAny(['editions']) || (data.editions is list && data.editions.size() <= 200))
         && (!data.keys().hasAny(['retiredAt']) || (data.retiredAt is string && data.retiredAt.size() <= 64))
+        // SUBMISSION PACKAGES v26 (25 Oct): the package's icon (one of twelve, outside the freeze like the name) and
+        // the named extras it sends, by id. `extraIds` is CONTENTS — frozen with the slots below — and its names
+        // travel in `otherMaterials`, which is what the send flow and every query's frozen summary read.
+        && (!data.keys().hasAny(['icon']) || data.icon in ['box', 'crown', 'globe', 'flag', 'feather', 'flask', 'star', 'bolt', 'heart', 'compass', 'pen', 'key'])
+        // SUBMISSION PACKAGES v39 (28 Oct): the package's colour, one of eight keys (never a hex; absent reads as Harbour).
+        // Filing, like the name and the icon: outside the freeze below, so a package that has gone out can be re-coloured.
+        && (!data.keys().hasAny(['colour']) || data.colour in ['harbour', 'lake', 'teal', 'pine', 'indigo', 'plum', 'slate', 'charcoal'])
+        && (!data.keys().hasAny(['extraIds']) || (data.extraIds is list && data.extraIds.size() <= 24))
         && data.status is string && (data.status == 'Active' || data.status == 'Retired')
         && data.createdDate is string && data.createdDate.size() <= 64;
     }
@@ -344,6 +371,8 @@ service cloud.firestore {
         && (!data.keys().hasAll(['socials']) || (data.socials is list && data.socials.size() <= 30))
         && (!data.keys().hasAll(['importedNeedsReview']) || data.importedNeedsReview is bool)
         && (!data.keys().hasAll(['setAside']) || data.setAside is bool)
+        // Agent card v2 — the pinned note's id (a notes-subcollection id, or "__flat__" for the old notes string)
+        && (!data.keys().hasAll(['pinnedNoteId']) || (data.pinnedNoteId is string && data.pinnedNoteId.size() >= 1 && data.pinnedNoteId.size() <= 128))
         // Assisted-fill provenance — a small map keyed by agent field name ({source, foundAt} per
         // entry). Written only when a found value is saved unedited (To-do housekeeping batch).
         && (!data.keys().hasAll(['fieldSources']) || (data.fieldSources is map && data.fieldSources.size() <= 12))
@@ -358,7 +387,10 @@ service cloud.firestore {
         // update allowlist, so every save that recomputed it was denied WHOLE — probed on the
         // deployed dev ruleset 25 Sep (permission-denied), the affectedKeys shape this file keeps
         // warning about, live on the page that documented the cache.
-        && (!data.keys().hasAll(['notePreview']) || (data.notePreview is string && data.notePreview.size() <= 512));
+        && (!data.keys().hasAll(['notePreview']) || (data.notePreview is string && data.notePreview.size() <= 512))
+        // Add agent v1 (9 Nov): "Agency unknown" is true or absent (never false), and an Other method's words are short.
+        && (!data.keys().hasAll(['agencyUnknown']) || data.agencyUnknown == true)
+        && (!data.keys().hasAll(['submissionMethodOther']) || (data.submissionMethodOther is string && data.submissionMethodOther.size() <= 40));
     }
 
     // Country allowlist for agent/communityAgent `country` fields. Three tolerated shapes:
@@ -500,6 +532,8 @@ service cloud.firestore {
         && (data.get('writerExpectedSetAt', null) == null || (data.writerExpectedSetAt is string && data.writerExpectedSetAt.size() <= 64))
         && (data.get('offerDate', null) == null || (data.offerDate is timestamp || data.offerDate is string))
         && (data.get('offerResponseDeadline', null) == null || (data.offerResponseDeadline is timestamp || data.offerResponseDeadline is string))
+        // Query Centre v152.2 §7: a pass taken off by mistake restarts the reply date from this day
+        && (data.get('replyRestartedOn', null) == null || (data.replyRestartedOn is string && data.replyRestartedOn.size() <= 32))
         && (data.get('offerNotes', null) == null || (data.offerNotes is string && data.offerNotes.size() <= 16384))
         && (data.get('closingReason', null) == null || (data.closingReason is string && data.closingReason.size() <= 256))
         && (data.get('closingNotes', null) == null || (data.closingNotes is string && data.closingNotes.size() <= 16384))
@@ -513,6 +547,10 @@ service cloud.firestore {
         // ⚠️ QUERY ACTIONS v1 (27 Sep) — the drawer's fields, every one FLAT (a map meets the
         // nested-allowlist denial) and every one optional: absent means "not recorded".
         && (data.get('sentPackageId', null) == null || (data.sentPackageId is string && data.sentPackageId.size() <= 128))
+        // VERSIONS v2 (D3) — the book version this query went with: a version id on the manuscript, the same shape as
+        // every other id here. Optional; absent means "not recorded" and the client works it out (D4). It is payload,
+        // never a determinant: nothing about the query's status reads it.
+        && (data.get('bookVersionId', null) == null || isValidId(data.bookVersionId))
         && (data.get('sentMaterials', null) == null || (data.sentMaterials is string && data.sentMaterials.size() <= 1024))
         && (data.get('sentVersions', null) == null || (data.sentVersions is list && data.sentVersions.size() <= 10))
         // PACKAGE EDITIONS (docs/contracts/package-editions.md §C3, 28 Sep) — how the materials were
@@ -593,7 +631,16 @@ service cloud.firestore {
           'eventKey',
           // Clean-up pass (28 Sep): a starting step the migration reconstructed for a query whose log
           // was empty. Only `true` is valid — absence is the only way to say "a real event".
-          'reconstructed'
+          'reconstructed',
+          // Query Centre v152 (recon A): what went with, or was asked for on, THIS step — the card's thread reads it.
+          // OPTIONAL: every older step has none and stays valid. The feed twin's own `materials` has the same shape.
+          'materials',
+          // Query Centre v152.1: what the agent said on one of their replies (§2.6), and a "told other agents" step's count
+          // and the deadline you gave them (§2.5). All OPTIONAL, on this log only (no feed twin carries them).
+          'replyNote', 'toldCount', 'toldDeadline',
+          // Query Centre v152.2: a pass's "open to more work" and its Wall-of-no opt-out (§5), "Something else"'s words
+          // (§5), how a nudge went (§4.2), and the offer step's "tell the rest later" flag (§6.1). All OPTIONAL.
+          'openToMore', 'offWall', 'askedFor', 'sentVia', 'tellLater'
         ])
         && (!data.keys().hasAny(['reconstructed']) || data.reconstructed == true)
         && data.type is string && data.type.size() <= 128
@@ -623,7 +670,17 @@ service cloud.firestore {
         && (!data.keys().hasAny(['materialsQuantity']) || (data.materialsQuantity is string && data.materialsQuantity.size() <= 64))
         && (!data.keys().hasAny(['fullVersionSent']) || (data.fullVersionSent is string && data.fullVersionSent.size() <= 128))
         && (!data.keys().hasAny(['feedbackType']) || (data.feedbackType is string && data.feedbackType.size() <= 64))
-        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64));
+        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64))
+        && (!data.keys().hasAny(['materials']) || (data.materials is list && data.materials.size() <= 20))
+        && (!data.keys().hasAny(['replyNote']) || (data.replyNote is string && data.replyNote.size() <= 500))
+        // v152.2 §6.1: the count is how many agents were ticked on the Tell list, which can exceed v152.1's stepper's 30
+        && (!data.keys().hasAny(['toldCount']) || (data.toldCount is int && data.toldCount >= 1 && data.toldCount <= 500))
+        && (!data.keys().hasAny(['toldDeadline']) || (data.toldDeadline is string && data.toldDeadline.size() <= 32))
+        && (!data.keys().hasAny(['openToMore']) || data.openToMore is bool)
+        && (!data.keys().hasAny(['offWall']) || data.offWall is bool)
+        && (!data.keys().hasAny(['askedFor']) || (data.askedFor is string && data.askedFor.size() <= 80))
+        && (!data.keys().hasAny(['sentVia']) || (data.sentVia is string && data.sentVia.size() <= 32))
+        && (!data.keys().hasAny(['tellLater']) || data.tellLater is bool);
     }
 
     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
@@ -658,7 +715,7 @@ service cloud.firestore {
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'detail', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour', 'steps', 'pinned'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
@@ -675,7 +732,13 @@ service cloud.firestore {
         // denies the whole document for one unlisted key, so a create carrying it would lose the
         // note rather than the colour. `setUserTaskColour` sends it alone and returns whether it
         // landed; a note with none reads yellow. Same safe hasAny pattern as every optional above.
-        && (!data.keys().hasAny(['colour']) || (data.colour is string && data.colour in ['pink', 'sage', 'yellow']))
+        // Corkboard v2 (6 Nov): five new papers; the old three stay valid (they are mapped when read, never rewritten).
+        && (!data.keys().hasAny(['colour']) || (data.colour is string && data.colour in ['butter', 'blush', 'powder', 'sand', 'stone', 'pink', 'sage', 'yellow']))
+        // Corkboard v2: pin to top — a bool when present.
+        && (!data.keys().hasAny(['pinned']) || data.pinned is bool)
+        // To-do list v50: the task's checklist — a list of at most 50 steps when present (the safe hasAny pattern).
+        // Each step is {text, done}; the list is written whole, and its items are not inspected one by one.
+        && (!data.keys().hasAny(['steps']) || (data.steps is list && data.steps.size() <= 50))
         && data.done is bool
         // SAFE optional-field pattern (hasAny guard) — matches every other optional field here. The
         // old `data.completedAt == null` errored on an ABSENT key (Firestore rules do NOT return null
@@ -849,7 +912,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'queryingGoals', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'discoverPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'queryingGoals', 'tourCompletedAt', 'tourDismissed', 'todoPrefs', 'notifyPrefs', 'discoverPrefs', 'marketingConsent', 'workspacePrefs', 'scheduledDeletion', 'foundingSeenTier'])
         /**
          * ⚠️ A CLIENT MAY NOT CHANGE ITS OWN `plan` — THIS LINE IS THE WHOLE GUARD.
          *
@@ -880,11 +943,17 @@ service cloud.firestore {
         allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
             'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId', 'bookVersions',
+            // Versions v2 (D2, D1)
+            'inUseBookVersionId', 'bookVersionSeq',
+            // Query letters v1 (6 Nov)
+            'inUseLetterId',
             // book profile amendment 2 — see the two clauses in isValidManuscript above.
             'elevatorPitch', 'synopsis',
             // Manuscripts v12 — the hero's setting and series, and nothing else (the ruling was
             // narrow; tests/rules asserts a declared-but-unlisted field like coverUrl stays out).
-            'setting', 'series'
+            'setting', 'series',
+            // Submission packages v26 — the named extras its packages send
+            'extras'
           ])
         );
 
@@ -907,7 +976,7 @@ service cloud.firestore {
           // be perfectly validated above and still be undeployable, because isValidVersion runs on
           // every write while hasOnly runs only on updates. Archiving IS an update and nothing else,
           // so leaving it out here would deny every archive silently while the validator said yes.
-          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status', 'bookVersionId', 'compIds'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status', 'bookVersionId', 'compIds', 'changes'])
         );
       }
 
@@ -916,11 +985,10 @@ service cloud.firestore {
       match /packages/{packageId} {
         allow get, delete: if isOwner(userId) && isValidId(packageId);
         allow list: if isOwner(userId);
-        // ⚠️ THE LETTER IS REQUIRED ON CREATE AND ONLY ON CREATE. Nothing new may be written without
-        // a covering letter; an existing record that predates the rule stays repairable. Putting it
-        // inside isValidPackage would apply it to update too — see the note there.
-        allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().queryLetterVersionId.size() >= 1;
+        // ⚠️ SUBMISSION PACKAGES v26 (25 Oct): A PACKAGE MAY START EMPTY. "Start from: Empty" makes a package
+        // the writer fills by dragging pieces in; it reads "Needs a letter" until it has one. The letter used to
+        // be required here, on create only. Nothing can go out without one: the send drawer reads `ql`.
+        allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId);
         // ⚠️ A SENT PACKAGE'S CONTENTS ARE IMMUTABLE, AND THIS IS THE GUARANTEE — not the client
         // check beside it. Once `firstSentAt` exists the three slot fields cannot change, so every
         // query that used this package keeps reporting what the agent actually received. The name,
@@ -931,9 +999,14 @@ service cloud.firestore {
         // edit the slots, and the guarantee is a formality. `hasAny` on the CHANGED keys is what
         // says "you may add it, you may never touch it again".
         allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId)
-          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt', 'edition', 'editions', 'retiredAt'])
+          && incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'otherMaterials', 'status', 'firstSentAt', 'bookVersionId', 'note', 'noteEditedAt', 'edition', 'editions', 'retiredAt', 'icon', 'colour', 'extraIds'])
           && (
             !existing().keys().hasAny(['firstSentAt'])
+            // v26: THE OTHER-MATERIALS MIGRATION. A package written before named extras gains `extraIds` ONCE,
+            // naming the one extra its `otherMaterials` text became — the text itself does not change, so what
+            // the package says it sends does not change either, and no edition starts.
+            || (!existing().keys().hasAny(['extraIds'])
+                && incoming().diff(existing()).affectedKeys().hasOnly(['extraIds']))
             // ⚠️ THE VERSION JOINS THE FROZEN SET, and it is the same argument as the other three:
             // a package that has gone out is a record of what the agent received, and the shape of
             // the book it carried is part of that record. Left mutable, a writer could retro-fit a
@@ -941,19 +1014,11 @@ service cloud.firestore {
             // requests that arrived on something else.
             // ⚠️ AND THE OTHER MATERIALS AND THE EDITION FIELDS JOIN IT (Part B): they are contents,
             // so outside an edition bump they are as fixed as the slots.
-            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions'])
-            // ⚠️ THE NEXT EDITION (Part B §B1). A sent package's contents change ONLY by starting its
-            // next edition: the number goes up by exactly one and the list grows by exactly one, so
-            // every earlier edition — what the agents received — is kept. The stamp and the sample
-            // slot (not content, Nick 28 Sep) still never move here.
-            || (!incoming().diff(existing()).affectedKeys().hasAny(['firstSentAt', 'samplePagesVersionId'])
-                && incoming().get('edition', 1) == existing().get('edition', 1) + 1
-                && incoming().get('editions', []).size() == existing().get('editions', [0]).size() + 1)
-            // THE UNDO OF THAT EDIT: back by exactly one, the list shorter by exactly one — the edition it
-            // removes is seconds old, and the client refuses once any query has gone out with it.
-            || (!incoming().diff(existing()).affectedKeys().hasAny(['firstSentAt', 'samplePagesVersionId'])
-                && incoming().get('edition', 1) == existing().get('edition', 1) - 1
-                && incoming().get('editions', [0]).size() == existing().get('editions', []).size() - 1)
+            || !incoming().diff(existing()).affectedKeys().hasAny(['queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'firstSentAt', 'bookVersionId', 'otherMaterials', 'edition', 'editions', 'extraIds'])
+            // ⚠️ SUBMISSION PACKAGES v40: NO MORE EDITIONS. Once a package has gone out it is LOCKED — its letter,
+            // synopsis, pages and extras never change again (a change is a NEW package, made from it). The branches
+            // that let a sent package start its next edition, and undo one, are gone; packages that already hold
+            // several editions stay readable, as they are.
             // ⚠️ THE STALE-STAMP LIFT (Nick, 28 Sep): removing the stamp, and nothing else, when undo or a
             // correction has left no query pointing at the package. A rule cannot QUERY for those queries,
             // so the client decides; what the rule holds is that the lift carries no other change.
@@ -1005,7 +1070,9 @@ service cloud.firestore {
             'name', 'agency', 'email', 'website', 'country', 'city', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
             'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'fieldSources',
-            'reopensOn', 'mswlCheckedAt', 'notePreview'
+            'reopensOn', 'mswlCheckedAt', 'notePreview', 'agencyUnknown', 'submissionMethodOther',
+            // Agent card v2 (19 Nov) — the note pinned to the top of the card's Notes; additive
+            'pinnedNoteId'
           ])
         );
 
@@ -1038,7 +1105,7 @@ service cloud.firestore {
             'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate',
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
             'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',
-            'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'rejectedDate', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes',
+            'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'rejectedDate', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes', 'replyRestartedOn',
             // ⚠️ `packageId` TRAVELS WITH `materialsWanted` AND IS LISTED BESIDE IT ON PURPOSE.
             // `materialsLinkWrites` (packageMetrics.ts) enforces exactly one source of truth for a
             // query's materials — it writes the package link OR the free-text materials and always
@@ -1057,7 +1124,9 @@ service cloud.firestore {
             'withdrawTold', 'agentRecheckOn',
             // Package editions (§C3, 28 Sep) — how the materials were recorded.
             'sentHow', 'sentPackageEdition', 'basedOnPackageId', 'basedOnPackageEdition',
-            'sentChanges', 'sentCorrectedAt', 'sentCorrectedFrom', 'sentPackageName'
+            'sentChanges', 'sentCorrectedAt', 'sentCorrectedFrom', 'sentPackageName',
+            // Versions v2 (D3) — "Which version went?" and Change, and the first-save backfill.
+            'bookVersionId'
           ])
         );
 
@@ -1089,7 +1158,9 @@ service cloud.firestore {
           // filed under a query belonging to a different manuscript while the feed still counted
           // it against the old book — which is worse than the denial it replaces, because it looks
           // correct on the page the writer is standing on.
-          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey',
+            // Query Centre v152.2 §6.1: the offer step's "tell the rest later" flag, set or cleared on its feed twin
+            'tellLater'])
         );
       }
 
@@ -1136,8 +1207,11 @@ service cloud.firestore {
         // locks pinned the old string; all three halves land together. The VALUE shape needs no
         // guard here — isValidUserTask already enforces it on every update.
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'detail', 'done', 'completedAt', 'updatedAt', 'dueDate', 'surfaceOffset', 'committedDate', 'tags', 'estimateMin', 'colour', 'steps', 'pinned', 'queryId', 'agentId', 'manuscriptId'])
         );
+        // To-do list v50: `steps` (the task's checklist) and the link (`queryId` / `agentId`) are edited after the task
+        // is made — a step ticked, an agent linked or unlinked — so they join the update list. Their shapes are checked by
+        // isValidUserTask on every write, as every other field's is.
       }
 
       // ROUTE: DismissedTasks
@@ -1269,11 +1343,100 @@ service cloud.firestore {
     match /contactMessages/{id} { allow read: if isAdmin(); allow write: if false; }
     match /contactSenders/{id}  { allow read, write: if false; }
 
-    // ROUTE: Beta feedback dock — NO client writes, admin-only reads.
-    // Same shape and same reasoning as contactMessages: the dock posts to the `sendBetaFeedback`
-    // callable, which writes via the Admin SDK and bypasses these rules. A report names a fault in
-    // the writer's own work in progress, so it is between them and the desk.
-    match /betaFeedback/{id} { allow read: if isAdmin(); allow write: if false; }
+    // ROUTE: Beta feedback dock — NO client writes. The dock (and the dashboard's founding writer card)
+    // post to the `sendBetaFeedback` callable, which writes via the Admin SDK and bypasses these rules.
+    // A report names a fault in the writer's own work in progress, so it is between them and the desk:
+    // an admin reads all, and since Dashboard v77 a writer reads their own (and nobody else's).
+    // Dashboard v77 — the founding writer card's record: a writer reads their OWN feedback (a get, or a
+    // list filtered `where uid == me`; a query the rules cannot prove is theirs is denied). `uid` is set by
+    // the `sendBetaFeedback` callable from the verified token, never the body. Still no client writes:
+    // Nick sets `status`, `title` and `statusAt` by hand in the console (betaFeedbackCore.ts documents them).
+    match /betaFeedback/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow write: if false;
+      // Your notes v1 — a note's follow-ups: `{ from: "writer" | "founder", text, at }`. Written only by callables
+      // (`addFeedbackNote`, and the founder's desk later), so NO client writes; read by an admin or the parent note's owner.
+      match /thread/{msg} {
+        allow read: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/betaFeedback/$(id)).data.uid == request.auth.uid);
+        allow write: if false;
+      }
+    }
+
+    // ROUTE: Founding writer stats (Dashboard v93) — NO client writes. The foundingStats functions recompute every
+    // writer's contributions, tier and standing from betaFeedback (Admin SDK) on any feedback write and nightly. A
+    // writer reads their OWN doc; an admin reads all.
+    // ROUTE: importDrafts — Dashboard first visit v2, Part F. A Smart Import review in progress, kept so a writer who
+    // leaves halfway can pick up where they left off. ONE live draft per writer, at their own uid; its JSON payload is
+    // split into ordered parts (`parts/{n}`) so a long file never meets the 1MB document limit. ONLY THE OWNER reads or
+    // writes it. `updatedAt` must be the server's time, so "kept for 7 days from the last change" (the daily clean-up,
+    // functions/src/importDrafts.ts) is measured by a clock the client cannot set. Never the original file.
+    match /importDrafts/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidImportDraft(incoming());
+      match /parts/{part} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && part.matches('^[0-9]{1,3}$')
+          && incoming().keys().hasOnly(['i', 'data'])
+          && incoming().i is int && incoming().i >= 0 && incoming().i < 1000
+          && incoming().data is string && incoming().data.size() <= 900000;
+      }
+    }
+
+    function isValidImportDraft(d) {
+      return d.keys().hasOnly(['uid', 'fileName', 'source', 'manuscriptId', 'step', 'agentsChecked', 'agentsTotal',
+          'queriesChecked', 'queriesTotal', 'queriesStarted', 'parts', 'startedAt', 'updatedAt', 'version'])
+        && d.uid == request.auth.uid
+        && d.fileName is string && d.fileName.size() <= 300
+        && d.source in ['smart', 'template']
+        && (d.manuscriptId == null || (d.manuscriptId is string && d.manuscriptId.size() <= 128))
+        && d.step in ['duplicates', 'agents', 'queries']
+        && d.agentsChecked is int && d.agentsTotal is int && d.queriesChecked is int && d.queriesTotal is int
+        && d.agentsChecked >= 0 && d.agentsTotal >= d.agentsChecked && d.queriesChecked >= 0 && d.queriesTotal >= d.queriesChecked
+        && d.queriesStarted is bool
+        && d.parts is int && d.parts >= 1 && d.parts <= 1000
+        && d.startedAt is string && d.startedAt.size() <= 40
+        && d.updatedAt == request.time
+        && d.version == 1;
+    }
+
+    // ROUTE: events — Dashboard first visit v2, Part I. The app records each first-visit step for the founder's desk.
+    // CREATE ONLY, by the signed-in writer, for their own uid, at the server's time; NOBODY READS IT FROM THE CLIENT
+    // (the desk reads through the Admin SDK). Exactly five fields; `props` holds only named keys, each an enum or a count
+    // — never free text a writer typed.
+    match /events/{eventId} {
+      allow read, update, delete: if false;
+      allow create: if isSignedIn() && isValidId(eventId) && isValidEvent(incoming());
+    }
+
+    function isValidEventPath(p) {
+      return p in ['querying', 'ready', 'writing', 'revising'];
+    }
+
+    function isValidEvent(e) {
+      return e.keys().hasOnly(['uid', 'name', 'at', 'path', 'props'])
+        && e.keys().hasAll(['uid', 'name', 'at', 'path', 'props'])
+        && e.uid == request.auth.uid
+        && e.name in ['signed_up', 'dashboard_first_seen', 'path_changed', 'tour_finished', 'tour_skipped',
+            'import_started', 'import_left', 'import_resumed', 'import_finished',
+            'first_agent', 'first_query', 'first_comp', 'first_letter',
+            'reminder_answered', 'getting_started_step', 'getting_started_done', 'getting_started_hidden',
+            'example_opened', 'opened_app']
+        && e.at == request.time
+        && isValidEventPath(e.path)
+        && e.props is map
+        && e.props.keys().hasOnly(['path', 'from', 'to', 'stop', 'step', 'agents', 'queries', 'answer'])
+        && (!('path' in e.props) || isValidEventPath(e.props.path))
+        && (!('from' in e.props) || isValidEventPath(e.props.from))
+        && (!('to' in e.props) || isValidEventPath(e.props.to))
+        && (!('stop' in e.props) || (e.props.stop is int && e.props.stop >= 1 && e.props.stop <= 3))
+        && (!('step' in e.props) || e.props.step in ['manuscript', 'agent', 'query', 'materials', 'comps', 'letter', 'ready', 'duplicates', 'agents', 'queries'])
+        && (!('agents' in e.props) || (e.props.agents is int && e.props.agents >= 0 && e.props.agents <= 100000))
+        && (!('queries' in e.props) || (e.props.queries is int && e.props.queries >= 0 && e.props.queries <= 100000))
+        && (!('answer' in e.props) || e.props.answer in ['yes', 'not_now']);
+    }
+
+    match /foundingStats/{userId} { allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId); allow write: if false; }
 
     // ROUTE: Weekly pulse (Dashboard v59) — NO client writes. The founding writer panel's faces post
     // to the `sendWeeklyPulse` callable, which sets `betaPulse/{uid}_{week}` via the Admin SDK. A

@@ -26,9 +26,11 @@
     "e2e": "node scripts/emu-guard.mjs npx playwright test",
     "e2e:emu": "node scripts/emu.mjs e2e",
     "hooks:install": "node scripts/hooks/install.mjs",
+    "audit:rules": "CA2_MODE=rules node scripts/emu.mjs e2e --config audits/consistency-v2/playwright.audit2.config.ts",
     "check:refs": "node scripts/check-design-refs.mjs"
   },
   "dependencies": {
+    "@sentry/react": "^11.11.0",
     "@tailwindcss/vite": "^4.1.14",
     "firebase": "^12.14.0",
     "flag-icons": "^7.5.0",

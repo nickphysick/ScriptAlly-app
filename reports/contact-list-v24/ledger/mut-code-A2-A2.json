@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "{\"pct\":\"69\",\"n\":78,\"k\":102,\"ring\":\"69%\"}"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 drawer read",
+  "ok": true,
+  "detail": "{\"pct\":\"69\",\"gaps\":78}"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 ring % = Housekeeping's",
+  "ok": true,
+  "detail": "banner 69 ring 69% drawer 69"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 n = Housekeeping's gaps",
+  "ok": true,
+  "detail": "banner 78 drawer 78"
+ },
+ {
+  "lock": "A2",
+  "where": "1512 k agents, at least one and no more than the gaps",
+  "ok": false,
+  "detail": "k 102 n 78"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "{\"pct\":\"69\",\"n\":78,\"k\":102,\"ring\":\"69%\"}"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 drawer read",
+  "ok": true,
+  "detail": "{\"pct\":\"69\",\"gaps\":78}"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 ring % = Housekeeping's",
+  "ok": true,
+  "detail": "banner 69 ring 69% drawer 69"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 n = Housekeeping's gaps",
+  "ok": true,
+  "detail": "banner 78 drawer 78"
+ },
+ {
+  "lock": "A2",
+  "where": "1280 k agents, at least one and no more than the gaps",
+  "ok": false,
+  "detail": "k 102 n 78"
+ }
+]

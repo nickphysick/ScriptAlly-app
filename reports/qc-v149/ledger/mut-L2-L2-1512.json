@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L2-1512",
+  "where": "population",
+  "ok": true,
+  "detail": "{\"card\":true,\"ban\":true,\"row\":true,\"list\":true}"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "banner shares the card's left and right",
+  "ok": true,
+  "detail": "304/1448 vs 304/1448"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "view row shares the card's left and right",
+  "ok": true,
+  "detail": "304/1448 vs 304/1448"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "list's left is 32 further out",
+  "ok": false,
+  "detail": "0.0"
+ },
+ {
+  "lock": "L2-1512",
+  "where": "list's right is 32 further out",
+  "ok": false,
+  "detail": "0.0"
+ }
+]

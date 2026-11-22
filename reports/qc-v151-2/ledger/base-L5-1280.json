@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88"
+ },
+ {
+  "where": "every cap is its status colour",
+  "ok": false,
+  "detail": "[{\"st\":\"Partial Requested\",\"w\":\"you\",\"body\":\"rgb(241, 230, 224)\",\"cap\":\"\",\"capW\":0,\"h\":31,\"fg\":\"\"},{\"st\":\"Partial Sent\",\"w\":\"you\",\"body\":\"rgb(241, 230, 224)\",\"cap\":\"\",\"capW\":0,\"h\":31,\"fg\":\"\"},{\"st\":\"Queried\",\"w\":\"you\",\"body\":\"rgb(241, 230, 224)\",\"cap\":\"\",\"capW\":0,\"h\":31,\"fg\":\"\"}]"
+ },
+ {
+  "where": "every body white, 30 tall, a 34px cap",
+  "ok": false,
+  "detail": "[{\"st\":\"Partial Requested\",\"w\":\"you\",\"body\":\"rgb(241, 230, 224)\",\"cap\":\"\",\"capW\":0,\"h\":31,\"fg\":\"\"},{\"st\":\"Partial Sent\",\"w\":\"you\",\"body\":\"rgb(241, 230, 224)\",\"cap\":\"\",\"capW\":0,\"h\":31,\"fg\":\"\"}]"
+ },
+ {
+  "where": "Queried's cap is sand, not grey",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Closed text #8a8076; open text ink",
+  "ok": false,
+  "detail": ""
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C5",
+  "where": "1512x982 Read all",
+  "ok": true,
+  "detail": "cut: cb15seed-e4"
+ },
+ {
+  "lock": "C5",
+  "where": "1512x982 face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "C5",
+  "where": "1512x982 opens",
+  "ok": true,
+  "detail": "Questions for the call with Tom Ellery:\n"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800 Read all",
+  "ok": true,
+  "detail": "cut: cb15seed-e4"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800 face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "C5",
+  "where": "1280x800 opens",
+  "ok": true,
+  "detail": "Questions for the call with Tom Ellery:\n"
+ }
+]

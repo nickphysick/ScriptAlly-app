@@ -1,0 +1,55 @@
+{
+ "emptyBefore": 2,
+ "s0": [
+  {
+   "id": "seed-cal-passed865-q",
+   "ql": "true",
+   "syn": "true",
+   "s": "first 3 chapters▾"
+  },
+  {
+   "id": "seed-query-10",
+   "ql": "true",
+   "syn": "false",
+   "s": "None▾"
+  },
+  {
+   "id": "seed-query-19",
+   "ql": "false",
+   "syn": "false",
+   "s": "None▾"
+  },
+  {
+   "id": "thin-q-cohort-1",
+   "ql": "true",
+   "syn": "true",
+   "s": "None▾"
+  }
+ ],
+ "s1": [
+  {
+   "id": "seed-cal-passed865-q",
+   "ql": "true",
+   "syn": "true",
+   "s": "first 3 chapters▾"
+  },
+  {
+   "id": "seed-query-10",
+   "ql": "true",
+   "syn": "false",
+   "s": "None▾"
+  },
+  {
+   "id": "seed-query-19",
+   "ql": "true",
+   "syn": "true",
+   "s": "first 3 chapters▾"
+  },
+  {
+   "id": "thin-q-cohort-1",
+   "ql": "true",
+   "syn": "true",
+   "s": "None▾"
+  }
+ ]
+}

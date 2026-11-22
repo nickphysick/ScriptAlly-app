@@ -1,0 +1,32 @@
+[
+ {
+  "where": "nothing at 500ms",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "open at 1.2s, #fbefe9",
+  "ok": true,
+  "detail": "rgb(251, 239, 233)"
+ },
+ {
+  "where": "stays while in it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "live: Today stop",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "closes on leaving both",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "closed: open, no Today, no next",
+  "ok": true,
+  "detail": "{\"open\":1,\"today\":0,\"next\":0}"
+ }
+]

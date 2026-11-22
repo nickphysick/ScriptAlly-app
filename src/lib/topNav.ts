@@ -57,7 +57,7 @@ export const NAV_MENUS: NavMenu[] = [
         items: [
           { label: "Queries Hub", blurb: "Every query and exactly where it stands", run: { kind: "path", path: "/queries" } },
           { label: "To-do", blurb: "What needs you, and what can wait", run: { kind: "path", path: "/todo" } },
-          { label: "Submission packages", blurb: "What you send, assembled once", run: { kind: "path", path: "/manuscripts/packages" } },
+          { label: "Submission packages", blurb: "What you send, assembled once", run: { kind: "path", path: "/queries/packages" } },
         ],
       },
       {
@@ -105,7 +105,7 @@ export const NAV_MENUS: NavMenu[] = [
       {
         cap: "Assembled",
         items: [
-          { label: "Submission packages", blurb: "Letter, synopsis and sample, ready to send", run: { kind: "path", path: "/manuscripts/packages" } },
+          { label: "Submission packages", blurb: "Letter, synopsis and sample, ready to send", run: { kind: "path", path: "/queries/packages" } },
         ],
       },
     ],
@@ -172,7 +172,7 @@ export function navPanels(input: PanelInput): Record<NavMenu["key"], NavPanel> {
       body: input.packagelessManuscripts > 0
         ? "Assemble the letter, synopsis and sample once, and every query after it is a send rather than a rebuild."
         : "Letter, synopsis and sample are ready for each book on the shelf.",
-      path: "/manuscripts/packages",
+      path: "/queries/packages",
       linkLabel: "Open the workshop",
     },
   };

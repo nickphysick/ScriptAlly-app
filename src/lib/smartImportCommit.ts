@@ -9,6 +9,7 @@
  * derives status, stage dates, and the "Responses Received" flag identically to hand-logged
  * queries. No model involvement here.
  */
+import { nameCase } from "./nameCase";
 import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
@@ -169,7 +170,8 @@ export async function commitSmartImport(
       // No name AND no agency — nothing to identify it by; its queries are skipped by validation.
       continue;
     }
-    const agentName = a.name?.trim() ?? "";
+    /* v149.1 B5 — a name that arrives in capitals is title-cased; a mixed-case name is kept as written (lib/nameCase) */
+    const agentName = nameCase(a.name?.trim() ?? "");
     agentLabel[a.ref] = agentName || (a.agency ?? "").trim();
     try {
       // the one agent match every import path uses (importDuplicates.ts)

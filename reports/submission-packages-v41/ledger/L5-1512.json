@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "L5-1512",
+  "where": "one rail",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "width 300 ±2",
+  "ok": true,
+  "detail": "300"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "its top level with the builder's ±1",
+  "ok": true,
+  "detail": "377.875 / 377.875"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "the head counts the live packages",
+  "ok": true,
+  "detail": "4 / 4"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "groups in order: out · ready · draft",
+  "ok": true,
+  "detail": "[\"out\",\"ready\",\"draft\"]"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "group out: its count is its rows",
+  "ok": true,
+  "detail": "2 / 2"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "group ready: its count is its rows",
+  "ok": true,
+  "detail": "1 / 1"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "group draft: its count is its rows",
+  "ok": true,
+  "detail": "1 / 1"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "Out with agents holds the stored sent packages",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L5-1512",
+  "where": "a sent row: “{n} sent · …”",
+  "ok": true,
+  "detail": "5 sent · 40% asked for more"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "a ready row: “Ready to send”",
+  "ok": true,
+  "detail": "Ready to send"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "a draft row: what it needs",
+  "ok": true,
+  "detail": "Needs a version and a letter"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "…in berry",
+  "ok": true,
+  "detail": "rgb(155, 74, 87)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "Retired folded by default",
+  "ok": true,
+  "detail": "false (1 retired)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "pk40-std: selected",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "pk40-std: a 3px left edge in its colour",
+  "ok": true,
+  "detail": "3px rgb(88, 58, 90)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "pk40-std: selecting did not move the page",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "pk40-ready: selected",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "pk40-ready: a 3px left edge in its colour",
+  "ok": true,
+  "detail": "3px rgb(46, 86, 65)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "pk40-ready: selecting did not move the page",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "↓ and Enter select the next row",
+  "ok": true,
+  "detail": "want pk40-ready"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "population: the page scrolled 600",
+  "ok": true,
+  "detail": "600 (rail top was 377.875)"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "after scrolling 600: the rail is at the scroller's top (14 ±1)",
+  "ok": true,
+  "detail": "14"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "after scrolling 600: the rail ends inside the scrollport",
+  "ok": true,
+  "detail": "620.9375 / 974"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "its rows scroll inside it",
+  "ok": true,
+  "detail": "auto"
+ },
+ {
+  "lock": "L5-1512",
+  "where": "no packages: no rail (the first-run builder only) and no Retired",
+  "ok": true,
+  "detail": "1 rail · 0 retired"
+ }
+]

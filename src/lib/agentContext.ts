@@ -87,7 +87,7 @@ export function statCells(agent: Agent): StatCell[] {
     cells.push({ key: "reply", value: String(weeks), unit: weeks === 1 ? "week" : "weeks", caption: "Expected response time" });
   }
   if (agent.submissionMethod) {
-    cells.push({ key: "submit", value: String(agent.submissionMethod), caption: "Preferred submission method" });
+    cells.push({ key: "submit", value: agent.submissionMethod === "Other" ? ((agent.submissionMethodOther ?? "").trim() || "Other") : String(agent.submissionMethod), caption: "Preferred submission method" });
   }
   return cells;
 }

@@ -1,0 +1,77 @@
+[
+ {
+  "where": "1280×800 population: list, card, banner, view row",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1272,\"w\":1024},\"list\":{\"l\":280,\"r\":1240,\"w\":960},\"card\":{\"l\":280,\"r\":1240,\"w\":960},\"ban\":{\"l\":280,\"r\":1240,\"w\":960},\"vr\":{\"l\":304,\"r\":1216,\"w\":912},\"panel\":null}"
+ },
+ {
+  "where": "1280×800 the three share left and right edges",
+  "ok": false,
+  "detail": "280.0–1240.0 · 280.0–1240.0 · 304.0–1216.0"
+ },
+ {
+  "where": "1280×800 each sits inside the list by 24",
+  "ok": false,
+  "detail": "left 0.0 · right 0.0"
+ },
+ {
+  "where": "1440×900 population: list, card, banner, view row",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1432,\"w\":1184},\"list\":{\"l\":280,\"r\":1400,\"w\":1120},\"card\":{\"l\":280,\"r\":1400,\"w\":1120},\"ban\":{\"l\":280,\"r\":1400,\"w\":1120},\"vr\":{\"l\":304,\"r\":1376,\"w\":1072},\"panel\":null}"
+ },
+ {
+  "where": "1440×900 the three share left and right edges",
+  "ok": false,
+  "detail": "280.0–1400.0 · 280.0–1400.0 · 304.0–1376.0"
+ },
+ {
+  "where": "1440×900 each sits inside the list by 24",
+  "ok": false,
+  "detail": "left 0.0 · right 0.0"
+ },
+ {
+  "where": "1512×900 population: list, card, banner, view row",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1504,\"w\":1256},\"list\":{\"l\":308,\"r\":1444,\"w\":1136},\"card\":{\"l\":308,\"r\":1444,\"w\":1136},\"ban\":{\"l\":308,\"r\":1444,\"w\":1136},\"vr\":{\"l\":340,\"r\":1412,\"w\":1072},\"panel\":null}"
+ },
+ {
+  "where": "1512×900 the three share left and right edges",
+  "ok": false,
+  "detail": "308.0–1444.0 · 308.0–1444.0 · 340.0–1412.0"
+ },
+ {
+  "where": "1512×900 each sits inside the list by 32",
+  "ok": false,
+  "detail": "left 0.0 · right 0.0"
+ },
+ {
+  "where": "1920×1080 population: list, card, banner, view row",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"r\":1912,\"w\":1664},\"list\":{\"l\":472,\"r\":1688,\"w\":1216},\"card\":{\"l\":472,\"r\":1688,\"w\":1216},\"ban\":{\"l\":472,\"r\":1688,\"w\":1216},\"vr\":{\"l\":504,\"r\":1656,\"w\":1152},\"panel\":null}"
+ },
+ {
+  "where": "1920×1080 the three share left and right edges",
+  "ok": false,
+  "detail": "472.0–1688.0 · 472.0–1688.0 · 504.0–1656.0"
+ },
+ {
+  "where": "1920×1080 each sits inside the list by 32",
+  "ok": false,
+  "detail": "left 0.0 · right 0.0"
+ },
+ {
+  "where": "2560×1440 population: list, card, banner, view row",
+  "ok": true,
+  "detail": "{\"sheet\":{\"l\":248,\"r\":2552,\"w\":2304},\"list\":{\"l\":792,\"r\":2008,\"w\":1216},\"card\":{\"l\":792,\"r\":2008,\"w\":1216},\"ban\":{\"l\":792,\"r\":2008,\"w\":1216},\"vr\":{\"l\":824,\"r\":1976,\"w\":1152},\"panel\":null}"
+ },
+ {
+  "where": "2560×1440 the three share left and right edges",
+  "ok": false,
+  "detail": "792.0–2008.0 · 792.0–2008.0 · 824.0–1976.0"
+ },
+ {
+  "where": "2560×1440 each sits inside the list by 32",
+  "ok": false,
+  "detail": "left 0.0 · right 0.0"
+ }
+]

@@ -1,0 +1,412 @@
+[
+ {
+  "where": "fullreq: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Send the full\",\"l2\":\"5 days left · by 10 Nov\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Mark full sent\",\"tone\":\"navy\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 126 SepCovering letterby email✎ Edit31 daysHV27 Oct✎ Edit9 days · today\"}"
+ },
+ {
+  "where": "fullreq: icon stage, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "fullreq: line 1",
+  "ok": true,
+  "detail": "Send the full"
+ },
+ {
+  "where": "fullreq: line 2",
+  "ok": true,
+  "detail": "5 days left · by 10 Nov"
+ },
+ {
+  "where": "fullreq: the action (Mark full sent, navy)",
+  "ok": true,
+  "detail": "Mark full sent navy"
+ },
+ {
+  "where": "fullreq: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "fullreq: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "fullreq: the thread never says where it stands",
+  "ok": true,
+  "detail": "Send the full / 5 days left · by 10 Nov"
+ },
+ {
+  "where": "rr: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Send the revision\",\"l2\":\"No date set\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Mark revision sent\",\"tone\":\"navy\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 128 JulCovering letterby email✎ Edit30 daysRV27 Aug✎ Edit20 days16 Sep✎ Edit40 daysRV26 Oct✎ Edit10 days · today\"}"
+ },
+ {
+  "where": "rr: icon stage, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "rr: line 1",
+  "ok": false,
+  "detail": "Send the revision"
+ },
+ {
+  "where": "rr: line 2",
+  "ok": false,
+  "detail": "No date set"
+ },
+ {
+  "where": "rr: the action (Mark revision sent, navy)",
+  "ok": true,
+  "detail": "Mark revision sent navy"
+ },
+ {
+  "where": "rr: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "rr: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "rr: the thread never says where it stands",
+  "ok": true,
+  "detail": "Send the revision / No date set"
+ },
+ {
+  "where": "offer: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Answer the offer\",\"l2\":\"6 days left\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Answer the offer\",\"tone\":\"navy\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 116 SepCovering letterby email✎ Edit44 daysOV30 Oct✎ Edit6 days · today\"}"
+ },
+ {
+  "where": "offer: icon stage, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "offer: line 1",
+  "ok": false,
+  "detail": "Answer the offer"
+ },
+ {
+  "where": "offer: line 2",
+  "ok": false,
+  "detail": "6 days left"
+ },
+ {
+  "where": "offer: the action (Answer the offer, navy)",
+  "ok": true,
+  "detail": "Answer the offer navy"
+ },
+ {
+  "where": "offer: the second action",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "offer: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "offer: the thread never says where it stands",
+  "ok": true,
+  "detail": "Answer the offer / 6 days left"
+ },
+ {
+  "where": "offertold: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Answer the offer\",\"l2\":\"5 days left\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Answer the offer\",\"tone\":\"navy\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 117 AugCovering letterby email✎ Edit70 daysTV26 Oct✎ Edit10 days · today\"}"
+ },
+ {
+  "where": "offertold: icon stage, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "offertold: line 1",
+  "ok": false,
+  "detail": "Answer the offer"
+ },
+ {
+  "where": "offertold: line 2",
+  "ok": false,
+  "detail": "5 days left"
+ },
+ {
+  "where": "offertold: the action (Answer the offer, navy)",
+  "ok": true,
+  "detail": "Answer the offer navy"
+ },
+ {
+  "where": "offertold: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "offertold: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "offertold: the thread never says where it stands",
+  "ok": true,
+  "detail": "Answer the offer / 5 days left"
+ },
+ {
+  "where": "nudge: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Nudge Priya?\",\"l2\":\"Reply was due 29 Oct\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Nudge\",\"tone\":\"outline\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 115 OctCovering letterby email✎ Edit21 days · todayPVNo reply yetReply was due 29 Oct · 7 days ago\"}"
+ },
+ {
+  "where": "nudge: icon clock, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "nudge: line 1",
+  "ok": false,
+  "detail": "Nudge Priya?"
+ },
+ {
+  "where": "nudge: line 2",
+  "ok": false,
+  "detail": "Reply was due 29 Oct"
+ },
+ {
+  "where": "nudge: the action (Nudge, outline)",
+  "ok": true,
+  "detail": "Nudge outline"
+ },
+ {
+  "where": "nudge: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "nudge: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "nudge: the thread never says where it stands",
+  "ok": false,
+  "detail": "Nudge Priya? / Reply was due 29 Oct"
+ },
+ {
+  "where": "nudge due: line 2 in rust",
+  "ok": false,
+  "detail": "rgb(125, 114, 104)"
+ },
+ {
+  "where": "agent: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Heard back?\",\"l2\":\"Record it when Rufus replies\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Record a response\",\"tone\":\"outline\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 129 OctCovering letterby email✎ Edit7 days · todayRVWaiting on RufusDay 7 of about 28 · reply expected 26 Nov\"}"
+ },
+ {
+  "where": "agent: icon ring, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "agent: line 1",
+  "ok": false,
+  "detail": "Heard back?"
+ },
+ {
+  "where": "agent: line 2",
+  "ok": false,
+  "detail": "Record it when Rufus replies"
+ },
+ {
+  "where": "agent: the action (Record a response, outline)",
+  "ok": true,
+  "detail": "Record a response outline"
+ },
+ {
+  "where": "agent: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "agent: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "agent: the thread never says where it stands",
+  "ok": true,
+  "detail": "Heard back? / Record it when Rufus replies"
+ },
+ {
+  "where": "nudgedwait: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Heard back?\",\"l2\":\"Record it when Wren replies\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Record a response\",\"tone\":\"outline\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 112 SepCovering letterby email✎ Edit54 days · todayWVWaiting on WrenDay 54 of about 62 · reply expected 13 Nov\"}"
+ },
+ {
+  "where": "nudgedwait: icon ring, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "nudgedwait: line 1",
+  "ok": false,
+  "detail": "Heard back?"
+ },
+ {
+  "where": "nudgedwait: line 2",
+  "ok": false,
+  "detail": "Record it when Wren replies"
+ },
+ {
+  "where": "nudgedwait: the action (Record a response, outline)",
+  "ok": true,
+  "detail": "Record a response outline"
+ },
+ {
+  "where": "nudgedwait: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "nudgedwait: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "nudgedwait: the thread never says where it stands",
+  "ok": true,
+  "detail": "Heard back? / Record it when Wren replies"
+ },
+ {
+  "where": "quiet: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Still nothing?\",\"l2\":\"Close it, or keep waiting\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Close it\",\"tone\":\"outline\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 112 SepCovering letterby email✎ Edit54 days · todayQVNo replyQuiet since 26 Sep\"}"
+ },
+ {
+  "where": "quiet: icon clock, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "quiet: line 1",
+  "ok": false,
+  "detail": "Still nothing?"
+ },
+ {
+  "where": "quiet: line 2",
+  "ok": false,
+  "detail": "Close it, or keep waiting"
+ },
+ {
+  "where": "quiet: the action (Close it, outline)",
+  "ok": true,
+  "detail": "Close it outline"
+ },
+ {
+  "where": "quiet: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "quiet: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "quiet: the thread never says where it stands",
+  "ok": true,
+  "detail": "Still nothing? / Close it, or keep waiting"
+ },
+ {
+  "where": "passed: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Closed\",\"l2\":\"Closed on 26 Oct\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Reopen\",\"tone\":\"outline\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 17 AugCovering letterby email✎ Edit50 daysPV26 Sep✎ Edit10 days6 Oct✎ Edit20 daysPV26 Oct✎ Edit\"}"
+ },
+ {
+  "where": "passed: icon grey, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "passed: line 1",
+  "ok": false,
+  "detail": "Closed"
+ },
+ {
+  "where": "passed: line 2",
+  "ok": false,
+  "detail": "Closed on 26 Oct"
+ },
+ {
+  "where": "passed: the action (Reopen, outline)",
+  "ok": true,
+  "detail": "Reopen outline"
+ },
+ {
+  "where": "passed: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "passed: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "passed: the thread never says where it stands",
+  "ok": true,
+  "detail": "Closed / Closed on 26 Oct"
+ },
+ {
+  "where": "withdrew: population (the footer and the thread)",
+  "ok": true,
+  "detail": "{\"icon\":\"\",\"l1\":\"Closed\",\"l2\":\"Closed on 31 Oct\",\"l2c\":\"rgb(125, 114, 104)\",\"btn\":\"Reopen\",\"tone\":\"outline\",\"second\":null,\"h\":44,\"iconW\":0,\"thread\":\"Day 16 SepCovering letterby email✎ Edit55 days31 Oct✎ Edit\"}"
+ },
+ {
+  "where": "withdrew: icon grey, 32px",
+  "ok": false,
+  "detail": " 0"
+ },
+ {
+  "where": "withdrew: line 1",
+  "ok": false,
+  "detail": "Closed"
+ },
+ {
+  "where": "withdrew: line 2",
+  "ok": false,
+  "detail": "Closed on 31 Oct"
+ },
+ {
+  "where": "withdrew: the action (Reopen, outline)",
+  "ok": true,
+  "detail": "Reopen outline"
+ },
+ {
+  "where": "withdrew: the second action",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "withdrew: the field is 52px",
+  "ok": false,
+  "detail": "44"
+ },
+ {
+  "where": "withdrew: the thread never says where it stands",
+  "ok": true,
+  "detail": "Closed / Closed on 31 Oct"
+ },
+ {
+  "where": "Tell other agents opens the record form on Told other agents",
+  "ok": false,
+  "detail": "{\"kind\":\"\",\"count\":false}"
+ }
+]

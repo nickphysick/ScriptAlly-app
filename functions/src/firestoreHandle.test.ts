@@ -115,12 +115,32 @@ describe("the Firestore handle has exactly one home", () => {
       "waitlistRetention.ts",
       /* the tenth (Dashboard v59): the founding writer panel's weekly pulse writes betaPulse */
       "weeklyPulse.ts",
+      /* the eleventh (Dashboard v93): it reads every betaFeedback doc and writes every foundingStats doc, and its
+         trigger names the same DATABASE_ID — so on prod it listens to the named database, not a (default) */
+      "foundingStats.ts",
+      /* the twelfth (Dashboard first visit v2, Part F): the daily clean-up deletes kept import reviews — every draft and
+         its parts — so it must be on the one handle, which on prod is the named database */
+      "importDrafts.ts",
+      /* the thirteenth (Your notes v1, Part B): addFeedbackNote and markFeedbackSeen write a note's thread and its
+         writerSeenAt — on prod that is the named database, so they are on the one handle */
+      "feedbackNotes.ts",
+      /* the fourteenth (Non-workspace v1, 9c): sendAccountEmail holds a pending change of address and claims the shared
+         rate limit — both Firestore writes, so on prod they must reach the named database */
+      "accountEmails.ts",
+      /* the fifteenth (Non-workspace v1, 9e): the nudge and weekly schedulers read every writer's records */
+      "reminderEmails.ts",
+      /* the sixteenth (Non-workspace v1.1, 5b): emailSettings reads and writes one writer's notifyPrefs and
+         marketingConsent from a signed link — on prod that is the named database, so it is on the one handle */
+      "emailSettings.ts",
     ];
+    /* Non-workspace v1, Phase 5: exported functions that touch no Firestore at all, held to exactly that below. */
+    const noFirestore = ["signOutOthers.ts"];
     /* ⚠️ RECONCILED AGAINST index.ts RATHER THAN TRUSTED AS A HAND-WRITTEN LIST — a literal here
      * goes stale the day a ninth function is exported, and goes stale silently. */
     const index = stripComments(read("index.ts"));
     const exported = [...index.matchAll(/from\s+"\.\/([A-Za-z0-9_]+)"/g)].map((m) => `${m[1]}.ts`);
-    expect(new Set(exported)).toEqual(new Set(consumers));
+    expect(new Set(exported)).toEqual(new Set([...consumers, ...noFirestore]));
+    for (const f of noFirestore) expect(stripComments(read(f)), `${f} touches no Firestore`).not.toMatch(/firestore|\bdb\b/i);
 
     for (const f of consumers) {
       expect(stripComments(read(f)), `${f} imports the shared handle`)

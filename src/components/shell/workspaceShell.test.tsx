@@ -32,6 +32,8 @@ vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
     manuscripts: msFixture,
     currentUser: { id: "u1", name: "Nick Physick", email: "n@example.com", plan: UserPlan.FREE },
+    /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer */
+    entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
   }),
 }));
 
@@ -407,7 +409,9 @@ describe("the sidebar", () => {
     const html = at("/dashboard");
     expect(html).toContain('class="ws-bmark"');
     expect(html).toContain("QueryHawk");
-    expect(srcCode.indexOf('className="ws-brand"')).toBeLessThan(srcCode.indexOf('className="ws-nav"'));
+    /* the nav's class is EdgeFadeScroll's `scrollClassName` since the nav gained its edge fade (25 Oct) */
+    expect(srcCode.indexOf('scrollClassName="ws-nav"')).toBeGreaterThan(-1);
+    expect(srcCode.indexOf('className="ws-brand"')).toBeLessThan(srcCode.indexOf('scrollClassName="ws-nav"'));
     expect(srcCode, "the sidebar card is gone").not.toContain('className="ws-phead"');
     // and NOT in the breadcrumb
     expect(html).not.toContain("ws-logotype");
@@ -415,7 +419,8 @@ describe("the sidebar", () => {
 
   /* ⚠️ RETARGETED from "the S tile navigates to the dashboard" — the mark still routes home. */
   it("the brand mark routes home", () => {
-    expect(srcCode).toMatch(/className="ws-brand"[\s\S]{0,120}go\("\/dashboard"\)/);
+    /* sidebar rail v1: through pickPage, which also puts a floating sidebar away */
+    expect(srcCode).toMatch(/className="ws-brand"[\s\S]{0,120}pickPage\("\/dashboard"\)/);
   });
 
   /* ⚠️ RETARGETED, INVERTED, from "has no avatar in the panel; the rail has it". */
@@ -443,7 +448,9 @@ describe("the sidebar", () => {
     expect(user).toBeGreaterThan(row);
     expect(gear, "the gear").toBeGreaterThan(user);
     /* the user row CLOSES before the gear opens — a sibling, not a child */
-    expect(foot.slice(user, gear), "the user row is closed before the gear").toMatch(/<\/div>\s*\{!sidebar\.collapsed && \(\s*<button\s+type="button"\s*$/);
+    expect(foot.slice(user, gear), "the user row is closed before the gear").toMatch(/<\/div>\s*<button\s+type="button"\s*$/);
+    /* sidebar rail v1: the full sidebar is never collapsed (the rail is its own layer), so the gear is
+       always rendered — no `!sidebar.collapsed` guard */
     expect(foot.slice(gear)).toContain('aria-label="Settings"');
     expect(foot.slice(gear)).toContain('onClick={() => go("/account")}');
     /* ⚠️ RETARGETED (ink shell v1): the GEAR needs no stopPropagation, being a sibling — still true.
@@ -459,7 +466,8 @@ describe("the sidebar", () => {
     expect(rule(".ws-gear")).toContain("width: 30px; height: 30px");
     expect(rule(".ws-gear")).toContain("border-radius: 50%");
     const html = at("/dashboard");
-    const nav = sliceBetween(html, '<nav class="ws-nav"', "</nav>", "the rendered nav");
+    /* the nav renders its attributes in EdgeFadeScroll's order since 25 Oct, so the anchor is its class, not its tag */
+    const nav = sliceBetween(html, 'class="ws-nav"', "</nav>", "the rendered nav");
     expect(nav, "the nav renders a Settings row").not.toContain(">Settings<");
     expect(nav).not.toMatch(/ws-glabel[^>]*>Account</);
     expect(html).toContain('class="ws-gear" aria-label="Settings"');

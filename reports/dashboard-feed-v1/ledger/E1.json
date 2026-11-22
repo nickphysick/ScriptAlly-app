@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "E1",
+  "where": "1512x982c population: a task with a tick box",
+  "ok": true,
+  "detail": "{\"key\":\"task-offer-seed-query-12\",\"pos\":\"1 of 35\",\"label\":\"Do this task: Noah Bright has made an offer\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982c the box's name says what it does",
+  "ok": true,
+  "detail": "Do this task: Noah Bright has made an offer"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982c it went somewhere",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"panel\":[\"d105-how\",\"query:seed-query-12\"]}"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982c the box goes exactly where Do this task goes",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"panel\":[\"d105-how\",\"query:seed-query-12\"]} vs {\"path\":\"/dashboard\",\"panel\":[\"d105-how\",\"query:seed-query-12\"]}"
+ },
+ {
+  "lock": "E1",
+  "where": "1512x982c not marked done: the plan still holds it, its count unchanged",
+  "ok": true,
+  "detail": "1 of 35 → 1 of 35"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 population: a task with a tick box",
+  "ok": true,
+  "detail": "{\"key\":\"task-offer-seed-query-12\",\"pos\":\"1 of 35\",\"label\":\"Do this task: Noah Bright has made an offer\"}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 the box's name says what it does",
+  "ok": true,
+  "detail": "Do this task: Noah Bright has made an offer"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 it went somewhere",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"panel\":[\"d105-how\",\"query:seed-query-12\"]}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 the box goes exactly where Do this task goes",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"panel\":[\"d105-how\",\"query:seed-query-12\"]} vs {\"path\":\"/dashboard\",\"panel\":[\"d105-how\",\"query:seed-query-12\"]}"
+ },
+ {
+  "lock": "E1",
+  "where": "1280x800 not marked done: the plan still holds it, its count unchanged",
+  "ok": true,
+  "detail": "1 of 35 → 1 of 35"
+ }
+]

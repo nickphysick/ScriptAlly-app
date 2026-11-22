@@ -1,0 +1,32 @@
+[
+ {
+  "where": "All: shown with the total",
+  "ok": true,
+  "detail": "That’s all 88. / 88"
+ },
+ {
+  "where": "another tab: absent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "a search: absent",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "a filter: absent",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "back to All: shown",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Birds-eye: absent",
+  "ok": false,
+  "detail": ""
+ }
+]

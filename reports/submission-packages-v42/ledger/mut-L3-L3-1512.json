@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "L3-1512",
+  "where": "one framed container",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "white",
+  "ok": true,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "a 7 ±1 white rim",
+  "ok": true,
+  "detail": "rgb(255, 255, 255) 0px 0px 0px 7px, rgba(28, 19, 15, 0.07) 0px 0px 0px 8px, rgba(28, 19, 15, 0.4) 0px 30px 50px -30px"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "the steps band is sage rgb(226, 230, 224)",
+  "ok": false,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "the preview band is sand rgb(244, 230, 214)",
+  "ok": true,
+  "detail": "rgb(244, 230, 214)"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "the sent note is blush rgb(243, 226, 220)",
+  "ok": true,
+  "detail": "rgb(243, 226, 220)"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "steps and preview side by side: tops equal ±1",
+  "ok": false,
+  "detail": "679.5625 / 1109.8125"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "…the preview to the right of the steps",
+  "ok": false,
+  "detail": "1321 / 321"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "population: the sent package's buttons",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "“Note, copy or delete…” inside the preview",
+  "ok": true,
+  "detail": "337–489.109375 / 321–1321"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "“Make a copy” inside the preview",
+  "ok": true,
+  "detail": "998.796875–1123.890625 / 321–1321"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "“Log a query with it” inside the preview",
+  "ok": true,
+  "detail": "1131.890625–1305 / 321–1321"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "the current batch has no Use button",
+  "ok": true,
+  "detail": "present"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "a Ready package offers “Use for current batch”",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "…which sets the active package",
+  "ok": true,
+  "detail": "pk40-ready"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "…and the tag moves to that tile",
+  "ok": true,
+  "detail": "[\"pk40-ready\"]"
+ },
+ {
+  "lock": "L3-1512",
+  "where": "…and its button goes",
+  "ok": true,
+  "detail": "still there"
+ }
+]

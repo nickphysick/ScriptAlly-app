@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L3",
+  "where": "1280 · population: the page's buttons",
+  "ok": true,
+  "detail": "427"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · unpinned: no Pin button",
+  "ok": false,
+  "detail": "Pin list|Pin listPin the listF"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the title row's Full screen enters",
+  "ok": false,
+  "detail": "pressed false"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · in full screen the toolbar says Exit full screen",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · in full screen the toolbar carries the icon toggle",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · the icon toggle switches to Cards and back",
+  "ok": false,
+  "detail": "cards false · list false"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · Exit full screen leaves",
+  "ok": true,
+  "detail": "pressed"
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · F enters",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1280 · Esc leaves",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · population: the page's buttons",
+  "ok": true,
+  "detail": "427"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · unpinned: no Pin button",
+  "ok": false,
+  "detail": "Pin list|Pin listPin the listF"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the title row's Full screen enters",
+  "ok": false,
+  "detail": "pressed false"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · in full screen the toolbar says Exit full screen",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · in full screen the toolbar carries the icon toggle",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · the icon toggle switches to Cards and back",
+  "ok": false,
+  "detail": "cards false · list false"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · Exit full screen leaves",
+  "ok": true,
+  "detail": "pressed"
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · F enters",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "L3",
+  "where": "1512 · Esc leaves",
+  "ok": true,
+  "detail": ""
+ }
+]

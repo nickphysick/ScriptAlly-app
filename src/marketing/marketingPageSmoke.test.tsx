@@ -27,7 +27,7 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 import { Landing } from "./Landing";
 import { MarketingShell } from "./MarketingShell";
 import { PricingPage } from "./PricingPage";
-import { PASSES, ADD_MONTH_PRICE, perMonth } from "./pricingCopy";
+import { PRO_PLANS, perMonth } from "./pricingCopy";
 import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
@@ -70,7 +70,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the reserve list."],
   ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
   ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],
-  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
+  /* Retarget (13 Nov): the Terms take Privacy's layout, titled "Terms", with their old wording. */
+  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Who we are and what you&#x27;re agreeing to"],
   /* Retarget (privacy page v1, 2 Nov): the page's title is "Privacy". */
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "The short version"],
 ];
@@ -155,13 +156,15 @@ describe("the public pricing page sells nothing and writes nothing", () => {
    * instead — any £ figure must be £0 or a figure the table states or derives. The next invented
    * number fails here whichever number it is.
    */
-  it("quotes no price that the pass table does not state", () => {
+  it("quotes no price that the plan table does not state", () => {
     const text = textOf(renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing"));
     const amounts = [...text.matchAll(/£\s*([\d.,]+)/g)].map((m) => m[1]);
     expect(amounts.length, "the sweep found prices (not vacuous)").toBeGreaterThan(1);
-    const allowed = new Set(["0", ADD_MONTH_PRICE, ...PASSES.map((p) => p.price), ...PASSES.map(perMonth)]);
+    const allowed = new Set(["0", ...PRO_PLANS.map((p) => p.price), ...PRO_PLANS.map(perMonth)]);
     for (const a of amounts) expect(allowed, `£${a} has a source`).toContain(a);
     expect(text, "the old monthly figure is not this page's").not.toContain("£4.99");
+    /* ⚠️ AND NO "ADD A MONTH" PRICE: plans are extended by QueryHawk getting in touch (24 Oct). */
+    expect(text).not.toContain("5.99");
   });
 
   /**
@@ -172,8 +175,9 @@ describe("the public pricing page sells nothing and writes nothing", () => {
     const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
     /* ⚠️ SCOPED TO THE BAND. The journey below says "Question 1 of 4", which is a count and not a
        places figure; a page-wide sweep for "N of M" reads it as the fabricated scarcity number. */
-    const band = sliceBetween(html, 'class="mk-pv3band"', 'class="mk-pv3soon"');
-    expect(band).toContain("mk-pv3count");
+    /* RE-POINTED (pricing v4, 24 Oct): the band is the founding box now (ref pricing-page-v2). */
+    const band = sliceBetween(html, 'class="mk-fb"', 'class="mk-pv4soon"');
+    expect(band).toContain("mk-fbcount");
     expect(band).not.toMatch(/\d+\s*(?:of|\/)\s*\d+/);
     expect(html).not.toContain("places claimed");
     expect(html).not.toContain("places left");
@@ -216,6 +220,7 @@ describe("the legal pages are honest about being drafts", () => {
      * ⚠️ THE PLACEHOLDERS RENDER AS PLACEHOLDERS. An invented entity name or address would make
      * the page look finished, and a legal page that looks finished and is not is the one nobody
      * chases. Both documents name the operating entity in their first section.
+     * (The 12 Nov ref wording dropped them; Nick restored the old Terms wording on 13 Nov.)
      */
     it(`/${doc} still shows its unfilled entity placeholders`, () => {
       const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
@@ -237,7 +242,7 @@ describe("the legal pages are honest about being drafts", () => {
   /**
    * ⚠️ THE POLICY SAYS THERE IS NO COOKIE BANNER AND NO THIRD-PARTY ANALYTICS (restored 31 Oct,
    * when GA was taken off the public site). True only while `.env.production` sets no
-   * `VITE_GA_MEASUREMENT_ID` — `analytics.ts` and the consent bar are dormant without it. The second
+   * `VITE_GA_MEASUREMENT_ID` — `analytics.ts` is dormant without it (the consent bar is deleted, 13 Nov). The second
    * test below holds the two together: set an id and this fails until the policy says so.
    */
   it("the privacy policy covers cookies and local storage, and claims no banner", () => {
@@ -523,16 +528,19 @@ describe("the hero", () => {
  */
 /* "the status band" is RETIRED (waitlist v1, 31 Oct): its heading is feature row 1's now, beside the
    Birds-eye window. The absence is asserted, and the glyph marks still draw in the footer. */
-describe("the status band is gone, and its glyphs survive in the footer", () => {
+describe("the status band is gone, and the public footer draws no glyph row", () => {
   it("renders no status band and no #pulse anchor", () => {
     const h = renderPage(<Landing onNavigate={noNavigate} />, "/");
     expect(h).not.toMatch(/["\s`]mk-statband["\s`]/);
     expect(h).not.toContain('id="pulse"');
   });
-  it("and the glyphs themselves still draw, in the footer", () => {
+  /* RE-POINTED (contact redesign v1, 12 Nov): the ref drops the row from the public footer — it means
+     nothing to a visitor who has not used the app. The marks still draw in the app's footer
+     (appFooter.test.tsx). */
+  it("and the public footer no longer draws the glyph row", () => {
     expect(renderPage(
       <MarketingShell user={null as never} onNavigate={noNavigate} path="/"><div /></MarketingShell>, "/"),
-      "the footer's signature row").toContain('class="mk-footglyphs"');
+      "the footer's signature row is gone").not.toContain("mk-footglyphs");
   });
 });
 
@@ -867,8 +875,9 @@ describe("the Founding Writers page", () => {
  * against the props actually rendered — rather than a count on either side alone, which would go
  * green the day both were changed in the same wrong direction.
  *
- * `claim` is the offer's own counter (the banner and the `/founders` hero); `tally` is the compact
- * bar in `/pricing`'s narrow tier column. `bar` was SWAPPED for `claim`, not added beside it.
+ * `claim` is the offer's own counter (the banner and the `/founders` hero); `left` is the compact
+ * bar and "N places left" line in `/pricing`'s founding box. `bar` was SWAPPED for `claim`, and
+ * `tally` for `left` (pricing v4, 24 Oct), never added beside them.
  */
 describe("the founding counter has two variants and no orphans", () => {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -884,16 +893,17 @@ describe("the founding counter has two variants and no orphans", () => {
       for (const m of read(f).matchAll(/<FoundingCounter variant="([a-z]+)"/g)) rendered.add(m[1]);
     }
     expect(declared, "every declared variant is rendered somewhere").toEqual([...rendered].sort());
-    expect(declared).toEqual(["claim", "tally"]);
-    /* The retired shapes, asserted absent so neither returns from a diff. */
+    expect(declared).toEqual(["claim", "left"]);
+    /* The retired shapes, asserted absent so none returns from a diff. */
     expect(union![1]).not.toContain('"bar"');
+    expect(union![1]).not.toContain('"tally"');
     expect(union![1]).not.toContain('"line"');
   });
 
   it("the banner and the founders hero draw the same shape, and pricing keeps its own", () => {
     expect(read("FoundingBand.tsx")).toContain('<FoundingCounter variant="claim" />');
     expect(read("FoundersPage.tsx")).toContain('<FoundingCounter variant="claim" />');
-    expect(read("PricingPage.tsx")).toContain('<FoundingCounter variant="tally" />');
+    expect(read("PricingPage.tsx")).toContain('<FoundingCounter variant="left" />');
   });
 
   /**
@@ -905,6 +915,7 @@ describe("the founding counter has two variants and no orphans", () => {
   it("builds both figures from the copy module, never from arithmetic in the component", () => {
     const src = read("FoundingSignup.tsx");
     expect(src).toContain("foundingRemainingLabel(count.claimed, count.cap)");
+    expect(src).toContain("foundingPlacesLeftLabel(count.claimed, count.cap)");
     expect(src).toContain("foundingCounterRest(count.cap)");
     expect(src, "no subtraction at the render site").not.toMatch(/count\.cap\s*-\s*count\.claimed/);
     /* Still the one gate that matters: no figure at all until the endpoint answers. */

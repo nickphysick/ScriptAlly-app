@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1512 ruled headings to measure (population)",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 switch to cards — a switch exists",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-D2",
+  "where": "@1280 ruled headings to measure (population)",
+  "ok": false,
+  "detail": "0"
+ }
+]

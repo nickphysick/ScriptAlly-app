@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "A3",
+  "where": "1280x800 population: every card found",
+  "ok": true,
+  "detail": "8/8"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 every card in one column",
+  "ok": true,
+  "detail": "268"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 the feed is column 2",
+  "ok": true,
+  "detail": "feed 746"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 the cards in Part A's order by top",
+  "ok": true,
+  "detail": "book-slot:120 task:474 tip-slot:763 scout-slot:1136 queries:1742 agents:2044 founding:2227 footer-slot:2531"
+ },
+ {
+  "lock": "A3",
+  "where": "1280x800 the footer is last",
+  "ok": true,
+  "detail": "footer-slot"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x982 population: every card found",
+  "ok": true,
+  "detail": "8/8"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x982 every card in one column",
+  "ok": true,
+  "detail": "268"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x982 the feed is column 2",
+  "ok": true,
+  "detail": "feed 855"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x982 the cards in Part A's order by top",
+  "ok": true,
+  "detail": "book-slot:120 task:474 tip-slot:750 scout-slot:1098 queries:1657 agents:1959 founding:2173 footer-slot:2477"
+ },
+ {
+  "lock": "A3",
+  "where": "1512x982 the footer is last",
+  "ok": true,
+  "detail": "footer-slot"
+ }
+]

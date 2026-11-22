@@ -126,8 +126,88 @@
   --sp-anthracite-hov: #34465f;
   --sp-cream: #f5f1eb;
   --sp-frame: #7c3a2a;
+  --sp-rust: #7a3f31; /* consistency fixes v1.1, ruling 6: the one rust for small warm accents (text and icons) */
+  /* Consistency roll-out v2, Phase 2 (rulings v3, ruling 2): two muted text colours on light grounds. Muted is for
+     supporting text (6.9:1 on oat), quiet for captions and meta (5.3:1 on oat). Both pass 4.5:1 on oat, cream and white. */
+  --sp-muted: #5b4f47;
+  --sp-quiet: #6b6058;
+  /* Consistency roll-out v2, Phase 2 (ruling 10): red only on "Delete account…", "Withdraw it" and
+     "I've decided not to send it" — the three actions that end something for good. */
+  --sp-danger: #a63d2f;
+  /* Consistency roll-out v2, Phase 6 (ruling 11): a filled navy button's hover ground. --sp-anthracite-hov (#34465f, a
+     LIGHTER step) keeps its value for the header pills that still read it. */
+  --sp-navy-hover: #24304a;
   --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
+  /* Consistency roll-out v1, Phase 7 (ruling 6): three heading sizes for the page body of workspace pages and the
+     Dashboard. Each is a whole `font` shorthand, read as `font: var(--sp-h-…) !important` (brand.tsx forces h1–h3
+     into its serif with !important). Colour stays each page's own.
+       section — heads a section of the page, or a framed card's band (the ref's "Your shelf", "The pitch")
+       card    — heads one card, or a part inside a card ("Next up", "Where they are now")
+       small   — a small heading inside a card, under its heading ("First 5") */
+  --sp-h-section: 400 24px/1.2 var(--sp-type);
+  --sp-h-card: 400 20px/1.25 var(--sp-type);
+  --sp-h-small: 600 16px/1.3 var(--sp-serif);
+  /* Consistency roll-out v1, Phase 8 (ruling 5): the framed card — Comps' `cp32-rc` › `cp32-rc-in`, as built. A white
+     rim (radius 20, 8 of padding, one soft shadow) holding a hairline frame (radius 13). `.sp-rc` › `.sp-rc-in` below
+     draw it; each page's own framed-card rule reads these values, so the card keeps its page's breakpoints and the
+     modifiers written against it. Not a framed card: single-edge side panels (the Views rails), the query card and
+     its Next box, stat tiles, art placeholders, the founding band, anything in a slide-out panel. */
+  --sp-rc-pad: 8px;
+  --sp-rc-r: 20px;
+  --sp-rc-sh: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07);
+  --sp-rc-in-r: 13px;
+  --sp-rc-edge: 1px solid #e9e3d9;
+  /* Consistency roll-out v1, Phase 9 (ruling 4): the main action button in the page body of workspace pages and the
+     Dashboard. 40 high, radius 10, 0 20 of padding, Source Serif 4 600 15. Filled: the navy ground, white words, one per
+     view. Outline: no ground, navy words, a 1.5px navy ring inside, the same box. `.sp-btn` + `--fill` / `--line` draw
+     it; each page's own button rule reads these values. Not: buttons in the navy header, selected toggles, tabs,
+     filter pills, list rows, icon-only buttons, destructive red buttons, Settings and public buttons. */
+  --sp-btn-h: 40px;
+  --sp-btn-r: 10px;
+  --sp-btn-pad: 0 20px;
+  --sp-btn-font: 600 15px/1 var(--sp-serif);
+  --sp-btn-ring: inset 0 0 0 1.5px var(--sp-anthracite);
+  --sp-btn-line-hov: rgba(42, 58, 82, .06);
+  /* Consistency roll-out v1, Phase 11 (ruling 8): the boxed text field on workspace pages and in slide-out panels.
+     44 high, radius 10, 0 14 of padding, white, Source Serif 4 16, a 1px edge inside; at focus a 1.5px navy edge.
+     A textarea takes the radius, edge, face and focus and keeps its own height; a headline field keeps its height and
+     size. `.sp-fld` draws it; each page's own field rule reads these values. Not: bare inputs inside a search bar or a
+     tag row, and Settings, onboarding and public fields. */
+  --sp-fld-h: 44px;
+  --sp-fld-r: 10px;
+  --sp-fld-pad: 0 14px;
+  --sp-fld-font: 400 16px var(--sp-serif);
+  --sp-fld-edge: inset 0 0 0 1px rgba(28, 19, 15, .18);
+  --sp-fld-focus: inset 0 0 0 1.5px var(--sp-anthracite);
 }
+.sp-fld { box-sizing: border-box; width: 100%; height: var(--sp-fld-h); padding: var(--sp-fld-pad); border: 0; border-radius: var(--sp-fld-r); background: #fff; box-shadow: var(--sp-fld-edge); font: var(--sp-fld-font); color: var(--sp-ink); outline: none; }
+.sp-fld:focus { box-shadow: var(--sp-fld-focus); }
+/* Consistency roll-out v1, Phase 12 (ruling 9): a slide-out panel's close button is a 36 × 36 circle; its fixed action
+   footer is 72 high with 14 24 of padding and a 1px hairline above. Builds, shells, headers and positions are the
+   panels' own. */
+/* Consistency roll-out v2, Phase 1 (rulings v2, ruling 7): a view switch is boxed — the track radius 12, each option 34
+   high with radius 9. Each switch's own rule reads these. */
+:root { --sp-vsw-r: 12px; --sp-vsw-opt-h: 34px; --sp-vsw-opt-r: 9px; }
+/* Consistency roll-out v2, Phase 3 (rulings v3): the text tag (ruling 4) — a pill that holds only words and labels
+   something; not a chip with a person in it, a count, a percentage, a Pro tag, a key cap, StatusDot, a filter pill or a
+   button. The filter pill (ruling 5): 32 high, Source Serif 4 14.5. The slide-out panel title (ruling 3): Special Elite
+   400 24/1.2, the section heading's size; the agent card's name is a person's name and stays its own. */
+:root {
+  --sp-tag-h: 28px; --sp-tag-pad: 0 12px; --sp-tag-r: 999px; --sp-tag-font: 600 14px/1 var(--sp-serif);
+  --sp-fpill-h: 32px; --sp-fpill-size: 14.5px;
+  --sp-panel-t: 400 24px/1.2 var(--sp-type);
+}
+/* Consistency roll-out v2, Phase 8 (rulings v3, ruling 1): running text in Source Serif 4 on workspace pages, the Dashboard and
+   slide-out panels is 16 (body) or 14 (secondary); 15, 15.5, 16.5 and 17 became 16, and 14.5 became 14. */
+:root { --sp-body-size: 16px; --sp-sec-size: 14px; }
+:root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
+.sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
+.sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
+.sp-btn--fill:hover:not(:disabled) { background: var(--sp-navy-hover); } /* roll-out v2, Phase 6 (ruling 11): darker, not --sp-anthracite-hov's lighter step */
+.sp-btn--line { background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
+.sp-btn--line:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
+.sp-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.sp-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; }
 
 /* ══ SEARCH — one component, two widths ══ */
 .sp-search {
@@ -164,7 +244,7 @@
 .sp-search-l {
   flex: 1 1 auto; min-width: 0;
   font-family: var(--sp-type); font-size: 16px; line-height: 1.2; padding-top: 2px;
-  color: rgba(28, 19, 15, 0.45);
+  color: var(--sp-quiet);
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 /* the shortcut, as an ink keycap */
@@ -219,7 +299,7 @@
 }
 .sp-inkpill:hover { background: var(--sp-anthracite-hov); }
 .sp-inkpill:active { transform: translateY(1px); }
-.sp-inkpill:focus-visible { outline: 2px solid var(--sp-frame); outline-offset: 2px; }
+.sp-inkpill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .sp-inkpill svg { width: 17px; height: 17px; flex: none; margin-top: -2px; stroke-width: 1.9; }
 .sp-inkpill-l { font-family: var(--sp-type); padding-top: 2px; }
 
@@ -241,4 +321,13 @@
     transition: none;
   }
   .sp-disc:hover, .sp-inkpill:active { transform: none; }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): ONE FOCUS RING. Every focusable button, link, tab, pill and row
+   that states no ring of its own takes a 2px navy outline, 2px off; on navy and other dark grounds the sheets state cream
+   #f4eee5. :where() keeps this at zero specificity, so a sheet's own (now standard) ring wins. Text fields are not in it:
+   they keep their navy focus edge and take no outer ring. */
+:where(button, a[href], summary, [role="button"], [role="tab"], [role="radio"], [role="option"], [role="switch"], [role="menuitem"], [role="checkbox"], [tabindex]:not([tabindex="-1"])):where(:not(input, textarea, select)):focus-visible {
+  outline: 2px solid var(--sp-anthracite);
+  outline-offset: 2px;
 }

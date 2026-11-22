@@ -22,6 +22,7 @@
  */
 import { guideWalking } from "../../../lib/guideWalk";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useDrawerFocus } from "../../shell/useDrawerFocus";
 import { createPortal } from "react-dom";
 import { lockStageScroll } from "../../../lib/stageScroll";
 import { eyeRows } from "../../../lib/qcBirdsEye";
@@ -103,6 +104,9 @@ export const QcBirdsDrawer: React.FC<{
   const popRef = useRef<Pop>(null);
   popRef.current = pop;
   const headRef = useRef<HTMLElement>(null);
+  /* Record a response v1, Phase 5 — the desk behind is inert while the drawer is out (one modal seal with the panels) */
+  const asideRef = useRef<HTMLElement>(null);
+  useDrawerFocus(asideRef, open, { modal: true });
   const place = useTabPlace();
   /* the drawer's clock is frozen when it opens, as the expanded card's was: a today that moved on a
      parent's re-render would slide the line, the pill and every bar end under the reader */
@@ -206,13 +210,13 @@ export const QcBirdsDrawer: React.FC<{
       data-qcv="bvd-tab"
       style={{ right: place.right, bottom: place.bottom }}
       onClick={onOpenDrawer}
-      aria-label={`Birds-eye view: ${counts.when.overdue} overdue, ${counts.when.upcoming} upcoming. Press B to open.`}
+      aria-label={`Birds-eye view: ${counts.when.overdue} past expected, ${counts.when.upcoming} upcoming. Press B to open.`}
       disabled={loading}
     >
       <span className="bvd-tab-img"><img src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" /></span>
       <span className="bvd-tab-t">
         <b>Birds-eye view</b>
-        <small><em>{counts.when.overdue}</em> OVERDUE · <em>{counts.when.upcoming}</em> UPCOMING</small>
+        <small><em>{counts.when.overdue}</em> PAST EXPECTED · <em>{counts.when.upcoming}</em> UPCOMING</small>
       </span>
       <span className="bvd-tab-go" aria-hidden="true">⤢</span>
     </button>
@@ -221,7 +225,7 @@ export const QcBirdsDrawer: React.FC<{
   const drawer = open ? (
     <>
       <div className={`bvd-dim${shown2 ? " is-in" : ""}`} data-qcv="bvd-dim" onClick={close} aria-hidden="true" />
-      <aside className={`bvd${shown2 ? " is-in" : ""}`} data-qcv="bvd" role="dialog" aria-modal="true" aria-labelledby="bvd-title">
+      <aside ref={asideRef} className={`bvd${shown2 ? " is-in" : ""}`} data-qcv="bvd" role="dialog" aria-modal="true" aria-labelledby="bvd-title">
         <header className="bvd-head" data-qcv="bvd-head" ref={headRef}>
           {/* ⚠️ INTERIM: the head is cut flat at both sides, so its sides are masked. When the uncut
               drawing arrives, the mask comes off (Nick, v126 §6). */}

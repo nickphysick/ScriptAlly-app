@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L4",
+  "where": "explainer → labels 48 (±1)",
+  "ok": true,
+  "detail": "48"
+ },
+ {
+  "lock": "L4",
+  "where": "BUILD label → cards 24 (±1)",
+  "ok": true,
+  "detail": "24"
+ },
+ {
+  "lock": "L4",
+  "where": "builder → navy band 96 (±1)",
+  "ok": true,
+  "detail": "96"
+ },
+ {
+  "lock": "L4",
+  "where": "both results rows were read (packages and pieces)",
+  "ok": true,
+  "detail": "[96,96]"
+ },
+ {
+  "lock": "L4",
+  "where": "top three → list panel 96 (±1), in both rows",
+  "ok": true,
+  "detail": "[96,96]"
+ },
+ {
+  "lock": "L4",
+  "where": "the status pill is 32 tall at 1512 (±1)",
+  "ok": true,
+  "detail": "32"
+ }
+]

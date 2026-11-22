@@ -14,6 +14,7 @@
  */
 import React, { useEffect, useState } from "react";
 import { workspaceSections } from "../../lib/workspaceNav";
+import { sidebarLabel } from "../../lib/workspaceShell";
 
 type Icons = Record<string, React.ReactNode>;
 
@@ -34,11 +35,11 @@ export const HandoffNav: React.FC = () => {
     <div className="ws-nav sf-appnav" aria-hidden="true" data-sf="appnav" {...{ inert: true }}>
       {sections.map((sec) => (
         <React.Fragment key={sec.id}>
-          <div className="ws-glabel">{sec.label}</div>
+          {sec.noHeading ? null : <div className="ws-glabel">{sec.label}</div>}
           {(sec.children ?? []).map((ch) => (
             <div key={ch.id} className={`ws-ni${ch.path === "/dashboard" ? " on" : ""}`}>
               <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id] ?? null}</span>
-              <span className="ws-lbl">{ch.label}</span>
+              <span className="ws-lbl">{sidebarLabel(ch)}</span>
             </div>
           ))}
         </React.Fragment>

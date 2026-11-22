@@ -12,17 +12,18 @@
  * ⚠️ NO AGENTS, NO SCORE: `pct` is null, and nothing shows a number.
  */
 import type { Agent } from "../types";
-import type { GapKey, HkModel } from "./contactHousekeeping";
+import { agencyNotKnown, type GapKey, type HkModel } from "./contactHousekeeping";
 import { isDoorClosed } from "./agentList";
 import { agentPrimary } from "./agentDisplay";
 
 /** points per detail, in points order (the drawer lists details in this order) */
-export const POINTS: Readonly<Record<GapKey, number>> = { reply: 6, materials: 5, genres: 4, wishlist: 3, reopen: 2 };
-export const POINTS_ORDER: readonly GapKey[] = ["reply", "materials", "genres", "wishlist", "reopen"];
+export const POINTS: Readonly<Record<GapKey, number>> = { reply: 6, materials: 5, genres: 4, wishlist: 3, reopen: 2, agency: 1 };
+export const POINTS_ORDER: readonly GapKey[] = ["reply", "materials", "genres", "wishlist", "reopen", "agency"];
 
 /** does a detail count for this agent? Every detail but the reopening date counts for every agent; that one only
  *  for an agent closed for now */
-export const appliesTo = (gap: GapKey, a: Agent): boolean => (gap === "reopen" ? isDoorClosed(a) : true);
+/* Add agent v1 — the agency counts only for a named agent with no agency, so no one else's health moves */
+export const appliesTo = (gap: GapKey, a: Agent): boolean => (gap === "reopen" ? isDoorClosed(a) : gap === "agency" ? agencyNotKnown(a) : true);
 
 /** the most one profile can hold: 18, or 20 for an agent closed for now */
 export const possibleFor = (a: Agent): number => POINTS_ORDER.reduce((s, g) => s + (appliesTo(g, a) ? POINTS[g] : 0), 0);

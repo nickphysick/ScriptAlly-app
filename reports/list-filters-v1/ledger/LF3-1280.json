@@ -1,0 +1,57 @@
+[
+ {
+  "name": "five labels and at least one segment",
+  "ok": true,
+  "got": "10"
+ },
+ {
+  "name": "seg queried: background = STAGE_COLOURS.queried.band",
+  "ok": true,
+  "got": "rgb(239, 230, 214) none"
+ },
+ {
+  "name": "seg partial: background = STAGE_COLOURS.partial.band",
+  "ok": true,
+  "got": "rgb(228, 235, 242) none"
+ },
+ {
+  "name": "seg full: background = STAGE_COLOURS.full.band",
+  "ok": true,
+  "got": "rgb(183, 201, 222) none"
+ },
+ {
+  "name": "seg offer: background = STAGE_COLOURS.offer.band under its sheen",
+  "ok": true,
+  "got": "rgb(239, 205, 201) linear-gradient(112deg, rgba(2"
+ },
+ {
+  "name": "seg closed: background = STAGE_COLOURS.closed.band",
+  "ok": true,
+  "got": "rgb(236, 234, 230) none"
+ },
+ {
+  "name": "label queried: background = STAGE_COLOURS.queried.band",
+  "ok": true,
+  "got": "rgb(239, 230, 214) none"
+ },
+ {
+  "name": "label partial: background = STAGE_COLOURS.partial.band",
+  "ok": true,
+  "got": "rgb(228, 235, 242) none"
+ },
+ {
+  "name": "label full: background = STAGE_COLOURS.full.band",
+  "ok": true,
+  "got": "rgb(183, 201, 222) none"
+ },
+ {
+  "name": "label offer: background = STAGE_COLOURS.offer.band under its sheen",
+  "ok": true,
+  "got": "rgb(239, 205, 201) linear-gradient(112deg, rgba(2"
+ },
+ {
+  "name": "label closed: background = STAGE_COLOURS.closed.band",
+  "ok": true,
+  "got": "rgb(236, 234, 230) none"
+ }
+]

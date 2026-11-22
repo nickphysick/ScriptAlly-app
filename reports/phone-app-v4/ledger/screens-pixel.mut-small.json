@@ -1,0 +1,1850 @@
+[
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 · text population",
+  "ok": true,
+  "detail": "59 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/dashboard @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Send\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 · targets",
+  "ok": false,
+  "detail": "button[see-all] \"See all 103\" 310×40 | button[closest-all] \"See all 70 in the Birds-eye vi\" 310×40 | button[fill-gaps] \"Fill in the gaps\" 310×40 | button[all-replies] \"See all replies\" 342×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/dashboard @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 ↓900 · text population",
+  "ok": true,
+  "detail": "61 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/dashboard @390x844 ↓900",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Send\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 ↓900 · targets",
+  "ok": false,
+  "detail": "button[see-all] \"See all 103\" 310×40 | button[closest-all] \"See all 70 in the Birds-eye vi\" 310×40 | button[fill-gaps] \"Fill in the gaps\" 310×40 | button[all-replies] \"See all replies\" 342×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/dashboard @390x844 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 ↓2200 · text population",
+  "ok": true,
+  "detail": "61 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/dashboard @390x844 ↓2200",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Send\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @390x844 ↓2200 · targets",
+  "ok": false,
+  "detail": "button[see-all] \"See all 103\" 310×40 | button[closest-all] \"See all 70 in the Birds-eye vi\" 310×40 | button[fill-gaps] \"Fill in the gaps\" 310×40 | button[all-replies] \"See all replies\" 342×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/dashboard @390x844 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/dashboard @390x844 · every text scales (population 55)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/dashboard @390x844 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/dashboard @390x844 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 · text population",
+  "ok": true,
+  "detail": "290 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/queries @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @390x844 · chip and group names (population 9)",
+  "ok": true,
+  "detail": "All 88, With you 23, With the agent 10, Gone quiet 37, Closed 18, With you, With the agent, Gone quiet, Closed"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 ↓900 · text population",
+  "ok": true,
+  "detail": "291 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/queries @390x844 ↓900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 ↓900 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @390x844 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 ↓2200 · text population",
+  "ok": true,
+  "detail": "291 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/queries @390x844 ↓2200",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @390x844 ↓2200 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @390x844 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/queries @390x844 · every text scales (population 286)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/queries @390x844 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/queries @390x844 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 · text population",
+  "ok": true,
+  "detail": "43 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/agents @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 · targets",
+  "ok": false,
+  "detail": "button[fit-card] \"Open Ingrid’s card\" 310×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/agents @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 ↓900 · text population",
+  "ok": true,
+  "detail": "44 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/agents @390x844 ↓900",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 ↓900 · targets",
+  "ok": false,
+  "detail": "button[fit-card] \"Open Ingrid’s card\" 310×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/agents @390x844 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 ↓2200 · text population",
+  "ok": true,
+  "detail": "44 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/agents @390x844 ↓2200",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @390x844 ↓2200 · targets",
+  "ok": false,
+  "detail": "button[fit-card] \"Open Ingrid’s card\" 310×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/agents @390x844 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/agents @390x844 · every text scales (population 39)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/agents @390x844 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/agents @390x844 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 · text population",
+  "ok": true,
+  "detail": "40 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/you @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 · targets",
+  "ok": false,
+  "detail": "button[full-picture] \"See the full picture\" 310×40 | button[open-wall] \"Open the wall\" 310×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/you @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 ↓900 · text population",
+  "ok": true,
+  "detail": "41 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/you @390x844 ↓900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 ↓900 · targets",
+  "ok": false,
+  "detail": "button[full-picture] \"See the full picture\" 310×40 | button[open-wall] \"Open the wall\" 310×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/you @390x844 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 ↓2200 · text population",
+  "ok": true,
+  "detail": "41 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/you @390x844 ↓2200",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @390x844 ↓2200 · targets",
+  "ok": false,
+  "detail": "button[full-picture] \"See the full picture\" 310×40 | button[open-wall] \"Open the wall\" 310×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/you @390x844 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/you @390x844 · every text scales (population 36)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/you @390x844 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/you @390x844 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds @390x844 · text population",
+  "ok": true,
+  "detail": "158 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "birds @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "birds @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-peek @390x844 · text population",
+  "ok": true,
+  "detail": "168 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "birds-peek @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Mark partial sent\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-peek @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-peek @390x844 · targets",
+  "ok": false,
+  "detail": "button[peek-open] \"Open this query\" 358×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "birds-peek @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-6m @390x844 · text population",
+  "ok": true,
+  "detail": "158 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "birds-6m @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-6m @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-6m @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "birds-6m @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "query-page @390x844 · text population",
+  "ok": true,
+  "detail": "9 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "query-page @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Record your answer\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "query-page @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "query-page @390x844 · targets",
+  "ok": false,
+  "detail": "button[edit] \"Edit query\" 358×40 | button[close-query] \"Close this query\" 358×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "query-page @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agent-sheet @390x844 · text population",
+  "ok": true,
+  "detail": "19 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "agent-sheet @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agent-sheet @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agent-sheet @390x844 · targets",
+  "ok": false,
+  "detail": "button[edit-agent] \"Edit details\" 358×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "agent-sheet @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agents-all @390x844 · text population",
+  "ok": true,
+  "detail": "170 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "agents-all @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agents-all @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agents-all @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "agents-all @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "tasks-page @390x844 · text population",
+  "ok": true,
+  "detail": "108 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "tasks-page @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "tasks-page @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "tasks-page @390x844 · targets",
+  "ok": false,
+  "detail": "button[fold] \"Show 52\" 310×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "tasks-page @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "search @390x844 · text population",
+  "ok": true,
+  "detail": "53 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "search @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "search @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "search @390x844 · targets",
+  "ok": false,
+  "detail": "button[scancel] \"Cancel\" 52×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "search @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log @390x844 · text population",
+  "ok": true,
+  "detail": "9 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log @390x844",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log @390x844 · targets",
+  "ok": false,
+  "detail": "button[plus-reply] \"An agent replied\" 175×40 | button[plus-note] \"Pin a note\" 175×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log @390x844 · every text scales (population 9)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log @390x844 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log @390x844 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-filled @390x844 · text population",
+  "ok": true,
+  "detail": "16 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-filled @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log query\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-filled @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-filled @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-filled @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log-filled @390x844 · every text scales (population 16)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log-filled @390x844 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log-filled @390x844 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-mats @390x844 · text population",
+  "ok": true,
+  "detail": "6 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-mats @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Done\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-mats @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-mats @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-mats @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-reply @390x844 · text population",
+  "ok": true,
+  "detail": "4 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-reply @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Done\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-reply @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-reply @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-reply @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-date @390x844 · text population",
+  "ok": true,
+  "detail": "6 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-date @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Done\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-date @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-date @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-date @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "reply-journey @390x844 · text population",
+  "ok": true,
+  "detail": "83 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "reply-journey @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Continue\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "reply-journey @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "reply-journey @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "reply-journey @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "add-agent @390x844 · text population",
+  "ok": true,
+  "detail": "11 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "add-agent @390x844",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Continue\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "add-agent @390x844 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "add-agent @390x844 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "add-agent @390x844 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 · text population",
+  "ok": true,
+  "detail": "59 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/dashboard @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Send\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 · targets",
+  "ok": false,
+  "detail": "button[see-all] \"See all 103\" 280×40 | button[closest-all] \"See all 70 in the Birds-eye vi\" 280×40 | button[fill-gaps] \"Fill in the gaps\" 280×40 | button[all-replies] \"See all replies\" 312×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/dashboard @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 ↓900 · text population",
+  "ok": true,
+  "detail": "61 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/dashboard @360x740 ↓900",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Send\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 ↓900 · targets",
+  "ok": false,
+  "detail": "button[see-all] \"See all 103\" 280×40 | button[closest-all] \"See all 70 in the Birds-eye vi\" 280×40 | button[fill-gaps] \"Fill in the gaps\" 280×40 | button[all-replies] \"See all replies\" 312×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/dashboard @360x740 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 ↓2200 · text population",
+  "ok": true,
+  "detail": "61 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/dashboard @360x740 ↓2200",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Send\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/dashboard @360x740 ↓2200 · targets",
+  "ok": false,
+  "detail": "button[see-all] \"See all 103\" 280×40 | button[closest-all] \"See all 70 in the Birds-eye vi\" 280×40 | button[fill-gaps] \"Fill in the gaps\" 280×40 | button[all-replies] \"See all replies\" 312×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/dashboard @360x740 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/dashboard @360x740 · every text scales (population 55)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/dashboard @360x740 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/dashboard @360x740 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 · text population",
+  "ok": true,
+  "detail": "290 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/queries @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @360x740 · chip and group names (population 9)",
+  "ok": true,
+  "detail": "All 88, With you 23, With the agent 10, Gone quiet 37, Closed 18, With you, With the agent, Gone quiet, Closed"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 ↓900 · text population",
+  "ok": true,
+  "detail": "291 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/queries @360x740 ↓900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 ↓900 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @360x740 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 ↓2200 · text population",
+  "ok": true,
+  "detail": "291 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/queries @360x740 ↓2200",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/queries @360x740 ↓2200 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/queries @360x740 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/queries @360x740 · every text scales (population 286)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/queries @360x740 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/queries @360x740 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 · text population",
+  "ok": true,
+  "detail": "43 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/agents @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 · targets",
+  "ok": false,
+  "detail": "button[fit-card] \"Open Ingrid’s card\" 280×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/agents @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 ↓900 · text population",
+  "ok": true,
+  "detail": "44 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/agents @360x740 ↓900",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 ↓900 · targets",
+  "ok": false,
+  "detail": "button[fit-card] \"Open Ingrid’s card\" 280×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/agents @360x740 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 ↓2200 · text population",
+  "ok": true,
+  "detail": "44 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/agents @360x740 ↓2200",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/agents @360x740 ↓2200 · targets",
+  "ok": false,
+  "detail": "button[fit-card] \"Open Ingrid’s card\" 280×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/agents @360x740 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/agents @360x740 · every text scales (population 39)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/agents @360x740 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/agents @360x740 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 · text population",
+  "ok": true,
+  "detail": "40 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/you @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 · targets",
+  "ok": false,
+  "detail": "button[full-picture] \"See the full picture\" 280×40 | button[open-wall] \"Open the wall\" 280×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/you @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 ↓900 · text population",
+  "ok": true,
+  "detail": "41 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/you @360x740 ↓900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 ↓900 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 ↓900 · targets",
+  "ok": false,
+  "detail": "button[full-picture] \"See the full picture\" 280×40 | button[open-wall] \"Open the wall\" 280×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/you @360x740 ↓900 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 ↓2200 · text population",
+  "ok": true,
+  "detail": "41 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "/you @360x740 ↓2200",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 ↓2200 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "/you @360x740 ↓2200 · targets",
+  "ok": false,
+  "detail": "button[full-picture] \"See the full picture\" 280×40 | button[open-wall] \"Open the wall\" 280×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "/you @360x740 ↓2200 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/you @360x740 · every text scales (population 36)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/you @360x740 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "/you @360x740 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds @360x740 · text population",
+  "ok": true,
+  "detail": "158 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "birds @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "birds @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-peek @360x740 · text population",
+  "ok": true,
+  "detail": "168 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "birds-peek @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Mark partial sent\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-peek @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-peek @360x740 · targets",
+  "ok": false,
+  "detail": "button[peek-open] \"Open this query\" 328×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "birds-peek @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-6m @360x740 · text population",
+  "ok": true,
+  "detail": "158 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "birds-6m @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-6m @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "birds-6m @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "birds-6m @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "query-page @360x740 · text population",
+  "ok": true,
+  "detail": "9 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "query-page @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Record your answer\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "query-page @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "query-page @360x740 · targets",
+  "ok": false,
+  "detail": "button[edit] \"Edit query\" 328×40 | button[close-query] \"Close this query\" 328×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "query-page @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agent-sheet @360x740 · text population",
+  "ok": true,
+  "detail": "19 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "agent-sheet @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log a query to Ingrid\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agent-sheet @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agent-sheet @360x740 · targets",
+  "ok": false,
+  "detail": "button[edit-agent] \"Edit details\" 328×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "agent-sheet @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agents-all @360x740 · text population",
+  "ok": true,
+  "detail": "170 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "agents-all @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agents-all @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "agents-all @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "agents-all @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "tasks-page @360x740 · text population",
+  "ok": true,
+  "detail": "108 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "tasks-page @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "tasks-page @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "tasks-page @360x740 · targets",
+  "ok": false,
+  "detail": "button[fold] \"Show 52\" 280×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "tasks-page @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "search @360x740 · text population",
+  "ok": true,
+  "detail": "53 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "search @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "search @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "search @360x740 · targets",
+  "ok": false,
+  "detail": "button[scancel] \"Cancel\" 52×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "search @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log @360x740 · text population",
+  "ok": true,
+  "detail": "9 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log @360x740",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log @360x740 · targets",
+  "ok": false,
+  "detail": "button[plus-reply] \"An agent replied\" 160×40 | button[plus-note] \"Pin a note\" 160×40"
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log @360x740 · every text scales (population 9)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log @360x740 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log @360x740 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-filled @360x740 · text population",
+  "ok": true,
+  "detail": "16 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-filled @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Log query\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-filled @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-filled @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-filled @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log-filled @360x740 · every text scales (population 16)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log-filled @360x740 · nothing clips at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-3",
+  "where": "quick-log-filled @360x740 · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-mats @360x740 · text population",
+  "ok": true,
+  "detail": "6 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-mats @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Done\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-mats @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-mats @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-mats @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-reply @360x740 · text population",
+  "ok": true,
+  "detail": "4 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-reply @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Done\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-reply @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-reply @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-reply @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-date @360x740 · text population",
+  "ok": true,
+  "detail": "6 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "quick-log-date @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Done\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-date @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "quick-log-date @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "quick-log-date @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "reply-journey @360x740 · text population",
+  "ok": true,
+  "detail": "83 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "reply-journey @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Continue\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "reply-journey @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "reply-journey @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "reply-journey @360x740 · words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "add-agent @360x740 · text population",
+  "ok": true,
+  "detail": "11 text elements"
+ },
+ {
+  "lock": "PA4-1",
+  "where": "add-agent @360x740",
+  "ok": true,
+  "detail": "[{\"h\":56,\"bg\":\"rgb(42, 58, 82)\",\"label\":\"Continue\"}]"
+ },
+ {
+  "lock": "PA4-2",
+  "where": "add-agent @360x740 · text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-2",
+  "where": "add-agent @360x740 · targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-9",
+  "where": "add-agent @360x740 · words",
+  "ok": true,
+  "detail": ""
+ }
+]

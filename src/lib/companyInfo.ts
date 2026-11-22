@@ -70,8 +70,9 @@ export const DELETION_WINDOW_DAYS = 30;
 
 /** The date the Terms state at the top of the band. */
 export const LEGAL_LAST_UPDATED = "31 Oct 2026";
-/** The privacy policy's own date: it changed on 2 Nov (privacy page v1), the Terms did not. */
-export const PRIVACY_LAST_UPDATED = "2 November 2026";
+/** The privacy policy's own date: it changed on 2 Nov (privacy page v1) and on 8 Nov (Sentry, crash
+ *  reporting v1); the Terms did not. */
+export const PRIVACY_LAST_UPDATED = "8 November 2026";
 
 /** The footer's strapline, under the hawk and the name (17 Sep). */
 export const FOOTER_TAGLINE =

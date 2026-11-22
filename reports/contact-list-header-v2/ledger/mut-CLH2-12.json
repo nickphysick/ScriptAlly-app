@@ -1,0 +1,62 @@
+[
+ {
+  "where": "1280 everything measured",
+  "ok": true,
+  "detail": "{\"h1\":306,\"art\":112,\"card\":408,\"rail\":112,\"ring\":927.875}"
+ },
+ {
+  "where": "1280 the h1 on the list card's left edge (±1)",
+  "ok": false,
+  "detail": "h1 306 card 408"
+ },
+ {
+  "where": "1280 List health's ring (recorded; v2.1 must not move it)",
+  "ok": true,
+  "detail": "ring 927.875"
+ },
+ {
+  "where": "1280 the Scout on the filter panel's left edge (±1)",
+  "ok": true,
+  "detail": "art 112 rail 112"
+ },
+ {
+  "where": "1512 everything measured",
+  "ok": true,
+  "detail": "{\"h1\":306,\"art\":112,\"card\":408,\"rail\":112,\"ring\":1159.875}"
+ },
+ {
+  "where": "1512 the h1 on the list card's left edge (±1)",
+  "ok": false,
+  "detail": "h1 306 card 408"
+ },
+ {
+  "where": "1512 List health's ring (recorded; v2.1 must not move it)",
+  "ok": true,
+  "detail": "ring 1159.875"
+ },
+ {
+  "where": "1512 the Scout on the filter panel's left edge (±1)",
+  "ok": true,
+  "detail": "art 112 rail 112"
+ },
+ {
+  "where": "1728 everything measured",
+  "ok": true,
+  "detail": "{\"h1\":306,\"art\":112,\"card\":408,\"rail\":112,\"ring\":1375.875}"
+ },
+ {
+  "where": "1728 the h1 on the list card's left edge (±1)",
+  "ok": false,
+  "detail": "h1 306 card 408"
+ },
+ {
+  "where": "1728 List health's ring (recorded; v2.1 must not move it)",
+  "ok": true,
+  "detail": "ring 1375.875"
+ },
+ {
+  "where": "1728 the Scout on the filter panel's left edge (±1)",
+  "ok": true,
+  "detail": "art 112 rail 112"
+ }
+]

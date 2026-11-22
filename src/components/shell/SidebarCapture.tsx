@@ -162,7 +162,9 @@ export const SidebarCapture: React.FC<SidebarCaptureProps> = ({ collapsed: colla
 
   const pick = (id: Row["id"]) => {
     if (id === "manuscript" && MANUSCRIPT_SOON) return;
-    close(false);
+    /* "Add an agent" opens the new-agent panel, which hands focus back to whatever had it when it opened: the menu's
+       trigger, so focus lands on a control that is still there rather than on a menu row that has gone */
+    close(id === "agent");
     if (onNavigate) runCaptureRow(id, onNavigate);
   };
 

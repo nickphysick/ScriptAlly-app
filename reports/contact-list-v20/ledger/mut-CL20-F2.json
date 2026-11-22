@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 switch to cards — a switch exists",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 a your-move card and a waiting card (population)",
+  "ok": true,
+  "detail": "{\"you\":{\"bg\":\"rgb(245, 226, 218)\",\"chip\":\"rgb(138, 64, 48)\"},\"wait\":{\"bg\":\"rgb(245, 226, 218)\",\"chip\":\"rgb(244, 238, 229)\"},\"n\":52}"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 your move: band rgb(245,226,218)",
+  "ok": true,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 your move: chip text rgb(138,64,48)",
+  "ok": true,
+  "detail": "rgb(138, 64, 48)"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 waiting: band unchanged (slate rgb(62,81,112))",
+  "ok": false,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1512 the agent panel's band is unchanged (slate)",
+  "ok": false,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 switch to cards — a switch exists",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 a your-move card and a waiting card (population)",
+  "ok": true,
+  "detail": "{\"you\":{\"bg\":\"rgb(245, 226, 218)\",\"chip\":\"rgb(138, 64, 48)\"},\"wait\":{\"bg\":\"rgb(245, 226, 218)\",\"chip\":\"rgb(244, 238, 229)\"},\"n\":52}"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 your move: band rgb(245,226,218)",
+  "ok": true,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 your move: chip text rgb(138,64,48)",
+  "ok": true,
+  "detail": "rgb(138, 64, 48)"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 waiting: band unchanged (slate rgb(62,81,112))",
+  "ok": false,
+  "detail": "rgb(245, 226, 218)"
+ },
+ {
+  "lock": "CL20-F2",
+  "where": "@1280 the agent panel's band is unchanged (slate)",
+  "ok": false,
+  "detail": "rgb(245, 226, 218)"
+ }
+]

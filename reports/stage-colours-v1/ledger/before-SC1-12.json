@@ -1,0 +1,52 @@
+[
+ {
+  "name": "current bars found: 70",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Queried: current segment rgb(239, 230, 214)",
+  "ok": false,
+  "got": "rgb(242, 235, 224)"
+ },
+ {
+  "name": "Full Sent: current segment rgb(183, 201, 222)",
+  "ok": false,
+  "got": "rgb(217, 225, 234)"
+ },
+ {
+  "name": "Partial Sent: current segment rgb(228, 235, 242)",
+  "ok": false,
+  "got": "rgb(236, 214, 210)"
+ },
+ {
+  "name": "Partial Requested: current segment rgb(228, 235, 242)",
+  "ok": false,
+  "got": "rgb(236, 214, 210)"
+ },
+ {
+  "name": "Revise & Resubmit: current segment rgb(183, 201, 222)",
+  "ok": false,
+  "got": "rgb(217, 225, 234)"
+ },
+ {
+  "name": "Full Requested: current segment rgb(183, 201, 222)",
+  "ok": false,
+  "got": "rgb(217, 225, 234)"
+ },
+ {
+  "name": "Offer: current segment rgb(142, 167, 198)",
+  "ok": false,
+  "got": "rgb(231, 214, 220)"
+ },
+ {
+  "name": "Offer: the sheen",
+  "ok": false,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested and Partial Sent segments are equal",
+  "ok": true,
+  "got": "rgb(236, 214, 210) / rgb(236, 214, 210)"
+ }
+]

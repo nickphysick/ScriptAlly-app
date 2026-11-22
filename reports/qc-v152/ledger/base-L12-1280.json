@@ -1,0 +1,31 @@
+[
+ {
+  "where": "population: the details view",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "no package control in the details view",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "an agent already queried for this manuscript is disabled, saying so",
+  "ok": false
+ },
+ {
+  "where": "population: an agent to move it to",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "This also changes: the history moves",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "This also changes: a reply-expected date when the new agent states a reply time",
+  "ok": false,
+  "detail": ""
+ }
+]

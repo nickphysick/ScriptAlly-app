@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L8-1280",
+  "where": "the founding strip is shown",
+  "ok": false,
+  "detail": "false"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…on one line (≤ 60 tall)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "…its text not cut",
+  "ok": false,
+  "detail": "null / null"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "the folder tab takes the strip's pink",
+  "ok": false,
+  "detail": "rgb(242, 238, 232)"
+ },
+ {
+  "lock": "L8-1280",
+  "where": "no pinned hawk",
+  "ok": true,
+  "detail": "false"
+ }
+]

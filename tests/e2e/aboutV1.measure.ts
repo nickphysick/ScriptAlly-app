@@ -169,7 +169,12 @@ test("A3 the bands alternate at desktop and put the copy first when stacked", as
   check(m.length === 3, `390: expected three vision bands, found ${m.length}`);
   m.forEach((b, i) => {
     check(b.ok, `390: band ${i + 1} lacks a plate or copy`);
-    check(b.copyBottom <= b.plateY + 1, `390: band ${i + 1}'s copy (to ${b.copyBottom.toFixed(1)}) is not above its plate (from ${b.plateY.toFixed(1)})`);
+    /* ⚠️ RE-POINTED (public pages on phones v1, Nick's pick 11B): at 390 each point is a white card
+       whose 64px illustration spot sits ABOVE the heading, as the board draws it — so the copy now
+       follows its plate. The law kept is the stacked one: plate and copy one above the other, never
+       side by side. The desktop alternation above is unchanged. */
+    check(b.plateY < b.copyY, `390: band ${i + 1}'s spot (from ${b.plateY.toFixed(1)}) is not above its copy (from ${b.copyY.toFixed(1)})`);
+    check(Math.abs(b.plateX - b.copyX) < 2, `390: band ${i + 1}'s spot (x ${b.plateX.toFixed(1)}) and copy (x ${b.copyX.toFixed(1)}) are not stacked`);
   });
 });
 
@@ -261,13 +266,19 @@ test("A6 four plates, each with a brief and a visible caption", async ({ page })
         slot: p.getAttribute("data-illo") ?? "",
         brief: (p.getAttribute("data-brief") ?? "").trim(),
         caption: (tag?.textContent ?? "").trim(),
+        label: p.getAttribute("aria-label") ?? "",
         visible: !!tb && tb.width > 0 && tb.height > 0 && cs?.visibility !== "hidden" && Number(cs?.opacity ?? 0) > 0,
       };
     }));
     check(r.length === 4, `${vp.width}: expected four plates, found ${r.length}`);
     for (const p of r) {
       check(p.brief.length > 0, `${vp.width}: plate "${p.slot}" has no data-brief`);
-      check(p.caption.length > 0 && p.visible, `${vp.width}: plate "${p.slot}"'s caption is not visible ("${p.caption}")`);
+      /* ⚠️ RE-POINTED (public pages on phones v1, 11B/12B): at a phone width each plate is a 64px (or
+         72px) round dashed spot with nothing drawn in it, so the caption is hidden there by design and
+         the plate's name is carried by its `aria-label` ("Illustration placeholder: …"), checked here
+         instead. Wider widths still show the caption. */
+      if (vp.width <= 760) check(p.caption.length > 0 && p.label.startsWith("Illustration placeholder:"), `${vp.width}: plate "${p.slot}" lost its name ("${p.label}")`);
+      else check(p.caption.length > 0 && p.visible, `${vp.width}: plate "${p.slot}"'s caption is not visible ("${p.caption}")`);
     }
   }
 });

@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "L1-1512",
+  "where": "population",
+  "ok": true,
+  "detail": "4 package rows"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "ground: the gradient",
+  "ok": true,
+  "detail": "url(\"http://127.0.0.1:4318/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229))"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "ground: the pattern over it",
+  "ok": true,
+  "detail": "url(\"http://127.0.0.1:4318/images/packages/packages-pattern.svg\"), linear-gradient(rgb(251, 249, 245), rgb(238, 235, 229"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "pattern at the Contact list's opacity",
+  "ok": true,
+  "detail": "packages 0.085 · contact 0.085"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk39=\"hd-card\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk38=\"labels\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk392=\"panel\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk39=\"tip\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk39=\"kicker\"]",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: .p8-bnr",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: .p9-ag3",
+  "ok": true,
+  "detail": "0 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk41=\"list\"]",
+  "ok": false,
+  "detail": "1 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk41=\"list-bar\"]",
+  "ok": false,
+  "detail": "1 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "retired: [data-pk41-tab]",
+  "ok": false,
+  "detail": "4 in the DOM"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "no BUILD, VIEW AND EDIT",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "no header art",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "no horizontal overflow (scroller)",
+  "ok": true,
+  "detail": "1256 > 1256"
+ },
+ {
+  "lock": "L1-1512",
+  "where": "no horizontal overflow (document)",
+  "ok": true,
+  "detail": "1512 > 1512"
+ }
+]

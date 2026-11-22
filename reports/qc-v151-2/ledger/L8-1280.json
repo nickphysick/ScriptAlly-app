@@ -1,0 +1,22 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "88"
+ },
+ {
+  "where": "every row 68 ±1",
+  "ok": true,
+  "detail": "[68]"
+ },
+ {
+  "where": "closed rows 68 ±1",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no tinted start",
+  "ok": true,
+  "detail": "[\"rgb(255, 255, 255)\"]"
+ }
+]

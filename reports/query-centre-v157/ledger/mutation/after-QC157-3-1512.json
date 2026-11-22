@@ -1,0 +1,122 @@
+[
+ {
+  "name": "Offer reached step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer cur step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer skip step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Partial Requested reached step: rgb(28, 19, 15)",
+  "ok": false,
+  "got": "rgb(95, 67, 61)"
+ },
+ {
+  "name": "Partial Requested cur step: rgb(28, 19, 15)",
+  "ok": false,
+  "got": "rgb(95, 67, 61)"
+ },
+ {
+  "name": "Partial Requested fut step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Revise & Resubmit reached step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Revise & Resubmit skip step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Revise & Resubmit cur step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Revise & Resubmit fut step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Full Requested reached step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Full Requested cur step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Full Requested fut step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Full Requested skip step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Queried cur step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Queried fut step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Partial Sent reached step: rgb(28, 19, 15)",
+  "ok": false,
+  "got": "rgb(95, 67, 61)"
+ },
+ {
+  "name": "Partial Sent cur step: rgb(28, 19, 15)",
+  "ok": false,
+  "got": "rgb(95, 67, 61)"
+ },
+ {
+  "name": "Partial Sent fut step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Full Sent reached step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Full Sent skip step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Full Sent cur step: rgb(28, 19, 15)",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Full Sent fut step: rgba(28, 19, 15, 0.42)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "reached and unreached steps both seen",
+  "ok": true,
+  "got": "Offer:reached Offer:cur Offer:skip Partial Requested:reached Partial Requested:cur Partial Requested:fut Revise & Resubmit:reached Revise & Resubmit:skip Revise & Resubmit:cur Revise & Resubmit:fut Full Requested:reached Full Requested:cur Full Requested:fut Full Requested:skip Queried:cur Queried:fut Partial Sent:reached Partial Sent:cur Partial Sent:fut Full Sent:reached Full Sent:skip Full Sent:cur Full Sent:fut"
+ }
+]

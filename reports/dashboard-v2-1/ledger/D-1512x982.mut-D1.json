@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "D1",
+  "where": "population: the three seeded events are in the feed",
+  "ok": true,
+  "detail": "{\"db21-q-req\":{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null},\"db21-q-offer\":{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null},\"db21-q-sent\":{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null}}"
+ },
+ {
+  "lock": "D1",
+  "where": "a full requested, not yet sent: the full card",
+  "ok": true,
+  "detail": "{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null}"
+ },
+ {
+  "lock": "D1",
+  "where": "an offer not yet answered: the full card",
+  "ok": true,
+  "detail": "{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null}"
+ },
+ {
+  "lock": "D1",
+  "where": "a full already sent: a collapsed row, a button, not expanded",
+  "ok": false,
+  "detail": "{\"big\":true,\"row\":false,\"exp\":null,\"fold\":null,\"foldExp\":null,\"sub\":null,\"tag\":null}"
+ },
+ {
+  "lock": "D1",
+  "where": "the collapsed row's sub-line names the agent",
+  "ok": false,
+  "detail": "null"
+ }
+]

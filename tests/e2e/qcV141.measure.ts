@@ -84,13 +84,13 @@ async function pickGroup(page: Page, g: string) {
 }
 
 /** the card's four counts, the hero's total, and which row is pressed */
+/* v149 (QC149 L13) — RE-POINTED: the breakdown card is gone; the four sets are the view chips above the list, and the total is the All chip's. The law is the same. */
 const card = (page: Page) => page.evaluate(() => {
-  const c = [...document.querySelectorAll<HTMLElement>("[data-qc141='card']")].find((e) => e.getBoundingClientRect().height > 0);
-  const t = [...document.querySelectorAll<HTMLElement>("[data-qc138='title-n']")].find((e) => e.getBoundingClientRect().height > 0);
-  if (!c) return null;
-  const n: Record<string, number> = {}; const on: string[] = [];
-  for (const r of c.querySelectorAll<HTMLElement>("[data-qc141='card-row']")) { n[r.dataset.k!] = Number(r.dataset.n); if (r.getAttribute("aria-pressed") === "true") on.push(r.dataset.k!); }
-  return { n, on, total: t ? Number(t.textContent) : NaN };
+  const chips = [...document.querySelectorAll<HTMLElement>("[data-qc149='view']")].filter((e) => e.getBoundingClientRect().height > 0);
+  if (!chips.length) return null;
+  const n: Record<string, number> = {}; const on: string[] = []; let total = NaN;
+  for (const r of chips) { if (r.dataset.k === "all") { total = Number(r.dataset.n); continue; } n[r.dataset.k!] = Number(r.dataset.n); if (r.getAttribute("aria-pressed") === "true") on.push(r.dataset.k!); }
+  return { n, on, total };
 });
 const band = (page: Page) => page.evaluate(() => {
   const b = [...document.querySelectorAll<HTMLElement>("[data-qc140='band']")].find((e) => e.getBoundingClientRect().height > 0);
@@ -116,8 +116,6 @@ const setOf = (r: { court: string; status: string; due: number | null; from?: nu
   return r.from != null && (now - r.from) / DAYMS > 84 ? "quiet" : "agent";
 };
 const chipN = (page: Page) => page.evaluate(() => Number([...document.querySelectorAll<HTMLElement>("[data-qc140='filters']")].find((e) => e.getBoundingClientRect().height > 0)?.dataset.n ?? NaN));
-/** an svg's drawing with its data attributes stripped, so a lock compares the marks and not their labels */
-const drawing = (svg: string) => svg.replace(/\sdata-[a-z0-9-]+="[^"]*"/g, "").replace(/\sclass="[^"]*"/g, "");
 const intersects = (a: DOMRectLike, b: DOMRectLike) => a.width > 0 && b.width > 0 && a.left < b.right - 0.5 && b.left < a.right - 0.5 && a.top < b.bottom - 0.5 && b.top < a.bottom - 0.5;
 type DOMRectLike = { left: number; right: number; top: number; bottom: number; width: number; height: number };
 
@@ -154,7 +152,7 @@ test.describe("Query Centre v141", () => {
       L.check("L2", `${vp.width} population`, all.length > 0 && !!c, `${all.length} rows`);
       const seen = new Map<string, string[]>();
       for (const k of KEYS) {
-        await press(page, `[data-qc141='card-row'][data-k='${k}']`);
+        await press(page, `[data-qc149='view'][data-k='${k}']`);
         await page.waitForTimeout(700);
         const shown = await rows(page);
         for (const r of shown) seen.set(r.id, [...(seen.get(r.id) ?? []), k]);
@@ -162,7 +160,7 @@ test.describe("Query Centre v141", () => {
         L.check("L2", `${vp.width} ${k}: the filter shows exactly the rows' own set`, JSON.stringify(shown.map((r) => r.id).sort()) === JSON.stringify(want),
           `${shown.length} shown vs ${want.length} from the rows`);
         L.check("L2", `${vp.width} ${k}: its count is the card's`, c?.n[k] === want.length, `${c?.n[k]} vs ${want.length}`);
-        await press(page, `[data-qc141='card-row'][data-k='${k}']`);
+        await press(page, `[data-qc149='view'][data-k='${k}']`);
         await page.waitForTimeout(500);
       }
       const multi = [...seen].filter(([, ks]) => ks.length !== 1);
@@ -181,7 +179,7 @@ test.describe("Query Centre v141", () => {
       const all = await rows(page);
       const want = all.filter((r) => setOf(r, now) === "quiet").map((r) => r.id).sort();
       L.check("L3", `${vp.width} population`, want.length > 0, `${want.length} gone quiet`);
-      await press(page, "[data-qc141='card-row'][data-k='quiet']");
+      await press(page, "[data-qc149='view'][data-k='quiet']");
       await page.waitForTimeout(800);
       const shown = (await rows(page)).map((r) => r.id).sort();
       L.check("L3", `${vp.width} (a) the list is exactly that set`, JSON.stringify(shown) === JSON.stringify(want), `${shown.length} vs ${want.length}`);
@@ -211,7 +209,7 @@ test.describe("Query Centre v141", () => {
       await open(page, vp);
       const c = await card(page);
       L.check("L4", `${vp.width} population`, (c?.n.quiet ?? 0) > 0 && (c?.n.quiet ?? 0) < (c?.total ?? 0), JSON.stringify(c));
-      await press(page, "[data-qc141='card-row'][data-k='quiet']");
+      await press(page, "[data-qc149='view'][data-k='quiet']");
       await page.waitForTimeout(700);
       await press(page, `${G} [data-qc140='filters']`);
       await page.waitForTimeout(700);
@@ -248,59 +246,9 @@ test.describe("Query Centre v141", () => {
     L.done(8);
   });
 
-  test("L6 · glyphs: Status — a glyph and a badge on every button, no two drawings alike; Package — no svg anywhere in the row or its menu", async ({ page }) => {
-    test.setTimeout(240_000);
-    const L = new Ledger("L6");
-    for (const vp of SIZES) {
-      await open(page, vp, { group: "status" });
-      const s = await page.evaluate(() => {
-        const nav = [...document.querySelectorAll<HTMLElement>("[data-qc140='jump']")].find((e) => e.getBoundingClientRect().height > 0)!;
-        return { mode: nav.dataset.mode, btns: [...nav.querySelectorAll<HTMLElement>("[data-qc140='jump-btn']")].map((b) => ({ k: b.dataset.gkey, svg: b.querySelector("svg")?.outerHTML ?? "", img: !!b.querySelector("img"), badge: b.querySelector("[data-qc141='jump-badge']")?.textContent ?? "" })) };
-      });
-      L.check("L6", `${vp.width} population`, s.mode === "glyph" && s.btns.length >= 3, `${s.mode} · ${s.btns.length}`);
-      L.check("L6", `${vp.width} Status: every button has a glyph and a badge`, s.btns.every((b) => (b.svg || b.img) && /^\d+$/.test(b.badge)), s.btns.map((b) => `${b.k}:${b.svg ? "svg" : b.img ? "img" : "-"}:${b.badge}`).join(" "));
-      const drawings = s.btns.map((b) => drawing(b.svg));
-      const dup = drawings.filter((d, i) => drawings.indexOf(d) !== i);
-      L.check("L6", `${vp.width} Status: no two glyphs alike`, dup.length === 0, `${dup.length} duplicate(s) among ${s.btns.map((b) => b.k).join(", ")}`);
-      L.check("L6", `${vp.width} No response and Passed both drawn`, s.btns.some((b) => b.k === "No Response") && s.btns.some((b) => b.k === "Rejected"), s.btns.map((b) => b.k).join(", "));
-      await pickGroup(page, "package");
-      const p = await page.evaluate(() => {
-        const nav = [...document.querySelectorAll<HTMLElement>("[data-qc140='jump']")].find((e) => e.getBoundingClientRect().height > 0)!;
-        return { mode: nav.dataset.mode, n: nav.querySelectorAll("[data-qc140='jump-btn']").length, svgs: [...nav.querySelectorAll<HTMLElement>("[data-qc140='jump-btn']")].reduce((a, b) => a + b.querySelectorAll("svg").length, 0) };
-      });
-      L.check("L6", `${vp.width} Package population`, p.mode === "name" && p.n > 1, JSON.stringify(p));
-      L.check("L6", `${vp.width} Package: no svg in any button`, p.svgs === 0, `${p.svgs}`);
-      if (await press(page, `${G} [data-qc140='jump-more']:not([hidden])`)) {
-        await page.waitForTimeout(500);
-        const m = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='jump-item']")].map((r) => r.querySelectorAll("svg").length));
-        L.check("L6", `${vp.width} Package menu population`, m.length > 0, `${m.length}`);
-        L.check("L6", `${vp.width} Package: no svg in any menu row`, m.every((x) => x === 0), JSON.stringify(m));
-        await page.keyboard.press("Escape");
-      } else L.check("L6", `${vp.width} Package menu population`, false, "no +N more");
-    }
-    L.done(16);
-  });
+  /* RETIRED (navy-bar-address-book v1): L6 · glyphs — its subject was the jump row's glyph buttons and "+N more" menu, retired in both modes. */
 
-  test("L7 · menu: in Package and Next action, no row's glyph or badge reaches its name", async ({ page }) => {
-    test.setTimeout(240_000);
-    const L = new Ledger("L7");
-    for (const vp of SIZES) for (const g of ["package", "action"]) {
-      await open(page, vp, { group: g });
-      const opened = await press(page, `${G} [data-qc140='jump-more']:not([hidden])`);
-      await page.waitForTimeout(500);
-      const m = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc140='jump-item']")].map((r) => {
-        const rect = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { left: b.left, right: b.right, top: b.top, bottom: b.bottom, width: b.width, height: b.height }; };
-        const mark = r.querySelector("[data-qc141='menu-mark'] [data-qc140='jump-mark']");
-        return { name: rect(r.querySelector("[data-qc141='menu-name']")), mark: rect(mark), badge: rect(r.querySelector("[data-qc141='menu-mark'] .qc140-jbd")), text: r.innerText.replace(/\s+/g, " ") };
-      }));
-      L.check("L7", `${vp.width} ${g} population`, opened && m.length > 0 && m.every((x) => x.name), `${m.length} rows`);
-      if (g === "action") L.check("L7", `${vp.width} action: rows with a glyph and a badge exist`, m.some((x) => x.mark && x.badge), m.map((x) => `${x.text}:${x.mark ? "g" : "-"}${x.badge ? "b" : ""}`).join(" "));
-      const bad = m.filter((x) => (x.mark && intersects(x.mark, x.name!)) || (x.badge && intersects(x.badge, x.name!)));
-      L.check("L7", `${vp.width} ${g}: no glyph or badge meets its name`, bad.length === 0, bad.map((x) => `${x.text} mark ${Math.round(x.mark?.right ?? 0)}/badge ${Math.round(x.badge?.right ?? 0)} vs name ${Math.round(x.name!.left)}`).join(" ‖ "));
-      await page.keyboard.press("Escape");
-    }
-    L.done(10);
-  });
+  /* RETIRED (navy-bar-address-book v1): L7 · menu — the "+N more" menu is retired with the jump row. */
 
   test("L8 · band fit: pinned, no two of the band's children overlap, and no two of the breakdown's sets", async ({ page }) => {
     test.setTimeout(240_000);
@@ -337,7 +285,9 @@ test.describe("Query Centre v141", () => {
     L.done(10);
   });
 
-  test("L9 · header: the card's width and right inset are the H6 tokens; it is no taller than the stack", async ({ page }) => {
+  /* RETIRED (v149, QC149 L13): the breakdown card this measured is gone — the Query Centre's header is the shared
+     PageHeaderCard, held to the Versions card by QC149-L1 and to the view row's edges by QC149-L2. */
+  test.skip("L9 · header: the card's width and right inset are the H6 tokens; it is no taller than the stack", async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger("L9");
     for (const vp of SIZES) {

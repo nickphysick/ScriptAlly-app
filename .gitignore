@@ -10,6 +10,8 @@ coverage/
 # web config is not a secret (it ships to every browser).
 .env
 .env*.local
+# Crash reporting v1: the Sentry auth token for source-map upload (Phase 4). A secret; never commit it.
+.env.sentry-build-plugin
 
 # ── Playwright (real-browser measurement; local only, never CI yet) ──
 # ⚠️ THESE GO IN BEFORE THE TOOL IS INSTALLED, not after. `storageState` is a LOGGED-IN SESSION
@@ -62,3 +64,6 @@ dist-emu/
 # and Nick's own photos with their truth (never committed).
 functions/eval/fixtures/photos/
 functions/eval/fixtures/photos-real/
+
+# Consistency fixes v1 — local screenshots and the review page show a copy of live data; never committed
+audits/consistency-fixes-v1/local/

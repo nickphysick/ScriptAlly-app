@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"card\":true,\"artBg\":\"rgb(247, 227, 218)\",\"artW\":130,\"img\":true,\"heading\":\"22 queries need you this week\",\"pills\":6,\"pillDots\":6,\"late\":[\"rgb(248, 227, 219)\",\"rgb(248, 227, 219)\",\"rgb(248, 227, 219)\"],\"ok\":[\"rgb(243, 239, 232)\",\"rgb(243, 239, 232)\",\"rgb(243, 239, 232)\"],\"l\":0,\"r\":0,\"you\":22}"
+ },
+ {
+  "where": "drawing panel",
+  "ok": true,
+  "detail": "rgb(247, 227, 218) 130 img true"
+ },
+ {
+  "where": "heading",
+  "ok": true,
+  "detail": "22 queries need you this week"
+ },
+ {
+  "where": "N is the Your move set",
+  "ok": true,
+  "detail": "22 queries need you this week · you 22"
+ },
+ {
+  "where": "pills, each with a StatusDot",
+  "ok": true,
+  "detail": "6/6"
+ },
+ {
+  "where": "pill fills",
+  "ok": true,
+  "detail": "[[\"rgb(243, 239, 232)\",\"rgb(243, 239, 232)\",\"rgb(243, 239, 232)\"],[\"rgb(248, 227, 219)\",\"rgb(248, 227, 219)\",\"rgb(248, 227, 219)\"]]"
+ },
+ {
+  "where": "edges are the content's ±1",
+  "ok": true,
+  "detail": "0 0"
+ }
+]

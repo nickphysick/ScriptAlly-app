@@ -1,0 +1,107 @@
+[
+ {
+  "name": "a population: tiles, stage labels and date switches to press (sent pills when the book has packages)",
+  "ok": true,
+  "got": "tile:you:24 tile:over:45 tile:wait:9 tile:offers:2 stage:queried:38 stage:partial:14 stage:full:16 stage:offer:2 stage:closed:18 sent:msv12-pkg-2:2 sent:msv12-pkg-1:4 sent:seed-pkg-2:2 sent:cv25-pkg-light:5 sent:cv25-pkg-orig:5 sent:seed-pkg-3:2 sent:seed-pkg-1:4 sent:none:55 switch:missing:55 switch:overYear:2"
+ },
+ {
+  "name": "tile you: the list shows its count",
+  "ok": true,
+  "got": "24 vs 24"
+ },
+ {
+  "name": "tile over: the list shows its count",
+  "ok": true,
+  "got": "45 vs 45"
+ },
+ {
+  "name": "tile wait: the list shows its count",
+  "ok": true,
+  "got": "9 vs 9"
+ },
+ {
+  "name": "tile offers: the list shows its count",
+  "ok": true,
+  "got": "2 vs 2"
+ },
+ {
+  "name": "stage queried: the list shows its count",
+  "ok": true,
+  "got": "38 vs 38"
+ },
+ {
+  "name": "stage partial: the list shows its count",
+  "ok": true,
+  "got": "14 vs 14"
+ },
+ {
+  "name": "stage full: the list shows its count",
+  "ok": true,
+  "got": "16 vs 16"
+ },
+ {
+  "name": "stage offer: the list shows its count",
+  "ok": true,
+  "got": "2 vs 2"
+ },
+ {
+  "name": "stage closed: the list shows its count",
+  "ok": true,
+  "got": "18 vs 18"
+ },
+ {
+  "name": "sent msv12-pkg-2: the list shows its count",
+  "ok": true,
+  "got": "2 vs 2"
+ },
+ {
+  "name": "sent msv12-pkg-1: the list shows its count",
+  "ok": true,
+  "got": "4 vs 4"
+ },
+ {
+  "name": "sent seed-pkg-2: the list shows its count",
+  "ok": true,
+  "got": "2 vs 2"
+ },
+ {
+  "name": "sent cv25-pkg-light: the list shows its count",
+  "ok": true,
+  "got": "5 vs 5"
+ },
+ {
+  "name": "sent cv25-pkg-orig: the list shows its count",
+  "ok": true,
+  "got": "5 vs 5"
+ },
+ {
+  "name": "sent seed-pkg-3: the list shows its count",
+  "ok": true,
+  "got": "2 vs 2"
+ },
+ {
+  "name": "sent seed-pkg-1: the list shows its count",
+  "ok": true,
+  "got": "4 vs 4"
+ },
+ {
+  "name": "sent none: the list shows its count",
+  "ok": true,
+  "got": "55 vs 55"
+ },
+ {
+  "name": "switch missing: the list shows its count",
+  "ok": true,
+  "got": "55 vs 55"
+ },
+ {
+  "name": "switch overYear: the list shows its count",
+  "ok": true,
+  "got": "2 vs 2"
+ },
+ {
+  "name": "after each, the whole list is back",
+  "ok": true,
+  "got": "88 of 88"
+ }
+]

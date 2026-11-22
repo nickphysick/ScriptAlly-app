@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "B2",
+  "where": "1512 population",
+  "ok": true,
+  "detail": "heads 4"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 headings in the order Your move, Querying, Not queried, Closed",
+  "ok": true,
+  "detail": "you,agent,none,closed"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 every row's disc is its group's set",
+  "ok": true,
+  "detail": "0 mismatched"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 Replies in and Added shown",
+  "ok": true,
+  "detail": "{\"replies\":true,\"added\":true}"
+ },
+ {
+  "lock": "B2",
+  "where": "1512 the toolbar is one line",
+  "ok": true,
+  "detail": "centres 587.8,587.8,587.8,587.8,587.8,587.8 bar 52"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 population",
+  "ok": true,
+  "detail": "heads 4"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 headings in the order Your move, Querying, Not queried, Closed",
+  "ok": true,
+  "detail": "you,agent,none,closed"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 every row's disc is its group's set",
+  "ok": true,
+  "detail": "0 mismatched"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 Replies in and Added hidden",
+  "ok": true,
+  "detail": "{\"replies\":false,\"added\":false}"
+ },
+ {
+  "lock": "B2",
+  "where": "1280 the toolbar is one line",
+  "ok": true,
+  "detail": "centres 604.8,604.8,604.8,604.8,604.8,604.8 bar 52"
+ }
+]

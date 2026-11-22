@@ -1,0 +1,67 @@
+[
+ {
+  "where": "offertold · Offer: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "offertold · Offer: exactly one quote, the right words",
+  "ok": true,
+  "detail": "[\"“I’d love to represent this book.”\"]"
+ },
+ {
+  "where": "passed · Rejected: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "passed · Rejected: exactly one quote, the right words",
+  "ok": true,
+  "detail": "[\"“Beautifully written, but I didn’t fall for it quite enough.”\"]"
+ },
+ {
+  "where": "rr · Revise & Resubmit: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rr · Revise & Resubmit: exactly one quote, the right words",
+  "ok": true,
+  "detail": "[\"“Loved the voice. The middle sags; tighten the second act and I’d read it again.”\"]"
+ },
+ {
+  "where": "rr · Full Requested: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rr · Full Requested: no quote",
+  "ok": false,
+  "detail": "[\"“”\"]"
+ },
+ {
+  "where": "long · Partial Requested: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "long · Partial Requested: no quote",
+  "ok": false,
+  "detail": "[\"“”\"]"
+ },
+ {
+  "where": "materials · Partial Requested: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "materials · Partial Requested: no quote",
+  "ok": false,
+  "detail": "[\"“”\"]"
+ },
+ {
+  "where": "no quote on your side",
+  "ok": true,
+  "detail": "0"
+ }
+]

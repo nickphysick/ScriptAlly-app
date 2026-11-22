@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"h\":true,\"bg\":\"rgb(255, 255, 255)\",\"tBg\":\"rgb(28, 19, 15)\",\"tFg\":\"rgb(244, 238, 229)\",\"mo\":[\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\",\"rgb(28, 19, 15)\"]}"
+ },
+ {
+  "where": "the date header navy",
+  "ok": false,
+  "detail": "rgb(255, 255, 255)"
+ },
+ {
+  "where": "TODAY white with navy text",
+  "ok": false,
+  "detail": "rgb(28, 19, 15) rgb(244, 238, 229)"
+ },
+ {
+  "where": "month names white",
+  "ok": false,
+  "detail": "[\"rgb(28, 19, 15)\"]"
+ },
+ {
+  "where": "load: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":1112.390625,\"tag\":1111.953125,\"inView\":true}"
+ },
+ {
+  "where": "drag: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":942.59375,\"tag\":942.953125,\"inView\":true}"
+ },
+ {
+  "where": "zoom 6w: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":831.28125,\"tag\":831.5625,\"inView\":true}"
+ },
+ {
+  "where": "zoom 6m: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":990.296875,\"tag\":989.96875,\"inView\":true}"
+ },
+ {
+  "where": "zoom 3m: today's line on the TODAY tag ±1",
+  "ok": true,
+  "detail": "{\"line\":942.59375,\"tag\":942.953125,\"inView\":true}"
+ }
+]

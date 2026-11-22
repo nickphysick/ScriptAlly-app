@@ -1,0 +1,37 @@
+[
+ {
+  "where": "Update: · moves 1 query’s dates",
+  "ok": true,
+  "detail": "response time · moves 1 query’s dates"
+ },
+ {
+  "where": "the retired nudge count is gone",
+  "ok": true,
+  "detail": "response time · moves 1 query’s dates"
+ },
+ {
+  "where": "Keep: · 1 query keeps its dates",
+  "ok": true,
+  "detail": "response time · 1 query keeps its dates"
+ },
+ {
+  "where": "Closed, left open: · 1 query stays open · moves 1 query’s dates",
+  "ok": true,
+  "detail": "response time, taking queries · 1 query stays open · moves 1 query’s dates"
+ },
+ {
+  "where": "Close it as no reply: · closes 1 query as no reply, and the dates no longer move",
+  "ok": true,
+  "detail": "response time, taking queries · closes 1 query as no reply"
+ },
+ {
+  "where": "…and the response-time offer stands down with the mock's line",
+  "ok": true,
+  "detail": "rt offer gone"
+ },
+ {
+  "where": "the line is visible in the navy bar",
+  "ok": true,
+  "detail": "visible"
+ }
+]

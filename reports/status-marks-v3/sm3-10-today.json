@@ -1,0 +1,196 @@
+{
+ "seed-query-12": {
+  "status": "Offer",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><path d=\"M12.00 2.40A2.78 2.78 0 0 1 16.80 3.69A2.78 2.78 0 0 1 20.31 7.20A2.78 2.78 0 0 1 21.60 12.00A2.78 2.78 0 0 1 20.31 16.80A2.78 2.78 0 0 1 16.80 20.31A2.78 2.78 0 0 1 12.00 21.60A2.78 2.78 0 0 1 7.20 20.31A2.78 2.78 0 0 1 3.69 16.80A2.78 2.78 0 0 1 2.40 12.00A2.78 2.78 0 0 1 3.69 7.20A2.78 2.78 0 0 1 7.20 3.69A2.78 2.78 0 0 1 12.00 2.40ZM12.00 6.70L13.41 10.36L17.33 10.57L14.28 13.04L15.29 16.83L12.00 14.70L8.71 16.83L9.72 13.04L6.67 10.57L10.59 10.36Z\" fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Offer</span>",
+  "circles": 0,
+  "paths": [
+   "M12.00 2.40A2.78 2.78 0 0 1 16.80 3.69A2.78 2.78 0 0 1 20.31 7.20A2.78 2.78 0 0 1 21.60 12.00A2.78 2.78 0 0 1 20.31 16.80A2.78 2.78 0 0 1 16.80 20.31A2.78 2.78 0 0 1 12.00 21.60A2.78 2.78 0 0 1 7.20 20.31A2.78 2.78 0 0 1 3.69 16.80A2.78 2.78 0 0 1 2.40 12.00A2.78 2.78 0 0 1 3.69 7.20A2.78 2.78 0 0 1 7.20 3.69A2.78 2.78 0 0 1 12.00 2.40ZM12.00 6.70L13.41 10.36L17.33 10.57L14.28 13.04L15.29 16.83L12.00 14.70L8.71 16.83L9.72 13.04L6.67 10.57L10.59 10.36Z"
+  ]
+ },
+ "cv25-q-08": {
+  "status": "Offer",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><path d=\"M12.00 2.40A2.78 2.78 0 0 1 16.80 3.69A2.78 2.78 0 0 1 20.31 7.20A2.78 2.78 0 0 1 21.60 12.00A2.78 2.78 0 0 1 20.31 16.80A2.78 2.78 0 0 1 16.80 20.31A2.78 2.78 0 0 1 12.00 21.60A2.78 2.78 0 0 1 7.20 20.31A2.78 2.78 0 0 1 3.69 16.80A2.78 2.78 0 0 1 2.40 12.00A2.78 2.78 0 0 1 3.69 7.20A2.78 2.78 0 0 1 7.20 3.69A2.78 2.78 0 0 1 12.00 2.40ZM12.00 6.70L13.41 10.36L17.33 10.57L14.28 13.04L15.29 16.83L12.00 14.70L8.71 16.83L9.72 13.04L6.67 10.57L10.59 10.36Z\" fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Offer</span>",
+  "circles": 0,
+  "paths": [
+   "M12.00 2.40A2.78 2.78 0 0 1 16.80 3.69A2.78 2.78 0 0 1 20.31 7.20A2.78 2.78 0 0 1 21.60 12.00A2.78 2.78 0 0 1 20.31 16.80A2.78 2.78 0 0 1 16.80 20.31A2.78 2.78 0 0 1 12.00 21.60A2.78 2.78 0 0 1 7.20 20.31A2.78 2.78 0 0 1 3.69 16.80A2.78 2.78 0 0 1 2.40 12.00A2.78 2.78 0 0 1 3.69 7.20A2.78 2.78 0 0 1 7.20 3.69A2.78 2.78 0 0 1 12.00 2.40ZM12.00 6.70L13.41 10.36L17.33 10.57L14.28 13.04L15.29 16.83L12.00 14.70L8.71 16.83L9.72 13.04L6.67 10.57L10.59 10.36Z"
+  ]
+ },
+ "seed-query-7": {
+  "status": "Partial Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial requested</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "seed-query-11": {
+  "status": "Revise & Resubmit",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Revise &amp; resubmit</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "seed-query-9": {
+  "status": "Full Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full requested</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "cv25-q-06": {
+  "status": "Partial Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial requested</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "seed-query-20": {
+  "status": "Partial Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial requested</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "msv12-q-3": {
+  "status": "Partial Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial requested</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "rj-send": {
+  "status": "Full Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full requested</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "cv25-q-09": {
+  "status": "Full Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full requested</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "cor-move-a": {
+  "status": "Partial Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial requested</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "cv25-q-07": {
+  "status": "Partial Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial requested</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "seed-pkgq-3": {
+  "status": "Full Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full requested</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "seed-cal-passed865-q": {
+  "status": "Full Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full requested</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "msv12-q-4": {
+  "status": "Full Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full requested</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "rj-dupe": {
+  "status": "Full Requested",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--in\" data-qc153=\"arrow\" data-dir=\"in\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.5 3.5 4 12M4 5.5V12h6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full requested</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "seed-query-2": {
+  "status": "Queried",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Queried</span>",
+  "circles": 1,
+  "paths": []
+ },
+ "thin-q-gap-solo": {
+  "status": "Partial Sent",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial sent</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "cor-pair": {
+  "status": "Partial Sent",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial sent</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "seed-query-23": {
+  "status": "Partial Sent",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial sent</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "seed-query-8": {
+  "status": "Partial Sent",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial sent</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "seed-pkgq-4": {
+  "status": "Partial Sent",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z\" fill=\"currentColor\" stroke=\"none\"></path></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Partial sent</span>",
+  "circles": 1,
+  "paths": [
+   "M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z"
+  ]
+ },
+ "probe-goalstress-today": {
+  "status": "Queried",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Queried</span>",
+  "circles": 1,
+  "paths": []
+ },
+ "qc150l9-q": {
+  "status": "Full Sent",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Full sent</span>",
+  "circles": 2,
+  "paths": []
+ },
+ "probe-un-both": {
+  "status": "Queried",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Queried</span>",
+  "circles": 1,
+  "paths": []
+ },
+ "probe-un-noagent": {
+  "status": "Queried",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Queried</span>",
+  "circles": 1,
+  "paths": []
+ },
+ "cv25-q-14": {
+  "status": "Queried",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Queried</span>",
+  "circles": 1,
+  "paths": []
+ },
+ "cv25-q-13": {
+  "status": "Queried",
+  "html": "<span aria-hidden=\"true\" style=\"width: 12px; height: 12px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\" style=\"display: block;\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle></svg></span><b class=\"qc153-arw qc153-arw--out\" data-qc153=\"arrow\" data-dir=\"out\" aria-hidden=\"true\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 12.5 12 4M5.5 4H12v6.5\"></path></svg></b><span class=\"qc154-thl\" data-qc154=\"track-label\" aria-hidden=\"true\">Queried</span>",
+  "circles": 1,
+  "paths": []
+ }
+}

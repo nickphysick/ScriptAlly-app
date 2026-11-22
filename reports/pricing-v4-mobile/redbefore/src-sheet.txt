@@ -1,0 +1,166 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.6s)
+PVM-6 @390 scroll 0 → 600
+PVM-6 @390 lit [1,3,6,12] want 12 plansTop 70.3
+  ✘  2 [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @390: the sheet is modal, Escape returns focus, and the result lights exactly one tile (2.8s)
+PVM-6 @375 scroll 0 → 600
+PVM-6 @375 lit [1,3,6,12] want 12 plansTop 70.2
+  ✘  3 [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @375: the sheet is modal, Escape returns focus, and the result lights exactly one tile (2.8s)
+
+
+  1) [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @390: the sheet is modal, Escape returns focus, and the result lights exactly one tile 
+
+    Error: Tab never takes focus out of the sheet
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 15
+
+      256 |     for (let i = 0; i < 12; i++) { await page.keyboard.press("Tab"); if (!(await inSheet())) escaped++; }
+      257 |     for (let i = 0; i < 6; i++) { await page.keyboard.press("Shift+Tab"); if (!(await inSheet())) escaped++; }
+    > 258 |     expect.soft(escaped, "Tab never takes focus out of the sheet").toBe(0);
+          |                                                                    ^
+      259 |     /* The page behind does not scroll. */
+      260 |     const y0 = await page.evaluate(() => window.scrollY);
+      261 |     await page.mouse.move(vp.width / 2, 40);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:258:68
+
+    Error: the page behind did not scroll
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 600
+
+      264 |     const y1 = await page.evaluate(() => window.scrollY);
+      265 |     console.log(`PVM-6 @${vp.width} scroll ${y0} → ${y1}`);
+    > 266 |     expect.soft(y1, "the page behind did not scroll").toBe(y0);
+          |                                                       ^
+      267 |     /* Escape closes it, and focus goes back to the button that opened it. */
+      268 |     await page.keyboard.press("Escape");
+      269 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:266:55
+
+    Error: focus returned to the opener
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "mk-pvsuit"
+    Received string:    "mk-brand mk-brand-link"
+
+      269 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+      270 |     const back = await page.evaluate(() => document.activeElement?.className ?? "");
+    > 271 |     expect.soft(back, "focus returned to the opener").toContain("mk-pvsuit");
+          |                                                       ^
+      272 |     expect.soft(await page.evaluate(() => getComputedStyle(document.documentElement).overflow), "the page scrolls again").not.toBe("hidden");
+      273 |     /* Open from the FAQ's link this time, drive to case (a)'s result, and see it in the plans. */
+      274 |     await page.locator(".mk-pvqa > button", { hasText: "Which plan should I choose?" }).click();
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:271:55
+
+    Error: exactly one tile is navy, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 3
+
+      Array [
+    +   1,
+    +   3,
+    +   6,
+        12,
+      ]
+
+      285 |     const plans = await rect(page, ".mk-pvplans");
+      286 |     console.log(`PVM-6 @${vp.width} lit ${JSON.stringify(lit)} want ${want} plansTop ${plans.top.toFixed(1)}`);
+    > 287 |     expect(lit, "exactly one tile is navy, the estimate's").toEqual([want]);
+          |                                                             ^
+      288 |     expect(await page.locator(".mk-pvpt--fit").evaluate((e) => getComputedStyle(e).backgroundColor), "and it is the navy").toBe("rgb(42, 58, 82)");
+      289 |     expect(plans.top, "Pro plans was brought into view, under the nav").toBeGreaterThanOrEqual(55);
+      290 |     expect(plans.top, "…near the top of the screen").toBeLessThan(vp.height / 2);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:287:61
+
+    Error Context: test-results/pricingMobile.measure.ts-P-2f7bf-ult-lights-exactly-one-tile-measure/error-context.md
+
+  2) [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @375: the sheet is modal, Escape returns focus, and the result lights exactly one tile 
+
+    Error: Tab never takes focus out of the sheet
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 15
+
+      256 |     for (let i = 0; i < 12; i++) { await page.keyboard.press("Tab"); if (!(await inSheet())) escaped++; }
+      257 |     for (let i = 0; i < 6; i++) { await page.keyboard.press("Shift+Tab"); if (!(await inSheet())) escaped++; }
+    > 258 |     expect.soft(escaped, "Tab never takes focus out of the sheet").toBe(0);
+          |                                                                    ^
+      259 |     /* The page behind does not scroll. */
+      260 |     const y0 = await page.evaluate(() => window.scrollY);
+      261 |     await page.mouse.move(vp.width / 2, 40);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:258:68
+
+    Error: the page behind did not scroll
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 600
+
+      264 |     const y1 = await page.evaluate(() => window.scrollY);
+      265 |     console.log(`PVM-6 @${vp.width} scroll ${y0} → ${y1}`);
+    > 266 |     expect.soft(y1, "the page behind did not scroll").toBe(y0);
+          |                                                       ^
+      267 |     /* Escape closes it, and focus goes back to the button that opened it. */
+      268 |     await page.keyboard.press("Escape");
+      269 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:266:55
+
+    Error: focus returned to the opener
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "mk-pvsuit"
+    Received string:    "mk-brand mk-brand-link"
+
+      269 |     await expect(page.locator(".mk-pvjs")).not.toHaveClass(/mk-open/);
+      270 |     const back = await page.evaluate(() => document.activeElement?.className ?? "");
+    > 271 |     expect.soft(back, "focus returned to the opener").toContain("mk-pvsuit");
+          |                                                       ^
+      272 |     expect.soft(await page.evaluate(() => getComputedStyle(document.documentElement).overflow), "the page scrolls again").not.toBe("hidden");
+      273 |     /* Open from the FAQ's link this time, drive to case (a)'s result, and see it in the plans. */
+      274 |     await page.locator(".mk-pvqa > button", { hasText: "Which plan should I choose?" }).click();
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:271:55
+
+    Error: exactly one tile is navy, the estimate's
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 3
+
+      Array [
+    +   1,
+    +   3,
+    +   6,
+        12,
+      ]
+
+      285 |     const plans = await rect(page, ".mk-pvplans");
+      286 |     console.log(`PVM-6 @${vp.width} lit ${JSON.stringify(lit)} want ${want} plansTop ${plans.top.toFixed(1)}`);
+    > 287 |     expect(lit, "exactly one tile is navy, the estimate's").toEqual([want]);
+          |                                                             ^
+      288 |     expect(await page.locator(".mk-pvpt--fit").evaluate((e) => getComputedStyle(e).backgroundColor), "and it is the navy").toBe("rgb(42, 58, 82)");
+      289 |     expect(plans.top, "Pro plans was brought into view, under the nav").toBeGreaterThanOrEqual(55);
+      290 |     expect(plans.top, "…near the top of the screen").toBeLessThan(vp.height / 2);
+        at /Users/nickphysick/ScriptAlly-pv4m/tests/e2e/pricingMobile.measure.ts:287:61
+
+    Error Context: test-results/pricingMobile.measure.ts-P-75024-ult-lights-exactly-one-tile-measure/error-context.md
+
+  2 failed
+    [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @390: the sheet is modal, Escape returns focus, and the result lights exactly one tile 
+    [measure] › tests/e2e/pricingMobile.measure.ts:246:3 › PVM-6 @375: the sheet is modal, Escape returns focus, and the result lights exactly one tile 
+  1 passed (25.4s)

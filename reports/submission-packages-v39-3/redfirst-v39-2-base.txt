@@ -1,0 +1,204 @@
+
+Running 7 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L10 · the four steps are on the page — []
+  ✗ L10 · an empty package opens on the version step, and only that one — []
+  ✗ L10 · picking a version fills it and opens the letter step — []
+  ✗ L10 · …with ONE write to the package — 0 writes
+  ✗ L10 · …through the writer (its toast) — Queries loaded | 
+  ✗ L10 · …and shows two green discs (#3e7d5a) — []
+  ✗ L10 · …with ONE write to the package — 0 writes
+[L10] 1/8 green
+removed 22
+
+  ✘  2 [measure] › tests/e2e/pk393.measure.ts:100:1 › L10 the version step opens first; a version opens the letter step; a letter closes them all; each pick writes once (32.7s)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+removed 22
+
+  ✘  3 [measure] › tests/e2e/pk393.measure.ts:128:1 › L11 the body quotes the letter's text, the pages name the version, an extra comes and goes, To is a real not-queried agent (4.0m)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+removed 22
+
+  ✘  4 [measure] › tests/e2e/pk393.measure.ts:163:1 › L12 hovering each step outlines exactly its part of the preview (3.0m)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+removed 22
+
+  ✘  5 [measure] › tests/e2e/pk393.measure.ts:186:1 › L13 disabled with the missing pieces until a version and a letter are in, then it opens the log journey with the package (4.0m)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+removed 22
+
+  ✘  6 [measure] › tests/e2e/pk393.measure.ts:223:1 › L13 a sent package: the note and Make a copy; its steps cannot be opened or changed; nothing writes; the primary is enabled (4.0m)
+wrote pk40-ms: 5 packages (out ×2, ready, draft, retired), 3 materials, 12 queries
+
+  ✗ L14 · the new builder is on the page — false
+  ✗ L14 · no Your materials card — 2
+  ✗ L14 · no draggable rows — 2
+  ✗ L14 · no packing-list slot markup — 5
+[L14] 0/4 green
+removed 22
+
+  ✘  7 [measure] › tests/e2e/pk393.measure.ts:248:1 › L14 no Your materials card, no draggable rows, no packing-list slot markup (9.2s)
+
+
+  1) [measure] › tests/e2e/pk393.measure.ts:100:1 › L10 the version step opens first; a version opens the letter step; a letter closes them all; each pick writes once 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 9
+
+    - Array []
+    + Array [
+    +   "the four steps are on the page — []",
+    +   "an empty package opens on the version step, and only that one — []",
+    +   "picking a version fills it and opens the letter step — []",
+    +   "…with ONE write to the package — 0 writes",
+    +   "…through the writer (its toast) — Queries loaded | ",
+    +   "…and shows two green discs (#3e7d5a) — []",
+    +   "…with ONE write to the package — 0 writes",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:124:5
+
+    Error Context: test-results/pk393.measure.ts-L10-the-v-3bd1f-m-all-each-pick-writes-once-measure/error-context.md
+
+    Error Context: test-results/pk393.measure.ts-L10-the-v-3bd1f-m-all-each-pick-writes-once-measure/error-context.md
+
+  2) [measure] › tests/e2e/pk393.measure.ts:128:1 › L11 the body quotes the letter's text, the pages name the version, an extra comes and goes, To is a real not-queried agent 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-pk26="page"] [data-pk393-step="ext"] [data-pk393="extra"] > button[aria-pressed]').first()
+
+
+      144 |   const chip = page.locator(`${pg} [data-pk393-step="ext"] [data-pk393="extra"] > button[aria-pressed]`).first();
+      145 |   L.check("no extra attached to begin with", r.exts === 0, String(r.exts));
+    > 146 |   await chip.click(); await page.waitForTimeout(1600);
+          |              ^
+      147 |   const on = await page.locator(`${pg} [data-pk393-part="ext"]`).allInnerTexts();
+      148 |   L.check("ticking Author bio adds its attachment, 'if asked'", on.length === 1 && /Author bio/.test(on[0]) && /if asked/.test(on[0]), JSON.stringify(on));
+      149 |   await chip.click(); await page.waitForTimeout(1600);
+        at /Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:146:14
+
+    Error Context: test-results/pk393.measure.ts-L11-the-b-db649-is-a-real-not-queried-agent-measure/error-context.md
+
+    Error Context: test-results/pk393.measure.ts-L11-the-b-db649-is-a-real-not-queried-agent-measure/error-context.md
+
+  3) [measure] › tests/e2e/pk393.measure.ts:163:1 › L12 hovering each step outlines exactly its part of the preview 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: locator.hover: Test timeout of 180000ms exceeded.
+    Call log:
+      - waiting for locator('[data-pk26="page"] [data-pk393-step="ver"] .p93-sh').first()
+
+
+      168 |   await open(page, "pk40-std");
+      169 |   for (const k of ["ver", "let", "syn", "ext"] as const) {
+    > 170 |     await page.locator(`${pg} [data-pk393-step="${k}"] .p93-sh`).first().hover();
+          |                                                                          ^
+      171 |     await page.waitForTimeout(250);
+      172 |     const r = await page.evaluate((p) => [...document.querySelectorAll(`${p} [data-pk393-part]`)].map((e) => {
+      173 |       const cs = getComputedStyle(e); return { part: (e as HTMLElement).dataset.pk393Part, sh: cs.boxShadow, bg: cs.backgroundColor };
+        at /Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:170:74
+
+    Error Context: test-results/pk393.measure.ts-L12-hover-b4349-tly-its-part-of-the-preview-measure/error-context.md
+
+    Error Context: test-results/pk393.measure.ts-L12-hover-b4349-tly-its-part-of-the-preview-measure/error-context.md
+
+  4) [measure] › tests/e2e/pk393.measure.ts:186:1 › L13 disabled with the missing pieces until a version and a letter are in, then it opens the log journey with the package 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.innerText: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('[data-pk26="page"] [data-pk393="primary"]').first()
+
+
+      190 |   await open(page, "pk40-draft");
+      191 |   const btn = page.locator(`${pg} [data-pk393="primary"]`).first();
+    > 192 |   const read = async () => ({ text: (await btn.innerText()).trim(), off: await btn.isDisabled() });
+          |                                                ^
+      193 |   let b = await read();
+      194 |   L.check("empty: disabled, 'Add a version and a letter to send it'", b.off && b.text === "Add a version and a letter to send it", JSON.stringify(b));
+      195 |   await page.locator(`${pg} [data-pk393-step="ver"] [role=radio]`).first().click(); await page.waitForTimeout(1800);
+        at read (/Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:192:48)
+        at /Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:193:17
+
+    Error Context: test-results/pk393.measure.ts-L13-disab-222bc-og-journey-with-the-package-measure/error-context.md
+
+    Error Context: test-results/pk393.measure.ts-L13-disab-222bc-og-journey-with-the-package-measure/error-context.md
+
+  5) [measure] › tests/e2e/pk393.measure.ts:223:1 › L13 a sent package: the note and Make a copy; its steps cannot be opened or changed; nothing writes; the primary is enabled 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.count: Target page, context or browser has been closed
+
+      229 |   const note = (await page.locator(`${pg} [data-pk393="sent-note"]`).first().innerText().catch(() => "")).replace(/\s+/g, " ");
+      230 |   L.check("the note says what is true (Nick's copy)", /^Out with \d+ agents?\. What went stays as it went\. To change anything, make a copy\./.test(note), note);
+    > 231 |   L.check("…with Make a copy", (await page.locator(`${pg} [data-pk393="copy-link"]`).count()) === 1, "copy link");
+          |                                                                                      ^
+      232 |   L.check("no step head is a button", (await page.locator(`${pg} [data-pk393-step] button.p93-sh`).count()) === 0, "buttons");
+      233 |   for (const k of ["ver", "let", "syn"] as const) await page.locator(`${pg} [data-pk393-step="${k}"] .p93-sh`).first().click({ force: true }).catch(() => {});
+      234 |   await page.waitForTimeout(500);
+        at /Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:231:86
+
+    Error Context: test-results/pk393.measure.ts-L13-a-sen-14809-ites-the-primary-is-enabled-measure/error-context.md
+
+    Error Context: test-results/pk393.measure.ts-L13-a-sen-14809-ites-the-primary-is-enabled-measure/error-context.md
+
+  6) [measure] › tests/e2e/pk393.measure.ts:248:1 › L14 no Your materials card, no draggable rows, no packing-list slot markup 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   "the new builder is on the page — false",
+    +   "no Your materials card — 2",
+    +   "no draggable rows — 2",
+    +   "no packing-list slot markup — 5",
+    + ]
+
+      46 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      47 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 48 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      49 |   }
+      50 | }
+      51 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:48:83)
+        at /Users/nickphysick/ScriptAlly-pk393/tests/e2e/pk393.measure.ts:261:5
+
+    Error Context: test-results/pk393.measure.ts-L14-no-Yo-b34af-no-packing-list-slot-markup-measure/error-context.md
+
+    Error Context: test-results/pk393.measure.ts-L14-no-Yo-b34af-no-packing-list-slot-markup-measure/error-context.md
+
+  6 failed
+    [measure] › tests/e2e/pk393.measure.ts:100:1 › L10 the version step opens first; a version opens the letter step; a letter closes them all; each pick writes once 
+    [measure] › tests/e2e/pk393.measure.ts:128:1 › L11 the body quotes the letter's text, the pages name the version, an extra comes and goes, To is a real not-queried agent 
+    [measure] › tests/e2e/pk393.measure.ts:163:1 › L12 hovering each step outlines exactly its part of the preview 
+    [measure] › tests/e2e/pk393.measure.ts:186:1 › L13 disabled with the missing pieces until a version and a letter are in, then it opens the log journey with the package 
+    [measure] › tests/e2e/pk393.measure.ts:223:1 › L13 a sent package: the note and Make a copy; its steps cannot be opened or changed; nothing writes; the primary is enabled 
+    [measure] › tests/e2e/pk393.measure.ts:248:1 › L14 no Your materials card, no draggable rows, no packing-list slot markup 
+  1 passed (16.8m)

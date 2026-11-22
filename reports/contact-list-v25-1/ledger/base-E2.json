@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "E2",
+  "where": "1512 population",
+  "ok": false,
+  "detail": "0 rows with genres, 0 with a match"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 one line",
+  "ok": true,
+  "detail": "0 rows wrap"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 matches first, ticked",
+  "ok": true,
+  "detail": "order and ticks"
+ },
+ {
+  "lock": "E2",
+  "where": "1512 shown + n",
+  "ok": true,
+  "detail": "0 rows where shown + n is not the agent's genres (Firestore)"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 population",
+  "ok": false,
+  "detail": "0 rows with genres, 0 with a match"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 one line",
+  "ok": true,
+  "detail": "0 rows wrap"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 matches first, ticked",
+  "ok": true,
+  "detail": "order and ticks"
+ },
+ {
+  "lock": "E2",
+  "where": "1280 shown + n",
+  "ok": true,
+  "detail": "0 rows where shown + n is not the agent's genres (Firestore)"
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L5",
+  "where": "1280 remembered cards · population: a placeholder shows",
+  "ok": true,
+  "detail": "{\"cards\":4,\"rows\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 remembered cards · card placeholders and no row placeholders",
+  "ok": true,
+  "detail": "{\"cards\":4,\"rows\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 remembered list · population: a placeholder shows",
+  "ok": true,
+  "detail": "{\"cards\":0,\"rows\":5}"
+ },
+ {
+  "lock": "L5",
+  "where": "1280 remembered list · row placeholders and no card placeholders",
+  "ok": true,
+  "detail": "{\"cards\":0,\"rows\":5}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 remembered cards · population: a placeholder shows",
+  "ok": true,
+  "detail": "{\"cards\":6,\"rows\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 remembered cards · card placeholders and no row placeholders",
+  "ok": true,
+  "detail": "{\"cards\":6,\"rows\":0}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 remembered list · population: a placeholder shows",
+  "ok": true,
+  "detail": "{\"cards\":0,\"rows\":5}"
+ },
+ {
+  "lock": "L5",
+  "where": "1512 remembered list · row placeholders and no card placeholders",
+  "ok": true,
+  "detail": "{\"cards\":0,\"rows\":5}"
+ }
+]

@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: the composer",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Escape with nothing entered: back to the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Escape with something entered: the discard strip",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the composer is still open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Discard closes it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "nothing was saved",
+  "ok": true,
+  "detail": ""
+ }
+]

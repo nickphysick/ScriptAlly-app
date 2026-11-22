@@ -1,0 +1,72 @@
+[
+ {
+  "name": "qc150l9-q (agent): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-query-2 (nudge): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-cal-near-q (quiet): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-query-10 (quiet): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-query-20 (materials): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-pkgq-3 (materials): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-query-12 (offer): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-cal-bang-q (quiet): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "seed-cal-passed20-q (quiet): no day pill and no status line",
+  "ok": true,
+  "got": "0/0"
+ },
+ {
+  "name": "a card with the agent or nudge due was read (where the old status line was drawn)",
+  "ok": true,
+  "got": "qc150l9-q(agent) pills 0 line 0 · seed-query-2(nudge) pills 0 line 0 · seed-cal-near-q(quiet) pills 0 line 0 · seed-query-10(quiet) pills 0 line 0 · seed-query-20(materials) pills 0 line 0 · seed-pkgq-3(materials) pills 0 line 0 · seed-query-12(offer) pills 0 line 0 · seed-cal-bang-q(quiet) pills 0 line 0 · seed-cal-passed20-q(quiet) pills 0 line 0"
+ },
+ {
+  "name": "a thread with three or more dated messages (6)",
+  "ok": true,
+  "got": "10 Jun, 24 Jun, 8 Jul, 22 Jul, 5 Aug, 19 Aug"
+ },
+ {
+  "name": "no day pill",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "no status line",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "16px above the first bubble",
+  "ok": true,
+  "got": "16"
+ }
+]

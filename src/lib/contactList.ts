@@ -210,7 +210,7 @@ export function rowDateLine(q: QcRow, nowMs: number): RowDateLine | null {
      "Overdue since 15 May" (the year added when it is not this year's) — Nick's wording, the same ink. */
   if (past && days > LONG_OVER) {
     const y = new Date(q.expectedMs).getFullYear() === new Date(nowMs).getFullYear();
-    return { text: `Overdue since ${y ? dmy(q.expectedMs) : dmyY(q.expectedMs)}`, over: true };
+    return { text: `Past expected since ${y ? dmy(q.expectedMs) : dmyY(q.expectedMs)}`, over: true };
   }
   return past
     ? { text: `Expected ${dmy(q.expectedMs)} · ${days}d over`, over: true }
@@ -254,6 +254,9 @@ export interface AgentFacts {
   rating: number | null;
   genres: string[];
   lastMs: number | null;
+  /** Contact list v25.4 — Housekeeping's gap count for the agent (`agentGapAction(hk, id).n`), set by the page that
+   *  owns Housekeeping's model; absent reads as 0. The "Missing details" filter reads it. */
+  gaps?: number;
 }
 
 export function agentFacts(a: Agent, rows: readonly QcRow[], msId: string | null): AgentFacts {
@@ -344,9 +347,11 @@ export interface ContactFilters {
   /** genre KEYS (`genreKey`) — canonical ids for anything picked from the app's genre list */
   genres: string[];
   genreMode: GenreMode;
+  /** v25.4 D — "Missing details": agents with any Housekeeping gap (`AgentFacts.gaps > 0`) */
+  missing?: boolean;
 }
 export const emptyContactFilters = (): ContactFilters =>
-  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any" });
+  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any", missing: false });
 export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "open", label: "Open now" }, { key: "closed", label: "Closed for now" },
   { key: "unknown", label: DOOR_NOT_KNOWN },
@@ -354,8 +359,8 @@ export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
 export const QUERIED_CHOICES: { key: QueriedChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "yes", label: "Queried" }, { key: "no", label: "Not queried yet" },
 ];
-export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres";
-export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres"];
+export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres" | "missing";
+export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres", "missing"];
 /** how many filters are on — one per applied-filters chip (search is not a filter here and is never counted) */
 export const contactFilterCount = (f: ContactFilters): number => appliedFilters(f, (k) => k).length;
 
@@ -391,6 +396,22 @@ export const SUBMISSION_CHOICES: { key: "either" | "open" | "closed"; label: str
   { key: "either", label: "Any" }, { key: "open", label: "Open" }, { key: "closed", label: "Closed" },
 ];
 
+/**
+ * Dashboard v118 Part B — the Contact list opened on one of the dashboard's Agents-on-file groups: `?status=` is
+ * `querying`, `closed` or `notq`. On arrival it presses the matching "At a glance" card (Querying · Closed · Not queried),
+ * which is the list's own status filter today — the card shows it pressed, and pressing it again clears it, like any
+ * other visit to that card. (The filter menu's model also holds a `status` field, but no control shows or clears it, so
+ * setting it from a link would narrow the list invisibly.) No second notion of "status" lives in the URL layer.
+ */
+export const CONTACT_STATUS_PARAM = "status";
+export type ContactStatusParam = "querying" | "closed" | "notq";
+export const CONTACT_STATUS_GLANCE: Record<ContactStatusParam, "querying" | "closed" | "none"> = { querying: "querying", closed: "closed", notq: "none" };
+export const glanceForParam = (p: string | null | undefined): "querying" | "closed" | "none" | null =>
+  p && Object.prototype.hasOwnProperty.call(CONTACT_STATUS_GLANCE, p) ? CONTACT_STATUS_GLANCE[p as ContactStatusParam] : null;
+/** the dashboard's Agents-on-file keys, as the Contact list's link */
+export const contactListForStatus = (k: "querying" | "closed" | "none"): string =>
+  `/agents?${CONTACT_STATUS_PARAM}=${k === "none" ? "notq" : k}`;
+
 /** "Where your query stands": the pack's eight, plus Revise & resubmit, Resubmitted and Signed while anyone is there */
 export const STANDS_ROWS: readonly StatusKey[] = ["none", "queried", "pr", "ps", "fr", "fs", "offer", "closed"];
 export const STANDS_EXTRA: readonly StatusKey[] = ["rr", "resub", "signed"];
@@ -415,6 +436,7 @@ export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => str
   if (f.queried !== "either") out.push({ key: "queried", label: f.queried === "yes" ? "Queried" : "Not queried yet", drop: (g) => ({ ...g, queried: "either" }) });
   if (f.mats) out.push({ key: "mats", label: "Missing materials", drop: (g) => ({ ...g, mats: false }) });
   if (f.always) out.push({ key: "always", label: "Always replies", drop: (g) => ({ ...g, always: false }) });
+  if (f.missing) out.push({ key: "missing", label: "Missing details", drop: (g) => ({ ...g, missing: false }) });
   if (f.genres.length) {
     out.push({
       key: "genres", label: `Genre: ${genreLabel(f.genres[0])}${f.genres.length > 1 ? ` +${f.genres.length - 1}` : ""}`,
@@ -453,6 +475,8 @@ export const isClosedNow = (x: Pick<AgentFacts, "openKey">) => x.openKey === "cl
 export const isDoorUnknown = (x: Pick<AgentFacts, "openKey">) => x.openKey === "unstated";
 export const isMissingMaterials = (x: Pick<AgentFacts, "agent">) => (x.agent.materialsWanted ?? []).length === 0;
 export const isAlwaysResponds = (x: Pick<AgentFacts, "agent">) => x.agent.noResponseMeansNo === false;
+/** v25.4 D — any Housekeeping gap: the count the card's "{n} details missing" line states */
+export const hasMissingDetails = (x: Pick<AgentFacts, "gaps">) => (x.gaps ?? 0) > 0;
 
 const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => boolean> = {
   status: (x, f) => f.status.length === 0 || f.status.includes(x.status14),
@@ -461,6 +485,7 @@ const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => 
   queried: (x, f) => f.queried === "either" || (f.queried === "yes" ? isQueried(x) : !isQueried(x)),
   mats: (x, f) => !f.mats || isMissingMaterials(x),
   always: (x, f) => !f.always || isAlwaysResponds(x),
+  missing: (x, f) => !f.missing || hasMissingDetails(x),
   genres: (x, f) => {
     if (f.genres.length === 0) return true;
     const mine = new Set(x.genres.map(genreKey));
@@ -632,7 +657,11 @@ export function contactGroups(
 
 /* ── sorting (v14 §4) — within groups when grouped ── */
 
-export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "added";
+export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "added" | "fit" | "urgency" | "rating";
+/** Contact list v25.1 E4 — the List's five headings, each a sort; the pill, the menu and the remembered sort offer these */
+/* Contact list v26 E — the four sorts the page offers (Surname, Date added, Reply time, Query status); the remembered sort
+   is one of these, an older key reads as A to Z */
+export const HEADING_SORTS: readonly SortKey[] = ["surname", "added", "reply", "status"];
 /** each with its italic line and the direction toggle's two words */
 export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [string, string] }[] = [
   { key: "surname", label: "Surname", line: "By family name", dir: ["A to Z", "Z to A"] },
@@ -642,6 +671,10 @@ export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [st
   { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
   /* v19 §C — the Date added heading: newest first, a record with no readable date last either way */
   { key: "added", label: "Date added", line: "Newest first", dir: ["Newest first", "Oldest first"] },
+  /* v25.1 E4 — the Genres, Your query and Agent fit headings */
+  { key: "fit", label: "Genre fit", line: "Most matches with the book first", dir: ["Best fit first", "Weakest fit first"] },
+  { key: "urgency", label: "Urgency", line: "The soonest dated next step first", dir: ["Most urgent first", "Least urgent first"] },
+  { key: "rating", label: "Agent fit", line: "Unrated last, either way", dir: ["Highest first", "Lowest first"] },
 ];
 
 /** v19 §C/§J — when the agent was added, from the record's own `dateAdded` (ISO); null when it does not parse */
@@ -661,7 +694,26 @@ export function addedLabel(a: Pick<Agent, "dateAdded">): string | null {
  * Sort within groups. ⚠️ REVERSED KEEPS THE MISSING LAST (the house law): reversing a list whose tail is
  * "unknown" would otherwise lead with the agents nobody can sort. Names are never missing.
  */
-export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed = false): AgentFacts[] {
+/** v25.1 E4 — what two of the heading sorts need beyond the facts: the day, and how many of an agent's genres match the
+ *  book in scope (the page's own genre match, `genreHit`) */
+export interface SortCtx { nowMs: number; fitOf: (x: AgentFacts) => number }
+
+/** v25.1 E4 — "Your query", most urgent first: a dated next step (soonest first; a your-move step with no date after the
+ *  dated ones), then by stage (Full sent, Partial sent, Queried, then a closed query, "Passed"), then not queried */
+const STAGE_TIER: Record<string, number> = { "Full Sent": 0, "Partial Sent": 1, "Queried": 2 };
+export function urgencyOf(x: Pick<AgentFacts, "stand" | "q">, nowMs: number): [number, number] {
+  const q = x.q;
+  if (!q || x.stand === "none") return [2, 0];
+  if (x.stand === "you") {
+    /* a nudge due is due now; a send or a decision is due by its date */
+    const due = q.court === "agent" ? Math.min(q.expectedMs ?? nowMs, nowMs) : q.expectedMs;
+    return [0, due ?? Number.MAX_SAFE_INTEGER];
+  }
+  /* with the agent, by stage; then a closed query ("Passed") */
+  return [1, x.stand === "closed" ? 3 : STAGE_TIER[String(q.status)] ?? 2.5];
+}
+
+export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed = false, ctx?: SortCtx): AgentFacts[] {
   const by = [...facts];
   const name = (x: AgentFacts) => (x.agent.name.trim() || x.agent.agency).toLowerCase();
   const sur = (a: AgentFacts, b: AgentFacts) => surnameOf(a.agent).localeCompare(surnameOf(b.agent)) || name(a).localeCompare(name(b));
@@ -672,10 +724,29 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
   const missing: Partial<Record<SortKey, (x: AgentFacts) => boolean>> = {
     reply: (x) => weeks(x) == null, activity: (x) => active(x) == null, added: (x) => addedMs(x.agent) == null,
   };
+  /* v25.1 E4 — the new heading sorts: the primary key alone turns with the direction; ties ALWAYS fall back to surname
+     A–Z, and an unrated agent (or, for reply, an unknown time) stays last both ways */
+  const turn = reversed ? -1 : 1;
+  if (key === "fit") {
+    const fit = ctx?.fitOf ?? (() => 0);
+    return by.sort((a, b) => turn * (fit(b) - fit(a)) || sur(a, b));
+  }
+  if (key === "rating") {
+    const r = (x: AgentFacts) => (typeof x.rating === "number" && x.rating > 0 ? x.rating : null);
+    /* Add agent v1 — ties fall to the shorter response time (the fit order), then surname */
+    const wk = (a: AgentFacts, b: AgentFacts) => { const x = weeks(a), y = weeks(b); return x === y ? 0 : x == null ? 1 : y == null ? -1 : x - y; };
+    return by.sort((a, b) => { const x = r(a), y = r(b); if (x == null || y == null) return x == null && y == null ? wk(a, b) || sur(a, b) : x == null ? 1 : -1; return turn * (y - x) || wk(a, b) || sur(a, b); });
+  }
+  if (key === "urgency") {
+    const now = ctx?.nowMs ?? Date.now();
+    return by.sort((a, b) => { const [ta, va] = urgencyOf(a, now), [tb, vb] = urgencyOf(b, now); return turn * (ta - tb || va - vb) || sur(a, b); });
+  }
+  if (key === "reply") {
+    return by.sort((a, b) => { const x = weeks(a), y = weeks(b); if (x == null || y == null) return x == null && y == null ? sur(a, b) : x == null ? 1 : -1; return turn * (x - y) || sur(a, b); });
+  }
   switch (key) {
     case "surname": by.sort(sur); break;
     case "agency": by.sort((a, b) => deThe(a.agent.agency || "\uffff").toLowerCase().localeCompare(deThe(b.agent.agency || "\uffff").toLowerCase()) || sur(a, b)); break;
-    case "reply": by.sort((a, b) => (weeks(a) ?? 999) - (weeks(b) ?? 999) || sur(a, b)); break;
     case "activity": by.sort((a, b) => (active(b) ?? 0) - (active(a) ?? 0) || sur(a, b)); break;
     case "status": by.sort((a, b) => rank(a) - rank(b) || sur(a, b)); break;
     case "added": by.sort((a, b) => (addedMs(b.agent) ?? -Infinity) - (addedMs(a.agent) ?? -Infinity) || sur(a, b)); break;
@@ -697,6 +768,8 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
 export function findDuplicateAgent(name: string, agents: readonly Agent[]): Agent | null {
   const typed = name.trim().toLowerCase();
   if (!typed) return null;
-  return agents.find((a) => (a.name ?? "").trim().toLowerCase() === typed) ?? null;
+  /* Add agent v1 — an agent whose agency is unknown is never the match: two such agents never match each other on
+     an empty agency */
+  return agents.find((a) => a.agencyUnknown !== true && (a.name ?? "").trim().toLowerCase() === typed) ?? null;
 }
 

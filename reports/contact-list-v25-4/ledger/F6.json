@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "F6",
+  "where": "population",
+  "ok": true,
+  "detail": "52 with gaps, 1 without"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-10 line = Housekeeping's 2",
+  "ok": true,
+  "detail": "2 details missing · Fill them in →"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-10 the link opens edit mode at reply",
+  "ok": true,
+  "detail": "{\"edit\":true,\"inField\":true,\"active\":\"BUTTON.\"}"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-06 line = Housekeeping's 2",
+  "ok": true,
+  "detail": "2 details missing · Fill them in →"
+ },
+ {
+  "lock": "F6",
+  "where": "cv25-agent-04 line = Housekeeping's 2",
+  "ok": true,
+  "detail": "2 details missing · Fill them in →"
+ },
+ {
+  "lock": "F6",
+  "where": "clv-fx-stale no gaps, no line",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "F6",
+  "where": "Filters has Missing details",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "F6",
+  "where": "filtered rows = Housekeeping's agents with n > 0",
+  "ok": true,
+  "detail": "52 rows vs 52; extra [] missing []"
+ },
+ {
+  "lock": "F6",
+  "where": "the toggle's count = Housekeeping's",
+  "ok": true,
+  "detail": "52 vs 52"
+ }
+]

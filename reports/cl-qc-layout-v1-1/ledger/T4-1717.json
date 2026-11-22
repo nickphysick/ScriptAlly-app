@@ -1,0 +1,32 @@
+[
+ {
+  "name": "300px: pinned",
+  "ok": true,
+  "got": "{\"capTop\":142,\"sticky\":142,\"stripFoot\":142,\"stuck\":true}"
+ },
+ {
+  "name": "300px: the frame's line (#e3d5c9, ΔE ≤ 3) and the white edge (ΔE ≤ 2) unbroken from the headings' top (306) to 990, 344 rows",
+  "ok": true,
+  "got": "worst line ΔE 0.00, white ΔE 0.00 "
+ },
+ {
+  "name": "600px: pinned",
+  "ok": true,
+  "got": "{\"capTop\":142,\"sticky\":142,\"stripFoot\":142,\"stuck\":true}"
+ },
+ {
+  "name": "600px: the frame's line (#e3d5c9, ΔE ≤ 3) and the white edge (ΔE ≤ 2) unbroken from the headings' top (306) to 990, 344 rows",
+  "ok": true,
+  "got": "worst line ΔE 0.00, white ΔE 0.00 "
+ },
+ {
+  "name": "1200px: pinned",
+  "ok": true,
+  "got": "{\"capTop\":142,\"sticky\":142,\"stripFoot\":142,\"stuck\":true}"
+ },
+ {
+  "name": "1200px: the frame's line (#e3d5c9, ΔE ≤ 3) and the white edge (ΔE ≤ 2) unbroken from the headings' top (306) to 990, 344 rows",
+  "ok": true,
+  "got": "worst line ΔE 0.00, white ΔE 0.00 "
+ }
+]

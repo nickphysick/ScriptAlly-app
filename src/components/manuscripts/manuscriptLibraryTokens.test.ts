@@ -32,6 +32,8 @@ const LIB = here("./manuscriptLibrary.css");
  */
 const DEFINED_IN = [
   LIB,
+  /* consistency roll-out v2, Phase 6: the one focus ring reads --sp-anthracite, a :root token here */
+  here("../shell/primitives.css"),
   here("./manuscriptPlate.css"),
   here("./manuscripts.css"),
   here("../shell/workspacePageGrid.css"),

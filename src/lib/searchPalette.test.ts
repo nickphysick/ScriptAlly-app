@@ -1,284 +1,202 @@
 /**
- * Locks for the command palette's pure core. Ranking, grouping, normalisation and highlighting
- * are all decided here, so they are testable without a browser; placement, focus and scrolling
- * are browser checks (jsdom cannot judge them) and are verified in the run report instead.
+ * Locks for ⌘K search's pure core (search v1). Matching, grouping, folding and highlighting are decided here, so they
+ * are testable without a browser; placement, focus and the peek are measured in tests/e2e/searchV1.measure.ts. The
+ * prompt's own unit locks are SV1-U1…U9 in searchV1.locks.test.ts.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
-  EMPTY_ACTION_COUNT, EMPTY_PAGE_COUNT, GROUP_ORDER, PALETTE_ACTIONS, PaletteItem, RANK,
-  buildCorpus, emptyStateItems, highlightParts, normalise, rankItems, scoreItem,
+  GROUP_ORDER, GROUP_LABEL, KIND_LEAN, PALETTE_ACTIONS, PALETTE_PAGES, PaletteItem, SCORE, START_IDS, DAY_ONE_PAGE_IDS,
+  fold, foldMap, highlightParts, isSelectable, near, scoreItem, searchPalette, slipped, snippetParts, tier, tokens,
 } from "./searchPalette";
-
-const item = (title: string, subtitle?: string): Pick<PaletteItem, "title" | "subtitle"> =>
-  ({ title, subtitle });
 
 const row = (over: Partial<PaletteItem>): PaletteItem => ({
   id: "x", group: "Agents", kind: "agent", title: "X", run: { kind: "path", path: "/x" }, ...over,
 });
+const heads = (rows: ReturnType<typeof searchPalette>["rows"]) =>
+  rows.filter((r) => r.type === "head").map((r) => (r as { label: string }).label);
+const ids = (rows: ReturnType<typeof searchPalette>["rows"]) =>
+  rows.flatMap((r) => (r.type === "item" ? [r.item.id] : []));
 
-describe("normalise — case and punctuation are stripped from both sides", () => {
-  it("lets orourke find O'Rourke", () => {
-    expect(normalise("O'Rourke")).toBe("orourke");
-    expect(normalise("orourke")).toBe(normalise("O'Rourke"));
+describe("folding — case, accents, apostrophes, punctuation", () => {
+  it("strips accents and keeps a map back to the raw string", () => {
+    const { out, map } = foldMap("Zoë");
+    expect(out).toBe("zoe");
+    expect(map).toEqual([0, 1, 2]);
   });
-  it("ignores spacing and ampersands", () => {
-    expect(normalise("Inkwell & Stone")).toBe("inkwellstone");
-  });
-});
-
-describe("scoreItem — ranked, not filtered", () => {
-  /* ⚠️ BAKED 20's SCALE: prefix 3 > word-boundary 2 > substring 1, with a subtitle match half a
-     point back. The WORD-BOUNDARY tier is new in the shell rebuild and is the one that was
-     missing — without it a surname match scored level with an incidental one. */
-  it("prefix beats word-boundary beats substring, and a subtitle is half a point back", () => {
-    expect(scoreItem(item("Marsh Agency"), "mar")).toBe(RANK.titlePrefix);
-    expect(scoreItem(item("The Marsh Agency"), "mar")).toBe(RANK.titleWordBoundary);
-    expect(scoreItem(item("Postmarsh"), "mar")).toBe(RANK.titleSubstring);
-    expect(scoreItem(item("Nothing", "Marsh Agency"), "mar"))
-      .toBe(RANK.titlePrefix - RANK.subtitlePenalty);
-    expect(scoreItem(item("Nothing", "The Marsh Agency"), "mar"))
-      .toBe(RANK.titleWordBoundary - RANK.subtitlePenalty);
-    // a title match always wins over the same match on a subtitle
-    expect(scoreItem(item("Marsh Agency"), "mar"))
-      .toBeGreaterThan(scoreItem(item("Nothing", "Marsh Agency"), "mar"));
-    // ⚠️ aisah → Aisha is a TRANSPOSITION, not a subsequence: walking "aishakapoor" for
-    // a-i-s-a-h, the h never comes back round. The subsequence tier cannot see it, which is why
-    // there is a typo tier at all.
-    expect(scoreItem(item("Aisha Kapoor"), "aisah")).toBe(RANK.typo);
-    // a genuine subsequence — the letters in order, gaps allowed
-    expect(scoreItem(item("Jonathan Marsh"), "jntn")).toBe(RANK.looseSubsequence);
-  });
-
-  it("the typo tier is ONE adjacent swap, not a general fuzzy match", () => {
-    expect(scoreItem(item("Marsh Agency"), "amrsh")).toBe(RANK.typo);   // one swap
-    expect(scoreItem(item("Marsh Agency"), "amrhs")).not.toBe(RANK.typo); // two
-  });
-
-  it("a non-match is a non-match, not a weak match", () => {
-    expect(scoreItem(item("Aisha Kapoor"), "zzzz")).toBe(RANK.noMatch);
-  });
-
-  it("an empty term scores everything the same — the empty state does its own thing", () => {
-    expect(scoreItem(item("Anything"), "")).toBe(0);
-    expect(scoreItem(item("Anything"), "   ")).toBe(0);
-  });
-
-  it("punctuation in the DATA does not defeat a plain-typed term", () => {
-    expect(scoreItem(item("Daniel O'Rourke"), "orourke")).toBeGreaterThan(RANK.noMatch);
-    expect(scoreItem(item("Inkwell & Stone"), "inkwell stone")).toBeGreaterThan(RANK.noMatch);
-  });
-
-  it("the loose tier reads the TITLE only — a subtitle at that looseness is noise", () => {
-    // every letter of "queries" appears in order in this subtitle, but it must not match
-    expect(scoreItem(item("Zzz", "quite a few entries"), "queries")).toBe(RANK.noMatch);
+  it("drops straight and curly apostrophes, and every other non-alphanumeric becomes a space", () => {
+    expect(fold("O'Rourke")).toBe("orourke");
+    expect(fold("O’Rourke")).toBe("orourke");
+    expect(fold("Marsh & Vale")).toBe("marsh   vale");
+    expect(tokens("  Full   MARSH ")).toEqual(["full", "marsh"]);
   });
 });
 
-describe("rankItems — group order, and stable within a group", () => {
-  const corpus: PaletteItem[] = [
-    row({ id: "p1", group: "Pages", kind: "page", title: "Packages" }),
-    row({ id: "a1", group: "Agents", title: "Pat Ackroyd" }),
-    row({ id: "a2", group: "Agents", title: "Packham Literary" }),
-    row({ id: "q1", group: "Queries", kind: "query", title: "Pack — full sent" }),
-  ];
-
-  it("lays groups out in the canonical order regardless of score", () => {
-    const groups = rankItems(corpus, "pack").map((r) => r.group);
-    const seen = [...new Set(groups)];
-    const expected = GROUP_ORDER.filter((g) => seen.includes(g));
-    expect(seen).toEqual(expected);
+describe("tiers — start 3, word start 2, inside 1", () => {
+  it("scores the three tiers", () => {
+    expect(tier("Marsh & Vale", "mar")).toBe(SCORE.start);
+    expect(tier("Imogen Marsh", "mar")).toBe(SCORE.wordStart);
+    expect(tier("Bellamarsh", "mar")).toBe(SCORE.inside);
+    expect(tier("Bellamarsh", "x")).toBe(0);
   });
-
-  it("an empty term returns nothing — the empty state is a separate path", () => {
-    expect(rankItems(corpus, "")).toEqual([]);
-    expect(rankItems(corpus, "  ")).toEqual([]);
-  });
-
-  it("drops non-matches entirely", () => {
-    expect(rankItems(corpus, "zzzz")).toEqual([]);
-  });
-
-  it("orders WITHIN a group by score — a prefix hit beats a mid-title hit", () => {
-    const agents = rankItems(corpus, "pack").filter((r) => r.group === "Agents");
-    expect(agents.map((a) => a.title)).toEqual(["Packham Literary", "Pat Ackroyd"]);
+  it("a one-letter word only matches the start of a word", () => {
+    expect(tier("Dana Black", "a")).toBe(0);
+    expect(tier("Dana Black", "b")).toBe(SCORE.wordStart);
   });
 });
 
-describe("highlightParts — the mark lands on what the reader can see", () => {
-  it("splits around the matched run", () => {
-    expect(highlightParts("The Marsh Agency", "marsh")).toEqual([
-      { text: "The ", match: false },
-      { text: "Marsh", match: true },
-      { text: " Agency", match: false },
+describe("scoring a row — every word must match, in any order", () => {
+  it("sums the words plus the kind's lean", () => {
+    const m = scoreItem(row({ title: "Imogen Marsh", subtitle: "Marsh & Vale · London" }), ["imogen", "london"]);
+    expect(m?.total).toBeCloseTo(KIND_LEAN.agent + SCORE.start + (SCORE.wordStart - SCORE.subtitlePenalty));
+    expect(m?.where).toEqual(["title", "sub"]);
+  });
+  it("a word that matches nowhere drops the row", () => {
+    expect(scoreItem(row({ title: "Imogen Marsh" }), ["imogen", "zzz"])).toBeNull();
+  });
+  it("a query's agency scores 1.5 and its keywords 2", () => {
+    const q = row({ kind: "query", group: "Queries", title: "Imogen Marsh", agency: "Quillfeather", keywords: "Offer" });
+    expect(scoreItem(q, ["quill"])?.total).toBeCloseTo(KIND_LEAN.query + SCORE.agency);
+    expect(scoreItem(q, ["offer"])?.total).toBeCloseTo(KIND_LEAN.query + SCORE.kwQuery);
+  });
+  it("keywords score 1.2 on an action or a page, 0.7 otherwise", () => {
+    expect(scoreItem(row({ kind: "action", group: "Actions", title: "Export", keywords: "csv" }), ["csv"])?.total)
+      .toBeCloseTo(KIND_LEAN.action + SCORE.kwActionPage);
+    expect(scoreItem(row({ kind: "task", group: "Tasks", title: "Send", keywords: "todo" }), ["todo"])?.total)
+      .toBeCloseTo(KIND_LEAN.task + SCORE.kwOther);
+  });
+  it("extra text scores 0.6, and only for words of three letters or more", () => {
+    const r = row({ title: "Priya Nair", extra: [{ label: "Wishlist", text: "locked-room mysteries" }] });
+    expect(scoreItem(r, ["locked"])?.total).toBeCloseTo(KIND_LEAN.agent + SCORE.extra);
+    expect(scoreItem(r, ["lo"])).toBeNull();
+  });
+});
+
+describe("a slipped letter — four letters or more, names only, and only as a fallback", () => {
+  it("near: one swapped, wrong, missing or extra letter", () => {
+    expect(near("aisah", "aisha")).toBe(true);
+    expect(near("aixha", "aisha")).toBe(true);
+    expect(near("aiha", "aisha")).toBe(true);
+    expect(near("aishaa", "aisha")).toBe(true);
+    expect(near("asiah", "aisha")).toBe(false);
+  });
+  it("is never tried for a short word", () => {
+    expect(slipped("Ben Fox", "bne")).toBe(false);
+  });
+  it("is only tried with `loose`, and only for agents and queries", () => {
+    expect(scoreItem(row({ title: "Aisha Rahman" }), ["aisah"])).toBeNull();
+    expect(scoreItem(row({ title: "Aisha Rahman" }), ["aisah"], true)?.total).toBeCloseTo(KIND_LEAN.agent + SCORE.slipped);
+    expect(scoreItem(row({ kind: "task", group: "Tasks", title: "Aisha Rahman" }), ["aisah"], true)).toBeNull();
+  });
+});
+
+describe("highlighting lands on what the reader sees", () => {
+  it("marks every matched word through the fold map", () => {
+    expect(highlightParts("Zoë Achterberg", ["ach", "zoe"])).toEqual([
+      { text: "Zoë", match: true }, { text: " ", match: false }, { text: "Ach", match: true }, { text: "terberg", match: false },
     ]);
   });
+  it("marks a whole apostrophised name", () => {
+    expect(highlightParts("Callum O'Rourke", ["orourke"]).filter((p) => p.match).map((p) => p.text)).toEqual(["O'Rourke"]);
+  });
+  it("a snippet starts at a word boundary before the match, with an ellipsis", () => {
+    const parts = snippetParts("Debut crime writers. Police procedurals with a twist, and locked-room mysteries.", ["locked"]);
+    expect(parts[0]).toEqual({ text: "…", match: false });
+    expect(parts.find((p) => p.match)?.text).toBe("locked");
+  });
+});
 
-  it("marks a leading match without an empty leading part", () => {
-    expect(highlightParts("Marsh", "mar")).toEqual([
-      { text: "Mar", match: true },
-      { text: "sh", match: false },
+describe("grouping — Best match, then the fixed order, capped", () => {
+  const agents = Array.from({ length: 6 }, (_, i) => row({ id: `agent:${i}`, agentId: `${i}`, title: `Sam ${i}` }));
+  const tasks = Array.from({ length: 5 }, (_, i) => row({ id: `task:${i}`, kind: "task", group: "Tasks", title: `Sam task ${i}` }));
+  const corpus = [...agents, ...tasks];
+
+  it("the order is Agents, Queries, Tasks, Notes, Materials, Start something, Go to, Help", () => {
+    expect(GROUP_ORDER.map((g) => GROUP_LABEL[g])).toEqual(
+      ["Agents", "Queries", "Tasks", "Notes", "Materials", "Start something", "Go to", "Help"]);
+  });
+  it("puts one Best match first, then caps Agents at four and Tasks at three, with Show all rows", () => {
+    const { rows } = searchPalette(corpus, "sam", "all");
+    expect(heads(rows)).toEqual(["Best match", "Agents", "Tasks"]);
+    expect(rows.filter((r) => r.type === "more").map((r) => (r as { label: string }).label))
+      .toEqual(["Show all 6 agents", "Show all 5 tasks"]);
+    expect(ids(rows).filter((i) => i.startsWith("agent:"))).toHaveLength(5);
+    expect(ids(rows).filter((i) => i.startsWith("task:"))).toHaveLength(3);
+  });
+  it("a heading carries its count only when it is capped", () => {
+    const { rows } = searchPalette([...agents.slice(0, 3), ...tasks], "sam", "all");
+    const h = rows.filter((r) => r.type === "head") as { label: string; count?: number }[];
+    expect(h.find((x) => x.label === "Agents")?.count).toBeUndefined();
+    expect(h.find((x) => x.label === "Tasks")?.count).toBe(5);
+  });
+  it("with a scope: that group only, uncapped, no Best match, and no hand-off row (neither page's Find can be seeded)", () => {
+    const { rows } = searchPalette(corpus, "sam", "Agents");
+    expect(heads(rows)).toEqual(["Agents"]);
+    expect(ids(rows)).toHaveLength(6);
+    expect(rows.map((r) => r.type)).toEqual(["head", "item", "item", "item", "item", "item", "item"]);
+  });
+  it("a scope with nothing points at Everything", () => {
+    const { rows } = searchPalette(agents, "sam", "Notes");
+    expect(rows[0]).toMatchObject({ type: "none", inScope: "Notes", elsewhere: 6 });
+    expect(rows[1]).toMatchObject({ type: "more", scope: "all", label: "Show all 6 in Everything" });
+  });
+  it("no match offers to add the term as an agent and to look in the Help centre", () => {
+    const { rows, total } = searchPalette(corpus, "pemberton hall", "all");
+    expect(total).toBe(0);
+    expect(rows[0]).toMatchObject({ type: "none", term: "pemberton hall", words: 2 });
+    const made = rows.flatMap((r) => (r.type === "item" ? [r.item] : []));
+    expect(made.map((m) => m.title)).toEqual(["Add “Pemberton Hall” as an agent", "Look for “pemberton hall” in the Help centre"]);
+    expect(made[0].run).toEqual({ kind: "newAgent", name: "Pemberton Hall" });
+  });
+  it("SOON rows are never selectable, and never the Best match", () => {
+    const soon = PALETTE_ACTIONS.find((a) => a.soon)!;
+    const { rows } = searchPalette([soon, row({ kind: "action", group: "Actions", id: "b", title: "Add a bookmark" })], "add", "all");
+    const best = rows[1];
+    expect(best.type === "item" && best.item.id).toBe("b");
+    expect(isSelectable({ type: "item", item: soon })).toBe(false);
+  });
+});
+
+describe("before you type", () => {
+  const corpus = [...PALETTE_ACTIONS, ...PALETTE_PAGES, row({ id: "agent:1", title: "Imogen Marsh" })];
+  it("with recents: Jump back in (four at most, missing records skipped), then Start something", () => {
+    const { rows } = searchPalette(corpus, "", "all", { recents: ["gone", "agent:1", "page:queries", "page:agents", "page:todo", "page:help"] });
+    expect(heads(rows)).toEqual(["Jump back in", "Start something"]);
+    expect(ids(rows).slice(0, 4)).toEqual(["agent:1", "page:queries", "page:agents", "page:todo"]);
+    expect(ids(rows).slice(4)).toEqual(START_IDS);
+  });
+  it("day one: Start something, then Go to with Dashboard, Queries, Agents and Tasks", () => {
+    const { rows } = searchPalette(corpus, "", "all", { recents: [] });
+    expect(heads(rows)).toEqual(["Start something", "Go to"]);
+    expect(ids(rows)).toEqual([...START_IDS, ...DAY_ONE_PAGE_IDS]);
+  });
+});
+
+describe("the actions and pages", () => {
+  it("lists the actions in order — no Export, whose only implementation is a closure inside the Queries page", () => {
+    expect(PALETTE_ACTIONS.map((a) => a.title)).toEqual([
+      "Log a query", "Record a response", "Add an agent", "Import from a spreadsheet", "Give feedback", "Add a manuscript",
     ]);
+    expect(PALETTE_ACTIONS.find((a) => a.id === "act:feedback")!.run).toEqual({ kind: "feedback" });
   });
-
-  it("⚠️ marks NOTHING when the match only existed after normalisation", () => {
-    // `orourke` ranks O'Rourke via normalise(), but there is no literal run to mark — marking a
-    // best guess would put the burgundy on the wrong characters.
-    expect(highlightParts("Daniel O'Rourke", "orourke")).toEqual([
-      { text: "Daniel O'Rourke", match: false },
-    ]);
+  it("Task settings goes where the account menu's Task settings goes, not to Tasks", () => {
+    expect(PALETTE_PAGES.find((p) => p.id === "page:task-settings")!.run).toEqual({ kind: "path", path: "/account/preferences" });
   });
-
-  it("an empty term marks nothing", () => {
-    expect(highlightParts("Anything", "")).toEqual([{ text: "Anything", match: false }]);
+  it("every day-one page id exists", () => {
+    for (const id of DAY_ONE_PAGE_IDS) expect(PALETTE_PAGES.some((p) => p.id === id), id).toBe(true);
   });
-});
-
-/* ⚠️ SESSION RECENTS ARE RETIRED (shell-rebuild Phase 5). Baked 20 specifies the empty state
-   exactly — three actions and four pages — and the Recent group was the only place recents ever
-   rendered. Their blocks were deleted with them rather than left asserting an export nothing
-   calls. A real feature was lost; it is recorded in the run report. */
-describe("the empty state is never empty — Baked 20: three actions, four pages", () => {
-  it("shows three actions and four pages, in that order", () => {
-    const rows = emptyStateItems();
-    expect(rows).toHaveLength(EMPTY_ACTION_COUNT + EMPTY_PAGE_COUNT);
-    expect(rows.slice(0, EMPTY_ACTION_COUNT).every((r) => r.group === "Actions")).toBe(true);
-    expect(rows.slice(EMPTY_ACTION_COUNT).every((r) => r.group === "Pages")).toBe(true);
-  });
-
-  it("takes no argument — there is no history to pass it", () => {
-    expect(emptyStateItems.length).toBe(0);
+  it("“settings” finds Task settings and Account by keyword", () => {
+    const t = searchPalette(PALETTE_PAGES, "settings", "all").rows.flatMap((r) => (r.type === "item" ? [r.item.id] : []));
+    expect(t).toEqual(expect.arrayContaining(["page:task-settings", "page:account"]));
   });
 });
 
-/* (The `pushRecent` block was deleted with the function it tested — see the note above the
-   empty-state describe. Retired by Baked 20, deliberately, not lost by accident.) */
-
-describe("⚠️ every action dispatches to an EXISTING handler", () => {
-  it("captures use the rail's contracts; the rest use the navigate bridge", () => {
-    const kinds = PALETTE_ACTIONS.map((a) => a.run.kind);
-    expect(new Set(kinds)).toEqual(new Set(["capture", "navigate"]));
-    const captures = PALETTE_ACTIONS.filter((a) => a.run.kind === "capture")
-      .map((a) => (a.run as { capture: string }).capture);
-    // exactly the three existing capture contracts — no fourth, no renamed one
-    expect(new Set(captures)).toEqual(new Set(["query", "record", "agent"]));
-  });
-
-  /* AMENDED (ink shell v1, follow-up 2 · Step 0 audit): ⌘L and ⌘R were never bound — no registry
-     entry, no listener — so the chips taught keys that did nothing. Only a bound key shows a keycap. */
-  it("no action advertises a key that nothing binds", () => {
-    for (const a of PALETTE_ACTIONS) expect(a.shortcut, `${a.id} shows a keycap`).toBeUndefined();
-  });
-  it("Add a manuscript is shown and SOON — the beta allows one manuscript", () => {
-    const byId = Object.fromEntries(PALETTE_ACTIONS.map((a) => [a.id, a]));
-    expect(byId["act:manuscript"].soon).toBe(true);
-  });
-});
-
-describe("buildCorpus — second lines carry context, over already-loaded data", () => {
-  const now = Date.parse("2026-07-30T12:00:00");
-  const agentLabel = (a: { name?: string; agency?: string }) =>
-    ({ primary: a.name || a.agency || "", secondary: a.name ? (a.agency ?? "") : "Agent not specified" });
-  const input = {
-    now, agentLabel,
-    agents: [{ id: "a1", name: "Daniel O'Rourke", agency: "Inkwell & Stone", city: "Dublin" }],
-    queries: [{ id: "q1", agentId: "a1", manuscriptId: "m1", status: "Full Sent", dateSent: "2026-07-21T09:00:00" }],
-    manuscripts: [{ id: "m1", title: "Murphy's Day Out", genre: "Thriller", wordCount: 50000 }],
-  };
-
-  it("agents show agency and city", () => {
-    const a = buildCorpus(input).find((i) => i.id === "agent:a1")!;
-    expect(a.title).toBe("Daniel O'Rourke");
-    expect(a.subtitle).toBe("Inkwell & Stone · Dublin");
-  });
-
-  it("queries show manuscript and age, and CARRY THEIR STATUS for the real StatusDot", () => {
-    const q = buildCorpus(input).find((i) => i.id === "query:q1")!;
-    expect(q.title).toBe("Daniel O'Rourke — Full Sent");
-    expect(q.subtitle).toBe("Murphy's Day Out · 9 days ago");
-    // the row renders StatusDot from this — never a locally drawn circle
-    expect(q.status).toBe("Full Sent");
-  });
-
-  it("manuscripts show genre, word count and query count — singular-safe", () => {
-    const m = buildCorpus(input).find((i) => i.id === "ms:m1")!;
-    expect(m.subtitle).toBe("Thriller · 50,000 words · 1 query");
-  });
-
-  it("an undated query says nothing rather than inventing an age", () => {
-    const q = buildCorpus({ ...input, queries: [{ id: "q2", agentId: "a1", manuscriptId: "m1", status: "Queried" }] })
-      .find((i) => i.id === "query:q2")!;
-    expect(q.subtitle).toBe("Murphy's Day Out");
-  });
-
-  it("pages and features are results — including Task settings and Help centre", () => {
-    const corpus = buildCorpus(input);
-    expect(rankItems(corpus, "pack").some((r) => r.title === "Packages")).toBe(true);
-    expect(rankItems(corpus, "settings").some((r) => r.title === "Task settings")).toBe(true);
-    expect(rankItems(corpus, "help").some((r) => r.title === "Help centre")).toBe(true);
-  });
-
-  it("the status is searchable — 'full' finds the full-sent query", () => {
-    expect(rankItems(buildCorpus(input), "full").some((r) => r.id === "query:q1")).toBe(true);
-  });
-});
-
-
-describe("Jump to — the contextual action", () => {
-  const now = Date.parse("2026-07-30T12:00:00");
-  const corpus = buildCorpus({
-    now,
-    agentLabel: (a: { name?: string; agency?: string }) => ({ primary: a.name ?? "", secondary: a.agency ?? "" }),
-    agents: [{ id: "a1", name: "Aisha Kapoor", agency: "The Lantern Agency" }],
-    queries: [], manuscripts: [],
-  });
-
-  /* ⚠️ IT IS THE TOP OF ACTIONS NOW, not a group of its own (Baked 20, shell-rebuild Phase 5).
-     Actions is the first group, so it is still the first row on screen — but the heading it used
-     to bring with it is gone, because a one-row group is a label wearing a heading's clothes. */
-  it("leads the Actions group when an agent matches, and dispatches to the preselect seam", () => {
-    const rows = rankItems(corpus, "aisha");
-    expect(rows[0].group).toBe("Actions");
-    expect(rows[0].title).toBe("Log a query to Aisha Kapoor");
-    expect(rows[0].shortcut, "⌘↵ is bound nowhere (follow-up 2)").toBeUndefined();
-    // the EXISTING seam — LogQueryFocusForm's initialAgentId, not a new handler
-    expect(rows[0].run).toEqual({ kind: "logQueryTo", agentId: "a1", name: "Aisha Kapoor" });
-  });
-
-  it("does not appear when no agent matched", () => {
-    expect(rankItems(corpus, "packages").some((r) => r.title.startsWith("Log a query to")))
-      .toBe(false);
-  });
-
-  it("offers ONE agent — the top-ranked one, not a second results list", () => {
-    const two = buildCorpus({
-      now,
-      agentLabel: (a: { name?: string; agency?: string }) => ({ primary: a.name ?? "", secondary: a.agency ?? "" }),
-      agents: [{ id: "a1", name: "Marcus Reed" }, { id: "a2", name: "Mark Ellery" }],
-      queries: [], manuscripts: [],
-    });
-    const jumps = rankItems(two, "mar").filter((r) => r.title.startsWith("Log a query to"));
-    expect(jumps).toHaveLength(1);
-    expect(jumps[0].title).toBe("Log a query to Marcus Reed");
-  });
-});
-
-/**
- * ⚠️ THE PALETTE NOW HAS TWO HOSTS, AND MUST STILL BE ONE PALETTE (shell-rebuild pack, Phase 5).
- * It was mounted inside AppShell — the workspace shell — so on /dashboard the search pill opened
- * nothing and ⌘K did nothing at all. The fix is a shared `usePalette` hook rather than a second
- * copy of the block, because two copies would register ⌘K twice: two listeners, both calling
- * preventDefault, on the app's one universal shortcut.
- */
 describe("both shells mount ONE palette", () => {
-  const read = (p: string) =>
-    readFileSync(resolve(__dirname, "..", "components", "shell", p), "utf8");
-
+  const read = (p: string) => readFileSync(resolve(__dirname, "..", "components", "shell", p), "utf8");
   it("the hook is the only place the corpus and ⌘K are wired", () => {
     const hook = read("usePalette.tsx");
     expect(hook).toContain("buildCorpus");
-    /* retargeted by the shortcuts registry: the key is read from `SHORTCUTS.search`, never spelled here */
     expect(hook).toContain("matchesShortcut(SHORTCUTS.search, e)");
     for (const host of ["AppShell.tsx", "TopNavHost.tsx"]) {
       expect(read(host), host).toContain("usePalette");
@@ -286,15 +204,10 @@ describe("both shells mount ONE palette", () => {
       expect(read(host), `${host} must not register its own ⌘K`).not.toContain('=== "k"');
     }
   });
-
-  it("the top-nav shell really is given an opener — the gap this phase closed", () => {
+  it("the top-nav shell really is given an opener", () => {
     expect(read("TopNavHost.tsx")).toContain("onOpenSearch={openPalette}");
   });
-
-  /* Baked 20 — ⌘K TOGGLES. Pressing it with the palette open closes it, which is what the hand
-     expects of a shortcut that is a switch. */
   it("⌘K toggles rather than only opening", () => {
-    const hook = read("usePalette.tsx");
-    expect(hook).toMatch(/setOpen\(\(v\) => \{[\s\S]*?if \(v\) return false;/);
+    expect(read("usePalette.tsx")).toMatch(/setOpen\(\(v\) => \{[\s\S]*?if \(v\) return false;/);
   });
 });

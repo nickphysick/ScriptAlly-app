@@ -1,0 +1,57 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.1s)
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol input[type=email] · 18.27
+LC2 F2 founders hero · .mk-fwcol input[type=email]::placeholder · 3.25
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-betanote, .mk-fwcol .mk-betanote .mk-doclink · 5.31
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 15.81
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 founders hero · .mk-fwcol .mk-claimnum, .mk-fwcol .mk-claimof, .mk-fwcol .mk-claimleft · 4.86
+LC2 F2 pricing box · .mk-fbtext input[type=email] · 18.27
+LC2 F2 pricing box · .mk-fbtext input[type=email]::placeholder · 3.25
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 5.12
+LC2 F2 pricing box · .mk-fbtext .mk-betanote, .mk-fbtext .mk-betanote .mk-doclink · 6.14
+LC2 F2 pricing box · .mk-fbtext .mk-fmmeta · 1.15
+  ✘  2 [measure] › tests/e2e/landingColoursV2.measure.ts:536:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment (1.9s)
+
+
+  1) [measure] › tests/e2e/landingColoursV2.measure.ts:536:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment 
+
+    Error: pricing box: .mk-fbtext .mk-fmmeta
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 4.5
+    Received:    1.153347923317276
+
+      543 |         console.log(`LC2 F2 ${label} · ${selector}${pseudo ?? ""} · ${f.ratio.toFixed(2)}`);
+      544 |         expect(lum(f.ground), `${label}: ${selector} sits on a light ground`).toBeGreaterThan(0.7);
+    > 545 |         expect(f.ratio, `${label}: ${selector}${pseudo ?? ""}`).toBeGreaterThanOrEqual(floor);
+          |                                                                 ^
+      546 |         n++;
+      547 |       }
+      548 |     };
+        at light (/Users/nickphysick/ScriptAlly-pricing4/tests/e2e/landingColoursV2.measure.ts:545:65)
+        at /Users/nickphysick/ScriptAlly-pricing4/tests/e2e/landingColoursV2.measure.ts:569:7
+
+    Error Context: test-results/landingColoursV2.measure.t-5a5ab-p-a-dark-on-light-treatment-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/landingColoursV2.measure.ts:536:3 › LC2 › F2 the same parts on a light ground keep a dark-on-light treatment 
+  1 passed (19.7s)

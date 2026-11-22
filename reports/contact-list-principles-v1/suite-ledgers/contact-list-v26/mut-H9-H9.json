@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "H9",
+  "where": "letters (population)",
+  "ok": true,
+  "detail": "19"
+ },
+ {
+  "lock": "H9",
+  "where": "each margin is its letter",
+  "ok": false,
+  "detail": "[\"4–8\",\"B\",\"C\",\"D\",\"E\",\"F\",\"H\",\"K\"]"
+ },
+ {
+  "lock": "H9",
+  "where": "margin 84 wide",
+  "ok": true,
+  "detail": "84"
+ },
+ {
+  "lock": "H9",
+  "where": "reply sections (population)",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "H9",
+  "where": "week labels ≤ 12, then 12+ and ?",
+  "ok": false,
+  "detail": "[\"4–8\",\"6\",\"8\",\"10\",\"12\",\"12+\",\"?\"]"
+ },
+ {
+  "lock": "H9",
+  "where": "in order, not known last",
+  "ok": false,
+  "detail": "[null,6,8,10,12,13,99]"
+ },
+ {
+  "lock": "H9",
+  "where": "status groups (population)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "H9",
+  "where": "each group has a ruled head",
+  "ok": true,
+  "detail": "a group with no head"
+ },
+ {
+  "lock": "H9",
+  "where": "an empty margin",
+  "ok": true,
+  "detail": "[[\"\",22],[\"\",22],[\"\",22],[\"\",22]]"
+ }
+]

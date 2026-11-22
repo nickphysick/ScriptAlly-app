@@ -1,0 +1,50 @@
+[
+ {
+  "where": "1440 a rated agent",
+  "ok": true,
+  "detail": "clv-fx-stale"
+ },
+ {
+  "where": "1440 the name truncates with an ellipsis",
+  "ok": true,
+  "detail": "876/277 ellipsis"
+ },
+ {
+  "where": "1440 the stars are drawn",
+  "ok": false
+ },
+ {
+  "where": "1440 the stars unclipped (scrollWidth ≤ clientWidth)",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "1440 the stars inside the agent cell and the row",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "1100 a rated agent",
+  "ok": true,
+  "detail": "clv-fx-stale"
+ },
+ {
+  "where": "1100 the name truncates with an ellipsis",
+  "ok": true,
+  "detail": "876/260 ellipsis"
+ },
+ {
+  "where": "1100 the stars are drawn",
+  "ok": false
+ },
+ {
+  "where": "1100 the stars unclipped (scrollWidth ≤ clientWidth)",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "1100 the stars inside the agent cell and the row",
+  "ok": false,
+  "detail": "none"
+ }
+]

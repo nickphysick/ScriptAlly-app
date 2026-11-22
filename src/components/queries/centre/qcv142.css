@@ -1,0 +1,67 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v142 (ref design-refs/query-centre-v142/): the toolbar's heights, the filter strip and the export link.
+ * ⚠️ v149 made the page list-only: the Cards view, its switch and its ruled heading are deleted, and their rules with
+ *    them (the query panel's card is v149's own, qcv149card.css). QcList138 imports this sheet for what is left.
+ */
+/* §B · THE UNPINNED TOOLBAR IS THE CONTACT LIST'S HEIGHT: 52 tall with 34px controls (the Contact list's toolbar, v19
+   `.cl19-tb`). The jump row's glyph buttons are 40 × 34 with a 20px glyph and a 17px badge; Find, Group by and Filters
+   are 34 tall. Full screen (the cream toolbar) is unchanged. */
+@media (min-width: 768px) {
+  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-tb { height: 52px; }  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-find { height: 34px; border-radius: 9px; }
+  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-chipw { height: 34px; border-radius: 9px; }
+  .qcv-group[data-v138]:not([data-full]) .qc138-sheet .qc140-chip { height: 34px; border-radius: 9px; }
+}
+
+/* ── §E · THE FILTER STRIP (the Contact list's, shell/filterStrip.css) in this list: inside the sticky stack, flush under
+   its bottom (the toolbar's, or the applied row's when one shows); the list card's width unpinned, inset 24px each side
+   in full screen. Three columns: Most used · Where it stands (the four sets, then the statuses) · What you sent + More. ── */
+@media (min-width: 768px) {
+  .qc138-sheet .lpop.qc142-strip { left: 0; right: 0; }
+  .qc138-sheet .lpop.qc142-strip.qc142-strip--full { left: 24px; right: 24px; }
+  .qc142-strip .cl20-fsb.qc142-fsb { grid-template-columns: minmax(min-content, 1fr) minmax(min-content, 1.45fr) minmax(min-content, 1.15fr); }
+  .qc142-strip .cl20-fcol { max-height: min(360px, calc(100vh - 320px)); }
+  .qc142-strip .cl20-fsh > b { white-space: nowrap; }
+  .qc142-strip .cl20-fsh > span { flex: none; }
+  /* v142.1 A2 — the export sits right of the count; the close button keeps the far right */
+  .qc142-strip .cl20-fsh > .qc1421-export { margin-right: auto; white-space: nowrap; }
+  .qc142-strip .cl20-fsh > .qc1421-export:disabled { opacity: 1; color: rgba(28, 19, 15, 0.35); }
+  .qc142-strip .cl20-fcol h4.qc142-fsub { margin-top: 16px; }
+  .qc142-strip .qc142-where .qc141-m { width: 10px; height: 10px; }
+  .qc142-strip .cl20-chip.on .qc141-m { box-shadow: 0 0 0 1.5px rgb(244, 238, 229); }
+  .qc142-strip .qc142-fgl { display: inline-grid; place-items: center; width: 15px; height: 15px; color: currentColor; }
+  .qc142-strip .qc142-fgl svg { width: 15px; height: 15px; }
+  /* the applied row's export (v140.1 §A's words), a quiet text button before "Clear all" */
+  .qc138-sheet .qc140-af-export {
+    flex: none; margin: 0 0 0 auto; padding: 0; border: 0; background: none; cursor: pointer; color: #1c130f; white-space: nowrap;
+    font: 400 15px/21px var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.35);
+  }
+  .qc138-sheet .qc140-af-export:disabled { color: rgba(28, 19, 15, 0.35); cursor: default; text-decoration: none; }
+  .qc138-sheet .qc140-af-export:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+  .qc138-sheet .qc140-af-export + .qc140-af-clear { margin-left: 22px; }
+}
+
+/* §A · as the Contact list's toolbar Full screen (v20 §C): at a window of 1440 or less the toolbar's "Exit full screen" is
+   its icon alone (the name stays), so the jump row keeps its glyphs at 1280 rather than folding them all into "+N more" */
+@media (min-width: 768px) and (max-width: 1440px) {
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc140-pin.qc142-xfs { gap: 0; width: 46px; padding: 0; justify-content: center; }
+  .qcv-group[data-v138][data-full] .qc138-sheet .qc140-pin.qc142-xfs .qc140-pin-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* v142.1 A4 — the Cards placeholder: the landing card's frame, a grey band strip, grey lines, a foot; no text */
+.qc142-sk { padding-top: 0; }
+.qc142-sk .mk-lc-band.qc142-skband { height: 37px; padding: 0; background: #efeae2; }
+.qc142-sk .mk-lc-line { margin-left: 18px; }
+.qc142-sk .qc142-skfoot { height: 16px; margin: 22px 18px 18px; border-radius: 5px; background: #f2ede6; }
+.qc142-sk .mk-lc-line, .qc142-sk .mk-lc-band.qc142-skband, .qc142-sk .qc142-skfoot { animation: qcv-sk-pulse 1.4s ease-in-out infinite; }
+@keyframes qcv-sk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .qc142-sk .mk-lc-line, .qc142-sk .mk-lc-band.qc142-skband, .qc142-sk .qc142-skfoot { animation: none; } }
+
+/* cards-sort-search v1 §B · ROOM FOR THE JUMP ROW IN FULL-SCREEN CARDS. The Sort chip joins the cream toolbar there, and
+   that toolbar's own give-way steps (v140: Group by drops "Grouped by", Find narrows to 210) key on its whole width,
+   which includes the 196px inset past the desk hawk — so they never fire, and at 1280 every glyph went into "+N more".
+   In full-screen Cards at a window of 1,600 or less, those two steps are taken. */
+@media (min-width: 768px) and (max-width: 1600px) {
+}

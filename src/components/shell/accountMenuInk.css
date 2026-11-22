@@ -17,12 +17,12 @@
   }
   .am-menu--ink .am-iid { display: block; min-width: 0; }
   .am-menu--ink .am-iname {
-    display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 15px; line-height: 1.3;
+    display: block; font-family: var(--sp-serif); font-weight: 600; font-size: var(--sp-body-size); line-height: 1.3;
     color: var(--ink-on-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .am-menu--ink .am-iemail {
     display: block; font-family: var(--sp-serif); font-size: 12.5px; line-height: 1.35;
-    color: rgba(28, 19, 15, 0.58); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--sp-quiet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .am-menu--ink .am-iplan {
     display: flex; align-items: center; margin: 0 10px 6px; padding: 10px 12px; border-radius: 10px;
@@ -42,7 +42,19 @@
     text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--ink-cream-rgb), 0.3);
   }
   .am-menu--ink .am-iplan-a:hover { color: var(--ink-cream-92); }
-  .am-menu--ink .am-iplan-a:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: 2px; border-radius: 3px; }
+  .am-menu--ink .am-iplan-a:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
+  /* shell nav v3: the Your notes row's "{n} new" — the full sidebar link's mark (inkShell.css `.ws-fblink i`) */
+  .am-menu--ink .am-new {
+    margin-left: auto; font-style: normal; padding: 1px 7px; border-radius: 999px; background: var(--ink-terra);
+    color: var(--ink-shell); font-weight: 600; font-size: 11px; line-height: 1.4; white-space: nowrap;
+  }
   /* the foot row stays lit while its menu is open */
   .ws-pfrow.is-lit { background: rgba(var(--ink-cream-rgb), 0.09); border-radius: 10px; }
+}
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .am-menu--ink .am-iav { width: 40px; height: 40px; font-size: 12px; }
+  .am-menu--ink .am-iplan-t small { font-size: 12px; }
 }

@@ -1,0 +1,12 @@
+[
+ {
+  "name": "at 600px the strip is stuck and the cap pinned directly under its ground (±1)",
+  "ok": true,
+  "got": "{\"capTop\":142,\"sticky\":142,\"stripFoot\":142,\"stuck\":true}"
+ },
+ {
+  "name": "1px and 6px outside the column, strip top 177.8 to the card's top 246.8 (headings 305.8), 68 samples, ΔE ≤ 2 from the ground rgb(242,238,232)",
+  "ok": true,
+  "got": "worst ΔE 0.00 "
+ }
+]

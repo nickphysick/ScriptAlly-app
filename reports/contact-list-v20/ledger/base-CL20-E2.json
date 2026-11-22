@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "CL20-E2",
+  "where": "a genre to choose (population)",
+  "ok": true,
+  "detail": "literary-fiction"
+ },
+ {
+  "lock": "CL20-E2",
+  "where": "the base readings were written",
+  "ok": true,
+  "detail": "reports/contact-list-v20/ledger/e2-base.json"
+ }
+]

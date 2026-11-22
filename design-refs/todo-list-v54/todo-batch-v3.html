@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>To-do — housekeeping batches, v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#2a3a52;--oat:#f2eee8;--paper:#fbf9f5;--ink:#1c130f;--ink2:#3a332d;--muted:#7a7066;--rule:#e6dfd4;--blush:#f3dfd6;--slate:#d7e0e8;--sand:#f2ebe0;--rust:#8a4a3a;--hk:#e4ebf1;
+    --type:"Special Elite","Courier New",monospace;--serif:"Source Serif 4",Georgia,serif}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--oat);font-family:var(--serif);color:var(--ink);display:flex;flex-direction:column;overflow:hidden}
+  button{font-family:inherit;cursor:pointer}
+  .ctl{background:var(--navy);color:#fff;padding:10px 28px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .ctl b{font:400 17px var(--type);margin-right:8px}
+  .o{height:32px;padding:0 13px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px}
+  .o.on{background:#fff;color:var(--navy)}
+  .ctl .rs{margin-left:auto;background:none;border:0;color:#fff;text-decoration:underline;font-size:14px}
+  .explain{background:#fff;border-bottom:1px solid var(--rule);padding:9px 28px;font-size:15px;line-height:1.45;color:var(--ink2)}
+  .page{flex:1;min-height:0;padding:14px 28px 18px;display:flex;flex-direction:column}
+  .thin{display:flex;align-items:baseline;gap:14px;margin-bottom:12px}
+  .thin h1{font:400 26px var(--type);margin:0}
+  .thin span{color:var(--muted)}
+  .frame{flex:1;min-height:0;background:var(--paper);border:1px solid var(--rule);border-radius:22px;display:grid;grid-template-columns:320px 1fr;overflow:hidden}
+  .tray{border-right:1px solid var(--rule);padding:14px 12px;overflow-y:auto}
+  .gh{border-radius:10px;padding:7px 12px;font:400 15.5px var(--type);background:var(--hk);display:flex;align-items:center;gap:8px}
+  .gh .qf{margin-left:auto;font:400 13px var(--serif);background:#fff;border:1px solid var(--rule);border-radius:999px;padding:2px 10px}
+  .row{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:12px;font-size:15px;border:2px solid transparent}
+  .row.sel{border-color:var(--navy);background:#fff}
+  .row .ic{width:32px;height:32px;border-radius:8px;border:1px solid var(--rule);background:#fff;display:grid;place-items:center;color:var(--muted);flex:none;font-size:13px}
+  .row b{display:block;font-weight:600}
+  .row i{color:var(--muted)}
+
+  .desk{padding:14px;display:flex;flex-direction:column;min-height:0;min-width:0}
+  /* the band, for a batch */
+  .band{background:var(--hk);border-radius:16px 16px 0 0;padding:12px 20px 10px}
+  .bt{display:flex;align-items:baseline;gap:12px}
+  .bt h2{font:400 22px var(--type);margin:0}
+  .bt i{color:var(--muted)}
+  .bt .pos{margin-left:auto;color:var(--muted);font-size:15px}
+  .prog{display:flex;gap:3px;margin-top:9px}
+  .prog span{flex:1;height:5px;border-radius:3px;background:#cdd7e0}
+  .prog span.done{background:var(--navy)}
+  .prog span.cur{background:#7d8ea6}
+  .now{margin-top:8px;font-size:15px;color:var(--ink2)}
+  .now b{font-weight:600;color:var(--ink)}
+  .body{flex:1;min-height:0;background:#fff;border:1px solid var(--rule);border-top:0;border-radius:0 0 16px 16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,32%)}
+  .work{display:flex;flex-direction:column;min-height:0}
+  .scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:16px 24px 10px}
+  .hawk{display:flex;gap:12px;margin-bottom:14px}
+  .hawk .h{width:34px;height:42px;border-radius:8px;background:repeating-linear-gradient(45deg,#ead2c7 0 6px,#f3dfd6 6px 12px);flex:none}
+  .bub{background:var(--blush);border-radius:12px;padding:9px 14px;font-size:15.5px;line-height:1.4}
+  h3{font:600 20px var(--serif);margin:0 0 2px}
+  .hint{font-style:italic;color:var(--ink2);margin:0 0 10px;font-size:15.5px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .tile{display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:56px;border:1.5px solid var(--rule);border-radius:12px;background:#faf8f4;font-size:16.5px;text-align:left}
+  .tile .bx{width:22px;height:22px;border-radius:6px;box-shadow:inset 0 0 0 1.6px #b9b1a5;flex:none;display:grid;place-items:center;color:#fff;font-size:13px}
+  .tile.on{border-color:var(--navy);background:#fff;box-shadow:0 0 0 1px var(--navy)}
+  .tile.on .bx{background:var(--navy);box-shadow:none}
+  .tile small{display:block;font-size:13.5px;color:var(--muted)}
+  /* the sample picker, inline */
+  .samp{margin-top:10px;border:1px solid var(--rule);border-radius:12px;background:var(--paper);padding:12px 14px}
+  .samp h4{margin:0 0 8px;font-size:15.5px;font-weight:600}
+  .units{display:flex;gap:8px;flex-wrap:wrap}
+  .unit{display:flex;align-items:center;gap:8px;border:1.5px solid var(--rule);border-radius:10px;padding:6px 10px;background:#fff;font-size:15px}
+  .unit.on{border-color:var(--navy)}
+  .unit .st{display:none;align-items:center;gap:6px}
+  .unit.on .st{display:inline-flex}
+  .unit .st button{width:26px;height:26px;border-radius:7px;border:1px solid var(--rule);background:#fff;font-size:15px;line-height:1}
+  .unit .st b{font:400 16px var(--type);min-width:30px;text-align:center}
+  .pres{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .pres button{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--rule);background:#fff;font-size:13.5px}
+  .pres button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .from{margin-top:9px;font-size:14.5px;color:var(--ink2)}
+  .from label{margin-right:14px;cursor:pointer}
+  .reads{margin-top:8px;font-size:14px;color:var(--muted);font-style:italic}
+  /* prefilled from their asks */
+  .asks{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;border-radius:10px;background:var(--sand);font-size:14.5px}
+  .asks b{font-weight:600}
+  /* same for others */
+  .same{margin-top:16px;border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .sameh{padding:10px 14px;background:var(--paper);border-bottom:1px solid var(--rule)}
+  .sameh b{font-weight:600}
+  .sameh p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+  .sr{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--rule);font-size:15px;cursor:pointer}
+  .sr:last-child{border-bottom:0}
+  .sr .bx{width:20px;height:20px;border-radius:6px;box-shadow:inset 0 0 0 1.6px #b9b1a5;display:grid;place-items:center;color:#fff;font-size:12px;flex:none}
+  .sr.on .bx{background:var(--navy);box-shadow:none}
+  .sr i{color:var(--muted)}
+  .sr em{margin-left:auto;font-size:13px;color:var(--muted)}
+  .sr em.why{color:var(--navy)}
+  .sel2{display:flex;gap:12px;padding:8px 14px;font-size:14px;background:var(--paper);border-top:1px solid var(--rule)}
+  .sel2 a{cursor:pointer;text-decoration:underline;text-decoration-color:var(--rule)}
+  /* the table */
+  .tbl{width:100%;border-collapse:collapse;font-size:15px}
+  .tbl th{font-weight:600;font-size:14px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);background:var(--paper);position:sticky;top:-16px;z-index:2;box-shadow:0 -16px 0 #fff}
+  .tbl th.c,.tbl td.c{text-align:center;width:86px}
+  .tbl td{padding:7px 10px;border-bottom:1px solid var(--rule)}
+  .tbl td i{color:var(--muted);font-size:13.5px;display:block}
+  .tk{width:22px;height:22px;border-radius:6px;box-shadow:inset 0 0 0 1.6px #b9b1a5;display:inline-grid;place-items:center;color:#fff;font-size:13px;cursor:pointer;border:0;background:transparent}
+  .tk.on{background:var(--navy);box-shadow:none}
+  .tk.ask{box-shadow:inset 0 0 0 1.6px #b9b1a5,0 0 0 3px #f2ebe0}
+  .stag{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+  .tools{display:flex;gap:10px;margin:0 0 10px;flex-wrap:wrap}
+  .tools button{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:#fff;font-size:14px}
+
+  .foot{flex:none;border-top:1px solid var(--rule);padding:12px 24px 14px;display:flex;align-items:center;gap:10px}
+  .g{height:40px;padding:0 14px;border:1px solid var(--rule);border-radius:999px;background:#fff;font-size:15.5px}
+  .lnk{background:none;border:0;text-decoration:underline;color:var(--ink2);font-size:15px}
+  .of{margin-left:auto;font-style:italic;color:var(--muted)}
+  .pri{height:46px;padding:0 24px;border:0;border-radius:999px;background:var(--navy);color:#fff;font-size:16.5px;font-weight:600}
+  .pri:disabled{background:#b6bcc6}
+
+  .prev{border-left:1px solid var(--rule);padding:16px;background:#fdfcfa;overflow-y:auto}
+  .qc{padding:7px;border-radius:20px;background:#fff;box-shadow:0 1px 2px rgba(28,19,15,.08),0 22px 40px -22px rgba(28,19,15,.32)}
+  .qin{border:1px solid #e3d5c9;border-radius:14px;overflow:hidden}
+  .qh{background:var(--navy);color:#fff;display:flex;justify-content:space-between;padding:8px 14px;font-size:13px}
+  .qh b{font:400 15px var(--type)}
+  .qb{padding:12px 14px}
+  .qb b{display:block;font:600 18px var(--serif)}
+  .qb span{color:var(--muted);font-size:14px}
+  .ms{display:flex;gap:8px;margin-top:8px;background:var(--sand);border-radius:10px;padding:7px 12px;font-size:14px}
+  .ms em{color:var(--muted);font-style:normal}
+  .ms b{font:400 15px var(--type)}
+  .thr{border-top:1px solid var(--rule);padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+  .day{align-self:center;font-size:12px;color:var(--muted);background:#f3efe8;border-radius:8px;padding:3px 10px}
+  .m{max-width:88%;padding:7px 10px 7px 12px;border-radius:14px;position:relative;line-height:1.35}
+  .me{align-self:flex-end;background:#f6f3ee;border-bottom-right-radius:4px}
+  .th{align-self:flex-start;background:#e5dcef;border-bottom-left-radius:4px}
+  .ts{font-size:11.5px;color:var(--muted);margin-left:8px;white-space:nowrap}
+  .clip{font-size:12.5px;background:#fff;box-shadow:inset 0 0 0 1px var(--rule);border-radius:999px;padding:1px 7px;margin-left:6px}
+  .num{width:62px;height:26px;border:1px solid var(--rule);border-radius:7px;text-align:center;font:400 15px var(--type);background:#fff}
+  .ptype{font-size:13px;color:var(--muted);font-style:italic;align-self:center;margin-left:4px}
+  .sect{margin-top:10px;padding-top:10px;border-top:1px dashed var(--rule)}
+  .sect h4{margin:0 0 8px;font-size:15px;font-weight:600}
+  .reads b{font-style:normal;color:var(--ink)}
+  .asks.noask{background:#f6f3ee;flex-wrap:wrap}
+  .asks.noask button{height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:#fff;font-size:14px}
+  .asks.noask a{cursor:pointer;font-size:14px;text-decoration:underline;text-decoration-color:var(--rule);color:var(--ink2)}
+  .na{color:var(--rust);font-style:italic}
+  .tbl th.sc,.tbl td.sc{width:210px}
+  .scell{width:100%;display:flex;justify-content:space-between;align-items:center;gap:6px;height:34px;padding:0 10px;border:1.5px solid var(--rule);border-radius:9px;background:#faf8f4;font-size:14px;color:var(--muted);text-align:left}
+  .scell.on{border-color:var(--navy);background:#fff;color:var(--ink)}
+  .scell span{color:var(--muted);font-size:11px}
+  tr.open td{background:#fbfaf7}
+  tr.exp td{background:#fbfaf7;padding:4px 10px 12px}
+  .exph{display:flex;justify-content:space-between;align-items:center;font-size:14.5px;margin:4px 0}
+  .tmsg{align-self:center;font-size:14px;color:var(--ink2);font-style:italic}
+  .vsw{display:inline-flex;margin-left:auto;background:#fff;border:1px solid #cdd7e0;border-radius:999px;padding:3px}
+  .vsw button{border:0;background:transparent;border-radius:999px;height:28px;padding:0 12px;font-size:14px;color:var(--ink2)}
+  .vsw button.on{background:var(--navy);color:#fff}
+  .bt .pos{margin-left:12px!important}
+  .mm{margin:10px 0 0;font-size:14px;color:var(--navy)}
+  .mmi{display:block;font-size:12.5px;color:var(--navy);font-style:italic;margin-top:2px}
+  .ok{position:fixed;left:50%;bottom:26px;transform:translate(-50%,30px);opacity:0;background:var(--navy);color:#fff;border-radius:999px;padding:11px 14px 11px 20px;display:flex;gap:14px;align-items:center;font-size:15.5px;transition:all .35s cubic-bezier(.22,1,.36,1);z-index:9}
+  .ok.show{transform:translate(-50%,0);opacity:1}
+  .ok button{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:999px;height:32px;padding:0 14px;font-weight:600}
+</style>
+</head>
+<body class="m1">
+<div class="ctl">
+  <b>Housekeeping batches</b>
+  <button class="o on" data-n="6">A batch of 6</button>
+  <button class="o" data-n="14">A batch of 14</button>
+  <button class="rs" onclick="reset(true)">Start again</button>
+</div>
+<div class="explain" id="ex"></div>
+<div class="page">
+  <div class="thin"><h1>Your to-do list</h1><span>Murphy's Day Out</span></div>
+  <div class="frame">
+    <aside class="tray">
+      <div class="gh">Housekeeping 31 <span class="qf" onclick="setView('table')" style="cursor:pointer">Quick fill</span></div>
+      <div class="row sel"><span class="ic">▤</span><span><b>Fill in what you sent</b><i id="trayN">12 queries</i></span></div>
+      <div class="row"><span class="ic">▤</span><span><b>What does Aisha want sent?</b><i>The Lantern Agency</i></span></div>
+      <div class="row"><span class="ic">▤</span><span><b>What does William want sent?</b><i>Foxglove Literary</i></span></div>
+    </aside>
+    <section class="desk">
+      <div class="band">
+        <div class="bt"><h2>Fill in what you sent</h2><i id="bsub">6 queries with nothing recorded</i><div class="vsw" id="vsw"><button data-v="one">One at a time</button><button data-v="table">All at once</button></div><span class="pos" id="pos"></span></div>
+        <div class="prog" id="prog"></div>
+        <div class="now" id="now"></div>
+      </div>
+      <div class="body">
+        <div class="work">
+          <div class="scroll" id="scroll"></div>
+          <div class="foot" id="foot"></div>
+        </div>
+        <aside class="prev" id="prev"></aside>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="ok" id="ok"></div>
+<script>
+const BASE=[
+ {n:"Tom Ellery",a:"Curtis Vane",f:"Tom",sent:"3 Mar 2024",asks:["Query letter","Opening sample"],askS:{u:"chapters",n:3},st:"Offer",col:"#e5dcef"},
+ {n:"Priya Shah",a:"Northlight",f:"Priya",sent:"3 Mar 2024",asks:["Query letter","Synopsis","Opening sample"],askS:{u:"pages",n:50},st:"Queried",col:"#f2ebe0"},
+ {n:"Sam Okoro",a:"Brightwater",f:"Sam",sent:"4 Mar 2024",asks:null,askS:null,st:"Passed",col:"#e4e1db"},
+ {n:"Hannah Wu",a:"Curtis Vane",f:"Hannah",sent:"4 Mar 2024",asks:["Query letter","Opening sample"],askS:{u:"chapters",n:3},st:"Queried",col:"#f2ebe0"},
+ {n:"Ben Carter",a:"Lark & Co",f:"Ben",sent:"11 Mar 2024",asks:null,askS:null,st:"Queried",col:"#f2ebe0"},
+ {n:"Maya Lind",a:"Foxglove Literary",f:"Maya",sent:"12 Mar 2024",asks:["Query letter"],askS:null,st:"Queried",col:"#f2ebe0"}
+];
+const MORE=[
+ {n:"Clara Hughes",a:"Northlight",f:"Clara",sent:"18 Mar 2024",asks:["Query letter","Synopsis","Opening sample"],askS:{u:"pages",n:50},st:"Queried"},
+ {n:"Dev Patel",a:"Curtis Vane",f:"Dev",sent:"18 Mar 2024",asks:["Query letter","Opening sample"],askS:{u:"chapters",n:3},st:"Queried"},
+ {n:"Ruth Adeyemi",a:"Lark & Co",f:"Ruth",sent:"19 Mar 2024",asks:null,askS:null,st:"Passed"},
+ {n:"Owen Price",a:"Brightwater",f:"Owen",sent:"19 Mar 2024",asks:null,askS:null,st:"Queried"},
+ {n:"Lena Moss",a:"Foxglove Literary",f:"Lena",sent:"20 Mar 2024",asks:["Query letter"],askS:null,st:"Queried"},
+ {n:"Kit Fraser",a:"Inkwell & Stone",f:"Kit",sent:"25 Mar 2024",asks:["Query letter","Synopsis","Opening sample"],askS:{u:"words",n:10000},st:"Queried"},
+ {n:"Nora Quinn",a:"Northlight",f:"Nora",sent:"25 Mar 2024",asks:["Query letter","Synopsis","Opening sample"],askS:{u:"pages",n:50},st:"Queried"},
+ {n:"Ian Doyle",a:"Curtis Vane",f:"Ian",sent:"26 Mar 2024",asks:["Query letter","Opening sample"],askS:{u:"chapters",n:3},st:"Queried"}
+];
+let Q=BASE.slice(),size=6,view=null,chosen=null;
+const MATS=["Query letter","Synopsis","Opening sample","Bio"];
+let mode="one",i,ans,same,doneSet,step;
+const $=x=>document.getElementById(x);
+const defS=()=>({u:"chapters",n:3,from:"opening",fu:"chapter",fn:4});let openRow=-1,tmsg="";
+function reset(hard){openRow=-1;tmsg="";if(hard)chosen=null;Q=size===6?BASE.slice():BASE.concat(MORE);i=0;step=0;same=new Set();doneSet=new Set();
+  ans=Q.map(q=>{const a={m:[],s:defS(),from:null};if(q.asks){a.m=[...q.asks];a.from="asks";if(q.askS)a.s={...defS(),u:q.askS.u,n:q.askS.n}}return a});
+  view=chosen||(Q.length>=8?"table":"one");mode=view;render()}
+function fmtN(u,n){return u==="words"?Number(n).toLocaleString("en-GB"):n}
+function unitWord(u,n){return n==1?u.replace(/s$/,""):u}
+function sampleWords(s){
+  if(s.from==="opening")return "first "+fmtN(s.u,s.n)+" "+unitWord(s.u,s.n);
+  if(s.u==="pages"&&s.fu==="page")return "pages "+s.fn+"–"+(Number(s.fn)+Number(s.n)-1);
+  if(s.u==="chapters"&&s.fu==="chapter")return s.n==1?"chapter "+s.fn:"chapters "+s.fn+"–"+(Number(s.fn)+Number(s.n)-1);
+  return fmtN(s.u,s.n)+" "+unitWord(s.u,s.n)+" from "+s.fu+" "+(s.fu==="word"?Number(s.fn).toLocaleString("en-GB"):s.fn);
+}
+function matWords(a){return a.m.map(m=>m==="Opening sample"?sampleWords(a.s):m.toLowerCase()).join(", ").replace(/, ([^,]*)$/," and $1")}
+function band(){
+  const left=Q.filter((_,k)=>!doneSet.has(k)).length;
+  $("pos").textContent=mode==="table"?"":(i+1)+" of "+Q.length;
+  $("prog").innerHTML=Q.map((_,k)=>`<span class="${doneSet.has(k)||(mode==="table"&&ans[k].m.length)?"done":k===i&&mode!=="table"?"cur":""}"></span>`).join("");
+  const q=Q[i];
+  $("now").innerHTML=mode==="table"?`<b>${ans.filter(x=>x.m.length).length}</b> of ${Q.length} filled in, ready to log`:`Now: <b>${q.n}</b> · ${q.a} · queried ${q.sent}`;
+  $("trayN").textContent=left+" queries";
+}
+function askWords(q){return q.askS?sampleWords({...defS(),u:q.askS.u,n:q.askS.n}):null}
+function mismatch(k){const q=Q[k],a=ans[k];if(!q.askS||!a.m.includes("Opening sample"))return null;const w=askWords(q),mine=sampleWords(a.s);return w===mine?null:`${q.f}'s guidelines ask for ${w}`}
+function picker(k){
+  const a=ans[k],s2=a.s;
+  const U=[["chapters","Chapters",[1,2,3,5]],["pages","Pages",[5,10,25,50]],["words","Words",[1000,2500,5000,10000]]];
+  const cur=U.find(x=>x[0]===s2.u);
+  const F=[["chapter","Chapter",[2,3,4,5]],["page","Page",[10,25,40,50]],["word","Word",[5000,10000,20000]]];
+  const fcur=F.find(x=>x[0]===s2.fu);
+  const fN=(u,n)=>u==="word"||u==="words"?Number(n).toLocaleString("en-GB"):n;
+  return `<div class="samp"><h4>How much of the sample went?</h4>
+   <div class="units">${U.map(([u,l])=>`<div class="unit${s2.u===u?" on":""}" onclick="setU(${k},'${u}')">${l}<span class="st"><button onclick="event.stopPropagation();bump(${k},-1)">−</button><input class="num" type="text" inputmode="numeric" value="${fN(u,s2.n)}" onclick="event.stopPropagation()" onchange="typeN(${k},this.value)"><button onclick="event.stopPropagation();bump(${k},1)">+</button></span></div>`).join("")}</div>
+   <div class="pres">${cur[2].map(n=>`<button class="${s2.n==n?"on":""}" onclick="setN(${k},${n})">${fN(s2.u,n)}</button>`).join("")}<span class="ptype">or type any amount</span></div>
+   <div class="from"><label><input type="radio" name="fr${k}" ${s2.from==="opening"?"checked":""} onclick="setF(${k},'opening')"> From the opening</label><label><input type="radio" name="fr${k}" ${s2.from!=="opening"?"checked":""} onclick="setF(${k},'sect')"> A section from further in</label></div>
+   ${s2.from!=="opening"?`<div class="sect"><h4>Where did it start?</h4>
+     <div class="units">${F.map(([u,l])=>`<div class="unit${s2.fu===u?" on":""}" onclick="setFU(${k},'${u}')">${l}<span class="st"><button onclick="event.stopPropagation();bumpF(${k},-1)">−</button><input class="num" type="text" inputmode="numeric" value="${fN(u,s2.fn)}" onclick="event.stopPropagation()" onchange="typeF(${k},this.value)"><button onclick="event.stopPropagation();bumpF(${k},1)">+</button></span></div>`).join("")}</div>
+     <div class="pres">${fcur[2].map(n=>`<button class="${s2.fn==n?"on":""}" onclick="setFN(${k},${n})">${fN(s2.fu,n)}</button>`).join("")}<span class="ptype">or type where it started</span></div></div>`:""}
+   <div class="reads">Reads as: <b>${sampleWords(s2)}</b></div></div>`;
+}
+function tiles(a,k){return `<div class="tiles">${MATS.map(m=>`<button class="tile${a.m.includes(m)?" on":""}" onclick="tog(${k},'${m}')"><span class="bx">${a.m.includes(m)?"✓":""}</span><span>${m}${m==="Opening sample"&&a.m.includes(m)?`<small>${sampleWords(a.s)}</small>`:""}</span></button>`).join("")}</div>${a.m.includes("Opening sample")?picker(k):""}`}
+function card(k){
+  const q=Q[k],a=ans[k];
+  $("prev").innerHTML=`<div class="qc"><div class="qin"><div class="qh"><span>${q.st}</span><b>${q.sent}</b></div><div class="qb"><b>${q.n}</b><span>${q.a}</span><div class="ms"><em>Querying</em><b>Murphy's Day Out</b></div></div>
+   <div class="thr"><div class="day">${q.sent}</div><div class="m me">You sent ${q.f} your query${a.m.length?`<span class="clip">📎 ${a.m.length}</span>`:""}<span class="ts">${q.sent.slice(0,5)} ✉</span></div>
+   ${q.st==="Offer"?`<div class="m th">${q.f} offered<span class="ts">17 Jul</span></div>`:q.st==="Passed"?`<div class="m th" style="background:#e4e1db">${q.f} passed<span class="ts">2 Apr</span></div>`:""}
+   </div></div></div>${a.m.length?`<p style="font-size:13.5px;color:var(--muted);margin:10px 4px 0;font-style:italic">📎 ${matWords(a)}</p>`:""}`;
+}
+function render(){
+  const why=chosen?`You picked “${view==="table"?"All at once":"One at a time"}” last time, so it opened that way.`:(Q.length>=8?`It opened “All at once” because there are ${Q.length} queries (8 or more). Switch to “One at a time” in the band if you'd rather.`:`It opened “One at a time” because there are only ${Q.length} queries. Switch to “All at once” in the band if you'd rather.`);
+  $("ex").innerHTML=`<b>Which view opens.</b> ${why} Your choice is remembered. The tray's Quick fill always opens “All at once”. Phones always use one at a time.`;
+  document.querySelectorAll("#vsw button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  $("bsub").textContent=Q.length+" queries with nothing recorded";
+  band();
+  const q=Q[i],a=ans[i];let h="",f="";
+  if(mode==="table"){
+    h=`<div class="tools"><button onclick="fillAsks()">Fill from their asks again</button><button onclick="copyDown()">Copy the first row to the gaps</button>${`<span class="tmsg">${tmsg||(()=>{const miss=Q.filter(q=>!q.asks).map(q=>q.f);return miss.length?`Rows with guidelines are filled in from them. No guidelines saved for ${miss.join(", ").replace(/, ([^,]*)$/," and $1")}.`:"Every row is filled in from their guidelines."})()}</span>`}</div>
+    <table class="tbl"><tr><th>Query</th>${MATS.map(m=>`${m==="Opening sample"?`<th class="sc">Sample</th>`:`<th class="c">${m}</th>`}`).join("")}</tr>
+    ${Q.map((r,k)=>`<tr class="${openRow===k?"open":""}"><td>${r.n}<i>${r.a} · ${r.sent}${r.asks?"":" · <span class='na'>no guidelines saved</span>"}</i>${mismatch(k)?`<span class="mmi">${mismatch(k)}</span>`:""}</td>${MATS.map(m=>m==="Opening sample"
+      ?`<td class="sc"><button class="scell${ans[k].m.includes(m)?" on":""}" onclick="openSample(${k})">${ans[k].m.includes(m)?sampleWords(ans[k].s):"None"}<span>▾</span></button></td>`
+      :`<td class="c"><button class="tk${ans[k].m.includes(m)?" on":""}" onclick="tt(${k},'${m}')">${ans[k].m.includes(m)?"✓":""}</button></td>`).join("")}</tr>
+      ${openRow===k?`<tr class="exp"><td colspan="${MATS.length+1}"><div class="exph"><label><input type="checkbox" ${ans[k].m.includes("Opening sample")?"checked":""} onchange="tt(${k},'Opening sample')"> An opening sample went to ${r.f}</label><button class="lnk" onclick="openRow=-1;render()">Done</button></div>${ans[k].m.includes("Opening sample")?picker(k):""}</td></tr>`:""}`).join("")}</table>`;
+    const n=ans.filter(x=>x.m.length).length;
+    f=`<button class="g">↻ Snooze</button><span class="of">${n} of ${Q.length} filled in</span><button class="pri" ${n?"":"disabled"} onclick="logTable()">Log ${n} ${n===1?"query":"queries"}</button>`;
+    $("scroll").innerHTML=h;$("foot").innerHTML=f;card(openRow>=0?openRow:0);return;
+  }
+  if(step===0){
+    const last=[...doneSet].pop();
+    h=q.asks?`<div class="hawk"><div class="h"></div><div class="bub">I've filled this in from what ${q.f} asks for. If that's what went, carry on. If not, change it first.</div></div>
+     <div class="asks">📋 <span>From <b>${q.a}'s</b> guidelines${q.askS?"":", which don't say how much of a sample"}</span></div>`
+     :`<div class="hawk"><div class="h"></div><div class="bub">${q.a}'s guidelines aren't saved, so I can't fill this in for you.</div></div>
+     <div class="asks noask"><span>No guidelines saved for <b>${q.a}</b>.</span>${last!==undefined?`<button onclick="copyFrom(${last})">Start from what went to ${Q[last].f}</button>`:""}<a onclick="alert('Opens ${q.a} on the Contact list at their guidelines')">Add their guidelines</a></div>`;
+    h+=`<h3>What went to ${q.f}?</h3><p class="hint">${q.asks?"Check it against what you actually sent.":"Tick everything that went with this query."}</p>${tiles(a,i)}`;
+    const mm=mismatch(i);if(mm)h+=`<p class="mm">ⓘ ${mm}. Leave it if that's not what went.</p>`;
+    f=`<button class="g">↻ Snooze</button><button class="lnk" onclick="next(false)">Skip this one</button><span class="of">1 of 2</span><button class="pri" ${a.m.length?"":"disabled"} onclick="toSame()">Next →</button>`;
+  } else {
+    const rest=Q.map((r,k)=>({r,k})).filter(x=>x.k!==i&&!doneSet.has(x.k));
+    h=`<h3>Did the same go to anyone else?</h3><p class="hint">${q.f} got your ${matWords(a)}. Tick anyone who got exactly the same.</p>
+    <div class="same"><div class="sameh"><b>${rest.length} more with nothing recorded</b><p>Ticked where it's likely. Untick anyone it doesn't fit.</p></div>
+    ${rest.map(({r,k})=>{const wk=r.sent.slice(-8)===q.sent.slice(-8)&&Math.abs(parseInt(r.sent)-parseInt(q.sent))<=3;const why=wk?"queried the same week":(r.asks&&q.asks&&r.asks.join()===q.asks.join()?"asks for the same":"");
+      const clash=a.m.includes("Opening sample")&&r.askS&&askWords(r)!==sampleWords(a.s)?`<span class="mmi">${r.f}'s guidelines ask for ${askWords(r)}</span>`:"";
+      return `<div class="sr${same.has(k)?" on":""}" onclick="tsame(${k})"><span class="bx">${same.has(k)?"✓":""}</span><span>${r.n} <i>· ${r.a} · ${r.sent}</i>${clash}</span><em class="${why?"why":""}">${why||""}</em></div>`}).join("")}
+    <div class="sel2"><a onclick="allSame(1)">Tick all</a><a onclick="allSame(0)">Untick all</a></div></div>`;
+    const n=same.size+1;
+    f=`<button class="g" onclick="step=0;render()">← Back</button><span class="of">2 of 2</span><button class="pri" onclick="logSame()">Log it for ${n} ${n===1?"query":"queries"}</button>`;
+  }
+  $("scroll").innerHTML=h;$("foot").innerHTML=f;card(i);
+}
+function tog(k,m){const a=ans[k];a.m=a.m.includes(m)?a.m.filter(x=>x!==m):[...a.m,m];render()}
+function setU(k,u){const d={chapters:3,pages:10,words:5000};if(ans[k].s.u===u)return;ans[k].s.u=u;ans[k].s.n=d[u];if(u==="pages")ans[k].s.fu="page";if(u==="chapters")ans[k].s.fu="chapter";render()}
+function setN(k,n){ans[k].s.n=n;render()}
+function setF(k,f){ans[k].s.from=f;render()}
+function setFU(k,u){const d={chapter:4,page:40,word:20000};if(ans[k].s.fu===u)return;ans[k].s.fu=u;ans[k].s.fn=d[u];render()}
+function setFN(k,n){ans[k].s.fn=n;render()}
+function num(v){const n=parseInt(String(v).replace(/[^0-9]/g,""),10);return isNaN(n)||n<1?null:n}
+function typeN(k,v){const n=num(v);if(n)ans[k].s.n=n;render()}
+function typeF(k,v){const n=num(v);if(n)ans[k].s.fn=n;render()}
+function bumpF(k,d){const s=ans[k].s,st={chapter:1,page:5,word:1000}[s.fu];s.fn=Math.max(1,Number(s.fn)+d*st);render()}
+function bump(k,d){const s=ans[k].s,st={chapters:1,pages:5,words:500}[s.u];s.n=Math.max(1,Number(s.n)+d*st);render()}
+function toSame(){step=1;same=new Set();const q=Q[i];Q.forEach((r,k)=>{if(k===i||doneSet.has(k))return;const wk=r.sent.slice(-8)===q.sent.slice(-8)&&Math.abs(parseInt(r.sent)-parseInt(q.sent))<=3;if(wk||(r.asks&&q.asks&&r.asks.join()===q.asks.join()))same.add(k)});render()}
+function tsame(k){same.has(k)?same.delete(k):same.add(k);render()}
+function allSame(on){same=new Set();if(on)Q.forEach((_,k)=>{if(k!==i&&!doneSet.has(k))same.add(k)});render()}
+function toast(t){const o=$("ok");o.innerHTML=`<span>✓ ${t}</span><button onclick="this.parentElement.classList.remove('show')">Undo</button>`;o.classList.add("show");clearTimeout(o._t);o._t=setTimeout(()=>o.classList.remove("show"),5000)}
+function next(){let k=i;for(let n=0;n<Q.length;n++){k=(k+1)%Q.length;if(!doneSet.has(k)){i=k;step=0;render();return}}toast("Batch done. Nothing left to fill in.");render()}
+function logSame(){const src=ans[i];doneSet.add(i);same.forEach(k=>{ans[k]={m:[...src.m],s:{...src.s}};doneSet.add(k)});toast(`Logged for ${same.size+1} queries`);next()}
+function logOne(){doneSet.add(i);toast(`Logged for ${Q[i].f}`);next()}
+function tt(k,m){const a=ans[k];a.m=a.m.includes(m)?a.m.filter(x=>x!==m):[...a.m,m];render()}
+function fillAsks(){let miss=[];Q.forEach((q,k)=>{if(!q.asks){miss.push(q.f);return}ans[k].m=[...q.asks];if(q.askS)ans[k].s={...defS(),u:q.askS.u,n:q.askS.n}});tmsg=miss.length?`Filled ${Q.length-miss.length}. No guidelines saved for ${miss.join(" and ")}, so ${miss.length===1?"that row is":"those rows are"} still empty.`:"Filled every row from their guidelines.";render()}
+function openSample(k){openRow=openRow===k?-1:k;if(openRow===k&&!ans[k].m.includes("Opening sample")){ans[k].m.push("Opening sample")}render()}
+function copyFrom(src){ans[i]={m:[...ans[src].m],s:{...ans[src].s}};render()}
+function copyDown(){const s=ans[0];let n=0;Q.forEach((_,k)=>{if(k&&!ans[k].m.length){ans[k]={m:[...s.m],s:{...s.s}};n++}});tmsg=`Copied ${Q[0].f}'s row to ${n} empty ${n===1?"row":"rows"}.`;render()}
+function logTable(){ans.forEach((a,k)=>{if(a.m.length)doneSet.add(k)});toast(`Logged for ${doneSet.size} queries`);render()}
+document.querySelectorAll(".o").forEach(b=>b.onclick=()=>{document.querySelectorAll(".o").forEach(x=>x.classList.remove("on"));b.classList.add("on");size=+b.dataset.n;reset()});
+function setView(v){chosen=v;view=v;mode=v;step=0;openRow=-1;render()}
+document.querySelectorAll("#vsw button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+reset(true);
+</script>
+</body>
+</html>

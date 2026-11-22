@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "F1",
+  "where": "population",
+  "ok": true,
+  "detail": "queries by book {\"The Smoke Test\":52,\"Murphy's Day Out\":14,\"Harbour of Glass\":8,\"The Quiet Second\":2,\"The Quiet Fixture\":10}"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list log door lands",
+  "ok": true,
+  "detail": "the shell's Log a query from /agents lands on /queries"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list log shown",
+  "ok": true,
+  "detail": "the moment shown"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list log n",
+  "ok": false,
+  "detail": "\"no. 14\" for Murphy's Day Out, Firestore says 14 queries → no. 15"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list after an agent",
+  "ok": true,
+  "detail": "the log moment after an agent is chosen"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list record door stays",
+  "ok": true,
+  "detail": "the record door left the page at /agents"
+ },
+ {
+  "lock": "F1",
+  "where": "Contact list record",
+  "ok": true,
+  "detail": "record title \"Someone wrote back.\""
+ },
+ {
+  "lock": "F1",
+  "where": "Query Centre log shown",
+  "ok": true,
+  "detail": "the moment shown"
+ },
+ {
+  "lock": "F1",
+  "where": "Query Centre log n",
+  "ok": false,
+  "detail": "\"no. 14\" for Murphy's Day Out, Firestore says 14 queries → no. 15"
+ },
+ {
+  "lock": "F1",
+  "where": "Query Centre after an agent",
+  "ok": true,
+  "detail": "the log moment after an agent is chosen"
+ },
+ {
+  "lock": "F1",
+  "where": "Query Centre record",
+  "ok": true,
+  "detail": "record title \"Someone wrote back.\""
+ }
+]

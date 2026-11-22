@@ -1,0 +1,77 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "{\"header\":{\"l\":276,\"r\":1476,\"w\":1200},\"banner\":{\"l\":276,\"r\":1476,\"w\":1200},\"toolbar\":{\"l\":276,\"r\":1476,\"w\":1200},\"table\":{\"l\":276,\"r\":1476,\"w\":1200},\"signoff\":{\"l\":276,\"r\":1476,\"w\":1200},\"birds\":{\"l\":276,\"r\":1476,\"w\":1200}}"
+ },
+ {
+  "where": "formula",
+  "ok": true,
+  "detail": "W 1100 (sheet 1256)"
+ },
+ {
+  "where": "header width",
+  "ok": false,
+  "detail": "1200.0 vs 1100"
+ },
+ {
+  "where": "header centred",
+  "ok": true,
+  "detail": "876.0 vs 876.0"
+ },
+ {
+  "where": "banner width",
+  "ok": false,
+  "detail": "1200.0 vs 1100"
+ },
+ {
+  "where": "banner centred",
+  "ok": true,
+  "detail": "876.0 vs 876.0"
+ },
+ {
+  "where": "toolbar width",
+  "ok": false,
+  "detail": "1200.0 vs 1100"
+ },
+ {
+  "where": "toolbar centred",
+  "ok": true,
+  "detail": "876.0 vs 876.0"
+ },
+ {
+  "where": "table width",
+  "ok": false,
+  "detail": "1200.0 vs 1100"
+ },
+ {
+  "where": "table centred",
+  "ok": true,
+  "detail": "876.0 vs 876.0"
+ },
+ {
+  "where": "signoff width",
+  "ok": false,
+  "detail": "1200.0 vs 1100"
+ },
+ {
+  "where": "signoff centred",
+  "ok": true,
+  "detail": "876.0 vs 876.0"
+ },
+ {
+  "where": "birds width",
+  "ok": false,
+  "detail": "1200.0 vs 1100"
+ },
+ {
+  "where": "birds centred",
+  "ok": true,
+  "detail": "876.0 vs 876.0"
+ },
+ {
+  "where": "title one line",
+  "ok": true,
+  "detail": "1 lines"
+ }
+]

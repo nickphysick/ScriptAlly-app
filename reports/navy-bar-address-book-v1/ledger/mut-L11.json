@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L11",
+  "where": "1280 · population: the box in full screen",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"full\":true,\"l\":20,\"t\":20,\"r\":1260,\"bt\":780,\"vw\":1280,\"vh\":800,\"cols\":2,\"strip\":true,\"card\":true,\"bg\":\"rgb(36, 51, 74)\",\"page\":\"rgb(242, 238, 232)\"}"
+ },
+ {
+  "lock": "L11",
+  "where": "1280 · fixed, at inset 20 (±1)",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"full\":true,\"l\":20,\"t\":20,\"r\":1260,\"bt\":780,\"vw\":1280,\"vh\":800,\"cols\":2,\"strip\":true,\"card\":true,\"bg\":\"rgb(36, 51, 74)\",\"page\":\"rgb(242, 238, 232)\"}"
+ },
+ {
+  "lock": "L11",
+  "where": "1280 · the same two columns, strip and card",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"full\":true,\"l\":20,\"t\":20,\"r\":1260,\"bt\":780,\"vw\":1280,\"vh\":800,\"cols\":2,\"strip\":true,\"card\":true,\"bg\":\"rgb(36, 51, 74)\",\"page\":\"rgb(242, 238, 232)\"}"
+ },
+ {
+  "lock": "L11",
+  "where": "1280 · no navy backdrop: the page's own background",
+  "ok": false,
+  "detail": "rgb(36, 51, 74) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "L11",
+  "where": "1280 · Esc exits",
+  "ok": true,
+  "detail": "{\"full\":false,\"pos\":\"static\"}"
+ },
+ {
+  "lock": "L11",
+  "where": "1512 · population: the box in full screen",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"full\":true,\"l\":20,\"t\":20,\"r\":1492,\"bt\":880,\"vw\":1512,\"vh\":900,\"cols\":2,\"strip\":true,\"card\":true,\"bg\":\"rgb(36, 51, 74)\",\"page\":\"rgb(242, 238, 232)\"}"
+ },
+ {
+  "lock": "L11",
+  "where": "1512 · fixed, at inset 20 (±1)",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"full\":true,\"l\":20,\"t\":20,\"r\":1492,\"bt\":880,\"vw\":1512,\"vh\":900,\"cols\":2,\"strip\":true,\"card\":true,\"bg\":\"rgb(36, 51, 74)\",\"page\":\"rgb(242, 238, 232)\"}"
+ },
+ {
+  "lock": "L11",
+  "where": "1512 · the same two columns, strip and card",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"full\":true,\"l\":20,\"t\":20,\"r\":1492,\"bt\":880,\"vw\":1512,\"vh\":900,\"cols\":2,\"strip\":true,\"card\":true,\"bg\":\"rgb(36, 51, 74)\",\"page\":\"rgb(242, 238, 232)\"}"
+ },
+ {
+  "lock": "L11",
+  "where": "1512 · no navy backdrop: the page's own background",
+  "ok": false,
+  "detail": "rgb(36, 51, 74) vs rgb(242, 238, 232)"
+ },
+ {
+  "lock": "L11",
+  "where": "1512 · Esc exits",
+  "ok": true,
+  "detail": "{\"full\":false,\"pos\":\"static\"}"
+ }
+]

@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "[22,36,12,18]"
+ },
+ {
+  "where": "navy buttons: navy, white text",
+  "ok": true,
+  "detail": "[{\"id\":\"seed-query-12\",\"w\":\"you\",\"st\":\"Offer\",\"btn\":{\"tone\":\"navy\",\"label\":\"Answer the offer\",\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(255, 255, 255)\",\"sh\":\"none\"}},{\"id\":\"cv25-q-08\",\"w\":\"you\",\"st\":\"Offer\",\"btn\":{\"tone\":\"navy\",\"label\":\"Answer the offer\",\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(255, 255, 255)\",\"sh\":\"none\"}}]"
+ },
+ {
+  "where": "Nudge / Close it: white, navy text, outlined #c9cfd8",
+  "ok": true,
+  "detail": "[{\"id\":\"seed-pkgq-9\",\"w\":\"you\",\"st\":\"Full Sent\",\"btn\":{\"tone\":\"nudge\",\"label\":\"Nudge\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"rgb(201, 207, 216) 0px 0px 0px 1.5px inset\"}},{\"id\":\"seed-query-21\",\"w\":\"you\",\"st\":\"Full Sent\",\"btn\":{\"tone\":\"nudge\",\"label\":\"Nudge\",\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"rgb(201, 207, 216) 0px 0px 0px 1.5px inset\"}}]"
+ },
+ {
+  "where": "every Your move row has a button; gone quiet's is Close it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "With the agent and Closed: none",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Birds-eye population",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "where": "Birds-eye: the list's colour and words for the same query",
+  "ok": true,
+  "detail": "[]"
+ }
+]

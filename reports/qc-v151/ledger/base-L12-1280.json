@@ -1,0 +1,32 @@
+[
+ {
+  "where": "All: shown with the total",
+  "ok": false,
+  "detail": "undefined / undefined"
+ },
+ {
+  "where": "another tab: absent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "a search: absent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "a filter: absent",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "back to All: shown",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Birds-eye: absent",
+  "ok": true,
+  "detail": ""
+ }
+]

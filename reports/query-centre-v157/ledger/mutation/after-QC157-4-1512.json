@@ -1,0 +1,47 @@
+[
+ {
+  "name": "every fact box (176): gap above and below differ ≤ 1px",
+  "ok": false,
+  "got": "worst 32.97"
+ },
+ {
+  "name": "seed-query-12 sent",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ },
+ {
+  "name": "seed-query-12 next",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ },
+ {
+  "name": "cv25-q-08 sent",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ },
+ {
+  "name": "cv25-q-08 next",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ },
+ {
+  "name": "seed-query-7 sent",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ },
+ {
+  "name": "seed-query-7 next",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ },
+ {
+  "name": "seed-query-11 sent",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ },
+ {
+  "name": "seed-query-11 next",
+  "ok": false,
+  "got": "10.00 / 24.78"
+ }
+]

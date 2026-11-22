@@ -1,0 +1,77 @@
+[
+ {
+  "where": "harness: the count on file from the rows",
+  "ok": true,
+  "detail": "53 agents on file vs 53 rows"
+ },
+ {
+  "where": "harness: typewriter, 36px, ink",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\" 36px rgb(28, 19, 15)"
+ },
+ {
+  "where": "harness: the subheader from the rows' own stands",
+  "ok": true,
+  "detail": "39 not yet queried"
+ },
+ {
+  "where": "harness: the subheader is a rust button",
+  "ok": true,
+  "detail": "true rgb(162, 69, 42)"
+ },
+ {
+  "where": "case {\"n\":17,\"q\":12,\"y\":5} title",
+  "ok": true,
+  "detail": "17 agents on file"
+ },
+ {
+  "where": "case {\"n\":17,\"q\":12,\"y\":5} subheader",
+  "ok": true,
+  "detail": "5 not yet queried link=true"
+ },
+ {
+  "where": "case {\"n\":17,\"q\":17,\"y\":1} title",
+  "ok": true,
+  "detail": "17 agents on file"
+ },
+ {
+  "where": "case {\"n\":17,\"q\":17,\"y\":1} subheader",
+  "ok": true,
+  "detail": "All of them queried link=false"
+ },
+ {
+  "where": "case {\"n\":17,\"q\":17,\"y\":1} plain in the quiet brown",
+  "ok": true,
+  "detail": "rgb(91, 79, 71)"
+ },
+ {
+  "where": "case {\"n\":1,\"q\":1,\"y\":0} title",
+  "ok": true,
+  "detail": "1 agent on file"
+ },
+ {
+  "where": "case {\"n\":1,\"q\":1,\"y\":0} subheader",
+  "ok": true,
+  "detail": "Already queried link=false"
+ },
+ {
+  "where": "case {\"n\":1,\"q\":1,\"y\":0} plain in the quiet brown",
+  "ok": true,
+  "detail": "rgb(91, 79, 71)"
+ },
+ {
+  "where": "case {\"n\":2,\"q\":0,\"y\":0} title",
+  "ok": true,
+  "detail": "2 agents so far. Neither queried yet."
+ },
+ {
+  "where": "case {\"n\":2,\"q\":0,\"y\":0} subheader",
+  "ok": true,
+  "detail": "null link=false"
+ },
+ {
+  "where": "case {\"n\":2,\"q\":0,\"y\":0} line beneath",
+  "ok": true,
+  "detail": "Add a few more and QueryHawk can start suggesting who to query next."
+ }
+]

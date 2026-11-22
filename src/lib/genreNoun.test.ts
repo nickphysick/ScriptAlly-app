@@ -17,12 +17,14 @@ describe("the genre-noun table", () => {
     expect(genreNoun("Crime")).toBe("crime");
     expect(genreNoun("crime")).toBe("crime");
     expect(genreNoun("Cosy crime")).toBe("cosy crime");
-    expect(genreNoun("noir")).toBe("crime");
+    /* Manuscripts v28 D2 moved the "noir" alias onto its own sub-genre (which still counts as crime when matching) */
+    expect(genreNoun("noir")).toBe("noir");
   });
   it("says each genre the way a sentence does, from a label, an id or an alias", () => {
     expect(genreNoun("Thriller")).toBe("thrillers");
     expect(genreNoun("thriller")).toBe("thrillers");
-    expect(genreNoun("psychological thriller")).toBe("thrillers");
+    /* v28 D2: "psychological thriller" is its own sub-genre now, not an alias of thriller */
+    expect(genreNoun("psychological thriller")).toBe("psychological thrillers");
     expect(genreNoun("Mystery")).toBe("mysteries");
     expect(genreNoun("Contemporary")).toBe("contemporary fiction");
     expect(genreNoun("Dystopian")).toBe("dystopian fiction");
