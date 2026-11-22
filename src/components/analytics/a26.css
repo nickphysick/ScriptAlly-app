@@ -169,7 +169,7 @@
 /* the three-up tiles (rounds, comparison) */
 .a26-page .a26-cmp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
 .a26-page .a26-cm { display: flex; flex-direction: column; padding: 18px 14px 16px; border-radius: 14px; background: var(--a26-well); text-align: center; min-width: 0; }
-/* Consistency roll-out v1, Phase 7: the small heading */ .a26-page .a26-cm h3 { font: var(--sp-h-small) !important; min-height: 42px; }
+/* Consolidate and finish v1, B2: a stat tile's title heads that one card, so it is the card heading */ .a26-page .a26-cm h3 { font: var(--sp-h-card) !important; min-height: 50px; }
 .a26-page .a26-cm-v { margin-top: 14px; font: 400 18px/1.2 var(--a26-type); }
 .a26-page .a26-cm-n { margin-top: 4px; font-size: 14px; color: var(--sp-quiet); }
 .a26-page .a26-rd { text-align: left; padding: 18px; }
