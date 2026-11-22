@@ -65,7 +65,8 @@
 /* ══ B · the striped band (the Founding writer band's construction) ═══════════════════════════════════════════════ */
 .cp32 .cp32-band { margin-top: 0; padding: 6px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .06); }
 .cp32 .cp32-band-in { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; min-height: 56px; padding: 6px 14px 6px 6px; border-radius: 14px; background: repeating-linear-gradient(118deg, #edd8cd 0 14px, #e6cec1 14px 28px); }
-.cp32 .cp32-bdisc { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: #fbf4ee; box-shadow: 0 0 0 2px #b98372; color: #6b3d33; }
+/* Consistency wrap-up v1 (rulings v4, item 3): the disc's icon and ring are the app's rust; its fill and size are unchanged */
+.cp32 .cp32-bdisc { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: #fbf4ee; box-shadow: 0 0 0 2px var(--sp-rust); color: var(--sp-rust); }
 .cp32 .cp32-bdisc svg { width: 20px; height: 20px; }
 .cp32 .cp32-band b { font: 400 20px/1.2 var(--c32-type); }
 .cp32 .cp32-band i { width: 1px; height: 26px; background: rgba(28, 19, 15, .22); }

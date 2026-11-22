@@ -231,15 +231,6 @@
    "kind": "agreed"
   },
   {
-   "rule": "R11",
-   "match": {
-    "sel": "cp32-bdisc"
-   },
-   "reason": "For Nick (B7): Comps' book disc icon (#6b3d33) — is it artwork?",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
-  },
-  {
    "rule": "R5",
    "match": {
     "sel": "sc-ch-h"
