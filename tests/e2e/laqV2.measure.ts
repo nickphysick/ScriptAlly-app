@@ -9,7 +9,7 @@
  *
  *   V2-1  the header: one navy piece (no seam at 100 / 110 / 125 / 150 %), two lines, the mentor; all six steps shot
  *   V2-2  adding an agent without leaving: 02 → 03 → 04; the record and its Finish task; closing removes both
- *   V2-3  not sent yet: one task, no query; "It has gone after all" removes it
+ *   V2-3  not sent yet: one task, no query; "I've sent it" goes back to Sent and keeps it (v2.1)
  *   V2-4  materials in the three saved states: 12 (asks + package match, one tap), 22 (no packages), 19 (nothing saved), 07
  *   V2-5  nudge: 08 (Unknown), 09 (past the date), 14 (from the card)
  *   V2-6  review: 15, 16 (paperclip open; Esc closes it first), 20 (no date), 10 (past); the two tiles
@@ -189,7 +189,7 @@ test("V2-2 — adding an agent without leaving the journey; closing removes it a
   ok(!s2.tasks.some((t) => t.agentId === added?.id), `…and the task (${JSON.stringify(s2.tasks)})`);
 });
 
-test("V2-3 — not sent yet: one task, no query; it has gone after all removes it", async () => {
+test("V2-3 — not sent yet: one task, no query; I've sent it goes back to Sent and keeps it", async () => {
   test.setTimeout(180_000);
   await open(page);
   await agent(page, "laq2-hv");
@@ -207,7 +207,9 @@ test("V2-3 — not sent yet: one task, no query; it has gone after all removes i
   await q(page, "sent-after-all").click();
   await page.waitForTimeout(800);
   const s2 = state();
-  ok(!s2.tasks.some((t) => t.agentId === "laq2-hv"), `it has gone after all removed it, and pressing again made no second (${JSON.stringify(s2.tasks)})`);
+  /* v2.1 · Phase 4: the task's "I've sent it" goes back to Sent and keeps the task (logging completes it, V21-3); pressing
+     "Put it on your to-do list" again made no second */
+  ok(s2.tasks.filter((t) => t.agentId === "laq2-hv").length === 1, `I've sent it keeps the one task (${JSON.stringify(s2.tasks)})`);
   /* catching up: an earlier date more than a week back */
   await sentBack(page, 2);
   ok((await head(page)).startsWith("Catching up."), `catching up (${await head(page)})`);
@@ -273,7 +275,7 @@ test("V2-5 — nudge: Unknown, past the date, from the card", async () => {
   await discard(page);
 });
 
-test("V2-6 — review: the grid card in preview, the paperclip, the two tiles", async () => {
+test("V2-6 — review: the grid card in preview, the paperclip, the two numbers", async () => {
   test.setTimeout(240_000);
   await open(page);
   await agent(page, "laq2-hv"); await sentToday(page); await q(page, "use-ask").click(); await how(page); await nudgeOn(page);
@@ -281,9 +283,10 @@ test("V2-6 — review: the grid card in preview, the paperclip, the two tiles", 
   ok(await card.isVisible(), "the grid card");
   ok((await card.getAttribute("role")) === "group" && (await card.getAttribute("tabindex")) === null, "not a link: no button role, no tab stop");
   ok(!(await card.locator('[data-qc154="act"]').count()), "no hover action in the Next box");
-  const tiles = await page.locator('[data-qls="count-tile"]').evaluateAll((els) => els.map((e) => ({ k: e.getAttribute("data-k"), h: Math.round(e.getBoundingClientRect().height), t: (e.textContent ?? "").replace(/\s+/g, " ").trim() })));
+  /* v2.1 · Phase 1 (D2): the two numbers are big numbers, the figure after logging with "+1" (V21-1 reads them) */
+  const tiles = await page.locator('[data-qls="count"]').evaluateAll((els) => els.map((e) => ({ k: e.getAttribute("data-k"), t: (e.textContent ?? "").replace(/\s+/g, " ").trim() })));
   READ.tiles = tiles;
-  ok(tiles.length === 2 && tiles[0].h === tiles[1].h, `two tiles, one height (${JSON.stringify(tiles)})`);
+  ok(tiles.length === 2 && tiles.every((x) => /\+1/.test(x.t)), `two big numbers (${JSON.stringify(tiles)})`);
   await shot(page, "15-review");
   const hoverBefore = await card.boundingBox();
   await card.hover(); await page.waitForTimeout(300);

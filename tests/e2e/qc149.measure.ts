@@ -437,7 +437,7 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       await carryOnMaterials(page);
       if (await page.locator("[data-qls='root'][data-step='how']").count()) await tap(page, "[data-qls='how-opt']");
       if (await page.locator("[data-qls='root'][data-step='nudge']").count()) await tap(page, "[data-qls='nudge-continue']");
-      L.check("the check, with the preview slip", !!(await box(page, "[data-qls='root'][data-step='check'] [data-qls='preview'] [data-qc153='slip']")), "no check");
+      L.check("the check, with the preview card (v2: the grid card)", !!(await box(page, "[data-qls='root'][data-step='check'] [data-qls='preview'] [data-qc154='card']")), "no check");
       await tap(page, "[data-qls='log']");
       await page.waitForTimeout(3500);
       L.check("the celebration", /^Off to /.test((await page.locator("[data-qls='yay-head']").getAttribute("aria-label").catch(() => null)) ?? ""), "no celebration");

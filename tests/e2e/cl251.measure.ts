@@ -27,7 +27,6 @@ function doneAll(...xs: [Ledger, number][]) {
 }
 const near = (a: number | undefined | null, b: number | undefined | null, d = 1) => a != null && b != null && Math.abs(a - b) <= d;
 const f1 = (n: number | undefined | null) => (n == null ? "—" : n.toFixed(1));
-const LOG_LINE = "Another one out the door – good work. Let’s get the dates and materials added, then sit back and we’ll remind you if and when you need to nudge.";
 const AGENT_LINE = "Fill out your agent profile with all the detail you can. A healthy list means better tracking, analysis, suggestions and reminders.";
 const RECORD: Record<string, string> = {
   partial: "A partial request: they want to read more, and that’s a real step forward. Add the date they asked and the send goes on your to-do list.",
@@ -133,7 +132,7 @@ test.skip("CL251-A1 A2 · one ledger card of four cells; a press filters, pale w
 });
 
 /* ═════════ B · the flows' headers ═════════ */
-test("CL251-B1 B2 B3 · the headers: Logging new query, Recording response and its four lines, Adding new agent", async ({ page }) => {
+test("CL251-B1 B2 B3 · the headers: Log a query (v2), Recording response and its four lines, Adding new agent", async ({ page }) => {
   test.setTimeout(400_000);
   const B1 = new Ledger("B1"), B2 = new Ledger("B2"), B3 = new Ledger("B3");
   const vp = SIZES[0];
@@ -143,15 +142,20 @@ test("CL251-B1 B2 B3 · the headers: Logging new query, Recording response and i
     const h = await head(page, "[data-qc149f='log']");
     B1.check(`${where} population`, !!h, `the log flow ${h ? "open" : "missing"}`);
     if (!h) return;
-    B1.check(`${where} first text`, h.first === "Logging new query", `first "${h.first}"`);
-    B1.check(`${where} line`, h.line === LOG_LINE, `line "${h.line?.slice(0, 50)}…"`);
-    B1.check(`${where} no art`, h.imgs === 0, `${h.imgs} img(s) in the header`);
+    /* Log a query v2 replaced this header (D1: one navy piece, two lines from `headline()`, the mentor); v2.1 Phase 7
+       re-points B1 at it. The B1 mutation (a second image) still breaks "one image". */
+    const HEAD = "Another query out. Great work!Let’s log the details.";
+    B1.check(`${where} first text`, h.first === "Another query out. Great work!", `first "${h.first}"`);
+    B1.check(`${where} title`, h.title === HEAD, `title "${h.title}"`);
+    B1.check(`${where} no line`, h.line === null, `line "${h.line?.slice(0, 50)}…"`);
+    B1.check(`${where} the mentor only`, h.imgs === 1, `${h.imgs} img(s) in the header`);
     B1.check(`${where} no band label`, !/^New query$/m.test(h.text), "\"New query\" absent");
-    /* Log a query v1 — each stage has its own line under the same title: Sent asks "When did you send it?" */
+    /* choosing an agent keeps the headline; the step asks when it went */
     await page.locator("[data-qls='agent'][data-group='ready']").first().click(T);
     await page.waitForTimeout(600);
     const h2 = await head(page, "[data-qc149f='log']");
-    B1.check(`${where} after an agent`, h2?.title === "Logging new query" && h2.line === "When did you send it?", `after choosing: "${h2?.title}" / "${h2?.line}"`);
+    const ask = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qls='body'] h2.laq-qh")].find((e) => e.offsetWidth)?.textContent ?? "");
+    B1.check(`${where} after an agent`, h2?.title === HEAD && /^When did it go to /.test(ask), `after choosing: "${h2?.title}" / "${ask}"`);
   };
   /* the Contact list: the top bar's Log a query, in place */
   await openCl24(page, vp);

@@ -35,7 +35,7 @@ export async function shot(page: Page, name: string): Promise<void> {
 
 
 /**
- * The first "Ready to query" row, once the list has stopped changing: the app's local Firestore cache can still be
+ * The first "Not queried yet" row, once the list has stopped changing: the app's local Firestore cache can still be
  * catching up when the panel opens, and an agent read as ready may move into the "already querying" fold a moment later.
  * Returns its id (stable for a full second).
  */

@@ -67,7 +67,8 @@ export async function openQc149(page: Page, vp: VP) {
     } catch { /* private mode */ }
   });
   await openApp(page, "/queries", vp);
-  await page.locator(".qc138-sheet [data-qcv='row']").first().waitFor({ timeout: 30_000 });
+  /* Log a query v2.1 Phase 7 — the Queries page's default view is the grid card (v154) now, besides the v138 sheet */
+  await page.locator(".qc138-sheet [data-qcv='row'], [data-qc154='card']").first().waitFor({ timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1000);
 }

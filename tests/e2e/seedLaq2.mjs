@@ -37,7 +37,7 @@ if (process.argv.includes("--state")) {
   const qs = (await db.collection(`users/${uid}/queries`).get()).docs.filter((d) => BOOKS.includes(d.data().manuscriptId))
     .map((d) => ({ id: d.id, agentId: d.data().agentId, manuscriptId: d.data().manuscriptId, status: d.data().status, nudgeDate: d.data().nudgeDate ?? null, sentPackageId: d.data().sentPackageId ?? null }));
   const added = (await db.collection(`users/${uid}/agents`).get()).docs.filter((d) => / Laqtwo$/.test(String(d.data().name ?? ""))).map((d) => ({ id: d.id, name: d.data().name, agency: d.data().agency ?? "" }));
-  const tasks = (await db.collection(`users/${uid}/tasks`).get()).docs.filter((d) => ours(d.id, d.data())).map((d) => ({ id: d.id, text: d.data().text, agentId: d.data().agentId ?? null }));
+  const tasks = (await db.collection(`users/${uid}/tasks`).get()).docs.filter((d) => ours(d.id, d.data())).map((d) => ({ id: d.id, text: d.data().text, agentId: d.data().agentId ?? null, done: !!d.data().done }));
   console.log(JSON.stringify({ queries: qs, added, tasks }));
   process.exit(0);
 }
