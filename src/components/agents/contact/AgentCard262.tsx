@@ -1021,7 +1021,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       say({ message: "Note deleted", undo: async () => { if (await onRestoreNote(n)) say({ message: "Note restored" }); } });
     });
   };
-  const quotes = threads.flatMap((t) => quotesOf(t.steps));
+  /* v2.2 — each quote knows its query, for "Change it on the query" (the agent's words are read-only here) */
+  const quotes = threads.flatMap((t) => quotesOf(t.steps).map((q0) => ({ ...q0, queryId: t.queryId })));
   const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const notes = (
     <div className="qc152-notes acv2-notes" data-cl262="notes" data-cl24="pane" data-acv2="notes">
@@ -1032,7 +1033,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         onEdit={p.preview ? null : editNote}
         onDelete={p.preview ? null : deleteNote}
         onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => say({ message: "On your to-do list for today" })); }}
-        onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => say({ message: "Pinned to your Corkboard" })); }} />
+        onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => say({ message: "Pinned to your Corkboard" })); }}
+        onQuoteOpen={p.preview ? null : (q0) => { if (q0.queryId) openQuery(q0.queryId); }} />
     </div>
   );
 

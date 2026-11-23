@@ -30,7 +30,7 @@ import { dayLabel, sideOf, tintOf, type ThreadStepIn } from "../../../lib/qcThre
 import { Bar } from "./QcGhost167";
 
 export interface NoteIn { id: string; text: string; ms: number | null; pinned: boolean; /** Agent card v2 — an undated note drawn first among the notes (the agent's old notes string) */ top?: boolean }
-export interface QuoteIn { key: string; status: QueryStatus | null; kind: "holding" | null; text: string; ms: number | null; fill: string; edge: string; /** v168 — the response's activity, whose words these are */ activityId?: string | null }
+export interface QuoteIn { key: string; status: QueryStatus | null; kind: "holding" | null; text: string; ms: number | null; fill: string; edge: string; /** v168 — the response's activity, whose words these are */ activityId?: string | null; /** Agent card v2.2 — the query they were said on */ queryId?: string | null }
 
 /** "when asking for the partial", "when passing", "with the offer" — what the response was, in the agent's name */
 export function quotePhrase(status: QueryStatus | null, kind: "holding" | null): string {
@@ -89,6 +89,8 @@ export interface NotesTab158Props {
   /** Query card v168 — the agent's recorded words edited in place, through their step's own words field (true when it
    *  landed); absent (the agent card): read-only */
   onQuoteEdit?: ((q: QuoteIn, text: string) => Promise<boolean>) | null;
+  /** Agent card v2.2 — where the agent's words are read-only (the agent card): open the query they were said on */
+  onQuoteOpen?: ((q: QuoteIn) => void) | null;
   /** Query card v167 §A — with no notes, two ghost note shapes in place of the empty words (the query card passes it;
    *  the agent card's empty state is its own and unchanged) */
   ghost?: boolean;
@@ -182,8 +184,12 @@ type Row = { t: "note"; n: NoteIn } | { t: "quote"; q: QuoteIn };
 
 /** v168 — what a note's ⋯ holds: Pin to the top (or Unpin), Make it a task, Send to Corkboard; the agent's words, Send to
  *  Corkboard only */
-export function menuItems168(e: Row, p: Pick<NotesTab158Props, "onPin" | "onTask" | "onCork">): { k: "pin" | "task" | "cork"; label: string; act: () => void }[] {
-  if (e.t === "quote") return p.onCork ? [{ k: "cork", label: "Send to Corkboard", act: () => p.onCork!(e.q.text) }] : [];
+export function menuItems168(e: Row, p: Pick<NotesTab158Props, "onPin" | "onTask" | "onCork" | "onQuoteOpen">): { k: "pin" | "task" | "cork" | "open"; label: string; act: () => void }[] {
+  if (e.t === "quote") return [
+    ...(p.onCork ? [{ k: "cork" as const, label: "Send to Corkboard", act: () => p.onCork!(e.q.text) }] : []),
+    /* Agent card v2.2 — the agent's words are read-only on that card: they are changed on the query they were said on */
+    ...(p.onQuoteOpen && e.q.queryId ? [{ k: "open" as const, label: "Change it on the query", act: () => p.onQuoteOpen!(e.q) }] : []),
+  ];
   return [
     ...(p.onPin ? [{ k: "pin" as const, label: e.n.pinned ? "Unpin" : "Pin to the top", act: () => p.onPin!(e.n.id, !e.n.pinned) }] : []),
     ...(p.onTask ? [{ k: "task" as const, label: "Make it a task", act: () => p.onTask!(e.n.text) }] : []),
