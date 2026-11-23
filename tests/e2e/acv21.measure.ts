@@ -318,25 +318,21 @@ test("AC21-2d · a tick saves its section only, as the built save stores it", as
   before = dump(id);
   if (MUTS.has("wholedraft")) await page.evaluate(() => {
     document.addEventListener("click", (e) => {
-      const t = (e.target as HTMLElement).closest<HTMLElement>("[data-acv21='tick'][data-k='wishlist']");
-      if (t) document.querySelector<HTMLElement>("[data-acv21='tick'][data-k='genres']")?.click();
+      const t = (e.target as HTMLElement).closest<HTMLElement>("[data-acv21='open'][data-k='wishlist'] [data-qc168='tick']");
+      if (t) document.querySelector<HTMLElement>("[data-acv21='open'][data-k='genres'] [data-qc168='tick']")?.click();
     }, true);
   });
+  /* Agent card v2.2 — re-pointed: one section is open at a time, so the wishlist is changed and ticked on its own */
   await pen(page, "wishlist");
-  await pen(page, "genres");
   const wl = page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`);
   await wl.fill("Thrillers with a moral knot, and AC21.");
   const gi = page.locator(`${AC} [data-acv21='open'][data-k='genres'] [data-aap='genre-input']`);
-  await gi.fill("Romance");
-  await gi.press("Enter");
   await page.waitForTimeout(200);
   await tick(page, "wishlist");
   after = dump(id);
   L.check("the wishlist's tick stores the wishlist", after.mswlNotes === "Thrillers with a moral knot, and AC21.", String(after.mswlNotes));
   L.check("…and leaves the stored genres alone", JSON.stringify(after.genres) === JSON.stringify(before.genres), `${JSON.stringify(after.genres)} vs ${JSON.stringify(before.genres)}`);
-  const g = await page.evaluate((js) => { const c = eval(js) as HTMLElement; return { open: !!c.querySelector("[data-acv21='open'][data-k='genres']"), chips: [...c.querySelectorAll<HTMLElement>("[data-acv21='open'][data-k='genres'] [data-aap='genre-chip']")].map((e) => e.dataset.g) }; }, CARD_JS);
-  L.check("…and the genre draft is still on screen", g.open && g.chips.includes("Romance"), JSON.stringify(g));
-  await cross(page, "genres");
+  L.check("…and nothing else was open (one section at a time)", (await openSecs(page)).length === 0, JSON.stringify(await openSecs(page)));
   /* each section stores what the same edit stored before this pack: the card's own patch for the same draft */
   before = dump(id);
   await pen(page, "contact");
@@ -359,23 +355,18 @@ test("AC21-2d · a tick saves its section only, as the built save stores it", as
   after = dump(id);
   L.check("Genres · stored as the patch stores it", JSON.stringify(after.genres) === JSON.stringify(expectedAfter(before, (d) => ({ ...d, genres: [...d.genres, "Horror"] })).genres), JSON.stringify(after.genres));
   L.check("the snackbar names the section", /Saved genres for Eda/.test(await toastText(page)), await toastText(page));
-  /* the cross: that section's fields back, another open section's draft untouched; Undo brings the draft back */
+  /* the cross: that section's fields back; Undo brings the draft back (v2.2: one section open at a time) */
   await pen(page, "wishlist");
-  await pen(page, "genres");
   await wl.fill("Crossed out.");
-  await gi.fill("Satire");
-  await gi.press("Enter");
   await cross(page, "wishlist");
   const x1 = await page.evaluate((js) => { const c = eval(js) as HTMLElement; return { wishOpen: !!c.querySelector("[data-acv21='open'][data-k='wishlist']"), quote: c.querySelector("[data-cl262='wishlist']")?.textContent ?? "", chips: [...c.querySelectorAll<HTMLElement>("[data-acv21='open'][data-k='genres'] [data-aap='genre-chip']")].map((e) => e.dataset.g) }; }, CARD_JS);
   L.check("the cross closes its section with its fields as stored", !x1.wishOpen && x1.quote === "Thrillers with a moral knot, and AC21.", JSON.stringify(x1));
-  L.check("…and leaves the other open section's draft alone", x1.chips.includes("Satire"), JSON.stringify(x1.chips));
   L.check("…the snackbar: “Changes to the wishlist discarded”", /Changes to the wishlist discarded/.test(await toastText(page)), await toastText(page));
   await toastUndo(page);
   const x2 = await page.evaluate((js) => (eval(js) as HTMLElement).querySelector<HTMLTextAreaElement>("[data-acv21='open'][data-k='wishlist'] textarea")?.value ?? null, CARD_JS);
   L.check("its Undo reopens the section with the changes back", x2 === "Crossed out.", String(x2));
   await cross(page, "wishlist");
-  await cross(page, "genres");
-  L.done(14);
+  L.done(13);
 });
 
 /* AC21-2e (the rust bar, Save all, Discard with two sections changed) is RETIRED by Agent card v2.2: one section is open at
@@ -429,8 +420,11 @@ test("AC21-2f · the pencils, the values as doors, and Tab", async ({ page }) =>
   /* v2.2 — one section at a time: each opened in turn */
   for (const k of ["wishlist", "genres"]) {
     await pen(page, k);
+    /* the tick waits for a change (disabled until then, so not a Tab stop): the wishlist is changed first */
+    if (k === "wishlist") await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`).fill("A change for Tab.");
     seen = await reach();
-    L.check(`Tab reaches ${k}'s cross and tick`, seen.has(`cross:${k}`) && seen.has(`tick:${k}`), [...seen].filter((s) => /cross|tick/.test(s)).join(" "));
+    L.check(k === "wishlist" ? `Tab reaches ${k}'s cross and tick (changed)` : `Tab reaches ${k}'s cross; its tick waits for a change`,
+      seen.has(`cross:${k}`) && (k === "wishlist" ? seen.has(`tick:${k}`) : !seen.has(`tick:${k}`)), [...seen].filter((s) => /cross|tick/.test(s)).join(" "));
     await cross(page, k);
   }
   L.done(16);
@@ -632,7 +626,9 @@ test("AC21-4a · the breath: on the rim only, still under the pointer, resting w
   const t0 = Date.now();
   await page.locator(`${AC} [data-acv21='open'][data-k='how'] [data-nrn='yes']`).click({ timeout: 5000 });
   L.check("an ordinary click on a control in the open section lands while it runs", Date.now() - t0 < 5000 && (await page.locator(`${AC} [data-nrn='yes']`).getAttribute("aria-checked")) === "true", `${Date.now() - t0}ms`);
-  /* typing rests it within 300ms; it is back within 3s of the last key */
+  /* typing rests it within 300ms; it is back within 3s of the last key (v2.2: How's change is discarded first — one
+     section at a time) */
+  await cross(page, "how");
   await pen(page, "wishlist");
   await page.waitForTimeout(1000);
   const ta = page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`);
@@ -664,12 +660,11 @@ test("AC21-4b · the press, the pop, the light, the undo", async ({ page }) => {
       window.setTimeout(() => { const i = c.querySelector<HTMLElement>(":scope > .qc163-rim > i"); if (i) i.animate([{ rotate: "-40deg", opacity: 0 }, { rotate: "320deg", opacity: 0 }], { duration: 1300 }).id = "qc163-light"; }, 500);
     }, true);
   }, CARD_JS);
-  /* hold the pointer down on a tick: the frame presses in to PRESS.to */
+  /* hold the pointer down on a tick: the frame presses in to PRESS.to (v2.2: one section open) */
   await pen(page, "wishlist");
-  await pen(page, "genres");
   await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`).fill(`Motion ${Date.now() % 1000}.`);
   await page.waitForTimeout(400);
-  const tk = await stableBox(page, `${AC} [data-acv21='tick'][data-k='wishlist']`);
+  const tk = await stableBox(page, `${AC} [data-acv21='open'][data-k='wishlist'] [data-qc168='tick']`);
   await page.mouse.move(tk!.x + tk!.width / 2, tk!.y + tk!.height / 2);
   await page.mouse.down();
   await page.waitForTimeout(250);
@@ -688,21 +683,21 @@ test("AC21-4b · the press, the pop, the light, the undo", async ({ page }) => {
   L.check("…from where the press left it (held at the press until the rise, and the first frame of the rise still under 1)", rise > 0 && before.every((x) => x.s < 0.995) && t.s[rise].s < 0.999, `${before.length} frames before the rise; first rising frame ${rise > 0 ? t.s[rise].s.toFixed(4) : "none"}`);
   L.check("…and returns to 1", Math.abs(t.s[t.s.length - 1].s - 1) < 0.001 && iPeak > 0, String(t.s[t.s.length - 1].s));
   const rises = t.s.filter((x, i) => i > 0 && x.s > 1.001 && t.s[i - 1].s <= 1.001).length;
-  L.check("two sections open, one ticked: it pops once", rises === 1, `${rises} rises`);
+  L.check("a section ticked: it pops once", rises === 1, `${rises} rises`);
   L.check("the light runs exactly once round the agent card's border", t.lights.length === 1, JSON.stringify(t.lights));
   L.check("…clockwise", t.lights[0] && t.lights[0].turn === "-40deg → 320deg" && ["1", "1 1"].includes(t.lights[0].mirror), JSON.stringify(t.lights[0]));
   L.check(`…and is gone within its own ${LIGHT.ms}ms + 200`, t.lights[0] && t.lights[0].end - t.lights[0].t0 <= LIGHT.ms + 200, t.lights[0] ? `${(t.lights[0].end - t.lights[0].t0).toFixed(0)}ms` : "none");
-  /* the breath is back within 2.5s of the light finishing (genres is still open) */
-  let back = -1;
-  for (let i = 0; i < 30; i++) { if (breathing(await motionNow(page)).length === 1) { back = i * 100; break; } await page.waitForTimeout(100); }
-  L.check("the rim's breath is back within 2.5s of the light finishing", back >= 0 && back <= 2500, `${back}ms after the trace`);
+  /* v2.2 — re-pointed: one section at a time, so after the tick nothing is open and the rim rests (v2.1 checked the
+     breath came back because genres stayed open beside it) */
+  await page.waitForTimeout(2500);
+  L.check("with nothing left open, the rim rests after the light", breathing(await motionNow(page)).length === 0, JSON.stringify(breathing(await motionNow(page))));
   /* Undo of the saved section: the light the other way (a fresh save, so its snackbar is still up) */
   await pen(page, "wishlist");
   const docBefore = JSON.stringify(dump("acv21fx-edit"));
   await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`).fill(`Undo me ${Date.now() % 1000}.`);
   await tick(page, "wishlist");
   const trU = trace(page, 2600);
-  await page.locator(".sa-toast-undo:visible").last().click({ timeout: 8000 });
+  await page.locator(`${AC} [data-acv22='toast'] [data-qc1522='undo']`).click({ timeout: 8000 });
   const u = await trU;
   L.check("Undo of a saved section: the light runs once, the other way", u.lights.length === 1 && u.lights[0].turn === "40deg → -320deg" && u.lights[0].mirror === "-1 1", JSON.stringify(u.lights));
   L.check("…and the card sinks back (never above 1)", Math.min(...u.s.map((x) => x.s)) < 0.99 && Math.max(...u.s.map((x) => x.s)) <= 1.0005, `${Math.min(...u.s.map((x) => x.s)).toFixed(4)} … ${Math.max(...u.s.map((x) => x.s)).toFixed(4)}`);
@@ -711,19 +706,21 @@ test("AC21-4b · the press, the pop, the light, the undo", async ({ page }) => {
   L.check("…and the agent is exactly as it was before the save", docUndone === docBefore, docUndone === docBefore ? "" : `${docBefore.slice(0, 160)} … vs … ${docUndone.slice(0, 160)}`);
   /* Undo of a discard: no light */
   await page.waitForTimeout(800);
+  /* v2.2 — genres is opened here (one section at a time: it was opened beside the wishlist before) */
+  await pen(page, "genres");
   const gi = page.locator(`${AC} [data-acv21='open'][data-k='genres'] [data-aap='genre-input']`);
   await gi.fill("Gothic");
   await gi.press("Enter");
   await cross(page, "genres");
   const trD = trace(page, 1800);
-  await page.locator(".sa-toast-undo:visible").last().click({ timeout: 8000 });
+  await page.locator(`${AC} [data-acv22='toast'] [data-qc1522='undo']`).click({ timeout: 8000 });
   L.check("Undo of a discard: no light", (await trD).lights.length === 0, JSON.stringify((await trD).lights));
   await cross(page, "genres");
   await page.waitForTimeout(600);
   /* drag off the tick: eases back with no pop */
   await pen(page, "wishlist");
   await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`).fill(`Drag ${Date.now() % 1000}.`);
-  const tk2 = await stableBox(page, `${AC} [data-acv21='tick'][data-k='wishlist']`);
+  const tk2 = await stableBox(page, `${AC} [data-acv21='open'][data-k='wishlist'] [data-qc168='tick']`);
   await page.mouse.move(tk2!.x + tk2!.width / 2, tk2!.y + tk2!.height / 2);
   const trG = trace(page, 1800);
   await page.mouse.down();
@@ -735,19 +732,21 @@ test("AC21-4b · the press, the pop, the light, the undo", async ({ page }) => {
   await cross(page, "wishlist");
   await pen(page, "wishlist");
   await page.waitForTimeout(900);
+  /* v2.2 — re-pointed: the tick waits for a change (it is disabled), so nothing-changed leaves by the cross */
+  L.check("with nothing changed the tick is disabled", await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] [data-qc168='tick']`).isDisabled(), "");
   const trN = trace(page, 1200);
-  await page.locator(`${AC} [data-acv21='tick'][data-k='wishlist']`).click();
+  await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] [data-qc168='cross']`).click();
   const n = await trN;
   await page.waitForTimeout(200);
   const mN = await motionNow(page);
-  L.check("a tick with nothing changed: no pop, no light, the tint at 0", Math.max(...n.s.map((x) => x.s)) <= 1.0005 && n.lights.length === 0 && (mN?.tintOp ?? 1) < 0.01, `max ${Math.max(...n.s.map((x) => x.s)).toFixed(4)} · lights ${n.lights.length} · tint ${mN?.tintOp}`);
+  L.check("the cross with nothing changed: no pop, no light, the tint at 0", Math.max(...n.s.map((x) => x.s)) <= 1.0005 && n.lights.length === 0 && (mN?.tintOp ?? 1) < 0.01, `max ${Math.max(...n.s.map((x) => x.s)).toFixed(4)} · lights ${n.lights.length} · tint ${mN?.tintOp}`);
   /* a star and Add note pop with no light */
   const star = page.locator(`${AC} [data-cl262='stars'] [data-star]`).nth(2);
   const trS = trace(page, 2600);
   await star.click();
   const st = await trS;
   L.check("a star pops with no light", Math.max(...st.s.map((x) => x.s)) > 1.01 && st.lights.length === 0, `max ${Math.max(...st.s.map((x) => x.s)).toFixed(4)} · lights ${st.lights.length}`);
-  await page.locator(".sa-toast-undo:visible").last().click({ timeout: 8000 }).catch(() => {});
+  await page.locator(`${AC} [data-acv22='toast'] [data-qc1522='undo']`).click({ timeout: 8000 }).catch(() => {});
   await page.waitForTimeout(1200);
   await page.locator(`${AC} [data-cl262='tab'][data-tab='notes']`).click();
   await page.waitForTimeout(400);
@@ -767,7 +766,7 @@ test("AC21-4c · the border's colour; the rest after the last section, by every 
   });
   if (MUTS.has("leaveon")) await page.addInitScript(() => {
     document.addEventListener("click", (e) => {
-      if (!(e.target as Element).closest?.("[data-acv21='cross']")) return;
+      if (!(e.target as Element).closest?.("[data-acv21='open'] [data-qc168='cross'], [data-acv22='head-open'] [data-qc168='cross']")) return;
       const c = [...document.querySelectorAll<HTMLElement>("[data-cl262='panel'] [data-acv2='card']")].find((x) => x.offsetHeight > 0);
       window.setTimeout(() => { c?.animate([{ scale: "1" }, { scale: "1.01" }, { scale: "1" }], { duration: 3200, iterations: Infinity, pseudoElement: "::before" }); }, 400);
     }, true);
@@ -802,24 +801,26 @@ test("AC21-4c · the border's colour; the rest after the last section, by every 
   };
   await cross(page, "how"); await atRest("the cross");
   await pen(page, "how"); await page.waitForTimeout(1200);
-  await page.locator(`${AC} [data-acv21='tick'][data-k='how']`).click(); await atRest("a tick with nothing changed");
+  /* v2.2 — re-pointed: the tick waits for a change (disabled), so the cross with nothing changed is the way out */
+  await page.locator(`${AC} [data-acv21='open'][data-k='how'] [data-qc168='cross']`).click(); await atRest("a cross with nothing changed");
   await pen(page, "how"); await page.waitForTimeout(1200);
   await page.keyboard.press("Escape"); await atRest("Esc");
   await pen(page, "wishlist"); await page.waitForTimeout(1200);
   await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`).fill("To be discarded.");
   await page.locator(`${AC} [data-cl262='tab'][data-tab='notes']`).click();
-  await page.locator(`${AC} [data-cl262='discard']`).click(); await atRest("the rust bar's Discard");
+  /* v2.2 — re-pointed: the rust bar is retired; leaving with a change asks inside the section, and its Discard lets the tab go */
+  await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] [data-qc168='discard']`).click(); await atRest("the question's Discard");
   await page.locator(`${AC} [data-cl262='tab'][data-tab='profile']`).click();
   /* reduced motion: nothing runs on the card */
   await page.emulateMedia({ reducedMotion: "reduce" });
   await pen(page, "wishlist");
   await page.waitForTimeout(1200);
   await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`).fill(`Reduced ${Date.now() % 1000}.`);
-  await page.locator(`${AC} [data-acv21='tick'][data-k='wishlist']`).click();
+  await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] [data-qc168='tick']`).click();
   await page.waitForTimeout(120);
   const red = await motionNow(page);
   L.check("reduced motion: no animation on the card", (red?.anims ?? []).filter((a) => a.state === "running").length === 0, JSON.stringify(red?.anims));
-  await page.locator(".sa-toast-undo:visible").last().click().catch(() => {});
+  await page.locator(`${AC} [data-acv22='toast'] [data-qc1522='undo']`).click().catch(() => {});
   await page.waitForTimeout(1500);
   L.done(8);
 });
