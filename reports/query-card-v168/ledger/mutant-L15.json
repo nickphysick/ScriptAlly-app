@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the group reads three items",
+  "ok": true,
+  "got": "[\"Query letter\",\"Synopsis\",\"First 3 chapters\"]"
+ },
+ {
+  "name": "one row per item",
+  "ok": false,
+  "got": "0 rows for 3 items"
+ },
+ {
+  "name": "each row's label is the reading row's",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "…in the same font family and size",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "…not upper-cased",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "one × per row",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "a last '+ Add' row",
+  "ok": false,
+  "got": ""
+ }
+]

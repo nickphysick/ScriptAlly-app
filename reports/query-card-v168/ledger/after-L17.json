@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the step's chips and + Add",
+  "ok": true,
+  "got": "[\"Query letter\",\"Synopsis\",\"First 3 chapters\",\"+ Add\"]"
+ },
+ {
+  "name": "not mono",
+  "ok": true,
+  "got": "[\"\\\"Source Serif 4\\\", Georgi\",\"\\\"Source Serif 4\\\", Georgi\",\"\\\"Source Serif 4\\\", Georgi\",\"\\\"Source Serif 4\\\", Georgi\"]"
+ },
+ {
+  "name": "not upper-cased",
+  "ok": true,
+  "got": "[\"none\",\"none\",\"none\",\"none\"]"
+ },
+ {
+  "name": "nothing under 12px",
+  "ok": true,
+  "got": "[14,14,14,14]"
+ }
+]

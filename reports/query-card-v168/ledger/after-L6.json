@@ -47,7 +47,7 @@
  {
   "name": "read back: its date is unchanged",
   "ok": true,
-  "got": "2026-10-14T17:26:40.387Z → 2026-10-14T17:26:40.387Z"
+  "got": "2026-10-14T21:12:07.134Z → 2026-10-14T21:12:07.134Z"
  },
  {
   "name": "Undo put the three back exactly",
