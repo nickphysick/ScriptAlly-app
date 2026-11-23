@@ -54,6 +54,9 @@ import { Track153 } from "./QcSlip153";
 import { bookLine164, stripStatus164 } from "../../../lib/qc164";
 import "./qcv164.css";
 import "./qcv167.css";
+/* Query card v168 — one way to edit: the pencil on the thing, the cross and the tick, one thing open at a time */
+import { Edit168Ctx, EditPen, mut168, useEditRule168 } from "./QcEdit168";
+import "./qcv168.css";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -221,7 +224,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const band = statusBand(r.status);
   const stageVars = { ["--band" as string]: band, ["--tint" as string]: sc.tint, ["--edge" as string]: sc.edge, ["--mark" as string]: sc.mark,
     ["--fdisc" as string]: quiet ? `linear-gradient(90deg, ${band}, #fff)` : band } as React.CSSProperties;
-  const jOpen = !!p.composer || !!p.editingId;
+  /* v168 — a step open in place is not a journey: the book, the tabs and the footer stay (only the composer folds them) */
+  const jOpen = !!p.composer;
   const tip = useTip();
   const view = p.view ?? "read";
   const rootRef = useRef<HTMLDivElement>(null);
@@ -230,6 +234,22 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   useLayoutEffect(() => { setRootEl(rootRef.current); }, []);
   const pop = { root: rootEl, open: popOpen, setOpen: setPopOpen };
   useOutsideClose(pop);
+  /* ══ v168 — ONE THING OPEN AT A TIME (QcEdit168). The card's own toast for "Changes discarded" (the cross's Undo
+     reopens the thing with its draft); a toast from the page replaces it. A card with no footer actions is a preview
+     (the To-do desk's card): it draws no pencils. */
+  const [local168, setLocal168] = useState<{ msg: string; onUndo: (() => void) | null; n: number } | null>(null);
+  useEffect(() => { setLocal168(null); }, [r.id]);
+  useEffect(() => { if (p.toast) setLocal168(null); }, [p.toast?.msg, !!p.toast]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!local168) return undefined;
+    const t = window.setTimeout(() => setLocal168(null), 5200);
+    return () => window.clearTimeout(t);
+  }, [local168?.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ed168 = useEditRule168(r.id, (msg, undo) => setLocal168({ msg, onUndo: undo, n: Date.now() }), () => rootRef.current);
+  const toast = local168 ? { msg: local168.msg, onUndo: local168.onUndo ? () => { const u = local168.onUndo; setLocal168(null); u?.(); } : null } : p.toast ?? null;
+  const live168 = !p.desk && !!p.onFoot;
+  /* every other door on the card goes through the rule: unchanged, what is open closes and the click goes on */
+  const g168 = (go: () => void) => ed168.guard(go);
   useEffect(() => { setPopOpen(null); }, [view, r.id]);
   /* ONE Escape handler for the editing views: the open popover first, then one level back */
   useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
@@ -308,8 +328,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
      at its end (only on arriving — on leaving, the box grows and nothing needs to move) */
   useLayoutEffect(() => {
     const el = bodyRef.current;
-    if (el && p.toast && p.tab === "tracking") el.scrollTop = el.scrollHeight;
-  }, [!!p.toast]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (el && toast && p.tab === "tracking" && !ed168.open) el.scrollTop = el.scrollHeight;
+  }, [!!toast]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* a chip's tip closes on any click elsewhere */
@@ -502,10 +522,10 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const prevToast = useRef<{ msg: string; undo: boolean; id: string } | null>(null);
   const [toastGone, setToastGone] = useState<{ msg: string; undo: boolean; k: number } | null>(null);
   useLayoutEffect(() => {
-    const was = prevToast.current, now = p.toast ? { msg: p.toast.msg, undo: !!p.toast.onUndo, id: r.id } : null;
+    const was = prevToast.current, now = toast ? { msg: toast.msg, undo: !!toast.onUndo, id: r.id } : null;
     if (was && was.id === r.id && (!now || now.msg !== was.msg) && !reduced()) setToastGone({ msg: was.msg, undo: was.undo, k: performance.now() });
     prevToast.current = now;
-  }, [p.toast?.msg, !!p.toast, r.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [toast?.msg, !!toast, r.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v158: no day pill above a day's first message (each bubble's stamp is its date) and no status line under the newest
      one (the footer says where the query stands); the wait between two messages is "N days later" at the side */
   const clipChip = (c: { items: string[]; version: string | null }) => (
@@ -550,10 +570,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : "", out ? "qc160-out" : ""].filter(Boolean).join(" ") || undefined}
               mark={checking ? <span className="qc153-chkw" data-qc153="checking">Checking</span> : stamped ? <span className="qc153-stamp" data-qc153="logged">Logged</span> : null}
               outer={{ "data-qc152": "msg", "data-rk": rk(it.key), "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId, "data-field": it.key === "field-nudge" ? "" : undefined,
+                "data-qc168-host": live168 && it.key !== "field-nudge" && !out ? "" : undefined,
                 ...(out ? { "data-leaving": "", "aria-hidden": true, inert: true } : {}), style: { animationDelay: `${i * 45}ms` } }}
-              /* v161 — a nudge drawn from the query's field has no activity to edit */
-              after={it.key === "field-nudge" ? null : <button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
-                onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
+              /* v161 — a nudge drawn from the query's field has no activity to edit. v168 — the pencil on the bubble's
+                 corner (the "✎ Edit" pill is gone); it opens that step where its bubble is */
+              after={it.key === "field-nudge" || !live168 || out ? null : <EditPen label={it.title} data={{ "data-qc168-k": `step:${it.activityId ?? it.key}` }}
+                onOpen={() => g168(() => p.onEditStep(it.activityId ?? null))} />} />
           </React.Fragment>
         );
       }), ...draftNode]}
@@ -572,8 +594,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const agentPane = (
     <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
       sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
-      onOpen={ed.on ? null : (k) => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials"))}
-      onFullCard={() => p.onAgentField(null)} editing={prof?.k ?? null} just={just} />
+      onOpen={ed.on ? null : (k) => g168(() => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")))}
+      onFullCard={() => g168(() => p.onAgentField(null))} editing={prof?.k ?? null} just={just} />
   );
 
   /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
@@ -589,9 +611,10 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   return (
     <PopCtx.Provider value={pop}>
+    <Edit168Ctx.Provider value={ed168}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
-      data-lean={view === "read" && !jOpen && !ed.on && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
-      data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" style={stageVars}>
+      data-lean={view === "read" && !jOpen && !p.editingId && !ed168.open && !ed.on && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
+      data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" data-qc168-open={ed168.open ?? undefined} style={stageVars}>
       <div ref={inRef} className="qc152-in">
         {ed.on ? (
         <div className="qc152-band is-ed" data-qc152="band" data-edit="">
@@ -600,7 +623,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         ) : (
         <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined}
           style={{ background: bandBg, color: bandInk(r.status) }}>
-          {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
+          {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={() => g168(p.backTo!.onBack)}>← {p.backTo.label}</button> : null}
           {/* v164 — the four-step track and the status name; the footer says whose move it is */}
           <span className="qc164-st" data-qc164="status" role="img" aria-label={ss.label}>
             <span className="qc164-trk" data-qc164="track" aria-hidden="true"><Track153 t={ss.track} status={r.status} /></span>
@@ -608,12 +631,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           </span>
           <span className="qc164-sp" aria-hidden="true" />
           {p.stepCard && p.stepCard.of > 1 ? <>
-            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(-1); }}>{PREV}</button>
-            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(1); }}>{NEXT}</button>
+            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); g168(() => { breatheClose(fr); p.stepCard!.go(-1); }); }}>{PREV}</button>
+            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); g168(() => { breatheClose(fr); p.stepCard!.go(1); }); }}>{NEXT}</button>
           </> : null}
           <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query"
             onClick={() => (p.editData ? ed.start() : p.onPencil())}>{PEN}</button>
-          <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={p.onClose}>✕</button>
+          <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={() => g168(p.onClose)}>✕</button>
         </div>
         )}
         <div className="qc152-agent">
@@ -638,7 +661,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         )}
         <div className="qc152-tabs" role="tablist" aria-label="The query">
           {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
-            <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
+            <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => (mut168("5") ? p.onTab(t) : g168(() => p.onTab(t)))}>
               {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
               {ed.on && t === "notes" && ed.keys.includes("notes")
                 ? <span className="qc152-dot" data-qc152="tab-dot" aria-label="unsaved changes" /> : null}
@@ -657,15 +680,15 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link. v158.1: with more than one action it is
              two rows (Foot, below) */
           const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
-          const primary = ft.button ? { label: ft.button.label, tone: ft.button.tone, act: ft.button.act as string, run: () => p.onFoot?.(ft.button!.act), hook: { "data-qc152": "reply-btn" } } : null;
-          const linkA = ft.link ? { label: ft.link.label, act: ft.link.act as string, run: () => p.onFoot?.(ft.link!.act), hook: { "data-qc1522": "foot-link" } } : null;
-          const repliedA = ft.replied ? { label: ft.replied.label, act: "resp", run: () => p.onFoot?.("resp"), hook: { "data-qc1522": "foot-replied" } } : null;
+          const primary = ft.button ? { label: ft.button.label, tone: ft.button.tone, act: ft.button.act as string, run: () => g168(() => p.onFoot?.(ft.button!.act)), hook: { "data-qc152": "reply-btn" } } : null;
+          const linkA = ft.link ? { label: ft.link.label, act: ft.link.act as string, run: () => g168(() => p.onFoot?.(ft.link!.act)), hook: { "data-qc1522": "foot-link" } } : null;
+          const repliedA = ft.replied ? { label: ft.replied.label, act: "resp", run: () => g168(() => p.onFoot?.("resp")), hook: { "data-qc1522": "foot-replied" } } : null;
           return <Foot late={ft.late} icon={ft.icon} lead={ft.lead} sub={ft.sub} primary={primary} others={[linkA, repliedA]}
             outer={{ "data-qc1522": "footer", "data-act": ft.button?.act ?? "none" }} />;
         })() : (
           <Foot late={box.late} icon={box.icon} lead={box.lead} sub={box.sub}
-            primary={{ label: box.button, tone: box.tone, act: box.act, arrow: true, run: () => p.onReply(box.act), hook: { "data-qc152": "reply-btn" } }}
-            others={[box.second ? { label: box.second.label, act: box.second.act, run: () => p.onReply(box.second!.act), hook: { "data-qc152": "reply-second" } } : null]}
+            primary={{ label: box.button, tone: box.tone, act: box.act, arrow: true, run: () => g168(() => p.onReply(box.act)), hook: { "data-qc152": "reply-btn" } }}
+            others={[box.second ? { label: box.second.label, act: box.second.act, run: () => g168(() => p.onReply(box.second!.act)), hook: { "data-qc152": "reply-second" } } : null]}
             outer={{ "data-act": box.act }} />
         )}
         </>}
@@ -686,11 +709,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             <span>{toastGone.msg}</span>{toastGone.undo ? <button type="button" tabIndex={-1}>Undo</button> : null}
           </div>
         ) : null}
-        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const u = p.toast?.onUndo; if (u) pressThen(e.currentTarget.closest<HTMLElement>(".spanel"), u, true); }}>Undo</button> : null}</div> : null}
+        {toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{toast.msg}</span>{toast.onUndo ? <button type="button" data-qc1522="undo" onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const u = toast?.onUndo; if (u) pressThen(e.currentTarget.closest<HTMLElement>(".spanel"), u, true); }}>Undo</button> : null}</div> : null}
         {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}
       </div>
       {tip.node}
     </div>
+    </Edit168Ctx.Provider>
     </PopCtx.Provider>
   );
 };

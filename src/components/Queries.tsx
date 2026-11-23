@@ -6306,7 +6306,7 @@ export const Queries: React.FC<{
         const isQueryStep = ed.status === QueryStatus.QUERIED && !ed.kind;
         const kind: FixStep["kind"] = ed.kind === "nudge" ? "nudge" : ed.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[ed.status ?? ""] ?? "queried"] ?? "queried";
         edit1522 = (
-          <QcStepEdit1522 key={ed.activityId} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
+          <QcStepEdit1522 key={ed.activityId} id={ed.activityId} onReopen={() => { setQc1522J(null); setQc1522Draft(null); setQc1522Edit(ed.activityId!); }} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
             mats={storedMats(ed.activityId) ?? (ed.status === QueryStatus.QUERIED ? asMats(ed.chips.map((c) => c.label)) : [])}
             request={ed.status === QueryStatus.PARTIAL_REQUESTED || ed.status === QueryStatus.FULL_REQUESTED || ed.status === QueryStatus.REVISE_RESUBMIT}
             words={words0} first={first} env={env} nowMs={now} floorMs={i > 0 ? dated[i - 1].ms : null} ceilMs={i >= 0 && i < dated.length - 1 ? dated[i + 1].ms : null}
@@ -6326,7 +6326,8 @@ export const Queries: React.FC<{
                   pkg: k ? { id: k.id, name: k.packageName, edition: k.edition ?? 1 } : null, pkgChanged: !!pkgList && v.pkgId !== undefined && (v.pkgId ?? null) !== (ctx.packageId ?? null) });
                 plan.query = { ...plan.query, ...dp.query };
               }
-              done1522(await commitPlan(uid, plan), "Step saved", null, false);
+              /* Query card v168 — the card's toast says what was saved; its Undo restores the step's own snapshot */
+              done1522(await commitPlan(uid, plan), "Saved that step", null, false);
             }, false)}
             onDelete={() => run1522(async () => {
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
@@ -6928,7 +6929,7 @@ export const Queries: React.FC<{
         : pipShown ? undefined
         : () => {
           const panel = document.querySelector("[data-qp='panel']");
-          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-editing], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
+          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-editing], [data-qc152='card'][data-qc168-open], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
           if (busy) { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); return; }
           (fromAgent ? closeFromAgent : closeQueryCard)();
         }}

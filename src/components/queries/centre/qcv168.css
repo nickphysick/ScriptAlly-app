@@ -27,7 +27,7 @@
 /* a tile clips at its 86px: its pencil sits inside the corner */
 .qc152 .nx-box.qc167-tile > .qc168-pen { top: 8px; right: 8px; }
 /* while a journey is open, as the old Edit pill was: no pencils in the thread */
-.qc152[data-j] .qc152-th .qc168-pen { visibility: hidden; }
+.qc152[data-qc167-jc] .qc152-th .qc168-pen { visibility: hidden; }
 
 /* ── the cross and the tick, where the pencil was ─────────────────────────────────────────────────────────────── */
 .qc152 .qc168-ct { margin: -4px 0 -4px auto; display: inline-flex; align-items: center; gap: 8px; flex: none; align-self: center; }

@@ -42,6 +42,6 @@
 
 /* Record a response v1, Phase 5 — leaving with something entered: the discard strip, and the card gives a short shake
    (the reference's 320ms). On the inner frame, so the panel's own slide-in is never replayed. */
-.spanel:has([data-qc1522="discard-strip"]) > .spanel-own { animation: spanelShake 320ms; }
+.spanel:has([data-qc1522="discard-strip"], [data-qc168="ask"]) > .spanel-own { animation: spanelShake 320ms; }
 @keyframes spanelShake { 20% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 80% { transform: translateX(-2px); } }
-@media (prefers-reduced-motion: reduce) { .spanel:has([data-qc1522="discard-strip"]) > .spanel-own { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .spanel:has([data-qc1522="discard-strip"], [data-qc168="ask"]) > .spanel-own { animation: none; } }

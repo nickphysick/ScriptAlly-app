@@ -6,6 +6,12 @@
  * materials, the agent's words (their steps only), and "Delete this step", which asks once and says what goes with it
  * and what the card goes back to. The step's type is not editable here: changing it is delete and record again. This
  * replaces v152.1's whole-history "Fix a mistake" form (F4).
+ *
+ * Query card v168 — THE ONE WAY TO EDIT: it opens from the pencil on the bubble's corner, and the cross and the tick sit
+ * in its heading row where the pencil was (QcEdit168 CrossTick). The tick waits for a change. The cross with a change
+ * discards at once and the card's toast offers Undo, which reopens it with what was typed; every other way of leaving
+ * (Esc, another pencil, a tab, ✕ …) asks "Discard your changes?" in its foot (DiscardAsk). "Delete this step" stays
+ * bottom left with its confirm as built. Every field, rule and write is v152.2's.
  */
 import React, { useState } from "react";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -15,10 +21,14 @@ import { CalendarField, MatChips, PopCtx, type MatEnv } from "./QcEdit152";
 import { StepGlyph } from "./QcBubble152";
 /* Query card v161.1 — a step's delete presses the card in, as every save that bumps does */
 import { pressAtPointer, pressThen } from "./qcMotion160";
+import { CrossTick, DiscardAsk, useHold168, useEdit168 } from "./QcEdit168";
 
 const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 
 export interface StepEditProps {
+  /** v168 — the step's activity id (the rule's key) and how to open it again (the cross's Undo) */
+  id: string;
+  onReopen: () => void;
   side: "me" | "them";
   status: QueryStatus | null;
   kind: "nudge" | "holding" | "told" | null;
@@ -46,23 +56,30 @@ export interface StepEditProps {
   onCancel: () => void;
 }
 
+type StepDraft = { d: number; mats: StepMaterial[]; words: string; how: string | null; pkgId: string | null };
+
 export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
   const pop = React.useContext(PopCtx);
-  const [d, setD] = useState(p.ms);
-  const [mats, setMats] = useState<StepMaterial[]>(p.mats);
-  const [words, setWords] = useState(p.words);
-  const [how, setHow] = useState<string | null>(p.how?.value ?? null);
-  const [pkgId, setPkgId] = useState<string | null>(p.pkg?.value ?? null);
+  const key = `step:${p.id}`;
+  /* the cross's Undo hands back what was typed */
+  const seed = useEdit168().seedOf(key) as StepDraft | undefined;
+  const [d, setD] = useState(seed?.d ?? p.ms);
+  const [mats, setMats] = useState<StepMaterial[]>(seed?.mats ?? p.mats);
+  const [words, setWords] = useState(seed?.words ?? p.words);
+  const [how, setHow] = useState<string | null>(seed ? seed.how : p.how?.value ?? null);
+  const [pkgId, setPkgId] = useState<string | null>(seed ? seed.pkgId : p.pkg?.value ?? null);
   const [del, setDel] = useState(false);
-  const [dirty, setDirty] = useState(false);
-  const [conf, setConf] = useState(false);
-  const up = () => { if (dirty) setConf(true); else p.onCancel(); };
+  const [dirty, setDirty] = useState(!!seed);
+  const draft: StepDraft = { d, mats, words, how, pkgId };
+  const ed = useHold168(key, dirty, draft, p.onCancel, p.onReopen);
+  const asking = ed.asking && ed.open === key;
   useEscapeLayer(true, () => {
     if (pop.open) { pop.setOpen(null); return; }
     if (del) { setDel(false); return; }
-    if (conf) { setConf(false); return; }
-    up();
+    if (asking) { ed.keep(); return; }
+    ed.leave();
   }, ESC_LEVEL.pageModal);
+  const save = () => void p.onSave({ dayMs: d, mats, words: words.trim(), ...(p.how ? { how } : {}), ...(p.pkg ? { pkgId } : {}) });
   const blocked = (ms: number) => {
     if (ms > sod(p.nowMs)) return "In the future";
     if (p.floorMs != null && ms < sod(p.floorMs)) return "Before the step above";
@@ -73,7 +90,7 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
     <div className={`qc152-m ${p.side} qc1522-edit`} data-qc1522="step-edit">
       <div className="qc1522-ebx">
         <div className="qc1522-eh"><span className="g">{StepGlyph({ status: p.status, kind: p.kind })}</span><b data-qc1522="edit-title">{p.title}</b><span className="sp" />
-          <button type="button" className="qc1522-x" aria-label="Close" data-qc1522="edit-x" onClick={up}>✕</button></div>
+          <CrossTick dirty={dirty} busy={p.busy} onCross={ed.cross} onTick={save} /></div>
         <div className="qc1522-fl tight">
           <label>When</label>
           <div className="qc1522-dp on" data-qc1522="edit-date"><CalendarField id="edit" valueMs={d} nowMs={p.nowMs} blocked={blocked} onChange={(ms) => { setD(sod(ms)); setDirty(true); }} /></div>
@@ -106,18 +123,11 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
             <button type="button" className="qc1522-lk" data-qc1522="keep-step" onClick={() => setDel(false)}>Keep it</button>
             <button type="button" className="qc1522-btn nv sm" data-qc1522="delete-ok" disabled={p.busy} onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); pressThen(fr, () => void p.onDelete()); }}>Delete</button>
           </div>
-        ) : conf ? (
-          <div className="qc1522-conf in" data-qc1522="discard-strip">
-            <span>Discard what you’ve entered?</span><span className="sp" />
-            <button type="button" className="qc1522-lk" data-qc1522="keep" onClick={() => setConf(false)}>Keep editing</button>
-            <button type="button" className="qc1522-btn nv sm" data-qc1522="discard" onClick={p.onCancel}>Discard</button>
-          </div>
+        ) : asking ? (
+          <DiscardAsk onKeep={ed.keep} onDiscard={ed.discard} />
         ) : (
           <div className="qc1522-ef">
             <button type="button" className="qc1522-lk rust" data-qc1522="delete-step" onClick={() => setDel(true)}>Delete this step</button>
-            <span className="sp" />
-            <button type="button" className="qc1522-btn gh sm" data-qc1522="edit-cancel" onClick={up}>Cancel</button>
-            <button type="button" className="qc1522-btn nv sm" data-qc1522="edit-save" disabled={p.busy || !dirty} onClick={() => void p.onSave({ dayMs: d, mats, words: words.trim(), ...(p.how ? { how } : {}), ...(p.pkg ? { pkgId } : {}) })}>Save</button>
           </div>
         )}
       </div>

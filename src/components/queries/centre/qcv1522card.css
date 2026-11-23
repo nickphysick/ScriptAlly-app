@@ -28,7 +28,6 @@
 
 /* §3.1 the draft: a dashed edge in its final colour, a transparent fill */
 .qc152 .qc152-m.qc1522-draft .qc152-bx { background: transparent !important; box-shadow: none !important; border: 1.5px dashed var(--dr, #b9ad9e); }
-.qc152 .qc152-m.qc1522-draft .qc152-fx { display: none; }
 .qc152 .qc152-m.new { animation: qc1522Pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
 @keyframes qc1522Pop { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
 
@@ -38,7 +37,6 @@
 /* Query card v167 §D (Nick, 22 Nov): with a journey's composer open the tabs STAY, so the Agent tab's profile drawers can
    be reached mid-journey; they still fold for a bubble edited in place */
 .qc152[data-j]:not([data-qc167-jc]) .qc152-tabs { max-height: 0; margin-top: 0; opacity: 0; border-color: transparent; }
-.qc152[data-j] .qc152-fx { display: none !important; }
 .qc152 .qc152-body.qc1522-tpad { padding-bottom: 64px; }
 
 /* §3.1 the composer: a white panel rising from the foot */

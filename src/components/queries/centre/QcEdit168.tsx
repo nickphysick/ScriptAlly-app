@@ -53,7 +53,7 @@ export interface Edit168 {
   cross: () => void;
   keep: () => void;
   discard: () => void;
-  /** the draft the cross's Undo hands back to `key` (once) */
+  /** the draft the cross's Undo hands back to `key` (until it closes) */
   seedOf: (key: string) => unknown;
   /** set by the editor that is open, every render; released by it as it closes */
   hold: (h: Hold168) => void;
@@ -78,7 +78,7 @@ export function useEditRule168(resetKey: string, toast: (msg: string, undo: (() 
     if (!asking) return;
     root()?.querySelector<HTMLElement>("[data-qc168='ask']")?.scrollIntoView({ block: "nearest" });
   }, [asking]); // eslint-disable-line react-hooks/exhaustive-deps
-  const shut = () => { const h = held.current; held.current = null; setOpen(null); setAsking(false); h?.close(); };
+  const shut = () => { const h = held.current; held.current = null; setOpen(null); setAsking(false); if (h) { seeds.current.delete(h.key); h.close(); } };
   const ask = (go: (() => void) | null) => {
     if (mut168("9")) { go?.(); return; }
     then.current = go; setAsking(true);
@@ -102,12 +102,13 @@ export function useEditRule168(resetKey: string, toast: (msg: string, undo: (() 
     },
     keep: () => { then.current = null; setAsking(false); },
     discard: () => { const go = then.current; then.current = null; shut(); go?.(); },
-    seedOf: (k) => { const v = seeds.current.get(k); seeds.current.delete(k); return v; },
+    /* read during render (twice under StrictMode): kept until the thing it seeded closes */
+    seedOf: (k) => seeds.current.get(k),
     hold: (h) => {
       if (held.current && held.current.key !== h.key) setAsking(false);
       held.current = h; setOpen(h.key);
     },
-    release: (k) => { if (held.current?.key !== k) return; held.current = null; setOpen(null); setAsking(false); },
+    release: (k) => { seeds.current.delete(k); if (held.current?.key !== k) return; held.current = null; setOpen(null); setAsking(false); },
   };
 }
 
