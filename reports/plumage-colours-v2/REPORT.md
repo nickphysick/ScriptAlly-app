@@ -171,4 +171,18 @@ the harness, so no chart there). Desktop WebKit cannot press the harness's Sign 
 actionable, and a launched context has no action timeout, so the first frames run hung 15 minutes): the WebKit test
 signs in with Enter and the measurement's navigation clicks are DOM clicks.
 
-The dev deploy, the final gates and the bundle proof are appended below by Phase 5.
+**The dev deploy.** Dev had moved during the work: at Step 0 it served `index-BGvJwFRg.js` (7972443ea); by Phase 5 it
+served `index-CgMT1yeh.js`, the Log a query v2 line (`dev/main-material-icons-v1-pst1-cf1-pc1-qc167-cwu1-laq2`,
+95f082fbd), deployed overnight by that session. So the integration branch is
+`dev/main-material-icons-v1-pst1-cf1-pc1-qc167-cwu1-laq2-pc2` @ b6bb20129: that line plus this branch, nothing of
+theirs overwritten.
+- One conflict (`QcCard154.tsx`'s root: Log a query v2 moved its role and handlers into `ctl` for its preview card;
+  this branch removed the outline), resolved as both. One merge fix: `qcLogStages.css` lifted the now-deleted hover
+  label to 12px inside the log-a-query panel; the rule went with the label. **The log-a-query preview card now
+  carries the band's label too** (it is the grid card).
+- Gates on the merged tree: tsc clean; Vitest 13,278 passed, 0 failed, 4 skipped (933 files); `check-design-refs`
+  clean; `pc2.measure.ts` 6 passed and Log a query v2's own `laqV2.measure.ts` 10 passed (16 of 16).
+- Deployed from a clean checkout of the pushed tip (`build:dev` clean, no warnings) with the served hash checked
+  inside the command before and after: **dev serves `index-D5y_IYfl.js`** (was `index-CgMT1yeh.js`). To back it out,
+  redeploy `…-cwu1-laq2` (95f082fbd → `index-CgMT1yeh.js`).
+- Not merged to `main`; nothing deployed to prod.
