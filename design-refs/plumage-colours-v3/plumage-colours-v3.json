@@ -1,0 +1,93 @@
+{
+ "name": "Plumage colours v3",
+ "changes": "From v2: the offer is flat duck egg on every surface (no stripes); Revise & resubmit is striped in the two Full blues on the two card bands; Full requested is a step deeper; the status label moves to the card's top right edge; the paperclip becomes a square tile in the Sent box with a chip-style materials hover; the agency line is ink at 66%; the agent kind tile is teal at 60%; the frame's clipping is restored.",
+ "ink": "#1c130f",
+ "navy": "#2a3a52",
+ "stages": {
+  "queried": "unchanged",
+  "partial": "unchanged (bandRequested #f1d9cf, band #e8c0af)",
+  "full": {
+   "bandRequested": "#d3deea",
+   "band": "#b9c9da",
+   "tint": "#eff3f7",
+   "edge": "#9fb3c8",
+   "mark": "#6f8fb0",
+   "rim": "#6f8fb0",
+   "rimHi": "#d3deea"
+  },
+  "offer": "unchanged values (band #c5e0d8, tint #eef6f3, edge #a9cdc2, mark #7fb3a5, rim #7fb3a5, rimHi #e2f0ec); flat everywhere",
+  "closed": "unchanged"
+ },
+ "offerStripes": "removed. OFFER_STRIPES and STRIPE_PAPER are deleted.",
+ "reviseResubmit": {
+  "stripes": "repeating-linear-gradient(118deg,#d3deea 0 22px,#b9c9da 22px 44px)",
+  "stripesWhere": "the grid card's band and the slide-in card's strip only",
+  "elsewhere": "flat #d3deea, the Full requested shade (bars, bubbles, pills, chips, discs, the phone)",
+  "resubmitted": "flat #b9c9da, the Full sent shade, on every surface"
+ },
+ "statusLabel": {
+  "where": "grid card only, on the card's top edge at the right",
+  "position": "its vertical centre on the frame's top edge (11px above the band's top, 11px below); 14px in from the band's right edge",
+  "drawnOutsideTheFrame": true,
+  "height": "22px",
+  "radius": "11px",
+  "fill": "#ffffff",
+  "edge": "1px inset, the stage's edge colour",
+  "shadow": "0 1px 2px rgba(28,19,15,.08)",
+  "type": "Special Elite 13px, ink",
+  "text": "the status name, as the app already words it"
+ },
+ "frameClipping": "restored (overflow hidden on the grid card's frame)",
+ "agencyLine": "rgba(28,19,15,.66)",
+ "attachmentsTile": {
+  "replaces": "the paperclip on the grid card",
+  "where": "inside the Sent box, 12px from its right edge, vertically centred",
+  "size": "44px wide, 50px high",
+  "radius": "10px",
+  "fill": "rgba(28,19,15,.055)",
+  "fillOpen": "rgba(28,19,15,.10)",
+  "glyph": "the existing paperclip glyph, 18px, stroke 1.7",
+  "count": "Special Elite 16px",
+  "ink": "rgba(28,19,15,.82)",
+  "layout": "glyph above count, 4px apart",
+  "shownWhen": "exactly when the paperclip is shown today",
+  "accessibleName": "unchanged"
+ },
+ "materialsHover": {
+  "opens": "on hover and on keyboard focus of the tile; closes on leave, blur and Escape",
+  "placement": "12px below the tile, its right edge 10px beyond the tile's right edge; opens upwards when there is no room below; never clipped by the card, the grid or the page",
+  "width": "284px",
+  "radius": "14px",
+  "fill": "#ffffff",
+  "edge": "1px #e3d5c9",
+  "shadow": "0 20px 36px -16px rgba(28,19,15,.42)",
+  "padding": "14px 16px 12px",
+  "pointer": "a 12px square turned 45 degrees, on the edge nearest the tile, 25px from the right",
+  "title": "the tile's accessible name (for example '4 materials'), Special Elite 16px",
+  "groups": "the groups, order and words the paperclip's pop-up has today; 1px #f1ebe2 between groups",
+  "groupHead": "Source Serif italic 14px #6b6058; the package name on the same line at the right",
+  "chip": {
+   "height": "28px",
+   "radius": "14px",
+   "fill": "#f8f4ed",
+   "edge": "1px inset #e8dfd2",
+   "type": "Source Serif 600 14px, ink",
+   "icon": "MaterialIcon at 16px before the words; a Full manuscript takes the Full status mark from StatusDot",
+   "gap": "6px between chips"
+  },
+  "chipAskedNotSent": {
+   "fill": "#ffffff",
+   "edge": "1px dashed rgba(42,58,82,.6)",
+   "ink": "#2a3a52"
+  }
+ },
+ "kinds": {
+  "agent": {
+   "tile": "#96aca9",
+   "glyph": "#1c130f",
+   "edge": "#7c9793",
+   "from": "the Scout's teal #50756f at 60%"
+  },
+  "others": "unchanged"
+ }
+}
