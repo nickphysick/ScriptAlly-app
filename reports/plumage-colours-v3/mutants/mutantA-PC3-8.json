@@ -1,0 +1,142 @@
+[
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: the hover opens on hover",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: fully inside the viewport",
+  "ok": true,
+  "got": "284,791 284×86 in 1512×982"
+ },
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: above the neighbouring cards (every hit point is the hover)",
+  "ok": true,
+  "got": "true,true,true,true,true"
+ },
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: no ancestor cuts it",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: no room below (43px), so it opens upwards, 12px above the tile",
+  "ok": true,
+  "got": "true / 12.0"
+ },
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: its right edge 10px past the tile's, or slid to stay in view",
+  "ok": true,
+  "got": "10.0px"
+ },
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: 284 wide, radius 14, white, the JSON's edge and shadow, padding 14 16 12",
+  "ok": true,
+  "got": "284 14px rgb(255, 255, 255) rgb(227, 213, 201) 0px 0px 0px 1px, rgba(28, 19, 15, 0.42) 0px 20px 36px -16px 14px 16px 12px"
+ },
+ {
+  "name": "last column seed-query-9: the hover opens on hover",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "last column seed-query-9: fully inside the viewport",
+  "ok": true,
+  "got": "1002,718 284×183 in 1512×982"
+ },
+ {
+  "name": "last column seed-query-9: above the neighbouring cards (every hit point is the hover)",
+  "ok": true,
+  "got": "true,true,true,true,true"
+ },
+ {
+  "name": "last column seed-query-9: no ancestor cuts it",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "last column seed-query-9: room below, so it opens 12px below the tile",
+  "ok": true,
+  "got": "false / 12.0"
+ },
+ {
+  "name": "last column seed-query-9: its right edge 10px past the tile's, or slid to stay in view",
+  "ok": true,
+  "got": "10.0px"
+ },
+ {
+  "name": "last column seed-query-9: 284 wide, radius 14, white, the JSON's edge and shadow, padding 14 16 12",
+  "ok": true,
+  "got": "284 14px rgb(255, 255, 255) rgb(227, 213, 201) 0px 0px 0px 1px, rgba(28, 19, 15, 0.42) 0px 20px 36px -16px 14px 16px 12px"
+ },
+ {
+  "name": "first column seed-query-12: the hover opens on hover",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "first column seed-query-12: fully inside the viewport",
+  "ok": true,
+  "got": "284,699 284×183 in 1512×982"
+ },
+ {
+  "name": "first column seed-query-12: above the neighbouring cards (every hit point is the hover)",
+  "ok": true,
+  "got": "true,true,true,true,true"
+ },
+ {
+  "name": "first column seed-query-12: no ancestor cuts it",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "first column seed-query-12: room below, so it opens 12px below the tile",
+  "ok": true,
+  "got": "false / 12.0"
+ },
+ {
+  "name": "first column seed-query-12: its right edge 10px past the tile's, or slid to stay in view",
+  "ok": true,
+  "got": "10.0px"
+ },
+ {
+  "name": "first column seed-query-12: 284 wide, radius 14, white, the JSON's edge and shadow, padding 14 16 12",
+  "ok": true,
+  "got": "284 14px rgb(255, 255, 255) rgb(227, 213, 201) 0px 0px 0px 1px, rgba(28, 19, 15, 0.42) 0px 20px 36px -16px 14px 16px 12px"
+ },
+ {
+  "name": "first row seed-query-12: the hover opens on hover",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "first row seed-query-12: fully inside the viewport",
+  "ok": true,
+  "got": "284,485 284×183 in 1512×982"
+ },
+ {
+  "name": "first row seed-query-12: above the neighbouring cards (every hit point is the hover)",
+  "ok": true,
+  "got": "true,true,true,true,true"
+ },
+ {
+  "name": "first row seed-query-12: no ancestor cuts it",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "first row seed-query-12: room below, so it opens 12px below the tile",
+  "ok": true,
+  "got": "false / 12.0"
+ },
+ {
+  "name": "first row seed-query-12: its right edge 10px past the tile's, or slid to stay in view",
+  "ok": true,
+  "got": "10.0px"
+ },
+ {
+  "name": "first row seed-query-12: 284 wide, radius 14, white, the JSON's edge and shadow, padding 14 16 12",
+  "ok": true,
+  "got": "284 14px rgb(255, 255, 255) rgb(227, 213, 201) 0px 0px 0px 1px, rgba(28, 19, 15, 0.42) 0px 20px 36px -16px 14px 16px 12px"
+ }
+]

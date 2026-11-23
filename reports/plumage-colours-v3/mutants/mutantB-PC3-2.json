@@ -1,0 +1,447 @@
+[
+ {
+  "name": "live Revise & resubmit grid cards: population",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "R&R seed-query-11: grid band computes the stripes",
+  "ok": false,
+  "got": "none"
+ },
+ {
+  "name": "R&R cor-undo: grid band computes the stripes",
+  "ok": false,
+  "got": "none"
+ },
+ {
+  "name": "Offer seed-query-12: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested seed-query-7: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested seed-query-9: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested seed-query-20: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested rj-send: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested cv25-q-09: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested cor-move-a: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested msv12-q-4: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested rj-dupe: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-2: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent cor-pair: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent seed-query-23: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent seed-query-8: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent qc150l9-q: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried probe-un-both: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried probe-un-noagent: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried cv25-q-14: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried cv25-q-13: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-close: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-query-22: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried msv12-q-1: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried msv12-q-7: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-query-4: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-query-19: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Full Sent seed-query-10: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried rj-nudge: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-chase: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-query-6: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-pkgq-1: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-pkgq-2: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-query-5: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried cor-move-b: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-pkgq-7: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-query-3: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried seed-cal-near-q: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb"
+ },
+ {
+  "name": "Full Sent seed-query-21: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb"
+ },
+ {
+  "name": "Full Sent msv12-q-5: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb"
+ },
+ {
+  "name": "Queried thin-q-remind: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried msv12-q-2: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried probe-un-noms: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried probe-goalstress-today: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried cv25-q-04: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Queried cv25-q-03: no stripes on its grid band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "No Response msv12-q-8: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cv25-q-01: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-1: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-13: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cv25-q-12: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected rej-query-1: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cor-move-c: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Withdrawn seed-query-17: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-15: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-16: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected msv12-q-6: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "No Response seed-query-18: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cor-closed: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Signed cv25-q-08: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-14: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cv25-q-02: no stripes on its grid band",
+  "ok": true,
+  "got": "none"
+ }
+]

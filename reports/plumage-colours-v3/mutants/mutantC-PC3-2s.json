@@ -1,0 +1,62 @@
+[
+ {
+  "name": "slide-in Partial Requested seed-query-7: no stripes",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Partial Sent thin-q-gap-solo: no stripes",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Full Requested seed-query-9: no stripes",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Full Sent qc150l9-q: no stripes",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in R&R seed-query-11: strip computes the stripes",
+  "ok": true,
+  "got": "repeating-linear-gradient(118deg, rgb(211, 222, 234) 0px, rgb(211, 222, 234) 22px, rgb(185, 201, 218) 22px, rgb(185, 201, 218) 44px)"
+ },
+ {
+  "name": "slide-in Resubmitted cv25-q-10: no stripes",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb"
+ },
+ {
+  "name": "bubble Partial Requested: no stripes (bubbles are not card bands)",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "bubble Full Requested: no stripes (bubbles are not card bands)",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "bubble Revise & Resubmit: no stripes (bubbles are not card bands)",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "bubble Offer: no stripes (bubbles are not card bands)",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "the stripes are drawn only on R&R grid bands and its slide-in strip",
+  "ok": true,
+  "got": "band, band"
+ },
+ {
+  "name": "Responses strip (full): no stripes",
+  "ok": true,
+  "got": "none"
+ }
+]

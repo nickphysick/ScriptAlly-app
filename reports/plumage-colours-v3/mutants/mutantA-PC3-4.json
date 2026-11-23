@@ -1,0 +1,3592 @@
+[
+ {
+  "name": "quiet cards on the page (they carry it too)",
+  "ok": true,
+  "got": "40"
+ },
+ {
+  "name": "Offer seed-query-12: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Offer seed-query-12: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Offer seed-query-12: its text \"Offer\"",
+  "ok": true,
+  "got": "Offer"
+ },
+ {
+  "name": "Offer seed-query-12: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Offer seed-query-12: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Offer seed-query-12: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Offer seed-query-12: Special Elite 13px in ink on white, 1px inset stage edge #a9cdc2, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(169, 205, 194) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Requested seed-query-7: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Requested seed-query-7: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Requested seed-query-7: its text \"Partial requested\"",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "Partial Requested seed-query-7: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Requested seed-query-7: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Requested seed-query-7: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Requested seed-query-7: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: its text \"Revise & resubmit\"",
+  "ok": true,
+  "got": "Revise & resubmit"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Requested seed-query-9: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Requested seed-query-9: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Requested seed-query-9: its text \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Full Requested seed-query-9: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Requested seed-query-9: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Requested seed-query-9: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Requested seed-query-9: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: its text \"Partial requested\"",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Requested seed-query-20: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Requested seed-query-20: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Requested seed-query-20: its text \"Partial requested\"",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "Partial Requested seed-query-20: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Requested seed-query-20: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Requested seed-query-20: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Requested seed-query-20: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: its text \"Partial requested\"",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Requested rj-send: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Requested rj-send: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Requested rj-send: its text \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Full Requested rj-send: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Requested rj-send: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Requested rj-send: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Requested rj-send: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Requested cv25-q-09: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Requested cv25-q-09: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Requested cv25-q-09: its text \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Full Requested cv25-q-09: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Requested cv25-q-09: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Requested cv25-q-09: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Requested cv25-q-09: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Requested cor-move-a: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Requested cor-move-a: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Requested cor-move-a: its text \"Partial requested\"",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "Partial Requested cor-move-a: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Requested cor-move-a: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Requested cor-move-a: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Requested cor-move-a: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: its text \"Partial requested\"",
+  "ok": true,
+  "got": "Partial requested"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: its text \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: its text \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: its text \"Revise & resubmit\"",
+  "ok": true,
+  "got": "Revise & resubmit"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Requested msv12-q-4: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Requested msv12-q-4: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Requested msv12-q-4: its text \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Full Requested msv12-q-4: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Requested msv12-q-4: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Requested msv12-q-4: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Requested msv12-q-4: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Requested rj-dupe: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Requested rj-dupe: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Requested rj-dupe: its text \"Full requested\"",
+  "ok": true,
+  "got": "Full requested"
+ },
+ {
+  "name": "Full Requested rj-dupe: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Requested rj-dupe: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Requested rj-dupe: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Requested rj-dupe: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-2: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-2: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-2: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-2: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-2: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-2: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-2: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent cor-pair: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent cor-pair: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent cor-pair: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent cor-pair: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent cor-pair: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent cor-pair: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent cor-pair: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent seed-query-23: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent seed-query-23: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent seed-query-23: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent seed-query-23: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent seed-query-23: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent seed-query-23: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent seed-query-23: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent seed-query-8: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent seed-query-8: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent seed-query-8: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent seed-query-8: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent seed-query-8: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent seed-query-8: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent seed-query-8: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Sent qc150l9-q: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Sent qc150l9-q: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Sent qc150l9-q: its text \"Full sent\"",
+  "ok": true,
+  "got": "Full sent"
+ },
+ {
+  "name": "Full Sent qc150l9-q: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Sent qc150l9-q: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Sent qc150l9-q: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Sent qc150l9-q: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried probe-un-both: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried probe-un-both: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried probe-un-both: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried probe-un-both: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried probe-un-both: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried probe-un-both: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried probe-un-both: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried probe-un-noagent: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried probe-un-noagent: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried probe-un-noagent: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried probe-un-noagent: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried probe-un-noagent: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried probe-un-noagent: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried probe-un-noagent: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried cv25-q-14: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried cv25-q-14: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried cv25-q-14: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried cv25-q-14: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried cv25-q-14: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried cv25-q-14: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried cv25-q-14: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried cv25-q-13: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried cv25-q-13: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried cv25-q-13: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried cv25-q-13: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried cv25-q-13: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried cv25-q-13: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried cv25-q-13: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-close: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-close: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-close: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-close: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-close: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-close: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-close: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-22: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-22: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-22: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-22: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-22: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-22: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-22: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried msv12-q-1: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried msv12-q-1: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried msv12-q-1: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried msv12-q-1: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried msv12-q-1: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried msv12-q-1: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried msv12-q-1: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried msv12-q-7: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried msv12-q-7: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried msv12-q-7: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried msv12-q-7: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried msv12-q-7: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried msv12-q-7: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried msv12-q-7: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-4: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-4: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-4: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-4: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-4: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-4: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-4: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-19: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-19: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-19: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-19: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-19: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-19: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-19: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Sent seed-query-10: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Sent seed-query-10: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Sent seed-query-10: its text \"Full sent\"",
+  "ok": true,
+  "got": "Full sent"
+ },
+ {
+  "name": "Full Sent seed-query-10: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Sent seed-query-10: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Sent seed-query-10: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Sent seed-query-10: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried rj-nudge: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried rj-nudge: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried rj-nudge: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried rj-nudge: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried rj-nudge: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried rj-nudge: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried rj-nudge: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-chase: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-chase: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-chase: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-chase: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-chase: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-chase: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-chase: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: its text \"Full sent\"",
+  "ok": true,
+  "got": "Full sent"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: its text \"Resubmitted\"",
+  "ok": true,
+  "got": "Resubmitted"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-6: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-6: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-6: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-6: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-6: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-6: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-6: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-pkgq-1: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-pkgq-1: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-pkgq-1: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-pkgq-1: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-pkgq-1: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-pkgq-1: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-pkgq-1: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-pkgq-2: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-pkgq-2: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-pkgq-2: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-pkgq-2: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-pkgq-2: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-pkgq-2: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-pkgq-2: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-5: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-5: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-5: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-5: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-5: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-5: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-5: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried cor-move-b: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried cor-move-b: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried cor-move-b: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried cor-move-b: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried cor-move-b: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried cor-move-b: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried cor-move-b: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-pkgq-7: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-pkgq-7: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-pkgq-7: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-pkgq-7: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-pkgq-7: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-pkgq-7: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-pkgq-7: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-query-3: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-query-3: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-query-3: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-query-3: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-query-3: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-query-3: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-query-3: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried seed-cal-near-q: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried seed-cal-near-q: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried seed-cal-near-q: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried seed-cal-near-q: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried seed-cal-near-q: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried seed-cal-near-q: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried seed-cal-near-q: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: its text \"Full sent\"",
+  "ok": true,
+  "got": "Full sent"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Sent seed-query-21: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Sent seed-query-21: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Sent seed-query-21: its text \"Full sent\"",
+  "ok": true,
+  "got": "Full sent"
+ },
+ {
+  "name": "Full Sent seed-query-21: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Sent seed-query-21: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Sent seed-query-21: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Sent seed-query-21: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: its text \"Partial sent\"",
+  "ok": true,
+  "got": "Partial sent"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: Special Elite 13px in ink on white, 1px inset stage edge #e2b09c, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(226, 176, 156) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Full Sent msv12-q-5: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Full Sent msv12-q-5: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Full Sent msv12-q-5: its text \"Full sent\"",
+  "ok": true,
+  "got": "Full sent"
+ },
+ {
+  "name": "Full Sent msv12-q-5: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Full Sent msv12-q-5: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Full Sent msv12-q-5: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Full Sent msv12-q-5: Special Elite 13px in ink on white, 1px inset stage edge #9fb3c8, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(159, 179, 200) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried thin-q-remind: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried thin-q-remind: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried thin-q-remind: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried thin-q-remind: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried thin-q-remind: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried thin-q-remind: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried thin-q-remind: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried msv12-q-2: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried msv12-q-2: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried msv12-q-2: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried msv12-q-2: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried msv12-q-2: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried msv12-q-2: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried msv12-q-2: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried probe-un-noms: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried probe-un-noms: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried probe-un-noms: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried probe-un-noms: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried probe-un-noms: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried probe-un-noms: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried probe-un-noms: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried probe-goalstress-today: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried probe-goalstress-today: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried probe-goalstress-today: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried probe-goalstress-today: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried probe-goalstress-today: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried probe-goalstress-today: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried probe-goalstress-today: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried cv25-q-04: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried cv25-q-04: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried cv25-q-04: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried cv25-q-04: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried cv25-q-04: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried cv25-q-04: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried cv25-q-04: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Queried cv25-q-03: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Queried cv25-q-03: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queried cv25-q-03: its text \"Queried\"",
+  "ok": true,
+  "got": "Queried"
+ },
+ {
+  "name": "Queried cv25-q-03: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Queried cv25-q-03: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Queried cv25-q-03: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Queried cv25-q-03: Special Elite 13px in ink on white, 1px inset stage edge #e0d2bb, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(224, 210, 187) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "No Response msv12-q-8: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "No Response msv12-q-8: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "No Response msv12-q-8: its text \"No reply\"",
+  "ok": true,
+  "got": "No reply"
+ },
+ {
+  "name": "No Response msv12-q-8: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "No Response msv12-q-8: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "No Response msv12-q-8: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "No Response msv12-q-8: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected cv25-q-01: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected cv25-q-01: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected cv25-q-01: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected cv25-q-01: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected cv25-q-01: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected cv25-q-01: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected cv25-q-01: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-query-1: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-query-1: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-query-1: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-query-1: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-query-1: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-query-1: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-query-1: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-query-13: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-query-13: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-query-13: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-query-13: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-query-13: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-query-13: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-query-13: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected cv25-q-12: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected cv25-q-12: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected cv25-q-12: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected cv25-q-12: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected cv25-q-12: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected cv25-q-12: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected cv25-q-12: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected rej-query-1: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected rej-query-1: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected rej-query-1: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected rej-query-1: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected rej-query-1: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected rej-query-1: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected rej-query-1: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected cor-move-c: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected cor-move-c: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected cor-move-c: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected cor-move-c: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected cor-move-c: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected cor-move-c: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected cor-move-c: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Withdrawn seed-query-17: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Withdrawn seed-query-17: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Withdrawn seed-query-17: its text \"Withdrawn\"",
+  "ok": true,
+  "got": "Withdrawn"
+ },
+ {
+  "name": "Withdrawn seed-query-17: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Withdrawn seed-query-17: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Withdrawn seed-query-17: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Withdrawn seed-query-17: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-query-15: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-query-15: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-query-15: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-query-15: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-query-15: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-query-15: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-query-15: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-query-16: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-query-16: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-query-16: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-query-16: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-query-16: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-query-16: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-query-16: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected msv12-q-6: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected msv12-q-6: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected msv12-q-6: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected msv12-q-6: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected msv12-q-6: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected msv12-q-6: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected msv12-q-6: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "No Response seed-query-18: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "No Response seed-query-18: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "No Response seed-query-18: its text \"No reply\"",
+  "ok": true,
+  "got": "No reply"
+ },
+ {
+  "name": "No Response seed-query-18: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "No Response seed-query-18: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "No Response seed-query-18: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "No Response seed-query-18: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected cor-closed: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected cor-closed: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected cor-closed: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected cor-closed: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected cor-closed: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected cor-closed: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected cor-closed: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Signed cv25-q-08: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Signed cv25-q-08: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Signed cv25-q-08: its text \"Signed\"",
+  "ok": true,
+  "got": "Signed"
+ },
+ {
+  "name": "Signed cv25-q-08: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Signed cv25-q-08: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Signed cv25-q-08: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Signed cv25-q-08: Special Elite 13px in ink on white, 1px inset stage edge #a9cdc2, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(169, 205, 194) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected seed-query-14: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected seed-query-14: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected seed-query-14: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected seed-query-14: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected seed-query-14: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected seed-query-14: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected seed-query-14: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "Rejected cv25-q-02: the frame clips (overflow hidden)",
+  "ok": true,
+  "got": "hidden/hidden"
+ },
+ {
+  "name": "Rejected cv25-q-02: exactly one label",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Rejected cv25-q-02: its text \"Passed\"",
+  "ok": true,
+  "got": "Passed"
+ },
+ {
+  "name": "Rejected cv25-q-02: drawn outside the frame",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Rejected cv25-q-02: its centre on the frame's top edge (within 1px of the band's top)",
+  "ok": false,
+  "got": "16.00px from the band's top"
+ },
+ {
+  "name": "Rejected cv25-q-02: 14px in from the band's right edge, 22px high, radius 11",
+  "ok": true,
+  "got": "14.0 / 22 / 11px"
+ },
+ {
+  "name": "Rejected cv25-q-02: Special Elite 13px in ink on white, 1px inset stage edge #dedbd5, the JSON's shadow",
+  "ok": true,
+  "got": "\"Special Elite\" 13px rgb(28, 19, 15) rgb(255, 255, 255) rgb(222, 219, 213) 0px 0px 0px 1px inset, rgba(28, 19, 15, 0.08) 0px 1px 2px 0px"
+ },
+ {
+  "name": "hit test: population",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "seed-query-12: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-7: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-11: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-9: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-06: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-20: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-3: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "rj-send: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-09: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cor-move-a: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-07: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-3: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-cal-passed865-q: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cor-undo: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-4: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "rj-dupe: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-2: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-gap-solo: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cor-pair: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-23: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-8: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-4: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-cal-soon-q: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-cal-bang-q: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "qc150l9-q: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "probe-un-both: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "probe-un-noagent: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-14: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-13: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-close: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-22: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-1: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-7: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-4: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-19: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-cohort-2: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-cohort-1: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-cohort-6: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-cohort-3: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-cohort-5: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-cohort-4: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-10: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-ms2-a: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "rj-nudge: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-chase: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-ms2-b: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-10: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-05: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-cal-passed20-q: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-6: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-1: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-2: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-5: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cor-move-b: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-7: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-3: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-cal-near-q: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-11: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-9: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-21: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-10: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-5: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "thin-q-remind: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-2: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "probe-dangling-pkg: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "probe-un-noms: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "probe-goalstress-today: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-04: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-03: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-8: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-8: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-01: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-1: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-13: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-12: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "rej-query-1: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cor-move-c: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-5: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-17: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-15: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-16: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "msv12-q-6: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-pkgq-6: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-18: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cor-closed: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-08: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "seed-query-14: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "cv25-q-02: no ancestor clips the label, and it is hit (not covered)",
+  "ok": true,
+  "got": "true,true,true,true"
+ },
+ {
+  "name": "Offer seed-query-12: pixels — the label's top edge line (#a9cdc2) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Partial Requested seed-query-7: pixels — the label's top edge line (#e2b09c) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: pixels — the label's top edge line (#9fb3c8) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Full Requested seed-query-9: pixels — the label's top edge line (#9fb3c8) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Queried seed-query-2: pixels — the label's top edge line (#e0d2bb) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: pixels — the label's top edge line (#e2b09c) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Full Sent qc150l9-q: pixels — the label's top edge line (#9fb3c8) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: pixels — the label's top edge line (#9fb3c8) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: pixels — the label's top edge line (#dedbd5) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "No Response msv12-q-8: pixels — the label's top edge line (#dedbd5) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Withdrawn seed-query-17: pixels — the label's top edge line (#dedbd5) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ },
+ {
+  "name": "Signed cv25-q-08: pixels — the label's top edge line (#a9cdc2) is on screen across its middle",
+  "ok": true,
+  "got": "100%"
+ }
+]

@@ -1,0 +1,147 @@
+[
+ {
+  "name": "cv25-q-02: the title is the tile's name (\"1 material\")",
+  "ok": true,
+  "got": "1 material"
+ },
+ {
+  "name": "cv25-q-02: the count is its chips (or 1 for a package alone)",
+  "ok": true,
+  "got": "0 chips, 1 package / 1"
+ },
+ {
+  "name": "cv25-q-02: closes on leave",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "seed-query-9: the title is the tile's name (\"2 materials\")",
+  "ok": true,
+  "got": "2 materials"
+ },
+ {
+  "name": "seed-query-9: the count is its chips (or 1 for a package alone)",
+  "ok": true,
+  "got": "2 chips, 0 package / 2"
+ },
+ {
+  "name": "seed-query-9 chip \"Full manuscript · asked\": 28 high, radius 14, Source Serif 600 14px, an icon at 16px",
+  "ok": true,
+  "got": "28 14px \"Source Serif 4\" 600 14px SPAN:16"
+ },
+ {
+  "name": "seed-query-9 chip \"Full manuscript · asked\" (asked): white, 1px dashed navy at 60%, navy words",
+  "ok": true,
+  "got": "rgb(255, 255, 255) 1px dashed rgba(42, 58, 82, 0.6) rgb(42, 58, 82)"
+ },
+ {
+  "name": "seed-query-9 chip \"Partial\": 28 high, radius 14, Source Serif 600 14px, an icon at 16px",
+  "ok": true,
+  "got": "28 14px \"Source Serif 4\" 600 14px svg:16"
+ },
+ {
+  "name": "seed-query-9 chip \"Partial\": #f8f4ed, 1px inset #e8dfd2, ink",
+  "ok": true,
+  "got": "rgb(248, 244, 237) rgb(232, 223, 210) 0px 0px 0px 1px inset rgb(28, 19, 15)"
+ },
+ {
+  "name": "seed-query-9: closes on leave",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "seed-query-12: the title is the tile's name (\"2 materials\")",
+  "ok": true,
+  "got": "2 materials"
+ },
+ {
+  "name": "seed-query-12: the count is its chips (or 1 for a package alone)",
+  "ok": true,
+  "got": "2 chips, 0 package / 2"
+ },
+ {
+  "name": "seed-query-12 chip \"Partial\": 28 high, radius 14, Source Serif 600 14px, an icon at 16px",
+  "ok": true,
+  "got": "28 14px \"Source Serif 4\" 600 14px svg:16"
+ },
+ {
+  "name": "seed-query-12 chip \"Partial\": #f8f4ed, 1px inset #e8dfd2, ink",
+  "ok": true,
+  "got": "rgb(248, 244, 237) rgb(232, 223, 210) 0px 0px 0px 1px inset rgb(28, 19, 15)"
+ },
+ {
+  "name": "seed-query-12 chip \"Full manuscript\": 28 high, radius 14, Source Serif 600 14px, an icon at 16px",
+  "ok": true,
+  "got": "28 14px \"Source Serif 4\" 600 14px SPAN:16"
+ },
+ {
+  "name": "seed-query-12 chip \"Full manuscript\": #f8f4ed, 1px inset #e8dfd2, ink",
+  "ok": true,
+  "got": "rgb(248, 244, 237) rgb(232, 223, 210) 0px 0px 0px 1px inset rgb(28, 19, 15)"
+ },
+ {
+  "name": "seed-query-12: closes on leave",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "seed-query-12: the title is the tile's name (\"2 materials\")",
+  "ok": true,
+  "got": "2 materials"
+ },
+ {
+  "name": "seed-query-12: the count is its chips (or 1 for a package alone)",
+  "ok": true,
+  "got": "2 chips, 0 package / 2"
+ },
+ {
+  "name": "seed-query-12 chip \"Partial\": 28 high, radius 14, Source Serif 600 14px, an icon at 16px",
+  "ok": true,
+  "got": "28 14px \"Source Serif 4\" 600 14px svg:16"
+ },
+ {
+  "name": "seed-query-12 chip \"Partial\": #f8f4ed, 1px inset #e8dfd2, ink",
+  "ok": true,
+  "got": "rgb(248, 244, 237) rgb(232, 223, 210) 0px 0px 0px 1px inset rgb(28, 19, 15)"
+ },
+ {
+  "name": "seed-query-12 chip \"Full manuscript\": 28 high, radius 14, Source Serif 600 14px, an icon at 16px",
+  "ok": true,
+  "got": "28 14px \"Source Serif 4\" 600 14px SPAN:16"
+ },
+ {
+  "name": "seed-query-12 chip \"Full manuscript\": #f8f4ed, 1px inset #e8dfd2, ink",
+  "ok": true,
+  "got": "rgb(248, 244, 237) rgb(232, 223, 210) 0px 0px 0px 1px inset rgb(28, 19, 15)"
+ },
+ {
+  "name": "seed-query-12: closes on leave",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: a manuscript chip with StatusDot's Full mark",
+  "ok": true,
+  "got": "{\"text\":\"Revised manuscript · asked\",\"statusDot\":true,\"asked\":true}"
+ },
+ {
+  "name": "seed-query-12: opens on keyboard focus",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "seed-query-12: Escape closes it, focus stays on the tile",
+  "ok": true,
+  "got": "{\"open\":false,\"focus\":\"tile\"}"
+ },
+ {
+  "name": "seed-query-12: Enter opens it again",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "seed-query-12: closes on blur",
+  "ok": true,
+  "got": "false"
+ }
+]

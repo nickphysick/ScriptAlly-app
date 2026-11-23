@@ -1,0 +1,77 @@
+[
+ {
+  "name": "Offer and Signed grid cards: both on the page",
+  "ok": true,
+  "got": "1 / 1"
+ },
+ {
+  "name": "Offer seed-query-12: grid band flat #c5e0d8, no gradient",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Offer seed-query-12 name: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 agency: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 step cur: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Signed cv25-q-08: grid band flat #c5e0d8, no gradient",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Signed cv25-q-08 name: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Signed cv25-q-08 agency: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Signed cv25-q-08 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Signed cv25-q-08 step skip: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Signed cv25-q-08 step skip: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "Signed cv25-q-08 step cur: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ }
+]

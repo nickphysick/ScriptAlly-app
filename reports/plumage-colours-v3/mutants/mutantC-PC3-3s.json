@@ -1,0 +1,517 @@
+[
+ {
+  "name": "slide-in Partial Requested seed-query-7: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Partial Requested seed-query-7: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in Partial Requested seed-query-7: strip #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "slide-in Partial Sent thin-q-gap-solo: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Partial Sent thin-q-gap-solo: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in Partial Sent thin-q-gap-solo: strip #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "slide-in Full Requested seed-query-9: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Full Requested seed-query-9: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in Full Requested seed-query-9: strip #d3deea, flat",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none"
+ },
+ {
+  "name": "slide-in Full Sent qc150l9-q: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Full Sent qc150l9-q: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in Full Sent qc150l9-q: strip #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "slide-in Revise & Resubmit seed-query-11: no outline",
+  "ok": true,
+  "got": "rgb(236, 230, 222) 0px -1px 0px 0px inset"
+ },
+ {
+  "name": "slide-in Revise & Resubmit seed-query-11: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in Resubmitted cv25-q-10: no outline",
+  "ok": true,
+  "got": "rgb(236, 230, 222) 0px -1px 0px 0px inset"
+ },
+ {
+  "name": "slide-in Resubmitted cv25-q-10: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in Resubmitted cv25-q-10 (quiet): strip fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "slide-in Offer seed-query-12: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Offer seed-query-12: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in Signed cv25-q-08: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Signed cv25-q-08: carries no band label",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "slide-in: every one of the eight opened",
+  "ok": true,
+  "got": "Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Resubmitted, Offer, Signed"
+ },
+ {
+  "name": "bubble R&R: flat #d3deea",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none"
+ },
+ {
+  "name": "elements read on the Query Centre and the slide-in",
+  "ok": true,
+  "got": "5531"
+ },
+ {
+  "name": "none computes a gone hex (v1's Full and navy offer, v2's Full requested and stripe paper)",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye bars with a known status: population",
+  "ok": true,
+  "got": "69 of 69"
+ },
+ {
+  "name": "Birds-eye: an R&R bar among them",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Birds-eye Queried thin-q-close: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-22: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-1: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-7: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-4: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-19: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-1: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-6: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-3: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-5: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-4: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-10: bar #b9c9da, flat, no outline",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-ms2-a: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried rj-nudge: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-chase: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-ms2-b: bar #b9c9da, flat, no outline",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none / none"
+ },
+ {
+  "name": "Birds-eye Resubmitted cv25-q-10: bar #b9c9da, flat, no outline",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cv25-q-05: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-passed20-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-6: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-1: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-5: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried cor-move-b: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-7: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-3: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested seed-query-7: bar #f1d9cf, flat, no outline",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-near-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cv25-q-11: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-pkgq-9: bar #b9c9da, flat, no outline",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-21: bar #b9c9da, flat, no outline",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-pkgq-10: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Sent msv12-q-5: bar #b9c9da, flat, no outline",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-remind: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Revise & Resubmit seed-query-11: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent thin-q-gap-solo: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cor-pair: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-query-23: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-query-8: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-dangling-pkg: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-noms: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-pkgq-4: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-goalstress-today: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-soon-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-query-9: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cv25-q-06: bar #f1d9cf, flat, no outline",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested seed-query-20: bar #f1d9cf, flat, no outline",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested msv12-q-3: bar #f1d9cf, flat, no outline",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Requested rj-send: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Requested cv25-q-09: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cor-move-a: bar #f1d9cf, flat, no outline",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cv25-q-07: bar #f1d9cf, flat, no outline",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-pkgq-3: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Offer seed-query-12: bar #c5e0d8, flat, no outline",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-cal-passed865-q: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Revise & Resubmit cor-undo: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Requested msv12-q-4: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Requested rj-dupe: bar #d3deea, flat, no outline",
+  "ok": true,
+  "got": "rgb(211, 222, 234) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-bang-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Full Sent qc150l9-q: bar #b9c9da, flat, no outline",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-both: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-noagent: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-04: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-14: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-13: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-03: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Responses: grid cards on show",
+  "ok": true,
+  "got": "6"
+ },
+ {
+  "name": "Responses card cv25-q-09: one label, no paperclip",
+  "ok": true,
+  "got": "{\"id\":\"cv25-q-09\",\"labels\":1,\"clip\":0}"
+ },
+ {
+  "name": "Responses card cv25-q-07: one label, no paperclip",
+  "ok": true,
+  "got": "{\"id\":\"cv25-q-07\",\"labels\":1,\"clip\":0}"
+ },
+ {
+  "name": "Responses card cv25-q-06: one label, no paperclip",
+  "ok": true,
+  "got": "{\"id\":\"cv25-q-06\",\"labels\":1,\"clip\":0}"
+ },
+ {
+  "name": "Responses card cv25-q-05: one label, no paperclip",
+  "ok": true,
+  "got": "{\"id\":\"cv25-q-05\",\"labels\":1,\"clip\":0}"
+ },
+ {
+  "name": "Responses card cv25-q-10: one label, no paperclip",
+  "ok": true,
+  "got": "{\"id\":\"cv25-q-10\",\"labels\":1,\"clip\":0}"
+ },
+ {
+  "name": "Responses card cv25-q-11: one label, no paperclip",
+  "ok": true,
+  "got": "{\"id\":\"cv25-q-11\",\"labels\":1,\"clip\":0}"
+ }
+]

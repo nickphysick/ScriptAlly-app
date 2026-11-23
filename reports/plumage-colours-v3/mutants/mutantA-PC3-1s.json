@@ -1,0 +1,107 @@
+[
+ {
+  "name": "slide-in Offer seed-query-12: strip flat #c5e0d8, no gradient",
+  "ok": false,
+  "got": "rgba(0, 0, 0, 0) / repeating-linear-gradient(118deg, rgb(246, 240, 229) 0px, rg"
+ },
+ {
+  "name": "slide-in Offer seed-query-12: strip words in ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step cur: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer band-word: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Signed cv25-q-08: strip flat #c5e0d8, no gradient",
+  "ok": false,
+  "got": "rgba(0, 0, 0, 0) / repeating-linear-gradient(118deg, rgb(246, 240, 229) 0px, rg"
+ },
+ {
+  "name": "slide-in Signed cv25-q-08: strip words in ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Signed step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Signed step skip: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Signed step skip: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Signed step cur: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Signed band-word: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "bubble Offer: flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "bubble Offer: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "the Stage filter's Offer pill: population",
+  "ok": true,
+  "got": "[\"segment\",\"pill\"]"
+ },
+ {
+  "name": "Stage filter segment (offer): flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Stage filter pill (offer): flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "the Offers heading's count: flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Birds-eye Offer seed-query-12: flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ }
+]

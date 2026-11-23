@@ -1,0 +1,147 @@
+[
+ {
+  "name": "full: a card to open",
+  "ok": true,
+  "got": "Revise & Resubmit seed-query-11"
+ },
+ {
+  "name": "full: the rim's tint #6f8fb0",
+  "ok": true,
+  "got": "rgb(111, 143, 176)"
+ },
+ {
+  "name": "tile query: population non-zero",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "tile query: #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile query: #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile query: #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile query: #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile agent: population non-zero",
+  "ok": true,
+  "got": "12"
+ },
+ {
+  "name": "tile agent: #96aca9, glyph #1c130f",
+  "ok": false,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile agent: 1px edge #7c9793",
+  "ok": false,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile agent: #96aca9, glyph #1c130f",
+  "ok": false,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile agent: 1px edge #7c9793",
+  "ok": false,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile agent: #96aca9, glyph #1c130f",
+  "ok": false,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile agent: 1px edge #7c9793",
+  "ok": false,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile agent: #96aca9, glyph #1c130f",
+  "ok": false,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "tile agent: 1px edge #7c9793",
+  "ok": false,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "tile material: population non-zero",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "tile material: #903830, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(144, 56, 48) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "tile material: #903830, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(144, 56, 48) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "tile material: #903830, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(144, 56, 48) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "tile task: population non-zero",
+  "ok": true,
+  "got": "11"
+ },
+ {
+  "name": "tile task: #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "tile task: #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "tile task: #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "tile task: #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ }
+]
