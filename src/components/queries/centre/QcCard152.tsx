@@ -234,6 +234,14 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   /* v168 — a step open in place is not a journey: the book, the tabs and the footer stay (only the composer folds them) */
   const jOpen = !!p.composer;
   const tip = useTip();
+  /* v168 §7 — what is not edited here says why: the card's own tip box, after 250ms of hover or on keyboard focus */
+  const whyT = useRef(0);
+  const why = (body: string): Record<string, unknown> => {
+    const on = (e: React.SyntheticEvent<HTMLElement>) => { const el = e.currentTarget; window.clearTimeout(whyT.current); whyT.current = window.setTimeout(() => tip.show(el, body), 250); };
+    const off = () => { window.clearTimeout(whyT.current); tip.hide(); };
+    return { tabIndex: 0, "data-qc168-why": body, onMouseEnter: on, onFocus: on, onMouseLeave: off, onBlur: off };
+  };
+  useEffect(() => () => window.clearTimeout(whyT.current), []);
   const view = p.view ?? "read";
   const rootRef = useRef<HTMLDivElement>(null);
   const [popOpen, setPopOpen] = useState<string | null>(null);
@@ -608,7 +616,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
       sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
       onOpen={ed.on ? null : (k) => g168(() => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")))}
-      onFullCard={() => g168(() => p.onAgentField(null))} editing={prof?.k ?? null} just={just} />
+      onFullCard={() => g168(() => p.onAgentField(null))} editing={prof?.k ?? null} just={just}
+      heardWhy={why(d.lastHeardMs != null ? `From ${first}’s latest reply on Tracking` : `Fills in when you record ${first}’s reply`)} />
   );
 
   /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). v168: each group edits
@@ -663,14 +672,14 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
           <div className="qc152-who"><div ref={nameRef} className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div><div className="qc152-ag" data-qc164="agency">{r.agency || ""}</div></div>
           {/* v164 — no status label (the strip names it); the day sits at the row's end, by the strip's old rule */}
-          {d.state !== "closed" && r.dayN != null ? <span className="qc164-day" data-qc164="day">Day {r.dayN}</span> : null}
+          {d.state !== "closed" && r.dayN != null ? <span className="qc164-day" data-qc164="day" {...why("Counted from the day you queried. Change that date on its step in Tracking")}>Day {r.dayN}</span> : null}
         </div>
         {view !== "read" ? p.editBody : <>
         {desk.bookRow ? (
           /* v53 (D8): the To-do card's book is one row — its height goes to Tracking */
           <div className="qc153-bkrow" data-qc152="book" data-qc153="book-row"><span>Querying</span><b>{p.msTitle ?? "No manuscript"}</b></div>
         ) : (
-        <div className="qc152-ms" data-qc152="book">
+        <div className="qc152-ms" data-qc152="book" {...why("A query stays with its book")}>
           <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
           {/* v164 — no "QUERYING" label; the title in --sp-h-card; genre and word count one sentence-case line */}
           <div><b>{p.msTitle ?? "No manuscript"}</b>

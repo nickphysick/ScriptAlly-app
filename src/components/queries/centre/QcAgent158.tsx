@@ -39,6 +39,8 @@ export interface AgentTab158Props {
   hasAsks: boolean;
   /** v167 — open a profile drawer at a detail (null: not editable here, e.g. while the pencil's edit mode is on) */
   onOpen: ((k: ProfileKey) => void) | null;
+  /** Query card v168 §7 — Last heard is not edited here: the props that show why, in the card's tip box */
+  heardWhy?: Record<string, unknown>;
   /** "{first}'s full card": the agent's card, by the route the card has always used */
   onFullCard: () => void;
   /** the detail whose drawer is open (its box keeps the navy edge) */
@@ -68,11 +70,11 @@ export const NxBox: React.FC<{ k: string; label: string; value: React.ReactNode;
 
 /** v167 — a fact box on the query card: a fixed 86px, the value on one line, a ghost bar where nothing is recorded */
 const Tile: React.FC<{ k: string; label: string; value: React.ReactNode | null; sub?: React.ReactNode; ghost: { w: number; words: string } | null;
-  open: (() => void) | null; valueClass?: string; cls?: string; fin?: string; finKey?: string }> = ({ k, label, value, sub, ghost, open, valueClass, cls, fin, finKey }) => (
+  open: (() => void) | null; valueClass?: string; cls?: string; fin?: string; finKey?: string; extra?: Record<string, unknown> }> = ({ k, label, value, sub, ghost, open, valueClass, cls, fin, finKey, extra }) => (
   /* v168 — a tile with a value takes the pencil (the keyboard's way in; a click anywhere on the tile still opens it);
      a ghost tile stays one "+ Add …" button, as v167 drew it */
   <div className={`nx-box qc167-tile${cls ?? ""}`} data-qc158="box" data-qc167="tile" data-k={k} data-ghost={value == null ? "" : undefined}
-    {...(open && value != null ? { onClick: open, "data-qc168-host": "", "data-qc167-ed": "" } : editable(value == null && ghost ? `${label}: + ${ghost.words}` : `${label}: edit`, open))}>
+    {...(open && value != null ? { onClick: open, "data-qc168-host": "", "data-qc167-ed": "" } : editable(value == null && ghost ? `${label}: + ${ghost.words}` : `${label}: edit`, open))} {...extra}>
     <small>{label}</small>
     {value == null
       ? <b data-qc158="value" className="qc167-gv">{ghost ? <Ghost w={ghost.w} words={open ? ghost.words : null} /> : null}</b>
@@ -100,7 +102,7 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
           value={how ?? null} ghost={{ w: 62, words: "Add how" }}
           sub={p.queriedVia ? <>you queried {p.queriedVia}</> : null} />
         {/* Last heard is the thread's, never the profile's: not editable, and "Not yet" (smaller, italic, grey) until a reply */}
-        <Tile k="heard" label="Last heard" open={null} ghost={null}
+        <Tile k="heard" label="Last heard" open={null} ghost={null} extra={p.heardWhy}
           value={p.lastHeardMs != null ? dayLabel(p.lastHeardMs, p.nowMs) : "Not yet"} valueClass={p.lastHeardMs != null ? undefined : "qc167-notyet"}
           sub={heardSub} />
       </div>
