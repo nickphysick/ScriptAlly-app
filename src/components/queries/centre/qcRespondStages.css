@@ -18,7 +18,6 @@
 /* status marks in rows: the StatusDot on its status colour */
 .laq.rar .laq-g.is-st { width: 38px; height: 38px; background: var(--c, #efe6d6); color: #1c130f; }
 .laq.rar .laq-g.is-st svg { width: 21px; height: 21px; }
-.laq.rar .laq-g.is-st.is-rr { background: repeating-linear-gradient(118deg, #d3deea 0 7px, #b9c9da 7px 14px); }
 .laq.rar .laq-big > button.is-on .laq-g.is-st { background: var(--c, #efe6d6); }
 .laq.rar .laq-big > button .laq-tag { text-align: right; }
 .laq.rar .rar-hint { margin-top: 14px; }

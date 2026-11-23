@@ -1,0 +1,82 @@
+[
+ {
+  "where": "the ✕: the journey opened",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "the ✕: the journey is gone",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "the ✕: the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "the ✕: the page's scroll is unchanged",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "where": "Escape: the journey opened",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Escape: the journey is gone",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Escape: the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Escape: the page's scroll is unchanged",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "where": "Cancel: the journey opened",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Cancel: the journey is gone",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Cancel: the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Cancel: the page's scroll is unchanged",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "where": "the scrim: the journey opened",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "the scrim: the journey is gone",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "the scrim: the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "the scrim: the page's scroll is unchanged",
+  "ok": true,
+  "detail": "0 → 0"
+ }
+]

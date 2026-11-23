@@ -186,7 +186,8 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
   useEffect(() => { if (s.step === "who" && phase === "flow") findRef.current?.focus({ preventScroll: true }); }, [s.step, phase]);
   useLayoutEffect(() => { if (s.step === "who") sbRef.current?.querySelector<HTMLElement>(".laq-big > button.is-hi")?.scrollIntoView({ block: "nearest" }); }, [hi, s.step]);
   const disc = (status: QueryStatus | string, closedRow = false) => (
-    <span className={`laq-g is-st${status === QueryStatus.REVISE_RESUBMIT ? " is-rr" : ""}`} style={{ "--c": closedRow ? toneOf(QueryStatus.REJECTED)!.disc : toneOf(status)!.disc } as React.CSSProperties} aria-hidden="true">
+    /* the disc is the status's own flat colour: the stripes are the two cards' bands only (lib/stageColours) */
+    <span className="laq-g is-st" style={{ "--c": closedRow ? toneOf(QueryStatus.REJECTED)!.disc : toneOf(status)!.disc } as React.CSSProperties} aria-hidden="true">
       <StatusDot status={status} overrideSize={21} decorative />
     </span>
   );

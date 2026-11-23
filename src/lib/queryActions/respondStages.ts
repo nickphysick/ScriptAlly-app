@@ -19,6 +19,8 @@ import { planRecord, withRecompute, type PlanCtx, type StepMaterial, type WriteP
 import { holdsPages, type OtherQ } from "../qc1522Write";
 import type { RawActivityDoc } from "../recomputeFields";
 import { dayIso } from "./dates";
+import { MONTHS_SHORT } from "../dates";
+import { WEEKDAY } from "./logStages";
 import { capFirst, sampleName, type Sample } from "./sample";
 import { STAGE_COLOURS, stageOf, statusBand } from "../stageColours";
 import { liveCount } from "../dashBreakdown";
@@ -300,8 +302,9 @@ export function toneStatus(qStatus: QueryStatus | string | null, kind: RKind | n
 
 /* ── dates ─────────────────────────────────────────────────────────────────────────────────────────────── */
 
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const WD = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+/* the app's one month table (lib/dates) and Log a query's weekday names */
+const MON = MONTHS_SHORT;
+const WD = WEEKDAY;
 export const sod = (ms: number): number => { const d = new Date(ms); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
 export const addDaysMs = (ms: number, n: number): number => { const d = new Date(ms); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n).getTime(); };
 export const dm = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}`; };
