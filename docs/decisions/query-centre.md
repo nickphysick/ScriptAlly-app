@@ -4,12 +4,29 @@
 
 ## Current state
 
-- **Colours (Plumage colours v1, 22 Nov 2026; branch `plumage-colours-v1`, NOT merged):** one table, `src/lib/stageColours.ts`, taken from the mentor hawk's plumage (pack design-refs/plumage-colours-v1/). The band is the STATUS's shade; an outline means the query is with the writer. Section "Plumage colours v1" below has the rules. This supersedes v157's "colour is the stage and nothing else" and its foil offer.
+- **Colours (Plumage colours v2, 22 Nov 2026; branch `plumage-colours-v2`, NOT merged):** one table, `src/lib/stageColours.ts` (packs design-refs/plumage-colours-v1/ and design-refs/plumage-colours-v2/). The band is the STATUS's shade; nothing outlines a band; Full is slate blue, Offer duck egg with soft stripes on the grid card's band and the slide-in strip only; every grid card names its status on a label across the band's bottom edge. Section "Plumage colours v2" below has the rules; it supersedes v1's outline and navy offer.
 - Newest build on this line: Query Centre v157 (18 Nov 2026; ref design-refs/query-centre-v157.html; report reports/query-centre-v157/REPORT.md; branch `query-centre-v157`, NOT merged). The grid card is `QcCard154.tsx`, styled by qcv154 → qcv1541 → qcv156 → qcv1561 → qcv157.
 - Stage colours come from one table, `src/lib/stageColours.ts` (band, tint, mark per stage). The grid card reads `band` only; `tint` and `mark` wait for the next pack.
 - Not yet on the slate ladder (they move in the next pack): the stage ring, Birds-eye, the log-a-query slip preview, the pull-out query card, Dashboard, activity feed, Analytics, Contact list, Responses, To-do, phone pages.
 
+## Plumage colours v2 — no outline, slate blue Full, duck egg Offer, the status name on the grid card (22 Nov 2026)
+
+Pack: design-refs/plumage-colours-v2/ (`plumage-colours-v2.json` the oracle for Full, Offer, the stripes, the accent inks and the label; `query-cards-v2.html` for the card band, label and colours only, not the page). Report: reports/plumage-colours-v2/REPORT.md. Branch `plumage-colours-v2`, NOT merged.
+
+The rules (Nick's rulings on v1 as it looked on dev; baked, do not reopen):
+1. **No with-you outline anywhere.** `withYouOutline`, `withYouShadow`, `WITH_YOU_OUTLINE_PX`, `PLUMAGE_NAVY` and `OFFER_INK` are deleted; nothing replaces the outline. Requested lighter, sent deeper, as v1.
+2. Queried, Partial and Closed are v1's. **Full is slate blue:** requested `#dbe4ee`, sent `#b9c9da` (R&R and Resubmitted too), tint `#eff3f7`, edge `#9fb3c8`, mark / rim `#6f8fb0`, rimHi `#dbe4ee`; accent ink `#3d5673`.
+3. **Offer (and Signed) is duck egg** `#c5e0d8`, tint `#eef6f3`, edge `#a9cdc2`, mark / rim `#7fb3a5`, rimHi `#e2f0ec`; accent ink `#2f5a4e`. **Text and marks are ink `#1c130f` on every band, the offer's included** (`bandInk`/`stageInk` return ink).
+4. **The stripes** (`OFFER_STRIPES`, through `bandBackground`): `repeating-linear-gradient(118deg, #f6f0e5 0 22px, Partial requested 22px 44px, Full requested 44px 66px)`, built from the table. **Two places only: the grid card's band (QcCard154, inline on `.qc154-hd`) and the slide-in card's strip (QcCard152).** Every other offer surface reads `statusBand` and is flat duck egg. No sheen, foil or animation on any offer surface.
+5. **The status label (grid card only):** across the band's bottom edge, its centre on the line, 14px from the band's left; 22 high, radius 11, white, 1px inset edge in the stage's `edge`, Special Elite 13 in ink, one line; the card's own word (`standWords`). Gone quiet cards carry it; the slide-in card does not. The frame (`.qc154-in`) no longer clips, the band rounds its own top corners (12px), the facts have 18px above them. It replaced v154's hover label under the track, which is deleted.
+6. The Next box's navy "needs you" outline is a different thing and is unchanged.
+
+How it is built: `pc2card.css` (the label, the frame, the facts' room); `QcCard154.tsx` (the label, the striped band, the band ease treating stripes as a gradient). Locks: src/lib/stageColours.test.ts, src/components/queries/centre/pc2card.test.tsx, tests/e2e/pc2.measure.ts PC2-1 … PC2-9 and the frames (pc1.measure.ts is retired; its tile lock carried over as PC2-9b).
+
 ## Plumage colours v1 — the band is the status's shade; an outline means it is with the writer (22 Nov 2026)
+
+> Superseded by Plumage colours v2, above: its outline (rule 4), its navy offer and paper ink (rule 3) and its Full shades (rule 2). Rules 1, 5 and 7 stand.
+
 
 Pack: design-refs/plumage-colours-v1/ (`plumage-colours-v1.json` is the oracle for every hex). Report: reports/plumage-colours-v1/REPORT.md. Branch `plumage-colours-v1`, NOT merged.
 

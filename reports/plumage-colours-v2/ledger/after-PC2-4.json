@@ -1,0 +1,57 @@
+[
+ {
+  "name": "Offer or Signed grid cards: population non-zero",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "Offer seed-query-12: grid band computes the stripes",
+  "ok": true,
+  "got": "repeating-linear-gradient(118deg, rgb(246, 240, 229) 0px, rgb(246, 240, 229) 22px, rgb(241, 217, 207) 22px, rgb(241, 217, 207) 44px, rgb(219, 228, 238) 44px, rgb(219, 228, 238) 66px)"
+ },
+ {
+  "name": "Offer cv25-q-08: grid band computes the stripes",
+  "ok": true,
+  "got": "repeating-linear-gradient(118deg, rgb(246, 240, 229) 0px, rgb(246, 240, 229) 22px, rgb(241, 217, 207) 22px, rgb(241, 217, 207) 44px, rgb(219, 228, 238) 44px, rgb(219, 228, 238) 66px)"
+ },
+ {
+  "name": "slide-in Offer seed-query-12: strip computes the stripes",
+  "ok": true,
+  "got": "repeating-linear-gradient(118deg, rgb(246, 240, 229) 0px, rgb(246, 240, 229) 22px, rgb(241, 217, 207) 22px, rgb(241, 217, 207) 44px, rgb(219, 228, 238) 44px, rgb(219, 228, 238) 66px)"
+ },
+ {
+  "name": "bubble Offer: flat duck egg (bubbles are not card bands)",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "the Stage filter's Offer pill: population",
+  "ok": true,
+  "got": "[\"segment\",\"pill\"]"
+ },
+ {
+  "name": "Stage filter segment (offer): flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Stage filter pill (offer): flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "the Offers group heading's count: flat duck egg",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Birds-eye Offer seed-query-12: flat duck egg, not the stripes",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Birds-eye Offer cv25-q-08: flat duck egg, not the stripes",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ }
+]

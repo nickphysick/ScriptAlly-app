@@ -1,0 +1,867 @@
+[
+ {
+  "name": "grid cards on the page",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "Partial Requested: population non-zero (the three v1 outlined)",
+  "ok": true,
+  "got": "6"
+ },
+ {
+  "name": "Full Requested: population non-zero (the three v1 outlined)",
+  "ok": true,
+  "got": "7"
+ },
+ {
+  "name": "Revise & Resubmit: population non-zero (the three v1 outlined)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Offer seed-query-12: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Offer cv25-q-08: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested seed-query-7: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested seed-query-9: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested seed-query-20: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested rj-send: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested cv25-q-09: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested cor-move-a: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested msv12-q-4: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested rj-dupe: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-2: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent cor-pair: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent seed-query-23: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent seed-query-8: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent qc150l9-q: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried probe-un-both: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried probe-un-noagent: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried cv25-q-14: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried cv25-q-13: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-close: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-22: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried msv12-q-1: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried msv12-q-7: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-4: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-19: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent seed-query-10: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried rj-nudge: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-chase: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent cv25-q-10: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-6: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-pkgq-1: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-pkgq-2: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-5: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent cor-undo: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried cor-move-b: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-pkgq-7: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-query-3: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried seed-cal-near-q: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent seed-query-21: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent msv12-q-5: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried thin-q-remind: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried msv12-q-2: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried probe-un-noms: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried probe-goalstress-today: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried cv25-q-04: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Queried cv25-q-03: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "No Response msv12-q-8: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cv25-q-01: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-1: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-13: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cv25-q-12: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected rej-query-1: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cor-move-c: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Withdrawn seed-query-17: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-15: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-16: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected msv12-q-6: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "No Response seed-query-18: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cor-closed: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected seed-query-14: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Rejected cv25-q-02: grid band has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Partial Requested seed-query-7: strip has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Partial Sent thin-q-gap-solo: strip has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Full Requested seed-query-9: strip has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Full Sent qc150l9-q: strip has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Revise & Resubmit seed-query-11: strip has no inset 3px shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "slide-in Offer seed-query-12: strip has no inset 3px shadow",
+  "ok": true,
+  "got": "rgb(236, 230, 222) 0px -1px 0px 0px inset"
+ },
+ {
+  "name": "bubble Partial Requested: no outline",
+  "ok": true,
+  "got": "rgb(226, 176, 156) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "bubble Full Requested: no outline",
+  "ok": true,
+  "got": "rgb(159, 179, 200) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "bubble Revise & Resubmit: no outline",
+  "ok": true,
+  "got": "rgb(159, 179, 200) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "bubble Offer: no outline",
+  "ok": true,
+  "got": "rgb(169, 205, 194) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-close: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-22: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-1: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-7: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-4: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-19: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-2: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-1: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-6: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-3: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-5: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-4: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-10: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-ms2-a: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried rj-nudge: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-chase: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-ms2-b: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent cv25-q-10: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cv25-q-05: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-passed20-q: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-6: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-1: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-2: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-5: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent cor-undo: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried cor-move-b: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-7: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-3: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Requested seed-query-7: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-near-q: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cv25-q-11: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-pkgq-9: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-21: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-pkgq-10: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent msv12-q-5: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-remind: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Revise & Resubmit seed-query-11: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-2: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-2: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent thin-q-gap-solo: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cor-pair: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-query-23: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-query-8: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried probe-dangling-pkg: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-noms: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-pkgq-4: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried probe-goalstress-today: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-soon-q: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-query-9: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cv25-q-06: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Requested seed-query-20: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Requested msv12-q-3: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Requested rj-send: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Requested cv25-q-09: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cor-move-a: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cv25-q-07: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-pkgq-3: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Offer seed-query-12: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-cal-passed865-q: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Requested msv12-q-4: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Requested rj-dupe: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Offer cv25-q-08: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-bang-q: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Full Sent qc150l9-q: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-both: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-noagent: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-04: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-14: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-13: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-03: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Responses strip (full): no outline",
+  "ok": true,
+  "got": "none"
+ }
+]

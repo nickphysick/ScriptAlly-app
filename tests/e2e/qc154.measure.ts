@@ -64,7 +64,7 @@ async function cards(page: Page) {
       if (e.scrollWidth > e.clientWidth + 1) (who ? named : cut).push(`ellipsis:${e.textContent}`);
       if (e.getBoundingClientRect().height > lh * 1.6) cut.push(`wrapped:${e.textContent}`);
     });
-    const vis = [...c.querySelectorAll<HTMLElement>("*")].filter((e) => e.childElementCount === 0 && e.offsetParent && getComputedStyle(e).opacity !== "0" && !e.closest(".qc154-sr,.qc154-act,.qc154-thl"))
+    const vis = [...c.querySelectorAll<HTMLElement>("*")].filter((e) => e.childElementCount === 0 && e.offsetParent && getComputedStyle(e).opacity !== "0" && !e.closest(".qc154-sr,.qc154-act"))
       .map((e) => e.textContent?.trim()).filter(Boolean).join(" | ");
     return {
       id: c.dataset.id, status: c.dataset.status, tone: c.dataset.tone, quiet: c.hasAttribute("data-quiet"), grp: c.closest("section")?.getAttribute("data-k"),
@@ -94,10 +94,13 @@ for (const vp of SIZES) {
     const xs = [...new Set(all.map((c) => c.x))];
     L.check("cards sit in three columns", xs.length === 3 || all.length < 3, xs.join(", "));
     for (const c of all) {
-      L.check(`${c.id}: no status word on show`, !!c.word && !c.visible.split(" | ").includes(c.word), `${c.word} · ${c.visible.slice(0, 120)}`);
+      /* Plumage colours v2 — the status word is on show once, on the band's label (was: no status word on show) */
+      /* a card in a folded group is in the DOM at 0 × 0 and shows nothing: only a card on show is read */
+      if (c.w > 0) L.check(`${c.id}: the status word on show exactly once (the band's label)`, !!c.word && c.visible.split(" | ").filter((t) => t === c.word).length === 1, `${c.word} · ${c.visible.slice(0, 120)}`);
       /* v157: the slate ladder (lib/stageColours); a quiet card's band is a gradient with no flat colour (QC157-1 reads its
          first stop) */
-      L.check(`${c.id}: band in the stage tone`, ({ queried: "rgb(239, 230, 214)", partial: "rgb(228, 235, 242)", full: "rgb(183, 201, 222)", offer: "rgb(142, 167, 198)", closed: "rgb(236, 234, 230)" } as Record<string, string>)[c.tone ?? ""] === c.band || (c.quiet && c.band === "rgba(0, 0, 0, 0)"), `${c.tone} ${c.band}`);
+      /* the band's colour: retired here (it still expected v157's slate ladder, stale since Plumage colours v1); the band
+         per status, quiet fades and the offer's stripes are measured by tests/e2e/pc2.measure.ts PC2-3 and PC2-4 */
       L.check(`${c.id}: no fact cut, nothing wrapped`, c.cut.length === 0, c.cut.join("; ") || "none");
     }
     /* screens: each group at this width */
@@ -154,34 +157,22 @@ for (const vp of SIZES) {
     L.check("hovered: the action shows", (await act.evaluate((e) => getComputedStyle(e).opacity)) === "1", String(await card.locator("[data-qc154='act']").textContent()));
     await card.screenshot({ path: `${DIR}/hover-card-${vp.width}.png` });
     await card.locator("[data-qc154='track']").hover(); await page.waitForTimeout(150);
-    const mid = await card.evaluate((c) => ({ act: getComputedStyle(c.querySelector(".qc154-act")!).opacity, lab: getComputedStyle(c.querySelector(".qc154-thl")!).opacity, anim: [...c.querySelectorAll(".qc153-nd, .qc153-ln")].map((e) => getComputedStyle(e).animationName).join(",") }));
+    const mid = await card.evaluate((c) => ({ act: getComputedStyle(c.querySelector(".qc154-act")!).opacity, lab: c.querySelectorAll(".qc154-thl").length, anim: [...c.querySelectorAll(".qc153-nd, .qc153-ln")].map((e) => getComputedStyle(e).animationName).join(",") }));
     L.check("track hovered: the action hides (fading, under 0.01)", Number(mid.act) < 0.01, mid.act);
     L.check("track hovered: the draw runs", /qc154-pop/.test(mid.anim), mid.anim);
-    L.check("track hovered: the label waits for the draw", Number(mid.lab) < 0.5, mid.lab);
+    /* Plumage colours v2 — the hover label under the current step is retired (the band's label names the status) */
+    L.check("track hovered: no hover label is drawn", mid.lab === 0, String(mid.lab));
     await page.waitForTimeout(1200);
-    const end = await card.evaluate((c) => ({ shown: [...c.querySelectorAll<HTMLElement>(".qc154-thl")].filter((e) => getComputedStyle(e).opacity === "1").map((e) => ({ t: e.textContent, inCur: !!e.closest(".qc153-nd--cur") })),
-      inside: (() => { const l = c.querySelector(".qc154-thl")!.getBoundingClientRect(); const i = c.querySelector(".qc154-in")!.getBoundingClientRect(); return l.left >= i.left - 0.5 && l.right <= i.right + 0.5 && l.bottom <= i.bottom; })() }));
-    L.check("exactly one label, under the current step", end.shown.length === 1 && end.shown[0].inCur, JSON.stringify(end.shown));
-    L.check("the label is inside the card", end.inside, String(end.inside));
     await card.screenshot({ path: `${DIR}/hover-track-${vp.width}.png` });
-    /* the far-right current step (an offer or a full) keeps its label inside the frame too */
-    const right = page.locator(`${PAGE} [data-qc154="card"]:has(.qc153-nd--cur:last-child)`).first();
-    if (await right.count()) {
-      await right.scrollIntoViewIfNeeded(); await right.locator("[data-qc154='track']").hover(); await page.waitForTimeout(1200);
-      const ok = await right.evaluate((c) => { const l = c.querySelector(".qc154-thl")!.getBoundingClientRect(); const i = c.querySelector(".qc154-in")!.getBoundingClientRect(); return { ok: l.right <= i.right + 0.5, l: l.right, i: i.right }; });
-      L.check("a last-step label stays inside the frame", ok.ok, JSON.stringify(ok));
-      await right.screenshot({ path: `${DIR}/hover-track-last-${vp.width}.png` });
-    }
-    /* reduced motion: no draw, no pulse, the label at once */
+    /* reduced motion: no draw, no pulse */
     await page.mouse.move(2, 2);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.waitForTimeout(200);
     await card.scrollIntoViewIfNeeded();
     await card.locator("[data-qc154='track']").hover(); await page.waitForTimeout(60);
-    const rm = await card.evaluate((c) => ({ lab: getComputedStyle(c.querySelector(".qc154-thl")!).opacity, anim: [...c.querySelectorAll(".qc153-nd, .qc153-ln")].map((e) => getComputedStyle(e).animationName).filter((n) => n !== "none") }));
+    const rm = await card.evaluate((c) => ({ anim: [...c.querySelectorAll(".qc153-nd, .qc153-ln")].map((e) => getComputedStyle(e).animationName).filter((n) => n !== "none") }));
     L.check("reduced motion: no animation", rm.anim.length === 0, rm.anim.join(",") || "none");
-    L.check("reduced motion: the label shows at once", rm.lab === "1", rm.lab);
-    L.done(9);
+    L.done(5);
   });
 
   test(`v154 M4 paperclip pop-ups · ${vp.width}`, async ({ page }) => {

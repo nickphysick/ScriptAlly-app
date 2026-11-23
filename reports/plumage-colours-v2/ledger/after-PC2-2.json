@@ -1,0 +1,12 @@
+[
+ {
+  "name": "elements read on the Query Centre and the slide-in",
+  "ok": true,
+  "got": "5589"
+ },
+ {
+  "name": "none computes a v1 Full or navy-Offer hex",
+  "ok": true,
+  "got": "none"
+ }
+]

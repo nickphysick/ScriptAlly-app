@@ -14,7 +14,7 @@
 - A query tile is the paper with its status mark in ink: the status is carried by the chip beside it, never the tile.
 - `#903830` is allowed for the material tile and nowhere else (kindColours.test.ts sweeps `src/`). Burgundy `#7c3a2a` is still not a brand colour.
 - Note, action, page, help and more tiles are unchanged.
-- The query status colours themselves are docs/decisions/query-centre.md's "Plumage colours v1".
+- The query status colours themselves are docs/decisions/query-centre.md's "Plumage colours v2" (22 Nov 2026), which supersedes v1's. Kind tiles are unchanged by v2. In search, an offer's status chip (duck egg `#c5e0d8`) can appear in the same result list as the agent tile's teal `#b0c1be`; the two are 1.34:1 apart (a ruling question in reports/plumage-colours-v2/REPORT.md).
 
 ## Standing notes moved from CLAUDE.md’s cross-cutting sections
 
