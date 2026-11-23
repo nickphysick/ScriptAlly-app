@@ -232,7 +232,7 @@
 
 /* the stamp */
 .laq .laq-stamp { position: absolute; left: 104px; top: 124px; z-index: 6; padding: 6px 12px 5px; border: 2.5px double var(--laq-navy); border-radius: 8px; color: var(--laq-navy); background: rgba(255,255,255,.55); font: 400 19px/1 var(--laq-tw) !important; letter-spacing: .06em; transform: rotate(-8deg); mix-blend-mode: multiply; pointer-events: none; text-align: center; }
-.laq .laq-stamp small { display: block; margin-top: 3px; font-size: 11.5px; letter-spacing: .1em; text-align: center; }
+.laq .laq-stamp small { display: block; margin-top: 3px; font-size: 12px; letter-spacing: .1em; text-align: center; }
 .laq .laq-stamp.is-thump { animation: laq-thump .42s cubic-bezier(.3,1.6,.5,1) both; }
 @keyframes laq-thump { 0% { opacity: 0; transform: rotate(-8deg) scale(1.9); } 60% { opacity: 1; transform: rotate(-8deg) scale(.94); } 100% { transform: rotate(-8deg) scale(1); } }
 
@@ -258,7 +258,8 @@
 .laq .laq-conf i.is-dot { width: 5px; height: 5px; border-radius: 50%; }
 /* the celebration's slip carries no preview tag, and the stamp sits on its facts */
 .laq .qi-slot { display: flex; align-items: center; justify-content: center; flex: none; background: repeating-linear-gradient(135deg, rgba(58,28,20,.05) 0 6px, transparent 6px 12px); border: 1px dashed rgba(58,28,20,.22); border-radius: 14px; }
-.laq .qi-ph { color: var(--sp-quiet); font: 400 8px/1.5 var(--laq-mono) !important; letter-spacing: .12em; text-transform: uppercase; }
+/* v2 — nothing in this panel under 12px and no small uppercase mono label: the placeholder's name reads at 12, as written */
+.laq .qi-ph { color: var(--sp-quiet); font: 400 12px/1.4 var(--laq-mono) !important; letter-spacing: 0; text-transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .laq *, .laq *::before, .laq *::after { animation: none !important; transition: none !important; }
@@ -376,8 +377,9 @@
 .laq .flh .flh-hd h3.flh-t .br { display: block; }
 .laq .flh .flh-hd h3.flh-t .is-c { color: #e8b9a6; }
 .laq .flh .flh-m { flex: none; display: block; width: 48px; height: 48px; }
-/* the mentor gives way before the headline would wrap to a third line: a narrow panel, or the page zoomed far in */
-@container laq (max-width: 470px) { .laq .flh .flh-m { display: none; } }
+/* the mentor gives way below the ref's 540 panel (the 504 panel at ≤1400 wide, every zoom past 100% at 1480), so the
+   headline never wraps to a third line */
+@container laq (max-width: 519px) { .laq .flh .flh-m { display: none; } }
 @media (prefers-reduced-motion: reduce) { .laq .flh .flh-hd h3.flh-t { animation: none; } }
 
 /* v2 · Phase 2 — "Add a new agent", the list's quiet last row, and the add screen in this panel (the ref's v21 rules) */
@@ -433,3 +435,11 @@
 /* v2 · Phase 7 — the logged screen under the same navy header: its body is the stage body's frame with the celebration's
    own padding inside */
 .laq .laq-sb.laq-yayb { padding: 0; }
+
+/* v2 · measured (V2-10) — two things the grid card does on the Queries page that this panel's rules do not allow, fixed
+   for the preview only (the grid card's own sheet is not edited; both are reported for the page):
+   · the paperclip's focus ring: qcv154's `.qc1533-clip.qc1533-clip:focus { all: unset }` outranks its own :focus-visible
+     ring, so Tab reached the paperclip with no ring at all;
+   · the track's hover label is 11.5px; nothing in this panel is under 12px. */
+.laq .qc151 .qc154-card .qc1533-clip.qc1533-clip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 6px; }
+.laq .qc154-card .qc154-thl { font-size: 12px !important; }

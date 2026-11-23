@@ -270,6 +270,10 @@ describe("v2 · Phase 6 — the preview row is the row the saved query produces"
     expect(c.weeks).toHaveLength(7);
     /* a query the Dashboard would not count as active leaves "Active queries" where it was (the tile then hides) */
     expect(reviewCounts(book, { ...p.query, status: QueryStatus.REJECTED } as Query, new Date(NOW)).active).toEqual([1, 1]);
+    /* at half past midnight a query sent today still counts as sent (measured: it read 0 → 0) */
+    const early = new Date(2026, 10, 22, 0, 30).getTime();
+    const pe = previewOf(planOf({ ...base, sent: sod(early) }, ctx, PREVIEW_ID, false, early)!, early, 8);
+    expect(reviewCounts([], pe.query, new Date(early)).sent).toEqual([0, 1]);
   });
 });
 

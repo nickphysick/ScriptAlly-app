@@ -477,12 +477,15 @@ export interface ReviewCounts {
  */
 export function reviewCounts(book: readonly Query[], unsaved: Query | null, now: Date): ReviewCounts {
   const withIt = unsaved ? [...book, unsaved] : [...book];
+  /* the sent figures are read at the END OF TODAY: a query sent today carries today's date, which `sentAt` reads as later
+     in the day than an early-morning now — so at 00:30 "Queries sent" read "0 → 0" (measured, V2-6 at 00:30) */
+  const eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
   const mon = isoWeekStart(now);
   const starts = Array.from({ length: 7 }, (_, i) => { const d = new Date(mon); d.setDate(d.getDate() - (6 - i) * 7); return { start: d }; });
   return {
     active: [liveCount(book), liveCount(withIt)],
-    sent: [sentAllTime(book, now), sentAllTime(withIt, now)],
-    weeks: sentWeeks(book, starts, now).map((w) => w.n),
+    sent: [sentAllTime(book, eod), sentAllTime(withIt, eod)],
+    weeks: sentWeeks(book, starts, eod).map((w) => w.n),
   };
 }
 
