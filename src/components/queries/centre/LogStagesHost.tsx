@@ -27,7 +27,6 @@ import { liveCount } from "../../../lib/dashBreakdown";
 import { agentFromDraft } from "../../../lib/agentCreate";
 import { emptyCardDraft, problemsOf } from "../../../lib/cardDraft";
 import { emptyCreated, toRemoveOnDiscard, toRemoveOnUndo, withAgent, withHeld, withLogged, withoutAgent, withoutHeld, withoutLogged, heldTaskFor, type JourneyCreated } from "../../../lib/queryActions/journeyCreated";
-import { isLive as qaIsLive } from "../../queryActions/journeys/common";
 import { useToast } from "../../toast/ToastProvider";
 import { QcLogStages, type Logged } from "./QcLogStages";
 import type { LogAgain } from "../../../lib/queryActions/drawerStore";
@@ -70,7 +69,8 @@ export const LogStagesHost: React.FC<{
   agentsNow.current = agents;
 
   const model = useMemo(() => {
-    const stAgents = stageAgents(agents, forBook.filter(qaIsLive), nowMs);
+    /* v2.1 (D4) — every query for this book, active or closed: an agent with a closed one is already queried */
+    const stAgents = stageAgents(agents, forBook, nowMs);
     const active = activePackageId(ms, packages);
     const stPackages: StagePackage[] = packagesFor(ms.id, packages, versions, ms.bookVersions).map((c) => ({
       id: c.id, name: c.name, active: c.id === active, card: c,

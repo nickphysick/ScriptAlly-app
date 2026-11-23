@@ -39,3 +39,48 @@ describe("v2.1 · Phase 1 — What went: one item per material, its icon from th
     expect(whatWent(plan)).toEqual([{ name: "Synopsis draft", kind: "letter" }]);
   });
 });
+
+/* ── Phase 3 — step one: agents already queried with this book (D4) ── */
+import { stageAgents, whoGroups, standingOf, BUSY_SHOWN } from "./logStages";
+import { QueryStatus, type Query } from "../../types";
+
+describe("v2.1 · Phase 3 — Not queried yet lists only agents with no query for this book", () => {
+  const ag = (id: string, name: string) => ({ id, name, agency: `${name} Agency`, email: "", submissionStatus: SubmissionStatus.OPEN, submissionMethod: SubmissionMethod.EMAIL,
+    materialsWanted: [], responseTimeWeeks: 8 } as unknown as Agent);
+  const AG = [ag("none", "Nora None"), ag("act", "Abel Active"), ag("pass", "Pia Pass"), ag("nr", "Ned Noreply"), ag("now", "Lena Logged")];
+  const qy = (id: string, agentId: string, status: QueryStatus, dateSent: string, extra: Partial<Query> = {}) => ({ id, agentId, manuscriptId: "m1", status, dateSent, ...extra } as Query);
+  const BOOK = [
+    qy("q1", "act", QueryStatus.QUERIED, "2026-10-03"),
+    qy("q2", "pass", QueryStatus.REJECTED, "2026-08-01", { lastStatusChange: "2026-09-12T10:00:00Z" } as Partial<Query>),
+    qy("q3", "nr", QueryStatus.NO_RESPONSE, "2026-07-01", { lastStatusChange: "2026-11-02T10:00:00Z" } as Partial<Query>),
+    /* logged in this sitting: the save's record, back through the listener */
+    qy("q4", "now", QueryStatus.QUERIED, "2026-11-23"),
+  ];
+  const list = stageAgents(AG, BOOK, NOW);
+  const g = whoGroups(list, "");
+  it("no query → Not queried yet; active, passed, no reply and logged just now → already queried", () => {
+    expect(g.ready.map((a) => a.id)).toEqual(["none"]);
+    expect(g.busy.map((a) => a.id).sort()).toEqual(["act", "now", "nr", "pass"]);
+  });
+  it("a closed query (a pass, no reply) is queried but not 'querying': the agent card's door is left as it was (D5)", () => {
+    const by = Object.fromEntries(list.map((a) => [a.id, a]));
+    expect([by.pass.queried, by.pass.querying]).toEqual([true, false]);
+    expect([by.nr.queried, by.nr.querying]).toEqual([true, false]);
+    expect([by.act.queried, by.act.querying]).toEqual([true, true]);
+  });
+  it("most recent first, each in the Queries page's own words", () => {
+    expect(g.busy.map((a) => [a.id, a.standing])).toEqual([
+      ["now", "Queried · sent 23 Nov"],
+      ["nr", "No reply · closed 2 Nov"],
+      ["act", "Queried · sent 3 Oct"],
+      ["pass", "Passed · 12 Sep"],
+    ]);
+    expect(standingOf({ status: QueryStatus.PARTIAL_REQUESTED }, Date.parse("2026-10-01"))).toBe("Partial requested");
+  });
+  it("a search that matches an agent already queried finds them under busyHit, never in ready", () => {
+    const s = whoGroups(list, "pia");
+    expect(s.ready).toEqual([]);
+    expect(s.busyHit.map((a) => a.id)).toEqual(["pass"]);
+  });
+  it("the open list shows ten", () => expect(BUSY_SHOWN).toBe(10));
+});

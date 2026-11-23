@@ -20,7 +20,7 @@ import {
   HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, askItems, askFill, sizeName, NO_LETTER, NO_SYN,
   planOf, previewOf, sameDay, sod, choiceOfSample, sampleOfChoice, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, isPastReply, settleReply, chipOn, daysBefore, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
-  reviewCounts, showsActive, type ReviewCounts, type WentItem, type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
+  reviewCounts, showsActive, BUSY_SHOWN, type ReviewCounts, type WentItem, type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcCard154 } from "./QcCard154";
 import { WeekSlider } from "../../forms/WeekSlider";
@@ -467,10 +467,13 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       );
     };
     const q = s.find.trim();
-    const off = (a: StageAgent) => (
-      <div key={a.id} className="laq-off" data-qls="agent-busy" data-id={a.id}>
-        <span className="laq-g" aria-hidden="true">{a.initials}</span><b>{a.name}</b>
-        <span>{a.queriedMs != null ? `queried ${dayMon(a.queriedMs)}` : "already querying"}</span>
+    /* v2.1 · Phase 3 — an agent already queried with this book: initials, name, agency, and where it stands in the
+       Queries page's words. Not a button: no arrow, no hover, no tab stop (D5). */
+    const done = (a: StageAgent) => (
+      <div key={a.id} className="laq-dn" data-qls="agent-busy" data-id={a.id}>
+        <span className="laq-g" aria-hidden="true">{a.initials}</span>
+        <span className="laq-tx"><b>{a.name}</b><span>{a.agency}</span></span>
+        {a.standing ? <span className="laq-tag is-m" data-qls="busy-standing">{a.standing}</span> : null}
       </div>
     );
     const nm = titleName(q);
@@ -490,19 +493,25 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         </label>
         {g.ready.length ? <><div className="laq-grp" data-qls="group" data-k="ready">Not queried yet <span>{g.ready.length}</span></div><div className="laq-big">{g.ready.map(row)}</div></> : null}
         {g.closed.length ? <><div className="laq-grp" data-qls="group" data-k="closed">Closed right now <span>{g.closed.length}</span></div><div className="laq-big">{g.closed.map(row)}</div></> : null}
+        {/* v2.1 · Phase 3 — a typed name that matches an agent already queried shows them here (screen 03) */}
+        {q && g.busyHit.length ? <><div className="laq-grp" data-qls="group" data-k="busy">Already queried with this book <span>{g.busyHit.length}</span></div><div className="laq-dns">{g.busyHit.map(done)}</div></> : null}
         {q && !pick.length && !g.busyHit.length ? <div className="laq-none" data-qls="none">No one called “{q}” in your Contact list.</div> : null}
-        {/* v2 · Phase 2 — adding an agent is always the list's last row, and never leaves this journey */}
+        {/* v2 · Phase 2 — adding an agent is always the list's last row, and never leaves this journey; v2.1: it names
+            the typed name only when nothing at all matched */}
         <div className="laq-big laq-addw">
-          <BigRow glyph="+" title={q && !pick.length ? `Add ${nm} as a new agent` : "Add a new agent"} quiet arrow={false} onClick={startAdd}
+          <BigRow glyph="+" title={q && !pick.length && !g.busyHit.length ? `Add ${nm} as a new agent` : "Add a new agent"} quiet arrow={false} onClick={startAdd}
             data={{ "data-qls": "new-agent" }} />
         </div>
-        {q && g.busyHit.length ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying</div>{g.busyHit.map(off)}</> : null}
-        {!q && g.busy.length ? (s.showBusy
-          ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying <span>{g.busy.length}</span><button type="button" className="laq-lk" style={{ marginLeft: "auto", fontSize: 13.5 }} data-qls="busy-hide" onClick={() => set({ showBusy: false })}>Hide</button></div>{g.busy.map(off)}</>
-          : <button type="button" className="laq-busy" data-qls="busy" onClick={() => set({ showBusy: true })}>
-              <span className="laq-faces" aria-hidden="true">{g.busy.slice(0, 4).map((a) => <i key={a.id}>{a.initials}</i>)}</span>
-              You've already queried {g.busy.length} {g.busy.length === 1 ? "agent" : "agents"} with this book<u>Show</u>
-            </button>) : null}
+        {!q && g.busy.length ? <>
+          <button type="button" className="laq-busy" data-qls="busy" aria-expanded={s.showBusy} onClick={() => set({ showBusy: !s.showBusy })}>
+            <span className="laq-faces" aria-hidden="true">{g.busy.slice(0, 4).map((a) => <i key={a.id}>{a.initials}</i>)}</span>
+            You've already queried {g.busy.length} {g.busy.length === 1 ? "agent" : "agents"} with this book<u>{s.showBusy ? "Hide" : "Show"}</u>
+          </button>
+          {s.showBusy ? <div className="laq-dns" data-qls="busy-list">
+            {g.busy.slice(0, BUSY_SHOWN).map(done)}
+            {g.busy.length > BUSY_SHOWN ? <p className="laq-dnm" data-qls="busy-more">and {g.busy.length - BUSY_SHOWN} more</p> : null}
+          </div> : null}
+        </> : null}
       </>
     );
   };

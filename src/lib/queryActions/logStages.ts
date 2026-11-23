@@ -28,6 +28,8 @@ import { addDays, reminderAnchors } from "./dates";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
 import { blankSample, sampleName, capFirst, type FromUnit, type Materials, type Sample } from "./sample";
 import { liveCount } from "../dashBreakdown";
+import { closedAt, sentAt } from "../oneScreen";
+import { standWords } from "../qc153";
 import { sentAllTime } from "../dash2";
 
 /** the calendar's heading month, through the platform rather than a second month table (lib/dates owns the one) */
@@ -119,6 +121,12 @@ export interface StageAgent {
   /** already querying this book (a live query) — the day it went, for "queried {date}" */
   queriedMs: number | null;
   querying: boolean;
+  /** v2.1 (D4) — any query for this book, active or closed: such an agent is never offered under "Not queried yet" */
+  queried: boolean;
+  /** v2.1 — where this book's latest query to them stands, in the Queries page's words (`standWords`); null if none */
+  standing: string | null;
+  /** v2.1 — when that query last moved (its close, else its send), for "most recent first" */
+  lastMs: number | null;
   closed: boolean;
   /** "5 Jan" when the card records a reopening date */
   reopens: string | null;
@@ -130,16 +138,25 @@ export interface StageAgent {
   agent: Agent;
 }
 
-export function stageAgents(agents: readonly Agent[], live: readonly Query[], nowMs: number): StageAgent[] {
+/**
+ * The journey's agents, read against EVERY query for this book (v2.1, D4: the host used to pass only the active ones,
+ * so an agent whose query had closed — a pass, no reply, withdrawn — came back under "Not queried yet").
+ * ⚠️ `querying` stays "has an ACTIVE query for this book": a door that seeds an agent (the agent card's "Log query")
+ *    still opens on one whose query closed — re-querying is out of scope (D5) and left exactly as it was.
+ */
+export function stageAgents(agents: readonly Agent[], book: readonly Query[], nowMs: number): StageAgent[] {
   return agents.filter((a) => !a.setAside).map((a) => {
-    const q = live.filter((x) => x.agentId === a.id);
+    const all = book.filter((x) => x.agentId === a.id);
+    const q = all.filter(isActiveQuery);
     const sent = q.map((x) => Date.parse(String(x.dateSent ?? ""))).filter((t) => Number.isFinite(t));
     const name = agentPrimary(a);
     const reo = a.reopensOn ? Date.parse(a.reopensOn) : NaN;
     const wks = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? Math.round(a.responseTimeWeeks) : null;
+    const latest = latestOf(all);
     return {
       id: a.id, name, first: firstName(name), agency: agentAgencyLine(a), initials: agentInitials(a),
       querying: q.length > 0, queriedMs: sent.length ? Math.max(...sent) : null,
+      queried: all.length > 0, standing: latest ? standingOf(latest.q, latest.ms) : null, lastMs: latest?.ms ?? null,
       closed: doorOf(a) === "closed", reopens: Number.isFinite(reo) ? dayMonY(reo, nowMs) : null,
       via: queryViaOf(a.submissionMethod), email: a.email?.trim() || null,
       weeks: wks, nrmn: !!a.noResponseMeansNo, ask: guidelineAsk(a), agent: a,
@@ -147,24 +164,51 @@ export function stageAgents(agents: readonly Agent[], live: readonly Query[], no
   });
 }
 
+const TERMINAL: ReadonlySet<string> = new Set([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.SIGNED]);
+/** active: not finished (journeys/common `isLive`, the set the host filtered with before v2.1) */
+const isActiveQuery = (q: Pick<Query, "status">): boolean => !TERMINAL.has(q.status);
+/** the query that last moved: a closed one by its close (`closedAt`), an active one by its send */
+function latestOf(all: readonly Query[]): { q: Query; ms: number | null } | null {
+  let best: { q: Query; ms: number | null } | null = null;
+  for (const q of all) {
+    const ms = isActiveQuery(q) ? sentAt(q) : closedAt(q);
+    if (!best || (ms ?? -Infinity) > (best.ms ?? -Infinity)) best = { q, ms };
+  }
+  return best;
+}
+/** "Queried · sent 3 Oct", "Partial requested", "Passed · 12 Sep", "No reply · closed 2 Nov" — the Queries page's own status word
+ *  (`standWords`), with the send date on a plain query and the closing date on a closed one */
+export function standingOf(q: Pick<Query, "status">, ms: number | null): string {
+  const word = standWords({ status: q.status as QueryStatus });
+  if (ms == null) return word;
+  if (q.status === QueryStatus.QUERIED) return `${word} · sent ${dayMon(ms)}`;
+  if (q.status === QueryStatus.NO_RESPONSE) return `${word} · closed ${dayMon(ms)}`;
+  return TERMINAL.has(q.status) ? `${word} · ${dayMon(ms)}` : word;
+}
+
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 export interface WhoGroups { ready: StageAgent[]; closed: StageAgent[]; busy: StageAgent[]; busyHit: StageAgent[] }
-/** Ready to query (open, not querying this book), Closed right now, and those already querying it */
+/**
+ * Not queried yet (open, no query for this book), Closed right now (closed to queries, none for this book), and
+ * Already queried — v2.1 (D4): every agent with a query for this book, active OR closed, most recent first.
+ */
 export function whoGroups(list: readonly StageAgent[], find: string): WhoGroups {
   const q = norm(find.trim());
   const m = (a: StageAgent) => !q || norm(`${a.name} ${a.agency}`).includes(q);
-  const by = (a: StageAgent, b: StageAgent) => a.name.localeCompare(b.name);
   /* Add agent v1 Phase 6 — the agents you can query are in fit order: Agent fit high first (unrated last), then the
      shorter response time, then the name (lib/agentFit) */
   const fit = (a: StageAgent, b: StageAgent) => fitOrder({ starRating: a.agent.starRating, responseTimeWeeks: a.agent.responseTimeWeeks, name: a.name }, { starRating: b.agent.starRating, responseTimeWeeks: b.agent.responseTimeWeeks, name: b.name });
-  const busy = list.filter((a) => a.querying).sort(by);
+  const recent = (a: StageAgent, b: StageAgent) => (b.lastMs ?? -Infinity) - (a.lastMs ?? -Infinity) || a.name.localeCompare(b.name);
+  const busy = list.filter((a) => a.queried).sort(recent);
   return {
-    ready: list.filter((a) => !a.querying && !a.closed && m(a)).sort(fit),
-    closed: list.filter((a) => !a.querying && a.closed && m(a)).sort(fit),
+    ready: list.filter((a) => !a.queried && !a.closed && m(a)).sort(fit),
+    closed: list.filter((a) => !a.queried && a.closed && m(a)).sort(fit),
     busy,
     busyHit: busy.filter(m),
   };
 }
+/** the already-queried list, open: the ten most recent, then "and {n} more" */
+export const BUSY_SHOWN = 10;
 /** "jane doe" → "Jane Doe" for "+ Add Jane Doe as a new agent" */
 export const titleName = (s: string): string => s.trim().replace(/\s+/g, " ").replace(/(^|\s)(\p{L})/gu, (_, a, b) => a + b.toUpperCase());
 
