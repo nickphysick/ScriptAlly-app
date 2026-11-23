@@ -1,0 +1,32 @@
+[
+ {
+  "name": "history: the head is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "history: the selected tab is unchanged",
+  "ok": false,
+  "got": "profile"
+ },
+ {
+  "name": "history: no Contact details section in the tab",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "notes: the head is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "notes: the selected tab is unchanged",
+  "ok": false,
+  "got": "profile"
+ },
+ {
+  "name": "notes: no Contact details section in the tab",
+  "ok": true,
+  "got": ""
+ }
+]

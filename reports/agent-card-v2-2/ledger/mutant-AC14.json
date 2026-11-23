@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: the preview face",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no pencil",
+  "ok": false,
+  "got": "2"
+ },
+ {
+  "name": "no ⋯",
+  "ok": false,
+  "got": "1"
+ }
+]

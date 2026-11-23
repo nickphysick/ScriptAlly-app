@@ -1,0 +1,32 @@
+[
+ {
+  "name": "wishlist: the tick is disabled before a change",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "genres: the tick is disabled before a change",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "how: the tick is disabled before a change",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "materials: the tick is disabled before a change",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "wishlist: the tick is enabled after a change",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the head: the tick is disabled before a change",
+  "ok": true,
+  "got": ""
+ }
+]

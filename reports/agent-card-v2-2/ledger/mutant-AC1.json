@@ -1,0 +1,52 @@
+[
+ {
+  "name": "the head: its pencil shows",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "the head: nothing moved or resized",
+  "ok": false,
+  "got": "21:DIV.qc152-who@72,72,111,67 | 22:DIV.ag-nmrow@72,72,111,29 | 24:DIV.qc152-ag@72,103,111,16"
+ },
+ {
+  "name": "how they work: its pencil shows",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "how they work: nothing moved or resized",
+  "ok": false,
+  "got": "42:DIV.nx@0,232,558,455 | 43:SECTION.acv2-sec@18,246,522,84 | 44:DIV.nx-boxes@18,246,522,84"
+ },
+ {
+  "name": "the wishlist: its pencil shows",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "the wishlist: nothing moved or resized",
+  "ok": false,
+  "got": "42:DIV.nx@0,232,558,455 | 56:SECTION.acv2-sec@18,348,522,72 | 57:H4.@18,348,522,21"
+ },
+ {
+  "name": "genres: its pencil shows",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "genres: nothing moved or resized",
+  "ok": false,
+  "got": "42:DIV.nx@0,232,558,455 | 60:SECTION.acv2-sec@18,438,522,59 | 61:H4.@18,438,522,21"
+ },
+ {
+  "name": "what they ask for: its pencil shows",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "what they ask for: nothing moved or resized",
+  "ok": false,
+  "got": "42:DIV.nx@0,232,558,455 | 67:SECTION.acv2-sec@18,515,522,113 | 68:H4.@18,515,522,21"
+ }
+]

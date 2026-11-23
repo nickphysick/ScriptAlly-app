@@ -1,0 +1,37 @@
+[
+ {
+  "name": "a section save: the card's toast",
+  "ok": true,
+  "got": "Saved the wishlist for AdaUndo"
+ },
+ {
+  "name": "…above the footer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "…and no app snackbar",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "its Undo restored the wishlist",
+  "ok": true,
+  "got": "Thrillers with a moral knot at the centre."
+ },
+ {
+  "name": "the cross on a changed note: the card's toast",
+  "ok": true,
+  "got": "Changes discardedUndo"
+ },
+ {
+  "name": "…with Undo",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "…and no app snackbar",
+  "ok": true,
+  "got": ""
+ }
+]

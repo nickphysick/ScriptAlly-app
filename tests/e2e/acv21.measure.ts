@@ -80,9 +80,12 @@ async function stableBox(page: Page, sel: string) {
   }
   return last;
 }
-const tick = async (page: Page, k: string) => { await page.locator(`${AC} [data-acv21='tick'][data-k='${k}']`).click(); await page.waitForTimeout(1600); };
-const cross = async (page: Page, k: string) => { await page.locator(`${AC} [data-acv21='cross'][data-k='${k}']`).click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400); };
-const toastUndo = async (page: Page) => { await page.locator(".sa-toast-undo:visible").last().click({ timeout: 8000 }); await page.waitForTimeout(1800); };
+/* Agent card v2.2 — re-pointed: the cross and the tick are the query card's (data-qc168) inside the open section, or in the
+   head for Contact details (edited in the head itself); the saved message is the card's own toast, not the snackbar */
+const openAt = (k: string) => (k === "contact" ? `${AC} [data-acv22='head-open']` : `${AC} [data-acv21='open'][data-k='${k}']`);
+const tick = async (page: Page, k: string) => { await page.locator(`${openAt(k)} [data-qc168='tick']`).click(); await page.waitForTimeout(1600); };
+const cross = async (page: Page, k: string) => { await page.locator(`${openAt(k)} [data-qc168='cross']`).click({ timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400); };
+const toastUndo = async (page: Page) => { await page.locator(`${AC} [data-acv22='toast'] [data-qc1522='undo']`).click({ timeout: 8000 }); await page.waitForTimeout(1800); };
 const toastText = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".sa-toast, [role='status']")].filter((e) => e.offsetHeight > 0).map((e) => (e.textContent ?? "").trim()).join(" | "));
 
 test.describe.configure({ mode: "default" });
@@ -231,26 +234,28 @@ test("AC21-2c · Contact details: the head shows the draft; the city offer", asy
     }, true);
   });
   await pen(page, "contact");
-  L.check("the name's pencil opens Contact details", JSON.stringify(await openSecs(page)) === JSON.stringify(["contact"]), JSON.stringify(await openSecs(page)));
+  /* v2.2 — re-pointed: Contact details opens in the head itself; the head's name is its field, its flag the checked
+     country pill (the place line is the pills while it is open) */
+  L.check("the name's pencil opens the head in place", await page.locator(`${AC} [data-acv22='head-open']`).count() === 1 && await page.locator(`${AC} [data-acv2='body'] [data-acv21='open']`).count() === 0, JSON.stringify(await openSecs(page)));
   const live = (field: string, value: string) => page.evaluate(({ js, field, value }) => {
     const c = eval(js) as HTMLElement;
     const inp = c.querySelector<HTMLInputElement>(`input[data-ae='${field}']`)!;
     const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
     set.call(inp, value);
     inp.dispatchEvent(new Event("input", { bubbles: true }));
-    return { name: c.querySelector("[data-acv2='name']")?.textContent ?? "", flag: c.querySelector<HTMLElement>("[data-acv2='head'] [data-acv21='flag']")?.dataset.country ?? "" };
+    return { name: c.querySelector<HTMLInputElement>("[data-acv2='name'] input")?.value ?? "", flag: c.querySelector<HTMLElement>("[data-acv2='head'] [data-aap='country'] [aria-checked='true']")?.dataset.country ?? "" };
   }, { js: CARD_JS, field, value });
   const n = await live("name", "Fiona Q Fullcard");
-  L.check("typing the name changes the head's name in the same frame", n.name === "Fiona Q Fullcard", JSON.stringify(n));
+  L.check("typing the name: the head's name field holds it", n.name === "Fiona Q Fullcard", JSON.stringify(n));
   /* choosing a country: the flag in the same frame */
   const fr = await page.evaluate(async (js) => {
     const c = eval(js) as HTMLElement;
     let frames = 0; const count = () => { frames++; }; requestAnimationFrame(count);
     c.querySelector<HTMLElement>("[data-aap='country'] [data-country='IE']")!.click();
     for (let i = 0; i < 4; i++) await Promise.resolve();
-    return { flag: c.querySelector<HTMLElement>("[data-acv2='head'] [data-acv21='flag']")?.dataset.country ?? "", frames };
+    return { flag: c.querySelector<HTMLElement>("[data-acv2='head'] [data-aap='country'] [aria-checked='true']")?.dataset.country ?? "", frames };
   }, CARD_JS);
-  L.check("choosing a country changes the head's flag in the same frame", fr.flag === "IE" && fr.frames === 0, JSON.stringify(fr));
+  L.check("choosing a country checks the head's pill in the same frame", fr.flag === "IE" && fr.frames === 0, JSON.stringify(fr));
   await page.evaluate((js) => { (eval(js) as HTMLElement).querySelector<HTMLElement>("[data-aap='country'] [data-country='GB']")!.click(); }, CARD_JS);
   const c1 = await live("city", "York");
   L.check("typing a city never changes the flag", c1.flag === "GB", JSON.stringify(c1));
@@ -261,7 +266,7 @@ test("AC21-2c · Contact details: the head shows the draft; the city offer", asy
   L.check("the offer shows: “Dublin is in Ireland. Change the country?”", (await offer.count()) === 1 && /Dublin is in Ireland\. Change the country\?/.test(await offer.innerText()), await offer.innerText().catch(() => "none"));
   await page.locator(`${AC} [data-acv21='city-set']`).click();
   await page.waitForTimeout(200);
-  const set = await page.evaluate((js) => { const c = eval(js) as HTMLElement; return { pill: c.querySelector("[data-aap='country'] [data-country='IE']")?.getAttribute("aria-checked"), flag: c.querySelector<HTMLElement>("[data-acv2='head'] [data-acv21='flag']")?.dataset.country, offer: c.querySelectorAll("[data-acv21='city-offer']").length }; }, CARD_JS);
+  const set = await page.evaluate((js) => { const c = eval(js) as HTMLElement; return { pill: c.querySelector("[data-aap='country'] [data-country='IE']")?.getAttribute("aria-checked"), flag: c.querySelector<HTMLElement>("[data-acv2='head'] [data-aap='country'] [aria-checked='true']")?.dataset.country, offer: c.querySelectorAll("[data-acv21='city-offer']").length }; }, CARD_JS);
   L.check("“Change to Ireland” sets the control and the head's flag", set.pill === "true" && set.flag === "IE" && set.offer === 0, JSON.stringify(set));
   /* Keep: back to the UK, the offer again, Keep the UK; it stays away for that city */
   await page.evaluate((js) => { (eval(js) as HTMLElement).querySelector<HTMLElement>("[data-aap='country'] [data-country='GB']")!.click(); }, CARD_JS);
@@ -373,55 +378,15 @@ test("AC21-2d · a tick saves its section only, as the built save stores it", as
   L.done(14);
 });
 
-test("AC21-2e · leaving with two sections changed: the rust bar, Save all, Discard", async ({ page }) => {
-  test.setTimeout(90_000 * 2);
-  const L = new Ledger("AC21-2e");
-  const id = "acv21fx-edit";
-  await openAc(page, id);
-  const change = async (w: string, g: string) => {
-    await pen(page, "wishlist");
-    await pen(page, "genres");
-    await page.locator(`${AC} [data-acv21='open'][data-k='wishlist'] textarea`).fill(w);
-    const gi = page.locator(`${AC} [data-acv21='open'][data-k='genres'] [data-aap='genre-input']`);
-    await gi.fill(g);
-    await gi.press("Enter");
-    await page.waitForTimeout(150);
-  };
-  let before = dump(id);
-  await change("Saved by Save all.", "Western");
-  await page.locator(`${AC} [data-cl262='tab'][data-tab='history']`).click();
-  await page.waitForTimeout(300);
-  const bar = await page.evaluate((js) => { const c = eval(js) as HTMLElement; return { n: c.querySelectorAll("[data-acv21='guard']").length, names: c.querySelector("[data-acv21='guard-names']")?.textContent ?? "", tab: c.querySelector("[data-cl262='tab'][aria-selected='true']")?.getAttribute("data-tab"), foot: c.querySelectorAll("[data-acv2='foot']").length, btn: c.querySelector("[data-acv21='save-all']")?.textContent }; }, CARD_JS);
-  L.check("the rust bar takes the footer's place", bar.n === 1 && bar.foot === 0, JSON.stringify(bar));
-  L.check("it names both sections", /the wishlist/.test(bar.names) && /genres/.test(bar.names), bar.names);
-  L.check("nothing else happened (still on Profile)", bar.tab === "profile", String(bar.tab));
-  L.check("its button reads “Save all”", bar.btn === "Save all", String(bar.btn));
-  await page.locator(`${AC} [data-acv21='save-all']`).click();
-  await page.waitForTimeout(2200);
-  let after = dump(id);
-  L.check("Save all stores both", after.mswlNotes === "Saved by Save all." && (after.genres ?? []).includes("Western"), `${after.mswlNotes} · ${JSON.stringify(after.genres)}`);
-  L.check("…and lands on the tab asked for", (await page.locator(`${AC} [data-cl262='tab'][aria-selected='true']`).getAttribute("data-tab")) === "history", "");
-  L.check("…one snackbar for both: “Saved 2 sections for Eda”", /Saved 2 sections for Eda/.test(await toastText(page)), await toastText(page));
-  await page.locator(`${AC} [data-cl262='tab'][data-tab='profile']`).click();
-  await page.waitForTimeout(300);
-  before = dump(id);
-  await change("Thrown away.", "Fantasy");
-  await page.locator(`${AC} [data-cl262='next-agent']`).click();
-  await page.waitForTimeout(300);
-  L.check("the arrows ask too", (await page.locator(`${AC} [data-acv21='guard']`).count()) === 1, "");
-  await page.locator(`${AC} [data-cl262='discard']`).click();
-  await page.waitForTimeout(1200);
-  after = dump(id);
-  L.check("Discard stores neither", after.mswlNotes === before.mswlNotes && JSON.stringify(after.genres) === JSON.stringify(before.genres), `${after.mswlNotes} · ${JSON.stringify(after.genres)}`);
-  L.check("…and carries on (the next agent)", (await page.locator(AC).first().getAttribute("data-agent-id")) !== id, String(await page.locator(AC).first().getAttribute("data-agent-id")));
-  L.done(10);
-});
+/* AC21-2e (the rust bar, Save all, Discard with two sections changed) is RETIRED by Agent card v2.2: one section is open at
+   a time and leaving it with a change asks inside it. Its successors: acv22.measure.ts AC2, AC3 and AC4
+   (tests/e2e/RETIRED-agent-card-v2-2.md). */
 
 test("AC21-2f · the pencils, the values as doors, and Tab", async ({ page }) => {
   test.setTimeout(90_000 * 2);
   const L = new Ledger("AC21-2f");
   await openAc(page, "acv21fx-full");
-  if (MUTS.has("hoveronly")) await page.addStyleTag({ content: ".acv2 .ag-sec:focus-within .cl262-pen, .acv2 .ag-head:focus-within .cl262-pen, .acv2 .cl262-pen:focus-visible { opacity: 0 !important; }" });
+  if (MUTS.has("hoveronly")) await page.addStyleTag({ content: ".qc152 [data-qc168-host]:focus-within .qc168-pen, .qc152 .qc168-pen:focus-visible { opacity: 0 !important; }" });
   for (const k of ["contact", "how", "wishlist", "genres", "materials"]) {
     const p = page.locator(`${AC} [data-cl262='pen'][data-k='${k}']`).first();
     const sec = k === "contact" ? page.locator(`${AC} [data-acv2='head']`) : page.locator(`${AC} [data-cl262='sec'][data-k='${k}']`);
@@ -436,7 +401,8 @@ test("AC21-2f · the pencils, the values as doors, and Tab", async ({ page }) =>
     await page.waitForTimeout(250);
     const foc = await p.evaluate((e) => getComputedStyle(e).opacity);
     const size = await p.evaluate((e) => e.getBoundingClientRect().width);
-    L.check(`${k} · the pencil: 0 at rest, 1 on hover, 1 on focus; 28px`, rest === "0" && hov === "1" && foc === "1" && Math.abs(size - 28) <= 1, `${rest} · ${hov} · ${foc} · ${size}`);
+    /* Agent card v2.2 — re-pointed: the pencil is the query card's 26px disc (QcEdit168 EditPen) */
+    L.check(`${k} · the pencil: 0 at rest, 1 on hover, 1 on focus; 26px`, rest === "0" && hov === "1" && foc === "1" && Math.abs(size - 26) <= 1.5, `${rest} · ${hov} · ${foc} · ${size}`);
   }
   /* a value opens only its own section */
   const doors: [string, string][] = [["how", "[data-acv2='facts'] [data-qc158='box'][data-k='method']"], ["wishlist", "[data-cl262='wishlist']"], ["genres", "[data-cl262='genres'] [data-cl262='genre']"], ["materials", "[data-acv2='asks'] [data-acv2='ask']"]];
@@ -450,21 +416,23 @@ test("AC21-2f · the pencils, the values as doors, and Tab", async ({ page }) =>
   const reach = async () => {
     await page.locator(`${AC} [data-cl262='close']`).focus();
     const seen = new Set<string>();
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 140; i++) {
       await page.keyboard.press("Tab");
-      const k = await page.evaluate(() => { const e = document.activeElement as HTMLElement | null; return e ? `${e.dataset.cl262 ?? e.dataset.acv21 ?? ""}:${e.dataset.k ?? ""}` : ""; });
+      /* v2.2 — the cross and the tick are v168's (data-qc168), named by the open section they sit in */
+      const k = await page.evaluate(() => { const e = document.activeElement as HTMLElement | null; return e ? `${e.dataset.cl262 ?? e.dataset.qc168 ?? e.dataset.acv21 ?? ""}:${e.dataset.k ?? e.closest<HTMLElement>("[data-acv21='open']")?.dataset.k ?? ""}` : ""; });
       seen.add(k);
     }
     return seen;
   };
   let seen = await reach();
   for (const k of ["contact", "how", "wishlist", "genres", "materials"]) L.check(`Tab reaches the ${k} pencil`, seen.has(`pen:${k}`), [...seen].filter((s) => s.startsWith("pen")).join(" "));
-  await pen(page, "wishlist");
-  await pen(page, "genres");
-  seen = await reach();
-  for (const k of ["wishlist", "genres"]) L.check(`Tab reaches ${k}'s cross and tick`, seen.has(`cross:${k}`) && seen.has(`tick:${k}`), [...seen].filter((s) => /cross|tick/.test(s)).join(" "));
-  await cross(page, "wishlist");
-  await cross(page, "genres");
+  /* v2.2 — one section at a time: each opened in turn */
+  for (const k of ["wishlist", "genres"]) {
+    await pen(page, k);
+    seen = await reach();
+    L.check(`Tab reaches ${k}'s cross and tick`, seen.has(`cross:${k}`) && seen.has(`tick:${k}`), [...seen].filter((s) => /cross|tick/.test(s)).join(" "));
+    await cross(page, k);
+  }
   L.done(16);
 });
 
@@ -479,39 +447,49 @@ test("AC21-2g · Based in: the country control, then the city beneath it, at 580
   for (const vp of SIZES) {
     await openAc(page, "acv21fx-full", vp);
     if (MUTS.has("georow")) await page.addStyleTag({ content: `
-      .acv2 .acv21-geo { display: flex !important; flex-wrap: wrap !important; align-items: center; gap: 8px; }
-      .acv2 .acv21-geo > .aap-pills { flex: none; flex-wrap: wrap !important; }
-      .acv2 .acv21-geo > input[data-ae="city"] { flex: 1 1 180px; min-width: 160px; width: auto !important; }
-      .acv2 .acv21-geo > .aap-cty { flex-basis: auto; }` });
+      .qc152 .ag-head .ag-hgeo { display: flex !important; flex-wrap: wrap !important; align-items: center; gap: 8px; }
+      .qc152 .ag-head .ag-hgeo > .aap-pills { flex: none; flex-wrap: wrap !important; }
+      .qc152 .ag-head .ag-hgeo > input[data-ae="city"] { flex: 1 1 180px; min-width: 160px; width: auto !important; }
+      .qc152 .ag-head .ag-hgeo > .aap-cty { flex-basis: auto; }` });
     if (MUTS.has("oneline")) await page.addStyleTag({ content: `
-      .acv2 .acv21-geo { display: flex !important; flex-wrap: nowrap !important; align-items: center; gap: 8px; }
-      .acv2 .acv21-geo > * { flex: 0 1 auto; min-width: 0; }
-      .acv2 .acv21-geo > input[data-ae="city"] { flex: 1 1 0; width: auto !important; }` });
+      .qc152 .ag-head .ag-hgeo { display: flex !important; flex-wrap: nowrap !important; align-items: center; gap: 8px; }
+      .qc152 .ag-head .ag-hgeo > * { flex: 0 1 auto; min-width: 0; }
+      .qc152 .ag-head .ag-hgeo > input[data-ae="city"] { flex: 1 1 0; width: auto !important; }` });
     await pen(page, "contact");
     const geo = () => page.evaluate((js) => {
       const c = eval(js) as HTMLElement;
       const g = c.querySelector<HTMLElement>("[data-acv21='geo']")!;
       const box = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { t: b.top, b: b.bottom, l: b.left, r: b.right, w: b.width }; };
+      /* (the head's own grid, not the wrapper with the offer under it) */
       const pills = box(g.querySelector("[data-aap='country']"));
       const cty = box(g.querySelector("[data-aap='country-more']"));
       const ctl = cty && pills ? { t: Math.min(pills.t, cty.t), b: Math.max(pills.b, cty.b) } : pills;
       const tops = [...g.querySelectorAll<HTMLElement>("[data-aap='country'] .aap-pill")].map((e) => Math.round(e.getBoundingClientRect().top));
-      return { card: Math.round(c.getBoundingClientRect().width), geo: box(g), pills, cty, ctl, city: box(g.querySelector("input[data-ae='city']")), tops };
+      return { card: Math.round(c.getBoundingClientRect().width), geo: box(g.querySelector(".ag-hgeo") ?? g), pills, cty, ctl, city: box(g.querySelector("input[data-ae='city']")), tops };
     }, CARD_JS);
-    const read = (state: string, g: Awaited<ReturnType<typeof geo>>) => {
+    /* Agent card v2.2 — re-pointed: Based in is edited in the HEAD, where the place line was. With a country of the three
+       the city sits on the pills' line, after them (the v2.2 ref's head); with Elsewhere chosen v2.1's ruling holds —
+       its search on the pills' line, the city beneath at full width, its list 280px inside the card */
+    const read = (state: string, g: Awaited<ReturnType<typeof geo>>, twoLines: boolean) => {
       const at = `${g.card}px card, ${state}`;
-      L.check(`${at}: the city's top is below the country control's bottom`, !!g.ctl && !!g.city && g.city.t >= g.ctl.b - 0.5,
-        g.ctl && g.city ? `control ${g.ctl.t.toFixed(1)}–${g.ctl.b.toFixed(1)} · city top ${g.city.t.toFixed(1)}` : "none");
-      L.check(`${at}: the city runs the full width`, !!g.city && !!g.geo && Math.abs(g.city.w - g.geo.w) <= 1, g.city && g.geo ? `${g.city.w.toFixed(1)} of ${g.geo.w.toFixed(1)}` : "none");
+      if (twoLines) {
+        L.check(`${at}: the city's top is below the country control's bottom`, !!g.ctl && !!g.city && g.city.t >= g.ctl.b - 0.5,
+          g.ctl && g.city ? `control ${g.ctl.t.toFixed(1)}–${g.ctl.b.toFixed(1)} · city top ${g.city.t.toFixed(1)}` : "none");
+        L.check(`${at}: the city runs the full width`, !!g.city && !!g.geo && Math.abs(g.city.w - g.geo.w) <= 1, g.city && g.geo ? `${g.city.w.toFixed(1)} of ${g.geo.w.toFixed(1)}` : "none");
+      } else {
+        L.check(`${at}: the city sits on the pills' line, after them`, !!g.pills && !!g.city && g.city.l >= g.pills.r - 0.5 && g.city.t < g.pills.b && g.pills.t < g.city.b,
+          g.pills && g.city ? `pills r ${g.pills.r.toFixed(1)} · city l ${g.city.l.toFixed(1)} t ${g.city.t.toFixed(1)}` : "none");
+        L.check(`${at}: the city takes the rest of the line`, !!g.city && !!g.geo && !!g.pills && g.city.r >= g.geo.r - 1, g.city && g.geo ? `${g.city.r.toFixed(1)} of ${g.geo.r.toFixed(1)}` : "none");
+      }
       L.check(`${at}: the pills are one line`, g.tops.length >= 4 && g.tops.every((t) => Math.abs(t - g.tops[0]) <= 1), JSON.stringify(g.tops));
     };
     const g1 = await geo();
     widths.push(g1.card);
-    read("a country of the three", g1);
+    read("a country of the three", g1, false);
     await page.evaluate((js) => { (eval(js) as HTMLElement).querySelector<HTMLElement>("[data-aap='country'] [data-country='elsewhere']")!.click(); }, CARD_JS);
     await page.waitForTimeout(250);
     const g2 = await geo();
-    read("Elsewhere chosen", g2);
+    read("Elsewhere chosen", g2, true);
     L.check(`${g2.card}px card, Elsewhere chosen: its search sits on the pills' line, after them`,
       !!g2.cty && !!g2.pills && g2.cty.l >= g2.pills.r - 0.5 && g2.cty.t < g2.pills.b && g2.pills.t < g2.cty.b,
       g2.cty && g2.pills ? `pills ${g2.pills.t.toFixed(1)}–${g2.pills.b.toFixed(1)} r ${g2.pills.r.toFixed(1)} · search ${g2.cty.t.toFixed(1)}–${g2.cty.b.toFixed(1)} l ${g2.cty.l.toFixed(1)} w ${g2.cty.w.toFixed(1)}` : "none");

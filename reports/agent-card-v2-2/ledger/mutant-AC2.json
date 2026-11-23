@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: the wishlist is open",
+  "ok": true,
+  "got": "wishlist"
+ },
+ {
+  "name": "opening genres closed the unchanged wishlist",
+  "ok": false,
+  "got": "wishlist,genres"
+ },
+ {
+  "name": "…and How then closed genres",
+  "ok": false,
+  "got": "how,wishlist,genres"
+ }
+]

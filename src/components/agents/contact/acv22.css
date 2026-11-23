@@ -26,27 +26,39 @@
 .qc152 .ag-head.hed .ag-nmrow .ag-sx { margin: 0 0 0 4px; flex: none; }
 .qc152 .ag-head .ag-hf { display: block; min-width: 0; }
 /* the quiet in-place field: the value's own type on a pale ground, navy when focused */
-.qc152 .ag-head .aap-inp.hin { height: auto; min-height: 32px; padding: 3px 8px; border-radius: 7px; background: #fbf9f5; box-shadow: inset 0 0 0 1px #e2d9cc; font: 400 15px var(--sp-serif); color: #1c130f; transition: box-shadow .15s; }
+.qc152 .ag-head .aap-inp.hin { height: auto; min-height: 30px; padding: 3px 8px; border-radius: 7px; background: #fbf9f5; box-shadow: inset 0 0 0 1px #e2d9cc; font: 400 15px var(--sp-serif); color: #1c130f; transition: box-shadow .15s; }
 .qc152 .ag-head .aap-inp.hin:focus { box-shadow: inset 0 0 0 1.5px #2a3a52; background: #fff; }
 .qc152 .ag-head .aap-inp.hin::placeholder { color: #a39a8f; font-style: italic; }
 .qc152 .ag-head .aap-inp.hin-nm { width: calc(100% + 8px); margin-left: -8px; padding: 1px 8px; font: inherit; letter-spacing: inherit; }
-.qc152 .ag-head .aap-inp.hin-ag { display: block; width: calc(100% + 8px); margin: 3px 0 0 -8px; min-height: 28px; padding: 2px 8px; font: inherit; letter-spacing: inherit; text-transform: uppercase; }
+.qc152 .ag-head .aap-inp.hin-ag { display: block; width: calc(100% + 8px); margin: 2px 0 0 -8px; min-height: 24px; padding: 1px 8px; font: inherit; letter-spacing: inherit; text-transform: uppercase; }
 .qc152 .ag-head .aap-inp.hin-ag::placeholder { text-transform: none; letter-spacing: 0; font: italic 400 14px var(--sp-serif); }
 .qc152 .ag-head .aap-note { display: block; margin-top: 3px; font: 400 13px var(--sp-serif) !important; }
-.qc152 .ag-head .ag-hedk { margin: 6px 14px 10px 20px; }
+.qc152 .ag-head .ag-hedk { margin: 4px 14px 6px 20px; }
 /* where the place line was: the country pills, then the city, on one line */
-.qc152 .ag-head .ag-hgeo { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
-.qc152 .ag-head .ag-hgeo .aap-pills { gap: 6px; flex-wrap: nowrap; }
-.qc152 .ag-head .ag-hgeo .aap-pill { height: 32px; padding: 0 12px; font-size: 14.5px; }
-.qc152 .ag-head .ag-hgeo > .aap-inp.hin { flex: 1 1 140px; width: auto; height: 32px; }
-.qc152 .ag-head .ag-hgeo .aap-cty { flex: 1 1 100%; }
+/* v2.1's Based-in ruling kept: Elsewhere's search sits on the pills' line, after them, its list 280px and inside the card;
+   with Elsewhere chosen the city drops beneath, full width */
+.qc152 .ag-head .ag-hgeo { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px; align-items: center; }
+.qc152 .ag-head .ag-hgeo > .aap-pills { grid-row: 1; grid-column: 1; gap: 6px; flex-wrap: nowrap; }
+.qc152 .ag-head .ag-hgeo .aap-pill { height: 30px; padding: 0 12px; font-size: 14.5px; }
+.qc152 .ag-head .ag-hgeo > .aap-inp.hin { grid-row: 1; grid-column: 2; width: 100%; min-width: 0; height: 30px; }
+.qc152 .ag-head .ag-hgeo > .aap-cty { grid-row: 1; grid-column: 2; min-width: 0; padding: 0; background: none; box-shadow: none; }
+.qc152 .ag-head .ag-hgeo:has(> .aap-cty) > .aap-inp.hin { grid-row: 2; grid-column: 1 / -1; }
+.qc152 .ag-head .ag-hgeo > .aap-cty .sa-cc-ph, .qc152 .ag-head .ag-hgeo > .aap-cty .sa-cc-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qc152 .ag-head .ag-hgeo > .aap-cty .sa-cc-menu { left: auto; right: 0; width: 280px; max-width: none; }
 .qc152 .ag-head .acv21-geooffer { margin-top: 8px; }
 /* where the contact line was: email and website side by side, each with its icon */
-.qc152 .ag-head .ag-hct { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+/* "More contact details" sits at the end of this row (it keeps the head's growth small) */
+.qc152 .ag-head .ag-hedk { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: start; }
+.qc152 .ag-head .ag-hedk > * { grid-column: 1 / -1; }
+.qc152 .ag-head .ag-hedk > .ag-hct { grid-column: 1; }
+.qc152 .ag-head .ag-hedk > .ag-hmorebtn { grid-column: 2; align-self: center; margin-top: 6px !important; }
+.qc152 .ag-head .ag-hct { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
 .qc152 .ag-head .ag-hct label { display: flex; align-items: center; gap: 7px; min-width: 0; color: #6f655c; }
-.qc152 .ag-head .ag-hct label .aap-inp.hin { flex: 1 1 auto; height: 32px; }
-.qc152 .ag-head .ag-hmore { margin-top: 10px; display: grid; gap: 8px; }
-.qc152 .ag-head .ag-hmorebtn { display: inline-block; margin-top: 8px; font-size: 13.5px !important; }
+.qc152 .ag-head .ag-hct label .aap-inp.hin { flex: 1 1 auto; height: 30px; }
+.qc152 .ag-head .ag-hmore { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.qc152 .ag-head .ag-hmore > [data-f='form'] { grid-column: 1 / -1; }
+.qc152 .ag-head .ag-hmore .aap-inp { height: 34px; }
+.qc152 .ag-head .ag-hmorebtn { display: inline-block; font-size: 13.5px !important; white-space: nowrap; }
 .qc152 .ag-head .aap-agask { margin: 8px 0; }
 @media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .ag-head.hed { animation: none; } .qc152.acv2-qc:has(.ag-head.hed) .qc152-body > * { transition: none; } }
 

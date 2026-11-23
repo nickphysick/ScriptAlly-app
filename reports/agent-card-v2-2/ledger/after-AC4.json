@@ -1,0 +1,52 @@
+[
+ {
+  "name": "reading: no rust bar",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "reading: no \"Save all\"",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "a section open: no rust bar",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "a section open: no \"Save all\"",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "leaving with a change: no rust bar",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "leaving with a change: no \"Save all\"",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "Esc with a change: no rust bar",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "Esc with a change: no \"Save all\"",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "the head open: no rust bar",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "the head open: no \"Save all\"",
+  "ok": true,
+  "got": "false"
+ }
+]

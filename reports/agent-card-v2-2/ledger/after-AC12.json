@@ -1,0 +1,27 @@
+[
+ {
+  "name": "the head is closed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the card's toast says so",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Undo reopened the head",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "…with the typed values",
+  "ok": true,
+  "got": "[\"Ada Quillon\",\"Leith\"]"
+ },
+ {
+  "name": "nothing was written",
+  "ok": true,
+  "got": "Ada Quill"
+ }
+]

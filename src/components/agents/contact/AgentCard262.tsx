@@ -203,8 +203,9 @@ const HeadOpen: React.FC<{ parts: ContactHeadParts; disc: React.ReactNode; pill:
         {p.parts.agencyAsk}
         {p.parts.place}
         {p.parts.contact}
-        {p.more ? p.parts.more : null}
+        {/* at the end of the email and website row (acv22.css), so opening the head grows it by little */}
         <button type="button" className="qc168-lk ag-hmorebtn" data-acv22="more" aria-expanded={p.more} onClick={p.onMore}>{p.more ? "Fewer contact details" : "More contact details"}</button>
+        {p.more ? p.parts.more : null}
         {p.err ? <p className="acv21-err" role="alert" data-acv21="err">{p.err}</p> : null}
         {asking ? <DiscardAsk words="Discard your changes to contact details?" onKeep={ed.keep} onDiscard={ed.discard} /> : null}
       </div>
@@ -327,6 +328,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const tip = useTip();
   const why = useWhy(tip);
   useEffect(() => { tip.hide(); }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* the add journey's finish screen (p.preview) draws no pencil and no ⋯ (AC14's mutation, a review aid off production,
+     shows them); declared above the band and the head, its first readers */
+  const shy = !!p.preview && !mut168("ac14");
   const rule = useEditRule168(a.id, (msg, undo) => say({ message: msg, ...(undo ? { undo } : {}) }), () => cardRef.current);
   /* ══ Agent card v2.1 Phase 4 · the query card's motion, from its own code (qcMotion160), on this card's frame ══════
      The frame is the white mat (`cardRef`): its ::before draws the paper and the shadow, so the breath swells that and
@@ -501,7 +505,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const saveSec = async (k: Sec262, silent = false): Promise<{ parts: string[]; undo?: () => Promise<boolean>; plan: OfferPlan | null } | "none" | null> => {
     const f = formRef.current;
     if (!kit) return null;
-    const part = partOf(k, f);
+    /* AC8's mutation (review aid, off production): the head's save drops the city */
+    const part = k === "contact" && mut168("ac8") ? { ...partOf(k, f), city: f.base.city } : partOf(k, f);
     const ch = changedFields(f.base, part);
     if (!ch.length) { setOpen((cur) => cur.filter((x) => x !== k)); return "none"; }
     const probs = problemsOf(part);
@@ -548,7 +553,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         setRevealSeq((n) => n + 1);
         setTab("profile");
         setOpen((cur) => (cur.includes(k) ? cur : [...cur, k]));
-        window.setTimeout(() => formRef.current.set(prev), 0);
+        /* AC12's mutation (review aid, off production): Undo reopens it clean */
+        if (!mut168("ac12")) window.setTimeout(() => formRef.current.set(prev), 0);
       } });
     }
   };
@@ -790,6 +796,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         </span>
       )}
       {/* Agent card v2.1 — editing is by section only: the band has no pencil */}
+      {p.preview && !shy ? <button type="button" className="qc152-x" data-qc168="band-more" aria-label={`More for ${m.first}`}>⋯</button> : null}
       {p.preview ? null : <>
         <span className="ag-pos" data-cl24="pos" data-acv2="pos">{p.index + 1} / {p.total}</span>
         <button type="button" className="qc152-x" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" title="Previous agent" disabled={p.index <= 0} onClick={() => goStep(-1)}>{IC.l}</button>
@@ -831,7 +838,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       <span className="qc152-cap">{pill.status ? <StatusDot status={pill.status} overrideSize={17} tone="ink" decorative /> : NQ16}</span><span>{pill.word}</span>
     </span>
   );
-  const headParts = contactOpen && kit && !p.preview ? contactHead(form, { geo: { kept: geoKept, keep: (key) => setGeoKept((s0) => new Set([...s0, key])) } }) : null;
+  /* AC9's mutation (review aid, off production): no city offer */
+  const headParts = contactOpen && kit && !p.preview ? contactHead(form, { geo: mut168("ac9") ? undefined : { kept: geoKept, keep: (key) => setGeoKept((s0) => new Set([...s0, key])) } }) : null;
   const moreHas = !!headParts?.moreHasValue;
   useEffect(() => { if (contactOpen) { setMore(moreHas || moreAsk.current); moreAsk.current = false; } }, [contactOpen]); // eslint-disable-line react-hooks/exhaustive-deps
   const head = headParts ? (
@@ -842,7 +850,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         {discEl}
         <div className="qc152-who">
           <div className="ag-nmrow"><h2 className="qc152-nm qcv-open-nm" data-apc="name" data-acv2="name">{hName}</h2>
-            {quiet ? null : <EditPen label={`${m.first}’s name and contact details`} onOpen={() => openSec("contact")} data={{ "data-cl262": "pen", "data-k": "contact" }} />}</div>
+            {quiet && (!p.preview || shy) ? null : <EditPen label={`${m.first}’s name and contact details`} onOpen={() => openSec("contact")} data={{ "data-cl262": "pen", "data-k": "contact" }} />}</div>
           {hAgency ? <div className="qc152-ag" data-acv2="agency">{hAgency.toUpperCase()}</div> : null}
           {place.text ? (
             <div className="ag-loc" data-acv2="loc">
@@ -893,7 +901,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const SEC_PEN: Record<Sec262, string> = { contact: `${m.first}’s name and contact details`, how: `how ${m.first} works`, wishlist: "the wishlist", genres: "genres", materials: `what ${m.first} asks for` };
   /* Agent card v2.2 — each section's pencil is the query card's (QcEdit168 EditPen): a 26px disc at the right end of the
      heading (the fact boxes': their top-right corner), shown on hover and on keyboard focus within; it moves nothing */
-  const penFor = (k: Sec262) => (p.preview ? null : <EditPen label={SEC_PEN[k]} onOpen={() => openSec(k)} data={{ "data-cl262": "pen", "data-k": k }} />);
+  const penFor = (k: Sec262) => (shy ? null : <EditPen label={SEC_PEN[k]} onOpen={() => openSec(k)} data={{ "data-cl262": "pen", "data-k": k }} />);
   /* the value itself opens its section (a faint edge on hover); a button or link inside a value keeps its own action */
   const doorOf = (k: Sec262): Record<string, unknown> => (p.preview || !kit ? {} : {
     "data-door": k,
