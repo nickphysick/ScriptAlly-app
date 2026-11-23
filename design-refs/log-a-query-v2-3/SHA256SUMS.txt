@@ -1,0 +1,7 @@
+a18fca3017cdcc2f1832b0d4a4186ee39a285a2972d6ac20c5d8a073ff9b24eb  ./decisions-v1.html
+3c8fbd3d0bc05bf9366953fbf0e51a62de244b7b95fd81a9ea19b67fb96c5610  ./screens/01-sent-count-every-query.png
+752f27ce99d5d36a7c27474c6f03f82c4f1402048d405dc4795ac67bac2f4b0e  ./screens/02-narrow-card-count-beside-sent.png
+cce005ee342e918184f1e4a3ced59a27901d968b2aa3b65d3f7add4ca2bc9eb6  ./screens/03-task-fixed-wording.png
+5587ca70326450cdce63ba81a885bfcf3d33124f388b09fb9b7fdfe5d41b2740  ./screens/04-sent-count-as-it-is-now.png
+a50af8e2dcab8d11283eb844a96608dcd6575edb3724ac839979854ace30a101  ./screens/05-narrow-card-as-it-is-now.png
+efb7d8ba1e438924c03e10f46cc1bd03d4faac7ea22006c54290d389ac15c375  ./screens/06-task-as-it-is-now.png

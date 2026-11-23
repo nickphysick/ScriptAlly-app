@@ -1,0 +1,23 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (2.5s)
+  ✘  2 [measure] › tests/e2e/cl251.measure.ts:129:1 › CL251-B1 B3 · the headers: Log a query (v2), Adding new agent (B2 retired, v2.2) (24.6s)
+grid 1280: 88 cards (50 with a tile, 0 compact), 53 words cut on 50; widths 268
+responses 1280: 7 cards (7 with a tile, 0 compact), 0 words cut on 0; widths 330
+grid 1440: 88 cards (50 with a tile, 0 compact), 4 words cut on 2; widths 321.3
+responses 1440: 7 cards (7 with a tile, 0 compact), 0 words cut on 0; widths 330
+grid 1512: 88 cards (50 with a tile, 0 compact), 0 words cut on 0; widths 345.3
+responses 1512: 7 cards (7 with a tile, 0 compact), 0 words cut on 0; widths 330
+grid 1920: 88 cards (50 with a tile, 0 compact), 0 words cut on 0; widths 424
+responses 1920: 7 cards (7 with a tile, 0 compact), 0 words cut on 0; widths 330
+  ✓  3 [measure] › tests/e2e/laqV23.measure.ts:85:15 › V23-D · the Sent box's words and the tile at 1280, 1440, 1512, 1920 — Queries grid and Responses (24.8s)
+escape queries hover: found true, opened true, closed false, stays closed false, tile focused true
+escape queries focus: found true, opened true, closed true, stays closed true, tile focused true
+escape queries click: found true, opened true, closed true, stays closed true, tile focused true
+escape responses hover: found true, opened true, closed false, stays closed false, tile focused true
+escape responses focus: found true, opened true, closed true, stays closed true, tile focused true
+escape responses click: found true, opened true, closed true, stays closed true, tile focused true
+escape log-a-query hover: found true, opened true, closed false, stays closed false, tile focused true
+escape log-a-query focus: found true, opened true, closed true, stays closed true, tile focused true
+escape log-a-query click: found true, opened true, closed true, stays closed true, tile focused true
+  ✓  4 [measure] › tests/e2e/laqV23.measure.ts:135:15 › V23-E · Escape on the materials pop-up: Queries page, Responses, Log a query's preview (23.8s)
+  1 failed
+  3 passed (1.3m)

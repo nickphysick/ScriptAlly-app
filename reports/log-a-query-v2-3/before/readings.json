@@ -1,0 +1,200 @@
+{
+  "sent": {
+    "grid-1280": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 50,
+      "cutWords": 53,
+      "widths": [
+        268
+      ],
+      "needForNoCut": 305,
+      "compact": 0,
+      "sample": [
+        "seed-query-12@268: 166 days ago(+25)",
+        "cv25-q-08@268: 93 days ago(+18)",
+        "seed-query-7@268: 110 days ago(+25)",
+        "seed-query-11@268: 138 days ago(+25)",
+        "seed-query-9@268: 138 days ago(+25)"
+      ]
+    },
+    "responses-1280": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 0,
+      "sample": []
+    },
+    "grid-1440": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 2,
+      "cutWords": 4,
+      "widths": [
+        321.3
+      ],
+      "needForNoCut": 331.3,
+      "compact": 0,
+      "sample": [
+        "seed-cal-passed865-q@321.3: 18 Apr 2024(+8) over a year ago(+10)",
+        "thin-q-close@321.3: 16 Aug 2025(+7) over a year ago(+10)"
+      ]
+    },
+    "responses-1440": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 0,
+      "sample": []
+    },
+    "grid-1512": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        345.3
+      ],
+      "needForNoCut": 345.3,
+      "compact": 0,
+      "sample": []
+    },
+    "responses-1512": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 0,
+      "sample": []
+    },
+    "grid-1920": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        424
+      ],
+      "needForNoCut": 424,
+      "compact": 0,
+      "sample": []
+    },
+    "responses-1920": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 0,
+      "sample": []
+    }
+  },
+  "laqNextEscape": {
+    "leaveCheck": true
+  },
+  "escape": [
+    {
+      "where": "queries",
+      "how": "hover",
+      "found": true,
+      "opened": true,
+      "closed": false,
+      "stays": false,
+      "focused": true
+    },
+    {
+      "where": "queries",
+      "how": "focus",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "queries",
+      "how": "click",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "responses",
+      "how": "hover",
+      "found": true,
+      "opened": true,
+      "closed": false,
+      "stays": false,
+      "focused": true
+    },
+    {
+      "where": "responses",
+      "how": "focus",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "responses",
+      "how": "click",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "log-a-query",
+      "how": "hover",
+      "found": true,
+      "opened": true,
+      "closed": false,
+      "stays": false,
+      "focused": true,
+      "journeyStillOpen": true
+    },
+    {
+      "where": "log-a-query",
+      "how": "focus",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true,
+      "journeyStillOpen": true
+    },
+    {
+      "where": "log-a-query",
+      "how": "click",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true,
+      "journeyStillOpen": true
+    }
+  ],
+  "checks": 0,
+  "at": "2026-11-23T19:44:42.361Z"
+}

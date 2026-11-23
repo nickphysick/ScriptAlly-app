@@ -91,6 +91,40 @@ describe("Plumage colours v3 · the materials tile replaces the paperclip", () =
   });
 });
 
+describe("Log a query v2.3 · Phase 2 (D2) · the compact tile on a narrow card", () => {
+  const raw = readFileSync(new URL("./pc3tile.css", import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const m = raw.match(/@container \(max-width: (\d+)px\) \{([\s\S]*)\}\s*$/);
+  const body = m?.[2] ?? "";
+  it("is a container query on the card (not the window), at the measured width: 340px outside, 328px of content", () => {
+    /* the container query reads the content box: the card's 6px padding (qcv154.css) on each side */
+    expect(v154).toMatch(/\.qc154-card \{\s*--navy: #2a3a52;\s*position: relative; overflow: visible; margin: 0 0 12px; padding: 6px;/);
+    expect(m?.[1]).toBe("328");
+    expect(raw).not.toMatch(/@media[^{]*\{[^}]*pc3-tile/);
+    /* the card is the container (qcv154.css, desk widths) */
+    expect(v154).toMatch(/\.qc154-card \{ container-type: inline-size; \}/);
+  });
+  it("the same button: the markup is unchanged (no second element, the hooks and the name stay)", () => {
+    const t = readFileSync(new URL("./QcMatTile.tsx", import.meta.url), "utf8");
+    expect(t.match(/<button /g)?.length).toBe(1);
+    expect(t).toMatch(/className=\{`pc3-tile\$\{open \? " is-open" : ""\}`\} data-qc1533="tab" data-pc3="tile" aria-label=\{name\}/);
+  });
+  it("a 24px pill on the label's line at its right-hand end, glyph and count side by side, nothing under 12px", () => {
+    expect(body).toMatch(/\.qc154-card \.pc3-tw \{ position: relative; z-index: 1; top: auto; right: auto; transform: none; order: -1; align-self: flex-end; margin: -4px -2px -22px 0; \}/);
+    expect(body).toMatch(/flex-direction: row; gap: 3px; width: auto; min-width: 24px; height: 24px;/);
+    expect(body).toMatch(/\.pc3-tile > svg \{ width: 14px; height: 14px; \}/);
+    expect(body).toMatch(/\.pc3-tile > i \{ font: normal 400 13px\/1 var\(--sp-type\) !important; \}/);
+    for (const px of [...body.matchAll(/font[^;]*?(\d+(?:\.\d+)?)px/g)].map((x) => Number(x[1]))) expect(px).toBeGreaterThanOrEqual(12);
+  });
+  it("the Sent box gives back the tile's 64px", () => {
+    expect(body).toMatch(/\[data-k="sent"\]:has\(\.pc3-tile\) \{ display: flex; flex-direction: column; gap: 2px; padding-right: 8px; \}/);
+  });
+  it("the wide card's tile is untouched: 44 × 50, vertically centred, 12px in", () => {
+    const wide = raw.slice(0, raw.indexOf("@container"));
+    expect(rule(wide, ".qc154-card .pc3-tw")).toMatch(/top: 50%; right: 12px; transform: translateY\(-50%\);/);
+    expect(rule(wide, ".qc154-card .pc3-tile.pc3-tile")).toMatch(/width: 44px; height: 50px;/);
+  });
+});
+
 describe("Plumage colours v3 · the materials hover's place", () => {
   const vp = { l: 8, t: 8, r: 1504, b: 974 };
   const tile = (x: number, y: number) => ({ left: x, top: y, right: x + 44, bottom: y + 50, width: 44, height: 50, x, y } as DOMRect);

@@ -68,12 +68,24 @@ export interface HeldDoor { mode: "log"; agentId: string; manuscriptId: string }
  * "I've sent it": the Log a query door a held task carries — Log a query for that agent and book, which opens at Sent
  * with the agent chosen. Derived from the task's own fields (no new stored field: the rules' `hasOnly()` has none to
  * spare): an open task linked to an agent and a book, to no query, in the words the journey wrote.
- * ⚠️ A writer who renames the task loses the button (the words are how it is known); the task itself is untouched.
+ * ⚠️ The words are how it is known — and since v2.3 (D3) the writer cannot rename it, so the button cannot be lost.
  */
-export function heldSendDoor(t: { text?: string; done?: boolean; agentId?: string | null; manuscriptId?: string | null; queryId?: string | null } | null | undefined): HeldDoor | null {
-  if (!t || t.done || !t.agentId || !t.manuscriptId || t.queryId) return null;
-  if (!(t.text ?? "").startsWith(HELD_PREFIX)) return null;
-  return { mode: "log", agentId: t.agentId, manuscriptId: t.manuscriptId };
+export function heldSendDoor(t: HeldShape | null | undefined): HeldDoor | null {
+  if (!t || t.done || !isHeldSendTask(t)) return null;
+  return { mode: "log", agentId: t.agentId!, manuscriptId: t.manuscriptId! };
+}
+type HeldShape = { text?: string; done?: boolean; agentId?: string | null; manuscriptId?: string | null; queryId?: string | null };
+/**
+ * v2.3 · Phase 4 (D3, Nick 23 Nov) — THE HELD TASK CANNOT BE RENAMED: it is the app's own task, as a nudge is, so its title
+ * is not editable anywhere a task's title is (the To-do page's own-task desk, WsOwnTask, on desktop and phone), nor can its
+ * agent be unlinked there (the link is how it is known). Ticking, dismissing, deleting and "I've sent it" are as built.
+ * Recognised as the door is (open or done): linked to an agent and a book, to no query, in the words the journey wrote.
+ * ⚠️ The words are still how it is known, and nothing renames it now, so it cannot be lost. If the agent's name changes,
+ *    the task keeps the words it was written with and is still recognised (the prefix); no rules change was needed.
+ * ⚠️ A task renamed before this change no longer starts with the words: it is an ordinary task and is left as it is.
+ */
+export function isHeldSendTask(t: HeldShape | null | undefined): boolean {
+  return !!t && !!t.agentId && !!t.manuscriptId && !t.queryId && (t.text ?? "").startsWith(HELD_PREFIX);
 }
 /** logging this agent's query for this book completes these held tasks (the save does it; Undo reopens them) */
 export function heldToComplete<T extends { id: string; text?: string; done?: boolean; agentId?: string | null; manuscriptId?: string | null; queryId?: string | null }>(tasks: readonly T[], agentId: string, manuscriptId: string): T[] {

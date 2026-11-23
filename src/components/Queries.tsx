@@ -446,6 +446,7 @@ import { QueriesV4 } from "./phone/v4/QueriesV4";
    page's query panel host; it was loaded here through the retired QueriesPhone, so the bundle keeps it unchanged */
 import "./queries/phone/queriesPhone.css";
 import { QM1_ART } from "./queries/phone/qm1Art";
+import { queriesSent } from "../lib/dash2";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
 // the one place a material (legacy string or structured QueryMaterial) becomes display text.
@@ -8248,7 +8249,7 @@ export const Queries: React.FC<{
                 <QcPage151
                   state155={state155}
                   loading={showGridSkeleton}
-                  counts={showGridSkeleton || qcLoadFail ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
+                  counts={showGridSkeleton || qcLoadFail ? null : { ms: qcLineTitle, sent: queriesSent(qcScoped.map((r) => r.query), now151), active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   /* v156 §2 — "this week" as a line on the navy header (v154's bar chart is gone) */
                   ring={<QcLine156 m={goal156} />} goal={goal156}
                   view={qcView150} onView={pickView150}

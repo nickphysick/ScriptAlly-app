@@ -226,7 +226,7 @@ import { logPayload } from "./logSave";
 import { buildQcRows } from "../qcSummary";
 import { stampRows } from "../queryState";
 import { liveCount } from "../dashBreakdown";
-import { sentAllTime } from "../dash2";
+import { queriesSent } from "../dash2";
 import { ActivityType, QueryStatus, SubmissionMethod, SubmissionStatus, type Activity, type Agent, type Query } from "../../types";
 
 describe("v2 · Phase 6 — the preview row is the row the saved query produces", () => {
@@ -268,7 +268,7 @@ describe("v2 · Phase 6 — the preview row is the row the saved query produces"
     const c = reviewCounts(book, p.query, new Date(NOW));
     expect(c.active).toEqual([liveCount(book), liveCount([...book, p.query])]);
     expect(c.active).toEqual([1, 2]);
-    expect(c.sent).toEqual([sentAllTime(book, new Date(NOW)), 3]);
+    expect(c.sent).toEqual([queriesSent(book, new Date(NOW)), 3]);
     expect(showsActive(c)).toBe(true);
     /* a query the Dashboard would not count as active leaves "Active queries" where it was (the tile then hides) */
     expect(reviewCounts(book, { ...p.query, status: QueryStatus.REJECTED } as Query, new Date(NOW)).active).toEqual([1, 1]);

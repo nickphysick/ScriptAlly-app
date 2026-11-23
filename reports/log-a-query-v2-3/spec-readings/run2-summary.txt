@@ -1,0 +1,22 @@
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.9s)
+  ✘   3 [measure] › tests/e2e/cl251.measure.ts:129:1 › CL251-B1 B3 · the headers: Log a query (v2), Adding new agent (B2 retired, v2.2) (24.6s)
+grid 1280: 88 cards (50 with a tile, 50 compact), 0 words cut on 0; widths 268
+responses 1280: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+grid 1440: 88 cards (50 with a tile, 50 compact), 0 words cut on 0; widths 321.3
+responses 1440: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+grid 1512: 88 cards (50 with a tile, 0 compact), 0 words cut on 0; widths 345.3
+responses 1512: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+grid 1920: 88 cards (50 with a tile, 0 compact), 0 words cut on 0; widths 424
+responses 1920: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+  ✓   4 [measure] › tests/e2e/laqV23.measure.ts:93:15 › V23-D · the Sent box's words and the tile at 1280, 1440, 1512, 1920 — Queries grid and Responses (24.3s)
+one count: dashboard "24 queries sent" · queries page "112 queries sent" · review "25 queries sent, one more with this query" · "25"
+  ✓   5 [measure] › tests/e2e/laqV23.measure.ts:229:15 › V23-S · one count of queries sent, the line under the Sent weeks, Add the dates (25.2s)
+  ✓   6 [measure] › tests/e2e/pc3.measure.ts:522:17 › Plumage colours v3 — the rendered locks › PC3-5 · the label clears the track, seal, name, facts and the heading above, at 1280, 1512 and 1920; one card height (22.0s)
+  ✓   7 [measure] › tests/e2e/pc3.measure.ts:571:55 › Plumage colours v3 — the rendered locks › PC3-7, 8, 11, 12 · the tile and the hover (Chromium) (15.3s)
+  ✓   8 [measure] › tests/e2e/pc3.measure.ts:576:18 › Plumage colours v3 — the rendered locks › PC3-13 · the compact tile on a narrow card, 1280 (Chromium) (9.0s)
+webkit population: [["Offer",1,0],["Partial Requested",6,0],["Revise & Resubmit",2,0],["Full Requested",7,0],["Queried",38,31],["Partial Sent",8,3],["Full Sent",6,5],["Resubmitted",1,1],["Rejected",15,0],["No Response",2,0],["Withdrawn",1,0],["Signed",1,0]]
+  ✘   9 [measure] › tests/e2e/pc3.measure.ts:699:17 › Plumage colours v3 — the rendered locks › PC3-W · the grid, tile and hover locks in WebKit (1512), and its frames (1.1m)
+  ✓  10 [measure] › tests/e2e/qc154.measure.ts:82:3 › v154 M1 grid and card · 1440 (15.4s)
+  ✓  11 [measure] › tests/e2e/qc154.measure.ts:82:3 › v154 M1 grid and card · 1920 (6.9s)
+  2 failed
+  8 passed (3.8m)

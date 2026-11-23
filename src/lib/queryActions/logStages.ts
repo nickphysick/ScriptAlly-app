@@ -28,6 +28,7 @@ import { addDays, reminderAnchors } from "./dates";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
 import { blankSample, sampleName, capFirst, type FromUnit, type Materials, type Sample } from "./sample";
 import { liveCount } from "../dashBreakdown";
+import { queriesSent } from "../dash2";
 import { closedAt, sentAt } from "../oneScreen";
 import { standWords } from "../qc153";
 
@@ -556,7 +557,7 @@ export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Pre
 export interface ReviewCounts {
   /** the Dashboard's active count for this book (its header's `liveCount`), before and with this query */
   active: [number, number];
-  /** the Queries page's "{n} queries sent" (`queriesSentOf`, v2.2), before and with this query */
+  /** "{n} queries sent" (lib/dash2 `queriesSent`, the one count), before and with this query */
   sent: [number, number];
 }
 /**
@@ -564,22 +565,15 @@ export interface ReviewCounts {
  *    unsaved query added (`previewOf`'s record — the save's own). "active queries" is the Dashboard's `liveCount`, so it
  *    steps up only when the Dashboard would count it, and shows only then; "queries sent" is the Queries page's.
  */
-/**
- * v2.2 · Phase 3 (D5) — "QUERIES SENT" AS THE QUERIES PAGE COUNTS IT: one per query of the book, dated or not (the
- * page's header is its rows for the book, Queries.tsx `sent: qcScoped.length`, one row per query). The logged screen's
- * "Query number {n}" is this plus the query just logged (the host's `count`), so the two always agree.
- * ⚠️ NOT the Dashboard's `sentAllTime` (dash2), which leaves out a query with no sent date or a future one. The two
- *    "sent" counts still differ on the Dashboard and the Queries page; that is for Nick to rule on (v2.2 REPORT).
- */
-export const queriesSentOf = (book: readonly Query[]): number => book.length;
+/* v2.3 · Phase 1 (D1) — "queries sent" is lib/dash2 `queriesSent`, the one count every surface calls (v2.2's own
+   `queriesSentOf` is gone): every logged query, dated or not, but not one dated after today. */
 
-/* `_now` is kept for the callers: since v2.2 neither figure reads the clock */
-export function reviewCounts(book: readonly Query[], unsaved: Query | null, _now: Date): ReviewCounts {
+export function reviewCounts(book: readonly Query[], unsaved: Query | null, now: Date): ReviewCounts {
   const withIt = unsaved ? [...book, unsaved] : [...book];
   return {
     active: [liveCount(book), liveCount(withIt)],
-    /* v2.2 · Phase 3 — the Queries page's count (the active figure stays the Dashboard's own) */
-    sent: [queriesSentOf(book), queriesSentOf(withIt)],
+    /* v2.3 · Phase 1 — the one count (the active figure stays the Dashboard's own) */
+    sent: [queriesSent(book, now), queriesSent(withIt, now)],
   };
 }
 /** v2.1 · Phase 1 — the big numbers: "active queries" only when the Dashboard would count this query as active */

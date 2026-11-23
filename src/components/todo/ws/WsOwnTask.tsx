@@ -15,6 +15,7 @@ import type { Agent, Query, TaskStep, UserTask } from "../../../types";
 import { addDays, fmt } from "../../../lib/queryActions/dates";
 import { DatePick, TICK, dayFromYmd } from "./WsControls";
 import { statusWords } from "../../queryActions/journeys/common";
+import { isHeldSendTask } from "../../../lib/queryActions/journeyCreated";
 
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const initials = (n: string) => { const w = n.trim().split(/\s+/).filter(Boolean); return (w.length > 1 ? w[0][0] + w[w.length - 1][0] : (w[0] ?? "").slice(0, 2)).toUpperCase(); };
@@ -45,6 +46,8 @@ export const WsOwnTask: React.FC<{
   const [stepIn, setStepIn] = useState("");
   useEffect(() => { setTitle(task.text); setNotes(task.detail ?? ""); setDueOpen(null); }, [task.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const steps = task.steps ?? [];
+  /* v2.3 · Phase 4 — the app's own held task: no title edit, no unlink (lib/queryActions/journeyCreated `isHeldSendTask`) */
+  const fixed = isHeldSendTask(task);
   const added = task.createdAt ? fmt(new Date(task.createdAt)) : "today";
   const linkQ = task.queryId ? queries.find((q) => q.id === task.queryId) : undefined;
   const linkA = agents.find((a) => a.id === (task.agentId ?? linkQ?.agentId));
@@ -68,10 +71,13 @@ export const WsOwnTask: React.FC<{
     <div className="tws-otask" data-tws="own">
       <div className="tws-ot1">
         <button type="button" className="tws-otick" aria-label="Mark done" title="Mark done" onClick={w.done}>{TICK}</button>
+        {/* Log a query v2.3 · Phase 4 (D3) — the held "Send your query to {agent}" task is the app's own: its words are fixed */}
+        {fixed ? <p className="tws-ott tws-ott--fixed" data-tws="fixed-title">{task.text}</p> : (
         <textarea ref={titleRef} className="tws-ott" rows={1} value={title} aria-label="What needs doing" spellCheck={false}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLTextAreaElement).blur(); } }}
           onBlur={() => { const v = title.trim(); if (!v) { setTitle(task.text); return; } if (v !== task.text) void w.update({ text: v }); }} />
+        )}
       </div>
       <div className="tws-otm">
         <span>Your task · added {added}</span><span aria-hidden="true">·</span>
@@ -121,7 +127,7 @@ export const WsOwnTask: React.FC<{
             <span className="tws-av">{initials((linkA?.name || linkA?.agency || "").trim())}</span>
             <b>{(linkA?.name || linkA?.agency || "").trim()}</b>
             <em>{linkQ ? `${titleOf(linkQ.manuscriptId) ?? "Your query"} · ${statusWords(linkQ.status)}` : (linkA?.agency ?? "")}</em>
-            <button type="button" aria-label="Unlink" title="Unlink" onClick={() => { void w.update({ queryId: null, agentId: null }); w.said("Unlinked."); }}>✕</button>
+            {fixed ? null : <button type="button" aria-label="Unlink" title="Unlink" onClick={() => { void w.update({ queryId: null, agentId: null }); w.said("Unlinked."); }}>✕</button>}
           </span>
         ) : (
           <button type="button" className="tws-olkadd" onClick={() => setPicking(!picking)}>+ Link an agent or query</button>

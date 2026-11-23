@@ -1,0 +1,54 @@
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.3s)
+  ✘   3 [measure] › tests/e2e/cl251.measure.ts:129:1 › CL251-B1 B3 · the headers: Log a query (v2), Adding new agent (B2 retired, v2.2) (24.4s)
+  ✓   4 [measure] › tests/e2e/laqV2.measure.ts:107:1 › V2-1 — the header: one navy piece at four zooms, two lines, the mentor; all six steps (17.7s)
+  ✓   5 [measure] › tests/e2e/laqV2.measure.ts:163:1 › V2-2 — adding an agent without leaving the journey; closing removes it and its task (8.2s)
+  ✓   6 [measure] › tests/e2e/laqV2.measure.ts:193:1 › V2-3 — not sent yet: one task, no query; I've sent it goes back to Sent and keeps it (6.6s)
+  ✓   7 [measure] › tests/e2e/laqV2.measure.ts:220:1 › V2-4 — materials in the three saved states (9.2s)
+  ✓   8 [measure] › tests/e2e/laqV2.measure.ts:256:1 › V2-5 — nudge: Unknown, past the date, from the card (10.6s)
+  ✓   9 [measure] › tests/e2e/laqV2.measure.ts:279:1 › V2-6 — review: the grid card in preview, the materials tile, the two numbers (12.1s)
+  ✓  10 [measure] › tests/e2e/laqV2.measure.ts:320:1 › V2-7 — logged: three endings, each undone (23.0s)
+  ✓  11 [measure] › tests/e2e/laqV2.measure.ts:350:1 › V2-8 — three in a row with Log and start another, the second undone (14.7s)
+  ✓  12 [measure] › tests/e2e/laqV2.measure.ts:384:1 › V2-9 — Escape at each level (4.4s)
+  ✓  13 [measure] › tests/e2e/laqV2.measure.ts:410:1 › V2-10 — keyboard only, open → logged; focus rings; nothing under 12px; nothing moves on hover (17.2s)
+  ✓  14 [measure] › tests/e2e/laqV21.measure.ts:108:1 › V21-1 — review: one sub-line, the card on the heading's edge, What went, the big numbers (14.8s)
+  ✓  15 [measure] › tests/e2e/laqV21.measure.ts:165:1 › V21-2 — step one: already queried agents, Show / Hide, and the search (4.0s)
+  ✓  16 [measure] › tests/e2e/laqV21.measure.ts:192:1 › V21-3 — not sent yet: the task's I've sent it, from the To-do page and the Dashboard (29.9s)
+  ✓  17 [measure] › tests/e2e/laqV21.measure.ts:252:1 › V21-4 — keyboard only, open → logged; rings; nothing under 12px; nothing moves on hover (18.3s)
+  ✓  18 [measure] › tests/e2e/laqV22.measure.ts:195:1 › V22-0 — the look: review (three, one, no date), the tile's pop-up, the logged screen; 100% and 150% (1.3m)
+  ✓  19 [measure] › tests/e2e/laqV22.measure.ts:311:1 › V22-2 — notes: add, two, edit, delete, Escape, kept words; saved on log, gone on undo, on the card's Notes tab (22.0s)
+  ✓  20 [measure] › tests/e2e/laqV22.measure.ts:410:1 › V22-3 — the 25th query: the review's count and Query number agree; the milestone (18.5s)
+  ✓  21 [measure] › tests/e2e/laqV22.measure.ts:435:1 › V22-4 — reduced motion: no confetti, no thump, the +1 still, the final state drawn (6.8s)
+  ✓  22 [measure] › tests/e2e/laqV22.measure.ts:471:1 › V22-5 — keyboard only, open → logged with a note added, edited and deleted; rings; nothing under 12px; nothing moves on hover (29.4s)
+grid 1280: 88 cards (50 with a tile, 50 compact), 0 words cut on 0; widths 268
+responses 1280: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+grid 1440: 88 cards (50 with a tile, 50 compact), 0 words cut on 0; widths 321.3
+responses 1440: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+grid 1512: 88 cards (50 with a tile, 50 compact), 0 words cut on 0; widths 345.3
+responses 1512: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+grid 1920: 88 cards (50 with a tile, 0 compact), 0 words cut on 0; widths 424
+responses 1920: 7 cards (7 with a tile, 7 compact), 0 words cut on 0; widths 330
+  ✓  23 [measure] › tests/e2e/laqV23.measure.ts:90:15 › V23-D · the Sent box's words and the tile at 1280, 1440, 1512, 1920 — Queries grid and Responses (27.3s)
+escape queries hover: found true, opened true, closed true, stays closed true, tile focused true
+escape queries focus: found true, opened true, closed true, stays closed true, tile focused true
+escape queries click: found true, opened true, closed true, stays closed true, tile focused true
+escape responses hover: found true, opened true, closed true, stays closed true, tile focused true
+escape responses focus: found true, opened true, closed true, stays closed true, tile focused true
+escape responses click: found true, opened true, closed true, stays closed true, tile focused true
+escape log-a-query hover: found true, opened true, closed true, stays closed true, tile focused true
+escape log-a-query focus: found true, opened true, closed true, stays closed true, tile focused true
+escape log-a-query click: found true, opened true, closed true, stays closed true, tile focused true
+  ✓  24 [measure] › tests/e2e/laqV23.measure.ts:140:15 › V23-E · Escape on the materials pop-up: Queries page, Responses, Log a query's preview (23.4s)
+one count: dashboard "24 queries sent" · queries page "112 queries sent" · review "25 queries sent, one more with this query" · "Query number 2425 for Murphy's Day Out"
+  ✘  25 [measure] › tests/e2e/laqV23.measure.ts:224:15 › V23-S · one count of queries sent, the line under the Sent weeks, Add the dates (28.1s)
+  ✓  26 [measure] › tests/e2e/laqV23.measure.ts:290:15 › V23-T · the held task on the To-do page: fixed words, no unlink, I've sent it, after a reload (8.9s)
+  ✓  27 [measure] › tests/e2e/pc3.measure.ts:420:77 › Plumage colours v3 — the rendered locks › PC3-1 … 4, 6, 9 · the grid, the slide-in, Birds-eye, the filter and Responses (Chromium) (32.4s)
+  ✓  28 [measure] › tests/e2e/pc3.measure.ts:522:17 › Plumage colours v3 — the rendered locks › PC3-5 · the label clears the track, seal, name, facts and the heading above, at 1280, 1512 and 1920; one card height (22.0s)
+  ✘  29 [measure] › tests/e2e/pc3.measure.ts:571:55 › Plumage colours v3 — the rendered locks › PC3-7, 8, 11, 12 · the tile and the hover (Chromium) (15.4s)
+  ✘  30 [measure] › tests/e2e/pc3.measure.ts:576:18 › Plumage colours v3 — the rendered locks › PC3-13 · the compact tile on a narrow card, 1280 (Chromium) (10.1s)
+  ✓  31 [measure] › tests/e2e/pc3.measure.ts:581:18 › Plumage colours v3 — the rendered locks › PC3-10 · the slide-in rim, and the four search tiles (17.0s)
+webkit population: [["Offer",1,0],["Partial Requested",6,0],["Revise & Resubmit",2,0],["Full Requested",7,0],["Queried",38,31],["Partial Sent",8,3],["Full Sent",6,5],["Resubmitted",1,1],["Rejected",15,0],["No Response",2,0],["Withdrawn",1,0],["Signed",1,0]]
+  ✘  32 [measure] › tests/e2e/pc3.measure.ts:699:17 › Plumage colours v3 — the rendered locks › PC3-W · the grid, tile and hover locks in WebKit (1512), and its frames (1.2m)
+  ✓  33 [measure] › tests/e2e/qc154.measure.ts:82:3 › v154 M1 grid and card · 1440 (7.5s)
+  ✓  34 [measure] › tests/e2e/qc154.measure.ts:82:3 › v154 M1 grid and card · 1920 (6.8s)
+  5 failed
+  28 passed (11.1m)

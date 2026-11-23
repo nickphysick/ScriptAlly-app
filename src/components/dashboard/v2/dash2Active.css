@@ -90,3 +90,9 @@
 .d22-stip li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .d22-stip li i { display: inline-block; vertical-align: -1px; margin-right: 10px; }
 .d22-stip li.d22-smore { color: var(--sp-quiet); padding-left: 21px; }
+
+/* Log a query v2.3 · Phase 1 — under the Sent weeks, when some queries have no sent date: the axis's small print (12.5px,
+   quiet), as a sentence, with the link in the ink's underline */
+.d58.d2 .d23-undated { margin: 0; padding: 10px 22px 14px; font-family: var(--d58-serif); font-size: 12.5px; line-height: 1.4; color: var(--sp-quiet); }
+.d58.d2 .d23-undated a { color: #1c130f; text-decoration: underline; text-underline-offset: 2px; }
+.d58.d2 .d23-undated a:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }

@@ -95,14 +95,14 @@ describe("LAQ22-S the review's 'queries sent' is the Queries page's count, and e
   it("the logged screen's 'Query number' reads the same count, plus this query: 29", () => {
     const host = readFileSync("src/components/queries/centre/LogStagesHost.tsx", "utf8");
     const ui = readFileSync("src/components/queries/centre/QcLogStages.tsx", "utf8");
-    expect(host).toMatch(/count=\{queriesSentOf\(forBook\)\}/);
+    expect(host).toMatch(/count=\{queriesSent\(forBook, nowMs\)\}/);
     expect(host).toMatch(/bookQueries=\{forBook\}/);
     expect(ui).toMatch(/const n = p\.count \+ 1;/);
     expect(ui).toMatch(/Query number <Odometer n=\{L\.n\} \/>/);
   });
-  it("the Queries page header still counts one per query of the book (Queries.tsx, read only)", () => {
+  it("the Queries page header calls the one count (v2.3 D1: lib/dash2 queriesSent)", () => {
     const q = readFileSync("src/components/Queries.tsx", "utf8");
-    expect(q).toMatch(/counts=\{showGridSkeleton \|\| qcLoadFail \? null : \{ ms: qcLineTitle, sent: qcScoped\.length,/);
+    expect(q).toMatch(/counts=\{showGridSkeleton \|\| qcLoadFail \? null : \{ ms: qcLineTitle, sent: queriesSent\(qcScoped\.map\(\(r\) => r\.query\), now151\),/);
   });
 });
 

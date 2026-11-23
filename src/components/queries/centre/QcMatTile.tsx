@@ -14,6 +14,11 @@
  *    viewport. In Log a query's preview (`inCard`) it is portalled into the card itself, outside the frame, and kept
  *    inside every clipping ancestor: that review reads its pop-up inside the card (tests/e2e/laqV2.measure.ts).
  * ⚠️ The tile and hover keep the paperclip's hooks (`data-qc1533="tab"` / `"pop"`), which Log a query's measurement uses.
+ * ⚠️ ESCAPE CLOSES IT AND IT STAYS CLOSED (Log a query v2.3 · Phase 3, D4): every open and close goes through `tileNext`.
+ *    Escape mutes the hover and focus (the tile takes focus back, and its focus used to show the hover again at once), until
+ *    the pointer leaves the tile and comes back, or focus leaves and returns, or the tile is clicked or pressed. Opened by
+ *    hover, by focus or by click, the same. Escape here closes only the hover (its escape layer); the next is the surface's.
+ *    Narrow cards draw this same button compact (pc3tile.css, v2.3 · Phase 2): nothing here knows which form it is.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -34,6 +39,25 @@ export const POINTER_RIGHT = 25;
 const MARGIN = 8;
 
 interface Place { left: number; top: number; up: boolean; pointer: number }
+
+/** v2.3 · Phase 3 — the hover's open state, and whether Escape has muted hover and focus */
+export interface TileState { open: boolean; muted: boolean }
+export type TileEvent = "enter" | "leave" | "focus" | "blur" | "click" | "press" | "escape";
+export const TILE_CLOSED: TileState = { open: false, muted: false };
+/** the one place the hover opens and closes: what each thing the writer does to the tile leaves it as */
+export function tileNext(s: TileState, e: TileEvent): TileState {
+  switch (e) {
+    /* hover and focus open it, unless Escape closed it and the pointer or focus has not left since */
+    case "enter": case "focus": return s.muted ? s : { open: true, muted: false };
+    /* the pointer or focus leaving closes it, and ends the mute: coming back opens it again */
+    case "leave": case "blur": return TILE_CLOSED;
+    /* a click opens it (it never closed it, as built); Enter or Space toggles */
+    case "click": return { open: true, muted: false };
+    case "press": return s.open ? { open: false, muted: s.muted } : { open: true, muted: false };
+    case "escape": return { open: false, muted: true };
+    default: { const unhandled: never = e; return unhandled; }
+  }
+}
 
 /** the rectangle the hover must stay inside: the viewport, and (drawn in the card) every clipping ancestor of the card */
 const boundsOf = (card: HTMLElement | null, inCard: boolean) => {
@@ -68,14 +92,15 @@ export const MatTile: React.FC<{
   /** the card, for the in-card hover's position */
   cardRef: React.RefObject<HTMLElement | null>;
 }> = ({ id, g, onOpen, inCard = false, escLevel = ESC_LEVEL.page, cardRef }) => {
-  const [open, setOpen] = useState(false);
+  const [st, setSt] = useState<TileState>(TILE_CLOSED);
+  const open = st.open;
   const [place, setPlace] = useState<Place | null>(null);
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLSpanElement>(null);
-  const show = () => setOpen(true);
-  const hide = () => { setOpen(false); setPlace(null); };
-  useEffect(() => { onOpen(open); }, [open, onOpen]);
-  useEscapeLayer(open, () => { hide(); btn.current?.focus(); }, escLevel);
+  /* ⚠️ a functional update: Escape's focus() runs this tile's focus handler in the same tick, and it must read the mute */
+  const go = (e: TileEvent) => setSt((s) => tileNext(s, e));
+  useEffect(() => { onOpen(open); if (!open) setPlace(null); }, [open, onOpen]);
+  useEscapeLayer(open, () => { go("escape"); btn.current?.focus(); }, escLevel);
   const name = materialsName(g.count);
   const popId = `pc3-hov-${id}`;
 
@@ -127,13 +152,13 @@ export const MatTile: React.FC<{
   ) : null;
 
   return (
-    <span className="pc3-tw" data-pc3="tile-wrap" onPointerEnter={show} onPointerLeave={hide}
+    <span className="pc3-tw" data-pc3="tile-wrap" onPointerEnter={() => go("enter")} onPointerLeave={() => go("leave")}
       onClick={(e) => e.stopPropagation()}>
       <button ref={btn} type="button" className={`pc3-tile${open ? " is-open" : ""}`} data-qc1533="tab" data-pc3="tile" aria-label={name}
         aria-expanded={open} aria-controls={open ? popId : undefined}
-        onFocus={show} onBlur={hide}
-        onClick={(e) => { e.stopPropagation(); if (!open) show(); }}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); if (open) hide(); else show(); } }}>
+        onFocus={() => go("focus")} onBlur={() => go("blur")}
+        onClick={(e) => { e.stopPropagation(); go("click"); }}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); go("press"); } }}>
         {CLIP}<i>{g.count}</i>
       </button>
       {hover ? createPortal(hover, inCard && cardRef.current ? cardRef.current : document.body) : null}

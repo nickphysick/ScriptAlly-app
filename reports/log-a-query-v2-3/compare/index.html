@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log a query v2.3 — before and after</title>
+<style>
+  :root { --ink: #1c130f; --quiet: #6b6058; --paper: #f6f1ea; --card: #fff; --line: #e3d5c9; }
+  body { margin: 0; padding: 24px 16px 48px; background: var(--paper); color: var(--ink); font: 16px/1.5 Georgia, "Source Serif 4", serif; }
+  main { max-width: 1180px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 36px 0 6px; }
+  p { margin: 0 0 12px; color: var(--quiet); max-width: 760px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  figure { margin: 0; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+  figcaption { font-size: 14px; color: var(--quiet); margin: 0 0 8px; }
+  img { display: block; max-width: 100%; height: auto; }
+  @media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Log a query v2.3 — before and after</h1>
+  <p>Base: dev line …-pc3-laq22-qc168 (93fb01e24). After: branch log-a-query-v2-3. Every frame is the emulator's harness account, taken by tests/e2e/laqV23shots.measure.ts on both builds.</p>
+
+  <h2>1 · The Dashboard's Sent card, with three undated queries (24 on the book)</h2>
+  <p>Before: 21 queries sent, and nothing about the three. After: 24, the weeks unchanged, and one line under them with the link.</p>
+  <div class="pair">
+    <figure><figcaption>Before</figcaption><img src="before/dashboard-sent-with-undated.png" alt="Before: the Sent card"></figure>
+    <figure><figcaption>After</figcaption><img src="after/dashboard-sent-with-undated.png" alt="After: the Sent card"></figure>
+  </div>
+
+  <h2>2 · The Dashboard's Sent card, no undated queries</h2>
+  <p>No line: the card is as it was.</p>
+  <div class="pair">
+    <figure><figcaption>Before</figcaption><img src="before/dashboard-sent-no-undated.png" alt="Before: the Sent card, no undated"></figure>
+    <figure><figcaption>After</figcaption><img src="after/dashboard-sent-no-undated.png" alt="After: the Sent card, no undated"></figure>
+  </div>
+
+  <h2>3 · A narrow card at 1280 (268px)</h2>
+  <p>Before: the 44 × 50 tile cut the date short. After: the paperclip and count on the "Sent" line; the date and the line beneath run the full width.</p>
+  <div class="pair">
+    <figure><figcaption>Before</figcaption><img src="before/card-1280.png" alt="Before: narrow card"></figure>
+    <figure><figcaption>After</figcaption><img src="after/card-1280.png" alt="After: narrow card"></figure>
+  </div>
+
+  <h2>4 · A wide card at 1512 (345px)</h2>
+  <p>Unchanged: the 44 × 50 tile as built.</p>
+  <div class="pair">
+    <figure><figcaption>Before</figcaption><img src="before/card-1512.png" alt="Before: wide card"></figure>
+    <figure><figcaption>After</figcaption><img src="after/card-1512.png" alt="After: wide card"></figure>
+  </div>
+
+  <h2>5 · The pop-up from the narrow card's tile (1280)</h2>
+  <div class="pair">
+    <figure><figcaption>Before</figcaption><img src="before/popup-1280.png" alt="Before: pop-up"></figure>
+    <figure><figcaption>After</figcaption><img src="after/popup-1280.png" alt="After: pop-up from the compact tile"></figure>
+  </div>
+
+  <h2>6 · The held task on the To-do page</h2>
+  <p>Before: the title is a field and the agent has an unlink. After: the words are fixed and there is no unlink; ticking, the date, steps and notes are as before.</p>
+  <div class="pair">
+    <figure><figcaption>Before</figcaption><img src="before/todo-held-task.png" alt="Before: held task"></figure>
+    <figure><figcaption>After</figcaption><img src="after/todo-held-task.png" alt="After: held task"></figure>
+  </div>
+</main>
+</body>
+</html>

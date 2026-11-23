@@ -52,3 +52,34 @@
 /* asked and not yet sent: white, a 1px dashed navy at 60%, navy words */
 .pc3-hov .pc3-chip.is-ask { background: #fff; box-shadow: none; border: 1px dashed rgba(42, 58, 82, 0.6); color: #2a3a52; }
 .pc3-hov .pc3-chip > svg, .pc3-hov .pc3-chip > span { flex: none; }
+
+/* ── Log a query v2.3 · Phase 2 (D2, Nick 23 Nov; design-refs/log-a-query-v2-3 screen 02) — THE COMPACT TILE on a narrow
+   card. Measured on the base (reports/log-a-query-v2-3/before): with the 44 × 50 tile, Sent words were cut on 268px
+   cards (1280, 53 words) and 321px cards (1440, 4 words), and the widest card that needed more room needed 331px; none
+   at 345px (1512) or wider. So at 340px and under (the card's own width — a container query, never the window; the query
+   reads the card's CONTENT box, 12px less than its outside for the 6px padding, hence 328 below) the
+   SAME button is drawn as a pill on the "Sent" label's line, at its right-hand end: the paperclip and the count side by
+   side. The box gives back its 64px, so the date and the "… days ago" line run the full width.
+   ⚠️ Nothing moves the card: the tile is absolutely placed in both forms, so the card's height is the same.
+   ⚠️ The pill is 24px high (its hit area); the drawn fill is 20px, inset 2px top and bottom, so it ends above the value's
+      line. Nothing under 12px: the count 13px, the glyph 14px. ── */
+@container (max-width: 328px) {
+  .qc154-card .qc154-f.qc154-f.qc154-f[data-k="sent"]:has(.pc3-tile) { display: flex; flex-direction: column; gap: 2px; padding-right: 8px; }
+  /* ON THE LABEL'S LINE WHEREVER THE BOX PUTS IT: the box centres its lines (qcv157), so no fixed top can find the label.
+     The pill joins the box's flow first (order −1), at the right (align-self), and its margins give back exactly the room it
+     takes (−4 + 24 − 22 = −2, the column's gap): its centre is the label's line, and no line moves. z-index keeps it over
+     the label, which is drawn after it. */
+  .qc154-card .pc3-tw { position: relative; z-index: 1; top: auto; right: auto; transform: none; order: -1; align-self: flex-end; margin: -4px -2px -22px 0; }
+  .qc154-card .pc3-tile.pc3-tile {
+    position: relative; isolation: isolate; flex-direction: row; gap: 3px; width: auto; min-width: 24px; height: 24px; padding: 0 7px 0 6px; border-radius: 12px;
+    background: transparent;
+  }
+  .qc154-card .pc3-tile.pc3-tile::before {
+    content: ""; position: absolute; inset: 2px 0; z-index: -1; border-radius: 10px; background: rgba(28, 19, 15, 0.055);
+  }
+  .qc154-card .pc3-tile.pc3-tile:hover, .qc154-card .pc3-tile.pc3-tile:focus, .qc154-card .pc3-tile.pc3-tile.is-open { background: transparent; }
+  .qc154-card .pc3-tile.pc3-tile:hover::before, .qc154-card .pc3-tile.pc3-tile:focus::before, .qc154-card .pc3-tile.pc3-tile.is-open::before { background: rgba(28, 19, 15, 0.1); }
+  .qc154-card .pc3-tile.pc3-tile:focus-visible { outline-offset: 0; }
+  .qc154-card .pc3-tile > svg { width: 14px; height: 14px; }
+  .qc154-card .pc3-tile > i { font: normal 400 13px/1 var(--sp-type) !important; }
+}

@@ -1,0 +1,22 @@
+[
+ {
+  "name": "last row (scrolled to the bottom) cv25-q-02: the hover opens on hover",
+  "ok": false,
+  "got": "false"
+ },
+ {
+  "name": "last column seed-query-9: the hover opens on hover",
+  "ok": false,
+  "got": "false"
+ },
+ {
+  "name": "first column seed-query-12: the hover opens on hover",
+  "ok": false,
+  "got": "false"
+ },
+ {
+  "name": "first row seed-query-12: the hover opens on hover",
+  "ok": false,
+  "got": "false"
+ }
+]

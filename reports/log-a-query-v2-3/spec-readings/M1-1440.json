@@ -1,0 +1,342 @@
+[
+ {
+  "name": "cards on the page (population)",
+  "ok": true,
+  "got": "36"
+ },
+ {
+  "name": "three columns, 14px gap",
+  "ok": true,
+  "got": "321.328px 321.328px 321.344px · 14px · 992"
+ },
+ {
+  "name": "cards sit in three columns",
+  "ok": true,
+  "got": "0, 335.3, 670.7"
+ },
+ {
+  "name": "seed-query-12: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Offer · NB | Noah Bright | Bright Literary | Sent | 10 Jun | 166 days ago | 2 | Next | No date yet | answer the offer | → | Offe"
+ },
+ {
+  "name": "seed-query-12: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-08: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Offer · TE | Tom Ellery | Ellery & Finch | Sent | 22 Aug | 93 days ago | 1 | Next | No date yet | answer the offer | → | Offer"
+ },
+ {
+  "name": "cv25-q-08: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-7: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial requested · RL | Rachel Lin | Lin Literary | Sent | 5 Aug | 110 days ago | 1 | Next | 50 days past | asked 96 days ago | → | Partial"
+ },
+ {
+  "name": "seed-query-7: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-11: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Revise & resubmit · IK | Iris Kwan | Kwan & Hall | Sent | 8 Jul | 138 days ago | 2 | Next | 35 days past | asked 138 days ago | → | Revise &"
+ },
+ {
+  "name": "seed-query-11: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-9: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full requested · AD | Ana Duarte | Duarte Words | Sent | 8 Jul | 138 days ago | 2 | Next | No date yet | asked 96 days ago | → | Full req"
+ },
+ {
+  "name": "seed-query-9: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-06: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial requested · CB | Clara Beaumont | Harbour Lane | Sent | 2 Sep | 82 days ago | 1 | Next | No date yet | asked 82 days ago | → | Parti"
+ },
+ {
+  "name": "cv25-q-06: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-20: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial requested · DM | David Marsh | Marsh & Co | Sent | 5 Aug | 110 days ago | 1 | Next | No date yet | asked 96 days ago | → | Partial r"
+ },
+ {
+  "name": "seed-query-20: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-3: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial requested · EV | Edda Voss | Voss Literary | Sent | 6 Sep | 78 days ago | 1 | Next | No date yet | asked 72 days ago | → | Partial r"
+ },
+ {
+  "name": "msv12-q-3: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "rj-send: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full requested · IV | Imogen Vale | Vale & Wick | Sent | 23 Jul | 123 days ago | 1 | Next | No date yet | asked 72 days ago | → | Full re"
+ },
+ {
+  "name": "rj-send: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-09: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full requested · JM | Jonathan Marsh | The Marsh Agency | Sent | 24 Sep | 60 days ago | 1 | Next | No date yet | asked 60 days ago | → | "
+ },
+ {
+  "name": "cv25-q-09: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cor-move-a: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial requested · MR | Marcus Reed | Reed & Partners | Sent | 29 Jul | 117 days ago | 1 | Next | No date yet | asked 77 days ago | → | Par"
+ },
+ {
+  "name": "cor-move-a: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-07: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial requested · MR | Marcus Reed | Bloomsbury Quill | Sent | 10 Sep | 74 days ago | 1 | Next | No date yet | asked 74 days ago | → | Par"
+ },
+ {
+  "name": "cv25-q-07: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-3: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full requested · MR | Marcus Reed | Reed & Partners | Sent | 25 Jun | 151 days ago | 1 | Next | No date yet | asked 151 days ago | → | Fu"
+ },
+ {
+  "name": "seed-pkgq-3: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-cal-passed865-q: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full requested · OF | Ottoline Frayn | Frayn Agency | Sent | 18 Apr 2024 | over a year ago | 1 | Next | No date yet | → | Full requested"
+ },
+ {
+  "name": "seed-cal-passed865-q: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-4: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full requested · TA | Theo Abara | Abara Grant Agency | Sent | 7 Sep | 77 days ago | 1 | Next | No date yet | asked 65 days ago | → | Ful"
+ },
+ {
+  "name": "msv12-q-4: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "rj-dupe: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full requested · TH | Tobias Hark | Hark Literary | Sent | 13 Jul | 133 days ago | 1 | Next | No date yet | asked 75 days ago | → | Full "
+ },
+ {
+  "name": "rj-dupe: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-2: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Queried · TE | Tom Ellery | Curtis Vane | Sent | 1 Sep | 83 days ago | Next | Past expected | Send nudge now | → | Queried"
+ },
+ {
+  "name": "seed-query-2: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "thin-q-gap-solo: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial sent · DR | Devendra Rao | Rao Agency | Sent | 6 Aug | 109 days ago | 1 | Next | Past expected | Send nudge now | → | Partial s"
+ },
+ {
+  "name": "thin-q-gap-solo: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cor-pair: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial sent · EH | Elinor Hale | Cavendish & Roe | Sent | 8 Aug | 107 days ago | 1 | Next | Past expected | Send nudge now | → | Parti"
+ },
+ {
+  "name": "cor-pair: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-23: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial sent · RO | Rufus Oyelaran | Oyelaran Books | Sent | 22 Jul | 124 days ago | 1 | Next | Past expected | Send nudge now | → | Pa"
+ },
+ {
+  "name": "seed-query-23: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-8: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial sent · DM | David Marsh | Marsh & Co | Sent | 25 Jul | 121 days ago | 1 | Next | Past expected | Send nudge now | → | Partial s"
+ },
+ {
+  "name": "seed-query-8: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-4: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Partial sent · PN | Priya Nair | Northbank Literary | Sent | 30 Jun | 146 days ago | 1 | Next | Past expected | Send nudge now | → | Pa"
+ },
+ {
+  "name": "seed-pkgq-4: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-cal-soon-q: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Queried · HB | Hester Blaine | Blaine & Vole | Sent | 8 Sep | 76 days ago | Next | Past expected | Send nudge now | → | Queried"
+ },
+ {
+  "name": "seed-cal-soon-q: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-cal-bang-q: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Queried · AC | Alasdair Crewe | Crewe Literary | Sent | 19 Aug | 96 days ago | Next | Past expected | Send nudge now | → | Queried"
+ },
+ {
+  "name": "seed-cal-bang-q: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "qc150l9-q: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Full sent · WC | Wren Calloway | Calloway & Hart | Sent | 15 Sep | 69 days ago | 1 | Reply expected by | 7 Jan 2027 | → | Full sent"
+ },
+ {
+  "name": "qc150l9-q: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "probe-un-both: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Queried · – | Agent not recorded | Sent | 20 Sep | 64 days ago | Next | No reply date | add a response time | → | Queried"
+ },
+ {
+  "name": "probe-un-both: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "probe-un-noagent: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Queried · – | Agent not recorded | Sent | 20 Sep | 64 days ago | Next | No reply date | add a response time | → | Queried"
+ },
+ {
+  "name": "probe-un-noagent: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-14: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Queried · FS | Fenella Strand | Brightwater Books | Sent | 28 Sep | 56 days ago | Next | No reply date | add a response time | → |"
+ },
+ {
+  "name": "cv25-q-14: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-13: the status word on show exactly once (the band's label)",
+  "ok": true,
+  "got": "Queried · NH | Nadia Hussain | Northgate Literary | Sent | 30 Sep | 54 days ago | 1 | Next | No reply date | add a response time |"
+ },
+ {
+  "name": "cv25-q-13: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-09: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-07: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-06: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-08: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-05: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-10: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-11: no fact cut, nothing wrapped",
+  "ok": true,
+  "got": "none"
+ }
+]

@@ -9,7 +9,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { QueryStatus, type Query } from "../types";
-import { sentAllTime, sentThisWeek, sentWeeks, wholeWeeksQuerying } from "./dash2";
+import { queriesSent, sentThisWeek, sentWeeks, wholeWeeksQuerying } from "./dash2";
 import { activeAt } from "./dashWeekMix";
 import { isoWeekStart } from "./dashboardStats";
 
@@ -22,7 +22,7 @@ const TOMORROW = q("tomorrow", noon(2026, 10, 24));
 describe("v2.1 · Phase 5 — sent today at noon", () => {
   for (const [label, now] of [["09:00", at(9)], ["00:05", at(0, 5)], ["23:55", at(23, 55)]] as const) {
     it(`now ${label}: counted by every sent figure`, () => {
-      expect(sentAllTime([TODAY], now)).toBe(1);
+      expect(queriesSent([TODAY], now)).toBe(1);
       expect(sentThisWeek([TODAY], now)).toBe(1);
       expect(wholeWeeksQuerying([TODAY], now)).toBe(0);
       expect(sentWeeks([TODAY], [{ start: isoWeekStart(now) }], now)[0].n).toBe(1);
@@ -31,7 +31,7 @@ describe("v2.1 · Phase 5 — sent today at noon", () => {
   }
   it("sent tomorrow: still not counted", () => {
     const now = at(9);
-    expect(sentAllTime([TOMORROW], now)).toBe(0);
+    expect(queriesSent([TOMORROW], now)).toBe(0);
     expect(sentThisWeek([TOMORROW], now)).toBe(0);
     expect(wholeWeeksQuerying([TOMORROW], now)).toBeNull();
     expect(sentWeeks([TOMORROW], [{ start: isoWeekStart(now) }], now)[0].n).toBe(0);

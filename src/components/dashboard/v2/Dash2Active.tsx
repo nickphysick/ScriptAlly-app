@@ -26,9 +26,10 @@ import { createPortal } from "react-dom";
 import type { Activity, Agent, Query } from "../../../types";
 import { activeTitle } from "../OneScreenChart";
 import {
-  activityIndex, breakdownFor, dash2Weeks, dateLabels, sentAllTime, sentCount, sentThisWeek, sentWeekAria, sentWeeks, visibleWeeks, weekAria,
+  ADD_THE_DATES, activityIndex, breakdownFor, dash2Weeks, dateLabels, queriesSent, sentCount, UNDATED_FROM, undatedSentIds, undatedSentLine, sentThisWeek, sentWeekAria, sentWeeks, visibleWeeks, weekAria,
 } from "../../../lib/dash2";
 import { agentPrimary, agentSecondary } from "../../../lib/agentDisplay";
+import { queriesForIds } from "../../../lib/queriesFilterParam";
 import { Frame } from "./Frame";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
@@ -86,7 +87,9 @@ export const Dash2Active: React.FC<{
   now: Date;
   /** v3: the third view's figures; absent → no third button */
   going?: HowItsGoing | null;
-}> = ({ loading, queries, activities, agents = [], activeCount, undatedCount, now, going = null }) => {
+  /** v2.3 · Phase 1: "Add the dates" — the Queries page showing only these (the undated) queries */
+  onAddDates?: (ids: string[]) => void;
+}> = ({ loading, queries, activities, agents = [], activeCount, undatedCount, now, going = null, onAddDates }) => {
   /* ⚠️ DECLARED FIRST (v3): the plot's measuring effect re-runs on it — the plot unmounts under "How it's going" */
   const [mode, setMode] = useState<ChartMode>("active");
   const plotRef = useRef<HTMLDivElement | null>(null);
@@ -160,7 +163,9 @@ export const Dash2Active: React.FC<{
   })();
 
   const fresh = loading ? 0 : sentThisWeek(queries, now);
-  const title = mode === "going" ? GOING_TITLE : mode === "sent" ? (loading ? "Queries sent" : sentCount(sentAllTime(queries, now))) : activeTitle(activeCount, undatedCount);
+  const title = mode === "going" ? GOING_TITLE : mode === "sent" ? (loading ? "Queries sent" : sentCount(queriesSent(queries, now))) : activeTitle(activeCount, undatedCount);
+  /* v2.3 · Phase 1 — counted as sent, but no week to draw them in: said once, under the Sent weeks */
+  const undated = useMemo(() => (loading ? [] : undatedSentIds(queries)), [loading, queries]);
   const change = mode !== "going" && fresh > 0 ? (mode === "sent" ? `${fresh} this week` : `+${fresh} this week`) : null;
 
   return (
@@ -234,6 +239,12 @@ export const Dash2Active: React.FC<{
             </div>
           )}
         </div>
+        {mode === "sent" && undated.length > 0 && (
+          <p className="d23-undated" data-d2="undated" data-n={undated.length}>
+            {undatedSentLine(undated.length)}{" "}
+            <a href={queriesForIds(undated, UNDATED_FROM)} data-d2="add-dates" onClick={(e) => { e.preventDefault(); onAddDates?.(undated); }}>{ADD_THE_DATES}</a>
+          </p>
+        )}
       </div>
       )}
       {hk !== null && mode === "active" && bd && tipPos && typeof document !== "undefined" && createPortal(

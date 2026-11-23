@@ -1,0 +1,27 @@
+[
+ {
+  "name": "Revise & Resubmit seed-query-11: a manuscript chip with StatusDot's Full mark",
+  "ok": false,
+  "got": "null"
+ },
+ {
+  "name": "seed-query-12: opens on keyboard focus",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "seed-query-12: Escape closes it, focus stays on the tile",
+  "ok": true,
+  "got": "{\"open\":false,\"focus\":\"tile\"}"
+ },
+ {
+  "name": "seed-query-12: Enter opens it again",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "seed-query-12: closes on blur",
+  "ok": true,
+  "got": "false"
+ }
+]
