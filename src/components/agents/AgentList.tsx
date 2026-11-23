@@ -11,6 +11,7 @@
  *
  * The page owns its own chrome and scroll — it mounts in a bare `fill`+`clip` StagePage.
  */
+import { sayForCard, type CardToast } from "../../lib/agentCardToast";
 import { flushSync } from "react-dom";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
@@ -603,6 +604,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const [justAdded, setJustAdded] = useState<string | null>(null);
   /* the page's snackbar (declared here, above every reader) */
   const { showToast } = useToast();
+  /* Agent card v2.2 B4 — the card's messages go into the open card's toast (lib/agentCardToast) */
+  const sayCard = sayForCard(showToast as (t: CardToast) => void);
   const [stampAt, setStampAt] = useState<{ left: number; top: number; date: string } | null>(null);
 
   /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
@@ -931,10 +934,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       save: async (change) => {
         const base = draftOf(agent, personalGenres);
         const r = await saveDraft(agent, base, { ...base, ...change }, { emit: false });
-        if (!r.ok) { showToast({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
+        if (!r.ok) { sayCard({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
         const undo = r.undo;
         /* principles v1 — the page's one snackbar channel: about 5 seconds, a new one replaces the old */
-        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, duration: CLP_TOAST_MS, replaces: CLP_TOAST,
+        sayCard({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, duration: CLP_TOAST_MS, replaces: CLP_TOAST,
           ...(undo ? { undo: async () => { await undo(); } } : {}) });
         return true;
       },
@@ -958,7 +961,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             : meta?.section ? sectionSavedWords(meta.section, first, offers) : savedWords(meta?.n ?? 1, first, offers);
           /* Agent card v2.1 — a section's save names the section; Save all makes its own snackbar (`silent`), and the card
              plays its Undo motion once the snapshot is back (`onUndo`) */
-          if (!meta?.silent) showToast({ message, ...(undo ? { undo: async () => { const ok = await undo(); if (ok) meta?.onUndo?.(); showToast({ message: UNDONE_WORDS }); } } : {}) });
+          if (!meta?.silent) sayCard({ message, ...(undo ? { undo: async () => { const ok = await undo(); if (ok) meta?.onUndo?.(); sayCard({ message: UNDONE_WORDS }); } } : {}) });
           return { ok: true, undo };
         },
         leaveRef: editLeave,

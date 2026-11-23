@@ -49,3 +49,8 @@
 .qc152 .ag-head .ag-hmorebtn { display: inline-block; margin-top: 8px; font-size: 13.5px !important; }
 .qc152 .ag-head .aap-agask { margin: 8px 0; }
 @media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .ag-head.hed { animation: none; } .qc152.acv2-qc:has(.ag-head.hed) .qc152-body > * { transition: none; } }
+
+/* ── B4 · the saved message, in the card: the query card's toast as a bar above the footer (v164's placing) ─────────── */
+.qc152.acv2-qc .qc152-in > .qc1522-toast { position: static; transform: none; left: auto; bottom: auto; align-self: stretch; flex: none; justify-content: space-between;
+  margin: 0; padding: 9px 16px; border-radius: 0; animation: qc168-in .2s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .qc152-in > .qc1522-toast { animation: none; } }

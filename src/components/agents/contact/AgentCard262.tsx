@@ -47,6 +47,7 @@ import { db as firestoreDb } from "../../../lib/firebase";
 import { commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { agentBack, openQueryPanelFromAgent } from "../../../lib/queryPanelStore";
 import { useToast } from "../../toast/ToastProvider";
+import { listenAgentCardToast, type CardToast } from "../../../lib/agentCardToast";
 import { committedNotes, computeNotePreview, effectiveNotes, emptyNotesDraft, FLAT_NOTE_ID } from "../../../lib/agentNotes";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
@@ -308,7 +309,20 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
      the card while open; every other door goes through `ask` (unchanged: what is open closes and the click goes on;
      changed: the question shows inside it, and nothing else happens). ═══════════════════════════════════════════ */
   const { showToast } = useToast();
-  const rule = useEditRule168(a.id, (msg, undo) => showToast({ message: msg, ...(undo ? { undo: async () => undo() } : {}) }), () => cardRef.current);
+  /* ══ Agent card v2.2 B4 · THE SAVED MESSAGE, IN THE CARD: every message the open card raises (and the hosts' for it, through
+     lib/agentCardToast) is the query card's toast bar above the footer, with its Undo where one exists. The app's snackbar
+     is not used by the open card (AC11's mutation uses it). ══════════════════════════════════════════════════════ */
+  const [toast168, setToast168] = useState<{ msg: string; undo: (() => void | Promise<void>) | null; n: number } | null>(null);
+  const cardToast = useCallback((t: CardToast) => setToast168({ msg: t.message, undo: t.undo ?? null, n: Date.now() }), []);
+  const say: (t: CardToast) => void = mut168("ac11") ? (t) => showToast(t as Parameters<typeof showToast>[0]) : cardToast;
+  useEffect(() => { if (p.preview || mut168("ac11")) return undefined; return listenAgentCardToast(cardToast); }, [p.preview, cardToast]);
+  useEffect(() => {
+    if (!toast168) return undefined;
+    const t = window.setTimeout(() => setToast168(null), 5200);
+    return () => window.clearTimeout(t);
+  }, [toast168?.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setToast168(null); }, [a.id]);
+  const rule = useEditRule168(a.id, (msg, undo) => say({ message: msg, ...(undo ? { undo } : {}) }), () => cardRef.current);
   /* ══ Agent card v2.1 Phase 4 · the query card's motion, from its own code (qcMotion160), on this card's frame ══════
      The frame is the white mat (`cardRef`): its ::before draws the paper and the shadow, so the breath swells that and
      nothing inside the card moves. The border's colour is the frame's `data-qc163-rim` (the query's stage, slate with no
@@ -524,7 +538,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     setSecErr((e) => ({ ...e, [k]: undefined }));
     setOpen((cur) => cur.filter((x) => x !== k));
     if (had.length) {
-      showToast({ message: `Changes to ${secName(k)} discarded`, undo: async () => {
+      say({ message: `Changes to ${secName(k)} discarded`, undo: async () => {
         opened.current = { k };
         setRevealSeq((n) => n + 1);
         setTab("profile");
@@ -739,7 +753,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       const d = new Date();
       const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       void db.addUserTask({ text: `Answer ${m.first}’s offer`, queryId: act.queryId, agentId: a.id, manuscriptId: q?.manuscriptId, dueDate: today })
-        .then(() => showToast({ message: "On your to-do list for today" }));
+        .then(() => say({ message: "On your to-do list for today" }));
     }
   };
 
@@ -783,7 +797,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const hAgency = hv.name.trim() ? (hv.agency.trim() || (hv.agencyUnknown ? "Agency unknown" : "")) : "";
   const place = placeOf(hv);
   const hEmail = hv.email.trim(), hSite = hv.website.trim();
-  const copyEmail = () => { void navigator.clipboard?.writeText(hEmail).then(() => showToast({ message: "Email address copied" }), () => {}); };
+  const copyEmail = () => { void navigator.clipboard?.writeText(hEmail).then(() => say({ message: "Email address copied" }), () => {}); };
   const quiet = p.preview || !!cd;
   /* a section's props (the head's too): declared ABOVE every render-time reader (the head reads it) */
   const sec = (k: Sec262) => {
@@ -986,7 +1000,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const pinNote = (id: string | null) => {
     const list = committedNotes(effectiveNotes(storedNotes, emptyNotesDraft(), { flatNote: a.notes, dateAdded: a.dateAdded }));
     void writeAgent(a.id, { pinnedNoteId: id, notePreview: computeNotePreview(list, id ?? undefined) })
-      .then((r) => { if (!r.ok) showToast({ message: "Couldn’t pin that note. Try again." }); });
+      .then((r) => { if (!r.ok) say({ message: "Couldn’t pin that note. Try again." }); });
   };
   /* Agent card v2 ruling 4 — Edit and Delete on every note of the writer's. The old string writes back to its own field
      through the card's notes save (`onNotes`); Delete clears it, and Undo writes the same bytes back. */
@@ -995,16 +1009,16 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (id === FLAT_NOTE_ID) {
       const was = a.notes ?? "";
       void p.onNotes("").then((ok) => {
-        if (!ok) { showToast({ message: "Couldn’t delete that note. Try again." }); return; }
-        showToast({ message: "Note deleted", undo: async () => { if (await p.onNotes(was)) showToast({ message: "Note restored" }); } });
+        if (!ok) { say({ message: "Couldn’t delete that note. Try again." }); return; }
+        say({ message: "Note deleted", undo: async () => { if (await p.onNotes(was)) say({ message: "Note restored" }); } });
       });
       return;
     }
     const n = storedNotes.find((x) => x.id === id);
     if (!n) return;
     void onDeleteNote(n).then((ok) => {
-      if (!ok) { showToast({ message: "Couldn’t delete that note. Try again." }); return; }
-      showToast({ message: "Note deleted", undo: async () => { if (await onRestoreNote(n)) showToast({ message: "Note restored" }); } });
+      if (!ok) { say({ message: "Couldn’t delete that note. Try again." }); return; }
+      say({ message: "Note deleted", undo: async () => { if (await onRestoreNote(n)) say({ message: "Note restored" }); } });
     });
   };
   const quotes = threads.flatMap((t) => quotesOf(t.steps));
@@ -1013,12 +1027,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     <div className="qc152-notes acv2-notes" data-cl262="notes" data-cl24="pane" data-acv2="notes">
       <NotesTab158 first={m.first} nowMs={p.nowMs} notes={noteList} quotes={quotes} resetKey={a.id}
         placeholder={`Add a note about ${m.first}`} emptySub={`This is the place for where you met ${m.first}, and anything worth remembering before you query.`}
-        onAdd={(text) => { landStart(); void onAddNote(text).then((ok) => { if (ok) { land([], { light: false }); showToast({ message: `Noted on ${m.first}’s card` }); } else { pressBack(cardRef.current); showToast({ message: "Couldn’t save that note. Try again." }); } }); }}
+        onAdd={(text) => { landStart(); void onAddNote(text).then((ok) => { if (ok) { land([], { light: false }); say({ message: `Noted on ${m.first}’s card` }); } else { pressBack(cardRef.current); say({ message: "Couldn’t save that note. Try again." }); } }); }}
         onPin={p.preview ? null : (id, on) => pinNote(on ? id : null)}
         onEdit={p.preview ? null : editNote}
         onDelete={p.preview ? null : deleteNote}
-        onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => showToast({ message: "On your to-do list for today" })); }}
-        onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }} />
+        onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => say({ message: "On your to-do list for today" })); }}
+        onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => say({ message: "Pinned to your Corkboard" })); }} />
     </div>
   );
 
@@ -1043,7 +1057,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
             {qbox}
             {tabs}
             <div ref={scrollRef} className="qc152-body" role="tabpanel" data-qc152="body" data-apc="scroll" data-cl262="scroll" data-acv2="body" data-tab={tab}>{body}</div>
-            {/* Agent card v2.2 — the footer always stays: a section's question is asked inside the section */}
+            {/* Agent card v2.2 — the footer always stays: a section's question is asked inside the section. B4: the card's
+                toast bar sits above it */}
+            {toast168 ? (
+              <div className="qc1522-toast" role="status" data-qc1522="toast" data-acv22="toast"><span>{toast168.msg}</span>
+                {toast168.undo ? <button type="button" data-qc1522="undo" onClick={() => { const u = toast168.undo; setToast168(null); void u?.(); }}>Undo</button> : null}</div>
+            ) : null}
             {footer}
           </div>
         </div>
