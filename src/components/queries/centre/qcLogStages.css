@@ -196,8 +196,19 @@
    classes so its sheet applies, v2.1: the column's full width (v2 had it 425 wide and centred). Not a control: no pointer, no lift. */
 .laq .laq-pv { position: relative; }
 .laq .laq-pvw.qc151.qc153 { padding-top: 0; width: 425px; max-width: 100%; margin: 18px auto 0; font: inherit; }
-/* v2.1 - on the review the card runs the column's full width, its left edge on the heading's (the logged screen keeps 425) */
-.laq .laq-pvw.qc151.qc153.is-wide { width: 100%; max-width: none; margin: 12px 0 0; }
+/* v2.2 · Phase 1 (mock v25 `.rv2 .qcp`, `.rvc-w.rv2 .qcp`) — the card runs the column's full width on BOTH screens, its
+   left edge on the column's (D4); 18px above it on the review and 22 on the logged screen for Plumage colours v3's label
+   (it sits on the top edge, about 11px above the frame); 34px beneath it while the stamp is on, for its hanging half */
+.laq .laq-pvw.qc151.qc153.is-wide { display: flow-root; width: 100%; max-width: none; margin: 18px 0 0; } /* flow-root: .laq-pvc's negative margin stays inside */
+.laq .laq-pvw.qc151.qc153.is-wide.is-logged { margin: 22px 0 34px; }
+.laq .laq-pvw.qc151.qc153.is-wide.has-stamp { margin-bottom: 34px; }
+/* the materials pop-up's sideways bound (see QcLogStages `card`): clipped sideways at the card's edges, open far below it.
+   Its reach below is padding cancelled by a negative margin, so it takes no room; it takes no pointer either (the card
+   does), so nothing under that reach loses a click. */
+.laq .laq-pvc { overflow-x: clip; overflow-y: visible; padding-bottom: 200px; margin-bottom: -200px; pointer-events: none; }
+.laq .laq-pvc > * { pointer-events: auto; }
+/* the logged screen has nothing under the card to reach into (the reach would only add a scroll bar): no bound there */
+.laq .laq-pvw.is-logged .laq-pvc { overflow: visible; padding-bottom: 0; margin-bottom: 0; }
 .laq .laq-pvw .qc154-card[data-preview] { margin: 0; cursor: default; }
 .laq .laq-pvw.is-wide .qc154-card[data-preview] { width: 100%; max-width: none; }
 .laq .laq-pvw .qc154-card[data-preview]:hover { transform: none; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 18px 34px -22px rgba(28, 19, 15, 0.32); }
@@ -232,13 +243,16 @@
 .laq .laq-toast button { all: unset; cursor: pointer; padding: 4px 11px; border-radius: 999px; background: rgba(255,255,255,.14); font-weight: 600; }
 
 /* the stamp */
-.laq .laq-stamp { position: absolute; left: 104px; top: 124px; z-index: 6; padding: 6px 12px 5px; border: 2.5px double var(--laq-navy); border-radius: 8px; color: var(--laq-navy); background: rgba(255,255,255,.55); font: 400 19px/1 var(--laq-tw) !important; letter-spacing: .06em; transform: rotate(-8deg); mix-blend-mode: multiply; pointer-events: none; text-align: center; }
+/* v2.2 · Phase 1 (D3, mock v25 `.qc-stamp`) — on the card's bottom-right corner, half off the edge: its right side 24px
+   in from the card's, about 30px hanging below the card; white at 80% and no multiply blend, so the words read where it
+   crosses the edge. Look, rotation and thump as before. */
+.laq .laq-stamp { position: absolute; right: 24px; bottom: -30px; z-index: 6; padding: 6px 12px 5px; border: 2.5px double var(--laq-navy); border-radius: 8px; color: var(--laq-navy); background: rgba(255,255,255,.8); font: 400 19px/1 var(--laq-tw) !important; letter-spacing: .06em; transform: rotate(-8deg); pointer-events: none; text-align: center; }
 .laq .laq-stamp small { display: block; margin-top: 3px; font-size: 12px; letter-spacing: .1em; text-align: center; }
 .laq .laq-stamp.is-thump { animation: laq-thump .42s cubic-bezier(.3,1.6,.5,1) both; }
 @keyframes laq-thump { 0% { opacity: 0; transform: rotate(-8deg) scale(1.9); } 60% { opacity: 1; transform: rotate(-8deg) scale(.94); } 100% { transform: rotate(-8deg) scale(1); } }
 
 /* the celebration */
-.laq .laq-yay { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; padding: 20px 22px 14px; text-align: center; background: radial-gradient(120% 60% at 50% 0%, #f6efe3 0%, #fff 62%); }
+.laq .laq-yay { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; padding: 20px 20px 14px; text-align: center; background: radial-gradient(120% 60% at 50% 0%, #f6efe3 0%, #fff 62%); }
 .laq .laq-yay > * { flex: none; }
 .laq .laq-yay .qi-slot { animation: laq-rise .55s .05s cubic-bezier(.2,1.2,.4,1) both; }
 @keyframes laq-rise { from { opacity: 0; transform: translateY(16px) scale(.94); } }
@@ -454,13 +468,6 @@
    own padding inside */
 .laq .laq-sb.laq-yayb { padding: 0; }
 
-/* v2 · measured (V2-10) — two things the grid card does on the Queries page that this panel's rules do not allow, fixed
-   for the preview only (the grid card's own sheet is not edited; both are reported for the page):
-   · the paperclip's focus ring: qcv154's `.qc1533-clip.qc1533-clip:focus { all: unset }` outranks its own :focus-visible
-     ring, so Tab reached the paperclip with no ring at all;
-   · (the track's hover label, 11.5px, was lifted to 12 here; Plumage colours v2 deleted that label, so its rule went
-     with it in the dev-line merge). */
-.laq .qc151 .qc154-card .qc1533-clip.qc1533-clip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 6px; }
 
 /* v2.1 · Phase 4 (screen 04) — the held task as it will appear, with its "I've sent it" (the ref's v23 `.laq-tdb`).
    Nothing moves on hover: the fill changes, not the size. */

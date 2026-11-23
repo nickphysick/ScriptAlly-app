@@ -876,10 +876,19 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   }, [s, phase, p.ctx, nowMs, p.quietWeeks]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v2 · Phase 6 — THE PREVIEW IS THE QUERIES PAGE'S OWN GRID CARD (QcCard154, `preview`), given the row the save's own
      record makes (`previewOf`); QcSlip153 leaves this journey. The page's root classes (.qc151.qc153) carry its sheet. */
-  const card = (pv: NonNullable<typeof preview>, stampOn: boolean, sentMs: number | null, wide = false) => (
-    <div className={`laq-pv laq-pvw qc151 qc153${wide ? " is-wide" : ""}`} data-qls="preview">
-      <QcCard154 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} act={null} onOpen={noop} onAct={noop} preview />
-      {stampOn ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(sentMs ?? nowMs).toUpperCase()}</small></span> : null}
+  /* v2.2 · Phase 1 (mock v25, screens 01/02/08) — the card runs the column's full width on the review AND the logged
+     screen (D4), with room above it for Plumage colours v3's label (18px on the review, 22 logged) and, while the stamp is
+     on, 34px beneath it for the stamp's hanging half (D3: on the bottom-right corner, half off the edge).
+     ⚠️ `.laq-pvc` IS THE MATERIALS POP-UP'S SIDEWAYS BOUND: QcMatTile keeps its in-card hover inside every clipping
+     ancestor of the card (`boundsOf`), so this wrapper clips sideways at the card's own edges (overflow-x: clip) and
+     reaches far below it (padding, cancelled by a negative margin), so the hover slides to stay inside the card's width
+     and still opens below the tile. The card's own code and sheet are not touched. */
+  const card = (pv: NonNullable<typeof preview>, stampOn: boolean, sentMs: number | null, where: "review" | "logged") => (
+    <div className={`laq-pv laq-pvw qc151 qc153 is-wide${where === "logged" ? " is-logged" : ""}${stampOn ? " has-stamp" : ""}`} data-qls="preview">
+      <div className="laq-pvc">
+        <QcCard154 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} act={null} onOpen={noop} onAct={noop} preview />
+      </div>
+      {stampOn ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp" aria-hidden="true"><span>Logged</span><small>{dayMon(sentMs ?? nowMs).toUpperCase()}</small></span> : null}
     </div>
   );
   /* the two quiet numbers under the card: the Dashboard's own functions, without and with this query */
@@ -890,7 +899,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     <>
       <h2 className="laq-qh">Ready to log {first}?</h2>
       <p className="laq-qs laq-rvs">This is the card you’ll see on your Queries page.</p>
-      {preview ? card(preview, stamp, s.sent, true) : null}
+      {preview ? card(preview, stamp, s.sent, "review") : null}
       {preview ? <WhatWent items={preview.went} pkg={preview.packageName} /> : null}
       {s.noteOpen
         ? <textarea ref={noteRef} className="rvd-n" data-qls="note" value={s.note} placeholder="A note, only you see it" aria-label="A note on this query" onChange={(e) => set({ note: e.target.value })} />
@@ -1106,7 +1115,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             <span className="laq-cnt" data-qls="count">Query number <Odometer n={L.n} /> for {p.bookTitle}</span>
             {mile ? <span className="laq-ms" data-qls="milestone">{mile}</span> : null}
             <div className="laq-slipw">
-              {card(L.preview, true, L.before.sent)}
+              {card(L.preview, true, L.before.sent, "logged")}
             </div>
           </div>
           </div>
