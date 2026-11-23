@@ -448,10 +448,8 @@
 .laq .rvw-t b { min-width: 0; font: 500 14.5px/1.25 var(--laq-se); color: var(--laq-ink); overflow-wrap: anywhere; }
 .laq .rvw.is-1 .rvw-t, .laq .rvw.is-2 .rvw-t { flex-direction: row; text-align: left; padding: 12px 14px; gap: 12px; }
 .laq .rvw.is-1 .rvw-t b, .laq .rvw.is-2 .rvw-t b { font-size: 15.5px; }
-/* Add a note: a small text link under the tiles, left-aligned; the note field opens in its place (the text field's tokens) */
+/* Add a note: a small text link under the tiles, left-aligned; the Notes tab's writing box opens in its place (v2.2) */
 .laq p.rvw-n { margin: 10px 2px 14px; font: 400 14.5px var(--laq-se); }
-.laq textarea.rvd-n { box-sizing: border-box; display: block; flex: none; width: 100%; height: 44px; min-height: 44px; margin: 10px 0 14px; resize: vertical; font: 400 16px/1.4 var(--laq-se); padding: 9px 11px; border-radius: var(--sp-fld-r); border: 0; box-shadow: var(--sp-fld-edge); outline: none; color: var(--laq-ink); background: #fff; }
-.laq textarea.rvd-n:focus { box-shadow: var(--sp-fld-focus); }
 /* the two numbers: at the foot of the body under a dashed rule, two columns with a faint divider; the figure after
    logging (38px, the typewriter face) with a small rose "+1" pill, the label beneath. One number is centred. */
 .laq .rvb { display: grid; grid-template-columns: 1fr 1fr; margin-top: auto; padding-top: 6px; border-top: 1px dashed rgba(28, 19, 15, .18); }
@@ -475,3 +473,16 @@
 .laq .laq-tdb { all: unset; box-sizing: border-box; cursor: pointer; flex: none; height: 36px; padding: 0 14px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--laq-navy); font: 600 14px/36px var(--laq-se); color: var(--laq-navy); }
 .laq .laq-tdb:hover { background: var(--laq-navy); color: #fff; }
 .laq .laq-tdb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* v2.2 · Phase 2 (D2, mock v25 `.nx-*`) — the review's notes are the Notes tab's own note and writing box under the
+   card's .qc152 (qcv158.css), with three differences this panel needs: Edit and Delete always shown (the tab reveals
+   them on hover or focus, and nothing moves on hover here); the edit's Cancel / Save on the right, its field as the
+   agent card's (acv2.css); the writing box in the flow, not stuck to the tab's foot. */
+.laq .qc152.laq-notes { position: static; }
+.laq .qc152 .nx-acts { margin-top: 8px; max-height: none; opacity: 1; overflow: visible; }
+.laq .qc152 .nx-acts[hidden] { display: none; }
+.laq .qc152 .nx-edit .nx-acts { justify-content: flex-end; }
+.laq .qc152 .nx-edit textarea { display: block; width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; border: 0; outline: 0; padding: 10px 12px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; font: 400 15px/1.45 var(--sp-serif) !important; color: #1c130f; }
+.laq .qc152 .nx-edit textarea:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.laq .qc152 .nx-nc { position: static; bottom: auto; z-index: auto; box-shadow: none; margin: 10px 0 14px; }
+.laq .qc152 .nx-nc textarea:focus-visible, .laq .qc152 .nx-nc button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

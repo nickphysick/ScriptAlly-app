@@ -53,7 +53,7 @@ describe("the Agent stage", () => {
 });
 
 describe("the answers make the log save's own plan", () => {
-  const base = { agentId: "mr", sent: NOW, via: SubmissionMethod.EMAIL, note: "" };
+  const base = { agentId: "mr", sent: NOW, via: SubmissionMethod.EMAIL, notes: [] };
   it("a package: its own versions, the sample portion the writer chose", () => {
     const m = materialsOf({ ...base, packageId: "pa", letterId: null, synopsisId: null, sample: { unit: "pages", amt: 10, bookVersionId: null } }, CTX);
     expect(m.pkCard?.id).toBe("pa");
@@ -82,7 +82,7 @@ describe("the agent's asks", () => {
 
 describe("the check and the celebration", () => {
   it("the preview is the save's own record, through the list's helpers", () => {
-    const plan = planOf({ agentId: "mr", sent: NOW, via: SubmissionMethod.EMAIL, packageId: "pa", letterId: null, synopsisId: null, sample: null, note: "" }, CTX, "pv", false)!;
+    const plan = planOf({ agentId: "mr", sent: NOW, via: SubmissionMethod.EMAIL, packageId: "pa", letterId: null, synopsisId: null, sample: null, notes: [] }, CTX, "pv", false)!;
     const pv = previewOf(plan, NOW, 4);
     expect(pv.row.status).toBe(QueryStatus.QUERIED);
     expect(pv.row.agentName).toBe("Marcus Reed");
@@ -101,7 +101,7 @@ describe("the check and the celebration", () => {
 });
 
 describe("v1.2 · a specific section saves as that section", () => {
-  const base = { agentId: "mr", sent: NOW, via: SubmissionMethod.EMAIL, note: "", packageId: null, letterId: "la", synopsisId: null };
+  const base = { agentId: "mr", sent: NOW, via: SubmissionMethod.EMAIL, notes: [], packageId: null, letterId: "la", synopsisId: null };
   it("pages 40–64 round-trips from the sample control, through the plan, into the save's record", () => {
     const fromControl = { unit: "pages" as const, amt: 25, from: 40, sect: true, fu: "page" as const };
     const choice = choiceOfSample(fromControl, "v2")!;

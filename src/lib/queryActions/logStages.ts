@@ -313,6 +313,32 @@ export const HOW: readonly { k: SubmissionMethod; label: string; word: string }[
 ];
 export const howLabel = (k: SubmissionMethod | null): string => HOW.find((h) => h.k === k)?.label ?? "";
 
+/* ── v2.2 · Phase 2: the review's notes ───────────────────────────────────────────────────────────────────────── */
+
+/** a note added on the review, before the query exists: drawn as the Notes tab's own note ("You · Today") */
+export interface JourneyNote { id: string; text: string; ms: number }
+/** the notes the review is holding: the list, the one being edited (its words so far), the writing box's words */
+export interface NotesState { notes: readonly JourneyNote[]; edit: { id: string; text: string } | null; draft: string }
+
+let noteSeq = 0;
+/** a new note, dated now: blank words add nothing */
+export const addNote = (n: readonly JourneyNote[], text: string, ms: number): JourneyNote[] =>
+  text.trim() ? [...n, { id: `jn-${ms}-${++noteSeq}`, text: text.trim(), ms }] : [...n];
+/** an edit saved in place: blank words change nothing (Save is disabled for them) */
+export const editNote = (n: readonly JourneyNote[], id: string, text: string): JourneyNote[] =>
+  text.trim() ? n.map((x) => (x.id === id ? { ...x, text: text.trim() } : x)) : [...n];
+export const deleteNote = (n: readonly JourneyNote[], id: string): JourneyNote[] => n.filter((x) => x.id !== id);
+/**
+ * WHAT "Log query" SAVES: every note, oldest first, as typed. Nothing the writer typed is lost: an edit still open
+ * saves its words so far (when not blank) in that note's place, and words still sitting in the writing box are added
+ * as the last note.
+ */
+export function notesToSave(st: NotesState): string[] {
+  const out = st.notes.map((x) => (st.edit && st.edit.id === x.id && st.edit.text.trim() ? st.edit.text.trim() : x.text));
+  if (st.draft.trim()) out.push(st.draft.trim());
+  return out;
+}
+
 /* ── the answers, and the plan they make ─────────────────────────────────────────────────────────────────────── */
 
 export interface LogAnswers {
@@ -324,7 +350,9 @@ export interface LogAnswers {
   letterId: string | null;
   synopsisId: string | null;
   sample: SampleChoice | null;
-  note: string;
+  /** v2.2 · Phase 2 — the notes added on the review, oldest first, each saved as a journal entry on the query (the
+   *  record the query card's Notes tab lists); words left unsaved in the writing box are the last of them */
+  notes: string[];
   /** v1.3 — the Nudge stage's answers; absent takes `replyDefaults` for the agent */
   reply?: ReplyAnswers;
 }

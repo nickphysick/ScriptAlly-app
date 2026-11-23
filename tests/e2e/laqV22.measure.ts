@@ -11,6 +11,9 @@
  *          Readings: the stamp's rectangle and every text rectangle it meets; the status label's clear space above and
  *          whether anything cuts it; the pop-up inside the panel, cut by nothing; Escape closes it before the leave
  *          check; the tile's focus ring on a keyboard walk; the card's left edge and width on both screens.
+ *   V22-2  notes (screens 03–07): add with the button and with Ctrl + Enter, two notes, edit in place, delete; Escape's
+ *          order; words left in the box are kept; saved on Log query as journal entries, gone on Undo; on the query
+ *          card's Notes tab afterwards, dated today
  */
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
@@ -27,6 +30,7 @@ const BASE = process.env.SA_E2E_BASE_URL ?? "http://127.0.0.1:4321";
 export const state = () => JSON.parse(execSync("node tests/e2e/seedLaq2.mjs --state").toString().trim().split("\n").pop()!) as {
   queries: { id: string; agentId: string; manuscriptId: string; status: string }[];
   added: { id: string; name: string }[]; tasks: { id: string; text: string; agentId: string | null; done?: boolean }[];
+  journal: { id: string; queryId: string; text: string; createdAt: string }[];
 };
 const R = (p: Page) => p.locator('[data-qls="root"]');
 const q = (p: Page, k: string) => p.locator(`[data-qls="${k}"]`);
@@ -283,4 +287,100 @@ test("V22-0 — the look: review (three, one, no date), the tile's pop-up, the l
   const ek = READ.escapeKeyboard as { popOpenOnFocus: boolean; popAfterFirst: boolean; leaveAfterSecond: boolean } | undefined;
   ok(!!ek && ek.popOpenOnFocus && !ek.popAfterFirst && ek.leaveAfterSecond, `keyboard: Escape closes the pop-up, then the leave check (${JSON.stringify(ek)})`);
   for (const k of ["review-three@100", "review-one@100", "review-nodate@100"]) ok((READ[k] as G).scrolls === false, `${k}: no scroll bar at the ref's panel height`);
+});
+
+const NB = (p: Page) => p.locator('[data-qls="notes"]');
+test("V22-2 — notes: add, two, edit, delete, Escape, kept words; saved on log, gone on undo, on the card's Notes tab", async () => {
+  test.setTimeout(400_000);
+  const p = page;
+  await toReview(p, "three");
+  await shot(p, "notes-01-review");
+  await q(p, "add-note").click();
+  const field = NB(p).locator("[data-qc158='field']");
+  await field.waitFor({ state: "visible" });
+  ok(await field.evaluate((e) => e === document.activeElement), "opening the box focuses the field");
+  ok(await NB(p).locator("[data-qc158='add-note']").isDisabled(), "Add note is disabled while empty");
+  ok((await field.getAttribute("placeholder")) === "Add a note about this query", "the Notes tab's placeholder, nothing else");
+  await shot(p, "notes-03-box-open");
+  /* Escape on an empty box closes it (not the leave check) */
+  await p.keyboard.press("Escape"); await p.waitForTimeout(200);
+  ok(!(await field.count()) && !(await q(p, "leave-discard").isVisible().catch(() => false)), "Escape closes an empty writing box first");
+  await q(p, "add-note").click();
+  await field.fill("Met at the Winchester festival. Asked for the opening chapters in person.");
+  await shot(p, "notes-04-typed");
+  /* the field is not saved on blur */
+  await p.locator('[data-qls="body"] h2.laq-qh').click(); await p.waitForTimeout(200);
+  ok(!(await NB(p).locator("[data-qc158='note']").count()), "not saved on blur");
+  await field.focus();
+  await p.keyboard.press("Control+Enter"); await p.waitForTimeout(400);
+  ok(await R(p).isVisible() && (await R(p).getAttribute("data-step")) === "check", "Ctrl + Enter in the field saves the note, never the query");
+  const notes = NB(p).locator("[data-qc158='note']");
+  ok((await notes.count()) === 1, "the note is added");
+  ok(!(await field.count()), "the box closes");
+  ok(((await notes.first().locator("header").textContent()) ?? "").replace(/\s+/g, " ").trim() === "You · Today", "You · Today");
+  ok((await NB(p).locator('[data-qls="notes-h"]').textContent())?.trim() === "Notes", "under a Notes heading");
+  ok((await q(p, "add-note").textContent())?.trim() === "Add another note", "the link says Add another note");
+  const acts = await notes.first().locator("[data-qc158='act']").evaluateAll((els) => els.map((e) => `${e.getAttribute("data-act")}:${(e as HTMLElement).offsetHeight > 0}`));
+  ok(JSON.stringify(acts) === JSON.stringify(["edit:true", "delete:true"]), `Edit and Delete, always shown, nothing else (${JSON.stringify(acts)})`);
+  await shot(p, "notes-05-added");
+  /* a second note, by the button; then delete it */
+  await q(p, "add-note").click();
+  await field.fill("A second thought.");
+  await NB(p).locator("[data-qc158='add-note']").click(); await p.waitForTimeout(300);
+  ok((await notes.count()) === 2, "two notes");
+  ok(JSON.stringify(await notes.locator("p").allTextContents()) === JSON.stringify(["Met at the Winchester festival. Asked for the opening chapters in person.", "A second thought."]), "oldest first");
+  await notes.nth(1).locator("[data-act='delete']").click(); await p.waitForTimeout(250);
+  ok((await notes.count()) === 1, "Delete removes it at once");
+  /* edit in place: Escape cancels; Ctrl + Enter saves */
+  await notes.first().locator("[data-act='edit']").click();
+  const ef = notes.first().locator("[data-qc158='edit-field']");
+  ok(await ef.evaluate((e) => e === document.activeElement), "Edit focuses the words in place");
+  await shot(p, "notes-06-editing");
+  await ef.fill("Changed, then cancelled");
+  await p.keyboard.press("Escape"); await p.waitForTimeout(250);
+  ok(!(await ef.count()) && (await notes.first().locator("p").textContent()) === "Met at the Winchester festival. Asked for the opening chapters in person." && await R(p).isVisible() && !(await q(p, "leave-discard").isVisible().catch(() => false)),
+    "Escape cancels the edit first, the words unchanged");
+  await notes.first().locator("[data-act='edit']").click();
+  await ef.fill("Met at the Winchester festival. Asked for the opening chapters.");
+  await p.keyboard.press("Control+Enter"); await p.waitForTimeout(250);
+  ok((await notes.first().locator("p").textContent()) === "Met at the Winchester festival. Asked for the opening chapters.", "Ctrl + Enter saves the edit");
+  /* words left in the box: Escape does not close it (it goes to the leave check) */
+  await q(p, "add-note").click();
+  await field.fill("Left in the box");
+  await p.keyboard.press("Escape"); await p.waitForTimeout(250);
+  ok(await field.isVisible() && await q(p, "leave-discard").isVisible().catch(() => false), "a box with words is not closed by Escape: the leave check");
+  await q(p, "leave-keep").click();
+  await shot(p, "notes-07-two-and-box");
+  /* Log query: both saved, the box's words too, in order */
+  await q(p, "log").click();
+  await q(p, "yay").waitFor({ state: "visible", timeout: 30_000 });
+  await p.waitForTimeout(1500);
+  const st = state();
+  const qid = st.queries.find((x) => x.agentId === "laq2-hv")?.id;
+  const j = st.journal.filter((x) => x.queryId === qid).sort((a, b) => a.createdAt.localeCompare(b.createdAt)).map((x) => x.text);
+  READ.savedNotes = j;
+  ok(JSON.stringify(j) === JSON.stringify(["Met at the Winchester festival. Asked for the opening chapters.", "Left in the box"]), `saved on log, as typed, oldest first (${JSON.stringify(j)})`);
+  await q(p, "undo").click(); await p.waitForTimeout(2000);
+  const after = state();
+  ok(!after.queries.some((x) => x.agentId === "laq2-hv") && !after.journal.some((x) => x.queryId === qid), `Undo removes the notes with the query (${JSON.stringify(after.journal)})`);
+  await discard(p);
+  /* again, then the query's card: the note on its Notes tab, dated today */
+  await toReview(p, "three");
+  await q(p, "add-note").click();
+  await field.fill("On the card afterwards.");
+  await p.keyboard.press("Control+Enter");
+  await q(p, "log").click();
+  await q(p, "yay").waitFor({ state: "visible", timeout: 30_000 });
+  await p.waitForTimeout(1200);
+  await q(p, "open-card").click();
+  const card = p.locator("[data-qp='panel'] [data-qc152='card']").locator("visible=true").first();
+  await card.waitFor({ state: "visible", timeout: 30_000 });
+  await card.locator("[data-qc152='tab'][data-tab='notes']").first().click();
+  await p.waitForTimeout(800);
+  const tabNotes = await card.locator("[data-qc158='note']").evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()));
+  READ.cardNotes = tabNotes;
+  ok(tabNotes.some((t) => /^You · Today/.test(t) && t.includes("On the card afterwards.")), `on the query card's Notes tab, dated today (${JSON.stringify(tabNotes)})`);
+  mkdirSync(SHOTS, { recursive: true });
+  await card.screenshot({ path: `${SHOTS}/notes-08-on-the-card.png` });
+  await p.keyboard.press("Escape");
 });

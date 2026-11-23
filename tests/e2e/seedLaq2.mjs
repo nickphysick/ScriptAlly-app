@@ -38,16 +38,22 @@ if (process.argv.includes("--state")) {
     .map((d) => ({ id: d.id, agentId: d.data().agentId, manuscriptId: d.data().manuscriptId, status: d.data().status, nudgeDate: d.data().nudgeDate ?? null, sentPackageId: d.data().sentPackageId ?? null }));
   const added = (await db.collection(`users/${uid}/agents`).get()).docs.filter((d) => / Laqtwo$/.test(String(d.data().name ?? ""))).map((d) => ({ id: d.id, name: d.data().name, agency: d.data().agency ?? "" }));
   const tasks = (await db.collection(`users/${uid}/tasks`).get()).docs.filter((d) => ours(d.id, d.data())).map((d) => ({ id: d.id, text: d.data().text, agentId: d.data().agentId ?? null, done: !!d.data().done }));
-  console.log(JSON.stringify({ queries: qs, added, tasks }));
+  /* v2.2 — the journal entries (the query card's notes) on this fixture's queries */
+  const qids = new Set(qs.map((q) => q.id));
+  const journal = (await db.collection(`users/${uid}/journalEntries`).get()).docs.filter((d) => qids.has(d.data().queryId))
+    .map((d) => ({ id: d.id, queryId: d.data().queryId, text: d.data().entryText, createdAt: d.data().createdAt }));
+  console.log(JSON.stringify({ queries: qs, added, tasks, journal }));
   process.exit(0);
 }
 if (process.argv.includes("--clean")) {
   let gone = 0;
   const addedIds = new Set((await db.collection(`users/${uid}/agents`).get()).docs.filter((d) => / Laqtwo$/.test(String(d.data().name ?? ""))).map((d) => d.id));
+  /* v2.2 — a logged query's journal entries carry its generated id, not the prefix: find them by the book */
+  const loggedIds = new Set((await db.collection(`users/${uid}/queries`).get()).docs.filter((d) => BOOKS.includes(d.data().manuscriptId)).map((d) => d.id));
   for (const c of ["queries", "activities", "journalEntries", "taskFlags", "tasks", "packages", "versions", "agents", "manuscripts"]) {
     for (const d of (await db.collection(`users/${uid}/${c}`).get()).docs) {
       const x = d.data();
-      if (ours(d.id, x) || addedIds.has(d.id) || addedIds.has(String(x.agentId ?? ""))) {
+      if (ours(d.id, x) || addedIds.has(d.id) || addedIds.has(String(x.agentId ?? "")) || (c === "journalEntries" && loggedIds.has(String(x.queryId ?? "")))) {
         if (c === "queries") for (const a of (await d.ref.collection("activity").get()).docs) await a.ref.delete();
         if (c === "agents") for (const n of (await d.ref.collection("notes").get()).docs) await n.ref.delete();
         await d.ref.delete();

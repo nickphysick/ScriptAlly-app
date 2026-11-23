@@ -107,7 +107,8 @@ export const LogStagesHost: React.FC<{
       showToast({ message: "Couldn't log the query. Nothing was saved." });
       return null;
     }
-    if (a.note) await addJournalEntry(id, a.note);
+    /* v2.2 · Phase 2 — each note as the Notes tab saves one (a journal entry on the query, dated now), oldest first */
+    for (const t of a.notes) await addJournalEntry(id, t);
     /* v1.3 — the card's response time, only when ticked and only now the query is logged (Cancel saves nothing). A card
        save that fails leaves the query logged with its own reply date, and says so. */
     let undoCard: (() => Promise<boolean>) | undefined;

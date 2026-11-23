@@ -13,7 +13,7 @@ const harriet = { id: "hv", name: "Harriet Vance", agency: "Vance & Wren", email
   materialsWanted: ["Query Letter", "Synopsis", "First 3 chapters"], responseTimeWeeks: 8, noResponseMeansNo: false } as unknown as Agent;
 const ctx: PlanContext = { manuscriptId: "m1", agents: [harriet], packages: [], letters: [{ id: "lb", name: "Letter B" }], synopses: [{ id: "s1", name: "One-page synopsis" }], bookVersions: [] };
 const base: LogAnswers = { agentId: "hv", sent: sod(NOW), via: SubmissionMethod.EMAIL, packageId: null, letterId: "lb", synopsisId: "s1",
-  sample: { unit: "chapters", amt: 3, bookVersionId: null }, note: "" };
+  sample: { unit: "chapters", amt: 3, bookVersionId: null }, notes: [] };
 const went = (a: LogAnswers) => previewOf(planOf(a, ctx, PREVIEW_ID, false, NOW)!, NOW, 8).went;
 
 describe("v2.1 · Phase 1 — What went: one item per material, its icon from the item", () => {

@@ -27,7 +27,7 @@ const JOANNA = ag("jl", "Joanna Lindqvist", { responseTimeWeeks: undefined });
 const ROSALIND = ag("rb", "Rosalind Burke", { responseTimeWeeks: 6, noResponseMeansNo: true });
 const CTX: PlanContext = { manuscriptId: "m", agents: [MARCUS, JOANNA, ROSALIND], packages: [], letters: [{ id: "la", name: "Letter A" }], synopses: [], bookVersions: [] };
 const answers = (agentId: string, reply?: ReplyAnswers): LogAnswers => ({
-  agentId, sent: SENT, via: SubmissionMethod.EMAIL, packageId: null, letterId: "la", synopsisId: null, sample: null, note: "", ...(reply ? { reply } : {}),
+  agentId, sent: SENT, via: SubmissionMethod.EMAIL, packageId: null, letterId: "la", synopsisId: null, sample: null, notes: [], ...(reply ? { reply } : {}),
 });
 
 describe("v1.3 · the track", () => {

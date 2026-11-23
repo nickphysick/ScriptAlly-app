@@ -234,7 +234,7 @@ describe("v2 · Phase 6 — the preview row is the row the saved query produces"
     materialsWanted: ["Query Letter", "Synopsis", "First 3 chapters"], responseTimeWeeks: 8, noResponseMeansNo: false } as unknown as Agent;
   const ctx: PlanContext = { manuscriptId: "m1", agents: [harriet], packages: [], letters: [{ id: "lb", name: "Letter B" }], synopses: [], bookVersions: [] };
   const base: LogAnswers = { agentId: "hv", sent: daysAgo(0), via: SubmissionMethod.EMAIL, packageId: null, letterId: "lb", synopsisId: null,
-    sample: { unit: "chapters", amt: 3, bookVersionId: null }, note: "" };
+    sample: { unit: "chapters", amt: 3, bookVersionId: null }, notes: [] };
   /** what addQuery writes for this plan (db.tsx: the payload, the id, QUERIED, undefined stripped) and its query-sent entry */
   const saved = (a: LogAnswers) => {
     const plan = planOf(a, ctx, "q-saved", false, NOW)!;

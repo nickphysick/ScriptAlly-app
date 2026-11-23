@@ -20,9 +20,11 @@ import {
   HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, askItems, askFill, sizeName, NO_LETTER, NO_SYN,
   planOf, previewOf, sameDay, sod, choiceOfSample, sampleOfChoice, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, isPastReply, settleReply, chipOn, daysBefore, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
-  reviewCounts, showsActive, BUSY_SHOWN, type ReviewCounts, type WentItem, type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
+  reviewCounts, showsActive, BUSY_SHOWN, addNote, editNote, deleteNote, notesToSave, type JourneyNote, type ReviewCounts, type WentItem, type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcCard154 } from "./QcCard154";
+import { NoteArticle, NoteCompose } from "./QcNotes158";
+import "./qcv158.css";
 import { WeekSlider } from "../../forms/WeekSlider";
 import { addDays } from "../../../lib/queryActions/dates";
 import { SampleControl } from "../../queryActions/controls";
@@ -140,8 +142,12 @@ export interface FlowState {
   /** v2 — which of the pieces screen's three ticks are open in place (Escape folds them, keeping the tick) */
   pOpen: { letter: boolean; syn: boolean; sample: boolean };
   via: SubmissionMethod | null;
-  note: string;
+  /** v2.2 · Phase 2 — the review's notes (the Notes tab's note and writing box): the list, the writing box open and
+   *  its words, the note being edited and its words so far */
+  notes: JourneyNote[];
   noteOpen: boolean;
+  draft: string;
+  noteEdit: { id: string; text: string } | null;
   /** the first name of the agent just logged with "Log and start another" */
   carried: string | null;
   /** v1.2 — the package a door named: shown chosen on the Materials stage until the writer answers it */
@@ -163,7 +169,7 @@ export const freshState = (nowMs: number): FlowState => ({
   calY: new Date(nowMs).getFullYear(), calM: new Date(nowMs).getMonth(),
   mat: "fork", packageId: null, pieces: { letterId: null, synopsisId: null, sample: null }, piecesSet: false,
   picked: { letterId: null, synopsisId: null, sample: null }, piecesTouched: false, pOpen: { letter: false, syn: false, sample: false },
-  via: null, note: "", noteOpen: false, carried: null, pkgSeed: null, reply: null, replySet: false, nCal: null,
+  via: null, notes: [], noteOpen: false, draft: "", noteEdit: null, carried: null, pkgSeed: null, reply: null, replySet: false, nCal: null,
   adding: null, notSent: false,
 });
 
@@ -866,7 +872,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
 
   /* ── the check stage ── */
   const answers = (): LogAnswers | null => (s.agentId && s.sent != null && s.via && s.piecesSet
-    ? { agentId: s.agentId, sent: s.sent, via: s.via, packageId: s.packageId, letterId: pc.letterId, synopsisId: pc.synopsisId, sample: pc.sample, note: s.note.trim(), ...(rp ? { reply: rp } : {}) }
+    ? { agentId: s.agentId, sent: s.sent, via: s.via, packageId: s.packageId, letterId: pc.letterId, synopsisId: pc.synopsisId, sample: pc.sample, notes: notesToSave({ notes: s.notes, edit: s.noteEdit, draft: s.draft }), ...(rp ? { reply: rp } : {}) }
     : null);
   const preview = useMemo(() => {
     const a = answers();
@@ -893,17 +899,56 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   );
   /* the two quiet numbers under the card: the Dashboard's own functions, without and with this query */
   const counts = useMemo(() => (preview ? reviewCounts(p.bookQueries, preview.query, new Date(nowMs)) : null), [preview, p.bookQueries, nowMs]);
+  /* v2.2 · Phase 2 — opening the writing box brings it into view and puts the caret in it */
   const noteRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => { if (s.noteOpen) noteRef.current?.focus({ preventScroll: true }); }, [s.noteOpen]);
+  useEffect(() => {
+    if (!s.noteOpen) return;
+    noteRef.current?.focus({ preventScroll: true });
+    noteRef.current?.closest(".nx-nc")?.scrollIntoView({ block: "nearest" });
+  }, [s.noteOpen]);
+  /* after a note is added, its link ("Add another note") comes into view under it */
+  const notesEnd = useRef<HTMLParagraphElement>(null);
+  const [addedAt, setAddedAt] = useState(0);
+  useEffect(() => { if (addedAt) notesEnd.current?.scrollIntoView({ block: "nearest" }); }, [addedAt]);
+  const addTheNote = () => {
+    if (!s.draft.trim()) return;
+    setS((o) => ({ ...o, notes: addNote(o.notes, o.draft, Date.now()), draft: "", noteOpen: false }));
+    setAddedAt(Date.now());
+  };
+  /* v2.2 · Phase 2 (D2, screens 03–07) — A NOTE ADDED HERE IS THE QUERY CARD'S NOTE: the Notes tab's own note article
+     and writing box (QcNotes158 `NoteArticle`, `NoteCompose`), under the card's .qc152 so its sheet applies. Edit and
+     Delete are always shown (nothing moves on hover in this panel); no Pin, task or Corkboard (the query does not exist
+     yet). Saved on Log query, each as the tab saves one. */
+  const notesBlock = () => (
+    <div className="qc152 laq-notes" data-qls="notes">
+      {s.notes.length ? (
+        <>
+          <div className="rvw-h" data-qls="notes-h"><b>Notes</b></div>
+          <div className="nx-nl" data-qls="note-list">
+            {s.notes.map((n) => (
+              <NoteArticle key={n.id} n={{ id: n.id, text: n.text, ms: n.ms, pinned: false }} nowMs={nowMs}
+                editing={s.noteEdit && s.noteEdit.id === n.id ? s.noteEdit.text : null}
+                onEditChange={(text) => set({ noteEdit: { id: n.id, text } })}
+                onEditCancel={() => set({ noteEdit: null })}
+                onEditSave={() => setS((o) => (o.noteEdit && o.noteEdit.text.trim() ? { ...o, notes: editNote(o.notes, o.noteEdit.id, o.noteEdit.text), noteEdit: null } : o))}
+                onEdit={() => set({ noteEdit: { id: n.id, text: n.text } })}
+                onDelete={() => setS((o) => ({ ...o, notes: deleteNote(o.notes, n.id), noteEdit: o.noteEdit?.id === n.id ? null : o.noteEdit }))} />
+            ))}
+          </div>
+        </>
+      ) : null}
+      {s.noteOpen
+        ? <NoteCompose value={s.draft} onChange={(t) => set({ draft: t })} onAdd={addTheNote} fieldRef={noteRef} />
+        : <p className="rvw-n" ref={notesEnd}><button type="button" className="laq-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>{s.notes.length ? "Add another note" : "Add a note"}</button></p>}
+    </div>
+  );
   const checkBody = () => (
     <>
       <h2 className="laq-qh">Ready to log {first}?</h2>
       <p className="laq-qs laq-rvs">This is the card you’ll see on your Queries page.</p>
       {preview ? card(preview, stamp, s.sent, "review") : null}
       {preview ? <WhatWent items={preview.went} pkg={preview.packageName} /> : null}
-      {s.noteOpen
-        ? <textarea ref={noteRef} className="rvd-n" data-qls="note" value={s.note} placeholder="A note, only you see it" aria-label="A note on this query" onChange={(e) => set({ note: e.target.value })} />
-        : <p className="rvw-n"><button type="button" className="laq-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>Add a note</button></p>}
+      {notesBlock()}
       {counts ? <ReviewNumbers c={counts} /> : null}
     </>
   );
@@ -940,7 +985,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     if (more) {
       stampThen(() => {
         /* the date and materials carry over; how comes from the next agent's card */
-        setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst, reply: null, replySet: false, nCal: null }));
+        setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", notes: [], noteOpen: false, draft: "", noteEdit: null, hi: 0, showBusy: false, carried: lastFirst, reply: null, replySet: false, nCal: null }));
         setSitting((k) => k + 1);
         showToast(`${lastFirst} logged.`, async () => {
           setToast(null);
@@ -957,7 +1002,11 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* ⌘↵ / Ctrl↵ logs from the check */
   useEffect(() => {
     if (s.step !== "check" || phase !== "flow") return;
-    const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && rootRef.current?.offsetParent) { e.preventDefault(); void doLog(false); } };
+    const onKey = (e: KeyboardEvent) => {
+      /* v2.2 — in a note's field ⌘↵ / Ctrl↵ saves the note (the field's own key), never the query */
+      if (e.defaultPrevented || (e.target as HTMLElement | null)?.closest?.('[data-qls="notes"]')) return;
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && rootRef.current?.offsetParent) { e.preventDefault(); void doLog(false); }
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   });
@@ -1040,6 +1089,10 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     if (leaveAsk) { setLeaveAsk(false); return; }
     if (s.step === "when" && s.earlier) { setS((o) => ({ ...o, earlier: false })); return; }
     if (s.step === "what" && (s.pOpen.letter || s.pOpen.syn || s.pOpen.sample)) { setS((o) => ({ ...o, pOpen: { letter: false, syn: false, sample: false } })); return; }
+    /* v2.2 · Phase 2 — on the review: an edit in progress, then an EMPTY writing box (one with words is never closed by
+       Escape: it goes on to the leave check); the materials pop-up is its own layer above this one */
+    if (s.step === "check" && s.noteEdit) { setS((o) => ({ ...o, noteEdit: null })); return; }
+    if (s.step === "check" && s.noteOpen && !s.draft.trim()) { setS((o) => ({ ...o, noteOpen: false })); return; }
     leave();
   }, ESC_LEVEL.journey);
   const leaveFoot = (

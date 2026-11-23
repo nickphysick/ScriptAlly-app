@@ -82,6 +82,90 @@ export interface NotesTab158Props {
   ghost?: boolean;
 }
 
+/**
+ * Log a query v2.2 — THE WRITER'S NOTE, lifted out of the tab so Log a query's review draws the same thing (one `.nx-n`
+ * article: "You · {day}", the words, and its actions; Edit opens the words in place with Cancel / Save). The tab passes
+ * its own state in, so its markup and behaviour are unchanged (qcNotes158.test.tsx). `editing` is the words being edited,
+ * or null.
+ */
+export interface NoteArticleProps {
+  n: NoteIn;
+  nowMs: number;
+  /** the tab's "scroll to the new note" marker */
+  isNew?: boolean;
+  editing: string | null;
+  onEditChange: (text: string) => void;
+  onEditCancel: () => void;
+  onEditSave: () => void;
+  onPin?: (() => void) | null;
+  onTask?: (() => void) | null;
+  onCork?: (() => void) | null;
+  /** starts an edit; absent: no Edit */
+  onEdit?: (() => void) | null;
+  /** absent: no Delete */
+  onDelete?: (() => void) | null;
+}
+export const NoteArticle: React.FC<NoteArticleProps> = (a) => {
+  const { n } = a;
+  const editing = a.editing != null;
+  return (
+    <article className="nx-n" data-qc158="note" data-id={n.id} data-pinned={n.pinned ? "" : undefined} data-new={a.isNew ? "" : undefined} tabIndex={0}>
+      <header><b>You</b>{n.ms != null ? <span>· {dayLabel(n.ms, a.nowMs)}</span> : null}{n.pinned ? <span className="pin" data-qc158="pinned">Pinned</span> : null}</header>
+      {editing ? (
+        <div className="nx-edit" data-qc158="edit">
+          <textarea value={a.editing!} rows={3} aria-label="Edit this note" data-qc158="edit-field" autoFocus
+            onChange={(ev) => a.onEditChange(ev.target.value)}
+            onKeyDown={(ev) => { if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) { ev.preventDefault(); a.onEditSave(); } if (ev.key === "Escape") { ev.stopPropagation(); a.onEditCancel(); } }} />
+          <div className="nx-acts" data-qc158="edit-acts">
+            <button type="button" className="nx-lk" data-qc158="edit-cancel" onClick={a.onEditCancel}>Cancel</button>
+            <button type="button" className="nx-lk" data-qc158="edit-save" disabled={!a.editing!.trim()} onClick={a.onEditSave}>Save</button>
+          </div>
+        </div>
+      ) : <p>{n.text}</p>}
+      <div className="nx-acts" data-qc158="acts" hidden={editing}>
+        {a.onPin ? <button type="button" className="nx-lk" data-qc158="act" data-act="pin" onClick={a.onPin}>{n.pinned ? "Unpin" : "Pin to the top"}</button> : null}
+        {a.onTask ? <button type="button" className="nx-lk" data-qc158="act" data-act="task" onClick={a.onTask}>Make it a task</button> : null}
+        {a.onCork ? <button type="button" className="nx-lk" data-qc158="act" data-act="cork" onClick={a.onCork}>Send to Corkboard</button> : null}
+        {a.onEdit ? <button type="button" className="nx-lk" data-qc158="act" data-act="edit" onClick={a.onEdit}>Edit</button> : null}
+        {a.onDelete ? <button type="button" className="nx-lk" data-qc158="act" data-act="delete" onClick={a.onDelete}>Delete</button> : null}
+      </div>
+    </article>
+  );
+};
+
+/**
+ * Log a query v2.2 — THE WRITING BOX, lifted out of the tab: the field (grows as typed, 44 to 120px) and "Add note",
+ * disabled while empty. Saved by the button or Ctrl/Cmd + Enter only, never on blur. The words are the caller's, so
+ * Log a query can keep what is left unsaved in it.
+ */
+export interface NoteComposeProps {
+  value: string;
+  onChange: (text: string) => void;
+  onAdd: () => void;
+  placeholder?: string;
+  /** the field, for a caller that focuses it */
+  fieldRef?: React.RefObject<HTMLTextAreaElement | null>;
+}
+export const NoteCompose: React.FC<NoteComposeProps> = (c) => {
+  const own = useRef<HTMLTextAreaElement>(null);
+  const ta = c.fieldRef ?? own;
+  /* the field grows with what is typed, to 120px */
+  useLayoutEffect(() => {
+    const el = ta.current; if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(120, Math.max(44, el.scrollHeight))}px`;
+  }, [c.value, ta]);
+  const words = c.placeholder ?? "Add a note about this query";
+  return (
+    <div className="nx-nc" data-qc158="compose">
+      <textarea ref={ta} rows={1} value={c.value} placeholder={words} aria-label={words} data-qc158="field"
+        onChange={(e) => c.onChange(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); c.onAdd(); } }} />
+      <button type="button" data-qc158="add-note" disabled={!c.value.trim()} onClick={c.onAdd}>Add note</button>
+    </div>
+  );
+};
+
 export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
   const [draft, setDraft] = useState("");
   /* Agent card v2 — one note edited in place at a time: its id and the words so far */
@@ -92,16 +176,9 @@ export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
     if (!t) return;
     if (await p.onEdit(editing.id, t)) setEditing(null);
   };
-  const ta = useRef<HTMLTextAreaElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const [scrollTo, setScrollTo] = useState<number | null>(null);
   useEffect(() => { setDraft(""); setEditing(null); }, [p.resetKey]);
-  /* the field grows with what is typed, to 120px */
-  useLayoutEffect(() => {
-    const el = ta.current; if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(120, Math.max(44, el.scrollHeight))}px`;
-  }, [draft]);
   /* after adding, scroll the list to the new note once it arrives (the journal returns no id: it is the count growing) */
   useEffect(() => {
     if (scrollTo == null || p.notes.length <= scrollTo) return;
@@ -132,28 +209,14 @@ export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
             <span>{p.emptySub ?? `This is the place for why you picked ${p.first}, and what you’d change if this one’s a no.`}</span>
           </div>
         ) : entries.map((e) => e.t === "note" ? (
-          <article key={e.n.id} className="nx-n" data-qc158="note" data-id={e.n.id} data-pinned={e.n.pinned ? "" : undefined}
-            data-new={scrollTo != null && newest?.id === e.n.id ? "" : undefined} tabIndex={0}>
-            <header><b>You</b>{e.n.ms != null ? <span>· {dayLabel(e.n.ms, p.nowMs)}</span> : null}{e.n.pinned ? <span className="pin" data-qc158="pinned">Pinned</span> : null}</header>
-            {editing && editing.id === e.n.id ? (
-              <div className="nx-edit" data-qc158="edit">
-                <textarea value={editing.text} rows={3} aria-label="Edit this note" data-qc158="edit-field" autoFocus
-                  onChange={(ev) => setEditing({ id: e.n.id, text: ev.target.value })}
-                  onKeyDown={(ev) => { if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) { ev.preventDefault(); void saveEdit(); } if (ev.key === "Escape") { ev.stopPropagation(); setEditing(null); } }} />
-                <div className="nx-acts" data-qc158="edit-acts">
-                  <button type="button" className="nx-lk" data-qc158="edit-cancel" onClick={() => setEditing(null)}>Cancel</button>
-                  <button type="button" className="nx-lk" data-qc158="edit-save" disabled={!editing.text.trim()} onClick={() => void saveEdit()}>Save</button>
-                </div>
-              </div>
-            ) : <p>{e.n.text}</p>}
-            <div className="nx-acts" data-qc158="acts" hidden={!!editing && editing.id === e.n.id}>
-              {p.onPin ? <button type="button" className="nx-lk" data-qc158="act" data-act="pin" onClick={() => p.onPin!(e.n.id, !e.n.pinned)}>{e.n.pinned ? "Unpin" : "Pin to the top"}</button> : null}
-              {p.onTask ? <button type="button" className="nx-lk" data-qc158="act" data-act="task" onClick={() => p.onTask!(e.n.text)}>Make it a task</button> : null}
-              {p.onCork ? <button type="button" className="nx-lk" data-qc158="act" data-act="cork" onClick={() => p.onCork!(e.n.text)}>Send to Corkboard</button> : null}
-              {p.onEdit ? <button type="button" className="nx-lk" data-qc158="act" data-act="edit" onClick={() => setEditing({ id: e.n.id, text: e.n.text })}>Edit</button> : null}
-              {p.onDelete ? <button type="button" className="nx-lk" data-qc158="act" data-act="delete" onClick={() => p.onDelete!(e.n.id)}>Delete</button> : null}
-            </div>
-          </article>
+          <NoteArticle key={e.n.id} n={e.n} nowMs={p.nowMs} isNew={scrollTo != null && newest?.id === e.n.id}
+            editing={editing && editing.id === e.n.id ? editing.text : null}
+            onEditChange={(text) => setEditing({ id: e.n.id, text })} onEditCancel={() => setEditing(null)} onEditSave={() => void saveEdit()}
+            onPin={p.onPin ? () => p.onPin!(e.n.id, !e.n.pinned) : null}
+            onTask={p.onTask ? () => p.onTask!(e.n.text) : null}
+            onCork={p.onCork ? () => p.onCork!(e.n.text) : null}
+            onEdit={p.onEdit ? () => setEditing({ id: e.n.id, text: e.n.text }) : null}
+            onDelete={p.onDelete ? () => p.onDelete!(e.n.id) : null} />
         ) : (
           <article key={e.q.key} className="nx-n them" data-qc158="quote" data-status={e.q.status ?? undefined} tabIndex={0}
             style={{ ["--bt" as string]: e.q.fill, ["--be" as string]: e.q.edge } as React.CSSProperties}>
@@ -168,12 +231,7 @@ export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
           </article>
         ))}
       </div>
-      <div className="nx-nc" data-qc158="compose">
-        <textarea ref={ta} rows={1} value={draft} placeholder={p.placeholder ?? "Add a note about this query"} aria-label={p.placeholder ?? "Add a note about this query"} data-qc158="field"
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); add(); } }} />
-        <button type="button" data-qc158="add-note" disabled={!draft.trim()} onClick={add}>Add note</button>
-      </div>
+      <NoteCompose value={draft} onChange={setDraft} onAdd={add} placeholder={p.placeholder} />
     </div>
   );
 };
