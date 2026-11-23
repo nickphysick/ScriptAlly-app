@@ -6287,6 +6287,8 @@ export const Queries: React.FC<{
             onEditOffer={() => { setQc1522J(null); setQc1522Edit(offerStep?.activityId ?? null); }} />
         );
       }
+      /* a step's kind as the step plan names it */
+      const fixKind = (x: ThreadStepIn): FixStep["kind"] => (x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[x.status ?? ""] ?? "queried"] ?? "queried");
       /* §2.4 the bubble edited in place */
       /* "__undated": the list's "Add date" asked for the first undated step's editor (Log a query v1.1) */
       const editKey = qc1522Edit === "__undated" ? steps1522.find((x) => x.ms == null && x.activityId && !x.kind)?.activityId ?? null : qc1522Edit;
@@ -6304,7 +6306,7 @@ export const Queries: React.FC<{
         const deleteText = `Delete this step? ${deps.length ? `${deps.map((d) => depName(d)).join(", ")} ${deps.length === 1 ? "depends" : "depend"} on it, so ${deps.length === 1 ? "it goes" : "they go"} too. ` : ""}${backTo ? `${first}’s card goes back to ${backTo}.` : "This removes the whole query."}`;
         const words0 = typeof (evStore.get(ed.activityId) as { replyNote?: unknown } | undefined)?.replyNote === "string" ? String((evStore.get(ed.activityId) as { replyNote?: string }).replyNote) : (ed.quote ?? "");
         const isQueryStep = ed.status === QueryStatus.QUERIED && !ed.kind;
-        const kind: FixStep["kind"] = ed.kind === "nudge" ? "nudge" : ed.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[ed.status ?? ""] ?? "queried"] ?? "queried";
+        const kind = fixKind(ed);
         edit1522 = (
           <QcStepEdit1522 key={ed.activityId} id={ed.activityId} onReopen={() => { setQc1522J(null); setQc1522Draft(null); setQc1522Edit(ed.activityId!); }} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
             mats={storedMats(ed.activityId) ?? (ed.status === QueryStatus.QUERIED ? asMats(ed.chips.map((c) => c.label)) : [])}
@@ -6337,6 +6339,27 @@ export const Queries: React.FC<{
             })} />
         );
       }
+      /* Query card v168 — the Materials tab edits each sent group's items in place: that step's own save (planStepEdit,
+         its materials only), with the step's date unchanged; one snapshot, so Undo puts it back exactly. An undated step,
+         or a request not yet answered, is not edited there. */
+      const matStep = (g: { activityId: string | null; pending: boolean }) => (g.pending || !g.activityId ? null : steps1522.find((x) => x.activityId === g.activityId && x.ms != null) ?? null);
+      card1522.matEdit = {
+        env, busy: qc152Busy,
+        of: (g) => {
+          const st = matStep(g);
+          return st && st.ms != null ? { mats: storedMats(st.activityId) ?? asMats(st.chips.map((c) => c.label)), stepMs: st.ms } : null;
+        },
+        save: (g, mats) => {
+          const st = matStep(g);
+          if (!st || !st.activityId || st.ms == null) return Promise.resolve(false);
+          return run1522(async () => {
+            const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+            const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+              { id: st.activityId!, kind: fixKind(st), dayMs: st.ms!, materials: mats }, null);
+            done1522(await commitPlan(uid, plan), "Saved what went", null, false);
+          }, false);
+        },
+      };
       card1522.composer = composer1522;
       card1522.draft = qc1522J ? qc1522Draft : null;
       card1522.editingId = edit1522 ? editKey : null;

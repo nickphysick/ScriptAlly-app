@@ -29,7 +29,8 @@ import "./qcv1522card.css";
 import "./qcv153thread.css";
 import { footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
 import { waitWords } from "../../../lib/qc1522";
-import { PopCtx, useOutsideClose } from "./QcEdit152";
+import { MatChips, PopCtx, useOutsideClose, type MatEnv } from "./QcEdit152";
+import type { StepMaterial } from "../../../lib/qc152Write";
 import { Bubble, StepGlyph } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import {
@@ -43,7 +44,7 @@ import "./sc1card.css";
 import "./qcv158.css";
 import { AgentTab158, type ProfileKey } from "./QcAgent158";
 import { ProfileDrawer, journeyName167, type ProfileIn, type ProfilePatch } from "./QcProfile167";
-import { MaterialsTab158 } from "./QcMaterials158";
+import { MaterialsTab158, type MatEdit168 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
 import { breatheClose, bump, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
@@ -146,6 +147,8 @@ export interface QcCard152Props {
   onSaveProfile?: (patch: ProfilePatch) => Promise<boolean>;
   /** v167 §C step 3 — the asks drawer's body (QcAsks167), drawn by the host that knows the book */
   asksBody?: (prof: ProfileIn, set: (p: ProfilePatch | null) => void) => React.ReactNode;
+  /** Query card v168 — the Materials tab's own editing: each group's step materials and their save (QcMaterials158) */
+  matEdit?: (Omit<MatEdit168, "chips"> & { env: MatEnv }) | null;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -598,15 +601,19 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       onFullCard={() => g168(() => p.onAgentField(null))} editing={prof?.k ?? null} just={just} />
   );
 
-  /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
-     the same step editor the per-block Edit opened, on the latest sent step. */
+  /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). v168: each group edits
+     its own items here, saved through its step's own save with the date unchanged (the page's `matEdit`); a pending
+     group's ghost row keeps v167's door, the send journey. The tab never changes. */
   const groups = materialGroups(d.steps, { nowMs });
-  const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
+  const matEdit0 = live168 && p.matEdit ? {
+    ...p.matEdit,
+    chips: (id: string, mats: StepMaterial[], onChange: (m: StepMaterial[]) => void, stepMs: number) => (
+      <MatChips id={id} mats={mats} onChange={onChange} env={p.matEdit!.env} stepMs={stepMs} request={false} addLabel="+ Add" />),
+  } : null;
+  const matEdit = matEdit0 && mut168("6") ? { ...matEdit0, save: async (g: { activityId: string | null }) => { openStep(g.activityId ?? queryStepId); return false; } } : matEdit0;
   const matPane = (
-    <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null}
-      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null}
-      /* v167 — a group's ghost row: what went, in its send's step editor; what is going, in the send journey */
-      onAddTo={(g) => { if (g.pending) p.onFoot?.("sent"); else { const id = g.activityId ?? queryStepId; if (id) openStep(id); } }} />
+    <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null} edit={matEdit}
+      onAddTo={(g) => { if (g.pending) p.onFoot?.("sent"); }} />
   );
 
   return (

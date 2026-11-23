@@ -20,8 +20,9 @@ const PR = st("pr", QueryStatus.PARTIAL_REQUESTED, 30, ["First 50 pages"]);
 const PS = st("ps", QueryStatus.PARTIAL_SENT, 28, ["First 50 pages"]);
 const FR = st("fr", QueryStatus.FULL_REQUESTED, 20, ["Full manuscript"]);
 const FS = st("fs", QueryStatus.FULL_SENT, 18, ["Full manuscript"]);
-const html = (steps: ThreadStepIn[], pkg: string | null = "Autumn round") =>
-  renderToStaticMarkup(<MaterialsTab158 groups={materialGroups(steps, { nowMs: NOW })} packageName={pkg} onAddSent={() => {}} onEditWent={() => {}} />);
+const EDIT = { chips: () => null, busy: false, of: (g: { pending: boolean }) => (g.pending ? null : { mats: [], stepMs: NOW }), save: async () => true };
+const html = (steps: ThreadStepIn[], pkg: string | null = "Autumn round", edit: typeof EDIT | null = null) =>
+  renderToStaticMarkup(<MaterialsTab158 groups={materialGroups(steps, { nowMs: NOW })} packageName={pkg} edit={edit} />);
 
 describe("QC158-8 (source) groups by what it went with", () => {
   it("a partial and a full sent: three groups, in order, each disc its stage's Band, the mark in ink", () => {
@@ -33,8 +34,14 @@ describe("QC158-8 (source) groups by what it went with", () => {
     expect(h).toContain('data-qc158="package">Autumn round</em>');
     expect(h).toMatch(/data-qc158="when">\d+ \w+, by email</);
     expect(h).toMatch(/With the partial<span class="r" data-qc158="when">\d+ \w+, asked \d+ \w+</);
-    expect(h).toContain(">+ Add something you sent</button>");
-    expect(h).toContain(">Edit what went</button>");
+    /* Query card v168 — re-pointed: the foot's "+ Add something you sent" and "Edit what went" are gone (each group edits
+       its own items, in the tab); with editing on, every sent group with items carries its pencil, a pending one none */
+    expect(h).not.toContain("Add something you sent");
+    expect(h).not.toContain("Edit what went");
+    expect(h).not.toContain('data-qc168="pen"');
+    const ed = html([Q, PR, PS, FR], "Autumn round", EDIT);
+    expect((ed.match(/data-qc168="pen"/g) ?? []).length).toBe(2);
+    expect(ed).toContain('aria-label="Edit what went: With the query"');
     expect(h).not.toContain("mat-summary");
   });
   it("on the free plan (no package name passed) the query's group carries none", () => {

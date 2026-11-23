@@ -61,6 +61,11 @@
 .qc152 .qc168-open { box-shadow: inset 0 0 0 1.5px #2a3a52 !important; background: #fff !important; }
 @keyframes qc168-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 
+/* ── Materials: a group open in place (its items are the app's own material chips, then "+ Add") ──────────────── */
+.qc152 .nx-grp.has-open > h4 { align-items: center; }
+.qc152 .nx-items.qc168-mats { padding: 10px 12px; }
+.qc152 .nx-grp.has-open > .qc168-gf { grid-column: 2; min-width: 0; }
+
 /* ── the card's small menu (the edit layer's anchored menu, kept) ─────────────────────────────────────────────── */
 .qc152 .qc152-pp { position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 340px; overflow: auto; padding: 6px; border-radius: 12px; background: #fff;
   box-shadow: 0 18px 40px -14px rgba(28, 19, 15, .35), 0 0 0 1px rgba(28, 19, 15, .08); animation: qc168-in .14s ease-out both; text-align: left; }
