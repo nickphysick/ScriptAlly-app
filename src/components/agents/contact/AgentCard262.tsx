@@ -30,7 +30,7 @@ import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { addedLabel } from "../../../lib/contactList";
 import { hrefFor } from "../../../lib/quickAdd";
-import { type AgentCard24Props, useCardModel } from "./AgentCard24";
+import { type AgentCard24Props, RemoveConfirm, useCardModel } from "./AgentCard24";
 import { acColours, acFoot, acPill, acTone, askList, factBoxes, factBoxesShown, finishItems, finishShare, queryBoxLine, type AcAct } from "../../../lib/agentCardV2";
 import { NxBox, TICK } from "../../queries/centre/QcAgent158";
 import { countryName, flagFor, normaliseCountry } from "../../../lib/territory";
@@ -75,7 +75,7 @@ import "./acv21.css";
 /* Agent card v2.2 — the query card's one way to edit, its parts imported (never copied), then this card's placing of them */
 import "../../queries/centre/qcv168.css";
 import "./acv22.css";
-import { CrossTick, DiscardAsk, Edit168Ctx, EditPen, mut168, useEditRule168, useHold168 } from "../../queries/centre/QcEdit168";
+import { CardMenu, CardMenuItem, CrossTick, DiscardAsk, Edit168Ctx, EditPen, mut168, useEditRule168, useHold168 } from "../../queries/centre/QcEdit168";
 
 /** the band's slate, for every agent (v26.2 ruling) */
 export const CARD262_BAND = "#5e7189";
@@ -765,6 +765,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     void p.edit.save({ rating: n }).then((ok) => { if (ok) land(["band"], { light: false }); else pressBack(cardRef.current); });
   };
 
+  /* ══ Agent card v2.2 B6 · the band's ⋯, before ✕: "Delete this agent" runs the existing delete behind its existing gate
+     (RemoveConfirm, lifted unchanged from the old card's footer), in the footer's place. No Undo. ══════════════════════ */
+  const [bandMenu, setBandMenu] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const inRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setBandMenu(false); setRemoving(false); }, [a.id]);
   const band = (
     <div className="qc152-band dk agb" data-qc152="band" data-acv2="band" data-acv2-part="band">
       {p.preview ? (
@@ -782,6 +789,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         <span className="ag-pos" data-cl24="pos" data-acv2="pos">{p.index + 1} / {p.total}</span>
         <button type="button" className="qc152-x" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" title="Previous agent" disabled={p.index <= 0} onClick={() => goStep(-1)}>{IC.l}</button>
         <button type="button" className="qc152-x" data-cl262="next-agent" data-cl24="next" aria-label="Next agent" title="Next agent" disabled={p.index >= p.total - 1} onClick={() => goStep(1)}>{IC.r}</button>
+        <button ref={moreRef} type="button" className="qc152-x" data-qc168="band-more" data-acv22="band-more" aria-label={`More for ${m.first}`} title="More"
+          aria-haspopup="menu" aria-expanded={bandMenu} onClick={() => { if (ask(() => setBandMenu(true))) setBandMenu((v) => !v); }}>⋯</button>
         <button type="button" className="qc152-x" data-cl262="close" data-cl24="close" aria-label="Close the agent" title="Close" onClick={() => (p.onClose ?? requestCardClose)()}>✕</button>
       </>}
     </div>
@@ -1053,8 +1062,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         <Edit168Ctx.Provider value={rule}>
         <div className="qc149c qcv-legacy qc152 acv2-qc" data-acv2="qc" data-qc168-open={rule.open ?? undefined}
           style={{ ["--band" as string]: col.band, ["--tint" as string]: col.tint, ["--edge" as string]: col.edge, ["--mark" as string]: col.mark, ["--fdisc" as string]: tone === "nq" ? "#f3f6f9" : col.band } as React.CSSProperties}>
-          <div className="qc152-in">
+          <div ref={inRef} className="qc152-in">
             {band}
+            {bandMenu && !p.preview ? (
+              <CardMenu root={inRef.current} anchor={moreRef.current} onClose={() => setBandMenu(false)} label={`${m.first}’s card`} hook="band-menu">
+                <CardMenuItem label="Delete this agent" rust data={{ "data-act": "delete" }} onPick={() => { setBandMenu(false); if (!mut168("ac13")) setRemoving(true); }} />
+              </CardMenu>
+            ) : null}
             {head}
             {qbox}
             {tabs}
@@ -1065,7 +1079,11 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
               <div className="qc1522-toast" role="status" data-qc1522="toast" data-acv22="toast"><span>{toast168.msg}</span>
                 {toast168.undo ? <button type="button" data-qc1522="undo" onClick={() => { const u = toast168.undo; setToast168(null); void u?.(); }}>Undo</button> : null}</div>
             ) : null}
-            {footer}
+            {removing ? (
+              <div className="qc149c-ft2 ag-remove" data-acv22="remove">
+                <RemoveConfirm agent={a} deleteQueries={p.deleteQueries} onKeep={() => setRemoving(false)} onDelete={p.onDelete} />
+              </div>
+            ) : footer}
           </div>
         </div>
         </Edit168Ctx.Provider>

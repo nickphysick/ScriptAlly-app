@@ -54,3 +54,7 @@
 .qc152.acv2-qc .qc152-in > .qc1522-toast { position: static; transform: none; left: auto; bottom: auto; align-self: stretch; flex: none; justify-content: space-between;
   margin: 0; padding: 9px 16px; border-radius: 0; animation: qc168-in .2s ease-out both; }
 @media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .qc152-in > .qc1522-toast { animation: none; } }
+
+/* ── B6 · the band's ⋯ (the query card's band button); the existing remove gate in the footer's place ────────────── */
+.qc152.acv2-qc .qc152-band .qc152-x[data-qc168="band-more"] { font: 700 18px/1 var(--sp-serif) !important; letter-spacing: 1px; }
+.qc152.acv2-qc .qc152-in > .ag-remove { flex: none; padding: 12px 16px 14px; border-top: 1px solid #ece6de; background: #fff; }
