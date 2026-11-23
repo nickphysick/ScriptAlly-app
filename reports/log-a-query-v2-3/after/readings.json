@@ -1,0 +1,322 @@
+{
+  "sent": {
+    "grid-1280": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        268
+      ],
+      "needForNoCut": 268,
+      "compact": 50,
+      "sample": []
+    },
+    "responses-1280": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 7,
+      "sample": []
+    },
+    "grid-1440": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        321.3
+      ],
+      "needForNoCut": 321.3,
+      "compact": 50,
+      "sample": []
+    },
+    "responses-1440": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 7,
+      "sample": []
+    },
+    "grid-1512": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        345.3
+      ],
+      "needForNoCut": 345.3,
+      "compact": 0,
+      "sample": []
+    },
+    "responses-1512": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 7,
+      "sample": []
+    },
+    "grid-1920": {
+      "cards": 88,
+      "withTile": 50,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        424
+      ],
+      "needForNoCut": 424,
+      "compact": 0,
+      "sample": []
+    },
+    "responses-1920": {
+      "cards": 7,
+      "withTile": 7,
+      "cutCards": 0,
+      "cutWords": 0,
+      "widths": [
+        330
+      ],
+      "needForNoCut": 330,
+      "compact": 7,
+      "sample": []
+    }
+  },
+  "laqNextEscape": {
+    "leaveCheck": true
+  },
+  "escape": [
+    {
+      "where": "queries",
+      "how": "hover",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "queries",
+      "how": "focus",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "queries",
+      "how": "click",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "responses",
+      "how": "hover",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "responses",
+      "how": "focus",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "responses",
+      "how": "click",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true
+    },
+    {
+      "where": "log-a-query",
+      "how": "hover",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true,
+      "journeyStillOpen": true
+    },
+    {
+      "where": "log-a-query",
+      "how": "focus",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true,
+      "journeyStillOpen": true
+    },
+    {
+      "where": "log-a-query",
+      "how": "click",
+      "found": true,
+      "opened": true,
+      "closed": true,
+      "stays": true,
+      "focused": true,
+      "journeyStillOpen": true
+    }
+  ],
+  "sentNoUndated": {
+    "head": "4 queries sent",
+    "line": null,
+    "href": null,
+    "size": null,
+    "color": null,
+    "axisSize": 12.5,
+    "axisColor": "rgb(107, 96, 88)",
+    "underPlot": null
+  },
+  "sentWithUndated": {
+    "head": "24 queries sent",
+    "line": "3 queries have no sent date, so they aren’t in the weeks above. Add the dates",
+    "href": "/queries?ids=laq2-mi01q%2Claq2-mi02q%2Claq2-mi03q&from=No%20sent%20date",
+    "size": 12.5,
+    "color": "rgb(107, 96, 88)",
+    "axisSize": 12.5,
+    "axisColor": "rgb(107, 96, 88)",
+    "underPlot": 0
+  },
+  "oneCount": {
+    "dashboard": "24 queries sent",
+    "queriesPage": "112 queries sent",
+    "review": "25 queries sent, one more with this query",
+    "queryNumber": "25",
+    "wantBook": 24,
+    "wantAll": 112,
+    "accountQueries": 112,
+    "accountUndated": 3
+  },
+  "addTheDates": {
+    "url": "http://127.0.0.1:4321/queries?ids=laq2-mi01q%2Claq2-mi02q%2Claq2-mi03q&from=No%20sent%20date",
+    "shown": [
+      "laq2-mi01q",
+      "laq2-mi02q",
+      "laq2-mi03q"
+    ],
+    "chip": "No sent date · 3×"
+  },
+  "checks": 28,
+  "at": "2026-11-23T21:01:50.004Z",
+  "heldTask": {
+    "a": {
+      "fixed": "Send your query to Harriet Vance",
+      "field": false,
+      "editable": false,
+      "unlink": false,
+      "sent": true,
+      "size": 21
+    },
+    "b": {
+      "fixed": "Send your query to Harriet Vance",
+      "field": false,
+      "editable": false,
+      "unlink": false,
+      "sent": true,
+      "size": 21
+    }
+  },
+  "sentWebkit": {
+    "grid-1280": {
+      "cards": 88,
+      "withTile": 50,
+      "compact": 50,
+      "cutWords": 0,
+      "widths": [
+        268
+      ]
+    },
+    "responses-1280": {
+      "cards": 7,
+      "withTile": 7,
+      "compact": 7,
+      "cutWords": 0,
+      "widths": [
+        330
+      ]
+    },
+    "grid-1440": {
+      "cards": 88,
+      "withTile": 50,
+      "compact": 50,
+      "cutWords": 0,
+      "widths": [
+        321.3
+      ]
+    },
+    "responses-1440": {
+      "cards": 7,
+      "withTile": 7,
+      "compact": 7,
+      "cutWords": 0,
+      "widths": [
+        330
+      ]
+    },
+    "grid-1512": {
+      "cards": 88,
+      "withTile": 50,
+      "compact": 0,
+      "cutWords": 0,
+      "widths": [
+        345.3
+      ]
+    },
+    "responses-1512": {
+      "cards": 7,
+      "withTile": 7,
+      "compact": 7,
+      "cutWords": 0,
+      "widths": [
+        330
+      ]
+    },
+    "grid-1920": {
+      "cards": 88,
+      "withTile": 50,
+      "compact": 0,
+      "cutWords": 0,
+      "widths": [
+        424
+      ]
+    },
+    "responses-1920": {
+      "cards": 7,
+      "withTile": 7,
+      "compact": 7,
+      "cutWords": 0,
+      "widths": [
+        330
+      ]
+    }
+  }
+}

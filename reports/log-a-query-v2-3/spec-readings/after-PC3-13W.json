@@ -1,0 +1,2042 @@
+[
+ {
+  "name": "narrow cards (340px and under) with a tile: population",
+  "ok": true,
+  "got": "50 of 88, width 268.0"
+ },
+ {
+  "name": "every card one height, with the compact tile or none",
+  "ok": true,
+  "got": "202.0–202.0"
+ },
+ {
+  "name": "seed-query-12: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "seed-query-12: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-12: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "seed-query-12: its fill ends above the value's line",
+  "ok": true,
+  "got": "671.9 / 672.1"
+ },
+ {
+  "name": "seed-query-12: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-12: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-12: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "seed-query-12: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-7: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-query-7: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-7: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-query-7: its fill ends above the value's line",
+  "ok": true,
+  "got": "947.2 / 947.4"
+ },
+ {
+  "name": "seed-query-7: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-7: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-7: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-query-7: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-11: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "seed-query-11: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-11: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "seed-query-11: its fill ends above the value's line",
+  "ok": true,
+  "got": "947.2 / 947.4"
+ },
+ {
+  "name": "seed-query-11: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-11: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-11: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "seed-query-11: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-9: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "seed-query-9: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-9: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "seed-query-9: its fill ends above the value's line",
+  "ok": true,
+  "got": "947.2 / 947.4"
+ },
+ {
+  "name": "seed-query-9: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-9: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-9: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "seed-query-9: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-06: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-06: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-06: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-06: its fill ends above the value's line",
+  "ok": true,
+  "got": "1175.2 / 1175.4"
+ },
+ {
+  "name": "cv25-q-06: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-06: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-06: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-06: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-20: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-query-20: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-20: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-query-20: its fill ends above the value's line",
+  "ok": true,
+  "got": "1175.2 / 1175.4"
+ },
+ {
+  "name": "seed-query-20: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-20: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-20: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-query-20: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-3: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "msv12-q-3: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "msv12-q-3: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "msv12-q-3: its fill ends above the value's line",
+  "ok": true,
+  "got": "1175.2 / 1175.4"
+ },
+ {
+  "name": "msv12-q-3: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "msv12-q-3: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "msv12-q-3: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "msv12-q-3: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "rj-send: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "rj-send: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "rj-send: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "rj-send: its fill ends above the value's line",
+  "ok": true,
+  "got": "1403.2 / 1403.4"
+ },
+ {
+  "name": "rj-send: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "rj-send: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "rj-send: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "rj-send: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-09: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-09: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-09: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-09: its fill ends above the value's line",
+  "ok": true,
+  "got": "1403.2 / 1403.4"
+ },
+ {
+  "name": "cv25-q-09: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-09: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-09: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-09: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cor-move-a: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cor-move-a: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cor-move-a: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cor-move-a: its fill ends above the value's line",
+  "ok": true,
+  "got": "1403.2 / 1403.4"
+ },
+ {
+  "name": "cor-move-a: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cor-move-a: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cor-move-a: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cor-move-a: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-07: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-07: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-07: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-07: its fill ends above the value's line",
+  "ok": true,
+  "got": "1631.2 / 1631.4"
+ },
+ {
+  "name": "cv25-q-07: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-07: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-07: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-07: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-3: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-3: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-3: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-3: its fill ends above the value's line",
+  "ok": true,
+  "got": "1631.2 / 1631.4"
+ },
+ {
+  "name": "seed-pkgq-3: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-3: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-3: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-3: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-cal-passed865-q: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-cal-passed865-q: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-cal-passed865-q: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-cal-passed865-q: its fill ends above the value's line",
+  "ok": true,
+  "got": "1631.2 / 1631.4"
+ },
+ {
+  "name": "seed-cal-passed865-q: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-cal-passed865-q: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-cal-passed865-q: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-cal-passed865-q: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cor-undo: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "cor-undo: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cor-undo: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "cor-undo: its fill ends above the value's line",
+  "ok": true,
+  "got": "1859.2 / 1859.4"
+ },
+ {
+  "name": "cor-undo: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cor-undo: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cor-undo: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "cor-undo: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-4: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "msv12-q-4: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "msv12-q-4: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "msv12-q-4: its fill ends above the value's line",
+  "ok": true,
+  "got": "1859.2 / 1859.4"
+ },
+ {
+  "name": "msv12-q-4: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "msv12-q-4: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "msv12-q-4: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "msv12-q-4: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "rj-dupe: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "rj-dupe: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "rj-dupe: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "rj-dupe: its fill ends above the value's line",
+  "ok": true,
+  "got": "1859.2 / 1859.4"
+ },
+ {
+  "name": "rj-dupe: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "rj-dupe: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "rj-dupe: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "rj-dupe: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "thin-q-gap-solo: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "thin-q-gap-solo: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "thin-q-gap-solo: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "thin-q-gap-solo: its fill ends above the value's line",
+  "ok": true,
+  "got": "2134.5 / 2134.7"
+ },
+ {
+  "name": "thin-q-gap-solo: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "thin-q-gap-solo: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "thin-q-gap-solo: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "thin-q-gap-solo: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cor-pair: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cor-pair: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cor-pair: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cor-pair: its fill ends above the value's line",
+  "ok": true,
+  "got": "2134.5 / 2134.7"
+ },
+ {
+  "name": "cor-pair: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cor-pair: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cor-pair: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cor-pair: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-23: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-query-23: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-23: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-query-23: its fill ends above the value's line",
+  "ok": true,
+  "got": "2362.5 / 2362.7"
+ },
+ {
+  "name": "seed-query-23: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-23: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-23: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-query-23: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-8: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-query-8: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-8: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-query-8: its fill ends above the value's line",
+  "ok": true,
+  "got": "2362.5 / 2362.7"
+ },
+ {
+  "name": "seed-query-8: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-8: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-8: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-query-8: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-4: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-4: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-4: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-4: its fill ends above the value's line",
+  "ok": true,
+  "got": "2362.5 / 2362.7"
+ },
+ {
+  "name": "seed-pkgq-4: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-4: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-4: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-4: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "qc150l9-q: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "qc150l9-q: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "qc150l9-q: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "qc150l9-q: its fill ends above the value's line",
+  "ok": true,
+  "got": "2865.8 / 2866.0"
+ },
+ {
+  "name": "qc150l9-q: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "qc150l9-q: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "qc150l9-q: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "qc150l9-q: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-13: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-13: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-13: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-13: its fill ends above the value's line",
+  "ok": true,
+  "got": "3093.8 / 3094.0"
+ },
+ {
+  "name": "cv25-q-13: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-13: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-13: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-13: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "thin-q-close: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "thin-q-close: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "thin-q-close: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "thin-q-close: its fill ends above the value's line",
+  "ok": true,
+  "got": "3369.1 / 3369.3"
+ },
+ {
+  "name": "thin-q-close: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "thin-q-close: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "thin-q-close: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "thin-q-close: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-1: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "msv12-q-1: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "msv12-q-1: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "msv12-q-1: its fill ends above the value's line",
+  "ok": true,
+  "got": "3369.1 / 3369.3"
+ },
+ {
+  "name": "msv12-q-1: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "msv12-q-1: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "msv12-q-1: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "msv12-q-1: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-7: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "msv12-q-7: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "msv12-q-7: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "msv12-q-7: its fill ends above the value's line",
+  "ok": true,
+  "got": "3597.1 / 3597.3"
+ },
+ {
+  "name": "msv12-q-7: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "msv12-q-7: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "msv12-q-7: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "msv12-q-7: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-10: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "seed-query-10: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-10: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "seed-query-10: its fill ends above the value's line",
+  "ok": true,
+  "got": "4281.1 / 4281.3"
+ },
+ {
+  "name": "seed-query-10: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-10: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-10: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "seed-query-10: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "thin-q-chase: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "thin-q-chase: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "thin-q-chase: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "thin-q-chase: its fill ends above the value's line",
+  "ok": true,
+  "got": "4509.1 / 4509.3"
+ },
+ {
+  "name": "thin-q-chase: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "thin-q-chase: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "thin-q-chase: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "thin-q-chase: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-ms2-b: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-query-ms2-b: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-ms2-b: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-query-ms2-b: its fill ends above the value's line",
+  "ok": true,
+  "got": "4509.1 / 4509.3"
+ },
+ {
+  "name": "seed-query-ms2-b: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-ms2-b: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-ms2-b: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-query-ms2-b: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-10: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "cv25-q-10: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-10: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-10: its fill ends above the value's line",
+  "ok": true,
+  "got": "4509.1 / 4509.3"
+ },
+ {
+  "name": "cv25-q-10: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-10: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-10: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "cv25-q-10: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-05: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-05: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-05: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-05: its fill ends above the value's line",
+  "ok": true,
+  "got": "4737.1 / 4737.3"
+ },
+ {
+  "name": "cv25-q-05: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-05: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-05: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-05: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-1: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-1: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-1: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-1: its fill ends above the value's line",
+  "ok": true,
+  "got": "4965.1 / 4965.3"
+ },
+ {
+  "name": "seed-pkgq-1: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-1: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-1: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "seed-pkgq-1: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-7: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-7: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-7: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-7: its fill ends above the value's line",
+  "ok": true,
+  "got": "5193.1 / 5193.3"
+ },
+ {
+  "name": "seed-pkgq-7: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-7: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-7: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-7: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-11: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-11: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-11: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-11: its fill ends above the value's line",
+  "ok": true,
+  "got": "5421.1 / 5421.3"
+ },
+ {
+  "name": "cv25-q-11: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-11: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-11: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-11: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-9: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-9: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-9: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-9: its fill ends above the value's line",
+  "ok": true,
+  "got": "5421.1 / 5421.3"
+ },
+ {
+  "name": "seed-pkgq-9: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-9: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-9: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-9: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-21: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.5 × 24.0"
+ },
+ {
+  "name": "seed-query-21: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-query-21: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.1px after \"Sent\""
+ },
+ {
+  "name": "seed-query-21: its fill ends above the value's line",
+  "ok": true,
+  "got": "5649.1 / 5649.3"
+ },
+ {
+  "name": "seed-query-21: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-query-21: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-query-21: the same button — \"2 materials\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 2 materials true"
+ },
+ {
+  "name": "seed-query-21: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-10: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-10: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-10: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-10: its fill ends above the value's line",
+  "ok": true,
+  "got": "5649.1 / 5649.3"
+ },
+ {
+  "name": "seed-pkgq-10: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-10: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-10: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-10: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-5: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "msv12-q-5: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "msv12-q-5: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "msv12-q-5: its fill ends above the value's line",
+  "ok": true,
+  "got": "5649.1 / 5649.3"
+ },
+ {
+  "name": "msv12-q-5: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "msv12-q-5: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "msv12-q-5: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "msv12-q-5: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "thin-q-remind: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "thin-q-remind: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "thin-q-remind: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "thin-q-remind: its fill ends above the value's line",
+  "ok": true,
+  "got": "5877.1 / 5877.3"
+ },
+ {
+  "name": "thin-q-remind: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "thin-q-remind: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "thin-q-remind: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "thin-q-remind: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-2: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "msv12-q-2: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "msv12-q-2: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "msv12-q-2: its fill ends above the value's line",
+  "ok": true,
+  "got": "5877.1 / 5877.3"
+ },
+ {
+  "name": "msv12-q-2: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "msv12-q-2: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "msv12-q-2: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "msv12-q-2: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-04: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-04: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-04: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-04: its fill ends above the value's line",
+  "ok": true,
+  "got": "6105.1 / 6105.3"
+ },
+ {
+  "name": "cv25-q-04: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-04: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-04: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-04: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-03: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-03: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-03: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-03: its fill ends above the value's line",
+  "ok": true,
+  "got": "6333.1 / 6333.3"
+ },
+ {
+  "name": "cv25-q-03: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-03: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-03: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-03: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-8: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-8: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-8: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-8: its fill ends above the value's line",
+  "ok": true,
+  "got": "6608.4 / 6608.5"
+ },
+ {
+  "name": "seed-pkgq-8: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-8: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-8: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-8: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-01: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-01: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-01: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-01: its fill ends above the value's line",
+  "ok": true,
+  "got": "6608.4 / 6608.5"
+ },
+ {
+  "name": "cv25-q-01: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-01: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-01: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-01: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "rej-query-1: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "rej-query-1: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "rej-query-1: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "rej-query-1: its fill ends above the value's line",
+  "ok": true,
+  "got": "7064.4 / 7064.5"
+ },
+ {
+  "name": "rej-query-1: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "rej-query-1: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "rej-query-1: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "rej-query-1: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-5: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-5: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-5: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-5: its fill ends above the value's line",
+  "ok": true,
+  "got": "7064.4 / 7064.5"
+ },
+ {
+  "name": "seed-pkgq-5: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-5: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-5: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-5: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "msv12-q-6: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "msv12-q-6: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "msv12-q-6: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "msv12-q-6: its fill ends above the value's line",
+  "ok": true,
+  "got": "7520.4 / 7520.5"
+ },
+ {
+  "name": "msv12-q-6: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "msv12-q-6: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "msv12-q-6: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "msv12-q-6: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-pkgq-6: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "seed-pkgq-6: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "seed-pkgq-6: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "seed-pkgq-6: its fill ends above the value's line",
+  "ok": true,
+  "got": "7520.4 / 7520.5"
+ },
+ {
+  "name": "seed-pkgq-6: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "seed-pkgq-6: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "seed-pkgq-6: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "seed-pkgq-6: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-08: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-08: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-08: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-08: its fill ends above the value's line",
+  "ok": true,
+  "got": "7748.4 / 7748.5"
+ },
+ {
+  "name": "cv25-q-08: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-08: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-08: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-08: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "cv25-q-02: a pill 24px high, at least 24 wide (its hit area)",
+  "ok": true,
+  "got": "37.4 × 24.0"
+ },
+ {
+  "name": "cv25-q-02: on the \"Sent\" label's line",
+  "ok": true,
+  "got": "-0.1px off its centre"
+ },
+ {
+  "name": "cv25-q-02: at the line's right-hand end, after the label's words",
+  "ok": true,
+  "got": "6.0px in; 39.2px after \"Sent\""
+ },
+ {
+  "name": "cv25-q-02: its fill ends above the value's line",
+  "ok": true,
+  "got": "7976.4 / 7976.5"
+ },
+ {
+  "name": "cv25-q-02: the box gives back the tile's room (8px)",
+  "ok": true,
+  "got": "8px"
+ },
+ {
+  "name": "cv25-q-02: the paperclip and the count side by side; glyph 14, count 13px (≥ 12)",
+  "ok": true,
+  "got": "true 14 13"
+ },
+ {
+  "name": "cv25-q-02: the same button — \"1 material\", the paperclip's hooks",
+  "ok": true,
+  "got": "BUTTON 0 1 material true"
+ },
+ {
+  "name": "cv25-q-02: no Sent word cut",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "seed-query-12: a visible focus ring",
+  "ok": true,
+  "got": "{\"fv\":true,\"style\":\"solid\",\"w\":\"2px\",\"c\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "name": "seed-query-12: focus opens the hover, as the tile's does",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "first row seed-query-12: the hover opens from the compact tile",
+  "ok": false,
+  "got": "false"
+ },
+ {
+  "name": "first row seed-query-12: no layout shift when it opens (card size unchanged)",
+  "ok": true,
+  "got": "268.0×202.0 → 268.0×202.0"
+ },
+ {
+  "name": "last row cv25-q-02: the hover opens from the compact tile",
+  "ok": false,
+  "got": "false"
+ },
+ {
+  "name": "last row cv25-q-02: no layout shift when it opens (card size unchanged)",
+  "ok": true,
+  "got": "268.0×202.0 → 268.0×202.0"
+ }
+]

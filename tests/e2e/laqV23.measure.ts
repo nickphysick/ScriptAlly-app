@@ -6,6 +6,7 @@
  *   V23-D  the Sent box's words against the materials tile: every card at 1280, 1440, 1512 and 1920 on the Queries
  *          page's grid and on Responses — how many words are cut, on how many cards, and each card's width (recon 0.5d;
  *          after Phase 2 the gate: none cut, population non-zero at each width)
+ *   V23-DW the same in WebKit (a launched browser: desktop WebKit signs in with Enter, as pc3.measure.ts PC3-W does)
  *   V23-E  Escape on the materials pop-up — opened by hover, by focus and by click, on the Queries page, Responses and
  *          Log a query's preview: is it closed 400ms later? (recon 0.5e; after Phase 3 the gate)
  *   V23-S  one count (Phase 1): on the seeded book (seedLaq2 + 21 + 22: 24 queries, three undated) the Dashboard's
@@ -16,10 +17,12 @@
  *          after a reload. Shot of the desk.
  * Readings to reports/log-a-query-v2-3/<tag>/readings.json. Run only through `npm run e2e:emu`.
  */
-import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { expect, test, webkit, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { ensureSignedIn } from "./measure";
+import { queriesSent } from "../../src/lib/dash2";
+import type { Query } from "../../src/types";
 
 const TAG = process.env.LAQ23_TAG ?? "after";
 const ONLY = (process.env.LAQ23_ONLY ?? "").split(",").filter(Boolean);
@@ -30,6 +33,7 @@ let checks = 0;
 const ok = (cond: boolean, label: string, got = "") => { checks++; console.log(`${cond ? "✓" : "✗"} ${label}${got ? ` — ${got}` : ""}`); expect.soft(cond, `${label} — ${got}`).toBe(true); };
 const BASE = process.env.SA_E2E_BASE_URL ?? "http://127.0.0.1:4321";
 const PAGE = ".qc151.qc153";
+const COMPACT_MAX = 340;
 const WIDTHS = [{ width: 1280, height: 800 }, { width: 1440, height: 900 }, { width: 1512, height: 982 }, { width: 1920, height: 1080 }];
 
 test.setTimeout(900_000);
@@ -104,6 +108,8 @@ if (run("D")) test("V23-D · the Sent box's words and the tile at 1280, 1440, 15
       console.log(`${where} ${vp.width}: ${cards.length} cards (${withTile.length} with a tile, ${withTile.filter((x) => x.compact).length} compact), ${words} words cut on ${cutCards.length}; widths ${widths.join("/")}`);
       if (TAG !== "before") {
         ok(withTile.length > 0, `${where} ${vp.width}: cards with materials on show (population)`, `${withTile.length}`);
+        const wrongForm = withTile.filter((x) => x.compact !== (x.w <= COMPACT_MAX));
+        ok(wrongForm.length === 0, `${where} ${vp.width}: the compact tile on cards ${COMPACT_MAX}px and under, the 44 × 50 tile on wider`, `${withTile.filter((x) => x.compact).length} compact of ${withTile.length}${wrongForm.length ? ` — wrong: ${wrongForm.slice(0, 3).map((x) => `${x.id}@${x.w}`).join(" ")}` : ""}`);
         ok(words === 0, `${where} ${vp.width}: no Sent word cut`, `${words} on ${cutCards.length}${cutCards.length ? ` — ${cutCards.slice(0, 3).map((x) => x.cut.join(" ")).join(" | ")}` : ""}`);
         const hs = cards.filter((x) => where === "grid").map((x) => x.h);
         if (hs.length) ok(Math.max(...hs) - Math.min(...hs) <= 0.5, `${where} ${vp.width}: every grid card one height (with and without the tile)`, `${Math.min(...hs)}–${Math.max(...hs)}`);
@@ -258,13 +264,18 @@ if (run("S")) test("V23-S · one count of queries sent, the line under the Sent 
     await p.locator('[data-qls="log"]').click();
     await p.locator('.laq-cnt[data-qls="count"]').waitFor({ state: "visible", timeout: 30_000 });
     await p.waitForTimeout(2500);
-    const qnum = (await p.locator('.laq-cnt[data-qls="count"]').textContent())?.trim() ?? "";
+    const qnum = (await p.locator('.laq-cnt[data-qls="count"] [data-qls="odometer"]').getAttribute("aria-label")) ?? "";
     const undo = p.getByRole("button", { name: /^Undo$/ }).first();
     if (await undo.isVisible().catch(() => false)) { await undo.click(); await p.waitForTimeout(1500); }
-    READ.oneCount = { dashboard: s.head, queriesPage: qHead, review, queryNumber: qnum };
+    /* the desktop Queries page has no book scope: its header is the one count over every query of the account */
+    const all = JSON.parse(execSync("node tests/e2e/laq23Queries.mjs", { timeout: 60_000 }).toString().trim().split("\n").pop()!) as Query[];
+    const wantAll = queriesSent(all, new Date());
+    const wantBook = queriesSent(all.filter((x) => x.manuscriptId === "laq2-ms"), new Date());
+    READ.oneCount = { dashboard: s.head, queriesPage: qHead, review, queryNumber: qnum, wantBook, wantAll, accountQueries: all.length, accountUndated: all.filter((x) => !x.dateSent).length };
     console.log(`one count: dashboard "${s.head}" · queries page "${qHead}" · review "${review}" · "${qnum}"`);
     if (TAG !== "before") {
-      ok(num(s.head) === 24 && num(qHead) === 24, "the seeded book (24, three undated): the Dashboard and the Queries page both say 24", `${s.head} / ${qHead}`);
+      ok(num(s.head) === 24 && wantBook === 24, "the seeded book (24, three undated): the Dashboard says 24, the one count over the book", `${s.head} / ${wantBook}`);
+      ok(num(qHead) === wantAll, "the Queries page header is the one count over its own scope (every manuscript on desktop)", `${qHead} / ${wantAll} of ${all.length} queries`);
       ok(num(review) === 25 && num(qnum) === 25, "Log a query: the review's queries sent with this one, and Query number, are 25", `${review} / ${qnum}`);
       ok(s.line === "3 queries have no sent date, so they aren’t in the weeks above. Add the dates", "the line under the weeks, and the link", `${s.line}`);
       ok(s.underPlot !== null && s.underPlot >= 0 && s.underPlot <= 16, "directly beneath the plot", `${s.underPlot}`);
@@ -281,7 +292,7 @@ if (run("S")) test("V23-S · one count of queries sent, the line under the Sent 
       READ.addTheDates = { url: p.url(), shown, chip };
       await p.screenshot({ path: `${OUT}/add-the-dates-queries-page.png` });
       ok(shown.length === 3 && shown.every((id) => /^laq2-mi0[1-3]$|^laq2-/.test(id)), "Add the dates: the Queries page showing only the three undated", `${shown.join(",")}`);
-      ok(!!chip && /· 3$/.test(chip), "with the removable chip that says so", `${chip}`);
+      ok(!!chip && /^No sent date · 3\b/.test(chip), "with the removable chip that says so", `${chip}`);
     }
     await c.close();
   } finally { CLEAN(); }
@@ -332,4 +343,49 @@ if (run("T")) test("V23-T · the held task on the To-do page: fixed words, no un
     }
     await c.close();
   } finally { CLEAN(); }
+});
+
+function envLocal(k: string): string | null {
+  try {
+    for (const line of readFileSync(".env.local", "utf8").split("\n")) {
+      const m = new RegExp(`^\\s*${k}\\s*=\\s*(.*)$`).exec(line);
+      if (m) return m[1].trim().replace(/^["']|["']$/g, "") || null;
+    }
+  } catch { /* none */ }
+  return null;
+}
+
+if (run("DW")) test("V23-DW · the Sent box's words and the tile at 1280, 1440, 1512, 1920 — Queries grid and Responses, WebKit", async () => {
+  const b = await webkit.launch();
+  const rows: Record<string, unknown> = {};
+  try {
+    const c = await b.newContext({ baseURL: BASE, viewport: WIDTHS[0] });
+    /* ⚠️ A LAUNCHED CONTEXT HAS NO ACTION TIMEOUT, and desktop WebKit cannot click the harness's Sign in */
+    c.setDefaultTimeout(45_000);
+    const p = await c.newPage();
+    await p.addInitScript(() => { try { localStorage.setItem("sa.guide.queries", "1"); localStorage.setItem("sa.guide.queries-explainer", "1"); sessionStorage.removeItem("qh.qc.filters"); sessionStorage.removeItem("qh.qc.collapsed1511"); } catch { /* private */ } });
+    await p.goto("/#/signin");
+    await p.locator("#au-email").fill(process.env.SA_E2E_EMAIL ?? "harness@scriptally.test");
+    await p.locator("#au-pw").fill(process.env.SA_E2E_PASSWORD ?? envLocal("SA_E2E_PASSWORD") ?? "");
+    await p.locator("#au-pw").press("Enter");
+    await p.locator("#ws-sidebar, .ws-work, #app-stage-scroll").first().waitFor({ state: "attached", timeout: 60_000 });
+    for (const vp of WIDTHS) {
+      await p.setViewportSize(vp);
+      for (const where of ["grid", "responses"] as const) {
+        if (where === "grid") await openGrid(p); else await openResponses(p);
+        const cards = await readSent(p);
+        const withTile = cards.filter((x) => x.tile);
+        const cutCards = withTile.filter((x) => x.cut.length);
+        const words = cutCards.reduce((n, x) => n + x.cut.length, 0);
+        rows[`${where}-${vp.width}`] = { cards: cards.length, withTile: withTile.length, compact: withTile.filter((x) => x.compact).length, cutWords: words, widths: [...new Set(cards.map((x) => x.w))] };
+        console.log(`webkit ${where} ${vp.width}: ${cards.length} cards (${withTile.length} with a tile, ${withTile.filter((x) => x.compact).length} compact), ${words} words cut`);
+        ok(withTile.length > 0, `webkit ${where} ${vp.width}: cards with materials on show (population)`, `${withTile.length}`);
+        const wrongForm = withTile.filter((x) => x.compact !== (x.w <= COMPACT_MAX));
+        ok(wrongForm.length === 0, `webkit ${where} ${vp.width}: the compact tile on cards ${COMPACT_MAX}px and under, the 44 × 50 tile on wider`, `${wrongForm.length} wrong`);
+        ok(words === 0, `webkit ${where} ${vp.width}: no Sent word cut`, `${words}${cutCards.length ? ` — ${cutCards.slice(0, 3).map((x) => x.cut.join(" ")).join(" | ")}` : ""}`);
+        if (where === "grid") { const hs = cards.map((x) => x.h); ok(Math.max(...hs) - Math.min(...hs) <= 0.5, `webkit grid ${vp.width}: every card one height`, `${Math.min(...hs)}–${Math.max(...hs)}`); }
+      }
+    }
+  } finally { await b.close(); }
+  READ.sentWebkit = rows;
 });

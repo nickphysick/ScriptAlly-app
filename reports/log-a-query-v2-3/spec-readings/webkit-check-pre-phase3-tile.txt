@@ -1,0 +1,4 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.5s)
+  ✘  2 [measure] › tests/e2e/pc3.measure.ts:699:17 › Plumage colours v3 — the rendered locks › PC3-W · the grid, tile and hover locks in WebKit (1512), and its frames (1.0m)
+  1 failed
+  1 passed (1.3m)

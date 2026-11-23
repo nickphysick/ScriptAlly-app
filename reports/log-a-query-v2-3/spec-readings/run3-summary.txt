@@ -1,0 +1,13 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.6s)
+webkit grid 1280: 88 cards (50 with a tile, 50 compact), 0 words cut
+webkit responses 1280: 7 cards (7 with a tile, 7 compact), 0 words cut
+webkit grid 1440: 88 cards (50 with a tile, 50 compact), 0 words cut
+webkit responses 1440: 7 cards (7 with a tile, 7 compact), 0 words cut
+webkit grid 1512: 88 cards (50 with a tile, 0 compact), 0 words cut
+webkit responses 1512: 7 cards (7 with a tile, 7 compact), 0 words cut
+webkit grid 1920: 88 cards (50 with a tile, 0 compact), 0 words cut
+webkit responses 1920: 7 cards (7 with a tile, 7 compact), 0 words cut
+  ✓  2 [measure] › tests/e2e/laqV23.measure.ts:358:16 › V23-DW · the Sent box's words and the tile at 1280, 1440, 1512, 1920 — Queries grid and Responses, WebKit (21.7s)
+  ✓  3 [measure] › tests/e2e/laqV23shots.measure.ts:59:1 › V23 shots · narrow and wide cards, the pop-up from the narrow card (7.5s)
+  ✓  4 [measure] › tests/e2e/laqV23shots.measure.ts:97:1 › V23 shots · the Dashboard's Sent card, with and without undated queries; the held task on the To-do page (16.9s)
+  4 passed (1.1m)
