@@ -20,7 +20,7 @@ import {
   HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, askItems, askFill, sizeName, NO_LETTER, NO_SYN,
   planOf, previewOf, sameDay, sod, choiceOfSample, sampleOfChoice, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, isPastReply, settleReply, chipOn, daysBefore, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
-  reviewCounts, type ReviewCounts, type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
+  reviewCounts, showsActive, type ReviewCounts, type WentItem, type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcCard154 } from "./QcCard154";
 import { WeekSlider } from "../../forms/WeekSlider";
@@ -310,41 +310,42 @@ const Odometer: React.FC<{ n: number }> = ({ n }) => {
 
 const noop = () => {};
 
-/* v2 · Phase 6 — WHAT LOGGING THIS DOES, under the review card (the ref's v22 `.rvs`): two small quiet tiles of one height,
-   "Active queries {n} → {n+1}" with a line stepping up one, and "Queries sent {n} → {n+1}" with this week's bar gaining a
-   block. The figures are `reviewCounts` (the Dashboard's own functions); "Active queries" shows only when the Dashboard
-   would count this query. Reduced motion: the final state, still. */
-const ARROW_R = <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="#a0675a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 6h15M11.5 1.5 16 6l-4.5 4.5" /></svg>;
+/* v2.1 · Phase 1 — THE TWO NUMBERS (mock v24 "Big numbers"): at the foot of the review body under a dashed rule, two
+   columns with a faint divider — the figure AFTER logging in the journey's typewriter face with a small rose "+1" beside
+   it, and its label beneath. The figures are `reviewCounts` (the Dashboard's own functions); "active queries" shows only
+   when the Dashboard would count this query as active (`showsActive`), and with one number it is centred. Reduced
+   motion: the pill does not pulse (CSS). */
 export const ReviewNumbers: React.FC<{ c: ReviewCounts }> = ({ c }) => {
-  const showActive = c.active[1] > c.active[0];
-  const top = Math.max(1, ...c.weeks, c.weeks[c.weeks.length - 1] + 1);
-  const hOf = (v: number) => (v ? Math.max(5, Math.round((v / top) * 26)) : 2);
-  const last = c.weeks.length - 1;
-  const lastH = hOf(c.weeks[last] ?? 0);
-  const num = (a: number, b: number) => <span className="rvs-n"><i>{a}</i>{ARROW_R}<b>{b}</b></span>;
+  const both = showsActive(c);
+  const cell = (k: string, n: number, label: string) => (
+    <div className="rvb-c" data-qls="count" data-k={k} aria-label={`${n} ${label}, one more with this query`}>
+      <span className="rvb-n" aria-hidden="true">{n}<i>+1</i></span><span className="rvb-l" aria-hidden="true">{label}</span>
+    </div>
+  );
   return (
-    <div className={`rvs${showActive ? "" : " is-one"}`} role="group" aria-label="What logging this does" data-qls="counts">
-      {showActive ? (
-        <div className="rvs-t" data-qls="count-tile" data-k="active" aria-label={`Active queries: ${c.active[0]}, then ${c.active[1]}`}>
-          <span className="rvs-l">Active queries</span>{num(c.active[0], c.active[1])}
-          <svg className="rvs-sp" width="84" height="30" viewBox="0 0 112 40" aria-hidden="true">
-            <path d="M0,27 H62" stroke="var(--laq-navy)" strokeOpacity=".55" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path className="rvs-g" d="M62,27 C80,27 80,12 98,12" stroke="#a0675a" strokeWidth="2" fill="none" strokeLinecap="round" strokeDasharray="4 4.5" />
-            <circle cx="62" cy="27" r="3.5" fill="#fff" stroke="var(--laq-navy)" strokeWidth="1.8" />
-            <circle className="rvs-d" cx="98" cy="12" r="5" fill="#f5e2da" stroke="#a0675a" strokeWidth="1.8" />
-          </svg>
-        </div>
-      ) : null}
-      <div className="rvs-t" data-qls="count-tile" data-k="sent" aria-label={`Queries sent: ${c.sent[0]}, then ${c.sent[1]}`}>
-        <span className="rvs-l">Queries sent</span>{num(c.sent[0], c.sent[1])}
-        <svg className="rvs-sp" width="84" height="30" viewBox="0 0 112 40" aria-hidden="true">
-          {c.weeks.map((v, i) => { const h = hOf(v); return <rect key={i} x={8 + i * 14} y={34 - h} width="9" height={h} rx="2" fill="var(--laq-navy)" fillOpacity={v ? (i === last ? 1 : 0.55) : 0.2} />; })}
-          <rect className="rvs-d" x={8 + last * 14 + 0.8} y={Math.max(1, 34 - lastH - 9.2)} width="7.4" height="7.4" rx="1.8" fill="#f5e2da" stroke="#a0675a" strokeWidth="1.6" strokeDasharray="2.5 2.5" />
-        </svg>
-      </div>
+    <div className={`rvb is-big${both ? "" : " is-one"}`} role="group" aria-label="What logging this does" data-qls="counts">
+      {both ? cell("active", c.active[1], "active queries") : null}
+      {cell("sent", c.sent[1], "queries sent")}
     </div>
   );
 };
+
+/* v2.1 · Phase 1 — WHAT WENT (mock v24, D1): one tile per material, its own icon (MaterialIcon, kind from
+   `materialIconKind`) at 30px in a sand disc. Three or more: three across, icon above the name, centred; one or two:
+   the tiles share the row, icon beside the name. Not buttons — the track above is how a step is changed. */
+export const WhatWent: React.FC<{ items: readonly WentItem[]; pkg: string | null }> = ({ items, pkg }) => (
+  <>
+    <div className="rvw-h" data-qls="went-head"><b>What went</b>{pkg ? <span data-qls="went-pkg">your {pkg} package</span> : null}</div>
+    <div className={`rvw is-${Math.min(3, Math.max(1, items.length))}`} data-qls="went" role="list">
+      {items.map((m, i) => (
+        <div key={i} className="rvw-t" role="listitem" data-qls="went-tile" data-kind={m.kind ?? ""}>
+          {m.kind ? <span className="rvw-i" aria-hidden="true"><MaterialIcon kind={m.kind} size={30} /></span> : null}
+          <b>{m.name}</b>
+        </div>
+      ))}
+    </div>
+  </>
+);
 
 /* ── the journey ──────────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -863,8 +864,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   }, [s, phase, p.ctx, nowMs, p.quietWeeks]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v2 · Phase 6 — THE PREVIEW IS THE QUERIES PAGE'S OWN GRID CARD (QcCard154, `preview`), given the row the save's own
      record makes (`previewOf`); QcSlip153 leaves this journey. The page's root classes (.qc151.qc153) carry its sheet. */
-  const card = (pv: NonNullable<typeof preview>, stampOn: boolean, sentMs: number | null) => (
-    <div className="laq-pv laq-pvw qc151 qc153" data-qls="preview">
+  const card = (pv: NonNullable<typeof preview>, stampOn: boolean, sentMs: number | null, wide = false) => (
+    <div className={`laq-pv laq-pvw qc151 qc153${wide ? " is-wide" : ""}`} data-qls="preview">
       <QcCard154 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} act={null} onOpen={noop} onAct={noop} preview />
       {stampOn ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(sentMs ?? nowMs).toUpperCase()}</small></span> : null}
     </div>
@@ -876,15 +877,13 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const checkBody = () => (
     <>
       <h2 className="laq-qh">Ready to log {first}?</h2>
-      <p className="laq-qs">Here’s how {first} will look on your Queries page. Tap the paperclip to check what went.</p>
-      {preview ? card(preview, stamp, s.sent) : null}
-      <div className="laq-nt">
-        {s.noteOpen
-          ? <textarea ref={noteRef} data-qls="note" value={s.note} placeholder={`Anything about this query for ${first}. It goes on the query card.`} aria-label="A note on this query" onChange={(e) => set({ note: e.target.value })} />
-          : <button type="button" className="laq-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>+ Add a note</button>}
-      </div>
+      <p className="laq-qs laq-rvs">This is the card you’ll see on your Queries page.</p>
+      {preview ? card(preview, stamp, s.sent, true) : null}
+      {preview ? <WhatWent items={preview.went} pkg={preview.packageName} /> : null}
+      {s.noteOpen
+        ? <textarea ref={noteRef} className="rvd-n" data-qls="note" value={s.note} placeholder="A note, only you see it" aria-label="A note on this query" onChange={(e) => set({ note: e.target.value })} />
+        : <p className="rvw-n"><button type="button" className="laq-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>Add a note</button></p>}
       {counts ? <ReviewNumbers c={counts} /> : null}
-      <p className="laq-qs is-foot">Something not right? Tap any step above to change it.</p>
     </>
   );
 

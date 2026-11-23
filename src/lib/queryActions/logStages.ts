@@ -21,13 +21,14 @@ import { fitOrder } from "../agentFit";
 import { queryViaOf } from "../queryVia";
 import { MONTHS_SHORT } from "../dates";
 import { agentAgencyLine, agentInitials, agentPrimary } from "../agentDisplay";
-import { logPayload, pieceVersions, type IfNo, type LogPlan, type PieceVersions } from "./logSave";
+import { logPayload, materialsToQuery, pieceVersions, type IfNo, type LogPlan, type PieceVersions } from "./logSave";
+import { formatQueryMaterial } from "../materials";
+import { materialIconKind, type MaterialIconKind } from "../materialIcon";
 import { addDays, reminderAnchors } from "./dates";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
 import { blankSample, sampleName, capFirst, type FromUnit, type Materials, type Sample } from "./sample";
 import { liveCount } from "../dashBreakdown";
-import { sentAllTime, sentWeeks } from "../dash2";
-import { isoWeekStart } from "../dashboardStats";
+import { sentAllTime } from "../dash2";
 
 /** the calendar's heading month, through the platform rather than a second month table (lib/dates owns the one) */
 export const monthLong = (year: number, month: number): string => new Date(year, month, 1).toLocaleString("en-GB", { month: "long" });
@@ -449,7 +450,26 @@ export const PREVIEW_ID = "__log-preview__";
 
 export interface Preview { row: QcRow; packageName: string | null; agent: Agent; state: QueryState | undefined; expectMs: number | null; noWindow: boolean;
   /** v2 — the record the save will write, as a Query (the review's two numbers read it) */
-  query: Query }
+  query: Query;
+  /** v2.1 — "What went": one item per material (`whatWent`) */
+  went: WentItem[] }
+
+/* ── v2.1 · Phase 1 — "What went" under the review card ───────────────────────────────────────────────────────── */
+
+export interface WentItem { name: string; kind: MaterialIconKind | null }
+/**
+ * One item per material the save records, in the save's own order (`materialsToQuery`). The icon kind is the item's
+ * (`materialIconKind`), never read from the name; a letter or synopsis is named by the version that went when one is
+ * named (the package's or the one picked), else by the material's own words. A material with no icon kind keeps its tile.
+ */
+export function whatWent(plan: Pick<LogPlan, "mat" | "pieceV">): WentItem[] {
+  return materialsToQuery(plan.mat).map((item) => {
+    const kind = materialIconKind(item);
+    const own = formatQueryMaterial(item);
+    const name = kind === "letter" ? plan.pieceV.qlVersion?.trim() || own : kind === "synopsis" ? plan.pieceV.synVersion?.trim() || own : own;
+    return { name, kind };
+  });
+}
 /** the unsaved query as the Query Centre will list it: the save's own record, through the list's own helpers */
 export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Preview {
   const { payload, summary } = logPayload(plan);
@@ -457,7 +477,7 @@ export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Pre
   const [row0] = buildQcRows([q], [plan.agent], [], nowMs);
   const [row] = stampRows([row0], [plan.agent], { quietWeeks, nowMs });
   const noWindow = !plan.expect;
-  return { row, packageName: plan.pkCard?.name ?? null, agent: plan.agent, state: row.qs, expectMs: plan.expect ? plan.expect.getTime() : null, noWindow, query: q };
+  return { row, packageName: plan.pkCard?.name ?? null, agent: plan.agent, state: row.qs, expectMs: plan.expect ? plan.expect.getTime() : null, noWindow, query: q, went: whatWent(plan) };
 }
 
 /* ── v2 · Phase 6 — the review's two numbers ──────────────────────────────────────────────────────────────────── */
@@ -467,27 +487,24 @@ export interface ReviewCounts {
   active: [number, number];
   /** its "{n} queries sent" (`sentAllTime`), before and with this query */
   sent: [number, number];
-  /** queries first sent in each of the last seven weeks, this week last, before this one (`sentWeeks`) */
-  weeks: number[];
 }
 /**
  * ⚠️ NOT A SECOND COUNT: both figures are the Dashboard's own functions, run over this book's queries as they are and
- *    with the unsaved query added (`previewOf`'s record — the save's own). So "Active queries" steps up only when the
- *    Dashboard would count it, and the tile shows only then.
+ *    with the unsaved query added (`previewOf`'s record — the save's own). So "active queries" steps up only when the
+ *    Dashboard would count it, and its figure shows only then (v2.1: the big numbers show the figure AFTER logging).
  */
 export function reviewCounts(book: readonly Query[], unsaved: Query | null, now: Date): ReviewCounts {
   const withIt = unsaved ? [...book, unsaved] : [...book];
   /* the sent figures are read at the END OF TODAY: a query sent today carries today's date, which `sentAt` reads as later
      in the day than an early-morning now — so at 00:30 "Queries sent" read "0 → 0" (measured, V2-6 at 00:30) */
   const eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-  const mon = isoWeekStart(now);
-  const starts = Array.from({ length: 7 }, (_, i) => { const d = new Date(mon); d.setDate(d.getDate() - (6 - i) * 7); return { start: d }; });
   return {
     active: [liveCount(book), liveCount(withIt)],
     sent: [sentAllTime(book, eod), sentAllTime(withIt, eod)],
-    weeks: sentWeeks(book, starts, eod).map((w) => w.n),
   };
 }
+/** v2.1 · Phase 1 — the big numbers: "active queries" only when the Dashboard would count this query as active */
+export const showsActive = (c: ReviewCounts): boolean => c.active[1] > c.active[0];
 
 /* ── the celebration ──────────────────────────────────────────────────────────────────────────────────────────── */
 
