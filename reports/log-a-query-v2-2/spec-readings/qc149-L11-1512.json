@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L11-1512",
+  "where": "the panel opens on the Agent stage",
+  "ok": true,
+  "detail": "no Agent stage"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "an agent already querying cannot be picked",
+  "ok": true,
+  "detail": "it was picked"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "the check, with the preview card (v2: the grid card)",
+  "ok": true,
+  "detail": "no check"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "the celebration",
+  "ok": true,
+  "detail": "no celebration"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "the list gains the row",
+  "ok": true,
+  "detail": "70 → 71 · Joan Whitfield"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "UNDONE: back on the check",
+  "ok": true,
+  "detail": "no check after Undo — the account may have been changed"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "…the list is back to its count",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "lock": "L11-1512",
+  "where": "the top bar's + Log a query opens the same card",
+  "ok": true,
+  "detail": "no card"
+ }
+]

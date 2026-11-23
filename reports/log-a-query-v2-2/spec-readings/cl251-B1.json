@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "B1",
+  "where": "Contact list population",
+  "ok": true,
+  "detail": "the log flow open"
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list first text",
+  "ok": true,
+  "detail": "first \"Another query out. Great work!\""
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list title",
+  "ok": true,
+  "detail": "title \"Another query out. Great work!Let’s log the details.\""
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list no line",
+  "ok": true,
+  "detail": "line \"undefined…\""
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list the mentor only",
+  "ok": true,
+  "detail": "1 img(s) in the header"
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list no band label",
+  "ok": true,
+  "detail": "\"New query\" absent"
+ },
+ {
+  "lock": "B1",
+  "where": "Contact list after an agent",
+  "ok": true,
+  "detail": "after choosing: \"Another query out. Great work!Let’s log the details.\" / \"When did it go to Joan?\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre population",
+  "ok": true,
+  "detail": "the log flow open"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre first text",
+  "ok": true,
+  "detail": "first \"Another query out. Great work!\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre title",
+  "ok": true,
+  "detail": "title \"Another query out. Great work!Let’s log the details.\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre no line",
+  "ok": true,
+  "detail": "line \"undefined…\""
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre the mentor only",
+  "ok": true,
+  "detail": "1 img(s) in the header"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre no band label",
+  "ok": true,
+  "detail": "\"New query\" absent"
+ },
+ {
+  "lock": "B1",
+  "where": "Query Centre after an agent",
+  "ok": true,
+  "detail": "after choosing: \"Another query out. Great work!Let’s log the details.\" / \"When did it go to Joan?\""
+ }
+]

@@ -1,0 +1,32 @@
+[
+ {
+  "name": "Make it a task made a dated task with the note's text",
+  "ok": true,
+  "got": "[{\"text\":\"q158 note 1: why this agent, and what to try next.\",\"dueDate\":\"2026-11-23\"},{\"text\":\"q158 note 1: why this agent, and what to try next.\",\"dueDate\":null}]"
+ },
+ {
+  "name": "Send to Corkboard made an undated note with the note's text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the original note is unchanged",
+  "ok": true,
+  "got": "[\"q158-n00\",\"q158-n01\",\"q158-n02\"]"
+ },
+ {
+  "name": "after one Pin, that note is pinned in the store",
+  "ok": true,
+  "got": "[{\"id\":\"q158-n00\",\"text\":\"q158 note 1: why this agent, and what to try next.\",\"pinned\":false},{\"id\":\"q158-n01\",\"text\":\"q158 note 2: why this agent, and what to try next.\",\"pinned\":true},{\"id\":\"q158-n02\",\"text\":\"q158 note 3: why this agent, and what to try next.\",\"pinned\":false}] · no errors"
+ },
+ {
+  "name": "the pinned note is first",
+  "ok": true,
+  "got": "q158-n02 true"
+ },
+ {
+  "name": "only one note is pinned",
+  "ok": true,
+  "got": "1 · console: none"
+ }
+]

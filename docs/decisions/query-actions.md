@@ -2,11 +2,21 @@
 
 ## Current state
 
+- **Log a query v2.2 (23 Nov 2026, branch `log-a-query-v2-2`, NOT merged)** — the journey round Plumage colours v3's card, notes as the query card shows them, one count of queries sent, words: section "Log a query v2.2" below.
 - **Log a query v2.1 (23 Nov 2026, branch `log-a-query-v2-1`, NOT merged)** — the review screen of mock v24, step one's already-queried agents, the held task's "I've sent it", a query sent today counting today: section "Log a query v2.1" below.
 - **Log a query v2 (22 Nov 2026, branch `log-a-query-v2`, NOT merged)** — the journey's header, add-agent, not-sent, materials, nudge, review and leave rules: section "Log a query v2" below.
 - Query actions v1 + v1.1 (27–28 Sep): every page finishes in the one query drawer; ref design-refs/query-actions-v11.html, report reports/query-actions-v1/. Prod rules for its fields are Nick's.
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
+
+## Log a query v2.2 — mock v25 (23 Nov 2026; ref design-refs/log-a-query-v2-2/; report reports/log-a-query-v2-2/REPORT.md; branch `log-a-query-v2-2`, NOT merged)
+
+- **The card (D1, D4).** The preview is still the real grid card. It runs the column's full width on the review AND the logged screen (`card(…, "review" | "logged")`, `.laq-pvw.is-wide`, `.is-logged`), 18px above it on the review and 22 on the logged screen for v3's label; the logged screen's column has the review's 20px insets.
+- **The stamp (D3)** sits on the card's bottom-right corner: `right: 24px; bottom: -30px`, white at 80%, no blend; 34px under the card while it is on (`.has-stamp`, `.is-logged`). Look, rotation, thump and reduced motion unchanged.
+- **The pop-up's sideways bound is `.laq-pvc`, not the card.** QcMatTile keeps its in-card hover inside every clipping ancestor (`boundsOf`); `.laq-pvc` clips sideways at the card's edges and reaches 200px below it (padding cancelled by a negative margin, `pointer-events: none`), and `.laq-pvw` is `flow-root` so that margin cannot collapse out. Removing either moves the pop-up or the page. No bound on the logged screen.
+- **Notes (D2) are the Notes tab's own parts**: `NoteArticle` and `NoteCompose` (QcNotes158), which `NotesTab158` itself uses, drawn under `.qc152` with Edit and Delete always shown. The review holds them in state (`addNote`/`editNote`/`deleteNote`); Log query saves `notesToSave` (the list, an open edit's words, the box's unsaved words) as journal entries, oldest first. Escape: an edit, then an EMPTY box, then the leave check.
+- **"Queries sent" (D5) is the Queries page's count**: `queriesSentOf(book)` = one per query of the book, dated or not (Queries.tsx `sent: qcScoped.length`). The review shows it +1 and the logged screen's "Query number" is the same. The Dashboard's `sentAllTime` still leaves out undated and future-dated queries: the two pages differ, for Nick to rule on.
+- **Dates in the logged line never break** (`unbroken` in `celebrationLine`). The not-sent screen says only "The task is on your To-do page." (D6).
 
 ## Log a query v2.1 — mock v24 and the v2 report's fixes (23 Nov 2026; ref design-refs/log-a-query-v2-1/; report reports/log-a-query-v2-1/REPORT.md; branch `log-a-query-v2-1`, NOT merged)
 

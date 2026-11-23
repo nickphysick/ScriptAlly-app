@@ -1,0 +1,22 @@
+[
+ {
+  "name": "the fixture holds notes (3) and recorded words (2)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "one list in date order: the older recorded words before this week's notes",
+  "ok": true,
+  "got": "qqnnn"
+ },
+ {
+  "name": "Partial Requested: background is its status's band; Send to Corkboard only",
+  "ok": true,
+  "got": "rgb(241, 217, 207) cork"
+ },
+ {
+  "name": "Full Requested: background is its status's band; Send to Corkboard only",
+  "ok": true,
+  "got": "rgb(211, 222, 234) cork"
+ }
+]

@@ -1,0 +1,156 @@
+{
+  "checks": 82,
+  "seam": {
+    "100%": {
+      "paint": {
+        "top": "rgb(42, 58, 82)",
+        "flh": "rgba(0, 0, 0, 0)",
+        "trk": "rgba(0, 0, 0, 0)",
+        "flhEdge": [
+          "0px",
+          "none"
+        ],
+        "trkEdge": [
+          "0px",
+          "0px",
+          "none"
+        ]
+      },
+      "off": {
+        "h": 165,
+        "bad": 0,
+        "rows": []
+      },
+      "lines": 2,
+      "mentor": true
+    },
+    "110%": {
+      "paint": {
+        "top": "rgb(42, 58, 82)",
+        "flh": "rgba(0, 0, 0, 0)",
+        "trk": "rgba(0, 0, 0, 0)",
+        "flhEdge": [
+          "0px",
+          "none"
+        ],
+        "trkEdge": [
+          "0px",
+          "0px",
+          "none"
+        ]
+      },
+      "off": {
+        "h": 182,
+        "bad": 0,
+        "rows": []
+      },
+      "lines": 2,
+      "mentor": false
+    },
+    "125%": {
+      "paint": {
+        "top": "rgb(42, 58, 82)",
+        "flh": "rgba(0, 0, 0, 0)",
+        "trk": "rgba(0, 0, 0, 0)",
+        "flhEdge": [
+          "0px",
+          "none"
+        ],
+        "trkEdge": [
+          "0px",
+          "0px",
+          "none"
+        ]
+      },
+      "off": {
+        "h": 206,
+        "bad": 0,
+        "rows": []
+      },
+      "lines": 2,
+      "mentor": false
+    },
+    "150%": {
+      "paint": {
+        "top": "rgb(42, 58, 82)",
+        "flh": "rgba(0, 0, 0, 0)",
+        "trk": "rgba(0, 0, 0, 0)",
+        "flhEdge": [
+          "0px",
+          "none"
+        ],
+        "trkEdge": [
+          "0px",
+          "0px",
+          "none"
+        ]
+      },
+      "off": {
+        "h": 248,
+        "bad": 0,
+        "rows": []
+      },
+      "lines": 2,
+      "mentor": false
+    }
+  },
+  "added": {
+    "queries": [],
+    "added": [
+      {
+        "id": "agent-le64gm481",
+        "name": "Imogen Laqtwo",
+        "agency": "Fogbound Books"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "task-1odzgnt1b",
+        "text": "Finish Imogen Laqtwo’s card",
+        "agentId": "agent-le64gm481",
+        "done": false
+      }
+    ],
+    "journal": []
+  },
+  "tiles": [
+    {
+      "k": "active",
+      "t": "1+1active queries"
+    },
+    {
+      "k": "sent",
+      "t": "1+1queries sent"
+    }
+  ],
+  "pastNext": "Gone quietNudge or closesince 28 Sep",
+  "11-logged-past-the-date-head": "Logged. Off to Harriet!It’s on your Queries page.",
+  "11-logged-past-the-date-line": "It’s past Harriet’s usual reply time, so a nudge is on your to-do list for today.",
+  "18-logged-close-if-no-reply-head": "Logged. Off to Harriet!That makes 1 active query.",
+  "18-logged-close-if-no-reply-line": "Harriet usually replies within 8 weeks, so expect something by 18 Jan 2027. If there’s nothing by 19 Jan 2027 we’ll close it for you.",
+  "21-logged-no-date-no-reminder-head": "Logged. Off to Callum!That makes 1 active query.",
+  "21-logged-no-date-no-reminder-line": "No reply date and no reminder for Callum. It’s waiting on your Queries page.",
+  "threeInARow": [
+    {
+      "id": "8U4DxBAzEYTO2x81ZVcP",
+      "agentId": "laq2-cr",
+      "manuscriptId": "laq2-ms",
+      "status": "Queried",
+      "nudgeDate": "2027-01-18T12:00:00.000Z",
+      "sentPackageId": "laq2-p1"
+    },
+    {
+      "id": "CxtIOvOmlzGdLqAVkpHV",
+      "agentId": "laq2-hv",
+      "manuscriptId": "laq2-ms",
+      "status": "Queried",
+      "nudgeDate": "2027-01-25T12:00:00.000Z",
+      "sentPackageId": "laq2-p1"
+    }
+  ],
+  "under12": [],
+  "hoverMoves": [],
+  "under12yay": [],
+  "noRing": [],
+  "at": "2026-11-23T16:27:00.629Z"
+}

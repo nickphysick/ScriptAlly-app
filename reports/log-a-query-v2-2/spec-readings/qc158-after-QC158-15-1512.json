@@ -1,0 +1,57 @@
+[
+ {
+  "name": "one: strip within 1px of the baseline",
+  "ok": true,
+  "got": "25.98,8.22,525.14,62.61 vs 25.98,8.22,525.14,62.61"
+ },
+ {
+  "name": "one: head within 1px of the baseline",
+  "ok": true,
+  "got": "24.05,56.2,525.73,83.84 vs 24.05,56.2,525.73,83.84"
+ },
+ {
+  "name": "one: book within 1px of the baseline",
+  "ok": true,
+  "got": "37.37,125.86,494.48,109.29 vs 37.37,125.86,494.48,109.29"
+ },
+ {
+  "name": "one: tabs within 1px of the baseline",
+  "ok": true,
+  "got": "38.14,233.46,488.7,45.61 vs 38.14,233.46,488.7,45.61"
+ },
+ {
+  "name": "one: foot within 1px of the baseline",
+  "ok": true,
+  "got": "8.22,612.98,526,93.6 vs 8.22,612.98,526,93.6"
+ },
+ {
+  "name": "many: strip within 1px of the baseline",
+  "ok": true,
+  "got": "25.98,8.22,525.14,62.61 vs 25.98,8.22,525.14,62.61"
+ },
+ {
+  "name": "many: head within 1px of the baseline",
+  "ok": true,
+  "got": "24.05,56.2,525.73,83.84 vs 24.05,56.2,525.73,83.84"
+ },
+ {
+  "name": "many: book within 1px of the baseline",
+  "ok": true,
+  "got": "37.37,125.86,494.48,109.29 vs 37.37,125.86,494.48,109.29"
+ },
+ {
+  "name": "many: tabs within 1px of the baseline",
+  "ok": true,
+  "got": "38.14,233.46,488.7,45.61 vs 38.14,233.46,488.7,45.61"
+ },
+ {
+  "name": "many: foot within 1px of the baseline",
+  "ok": true,
+  "got": "8.22,612.98,526,93.6 vs 8.22,612.98,526,93.6"
+ },
+ {
+  "name": "the Query Centre grid is pixel-identical to the last shot before v158",
+  "ok": true,
+  "got": "0 pixels differ"
+ }
+]

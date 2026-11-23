@@ -1,0 +1,926 @@
+{
+  "checks": 19,
+  "review-three@100": {
+    "card": {
+      "l": 951,
+      "t": 291.2,
+      "r": 1437,
+      "b": 495.2
+    },
+    "label": {
+      "l": 1343,
+      "t": 287.2,
+      "r": 1416,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 1134,
+      "t": 410.2,
+      "r": 1178,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 951,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "pop-hover@100": {
+    "card": {
+      "l": 951,
+      "t": 291.2,
+      "r": 1437,
+      "b": 495.2
+    },
+    "label": {
+      "l": 1343,
+      "t": 287.2,
+      "r": 1416,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 1134,
+      "t": 410.2,
+      "r": 1178,
+      "b": 460.2
+    },
+    "pop": {
+      "l": 959,
+      "t": 472.2,
+      "r": 1243,
+      "b": 620.2
+    },
+    "popCut": [],
+    "popOnTop": true,
+    "popInPanel": true,
+    "popInCardWidth": true,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 951,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "escape": {
+    "popAfterFirst": true,
+    "leaveAfterFirst": false,
+    "leaveAfterSecond": false
+  },
+  "tileRing": {
+    "outline": "solid 2px rgb(42, 58, 82)",
+    "shadow": "none",
+    "ring": true
+  },
+  "escapeKeyboard": {
+    "popOpenOnFocus": true,
+    "popAfterFirst": false,
+    "leaveAfterFirst": false,
+    "leaveAfterSecond": true
+  },
+  "review-one@100": {
+    "card": {
+      "l": 951,
+      "t": 291.2,
+      "r": 1437,
+      "b": 495.2
+    },
+    "label": {
+      "l": 1343,
+      "t": 287.2,
+      "r": 1416,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 1134,
+      "t": 410.2,
+      "r": 1178,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 951,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "review-stamp-one@100": {
+    "card": {
+      "l": 951,
+      "t": 291.2,
+      "r": 1437,
+      "b": 495.2
+    },
+    "label": {
+      "l": 1343,
+      "t": 287.2,
+      "r": 1416,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 1134,
+      "t": 410.2,
+      "r": 1178,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 1308.8,
+      "t": 469.4,
+      "r": 1415.9,
+      "b": 532
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 951,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "logged-one@100": {
+    "card": {
+      "l": 951,
+      "t": 522.8,
+      "r": 1437,
+      "b": 726.8
+    },
+    "label": {
+      "l": 1343,
+      "t": 518.8,
+      "r": 1416,
+      "b": 540.8
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 35.1,
+    "tile": {
+      "l": 1134,
+      "t": 641.8,
+      "r": 1178,
+      "b": 691.8
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 1308.8,
+      "t": 701,
+      "r": 1415.9,
+      "b": 763.6
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 1102.7,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "review-nodate@100": {
+    "card": {
+      "l": 951,
+      "t": 291.2,
+      "r": 1437,
+      "b": 495.2
+    },
+    "label": {
+      "l": 1343,
+      "t": 287.2,
+      "r": 1416,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 1134,
+      "t": 410.2,
+      "r": 1178,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 951,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "logged-three@100": {
+    "card": {
+      "l": 951,
+      "t": 487.8,
+      "r": 1437,
+      "b": 691.8
+    },
+    "label": {
+      "l": 1343,
+      "t": 483.8,
+      "r": 1416,
+      "b": 505.8
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 36.3,
+    "tile": {
+      "l": 1134,
+      "t": 606.8,
+      "r": 1178,
+      "b": 656.8
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 1308.8,
+      "t": 666,
+      "r": 1415.9,
+      "b": 728.6
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 1087.7,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "logged-nodate@100": {
+    "card": {
+      "l": 951,
+      "t": 522.8,
+      "r": 1437,
+      "b": 726.8
+    },
+    "label": {
+      "l": 1343,
+      "t": 518.8,
+      "r": 1416,
+      "b": 540.8
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 35.1,
+    "tile": {
+      "l": 1134,
+      "t": 641.8,
+      "r": 1178,
+      "b": 691.8
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 1308.8,
+      "t": 701,
+      "r": 1415.9,
+      "b": 763.6
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 1094.7,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "review-three@150": {
+    "card": {
+      "l": 494,
+      "t": 252.2,
+      "r": 944,
+      "b": 456.2
+    },
+    "label": {
+      "l": 850,
+      "t": 248.2,
+      "r": 923,
+      "b": 270.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 659,
+      "t": 371.2,
+      "r": 703,
+      "b": 421.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 494,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "pop-hover@150": {
+    "card": {
+      "l": 494,
+      "t": 252.2,
+      "r": 944,
+      "b": 456.2
+    },
+    "label": {
+      "l": 850,
+      "t": 248.2,
+      "r": 923,
+      "b": 270.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 659,
+      "t": 371.2,
+      "r": 703,
+      "b": 421.2
+    },
+    "pop": {
+      "l": 502,
+      "t": 211.2,
+      "r": 786,
+      "b": 359.2
+    },
+    "popCut": [],
+    "popOnTop": true,
+    "popInPanel": true,
+    "popInCardWidth": true,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 494,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "review-one@150": {
+    "card": {
+      "l": 494,
+      "t": 252.2,
+      "r": 944,
+      "b": 456.2
+    },
+    "label": {
+      "l": 850,
+      "t": 248.2,
+      "r": 923,
+      "b": 270.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 659,
+      "t": 371.2,
+      "r": 703,
+      "b": 421.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 494,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "review-stamp-one@150": {
+    "card": {
+      "l": 494,
+      "t": 252.2,
+      "r": 944,
+      "b": 456.2
+    },
+    "label": {
+      "l": 850,
+      "t": 248.2,
+      "r": 923,
+      "b": 270.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 659,
+      "t": 371.2,
+      "r": 703,
+      "b": 421.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 815.8,
+      "t": 430.4,
+      "r": 922.9,
+      "b": 493
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 494,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "logged-one@150": {
+    "card": {
+      "l": 494,
+      "t": 255.8,
+      "r": 944,
+      "b": 459.8
+    },
+    "label": {
+      "l": 850,
+      "t": 251.8,
+      "r": 923,
+      "b": 273.8
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 33.5,
+    "tile": {
+      "l": 659,
+      "t": 374.8,
+      "r": 703,
+      "b": 424.8
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 815.8,
+      "t": 434,
+      "r": 922.9,
+      "b": 496.6
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 627.7,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "review-nodate@150": {
+    "card": {
+      "l": 494,
+      "t": 252.2,
+      "r": 944,
+      "b": 456.2
+    },
+    "label": {
+      "l": 850,
+      "t": 248.2,
+      "r": 923,
+      "b": 270.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 659,
+      "t": 371.2,
+      "r": 703,
+      "b": 421.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": null,
+    "stampStyle": null,
+    "stampHits": [],
+    "stampToCard": null,
+    "headLeft": 494,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "logged-three@150": {
+    "card": {
+      "l": 494,
+      "t": 255.8,
+      "r": 944,
+      "b": 459.8
+    },
+    "label": {
+      "l": 850,
+      "t": 251.8,
+      "r": 923,
+      "b": 273.8
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 36.3,
+    "tile": {
+      "l": 659,
+      "t": 374.8,
+      "r": 703,
+      "b": 424.8
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 815.8,
+      "t": 434,
+      "r": 922.9,
+      "b": 496.6
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 612.7,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "logged-nodate@150": {
+    "card": {
+      "l": 494,
+      "t": 255.8,
+      "r": 944,
+      "b": 459.8
+    },
+    "label": {
+      "l": 850,
+      "t": 251.8,
+      "r": 923,
+      "b": 273.8
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 34.1,
+    "tile": {
+      "l": 659,
+      "t": 374.8,
+      "r": 703,
+      "b": 424.8
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 815.8,
+      "t": 434,
+      "r": 922.9,
+      "b": 496.6
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 619.7,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "at": "2026-11-23T17:20:21.691Z",
+  "savedNotes": [
+    "Met at the Winchester festival. Asked for the opening chapters.",
+    "Left in the box"
+  ],
+  "cardNotes": [
+    "You· 23 NovOn the card afterwards.Pin to the topMake it a taskSend to Corkboard"
+  ],
+  "milestoneReview": [
+    "20+1active queries",
+    "25+1queries sent"
+  ],
+  "milestoneLogged": {
+    "n": "25",
+    "mile": "Twenty-five queries. That takes some nerve."
+  },
+  "reduced": {
+    "confetti": false,
+    "stamp": {
+      "thump": false,
+      "anim": "none"
+    },
+    "head": "Off to Harriet.",
+    "odo": {
+      "go": true,
+      "tr": "0s",
+      "tf": "matrix(1, 0, 0, 1, 0, -25.2969)"
+    },
+    "anims": []
+  },
+  "review-stamp-three@100": {
+    "card": {
+      "l": 951,
+      "t": 291.2,
+      "r": 1437,
+      "b": 495.2
+    },
+    "label": {
+      "l": 1343,
+      "t": 287.2,
+      "r": 1416,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 1134,
+      "t": 410.2,
+      "r": 1178,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 1308.8,
+      "t": 469.4,
+      "r": 1415.9,
+      "b": 532
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 951,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": true
+  },
+  "review-stamp-nodate@100": {
+    "card": {
+      "l": 951,
+      "t": 291.2,
+      "r": 1437,
+      "b": 495.2
+    },
+    "label": {
+      "l": 1343,
+      "t": 287.2,
+      "r": 1416,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 1134,
+      "t": 410.2,
+      "r": 1178,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 1308.8,
+      "t": 469.4,
+      "r": 1415.9,
+      "b": 532
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 951,
+    "colLeft": 951,
+    "colRight": 1437,
+    "scrolls": false
+  },
+  "review-stamp-three@150": {
+    "card": {
+      "l": 494,
+      "t": 291.2,
+      "r": 944,
+      "b": 495.2
+    },
+    "label": {
+      "l": 850,
+      "t": 287.2,
+      "r": 923,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 659,
+      "t": 410.2,
+      "r": 703,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 815.8,
+      "t": 469.4,
+      "r": 922.9,
+      "b": 532
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 494,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "review-stamp-nodate@150": {
+    "card": {
+      "l": 494,
+      "t": 291.2,
+      "r": 944,
+      "b": 495.2
+    },
+    "label": {
+      "l": 850,
+      "t": 287.2,
+      "r": 923,
+      "b": 309.2
+    },
+    "labelCut": [],
+    "labelOnTop": true,
+    "clearAbove": 15.2,
+    "tile": {
+      "l": 659,
+      "t": 410.2,
+      "r": 703,
+      "b": 460.2
+    },
+    "pop": null,
+    "popCut": null,
+    "popOnTop": null,
+    "popInPanel": null,
+    "popInCardWidth": null,
+    "stamp": {
+      "l": 815.8,
+      "t": 469.4,
+      "r": 922.9,
+      "b": 532
+    },
+    "stampStyle": {
+      "bg": "rgba(255, 255, 255, 0.8)",
+      "blend": "normal",
+      "tf": "matrix(0.990268, -0.139173, 0.139173, 0.990268, 0, 0)"
+    },
+    "stampHits": [],
+    "stampToCard": {
+      "rightIn": 21.1,
+      "hangs": 36.8
+    },
+    "headLeft": 494,
+    "colLeft": 494,
+    "colRight": 944,
+    "scrolls": true
+  },
+  "under12": [],
+  "hoverMoves": [],
+  "noRing": []
+}
