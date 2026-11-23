@@ -72,8 +72,6 @@
 /* editing on the card: the built sections, their headings in the typewriter at 16px; the save bar in the footer's place */
 .cl262-card.acv2.apc .cl262-sec h5 { font: 400 16px/1.2 var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; color: #1c130f; }
 .cl262-card.acv2.apc .acv2-pro > .cl262-sec { margin: 0; }
-.acv2 .ag-savewrap { flex: none; border-top: 1px solid #ece6de; background: #fff; }
-.acv2 .ag-savewrap .cl262-save { margin: 10px 12px 12px; }
 
 /* ── History: the query card's thread; a heading per query only when there is more than one ── */
 .acv2 .ag-hist { display: flex; flex-direction: column; min-height: 100%; }

@@ -5,8 +5,8 @@
  * Contact list v26.2 Part C, rebuilt by Add agent v1 Phase 4 (design-refs/add-agent-v1/agent-card-edit-v1.html) —
  * EDITING ON THE CARD, with the add journey's own controls (`agentPills`): each profile section's fields drawn where its
  * read-only content was, over the editor's one draft (`useAgentForm`: `CardDraft`, `changedFields`). Agent card v2.1: each
- * section saves its own fields (its tick, in AgentCard262); there is no save bar, and the rust `GuardBar` appears only when
- * leaving with something unsaved.
+ * section saves its own fields (its tick, in AgentCard262); there is no save bar. Agent card v2.2: the rust `GuardBar` is
+ * retired — one section is open at a time, and leaving it with a change asks inside it.
  *
  *   Contact details  Name and Agency side by side (the agency rule), Based in, Email and Website side by side, the
  *                    submission link (conditional), MSWL, Social            — powder
@@ -14,8 +14,6 @@
  *   Materials        "What {First} asks for — pick all that apply"          — sand
  *   How {First} works taking queries, how they take them, response time, if they don't reply — sand
  *
- * ⚠️ THE RUST BAR IS THE DISCARD GUARD: with unsaved changes, ✕, Esc, a tab, paging and another row bring it up in the
- *    footer's place; nothing else happens until Keep editing, Discard or Save all is chosen.
  * ⚠️ CARD OFFERS v1 (design-refs/card-offers-v1/agent-card-edit-v8.html): THE RUST "ALSO CHANGES" BOX IS GONE. What an edit
  *    does to the queries already out is an OFFER that asks (`cardOffers`): the close offer under Taking queries, the
  *    response-time offer under the slider's hint, a powder note when a request in progress is safe, and quiet grey
@@ -379,17 +377,3 @@ export const FIELD_NAME: Partial<Record<keyof CardDraft, string>> = {
   weeks: "response time", nrn: "response policy",
 };
 export const changeNames = (changed: readonly (keyof CardDraft)[]): string[] => [...new Set(changed.map((k) => FIELD_NAME[k] ?? String(k)))];
-
-/**
- * Agent card v2.1 — THE RUST BAR: only when leaving with something unsaved (another tab, the arrows, ✕, Esc, another agent,
- * another page). It takes the footer's place: "Unsaved changes", the sections named beneath, then Keep editing, Discard
- * and Save all ("Save it" for one). There is no save bar: each open section has its own tick and cross.
- */
-export const GuardBar: React.FC<{ names: readonly string[]; busy: boolean; problem: string | null; onKeep: () => void; onDiscard: () => void; onSaveAll: () => void; onSaveAllDown?: () => void }> = ({ names, busy, problem, onKeep, onDiscard, onSaveAll, onSaveAllDown }) => (
-  <div className="cl262-save is-guard acv21-guard" data-cl262="save-bar" data-acv21="guard" data-guard="" role="alertdialog" aria-label="Unsaved changes">
-    <span className="cl262-sv"><b>Unsaved changes</b><i data-acv21="guard-names">{problem ?? names.join(", ")}</i></span>
-    <button type="button" className="cl262-sx" data-cl262="keep" onClick={onKeep}>Keep editing</button>
-    <button type="button" className="cl262-sx" data-cl262="discard" onClick={onDiscard}>Discard</button>
-    <button type="button" className="cl262-sb" data-acv21="save-all" disabled={busy} onPointerDown={onSaveAllDown} onClick={onSaveAll}>{names.length === 1 ? "Save it" : "Save all"}</button>
-  </div>
-);

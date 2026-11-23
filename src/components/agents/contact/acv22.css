@@ -10,3 +10,9 @@
 .qc152 [data-qc168-host]:is(:hover, :focus-within) > h4 > .qc168-pen { opacity: 1; }
 .qc152 .ag-nmrow > .qc168-pen { position: relative; top: auto; right: auto; flex: none; margin-left: 6px; align-self: center; }
 .qc152 .ag-head[data-qc168-host]:is(:hover, :focus-within) .ag-nmrow > .qc168-pen { opacity: 1; }
+
+/* ── B2 · one section at a time: while something is open the rest of the tab sits back (42%, 180ms) ──────────────── */
+.qc152.acv2-qc .acv2-pro > * { transition: opacity .18s ease; }
+.qc152.acv2-qc[data-qc168-open] .acv2-pro > *:not(.live):not(:has(.live)) { opacity: .42; }
+.qc152.acv2-qc .acv2-sec.live .qc168-ask { margin: 12px 0 2px; }
+@media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .acv2-pro > * { transition: none; } }

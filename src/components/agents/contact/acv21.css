@@ -114,8 +114,7 @@
 @keyframes acv21-offer-in { from { opacity: 0; translate: 0 -4px; } to { opacity: 1; translate: 0 0; } }
 
 /* the rust bar: "Unsaved changes", the sections named beneath, Keep editing, Discard, Save all */
-.acv2 .acv21-guard { gap: 14px; }
-.acv2 .acv21-guard .cl262-sv i { font: italic 400 13.5px var(--sp-serif) !important; }
+/* (the rust bar's rules are retired with it: Agent card v2.2) */
 
 @media (prefers-reduced-motion: reduce) {
   .acv2 .acv21-geooffer { animation: none; }

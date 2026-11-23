@@ -31,7 +31,7 @@ import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { addedLabel } from "../../../lib/contactList";
 import { hrefFor } from "../../../lib/quickAdd";
 import { type AgentCard24Props, useCardModel } from "./AgentCard24";
-import { acColours, acFoot, acPill, acTone, askList, factBoxes, factBoxesShown, finishItems, finishShare, queryBoxLine, sectionsSavedWords, UNDONE_WORDS, type AcAct } from "../../../lib/agentCardV2";
+import { acColours, acFoot, acPill, acTone, askList, factBoxes, factBoxesShown, finishItems, finishShare, queryBoxLine, type AcAct } from "../../../lib/agentCardV2";
 import { NxBox, TICK } from "../../queries/centre/QcAgent158";
 import { countryName, flagFor, normaliseCountry } from "../../../lib/territory";
 import "flag-icons/css/flag-icons.min.css";
@@ -52,7 +52,7 @@ import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { CARD_EDITING_EVENT, requestCardClose } from "./AgentCardPanel262";
 import { pickDraft, useAgentForm } from "../card/useAgentForm";
-import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, GuardBar, changeNames, type OfferKit } from "./AgentCard262Edit";
+import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, changeNames, type OfferKit } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
 import { applyPatch, cardPatch, changedFields, draftOf, problemsOf, toContactDraft, type CardDraft, type CardProblemKey } from "../../../lib/cardDraft";
 import { cardOffers, offerPlan, type CardOffers, type CloseChoice, type OfferPlan, type RtChoice } from "../../../lib/cardOffers";
@@ -74,7 +74,7 @@ import "./acv21.css";
 /* Agent card v2.2 — the query card's one way to edit, its parts imported (never copied), then this card's placing of them */
 import "../../queries/centre/qcv168.css";
 import "./acv22.css";
-import { EditPen } from "../../queries/centre/QcEdit168";
+import { CrossTick, DiscardAsk, Edit168Ctx, EditPen, mut168, useEditRule168, useHold168 } from "../../queries/centre/QcEdit168";
 
 /** the band's slate, for every agent (v26.2 ruling) */
 export const CARD262_BAND = "#5e7189";
@@ -150,22 +150,30 @@ const XI = <svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="c
 const OK = <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4.5 10.5l3.6 3.6 7.4-8" /></svg>;
 /**
  * Agent card v2.1 — AN OPEN SECTION LOOKS LIKE ITSELF: its place, its heading and its type, its contents live. A 1.5px navy
- * outline 9px outside it shows it is open (no tinted box, no header bar, no "Close"). At the right of its heading: the cross
- * (discard, outlined) and the tick (save, navy).
+ * outline 9px outside it shows it is open (no tinted box, no header bar, no "Close").
+ * Agent card v2.2 — the query card's way: the cross and the tick are v168's CrossTick at the right of its heading (the tick
+ * waits for a change); the section holds the card's ONE-OPEN rule while open (useHold168), so any other door with a change
+ * asks here, inside it ("Discard your changes to {section}?" · Keep editing · Discard).
  */
-const OpenSec: React.FC<{ k: Sec262; heading: React.ReactNode; label: string; err?: string; busy: boolean; onCross: () => void; onTick: () => void; onTickDown?: () => void; className?: string; children: React.ReactNode }> = ({ k, heading, label, err, busy, onCross, onTick, onTickDown, className, children }) => (
-  <section className={`acv2-sec ag-sec live${className ? ` ${className}` : ""}`} data-cl262="sec" data-k={k} data-editing="" data-acv21="open">
-    <h4>{heading}
-      <span className="ag-sx" data-acv21="sx">
-        <button type="button" className="ag-no" data-acv21="cross" data-k={k} aria-label={`Discard changes to ${label}`} title="Discard changes" onClick={onCross}>{XI}</button>
-        <button type="button" className="ag-ok" data-acv21="tick" data-k={k} aria-label={`Save ${label}`} title="Save" disabled={busy} onPointerDown={onTickDown} onClick={onTick}>{OK}</button>
-      </span>
-    </h4>
-    {err ? <p className="acv21-err" role="alert" data-acv21="err">{err}</p> : null}
-    {/* the editor's own field styles live under its `.ac` root (box-sizing and face inheritance only) */}
-    <div className="ac acv21-body">{children}</div>
-  </section>
-);
+const OpenSec: React.FC<{ k: Sec262; heading: React.ReactNode; label: string; err?: string; busy: boolean; dirty: boolean; draft: unknown;
+  onCross: () => void; onTick: () => void; onTickDown?: () => void; onClose: () => void; onReopen: () => void; className?: string; children: React.ReactNode }> = (p) => {
+  const key = `sec:${p.k}`;
+  const ed = useHold168(key, p.dirty, p.draft, p.onClose, p.onReopen);
+  const asking = ed.asking && ed.open === key;
+  return (
+    <section className={`acv2-sec ag-sec live${p.className ? ` ${p.className}` : ""}`} data-cl262="sec" data-k={p.k} data-editing="" data-acv21="open">
+      <h4>{p.heading}
+        <span className="ag-sx" data-acv21="sx">
+          <CrossTick what={p.label} dirty={mut168("ac5") || p.dirty} busy={p.busy} onCross={p.onCross} onTick={p.onTick} onTickDown={p.onTickDown} />
+        </span>
+      </h4>
+      {p.err ? <p className="acv21-err" role="alert" data-acv21="err">{p.err}</p> : null}
+      {/* the editor's own field styles live under its `.ac` root (box-sizing and face inheritance only) */}
+      <div className="ac acv21-body">{p.children}</div>
+      {asking ? <DiscardAsk words={`Discard your changes to ${p.label}?`} onKeep={ed.keep} onDiscard={ed.discard} /> : null}
+    </section>
+  );
+};
 /** Agent card v2 — the query box's door back: the tab the writer left, for this agent, read once when the card returns */
 let returnTo: { agentId: string; tab: Tab } | null = null;
 /** the parts a changed field lives in (the saved tint) */
@@ -261,6 +269,11 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   openRef.current = open;
   /* Agent card v2 — the frame the bump moves (the white mat), and what a save lands on */
   const cardRef = useRef<HTMLDivElement>(null);
+  /* ══ Agent card v2.2 · ONE THING OPEN AT A TIME — the query card's rule (QcEdit168): a section, the head or a note holds
+     the card while open; every other door goes through `ask` (unchanged: what is open closes and the click goes on;
+     changed: the question shows inside it, and nothing else happens). ═══════════════════════════════════════════ */
+  const { showToast } = useToast();
+  const rule = useEditRule168(a.id, (msg, undo) => showToast({ message: msg, ...(undo ? { undo: async () => undo() } : {}) }), () => cardRef.current);
   /* ══ Agent card v2.1 Phase 4 · the query card's motion, from its own code (qcMotion160), on this card's frame ══════
      The frame is the white mat (`cardRef`): its ::before draws the paper and the shadow, so the breath swells that and
      nothing inside the card moves. The border's colour is the frame's `data-qc163-rim` (the query's stage, slate with no
@@ -374,15 +387,21 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
    *  its first control, or to the field asked for */
   const openSec = (k: Sec262, field?: string, focus?: "website" | "email") => {
     if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
-    opened.current = { k, field, focus };
-    setRevealSeq((n) => n + 1);
-    setTab("profile");
-    const cur = openRef.current;
-    if (cur.includes(k)) return;
-    if (!cur.length) resetRef.current(a);
-    else form.rebase(SEC_FIELDS[k], draftOf(a, kit.personal));
-    setSecErr((e) => ({ ...e, [k]: undefined }));
-    setOpen([...cur, k]);
+    const go = () => {
+      opened.current = { k, field, focus };
+      setRevealSeq((n) => n + 1);
+      setTab("profile");
+      const cur = openRef.current;
+      if (cur.includes(k)) return;
+      if (!cur.length) resetRef.current(a);
+      else formRef.current.rebase(SEC_FIELDS[k], draftOf(a, kit.personal));
+      setSecErr((e) => ({ ...e, [k]: undefined }));
+      /* one at a time (AC2's mutation "allow two" keeps the first; AC3's "skip the ask" drops a changed one unasked) */
+      setOpen(mut168("ac2") ? [...cur, k] : [k]);
+    };
+    if (openRef.current.includes(k)) { go(); return; }
+    if (mut168("ac2") || mut168("ac3")) { go(); return; }
+    rule.guard(go);
   };
   /** Contact details, from the name's pencil, + Add email / + Add a website, and every door that asks for "who" */
   const openAll = (focus?: "website" | "email") => openSec("contact", undefined, focus);
@@ -474,36 +493,6 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       } });
     }
   };
-  /** Save all: each changed section in turn; one snackbar for them all, whose Undo puts every snapshot back */
-  const saveAll = async (): Promise<boolean> => {
-    const ks = openRef.current.filter((k) => secChanged(k, formRef.current).length > 0);
-    const saved: { k: Sec262; undo?: () => Promise<boolean>; parts: string[]; plan: OfferPlan | null }[] = [];
-    landStart();
-    setBusy("all");
-    for (const k of ks) {
-      const r = await saveSec(k, true);
-      if (r === null) { setBusy(null); pressBack(cardRef.current); return false; }
-      if (r !== "none") saved.push({ k, ...r });
-    }
-    setBusy(null);
-    setOpen([]);
-    if (!saved.length) pressBack(cardRef.current);
-    if (saved.length) {
-      const allParts = saved.flatMap((s) => s.parts);
-      land(allParts);
-      const undos = saved.map((s) => s.undo);
-      const plan0 = saved.find((s) => s.plan)?.plan ?? null;
-      const message = sectionsSavedWords(saved.map((s) => secName(s.k)), m.first, plan0);
-      showToast({ message, ...(undos.every(Boolean) ? { undo: async () => {
-        let ok = true;
-        for (const u of [...undos].reverse()) ok = (await u!()) && ok;
-        if (ok) landUndo(allParts);
-        showToast({ message: UNDONE_WORDS });
-      } } : {}) });
-    }
-    return true;
-  };
-  const closeAll = useCallback(() => { setOpen([]); setSecErr({}); }, []);
 
   /* ══ Part D · keeping your place ══════════════════════════════════════════════════════════════════════════════
      EDITING NEVER MOVES THE CARD UNDER YOU. The card, its frame and its scroller are never replaced (every change is a
@@ -586,34 +575,21 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (by) sc.scrollBy({ top: by, behavior: reduce ? "auto" : "smooth" });
   }, [open, revealSeq]);
 
-  /* THE RUST BAR: ✕, Esc, paging, a tab, another row and leaving the page all ask; with unsaved changes the rust bar takes
-     the footer's place and nothing else happens until Keep editing, Discard or Save all. With nothing unsaved, leaving
-     just closes the open sections. */
-  const [guard, setGuard] = useState<{ run: () => void } | null>(null);
+  /* Agent card v2.2 — THE RUST BAR, Save all and their guard are retired: ✕, Esc, paging, a tab, another row, the query
+     box and a footer action go through the one-open rule (`ask`): unchanged, what is open closes and the click goes on;
+     changed, the question shows inside it and nothing else happens. Leaving the page still asks the browser. */
   const dirtyRef = useRef(false);
   dirtyRef.current = dirty;
-  const bypass = useRef(false);
+  const ruleRef = useRef(rule);
+  ruleRef.current = rule;
+  /** a door: true when the caller may go on now; false when the rule has taken the click (it runs `run` itself once
+   *  what is open has closed, or asks) */
   const ask = useCallback((run: () => void): boolean => {
-    if (bypass.current) return true;
-    if (!dirtyRef.current) { if (openRef.current.length) closeAll(); return true; }
-    setGuard({ run });
+    const r = ruleRef.current;
+    if (!r.open) return true;
+    r.guard(run);
     return false;
-  }, [closeAll]);
-  const discardThen = (run: () => void) => {
-    setGuard(null);
-    bypass.current = true;
-    for (const k of openRef.current) formRef.current.revert(SEC_FIELDS[k]);
-    closeAll();
-    run();
-    window.setTimeout(() => { bypass.current = false; }, 0);
-  };
-  const saveAllThen = async (run: () => void) => {
-    if (!(await saveAll())) return;
-    setGuard(null);
-    bypass.current = true;
-    run();
-    window.setTimeout(() => { bypass.current = false; }, 0);
-  };
+  }, []);
   /* the host's ✕ and Esc */
   useEffect(() => {
     const g = kit?.closeGuardRef;
@@ -677,12 +653,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     f.addEventListener("click", onClick, true);
     return () => { f.removeEventListener("keydown", onKey, true); f.removeEventListener("pointerdown", onDown, true); f.removeEventListener("click", onClick, true); };
   }, [p.preview]);
-  /* Esc while editing: the rust bar up means Keep editing; changes ask; no changes closes the open sections */
-  useEscapeLayer(editing || !!guard, () => {
-    if (guard) { setGuard(null); return; }
-    if (dirtyRef.current) { setGuard({ run: () => {} }); return; }
-    closeAll();
-  }, ESC_LEVEL.card);
+  /* Esc while something is open: the question up means Keep editing; otherwise leave it (unchanged closes, changed asks) */
+  useEscapeLayer(!!rule.open, () => { const r = ruleRef.current; if (r.asking) r.keep(); else r.leave(); }, ESC_LEVEL.card);
 
   /* ══ Agent card v2 · the face ══════════════════════════════════════════════════════════════════════════════════ */
   const tone = acTone(x);
@@ -702,7 +674,6 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const name = agentPrimary(a);
   const agency = (a.name ?? "").trim() ? ((a.agency ?? "").trim() || (a.agencyUnknown ? "Agency unknown" : "")) : "";
   const initials = agentInitials(a).slice(0, 2);
-  const { showToast } = useToast();
   const db = useScriptAllyDb();
 
   /* the query card for this agent's live query, with "← Back to {first}"; the card comes back at the tab it left */
@@ -833,7 +804,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     "data-door": k,
     onClick: (e: React.MouseEvent) => { if ((e.target as Element).closest("button, a, input, textarea, [role='button']")) return; openSec(k); },
   });
-  const sec = (k: Sec262) => { const t = tickPress(k); return { k, label: secName(k), err: secErr[k], busy: busy != null, onCross: () => cross(k), onTick: t.onTick, onTickDown: t.onPointerDown }; };
+  const sec = (k: Sec262) => {
+    const t = tickPress(k);
+    return { k, label: secName(k), err: secErr[k], busy: busy != null, dirty: secChanged(k).length > 0, draft: pickDraft(form.d, SEC_FIELDS[k]),
+      onCross: () => cross(k), onTick: t.onTick, onTickDown: t.onPointerDown,
+      onClose: () => { formRef.current.revert(SEC_FIELDS[k]); setSecErr((e) => ({ ...e, [k]: undefined })); setOpen((cur) => cur.filter((x) => x !== k)); },
+      onReopen: () => openSec(k) };
+  };
   const factsShown = factBoxesShown(boxes);
   /* the fact boxes over the draft while How is open: the draft through the save's own patch, read by the same boxes */
   const draftBoxes = howOpen ? factBoxes(applyPatch(a, cardPatch(a, form.base, howPart, new Date(p.nowMs).toISOString())), (howPart.door ?? x.door) as typeof x.door) : boxes;
@@ -998,7 +975,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     <div ref={cardRef} className={`cl262-card apc acv2${editing ? " is-editing" : ""}${p.preview ? " is-preview" : ""}`} data-cl262="card" data-apc="card" data-acv2="card"
       data-tone={tone} data-stand={x.stand} data-agent-id={a.id} data-qc163-rim={rim.rim} data-qc163-rim-hi={rim.rimHi}>
       <div className="apc-frame acv2-frame" data-apc="frame" data-acv2="frame">
-        <div className="qc149c qcv-legacy qc152 acv2-qc" data-acv2="qc"
+        <Edit168Ctx.Provider value={rule}>
+        <div className="qc149c qcv-legacy qc152 acv2-qc" data-acv2="qc" data-qc168-open={rule.open ?? undefined}
           style={{ ["--band" as string]: col.band, ["--tint" as string]: col.tint, ["--edge" as string]: col.edge, ["--mark" as string]: col.mark, ["--fdisc" as string]: tone === "nq" ? "#f3f6f9" : col.band } as React.CSSProperties}>
           <div className="qc152-in">
             {band}
@@ -1006,17 +984,11 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
             {qbox}
             {tabs}
             <div ref={scrollRef} className="qc152-body" role="tabpanel" data-qc152="body" data-apc="scroll" data-cl262="scroll" data-acv2="body" data-tab={tab}>{body}</div>
-            {/* Agent card v2.1 — no save bar: the footer stays in view while sections are open, and the rust bar takes its
-                place only when leaving with something unsaved */}
-            {guard ? (
-              <div className="ag-savewrap" data-acv2="save">
-                <GuardBar names={dirtySecs.map(secName)} busy={busy === "all"} problem={Object.values(secErr).find(Boolean) ?? null}
-                  onKeep={() => setGuard(null)} onDiscard={() => { const g = guard; discardThen(g.run); }}
-                  onSaveAllDown={() => pressAtPointer(cardRef.current)} onSaveAll={() => { const g = guard; pressThen(cardRef.current, () => void saveAllThen(g.run)); }} />
-              </div>
-            ) : footer}
+            {/* Agent card v2.2 — the footer always stays: a section's question is asked inside the section */}
+            {footer}
           </div>
         </div>
+        </Edit168Ctx.Provider>
       </div>
     </div>
   );
