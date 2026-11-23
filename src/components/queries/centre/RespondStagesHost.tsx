@@ -16,7 +16,7 @@ import { useScriptAllyDb } from "../../../lib/db";
 import { ComponentType, QueryStatus, type Agent, type Query } from "../../../types";
 import { buildQcRows } from "../../../lib/qcSummary";
 import { stampRows } from "../../../lib/queryState";
-import { commitMany, readLog, readFeed } from "../../../lib/qc152Write";
+import { commitMany, readLog, readFeed, refusedMarks } from "../../../lib/qc152Write";
 import { restoreSnapshot } from "../../../lib/queryActions/snapshot";
 import { bookOf } from "../../../lib/queryActions/sample";
 import { bookVersionsOf, latestVersion, readVersions } from "../../../lib/bookVersions";
@@ -102,11 +102,24 @@ export const RespondStagesHost: React.FC<{
     if (!q) return null;
     let snap;
     const pv = previewOf(id, a);
+    let refused: string[] = [];
     try {
       const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
       const others = othersFor(q, queries as Query[], isLive);
+      const tell = a.kind === "of" && a.others === "task";
       const plans = planOfResponse(planCtx(q, existing, feed), a, others);
-      snap = await commitMany(uid, plans, a.kind === "of" && a.others === "task" ? others.map((o) => o.id) : []);
+      try {
+        snap = await commitMany(uid, plans, tell ? others.map((o) => o.id) : []);
+      } catch (e) {
+        /* the composer's own ruling (v152.1, Queries.tsx "tell"): a sibling at the rules' field ceiling refuses the marks
+           and with them the batch. Probe each mark on its own (`refusedMarks`), save the reply and every accepted sibling
+           in one batch, and name the refused ones, never dropping them silently. */
+        if (!tell || (e as { code?: string })?.code !== "permission-denied") throw e;
+        refused = await refusedMarks(uid, plans[plans.length - 1]);
+        if (!refused.length) throw e;
+        const kept = others.filter((o) => !refused.includes(o.id));
+        snap = await commitMany(uid, planOfResponse(planCtx(q, existing, feed), a, kept), kept.map((o) => o.id));
+      }
     } catch (e) {
       console.error("[record a response] save failed", e);
       showToast({ message: "Couldn't record the reply. Nothing was saved." });
@@ -115,6 +128,10 @@ export const RespondStagesHost: React.FC<{
     /* each note as the Notes tab saves one (a journal entry on the query, dated now), oldest first */
     const before = new Set(live.current.journalEntries.filter((j) => j.queryId === id).map((j) => j.id));
     for (const t of notes) await addJournalEntry(id, t);
+    if (refused.length) {
+      const names = refused.map((rid) => { const x = queries.find((y) => y.id === rid); const ag = agents.find((y) => y.id === x?.agentId); return ag?.name || ag?.agency || "an agent"; });
+      showToast({ message: `Recorded. Couldn’t mark ${names.join(", ")} to tell.` });
+    }
     /* the door that opened this response hears of it, once */
     responseSaved(id);
     const undo = async () => {

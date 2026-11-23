@@ -1,0 +1,250 @@
+[
+ {
+  "screen": "01-whole-page-dashboard.png",
+  "pct": 28.9,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "02-who-replied.png",
+  "pct": 9.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "03-who-replied-search-closed.png",
+  "pct": 4.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "04-reply-from-queried.png",
+  "pct": 5.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "05-reply-another-kind.png",
+  "pct": 7.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "06-when.png",
+  "pct": 5.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "07-when-calendar.png",
+  "pct": 6.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "08-asked-partial.png",
+  "pct": 5.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "09-asked-partial-extras.png",
+  "pct": 9.8,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "10-sent-question.png",
+  "pct": 4.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "11-sent-not-yet-slider.png",
+  "pct": 6.8,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "12-sent-not-yet-no-date.png",
+  "pct": 6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "13-review-partial-not-sent.png",
+  "pct": 8.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "14-recorded-partial-not-sent.png",
+  "pct": 11.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "15-sent-yes-reply-time-slider.png",
+  "pct": 7.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "16-sent-yes-unknown.png",
+  "pct": 6.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "17-what-went.png",
+  "pct": 7.8,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "18-what-went-scrolled.png",
+  "pct": 13.4,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "19-review-partial-sent.png",
+  "pct": 7.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "20-review-materials-tile-open.png",
+  "pct": 8.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "21-review-with-note.png",
+  "pct": 8.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "22-recorded-partial-sent.png",
+  "pct": 11.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "23-review-full.png",
+  "pct": 7.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "24-recorded-full.png",
+  "pct": 9.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "25-review-revise-resubmit.png",
+  "pct": 7.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "26-recorded-revise-resubmit.png",
+  "pct": 9.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "27-review-offer.png",
+  "pct": 7.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "28-recorded-offer.png",
+  "pct": 11.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "29-review-pass.png",
+  "pct": 6.4,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "30-recorded-pass.png",
+  "pct": 6.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "31-asked-full.png",
+  "pct": 5.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "32-their-words-rr.png",
+  "pct": 5.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "33-rr-will-you-revise.png",
+  "pct": 7.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "34-offer-answer-slider.png",
+  "pct": 5.8,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "35-offer-tell-others.png",
+  "pct": 4.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "36-their-words-pass.png",
+  "pct": 5.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "37-review-something-else.png",
+  "pct": null
+ },
+ {
+  "screen": "38-recorded-something-else.png",
+  "pct": null
+ },
+ {
+  "screen": "39-whole-page-from-a-card.png",
+  "pct": 27.6,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "40-discard-bar.png",
+  "pct": 5.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "41-closed-same-page.png",
+  "pct": 46,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "42-whole-page-top-bar-queries.png",
+  "pct": 29.3,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ }
+]
