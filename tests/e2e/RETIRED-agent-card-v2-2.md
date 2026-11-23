@@ -25,6 +25,12 @@ band's ⋯. Locks: `tests/e2e/acv22.measure.ts` (AC1–AC14).
 | AC21-2c | the Contact details section; the head's name text and flag showing the draft | the head opens in place; its name field holds the words; the checked country pill is the place line while open | contact is edited in the head itself |
 | AC21-2f | the 28px pencil; two sections open together for Tab | the 26px disc; each section opened in turn; cross and tick named by the open section | v168's pencil; one section at a time |
 | AC21-2g | Based in as two lines in the section | in the head: a country of the three puts the city on the pills' line (the v2.2 ref); Elsewhere keeps v2.1's ruling (search on the pills' line, the city beneath at full width, the 280px list) | Based in moved into the head, where the place line was (for Nick: the plain case follows the ref, not the 21 Nov two-line ruling) |
+| AC21-2d | the wishlist and genres open together; the wishlist's tick leaves the genre draft on screen; the cross leaves the other section's draft | each changed and ticked on its own; "nothing else was open"; the cross and its Undo on the wishlist alone (the other-draft checks go; the `wholedraft` mutation has no second open section to bite on now) | one section at a time |
+| AC21-2f (Tab) | Tab reaches every open section's cross and tick | Tab reaches the cross; the tick once the section has a change (a disabled tick is not a Tab stop) | the tick waits for a change |
+| AC21-4a | the wishlist opened while How held a change | How's change discarded first (its cross) | opening another section with a change asks |
+| AC21-4b | the wishlist and genres opened together; the breath back after the tick (genres still open); a tick with nothing changed | the wishlist alone, genres opened for its own step; the rim at rest after the tick (nothing left open); the tick disabled and the cross with nothing changed | one section at a time; the tick waits for a change |
+| AC21-4c | "a tick with nothing changed" rests the border; "the rust bar's Discard" | "a cross with nothing changed"; the question's Discard inside the section | the tick is disabled until a change; the rust bar is retired |
+| AC21-4b, 4c Undo | the snackbar's Undo | the card toast's Undo | the open card's messages are in the card |
 | `acv2.measure.ts` AC2-9 (and its `undodrop` mutation) | the snackbar's Undo | the card toast's Undo | the open card's messages are in the card |
 
 Retired whole: **AC21-2e** (leaving with two sections changed: the rust bar, Save all, Discard). Its subject is retired.
