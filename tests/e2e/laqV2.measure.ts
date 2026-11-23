@@ -12,7 +12,8 @@
  *   V2-3  not sent yet: one task, no query; "I've sent it" goes back to Sent and keeps it (v2.1)
  *   V2-4  materials in the three saved states: 12 (asks + package match, one tap), 22 (no packages), 19 (nothing saved), 07
  *   V2-5  nudge: 08 (Unknown), 09 (past the date), 14 (from the card)
- *   V2-6  review: 15, 16 (paperclip open; Esc closes it first), 20 (no date), 10 (past); the two tiles
+ *   V2-6  review: 15, 16 (the materials tile's pop-up open; Esc closes it first), 20 (no date), 10 (past); the two tiles
+ *          (v2.2: Plumage colours v3 took the paperclip off the card; the tile keeps its hooks, `data-qc1533="tab"`/`"pop"`)
  *   V2-7  logged: 11 / 18 / 21, each undone
  *   V2-8  three in a row with "Log and start another", the second undone; counts read back
  *   V2-9  Escape at each level; 13 (the leave check)
@@ -275,7 +276,7 @@ test("V2-5 — nudge: Unknown, past the date, from the card", async () => {
   await discard(page);
 });
 
-test("V2-6 — review: the grid card in preview, the paperclip, the two numbers", async () => {
+test("V2-6 — review: the grid card in preview, the materials tile, the two numbers", async () => {
   test.setTimeout(240_000);
   await open(page);
   await agent(page, "laq2-hv"); await sentToday(page); await q(page, "use-ask").click(); await how(page); await nudgeOn(page);
@@ -293,11 +294,11 @@ test("V2-6 — review: the grid card in preview, the paperclip, the two numbers"
   const hoverAfter = await card.boundingBox();
   ok(JSON.stringify(hoverBefore) === JSON.stringify(hoverAfter), "no hover lift");
   await card.locator('[data-qc1533="tab"]').click();
-  ok(await card.locator('[data-qc1533="pop"]').isVisible(), "the paperclip opens on tap");
-  await shot(page, "16-review-paperclip-open");
+  ok(await card.locator('[data-qc1533="pop"]').isVisible(), "the materials tile opens its pop-up on a click");
+  await shot(page, "16-review-materials-tile-open");
   await page.keyboard.press("Escape");
   await page.waitForTimeout(200);
-  ok(!(await card.locator('[data-qc1533="pop"]').count()) && await R(page).isVisible(), "Escape closes the paperclip first; the journey stays");
+  ok(!(await card.locator('[data-qc1533="pop"]').count()) && await R(page).isVisible(), "Escape closes the pop-up first; the journey stays");
   ok(!(await q(page, "leave-keep").isVisible().catch(() => false)), "…and asks nothing yet");
   await discard(page);
   /* no date, no reminder */
@@ -442,7 +443,7 @@ test("V2-10 — keyboard only, open → logged; focus rings; nothing under 12px;
   under12.push(...(await smallText()));
   ok(await tabTo('[data-qls="nudge-continue"]'), "Tab reaches Continue"); await page.keyboard.press("Enter");
   await expect(R(page)).toHaveAttribute("data-step", "check");
-  ok(await tabTo('[data-qc1533="tab"]'), "Tab reaches the paperclip");
+  ok(await tabTo('[data-qc1533="tab"]'), "Tab reaches the materials tile");
   /* nothing under 12px, on the review (and below, on the nudge step and the logged screen) */
   const small = [...under12, ...(await smallText())];
   READ.under12 = small;
@@ -450,14 +451,14 @@ test("V2-10 — keyboard only, open → logged; focus rings; nothing under 12px;
   /* nothing moves on hover: every control in the panel, the rest of the panel measured before and after */
   const rects = () => R(page).evaluate((root) => [...root.querySelectorAll<HTMLElement>("*")].map((e) => { const r = e.getBoundingClientRect(); return `${e.tagName.toLowerCase()}.${String(e.className).split(" ")[0]}@${Math.round(r.x * 2) / 2},${Math.round(r.y * 2) / 2},${Math.round(r.width * 2) / 2},${Math.round(r.height * 2) / 2}`; }));
   const moved: string[] = [];
-  /* a still start: focus off the paperclip (its pop-up shut), the body at the top, animations done */
+  /* a still start: focus off the materials tile (its pop-up shut), the body at the top, animations done */
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await R(page).locator('[data-qls="body"]').evaluate((el) => { el.scrollTop = 0; });
   await page.waitForTimeout(800);
   const controls = await R(page).locator('button:visible, [role="button"]:visible').all();
   for (const c of controls.slice(0, 30)) {
     const name = (await c.getAttribute("data-qls")) ?? (await c.getAttribute("data-qc1533")) ?? (await c.getAttribute("class")) ?? "?";
-    if (name === "tab" || name.includes("qc1533")) continue; /* the paperclip opens its pop-up on hover (a layer over, not a move) */
+    if (name === "tab" || name.includes("qc1533")) continue; /* the materials tile opens its pop-up on hover (a layer over, not a move) */
     await page.mouse.move(0, 0); await page.waitForTimeout(160);
     const a = await rects();
     await c.hover().catch(() => {}); await page.waitForTimeout(260);

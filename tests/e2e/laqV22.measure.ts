@@ -14,6 +14,9 @@
  *   V22-2  notes (screens 03–07): add with the button and with Ctrl + Enter, two notes, edit in place, delete; Escape's
  *          order; words left in the box are kept; saved on Log query as journal entries, gone on Undo; on the query
  *          card's Notes tab afterwards, dated today
+ *   V22-3  the 25th query (seedLaq22.mjs: 24 on the book, three undated): the review's "queries sent" 25 and the
+ *          logged screen's "Query number 25" agree (D5), and the milestone line shows
+ *   V22-4  reduced motion: no confetti, no thump (and no wait for one), the "+1" still, the final state drawn at once
  */
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
@@ -90,6 +93,11 @@ async function toReview(p: Page, k: Case) {
   await p.waitForTimeout(600);
 }
 
+/** the review's stamp is on for 650ms while the stamp thumps and the panel bumps: hold both at their end state (the
+ *  stamp's place is unchanged; only the motion goes) so it is read where it lands */
+async function holdStill(p: Page) {
+  await p.addStyleTag({ content: ".laq .laq-stamp.is-thump, .laq .laq-in.is-bump { animation: none !important; }" });
+}
 /** the geometry this pass is about, read off the page in one go */
 export const geo = (p: Page, still = true) => R(p).evaluate((root, still) => {
   if (still) root.querySelector<HTMLElement>('[data-qls="preview"]')?.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior });
@@ -122,9 +130,11 @@ export const geo = (p: Page, still = true) => R(p).evaluate((root, still) => {
     const r = el.getBoundingClientRect(); const out: string[] = [];
     for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
       const cs = getComputedStyle(a);
-      if (cs.overflowX === "visible" && cs.overflowY === "visible") continue;
+      const cx = cs.overflowX !== "visible", cy = cs.overflowY !== "visible";
+      if (!cx && !cy) continue;
       const x = a.getBoundingClientRect();
-      if (r.left < x.left - 0.5 || r.top < x.top - 0.5 || r.right > x.right + 0.5 || r.bottom > x.bottom + 0.5) out.push(`${a.tagName.toLowerCase()}.${String(a.className).split(" ")[0]}`);
+      /* an ancestor cuts only along the axis it clips (overflow-x: clip leaves the vertical open) */
+      if ((cx && (r.left < x.left - 0.5 || r.right > x.right + 0.5)) || (cy && (r.top < x.top - 0.5 || r.bottom > x.bottom + 0.5))) out.push(`${a.tagName.toLowerCase()}.${String(a.className).split(" ")[0]}`);
     }
     return out;
   };
@@ -136,13 +146,15 @@ export const geo = (p: Page, still = true) => R(p).evaluate((root, still) => {
   const clearAbove = lr ? Math.round((lr.top - Math.max(...above.map((x) => x.r.b), -1e9)) * 10) / 10 : null;
   const labelOnTop = (() => {
     if (!lr) return null;
-    const pts = [[lr.left + 3, lr.top + 3], [lr.right - 3, lr.top + 3], [(lr.left + lr.right) / 2, (lr.top + lr.bottom) / 2], [lr.left + 3, lr.bottom - 3], [lr.right - 3, lr.bottom - 3]];
+    /* along its middle and its top and bottom edges, clear of the pill's rounded ends */
+    const my = (lr.top + lr.bottom) / 2, mx = (lr.left + lr.right) / 2;
+    const pts = [[lr.left + 2, my], [mx, my], [lr.right - 2, my], [lr.left + 12, lr.top + 1.5], [lr.right - 12, lr.top + 1.5], [lr.left + 12, lr.bottom - 1.5], [lr.right - 12, lr.bottom - 1.5]];
     return pts.every(([x, y]) => { const e = document.elementFromPoint(x, y); return !!e && (e === label || label!.contains(e)); });
   })();
   /* the pop-up: inside the panel and every clipping ancestor, and on top at its corners */
   const panelR = root.getBoundingClientRect();
   const popR = pop?.getBoundingClientRect() ?? null;
-  const popOnTop = popR ? [[popR.left + 4, popR.top + 4], [popR.right - 4, popR.top + 4], [popR.left + 4, popR.bottom - 4], [popR.right - 4, popR.bottom - 4]]
+  const popOnTop = popR ? [[popR.left + 16, popR.top + 16], [popR.right - 16, popR.top + 16], [popR.left + 16, popR.bottom - 16], [popR.right - 16, popR.bottom - 16], [popR.left + 2, (popR.top + popR.bottom) / 2], [popR.right - 2, (popR.top + popR.bottom) / 2]]
     .every(([x, y]) => { const e = document.elementFromPoint(x, y); return !!e && (e === pop || pop!.contains(e)); }) : null;
   for (const [e, v] of pe) e.style.pointerEvents = v;
   const stR = stamp ? rr(stamp.getBoundingClientRect()) : null;
@@ -237,9 +249,11 @@ test("V22-0 — the look: review (three, one, no date), the tile's pop-up, the l
       }
       if (k !== "one") { await discard(p); continue; }
       /* the logged screen (one material), then Undo */
+      await holdStill(p);
       await q(p, "log").click();
-      await p.waitForTimeout(470);
-      if (await q(p, "stamp").count()) { READ[`review-stamp-one${z}`] = await geo(p, false); await panel(p).screenshot({ path: `${SHOTS}/review-stamp-one${z}.png` }); }
+      /* the stamp lands on the review once the save is in (a stamp is a claim that it landed), for 650ms */
+      await q(p, "stamp").waitFor({ state: "attached", timeout: 15_000 }).catch(() => {});
+      if ((await R(p).getAttribute("data-step")) === "check" && await q(p, "stamp").count()) { READ[`review-stamp-one${z}`] = await geo(p, false); await panel(p).screenshot({ path: `${SHOTS}/review-stamp-one${z}.png` }); }
       await q(p, "yay").waitFor({ state: "visible", timeout: 30_000 });
       await p.waitForTimeout(1800);
       READ[`logged-one${z}`] = await geo(p);
@@ -251,9 +265,11 @@ test("V22-0 — the look: review (three, one, no date), the tile's pop-up, the l
     /* the logged screen with three materials and with no date */
     for (const k of ["three", "nodate"] as Case[]) {
       await toReview(p, k);
+      await holdStill(p);
       await q(p, "log").click();
-      await p.waitForTimeout(470);
-      if (await q(p, "stamp").count()) { READ[`review-stamp-${k}${z}`] = await geo(p, false); await panel(p).screenshot({ path: `${SHOTS}/review-stamp-${k}${z}.png` }); }
+      /* the stamp lands on the review once the save is in (a stamp is a claim that it landed), for 650ms */
+      await q(p, "stamp").waitFor({ state: "attached", timeout: 15_000 }).catch(() => {});
+      if ((await R(p).getAttribute("data-step")) === "check" && await q(p, "stamp").count()) { READ[`review-stamp-${k}${z}`] = await geo(p, false); await panel(p).screenshot({ path: `${SHOTS}/review-stamp-${k}${z}.png` }); }
       await q(p, "yay").waitFor({ state: "visible", timeout: 30_000 });
       await p.waitForTimeout(1800);
       READ[`logged-${k}${z}`] = await geo(p);
@@ -281,9 +297,11 @@ test("V22-0 — the look: review (three, one, no date), the tile's pop-up, the l
       ok(!!g.stamp && g.stampHits.length === 0, `${k}: the stamp meets no text (${JSON.stringify(g.stampHits)})`);
       ok(!!g.stampToCard && g.stampToCard.hangs >= 20 && g.stampToCard.hangs <= 40, `${k}: the stamp hangs about 30px below the card (${JSON.stringify(g.stampToCard)})`);
     }
-    if (k.startsWith("pop-")) ok(!!g.pop && g.popOnTop === true && (g.popCut ?? []).length === 0 && g.popInCardWidth === true && !!g.tile && g.pop.t > g.tile.b,
+    /* below the tile where the panel has room (100%); at 150% the panel is short and QcMatTile's own rule opens it above */
+    if (k.startsWith("pop-")) ok(!!g.pop && g.popOnTop === true && (g.popCut ?? []).length === 0 && g.popInCardWidth === true && !!g.tile && (k.endsWith("@150") || g.pop.t > g.tile.b),
       `${k}: the pop-up below the tile, inside the card's width, cut by nothing (${JSON.stringify({ pop: g.pop, tile: g.tile, on: g.popOnTop, cut: g.popCut, w: g.popInCardWidth })})`);
   }
+  ok(["one", "three", "nodate"].every((k) => `review-stamp-${k}@100` in READ), `the stamp read on the review too (${Object.keys(READ).filter((k) => k.startsWith("review-stamp")).join(", ")})`);
   const ek = READ.escapeKeyboard as { popOpenOnFocus: boolean; popAfterFirst: boolean; leaveAfterSecond: boolean } | undefined;
   ok(!!ek && ek.popOpenOnFocus && !ek.popAfterFirst && ek.leaveAfterSecond, `keyboard: Escape closes the pop-up, then the leave check (${JSON.stringify(ek)})`);
   for (const k of ["review-three@100", "review-one@100", "review-nodate@100"]) ok((READ[k] as G).scrolls === false, `${k}: no scroll bar at the ref's panel height`);
@@ -317,7 +335,10 @@ test("V22-2 — notes: add, two, edit, delete, Escape, kept words; saved on log,
   const notes = NB(p).locator("[data-qc158='note']");
   ok((await notes.count()) === 1, "the note is added");
   ok(!(await field.count()), "the box closes");
-  ok(((await notes.first().locator("header").textContent()) ?? "").replace(/\s+/g, " ").trim() === "You · Today", "You · Today");
+  /* the Notes tab's own header: "You · {day}" (its dayLabel names the day; the ref drew "Today") */
+  const today = await p.evaluate(() => { const d = new Date(); return `${d.getDate()} ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()]}`; });
+  const hd = ((await notes.first().locator("header").textContent()) ?? "").replace(/\s+/g, " ").trim();
+  ok(new RegExp(`^You ?· ${today}$`).test(hd), `You · ${today} (${hd})`);
   ok((await NB(p).locator('[data-qls="notes-h"]').textContent())?.trim() === "Notes", "under a Notes heading");
   ok((await q(p, "add-note").textContent())?.trim() === "Add another note", "the link says Add another note");
   const acts = await notes.first().locator("[data-qc158='act']").evaluateAll((els) => els.map((e) => `${e.getAttribute("data-act")}:${(e as HTMLElement).offsetHeight > 0}`));
@@ -379,8 +400,171 @@ test("V22-2 — notes: add, two, edit, delete, Escape, kept words; saved on log,
   await p.waitForTimeout(800);
   const tabNotes = await card.locator("[data-qc158='note']").evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()));
   READ.cardNotes = tabNotes;
-  ok(tabNotes.some((t) => /^You · Today/.test(t) && t.includes("On the card afterwards.")), `on the query card's Notes tab, dated today (${JSON.stringify(tabNotes)})`);
+  const today2 = await p.evaluate(() => { const d = new Date(); return `${d.getDate()} ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()]}`; });
+  ok(tabNotes.some((t) => new RegExp(`^You ?· ${today2}On the card afterwards\\.`).test(t)), `on the query card's Notes tab, as typed, dated today (${JSON.stringify(tabNotes)})`);
   mkdirSync(SHOTS, { recursive: true });
   await card.screenshot({ path: `${SHOTS}/notes-08-on-the-card.png` });
   await p.keyboard.press("Escape");
+});
+
+test("V22-3 — the 25th query: the review's count and Query number agree; the milestone", async () => {
+  test.setTimeout(300_000);
+  execSync("node tests/e2e/seedLaq2.mjs --clean && node tests/e2e/seedLaq2.mjs && node tests/e2e/seedLaq21.mjs && node tests/e2e/seedLaq22.mjs", { stdio: "ignore" });
+  try {
+    const p = page;
+    await toReview(p, "three");
+    const sent = await p.locator('[data-qls="count"]').evaluateAll((els) => els.map((e) => (e.textContent ?? "").replace(/\s+/g, " ").trim()));
+    READ.milestoneReview = sent;
+    ok(sent.some((t) => /^25\s*\+1\s*queries sent$/.test(t)), `the review says 25 queries sent, undated ones counted (${JSON.stringify(sent)})`);
+    await q(p, "log").click();
+    await q(p, "yay").waitFor({ state: "visible", timeout: 30_000 });
+    await p.waitForTimeout(2600);
+    const n = await q(p, "odometer").getAttribute("data-n");
+    const mile = ((await q(p, "milestone").textContent().catch(() => "")) ?? "").trim();
+    READ.milestoneLogged = { n, mile };
+    ok(n === "25", `Query number 25 (${n})`);
+    ok(mile === "Twenty-five queries. That takes some nerve.", `the milestone (${mile})`);
+    await shot(p, "logged-25th");
+    await q(p, "undo").click(); await p.waitForTimeout(1500);
+    await discard(p);
+  } finally {
+    execSync("node tests/e2e/seedLaq2.mjs --clean && node tests/e2e/seedLaq2.mjs && node tests/e2e/seedLaq21.mjs", { stdio: "ignore" });
+  }
+});
+
+test("V22-4 — reduced motion: no confetti, no thump, the +1 still, the final state drawn", async ({ browser }) => {
+  test.setTimeout(300_000);
+  const c = await browser.newContext({ baseURL: BASE, viewport: { width: 1480, height: 900 }, reducedMotion: "reduce" });
+  const p = await c.newPage();
+  await p.goto("/dashboard"); await ensureSignedIn(p);
+  await toReview(p, "three");
+  const pill = await p.locator(".rvb-n i").first().evaluate((e) => getComputedStyle(e).animationName);
+  ok(pill === "none", `the +1 is still (${pill})`);
+  await q(p, "log").click();
+  /* no thump to wait for: the logged screen comes as soon as the save lands */
+  await q(p, "yay").waitFor({ state: "visible", timeout: 30_000 });
+  await p.waitForTimeout(120);
+  const r = await R(p).evaluate((root) => {
+    const st = root.querySelector<HTMLElement>('[data-qls="stamp"]');
+    const odo = root.querySelector<HTMLElement>(".laq-odo > span");
+    return {
+      confetti: !!root.querySelector('[data-qls="confetti"]'),
+      stamp: st ? { thump: st.classList.contains("is-thump"), anim: getComputedStyle(st).animationName } : null,
+      head: (root.querySelector('[data-qls="yay-head"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      odo: odo ? { go: odo.parentElement!.classList.contains("is-go"), tr: getComputedStyle(odo).transitionDuration, tf: getComputedStyle(odo).transform } : null,
+      anims: [...root.querySelectorAll<HTMLElement>("*")].filter((e) => getComputedStyle(e).animationName !== "none").map((e) => String(e.className).split(" ")[0]).slice(0, 8),
+    };
+  });
+  READ.reduced = r;
+  ok(!r.confetti, "no confetti");
+  ok(!!r.stamp && !r.stamp.thump && r.stamp.anim === "none", `the stamp is simply there, no thump (${JSON.stringify(r.stamp)})`);
+  ok(r.head === "Off to Harriet.", `the heading drawn whole at once (${r.head})`);
+  ok(!!r.odo && r.odo.go && /^0s/.test(r.odo.tr), `the count drawn at its final figure (${JSON.stringify(r.odo)})`);
+  ok(r.anims.length === 0, `nothing animates (${JSON.stringify(r.anims)})`);
+  mkdirSync(SHOTS, { recursive: true });
+  await panel(p).screenshot({ path: `${SHOTS}/logged-reduced-motion.png` });
+  await q(p, "undo").click(); await p.waitForTimeout(1500);
+  await discard(p);
+  await c.close();
+});
+
+test("V22-5 — keyboard only, open → logged with a note added, edited and deleted; rings; nothing under 12px; nothing moves on hover", async () => {
+  test.setTimeout(300_000);
+  const p = page;
+  /* the not-sent screen, for the side-by-side sheet (screen 09) */
+  await open(p);
+  await agent(p, "laq2-hv", "Harriet");
+  await q(p, "not-sent").click();
+  await q(p, "not-sent-task").waitFor({ state: "visible", timeout: 10_000 });
+  await shot(p, "not-sent@100");
+  await q(p, "not-sent-done").click();
+  await R(p).waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+  execSync("node tests/e2e/seedLaq2.mjs --clean && node tests/e2e/seedLaq2.mjs && node tests/e2e/seedLaq21.mjs", { stdio: "ignore" });
+
+  await open(p);
+  const noRing: string[] = [];
+  const tabTo = async (sel: string, back = false) => {
+    for (let i = 0; i < 40; i++) {
+      await p.keyboard.press(back ? "Shift+Tab" : "Tab");
+      const r = await p.evaluate((s) => {
+        const a = document.activeElement as HTMLElement | null;
+        if (!a || !a.closest('[data-qls="root"]')) return { hit: false, ring: true, name: "" };
+        const cs = getComputedStyle(a);
+        const ring = (cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) > 0) || cs.boxShadow !== "none";
+        return { hit: a.matches(s), ring, name: `${a.tagName.toLowerCase()}[${a.getAttribute("data-qls") ?? a.getAttribute("data-qc158") ?? a.className}]` };
+      }, sel);
+      if (!r.ring && r.name) noRing.push(r.name);
+      if (r.hit) return true;
+    }
+    return false;
+  };
+  const small = () => R(p).evaluate((root) => [...root.querySelectorAll<HTMLElement>("*")].filter((e) => {
+    if (!e.offsetParent && getComputedStyle(e).position !== "fixed") return false;
+    const own = [...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim());
+    return own && parseFloat(getComputedStyle(e).fontSize) < 12 && !e.closest('[aria-hidden="true"]');
+  }).map((e) => `${e.tagName.toLowerCase()}.${e.className}:${getComputedStyle(e).fontSize}:${(e.textContent ?? "").trim().slice(0, 20)}`));
+  await q(p, "find").focus();
+  await p.keyboard.type("Harriet"); await p.waitForTimeout(400);
+  await p.keyboard.press("Enter");
+  await expect(R(p)).toHaveAttribute("data-step", "when");
+  ok(await tabTo('[data-qls="when-opt"][data-k="today"]'), "Tab reaches Today"); await p.keyboard.press("Enter");
+  ok(await tabTo('[data-qls="use-ask"]'), "Tab reaches I sent what Harriet asks for"); await p.keyboard.press("Enter");
+  await expect(R(p)).toHaveAttribute("data-step", "how");
+  ok(await tabTo('[data-qls="how-opt"]'), "Tab reaches How"); await p.keyboard.press("Enter");
+  ok(await tabTo('[data-qls="nudge-continue"]'), "Tab reaches Continue"); await p.keyboard.press("Enter");
+  await expect(R(p)).toHaveAttribute("data-step", "check");
+  /* add two notes, edit the first, delete the second — keys only */
+  for (const words of ["First, by keyboard.", "Second, to delete."]) {
+    ok(await tabTo('[data-qls="add-note"]'), "Tab reaches Add a note"); await p.keyboard.press("Enter");
+    await p.waitForTimeout(200);
+    ok(await p.evaluate(() => document.activeElement?.getAttribute("data-qc158") === "field"), "the field has the caret");
+    await p.keyboard.type(words);
+    await p.keyboard.press("Control+Enter"); await p.waitForTimeout(250);
+  }
+  const notes = NB(p).locator("[data-qc158='note']");
+  ok((await notes.count()) === 2, "two notes by keyboard");
+  await p.locator('[data-qls="body"] h2.laq-qh').click();
+  ok(await tabTo("[data-qc158='note'] [data-act='edit']"), "Tab reaches Edit"); await p.keyboard.press("Enter");
+  await p.waitForTimeout(200);
+  await p.keyboard.press(process.platform === "darwin" ? "Meta+ArrowDown" : "Control+End"); await p.keyboard.type(" Edited.");
+  await p.keyboard.press("Control+Enter"); await p.waitForTimeout(250);
+  ok((await notes.first().locator("p").textContent()) === "First, by keyboard. Edited.", "edited by keyboard");
+  ok(await tabTo("[data-qc158='note']:nth-child(2) [data-act='delete']"), "Tab reaches the second note's Delete"); await p.keyboard.press("Enter");
+  await p.waitForTimeout(250);
+  ok((await notes.count()) === 1, "deleted by keyboard");
+  const under12 = await small();
+  READ.under12 = under12;
+  ok(under12.length === 0, `nothing under 12px (${JSON.stringify(under12)})`);
+  /* nothing moves on hover, a note's Edit and Delete included */
+  const rects = () => R(p).evaluate((root) => [...root.querySelectorAll<HTMLElement>("*")].map((e) => { const r = e.getBoundingClientRect(); return `${e.tagName.toLowerCase()}.${String(e.className).split(" ")[0]}@${Math.round(r.x * 2) / 2},${Math.round(r.y * 2) / 2},${Math.round(r.width * 2) / 2},${Math.round(r.height * 2) / 2}`; }));
+  await p.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await p.waitForTimeout(800);
+  const moved: string[] = [];
+  for (const c of (await R(p).locator('button:visible, [data-qls="went-tile"], [data-qc158="note"]').all()).slice(0, 40)) {
+    const name = (await c.getAttribute("data-qls")) ?? (await c.getAttribute("data-act")) ?? (await c.getAttribute("data-qc158")) ?? (await c.getAttribute("data-qc1533")) ?? "?";
+    if (name === "tab") continue; /* the materials tile opens its pop-up on hover: a layer over, not a move */
+    await p.mouse.move(0, 0); await p.waitForTimeout(160);
+    const a = await rects();
+    await c.hover().catch(() => {}); await p.waitForTimeout(260);
+    const b = await rects();
+    await p.mouse.move(0, 0); await p.waitForTimeout(300);
+    const after = await rects();
+    const hit = a.map((x, i) => (x !== b[i] && x === after[i] ? b[i] : null)).filter((x): x is string => !!x);
+    if (hit.length) moved.push(`${name}: ${hit.length} (${hit.slice(0, 3).join(" | ")})`);
+  }
+  READ.hoverMoves = moved;
+  ok(moved.length === 0, `nothing moves on hover (${JSON.stringify(moved)})`);
+  await p.locator('[data-qls="body"] h2.laq-qh').click();
+  ok(await tabTo('[data-qls="log"]'), "Tab reaches Log query");
+  READ.noRing = noRing;
+  ok(noRing.length === 0, `a ring on every control met (${JSON.stringify(noRing)})`);
+  await p.keyboard.press("Enter");
+  await q(p, "yay").waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
+  await p.waitForTimeout(1200);
+  const qid = state().queries.find((x) => x.agentId === "laq2-hv")?.id;
+  const j = state().journal.filter((x) => x.queryId === qid).map((x) => x.text);
+  ok(JSON.stringify(j) === JSON.stringify(["First, by keyboard. Edited."]), `logged by keyboard with the note as edited (${JSON.stringify(j)})`);
+  await q(p, "undo").click(); await p.waitForTimeout(1500);
+  ok(!state().queries.some((x) => x.agentId === "laq2-hv") && !state().journal.some((x) => x.queryId === qid), "undone, the note with it");
+  await discard(p);
 });

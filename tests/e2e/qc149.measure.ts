@@ -418,8 +418,13 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       test.skip(!run("L11") || BASE || vp.width !== 1512);
       const L = new Ledger(`L11-${vp.width}`);
       await openQc(page, vp);
-      const before = (await rows(page)).length;
-      await tap(page, "[data-qc149='log']");
+      /* Log a query v2.2 Phase 5 — re-pointed at the page as it is: the header's door is `data-qc151="log"` (v151), and the
+         list is the grid of cards (v154) by default, so the rows are read off both the sheet and the grid */
+      const listed = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".qc138-sheet [data-qcv='row'], [data-qc154='card']:not([data-preview])")]
+        .filter((r) => r.getBoundingClientRect().height > 0 && !r.closest("[data-qc139='practice']") && !r.closest("[data-qls='root']"))
+        .map((r) => ({ id: r.dataset.id ?? "", name: r.dataset.name ?? (r.querySelector("[data-qc154='name']")?.textContent ?? "").trim() })));
+      const before = (await listed()).length;
+      await tap(page, "[data-qc151='log'], [data-qc149='log']");
       await page.waitForTimeout(1000);
       /* Log a query v1 — the staged journey (QcLogStages): Agent, Sent, Materials, How, the check, then the celebration */
       L.check("the panel opens on the Agent stage", !!(await box(page, "[data-qp='panel'] [data-qls='root'][data-step='who']")), "no Agent stage");
@@ -441,18 +446,22 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       await tap(page, "[data-qls='log']");
       await page.waitForTimeout(3500);
       L.check("the celebration", /^Off to /.test((await page.locator("[data-qls='yay-head']").getAttribute("aria-label").catch(() => null)) ?? ""), "no celebration");
-      const after = await rows(page);
+      const after = await listed();
       L.check("the list gains the row", after.length === before + 1 && after.some((r) => r.name === agentName), `${before} → ${after.length} · ${agentName}`);
       await tap(page, "[data-qls='undo']");
       await page.waitForTimeout(2500);
       L.check("UNDONE: back on the check", !!(await box(page, "[data-qls='root'][data-step='check']")), "no check after Undo — the account may have been changed");
-      L.check("…the list is back to its count", (await rows(page)).length === before, String((await rows(page)).length));
+      L.check("…the list is back to its count", (await listed()).length === before, String((await listed()).length));
       await closePanel(page);
+      /* Log a query v2 — Escape on a journey with answers is the leave check (v2 Phase 7), not a close: discard it */
+      const discardIt = page.locator("[data-qls='leave-discard']").filter({ visible: true }).first();
+      if (await discardIt.count()) { await discardIt.click(); await page.waitForTimeout(600); }
       /* the top bar's "+ Log a query" opens the same card */
       const bar = page.locator(".ws-pagebar button").filter({ hasText: "Log a query" }).first();
       if (await bar.count()) { await bar.click(); await page.waitForTimeout(1000); }
       L.check("the top bar's + Log a query opens the same card", !!(await box(page, "[data-qp='panel'] [data-qls='root']")), "no card");
-      L.done(9);
+      /* v2.2: eight readings — the ninth (v1's) went with v1's journey; every check above still runs */
+      L.done(8);
     });
 
     test("L12 · Who replied? lists every live query once, in two groups, and a pick opens it in respond mode", async ({ page }) => {

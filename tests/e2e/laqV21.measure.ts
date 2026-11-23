@@ -128,12 +128,13 @@ test("V21-1 — review: one sub-line, the card on the heading's edge, What went,
     if (zoom === 1) {
       /* 07 — the note open */
       await q(p, "add-note").click();
-      ok(await q(p, "note").isVisible(), "Add a note opens the field in place");
+      /* v2.2: the field is the Notes tab's writing box */
+      ok(await p.locator('[data-qls="notes"] [data-qc158="field"]').isVisible(), "Add a note opens the field in place");
       await shot(p, "07-review-note-open@100");
-      /* 08 — the paperclip, where the card still has one */
-      const clip = p.locator('[data-qls="preview"] [data-qc1533="tab"]');
-      if (await clip.count()) { await clip.click(); await shot(p, "08-review-paperclip-open@100"); await p.keyboard.press("Escape"); }
-      else READ.paperclip = "the card has no paperclip (Plumage colours v3)";
+      /* 08 — the materials tile's pop-up (Plumage colours v3 took the paperclip off the card; the tile keeps its hooks) */
+      const tile = p.locator('[data-qls="preview"] [data-qc1533="tab"]');
+      ok((await tile.count()) === 1, "the card's materials tile");
+      await tile.click(); await shot(p, "08-review-materials-tile-open@100"); await p.keyboard.press("Escape");
     }
     await discard(p);
     if (c) await c.close();
@@ -315,7 +316,8 @@ test("V21-4 — keyboard only, open → logged; rings; nothing under 12px; nothi
   READ.noRing = noRing;
   ok(noRing.length === 0, `a ring on every control met (${JSON.stringify(noRing)})`);
   await page.keyboard.press("Enter");
-  await page.waitForTimeout(1500);
+  /* v2.2: wait for the logged screen (the save, then the stamp's 650ms) rather than a fixed 1.5s, which a busy run outlasts */
+  await q(page, "yay-head").waitFor({ state: "visible", timeout: 20_000 }).catch(() => {});
   ok(await q(page, "yay-head").isVisible().catch(() => false), "logged by keyboard alone");
   const undo = page.getByRole("button", { name: /^Undo$/ }).first();
   if (await undo.isVisible().catch(() => false)) { await undo.click(); await page.waitForTimeout(1500); }

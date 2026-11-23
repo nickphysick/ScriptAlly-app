@@ -28,12 +28,6 @@ function doneAll(...xs: [Ledger, number][]) {
 const near = (a: number | undefined | null, b: number | undefined | null, d = 1) => a != null && b != null && Math.abs(a - b) <= d;
 const f1 = (n: number | undefined | null) => (n == null ? "—" : n.toFixed(1));
 const AGENT_LINE = "Fill out your agent profile with all the detail you can. A healthy list means better tracking, analysis, suggestions and reminders.";
-const RECORD: Record<string, string> = {
-  partial: "A partial request: they want to read more, and that’s a real step forward. Add the date they asked and the send goes on your to-do list.",
-  full: "A full request. They’ve read enough to want the whole book – well done. Add the date and the send goes on your to-do list.",
-  pass: "It stings, but every answer gets you closer to the right agent. Add the date and we’ll close the query for you.",
-  offer: "An offer of representation. Huge news. Add the date it came in and we’ll set a decision date two weeks on and keep it in front of you.",
-};
 
 /** the list's rows by group (grouped by status) */
 async function rowsByGroup(page: Page) {
@@ -132,9 +126,9 @@ test.skip("CL251-A1 A2 · one ledger card of four cells; a press filters, pale w
 });
 
 /* ═════════ B · the flows' headers ═════════ */
-test("CL251-B1 B2 B3 · the headers: Log a query (v2), Recording response and its four lines, Adding new agent", async ({ page }) => {
+test("CL251-B1 B3 · the headers: Log a query (v2), Adding new agent (B2 retired, v2.2)", async ({ page }) => {
   test.setTimeout(400_000);
-  const B1 = new Ledger("B1"), B2 = new Ledger("B2"), B3 = new Ledger("B3");
+  const B1 = new Ledger("B1"), B3 = new Ledger("B3");
   const vp = SIZES[0];
   const breakB1 = async () => { if (MUT === "B1") await page.evaluate(() => { const h = [...document.querySelectorAll("[data-flh='head']")].find((e) => (e as HTMLElement).offsetWidth); if (h) { const i = document.createElement("img"); i.src = "/images/qc/courier-cutout.png"; i.width = 40; h.prepend(i); } }); };
   const checkLog = async (where: string) => {
@@ -165,34 +159,16 @@ test("CL251-B1 B2 B3 · the headers: Log a query (v2), Recording response and it
   await page.keyboard.press("Escape"); await page.waitForTimeout(500);
   /* the Query Centre: its header's door */
   await openQc149(page, vp);
-  await page.locator("[data-qc149='log']").first().click(T).catch(() => {});
+  /* Log a query v2.2 Phase 5 — re-pointed: the Queries page header's door is `data-qc151="log"` (v151) */
+  await page.locator("[data-qc151='log'], [data-qc149='log']").locator("visible=true").first().click(T).catch(() => {});
   await page.waitForTimeout(1200);
   await checkLog("Query Centre");
 
-  /* B2 — Who replied: the title, no line; respond mode: each pick's line, changing with the pick */
-  const recordLines = async (where: string) => {
-    if (MUT === "B2") await page.evaluate(() => { const h = [...document.querySelectorAll("[data-qc149c='card'][data-mode='respond'] [data-flh='head'] .flh-tx")].find((e) => (e as HTMLElement).offsetWidth); if (h) { const p = document.createElement("p"); p.className = "flh-l"; p.dataset.flh = "line"; p.textContent = "A line"; h.appendChild(p); } });
-    const h0 = await head(page, "[data-qc149c='card'][data-mode='respond']");
-    B2.check(`${where} respond population`, !!h0, `respond mode ${h0 ? "open" : "missing"}`);
-    if (!h0) return;
-    B2.check(`${where} respond title, no line before a pick`, h0.title === "Recording response" && h0.line == null && !/Recording a response/.test(h0.text), `title "${h0.title}" line "${h0.line}"`);
-    for (const k of ["partial", "full", "pass", "offer"]) {
-      await page.locator(`[data-qc149c='resp-opt'][data-k='${k}']`).first().click(T).catch(() => {});
-      await page.waitForTimeout(350);
-      const h = await head(page, "[data-qc149c='card'][data-mode='respond']");
-      B2.check(`${where} ${k} line`, h?.line === RECORD[k], `${k}: "${h?.line?.slice(0, 50)}…"`);
-    }
-  };
-  /* "Who replied?" (QcWhoReplied149) is RETIRED by Record a response v1 (16 Nov): the card-frame picker is measured by
-     recordResponse1.measure.ts (R2–R5). The respond mode read below is from a query card. */
-  /* from a query card */
-  await openQc149(page, vp);
-  await page.locator(".qc138-sheet [data-qcv='row']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1300);
-  await page.locator("[data-qc149c='record']").first().click(T).catch(() => {});
-  await page.waitForTimeout(900);
-  await recordLines("from a query card");
-
+  /* B2 — RETIRED by Log a query v2.2 Phase 5: it read the respond mode's header ("Recording response" and a line per pick)
+     from the query card's "Record a response" (`data-qc149c="record"`). Record a response v1 (16 Nov) moved recording into
+     the card frame's composer, so on desktop that button and that mode are no longer reached. What covers recording now:
+     recordResponse1.measure.ts (R1 one dialog per door, R3 the composer "What did {first} say?" in the same panel, R12
+     the phone's own flow). The header's per-pick lines have no rendered check on desktop (reported in v2.2's REPORT). */
   /* B3 — "+ Add an agent" on the Contact list */
   await openCl24(page, vp);
   await page.locator("[data-cl24='add']").first().click(T).catch(() => {});
@@ -207,7 +183,7 @@ test("CL251-B1 B2 B3 · the headers: Log a query (v2), Recording response and it
      them). What B3 guards is that the editor under the header is whole: the sections, and the name field first. */
   const tabs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-ap='panel-new'] [data-cl252='edit-mode'] [data-cl252='sec']")].map((t) => t.dataset.sec ?? ""));
   B3.check("the editor under the header is whole", ["who", "want", "work", "reach"].every((k) => tabs.includes(k)) && !!(await page.$("[data-ap='panel-new'] [data-ae='name']")), tabs.join(" · "));
-  doneAll([B1, BASE ? 0 : 12], [B2, BASE ? 0 : 14], [B3, BASE ? 0 : 4]);
+  doneAll([B1, BASE ? 0 : 12], [B3, BASE ? 0 : 4]);
 });
 
 /* ═════════ C · the tidy-ups ═════════ */

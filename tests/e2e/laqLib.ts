@@ -62,7 +62,8 @@ export async function carryOnMaterials(page: Page): Promise<string> {
     await rows.first().click();
     return name;
   }
-  if (!(await page.locator('[data-qls="pieces-continue"]').count())) await page.locator('[data-qls="pc-opt"][data-k="letter"]').first().click();
+  /* Log a query v2.2 Phase 5 — the pieces screen's ticks are `data-qls="piece"` rows (v2), not v1's `pc-opt` radios */
+  if (!(await page.locator('[data-qls="pieces-continue"]').count())) await page.locator('[data-qls="piece"][data-k="letter"] > button').first().click();
   await page.locator('[data-qls="pieces-continue"]').click();
   return "pieces";
 }
