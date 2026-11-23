@@ -1,15 +1,16 @@
 /**
- * Plumage colours v2 — the one table (lib/stageColours): Queried, Partial and Closed from design-refs/plumage-colours-v1/
- * plumage-colours-v1.json, Full and Offer from design-refs/plumage-colours-v2/plumage-colours-v2.json (the oracles);
+ * Plumage colours v3 — the one table (lib/stageColours): Queried, Partial and Closed from design-refs/plumage-colours-v1/
+ * plumage-colours-v1.json, the Offer from plumage-colours-v2.json, Full and the R&R stripes from plumage-colours-v3.json
+ * (the oracles);
  * every status in one stage, its band (two shades for partial and full), no outline, ink on every band, no sheen
- * anywhere in `src/`, and every hex a stylesheet restates equal to the table. Measured in tests/e2e/pc2.measure.ts.
+ * anywhere in `src/`, and every hex a stylesheet restates equal to the table. Measured in tests/e2e/pc3.measure.ts.
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { QueryStatus } from "../types";
 import {
-  ACCENT_INK, OFFER_STRIPES, STAGE_COLOURS, STAGE_INK, STAGE_STATUSES, STRIPE_PAPER,
+  ACCENT_INK, RR_STRIPES, STAGE_COLOURS, STAGE_INK, STAGE_STATUSES,
   bandBackground, bandInk, quietBackground, stageInk, stageOf, statusBand,
 } from "./stageColours";
 import * as TABLE from "./stageColours";
@@ -21,10 +22,11 @@ import { TAB_ACCENT_157, tabAccent157 } from "./qc1533";
 const css = (f: string) => readFileSync(`src/components/queries/centre/${f}`, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 const PACK = JSON.parse(readFileSync("design-refs/plumage-colours-v1/plumage-colours-v1.json", "utf8"));
 const V2 = JSON.parse(readFileSync("design-refs/plumage-colours-v2/plumage-colours-v2.json", "utf8"));
-/** v2's status bands: v1's, with Full and Offer from v2 (R&R and Resubmitted on the Full sent band) */
+const V3 = JSON.parse(readFileSync("design-refs/plumage-colours-v3/plumage-colours-v3.json", "utf8"));
+/** v3's status bands: v1's, the Offer from v2, Full from v3 (R&R on the Full requested band, Resubmitted on Full sent) */
 const V2_BAND: Record<string, string> = {
-  ...PACK.statusBand, "Full requested": V2.stages.full.bandRequested, "Full sent": V2.stages.full.band,
-  "Revise and resubmit": V2.stages.full.band, Resubmitted: V2.stages.full.band, Offer: V2.stages.offer.band, Signed: V2.stages.offer.band,
+  ...PACK.statusBand, "Full requested": V3.stages.full.bandRequested, "Full sent": V3.stages.full.band,
+  "Revise and resubmit": V3.stages.full.bandRequested, Resubmitted: V3.stages.full.band, Offer: V2.stages.offer.band, Signed: V2.stages.offer.band,
 };
 /** the pack's status names → the enum's */
 const STATUS_OF: Record<string, QueryStatus> = {
@@ -34,15 +36,16 @@ const STATUS_OF: Record<string, QueryStatus> = {
   "No response": QueryStatus.NO_RESPONSE, Withdrawn: QueryStatus.WITHDRAWN,
 };
 
-describe("Plumage colours v2 · the table", () => {
-  it("Queried, Partial and Closed are v1's pack hex for hex (band = the sent shade); Full and Offer are v2's", () => {
+describe("Plumage colours v3 · the table", () => {
+  it("Queried, Partial and Closed are v1's pack hex for hex (band = the sent shade); the Offer is v2's; Full is v3's", () => {
     for (const k of ["queried", "partial", "closed"] as const) {
       const p = PACK.stages[k];
       const band = p.band ?? p.bandSent;
       expect([k, STAGE_COLOURS[k]]).toEqual([k, { band, bandRequested: p.bandRequested ?? band, tint: p.tint, edge: p.edge, mark: p.mark, rim: p.rim, rimHi: p.rimHi }]);
     }
-    for (const k of ["full", "offer"] as const) expect([k, STAGE_COLOURS[k]]).toEqual([k, V2.stages[k]]);
-    expect(STAGE_COLOURS.full).toEqual({ band: "#b9c9da", bandRequested: "#dbe4ee", tint: "#eff3f7", edge: "#9fb3c8", mark: "#6f8fb0", rim: "#6f8fb0", rimHi: "#dbe4ee" });
+    expect(STAGE_COLOURS.offer).toEqual(V2.stages.offer);
+    expect(STAGE_COLOURS.full).toEqual(V3.stages.full);
+    expect(STAGE_COLOURS.full).toEqual({ band: "#b9c9da", bandRequested: "#d3deea", tint: "#eff3f7", edge: "#9fb3c8", mark: "#6f8fb0", rim: "#6f8fb0", rimHi: "#d3deea" });
     expect(STAGE_COLOURS.offer).toEqual({ band: "#c5e0d8", bandRequested: "#c5e0d8", tint: "#eef6f3", edge: "#a9cdc2", mark: "#7fb3a5", rim: "#7fb3a5", rimHi: "#e2f0ec" });
   });
   it("Queried and Closed are unchanged", () => {
@@ -58,15 +61,15 @@ describe("Plumage colours v2 · the table", () => {
   });
 });
 
-describe("Plumage colours v2 · the status band", () => {
-  it("is v1's statusBand with Full and Offer from v2, and covers every status", () => {
+describe("Plumage colours v3 · the status band", () => {
+  it("is v1's statusBand with the Offer from v2 and Full from v3, and covers every status", () => {
     expect(Object.keys(V2_BAND).map((k) => STATUS_OF[k]).sort()).toEqual([...Object.values(QueryStatus)].sort());
     for (const [name, hex] of Object.entries(V2_BAND)) expect([name, statusBand(STATUS_OF[name])]).toEqual([name, hex]);
   });
   it("partial and full have two shades; every other stage one", () => {
     expect([statusBand(QueryStatus.PARTIAL_REQUESTED), statusBand(QueryStatus.PARTIAL_SENT)]).toEqual(["#f1d9cf", "#e8c0af"]);
-    expect([statusBand(QueryStatus.FULL_REQUESTED), statusBand(QueryStatus.FULL_SENT)]).toEqual(["#dbe4ee", "#b9c9da"]);
-    expect([statusBand(QueryStatus.REVISE_RESUBMIT), statusBand(QueryStatus.RESUBMITTED)]).toEqual(["#b9c9da", "#b9c9da"]);
+    expect([statusBand(QueryStatus.FULL_REQUESTED), statusBand(QueryStatus.FULL_SENT)]).toEqual(["#d3deea", "#b9c9da"]);
+    expect([statusBand(QueryStatus.REVISE_RESUBMIT), statusBand(QueryStatus.RESUBMITTED)]).toEqual(["#d3deea", "#b9c9da"]);
     expect([statusBand(QueryStatus.OFFER), statusBand(QueryStatus.SIGNED)]).toEqual(["#c5e0d8", "#c5e0d8"]);
     for (const s of ["queried", "offer", "closed"] as const) expect(STAGE_COLOURS[s].bandRequested).toBe(STAGE_COLOURS[s].band);
     expect(statusBand(null)).toBe("#efe6d6");
@@ -77,7 +80,7 @@ describe("Plumage colours v2 · the status band", () => {
     expect(quietBackground(QueryStatus.PARTIAL_SENT)).toBe("linear-gradient(90deg, #e8c0af 0, #e8c0af 26%, #fff 82%)");
   });
   it("text and marks: ink on every band, the offer's included", () => {
-    expect([STAGE_INK, V2.ink, V2.offerInk]).toEqual(["#1c130f", "#1c130f", "#1c130f"]);
+    expect([STAGE_INK, V2.ink, V2.offerInk, V3.ink]).toEqual(["#1c130f", "#1c130f", "#1c130f", "#1c130f"]);
     for (const s of Object.values(QueryStatus)) expect([s, bandInk(s)]).toEqual([s, STAGE_INK]);
     for (const s of Object.keys(STAGE_COLOURS) as (keyof typeof STAGE_COLOURS)[]) expect([s, stageInk(s)]).toEqual([s, STAGE_INK]);
   });
@@ -110,27 +113,33 @@ describe("Plumage colours v2 · no with-you outline", () => {
   });
 });
 
-/* LOCK 4 (source half) — Plumage colours v2: the offer's soft stripes are the JSON's, built from the table, and drawn by
-   the two card bands only (QcCard154's band, QcCard152's strip, through bandBackground); every other surface is flat. */
-describe("Plumage colours v2 · the offer's stripes, on two card bands only", () => {
-  it("are the JSON's stripes, character for character, and are built from the table's requested shades", () => {
-    expect(OFFER_STRIPES).toBe(V2.offerStripes);
-    expect(STRIPE_PAPER).toBe("#f6f0e5");
-    expect(OFFER_STRIPES).toContain(`${STAGE_COLOURS.partial.bandRequested} 22px 44px`);
-    expect(OFFER_STRIPES).toContain(`${STAGE_COLOURS.full.bandRequested} 44px 66px`);
-    expect(readFileSync("src/lib/stageColours.ts", "utf8")).toContain("${STAGE_COLOURS.partial.bandRequested} 22px 44px,${STAGE_COLOURS.full.bandRequested} 44px 66px");
+/* LOCK 2 (source half) — Plumage colours v3: the stripes mean Revise & Resubmit. They are the JSON's, built from the
+   table's two Full shades, and drawn by the two card bands only (QcCard154's band, QcCard152's strip, through
+   bandBackground); every other surface is flat. The offer's v2 stripes and their paper are gone. */
+describe("Plumage colours v3 · Revise & Resubmit's stripes, on two card bands only", () => {
+  it("are the JSON's stripes, character for character, built from the table's two Full shades", () => {
+    expect(RR_STRIPES).toBe(V3.reviseResubmit.stripes);
+    expect(RR_STRIPES).toContain(`${STAGE_COLOURS.full.bandRequested} 0 22px`);
+    expect(RR_STRIPES).toContain(`${STAGE_COLOURS.full.band} 22px 44px`);
+    expect(readFileSync("src/lib/stageColours.ts", "utf8")).toContain("${STAGE_COLOURS.full.bandRequested} 0 22px,${STAGE_COLOURS.full.band} 22px 44px");
   });
-  it("bandBackground is the stripes for Offer and Signed, the flat status band for every other status", () => {
-    for (const s of Object.values(QueryStatus)) expect([s, bandBackground(s)]).toEqual([s, stageOf(s) === "offer" ? OFFER_STRIPES : statusBand(s)]);
+  it("the offer's stripes and their paper are deleted", () => {
+    for (const n of ["OFFER_STRIPES", "STRIPE_PAPER"]) expect([n, n in TABLE]).toEqual([n, false]);
+  });
+  it("bandBackground is the stripes for Revise & Resubmit only, the flat status band for every other status", () => {
+    for (const s of Object.values(QueryStatus)) expect([s, bandBackground(s)]).toEqual([s, s === QueryStatus.REVISE_RESUBMIT ? RR_STRIPES : statusBand(s)]);
+    for (const s of [QueryStatus.OFFER, QueryStatus.SIGNED]) expect([s, bandBackground(s)]).toEqual([s, "#c5e0d8"]);
+    expect(bandBackground(QueryStatus.RESUBMITTED)).toBe("#b9c9da");
     expect(bandBackground(null)).toBe("#efe6d6");
   });
   const files: string[] = [];
   const walk = (d: string) => { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else if (/\.(tsx?|css)$/.test(f) && !/\.test\.tsx?$/.test(f)) files.push(p); } };
   walk("src");
   const code = (f: string) => readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-  it("only the grid card and the slide-in card call bandBackground or name OFFER_STRIPES", () => {
+  it("only the grid card and the slide-in card call bandBackground or name RR_STRIPES; nothing names the offer's", () => {
     expect(files.length).toBeGreaterThan(500);
-    const users = files.filter((f) => f !== "src/lib/stageColours.ts" && /\bbandBackground\(|\bOFFER_STRIPES\b/.test(code(f))).sort();
+    const users = files.filter((f) => f !== "src/lib/stageColours.ts" && /\bbandBackground\(|\bRR_STRIPES\b/.test(code(f))).sort();
+    expect(files.filter((f) => /\bOFFER_STRIPES\b|\bSTRIPE_PAPER\b/.test(code(f)))).toEqual([]);
     expect(users).toEqual(["src/components/queries/centre/QcCard152.tsx", "src/components/queries/centre/QcCard154.tsx"]);
   });
   it("the grid card puts it on its band only, when not quiet; the slide-in card on its strip", () => {
@@ -145,8 +154,8 @@ describe("Plumage colours v2 · the offer's stripes, on two card bands only", ()
   });
   it("no stylesheet draws the stripes, and no offer rule anywhere carries a gradient, an animation or a transition", () => {
     const sheets = files.filter((f) => f.endsWith(".css"));
-    /* the offer's stripes by their colours (Comps' own 118° stripes, #edd8cd/#e6cec1, are not the offer's) */
-    expect(sheets.filter((f) => /repeating-linear-gradient\(\s*118deg[^;]*(#f6f0e5|#f1d9cf|#dbe4ee)/i.test(code(f)))).toEqual([]);
+    /* the stripes by their colours, v2's offer's and v3's R&R's (Comps' own 118° stripes, #edd8cd/#e6cec1, are neither) */
+    expect(sheets.filter((f) => /repeating-linear-gradient\(\s*118deg[^;]*(#f6f0e5|#f1d9cf|#dbe4ee|#d3deea|#b9c9da)/i.test(code(f)))).toEqual([]);
     const offerRules = sheets.flatMap((f) => [...code(f).matchAll(/([^{}]+)\{([^}]*)\}/g)]
       .filter((m) => /data-(tone|stage|sk)="offer"|"Offer"|"Signed"|\[data-offer\]/.test(m[1]) && /gradient|animation|transition/.test(m[2]))
       .map((m) => `${f}: ${m[1].trim()}`));
@@ -273,7 +282,7 @@ describe("Plumage colours v1 · the Query Centre's stylesheets restate the table
     expect(sectionSwatch("attention", "quiet")).toBe("#f4efe6");
     expect(sectionSwatch("attention", "closed")).toBe("#eceae6");
     expect(sectionSwatch("status", QueryStatus.FULL_SENT)).toBe(STAGE_COLOURS.full.band);
-    expect(sectionSwatch("status", QueryStatus.FULL_REQUESTED)).toBe("#dbe4ee"); /* Phase 2: a Status group its status's band */
+    expect(sectionSwatch("status", QueryStatus.FULL_REQUESTED)).toBe("#d3deea"); /* Phase 2: a Status group its status's band */
     expect(sectionSwatch("status", "closed")).toBe(STAGE_COLOURS.closed.band);
   });
   it("the paperclip accent is the stage's edge and the pack's accent ink; the resting ink is the ink 82% over white", () => {
@@ -282,7 +291,9 @@ describe("Plumage colours v1 · the Query Centre's stylesheets restate the table
     expect(tabAccent157(QueryStatus.SIGNED)).toEqual(TAB_ACCENT_157.offer);
     const mix = (h: string) => [1, 3, 5].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * 0.82 + 255 * 0.18));
     for (const a of Object.values(TAB_ACCENT_157)) expect(mix(a.ink)).toEqual([1, 3, 5].map((i) => parseInt(a.rest.slice(i, i + 2), 16)));
-    expect(readFileSync("src/components/queries/centre/QcCard154.tsx", "utf8")).toContain("accent={tabAccent157(r.status)}");
+    /* Plumage colours v3: the grid card no longer draws the paperclip (its materials are a tile, QcMatTile, in ink);
+       the accent is the unrendered slip's (QcSlip153 MatTab1533) */
+    expect(readFileSync("src/components/queries/centre/QcCard154.tsx", "utf8")).not.toMatch(/tabAccent157|MatTab1533/);
   });
   it("the unreachable stage ring keeps its own v153 fills (QcStageRing1531 is rendered by no route; AUDIT.md)", () => {
     expect(RING_BUCKETS.slice(0, 4).map((b) => b.fill)).toEqual(["#efe7da", "#ecd6d2", "#d9e1ea", "#e7d6dc"]);

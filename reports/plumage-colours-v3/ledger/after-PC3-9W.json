@@ -1,0 +1,887 @@
+[
+ {
+  "name": "agency lines: population",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "Offer seed-query-12: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Offer seed-query-12: agency ≥ 4.5:1 on #c5e0d8",
+  "ok": true,
+  "got": "5.12"
+ },
+ {
+  "name": "Partial Requested seed-query-7: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Requested seed-query-7: agency ≥ 4.5:1 on #f1d9cf",
+  "ok": true,
+  "got": "5.18"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: agency ≥ 4.5:1 on #d3deea / #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Full Requested seed-query-9: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Requested seed-query-9: agency ≥ 4.5:1 on #d3deea",
+  "ok": true,
+  "got": "5.17"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: agency ≥ 4.5:1 on #f1d9cf",
+  "ok": true,
+  "got": "5.18"
+ },
+ {
+  "name": "Partial Requested seed-query-20: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Requested seed-query-20: agency ≥ 4.5:1 on #f1d9cf",
+  "ok": true,
+  "got": "5.18"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: agency ≥ 4.5:1 on #f1d9cf",
+  "ok": true,
+  "got": "5.18"
+ },
+ {
+  "name": "Full Requested rj-send: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Requested rj-send: agency ≥ 4.5:1 on #d3deea",
+  "ok": true,
+  "got": "5.17"
+ },
+ {
+  "name": "Full Requested cv25-q-09: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Requested cv25-q-09: agency ≥ 4.5:1 on #d3deea",
+  "ok": true,
+  "got": "5.17"
+ },
+ {
+  "name": "Partial Requested cor-move-a: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Requested cor-move-a: agency ≥ 4.5:1 on #f1d9cf",
+  "ok": true,
+  "got": "5.18"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: agency ≥ 4.5:1 on #f1d9cf",
+  "ok": true,
+  "got": "5.18"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: agency ≥ 4.5:1 on #d3deea",
+  "ok": true,
+  "got": "5.17"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: agency ≥ 4.5:1 on #d3deea",
+  "ok": true,
+  "got": "5.17"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Revise & Resubmit cor-undo: agency ≥ 4.5:1 on #d3deea / #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Full Requested msv12-q-4: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Requested msv12-q-4: agency ≥ 4.5:1 on #d3deea",
+  "ok": true,
+  "got": "5.17"
+ },
+ {
+  "name": "Full Requested rj-dupe: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Requested rj-dupe: agency ≥ 4.5:1 on #d3deea",
+  "ok": true,
+  "got": "5.17"
+ },
+ {
+  "name": "Queried seed-query-2: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-2: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Partial Sent cor-pair: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent cor-pair: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Partial Sent seed-query-23: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent seed-query-23: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Partial Sent seed-query-8: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent seed-query-8: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Full Sent qc150l9-q: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Sent qc150l9-q: agency ≥ 4.5:1 on #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Queried probe-un-both: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried probe-un-both: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried probe-un-noagent: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried probe-un-noagent: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried cv25-q-14: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried cv25-q-14: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried cv25-q-13: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried cv25-q-13: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-close: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-close: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-query-22: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-22: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried msv12-q-1: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried msv12-q-1: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried msv12-q-7: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried msv12-q-7: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-query-4: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-4: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-query-19: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-19: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Full Sent seed-query-10: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Sent seed-query-10: agency ≥ 4.5:1 on #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried rj-nudge: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried rj-nudge: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried thin-q-chase: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-chase: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: agency ≥ 4.5:1 on #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Resubmitted cv25-q-10: agency ≥ 4.5:1 on #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-query-6: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-6: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-pkgq-1: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-pkgq-1: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-pkgq-2: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-pkgq-2: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-query-5: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-5: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried cor-move-b: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried cor-move-b: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-pkgq-7: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-pkgq-7: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-query-3: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-query-3: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried seed-cal-near-q: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried seed-cal-near-q: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: agency ≥ 4.5:1 on #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Full Sent seed-query-21: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Sent seed-query-21: agency ≥ 4.5:1 on #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: agency ≥ 4.5:1 on #e8c0af",
+  "ok": true,
+  "got": "4.69"
+ },
+ {
+  "name": "Full Sent msv12-q-5: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Full Sent msv12-q-5: agency ≥ 4.5:1 on #b9c9da",
+  "ok": true,
+  "got": "4.68"
+ },
+ {
+  "name": "Queried thin-q-remind: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried thin-q-remind: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried msv12-q-2: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried msv12-q-2: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried probe-un-noms: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried probe-un-noms: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried probe-goalstress-today: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried probe-goalstress-today: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried cv25-q-04: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried cv25-q-04: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Queried cv25-q-03: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Queried cv25-q-03: agency ≥ 4.5:1 on #efe6d6",
+  "ok": true,
+  "got": "5.38"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "No Response msv12-q-8: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "No Response msv12-q-8: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected cv25-q-01: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected cv25-q-01: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected seed-query-1: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-query-1: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected seed-query-13: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-query-13: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected cv25-q-12: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected cv25-q-12: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected rej-query-1: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected rej-query-1: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected cor-move-c: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected cor-move-c: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Withdrawn seed-query-17: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Withdrawn seed-query-17: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected seed-query-15: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-query-15: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected seed-query-16: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-query-16: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected msv12-q-6: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected msv12-q-6: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "No Response seed-query-18: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "No Response seed-query-18: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected cor-closed: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected cor-closed: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Signed cv25-q-08: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Signed cv25-q-08: agency ≥ 4.5:1 on #c5e0d8",
+  "ok": true,
+  "got": "5.12"
+ },
+ {
+  "name": "Rejected seed-query-14: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected seed-query-14: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ },
+ {
+  "name": "Rejected cv25-q-02: agency rgba(28,19,15,.66)",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.66)"
+ },
+ {
+  "name": "Rejected cv25-q-02: agency ≥ 4.5:1 on #eceae6",
+  "ok": true,
+  "got": "5.46"
+ }
+]

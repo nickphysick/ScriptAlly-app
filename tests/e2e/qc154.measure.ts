@@ -4,7 +4,7 @@
  *   M1  the grid and the card: three across, the band, no status word on show, two facts, labels never cut mid-word
  *   M2  the Next box's states, read from every card
  *   M3  hover: the action overlay, the track's draw and its one label, reduced motion
- *   M4  the paperclip pop-up in the first and third columns, never clipped, under the toolbar
+ *   M4  RETIRED (Plumage colours v3: no paperclip on the card; the tile's hover is pc3.measure.ts PC3-8 and PC3-11)
  *   M5  the goal chart in the header; the header's height (v153.4: 218)
  *   M6  the sticky toolbar: rest unchanged, mid-scroll in three groups (fade + group label), no sticky headings, the rail
  * Screens, readings and ledgers to reports/qc-v154/. Readings only where the brief gives no number.
@@ -175,36 +175,9 @@ for (const vp of SIZES) {
     L.done(5);
   });
 
-  test(`v154 M4 paperclip pop-ups · ${vp.width}`, async ({ page }) => {
-    const L = new Ledger(`M4-${vp.width}`);
-    await openQc(page, vp);
-    const withClip = await page.evaluate((sel) => [...document.querySelectorAll<HTMLElement>(`${sel} [data-qc154="card"]`)].filter((c) => c.querySelector("[data-qc154='clip']"))
-      .map((c) => ({ id: c.dataset.id!, col: Math.round((c.getBoundingClientRect().x - c.parentElement!.getBoundingClientRect().x) / (c.getBoundingClientRect().width + 14)) })), PAGE);
-    L.check("cards with materials (population)", withClip.length > 0, String(withClip.length));
-    L.check("no clip on a card without materials", await page.evaluate((sel) => [...document.querySelectorAll(`${sel} [data-qc154="card"]`)].every((c) => !!c.querySelector("[data-qc154='clip']") === !!c.querySelector(".qc1533-clip")), PAGE), "checked");
-    for (const col of [0, 2]) {
-      const c = withClip.find((x) => x.col === col);
-      if (!c) { L.check(`a clipped card in column ${col + 1}`, false, "none"); continue; }
-      const card = page.locator(`${PAGE} [data-qc154="card"][data-id="${c.id}"]`);
-      await card.scrollIntoViewIfNeeded();
-      await scrollTo(page, await page.evaluate(([sel, id]) => { const s = document.querySelector<HTMLElement>(sel)!; const e = document.querySelector<HTMLElement>(`[data-qc154="card"][data-id="${id}"]`)!; return s.scrollTop + e.getBoundingClientRect().top - s.getBoundingClientRect().top - 260; }, [SCROLL, c.id] as const));
-      await page.waitForTimeout(250);
-      await card.locator(".qc1533-clip").hover(); await page.waitForTimeout(300);
-      const r = await page.evaluate(([id, sel]) => {
-        const pop = document.querySelector<HTMLElement>(`[data-qc154="card"][data-id="${id}"] [data-qc1533="pop"]`);
-        if (!pop) return null;
-        const p = pop.getBoundingClientRect();
-        const pt = document.elementFromPoint(p.left + p.width / 2, p.top + 12);
-        const list = document.querySelector<HTMLElement>(`${sel} [data-qc153="list-column"]`)!.getBoundingClientRect();
-        return { l: p.left, r: p.right, t: p.top, b: p.bottom, onTop: !!pt && pop.contains(pt), listL: list.left, listR: list.right, vw: innerWidth, up: pop.hasAttribute("data-up") };
-      }, [c.id, PAGE] as const);
-      L.check(`column ${col + 1}: the pop-up opens`, !!r, JSON.stringify(r));
-      L.check(`column ${col + 1}: nothing paints over it`, !!r && r.onTop, JSON.stringify(r));
-      L.check(`column ${col + 1}: inside the window`, !!r && r.l >= 0 && r.r <= r.vw, JSON.stringify(r));
-      await page.screenshot({ path: `${DIR}/pop-col${col + 1}-${vp.width}.png`, clip: { x: Math.max(0, (r?.l ?? 0) - 340), y: Math.max(0, (r?.t ?? 0) - 160), width: 720, height: 420 } });
-    }
-    L.done(4);
-  });
+  /* M4 (the paperclip's pop-up in the first and third columns) is retired by Plumage colours v3: the grid card has no
+     paperclip. The materials tile's hover is measured by tests/e2e/pc3.measure.ts PC3-8 (last row, last and first
+     column, inside the window, above its neighbours) and PC3-11. */
 
   test(`v154 M5 goal chart and header · ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`M5-${vp.width}`);

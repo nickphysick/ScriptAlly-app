@@ -41,7 +41,7 @@ const QUERIES = [
 const TASKS = [task("t1", "partial_requested", "q1"), task("t2", "full_requested", "q2"), task("t3", "nudge_overdue", "q3")];
 const STAGE_OF_ROW: Record<string, Stage> = { "Send Greg your partial": "partial", "Send Jonathan your full": "full", "Nudge William": "queried" };
 /** Plumage colours v1 — the band is the query's status band: the two asks are requested, so the lighter shade */
-const BAND_OF_ROW: Record<string, string> = { "Send Greg your partial": "#f1d9cf", "Send Jonathan your full": "#dbe4ee", "Nudge William": "#efe6d6" };
+const BAND_OF_ROW: Record<string, string> = { "Send Greg your partial": "#f1d9cf", "Send Jonathan your full": "#d3deea", "Nudge William": "#efe6d6" };
 
 vi.mock("../../../lib/firebase", () => ({ db: {}, auth: {}, OperationType: { GET: "GET", WRITE: "WRITE", DELETE: "DELETE" }, handleFirestoreError: () => {} }));
 vi.mock("firebase/firestore", () => ({
