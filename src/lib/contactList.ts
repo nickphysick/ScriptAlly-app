@@ -156,8 +156,9 @@ const dmyY = (ms: number): string =>
 export const LONG_OVER = 30;
 
 /** The agent's STANDING QUERY — what the row's right column speaks about. The furthest-along
- *  live one (the board's own law), else the latest close, else null. One rule, stated once. */
-export function standingQuery(rows: readonly QcRow[]): QcRow | null {
+ *  live one (the board's own law), else the latest close, else null. One rule, stated once.
+ *  It reads only `court`, `status` and `lastMs`, so search (lib/searchPalette buildCorpus) asks it too. */
+export function standingQuery<R extends Pick<QcRow, "court" | "status" | "lastMs">>(rows: readonly R[]): R | null {
   const open = rows.filter((r) => r.court !== "closed");
   const pool = open.length ? open : rows;
   if (pool.length === 0) return null;

@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   GROUP_ORDER, GROUP_LABEL, KIND_LEAN, PALETTE_ACTIONS, PALETTE_PAGES, PaletteItem, SCORE, START_IDS, DAY_ONE_PAGE_IDS,
-  fold, foldMap, highlightParts, isSelectable, near, scoreItem, searchPalette, slipped, snippetParts, tier, tokens,
+  buildCorpus, type CorpusQuery, fold, foldMap, highlightParts, isSelectable, near, scoreItem, searchPalette, slipped, snippetParts, tier, tokens,
 } from "./searchPalette";
 
 const row = (over: Partial<PaletteItem>): PaletteItem => ({
@@ -209,5 +209,39 @@ describe("both shells mount ONE palette", () => {
   });
   it("⌘K toggles rather than only opening", () => {
     expect(read("usePalette.tsx")).toMatch(/setOpen\(\(v\) => \{[\s\S]*?if \(v\) return false;/);
+  });
+});
+
+/**
+ * Search standing B1 (reports/search-recon-v1/REPORT.md §4) — an agent row speaks for the agent's STANDING query on the
+ * book in hand, chosen by the Contact list's own rule (lib/contactList standingQuery: the furthest-along live query,
+ * else the latest close), never by whichever query happens to load first. "Open the query" opens that same query.
+ */
+describe("an agent row's query is the agent's standing query (B1)", () => {
+  const agentRow = (qs: CorpusQuery[]) => buildCorpus({
+    agents: [{ id: "a1", name: "Tom Ellery" }], queries: qs, activeManuscriptId: "m1",
+    agentLabel: (a) => ({ primary: a.name ?? "", secondary: "" }),
+  }).find((i) => i.id === "agent:a1")!;
+  const q = (id: string, status: string): CorpusQuery => ({ id, agentId: "a1", manuscriptId: "m1", status });
+  const speaksFor = (qs: CorpusQuery[]) => {
+    const r = agentRow(qs);
+    const peek = r.peek as { status?: string };
+    const open = r.second?.run as { kind: string; queryId?: string } | undefined;
+    return { status: r.status, peek: peek.status, label: r.second?.label, opens: open?.kind === "query" ? open.queryId : null };
+  };
+
+  it("Rejected then Queried shows Queried, and Open the query opens the Queried one", () => {
+    expect(speaksFor([q("q1", "Rejected"), q("q2", "Queried")]))
+      .toEqual({ status: "Queried", peek: "Queried", label: "Open the query", opens: "q2" });
+  });
+  it("Partial Sent and Full Sent shows Full Sent, and Open the query opens the Full Sent one", () => {
+    expect(speaksFor([q("q1", "Partial Sent"), q("q2", "Full Sent")]))
+      .toEqual({ status: "Full Sent", peek: "Full Sent", label: "Open the query", opens: "q2" });
+  });
+  it("reversing the input order changes nothing", () => {
+    for (const qs of [[q("q1", "Rejected"), q("q2", "Queried")], [q("q1", "Partial Sent"), q("q2", "Full Sent")]]) {
+      expect(speaksFor([...qs].reverse())).toEqual(speaksFor(qs));
+      expect(speaksFor([...qs].reverse()).opens).toBe("q2");
+    }
   });
 });

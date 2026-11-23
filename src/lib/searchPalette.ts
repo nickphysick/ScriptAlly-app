@@ -19,6 +19,9 @@ import { RailCaptureKey } from "../components/shell/railNav";
 import { TODO_ROUTES } from "./todoRoutes";
 import { workspaceSections } from "./workspaceNav";
 import { stageOf } from "./stageColours";
+import { courtOf } from "./qcSummary";
+import { standingQuery } from "./contactList";
+import type { QueryStatus } from "../types";
 
 /** What opening a row does. Data only — the palette component performs it. */
 export type PaletteRun =
@@ -580,6 +583,8 @@ export interface QueryRowFacts {
   quiet: boolean;
   /** Whose move: the row's court (lib/qcSummary courtOf). */
   court: "you" | "agent" | "offer" | "closed";
+  /** The row's last activity (QcRow.lastMs) — standingQuery's tie to the latest close. */
+  lastMs: number;
 }
 
 export interface CorpusAgent {
@@ -634,8 +639,18 @@ export function buildCorpus(input: CorpusInput): PaletteItem[] {
   const { agents, queries, agentLabel, rows, policy, activeManuscriptId, packageNames } = input;
   const ms = input.activeManuscriptTitle ?? "this manuscript";
   const agentById = new Map(agents.map((a) => [a.id, a]));
+  /* ⚠️ THE AGENT'S STANDING QUERY ON THE BOOK IN HAND — the Contact list's own rule (lib/contactList standingQuery: the
+     furthest-along live query, else the latest close), never the first one loaded (search recon v1, B1). The row's chip,
+     its peek and "Open the query" all speak for this one query. */
+  const onBook = new Map<string, { q: CorpusQuery; court: ReturnType<typeof courtOf>; status: QueryStatus; lastMs: number }[]>();
+  if (activeManuscriptId) for (const q of queries) {
+    if (q.manuscriptId !== activeManuscriptId) continue;
+    const c = { q, court: courtOf(q.status as QueryStatus), status: q.status as QueryStatus, lastMs: rows?.get(q.id)?.lastMs ?? 0 };
+    const list = onBook.get(q.agentId);
+    if (list) list.push(c); else onBook.set(q.agentId, [c]);
+  }
   const activeQueryOf = new Map<string, CorpusQuery>();
-  for (const q of queries) if (activeManuscriptId && q.manuscriptId === activeManuscriptId && !activeQueryOf.has(q.agentId)) activeQueryOf.set(q.agentId, q);
+  for (const [agentId, list] of onBook) { const s = standingQuery(list); if (s) activeQueryOf.set(agentId, s.q); }
 
   const agentItems: PaletteItem[] = agents.map((a) => {
     const { primary, secondary } = agentLabel(a);

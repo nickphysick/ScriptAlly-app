@@ -10,7 +10,7 @@ const agentLabel = (a: { name?: string; agency?: string }) => ({ primary: a.name
 const facts = (over: Partial<QueryRowFacts>): QueryRowFacts => ({
   sent: "14 Sep", sentLine: "66 days ago", sentMs: Date.parse("2026-09-14T09:00:00Z"),
   next: { label: "Next", value: "Send the full", line: null }, heard: { value: "2 Nov", line: "full requested" },
-  quiet: false, court: "you", ...over,
+  quiet: false, court: "you", lastMs: 0, ...over,
 });
 const base = {
   agentLabel,

@@ -76,7 +76,7 @@ export function queryRowFacts(queries: Query[], agents: Agent[], activities: Act
     const heard = heardFact(r, now);
     out.set(r.id, {
       sent: r.sentMs == null ? null : sent.value, sentLine: sent.line, sentMs: r.sentMs,
-      next, heard: { value: heard.value, line: heard.line }, quiet: isQuietCard(r, now), court: r.court,
+      next, heard: { value: heard.value, line: heard.line }, quiet: isQuietCard(r, now), court: r.court, lastMs: r.lastMs,
     });
   }
   return out;
