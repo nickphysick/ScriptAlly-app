@@ -539,12 +539,11 @@ export interface ReviewCounts {
  */
 export function reviewCounts(book: readonly Query[], unsaved: Query | null, now: Date): ReviewCounts {
   const withIt = unsaved ? [...book, unsaved] : [...book];
-  /* the sent figures are read at the END OF TODAY: a query sent today carries today's date, which `sentAt` reads as later
-     in the day than an early-morning now — so at 00:30 "Queries sent" read "0 → 0" (measured, V2-6 at 00:30) */
-  const eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  /* v2.1 · Phase 5 — `sentAllTime` itself counts a query sent today from the moment it is logged (oneScreen `sentBy`),
+     so v2's end-of-day workaround here (it read "0 → 0" at 00:30) is gone */
   return {
     active: [liveCount(book), liveCount(withIt)],
-    sent: [sentAllTime(book, eod), sentAllTime(withIt, eod)],
+    sent: [sentAllTime(book, now), sentAllTime(withIt, now)],
   };
 }
 /** v2.1 · Phase 1 — the big numbers: "active queries" only when the Dashboard would count this query as active */
