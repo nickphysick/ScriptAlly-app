@@ -71,6 +71,10 @@ import "../../queries/centre/sc1card.css";
 import "../../queries/centre/qcv158.css";
 import "./acv2.css";
 import "./acv21.css";
+/* Agent card v2.2 — the query card's one way to edit, its parts imported (never copied), then this card's placing of them */
+import "../../queries/centre/qcv168.css";
+import "./acv22.css";
+import { EditPen } from "../../queries/centre/QcEdit168";
 
 /** the band's slate, for every agent (v26.2 ruling) */
 export const CARD262_BAND = "#5e7189";
@@ -119,7 +123,6 @@ export const SEC_PROBLEMS: Record<Sec262, readonly CardProblemKey[]> = {
 export const secName = (k: Sec262): string => ({ contact: "contact details", how: "how they work", wishlist: "the wishlist", genres: "genres", materials: "what they ask for" })[k];
 
 const IC = {
-  pen: <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16l-4 1 1-4z" /></svg>,
   clock: <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>,
   l: <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6" /></svg>,
   r: <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 4l6 6-6 6" /></svg>,
@@ -765,13 +768,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const copyEmail = () => { void navigator.clipboard?.writeText(hEmail).then(() => showToast({ message: "Email address copied" }), () => {}); };
   const quiet = p.preview || !!cd;
   const head = (
-    <div className="ag-head" data-acv2="head" data-acv2-part="head" data-live={cd ? "" : undefined}>
+    <div className="ag-head" data-acv2="head" data-acv2-part="head" data-live={cd ? "" : undefined} data-qc168-host={quiet ? undefined : ""}>
       <div className="qc152-agent" data-acv2="head-row">
         <span className={`qc152-disc acv2-disc${tone === "nq" ? " nq" : tone === "closed" ? " cl" : ""}`} data-acv2="disc" data-tone={tone} aria-hidden="true"
           style={tone === "nq" ? undefined : { boxShadow: `0 0 0 2.5px #fff, 0 0 0 4.5px ${col.edge}` }}>{initials}</span>
         <div className="qc152-who">
           <div className="ag-nmrow"><h2 className="qc152-nm qcv-open-nm" data-apc="name" data-acv2="name">{hName}</h2>
-            {quiet ? null : <button type="button" className="cl262-pen ag-pen" data-cl262="pen" data-k="contact" aria-label={`Edit ${m.first}’s name and contact details`} onClick={() => openSec("contact")}>{IC.pen}</button>}</div>
+            {quiet ? null : <EditPen label={`${m.first}’s name and contact details`} onOpen={() => openSec("contact")} data={{ "data-cl262": "pen", "data-k": "contact" }} />}</div>
           {hAgency ? <div className="qc152-ag" data-acv2="agency">{hAgency.toUpperCase()}</div> : null}
           {place.text ? (
             <div className="ag-loc" data-acv2="loc">
@@ -822,8 +825,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
   const fin = gaps ? finishItems(gaps.keys ?? []) : [];
   const SEC_PEN: Record<Sec262, string> = { contact: `${m.first}’s name and contact details`, how: `how ${m.first} works`, wishlist: "the wishlist", genres: "genres", materials: `what ${m.first} asks for` };
-  /* each section's pencil: 28px, shown on hover and on keyboard focus within the section */
-  const penFor = (k: Sec262) => (p.preview ? null : <button type="button" className="cl262-pen ag-pen" data-cl262="pen" data-k={k} aria-label={`Edit ${SEC_PEN[k]}`} onClick={() => openSec(k)}>{IC.pen}</button>);
+  /* Agent card v2.2 — each section's pencil is the query card's (QcEdit168 EditPen): a 26px disc at the right end of the
+     heading (the fact boxes': their top-right corner), shown on hover and on keyboard focus within; it moves nothing */
+  const penFor = (k: Sec262) => (p.preview ? null : <EditPen label={SEC_PEN[k]} onOpen={() => openSec(k)} data={{ "data-cl262": "pen", "data-k": k }} />);
   /* the value itself opens its section (a faint edge on hover); a button or link inside a value keeps its own action */
   const doorOf = (k: Sec262): Record<string, unknown> => (p.preview || !kit ? {} : {
     "data-door": k,
@@ -865,7 +869,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           <div className="ag-ctl"><EditHow form={form} agent={a} kit={kit} first={m.first} offers={offerKit} /></div>
         </OpenSec>
       ) : factsShown ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="how" data-acv2="facts-sec">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="how" data-acv2="facts-sec" data-qc168-host="">
           {penFor("how")}
           {boxRow(boxes, false)}
         </section>
@@ -873,7 +877,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       {isOpen("wishlist") ? (
         <OpenSec {...sec("wishlist")} heading={<>Wishlist <em>in {m.first}’s words</em></>}><EditWishlist form={form} /></OpenSec>
       ) : wish ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="wishlist" data-qc158="wishlist" data-acv2="wishlist" data-acv2-part="wishlist">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="wishlist" data-qc158="wishlist" data-acv2="wishlist" data-acv2-part="wishlist" data-qc168-host="">
           <h4>Wishlist <em>in {m.first}’s words</em>{penFor("wishlist")}</h4>
           <p className="nx-quote" data-cl262="wishlist" {...doorOf("wishlist")}>{wish}</p>
         </section>
@@ -881,7 +885,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       {isOpen("genres") && kit ? (
         <OpenSec {...sec("genres")} heading={<>Genres {m.first} takes</>}><EditGenres form={form} kit={kit} isHit={p.genreHit} /></OpenSec>
       ) : genres.length ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="genres" data-acv2="genres" data-acv2-part="genres">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="genres" data-acv2="genres" data-acv2-part="genres" data-qc168-host="">
           <h4>Genres {m.first} takes{genres.some((g) => p.genreHit(g)) ? <span className="r" data-acv2="yours">includes yours</span> : null}{penFor("genres")}</h4>
           <div className="nx-chips" data-cl262="genres" {...doorOf("genres")}>
             {[...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))].map((g) => (
@@ -895,7 +899,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       {isOpen("materials") ? (
         <OpenSec {...sec("materials")} heading={<>What {m.first} asks for <em data-acv21="tick-all">tick all that apply</em></>}><EditMaterials form={form} /></OpenSec>
       ) : asks.length ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="materials" data-qc158="asks" data-acv2="asks" data-acv2-part="asks">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="materials" data-qc158="asks" data-acv2="asks" data-acv2-part="asks" data-qc168-host="">
           <h4>What {m.first} asks for{penFor("materials")}</h4>
           <ul className="nx-list" {...doorOf("materials")}>{asks.map((c) => (
             <li key={c.label} data-acv2="ask"><MaterialItemIcon kind={c.icon} size={20} />{c.label}{c.qty ? <span className="r">{c.qty}</span> : null}</li>

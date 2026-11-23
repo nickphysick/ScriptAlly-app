@@ -1,0 +1,12 @@
+/* Agent card v2.2 (design-refs/agent-card-v2-2/agent-card-v2-2.html) — the agent card edited the query card's one way.
+   The parts are Query card v168's (QcEdit168: EditPen, CrossTick, DiscardAsk, CardMenu) with their own sheet (qcv168.css),
+   imported, never copied; this sheet only PLACES them on this card. Nothing here is under 12px; no uppercase mono label.
+   ⚠️ A PENCIL IS ABSOLUTELY PLACED and only its opacity changes: showing it moves nothing (acv22.measure.ts AC1). */
+
+/* ── B1 · the pencil: at the right end of a section's heading; the fact boxes' at their top-right corner; the name's
+      beside the name ─────────────────────────────────────────────────────────────────────────────────────────────── */
+.qc152 .acv2-sec[data-qc168-host] > h4 { position: relative; padding-right: 34px; }
+.qc152 .acv2-sec > h4 > .qc168-pen { top: 50%; right: 0; translate: 0 -50%; }
+.qc152 [data-qc168-host]:is(:hover, :focus-within) > h4 > .qc168-pen { opacity: 1; }
+.qc152 .ag-nmrow > .qc168-pen { position: relative; top: auto; right: auto; flex: none; margin-left: 6px; align-self: center; }
+.qc152 .ag-head[data-qc168-host]:is(:hover, :focus-within) .ag-nmrow > .qc168-pen { opacity: 1; }
