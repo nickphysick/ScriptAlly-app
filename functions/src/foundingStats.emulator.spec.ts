@@ -65,7 +65,9 @@ describe("foundingStats — the recompute", () => {
     await db.collection("betaFeedback").add(note("dan", { status: "fixed" }));
     expect(await recomputeFoundingStats(db, NO_ACCOUNTS)).toBe(2);
     expect(await stats("carol")).toMatchObject({ contributions: 0, tier: null });
-    expect(await stats("dan")).toMatchObject({ contributions: 1, tier: "fledgling" });
+    /* dan's one note is "fixed": 1 for the note + the +3 now-in-the-app bonus, since Nick's
+       ruling of 9 Nov (84db5c5b4, Your notes v1 Part A) that fixed earns like built. */
+    expect(await stats("dan")).toMatchObject({ contributions: 4, tier: "archivist" });
   });
 });
 
