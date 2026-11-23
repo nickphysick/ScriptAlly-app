@@ -55,10 +55,30 @@ async function recordThenUndo(page: Page, name: string) {
   await settle(page, 800);
 }
 
-test.beforeEach(async ({ page }) => { await page.setViewportSize(VP); });
+test.beforeEach(async ({ page }) => {
+  await page.setViewportSize(VP);
+  page.on("console", (m) => { if (m.type() === "error" && /record a response|FirebaseError|permission/i.test(m.text())) console.log(`[page error] ${m.text().slice(0, 400)}`); });
+});
 
 test("S1 · who, reply, when, a partial not yet sent", async ({ page }) => {
   await openFromDashboard(page);
+  /* Phase 6 — the head: the Archivist's head at 48px, clipped to a circle, no ring; the head and the track one navy block
+     (no hairline between them: the track sits inside the head's own painted element) */
+  const head = await page.evaluate(() => {
+    const img = document.querySelector<HTMLImageElement>('[data-rar="art"]')!;
+    const cs = getComputedStyle(img), top = img.closest(".laq-top")!;
+    return { src: img.getAttribute("src"), w: Math.round(img.getBoundingClientRect().width), h: Math.round(img.getBoundingClientRect().height), loaded: img.complete && img.naturalWidth > 0,
+      radius: cs.borderTopLeftRadius, ring: cs.boxShadow, trackInTop: !!top.querySelector('[data-rar="track"]'), topBg: getComputedStyle(top).backgroundColor,
+      headBg: getComputedStyle(document.querySelector('[data-rar="head"]')!).backgroundColor };
+  });
+  mkdirSync("reports/record-a-response-v2/ledger", { recursive: true });
+  (await import("node:fs")).writeFileSync("reports/record-a-response-v2/ledger/H1-head.json", JSON.stringify(head, null, 1));
+  expect(head.src).toBe("/images/archivist-head.png");
+  expect(head.loaded).toBe(true);
+  expect([head.w, head.h]).toEqual([48, 48]);
+  expect(head.radius).toBe("50%");
+  expect(head.ring).toBe("none");
+  expect(head.trackInTop).toBe(true);
   await whole(page, "01-whole-page-dashboard"); done("01");
   await shot(page, "02-who-replied"); done("02");
   await page.keyboard.type("Ashworth"); await settle(page);

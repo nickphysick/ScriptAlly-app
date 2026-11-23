@@ -1,0 +1,11 @@
+{
+ "src": "/images/archivist-head.png",
+ "w": 48,
+ "h": 48,
+ "loaded": true,
+ "radius": "50%",
+ "ring": "none",
+ "trackInTop": true,
+ "topBg": "rgb(42, 58, 82)",
+ "headBg": "rgba(0, 0, 0, 0)"
+}
