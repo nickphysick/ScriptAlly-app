@@ -11,7 +11,8 @@
  */
 
 /* the tile: 44 × 50, 12px in from the Sent box's right edge, vertically centred; the glyph above the count, 4px apart */
-.qc154-card .qc154-f[data-k="sent"]:has(.pc3-tile) { padding-right: 64px; }
+/* the box's words end 8px before the tile: 12 + 44 + 8 (outranks qcv1561's `.qc151.qc153 .qc154-card .qc154-f.qc154-f` padding) */
+.qc154-card .qc154-f.qc154-f.qc154-f[data-k="sent"]:has(.pc3-tile) { padding-right: 64px; }
 .qc154-card .pc3-tw { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); display: block; }
 .qc154-card .pc3-tile.pc3-tile {
   all: unset; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;

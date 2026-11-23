@@ -135,10 +135,10 @@ test.describe("Query Centre v157", () => {
       for (const c of got) {
         if (seen.has(`${c.status}${c.quiet}`)) continue;
         seen.add(`${c.status}${c.quiet}`);
-        /* Plumage colours v2: an offer's grid band is the soft stripes, with no flat colour of its own; they are measured
-           by tests/e2e/pc2.measure.ts PC2-4, so here an offer is only checked to be striped */
-        if ((c.status === "Offer" || c.status === "Signed") && !c.quiet) {
-          L.check(`${c.status}: band striped (PC2-4 reads the stripes)`, /^repeating-linear-gradient\(118deg/.test(c.image), `${c.id} ${c.image.slice(0, 40)}`);
+        /* Plumage colours v3: the offer is flat again; Revise & Resubmit's grid band is the stripes, with no flat colour of
+           its own, measured by tests/e2e/pc3.measure.ts PC3-2, so here an R&R band is only checked to be striped */
+        if (c.status === "Revise & Resubmit" && !c.quiet) {
+          L.check(`${c.status}: band striped (PC3-2 reads the stripes)`, /^repeating-linear-gradient\(118deg/.test(c.image), `${c.id} ${c.image.slice(0, 40)}`);
           continue;
         }
         const want = rgb(statusBand(c.status));
@@ -151,8 +151,8 @@ test.describe("Query Centre v157", () => {
       L.done(6);
     });
 
-    /* QC157-2 (the offer's foil) is retired by Plumage colours v1; Plumage colours v2's offer stripes are measured by
-       tests/e2e/pc2.measure.ts PC2-4 (the stripes on the grid band, flat duck egg elsewhere). */
+    /* QC157-2 (the offer's foil) is retired by Plumage colours v1; Plumage colours v3's flat offer is measured by
+       tests/e2e/pc3.measure.ts PC3-1 (no gradient on any offer surface). */
 
     test(`QC157-3 track — ${w}`, async ({ page }) => {
       test.skip(PHASE === "ref", "not on the reference");
@@ -215,7 +215,8 @@ test.describe("Query Centre v157", () => {
       const quiet = got.filter((g) => g.quiet);
       L6.check(`quiet cards: ${quiet.length}`, quiet.length >= 2, quiet.map((q) => q.id).join(", "));
       L6.check("every quiet band is a gradient ending in white at 82%", quiet.every((q) => /linear-gradient\(90deg.*rgb\(255, 255, 255\) 82%\)/.test(q.band)), [...new Set(quiet.map((q) => q.band))].join(" ; "));
-      const flat = got.filter((g) => !g.quiet && g.status !== "Offer" && g.status !== "Signed");
+      /* Plumage colours v3: the offer is flat again; Revise & Resubmit's band is the stripes (pc3.measure.ts PC3-2) */
+      const flat = got.filter((g) => !g.quiet && g.status !== "Revise & Resubmit");
       L6.check("no other card has a band gradient", flat.every((g) => g.band === "none"), [...new Set(flat.map((g) => g.band))].join(" ; ").slice(0, 300));
       /* "waiting" read from the Next box's own state, not the quiet mark: a Queried card still inside its reply window
          ("wait") or just past it ("over", nudge due) — with the agent, and not gone quiet */
