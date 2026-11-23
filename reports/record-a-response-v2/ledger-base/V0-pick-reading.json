@@ -1,0 +1,26 @@
+{
+ "open": {
+  "path": "/dashboard",
+  "search": "",
+  "journey": false,
+  "track": false,
+  "step": null,
+  "head": null,
+  "composer": null,
+  "picker": true,
+  "qadDrawer": false,
+  "scrollY": 0
+ },
+ "after": {
+  "path": "/dashboard",
+  "search": "",
+  "journey": false,
+  "track": false,
+  "step": null,
+  "head": null,
+  "composer": "What did Priya say?",
+  "picker": false,
+  "qadDrawer": false,
+  "scrollY": 0
+ }
+}
