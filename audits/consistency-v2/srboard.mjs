@@ -14,19 +14,50 @@ import { join, resolve, relative } from "node:path";
 const RUN = resolve(process.argv[2] || "audits/consistency-v2/.run");
 const OUT = resolve(process.argv[3] || "audits/consistency-v2/board-data-spacing-rows.json");
 const ROOT = process.cwd();
-const GRID = [8, 16, 24, 32, 40, 48];
 const SPACING_FAMILIES = new Set(["workspace", "dashboard", "overlays"]);
+
+/* A page-gutter reading is the sheet's edge to the outermost content on each side. When the two sides
+   differ, one of them is not a gutter, and the value says why in words (hand check, main-green v1). */
+function gutterNote(value) {
+  const [l, r] = String(value).split(" ").map(Number);
+  if (l === r) return {};
+  if (l < 0 || r < 0) return { note: "Not a gutter on either side: a carousel's off-screen cards run past the sheet's edge, so neither reading is the page's gutter." };
+  return { note: `Not a gutter on the ${l > r ? "left" : "right"}: the outermost content stops short of that side (a narrow column or a single card), so only the ${l > r ? "right" : "left"} side, ${Math.min(l, r)}, is the page's gutter.` };
+}
+
+/* Hand checks (main-green v1, 23 Nov): three values each for two spacing groups and two row kinds, checked
+   against the CSS that sets them, the raw rectangles and the crop. Each line says what was compared. */
+const HAND_CHECKS = [
+  { group: "page-gutter", value: "32 32 @1512", result: "agrees", how: "the sheet is 1424 wide, under --work-max 1660 (src/index.css:315), so the gap is --work-gutter, 32 (src/index.css:318), set by .wpg-scroll > * (src/components/shell/workspacePageGrid.css:489)." },
+  { group: "page-gutter", value: "118 118 @1920", result: "agrees", how: "the sheet is 1832 wide; (1832 − 1660) / 2 = 86 of centring margin, plus the 32 gutter, is 118." },
+  { group: "page-gutter", value: "32 632 @1512", result: "agrees as geometry, but not a gutter", how: "on Versions (empty) the only content is one 760px card in the left column: 1424 − 32 − 760 = 632. The left side is the gutter; the value now carries a note saying so (likewise 32 332, and the carousel's negative readings on Responses)." },
+  { group: "panel-body-padding", value: "20 20 12 20", result: "agrees", how: ".laq .laq-sb { padding: 20px 20px 12px } (src/components/queries/centre/qcLogStages.css:89)." },
+  { group: "panel-body-padding", value: "6 16 6 16", result: "agrees", how: ".qc152 .qc1522-cb { padding: 6px 16px } (src/components/queries/centre/qcv1522card.css:55)." },
+  { group: "panel-body-padding", value: "6 10 14 10", result: "agrees", how: ".qcrr-body { padding: 6px 10px 14px } (src/components/queries/centre/qcWhoReplied.css:10)." },
+  { rowKind: "Record a response picker rows", value: "58 high, padding 8 10, radius 12", result: "agrees", how: "min-height: 58px; padding: 8px 10px; border-radius: 12px (src/components/queries/centre/qcWhoReplied.css:20)." },
+  { rowKind: "Record a response picker rows", value: "hover and selected #f7f3ee", result: "agrees", how: ".qcrr-row:hover, .qcrr-row.hi (qcWhoReplied.css:21); the selected row is the aria-selected keyboard highlight (QcWhoReplied.tsx:98), on the same ground as hover." },
+  { rowKind: "Record a response picker rows", value: "primary Source Serif 4 16/500, secondary 13.5/400 grey", result: "agrees after a probe fix", how: "the first reading took the avatar disc's initials as secondary; the probe now reads words in order and skips initials, stars and text on its own filled ground (srprobe.js). The crop shows the name over the agency and date line." },
+  { rowKind: "Contact list rows", value: "72 high, padding 10 0, 1px rule at 8%", result: "agrees after a builder fix", how: "min-height: 72px; padding: 10px 0 (src/components/agents/contact/contactV26.css:114); the rule is .cl26-row + .cl26-row { border-top } (:118), so a run's first row has none of its own and now takes its next row's (srboard.mjs)." },
+  { rowKind: "Contact list rows", value: "hover #fbf9f6", result: "agrees", how: ".cl26-row:hover (contactV26.css:119)." },
+  { rowKind: "Contact list rows", value: "primary Special Elite 18/1.3 #1c130f, secondary Source Serif 4 14/1.35 #5b4f47", result: "agrees after a probe fix", how: "contactV26.css:124 and contactPrinciples.css:31; line heights 23.4 and 18.9 match. The first reading took the star rating as primary." },
+];
 
 /* ── the views and their families ── */
 const files = readdirSync(RUN);
 const family = {};
+const routed = {}; /* key → { path, finalUrl } */
 for (const f of files) {
   const m = /^(.+)@(1512|1920)\.json$/.exec(f); if (!m) continue;
-  try { family[m[1]] = JSON.parse(readFileSync(join(RUN, f), "utf8")).family; } catch { /* unreadable view: skipped */ }
+  try { const d = JSON.parse(readFileSync(join(RUN, f), "utf8")); family[m[1]] = d.family; routed[m[1]] = { path: d.path, finalUrl: d.finalUrl }; } catch { /* unreadable view: skipped */ }
 }
+/* a route that redirects onto another measured view (the phone-only /you, /goals, /materials land on
+   /dashboard on desktop) measures that view again; counting it would count the same page twice */
+const measuredPaths = new Set(Object.values(routed).filter((r) => r.path === r.finalUrl).map((r) => r.path));
+const redirected = new Set(Object.entries(routed).filter(([, r]) => r.finalUrl && r.path && r.finalUrl !== r.path && !r.path.includes("?") && measuredPaths.has(r.finalUrl)).map(([k]) => k));
 const sr = [];
 for (const f of files) {
   const m = /^(.+)@sr-(\d+)\.json$/.exec(f); if (!m) continue;
+  if (redirected.has(m[1])) continue;
   const d = JSON.parse(readFileSync(join(RUN, f), "utf8"));
   if (d.error) { sr.push({ key: m[1], vw: +m[2], error: d.error }); continue; }
   sr.push({ key: m[1], vw: +m[2], fam: family[m[1]] || "unknown", ...d });
@@ -59,7 +90,7 @@ const whereSet = (rule) => {
 
 const onGrid = (v) => {
   const parts = String(v).split(" ").map(Number);
-  return parts.every((x) => GRID.includes(x));
+  return parts.every((x) => x >= 0 && x % 8 === 0); /* a multiple of 8 (64, 96 included); a negative reading is never on it */
 };
 
 /* ── spacing ── */
@@ -94,7 +125,7 @@ for (const [g, what] of GROUPS) {
     const list = [...vals.values()].sort((a, b) => b.count - a.count).map((e) => ({
       value: e.value, count: e.count, onGrid: onGrid(e.value), pages: [...e.pages].sort(), widths: [...e.widths].sort(), scopes: [...e.scopes].sort(),
       setBy: [...e.setBy.entries()].sort((a, b) => b[1] - a[1]).map(([w]) => w).slice(0, 6), ...(e.pitch.size ? { pitch: [...e.pitch].sort((a, b) => a - b) } : {}),
-      example: e.example, crop: e.crop,
+      example: e.example, crop: e.crop, ...(g === "page-gutter" ? gutterNote(e.value) : {}),
     }));
     const offGrid = list.filter((x) => !x.onGrid).length;
     spacing.push({
@@ -109,14 +140,15 @@ for (const [g, what] of GROUPS) {
 /* [kind, test(view key, row selector, list selector)] — first match wins; ROW_COPY lists the kinds whose row text is fixed copy */
 const ROW_KINDS = [
   ["search palette results", (k, s, l) => /^overlay-.*(search|Search|palette|K)/.test(k) || /(srch|sv1-|cmdk|palette)/.test(s + l)],
-  ["Log a query picker rows", (k) => /^journey-laq/.test(k)],
+  ["Log a query picker rows", (k) => /^journey-laq|^overlay-Log-a-query/.test(k)],
+  ["Materials letters rows", (k) => /^materials-letters/.test(k)],
   ["Record a response picker rows", (k, s) => /^journey-rr|Record-a-response/.test(k) || /qcrr/.test(s)],
   ["Settings rows", (k) => /^account-/.test(k)],
-  ["Queries list rows", (k) => /^queries/.test(k)],
   ["Contact list rows", (k) => /^agents($|-empty|-all)/.test(k)],
   ["Discover rows", (k) => /^agents-discover/.test(k)],
   ["To-do tray rows", (k) => /^todo/.test(k)],
   ["Comps shelf rows", (k) => /^manuscripts-comps/.test(k)],
+  ["Queries list rows", (k) => /^queries($|-empty|-all)/.test(k)],
   ["Responses rows", (k) => /^queries-responses|responses/.test(k)],
   ["Packages rows", (k) => /packages/.test(k)],
   ["Manuscripts and versions rows", (k) => /^manuscripts/.test(k)],
@@ -132,7 +164,10 @@ const kinds = new Map();
 for (const v of sr) {
   if (v.error || v.fam === "public") continue;
   /* rows of the page behind an overlay are that page's; query cards are rows only on the Queries pages */
-  const ordered = v.rows.filter((r) => (v.fam !== "overlays" || r.scope === "panel") && (r.role !== "cards/query-card" || /^queries/.test(v.key))).sort((a, b) => (a.divider == null) - (b.divider == null));
+  /* a rule drawn as \`.row + .row { border-top }\` leaves the first row of each run with no border of its own,
+     though the line under it (the next row's) is the same: that row takes its next row's separator */
+  const inOrder = v.rows.map((r, i, all) => { const n = all[i + 1]; return r.divider === "nothing" && n && n.list === r.list && /^border-top/.test(n.divider || "") ? { ...r, divider: n.divider, style: { ...r.style, divider: n.divider } } : r; });
+  const ordered = inOrder.filter((r) => (v.fam !== "overlays" || r.scope === "panel") && (r.role !== "cards/query-card" || /^queries($|-empty|-all)/.test(v.key))).sort((a, b) => (a.divider == null) - (b.divider == null));
   for (const r of ordered) {
     const kind = kindOf(v.key, r.sel, r.list);
     if (!kinds.has(kind)) kinds.set(kind, { styles: new Map(), pages: new Set(), rows: 0, headers: new Map() });
@@ -144,7 +179,7 @@ for (const v of sr) {
     if (s.divider == null) { const twin = [...K.styles.keys()].find((k) => { const o = JSON.parse(k); const { div, ...rest } = o; return JSON.stringify(rest) === JSON.stringify(base); }); if (twin) sig = twin; }
     if (!K.styles.has(sig)) K.styles.set(sig, { height: s.height, minHeight: s.minHeight, padding: s.padding, divider: r.divider ? r.divider.replace(/^gap (\d+)$/, "gap $1") : null, ground: { rest: r.selected ? null : s.bg, hover: null, selected: r.selected ? s.bg : null }, bgImage: s.bgImage, radius: s.radius, primary: fontKey(s.primary), secondary: fontKey(s.secondary), selector: r.sel, count: 0, pages: new Set(), widths: new Set(), example: null, crop: null });
     const S = K.styles.get(sig); S.count++; S.pages.add(v.key); S.widths.add(v.vw);
-    if (!S.example) S.example = { page: v.key, vw: v.vw, text: ROW_COPY.has(kind) ? r.text : "[data]" };
+    if (!S.example) S.example = { page: v.key, vw: v.vw, text: ROW_COPY.has(kind) && !/\d/.test(r.text || "") ? r.text : "[data]" /* a figure or date in a Settings row is the account's */ };
     if (r.hover && !S.ground.hover) S.ground.hover = r.hover;
     if (r.crop && !S.crop) S.crop = r.crop;
   }
@@ -171,8 +206,10 @@ const rows = [...kinds.entries()].filter(([, K]) => K.rows > 0 || K.headers.size
 
 const crops = [...new Set([...spacing.flatMap((g) => g.values.map((v) => v.crop)), ...rows.flatMap((k) => k.styles.map((s) => s.crop))].filter(Boolean))].sort();
 const out = {
-  about: "Main green v1, Part 3 — spacing and list rows, measured (no app code changed). Made by audits/consistency-v2/srboard.mjs from a harness run with CA_SR=1 (srprobe.js). Spacing covers workspace pages, the Dashboard and slide-out panels; rows cover every signed-in surface. Values are CSS px at 1512×982 and 1920×1080. `setBy` is the rule that declares the value (CDP), matched to src/**/*.css by its selector; `onGrid` means every part is one of 8, 16, 24, 32, 40, 48. A row's text is kept only when it is fixed interface copy; anything from the account is [data]. Crops (real size, one per distinct value or style) are in /Users/nickphysick/ScriptAlly-backups/main-green-v1/crops/.",
+  about: "Main green v1, Part 3 — spacing and list rows, measured (no app code changed). Made by audits/consistency-v2/srboard.mjs from a harness run with CA_SR=1 (srprobe.js). Spacing covers workspace pages, the Dashboard and slide-out panels; rows cover every signed-in surface. Values are CSS px at 1512×982 and 1920×1080. `setBy` is the rule that declares the value (CDP), matched to src/**/*.css by its selector; `onGrid` means every part is a multiple of 8 (0 included). A gutter value whose two sides differ carries a `note` saying which side is not a gutter. A row's text is kept only when it is fixed interface copy; anything from the account is [data]. Crops (real size, one per distinct value or style) are in /Users/nickphysick/ScriptAlly-backups/main-green-v1/crops/.",
   run: relative(ROOT, RUN) || RUN, views: new Set(sr.map((v) => v.key)).size, readings: sr.length, probeErrors: sr.filter((v) => v.error).map((v) => `${v.key}@${v.vw}: ${v.error}`),
+  handChecks: HAND_CHECKS,
+  skippedRedirects: [...redirected].sort().map((k) => `${k}: ${routed[k].path} lands on ${routed[k].finalUrl}, measured as its own view`),
   spacing, rows, crops,
 };
 writeFileSync(OUT, JSON.stringify(out, null, 1) + "\n");

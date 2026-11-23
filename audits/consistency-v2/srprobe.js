@@ -205,10 +205,18 @@
     const divider = bb > 0 ? `border-bottom ${bb}px ${c.borderBottomColor}` : bt > 0 ? `border-top ${bt}px ${c.borderTopColor}` : pseudoRule ? "pseudo-element rule" : insetLine ? `inset line ${c.boxShadow}` : gapNext > 0 ? `gap ${gapNext}` : gapNext === 0 ? "nothing" : null; /* null: the last row, separator read from its siblings */
     const ls = leaves(el);
     const fonts = ls.map((e) => ({ e, f: font(e) }));
-    const primary = fonts.slice().sort((x, y) => y.f.size - x.f.size || +y.f.weight - +x.f.weight)[0];
-    const second = primary ? fonts.filter((x) => x.f.size < primary.f.size || x.f.color !== primary.f.color) : [];
-    const cnt = {}; for (const x of second) { const k = JSON.stringify(x.f); cnt[k] = (cnt[k] || 0) + 1; }
-    const secondary = Object.entries(cnt).sort((x, y) => y[1] - x[1])[0];
+    /* Primary is the first WORDS in reading order, secondary the next words in another face. Not words:
+       text without two letters together (a star rating), one to three capitals (an avatar's initials),
+       and text on its own filled ground inside the row (a chip, a pill, an avatar disc). Hand check,
+       main-green v1: the largest-font rule read the Contact list's stars as its primary type and the
+       Record a response picker's avatar initials as its secondary. */
+    const ownText = (e) => [...e.childNodes].filter((t) => t.nodeType === 3).map((t) => t.textContent).join("").trim();
+    const onFill = (e) => { for (let n = e; n && n !== el; n = n.parentElement) { const s = cs(n); if ((s.backgroundColor !== "rgba(0, 0, 0, 0)" && s.backgroundColor !== "transparent") || s.backgroundImage !== "none") return true; } return false; };
+    const words = fonts.filter((x) => { const t = ownText(x.e); return /\p{L}{2}/u.test(t) && !/^\p{Lu}{1,3}$/u.test(t) && !onFill(x.e); });
+    const primary = words[0] || fonts.slice().sort((x, y) => y.f.size - x.f.size || +y.f.weight - +x.f.weight)[0];
+    const pk = primary ? JSON.stringify(primary.f) : null;
+    const sec = words.find((x) => JSON.stringify(x.f) !== pk);
+    const secondary = sec ? [JSON.stringify(sec.f)] : null;
     const selected = el.getAttribute("aria-selected") === "true" || el.getAttribute("aria-current") || el.getAttribute("aria-pressed") === "true" || SELECTED.test(typeof el.className === "string" ? el.className : "");
     const style = { height: px(b.height), minHeight: c.minHeight, padding: pad(c), bg: c.backgroundColor, bgImage: c.backgroundImage === "none" ? null : c.backgroundImage.slice(0, 80), radius: c.borderRadius, divider: divider && divider.replace(/^gap \d+$/, "gap"), primary: primary ? primary.f : null, secondary: secondary ? JSON.parse(secondary[0]) : null };
     rows.push({ id: r.id, role: r.role, sel: r.sel, scope: scopeOf(el), list: sel(el.parentElement), selected: !!selected, gapNext, divider, style, text: (el.textContent || "").trim().slice(0, 60), tag: tag(el) });
