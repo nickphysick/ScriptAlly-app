@@ -1,0 +1,72 @@
+/* Agent card v2.2 (design-refs/agent-card-v2-2/agent-card-v2-2.html) — the agent card edited the query card's one way.
+   The parts are Query card v168's (QcEdit168: EditPen, CrossTick, DiscardAsk, CardMenu) with their own sheet (qcv168.css),
+   imported, never copied; this sheet only PLACES them on this card. Nothing here is under 12px; no uppercase mono label.
+   ⚠️ A PENCIL IS ABSOLUTELY PLACED and only its opacity changes: showing it moves nothing (acv22.measure.ts AC1). */
+
+/* ── B1 · the pencil: at the right end of a section's heading; the fact boxes' at their top-right corner; the name's
+      beside the name ─────────────────────────────────────────────────────────────────────────────────────────────── */
+.qc152 .acv2-sec[data-qc168-host] > h4 { position: relative; padding-right: 34px; }
+.qc152 .acv2-sec > h4 > .qc168-pen { top: 50%; right: 0; translate: 0 -50%; }
+.qc152 [data-qc168-host]:is(:hover, :focus-within) > h4 > .qc168-pen { opacity: 1; }
+.qc152 .ag-nmrow > .qc168-pen { position: relative; top: auto; right: auto; flex: none; margin-left: 6px; align-self: center; }
+.qc152 .ag-head[data-qc168-host]:is(:hover, :focus-within) .ag-nmrow > .qc168-pen { opacity: 1; }
+
+/* ── B2 · one section at a time: while something is open the rest of the tab sits back (42%, 180ms) ──────────────── */
+.qc152.acv2-qc .acv2-pro > * { transition: opacity .18s ease; }
+.qc152.acv2-qc[data-qc168-open] .acv2-pro > *:not(.live):not(:has(.live)) { opacity: .42; }
+.qc152.acv2-qc .acv2-sec.live .qc168-ask { margin: 12px 0 2px; }
+@media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .acv2-pro > * { transition: none; } }
+
+/* ── B3 · the head, edited in place (the ref's `.hed`): each field where its value sat, in its own type ─────────────── */
+.qc152.acv2-qc .ag-head.hed { box-shadow: inset 0 0 0 1.5px #2a3a52; border-radius: 14px; margin: 2px 4px 0; padding-bottom: 2px; animation: qc168-in .18s ease-out both; }
+.qc152.acv2-qc:has(.ag-head.hed) .qc152-body > * { opacity: .42; transition: opacity .18s ease; }
+.qc152 .ag-head.hed .qc152-who { flex: 1 1 auto; min-width: 0; }
+.qc152 .ag-head.hed .ag-nmrow { gap: 8px; }
+.qc152 .ag-head.hed .ag-nmrow > h2 { flex: 1 1 auto; min-width: 0; margin: 0; }
+.qc152 .ag-head.hed .ag-nmrow .ag-sx { margin: 0 0 0 4px; flex: none; }
+.qc152 .ag-head .ag-hf { display: block; min-width: 0; }
+/* the quiet in-place field: the value's own type on a pale ground, navy when focused */
+.qc152 .ag-head .aap-inp.hin { height: auto; min-height: 30px; padding: 3px 8px; border-radius: 7px; background: #fbf9f5; box-shadow: inset 0 0 0 1px #e2d9cc; font: 400 15px var(--sp-serif); color: #1c130f; transition: box-shadow .15s; }
+.qc152 .ag-head .aap-inp.hin:focus { box-shadow: inset 0 0 0 1.5px #2a3a52; background: #fff; }
+.qc152 .ag-head .aap-inp.hin::placeholder { color: #a39a8f; font-style: italic; }
+.qc152 .ag-head .aap-inp.hin-nm { width: calc(100% + 8px); margin-left: -8px; padding: 1px 8px; font: inherit; letter-spacing: inherit; }
+.qc152 .ag-head .aap-inp.hin-ag { display: block; width: calc(100% + 8px); margin: 2px 0 0 -8px; min-height: 24px; padding: 1px 8px; font: inherit; letter-spacing: inherit; text-transform: uppercase; }
+.qc152 .ag-head .aap-inp.hin-ag::placeholder { text-transform: none; letter-spacing: 0; font: italic 400 14px var(--sp-serif); }
+.qc152 .ag-head .aap-note { display: block; margin-top: 3px; font: 400 13px var(--sp-serif) !important; }
+.qc152 .ag-head .ag-hedk { margin: 4px 14px 6px 20px; }
+/* where the place line was: the country pills, then the city, on one line */
+/* v2.1's Based-in ruling kept: Elsewhere's search sits on the pills' line, after them, its list 280px and inside the card;
+   with Elsewhere chosen the city drops beneath, full width */
+.qc152 .ag-head .ag-hgeo { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px; align-items: center; }
+.qc152 .ag-head .ag-hgeo > .aap-pills { grid-row: 1; grid-column: 1; gap: 6px; flex-wrap: nowrap; }
+.qc152 .ag-head .ag-hgeo .aap-pill { height: 30px; padding: 0 12px; font-size: 14.5px; }
+.qc152 .ag-head .ag-hgeo > .aap-inp.hin { grid-row: 1; grid-column: 2; width: 100%; min-width: 0; height: 30px; }
+.qc152 .ag-head .ag-hgeo > .aap-cty { grid-row: 1; grid-column: 2; min-width: 0; padding: 0; background: none; box-shadow: none; }
+.qc152 .ag-head .ag-hgeo:has(> .aap-cty) > .aap-inp.hin { grid-row: 2; grid-column: 1 / -1; }
+.qc152 .ag-head .ag-hgeo > .aap-cty .sa-cc-ph, .qc152 .ag-head .ag-hgeo > .aap-cty .sa-cc-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qc152 .ag-head .ag-hgeo > .aap-cty .sa-cc-menu { left: auto; right: 0; width: 280px; max-width: none; }
+.qc152 .ag-head .acv21-geooffer { margin-top: 8px; }
+/* where the contact line was: email and website side by side, each with its icon */
+/* "More contact details" sits at the end of this row (it keeps the head's growth small) */
+.qc152 .ag-head .ag-hedk { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: start; }
+.qc152 .ag-head .ag-hedk > * { grid-column: 1 / -1; }
+.qc152 .ag-head .ag-hedk > .ag-hct { grid-column: 1; }
+.qc152 .ag-head .ag-hedk > .ag-hmorebtn { grid-column: 2; align-self: center; margin-top: 6px !important; }
+.qc152 .ag-head .ag-hct { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.qc152 .ag-head .ag-hct label { display: flex; align-items: center; gap: 7px; min-width: 0; color: #6f655c; }
+.qc152 .ag-head .ag-hct label .aap-inp.hin { flex: 1 1 auto; height: 30px; }
+.qc152 .ag-head .ag-hmore { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.qc152 .ag-head .ag-hmore > [data-f='form'] { grid-column: 1 / -1; }
+.qc152 .ag-head .ag-hmore .aap-inp { height: 34px; }
+.qc152 .ag-head .ag-hmorebtn { display: inline-block; font-size: 13.5px !important; white-space: nowrap; }
+.qc152 .ag-head .aap-agask { margin: 8px 0; }
+@media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .ag-head.hed { animation: none; } .qc152.acv2-qc:has(.ag-head.hed) .qc152-body > * { transition: none; } }
+
+/* ── B4 · the saved message, in the card: the query card's toast as a bar above the footer (v164's placing) ─────────── */
+.qc152.acv2-qc .qc152-in > .qc1522-toast { position: static; transform: none; left: auto; bottom: auto; align-self: stretch; flex: none; justify-content: space-between;
+  margin: 0; padding: 9px 16px; border-radius: 0; animation: qc168-in .2s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .qc152.acv2-qc .qc152-in > .qc1522-toast { animation: none; } }
+
+/* ── B6 · the band's ⋯ (the query card's band button); the existing remove gate in the footer's place ────────────── */
+.qc152.acv2-qc .qc152-band .qc152-x[data-qc168="band-more"] { font: 700 18px/1 var(--sp-serif) !important; letter-spacing: 1px; }
+.qc152.acv2-qc .qc152-in > .ag-remove { flex: none; padding: 12px 16px 14px; border-top: 1px solid #ece6de; background: #fff; }

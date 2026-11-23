@@ -30,8 +30,8 @@ import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { addedLabel } from "../../../lib/contactList";
 import { hrefFor } from "../../../lib/quickAdd";
-import { type AgentCard24Props, useCardModel } from "./AgentCard24";
-import { acColours, acFoot, acPill, acTone, askList, factBoxes, factBoxesShown, finishItems, finishShare, queryBoxLine, sectionsSavedWords, UNDONE_WORDS, type AcAct } from "../../../lib/agentCardV2";
+import { type AgentCard24Props, RemoveConfirm, useCardModel } from "./AgentCard24";
+import { acColours, acFoot, acPill, acTone, askList, factBoxes, factBoxesShown, finishItems, finishShare, queryBoxLine, type AcAct } from "../../../lib/agentCardV2";
 import { NxBox, TICK } from "../../queries/centre/QcAgent158";
 import { countryName, flagFor, normaliseCountry } from "../../../lib/territory";
 import "flag-icons/css/flag-icons.min.css";
@@ -47,12 +47,13 @@ import { db as firestoreDb } from "../../../lib/firebase";
 import { commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { agentBack, openQueryPanelFromAgent } from "../../../lib/queryPanelStore";
 import { useToast } from "../../toast/ToastProvider";
+import { listenAgentCardToast, type CardToast } from "../../../lib/agentCardToast";
 import { committedNotes, computeNotePreview, effectiveNotes, emptyNotesDraft, FLAT_NOTE_ID } from "../../../lib/agentNotes";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { CARD_EDITING_EVENT, requestCardClose } from "./AgentCardPanel262";
 import { pickDraft, useAgentForm } from "../card/useAgentForm";
-import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, GuardBar, changeNames, type OfferKit } from "./AgentCard262Edit";
+import { EditGenres, EditHow, EditMaterials, EditWishlist, changeNames, contactHead, type ContactHeadParts, type OfferKit } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
 import { applyPatch, cardPatch, changedFields, draftOf, problemsOf, toContactDraft, type CardDraft, type CardProblemKey } from "../../../lib/cardDraft";
 import { cardOffers, offerPlan, type CardOffers, type CloseChoice, type OfferPlan, type RtChoice } from "../../../lib/cardOffers";
@@ -71,6 +72,11 @@ import "../../queries/centre/sc1card.css";
 import "../../queries/centre/qcv158.css";
 import "./acv2.css";
 import "./acv21.css";
+/* Agent card v2.2 — the query card's one way to edit, its parts imported (never copied), then this card's placing of them */
+import "../../queries/centre/qcv168.css";
+import "./acv22.css";
+import { useTip, useWhy } from "../../queries/centre/QcCard152";
+import { CardMenu, CardMenuItem, CrossTick, DiscardAsk, Edit168Ctx, EditPen, mut168, useEditRule168, useHold168 } from "../../queries/centre/QcEdit168";
 
 /** the band's slate, for every agent (v26.2 ruling) */
 export const CARD262_BAND = "#5e7189";
@@ -119,7 +125,6 @@ export const SEC_PROBLEMS: Record<Sec262, readonly CardProblemKey[]> = {
 export const secName = (k: Sec262): string => ({ contact: "contact details", how: "how they work", wishlist: "the wishlist", genres: "genres", materials: "what they ask for" })[k];
 
 const IC = {
-  pen: <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16l-4 1 1-4z" /></svg>,
   clock: <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>,
   l: <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6" /></svg>,
   r: <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 4l6 6-6 6" /></svg>,
@@ -147,22 +152,66 @@ const XI = <svg viewBox="0 0 20 20" width="12" height="12" fill="none" stroke="c
 const OK = <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4.5 10.5l3.6 3.6 7.4-8" /></svg>;
 /**
  * Agent card v2.1 — AN OPEN SECTION LOOKS LIKE ITSELF: its place, its heading and its type, its contents live. A 1.5px navy
- * outline 9px outside it shows it is open (no tinted box, no header bar, no "Close"). At the right of its heading: the cross
- * (discard, outlined) and the tick (save, navy).
+ * outline 9px outside it shows it is open (no tinted box, no header bar, no "Close").
+ * Agent card v2.2 — the query card's way: the cross and the tick are v168's CrossTick at the right of its heading (the tick
+ * waits for a change); the section holds the card's ONE-OPEN rule while open (useHold168), so any other door with a change
+ * asks here, inside it ("Discard your changes to {section}?" · Keep editing · Discard).
  */
-const OpenSec: React.FC<{ k: Sec262; heading: React.ReactNode; label: string; err?: string; busy: boolean; onCross: () => void; onTick: () => void; onTickDown?: () => void; className?: string; children: React.ReactNode }> = ({ k, heading, label, err, busy, onCross, onTick, onTickDown, className, children }) => (
-  <section className={`acv2-sec ag-sec live${className ? ` ${className}` : ""}`} data-cl262="sec" data-k={k} data-editing="" data-acv21="open">
-    <h4>{heading}
-      <span className="ag-sx" data-acv21="sx">
-        <button type="button" className="ag-no" data-acv21="cross" data-k={k} aria-label={`Discard changes to ${label}`} title="Discard changes" onClick={onCross}>{XI}</button>
-        <button type="button" className="ag-ok" data-acv21="tick" data-k={k} aria-label={`Save ${label}`} title="Save" disabled={busy} onPointerDown={onTickDown} onClick={onTick}>{OK}</button>
-      </span>
-    </h4>
-    {err ? <p className="acv21-err" role="alert" data-acv21="err">{err}</p> : null}
-    {/* the editor's own field styles live under its `.ac` root (box-sizing and face inheritance only) */}
-    <div className="ac acv21-body">{children}</div>
-  </section>
-);
+const OpenSec: React.FC<{ k: Sec262; heading: React.ReactNode; label: string; err?: string; busy: boolean; dirty: boolean; draft: unknown;
+  onCross: () => void; onTick: () => void; onTickDown?: () => void; onClose: () => void; onReopen: () => void; className?: string; children: React.ReactNode }> = (p) => {
+  const key = `sec:${p.k}`;
+  const ed = useHold168(key, p.dirty, p.draft, p.onClose, p.onReopen);
+  const asking = ed.asking && ed.open === key;
+  return (
+    <section className={`acv2-sec ag-sec live${p.className ? ` ${p.className}` : ""}`} data-cl262="sec" data-k={p.k} data-editing="" data-acv21="open">
+      <h4>{p.heading}
+        <span className="ag-sx" data-acv21="sx">
+          <CrossTick what={p.label} dirty={mut168("ac5") || p.dirty} busy={p.busy} onCross={p.onCross} onTick={p.onTick} onTickDown={p.onTickDown} />
+        </span>
+      </h4>
+      {p.err ? <p className="acv21-err" role="alert" data-acv21="err">{p.err}</p> : null}
+      {/* the editor's own field styles live under its `.ac` root (box-sizing and face inheritance only) */}
+      <div className="ac acv21-body">{p.children}</div>
+      {asking ? <DiscardAsk words={`Discard your changes to ${p.label}?`} onKeep={ed.keep} onDiscard={ed.discard} /> : null}
+    </section>
+  );
+};
+/**
+ * Agent card v2.2 B3 — THE HEAD, EDITED IN PLACE. Name and contact details open in the head itself (no Contact details
+ * section drops into the tab, and the tab does not change): the name a field in the name's own type with the cross and the
+ * tick beside it where the pencil was; the agency under it; the place line becomes the country pills and the city (the
+ * built city offer under them); the contact line becomes email and website; "More contact details" opens MSWL, social and
+ * the submission link in the same place. It holds the one-open rule as a section does, and asks inside itself.
+ */
+const HeadOpen: React.FC<{ parts: ContactHeadParts; disc: React.ReactNode; pill: React.ReactNode; err?: string; busy: boolean; dirty: boolean; draft: unknown;
+  more: boolean; onMore: () => void; onCross: () => void; onTick: () => void; onTickDown?: () => void; onClose: () => void; onReopen: () => void }> = (p) => {
+  const key = "sec:contact";
+  const ed = useHold168(key, p.dirty, p.draft, p.onClose, p.onReopen);
+  const asking = ed.asking && ed.open === key;
+  return (
+    <div className="ag-head hed live" data-acv2="head" data-acv2-part="head" data-acv22="head-open" data-cl262="sec" data-k="contact" data-editing="" data-acv21="open">
+      <div className="qc152-agent" data-acv2="head-row">
+        {p.disc}
+        <div className="qc152-who">
+          <div className="ag-nmrow"><h2 className="qc152-nm qcv-open-nm" data-acv2="name">{p.parts.name}</h2>
+            <span className="ag-sx" data-acv21="sx"><CrossTick what="contact details" dirty={mut168("ac5") || p.dirty} busy={p.busy} onCross={p.onCross} onTick={p.onTick} onTickDown={p.onTickDown} /></span></div>
+          <div className="qc152-ag" data-acv2="agency">{p.parts.agency}</div>
+        </div>
+        {p.pill}
+      </div>
+      <div className="ag-hedk" data-acv22="head-fields">
+        {p.parts.agencyAsk}
+        {p.parts.place}
+        {p.parts.contact}
+        {/* at the end of the email and website row (acv22.css), so opening the head grows it by little */}
+        <button type="button" className="qc168-lk ag-hmorebtn" data-acv22="more" aria-expanded={p.more} onClick={p.onMore}>{p.more ? "Fewer contact details" : "More contact details"}</button>
+        {p.more ? p.parts.more : null}
+        {p.err ? <p className="acv21-err" role="alert" data-acv21="err">{p.err}</p> : null}
+        {asking ? <DiscardAsk words="Discard your changes to contact details?" onKeep={ed.keep} onDiscard={ed.discard} /> : null}
+      </div>
+    </div>
+  );
+};
 /** Agent card v2 — the query box's door back: the tab the writer left, for this agent, read once when the card returns */
 let returnTo: { agentId: string; tab: Tab } | null = null;
 /** the parts a changed field lives in (the saved tint) */
@@ -258,6 +307,31 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   openRef.current = open;
   /* Agent card v2 — the frame the bump moves (the white mat), and what a save lands on */
   const cardRef = useRef<HTMLDivElement>(null);
+  /* ══ Agent card v2.2 · ONE THING OPEN AT A TIME — the query card's rule (QcEdit168): a section, the head or a note holds
+     the card while open; every other door goes through `ask` (unchanged: what is open closes and the click goes on;
+     changed: the question shows inside it, and nothing else happens). ═══════════════════════════════════════════ */
+  const { showToast } = useToast();
+  /* ══ Agent card v2.2 B4 · THE SAVED MESSAGE, IN THE CARD: every message the open card raises (and the hosts' for it, through
+     lib/agentCardToast) is the query card's toast bar above the footer, with its Undo where one exists. The app's snackbar
+     is not used by the open card (AC11's mutation uses it). ══════════════════════════════════════════════════════ */
+  const [toast168, setToast168] = useState<{ msg: string; undo: (() => void | Promise<void>) | null; n: number } | null>(null);
+  const cardToast = useCallback((t: CardToast) => setToast168({ msg: t.message, undo: t.undo ?? null, n: Date.now() }), []);
+  const say: (t: CardToast) => void = mut168("ac11") ? (t) => showToast(t as Parameters<typeof showToast>[0]) : cardToast;
+  useEffect(() => { if (p.preview || mut168("ac11")) return undefined; return listenAgentCardToast(cardToast); }, [p.preview, cardToast]);
+  useEffect(() => {
+    if (!toast168) return undefined;
+    const t = window.setTimeout(() => setToast168(null), 5200);
+    return () => window.clearTimeout(t);
+  }, [toast168?.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setToast168(null); }, [a.id]);
+  /* v2.2 B7 — what isn't edited here says why, in the card's tip box (the query card's, shared) */
+  const tip = useTip();
+  const why = useWhy(tip);
+  useEffect(() => { tip.hide(); }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* the add journey's finish screen (p.preview) draws no pencil and no ⋯ (AC14's mutation, a review aid off production,
+     shows them); declared above the band and the head, its first readers */
+  const shy = !!p.preview && !mut168("ac14");
+  const rule = useEditRule168(a.id, (msg, undo) => say({ message: msg, ...(undo ? { undo } : {}) }), () => cardRef.current);
   /* ══ Agent card v2.1 Phase 4 · the query card's motion, from its own code (qcMotion160), on this card's frame ══════
      The frame is the white mat (`cardRef`): its ::before draws the paper and the shadow, so the breath swells that and
      nothing inside the card moves. The border's colour is the frame's `data-qc163-rim` (the query's stage, slate with no
@@ -355,6 +429,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const [geoKept, setGeoKept] = useState<ReadonlySet<string>>(() => new Set());
   const contactOpen = open.includes("contact");
   useEffect(() => { if (!contactOpen) setGeoKept(new Set()); }, [contactOpen]);
+  /* v2.2 — "More contact details" opens by itself when any of the three holds a value, and when a door asks for one */
+  const [more, setMore] = useState(false);
   /* a problem a section's tick met (its own fields' problems, or a refused save), shown under its heading */
   const [secErr, setSecErr] = useState<Partial<Record<Sec262, string>>>({});
   const [busy, setBusy] = useState<Sec262 | "all" | null>(null);
@@ -369,20 +445,29 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /** open one section in place (beside any already open), its fields re-read from the agent as it is now; focus goes to
    *  its first control, or to the field asked for */
-  const openSec = (k: Sec262, field?: string, focus?: "website" | "email") => {
+  const openSec = (k: Sec262, field?: string, focus?: string) => {
     if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
-    opened.current = { k, field, focus };
-    setRevealSeq((n) => n + 1);
-    setTab("profile");
-    const cur = openRef.current;
-    if (cur.includes(k)) return;
-    if (!cur.length) resetRef.current(a);
-    else form.rebase(SEC_FIELDS[k], draftOf(a, kit.personal));
-    setSecErr((e) => ({ ...e, [k]: undefined }));
-    setOpen([...cur, k]);
+    const go = () => {
+      opened.current = { k, field, focus };
+      setRevealSeq((n) => n + 1);
+      /* v2.2 — the head opens where it is: the tab you are on does not change (AC6's mutation switches to Profile) */
+      if (k !== "contact" || mut168("ac6")) setTab("profile");
+      const cur = openRef.current;
+      if (cur.includes(k)) return;
+      if (!cur.length) resetRef.current(a);
+      else formRef.current.rebase(SEC_FIELDS[k], draftOf(a, kit.personal));
+      setSecErr((e) => ({ ...e, [k]: undefined }));
+      /* one at a time (AC2's mutation "allow two" keeps the first; AC3's "skip the ask" drops a changed one unasked) */
+      setOpen(mut168("ac2") ? [...cur, k] : [k]);
+    };
+    if (openRef.current.includes(k)) { go(); return; }
+    if (mut168("ac2") || mut168("ac3")) { go(); return; }
+    rule.guard(go);
   };
-  /** Contact details, from the name's pencil, + Add email / + Add a website, and every door that asks for "who" */
-  const openAll = (focus?: "website" | "email") => openSec("contact", undefined, focus);
+  /** Contact details, from the name's pencil, + Add email / + Add a website, and every door that asks for "who"; a door
+   *  to one of the rarer three opens "More contact details" with it */
+  const moreAsk = useRef(false);
+  const openAll = (focus?: string) => { if (focus === "mswl" || focus === "social" || focus === "form") moreAsk.current = true; openSec("contact", undefined, focus); };
   /* Add agent v1 Phase 5 — a door's ask: open at its section (Contact details for "who"), or the Notes tab, once per seq */
   const applyAsk = (tab?: AgentCardTab, focus?: AgentCardField) => {
     const w = secsFor(tab, focus);
@@ -390,7 +475,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (w === "all") {
       /* Card offers v1 — a door at a contact link lands in it: whichever of website and email is missing first */
       const site0 = !(a.website ?? "").trim(), mail0 = !(a.email ?? "").trim();
-      const f = focus === "website" || focus === "email" ? (site0 ? "website" : mail0 ? "email" : focus) : undefined;
+      const f = focus === "website" || focus === "email" ? (site0 ? "website" : mail0 ? "email" : focus) : focus === "mswl" ? "mswl" : undefined;
       openAll(f);
       return;
     }
@@ -420,7 +505,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const saveSec = async (k: Sec262, silent = false): Promise<{ parts: string[]; undo?: () => Promise<boolean>; plan: OfferPlan | null } | "none" | null> => {
     const f = formRef.current;
     if (!kit) return null;
-    const part = partOf(k, f);
+    /* AC8's mutation (review aid, off production): the head's save drops the city */
+    const part = k === "contact" && mut168("ac8") ? { ...partOf(k, f), city: f.base.city } : partOf(k, f);
     const ch = changedFields(f.base, part);
     if (!ch.length) { setOpen((cur) => cur.filter((x) => x !== k)); return "none"; }
     const probs = problemsOf(part);
@@ -462,45 +548,16 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     setSecErr((e) => ({ ...e, [k]: undefined }));
     setOpen((cur) => cur.filter((x) => x !== k));
     if (had.length) {
-      showToast({ message: `Changes to ${secName(k)} discarded`, undo: async () => {
+      say({ message: `Changes to ${secName(k)} discarded`, undo: async () => {
         opened.current = { k };
         setRevealSeq((n) => n + 1);
         setTab("profile");
         setOpen((cur) => (cur.includes(k) ? cur : [...cur, k]));
-        window.setTimeout(() => formRef.current.set(prev), 0);
+        /* AC12's mutation (review aid, off production): Undo reopens it clean */
+        if (!mut168("ac12")) window.setTimeout(() => formRef.current.set(prev), 0);
       } });
     }
   };
-  /** Save all: each changed section in turn; one snackbar for them all, whose Undo puts every snapshot back */
-  const saveAll = async (): Promise<boolean> => {
-    const ks = openRef.current.filter((k) => secChanged(k, formRef.current).length > 0);
-    const saved: { k: Sec262; undo?: () => Promise<boolean>; parts: string[]; plan: OfferPlan | null }[] = [];
-    landStart();
-    setBusy("all");
-    for (const k of ks) {
-      const r = await saveSec(k, true);
-      if (r === null) { setBusy(null); pressBack(cardRef.current); return false; }
-      if (r !== "none") saved.push({ k, ...r });
-    }
-    setBusy(null);
-    setOpen([]);
-    if (!saved.length) pressBack(cardRef.current);
-    if (saved.length) {
-      const allParts = saved.flatMap((s) => s.parts);
-      land(allParts);
-      const undos = saved.map((s) => s.undo);
-      const plan0 = saved.find((s) => s.plan)?.plan ?? null;
-      const message = sectionsSavedWords(saved.map((s) => secName(s.k)), m.first, plan0);
-      showToast({ message, ...(undos.every(Boolean) ? { undo: async () => {
-        let ok = true;
-        for (const u of [...undos].reverse()) ok = (await u!()) && ok;
-        if (ok) landUndo(allParts);
-        showToast({ message: UNDONE_WORDS });
-      } } : {}) });
-    }
-    return true;
-  };
-  const closeAll = useCallback(() => { setOpen([]); setSecErr({}); }, []);
 
   /* ══ Part D · keeping your place ══════════════════════════════════════════════════════════════════════════════
      EDITING NEVER MOVES THE CARD UNDER YOU. The card, its frame and its scroller are never replaced (every change is a
@@ -553,7 +610,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   /* revealing and focus: a section opened scrolls into view only by what it needs (plus 90px of air), or its heading
      comes to 70px below the band when it was hidden; focus goes to its first control (or the field asked for) without
      scrolling */
-  const opened = useRef<{ k: Sec262; focus?: "website" | "email"; field?: string } | null>(null);
+  const opened = useRef<{ k: Sec262; focus?: string; field?: string } | null>(null);
   /* a reveal asked for while the section is already open changes no state: this makes it a new ask */
   const [revealSeq, setRevealSeq] = useState(0);
   useEffect(() => {
@@ -561,6 +618,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     const sc = scrollRef.current;
     if (!o || !sc) return;
     opened.current = null;
+    /* v2.2 — the head is not in the scroller: its field takes the focus where it is */
+    if (o.k === "contact") {
+      const hd = cardRef.current?.querySelector<HTMLElement>("[data-acv22='head-open']");
+      const f = hd?.querySelector<HTMLInputElement>(mut168("ac10") ? "input[data-ae='name']" : o.focus ? `input[data-ae='${o.focus}'], [data-f='${o.focus}'] input` : "input[data-ae='name']");
+      if (f) { f.focus({ preventScroll: true }); const n = f.value?.length ?? 0; try { f.setSelectionRange(n, n); } catch { /* not a text field */ } }
+      return;
+    }
     const el = secEl(sc, o.k);
     if (!el) return;
     /* Agent card v2 — a fact box's "Add" lands in that field of "How {first} works" */
@@ -583,34 +647,21 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (by) sc.scrollBy({ top: by, behavior: reduce ? "auto" : "smooth" });
   }, [open, revealSeq]);
 
-  /* THE RUST BAR: ✕, Esc, paging, a tab, another row and leaving the page all ask; with unsaved changes the rust bar takes
-     the footer's place and nothing else happens until Keep editing, Discard or Save all. With nothing unsaved, leaving
-     just closes the open sections. */
-  const [guard, setGuard] = useState<{ run: () => void } | null>(null);
+  /* Agent card v2.2 — THE RUST BAR, Save all and their guard are retired: ✕, Esc, paging, a tab, another row, the query
+     box and a footer action go through the one-open rule (`ask`): unchanged, what is open closes and the click goes on;
+     changed, the question shows inside it and nothing else happens. Leaving the page still asks the browser. */
   const dirtyRef = useRef(false);
   dirtyRef.current = dirty;
-  const bypass = useRef(false);
+  const ruleRef = useRef(rule);
+  ruleRef.current = rule;
+  /** a door: true when the caller may go on now; false when the rule has taken the click (it runs `run` itself once
+   *  what is open has closed, or asks) */
   const ask = useCallback((run: () => void): boolean => {
-    if (bypass.current) return true;
-    if (!dirtyRef.current) { if (openRef.current.length) closeAll(); return true; }
-    setGuard({ run });
+    const r = ruleRef.current;
+    if (!r.open) return true;
+    r.guard(run);
     return false;
-  }, [closeAll]);
-  const discardThen = (run: () => void) => {
-    setGuard(null);
-    bypass.current = true;
-    for (const k of openRef.current) formRef.current.revert(SEC_FIELDS[k]);
-    closeAll();
-    run();
-    window.setTimeout(() => { bypass.current = false; }, 0);
-  };
-  const saveAllThen = async (run: () => void) => {
-    if (!(await saveAll())) return;
-    setGuard(null);
-    bypass.current = true;
-    run();
-    window.setTimeout(() => { bypass.current = false; }, 0);
-  };
+  }, []);
   /* the host's ✕ and Esc */
   useEffect(() => {
     const g = kit?.closeGuardRef;
@@ -674,12 +725,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     f.addEventListener("click", onClick, true);
     return () => { f.removeEventListener("keydown", onKey, true); f.removeEventListener("pointerdown", onDown, true); f.removeEventListener("click", onClick, true); };
   }, [p.preview]);
-  /* Esc while editing: the rust bar up means Keep editing; changes ask; no changes closes the open sections */
-  useEscapeLayer(editing || !!guard, () => {
-    if (guard) { setGuard(null); return; }
-    if (dirtyRef.current) { setGuard({ run: () => {} }); return; }
-    closeAll();
-  }, ESC_LEVEL.card);
+  /* Esc while something is open: the question up means Keep editing; otherwise leave it (unchanged closes, changed asks) */
+  useEscapeLayer(!!rule.open, () => { const r = ruleRef.current; if (r.asking) r.keep(); else r.leave(); }, ESC_LEVEL.card);
 
   /* ══ Agent card v2 · the face ══════════════════════════════════════════════════════════════════════════════════ */
   const tone = acTone(x);
@@ -699,7 +746,6 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const name = agentPrimary(a);
   const agency = (a.name ?? "").trim() ? ((a.agency ?? "").trim() || (a.agencyUnknown ? "Agency unknown" : "")) : "";
   const initials = agentInitials(a).slice(0, 2);
-  const { showToast } = useToast();
   const db = useScriptAllyDb();
 
   /* the query card for this agent's live query, with "← Back to {first}"; the card comes back at the tab it left */
@@ -718,7 +764,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       const d = new Date();
       const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       void db.addUserTask({ text: `Answer ${m.first}’s offer`, queryId: act.queryId, agentId: a.id, manuscriptId: q?.manuscriptId, dueDate: today })
-        .then(() => showToast({ message: "On your to-do list for today" }));
+        .then(() => say({ message: "On your to-do list for today" }));
     }
   };
 
@@ -730,6 +776,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     void p.edit.save({ rating: n }).then((ok) => { if (ok) land(["band"], { light: false }); else pressBack(cardRef.current); });
   };
 
+  /* ══ Agent card v2.2 B6 · the band's ⋯, before ✕: "Delete this agent" runs the existing delete behind its existing gate
+     (RemoveConfirm, lifted unchanged from the old card's footer), in the footer's place. No Undo. ══════════════════════ */
+  const [bandMenu, setBandMenu] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const inRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setBandMenu(false); setRemoving(false); }, [a.id]);
   const band = (
     <div className="qc152-band dk agb" data-qc152="band" data-acv2="band" data-acv2-part="band">
       {p.preview ? (
@@ -743,10 +796,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         </span>
       )}
       {/* Agent card v2.1 — editing is by section only: the band has no pencil */}
+      {p.preview && !shy ? <button type="button" className="qc152-x" data-qc168="band-more" aria-label={`More for ${m.first}`}>⋯</button> : null}
       {p.preview ? null : <>
         <span className="ag-pos" data-cl24="pos" data-acv2="pos">{p.index + 1} / {p.total}</span>
         <button type="button" className="qc152-x" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" title="Previous agent" disabled={p.index <= 0} onClick={() => goStep(-1)}>{IC.l}</button>
         <button type="button" className="qc152-x" data-cl262="next-agent" data-cl24="next" aria-label="Next agent" title="Next agent" disabled={p.index >= p.total - 1} onClick={() => goStep(1)}>{IC.r}</button>
+        <button ref={moreRef} type="button" className="qc152-x" data-qc168="band-more" data-acv22="band-more" aria-label={`More for ${m.first}`} title="More"
+          aria-haspopup="menu" aria-expanded={bandMenu} onClick={() => { if (ask(() => setBandMenu(true))) setBandMenu((v) => !v); }}>⋯</button>
         <button type="button" className="qc152-x" data-cl262="close" data-cl24="close" aria-label="Close the agent" title="Close" onClick={() => (p.onClose ?? requestCardClose)()}>✕</button>
       </>}
     </div>
@@ -762,16 +818,39 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const hAgency = hv.name.trim() ? (hv.agency.trim() || (hv.agencyUnknown ? "Agency unknown" : "")) : "";
   const place = placeOf(hv);
   const hEmail = hv.email.trim(), hSite = hv.website.trim();
-  const copyEmail = () => { void navigator.clipboard?.writeText(hEmail).then(() => showToast({ message: "Email address copied" }), () => {}); };
+  const copyEmail = () => { void navigator.clipboard?.writeText(hEmail).then(() => say({ message: "Email address copied" }), () => {}); };
   const quiet = p.preview || !!cd;
-  const head = (
-    <div className="ag-head" data-acv2="head" data-acv2-part="head" data-live={cd ? "" : undefined}>
+  /* a section's props (the head's too): declared ABOVE every render-time reader (the head reads it) */
+  const sec = (k: Sec262) => {
+    const t = tickPress(k);
+    return { k, label: secName(k), err: secErr[k], busy: busy != null, dirty: secChanged(k).length > 0, draft: pickDraft(form.d, SEC_FIELDS[k]),
+      onCross: () => cross(k), onTick: t.onTick, onTickDown: t.onPointerDown,
+      onClose: () => { formRef.current.revert(SEC_FIELDS[k]); setSecErr((e) => ({ ...e, [k]: undefined })); setOpen((cur) => cur.filter((x) => x !== k)); },
+      onReopen: () => openSec(k) };
+  };
+  const discEl = (
+    <span className={`qc152-disc acv2-disc${tone === "nq" ? " nq" : tone === "closed" ? " cl" : ""}`} data-acv2="disc" data-tone={tone} aria-hidden="true"
+      style={tone === "nq" ? undefined : { boxShadow: `0 0 0 2.5px #fff, 0 0 0 4.5px ${col.edge}` }}>{initials}</span>
+  );
+  const pillEl = (
+    <span className={`qc152-pill${tone === "nq" ? " nq" : ""}`} data-qc152="pill" data-acv2="pill" data-stage={tone === "nq" ? undefined : tone} data-tone={tone}
+      {...(p.preview ? {} : why(tone === "nq" ? `Changes when you log a query to ${m.first}` : `From your query to ${m.first}. It changes when the query does`))}>
+      <span className="qc152-cap">{pill.status ? <StatusDot status={pill.status} overrideSize={17} tone="ink" decorative /> : NQ16}</span><span>{pill.word}</span>
+    </span>
+  );
+  /* AC9's mutation (review aid, off production): no city offer */
+  const headParts = contactOpen && kit && !p.preview ? contactHead(form, { geo: mut168("ac9") ? undefined : { kept: geoKept, keep: (key) => setGeoKept((s0) => new Set([...s0, key])) } }) : null;
+  const moreHas = !!headParts?.moreHasValue;
+  useEffect(() => { if (contactOpen) { setMore(moreHas || moreAsk.current); moreAsk.current = false; } }, [contactOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  const head = headParts ? (
+    <HeadOpen parts={headParts} disc={discEl} pill={pillEl} more={more} onMore={() => setMore((v) => !v)} {...sec("contact")} />
+  ) : (
+    <div className="ag-head" data-acv2="head" data-acv2-part="head" data-live={cd ? "" : undefined} data-qc168-host={quiet ? undefined : ""}>
       <div className="qc152-agent" data-acv2="head-row">
-        <span className={`qc152-disc acv2-disc${tone === "nq" ? " nq" : tone === "closed" ? " cl" : ""}`} data-acv2="disc" data-tone={tone} aria-hidden="true"
-          style={tone === "nq" ? undefined : { boxShadow: `0 0 0 2.5px #fff, 0 0 0 4.5px ${col.edge}` }}>{initials}</span>
+        {discEl}
         <div className="qc152-who">
           <div className="ag-nmrow"><h2 className="qc152-nm qcv-open-nm" data-apc="name" data-acv2="name">{hName}</h2>
-            {quiet ? null : <button type="button" className="cl262-pen ag-pen" data-cl262="pen" data-k="contact" aria-label={`Edit ${m.first}’s name and contact details`} onClick={() => openSec("contact")}>{IC.pen}</button>}</div>
+            {quiet && (!p.preview || shy) ? null : <EditPen label={`${m.first}’s name and contact details`} onOpen={() => openSec("contact")} data={{ "data-cl262": "pen", "data-k": "contact" }} />}</div>
           {hAgency ? <div className="qc152-ag" data-acv2="agency">{hAgency.toUpperCase()}</div> : null}
           {place.text ? (
             <div className="ag-loc" data-acv2="loc">
@@ -780,9 +859,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
             </div>
           ) : null}
         </div>
-        <span className={`qc152-pill${tone === "nq" ? " nq" : ""}`} data-qc152="pill" data-acv2="pill" data-stage={tone === "nq" ? undefined : tone} data-tone={tone}>
-          <span className="qc152-cap">{pill.status ? <StatusDot status={pill.status} overrideSize={17} tone="ink" decorative /> : NQ16}</span><span>{pill.word}</span>
-        </span>
+        {pillEl}
       </div>
       {hEmail || hSite || !quiet ? (
         <div className="ag-contact" data-acv2="contact" data-acv2-part="contact">
@@ -822,14 +899,15 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
   const fin = gaps ? finishItems(gaps.keys ?? []) : [];
   const SEC_PEN: Record<Sec262, string> = { contact: `${m.first}’s name and contact details`, how: `how ${m.first} works`, wishlist: "the wishlist", genres: "genres", materials: `what ${m.first} asks for` };
-  /* each section's pencil: 28px, shown on hover and on keyboard focus within the section */
-  const penFor = (k: Sec262) => (p.preview ? null : <button type="button" className="cl262-pen ag-pen" data-cl262="pen" data-k={k} aria-label={`Edit ${SEC_PEN[k]}`} onClick={() => openSec(k)}>{IC.pen}</button>);
+  /* Agent card v2.2 — each section's pencil is the query card's (QcEdit168 EditPen): a 26px disc at the right end of the
+     heading (the fact boxes': their top-right corner), shown on hover and on keyboard focus within; it moves nothing */
+  const penFor = (k: Sec262) => (shy ? null : <EditPen label={SEC_PEN[k]} onOpen={() => openSec(k)} data={{ "data-cl262": "pen", "data-k": k }} />);
   /* the value itself opens its section (a faint edge on hover); a button or link inside a value keeps its own action */
   const doorOf = (k: Sec262): Record<string, unknown> => (p.preview || !kit ? {} : {
     "data-door": k,
     onClick: (e: React.MouseEvent) => { if ((e.target as Element).closest("button, a, input, textarea, [role='button']")) return; openSec(k); },
   });
-  const sec = (k: Sec262) => { const t = tickPress(k); return { k, label: secName(k), err: secErr[k], busy: busy != null, onCross: () => cross(k), onTick: t.onTick, onTickDown: t.onPointerDown }; };
+
   const factsShown = factBoxesShown(boxes);
   /* the fact boxes over the draft while How is open: the draft through the save's own patch, read by the same boxes */
   const draftBoxes = howOpen ? factBoxes(applyPatch(a, cardPatch(a, form.base, howPart, new Date(p.nowMs).toISOString())), (howPart.door ?? x.door) as typeof x.door) : boxes;
@@ -844,10 +922,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   );
   const profile = (
     <div className="nx acv2-pro" data-cl262="profile" data-cl24="pane" data-acv2="profile">
-      {isOpen("contact") && kit ? (
-        <OpenSec {...sec("contact")} heading="Contact details">
-          <EditContact form={form} agent={a} kit={kit} geo={{ kept: geoKept, keep: (key) => setGeoKept((s) => new Set([...s, key])) }} />
-        </OpenSec>
+      {/* v2.2 — no Contact details section: it is edited in the head (AC7's mutation draws a section here as well) */}
+      {isOpen("contact") && kit && mut168("ac7") ? (
+        <section className="acv2-sec ag-sec live" data-cl262="sec" data-k="contact-copy" data-acv21="open"><h4>Contact details</h4><div style={{ height: 320 }} /></section>
       ) : null}
       {gaps && !editing ? (
         <div className="ag-fin" data-acv2="finish" data-n={gaps.n}>
@@ -865,7 +942,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           <div className="ag-ctl"><EditHow form={form} agent={a} kit={kit} first={m.first} offers={offerKit} /></div>
         </OpenSec>
       ) : factsShown ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="how" data-acv2="facts-sec">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="how" data-acv2="facts-sec" data-qc168-host="">
           {penFor("how")}
           {boxRow(boxes, false)}
         </section>
@@ -873,7 +950,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       {isOpen("wishlist") ? (
         <OpenSec {...sec("wishlist")} heading={<>Wishlist <em>in {m.first}’s words</em></>}><EditWishlist form={form} /></OpenSec>
       ) : wish ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="wishlist" data-qc158="wishlist" data-acv2="wishlist" data-acv2-part="wishlist">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="wishlist" data-qc158="wishlist" data-acv2="wishlist" data-acv2-part="wishlist" data-qc168-host="">
           <h4>Wishlist <em>in {m.first}’s words</em>{penFor("wishlist")}</h4>
           <p className="nx-quote" data-cl262="wishlist" {...doorOf("wishlist")}>{wish}</p>
         </section>
@@ -881,7 +958,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       {isOpen("genres") && kit ? (
         <OpenSec {...sec("genres")} heading={<>Genres {m.first} takes</>}><EditGenres form={form} kit={kit} isHit={p.genreHit} /></OpenSec>
       ) : genres.length ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="genres" data-acv2="genres" data-acv2-part="genres">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="genres" data-acv2="genres" data-acv2-part="genres" data-qc168-host="">
           <h4>Genres {m.first} takes{genres.some((g) => p.genreHit(g)) ? <span className="r" data-acv2="yours">includes yours</span> : null}{penFor("genres")}</h4>
           <div className="nx-chips" data-cl262="genres" {...doorOf("genres")}>
             {[...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))].map((g) => (
@@ -895,7 +972,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       {isOpen("materials") ? (
         <OpenSec {...sec("materials")} heading={<>What {m.first} asks for <em data-acv21="tick-all">tick all that apply</em></>}><EditMaterials form={form} /></OpenSec>
       ) : asks.length ? (
-        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="materials" data-qc158="asks" data-acv2="asks" data-acv2-part="asks">
+        <section className="acv2-sec ag-sec" data-cl262="sec" data-k="materials" data-qc158="asks" data-acv2="asks" data-acv2-part="asks" data-qc168-host="">
           <h4>What {m.first} asks for{penFor("materials")}</h4>
           <ul className="nx-list" {...doorOf("materials")}>{asks.map((c) => (
             <li key={c.label} data-acv2="ask"><MaterialItemIcon kind={c.icon} size={20} />{c.label}{c.qty ? <span className="r">{c.qty}</span> : null}</li>
@@ -903,7 +980,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         </section>
       ) : null}
       <div className="nx-foot" data-acv2="profile-foot">
-        <span className="ag-added" data-cl262="added">{added ? `Added ${added}` : "Added"}</span>
+        <span className="ag-added" data-cl262="added" {...(p.preview ? {} : why(`The day you added ${m.first}`))}>{added ? `Added ${added}` : "Added"}</span>
       </div>
     </div>
   );
@@ -946,7 +1023,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const pinNote = (id: string | null) => {
     const list = committedNotes(effectiveNotes(storedNotes, emptyNotesDraft(), { flatNote: a.notes, dateAdded: a.dateAdded }));
     void writeAgent(a.id, { pinnedNoteId: id, notePreview: computeNotePreview(list, id ?? undefined) })
-      .then((r) => { if (!r.ok) showToast({ message: "Couldn’t pin that note. Try again." }); });
+      .then((r) => { if (!r.ok) say({ message: "Couldn’t pin that note. Try again." }); });
   };
   /* Agent card v2 ruling 4 — Edit and Delete on every note of the writer's. The old string writes back to its own field
      through the card's notes save (`onNotes`); Delete clears it, and Undo writes the same bytes back. */
@@ -955,30 +1032,32 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (id === FLAT_NOTE_ID) {
       const was = a.notes ?? "";
       void p.onNotes("").then((ok) => {
-        if (!ok) { showToast({ message: "Couldn’t delete that note. Try again." }); return; }
-        showToast({ message: "Note deleted", undo: async () => { if (await p.onNotes(was)) showToast({ message: "Note restored" }); } });
+        if (!ok) { say({ message: "Couldn’t delete that note. Try again." }); return; }
+        say({ message: "Note deleted", undo: async () => { if (await p.onNotes(was)) say({ message: "Note restored" }); } });
       });
       return;
     }
     const n = storedNotes.find((x) => x.id === id);
     if (!n) return;
     void onDeleteNote(n).then((ok) => {
-      if (!ok) { showToast({ message: "Couldn’t delete that note. Try again." }); return; }
-      showToast({ message: "Note deleted", undo: async () => { if (await onRestoreNote(n)) showToast({ message: "Note restored" }); } });
+      if (!ok) { say({ message: "Couldn’t delete that note. Try again." }); return; }
+      say({ message: "Note deleted", undo: async () => { if (await onRestoreNote(n)) say({ message: "Note restored" }); } });
     });
   };
-  const quotes = threads.flatMap((t) => quotesOf(t.steps));
+  /* v2.2 — each quote knows its query, for "Change it on the query" (the agent's words are read-only here) */
+  const quotes = threads.flatMap((t) => quotesOf(t.steps).map((q0) => ({ ...q0, queryId: t.queryId })));
   const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const notes = (
     <div className="qc152-notes acv2-notes" data-cl262="notes" data-cl24="pane" data-acv2="notes">
       <NotesTab158 first={m.first} nowMs={p.nowMs} notes={noteList} quotes={quotes} resetKey={a.id}
         placeholder={`Add a note about ${m.first}`} emptySub={`This is the place for where you met ${m.first}, and anything worth remembering before you query.`}
-        onAdd={(text) => { landStart(); void onAddNote(text).then((ok) => { if (ok) { land([], { light: false }); showToast({ message: `Noted on ${m.first}’s card` }); } else { pressBack(cardRef.current); showToast({ message: "Couldn’t save that note. Try again." }); } }); }}
+        onAdd={(text) => { landStart(); void onAddNote(text).then((ok) => { if (ok) { land([], { light: false }); say({ message: `Noted on ${m.first}’s card` }); } else { pressBack(cardRef.current); say({ message: "Couldn’t save that note. Try again." }); } }); }}
         onPin={p.preview ? null : (id, on) => pinNote(on ? id : null)}
         onEdit={p.preview ? null : editNote}
         onDelete={p.preview ? null : deleteNote}
-        onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => showToast({ message: "On your to-do list for today" })); }}
-        onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }} />
+        onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => say({ message: "On your to-do list for today" })); }}
+        onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => say({ message: "Pinned to your Corkboard" })); }}
+        onQuoteOpen={p.preview ? null : (q0) => { if (q0.queryId) openQuery(q0.queryId); }} />
     </div>
   );
 
@@ -994,25 +1073,35 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     <div ref={cardRef} className={`cl262-card apc acv2${editing ? " is-editing" : ""}${p.preview ? " is-preview" : ""}`} data-cl262="card" data-apc="card" data-acv2="card"
       data-tone={tone} data-stand={x.stand} data-agent-id={a.id} data-qc163-rim={rim.rim} data-qc163-rim-hi={rim.rimHi}>
       <div className="apc-frame acv2-frame" data-apc="frame" data-acv2="frame">
-        <div className="qc149c qcv-legacy qc152 acv2-qc" data-acv2="qc"
+        <Edit168Ctx.Provider value={rule}>
+        <div className="qc149c qcv-legacy qc152 acv2-qc" data-acv2="qc" data-qc168-open={rule.open ?? undefined}
           style={{ ["--band" as string]: col.band, ["--tint" as string]: col.tint, ["--edge" as string]: col.edge, ["--mark" as string]: col.mark, ["--fdisc" as string]: tone === "nq" ? "#f3f6f9" : col.band } as React.CSSProperties}>
-          <div className="qc152-in">
+          <div ref={inRef} className="qc152-in">
             {band}
+            {bandMenu && !p.preview ? (
+              <CardMenu root={inRef.current} anchor={moreRef.current} onClose={() => setBandMenu(false)} label={`${m.first}’s card`} hook="band-menu">
+                <CardMenuItem label="Delete this agent" rust data={{ "data-act": "delete" }} onPick={() => { setBandMenu(false); if (!mut168("ac13")) setRemoving(true); }} />
+              </CardMenu>
+            ) : null}
             {head}
             {qbox}
             {tabs}
             <div ref={scrollRef} className="qc152-body" role="tabpanel" data-qc152="body" data-apc="scroll" data-cl262="scroll" data-acv2="body" data-tab={tab}>{body}</div>
-            {/* Agent card v2.1 — no save bar: the footer stays in view while sections are open, and the rust bar takes its
-                place only when leaving with something unsaved */}
-            {guard ? (
-              <div className="ag-savewrap" data-acv2="save">
-                <GuardBar names={dirtySecs.map(secName)} busy={busy === "all"} problem={Object.values(secErr).find(Boolean) ?? null}
-                  onKeep={() => setGuard(null)} onDiscard={() => { const g = guard; discardThen(g.run); }}
-                  onSaveAllDown={() => pressAtPointer(cardRef.current)} onSaveAll={() => { const g = guard; pressThen(cardRef.current, () => void saveAllThen(g.run)); }} />
+            {/* Agent card v2.2 — the footer always stays: a section's question is asked inside the section. B4: the card's
+                toast bar sits above it */}
+            {toast168 ? (
+              <div className="qc1522-toast" role="status" data-qc1522="toast" data-acv22="toast"><span>{toast168.msg}</span>
+                {toast168.undo ? <button type="button" data-qc1522="undo" onClick={() => { const u = toast168.undo; setToast168(null); void u?.(); }}>Undo</button> : null}</div>
+            ) : null}
+            {removing ? (
+              <div className="qc149c-ft2 ag-remove" data-acv22="remove">
+                <RemoveConfirm agent={a} deleteQueries={p.deleteQueries} onKeep={() => setRemoving(false)} onDelete={p.onDelete} />
               </div>
             ) : footer}
           </div>
         </div>
+        </Edit168Ctx.Provider>
+        {tip.node}
       </div>
     </div>
   );

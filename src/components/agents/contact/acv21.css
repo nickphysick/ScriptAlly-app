@@ -37,13 +37,7 @@
 
 /* ── Phase 2 · editing by section, in place ── */
 /* each section's pencil: 28px, shown on hover and on keyboard focus within the section (the name's, within the head) */
-.acv2 .cl262-pen.ag-pen { width: 28px; height: 28px; border-radius: 8px; flex: none; }
-.acv2 .ag-sec:hover .cl262-pen, .acv2 .ag-sec:focus-within .cl262-pen,
-.acv2 .ag-head:hover .cl262-pen, .acv2 .ag-head:focus-within .cl262-pen, .acv2 .cl262-pen:focus-visible { opacity: 1; }
-.acv2 .cl262-pen.ag-pen:hover { background: #e6edf6; }
-.acv2 .cl262-pen.ag-pen:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
-.acv2 .ag-nmrow .cl262-pen { margin-left: 6px; }
-.acv2 .acv2-sec h4 .cl262-pen { align-self: center; }
+/* (the 28px .ag-pen is retired: Agent card v2.2 uses the query card's EditPen, placed in acv22.css) */
 /* the value itself opens its section: a faint edge on hover */
 .acv2 [data-door] { cursor: pointer; }
 .acv2 .nx-boxes[data-door]:hover .nx-box, .acv2 .nx-list[data-door]:hover, .acv2 .nx-chips[data-door]:hover .nx-chip.no { box-shadow: inset 0 0 0 1px #c9bfb1; }
@@ -120,8 +114,7 @@
 @keyframes acv21-offer-in { from { opacity: 0; translate: 0 -4px; } to { opacity: 1; translate: 0 0; } }
 
 /* the rust bar: "Unsaved changes", the sections named beneath, Keep editing, Discard, Save all */
-.acv2 .acv21-guard { gap: 14px; }
-.acv2 .acv21-guard .cl262-sv i { font: italic 400 13.5px var(--sp-serif) !important; }
+/* (the rust bar's rules are retired with it: Agent card v2.2) */
 
 @media (prefers-reduced-motion: reduce) {
   .acv2 .acv21-geooffer { animation: none; }

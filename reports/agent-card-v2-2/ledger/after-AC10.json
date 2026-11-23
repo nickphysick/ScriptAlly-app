@@ -1,0 +1,22 @@
+[
+ {
+  "name": "+ Add email: the head is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "+ Add email: the email field has the focus",
+  "ok": true,
+  "got": "email"
+ },
+ {
+  "name": "+ Add website: the head is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "+ Add website: the website field has the focus",
+  "ok": true,
+  "got": "website"
+ }
+]

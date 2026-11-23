@@ -6,7 +6,7 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { MaterialsTab158 } from "./QcMaterials158";
+import { MaterialsTab158, sameWords } from "./QcMaterials158";
 import { materialGroups, type ThreadStepIn } from "../../../lib/qcThread152";
 import { QueryStatus } from "../../../types";
 import { STAGE_COLOURS } from "../../../lib/stageColours";
@@ -59,5 +59,16 @@ describe("QC158-9 (source) a request not yet answered", () => {
     expect(done).not.toContain("pend");
     const css = readFileSync("src/components/queries/centre/qcv158.css", "utf8");
     expect(css).toMatch(/\.qc152 \.nx-grp\.pend \.nx-items \{ background: #fff; box-shadow: inset 0 0 0 1\.5px #2a3a52; \}/);
+  });
+});
+
+/* Query card v168.1 A2 — a row says its name once */
+describe("QC168.1-A2 (source) a detail that repeats the label is not drawn", () => {
+  it("sameWords ignores case and spacing; a step's recorded rows carry no detail, the query record's real detail stays", () => {
+    expect(sameWords("Full manuscript", "full  manuscript")).toBe(true);
+    expect(sameWords("Query letter · Agent letter v2", "Query letter")).toBe(false);
+    const fs = { ...st("fs", QueryStatus.FULL_SENT, 18, []), chips: [{ label: "Full manuscript", detail: "Full manuscript", icon: null }] } as ThreadStepIn;
+    const h = html([Q, FR, fs]);
+    expect(h).not.toMatch(/Full manuscript<span class="r"[^>]*>Full manuscript</i);
   });
 });

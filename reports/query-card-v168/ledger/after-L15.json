@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the group reads three items",
+  "ok": true,
+  "got": "[\"Query letter\",\"Synopsis\",\"First 3 chapters\"]"
+ },
+ {
+  "name": "one row per item",
+  "ok": true,
+  "got": "3 rows for 3 items"
+ },
+ {
+  "name": "each row's label is the reading row's",
+  "ok": true,
+  "got": "[\"Query letter\",\"Synopsis\",\"First 3 chapters\"]"
+ },
+ {
+  "name": "…in the same font family and size",
+  "ok": true,
+  "got": "[\"\\\"Source Serif 4\\\", Ge 15.5px\",\"\\\"Source Serif 4\\\", Ge 15.5px\",\"\\\"Source Serif 4\\\", Ge 15.5px\"]"
+ },
+ {
+  "name": "…not upper-cased",
+  "ok": true,
+  "got": "[\"none\",\"none\",\"none\"]"
+ },
+ {
+  "name": "one × per row",
+  "ok": true,
+  "got": "[1,1,1]"
+ },
+ {
+  "name": "a last '+ Add' row",
+  "ok": true,
+  "got": ""
+ }
+]

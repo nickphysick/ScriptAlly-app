@@ -1,0 +1,27 @@
+[
+ {
+  "name": "the question shows inside the wishlist",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "…in its words",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing else opened",
+  "ok": true,
+  "got": "wishlist"
+ },
+ {
+  "name": "Discard: the click goes on (genres opens)",
+  "ok": true,
+  "got": "genres"
+ },
+ {
+  "name": "nothing was written",
+  "ok": true,
+  "got": "Thrillers with a moral knot at the centre."
+ }
+]

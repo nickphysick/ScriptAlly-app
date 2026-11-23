@@ -1,0 +1,22 @@
+[
+ {
+  "name": "⋯ holds Delete this agent",
+  "ok": true,
+  "got": "[\"Delete this agent\"]"
+ },
+ {
+  "name": "the existing gate opens",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "…asking for the typed name (Ada has a query)",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "not confirmed: Ada is still there",
+  "ok": true,
+  "got": ""
+ }
+]

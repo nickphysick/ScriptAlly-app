@@ -154,17 +154,21 @@ export const MoreDisc: React.FC<{ label: string; open: boolean; onOpen: (el: HTM
 );
 
 /** the cross and the tick, where the pencil was */
-export const CrossTick: React.FC<{ dirty: boolean; busy?: boolean; onCross: () => void; onTick: () => void }> = ({ dirty, busy, onCross, onTick }) => (
+export const CrossTick: React.FC<{ dirty: boolean; busy?: boolean; onCross: () => void; onTick: () => void;
+  /** Agent card v2.2 — the tick's press (the card presses in at the pointer before the save), and what each names */
+  onTickDown?: () => void; what?: string }> = ({ dirty, busy, onCross, onTick, onTickDown, what }) => (
   <span className="qc168-ct" data-qc168="ct">
-    <button type="button" className="qc168-tc x" data-qc168="cross" aria-label="Discard changes" title="Discard changes" onClick={onCross}>{CROSS}</button>
-    <button type="button" className="qc168-tc k" data-qc168="tick" aria-label="Save" title="Save" disabled={(!dirty && !mut168("3")) || !!busy} onClick={onTick}>{TICK}</button>
+    <button type="button" className="qc168-tc x" data-qc168="cross" aria-label={what ? `Discard changes to ${what}` : "Discard changes"} title="Discard changes" onClick={onCross}>{CROSS}</button>
+    <button type="button" className="qc168-tc k" data-qc168="tick" aria-label={what ? `Save ${what}` : "Save"} title="Save" disabled={(!dirty && !mut168("3")) || !!busy} onPointerDown={onTickDown} onClick={onTick}>{TICK}</button>
   </span>
 );
 
 /** the one question, inside what is open */
-export const DiscardAsk: React.FC<{ onKeep: () => void; onDiscard: () => void; className?: string }> = ({ onKeep, onDiscard, className }) => (
-  <div className={`qc168-ask${className ? ` ${className}` : ""}`} role="alertdialog" aria-label="Discard your changes?" data-qc168="ask">
-    <span>Discard your changes?</span><span className="sp" />
+export const DiscardAsk: React.FC<{ onKeep: () => void; onDiscard: () => void; className?: string;
+  /** Agent card v2.2 — the question naming what is open ("Discard your changes to the wishlist?") */
+  words?: string }> = ({ onKeep, onDiscard, className, words = "Discard your changes?" }) => (
+  <div className={`qc168-ask${className ? ` ${className}` : ""}`} role="alertdialog" aria-label={words} data-qc168="ask">
+    <span>{words}</span><span className="sp" />
     <button type="button" className="qc168-lk" data-qc168="keep" onClick={onKeep}>Keep editing</button>
     <button type="button" className="qc1522-btn nv sm" data-qc168="discard" onClick={onDiscard}>Discard</button>
   </div>

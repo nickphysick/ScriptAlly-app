@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: sent rows read",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "no row shows a detail equal to its label",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "the pencil's box overlaps no text box in its group",
+  "ok": true,
+  "got": "[]"
+ }
+]

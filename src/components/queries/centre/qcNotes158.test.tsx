@@ -110,3 +110,14 @@ describe("QC158-13 (source) empty", () => {
     expect(css).toMatch(/\.qc152 \.nx-nempty \{ margin: auto 0; text-align: center; \}/);
   });
 });
+
+/* Agent card v2.2 B5 — the agent's words: Send to Corkboard and "Change it on the query" (when the card gives a door) */
+describe("ACV22-B5 (source) the agent's words' ⋯", () => {
+  it("holds Change it on the query only with a door and a query", () => {
+    const q0 = { ...quotes[0], queryId: "q1" };
+    const all = { onCork: () => {}, onQuoteOpen: () => {} };
+    expect(menuItems168({ t: "quote", q: q0 }, all).map((x) => x.label)).toEqual(["Send to Corkboard", "Change it on the query"]);
+    expect(menuItems168({ t: "quote", q: { ...q0, queryId: null } }, all).map((x) => x.k)).toEqual(["cork"]);
+    expect(menuItems168({ t: "quote", q: q0 }, { onCork: () => {} }).map((x) => x.k)).toEqual(["cork"]);
+  });
+});

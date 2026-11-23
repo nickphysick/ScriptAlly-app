@@ -25,7 +25,7 @@ import { openCard as openAgentRow } from "./cl262Lib";
 const TAG = (process.env.QC168_TAG ?? "after") as "after" | "mutant";
 const ONLY = process.env.QC168_ONLY ?? "";
 const run = (id: string) => (!ONLY && id !== "F") || ONLY.split(",").includes(id);
-const MUT = TAG === "mutant" ? (process.env.QC168_MUT ?? "1,2,3,4,5,6,7,8,9,10,11,12,13,14").split(",") : [];
+const MUT = TAG === "mutant" ? (process.env.QC168_MUT ?? "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17").split(",") : [];
 const DIR = "reports/query-card-v168";
 const PAGE = ".qc151.qc153";
 const CARD = "[data-qp='panel'] [data-qc152='card']";
@@ -111,7 +111,7 @@ async function undo(page: Page) { await page.locator(UNDO).click(); await page.w
 /* ── the in-page mutations (CSS/DOM): L2, L7, L13 ── */
 async function mutate(page: Page) {
   const m = own();
-  if (!["2", "7", "13"].includes(m)) return;
+  if (!["2", "7", "13", "17"].includes(m)) return;
   await page.evaluate((m) => {
     const css = (id: string, t: string) => { if (!document.getElementById(id)) { const s = document.createElement("style"); s.id = id; s.textContent = t; document.head.append(s); } };
     /* M2 the pencil placed in the flow on hover (it takes its own room) */
@@ -123,6 +123,8 @@ async function mutate(page: Page) {
     }
     /* M13 one retired sheet loaded again */
     if (m === "13") css("m13", ".qc152 .qc152-ebar { display: flex; } .qc152 .qc152-edstrip { display: flex; }");
+    /* M17 the step editor's chip words back in mono capitals */
+    if (m === "17") css("m17", ".qc152 .qc1522-edit .qc152-mp { font-family: var(--sp-mono) !important; text-transform: uppercase !important; }");
   }, m);
 }
 
@@ -474,6 +476,75 @@ if (run("14")) test("QC168-14 · keyboard: Tab, Enter, Esc, and Cmd/Ctrl + Enter
   if (ok) await undo(page);
   L.check("restored", readDb().notes[ACT("n1")] === n1, JSON.stringify(readDb().notes[ACT("n1")]));
   L.done(9);
+});
+
+/* ══ Query card v168.1 ══════════════════════════════════════════════════════════════════════════════════════════════ */
+/* L15 — an open group draws one row per item, its label the reading row's, in the reading row's type; one × per row */
+if (run("15")) test("QC168-15 · an open group is the tab's own rows", async ({ page }) => {
+  const L = new Ledger("L15");
+  await openQc(page);
+  L.check("population: the card opened", await openCard(page), "");
+  await tab(page, "materials");
+  const grp = page.locator(C("[data-qc158='group'][data-kind='query']"));
+  const read = await grp.locator("[data-qc158='item']").evaluateAll((ls) => ls.map((l) => { const cs = getComputedStyle(l); return { t: ((l.textContent ?? "").slice(0, (l.textContent ?? "").length - (l.querySelector(".r")?.textContent ?? "").length)).trim(), fam: cs.fontFamily, size: cs.fontSize }; }));
+  L.check("population: the group reads three items", read.length === 3, JSON.stringify(read.map((r) => r.t)));
+  await grp.locator(".nx-items").hover(); await grp.locator("[data-qc168='pen']").click(); await page.waitForTimeout(400);
+  const rows = await page.locator(C("[data-qc168='group-edit'] [data-qc168='mat-row']")).evaluateAll((rs) => rs.map((r) => {
+    const lab = r.querySelector<HTMLElement>("[data-qc168='mat-label']"); const cs = lab ? getComputedStyle(lab) : null;
+    return { t: (lab?.textContent ?? "").trim(), fam: cs?.fontFamily ?? "", size: cs?.fontSize ?? "", up: cs?.textTransform ?? "", x: r.querySelectorAll(".qc168-mx").length };
+  }));
+  L.check("one row per item", rows.length === read.length, `${rows.length} rows for ${read.length} items`);
+  L.check("each row's label is the reading row's", rows.length === read.length && rows.every((r, i) => r.t === read[i].t), JSON.stringify(rows.map((r) => r.t)));
+  L.check("…in the same font family and size", rows.length > 0 && rows.every((r, i) => r.fam === read[i]?.fam && r.size === read[i]?.size), JSON.stringify(rows.map((r) => `${r.fam.slice(0, 20)} ${r.size}`)));
+  L.check("…not upper-cased", rows.length > 0 && rows.every((r) => r.up !== "uppercase"), JSON.stringify(rows.map((r) => r.up)));
+  L.check("one × per row", rows.length > 0 && rows.every((r) => r.x === 1), JSON.stringify(rows.map((r) => r.x)));
+  L.check("a last '+ Add' row", ((await page.locator(C("[data-qc168='group-edit'] [data-qc168='add-row']")).textContent().catch(() => "")) ?? "").trim() === "+ Add", "");
+  await page.locator(C("[data-qc168='cross']")).click();
+  L.done(8);
+});
+
+/* L16 — no Materials row shows a detail equal to its label; the group's pencil overlaps no text in the group */
+if (run("16")) test("QC168-16 · a row says its name once, and the pencil sits clear of the words", async ({ page }) => {
+  const L = new Ledger("L16");
+  await openQc(page);
+  L.check("population: the card opened", await openCard(page), "");
+  await tab(page, "materials");
+  const r = await page.evaluate((card) => {
+    const root = document.querySelector<HTMLElement>(card)!;
+    const items = [...root.querySelectorAll<HTMLElement>("[data-qc158='group']:not([data-pending]) [data-qc158='item']")];
+    const twice = items.filter((li) => { const d = li.querySelector(".r"); const all = li.textContent ?? ""; const lab = all.slice(0, all.length - (d?.textContent ?? "").length).trim(); return !!d && d.textContent!.trim().toLowerCase() === lab.toLowerCase(); }).map((li) => li.textContent);
+    const overlaps: string[] = [];
+    for (const ul of root.querySelectorAll<HTMLElement>(".nx-items[data-qc168-host]")) {
+      const pen = ul.querySelector<HTMLElement>(":scope > [data-qc168='pen']")!.getBoundingClientRect();
+      const w = document.createTreeWalker(ul, NodeFilter.SHOW_TEXT);
+      for (let t = w.nextNode(); t; t = w.nextNode()) {
+        if (!(t.textContent ?? "").trim() || t.parentElement!.closest("[data-qc168='pen']")) continue;
+        const rg = document.createRange(); rg.selectNodeContents(t); const b = rg.getBoundingClientRect();
+        if (b.right > pen.left && b.left < pen.right && b.bottom > pen.top && b.top < pen.bottom) overlaps.push(t.textContent!.trim());
+      }
+    }
+    return { rows: items.length, twice, overlaps };
+  }, CARD);
+  L.check("population: sent rows read", r.rows >= 3, String(r.rows));
+  L.check("no row shows a detail equal to its label", r.twice.length === 0, JSON.stringify(r.twice));
+  L.check("the pencil's box overlaps no text box in its group", r.overlaps.length === 0, JSON.stringify(r.overlaps));
+  L.done(4);
+});
+
+/* L17 — an open step's material labels and "+ Add" are not mono and not upper-cased */
+if (run("17")) test("QC168-17 · a step's chips speak in the serif, never mono capitals", async ({ page }) => {
+  const L = new Ledger("L17");
+  await openQc(page);
+  L.check("population: the card opened", await openCard(page), "");
+  await openStep(page, "sent");
+  await mutate(page);
+  const r = await page.locator(`${STEP} [data-qc152='mat-chip'], ${STEP} [data-qc152='mat-add']`).evaluateAll((es) => es.map((e) => { const cs = getComputedStyle(e); return { t: (e.textContent ?? "").trim(), fam: cs.fontFamily, up: cs.textTransform, px: parseFloat(cs.fontSize) }; }));
+  L.check("population: the step's chips and + Add", r.length >= 4, JSON.stringify(r.map((x) => x.t)));
+  L.check("not mono", r.length > 0 && r.every((x) => !/mono/i.test(x.fam)), JSON.stringify(r.map((x) => x.fam.slice(0, 24))));
+  L.check("not upper-cased", r.length > 0 && r.every((x) => x.up !== "uppercase"), JSON.stringify(r.map((x) => x.up)));
+  L.check("nothing under 12px", r.length > 0 && r.every((x) => x.px >= 12), JSON.stringify(r.map((x) => x.px)));
+  await page.locator(`${STEP} [data-qc168='cross']`).click().catch(() => {});
+  L.done(5);
 });
 
 /* ══ F — the frames: a step open, a group open, a note open, the ⋯ menu, the move list, a why-tip, the toast ══════════ */

@@ -1,0 +1,62 @@
+[
+ {
+  "name": "More opened by itself (Wren has a wishlist page)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the save landed (the card's toast)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "read back: name",
+  "ok": true,
+  "got": "Wren Larkin"
+ },
+ {
+  "name": "read back: agency",
+  "ok": true,
+  "got": "Field Literary"
+ },
+ {
+  "name": "read back: country",
+  "ok": true,
+  "got": "IE"
+ },
+ {
+  "name": "read back: city",
+  "ok": false,
+  "got": "Edinburgh"
+ },
+ {
+  "name": "read back: email",
+  "ok": true,
+  "got": "wren@field.example"
+ },
+ {
+  "name": "read back: website",
+  "ok": true,
+  "got": "https://field.example"
+ },
+ {
+  "name": "read back: MSWL",
+  "ok": true,
+  "got": "[{\"platform\":\"MSWL\",\"handle\":\"https://www.manuscriptwishlist.com/mswl-post/wren-larkin/\"},{\"platform\":\"Submission form\",\"handle\":\"https://field.example/submit\"},{\"platform\":\"Other\",\"handle\":\"@wrenlarkin\"}]"
+ },
+ {
+  "name": "read back: social",
+  "ok": true,
+  "got": "[{\"platform\":\"MSWL\",\"handle\":\"https://www.manuscriptwishlist.com/mswl-post/wren-larkin/\"},{\"platform\":\"Submission form\",\"handle\":\"https://field.example/submit\"},{\"platform\":\"Other\",\"handle\":\"@wrenlarkin\"}]"
+ },
+ {
+  "name": "read back: submission link",
+  "ok": true,
+  "got": "[{\"platform\":\"MSWL\",\"handle\":\"https://www.manuscriptwishlist.com/mswl-post/wren-larkin/\"},{\"platform\":\"Submission form\",\"handle\":\"https://field.example/submit\"},{\"platform\":\"Other\",\"handle\":\"@wrenlarkin\"}]"
+ },
+ {
+  "name": "Undo restored every field",
+  "ok": true,
+  "got": ""
+ }
+]

@@ -589,12 +589,13 @@ test("AC2-9 · the old notes string: Edit, Delete and Undo", async ({ page }) =>
   L.check("edit · the string is the new words", after.notes === edited, JSON.stringify(after.notes));
   L.check("edit · nothing else on the agent changed", strip(after) === strip(before), strip(after) === strip(before) ? "" : `${strip(before).slice(0, 160)} vs ${strip(after).slice(0, 160)}`);
   /* Delete, then Undo: the same bytes back */
-  if (MUTS.has("undodrop")) await page.evaluate(() => document.addEventListener("click", (e) => { if ((e.target as HTMLElement).closest(".sa-toast-undo")) e.stopImmediatePropagation(); }, true));
+  /* Agent card v2.2 — re-pointed: the open card's messages are its own toast (data-acv22="toast"), not the snackbar */
+  if (MUTS.has("undodrop")) await page.evaluate(() => document.addEventListener("click", (e) => { if ((e.target as HTMLElement).closest("[data-acv22='toast'] [data-qc1522='undo']")) e.stopImmediatePropagation(); }, true));
   await noteAct(page, "__flat__", "delete");
   await page.waitForTimeout(1500);
   L.check("delete · the string is cleared", agentOf("acv2fx-notes").notes === "", JSON.stringify(agentOf("acv2fx-notes").notes));
   L.check("delete · the note is gone from the card", (await page.locator(`${AC} [data-qc158='note'][data-id='__flat__']`).count()) === 0, "");
-  await page.locator(".sa-toast-undo:visible").last().click();
+  await page.locator(`${AC} [data-acv22='toast'] [data-qc1522='undo']`).click();
   await page.waitForTimeout(1500);
   const back = agentOf("acv2fx-notes").notes;
   L.check("undo · byte for byte", back === edited, JSON.stringify(back));

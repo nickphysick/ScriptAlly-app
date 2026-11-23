@@ -1,0 +1,37 @@
+[
+ {
+  "name": "More is closed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the tabs row moved down by 56px or less",
+  "ok": true,
+  "got": "200 → 252 (52)"
+ },
+ {
+  "name": "the status pill is still drawn",
+  "ok": true,
+  "got": "30"
+ },
+ {
+  "name": "the query box is still drawn (it was: false)",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "the footer is still drawn",
+  "ok": true,
+  "got": "79"
+ },
+ {
+  "name": "no Contact details section in the tab",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the tab below sits back (42%)",
+  "ok": true,
+  "got": ""
+ }
+]

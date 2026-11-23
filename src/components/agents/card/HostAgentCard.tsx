@@ -13,6 +13,7 @@
  * `preview`: the add journey's finish screen draws the same face, read-only; its "Fill them in →", "+ Website" and the
  * section adds open THIS card in edit mode (the agent is saved by then), and its "Log a query" opens Logging new query.
  */
+import { sayForCard, type CardToast } from "../../../lib/agentCardToast";
 import React, { useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { db as firestoreDb } from "../../../lib/firebase";
@@ -52,6 +53,8 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
   const { agents, queries, manuscripts, activities, currentUser, taskFlags, userTasks, deleteAgent } = useScriptAllyDb();
   const navigate = useNavigate();
   const { showToast } = useToast();
+  /* Agent card v2.2 B4 — the card's messages go into the open card's toast (lib/agentCardToast) */
+  const sayCard = sayForCard(showToast as (t: CardToast) => void);
   const agent = agents.find((a) => a.id === agentId) ?? null;
   const scoped = useMemo(() => {
     let id: string | null = null;
@@ -103,9 +106,9 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
       save: async (change) => {
         const base = draftOf(agent, personal);
         const r = await saveDraft(agent, base, { ...base, ...change }, { emit: false });
-        if (!r.ok) { showToast({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
+        if (!r.ok) { sayCard({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
         const undo = r.undo;
-        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+        sayCard({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
         return true;
       },
       renderEdit: () => null,
@@ -125,7 +128,7 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
             : meta?.section ? sectionSavedWords(meta.section, first, offers) : savedWords(meta?.n ?? 1, first, offers);
           /* Agent card v2.1 — a section's save names the section; Save all makes its own snackbar (`silent`), and the card
              plays its Undo motion once the snapshot is back (`onUndo`) */
-          if (!meta?.silent) showToast({ message, ...(undo ? { undo: async () => { const ok = await undo(); if (ok) meta?.onUndo?.(); showToast({ message: UNDONE_WORDS }); } } : {}) });
+          if (!meta?.silent) sayCard({ message, ...(undo ? { undo: async () => { const ok = await undo(); if (ok) meta?.onUndo?.(); sayCard({ message: UNDONE_WORDS }); } } : {}) });
           return { ok: true, undo };
         },
         leaveRef: leave, closeGuardRef: guard, resumePick: noop,

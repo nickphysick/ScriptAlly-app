@@ -1,0 +1,37 @@
+[
+ {
+  "name": "a section save: the card's toast",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "…above the footer",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "…and no app snackbar",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "its Undo restored the wishlist",
+  "ok": false,
+  "got": "Thrillers with a moral knot at the centre. ACV22-AC11"
+ },
+ {
+  "name": "the cross on a changed note: the card's toast",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "…with Undo",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "…and no app snackbar",
+  "ok": true,
+  "got": ""
+ }
+]
