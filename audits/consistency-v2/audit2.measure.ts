@@ -139,7 +139,103 @@ async function measure(page: Page, entry: Record<string, unknown>, vw: number) {
   /* CA_PROBE=<file of JS>: evaluated on the page at 1512 (it must only read, or put back what it changes); the result goes to <key>@probe.json */
   if (vw === 1512 && process.env.CA_PROBE) writeFileSync(resolve(OUT, `${entry.key}@probe.json`), JSON.stringify(await page.evaluate(readFileSync(process.env.CA_PROBE, "utf8")).catch((e) => ({ error: String(e) })), null, 1));
   writeFileSync(resolve(OUT, `${entry.key}@${vw}.json`), JSON.stringify({ ...entry, ...data, hover, shots }, null, 1));
+  if (process.env.CA_SR === "1") await spacingRows(page, String(entry.key), vw, data.records);
   return data;
+}
+
+/* Main green v1, Part 3: CA_SR=1 runs srprobe.js at every width (spacing groups and list rows, reads only), then for
+   each distinct value: the CSS rule that declares it (CDP CSS.getMatchedStylesForNode — its selector text, matched to a
+   source file by srboard.mjs), one real-size crop (CA_SR_CROPS), and, for list rows, the ground on hover. Writes
+   <key>@sr-<vw>.json beside the run. */
+const SR = readFileSync(resolve(DIR, "srprobe.js"), "utf8");
+const SR_CROPS = resolve(process.env.CA_SR_CROPS || "/Users/nickphysick/ScriptAlly-backups/main-green-v1/crops");
+const srCropped = new Set<string>();
+const SHORTHAND: Record<string, string[]> = {
+  "row-gap": ["row-gap", "gap", "grid-row-gap", "grid-gap"], "column-gap": ["column-gap", "gap", "grid-column-gap", "grid-gap"],
+  "margin-top": ["margin-top", "margin-block-start", "margin-block", "margin"], "margin-bottom": ["margin-bottom", "margin-block-end", "margin-block", "margin"],
+  "margin-left": ["margin-left", "margin-inline-start", "margin-inline", "margin"], "margin-right": ["margin-right", "margin-inline-end", "margin-inline", "margin"],
+  "padding-top": ["padding-top", "padding-block-start", "padding-block", "padding"], "padding-bottom": ["padding-bottom", "padding-block-end", "padding-block", "padding"],
+  "padding-left": ["padding-left", "padding-inline-start", "padding-inline", "padding"], "padding-right": ["padding-right", "padding-inline-end", "padding-inline", "padding"],
+};
+type SrItem = { group: string; ck: string; ct: string[]; src: { tag: string; prop: string; v?: number | null; rule?: unknown }[]; crop?: string };
+type SrRow = { tag: string; style: unknown; hover?: unknown; crop?: string; selected: boolean };
+async function spacingRows(page: Page, key: string, vw: number, recs: Rec[]) {
+  await page.evaluate((r) => { (window as unknown as { __ca2Recs: unknown }).__ca2Recs = r; }, (recs as unknown as { id: string; role: string; sel: string }[]).map((r) => ({ id: r.id, role: r.role, sel: r.sel })));
+  const res = (await page.evaluate(SR).catch((e) => ({ error: String(e) }))) as { spacing?: SrItem[]; rows?: SrRow[]; headers?: { tag: string }[]; error?: string };
+  if (res.error || !res.spacing) { writeFileSync(resolve(OUT, `${key}@sr-${vw}.json`), JSON.stringify(res, null, 1)); return; }
+  /* the declaring rule, once per (element, property) — capped so a long page cannot stall the run */
+  const cdp = await page.context().newCDPSession(page);
+  const ruleCache = new Map<string, unknown>(); let looked = 0;
+  try {
+    await cdp.send("DOM.enable"); await cdp.send("CSS.enable");
+    const { root } = await cdp.send("DOM.getDocument", { depth: -1 });
+    const seenCk = new Set<string>();
+    for (const it of res.spacing) {
+      if (seenCk.has(it.ck)) continue; seenCk.add(it.ck);
+      for (const s of it.src) {
+        if (s.prop === "(unattributed)" || looked >= 160) continue;
+        const k = `${s.tag}|${s.prop}`;
+        if (!ruleCache.has(k)) {
+          looked++;
+          let found: unknown = null;
+          try {
+            const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector: `[data-casr="${s.tag}"]` });
+            if (nodeId) {
+              const m = await cdp.send("CSS.getMatchedStylesForNode", { nodeId }) as { matchedCSSRules?: { rule: { selectorList: { text: string }; origin: string; style: { cssProperties: { name: string; value: string; disabled?: boolean }[] } } }[]; inlineStyle?: { cssProperties: { name: string; value: string }[] } };
+              const names = SHORTHAND[s.prop] || [s.prop];
+              const inl = m.inlineStyle?.cssProperties.find((c) => names.includes(c.name) && c.value);
+              if (inl) found = { inline: true, prop: inl.name, value: inl.value };
+              else for (let i = (m.matchedCSSRules || []).length - 1; i >= 0 && !found; i--) {
+                const r = m.matchedCSSRules![i]; if (r.rule.origin !== "regular") continue;
+                const p = r.rule.style.cssProperties.find((c) => names.includes(c.name) && c.value && !c.disabled);
+                if (p) found = { sel: r.rule.selectorList.text, prop: p.name, value: p.value };
+              }
+            }
+          } catch { /* no rule read; none invented */ }
+          ruleCache.set(k, found);
+        }
+        s.rule = ruleCache.get(k);
+      }
+    }
+  } catch { /* CDP unavailable: values stand without their rule */ }
+  await cdp.detach().catch(() => {});
+  /* crops: one per distinct value (global across the run), the union of the elements around it, at real size */
+  mkdirSync(SR_CROPS, { recursive: true });
+  const crop = async (ck: string, tags: string[]) => {
+    if (srCropped.has(ck)) return undefined;
+    try {
+      const first = page.locator(`[data-casr="${tags[0]}"]`).first();
+      await first.scrollIntoViewIfNeeded({ timeout: 1200 });
+      const boxes = (await Promise.all(tags.map((t) => page.locator(`[data-casr="${t}"]`).first().boundingBox()))).filter(Boolean) as { x: number; y: number; width: number; height: number }[];
+      if (!boxes.length) return undefined;
+      const vp = page.viewportSize()!; const padPx = 8;
+      const x0 = Math.max(0, Math.min(...boxes.map((b) => b.x)) - padPx), y0 = Math.max(0, Math.min(...boxes.map((b) => b.y)) - padPx);
+      const x1 = Math.min(vp.width, Math.max(...boxes.map((b) => b.x + b.width)) + padPx), y1 = Math.min(vp.height, Math.max(...boxes.map((b) => b.y + b.height)) + padPx);
+      const clip = { x: x0, y: y0, width: Math.min(x1 - x0, 1200), height: Math.min(y1 - y0, 700) };
+      if (clip.width < 3 || clip.height < 3) return undefined;
+      const file = `${ck.replace(/[^A-Za-z0-9.-]+/g, "_").slice(0, 80)}--${hash(ck)}.png`;
+      await page.screenshot({ path: resolve(SR_CROPS, file), clip, animations: "disabled", scale: "css" });
+      srCropped.add(ck); return file;
+    } catch { return undefined; }
+  };
+  for (const it of res.spacing) { const f = await crop(it.ck, it.ct); if (f) it.crop = f; }
+  /* rows: one hover reading and one crop per distinct row style */
+  const seenRow = new Set<string>();
+  for (const r of res.rows || []) {
+    const ck = `row|${hash(r.style)}`;
+    if (seenRow.has(ck)) continue; seenRow.add(ck);
+    try {
+      const loc = page.locator(`[data-casr="${r.tag}"]`).first();
+      await loc.scrollIntoViewIfNeeded({ timeout: 1200 });
+      await page.mouse.move(2, 2); await page.waitForTimeout(100);
+      await loc.hover({ timeout: 1500 }); await page.waitForTimeout(180);
+      r.hover = await page.evaluate((t) => { const e = document.querySelector(`[data-casr="${t}"]`); return e ? getComputedStyle(e).backgroundColor : null; }, r.tag);
+      await page.mouse.move(2, 2); await page.waitForTimeout(100);
+    } catch { /* no hover reading */ }
+    const f = await crop(ck, [r.tag]); if (f) r.crop = f;
+  }
+  await top(page);
+  writeFileSync(resolve(OUT, `${key}@sr-${vw}.json`), JSON.stringify({ key, vw, ...res }, null, 1));
 }
 
 /* Consolidate and finish v1, B1: CA_TRACE=<comma-separated sels> reads, at 1512, where each matching element's font size

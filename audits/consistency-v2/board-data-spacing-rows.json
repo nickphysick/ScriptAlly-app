@@ -1,0 +1,6336 @@
+{
+ "about": "Main green v1, Part 3 — spacing and list rows, measured (no app code changed). Made by audits/consistency-v2/srboard.mjs from a harness run with CA_SR=1 (srprobe.js). Spacing covers workspace pages, the Dashboard and slide-out panels; rows cover every signed-in surface. Values are CSS px at 1512×982 and 1920×1080. `setBy` is the rule that declares the value (CDP), matched to src/**/*.css by its selector; `onGrid` means every part is a multiple of 8 (0 included). A gutter value whose two sides differ carries a `note` saying which side is not a gutter. A row's text is kept only when it is fixed interface copy; anything from the account is [data]. Crops (real size, one per distinct value or style) are in /Users/nickphysick/ScriptAlly-backups/main-green-v1/crops/.",
+ "run": "../ScriptAlly-backups/main-green-v1/runs/full",
+ "views": 66,
+ "readings": 132,
+ "probeErrors": [],
+ "handChecks": [
+  {
+   "group": "page-gutter",
+   "value": "32 32 @1512",
+   "result": "agrees",
+   "how": "the sheet is 1424 wide, under --work-max 1660 (src/index.css:315), so the gap is --work-gutter, 32 (src/index.css:318), set by .wpg-scroll > * (src/components/shell/workspacePageGrid.css:489)."
+  },
+  {
+   "group": "page-gutter",
+   "value": "118 118 @1920",
+   "result": "agrees",
+   "how": "the sheet is 1832 wide; (1832 − 1660) / 2 = 86 of centring margin, plus the 32 gutter, is 118."
+  },
+  {
+   "group": "page-gutter",
+   "value": "32 632 @1512",
+   "result": "agrees as geometry, but not a gutter",
+   "how": "on Versions (empty) the only content is one 760px card in the left column: 1424 − 32 − 760 = 632. The left side is the gutter; the value now carries a note saying so (likewise 32 332, and the carousel's negative readings on Responses)."
+  },
+  {
+   "group": "panel-body-padding",
+   "value": "20 20 12 20",
+   "result": "agrees",
+   "how": ".laq .laq-sb { padding: 20px 20px 12px } (src/components/queries/centre/qcLogStages.css:89)."
+  },
+  {
+   "group": "panel-body-padding",
+   "value": "6 16 6 16",
+   "result": "agrees",
+   "how": ".qc152 .qc1522-cb { padding: 6px 16px } (src/components/queries/centre/qcv1522card.css:55)."
+  },
+  {
+   "group": "panel-body-padding",
+   "value": "6 10 14 10",
+   "result": "agrees",
+   "how": ".qcrr-body { padding: 6px 10px 14px } (src/components/queries/centre/qcWhoReplied.css:10)."
+  },
+  {
+   "rowKind": "Record a response picker rows",
+   "value": "58 high, padding 8 10, radius 12",
+   "result": "agrees",
+   "how": "min-height: 58px; padding: 8px 10px; border-radius: 12px (src/components/queries/centre/qcWhoReplied.css:20)."
+  },
+  {
+   "rowKind": "Record a response picker rows",
+   "value": "hover and selected #f7f3ee",
+   "result": "agrees",
+   "how": ".qcrr-row:hover, .qcrr-row.hi (qcWhoReplied.css:21); the selected row is the aria-selected keyboard highlight (QcWhoReplied.tsx:98), on the same ground as hover."
+  },
+  {
+   "rowKind": "Record a response picker rows",
+   "value": "primary Source Serif 4 16/500, secondary 13.5/400 grey",
+   "result": "agrees after a probe fix",
+   "how": "the first reading took the avatar disc's initials as secondary; the probe now reads words in order and skips initials, stars and text on its own filled ground (srprobe.js). The crop shows the name over the agency and date line."
+  },
+  {
+   "rowKind": "Contact list rows",
+   "value": "72 high, padding 10 0, 1px rule at 8%",
+   "result": "agrees after a builder fix",
+   "how": "min-height: 72px; padding: 10px 0 (src/components/agents/contact/contactV26.css:114); the rule is .cl26-row + .cl26-row { border-top } (:118), so a run's first row has none of its own and now takes its next row's (srboard.mjs)."
+  },
+  {
+   "rowKind": "Contact list rows",
+   "value": "hover #fbf9f6",
+   "result": "agrees",
+   "how": ".cl26-row:hover (contactV26.css:119)."
+  },
+  {
+   "rowKind": "Contact list rows",
+   "value": "primary Special Elite 18/1.3 #1c130f, secondary Source Serif 4 14/1.35 #5b4f47",
+   "result": "agrees after a probe fix",
+   "how": "contactV26.css:124 and contactPrinciples.css:31; line heights 23.4 and 18.9 match. The first reading took the star rating as primary."
+  }
+ ],
+ "skippedRedirects": [
+  "goals: /goals lands on /dashboard, measured as its own view",
+  "materials: /materials lands on /dashboard, measured as its own view",
+  "queries-all: /queries/all lands on /queries, measured as its own view",
+  "you: /you lands on /dashboard, measured as its own view"
+ ],
+ "spacing": [
+  {
+   "group": "section-gap",
+   "what": "1. Section to section in a page's main column (a section: a block with its own section heading, or a framed card alone in the column)",
+   "distinctValues": 6,
+   "occurrences": 22,
+   "pages": 6,
+   "summary": "6 different values across 6 pages (22 measured); 6 on the 8-point grid, 0 off it; the commonest is 64 (10×).",
+   "values": [
+    {
+     "value": 64,
+     "count": 10,
+     "onGrid": true,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/analytics/a26.css:63"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "section.a26-sec",
+      "b": "div.a26-sec",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "section-gap_64--9f48400b61.png"
+    },
+    {
+     "value": 24,
+     "count": 4,
+     "onGrid": true,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "row-gap ← src/components/manuscripts/v29/msv29.css:90"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "section.ms29-frame",
+      "b": "section.ms29-frame",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "section-gap_24--d498f4c56a.png"
+    },
+    {
+     "value": 16,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "dashboard"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "row-gap ← src/components/dashboard/v3/dash3.css:25"
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "a": "section.os-card.d2-card.d22-chart",
+      "b": "section.os-card.d2-card.d3-expected",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "section-gap_16--d8f99199a8.png"
+    },
+    {
+     "value": 96,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/manuscripts/comps32/comps32.css:154"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "nav.cp32-rc.cp32-shelfc",
+      "b": "section.cp32-res",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "section-gap_96--5023901857.png"
+    },
+    {
+     "value": 80,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/manuscripts/comps32/comps32.css:190"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "section.cp32-res",
+      "b": "section.cp32-rc.cp32-tbl",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "section-gap_80--81fc54b626.png"
+    },
+    {
+     "value": 72,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "queries-responses"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/responses/responses15.css:115"
+     ],
+     "example": {
+      "page": "queries-responses",
+      "vw": 1512,
+      "a": "section.rsp15-sec",
+      "b": "section.rsp15-rc",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "section-gap_72--65168166f9.png"
+    }
+   ]
+  },
+  {
+   "group": "section-heading-gap",
+   "what": "2. A section heading to the first thing under it",
+   "distinctValues": 18,
+   "occurrences": 68,
+   "pages": 24,
+   "summary": "18 different values across 24 pages (68 measured); 3 on the 8-point grid, 15 off it; the commonest is 16 (12×).",
+   "values": [
+    {
+     "value": 16,
+     "count": 12,
+     "onGrid": true,
+     "pages": [
+      "dashboard",
+      "dashboard-fv",
+      "journey-laq-fork",
+      "journey-laq-how",
+      "journey-laq-package",
+      "journey-laq-when"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page",
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/dashboard/v2/dash2Frame.css:40, src/components/dashboard/v2/dash2Frame.css:41",
+      "margin-bottom ← src/components/queries/centre/qcLogStages.css:95",
+      "padding-top ← src/components/queries/centre/qcLogStages.css:162",
+      "margin-bottom ← src/components/queries/centre/qcLogStages.css:96",
+      "padding-top ← src/components/queries/centre/qcLogStages.css:100"
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "a": "h2.os-cardttl.d2-cardttl",
+      "b": "div.d2-body.d3-exbody",
+      "line": "div.os-band.d2-tone--paper",
+      "first": "p.d3-exsay",
+      "grid": null,
+      "panel": null,
+      "boxGap": 0
+     },
+     "crop": "section-heading-gap_16--eb0b34cdf8.png"
+    },
+    {
+     "value": 52,
+     "count": 10,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/analytics/a26.css:136, src/components/analytics/a26.css:248, src/components/analytics/a26.css:263"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h2",
+      "b": "div.a26-wh",
+      "line": "small",
+      "first": "h3.a26-h3",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "small",
+       "gap": -23
+      },
+      "boxGap": 24
+     },
+     "crop": "section-heading-gap_52--f4203f6eae.png"
+    },
+    {
+     "value": 7,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "journey-laq-check",
+      "journey-laq-note"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/queries/centre/qcLogStages.css:96",
+      "padding-top ← src/components/queries/centre/qcLogStages.css:214"
+     ],
+     "example": {
+      "page": "journey-laq-check",
+      "vw": 1512,
+      "a": "h2.laq-qh",
+      "b": "div.laq-pv.laq-pvw.qc151",
+      "line": "p.laq-qs",
+      "first": "span.laq-pvtag",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p.laq-qs",
+       "gap": 4
+      },
+      "boxGap": 16
+     },
+     "crop": "section-heading-gap_7--e6d2f786a6.png"
+    },
+    {
+     "value": 19,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "journey-laq-who",
+      "overlay-Log-a-query-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/queries/centre/qcLogStages.css:95"
+     ],
+     "example": {
+      "page": "journey-laq-who",
+      "vw": 1512,
+      "a": "h2.laq-qh",
+      "b": "label.laq-srch",
+      "line": "h2.laq-qh",
+      "first": "svg",
+      "grid": null,
+      "panel": null,
+      "boxGap": 4
+     },
+     "crop": "section-heading-gap_19--1b648a5ccc.png"
+    },
+    {
+     "value": 32,
+     "count": 4,
+     "onGrid": true,
+     "pages": [
+      "manuscripts-comps-empty",
+      "queries-analytics-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/manuscripts/comps32/comps32.css:233",
+      "padding-top ← src/components/manuscripts/comps32/comps32.css:234",
+      "margin-top ← src/components/analytics/a26.css:233",
+      "padding-top ← src/components/analytics/a26.css:234"
+     ],
+     "example": {
+      "page": "manuscripts-comps-empty",
+      "vw": 1512,
+      "a": "h2.cp32-firsth",
+      "b": "ol.cp32-steps",
+      "line": "h2.cp32-firsth",
+      "first": "li",
+      "grid": null,
+      "panel": null,
+      "boxGap": 32
+     },
+     "crop": null
+    },
+    {
+     "value": 44,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/manuscripts/v29/msv29.css:58"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "h2.ms29-bh",
+      "b": "section.ms29-pt.is-none",
+      "line": "p.ms29-bs",
+      "first": "h3.ms29-ph",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p.ms29-bs",
+       "gap": 4
+      },
+      "boxGap": 18
+     },
+     "crop": "section-heading-gap_44--aa361374ca.png"
+    },
+    {
+     "value": 39,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/manuscripts/v29/msv29.css:92",
+      "padding-top ← src/components/manuscripts/v29/msv29.css:91"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "h2.ms29-bh",
+      "b": "div.ms29-sh",
+      "line": "div.ms29-band.ms29-band--stone",
+      "first": "b",
+      "grid": null,
+      "panel": null,
+      "boxGap": 0
+     },
+     "crop": "section-heading-gap_39--7d4db817c6.png"
+    },
+    {
+     "value": 24,
+     "count": 4,
+     "onGrid": true,
+     "pages": [
+      "manuscripts-versions",
+      "manuscripts-versions-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/versions/v6/versionsV6.css:52"
+     ],
+     "example": {
+      "page": "manuscripts-versions-empty",
+      "vw": 1512,
+      "a": "h2.v6-bt",
+      "b": "div.v6-pad",
+      "line": "div.v6-band.v6-tone--sand",
+      "first": "li",
+      "grid": null,
+      "panel": null,
+      "boxGap": 0
+     },
+     "crop": "section-heading-gap_24--d6b7f44673.png"
+    },
+    {
+     "value": 42,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "todo-corkboard",
+      "todo-corkboard-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/todo/corkboard/corkboard15.css:101",
+      "padding-top ← src/components/todo/corkboard/corkboard15.css:121"
+     ],
+     "example": {
+      "page": "todo-corkboard-empty",
+      "vw": 1512,
+      "a": "h2",
+      "b": "div.cb15-wall",
+      "line": "p",
+      "first": "div.cb15-nbody.cb15-clamp",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p",
+       "gap": -27
+      },
+      "boxGap": 20
+     },
+     "crop": "section-heading-gap_42--27fb04779e.png"
+    },
+    {
+     "value": 108,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "agents-discover"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/agents/discover1/discover1.css:327"
+     ],
+     "example": {
+      "page": "agents-discover",
+      "vw": 1512,
+      "a": "h2",
+      "b": "ol.dv1-steps",
+      "line": "h2",
+      "first": "span",
+      "grid": null,
+      "panel": null,
+      "boxGap": 38
+     },
+     "crop": "section-heading-gap_108--72b9b80664.png"
+    },
+    {
+     "value": 27,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/dashboard/fv2/fv2.css:29"
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "a": "h2.fv2-gst",
+      "b": "div.fv2-gsbar",
+      "line": "span.fv2-gsn",
+      "first": "div.fv2-gsbar",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "span.fv2-gsn",
+       "gap": -24
+      },
+      "boxGap": 27
+     },
+     "crop": "section-heading-gap_27--477f060e89.png"
+    },
+    {
+     "value": 4,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/dashboard/fv2/fv2.css:38"
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "a": "h2.fv2-et",
+      "b": "p.fv2-ep",
+      "line": "h2.fv2-et",
+      "first": "p.fv2-ep",
+      "grid": null,
+      "panel": null,
+      "boxGap": 4
+     },
+     "crop": "section-heading-gap_4--c4dcb1ca47.png"
+    },
+    {
+     "value": 30,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "journey-laq-nudge"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/queries/centre/qcLogStages.css:96",
+      "padding-top ← src/components/queries/centre/qcLogStages.css:287"
+     ],
+     "example": {
+      "page": "journey-laq-nudge",
+      "vw": 1512,
+      "a": "h2.laq-qh",
+      "b": "div.laq-wkb",
+      "line": "p.laq-qs",
+      "first": "label.sa-label",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p.laq-qs",
+       "gap": 4
+      },
+      "boxGap": 16
+     },
+     "crop": "section-heading-gap_30--c069206cd7.png"
+    },
+    {
+     "value": 61,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/manuscripts/comps32/comps32.css:81, src/components/manuscripts/comps32/comps32.css:246"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "h2.cp32-rbt",
+      "b": "div.cp32-shelf",
+      "line": "small",
+      "first": "svg",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "small",
+       "gap": -23
+      },
+      "boxGap": 24
+     },
+     "crop": "section-heading-gap_61--8edf6b8f4e.png"
+    },
+    {
+     "value": 22,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/manuscripts/comps32/comps32.css:185"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "h2.cp32-plh",
+      "b": "p.cp32-plinth-s",
+      "line": "div.cp32-plinth",
+      "first": "p.cp32-plinth-s",
+      "grid": null,
+      "panel": null,
+      "boxGap": 22
+     },
+     "crop": "section-heading-gap_22--aa4b1d3cb5.png"
+    },
+    {
+     "value": 69,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/analytics/a26.css:70",
+      "padding-top ← src/components/analytics/a26.css:118",
+      "padding-top ← src/components/analytics/a26.css:75"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h2",
+      "b": "div.a26-three",
+      "line": "p",
+      "first": "svg",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p",
+       "gap": -28
+      },
+      "boxGap": 22
+     },
+     "crop": "section-heading-gap_69--dca781bfeb.png"
+    },
+    {
+     "value": 45,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-packages-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/packages/v62/pk62.css:253"
+     ],
+     "example": {
+      "page": "queries-packages-empty",
+      "vw": 1512,
+      "a": "h2",
+      "b": "figure.k62-sb",
+      "line": "p.k62-map-eg",
+      "first": "i",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p.k62-map-eg",
+       "gap": 6
+      },
+      "boxGap": 28
+     },
+     "crop": "section-heading-gap_45--5b498f311a.png"
+    },
+    {
+     "value": 62,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-responses-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/responses/responses15.css:352",
+      "padding-top ← src/components/responses/responses15.css:354"
+     ],
+     "example": {
+      "page": "queries-responses-empty",
+      "vw": 1512,
+      "a": "h2.rsp15-wwt",
+      "b": "div.rsp15-three",
+      "line": "p",
+      "first": "em",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p",
+       "gap": 6
+      },
+      "boxGap": 52
+     },
+     "crop": "section-heading-gap_62--4ef5a16c6f.png"
+    }
+   ]
+  },
+  {
+   "group": "card-gap:across",
+   "what": "3. Card to card in one grid or stack (across: side by side; down: stacked)",
+   "distinctValues": 4,
+   "occurrences": 15,
+   "pages": 3,
+   "summary": "4 different values across 3 pages (15 measured); 2 on the 8-point grid, 2 off it; the commonest is 12 (8×).",
+   "values": [
+    {
+     "value": 12,
+     "count": 8,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "column-gap ← src/components/analytics/a26.css:170"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "div.a26-cm.a26-rd",
+      "b": "div.a26-cm.a26-rd",
+      "line": null,
+      "first": null,
+      "grid": "div.a26-cmp",
+      "panel": null
+     },
+     "crop": "card-gap_across_12--ff4474a0a9.png"
+    },
+    {
+     "value": 6,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "overlay-Agent-card"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "column-gap ← src/components/queries/centre/qcv158.css:24"
+     ],
+     "example": {
+      "page": "overlay-Agent-card",
+      "vw": 1512,
+      "a": "div.nx-box",
+      "b": "div.nx-box",
+      "line": null,
+      "first": null,
+      "grid": "div.nx-boxes",
+      "panel": null
+     },
+     "crop": "card-gap_across_6--c6161a6cee.png"
+    },
+    {
+     "value": 32,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "column-gap ← src/components/analytics/a26.css:155"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "section.a26-rc",
+      "b": "section.a26-rc",
+      "line": null,
+      "first": null,
+      "grid": "div.a26-two.a26-two--eq",
+      "panel": null
+     },
+     "crop": "card-gap_across_32--6dc02441c2.png"
+    },
+    {
+     "value": 40,
+     "count": 1,
+     "onGrid": true,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "column-gap ← src/components/manuscripts/comps32/comps32.css:79, src/components/manuscripts/comps32/comps32.css:244"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1920,
+      "a": "nav.cp32-rc.cp32-shelfc",
+      "b": "section.cp32-rc.cp32-work",
+      "line": null,
+      "first": null,
+      "grid": "div.cp32-grid",
+      "panel": null
+     },
+     "crop": null
+    }
+   ]
+  },
+  {
+   "group": "card-gap:down",
+   "what": "3. Card to card in one grid or stack (across: side by side; down: stacked)",
+   "distinctValues": 7,
+   "occurrences": 40,
+   "pages": 7,
+   "summary": "7 different values across 7 pages (40 measured); 4 on the 8-point grid, 3 off it; the commonest is 20 (16×).",
+   "values": [
+    {
+     "value": 20,
+     "count": 16,
+     "onGrid": false,
+     "pages": [
+      "todo-corkboard",
+      "todo-corkboard-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "row-gap ← src/components/todo/corkboard/corkboard15.css:111"
+     ],
+     "example": {
+      "page": "todo-corkboard-empty",
+      "vw": 1512,
+      "a": "div.cb15-note",
+      "b": "div.cb15-note",
+      "line": null,
+      "first": null,
+      "grid": "div.cb15-wcol",
+      "panel": null
+     },
+     "crop": "card-gap_down_20--35f03d3678.png"
+    },
+    {
+     "value": 16,
+     "count": 8,
+     "onGrid": true,
+     "pages": [
+      "dashboard",
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "row-gap ← src/components/dashboard/v3/dash3.css:25"
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "a": "div.d2-gs",
+      "b": "div.os-card.d60-card.d60-hoopcard",
+      "line": null,
+      "first": null,
+      "grid": "div.d2-col.d2-left",
+      "panel": null
+     },
+     "crop": "card-gap_down_16--364a58918d.png"
+    },
+    {
+     "value": 0,
+     "count": 4,
+     "onGrid": true,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "section.ms29-pt.is-none",
+      "b": "section.ms29-pt.is-none",
+      "line": null,
+      "first": null,
+      "grid": "div.ms29-in",
+      "panel": null
+     },
+     "crop": "card-gap_down_0--1f7f489a73.png"
+    },
+    {
+     "value": 24,
+     "count": 4,
+     "onGrid": true,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "row-gap ← src/components/manuscripts/v29/msv29.css:90"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "section.ms29-frame",
+      "b": "section.ms29-frame",
+      "line": null,
+      "first": null,
+      "grid": "div.ms29-side",
+      "panel": null
+     },
+     "crop": "card-gap_down_24--36a8c6ffb1.png"
+    },
+    {
+     "value": 12,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "row-gap ← src/components/manuscripts/v29/msv29.css:91"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "div.ms29-bk",
+      "b": "div.ms29-nx",
+      "line": null,
+      "first": null,
+      "grid": "div.ms29-sh",
+      "panel": null
+     },
+     "crop": "card-gap_down_12--182015f752.png"
+    },
+    {
+     "value": 679,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/analytics/a26.css:63"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "div.a26-sec",
+      "b": "div.a26-sec",
+      "line": null,
+      "first": null,
+      "grid": "div.a26-flow",
+      "panel": null
+     },
+     "crop": "card-gap_down_679--8c9156506b.png"
+    },
+    {
+     "value": 64,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/analytics/a26.css:63"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "div.a26-sec",
+      "b": "div.a26-sec",
+      "line": null,
+      "first": null,
+      "grid": "div.a26-flow",
+      "panel": null
+     },
+     "crop": "card-gap_down_64--857cad5172.png"
+    }
+   ]
+  },
+  {
+   "group": "framed-inner-padding",
+   "what": "4. Padding inside a framed card's inner frame (top right bottom left)",
+   "distinctValues": 16,
+   "occurrences": 62,
+   "pages": 13,
+   "summary": "16 different values across 13 pages (62 measured); 2 on the 8-point grid, 14 off it; the commonest is 16 18 18 18 (10×).",
+   "values": [
+    {
+     "value": "16 18 18 18",
+     "count": 10,
+     "onGrid": false,
+     "pages": [
+      "dashboard",
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-right ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-bottom ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-left ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-top ← src/components/dashboard/v2/dash2Frame.css:40, src/components/dashboard/v2/dash2Frame.css:41",
+      "padding-right ← src/components/dashboard/v2/dash2Frame.css:40, src/components/dashboard/v2/dash2Frame.css:41"
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "a": "div.os-frame",
+      "b": "div.d60-hb",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.os-band.d60-band--slate"
+     },
+     "crop": "framed-inner-padding_16_18_18_18--f7e51bc01b.png"
+    },
+    {
+     "value": "28 32 32 32",
+     "count": 8,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/analytics/a26.css:84, src/components/analytics/a26.css:248, src/components/analytics/a26.css:263",
+      "padding-right ← src/components/analytics/a26.css:84, src/components/analytics/a26.css:248, src/components/analytics/a26.css:263"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "div.a26-rc-in",
+      "b": "div.a26-pad",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.a26-rb.a26-rb--st"
+     },
+     "crop": "framed-inner-padding_28_32_32_32--3e72c1656f.png"
+    },
+    {
+     "value": "0 0 0 0",
+     "count": 6,
+     "onGrid": true,
+     "pages": [
+      "dashboard",
+      "overlay-Agent-card",
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page",
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-right ← src/components/dashboard/v2/dash2Frame.css:14"
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "a": "div.os-frame",
+      "b": "div.d2-aq",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.os-band.d2-tone--navy"
+     },
+     "crop": "framed-inner-padding_0_0_0_0--caaf5a7dbe.png"
+    },
+    {
+     "value": "40 44 40 44",
+     "count": 6,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-comps-empty",
+      "queries-analytics-empty",
+      "queries-packages-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/manuscripts/comps32/comps32.css:231",
+      "padding-right ← src/components/manuscripts/comps32/comps32.css:231"
+     ],
+     "example": {
+      "page": "manuscripts-comps-empty",
+      "vw": 1512,
+      "a": "div.cp32-rc-in",
+      "b": "div.cp32-first-in",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0"
+     },
+     "crop": "framed-inner-padding_40_44_40_44--08a38be347.png"
+    },
+    {
+     "value": "27 26 131 26",
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/manuscripts/v29/msv29.css:58",
+      "padding-right ← src/components/manuscripts/v29/msv29.css:58"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "div.ms29-in",
+      "b": "section.ms29-pt.is-none",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.ms29-band.ms29-band--sand"
+     },
+     "crop": "framed-inner-padding_27_26_131_26--c7ac6cb7b5.png"
+    },
+    {
+     "value": "6 26 71 26",
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/manuscripts/v29/msv29.css:76",
+      "padding-right ← src/components/manuscripts/v29/msv29.css:76"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "div.ms29-in",
+      "b": "div.ms29-dt",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.ms29-band.ms29-band--stone"
+     },
+     "crop": "framed-inner-padding_6_26_71_26--21dfd08288.png"
+    },
+    {
+     "value": "18 18 20 18",
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/manuscripts/v29/msv29.css:91",
+      "padding-right ← src/components/manuscripts/v29/msv29.css:91"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "div.ms29-in",
+      "b": "div.ms29-sh",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.ms29-band.ms29-band--stone"
+     },
+     "crop": "framed-inner-padding_18_18_20_18--5fc6693862.png"
+    },
+    {
+     "value": "24 28 28 28",
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-versions",
+      "manuscripts-versions-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/versions/v6/versionsV6.css:52",
+      "padding-right ← src/components/versions/v6/versionsV6.css:52"
+     ],
+     "example": {
+      "page": "manuscripts-versions-empty",
+      "vw": 1512,
+      "a": "div.v6-frame",
+      "b": "div.v6-pad",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.v6-band.v6-tone--sand"
+     },
+     "crop": "framed-inner-padding_24_28_28_28--6d509b3508.png"
+    },
+    {
+     "value": "16 44 16 48",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-right ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-bottom ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-left ← src/components/dashboard/v2/dash2Frame.css:14",
+      "padding-top ← src/components/dashboard/fv1/fv1.css:48",
+      "padding-right ← src/components/dashboard/fv1/fv1.css:48"
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "a": "div.os-frame",
+      "b": "div.fv1-path",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.os-band"
+     },
+     "crop": "framed-inner-padding_16_44_16_48--fc6c855d74.png"
+    },
+    {
+     "value": "24 24 24 24",
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/manuscripts/comps32/comps32.css:81, src/components/manuscripts/comps32/comps32.css:246",
+      "padding-right ← src/components/manuscripts/comps32/comps32.css:81, src/components/manuscripts/comps32/comps32.css:246"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "div.cp32-rc-in",
+      "b": "div.cp32-shelf",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.cp32-rb.is-sand"
+     },
+     "crop": "framed-inner-padding_24_24_24_24--332dcd75ef.png"
+    },
+    {
+     "value": "28 32 36 32",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/manuscripts/comps32/comps32.css:115, src/components/manuscripts/comps32/comps32.css:247",
+      "padding-right ← src/components/manuscripts/comps32/comps32.css:115, src/components/manuscripts/comps32/comps32.css:247"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "div.cp32-rc-in",
+      "b": "div.cp32-wk",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.cp32-rb.is-navy"
+     },
+     "crop": "framed-inner-padding_28_32_36_32--58ce524afc.png"
+    },
+    {
+     "value": "0 0 212 16",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← src/components/manuscripts/comps32/comps32.css:191",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "div.cp32-rc-in",
+      "b": "table",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 16",
+      "bandAbove": "div.cp32-cpd"
+     },
+     "crop": "framed-inner-padding_0_0_212_16--5f836539b4.png"
+    },
+    {
+     "value": "26 28 24 28",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/analytics/a26.css:118",
+      "padding-right ← src/components/analytics/a26.css:118"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "div.a26-rc-in",
+      "b": "div.a26-find",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0"
+     },
+     "crop": "framed-inner-padding_26_28_24_28--ae4bf4d4a2.png"
+    },
+    {
+     "value": "10 10 62 10",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-top ← src/components/packages/v62/pk62.css:106",
+      "padding-right ← src/components/packages/v62/pk62.css:106"
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "a": "div.k62-rc-in",
+      "b": "div.k62-plist",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.k62-rb.k62-sd"
+     },
+     "crop": "framed-inner-padding_10_10_62_10--2483f2776b.png"
+    },
+    {
+     "value": "0 0 57 0",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)"
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "a": "div.k62-rc-in",
+      "b": "div.k62-split",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.k62-rb.k62-nv.k62-band"
+     },
+     "crop": "framed-inner-padding_0_0_57_0--326292f4c6.png"
+    },
+    {
+     "value": "0 0 67 0",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-right ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-bottom ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)",
+      "padding-left ← *, ::after, ::before, ::backdrop { padding: 0 } (selector not found in src/**/*.css)"
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "a": "div.k62-rc-in",
+      "b": "div.k62-tbl",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null,
+      "cssPadding": "0 0 0 0",
+      "bandAbove": "div.k62-rb.k62-st"
+     },
+     "crop": "framed-inner-padding_0_0_67_0--2afedc1a89.png"
+    }
+   ]
+  },
+  {
+   "group": "card-heading-gap",
+   "what": "5. A card heading to the first thing under it",
+   "distinctValues": 15,
+   "occurrences": 78,
+   "pages": 13,
+   "summary": "15 different values across 13 pages (78 measured); 4 on the 8-point grid, 11 off it; the commonest is 17 (22×).",
+   "values": [
+    {
+     "value": 17,
+     "count": 22,
+     "onGrid": false,
+     "pages": [
+      "overlay-Keyboard-shortcuts"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/shell/shortcutsSheet.css:37",
+      "padding-top ← src/components/shell/shortcutsSheet.css:41",
+      "border-top ← src/components/shell/shortcutsSheet.css:41"
+     ],
+     "example": {
+      "page": "overlay-Keyboard-shortcuts",
+      "vw": 1512,
+      "a": "h3.sks-scope",
+      "b": "ul.sks-list",
+      "line": "h3.sks-scope",
+      "first": "span.sks-label",
+      "grid": null,
+      "panel": null,
+      "boxGap": 6
+     },
+     "crop": "card-heading-gap_17--3913b7aa7c.png"
+    },
+    {
+     "value": 4,
+     "count": 16,
+     "onGrid": false,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty",
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/manuscripts/v29/msv29.css:61",
+      "margin-bottom ← src/components/todo/ws/todoWs.css:623"
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "a": "h3.ms29-ph",
+      "b": "em",
+      "line": "h3.ms29-ph",
+      "first": "em",
+      "grid": null,
+      "panel": null,
+      "boxGap": 4
+     },
+     "crop": "card-heading-gap_4--85081df3aa.png"
+    },
+    {
+     "value": 14,
+     "count": 8,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics",
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/analytics/a26.css:178",
+      "margin-bottom ← src/components/packages/v62/pk62.css:92"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h3",
+      "b": "p.a26-rd-n",
+      "line": "h3",
+      "first": "p.a26-rd-n",
+      "grid": null,
+      "panel": null,
+      "boxGap": 14
+     },
+     "crop": "card-heading-gap_14--e2cb56e0ad.png"
+    },
+    {
+     "value": 26,
+     "count": 6,
+     "onGrid": false,
+     "pages": [
+      "journey-rr-picker",
+      "overlay-Record-a-response-journey",
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page",
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/queries/centre/qcWhoReplied.css:13",
+      "margin-top ← src/components/analytics/a26.css:216"
+     ],
+     "example": {
+      "page": "journey-rr-picker",
+      "vw": 1512,
+      "a": "h3",
+      "b": "label.qcrr-srch",
+      "line": "h3",
+      "first": "svg",
+      "grid": null,
+      "panel": null,
+      "boxGap": 12
+     },
+     "crop": "card-heading-gap_26--98d706052c.png"
+    },
+    {
+     "value": 0,
+     "count": 4,
+     "onGrid": true,
+     "pages": [
+      "dashboard-fv",
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-top ← src/components/dashboard/fv2/fv2.css:64",
+      "padding-top ← src/components/analytics/a26.css:125"
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "a": "h3.os-cardttl",
+      "b": "p.fv2-said",
+      "line": "div.os-band",
+      "first": "p.fv2-said",
+      "grid": null,
+      "panel": null,
+      "boxGap": 0
+     },
+     "crop": "card-heading-gap_0--bb27aeaf5c.png"
+    },
+    {
+     "value": 8,
+     "count": 4,
+     "onGrid": true,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/analytics/a26.css:101"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h3.a26-h3",
+      "b": "div.a26-path",
+      "line": "h3.a26-h3",
+      "first": "span",
+      "grid": null,
+      "panel": null,
+      "boxGap": 6
+     },
+     "crop": "card-heading-gap_8--197a9d2869.png"
+    },
+    {
+     "value": 12,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "agents-discover"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/agents/discover1/discover1.css:336"
+     ],
+     "example": {
+      "page": "agents-discover",
+      "vw": 1512,
+      "a": "h3",
+      "b": "p",
+      "line": "h3",
+      "first": "p",
+      "grid": null,
+      "panel": null,
+      "boxGap": 12
+     },
+     "crop": "card-heading-gap_12--1d31ba6384.png"
+    },
+    {
+     "value": 10,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "journey-laq-nudge"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/queries/centre/qcLogStages.css:286",
+      "padding-top ← src/components/queries/centre/qcLogStages.css:312"
+     ],
+     "example": {
+      "page": "journey-laq-nudge",
+      "vw": 1512,
+      "a": "h3.laq-qh.is-q2",
+      "b": "div.laq-nopts",
+      "line": "h3.laq-qh.is-q2",
+      "first": "button",
+      "grid": null,
+      "panel": null,
+      "boxGap": 10
+     },
+     "crop": null
+    },
+    {
+     "value": 20,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/manuscripts/comps32/comps32.css:128"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "h3.cp32-h3",
+      "b": "div.cp32-tags",
+      "line": "p",
+      "first": "span.cp32-tag",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p",
+       "gap": 16
+      },
+      "boxGap": 20
+     },
+     "crop": "card-heading-gap_20--347a943732.png"
+    },
+    {
+     "value": 37,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/manuscripts/comps32/comps32.css:125",
+      "padding-top ← src/components/manuscripts/comps32/comps32.css:135"
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "a": "h3.cp32-h3",
+      "b": "ul.cp32-lst",
+      "line": "h3.cp32-h3",
+      "first": "svg",
+      "grid": null,
+      "panel": null,
+      "boxGap": 16
+     },
+     "crop": "card-heading-gap_37--342562f35e.png"
+    },
+    {
+     "value": 40,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/analytics/a26.css:102",
+      "padding-top ← src/components/analytics/a26.css:139"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h3.a26-h3",
+      "b": "div.a26-groups",
+      "line": "p.a26-h3s",
+      "first": "b",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p.a26-h3s",
+       "gap": 6
+      },
+      "boxGap": 22
+     },
+     "crop": "card-heading-gap_40--b91ae8eda8.png"
+    },
+    {
+     "value": 24,
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/analytics/a26.css:102"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h3.a26-h3",
+      "b": "div.a26-path",
+      "line": "p.a26-h3s",
+      "first": "span",
+      "grid": null,
+      "panel": null,
+      "subtitle": {
+       "sel": "p.a26-h3s",
+       "gap": 6
+      },
+      "boxGap": 22
+     },
+     "crop": "card-heading-gap_24--a3733f1924.png"
+    },
+    {
+     "value": 126,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/analytics/a26.css:216"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h3",
+      "b": "div.a26-cols",
+      "line": "h3",
+      "first": "b",
+      "grid": null,
+      "panel": null,
+      "boxGap": 10
+     },
+     "crop": "card-heading-gap_126--fc3e24a1e6.png"
+    },
+    {
+     "value": 97,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-analytics"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-top ← src/components/analytics/a26.css:216"
+     ],
+     "example": {
+      "page": "queries-analytics",
+      "vw": 1512,
+      "a": "h3",
+      "b": "div.a26-cols",
+      "line": "h3",
+      "first": "b",
+      "grid": null,
+      "panel": null,
+      "boxGap": 10
+     },
+     "crop": "card-heading-gap_97--a0490da829.png"
+    },
+    {
+     "value": 53,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/packages/v62/pk62.css:92",
+      "padding-top ← src/components/packages/v62/pk62.css:189",
+      "padding-top ← src/components/packages/v62/pk62.css:187, src/components/packages/v62/pk62.css:362"
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "a": "h3.k62-h3",
+      "b": "div.k62-mat",
+      "line": "h3.k62-h3",
+      "first": "span",
+      "grid": null,
+      "panel": null,
+      "boxGap": 14
+     },
+     "crop": "card-heading-gap_53--cc871ed690.png"
+    }
+   ]
+  },
+  {
+   "group": "panel-body-padding",
+   "what": "6a. Padding inside a slide-out panel's body (top right bottom left)",
+   "distinctValues": 11,
+   "occurrences": 46,
+   "pages": 23,
+   "summary": "11 different values across 23 pages (46 measured); 0 on the 8-point grid, 11 off it; the commonest is 20 20 12 20 (18×).",
+   "values": [
+    {
+     "value": "20 20 12 20",
+     "count": 18,
+     "onGrid": false,
+     "pages": [
+      "journey-laq-check",
+      "journey-laq-fork",
+      "journey-laq-how",
+      "journey-laq-note",
+      "journey-laq-nudge",
+      "journey-laq-package",
+      "journey-laq-when",
+      "journey-laq-who",
+      "overlay-Log-a-query-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/queries/centre/qcLogStages.css:89",
+      "padding-right ← src/components/queries/centre/qcLogStages.css:89",
+      "padding-bottom ← src/components/queries/centre/qcLogStages.css:89",
+      "padding-left ← src/components/queries/centre/qcLogStages.css:89"
+     ],
+     "example": {
+      "page": "journey-laq-check",
+      "vw": 1512,
+      "a": "div.laq-sb.is-in",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.spanel.qsp"
+     },
+     "crop": "panel-body-padding_20_20_12_20--cca6c07cf1.png"
+    },
+    {
+     "value": "16 18 14 18",
+     "count": 6,
+     "onGrid": false,
+     "pages": [
+      "overlay-Query-card-slide-out",
+      "queries-analytics",
+      "queries-analytics-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/shell/pageGuide.css:10",
+      "padding-right ← src/components/shell/pageGuide.css:10",
+      "padding-bottom ← src/components/shell/pageGuide.css:10",
+      "padding-left ← src/components/shell/pageGuide.css:10",
+      "padding-top ← src/components/queries/centre/qcv152card.css:116, src/components/queries/centre/qcv152card.css:209",
+      "padding-right ← src/components/queries/centre/qcv152card.css:116, src/components/queries/centre/qcv152card.css:209"
+     ],
+     "example": {
+      "page": "overlay-Query-card-slide-out",
+      "vw": 1512,
+      "a": "div.qc152-th.build",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.spanel.qsp"
+     },
+     "crop": "panel-body-padding_16_18_14_18--c92f12f6fe.png"
+    },
+    {
+     "value": "6 16 6 16",
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "journey-rr-composer",
+      "journey-rr-more"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/queries/centre/qcv1522card.css:55",
+      "padding-right ← src/components/queries/centre/qcv1522card.css:55",
+      "padding-bottom ← src/components/queries/centre/qcv1522card.css:55",
+      "padding-left ← src/components/queries/centre/qcv1522card.css:55"
+     ],
+     "example": {
+      "page": "journey-rr-composer",
+      "vw": 1512,
+      "a": "div.qc1522-cb",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.spanel.qsp"
+     },
+     "crop": "panel-body-padding_6_16_6_16--0a3d995a2c.png"
+    },
+    {
+     "value": "6 10 14 10",
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "journey-rr-picker",
+      "overlay-Record-a-response-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/queries/centre/qcWhoReplied.css:10",
+      "padding-right ← src/components/queries/centre/qcWhoReplied.css:10",
+      "padding-bottom ← src/components/queries/centre/qcWhoReplied.css:10",
+      "padding-left ← src/components/queries/centre/qcWhoReplied.css:10"
+     ],
+     "example": {
+      "page": "journey-rr-picker",
+      "vw": 1512,
+      "a": "div.qc152-body.qcrr-body",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.spanel.qsp"
+     },
+     "crop": "panel-body-padding_6_10_14_10--c8960bb081.png"
+    },
+    {
+     "value": "0 0 6 0",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-Account-menu"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/shell/shellMenus.css:22",
+      "padding-right ← src/components/shell/shellMenus.css:22",
+      "padding-bottom ← src/components/shell/shellMenus.css:22",
+      "padding-left ← src/components/shell/shellMenus.css:22"
+     ],
+     "example": {
+      "page": "overlay-Account-menu",
+      "vw": 1512,
+      "a": "div.am-menu.am-menu--ink.sa-pop",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "div.am-menu.am-menu--ink.sa-pop"
+     },
+     "crop": "panel-body-padding_0_0_6_0--55a9685d63.png"
+    },
+    {
+     "value": "22 28 28 28",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-Add-a-comp"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/manuscripts/comps25/compsV25.css:152, src/components/manuscripts/comps25/compsV25.css:222",
+      "padding-right ← src/components/manuscripts/comps25/compsV25.css:152, src/components/manuscripts/comps25/compsV25.css:222",
+      "padding-bottom ← src/components/manuscripts/comps25/compsV25.css:152, src/components/manuscripts/comps25/compsV25.css:222",
+      "padding-left ← src/components/manuscripts/comps25/compsV25.css:152, src/components/manuscripts/comps25/compsV25.css:222"
+     ],
+     "example": {
+      "page": "overlay-Add-a-comp",
+      "vw": 1512,
+      "a": "form.cv-layer.cf-body.cf",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.hdr.is-in"
+     },
+     "crop": "panel-body-padding_22_28_28_28--05c81e38b6.png"
+    },
+    {
+     "value": "14 16 18 16",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-Add-an-agent-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/agents/card/addAgentJourney.css:20",
+      "padding-right ← src/components/agents/card/addAgentJourney.css:20",
+      "padding-bottom ← src/components/agents/card/addAgentJourney.css:20",
+      "padding-left ← src/components/agents/card/addAgentJourney.css:20"
+     ],
+     "example": {
+      "page": "overlay-Add-an-agent-journey",
+      "vw": 1512,
+      "a": "div.aaj-body",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.spanel.qsp.apn"
+     },
+     "crop": "panel-body-padding_14_16_18_16--ed29e02980.png"
+    },
+    {
+     "value": "14 18 18 18",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-Agent-card"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/queries/centre/qcv158.css:13",
+      "padding-right ← src/components/queries/centre/qcv158.css:13",
+      "padding-bottom ← src/components/queries/centre/qcv158.css:13",
+      "padding-left ← src/components/queries/centre/qcv158.css:13"
+     ],
+     "example": {
+      "page": "overlay-Agent-card",
+      "vw": 1512,
+      "a": "div.nx.acv2-pro",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "div.cl262-panel"
+     },
+     "crop": "panel-body-padding_14_18_18_18--9a4c40a8fb.png"
+    },
+    {
+     "value": "0 24 22 24",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-Keyboard-shortcuts"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/shell/shortcutsSheet.css:35",
+      "padding-right ← src/components/shell/shortcutsSheet.css:35",
+      "padding-bottom ← src/components/shell/shortcutsSheet.css:35",
+      "padding-left ← src/components/shell/shortcutsSheet.css:35"
+     ],
+     "example": {
+      "page": "overlay-Keyboard-shortcuts",
+      "vw": 1512,
+      "a": "div.sks-body",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "div.sks"
+     },
+     "crop": "panel-body-padding_0_24_22_24--d753ed3560.png"
+    },
+    {
+     "value": "22 24 22 24",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-New-package"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/packages/v62/pk62.css:314",
+      "padding-right ← src/components/packages/v62/pk62.css:314",
+      "padding-bottom ← src/components/packages/v62/pk62.css:314",
+      "padding-left ← src/components/packages/v62/pk62.css:314"
+     ],
+     "example": {
+      "page": "overlay-New-package",
+      "vw": 1512,
+      "a": "div.k62-hdr-body",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.k62-hdr"
+     },
+     "crop": "panel-body-padding_22_24_22_24--f7c48970c2.png"
+    },
+    {
+     "value": "4 0 10 0",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-Search-palette"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "padding-top ← src/components/shell/searchV1.css:67",
+      "padding-right ← src/components/shell/searchV1.css:67",
+      "padding-bottom ← src/components/shell/searchV1.css:67",
+      "padding-left ← src/components/shell/searchV1.css:67"
+     ],
+     "example": {
+      "page": "overlay-Search-palette",
+      "vw": 1512,
+      "a": "div.sv1-list",
+      "b": null,
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "div.sp-pal.sp-pal--ink.sp-pal--v1"
+     },
+     "crop": "panel-body-padding_4_0_10_0--6a5e8b314b.png"
+    }
+   ]
+  },
+  {
+   "group": "panel-field-gap",
+   "what": "6b. Field to field in a slide-out panel: the bottom of one field's control to the next field's label (pitch = label top to label top)",
+   "distinctValues": 3,
+   "occurrences": 8,
+   "pages": 2,
+   "summary": "3 different values across 2 pages (8 measured); 0 on the 8-point grid, 3 off it; the commonest is 14 (4×).",
+   "values": [
+    {
+     "value": 14,
+     "count": 4,
+     "onGrid": false,
+     "pages": [
+      "overlay-Add-a-comp"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/manuscripts/comps25/compsV25.css:166"
+     ],
+     "pitch": [
+      81,
+      89
+     ],
+     "example": {
+      "page": "overlay-Add-a-comp",
+      "vw": 1512,
+      "a": "label.cf-fld",
+      "b": "label.cf-fld",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.hdr.is-in"
+     },
+     "crop": "panel-field-gap_14--d1df1c8597.png"
+    },
+    {
+     "value": 302,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-Add-a-comp"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/manuscripts/comps25/compsV25.css:166",
+      "margin-bottom ← src/components/manuscripts/comps25/compsV25.css:153"
+     ],
+     "pitch": [
+      368
+     ],
+     "example": {
+      "page": "overlay-Add-a-comp",
+      "vw": 1512,
+      "a": "label.cf-fld",
+      "b": "label.cf-fld",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.hdr.is-in"
+     },
+     "crop": "panel-field-gap_302--b1ef3ac6ab.png"
+    },
+    {
+     "value": 20,
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "overlay-New-package"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "scopes": [
+      "panel"
+     ],
+     "setBy": [
+      "margin-bottom ← src/components/packages/v62/pk62.css:315"
+     ],
+     "pitch": [
+      86
+     ],
+     "example": {
+      "page": "overlay-New-package",
+      "vw": 1512,
+      "a": "label.k62-fld",
+      "b": "label.k62-fld",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": "aside.k62-hdr"
+     },
+     "crop": "panel-field-gap_20--df259b8a8f.png"
+    }
+   ]
+  },
+  {
+   "group": "page-gutter:1512",
+   "what": "7. The page's left and right gutters (sheet edge to content edge), per width",
+   "distinctValues": 4,
+   "occurrences": 24,
+   "pages": 24,
+   "summary": "4 different values across 24 pages (24 measured); 2 on the 8-point grid, 2 off it; the commonest is 32 32 (19×).",
+   "values": [
+    {
+     "value": "32 32",
+     "count": 19,
+     "onGrid": true,
+     "pages": [
+      "agents",
+      "agents-discover",
+      "dashboard",
+      "dashboard-fv",
+      "manuscripts",
+      "manuscripts-comps",
+      "manuscripts-comps-empty",
+      "manuscripts-empty",
+      "queries",
+      "queries-analytics",
+      "queries-analytics-empty",
+      "queries-empty",
+      "queries-packages",
+      "queries-packages-empty",
+      "queries-responses-empty",
+      "todo",
+      "todo-corkboard",
+      "todo-corkboard-empty",
+      "todo-empty"
+     ],
+     "widths": [
+      1512
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/queries/centre/qcv153.css:257",
+      "padding-left ← src/components/dashboard/v2/dash2Founding.css:114",
+      "padding-left ← src/components/dashboard/v2/dash2.css:21",
+      "padding-right ← src/components/dashboard/v2/dash2Founding.css:114"
+     ],
+     "example": {
+      "page": "agents-discover",
+      "vw": 1512,
+      "a": "section.dv1-hw",
+      "b": "section.dv1-hw",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_32_32_1512--a65f43de9d.png"
+    },
+    {
+     "value": "32 632",
+     "count": 2,
+     "onGrid": true,
+     "pages": [
+      "manuscripts-versions",
+      "manuscripts-versions-empty"
+     ],
+     "widths": [
+      1512
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/versions/v6/versionsV6.css:43",
+      "padding-left ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/versions/v6/versionsV6.css:43",
+      "padding-right ← src/components/shell/workspacePageGrid.css:489"
+     ],
+     "example": {
+      "page": "manuscripts-versions-empty",
+      "vw": 1512,
+      "a": "section.v6-card",
+      "b": "section.v6-card",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_32_632_1512--4d1377fe1f.png",
+     "note": "Not a gutter on the right: the outermost content stops short of that side (a narrow column or a single card), so only the left side, 32, is the page's gutter."
+    },
+    {
+     "value": "32 332",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "materials-letters",
+      "materials-letters-empty"
+     ],
+     "widths": [
+      1512
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/letters/queryLetters.css:218",
+      "padding-left ← src/components/letters/queryLetters.css:14",
+      "padding-right ← src/components/letters/queryLetters.css:223",
+      "padding-right ← src/components/letters/queryLetters.css:14"
+     ],
+     "example": {
+      "page": "materials-letters-empty",
+      "vw": 1512,
+      "a": "li",
+      "b": "div.qlp-first-p",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_32_332_1512--b36c85a802.png",
+     "note": "Not a gutter on the right: the outermost content stops short of that side (a narrow column or a single card), so only the left side, 32, is the page's gutter."
+    },
+    {
+     "value": "-286 4",
+     "count": 1,
+     "onGrid": false,
+     "pages": [
+      "queries-responses"
+     ],
+     "widths": [
+      1512
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/queries/centre/qcv154.css:19",
+      "padding-left ← src/components/responses/responses15.css:178",
+      "padding-left ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/queries/centre/qcv154.css:19",
+      "padding-right ← src/components/responses/responses15.css:178",
+      "padding-right ← src/components/shell/workspacePageGrid.css:489"
+     ],
+     "example": {
+      "page": "queries-responses",
+      "vw": 1512,
+      "a": "div.qc154-card",
+      "b": "div.qc154-card",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_-286_4_1512--cbc040e609.png",
+     "note": "Not a gutter on either side: a carousel's off-screen cards run past the sheet's edge, so neither reading is the page's gutter."
+    }
+   ]
+  },
+  {
+   "group": "page-gutter:1920",
+   "what": "7. The page's left and right gutters (sheet edge to content edge), per width",
+   "distinctValues": 4,
+   "occurrences": 24,
+   "pages": 24,
+   "summary": "4 different values across 24 pages (24 measured); 0 on the 8-point grid, 4 off it; the commonest is 118 118 (19×).",
+   "values": [
+    {
+     "value": "118 118",
+     "count": 19,
+     "onGrid": false,
+     "pages": [
+      "agents",
+      "agents-discover",
+      "dashboard",
+      "dashboard-fv",
+      "manuscripts",
+      "manuscripts-comps",
+      "manuscripts-comps-empty",
+      "manuscripts-empty",
+      "queries",
+      "queries-analytics",
+      "queries-analytics-empty",
+      "queries-empty",
+      "queries-packages",
+      "queries-packages-empty",
+      "queries-responses-empty",
+      "todo",
+      "todo-corkboard",
+      "todo-corkboard-empty",
+      "todo-empty"
+     ],
+     "widths": [
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/shell/workspacePageGrid.css:489",
+      "margin-left ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/shell/workspacePageGrid.css:489",
+      "margin-right ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/queries/centre/qcv153.css:257",
+      "padding-left ← src/components/dashboard/v2/dash2Founding.css:114"
+     ],
+     "example": {
+      "page": "agents-discover",
+      "vw": 1920,
+      "a": "section.dv1-hw",
+      "b": "section.dv1-hw",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_118_118_1920--94df826f44.png"
+    },
+    {
+     "value": "118 954",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "manuscripts-versions",
+      "manuscripts-versions-empty"
+     ],
+     "widths": [
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/versions/v6/versionsV6.css:43",
+      "padding-left ← src/components/shell/workspacePageGrid.css:489",
+      "margin-left ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/versions/v6/versionsV6.css:43",
+      "padding-right ← src/components/shell/workspacePageGrid.css:489",
+      "margin-right ← src/components/shell/workspacePageGrid.css:489"
+     ],
+     "example": {
+      "page": "manuscripts-versions-empty",
+      "vw": 1920,
+      "a": "section.v6-card",
+      "b": "section.v6-card",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_118_954_1920--5af55eb9d1.png",
+     "note": "Not a gutter on the right: the outermost content stops short of that side (a narrow column or a single card), so only the left side, 118, is the page's gutter."
+    },
+    {
+     "value": "118 654",
+     "count": 2,
+     "onGrid": false,
+     "pages": [
+      "materials-letters",
+      "materials-letters-empty"
+     ],
+     "widths": [
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/letters/queryLetters.css:218",
+      "margin-left ← src/components/letters/queryLetters.css:38",
+      "padding-left ← src/components/letters/queryLetters.css:14",
+      "padding-right ← src/components/letters/queryLetters.css:223",
+      "margin-right ← src/components/letters/queryLetters.css:38",
+      "padding-right ← src/components/letters/queryLetters.css:14"
+     ],
+     "example": {
+      "page": "materials-letters-empty",
+      "vw": 1920,
+      "a": "li",
+      "b": "div.qlp-first-p",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_118_654_1920--b5207ba979.png",
+     "note": "Not a gutter on the right: the outermost content stops short of that side (a narrow column or a single card), so only the left side, 118, is the page's gutter."
+    },
+    {
+     "value": "118 -18",
+     "count": 1,
+     "onGrid": false,
+     "pages": [
+      "queries-responses"
+     ],
+     "widths": [
+      1920
+     ],
+     "scopes": [
+      "page"
+     ],
+     "setBy": [
+      "padding-left ← src/components/shared/stripBand.css:18",
+      "padding-left ← src/components/shell/workspacePageGrid.css:489",
+      "margin-left ← src/components/shell/workspacePageGrid.css:489",
+      "padding-right ← src/components/queries/centre/qcv154.css:19",
+      "padding-right ← src/components/responses/responses15.css:178",
+      "padding-right ← src/components/shell/workspacePageGrid.css:489"
+     ],
+     "example": {
+      "page": "queries-responses",
+      "vw": 1920,
+      "a": "section.sband.sband--grey.rsp15-gb",
+      "b": "div.qc154-card",
+      "line": null,
+      "first": null,
+      "grid": null,
+      "panel": null
+     },
+     "crop": "page-gutter_118_-18_1920--628edbd538.png",
+     "note": "Not a gutter on either side: a carousel's off-screen cards run past the sheet's edge, so neither reading is the page's gutter."
+    }
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "kind": "Record a response picker rows",
+   "rowsMeasured": 280,
+   "pages": [
+    "journey-rr-picker",
+    "overlay-Record-a-response-journey"
+   ],
+   "distinctStyles": 2,
+   "summary": "2 different row styles across 2 pages (280 rows): 1 height, 1 kind of separator, 1 primary type; 0 header styles.",
+   "styles": [
+    {
+     "height": 58,
+     "minHeight": "58px",
+     "padding": "8 10 8 10",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(247, 243, 238)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 16/500 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 13.5/400 rgb(125, 114, 104)",
+     "selector": "button.qcrr-row.hi",
+     "count": 276,
+     "pages": [
+      "journey-rr-picker",
+      "overlay-Record-a-response-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "journey-rr-picker",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_c3eb5eaad8--d305fb22cc.png"
+    },
+    {
+     "height": 58,
+     "minHeight": "58px",
+     "padding": "8 10 8 10",
+     "divider": "nothing",
+     "ground": {
+      "rest": null,
+      "hover": "rgb(247, 243, 238)",
+      "selected": "rgb(247, 243, 238)"
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 16/500 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 13.5/400 rgb(125, 114, 104)",
+     "selector": "button.qcrr-row",
+     "count": 4,
+     "pages": [
+      "journey-rr-picker",
+      "overlay-Record-a-response-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "journey-rr-picker",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_179bbcc5ce--7a1a68575d.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "To-do tray rows",
+   "rowsMeasured": 228,
+   "pages": [
+    "todo",
+    "todo-empty"
+   ],
+   "distinctStyles": 7,
+   "summary": "7 different row styles across 2 pages (228 rows): 4 heights, 3 kinds of separator, 4 primary types; 1 header style.",
+   "styles": [
+    {
+     "height": 58,
+     "minHeight": "58px",
+     "padding": "8 11 8 11",
+     "divider": "pseudo-element rule",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(255, 255, 255)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 15/500 rgb(58, 51, 45)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "div.tws-ti",
+     "count": 160,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "todo-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_dd992b62a2--d433a4c2ea.png"
+    },
+    {
+     "height": 73.8,
+     "minHeight": "58px",
+     "padding": "8 11 8 11",
+     "divider": "pseudo-element rule",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(255, 255, 255)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 15/500 rgb(58, 51, 45)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "div.tws-ti",
+     "count": 32,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "todo-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_8ce955abd8--6950435aa7.png"
+    },
+    {
+     "height": 58,
+     "minHeight": "58px",
+     "padding": "8 11 8 11",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(255, 255, 255)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 15/500 rgb(58, 51, 45)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "div.tws-ti",
+     "count": 12,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "todo-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_874ac65126--39064df38a.png"
+    },
+    {
+     "height": 40,
+     "minHeight": "auto",
+     "padding": "0 0 12 0",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(107, 96, 88)",
+     "secondary": null,
+     "selector": "li.tws-st",
+     "count": 12,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "todo-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_5f72045642--341a7cd08e.png"
+    },
+    {
+     "height": 58,
+     "minHeight": "58px",
+     "padding": "8 11 8 11",
+     "divider": "gap 6",
+     "ground": {
+      "rest": null,
+      "hover": "rgb(255, 255, 255)",
+      "selected": "rgb(255, 255, 255)"
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 15/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "div.tws-ti",
+     "count": 4,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "todo-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_8441cb864a--4c42b11ed1.png"
+    },
+    {
+     "height": 73.8,
+     "minHeight": "58px",
+     "padding": "8 11 8 11",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(255, 255, 255)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 15/500 rgb(58, 51, 45)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "div.tws-ti",
+     "count": 4,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "todo-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_ddade74011--dc7f406d38.png"
+    },
+    {
+     "height": 200.8,
+     "minHeight": "auto",
+     "padding": "0 0 12 0",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 16/400 rgb(58, 51, 45)",
+     "selector": "li.tws-st.tws-q",
+     "count": 4,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "todo-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_5ac95841d0--bd3dbc3f1b.png"
+    }
+   ],
+   "headers": [
+    {
+     "kind": "group-header",
+     "height": 32,
+     "padding": "0 2 0 2",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Special Elite 16/400 rgb(28, 19, 15)",
+     "selector": "button.tws-gb",
+     "count": 20,
+     "pages": [
+      "todo",
+      "todo-empty"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Log a query picker rows",
+   "rowsMeasured": 194,
+   "pages": [
+    "journey-laq-how",
+    "journey-laq-package",
+    "journey-laq-when",
+    "journey-laq-who",
+    "overlay-Log-a-query-journey"
+   ],
+   "distinctStyles": 2,
+   "summary": "2 different row styles across 5 pages (194 rows): 2 heights, 2 kinds of separator, 2 primary types; 0 header styles.",
+   "styles": [
+    {
+     "height": 63.5,
+     "minHeight": "auto",
+     "padding": "12 14 12 14",
+     "divider": "gap 8",
+     "ground": {
+      "rest": "rgb(255, 255, 255)",
+      "hover": "rgb(255, 255, 255)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "14px",
+     "primary": "Source Serif 4 16.5/500 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 13.5/400 rgb(111, 100, 91)",
+     "selector": "div.laq-big > button",
+     "count": 190,
+     "pages": [
+      "journey-laq-how",
+      "journey-laq-package",
+      "journey-laq-when",
+      "journey-laq-who",
+      "overlay-Log-a-query-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "journey-laq-how",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_3d3ef5b48b--f24a5f8bea.png"
+    },
+    {
+     "height": 60,
+     "minHeight": "auto",
+     "padding": "10 12 10 12",
+     "divider": null,
+     "ground": {
+      "rest": "rgb(250, 248, 244)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 14.5/400 rgb(42, 58, 82)",
+     "secondary": null,
+     "selector": "button.laq-busy",
+     "count": 4,
+     "pages": [
+      "journey-laq-who",
+      "overlay-Log-a-query-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "journey-laq-who",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_44f632e9f4--09a92a30bc.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Queries list rows",
+   "rowsMeasured": 116,
+   "pages": [
+    "queries",
+    "queries-empty"
+   ],
+   "distinctStyles": 2,
+   "summary": "2 different row styles across 2 pages (116 rows): 2 heights, 1 kind of separator, 1 primary type; 1 header style.",
+   "styles": [
+    {
+     "height": 192,
+     "minHeight": "auto",
+     "padding": "6 6 6 6",
+     "divider": "gap 26",
+     "ground": {
+      "rest": "rgb(255, 255, 255)",
+      "hover": "rgb(255, 255, 255)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "18px",
+     "primary": "Source Serif 4 17/600 rgb(244, 238, 229)",
+     "secondary": null,
+     "selector": "div.qc154-card",
+     "count": 58,
+     "pages": [
+      "queries",
+      "queries-empty"
+     ],
+     "widths": [
+      1512
+     ],
+     "example": {
+      "page": "queries-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_481a2ce61c--47ce5c0031.png"
+    },
+    {
+     "height": 196,
+     "minHeight": "auto",
+     "padding": "6 6 6 6",
+     "divider": "gap 26",
+     "ground": {
+      "rest": "rgb(255, 255, 255)",
+      "hover": "rgb(255, 255, 255)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "18px",
+     "primary": "Source Serif 4 17/600 rgb(244, 238, 229)",
+     "secondary": null,
+     "selector": "div.qc154-card",
+     "count": 58,
+     "pages": [
+      "queries",
+      "queries-empty"
+     ],
+     "widths": [
+      1920
+     ],
+     "example": {
+      "page": "queries-empty",
+      "vw": 1920,
+      "text": "[data]"
+     },
+     "crop": "row_f9fd57c755--2c69119aad.png"
+    }
+   ],
+   "headers": [
+    {
+     "kind": "group-header",
+     "height": 46,
+     "padding": "0 18 0 18",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Special Elite 17/400 rgb(28, 19, 15)",
+     "selector": "button.fp-fold",
+     "count": 4,
+     "pages": [
+      "queries",
+      "queries-empty"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Contact list rows",
+   "rowsMeasured": 106,
+   "pages": [
+    "agents"
+   ],
+   "distinctStyles": 2,
+   "summary": "2 different row styles across 1 page (106 rows): 1 height, 1 kind of separator, 2 primary types; 3 header styles.",
+   "styles": [
+    {
+     "height": 72,
+     "minHeight": "72px",
+     "padding": "10 0 10 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.08)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(251, 249, 246)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Special Elite 18/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "div.cl26-row",
+     "count": 100,
+     "pages": [
+      "agents"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "agents",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_6aa28ab199--f0b794d92c.png"
+    },
+    {
+     "height": 72,
+     "minHeight": "72px",
+     "padding": "10 0 10 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.08)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(251, 249, 246)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Special Elite 18/400 rgb(107, 96, 88)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.cl26-row",
+     "count": 6,
+     "pages": [
+      "agents"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "agents",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_ca1b971451--f782e2a298.png"
+    }
+   ],
+   "headers": [
+    {
+     "kind": "column-header",
+     "height": 14,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(91, 79, 71)",
+     "type": "Special Elite 14/400 rgb(91, 79, 71)",
+     "selector": "span.cl26-thx",
+     "count": 4,
+     "pages": [
+      "agents"
+     ]
+    },
+    {
+     "kind": "table-head",
+     "height": 42,
+     "padding": "0 0 0 0",
+     "ground": "rgb(251, 249, 246)",
+     "rule": "1 rgba(28, 19, 15, 0.1)",
+     "type": "Special Elite 14/400 rgb(28, 19, 15)",
+     "selector": "div.cl26-th",
+     "count": 2,
+     "pages": [
+      "agents"
+     ]
+    },
+    {
+     "kind": "column-header",
+     "height": 14,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(91, 79, 71)",
+     "type": "Special Elite 14/400 rgb(28, 19, 15)",
+     "selector": "div.cl26-th > span",
+     "count": 2,
+     "pages": [
+      "agents"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "search palette results",
+   "rowsMeasured": 106,
+   "pages": [
+    "overlay-Keyboard-shortcuts",
+    "overlay-Search-palette"
+   ],
+   "distinctStyles": 4,
+   "summary": "4 different row styles across 2 pages (106 rows): 2 heights, 2 kinds of separator, 1 primary type; 0 header styles.",
+   "styles": [
+    {
+     "height": 43,
+     "minHeight": "0px",
+     "padding": "9 0 9 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.1)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "li.sks-row",
+     "count": 74,
+     "pages": [
+      "overlay-Keyboard-shortcuts"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "overlay-Keyboard-shortcuts",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_8a42e33bbd--dd04e97a76.png"
+    },
+    {
+     "height": 43,
+     "minHeight": "0px",
+     "padding": "9 0 9 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.1)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 12/400 rgb(107, 96, 88)",
+     "selector": "li.sks-row",
+     "count": 18,
+     "pages": [
+      "overlay-Keyboard-shortcuts"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "overlay-Keyboard-shortcuts",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_f50313484b--9254aa0b3a.png"
+    },
+    {
+     "height": 50,
+     "minHeight": "0px",
+     "padding": "0 10 0 10",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(217, 150, 122, 0.16)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "9px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.sv1-row.sel",
+     "count": 12,
+     "pages": [
+      "overlay-Search-palette"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "overlay-Search-palette",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_a948eaf2e3--1803e74ba5.png"
+    },
+    {
+     "height": 50,
+     "minHeight": "0px",
+     "padding": "0 10 0 10",
+     "divider": "nothing",
+     "ground": {
+      "rest": null,
+      "hover": "rgba(217, 150, 122, 0.16)",
+      "selected": "rgba(217, 150, 122, 0.16)"
+     },
+     "bgImage": null,
+     "radius": "9px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.sv1-row",
+     "count": 2,
+     "pages": [
+      "overlay-Search-palette"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "overlay-Search-palette",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_d550725503--cb4d5892f5.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Settings rows",
+   "rowsMeasured": 50,
+   "pages": [
+    "account-data",
+    "account-emails",
+    "account-plan",
+    "account-preferences",
+    "account-profile"
+   ],
+   "distinctStyles": 8,
+   "summary": "8 different row styles across 5 pages (50 rows): 7 heights, 3 kinds of separator, 4 primary types; 6 header styles.",
+   "styles": [
+    {
+     "height": 79.8,
+     "minHeight": "0px",
+     "padding": "18 22 18 22",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.16)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.sc-row",
+     "count": 16,
+     "pages": [
+      "account-plan",
+      "account-preferences",
+      "account-profile"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-plan",
+      "vw": 1512,
+      "text": "Smart ImportOnce on every plan. You haven't used yours yet.O"
+     },
+     "crop": "row_6e0501284c--d9a4d4b472.png"
+    },
+    {
+     "height": 91,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "table.plt-t tr",
+     "count": 14,
+     "pages": [
+      "account-plan"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-plan",
+      "vw": 1512,
+      "text": "Query lettersKeep every draft of your letter and see which w"
+     },
+     "crop": "row_e6357a9d02--79c43d3d1a.png"
+    },
+    {
+     "height": 100.1,
+     "minHeight": "0px",
+     "padding": "18 22 18 22",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.16)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.sc-row",
+     "count": 10,
+     "pages": [
+      "account-data",
+      "account-emails",
+      "account-preferences",
+      "account-profile"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-data",
+      "vw": 1512,
+      "text": "Put something rightMost things you can edit yourself. For an"
+     },
+     "crop": "row_acc91fdbca--b91663c699.png"
+    },
+    {
+     "height": 57,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": null,
+     "secondary": null,
+     "selector": "table.plt-t tr",
+     "count": 2,
+     "pages": [
+      "account-plan"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-plan",
+      "vw": 1512,
+      "text": "Your plan"
+     },
+     "crop": "row_35228287a1--2706524677.png"
+    },
+    {
+     "height": 120.4,
+     "minHeight": "0px",
+     "padding": "18 22 18 22",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.16)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.sc-row",
+     "count": 2,
+     "pages": [
+      "account-preferences"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-preferences",
+      "vw": 1512,
+      "text": "A query goes quiet afterCounted from the reply date or your "
+     },
+     "crop": "row_2a2cb230ba--999ea7a398.png"
+    },
+    {
+     "height": 81,
+     "minHeight": "0px",
+     "padding": "18 22 18 22",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.16)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.sc-row",
+     "count": 2,
+     "pages": [
+      "account-preferences"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-preferences",
+      "vw": 1512,
+      "text": "Move a task to the back of the list afterNothing is deleted."
+     },
+     "crop": "row_abac7b115c--78a0a2990d.png"
+    },
+    {
+     "height": 58.7,
+     "minHeight": "0px",
+     "padding": "18 22 18 22",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.16)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "secondary": null,
+     "selector": "div.sc-row.sc-row--full",
+     "count": 2,
+     "pages": [
+      "account-profile"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-profile",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_2dad3b0ba5--dbf2d9dea2.png"
+    },
+    {
+     "height": 81,
+     "minHeight": "0px",
+     "padding": "18 22 18 22",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.16)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/600 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "div.sc-row",
+     "count": 2,
+     "pages": [
+      "account-profile"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "account-profile",
+      "vw": 1512,
+      "text": "Display name"
+     },
+     "crop": "row_d963f99f44--225ccf1dfe.png"
+    }
+   ],
+   "headers": [
+    {
+     "kind": "column-header",
+     "height": 91,
+     "padding": "11 14 11 14",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "1 rgb(239, 230, 219)",
+     "type": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "selector": "table.plt-t th",
+     "count": 14,
+     "pages": [
+      "account-plan"
+     ]
+    },
+    {
+     "kind": "group-header",
+     "height": 54.5,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Special Elite 17/400 rgb(28, 19, 15)",
+     "selector": "tr.plt-grp",
+     "count": 6,
+     "pages": [
+      "account-plan"
+     ]
+    },
+    {
+     "kind": "column-header",
+     "height": 54.5,
+     "padding": "18 14 11 14",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Special Elite 17/400 rgb(28, 19, 15)",
+     "selector": "tr.plt-grp > th",
+     "count": 6,
+     "pages": [
+      "account-plan"
+     ]
+    },
+    {
+     "kind": "table-head",
+     "height": 107,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Special Elite 22/400 rgb(28, 19, 15)",
+     "selector": "table.plt-t tr",
+     "count": 2,
+     "pages": [
+      "account-plan"
+     ]
+    },
+    {
+     "kind": "column-header",
+     "height": 107,
+     "padding": "11 14 11 14",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "1 rgb(224, 213, 200)",
+     "type": "Special Elite 22/400 rgb(28, 19, 15)",
+     "selector": "table.plt-t th",
+     "count": 2,
+     "pages": [
+      "account-plan"
+     ]
+    },
+    {
+     "kind": "column-header",
+     "height": 107,
+     "padding": "11 14 11 14",
+     "ground": "rgb(42, 58, 82)",
+     "rule": "1 rgba(244, 238, 229, 0.14)",
+     "type": "Special Elite 22/400 rgb(244, 238, 229)",
+     "selector": "th.plt-p",
+     "count": 2,
+     "pages": [
+      "account-plan"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Comps shelf rows",
+   "rowsMeasured": 42,
+   "pages": [
+    "manuscripts-comps",
+    "manuscripts-comps-empty"
+   ],
+   "distinctStyles": 9,
+   "summary": "9 different row styles across 2 pages (42 rows): 7 heights, 4 kinds of separator, 4 primary types; 2 header styles.",
+   "styles": [
+    {
+     "height": 76,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(250, 248, 244)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.cp32-rc-in tr",
+     "count": 14,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": null
+    },
+    {
+     "height": 75.1,
+     "minHeight": "auto",
+     "padding": "16 18 16 18",
+     "divider": "gap 12",
+     "ground": {
+      "rest": "rgb(245, 241, 235)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 17/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14.5/400 rgb(107, 96, 88)",
+     "selector": "button.cp32-row",
+     "count": 10,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_e23fb5326a--51fc854a54.png"
+    },
+    {
+     "height": 303.4,
+     "minHeight": "auto",
+     "padding": "24 24 28 24",
+     "divider": null,
+     "ground": {
+      "rest": "rgb(245, 241, 235)",
+      "hover": "rgb(245, 241, 235)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 18/600 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ol.cp32-steps > li",
+     "count": 6,
+     "pages": [
+      "manuscripts-comps-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_b4e06fa4e6--b27b4a5044.png"
+    },
+    {
+     "height": 109.1,
+     "minHeight": "auto",
+     "padding": "16 18 16 18",
+     "divider": "gap 12",
+     "ground": {
+      "rest": null,
+      "hover": "rgb(255, 255, 255)",
+      "selected": "rgb(255, 255, 255)"
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 17/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14.5/400 rgb(107, 96, 88)",
+     "selector": "button.cp32-row",
+     "count": 2,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_1293b63c74--74918edf80.png"
+    },
+    {
+     "height": 72,
+     "minHeight": "72px",
+     "padding": "2 0 14 0",
+     "divider": "border-top 1px rgb(235, 228, 218)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "ul.cp32-lst > li",
+     "count": 2,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_eff2c9cbad--4afcdad916.png"
+    },
+    {
+     "height": 72,
+     "minHeight": "72px",
+     "padding": "14 0 14 0",
+     "divider": "border-top 1px rgb(235, 228, 218)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "ul.cp32-lst > li",
+     "count": 2,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_5ffd92d00f--decfc8175d.png"
+    },
+    {
+     "height": 109.1,
+     "minHeight": "auto",
+     "padding": "16 18 16 18",
+     "divider": null,
+     "ground": {
+      "rest": "rgb(245, 241, 235)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 17/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14.5/400 rgb(107, 96, 88)",
+     "selector": "button.cp32-row",
+     "count": 2,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_43b76d1bc5--31f48800d4.png"
+    },
+    {
+     "height": 384.3,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Special Elite 96/400 rgb(255, 250, 243)",
+     "secondary": null,
+     "selector": "button.cp32-podc.is-p1",
+     "count": 2,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_9623adefc9--09a42d1851.png"
+    },
+    {
+     "height": 410.5,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Special Elite 96/400 rgb(255, 250, 243)",
+     "secondary": null,
+     "selector": "button.cp32-podc.is-p1",
+     "count": 2,
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-comps",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_04ceefda73--6ee6fd3972.png"
+    }
+   ],
+   "headers": [
+    {
+     "kind": "column-header",
+     "height": 53.3,
+     "padding": "18 28 18 28",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "1 rgb(235, 228, 218)",
+     "type": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.cp32-rc-in th",
+     "count": 10,
+     "pages": [
+      "manuscripts-comps"
+     ]
+    },
+    {
+     "kind": "table-head",
+     "height": 53.3,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.cp32-rc-in tr",
+     "count": 2,
+     "pages": [
+      "manuscripts-comps"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "Dashboard rows",
+   "rowsMeasured": 38,
+   "pages": [
+    "dashboard",
+    "dashboard-fv"
+   ],
+   "distinctStyles": 14,
+   "summary": "14 different row styles across 2 pages (38 rows): 9 heights, 6 kinds of separator, 6 primary types; 0 header styles.",
+   "styles": [
+    {
+     "height": 31,
+     "minHeight": "0px",
+     "padding": "5 0 5 0",
+     "divider": "border-bottom 1px rgba(28, 19, 15, 0.07)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "secondary": null,
+     "selector": "li.fv1-gsr.is-done",
+     "count": 4,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_23ff24bb43--00923b48d1.png"
+    },
+    {
+     "height": 58,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "border-top 1px rgb(235, 228, 218)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "ul.d3-exl.is-example > li",
+     "count": 4,
+     "pages": [
+      "dashboard",
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_83a73b35dd--fc1c2eade7.png"
+    },
+    {
+     "height": 18.8,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(42, 58, 82, 0.06)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "6px",
+     "primary": "Special Elite 18/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ul.d60-hl > li",
+     "count": 4,
+     "pages": [
+      "dashboard",
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_aba97bb7c0--266c8a6df4.png"
+    },
+    {
+     "height": 18.8,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": "gap 5",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(42, 58, 82, 0.06)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "6px",
+     "primary": "Special Elite 18/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ul.d60-hl > li",
+     "count": 4,
+     "pages": [
+      "dashboard"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_7926105a27--22c72fb5d3.png"
+    },
+    {
+     "height": 48,
+     "minHeight": "48px",
+     "padding": "8 6 8 6",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "color(srgb 0.921569 0.894118 0.854902 / 0.45)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "8px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "button.nu-row",
+     "count": 4,
+     "pages": [
+      "dashboard"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_f1d983f685--3a808f1b44.png"
+    },
+    {
+     "height": 57,
+     "minHeight": "44px",
+     "padding": "6 4 6 4",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "8px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "button.d3-ex",
+     "count": 4,
+     "pages": [
+      "dashboard"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_174beafb6a--2321315c19.png"
+    },
+    {
+     "height": 31,
+     "minHeight": "0px",
+     "padding": "5 0 5 0",
+     "divider": "border-bottom 1px rgba(28, 19, 15, 0.07)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 14/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "li.fv1-gsr.is-todo",
+     "count": 2,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_2d2ef7b12f--a4f3fd3828.png"
+    },
+    {
+     "height": 57,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "border-top 1px rgb(235, 228, 218)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "ul.d3-exl.is-example > li",
+     "count": 2,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": null
+    },
+    {
+     "height": 30,
+     "minHeight": "0px",
+     "padding": "5 0 5 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 14/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "li.fv1-gsr.is-todo",
+     "count": 2,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_db0f9286c4--9e9e762c70.png"
+    },
+    {
+     "height": 48,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "ul.d2-later.nu-rows > li",
+     "count": 2,
+     "pages": [
+      "dashboard"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_f86f4f5c8b--c0498d8791.png"
+    },
+    {
+     "height": 49,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "border-top 1px rgb(235, 228, 218)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "ul.d2-later.nu-rows > li",
+     "count": 2,
+     "pages": [
+      "dashboard"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_15147dcf0e--aaded0fa47.png"
+    },
+    {
+     "height": 57,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "ul.d3-exl > li",
+     "count": 2,
+     "pages": [
+      "dashboard"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "dashboard",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_98c8601161--532f821bc5.png"
+    },
+    {
+     "height": 93.9,
+     "minHeight": "0px",
+     "padding": "8 8 8 8",
+     "divider": "gap 3",
+     "ground": {
+      "rest": null,
+      "hover": "rgb(246, 241, 234)",
+      "selected": "rgb(246, 241, 234)"
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 14/700 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 13.5/400 rgb(91, 79, 71)",
+     "selector": "li.fv1-gsr.is-current",
+     "count": 1,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1512
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_c5c7e10446--c2ae86695b.png"
+    },
+    {
+     "height": 75,
+     "minHeight": "0px",
+     "padding": "8 8 8 8",
+     "divider": "gap 3",
+     "ground": {
+      "rest": null,
+      "hover": "rgb(246, 241, 234)",
+      "selected": "rgb(246, 241, 234)"
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 14/700 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 13.5/400 rgb(91, 79, 71)",
+     "selector": "li.fv1-gsr.is-current",
+     "count": 1,
+     "pages": [
+      "dashboard-fv"
+     ],
+     "widths": [
+      1920
+     ],
+     "example": {
+      "page": "dashboard-fv",
+      "vw": 1920,
+      "text": "[data]"
+     },
+     "crop": "row_4bdb0ea71f--79478d1749.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Manuscripts and versions rows",
+   "rowsMeasured": 32,
+   "pages": [
+    "manuscripts",
+    "manuscripts-empty",
+    "manuscripts-versions",
+    "manuscripts-versions-empty"
+   ],
+   "distinctStyles": 4,
+   "summary": "4 different row styles across 4 pages (32 rows): 3 heights, 3 kinds of separator, 2 primary types; 0 header styles.",
+   "styles": [
+    {
+     "height": 52.4,
+     "minHeight": "52px",
+     "padding": "14 0 14 0",
+     "divider": "border-bottom 1px rgba(28, 19, 15, 0.18)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/400 rgb(91, 79, 71)",
+     "secondary": "Special Elite 18/400 rgb(28, 19, 15)",
+     "selector": "button.ms29-dt-r",
+     "count": 12,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_27ff54c931--74f454c87b.png"
+    },
+    {
+     "height": 45.9,
+     "minHeight": "auto",
+     "padding": "0 0 0 52",
+     "divider": "gap 22",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 18/600 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ol.v6-steps > li",
+     "count": 12,
+     "pages": [
+      "manuscripts-versions",
+      "manuscripts-versions-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-versions-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_5712789e68--4cf0ccaca5.png"
+    },
+    {
+     "height": 52,
+     "minHeight": "52px",
+     "padding": "14 0 14 0",
+     "divider": "border-bottom 1px rgba(28, 19, 15, 0.18)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/400 rgb(91, 79, 71)",
+     "secondary": "Source Serif 4 16/400 rgb(91, 79, 71)",
+     "selector": "button.ms29-dt-r",
+     "count": 4,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_b3b07f7bed--73e4806905.png"
+    },
+    {
+     "height": 52,
+     "minHeight": "52px",
+     "padding": "14 0 14 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/400 rgb(91, 79, 71)",
+     "secondary": "Special Elite 18/400 rgb(28, 19, 15)",
+     "selector": "button.ms29-dt-r",
+     "count": 4,
+     "pages": [
+      "manuscripts",
+      "manuscripts-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "manuscripts-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_fdcfde7e8d--9d4e07a51b.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "other rows (your-notes)",
+   "rowsMeasured": 26,
+   "pages": [
+    "your-notes"
+   ],
+   "distinctStyles": 6,
+   "summary": "6 different row styles across 1 page (26 rows): 5 heights, 3 kinds of separator, 3 primary types; 0 header styles.",
+   "styles": [
+    {
+     "height": 82.8,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 12.5/600 rgb(59, 50, 44)",
+     "secondary": "Source Serif 4 12/400 rgb(107, 96, 88)",
+     "selector": "li.is-future",
+     "count": 8,
+     "pages": [
+      "your-notes"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "your-notes",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_bdcf01e129--515fe49538.png"
+    },
+    {
+     "height": 31,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.08)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ul.qc1531-lg > li",
+     "count": 6,
+     "pages": [
+      "your-notes"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "your-notes",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_5f0b1f29ad--e635608025.png"
+    },
+    {
+     "height": 60.9,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": "gap 12",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 14.5/400 rgb(59, 50, 44)",
+     "secondary": null,
+     "selector": "ul.yn-key > li",
+     "count": 4,
+     "pages": [
+      "your-notes"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "your-notes",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_ef6ea8f766--e3a90cf5a9.png"
+    },
+    {
+     "height": 40.6,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": "gap 12",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 14.5/400 rgb(59, 50, 44)",
+     "secondary": null,
+     "selector": "ul.yn-key > li",
+     "count": 4,
+     "pages": [
+      "your-notes"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "your-notes",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_7400b55343--7b8526c1b6.png"
+    },
+    {
+     "height": 30,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.08)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 15/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ul.qc1531-lg > li",
+     "count": 2,
+     "pages": [
+      "your-notes"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "your-notes",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_52b498abd7--0fe47cb37c.png"
+    },
+    {
+     "height": 82.8,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "10px",
+     "primary": "Source Serif 4 12.5/600 rgb(59, 50, 44)",
+     "secondary": "Source Serif 4 12/400 rgb(160, 103, 90)",
+     "selector": "li.is-next",
+     "count": 2,
+     "pages": [
+      "your-notes"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "your-notes",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_82e04e444d--50cc0ab142.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Packages rows",
+   "rowsMeasured": 24,
+   "pages": [
+    "queries-packages"
+   ],
+   "distinctStyles": 7,
+   "summary": "7 different row styles across 1 page (24 rows): 6 heights, 4 kinds of separator, 3 primary types; 2 header styles.",
+   "styles": [
+    {
+     "height": 76,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "nothing",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(250, 248, 244)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(107, 96, 88)",
+     "selector": "div.k62-tbl tr",
+     "count": 8,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_60840cb9e6--b5329c3e5c.png"
+    },
+    {
+     "height": 99.4,
+     "minHeight": "auto",
+     "padding": "14 14 14 14",
+     "divider": "gap 2",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 17/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14.5/400 rgb(91, 79, 71)",
+     "selector": "button.k62-prow",
+     "count": 6,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_755d61fb8e--daa6ef06ef.png"
+    },
+    {
+     "height": 99.4,
+     "minHeight": "auto",
+     "padding": "14 14 14 14",
+     "divider": "gap 2",
+     "ground": {
+      "rest": null,
+      "hover": "rgb(241, 237, 231)",
+      "selected": "rgb(241, 237, 231)"
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 17/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14.5/400 rgb(91, 79, 71)",
+     "selector": "button.k62-prow",
+     "count": 2,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_f401972b5f--d93d7d0c0c.png"
+    },
+    {
+     "height": 77.8,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "gap 6",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "li.k62-cr",
+     "count": 2,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_ba1601e7c0--dedb16a42c.png"
+    },
+    {
+     "height": 58.9,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": "gap 6",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "li.k62-cr",
+     "count": 2,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_267a866745--a2dbb8b056.png"
+    },
+    {
+     "height": 54,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(107, 96, 88)",
+     "secondary": null,
+     "selector": "li.k62-cr.k62-empty",
+     "count": 2,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_c438e62105--c894c98701.png"
+    },
+    {
+     "height": 104,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(107, 96, 88)",
+     "secondary": null,
+     "selector": "li.k62-cr.k62-empty",
+     "count": 2,
+     "pages": [
+      "queries-packages"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-packages",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_1518e7ce06--cbbb24ebf5.png"
+    }
+   ],
+   "headers": [
+    {
+     "kind": "column-header",
+     "height": 53.9,
+     "padding": "18 28 18 28",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "1 rgb(235, 228, 218)",
+     "type": "Source Serif 4 14.5/400 rgb(107, 96, 88)",
+     "selector": "div.k62-tbl th",
+     "count": 10,
+     "pages": [
+      "queries-packages"
+     ]
+    },
+    {
+     "kind": "table-head",
+     "height": 53.9,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Source Serif 4 14.5/400 rgb(107, 96, 88)",
+     "selector": "div.k62-tbl tr",
+     "count": 2,
+     "pages": [
+      "queries-packages"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "other rows (plans)",
+   "rowsMeasured": 20,
+   "pages": [
+    "plans"
+   ],
+   "distinctStyles": 5,
+   "summary": "5 different row styles across 1 page (20 rows): 4 heights, 3 kinds of separator, 3 primary types; 0 header styles.",
+   "styles": [
+    {
+     "height": 31.1,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": "gap 1",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(244, 238, 229)",
+     "secondary": null,
+     "selector": "ul.pl-feat > li",
+     "count": 10,
+     "pages": [
+      "plans"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "plans",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_cad0aa6178--22c75bf06b.png"
+    },
+    {
+     "height": 48,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": "gap 8",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ul.pl-feat > li",
+     "count": 4,
+     "pages": [
+      "plans"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "plans",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_d3eb4ede3c--56082fee41.png"
+    },
+    {
+     "height": 31.1,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": "gap 1",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": null,
+     "secondary": null,
+     "selector": "li.pl-lead",
+     "count": 2,
+     "pages": [
+      "plans"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "plans",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_eb985bbe1f--c6951859a3.png"
+    },
+    {
+     "height": 55.1,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": "gap 1",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(244, 238, 229)",
+     "secondary": null,
+     "selector": "ul.pl-feat > li",
+     "count": 2,
+     "pages": [
+      "plans"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "plans",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_eb3dab4f72--0a8c363c12.png"
+    },
+    {
+     "height": 46.6,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Serif 4 16/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ul.pl-feat > li",
+     "count": 2,
+     "pages": [
+      "plans"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "plans",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_84b4fd5bc4--c20d2567b6.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Materials letters rows",
+   "rowsMeasured": 12,
+   "pages": [
+    "materials-letters",
+    "materials-letters-empty"
+   ],
+   "distinctStyles": 1,
+   "summary": "1 different row style across 2 pages (12 rows): 1 height, 1 kind of separator, 1 primary type; 0 header styles.",
+   "styles": [
+    {
+     "height": 100,
+     "minHeight": "auto",
+     "padding": "0 0 0 52",
+     "divider": "gap 24",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Special Elite 20/400 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ol.qlp-steps > li",
+     "count": 12,
+     "pages": [
+      "materials-letters",
+      "materials-letters-empty"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "materials-letters-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_30228d3787--39cf06ae5b.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Responses rows",
+   "rowsMeasured": 12,
+   "pages": [
+    "queries-responses"
+   ],
+   "distinctStyles": 2,
+   "summary": "2 different row styles across 1 page (12 rows): 2 heights, 2 kinds of separator, 2 primary types; 3 header styles.",
+   "styles": [
+    {
+     "height": 68,
+     "minHeight": "68px",
+     "padding": "0 20 0 16",
+     "divider": "border-bottom 1px rgb(235, 229, 219)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(250, 247, 242)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Special Elite 12/400 rgb(140, 131, 121)",
+     "secondary": "Source Serif 4 16.5/600 rgb(28, 19, 15)",
+     "selector": "button.rsp15-rcr",
+     "count": 6,
+     "pages": [
+      "queries-responses"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-responses",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_250ea79f66--bf9ab3e0e1.png"
+    },
+    {
+     "height": 122.6,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Special Elite 17/400 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14/400 rgb(91, 79, 71)",
+     "selector": "ol.rsp15-gb-road > li",
+     "count": 6,
+     "pages": [
+      "queries-responses"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "queries-responses",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_7bf5905d41--12774db70a.png"
+    }
+   ],
+   "headers": [
+    {
+     "kind": "column-header",
+     "height": 32,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(111, 101, 92)",
+     "type": "Source Serif 4 13.5/400 rgb(111, 101, 92)",
+     "selector": "div.rsp15-rch > button",
+     "count": 10,
+     "pages": [
+      "queries-responses"
+     ]
+    },
+    {
+     "kind": "table-head",
+     "height": 44,
+     "padding": "0 20 0 16",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "1 rgb(235, 229, 219)",
+     "type": "Source Serif 4 13.5/600 rgb(28, 19, 15)",
+     "selector": "div.rsp15-rch",
+     "count": 2,
+     "pages": [
+      "queries-responses"
+     ]
+    },
+    {
+     "kind": "column-header",
+     "height": 32,
+     "padding": "0 0 0 0",
+     "ground": "rgba(0, 0, 0, 0)",
+     "rule": "0 rgb(28, 19, 15)",
+     "type": "Source Serif 4 12/600 rgb(28, 19, 15)",
+     "selector": "button.on",
+     "count": 2,
+     "pages": [
+      "queries-responses"
+     ]
+    }
+   ]
+  },
+  {
+   "kind": "other rows (help)",
+   "rowsMeasured": 8,
+   "pages": [
+    "help"
+   ],
+   "distinctStyles": 4,
+   "summary": "4 different row styles across 1 page (8 rows): 3 heights, 2 kinds of separator, 2 primary types; 0 header styles.",
+   "styles": [
+    {
+     "height": 50,
+     "minHeight": "0px",
+     "padding": "0 0 8 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.12)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Sans 3 14/400 rgb(107, 96, 88)",
+     "secondary": null,
+     "selector": "ul.hc-new > li",
+     "count": 2,
+     "pages": [
+      "help"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "help",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_98e02a7053--efda2c6198.png"
+    },
+    {
+     "height": 59,
+     "minHeight": "0px",
+     "padding": "8 0 8 0",
+     "divider": "border-top 1px rgba(28, 19, 15, 0.12)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Sans 3 14/400 rgb(107, 96, 88)",
+     "secondary": null,
+     "selector": "ul.hc-new > li",
+     "count": 2,
+     "pages": [
+      "help"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "help",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_32a501e6a0--afe3865cd2.png"
+    },
+    {
+     "height": 32,
+     "minHeight": "0px",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Sans 3 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Sans 3 14/400 rgb(107, 96, 88)",
+     "selector": "section.hc-area li",
+     "count": 2,
+     "pages": [
+      "help"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "help",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_43e48960f5--84af23eb0a.png"
+    },
+    {
+     "height": 32,
+     "minHeight": "32px",
+     "padding": "4 0 4 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgb(248, 244, 237)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "Source Sans 3 16/400 rgb(28, 19, 15)",
+     "secondary": "Source Sans 3 14/400 rgb(107, 96, 88)",
+     "selector": "button.hc-alink",
+     "count": 2,
+     "pages": [
+      "help"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "help",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_3761768136--3a1f0ad4ea.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Discover rows",
+   "rowsMeasured": 6,
+   "pages": [
+    "agents-discover"
+   ],
+   "distinctStyles": 1,
+   "summary": "1 different row style across 1 page (6 rows): 1 height, 1 kind of separator, 1 primary type; 0 header styles.",
+   "styles": [
+    {
+     "height": 390.4,
+     "minHeight": "auto",
+     "padding": "0 0 0 0",
+     "divider": null,
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": "JetBrains Mono 12/600 rgb(107, 96, 88)",
+     "secondary": "Source Serif 4 12.5/400 rgb(107, 96, 88)",
+     "selector": "ol.dv1-steps > li",
+     "count": 6,
+     "pages": [
+      "agents-discover"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "agents-discover",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_78d0fc089a--a172d60394.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "other rows (overlay-Add-an-agent-journey)",
+   "rowsMeasured": 6,
+   "pages": [
+    "overlay-Add-an-agent-journey"
+   ],
+   "distinctStyles": 1,
+   "summary": "1 different row style across 1 page (6 rows): 1 height, 1 kind of separator, 1 primary type; 0 header styles.",
+   "styles": [
+    {
+     "height": 52,
+     "minHeight": "52px",
+     "padding": "10 14 10 14",
+     "divider": null,
+     "ground": {
+      "rest": "rgb(245, 241, 234)",
+      "hover": "rgb(245, 241, 234)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 16/600 rgb(28, 19, 15)",
+     "secondary": "Source Serif 4 14.5/400 rgb(108, 103, 95)",
+     "selector": "button.aaj-row",
+     "count": 6,
+     "pages": [
+      "overlay-Add-an-agent-journey"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "overlay-Add-an-agent-journey",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_9d4880f940--f4b0a0840b.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Analytics rows",
+   "rowsMeasured": 6,
+   "pages": [
+    "queries-analytics-empty"
+   ],
+   "distinctStyles": 2,
+   "summary": "2 different row styles across 1 page (6 rows): 2 heights, 1 kind of separator, 1 primary type; 0 header styles.",
+   "styles": [
+    {
+     "height": 304,
+     "minHeight": "auto",
+     "padding": "24 24 28 24",
+     "divider": null,
+     "ground": {
+      "rest": "rgb(245, 241, 235)",
+      "hover": "rgb(245, 241, 235)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 18/600 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ol.a26-steps > li",
+     "count": 3,
+     "pages": [
+      "queries-analytics-empty"
+     ],
+     "widths": [
+      1512
+     ],
+     "example": {
+      "page": "queries-analytics-empty",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_56bdc651aa--4d22a9208b.png"
+    },
+    {
+     "height": 280,
+     "minHeight": "auto",
+     "padding": "24 24 28 24",
+     "divider": null,
+     "ground": {
+      "rest": "rgb(245, 241, 235)",
+      "hover": "rgb(245, 241, 235)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "12px",
+     "primary": "Source Serif 4 18/600 rgb(28, 19, 15)",
+     "secondary": null,
+     "selector": "ol.a26-steps > li",
+     "count": 3,
+     "pages": [
+      "queries-analytics-empty"
+     ],
+     "widths": [
+      1920
+     ],
+     "example": {
+      "page": "queries-analytics-empty",
+      "vw": 1920,
+      "text": "[data]"
+     },
+     "crop": "row_fa5b478cf2--d42f227b43.png"
+    }
+   ],
+   "headers": []
+  },
+  {
+   "kind": "Agent card rows",
+   "rowsMeasured": 4,
+   "pages": [
+    "overlay-Agent-card"
+   ],
+   "distinctStyles": 1,
+   "summary": "1 different row style across 1 page (4 rows): 1 height, 1 kind of separator, 1 primary type; 0 header styles.",
+   "styles": [
+    {
+     "height": 52.9,
+     "minHeight": "42px",
+     "padding": "6 12 6 12",
+     "divider": "border-top 1px rgb(236, 230, 222)",
+     "ground": {
+      "rest": "rgba(0, 0, 0, 0)",
+      "hover": "rgba(0, 0, 0, 0)",
+      "selected": null
+     },
+     "bgImage": null,
+     "radius": "0px",
+     "primary": null,
+     "secondary": null,
+     "selector": "ul.nx-list > li",
+     "count": 4,
+     "pages": [
+      "overlay-Agent-card"
+     ],
+     "widths": [
+      1512,
+      1920
+     ],
+     "example": {
+      "page": "overlay-Agent-card",
+      "vw": 1512,
+      "text": "[data]"
+     },
+     "crop": "row_0b5dd79050--1e8307998e.png"
+    }
+   ],
+   "headers": []
+  }
+ ],
+ "crops": [
+  "card-gap_across_12--ff4474a0a9.png",
+  "card-gap_across_32--6dc02441c2.png",
+  "card-gap_across_6--c6161a6cee.png",
+  "card-gap_down_0--1f7f489a73.png",
+  "card-gap_down_12--182015f752.png",
+  "card-gap_down_16--364a58918d.png",
+  "card-gap_down_20--35f03d3678.png",
+  "card-gap_down_24--36a8c6ffb1.png",
+  "card-gap_down_64--857cad5172.png",
+  "card-gap_down_679--8c9156506b.png",
+  "card-heading-gap_0--bb27aeaf5c.png",
+  "card-heading-gap_12--1d31ba6384.png",
+  "card-heading-gap_126--fc3e24a1e6.png",
+  "card-heading-gap_14--e2cb56e0ad.png",
+  "card-heading-gap_17--3913b7aa7c.png",
+  "card-heading-gap_20--347a943732.png",
+  "card-heading-gap_24--a3733f1924.png",
+  "card-heading-gap_26--98d706052c.png",
+  "card-heading-gap_37--342562f35e.png",
+  "card-heading-gap_4--85081df3aa.png",
+  "card-heading-gap_40--b91ae8eda8.png",
+  "card-heading-gap_53--cc871ed690.png",
+  "card-heading-gap_8--197a9d2869.png",
+  "card-heading-gap_97--a0490da829.png",
+  "framed-inner-padding_0_0_0_0--caaf5a7dbe.png",
+  "framed-inner-padding_0_0_212_16--5f836539b4.png",
+  "framed-inner-padding_0_0_57_0--326292f4c6.png",
+  "framed-inner-padding_0_0_67_0--2afedc1a89.png",
+  "framed-inner-padding_10_10_62_10--2483f2776b.png",
+  "framed-inner-padding_16_18_18_18--f7e51bc01b.png",
+  "framed-inner-padding_16_44_16_48--fc6c855d74.png",
+  "framed-inner-padding_18_18_20_18--5fc6693862.png",
+  "framed-inner-padding_24_24_24_24--332dcd75ef.png",
+  "framed-inner-padding_24_28_28_28--6d509b3508.png",
+  "framed-inner-padding_26_28_24_28--ae4bf4d4a2.png",
+  "framed-inner-padding_27_26_131_26--c7ac6cb7b5.png",
+  "framed-inner-padding_28_32_32_32--3e72c1656f.png",
+  "framed-inner-padding_28_32_36_32--58ce524afc.png",
+  "framed-inner-padding_40_44_40_44--08a38be347.png",
+  "framed-inner-padding_6_26_71_26--21dfd08288.png",
+  "page-gutter_-286_4_1512--cbc040e609.png",
+  "page-gutter_118_-18_1920--628edbd538.png",
+  "page-gutter_118_118_1920--94df826f44.png",
+  "page-gutter_118_654_1920--b5207ba979.png",
+  "page-gutter_118_954_1920--5af55eb9d1.png",
+  "page-gutter_32_32_1512--a65f43de9d.png",
+  "page-gutter_32_332_1512--b36c85a802.png",
+  "page-gutter_32_632_1512--4d1377fe1f.png",
+  "panel-body-padding_0_0_6_0--55a9685d63.png",
+  "panel-body-padding_0_24_22_24--d753ed3560.png",
+  "panel-body-padding_14_16_18_16--ed29e02980.png",
+  "panel-body-padding_14_18_18_18--9a4c40a8fb.png",
+  "panel-body-padding_16_18_14_18--c92f12f6fe.png",
+  "panel-body-padding_20_20_12_20--cca6c07cf1.png",
+  "panel-body-padding_22_24_22_24--f7c48970c2.png",
+  "panel-body-padding_22_28_28_28--05c81e38b6.png",
+  "panel-body-padding_4_0_10_0--6a5e8b314b.png",
+  "panel-body-padding_6_10_14_10--c8960bb081.png",
+  "panel-body-padding_6_16_6_16--0a3d995a2c.png",
+  "panel-field-gap_14--d1df1c8597.png",
+  "panel-field-gap_20--df259b8a8f.png",
+  "panel-field-gap_302--b1ef3ac6ab.png",
+  "row_04ceefda73--6ee6fd3972.png",
+  "row_0b5dd79050--1e8307998e.png",
+  "row_1293b63c74--74918edf80.png",
+  "row_15147dcf0e--aaded0fa47.png",
+  "row_1518e7ce06--cbbb24ebf5.png",
+  "row_174beafb6a--2321315c19.png",
+  "row_179bbcc5ce--7a1a68575d.png",
+  "row_23ff24bb43--00923b48d1.png",
+  "row_250ea79f66--bf9ab3e0e1.png",
+  "row_267a866745--a2dbb8b056.png",
+  "row_27ff54c931--74f454c87b.png",
+  "row_2a2cb230ba--999ea7a398.png",
+  "row_2d2ef7b12f--a4f3fd3828.png",
+  "row_2dad3b0ba5--dbf2d9dea2.png",
+  "row_30228d3787--39cf06ae5b.png",
+  "row_32a501e6a0--afe3865cd2.png",
+  "row_35228287a1--2706524677.png",
+  "row_3761768136--3a1f0ad4ea.png",
+  "row_3d3ef5b48b--f24a5f8bea.png",
+  "row_43b76d1bc5--31f48800d4.png",
+  "row_43e48960f5--84af23eb0a.png",
+  "row_44f632e9f4--09a92a30bc.png",
+  "row_481a2ce61c--47ce5c0031.png",
+  "row_4bdb0ea71f--79478d1749.png",
+  "row_52b498abd7--0fe47cb37c.png",
+  "row_56bdc651aa--4d22a9208b.png",
+  "row_5712789e68--4cf0ccaca5.png",
+  "row_5ac95841d0--bd3dbc3f1b.png",
+  "row_5f0b1f29ad--e635608025.png",
+  "row_5f72045642--341a7cd08e.png",
+  "row_5ffd92d00f--decfc8175d.png",
+  "row_60840cb9e6--b5329c3e5c.png",
+  "row_6aa28ab199--f0b794d92c.png",
+  "row_6e0501284c--d9a4d4b472.png",
+  "row_7400b55343--7b8526c1b6.png",
+  "row_755d61fb8e--daa6ef06ef.png",
+  "row_78d0fc089a--a172d60394.png",
+  "row_7926105a27--22c72fb5d3.png",
+  "row_7bf5905d41--12774db70a.png",
+  "row_82e04e444d--50cc0ab142.png",
+  "row_83a73b35dd--fc1c2eade7.png",
+  "row_8441cb864a--4c42b11ed1.png",
+  "row_84b4fd5bc4--c20d2567b6.png",
+  "row_874ac65126--39064df38a.png",
+  "row_8a42e33bbd--dd04e97a76.png",
+  "row_8ce955abd8--6950435aa7.png",
+  "row_9623adefc9--09a42d1851.png",
+  "row_98c8601161--532f821bc5.png",
+  "row_98e02a7053--efda2c6198.png",
+  "row_9d4880f940--f4b0a0840b.png",
+  "row_a948eaf2e3--1803e74ba5.png",
+  "row_aba97bb7c0--266c8a6df4.png",
+  "row_abac7b115c--78a0a2990d.png",
+  "row_acc91fdbca--b91663c699.png",
+  "row_b3b07f7bed--73e4806905.png",
+  "row_b4e06fa4e6--b27b4a5044.png",
+  "row_ba1601e7c0--dedb16a42c.png",
+  "row_bdcf01e129--515fe49538.png",
+  "row_c3eb5eaad8--d305fb22cc.png",
+  "row_c438e62105--c894c98701.png",
+  "row_c5c7e10446--c2ae86695b.png",
+  "row_ca1b971451--f782e2a298.png",
+  "row_cad0aa6178--22c75bf06b.png",
+  "row_d3eb4ede3c--56082fee41.png",
+  "row_d550725503--cb4d5892f5.png",
+  "row_d963f99f44--225ccf1dfe.png",
+  "row_db0f9286c4--9e9e762c70.png",
+  "row_dd992b62a2--d433a4c2ea.png",
+  "row_ddade74011--dc7f406d38.png",
+  "row_e23fb5326a--51fc854a54.png",
+  "row_e6357a9d02--79c43d3d1a.png",
+  "row_eb3dab4f72--0a8c363c12.png",
+  "row_eb985bbe1f--c6951859a3.png",
+  "row_ef6ea8f766--e3a90cf5a9.png",
+  "row_eff2c9cbad--4afcdad916.png",
+  "row_f1d983f685--3a808f1b44.png",
+  "row_f401972b5f--d93d7d0c0c.png",
+  "row_f50313484b--9254aa0b3a.png",
+  "row_f86f4f5c8b--c0498d8791.png",
+  "row_f9fd57c755--2c69119aad.png",
+  "row_fa5b478cf2--d42f227b43.png",
+  "row_fdcfde7e8d--9d4e07a51b.png",
+  "section-gap_16--d8f99199a8.png",
+  "section-gap_24--d498f4c56a.png",
+  "section-gap_64--9f48400b61.png",
+  "section-gap_72--65168166f9.png",
+  "section-gap_80--81fc54b626.png",
+  "section-gap_96--5023901857.png",
+  "section-heading-gap_108--72b9b80664.png",
+  "section-heading-gap_16--eb0b34cdf8.png",
+  "section-heading-gap_19--1b648a5ccc.png",
+  "section-heading-gap_22--aa4b1d3cb5.png",
+  "section-heading-gap_24--d6b7f44673.png",
+  "section-heading-gap_27--477f060e89.png",
+  "section-heading-gap_30--c069206cd7.png",
+  "section-heading-gap_39--7d4db817c6.png",
+  "section-heading-gap_4--c4dcb1ca47.png",
+  "section-heading-gap_42--27fb04779e.png",
+  "section-heading-gap_44--aa361374ca.png",
+  "section-heading-gap_45--5b498f311a.png",
+  "section-heading-gap_52--f4203f6eae.png",
+  "section-heading-gap_61--8edf6b8f4e.png",
+  "section-heading-gap_62--4ef5a16c6f.png",
+  "section-heading-gap_69--dca781bfeb.png",
+  "section-heading-gap_7--e6d2f786a6.png"
+ ]
+}
