@@ -7,8 +7,9 @@
  * the query's state, the head, the book, the tabs, the TRACKING THREAD (each step a message, the waits between them),
  * the Agent and Materials tabs, Notes unchanged, and the reply box as the footer.
  *
- * ⚠️ THE CARD WRITES NOTHING. The reply box's button, the pencil and each bubble's ✎ Edit hand back to the page; the
- *    derivations are lib/qcThread152 (pure). The phone's card is QcQueryCard149's own and is not touched.
+ * ⚠️ THE CARD WRITES NOTHING. The reply box's button, the band's ⋯ and every pencil hand back to the page; the
+ *    derivations are lib/qcThread152 (pure). Query card v168: ONE WAY TO EDIT — the pencil on the thing (QcEdit168);
+ *    the whole-card edit mode (the band's pencil, "Editing", the save bar, the double-click) is retired. The phone's card is QcQueryCard149's own and is not touched.
  * ⚠️ IT PORTALS WITH THE PANEL (document.body), so no page token reaches it: colours are literals and the faces are
  *    the `:root` --sp-* tokens. The tips are portalled again, to body, as fixed boxes — the panel leans, and a rotated
  *    ancestor would be the containing block of anything fixed inside it.
@@ -33,11 +34,6 @@ import { MatChips, PopCtx, useOutsideClose, type MatEnv } from "./QcEdit152";
 import type { StepMaterial } from "../../../lib/qc152Write";
 import { Bubble, StepGlyph } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import {
-  Ed, EdMenu, EditStrip, LeaveAsk, MenuItem, NotesEditPane, SaveBar, useEditLayer,
-  type CardEditData, type CardEdits,
-} from "./QcCardEdit152";
-import "./qcv152inplace.css";
 /* Stage colours v1 — last, so the stage colours sit over every earlier layer of the card */
 import "./sc1card.css";
 /* Query card v158 — the Agent, Materials and Notes tab bodies */
@@ -102,14 +98,13 @@ export interface QcCard152Props {
   onTab: (t: CardTab152) => void;
   notes: React.ReactNode;
   onClose: () => void;
-  onPencil: () => void;
   onEditStep: (activityId: string | null) => void;
   onReply: (act: ReplyAct) => void;
   onAgentField: (field: "wishlist" | "email" | "website" | "method" | "reply" | "materials" | null) => void;
   onCopyEmail: () => void;
   /** §3–§4: the view the card shows — the reading card, or an editing or recording view (`editBody`) under the same
    *  band and head; any view but "read" straightens the lean (§2.1) */
-  view?: "read" | "record" | "fork" | "fix" | "details";
+  view?: "read" | "record" | "fork" | "fix";
   editBody?: React.ReactNode;
   /** Escape in an editing view: an open menu or calendar closes first, then the view steps back one level (§4.7) */
   onBack?: () => void;
@@ -131,9 +126,6 @@ export interface QcCard152Props {
    *  where the new step will go; the step being checked (a soft pulsing ring and "Checking"); the step just logged
    *  (a "Logged" stamp); a send of several things as "your materials" with a paperclip */
   desk?: { bookRow?: boolean; typing?: boolean; checkKey?: string | null; stampKey?: string | null; clip?: { key: string; items: string[]; version: string | null } | null };
-  /** Log a query v1.1 — editing in place: the pencil's edit mode (the agent, the agent's details, the notes) */
-  editData?: CardEditData;
-  onSaveEdits?: (e: CardEdits) => Promise<boolean>;
   /** Record a response v1, Phase 5 — the grid is behind the dim now, so the band carries ‹ › through the set the card was
    *  opened from (the ← → keys' set). Absent, or a set of one: no arrows. */
   stepCard?: { at: number; of: number; go: (d: 1 | -1) => void } | null;
@@ -275,8 +267,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   /* ONE Escape handler for the editing views: the open popover first, then one level back */
   useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
   const bodyRef = useRef<HTMLDivElement>(null);
-  /* v1.1 — the edit layer: the pencil, or a double-click on a value, enters it; Esc closes a menu, then asks */
-  const ed = useEditLayer(p.editData, p.onSaveEdits, r.id);
   const inRef = useRef<HTMLDivElement>(null);
   /* ══ v167 §C/§D — THE PROFILE DRAWER: in the composer's slot; a journey already open waits under it, still mounted
      (hidden), so every answer and its step stay as they were. Saving, going back or Esc returns to it, focus on the
@@ -316,14 +306,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     try { ok = await p.onSaveProfile(patch); } finally { setProfBusy(false); }
     if (ok) { setJust({ k, n: Date.now() }); closeProf(); }
   };
-  useEscapeLayer(ed.on, () => {
-    if (ed.open) ed.setOpen(null);
-    else if (ed.leave) ed.keep();
-    else ed.ask();
-  }, ESC_LEVEL.pageModal);
   const queryStepId = d.steps.find((x) => x.status === QueryStatus.QUERIED && !x.kind)?.activityId ?? null;
   const openStep = (id: string | null) => { p.onTab("tracking"); p.onEditStep(id); };
-  const edAgent = ed.on && ed.dr ? p.editData?.agents.find((a) => a.id === ed.dr!.agentId) ?? null : null;
   const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
   const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs, steps: d.steps, quietWeeks: d.quietWeeks, reason: d.reason ?? null, nudged: d.nudged });
   const [buildId, setBuildId] = useState<string | null>(null);
@@ -566,7 +550,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   }, shown0);
   const trackingPane = (
     <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread" data-steps={msgIdx.length}>
-      {ed.on ? <div className="qc152-trknote" data-qc152="track-note">Steps are edited one at a time: hover a message for ✎ Edit</div> : null}
       {folded ? (
         <button type="button" className="qc152-coll" data-qc152="fold" onClick={() => setUnfold(true)}>{folded} earlier {folded === 1 ? "step" : "steps"} · show</button>
       ) : null}
@@ -615,7 +598,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const agentPane = (
     <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
       sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
-      onOpen={ed.on ? null : (k) => g168(() => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")))}
+      onOpen={(k) => g168(() => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")))}
       onFullCard={() => g168(() => p.onAgentField(null))} editing={prof?.k ?? null} just={just}
       heardWhy={why(d.lastHeardMs != null ? `From ${first}’s latest reply on Tracking` : `Fills in when you record ${first}’s reply`)} />
   );
@@ -639,14 +622,9 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     <PopCtx.Provider value={pop}>
     <Edit168Ctx.Provider value={ed168}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
-      data-lean={view === "read" && !jOpen && !p.editingId && !ed168.open && !ed.on && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
+      data-lean={view === "read" && !jOpen && !p.editingId && !ed168.open && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined}
       data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" data-qc168-open={ed168.open ?? undefined} style={stageVars}>
       <div ref={inRef} className="qc152-in">
-        {ed.on ? (
-        <div className="qc152-band is-ed" data-qc152="band" data-edit="">
-          <EditStrip n={ed.keys.length} onStop={() => ed.ask()} />
-        </div>
-        ) : (
         <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined}
           style={{ background: bandBg, color: bandInk(r.status) }}>
           {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={() => g168(p.backTo!.onBack)}>← {p.backTo.label}</button> : null}
@@ -667,7 +645,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             aria-haspopup="menu" aria-expanded={bandMenu === "menu"} onClick={() => g168(() => setBandMenu((m) => (m === "menu" ? null : "menu")))}>⋯</button> : null}
           <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={() => g168(p.onClose)}>✕</button>
         </div>
-        )}
         <div className="qc152-agent">
           <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
           <div className="qc152-who"><div ref={nameRef} className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div><div className="qc152-ag" data-qc164="agency">{r.agency || ""}</div></div>
@@ -690,20 +667,17 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
             <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => (mut168("5") ? p.onTab(t) : g168(() => p.onTab(t)))}>
               {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
-              {ed.on && t === "notes" && ed.keys.includes("notes")
-                ? <span className="qc152-dot" data-qc152="tab-dot" aria-label="unsaved changes" /> : null}
             </button>
           ))}
         </div>
         <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
-          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
+          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{p.notes}</div>}
         </div>
-        {!ed.on && prof && profileIn ? (
+        {prof && profileIn ? (
           <ProfileDrawer key={`${r.id}:${prof.k}`} k={prof.k} prof={profileIn} journey={prof.journey} busy={profBusy} onBack={closeProf} onSave={(x) => void saveProf(x)}
             asks={p.asksBody ? (set) => p.asksBody!(profileIn, set) : undefined} />
         ) : null}
-        {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
-          : p.composer ? p.composer : prof ? null : d.foot ? (() => {
+        {p.composer ? p.composer : prof ? null : d.foot ? (() => {
           /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link. v158.1: with more than one action it is
              two rows (Foot, below) */
           const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
@@ -719,16 +693,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             outer={{ "data-act": box.act }} />
         )}
         </>}
-        {ed.on && ed.leave ? <LeaveAsk n={ed.keys.length} busy={ed.busy} onLose={ed.lose} onKeep={ed.keep} onSave={() => void ed.save()} /> : null}
-        {ed.on && ed.open && ed.dr && p.editData ? (
-          <EdMenu root={inRef.current} anchor={ed.anchor} onClose={() => ed.setOpen(null)}>
-            {ed.open === "agent" ? <>
-              <div className="ph">Who’s this query to?</div>
-              {p.editData.agents.map((a) => <MenuItem key={a.id} data={a.id} on={ed.dr!.agentId === a.id} label={a.name} sub={a.agency} onPick={() => { ed.setAgent(a.id); ed.setOpen(null); }} />)}
-              <div className="pf">Moves this query to another agent. Their details come with them.</div>
-            </> : null}
-          </EdMenu>
-        ) : null}
         {bandMenu === "menu" ? (
           <CardMenu root={inRef.current} anchor={moreRef.current} onClose={() => setBandMenu(null)} label="This query" hook="band-menu">
             {p.moveTo ? <CardMenuItem label="Move to another agent" data={{ "data-act": "move" }} onPick={() => setBandMenu("move")} /> : null}

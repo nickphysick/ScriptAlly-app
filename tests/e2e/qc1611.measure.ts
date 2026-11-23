@@ -200,7 +200,7 @@ if (PHASE !== "before") {
       { what: "record a response", key: "agent", open: async (p) => { await p.locator(C("[data-qc152='reply-btn']")).click(); await p.waitForTimeout(600); await p.locator(C("[data-qc1522='reply-types'] [data-v='passed']")).click(); }, press: async (p) => { await press(p, SAVE); } },
       { what: "close the query", key: "nudgedquiet", open: async (p) => { await p.locator(C("[data-qc152='reply-btn']")).click(); }, press: async (p) => { await press(p, SAVE); } },
       { what: "decline the offer", key: "offer", open: async (p) => { await p.locator(C("[data-qc152='reply-btn']")).click(); await p.waitForTimeout(600); await p.locator(C("[data-qc1522='offer-choices'] [data-v='decline']")).click(); }, press: async (p) => { await press(p, SAVE); } },
-      { what: "delete a step", key: "rr", open: async (p) => { const m = p.locator(C("[data-qc152='thread'] > .qc152-m")).last(); await m.hover(); await m.locator("[data-qc152='edit-step']").click(); await p.waitForTimeout(600); await p.locator(C("[data-qc1522='delete-step']")).click(); }, press: async (p) => { await press(p, C("[data-qc1522='delete-ok']")); } },
+      { what: "delete a step", key: "rr", open: async (p) => { const m = p.locator(C("[data-qc152='thread'] > .qc152-m")).last(); await m.hover(); await m.locator("[data-qc168='pen']").click(); await p.waitForTimeout(600); await p.locator(C("[data-qc1522='delete-step']")).click(); }, press: async (p) => { await press(p, C("[data-qc1522='delete-ok']")); } },
     ];
     const ran: string[] = [];
     for (const a of ACTS) {

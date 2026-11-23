@@ -343,29 +343,31 @@ test.describe("Query card v158", () => {
         await page.waitForTimeout(800);
         const list = () => page.evaluate((sel) => [...document.querySelector<HTMLElement>(sel)!.querySelectorAll<HTMLElement>("[data-qc158='note'], [data-qc158='quote']")].map((e) => ({
           t: e.dataset.qc158!, id: e.dataset.id ?? "", status: e.dataset.status ?? "", pinned: e.hasAttribute("data-pinned"), bg: getComputedStyle(e).backgroundColor,
-          acts: [...e.querySelectorAll<HTMLElement>("[data-qc158='act']")].map((a) => a.dataset.act!), text: e.querySelector("p")?.textContent ?? "",
+          /* Query card v168 — re-pointed: the actions are behind each entry's ⋯ (what it holds is menuItems168's, unit-tested) */
+          acts: e.querySelector("[data-qc168='more']") ? ["more"] : [], text: e.querySelector("p")?.textContent ?? "",
         })), CARD);
         const l = await list();
         const notes = l.filter((x) => x.t === "note"), quotes = l.filter((x) => x.t === "quote");
         L10.check(`the fixture holds notes (${notes.length}) and recorded words (${quotes.length})`, notes.length >= 1 && quotes.length >= 1, "");
         L10.check("one list in date order: the older recorded words before this week's notes", l.findIndex((x) => x.t === "note") > l.map((x) => x.t).lastIndexOf("quote"), l.map((x) => x.t[0]).join(""));
         /* Plumage colours v1 — a quote's background is the band of the status the reply set (lib/stageColours statusBand) */
-        for (const q of quotes) L10.check(`${q.status}: background is its status's band; Send to Corkboard only`, q.bg === rgb(statusBand(q.status)) && q.acts.join(",") === "cork", `${q.bg} ${q.acts}`);
+        for (const q of quotes) L10.check(`${q.status}: background is its status's band; its ⋯ (Send to Corkboard only)`, q.bg === rgb(statusBand(q.status)) && q.acts.join(",") === "more", `${q.bg} ${q.acts}`);
         /* QC158-12: task, corkboard, the note unchanged; pin one, then another: only one pinned, first */
         const errs: string[] = [];
         page.on("console", (m) => { if (m.type() === "error" || /pin|journal/i.test(m.text())) errs.push(m.text().slice(0, 200)); });
         page.on("pageerror", (e) => errs.push(`pageerror: ${String(e).slice(0, 200)}`));
         const n0 = notes[0];
         const art = (id: string) => page.locator(C(`[data-qc158='note'][data-id='${id}']`));
-        await art(n0.id).hover(); await art(n0.id).locator("[data-act='task']").click(); await page.waitForTimeout(900);
-        await art(n0.id).hover(); await art(n0.id).locator("[data-act='cork']").click(); await page.waitForTimeout(900);
+        const menuAct = async (id: string, act: string) => { await art(id).hover(); await art(id).locator("[data-qc168='more']").click(); await page.locator(C(`[data-qc168='note-menu'] [data-act='${act}']`)).click(); };
+        await menuAct(n0.id, "task"); await page.waitForTimeout(900);
+        await menuAct(n0.id, "cork"); await page.waitForTimeout(900);
         const c1 = JSON.parse(seed("--count")) as { notes: { id: string; text: string; pinned: boolean }[]; tasks: { text: string; dueDate: string | null }[] };
         L12.check("Make it a task made a dated task with the note's text", c1.tasks.some((t) => t.text === n0.text && !!t.dueDate), JSON.stringify(c1.tasks));
         L12.check("Send to Corkboard made an undated note with the note's text", c1.tasks.some((t) => t.text === n0.text && !t.dueDate), "");
         L12.check("the original note is unchanged", c1.notes.length === 3 && c1.notes.some((x) => x.id === n0.id && x.text === n0.text), JSON.stringify(c1.notes.map((x) => x.id)));
         /* the pin links are pressed from the keyboard (focus, Enter): a real way to use them, and steady on the leaning
            card near the sticky writing box, where a synthetic pointer click was not delivered in this harness */
-        const press = async (id: string) => { const b = art(id).locator("[data-act='pin']"); await art(id).hover(); await b.focus(); await page.keyboard.press("Enter"); await page.waitForTimeout(1200); };
+        const press = async (id: string) => { const b = art(id).locator("[data-qc168='more']"); await art(id).hover(); await b.focus(); await page.keyboard.press("Enter"); await page.locator(C("[data-qc168='note-menu'] [data-act='pin']")).focus(); await page.keyboard.press("Enter"); await page.waitForTimeout(1200); };
         await press(notes[1].id);
         const afterOne = JSON.parse(seed("--count")) as { notes: { id: string; pinned: boolean }[] };
         L12.check("after one Pin, that note is pinned in the store", afterOne.notes.some((x) => x.id === notes[1].id && x.pinned), `${JSON.stringify(afterOne.notes)} · ${errs.join(" | ") || "no errors"}`);

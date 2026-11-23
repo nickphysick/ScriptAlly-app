@@ -52,7 +52,7 @@ export const packageChip = (name: string | null): string => {
   return (/package$/i.test(n) ? n : `${n} package`).toUpperCase();
 };
 
-export type CardMode = "view" | "respond" | "edit" | "record" | "fork" | "fix" | "details";
+export type CardMode = "view" | "respond" | "edit" | "record" | "fork" | "fix";
 export type CardTab = "tracking" | "agent" | "materials" | "notes";
 export type RespChoice = "partial" | "full" | "pass" | "offer";
 
@@ -217,12 +217,11 @@ export interface QcQueryCard149Props {
   v152?: QcCard152Data;
   onReply152?: (act: ReplyAct) => void;
   onEditStep152?: (activityId: string | null) => void;
-  onPencil152?: () => void;
   /** §3–§4: the editing view's body (the record form, What needs changing?, Fix a mistake, the details) and its back */
   edit152?: React.ReactNode;
   onBack152?: () => void;
   /** v152.2 §2–§3 — the composer, its draft, the bubble edited in place, the toast and the footer's controls */
-  card1522?: Pick<QcCard152Props, "composer" | "draft" | "editingId" | "editNode" | "toast" | "burst" | "onFoot" | "desk" | "editData" | "onSaveEdits" | "stepCard" | "backTo" | "motion" | "profile" | "onSaveProfile" | "asksBody" | "matEdit" | "moveTo" | "onDeleteQuery">;
+  card1522?: Pick<QcCard152Props, "composer" | "draft" | "editingId" | "editNode" | "toast" | "burst" | "onFoot" | "desk" | "stepCard" | "backTo" | "motion" | "profile" | "onSaveProfile" | "asksBody" | "matEdit" | "moveTo" | "onDeleteQuery">;
 }
 
 const blankEdits = (): CardEdits => ({ dates: {}, removed: [], added: null, packageKey: null, pieces: {}, agent: {} });
@@ -350,7 +349,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
 
   /* ── v152 §2: the desktop reading view ── */
   const v152 = !phone && p.v152 ? p.v152 : null;
-  if (v152 && (mode === "view" || mode === "record" || mode === "fork" || mode === "fix" || mode === "details")) {
+  if (v152 && (mode === "view" || mode === "record" || mode === "fork" || mode === "fix")) {
     return (
       <QcCard152 row={r} nowMs={nowMs} d={v152} first={p.agent.first} msTitle={p.msTitle} bookChips={p.bookChips} packageName={p.packageName}
         wishlist={p.wishlist.text} email={p.contact.email} website={p.contact.website} websiteHref={p.contact.websiteHref}
@@ -360,7 +359,6 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
           onPin={p.onPinNote ?? null} onTask={p.onNoteTask ?? null} onCork={p.onNoteCork ?? null} ghost
           onEdit={p.onEditNote ?? null} onDelete={p.onDeleteNote ?? null} onQuoteEdit={p.onQuoteEdit ?? null} />}
         onClose={p.onClose}
-        onPencil={() => (p.onPencil152 ? p.onPencil152() : p.onMode("edit"))}
         onEditStep={(id) => (p.onEditStep152 ? p.onEditStep152(id) : (setTab("tracking"), p.onMode("edit")))}
         onReply={(a) => p.onReply152?.(a)}
         onAgentField={p.onAgentField}

@@ -25,6 +25,12 @@ import { CrossTick, DiscardAsk, useHold168, useEdit168 } from "./QcEdit168";
 
 const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 
+/** the stored submission methods (types.ts SubmissionMethod) and their words: the Query sent step's How (moved here from
+ *  the retired edit layer, QcCardEdit152, by Query card v168) */
+export const STEP_METHODS: { v: string; label: string }[] = [
+  { v: "Email", label: "Email" }, { v: "Query Manager", label: "QueryManager" }, { v: "Online Form", label: "Online form" }, { v: "Post", label: "Post" },
+];
+
 export interface StepEditProps {
   /** v168 — the step's activity id (the rule's key) and how to open it again (the cross's Undo) */
   id: string;

@@ -213,7 +213,8 @@ for (const vp of SIZES) {
       const deg = (v: string) => (v === "none" ? 0 : parseFloat(v));
       const read = await rot();
       L.check("reading: rotate 1.6° ±0.1", Math.abs(deg(read) - 1.6) <= 0.1, read);
-      await page.locator(`${CARD152} [data-qc152='pencil']`).click({ timeout: 8000 }).catch(() => {});
+      /* Query card v168 — re-pointed: the band's pencil is gone; the editing view is a step opened from its own pencil */
+      await page.locator(`${CARD152} [data-qc152='thread'] [data-qc168='pen']`).first().click({ timeout: 8000 }).catch(() => {});
       await page.waitForTimeout(600);
       const ed = await rot();
       L.check("population: an editing view is open", await page.locator("[data-qp='panel'] [data-lean='flat'], [data-qp='panel'] [data-qc152='flat']").count() > 0, "no flat view");

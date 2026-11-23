@@ -128,7 +128,7 @@ import { QcAsks167 } from "./queries/centre/QcAsks167";
 import { bookOf } from "../lib/queryActions/sample";
 import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
-import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcCardEdit152";
+import { STEP_METHODS as EDIT_METHODS } from "./queries/centre/QcStepEdit1522";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import { courtOf, expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
@@ -6389,18 +6389,6 @@ export const Queries: React.FC<{
       card1522.composer = composer1522;
       card1522.draft = qc1522J ? qc1522Draft : null;
       card1522.editingId = edit1522 ? editKey : null;
-      /* Log a query v1.1 — editing in place: the agent, the agent's details and the notes, saved on the card's Save */
-      const detailsOf = (id: string): AgentDetails | null => {
-        const a = agents.find((x) => x.id === id);
-        if (!a) return null;
-        return {
-          weeks: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
-          nrmn: typeof a.noResponseMeansNo === "boolean" ? a.noResponseMeansNo : null,
-          asks: (a.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
-          method: a.submissionMethod ? String(a.submissionMethod) : null,
-          wishlist: a.mswlNotes ?? "", email: a.email ?? "", website: a.website ?? "",
-        };
-      };
       /* Query card v167 §C — the agent's profile, edited from the card's own drawers. ONE write: the agent card's save path
          (commitCardSave: its snapshot, the reply-time deadline fan-out, the data-quality flag), for every query with this
          agent. Undo restores that snapshot (the house rule: put back what the save changed, never a second write). */
@@ -6438,47 +6426,7 @@ export const Queries: React.FC<{
         const book167 = bookOf(manuscripts.find((m) => m.id === q.manuscriptId)?.wordCount ?? null);
         card1522.asksBody = (prof, set) => <QcAsks167 prof={prof} book={book167} onPatch={set} />;
       }
-      card1522.editData = {
-        agentId: q.agentId,
-        agents: [...agents].map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) || null })).sort((a, b) => a.name.localeCompare(b.name)),
-        detailsOf,
-        notes: journalEntries.filter((j) => j.queryId === q.id)
-          .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
-          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" })),
-      };
-      card1522.onSaveEdits = async (e) => {
-        if (qc152Busy) return false;
-        setQc152Busy(true);
-        try {
-          /* 1 · the agent the query is to: the old details save (planDetails1522), on the page's batched writer */
-          if (e.agentId) await commitPlan(uid, planDetails1522(q, { agentId: e.agentId, method: q.sendMethod ?? "", pkg: null, pkgChanged: false }));
-          /* 2 · the agent's own details: the agent card's save path (its snapshot, the reply-time fan-out, the flag) */
-          const target = agents.find((x) => x.id === e.detailsAgentId);
-          if (target && Object.keys(e.details).length) {
-            const d = e.details;
-            const patch: AgentEditPatch = {};
-            if ("weeks" in d) patch.responseTimeWeeks = d.weeks ?? null;
-            if ("nrmn" in d && typeof d.nrmn === "boolean") patch.noResponseMeansNo = d.nrmn;
-            if ("asks" in d) patch.materialsWanted = d.asks ?? [];
-            if ("method" in d && d.method) patch.submissionMethod = d.method;
-            if ("wishlist" in d) { patch.mswlNotes = (d.wishlist ?? "").trim(); patch.mswlCheckedAt = new Date().toISOString(); }
-            if ("email" in d) patch.email = (d.email ?? "").trim();
-            if ("website" in d) patch.website = (d.website ?? "").trim();
-            const out = await commitCardSave({ uid, agent: target, queries, patch, resolveTaskFlag: scriptDb.resolveTaskFlag });
-            if ("error" in out.res) throw new Error(String(out.res.error));
-          }
-          /* 3 · the notes: the notes path (journalEntries) */
-          for (const n of e.notes.updated) await updateJournalEntry(n.id, n.text);
-          for (const id of e.notes.deleted) await deleteJournalEntry(id);
-          for (const t of e.notes.added) await addJournalEntry(q.id, t);
-        } catch (err) {
-          console.error("[query card] edit-in-place save failed", err);
-          showToast({ message: "Couldn't save all the changes. Check the card and try again." });
-          return false;
-        } finally { setQc152Busy(false); }
-        setQc1522Toast({ msg: "Changes saved", undo: null });
-        return true;
-      };
+      /* (Query card v168 retired the whole-card edit layer's data and its Save: editData, onSaveEdits, detailsOf) */
       card1522.editNode = edit1522;
       card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: qc1522Toast.undo ? () => {
         const t = qc1522Toast; setQc1522Toast(null);
@@ -6989,7 +6937,7 @@ export const Queries: React.FC<{
         : pipShown ? undefined
         : () => {
           const panel = document.querySelector("[data-qp='panel']");
-          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-editing], [data-qc152='card'][data-qc168-open], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
+          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-qc168-open], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
           if (busy) { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); return; }
           (fromAgent ? closeFromAgent : closeQueryCard)();
         }}
