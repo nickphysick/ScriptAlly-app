@@ -58,7 +58,8 @@ const draftStore = () => import("../../../lib/importDraft");
 import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState } from "../../../lib/dashTour";
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import { Dash2Band } from "../v2/Dash2Band";
-import { wholeWeeksQuerying } from "../../../lib/dash2";
+import { UNDATED_FROM, wholeWeeksQuerying } from "../../../lib/dash2";
+import { queriesForIds } from "../../../lib/queriesFilterParam";
 import { expectedBack, howItsGoing, stageMarks, withoutContradictions } from "../../../lib/dash3";
 import { Dash3Expected } from "../v3/Dash3Expected";
 import { Dash3GsRow } from "../v3/Dash3GsRow";
@@ -712,7 +713,8 @@ export const Dash58: React.FC<Dash58Props> = ({
                 </div>
               ) : (
                 <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} agents={agents}
-                  activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} going={going} />
+                  activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} going={going}
+                  onAddDates={(ids) => navigate(queriesForIds(ids, UNDATED_FROM))} />
               )}
               {/* before the first query, a labelled example; afterwards, the clock's own rows. A row opens its query's card. */}
               <Dash3Expected loading={loading} model={pre ? null : expected}

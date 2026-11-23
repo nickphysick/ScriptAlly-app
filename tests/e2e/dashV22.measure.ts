@@ -29,7 +29,7 @@ import { decode } from "fast-png";
 import { openRoute, liftMotionSuppression } from "./measure";
 import { harnessDb } from "./harnessDocs";
 import { targetEnv, EMULATOR_PROJECT, ROOT } from "./fsTarget.mjs";
-import { sentAllTime, sentCount, sentWeeks, dash2Weeks } from "../../src/lib/dash2";
+import { queriesSent, sentCount, sentWeeks, dash2Weeks } from "../../src/lib/dash2";
 import { scopeQueries } from "../../src/lib/manuscriptScope";
 import type { Query } from "../../src/types";
 
@@ -274,7 +274,7 @@ test("DB22 A1 · B1 · B2 — the layout and the chart", async ({ page }) => {
     }
     L.check("B2", `${w} this week drawn`, !!nowBar, nowBar ? `n ${nowBar.n}` : "none");
     const head2 = (await page.locator('.d2 [data-d2="chart-count"]').textContent())?.trim();
-    const wantHead = sentCount(sentAllTime(qs, new Date()));
+    const wantHead = sentCount(queriesSent(qs, new Date()));
     L.check("B2", `${w} the header`, head2 === wantHead, `"${head2}" · want "${wantHead}"`);
     /* the derived weeks, checked against the page's own data */
     const all = dash2Weeks(qs, new Date());

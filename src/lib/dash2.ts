@@ -155,10 +155,25 @@ export function sentWeeks(queries: readonly Query[], weeks: readonly { start: Da
   });
 }
 
-/** every query for this manuscript ever sent, up to now — the band's "{n} queries sent" */
-export function sentAllTime(queries: readonly Query[], now: Date): number {
-  return queries.filter((q) => { const s = sentAt(q); return s !== null && s <= sentBy(now); }).length;
+/**
+ * Log a query v2.3 · Phase 1 (D1, Nick 23 Nov) — "QUERIES SENT", THE ONE COUNT: every logged query counts as sent, dated
+ * or not, except one whose sent date is after today (it has not gone yet). The Dashboard's "{n} queries sent", the Queries
+ * page's header, Log a query's review and its "Query number {n}" all call this; nothing else derives the figure.
+ * ⚠️ The weekly chart is NOT this: an undated query cannot be placed in a week (`sentWeeks` skips it), so the Dashboard says
+ *    how many are missing from the weeks (`undatedSentIds`) instead of drawing them.
+ */
+export function queriesSent(queries: readonly Query[], now: Date | number): number {
+  const by = sentBy(now);
+  return queries.filter((q) => { const s = sentAt(q); return s === null || s <= by; }).length;
 }
+/** the queries with no sent date — counted as sent, absent from the weeks (the Dashboard's line under its chart) */
+export const undatedSentIds = (queries: readonly Query[]): string[] => queries.filter((q) => sentAt(q) === null).map((q) => q.id);
+/** "3 queries have no sent date, so they aren't in the weeks above." (one: "1 query has no sent date, so it isn't …") */
+export const undatedSentLine = (n: number): string =>
+  n === 1 ? "1 query has no sent date, so it isn’t in the weeks above." : `${n} queries have no sent date, so they aren’t in the weeks above.`;
+export const ADD_THE_DATES = "Add the dates";
+/** the chip's words on the Queries page the link opens (`queriesForIds`' `from`) */
+export const UNDATED_FROM = "No sent date";
 
 /** "26 queries sent" / "1 query sent" */
 export const sentCount = (n: number): string => `${n} ${n === 1 ? "query" : "queries"} sent`;
