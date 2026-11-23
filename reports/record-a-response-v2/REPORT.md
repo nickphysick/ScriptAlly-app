@@ -180,4 +180,5 @@ Known departures, all by the brief's own rules:
 ## Branch and dev
 
 - **Branch:** `record-a-response-v2` (pushed), on top of `5e61502c6`.
-- **Dev:** see the deploy section the commit after this one adds.
+- **Dev line:** `dev/main-material-icons-v1-pst1-cf1-pc1-qc167-cwu1-laq2-pc2-laq21-mg1-pc3-laq22-qc168-sb1-laq23-acv22-rar2` @ `b76bbcc96`. That is the served line (`…-acv22`, `index-UL5zH8Qk.js`, checked before deploying) plus this branch.
+- **Deployed:** hosting only, from a clean detached checkout of the pushed tip, to https://scriptally-dev.web.app. The bundle is `index-N01SII2_.js`, and the served hash was read back after the deploy and matches.
