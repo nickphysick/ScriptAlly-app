@@ -25,7 +25,7 @@
  * surface about where each query stands now, provisional rungs or not.
  */
 import { Activity, Query, QueryStatus } from "../types";
-import { closedAt, sentAt } from "./oneScreen";
+import { closedAt, sentAt, sentBy } from "./oneScreen";
 import { DerivableActivity, orderedStatusBearing } from "./queryDerivation";
 
 /** The stages a live query can stand at, in pipeline order — the popup's rows, top to bottom. */
@@ -55,7 +55,8 @@ export const UNDATED_LABEL = "Stage not dated";
 /** The ledger's question, asked of one query at one moment. */
 export const activeAt = (q: Query, atMs: number): boolean => {
   const s = sentAt(q);
-  if (s === null || s > atMs) return false;
+  /* v2.1 · Phase 5: a send on the day asked about counts all that day (it is stored at noon) */
+  if (s === null || s > sentBy(atMs)) return false;
   const c = closedAt(q);
   return c === null || Math.max(c, s) > atMs;
 };

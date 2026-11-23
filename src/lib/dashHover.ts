@@ -22,7 +22,7 @@ import { agentPrimary, agentSecondary } from "./agentDisplay";
 import type { ClosedBucketKey, ClosedTile } from "./dashClosed";
 import { agentQueryStates } from "./contactDesk";
 import { TIERS, type FoundingStats } from "./foundingStats";
-import { closedAt, sentAt } from "./oneScreen";
+import { closedAt, sentAt, sentBy } from "./oneScreen";
 import { dayMonth } from "./dates";
 import type { WeekMix } from "./dashWeekMix";
 
@@ -141,7 +141,8 @@ export function closedCards(tile: Pick<ClosedTile, "members">, key: ClosedBucket
     if (!q) continue;
     const a = ag.get(q.agentId) ?? null;
     const s0 = sentAt(q), c = closedAt(q);
-    const futureSent = s0 !== null && s0 > nowMs;
+    /* v2.1 · Phase 5: a send dated today is not in the future (it is stored at noon) */
+    const futureSent = s0 !== null && s0 > sentBy(nowMs);
     const s = futureSent ? null : s0;
     const quiet = key === "quiet";
     /* `closedAt` falls back to the send when nothing dates the close; a close that is not after the send is unknown here,

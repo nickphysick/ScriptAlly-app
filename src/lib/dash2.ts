@@ -10,7 +10,7 @@
  */
 import { STAGE_COLOURS } from "./stageColours";
 import type { Query } from "../types";
-import { aggregateLedger, dailyLedger, sentAt, type LedgerPoint } from "./oneScreen";
+import { aggregateLedger, dailyLedger, sentAt, sentBy, type LedgerPoint } from "./oneScreen";
 import { indexActivities, weekMix, type ActivityIndex } from "./dashWeekMix";
 import { weekCallout, type WeekGroupKey } from "./dashHover";
 import { isoWeekStart } from "./dashboardStats";
@@ -30,7 +30,7 @@ const dayMonth = (d: Date) => `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
  * on a Sunday read "2 weeks" on the Monday. The tag states elapsed whole weeks.
  */
 export function wholeWeeksQuerying(queries: readonly Query[], now: Date): number | null {
-  const times = queries.map((q) => sentAt(q)).filter((t): t is number => t !== null && t <= now.getTime());
+  const times = queries.map((q) => sentAt(q)).filter((t): t is number => t !== null && t <= sentBy(now));
   if (times.length === 0) return null;
   const f = new Date(Math.min(...times));
   const from = Date.UTC(f.getFullYear(), f.getMonth(), f.getDate());
@@ -44,7 +44,7 @@ export const weeksTag = (n: number): string => `${n} ${n === 1 ? "week" : "weeks
 /** Sent since this ISO week began — the band's "+{n} this week". */
 export function sentThisWeek(queries: readonly Query[], now: Date): number {
   const from = isoWeekStart(now).getTime();
-  return queries.filter((q) => { const s = sentAt(q); return s !== null && s >= from && s <= now.getTime(); }).length;
+  return queries.filter((q) => { const s = sentAt(q); return s !== null && s >= from && s <= sentBy(now); }).length;
 }
 
 /* ── the weeks ───────────────────────────────────────────────────────────────────────────────── */
@@ -143,7 +143,7 @@ const weekEnd = (start: Date): number => { const e = new Date(start); e.setDate(
  * (`sentAt`, the ledger's own). A query with no sent date is skipped, never placed. Newest last, as the weeks are.
  */
 export function sentWeeks(queries: readonly Query[], weeks: readonly { start: Date }[], now: Date): SentWeek[] {
-  const nowMs = now.getTime();
+  const nowMs = sentBy(now);
   const sent = queries
     .map((q) => ({ id: q.id, t: sentAt(q) }))
     .filter((x): x is { id: string; t: number } => x.t !== null && x.t <= nowMs)
@@ -157,7 +157,7 @@ export function sentWeeks(queries: readonly Query[], weeks: readonly { start: Da
 
 /** every query for this manuscript ever sent, up to now — the band's "{n} queries sent" */
 export function sentAllTime(queries: readonly Query[], now: Date): number {
-  return queries.filter((q) => { const s = sentAt(q); return s !== null && s <= now.getTime(); }).length;
+  return queries.filter((q) => { const s = sentAt(q); return s !== null && s <= sentBy(now); }).length;
 }
 
 /** "26 queries sent" / "1 query sent" */

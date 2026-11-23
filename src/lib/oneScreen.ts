@@ -76,6 +76,12 @@ export const sentAt = (q: Query): number | null => parseWhen(q.dateSent);
 
 const dayStart = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const dayEnd = (d: Date): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+/**
+ * Log a query v2.1 · Phase 5 — THE LAST INSTANT A SEND COUNTS AS "SENT BY NOW": the end of today. A sent date is stored
+ * at noon of its day, so comparing it with the current instant left a query logged this morning uncounted until
+ * midday. A query dated tomorrow or later still does not count.
+ */
+export const sentBy = (now: Date | number): number => dayEnd(new Date(now)).getTime();
 
 /**
  * ⚠️ THE DAILY ROW IS THE SOURCE OF TRUTH (§3) and every other frequency is aggregated FROM it —
