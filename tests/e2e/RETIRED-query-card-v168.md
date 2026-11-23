@@ -51,6 +51,7 @@ Unit test deleted with its subject: `src/components/queries/centre/qcCardEdit152
 | `qc1611.measure.ts` "delete a step" | `[data-qc152='edit-step']` | the bubble's `[data-qc168='pen']` | the pill is the pencil |
 | `acv2.measure.ts` AC2-9 (and its `noteAct`) | hover row's Edit / Delete / Pin, `edit-save` | the pencil; "Delete this note" asked inside; ⋯ menu; the tick | the hover row is retired on the agent card too |
 | `qc158.measure.ts` QC158-10/12 | `[data-qc158='act']` buttons | the ⋯ disc and its menu items | as above |
+| `qc167.measure.ts` QC167-13 and its frames | Cancel closes a drawer after the asks were ticked | Cancel, then Discard in the drawer's footer | Phase 6: Cancel with a change asks "Discard your changes?" (it timed out on the next card, the drawer still open) |
 | `qc1581.measure.ts` the last note's Pin | the hover row's Pin | the last note's ⋯ menu's Pin (opens above it) | as above |
 
 Retired whole: `tests/e2e/laqEdit.measure.ts` and its helper `tests/e2e/laqEditDb.mjs`. Every lock in it measured
