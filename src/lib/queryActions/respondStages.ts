@@ -7,8 +7,8 @@
  * own steps → Record. Everything here is pure: the steps a reply takes, the likely replies first, the headline, the
  * track's values, what the save will write, and the two numbers.
  *
- * ⚠️ NO NEW WRITER. `planOfResponse` composes the page's existing plans (lib/qc152Write `planRecord`, lib/qc1522Write
- *    `planTell`) into one batch; `recomputeQuery`'s derivation (`withRecompute`) stays the only thing that sets a status.
+ * ⚠️ NO NEW WRITER. `planOfResponse` composes the page's existing plan (lib/qc152Write `planRecord`, and lib/qc1522Write
+ *    `planTell`'s own marks) into one batch; `recomputeQuery`'s derivation (`withRecompute`) stays the only thing that sets a status.
  *    The reply time and the nudge are the query's existing `writerExpectedDate` / `nudgeDate` (the send form's own
  *    fields); the extras an agent asked for are the step's own materials (`kind: "other"`, its words in `text`).
  * ⚠️ "SOMETHING ELSE" AS A REPLY IS NOT HERE: no existing record holds a reply that changes nothing (every reply step
@@ -16,7 +16,7 @@
  */
 import { QueryStatus, type Activity, type Query } from "../../types";
 import { planRecord, withRecompute, type PlanCtx, type StepMaterial, type WritePlan } from "../qc152Write";
-import { holdsPages, planTell, type OtherQ } from "../qc1522Write";
+import { holdsPages, type OtherQ } from "../qc1522Write";
 import type { RawActivityDoc } from "../recomputeFields";
 import { dayIso } from "./dates";
 import { capFirst, sampleName, type Sample } from "./sample";
@@ -171,7 +171,7 @@ function feedAfter(feed: readonly RawActivityDoc[], plan: WritePlan): RawActivit
  *   2. "it's gone": the send's step (what went, the version, the named synopsis), then the reply time and the nudge on the
  *      query (`writerExpectedDate` + `writerExpectedSetAt`, `nudgeDate`), each cleared when not wanted;
  *   3. revise and resubmit, "No, close the query": the close (as withdrawn — closed by you);
- *   4. an offer, "Put it on my to-do list": every other open query marked to tell, the offer step flagged (`planTell`).
+ *   4. an offer, "Put it on my to-do list": the offer step flagged as it is made, every other open query marked to tell.
  * Each later plan's derivation reads the log the earlier ones leave, so the last one's derived fields are the truth.
  */
 export function planOfResponse(c: PlanCtx & { feed: RawActivityDoc[] }, a: RespAnswers, others: readonly OtherQ[]): WritePlan[] {
@@ -185,7 +185,10 @@ export function planOfResponse(c: PlanCtx & { feed: RawActivityDoc[] }, a: RespA
     : a.kind === "rr" ? (a.rrNext === "yes" && a.rrBy != null ? { expectedBy: iso(a.rrBy) } : {})
     : a.kind === "of" ? { offerDeadline: iso(a.ofBy) }
     : { feedbackType: a.words.trim() ? "Yes" : "Form" };
-  const reply = planRecord({ ...c, existing }, kind, a.when, askedMaterials(a), { replyNote: a.words, resp: resp as never });
+  /* an offer whose telling goes on the to-do list carries the flag from the start (`tellLater`, the step's own field): the
+     step is created in this batch, and a create cannot be followed by an update of it in the same batch */
+  const tell = a.kind === "of" && a.others === "task" && others.length > 0;
+  const reply = planRecord({ ...c, existing }, kind, a.when, askedMaterials(a), { replyNote: a.words, resp: resp as never, ...(tell ? { step: { tellLater: true } } : {}) });
   /* a partial's own request fields (the drawer's `saveResponse` writes these): the synopsis asked for, and a section */
   if (a.kind === "pr") {
     const q = c.q;
@@ -205,9 +208,10 @@ export function planOfResponse(c: PlanCtx & { feed: RawActivityDoc[] }, a: RespA
   if (a.kind === "rr" && a.rrNext === "close") {
     push(planRecord({ ...c, existing }, "withdrawn", a.when, [], { withdraw: { token: "withdrew", event: "withdrawn" } }));
   }
-  if (a.kind === "of" && a.others === "task" && others.length) {
-    const told: Record<string, boolean> = {};
-    push(planTell({ ...c, existing, feed }, others, told, true, a.ofBy));
+  /* the other open queries, marked to tell (lib/qc1522Write `planTell`'s own marks, `offerTold: false`): the To-do's
+     "tell the others" card reads them, and completes itself when none is left */
+  if (tell) {
+    push({ queryId: c.q.id, set: [], del: [], query: {}, update: others.filter((o) => !o.told).map((o) => ({ path: `queries/${o.id}`, data: { offerRefQueryId: c.q.id, offerTold: false } })) });
   }
   return plans;
 }
