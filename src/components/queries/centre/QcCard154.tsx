@@ -75,7 +75,8 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
      quiet's fade) at either end changes at once. Web Animations from the committed change, so it runs in the frame the
      new colour is drawn in (a CSS transition, measured, did not start behind the open card). */
   /* Plumage colours v1 — the band is the status's shade (requested lighter than sent). Plumage colours v2: no outline;
-     an offer's band is the soft stripes (lib/stageColours bandBackground), inline on the band, so it eases at once */
+     Plumage colours v3: Revise & Resubmit's band is the stripes (lib/stageColours bandBackground; the offer is flat),
+     inline on the band, so it eases at once */
   const band = statusBand(r.status);
   const bandBg = quiet ? null : bandBackground(r.status);
   const striped = bandBg !== null && bandBg !== band;
