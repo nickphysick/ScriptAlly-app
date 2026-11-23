@@ -2,10 +2,19 @@
 
 ## Current state
 
+- **Log a query v2.1 (23 Nov 2026, branch `log-a-query-v2-1`, NOT merged)** — the review screen of mock v24, step one's already-queried agents, the held task's "I've sent it", a query sent today counting today: section "Log a query v2.1" below.
 - **Log a query v2 (22 Nov 2026, branch `log-a-query-v2`, NOT merged)** — the journey's header, add-agent, not-sent, materials, nudge, review and leave rules: section "Log a query v2" below.
 - Query actions v1 + v1.1 (27–28 Sep): every page finishes in the one query drawer; ref design-refs/query-actions-v11.html, report reports/query-actions-v1/. Prod rules for its fields are Nick's.
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
+
+## Log a query v2.1 — mock v24 and the v2 report's fixes (23 Nov 2026; ref design-refs/log-a-query-v2-1/; report reports/log-a-query-v2-1/REPORT.md; branch `log-a-query-v2-1`, NOT merged)
+
+- **The review (D1–D3).** "Ready to log {first}?" and one sub-line; the preview (the real grid card, `preview`) runs the column's full width on the review only (`.laq-pvw.is-wide`; the logged screen keeps 425px). "What went" is `whatWent(plan)` — the save's own materials (`materialsToQuery`), the icon kind from `materialIconKind`, never the label; a letter or synopsis is named by the version that went. Tiles are not buttons. The two numbers are big numbers at the foot (`ReviewNumbers`, the figure AFTER logging, "+1"), still the Dashboard's own functions (`reviewCounts`, `showsActive`). "Something not right?" is gone.
+- **The query card is the oracle, not the ref.** Plumage colours v2/v3 change the grid card under the preview (the label above the frame's top right, the paperclip leaving the card). Never restyle or fork the card for the preview; only the `preview` prop and `.laq`-scoped placement. Leave ~11px above the card for its label.
+- **Step one (D4).** `stageAgents` reads every query for the book; `queried` (any) decides the groups, `querying` (active) still gates a door's seeded agent, so re-querying (D5) is untouched. The already-queried rows are not buttons; their words are `standWords` plus a date (`standingOf`).
+- **The held task.** No stored field marks it (the task rules' `hasOnly()` has none to spare): `heldSendDoor` derives it from an open task with an agent and a book, no query, and the words `heldTaskText` writes. It is dated today so the board shows it (an undated task is a note). Logging completes it (`heldToComplete` in the host's save; Undo reopens). On the Dashboard it leads "Ready to query", which stays on the list behind work only while it holds one.
+- **Sent today counts today.** `sentBy(now)` (oneScreen) is the end of today; dash2's four sent figures, `activeAt` and `closedCards`' future guard read it. The ledger already counted by day.
 
 ## Log a query v2 — the journey in mock v22 (22 Nov 2026; ref design-refs/log-a-query-v2/; report reports/log-a-query-v2/REPORT.md; branch `log-a-query-v2`, NOT merged)
 - **The header is one navy piece** (`.laq-top`): FlowHead and the track are transparent on one painted block, so there is no
