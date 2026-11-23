@@ -99,15 +99,17 @@ export const DOORS: Door[] = [
     await p.locator("[data-cl262='panel']").waitFor({ timeout: 20_000 }).catch(() => {});
     return clickVisible(p, "[data-cl262='panel'] button:has-text('Record a response')");
   } },
-  { door: "Search palette (⌘K)", route: "/dashboard", at: "reply", press: async (p) => {
+  /* the palette's own "Record a response" action (lib/searchPalette `act:record`, a capture through openResponse). Its
+     per-query "Record a response" (⌘↵ on a query row, `recordFor`) calls openResponse({ queryId }) directly and is locked
+     at source in src/components/queries/recordResponse2.test.ts: a name search lists the agent row, not the query row,
+     and the agent row's ⌘↵ is "Open the query", which navigates by design (the first base reading pressed that one). */
+  { door: "Search palette (⌘K) action", route: "/dashboard", at: "who", press: async (p) => {
     await p.keyboard.press("Meta+k"); await settle(p, 500);
     if (!(await p.locator(".sp-pal[role='dialog']").count())) return false;
-    await p.keyboard.type(PRIYA.name); await settle(p, 900);
-    /* the query row's second action is ⌘↵ (lib/searchPalette: "Record a response" on a live query's row) */
-    const rows = p.locator(".sp-pal [role='option']");
-    const n = await rows.count();
-    for (let i = 0; i < n; i++) { if (/Record a response/.test((await rows.nth(i).textContent()) ?? "")) { for (let k = 0; k < i; k++) await p.keyboard.press("ArrowDown"); break; } }
-    await p.keyboard.press("Meta+Enter");
+    await p.keyboard.type("Record a response"); await settle(p, 900);
+    const row = p.locator(".sp-pal [role='option'][data-kind='action']").filter({ hasText: "Record a response" }).first();
+    if (!(await row.count())) return false;
+    await row.click();
     return true;
   } },
 ];

@@ -205,7 +205,7 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
 import { QueryPanelHost } from "./queries/QueryPanelHost";
-import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, openQueryPanelFromAgent, queryPanelBack, releaseRightPanel, responseSaved, setPipResponder, subscribeQueryPanel, subscribeRightPanel, type PanelBack, type PanelOrigin, type ResponseRequest } from "../lib/queryPanelStore";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, openQueryPanelFromAgent, queryPanelBack, openResponse, releaseRightPanel, responseSaved, setPipResponder, subscribeQueryPanel, subscribeRightPanel, type PanelBack, type PanelOrigin, type ResponseRequest } from "../lib/queryPanelStore";
 import { QC155_LOAD, useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -1863,10 +1863,18 @@ export const Queries: React.FC<{
   useEffect(() => { if (!qc1522Toast) return undefined; const t = window.setTimeout(() => setQc1522Toast(null), 5200); return () => window.clearTimeout(t); }, [qc1522Toast]);
   useEffect(() => { if (!qc1522Burst) return undefined; const t = window.setTimeout(() => setQc1522Burst(null), 2400); return () => window.clearTimeout(t); }, [qc1522Burst]);
   const FOOT_J: Record<FootAct, Journey> = { offer: "offer", tell: "tell", sent: "send", nudge: "nudge", close: "close", resp: "reply", reopen: "reopen" };
+  /* Record a response v2 — the query the card shows, for its reply box's door (set where `cardQueryId` is known, below) */
+  const cardIdFor1522 = useRef<string | null>(null);
   const open1522 = useCallback((a: FootAct | Journey, reply: ReplyType | null = null) => {
+    const j = (FOOT_J as Record<string, Journey>)[a] ?? (a as Journey);
+    /* Record a response v2 — ONE JOURNEY: on the desktop the card's reply box ("What did {first} say?") is the response
+       journey, opened at its second step for this query (the card gives way: the journey claims the right-hand panel).
+       The phone keeps the card's own composer. Reopen, nudge, send and close stay the card's. */
+    const id = cardIdFor1522.current;
+    if (j === "reply" && !qmPhone && id && !isPracticeId(id)) { openResponse({ queryId: id, reply }); return; }
     setQc1522Edit(null); setQc1522Toast(null); setQc1522Draft(null);
-    setQc1522J({ j: (FOOT_J as Record<string, Journey>)[a] ?? (a as Journey), n: Date.now(), reply });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setQc1522J({ j, n: Date.now(), reply });
+  }, [qmPhone]); // eslint-disable-line react-hooks/exhaustive-deps
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
   /* Record a response v1, Phase 3 — the query picked from "Who replied?": its composer's Cancel is "← Someone else" */
   const whoPickedRef = useRef<string | null>(null);
@@ -3034,6 +3042,7 @@ export const Queries: React.FC<{
    */
   /* the store's wins while it is set: it is what the reader last pressed */
   const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
+  cardIdFor1522.current = cardQueryId;
   /* To-do card thread v1 — THE ACTIVITY LISTENER FOLLOWS THE CARD'S QUERY. Every reader of `trackingEvents` pairs it with
      `activeQuery` (this id). It used to follow `selectedQueryId` only, so a card opened from another page (the To-do desk,
      through the shared panel) or from Birds-eye was drawn from another query's activity, or none: a short thread, and a
@@ -5903,6 +5912,9 @@ export const Queries: React.FC<{
     const q = queries.find((x) => x.id === id);
     if (!q) return;
     const a: FootAct = courtOf(q.status as QueryStatus) === "closed" ? "reopen" : "resp";
+    /* Record a response v2 — a live query's response is the journey, over the page (the bulk queue, Birds-eye, a list
+       row's button, the desk's verb all come here); a closed query keeps the card's Reopen */
+    if (a === "resp" && !qmPhone) { openResponse({ queryId: id, from: o.from, back: o.back, reply: o.reply ?? null }); return; }
     setQcFlow(null);
     cardSetRef.current = o.set ?? [id];
     const reply = a === "resp" ? o.reply ?? null : null;
