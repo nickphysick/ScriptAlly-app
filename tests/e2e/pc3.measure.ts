@@ -26,6 +26,10 @@
  *   PC3-11 the hover: opens on hover and on focus; closes on leave, blur and Escape (focus back on the tile); its title
  *          the tile's name; its chips the JSON's; an asked chip dashed; a Full manuscript the Full mark from StatusDot
  *   PC3-12 nothing in the tile or the hover under 12px
+ *   PC3-13 (Log a query v2.3 · Phase 2) the compact tile on a narrow card (1280): the same button as a 24px pill on the
+ *          "Sent" label's line at its right-hand end, glyph and count side by side, nothing under 12px, no Sent word cut,
+ *          the card's height unchanged, a visible focus ring, a hit area of at least 24 × 24, and its hover fully in view
+ *          from a first-row and a last-row card (Chromium; WebKit in PC3-W)
  *   PC3-F  the frames (reports/plumage-colours-v3/frames/)
  *
  * The harness has one Revise & resubmit query and no live Resubmitted or Signed one, so beforeAll gives a Full sent query
@@ -86,6 +90,9 @@ const run = (id: string) => (!ONLY && id !== "F" && id !== "W") || ONLY.split(",
 const PHASE = /^mutant[A-Z0-9]*$/.test(process.env.SA_PHASE ?? "") ? process.env.SA_PHASE! : "after";
 const DIR = "reports/plumage-colours-v3";
 const DESK = { width: 1512, height: 982 };
+/** Log a query v2.3 · Phase 2 — at this card width and under, the tile is drawn compact (pc3tile.css's container query) */
+const COMPACT_MAX = 340;
+const NARROW = { width: 1280, height: 800 };
 const CARD = "[data-qp='panel'] [data-qc152='card']";
 test.setTimeout(480_000);
 mkdirSync(`${DIR}/ledger`, { recursive: true });
@@ -180,7 +187,7 @@ async function openQc(page: Page, view: "list" | "birds" = "list", vp = DESK) {
 
 interface Box { x: number; y: number; w: number; h: number }
 interface CardReading {
-  id: string; status: string; quiet: boolean; bg: string; img: string; shadow: string; h: number; band: Box; frame: Box; frameOverflow: string;
+  id: string; status: string; quiet: boolean; bg: string; img: string; shadow: string; h: number; w: number; band: Box; frame: Box; frameOverflow: string;
   labels: { text: string; box: Box; edge: string; font: string; size: string; color: string; bg: string; radius: string; inFrame: boolean; shadow: string }[];
   seal: Box | null; name: Box | null; track: Box | null; facts: Box[]; factsPadTop: string;
   agency: { color: string } | null; inks: { what: string; color: string }[]; text: string; arrows: number; chips: number; chev: number;
@@ -204,7 +211,7 @@ const readCards = (page: Page): Promise<CardReading[]> => page.evaluate((root) =
     const cnt = tl?.querySelector("i") ?? null;
     return {
       id: c.dataset.id ?? "", status: c.dataset.status ?? "", quiet: c.hasAttribute("data-quiet"),
-      bg: hd.backgroundColor, img: hd.backgroundImage, shadow: hd.boxShadow, h: c.getBoundingClientRect().height,
+      bg: hd.backgroundColor, img: hd.backgroundImage, shadow: hd.boxShadow, h: c.getBoundingClientRect().height, w: c.getBoundingClientRect().width,
       band: box(hdEl)!, frame: box(frame)!, frameOverflow: `${getComputedStyle(frame).overflowX}/${getComputedStyle(frame).overflowY}`,
       labels: [...c.querySelectorAll<HTMLElement>("[data-pc2='label'], [data-pc3='label'], .pc2-lbl, .pc3-lbl")].filter((e, i, a) => a.indexOf(e) === i).map((e) => {
         const cs = getComputedStyle(e);
@@ -566,6 +573,11 @@ test.describe("Plumage colours v3 — the rendered locks", () => {
     await tileLocks(page, "chromium");
   });
 
+  if (run("13")) test("PC3-13 · the compact tile on a narrow card, 1280 (Chromium)", async ({ page }) => {
+    await openQc(page, "list", NARROW);
+    await compactLocks(page, "chromium");
+  });
+
   if (run("10")) test("PC3-10 · the slide-in rim, and the four search tiles", async ({ page }) => {
     await openQc(page);
     const cards = await readCards(page);
@@ -701,10 +713,77 @@ test.describe("Plumage colours v3 — the rendered locks", () => {
       await openQc(p);
       await tileLocks(p, "webkit");
       await frames(p, "webkit");
+      await p.setViewportSize(NARROW);
+      await openQc(p, "list", NARROW);
+      await compactLocks(p, "webkit");
       /* Log a query's preview card is framed by laqV2.measure.ts (Log a query's own); this run frames the grid's */
     } finally { await b.close(); }
   });
 });
+
+/** PC3-13 — the compact tile (Log a query v2.3 · Phase 2): read on every narrow card with a tile on the page */
+async function compactLocks(page: Page, engine: string) {
+  const L = new Ledger(`PC3-13${engine === "chromium" ? "" : "W"}`);
+  const all = await readCards(page);
+  const cards = all.filter((c) => c.tile && c.w <= COMPACT_MAX);
+  L.check(`narrow cards (${COMPACT_MAX}px and under) with a tile: population`, cards.length >= 10, `${cards.length} of ${all.length}, width ${all[0]?.w.toFixed(1)}`);
+  const hs = all.map((c) => c.h);
+  L.check("every card one height, with the compact tile or none", Math.max(...hs) - Math.min(...hs) <= 0.5, `${Math.min(...hs).toFixed(1)}–${Math.max(...hs).toFixed(1)}`);
+  const read = await page.evaluate(([root, max]) => [...document.querySelectorAll<HTMLElement>(`${root} [data-qc154="card"]`)].filter((c) => c.getBoundingClientRect().width > 0 && c.getBoundingClientRect().width <= (max as number) && c.querySelector('[data-pc3="tile"]')).map((c) => {
+    const tl = c.querySelector<HTMLElement>('[data-pc3="tile"]')!; const t = tl.getBoundingClientRect();
+    const box = c.querySelector<HTMLElement>('[data-k="sent"]')!; const b = box.getBoundingClientRect();
+    const lab = box.querySelector<HTMLElement>(":scope > span.qc154-fl")!; const l = lab.getBoundingClientRect();
+    const range = document.createRange(); range.selectNodeContents(lab); const lt = range.getBoundingClientRect();
+    const words = [...box.querySelectorAll<HTMLElement>(":scope > span.qc154-fl, :scope > b, :scope > em")];
+    const val = box.querySelector<HTMLElement>(":scope > b")!.getBoundingClientRect();
+    const svg = tl.querySelector("svg")!.getBoundingClientRect(); const i = tl.querySelector("i")!;
+    const fill = getComputedStyle(tl, "::before");
+    return { id: c.dataset.id ?? "", w: t.width, h: t.height, cy: t.top + t.height / 2, ly: l.top + l.height / 2, right: b.right - t.right, labelEnd: t.left - lt.right,
+      fillTop: t.top + parseFloat(fill.top), fillBottom: t.bottom - parseFloat(fill.bottom), valueTop: val.top, valueRight: val.right, boxRight: b.right,
+      padR: getComputedStyle(box).paddingRight, glyph: svg.width, glyphBeside: Math.abs((svg.top + svg.height / 2) - (i.getBoundingClientRect().top + i.getBoundingClientRect().height / 2)) <= 2 && svg.right <= i.getBoundingClientRect().left,
+      count: i.textContent ?? "", countPx: parseFloat(getComputedStyle(i).fontSize), label: tl.getAttribute("aria-label") ?? "", tag: tl.tagName, tab: tl.tabIndex,
+      hooks: tl.dataset.qc1533 === "tab" && tl.dataset.pc3 === "tile", cut: words.filter((e) => e.scrollWidth > e.clientWidth + 0.5).map((e) => e.textContent) };
+  }), [PAGE, COMPACT_MAX] as const);
+  for (const r of read) {
+    L.check(`${r.id}: a pill 24px high, at least 24 wide (its hit area)`, Math.abs(r.h - 24) <= 0.5 && r.w >= 24, `${r.w.toFixed(1)} × ${r.h.toFixed(1)}`);
+    L.check(`${r.id}: on the "Sent" label's line`, Math.abs(r.cy - r.ly) <= 1.5, `${(r.cy - r.ly).toFixed(1)}px off its centre`);
+    L.check(`${r.id}: at the line's right-hand end, after the label's words`, r.right >= 0 && r.right <= 8.5 && r.labelEnd >= 4, `${r.right.toFixed(1)}px in; ${r.labelEnd.toFixed(1)}px after "Sent"`);
+    L.check(`${r.id}: its fill ends above the value's line`, r.fillBottom <= r.valueTop + 0.5, `${r.fillBottom.toFixed(1)} / ${r.valueTop.toFixed(1)}`);
+    L.check(`${r.id}: the box gives back the tile's room (8px)`, r.padR === "8px", r.padR);
+    L.check(`${r.id}: the paperclip and the count side by side; glyph 14, count ${r.countPx}px (≥ 12)`, r.glyphBeside && Math.abs(r.glyph - 14) <= 0.5 && r.countPx >= 12, `${r.glyphBeside} ${r.glyph} ${r.countPx}`);
+    L.check(`${r.id}: the same button — "${r.label}", the paperclip's hooks`, r.tag === "BUTTON" && r.tab >= 0 && r.label === `${r.count} material${r.count === "1" ? "" : "s"}` && r.hooks, `${r.tag} ${r.tab} ${r.label} ${r.hooks}`);
+    L.check(`${r.id}: no Sent word cut`, r.cut.length === 0, r.cut.join(" | ") || "none");
+  }
+  /* the focus ring, by keyboard */
+  const k = cards[0];
+  await cardAt(page, k.id).evaluate((e) => e.scrollIntoView({ block: "center" }));
+  await page.keyboard.press("Shift");
+  await cardAt(page, k.id).locator("[data-pc3='tile']").focus();
+  await page.waitForTimeout(300);
+  const ring = await cardAt(page, k.id).locator("[data-pc3='tile']").evaluate((e) => { const cs = getComputedStyle(e); return { fv: e.matches(":focus-visible"), style: cs.outlineStyle, w: cs.outlineWidth, c: cs.outlineColor }; });
+  L.check(`${k.id}: a visible focus ring`, ring.style === "solid" && parseFloat(ring.w) >= 2, JSON.stringify(ring));
+  const open = await page.evaluate((id) => !!document.getElementById(`pc3-hov-${id}`), k.id);
+  L.check(`${k.id}: focus opens the hover, as the tile's does`, open, `${open}`);
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  /* the hover from the compact form, first and last row: fully in view, nothing cuts it, above its neighbours */
+  const first = cards.reduce((a, c) => (c.band.y < a.band.y ? c : a), cards[0]);
+  const last = cards.reduce((a, c) => (c.band.y > a.band.y ? c : a), cards[0]);
+  for (const [name, c, block] of [["first row", first, "start"], ["last row", last, "end"]] as const) {
+    const before = (await cardAt(page, c.id).boundingBox())!;
+    const h = await readHover(page, c.id, block);
+    L.check(`${name} ${c.id}: the hover opens from the compact tile`, h.open && !!h.box, `${h.open}`);
+    if (h.box) {
+      const b = h.box;
+      L.check(`${name} ${c.id}: fully inside the viewport`, b.x >= 0 && b.y >= 0 && b.x + b.w <= h.vw && b.y + b.h <= h.vh, `${b.x.toFixed(0)},${b.y.toFixed(0)} ${b.w.toFixed(0)}×${b.h.toFixed(0)} in ${h.vw}×${h.vh}`);
+      L.check(`${name} ${c.id}: nothing cuts it, every hit point is the hover`, h.cut.length === 0 && h.hits.every(Boolean), `${h.cut.join("; ") || "none"} · ${h.hits.join(",")}`);
+      for (const z of h.sizes) L.check(`${name} ${c.id} ${z.what}: ≥ 12px`, z.px >= 12, `${z.px}px`);
+    }
+    const after = (await cardAt(page, c.id).boundingBox())!;
+    L.check(`${name} ${c.id}: no layout shift when it opens (card size unchanged)`, Math.abs(after.width - before.width) <= 0.5 && Math.abs(after.height - before.height) <= 0.5, `${before.width.toFixed(1)}×${before.height.toFixed(1)} → ${after.width.toFixed(1)}×${after.height.toFixed(1)}`);
+    await page.mouse.move(2, 2);
+  }
+  L.done(20);
+}
 
 /** PC3-7, 8, 11, 12 — the tile, the hover's place, its behaviour and its type */
 async function tileLocks(page: Page, engine: string) {
@@ -713,7 +792,11 @@ async function tileLocks(page: Page, engine: string) {
   const T = V3.attachmentsTile;
   const cards = (await readCards(page)).filter((c) => c.tile);
   L7.check("cards with a tile: population", cards.length >= 10, `${cards.length}`);
-  for (const c of cards) {
+  /* Log a query v2.3 · Phase 2 — the 44 × 50 tile is the WIDE card's (over 340px); a narrow card draws the compact pill
+     (PC3-13). At 1512 every grid card is wide: the scope is asserted, so a narrower page cannot pass by skipping. */
+  const wide = cards.filter((c) => c.w > COMPACT_MAX);
+  L7.check(`wide cards (over ${COMPACT_MAX}px) with a tile: population`, wide.length >= 10, `${wide.length} of ${cards.length}`);
+  for (const c of wide) {
     const t = c.tile!;
     L7.check(`${c.id}: 44 × 50, radius 10`, Math.abs(t.box.w - 44) <= 0.5 && Math.abs(t.box.h - 50) <= 0.5 && t.radius === "10px", `${t.box.w} × ${t.box.h} r ${t.radius}`);
     L7.check(`${c.id}: 12px in from the Sent box's right edge, vertically centred`, Math.abs(t.sent.x + t.sent.w - (t.box.x + t.box.w) - 12) <= 0.5 && Math.abs(t.sent.y + t.sent.h / 2 - (t.box.y + t.box.h / 2)) <= 0.5,
@@ -724,11 +807,11 @@ async function tileLocks(page: Page, engine: string) {
     L7.check(`${c.id}: named "${t.count} material${t.count === "1" ? "" : "s"}", a button that takes focus`, t.label === `${t.count} material${t.count === "1" ? "" : "s"}` && t.tag === "BUTTON" && t.tabIndex >= 0, `${t.label} ${t.tag} ${t.tabIndex}`);
   }
   /* the Sent box's words never run under the tile */
-  const under = await page.evaluate((root) => [...document.querySelectorAll<HTMLElement>(`${root} [data-qc154="card"]`)].filter((c) => c.getBoundingClientRect().width > 0 && c.querySelector('[data-pc3="tile"]')).map((c) => {
+  const under = await page.evaluate(([root, max]) => [...document.querySelectorAll<HTMLElement>(`${root} [data-qc154="card"]`)].filter((c) => c.getBoundingClientRect().width > (max as number) && c.querySelector('[data-pc3="tile"]')).map((c) => {
     const t = c.querySelector<HTMLElement>('[data-pc3="tile"]')!.getBoundingClientRect();
     const words = [...c.querySelectorAll<HTMLElement>('[data-k="sent"] > span:not(.pc3-tw), [data-k="sent"] > b, [data-k="sent"] > em')].map((e) => e.getBoundingClientRect().right);
     return { id: c.dataset.id ?? "", over: Math.max(...words) - t.left };
-  }), PAGE);
+  }), [PAGE, COMPACT_MAX] as const);
   for (const u of under) L7.check(`${u.id}: the Sent box's words end before the tile`, u.over <= 0.5, `${u.over.toFixed(1)}px`);
 
   /* PC3-8 · the hover's place: last row, last column, and a first-row card */
