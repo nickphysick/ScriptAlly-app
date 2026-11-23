@@ -16,6 +16,8 @@ import { createPortal } from "react-dom";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import { stepMaterialIcon } from "../../../lib/materialIcon";
 import { KIND_LABEL, UNIT, matLabel, type MatKind, type SampleUnit, type StepMaterial } from "../../../lib/qc152Write";
+import { chipIcon } from "./QcBubble152";
+import { sentenceCase } from "./QcAgent158";
 import "./qcv152edit.css";
 
 const MON_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -188,7 +190,11 @@ export const MatChips: React.FC<{
   request: boolean;
   /** v152.2 the add button's words ("+ Add") */
   addLabel?: string;
-}> = ({ id, mats, onChange, env, stepMs, request, addLabel }) => {
+  /** Query card v168.1 — how they are DRAWN, nothing else: "chips" (as built) or "rows" (the Materials tab's own rows:
+   *  each item its icon and sentence-case label with a × at the right, then a last "+ Add" row; drawn as <li>s for the
+   *  caller's list). The popovers, the version and sample pickers and the add menu are the same in both. */
+  look?: "chips" | "rows";
+}> = ({ id, mats, onChange, env, stepMs, request, addLabel, look = "chips" }) => {
   const api = useContext(PopCtx);
   const vName = (vid: string) => env.versions.find((v) => v.id === vid)?.name ?? null;
   const originalId = env.versions[0]?.id ?? null;
@@ -210,39 +216,45 @@ export const MatChips: React.FC<{
     onChange([...mats, n]);
     api.setOpen(`mat:${id}:${mats.length}`);
   };
+  const items = mats.map((m, i) => (
+    <MatChip key={i} chipId={`mat:${id}:${i}`} m={m} label={label(m)} env={env} stepMs={stepMs} request={request} row={look === "rows"}
+      onPut={(p) => put(i, p)} onDrop={() => drop(i)}
+      onDone={() => { if (m.kind === "other" && !(m.text ?? "").trim()) drop(i); api.setOpen(null); }} />
+  ));
+  const addOne = <AddMat id={`mat:${id}:add`} kinds={addable} onAdd={add} label={addLabel} row={look === "rows"} />;
+  if (look === "rows") return <>{items}{addOne}</>;
   return (
     <div className="qc152-mats" data-qc152="mats">
-      {mats.map((m, i) => (
-        <MatChip key={i} chipId={`mat:${id}:${i}`} m={m} label={label(m)} env={env} stepMs={stepMs} request={request}
-          onPut={(p) => put(i, p)} onDrop={() => drop(i)}
-          onDone={() => { if (m.kind === "other" && !(m.text ?? "").trim()) drop(i); api.setOpen(null); }} />
-      ))}
-      <AddMat id={`mat:${id}:add`} kinds={addable} onAdd={add} label={addLabel} />
+      {items}
+      {addOne}
     </div>
   );
 };
 
-const AddMat: React.FC<{ id: string; kinds: MatKind[]; onAdd: (k: MatKind) => void; label?: string }> = ({ id, kinds, onAdd, label }) => {
+const AddMat: React.FC<{ id: string; kinds: MatKind[]; onAdd: (k: MatKind) => void; label?: string; row?: boolean }> = ({ id, kinds, onAdd, label, row }) => {
   const api = useContext(PopCtx);
   const btn = useRef<HTMLButtonElement>(null);
   const open = api.open === id;
+  const Host = row ? "li" : "span";
   return (
-    <span className="qc152-mpw plus">
-      <button ref={btn} type="button" className="qc152-mp" data-qc152="mat-add" data-pop-anchor="" onClick={() => api.setOpen(open ? null : id)}>{label ?? "+ Material"}</button>
+    <Host className={row ? "qc168-addrow" : "qc152-mpw plus"} data-qc168={row ? "add-row" : undefined}>
+      <button ref={btn} type="button" className={row ? "qc168-lk" : "qc152-mp"} data-qc152="mat-add" data-pop-anchor="" onClick={() => api.setOpen(open ? null : id)}>{label ?? "+ Material"}</button>
       {open ? (
         <Pop anchor={btn} className="qc152-menu" data="mat-add-menu">
           <div className="qc152-mph"><b>Add a material</b><em>One of each kind per step.</em></div>
           {kinds.map((k) => <button key={k} type="button" className="qc152-qo" data-qc152="mat-kind" data-k={k} onClick={() => onAdd(k)}><span><b>{KIND_LABEL[k]}</b></span></button>)}
         </Pop>
       ) : null}
-    </span>
+    </Host>
   );
 };
 
 const MatChip: React.FC<{
   chipId: string; m: StepMaterial; label: string; env: MatEnv; stepMs: number; request: boolean;
   onPut: (p: Partial<StepMaterial>) => void; onDrop: () => void; onDone: () => void;
-}> = ({ chipId, m, label, env, stepMs, request, onPut, onDrop, onDone }) => {
+  /** v168.1 — drawn as the Materials tab's row (its icon, its sentence-case label, a × at the right) */
+  row?: boolean;
+}> = ({ chipId, m, label, env, stepMs, request, onPut, onDrop, onDone, row }) => {
   const api = useContext(PopCtx);
   const btn = useRef<HTMLButtonElement>(null);
   const open = api.open === chipId;
@@ -298,10 +310,16 @@ const MatChip: React.FC<{
       {late ? <p className="qc152-mpw2" data-qc152="version-late">Are you sure? {v.name} was saved {Math.round((v.madeMs - stepMs) / DAY)} days after this went.</p> : null}
     </>;
   })() : null;
+  const Host = row ? "li" : "span";
   return (
-    <span className={`qc152-mpw${open ? " open" : ""}`}>
-      <button ref={btn} type="button" className="qc152-mp" data-qc152="mat-chip" data-kind={m.kind} data-pop-anchor="" title="Change this" onClick={() => api.setOpen(open ? null : chipId)}>{(() => { const k = stepMaterialIcon(m); return k && k !== "full" ? <MaterialIcon kind={k} size={16} inline /> : null; })()}{label}</button>
-      <button type="button" className="qc152-mx" data-qc152="mat-x" aria-label={`Remove ${label}`} onClick={() => { onDrop(); api.setOpen(null); }}>✕</button>
+    <Host className={row ? `qc168-mrow${open ? " open" : ""}` : `qc152-mpw${open ? " open" : ""}`} data-qc168={row ? "mat-row" : undefined}>
+      {row ? (
+        <button ref={btn} type="button" className="qc168-mlab" data-qc152="mat-chip" data-kind={m.kind} data-pop-anchor="" title="Change this" onClick={() => api.setOpen(open ? null : chipId)}>
+          {chipIcon(stepMaterialIcon(m), 20)}<span data-qc168="mat-label">{sentenceCase(label)}</span></button>
+      ) : (
+        <button ref={btn} type="button" className="qc152-mp" data-qc152="mat-chip" data-kind={m.kind} data-pop-anchor="" title="Change this" onClick={() => api.setOpen(open ? null : chipId)}>{(() => { const k = stepMaterialIcon(m); return k && k !== "full" ? <MaterialIcon kind={k} size={16} inline /> : null; })()}{label}</button>
+      )}
+      <button type="button" className={row ? "qc168-mx" : "qc152-mx"} data-qc152="mat-x" aria-label={`Remove ${label}`} onClick={() => { onDrop(); api.setOpen(null); }}>{row ? "×" : "✕"}</button>
       {open ? (
         <Pop anchor={btn} className="qc152-menu qc152-mpop" data="mat-editor">
           <div className="qc152-mph"><b>{KIND_LABEL[m.kind]}</b></div>
@@ -312,6 +330,6 @@ const MatChip: React.FC<{
           </div>
         </Pop>
       ) : null}
-    </span>
+    </Host>
   );
 };

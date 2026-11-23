@@ -63,8 +63,22 @@
 
 /* ── Materials: a group open in place (its items are the app's own material chips, then "+ Add") ──────────────── */
 .qc152 .nx-grp.has-open > h4 { align-items: center; }
-.qc152 .nx-items.qc168-mats { padding: 10px 12px; }
 .qc152 .nx-grp.has-open > .qc168-gf { grid-column: 2; min-width: 0; }
+/* v168.1 — the open group is the tab's own rows: the reading row's icon, label, type and height, a × at the right, then
+   "+ Add" in the card's link style. No mono capitals, no dashed box (the chips' look stays the composer's) */
+.qc152 .nx-items.qc168-mats { padding: 0; }
+.qc152 .nx-items .qc168-mrow, .qc152 .nx-items .qc168-addrow { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 5px 6px 5px 12px; box-sizing: border-box; }
+.qc152 .nx-items .qc168-mrow + .qc168-mrow, .qc152 .nx-items .qc168-addrow { border-top: 1px solid #efe9df; }
+.qc152 .qc168-mlab { all: unset; box-sizing: border-box; cursor: pointer; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 10px; font: 400 15.5px var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc168-mlab svg { color: #7a7066; flex: none; }
+.qc152 .qc168-mlab:focus-visible, .qc152 .qc168-mx:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 4px; }
+.qc152 .qc168-mrow.open .qc168-mlab { color: #2a3a52; }
+.qc152 .qc168-mx { all: unset; cursor: pointer; flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 400 18px/1 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc168-mx:hover { background: #2a3a52; color: #fff; }
+.qc152 .qc168-addrow .qc168-lk { font: 400 14.5px var(--sp-serif) !important; }
+/* v168.1 — the step editor's chips keep their shape; their words are sentence case in the serif, never mono capitals */
+.qc152 .qc1522-edit .qc152-mp { font: 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #1c130f; }
+.qc152 .qc1522-edit .qc152-mx { font: 400 14px/26px var(--sp-serif) !important; }
 
 /* ── Notes: nothing moves on hover; a note opens where it is (its words in place, no box inside the box) ─────── */
 .qc152 .nx-n[data-qc168-host] > header { padding-right: 64px; }

@@ -66,9 +66,9 @@ const GroupEditor: React.FC<{ g: MatGroup; base: { mats: StepMaterial[]; stepMs:
     <div className={`nx-grp${g.pending ? " pend" : ""} has-open`} data-qc158="group" data-kind={g.kind} data-stage={stageOf(g.status)} data-qc168-open-grp={g.key}>
       {disc}
       <h4 data-qc158="heading">{head}<CrossTick dirty={dirty} busy={edit.busy} onCross={ed.cross} onTick={() => void save()} /></h4>
-      <div className="nx-items qc168-open qc168-mats" data-qc168="group-edit">
+      <ul className="nx-items qc168-open qc168-mats" data-qc168="group-edit">
         {edit.chips(`grp-${g.key}`, mats, setMats, base.stepMs)}
-      </div>
+      </ul>
       {asking ? <div className="qc168-gf"><DiscardAsk onKeep={ed.keep} onDiscard={ed.discard} /></div> : null}
     </div>
   );

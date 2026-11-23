@@ -610,7 +610,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const matEdit0 = live168 && p.matEdit ? {
     ...p.matEdit,
     chips: (id: string, mats: StepMaterial[], onChange: (m: StepMaterial[]) => void, stepMs: number) => (
-      <MatChips id={id} mats={mats} onChange={onChange} env={p.matEdit!.env} stepMs={stepMs} request={false} addLabel="+ Add" />),
+      /* v168.1 — the open group is the tab's own rows (lock L15's mutation draws the chips) */
+      <MatChips id={id} mats={mats} onChange={onChange} env={p.matEdit!.env} stepMs={stepMs} request={false} addLabel="+ Add" look={mut168("15") ? "chips" : "rows"} />),
   } : null;
   const matEdit = matEdit0 && mut168("6") ? { ...matEdit0, save: async (g: { activityId: string | null }) => { openStep(g.activityId ?? queryStepId); return false; } } : matEdit0;
   const matPane = (
