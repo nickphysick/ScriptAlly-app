@@ -75,6 +75,7 @@ import "./acv21.css";
 /* Agent card v2.2 — the query card's one way to edit, its parts imported (never copied), then this card's placing of them */
 import "../../queries/centre/qcv168.css";
 import "./acv22.css";
+import { useTip, useWhy } from "../../queries/centre/QcCard152";
 import { CardMenu, CardMenuItem, CrossTick, DiscardAsk, Edit168Ctx, EditPen, mut168, useEditRule168, useHold168 } from "../../queries/centre/QcEdit168";
 
 /** the band's slate, for every agent (v26.2 ruling) */
@@ -322,6 +323,10 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     return () => window.clearTimeout(t);
   }, [toast168?.n]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setToast168(null); }, [a.id]);
+  /* v2.2 B7 — what isn't edited here says why, in the card's tip box (the query card's, shared) */
+  const tip = useTip();
+  const why = useWhy(tip);
+  useEffect(() => { tip.hide(); }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const rule = useEditRule168(a.id, (msg, undo) => say({ message: msg, ...(undo ? { undo } : {}) }), () => cardRef.current);
   /* ══ Agent card v2.1 Phase 4 · the query card's motion, from its own code (qcMotion160), on this card's frame ══════
      The frame is the white mat (`cardRef`): its ::before draws the paper and the shadow, so the breath swells that and
@@ -821,7 +826,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       style={tone === "nq" ? undefined : { boxShadow: `0 0 0 2.5px #fff, 0 0 0 4.5px ${col.edge}` }}>{initials}</span>
   );
   const pillEl = (
-    <span className={`qc152-pill${tone === "nq" ? " nq" : ""}`} data-qc152="pill" data-acv2="pill" data-stage={tone === "nq" ? undefined : tone} data-tone={tone}>
+    <span className={`qc152-pill${tone === "nq" ? " nq" : ""}`} data-qc152="pill" data-acv2="pill" data-stage={tone === "nq" ? undefined : tone} data-tone={tone}
+      {...(p.preview ? {} : why(tone === "nq" ? `Changes when you log a query to ${m.first}` : `From your query to ${m.first}. It changes when the query does`))}>
       <span className="qc152-cap">{pill.status ? <StatusDot status={pill.status} overrideSize={17} tone="ink" decorative /> : NQ16}</span><span>{pill.word}</span>
     </span>
   );
@@ -966,7 +972,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         </section>
       ) : null}
       <div className="nx-foot" data-acv2="profile-foot">
-        <span className="ag-added" data-cl262="added">{added ? `Added ${added}` : "Added"}</span>
+        <span className="ag-added" data-cl262="added" {...(p.preview ? {} : why(`The day you added ${m.first}`))}>{added ? `Added ${added}` : "Added"}</span>
       </div>
     </div>
   );
@@ -1087,6 +1093,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           </div>
         </div>
         </Edit168Ctx.Provider>
+        {tip.node}
       </div>
     </div>
   );

@@ -156,8 +156,8 @@ const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke=
 /** the queries this page session has already opened: the thread builds in only the first time */
 const built = new Set<string>();
 
-/** one dark tip at a time, portalled to body (§2.4) */
-function useTip() {
+/** one dark tip at a time, portalled to body (§2.4) — exported for the agent card's "why" tips (Agent card v2.2 B7) */
+export function useTip() {
   const [tip, setTip] = useState<{ x: number; y: number; head: string | null; body: string } | null>(null);
   const show = (el: Element, body: string, head: string | null = null) => {
     const r = el.getBoundingClientRect();
@@ -166,6 +166,17 @@ function useTip() {
   const hide = () => setTip(null);
   const node = tip ? createPortal(<TipBox {...tip} />, document.body) : null;
   return { show, hide, node, on: !!tip };
+}
+/** v168 §7 — what is not edited here says why: a box's props that show `body` in the card's tip box after 250ms of hover,
+ *  or at once on keyboard focus (shared with the agent card, Agent card v2.2 B7) */
+export function useWhy(tip: ReturnType<typeof useTip>): (body: string) => Record<string, unknown> {
+  const whyT = useRef(0);
+  useEffect(() => () => window.clearTimeout(whyT.current), []);
+  return (body: string) => {
+    const on = (e: React.SyntheticEvent<HTMLElement>) => { const el = e.currentTarget; window.clearTimeout(whyT.current); whyT.current = window.setTimeout(() => tip.show(el, body), 250); };
+    const off = () => { window.clearTimeout(whyT.current); tip.hide(); };
+    return { tabIndex: 0, "data-qc168-why": body, onMouseEnter: on, onFocus: on, onMouseLeave: off, onBlur: off };
+  };
 }
 const TipBox: React.FC<{ x: number; y: number; head: string | null; body: string }> = ({ x, y, head, body }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -227,13 +238,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const jOpen = !!p.composer;
   const tip = useTip();
   /* v168 §7 — what is not edited here says why: the card's own tip box, after 250ms of hover or on keyboard focus */
-  const whyT = useRef(0);
-  const why = (body: string): Record<string, unknown> => {
-    const on = (e: React.SyntheticEvent<HTMLElement>) => { const el = e.currentTarget; window.clearTimeout(whyT.current); whyT.current = window.setTimeout(() => tip.show(el, body), 250); };
-    const off = () => { window.clearTimeout(whyT.current); tip.hide(); };
-    return { tabIndex: 0, "data-qc168-why": body, onMouseEnter: on, onFocus: on, onMouseLeave: off, onBlur: off };
-  };
-  useEffect(() => () => window.clearTimeout(whyT.current), []);
+  const why = useWhy(tip);
   const view = p.view ?? "read";
   const rootRef = useRef<HTMLDivElement>(null);
   const [popOpen, setPopOpen] = useState<string | null>(null);
