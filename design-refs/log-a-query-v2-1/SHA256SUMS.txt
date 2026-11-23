@@ -1,0 +1,13 @@
+9a61543f41a4489f4296a3ea3657020273173511d58ea63c7c17320878dfcaed  ./log-a-query-v2-1.html
+b7b18c83b186a2f1744317125dd49319fb4508f7c70c22aa27692e16169507d2  ./screens/00-whole-page.png
+65f188a81ae7ea6255bf3b3df63ce9c7fe4a01e561fdb2e53b4c06896772857d  ./screens/01-step-one-fixed.png
+186e0238ffadb2adf1dec4445e9082b011154c1761a211f15c5c0aec7b0e64bb  ./screens/02-step-one-already-queried-shown.png
+ffcd48c3558a3c81202acec0826f55f21b7be1f08dba08867527a2b2b9088f1f  ./screens/03-step-one-search-finds-queried-agent.png
+7693272bed054400d17432ab4a27aa20d73abf7ee6b0656a0e5b85e71f9f67a2  ./screens/04-not-sent-task-with-button.png
+995fb0605104360e085219e3a1a0ab9041afc473c12547749ba97841860e565a  ./screens/05-back-at-sent-agent-chosen.png
+f848485615fb1a262a0a87cf132d615d62594a2fb84092d1af1784c42bd6d1fc  ./screens/06-review-three-materials.png
+de556256a7419909247520e25ae8a6f6291bd3121abfa64ef0daf7de12b5a941  ./screens/07-review-note-open.png
+f6963b99b6779900f2ba85fdfa9c14736978781b06375c66576a5d135225d134  ./screens/08-review-paperclip-open.png
+385447716e517e6d241d4547a38ff0a933fe3a17b9207f63b068694433197eb2  ./screens/09-logged.png
+d9b177fa1fbd8b23b1e1103e9d19815714b9e7bb22d380de05c5eefee1fea37c  ./screens/10-review-two-materials-no-date.png
+71e6a7e4e3ffe726f0de9b2b626a3f84ab9d4a0cfb12addcddc935a9b8db8141  ./screens/11-review-one-material.png
