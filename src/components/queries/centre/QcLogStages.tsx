@@ -659,7 +659,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const pkgBody = () => (
     <>
       <h2 className="laq-qh">Which package went to {first}?</h2>
-      <p className="laq-qs">Tap the one you sent.</p>
+      <p className="laq-qs">Pick the one you sent.</p>
       <div className="laq-big" data-qls="packages">
         {p.packages.map((x) => (
           <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={(s.piecesSet ? s.packageId : s.pkgSeed) === x.id}
@@ -1061,8 +1061,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     </>
   );
   const foot = s.notSent ? notSentFoot : s.adding ? addFoot : s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && mat === "pcs" ? piecesFoot
-    : s.step === "what" && mat === "pkg" ? matBack("Tap a package to carry on")
-    : s.step === "nudge" ? nudgeFoot : s.step === "check" ? checkFoot : backFoot("Tap one to carry on");
+    : s.step === "what" && mat === "pkg" ? matBack("Pick a package to carry on")
+    : s.step === "nudge" ? nudgeFoot : s.step === "check" ? checkFoot : backFoot("Pick one to carry on");
 
   if (phase === "yay" && logged) {
     const L = logged;
