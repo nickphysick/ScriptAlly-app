@@ -283,23 +283,23 @@ describe("v2 · Phase 6 — the preview row is the row the saved query produces"
 /* ── Phase 7 — the logged screen's line ── */
 import { celebrationLine } from "./logStages";
 
-describe("v2 · Phase 7 — celebrationLine, by the reminder chosen", () => {
+describe("v2 · Phase 7 — celebrationLine, by the reminder chosen (v2.2: each date's spaces are no-break spaces)", () => {
   const r = (ifNo: "nudge" | "close" | "none" | "now", wk: number | null, nWhen: "week" | "8w" | "n2" = "week") => ({ wk, saveWk: false, ifNo, nWhen, nPick: null });
   it("nudge set", () => {
     expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(0), nowMs: NOW, reply: r("nudge", 8) }))
-      .toBe("Harriet usually replies within 8 weeks, so expect something by 17 Jan 2027. We’ll remind you to nudge on 25 Jan 2027.");
+      .toBe("Harriet usually replies within 8 weeks, so expect something by 17\u00a0Jan\u00a02027. We’ll remind you to nudge on 25\u00a0Jan\u00a02027.");
   });
   it("will close if no reply", () => {
     expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(0), nowMs: NOW, reply: r("close", 8) }))
-      .toBe("Harriet usually replies within 8 weeks, so expect something by 17 Jan 2027. If there’s nothing by 18 Jan 2027 we’ll close it for you.");
+      .toBe("Harriet usually replies within 8 weeks, so expect something by 17\u00a0Jan\u00a02027. If there’s nothing by 18\u00a0Jan\u00a02027 we’ll close it for you.");
   });
   it("no reminder", () => {
     expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(0), nowMs: NOW, reply: r("none", 8) }))
-      .toBe("Harriet usually replies within 8 weeks, so expect something by 17 Jan 2027. There’s no reminder set, so keep an eye on it.");
+      .toBe("Harriet usually replies within 8 weeks, so expect something by 17\u00a0Jan\u00a02027. There’s no reminder set, so keep an eye on it.");
   });
   it("no date", () => {
     expect(celebrationLine({ first: "Callum", wk: null, sentMs: daysAgo(0), nowMs: NOW, reply: r("nudge", null, "8w") }))
-      .toBe("There’s no reply date for Callum, so we’ll remind you to nudge on 18 Jan 2027.");
+      .toBe("There’s no reply date for Callum, so we’ll remind you to nudge on 18\u00a0Jan\u00a02027.");
     expect(celebrationLine({ first: "Callum", wk: null, sentMs: daysAgo(0), nowMs: NOW, reply: r("none", null) }))
       .toBe("No reply date and no reminder for Callum. It’s waiting on your Queries page.");
   });

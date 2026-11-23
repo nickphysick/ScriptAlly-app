@@ -608,11 +608,16 @@ export const MILESTONE: Record<number, string> = {
  *    rest promise nothing.
  */
 export interface EndingFacts { first: string; wk: number | null; sentMs: number; nowMs: number; reply: ReplyAnswers }
+/** v2.2 · Phase 4 — a date never breaks across lines ("11 Jan 2027" stays whole): its spaces are no-break spaces */
+export const unbroken = (d: string): string => d.replace(/ /g, "\u00a0");
+
 export function celebrationLine(f: EndingFacts): string {
   const { first, nowMs } = f;
+  /* every date this line names goes through `unbroken` */
+  const date = (ms: number) => unbroken(dayMonY(ms, nowMs));
   const ex = expectOf(f.sentMs, f.wk);
   const nd = nudgeDateOf(f.reply, f.sentMs, nowMs);
-  const n = nd ? dayMonY(nd.getTime(), nowMs) : null;
+  const n = nd ? date(nd.getTime()) : null;
   const choice = f.reply.ifNo;
   if (ex && sod(ex.getTime()) < sod(nowMs)) {
     if (choice === "now") return `It’s past ${first}’s usual reply time, so a nudge is on your to-do list for today.`;
@@ -624,9 +629,9 @@ export function celebrationLine(f: EndingFacts): string {
       ? `There’s no reply date for ${first}, so we’ll remind you to nudge on ${n}.`
       : `No reply date and no reminder for ${first}. It’s waiting on your Queries page.`;
   }
-  const lead = `${first} usually replies within ${f.wk} weeks, so expect something by ${dayMonY(ex.getTime(), nowMs)}. `;
+  const lead = `${first} usually replies within ${f.wk} weeks, so expect something by ${date(ex.getTime())}. `;
   if (choice === "nudge" && n) return `${lead}We’ll remind you to nudge on ${n}.`;
-  if (choice === "close") return `${lead}If there’s nothing by ${dayMonY(addDays(ex, 1).getTime(), nowMs)} we’ll close it for you.`;
+  if (choice === "close") return `${lead}If there’s nothing by ${date(addDays(ex, 1).getTime())} we’ll close it for you.`;
   return `${lead}There’s no reminder set, so keep an eye on it.`;
 }
 

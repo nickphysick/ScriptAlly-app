@@ -584,7 +584,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         <span><b>Send your query to {heldName}</b><span>{agent?.agency || "No agency yet"} · added today</span></span>
         <button type="button" className="laq-tdb" data-qls="sent-after-all" onClick={() => set({ notSent: false, sent: null, dir: "back", step: "when" })}>I’ve sent it</button>
       </div>
-      <p className="laq-info" style={{ marginTop: 12 }}>The task sits on your To-do page and your Dashboard. The button works from both.</p>
+      <p className="laq-info" style={{ marginTop: 12 }}>The task is on your To-do page.</p>
     </>
   );
   const notSentFoot = (

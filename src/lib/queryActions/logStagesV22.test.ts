@@ -105,3 +105,41 @@ describe("LAQ22-S the review's 'queries sent' is the Queries page's count, and e
     expect(q).toMatch(/counts=\{showGridSkeleton \|\| qcLoadFail \? null : \{ ms: qcLineTitle, sent: qcScoped\.length,/);
   });
 });
+
+/* ── Phase 4: words ─────────────────────────────────────────────────────────────────────────────────────────── */
+import { celebrationLine, unbroken } from "./logStages";
+
+describe("LAQ22-W a date in the logged screen's line never breaks across lines", () => {
+  const NOW = new Date(2026, 10, 23, 12).getTime();
+  const DAY = 86_400_000;
+  const r = (ifNo: "nudge" | "close" | "none" | "now", wk: number | null, nWhen: "week" | "8w" | "n2" = "week") => ({ wk, saveWk: false, ifNo, nWhen, nPick: null });
+  /* every variant: ahead (nudge, close, none), no date (nudge, none), past (now, nudge, none) */
+  const lines = [
+    celebrationLine({ first: "Harriet", wk: 8, sentMs: NOW, nowMs: NOW, reply: r("nudge", 8) }),
+    celebrationLine({ first: "Harriet", wk: 8, sentMs: NOW, nowMs: NOW, reply: r("close", 8) }),
+    celebrationLine({ first: "Harriet", wk: 8, sentMs: NOW, nowMs: NOW, reply: r("none", 8) }),
+    celebrationLine({ first: "Callum", wk: null, sentMs: NOW, nowMs: NOW, reply: r("nudge", null, "8w") }),
+    celebrationLine({ first: "Callum", wk: null, sentMs: NOW, nowMs: NOW, reply: r("none", null) }),
+    celebrationLine({ first: "Nadia", wk: 2, sentMs: NOW - 40 * DAY, nowMs: NOW, reply: r("now", 2) }),
+    celebrationLine({ first: "Nadia", wk: 2, sentMs: NOW - 40 * DAY, nowMs: NOW, reply: r("nudge", 2) }),
+    celebrationLine({ first: "Nadia", wk: 2, sentMs: NOW - 40 * DAY, nowMs: NOW, reply: r("none", 2) }),
+  ];
+  const DATE = /\d{1,2}[\s ](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)([\s ]\d{4})?/g;
+  it("every date in every variant is whole (no ordinary space inside it)", () => {
+    let dates = 0;
+    for (const l of lines) for (const m of l.match(DATE) ?? []) { dates++; expect(m, `${m} in: ${l}`).not.toMatch(/ /); }
+    expect(dates).toBeGreaterThanOrEqual(6);
+  });
+  it("only the dates: the words between them still break", () => {
+    expect(lines[0]).toContain("usually replies within 8 weeks, so expect something by ");
+    expect(unbroken("11 Jan 2027")).toBe("11 Jan 2027");
+  });
+});
+
+describe("LAQ22-W the not-sent screen stops promising the Dashboard (D6)", () => {
+  const ui = readFileSync("src/components/queries/centre/QcLogStages.tsx", "utf8");
+  it("says the task is on the To-do page", () => {
+    expect(ui).toContain(">The task is on your To-do page.</p>");
+    expect(ui).not.toContain("The button works from both");
+  });
+});
