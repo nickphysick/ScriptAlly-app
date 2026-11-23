@@ -1,0 +1,113 @@
+/* Query card v168 (design-refs/query-card-v168/query-card-v168.html, "One way to edit") — the pencil on the thing, the
+   cross and the tick where the pencil was, the one question, the card's small menu, and the dimming while one thing is
+   open. A LAYER: every rule keys off a part only QcEdit168 draws, or `[data-qc168-open]` on the card.
+   ⚠️ THE PENCIL IS ABSOLUTELY PLACED on a `position: relative` host and only its opacity changes: showing it moves
+      nothing (lock L2 of qc168.measure.ts makes it static and must go red).
+   ⚠️ THE CARD PORTALS WITH THE PANEL: colours are literals, faces are the `:root` --sp-* tokens. brand.tsx forces a face
+      on bare spans and buttons, so every part states its own. Nothing here is under 12px. */
+
+.qc152 .qc152-in { position: relative; }
+
+/* ── the pencil: a 26px white disc on the top-right corner of what it edits ────────────────────────────────────── */
+.qc152 [data-qc168-host] { position: relative; }
+.qc152 .qc168-pen {
+  all: unset; box-sizing: border-box; position: absolute; top: -10px; right: 8px; z-index: 3; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; background: #fff; color: #2a3a52; cursor: pointer;
+  box-shadow: inset 0 0 0 1px #d9cfc2, 0 3px 8px -4px rgba(28, 19, 15, .45);
+  opacity: 0; transition: opacity .18s ease, background .15s, color .15s;
+}
+.qc152 .qc168-pen.qc168-more { right: 38px; font: 700 15px/1 var(--sp-serif) !important; letter-spacing: .5px; }
+.qc152 [data-qc168-host]:hover > .qc168-pen, .qc152 [data-qc168-host]:focus-within > .qc168-pen,
+.qc152 [data-qc168-host]:hover > .qc152-bx > .qc168-pen, .qc152 [data-qc168-host]:focus-within > .qc152-bx > .qc168-pen,
+.qc152 .qc168-pen:focus-visible, .qc152 .qc168-pen[aria-expanded="true"] { opacity: 1; }
+.qc152 .qc168-pen:hover { background: #2a3a52; color: #fff; box-shadow: none; }
+.qc152 .qc168-pen:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* a bubble's pencil sits on its box (the box is the host's own `position: relative`) */
+.qc152 .qc152-m[data-qc168-host] > .qc152-bx { position: relative; }
+/* a tile clips at its 86px: its pencil sits inside the corner */
+.qc152 .nx-box.qc167-tile > .qc168-pen { top: 8px; right: 8px; }
+/* while a journey is open, as the old Edit pill was: no pencils in the thread */
+.qc152[data-qc167-jc] .qc152-th .qc168-pen { visibility: hidden; }
+
+/* ── the cross and the tick, where the pencil was ─────────────────────────────────────────────────────────────── */
+.qc152 .qc168-ct { margin: -4px 0 -4px auto; display: inline-flex; align-items: center; gap: 8px; flex: none; align-self: center; }
+.qc152 .qc168-tc { all: unset; box-sizing: border-box; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.qc152 .qc168-tc.x { background: #fff; color: #55504a; box-shadow: inset 0 0 0 1px #cfc7bc; }
+.qc152 .qc168-tc.x:hover { box-shadow: inset 0 0 0 1.5px #2a3a52; color: #2a3a52; }
+.qc152 .qc168-tc.k { background: #2a3a52; color: #fff; }
+.qc152 .qc168-tc.k:hover { filter: brightness(1.12); }
+.qc152 .qc168-tc:disabled { opacity: .38; pointer-events: none; }
+.qc152 .qc168-tc:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* ── the one question, a row inside what is open ──────────────────────────────────────────────────────────────── */
+.qc152 .qc168-ask {
+  display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 8px 10px 8px 12px; border-radius: 10px;
+  background: #fbf2ee; box-shadow: inset 0 0 0 1px #f0d9cf; font: 400 14.5px/1.4 var(--sp-serif); color: #1c130f; animation: qc168-in .18s ease-out both;
+}
+.qc152 .qc168-ask > span:first-child { font: inherit; }
+.qc152 .qc168-ask .sp { flex: 1 1 auto; }
+.qc152 .qc168-ask.bar { margin: 0; border-radius: 0; padding: 14px 16px; border-top: 1px solid #f0d9cf; box-shadow: none; }
+.qc152 .qc168-lk { all: unset; cursor: pointer; flex: none; font: 400 14px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.qc152 .qc168-lk.rust { color: var(--sp-rust); text-decoration: none; }
+.qc152 .qc168-lk.rust:hover { text-decoration: underline; }
+.qc152 .qc168-lk:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc168-ask .qc1522-btn.sm, .qc152 .qc168-ef .qc1522-btn.sm { height: 34px !important; min-height: 34px !important; padding: 0 14px !important; font-size: 14px !important; }
+.qc152 .qc168-ef { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+
+/* ── one thing open: the other items in that tab's list sit back ──────────────────────────────────────────────── */
+.qc152 :is(.qc152-th, .nx-rail, .nx-nl) > * { transition: opacity .18s ease; }
+.qc152[data-qc168-open] :is(.qc152-th, .nx-rail, .nx-nl) > *:not(.qc168-open):not(.qc1522-edit):not(:has(.qc168-open)) { opacity: .42; }
+.qc152 .qc168-open, .qc152 .qc1522-edit { animation: qc168-in .18s ease-out both; scroll-margin: 10px 0; }
+.qc152 .qc168-open { box-shadow: inset 0 0 0 1.5px #2a3a52 !important; background: #fff !important; }
+@keyframes qc168-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+/* ── Materials: a group open in place (its items are the app's own material chips, then "+ Add") ──────────────── */
+.qc152 .nx-grp.has-open > h4 { align-items: center; }
+.qc152 .nx-items.qc168-mats { padding: 10px 12px; }
+.qc152 .nx-grp.has-open > .qc168-gf { grid-column: 2; min-width: 0; }
+
+/* ── Notes: nothing moves on hover; a note opens where it is (its words in place, no box inside the box) ─────── */
+.qc152 .nx-n[data-qc168-host] > header { padding-right: 64px; }
+.qc152 .nx-n.qc168-open > header { padding-right: 0; }
+.qc152 .nx-n.qc168-open .nx-edit textarea, .qc152 .nx-n.qc168-open .nx-edit textarea:focus {
+  display: block; width: 100%; box-sizing: border-box; min-height: 66px; resize: none; overflow: hidden; margin: 0; padding: 2px 0;
+  border: 0 !important; outline: 0 !important; border-radius: 0; background: transparent; box-shadow: none !important;
+  font: 400 16px/1.45 var(--sp-serif) !important; color: #1c130f;
+}
+.qc152 .nx-n.them.qc168-open .nx-edit textarea { font-style: italic !important; }
+.qc152 .nx-n.them.qc168-open { background: var(--bt) !important; }
+/* while a note is open the writing box is not sticky */
+.qc152 .nx-notes.has-open .nx-nc { position: static; box-shadow: none; }
+.qc152 .qc168-mn.nm { top: 20px; right: 8px; min-width: 230px; }
+.qc152 .qc168-mn.nm.up { top: auto; bottom: calc(100% - 14px); }
+
+/* ── the band's ⋯ (in the pencil's place, the same 26px band button) ──────────────────────────────────────────── */
+.qc152 .qc152-band .qc152-x[data-qc168="band-more"] { font: 700 18px/1 var(--sp-serif) !important; letter-spacing: 1px; }
+
+/* ── what is not edited here says why (the card's tip box, after 250ms) ─────────────────────────────────────────── */
+.qc152 [data-qc168-why] { cursor: default; outline: none; }
+.qc152 [data-qc168-why]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 6px; }
+
+/* ── the card's small menu (the edit layer's anchored menu, kept) ─────────────────────────────────────────────── */
+.qc152 .qc152-pp { position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 340px; overflow: auto; padding: 6px; border-radius: 12px; background: #fff;
+  box-shadow: 0 18px 40px -14px rgba(28, 19, 15, .35), 0 0 0 1px rgba(28, 19, 15, .08); animation: qc168-in .14s ease-out both; text-align: left; }
+.qc152 .qc152-pp .ph { padding: 6px 10px 4px; font: 400 15px var(--sp-type) !important; color: #1c130f; }
+.qc152 .qc152-pp .pf { padding: 6px 10px 4px; font: italic 400 12.5px var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc152-it { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 7px 10px; border-radius: 8px; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc152-it.rust { color: var(--sp-rust); }
+.qc152 .qc152-it:hover, .qc152 .qc152-it:focus-visible { background: #f6f2ec; }
+.qc152 .qc152-it .ck { width: 14px; color: #2a3a52; font: inherit; }
+.qc152 .qc152-it small { margin-left: auto; font: italic 400 12.5px var(--sp-serif) !important; color: #9a8f84; }
+
+/* the step editor's How and Package rows (kept from the retired edit layer's sheet) */
+.qc152 .qc1522-sseg { display: flex; flex-wrap: wrap; gap: 6px; }
+.qc152 .qc1522-sseg button { all: unset; cursor: pointer; padding: 5px 11px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 13.5px var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc1522-sseg button:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
+.qc152 .qc1522-sseg button.on { background: #2a3a52; color: #fff; box-shadow: none; }
+.qc152 .qc1522-sseg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.qc152 .qc1522-ebx .qc1522-btn.sm { font-size: 14px !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc168-pen, .qc152 :is(.qc152-th, .nx-rail, .nx-nl) > * { transition: none; }
+  .qc152 .qc168-open, .qc152 .qc1522-edit, .qc152 .qc168-ask, .qc152 .qc152-pp { animation: none; }
+}

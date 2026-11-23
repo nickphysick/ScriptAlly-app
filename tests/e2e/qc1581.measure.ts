@@ -268,7 +268,9 @@ test.describe("Query card v158.1", () => {
         const id = await last.getAttribute("data-id");
         L.check("the list holds notes and is scrolled to its end", !!id, id ?? "none");
         await last.hover(); await page.waitForTimeout(250);
-        const pin = last.locator("[data-act='pin']");
+        /* Query card v168 — re-pointed: Pin is in the last note's ⋯ menu (which opens above it, clear of the writing box) */
+        await last.locator("[data-qc168='more']").click(); await page.waitForTimeout(250);
+        const pin = page.locator(C("[data-qc168='note-menu'] [data-act='pin']"));
         const g = await pin.evaluate((el) => { const r = el.getBoundingClientRect(); const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return { hit: hit === el || el.contains(hit), box: [r.x, r.y, r.width, r.height].map(Math.round) }; });
         L.check("the open Pin link is on top at its centre (not under the writing box)", g.hit, JSON.stringify(g));
         const b = await pin.boundingBox();

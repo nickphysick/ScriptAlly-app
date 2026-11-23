@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the existing confirm opens",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "…with its words: This can’t be undone",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "not confirmed: the query is still there",
+  "ok": true,
+  "got": "Full Sent"
+ }
+]

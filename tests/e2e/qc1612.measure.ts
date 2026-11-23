@@ -359,12 +359,16 @@ if (run("6")) test("QC1612-6 · not otherwise: reading the card, a tab change an
   tr = await stopTrace(page);
   L.check("a tab change: no scale animation on the frame", tr.frames.length > 60 && scaleAnims(tr).length === 0 && tr.frames.every((f) => f.scale === 1 && f.frameScale === 1), JSON.stringify(scaleAnims(tr)));
   await startTrace(page);
-  await tap(page, C("[data-qc152='pencil']")); await page.waitForTimeout(400);
-  const edit = await page.locator(`${CARD}[data-editing]`).count();
+  /* Query card v168 — re-pointed: the whole-card edit mode (the band's pencil) is retired; the editing that remains is
+     one thing opened from its pencil, here a step in place */
+  await page.locator(C("[data-qc152='thread'] > [data-qc168-host]")).first().hover();
+  await tap(page, C("[data-qc152='thread'] > [data-qc168-host] [data-qc168='pen']"));
+  await page.waitForTimeout(400);
+  const edit = await page.locator(C("[data-qc1522='step-edit']")).count();
   await page.waitForTimeout(2600);
   tr = await stopTrace(page);
-  L.check("population: the card's edit mode is on", edit > 0, String(edit));
-  L.check("the edit mode: no scale animation on the frame", tr.frames.length > 60 && scaleAnims(tr).length === 0 && tr.frames.every((f) => f.scale === 1 && f.frameScale === 1), JSON.stringify(scaleAnims(tr)));
+  L.check("population: a step is open in place", edit > 0, String(edit));
+  L.check("a step open in place: no scale animation on the frame", tr.frames.length > 60 && scaleAnims(tr).length === 0 && tr.frames.every((f) => f.scale === 1 && f.frameScale === 1), JSON.stringify(scaleAnims(tr)));
   L.done(5);
 });
 

@@ -479,7 +479,9 @@
    them on hover or focus, and nothing moves on hover here); the edit's Cancel / Save on the right, its field as the
    agent card's (acv2.css); the writing box in the flow, not stuck to the tab's foot. */
 .laq .qc152.laq-notes { position: static; }
-.laq .qc152 .nx-acts { margin-top: 8px; max-height: none; opacity: 1; overflow: visible; }
+/* Query card v168 retired the tab's hover row (.qc152 .nx-acts): the review keeps its always-shown row, so the flex and
+   gap it inherited are stated here */
+.laq .qc152 .nx-acts { display: flex; gap: 14px; margin-top: 8px; max-height: none; opacity: 1; overflow: visible; }
 .laq .qc152 .nx-acts[hidden] { display: none; }
 .laq .qc152 .nx-edit .nx-acts { justify-content: flex-end; }
 .laq .qc152 .nx-edit textarea { display: block; width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; border: 0; outline: 0; padding: 10px 12px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; font: 400 15px/1.45 var(--sp-serif) !important; color: #1c130f; }

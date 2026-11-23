@@ -10,7 +10,7 @@ const card = () => readFileSync("src/components/queries/centre/QcCard152.tsx", "
 
 describe("QC158-1/2 (source) one height", () => {
   it("nothing lets the reading card shrink to its content: no `height: auto` on the card's panel", () => {
-    const all = ["qcv152card.css", "qcv1522card.css", "qcv153thread.css", "qcv152inplace.css", "sc1card.css"].map(css).join("\n");
+    const all = ["qcv152card.css", "qcv1522card.css", "qcv153thread.css", "qcv168.css", "sc1card.css"].map(css).join("\n");
     expect(all).not.toMatch(/\.spanel\.qsp[^{]*:has\(> \.spanel-own > \[data-qc152\]\)[^{]*\{[^}]*height:\s*auto/);
     expect(css("qcv152card.css")).toMatch(/height: var\(--qc152-h\);/);
   });

@@ -489,13 +489,23 @@ test.skip("AC2-6 · save bumps once; cancel, discard, undo never; the saved tint
           mutation: bothname (both doors end in Name)
    AC2-9  the old notes string: Edit changes only that string; Delete clears it, and Undo puts it back byte for byte
           mutation: undodrop (the Undo press reaches nothing) */
-/** a note's actions show on hover or focus, as on the query card: hover the note, then press */
+/** a note's actions. Query card v168 — re-pointed: nothing shows on hover any more; Pin, task and Corkboard are in the
+ *  note's ⋯ menu, Edit is its pencil, and Delete is "Delete this note" inside the open note, asked once */
 async function noteAct(page: Page, id: string, act: string) {
   const n = page.locator(`${AC} [data-qc158='note'][data-id='${id}']`);
   await n.scrollIntoViewIfNeeded();
   await n.hover();
   await page.waitForTimeout(250);
-  await n.locator(`[data-act='${act}']`).click();
+  if (act === "edit" || act === "delete") {
+    await n.locator("[data-qc168='pen']").click();
+    if (act === "delete") {
+      await page.locator(`${AC} [data-qc168='delete-note']`).click();
+      await page.locator(`${AC} [data-qc168='delete-ok']`).click();
+    }
+    return;
+  }
+  await n.locator("[data-qc168='more']").click();
+  await page.locator(`${AC} [data-qc168='note-menu'] [data-act='${act}']`).click();
 }
 const agentOf = (id: string) => (JSON.parse(dump(id)) as { agent: Record<string, unknown> }).agent;
 
@@ -566,12 +576,13 @@ test("AC2-9 · the old notes string: Edit, Delete and Undo", async ({ page }) =>
   await openAc(page, SIZES[0], { id: "acv2fx-notes" });
   await tab(page, "notes");
   const flatNote = page.locator(`${AC} [data-qc158='note'][data-id='__flat__']`);
-  L.check("the old string is a note with Edit and Delete", (await flatNote.locator("[data-act='edit']").count()) === 1 && (await flatNote.locator("[data-act='delete']").count()) === 1, "");
+  /* v168 — re-pointed: Edit is the note's pencil; Delete lives inside the open note */
+  L.check("the old string is a note with Edit (its pencil), and Delete inside it", (await flatNote.locator("[data-qc168='pen']").count()) === 1, "");
   /* Edit: only the string changes */
   const edited = `${old}\nAnd she answers within a week. (edited)`;
   await noteAct(page, "__flat__", "edit");
   await page.locator(`${AC} [data-qc158='edit-field']`).fill(edited);
-  await page.locator(`${AC} [data-qc158='edit-save']`).click();
+  await page.locator(`${AC} [data-qc168='tick']`).click();
   await page.waitForTimeout(1500);
   const after = agentOf("acv2fx-notes");
   const strip = (a: Record<string, unknown>) => JSON.stringify(Object.fromEntries(Object.entries(a).filter(([k]) => k !== "notes").sort(([x], [y]) => x.localeCompare(y))));

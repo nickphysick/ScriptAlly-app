@@ -579,6 +579,9 @@ if (run("13")) test("QC167-13 · nothing new under 12px, no new uppercase mono l
       const r = await scan(); n += r.n;
       L.check(`${key} drawer ${open}`, r.out.length === 0, r.out.join("; "));
       await page.locator(C("[data-qc167='cancel']")).click();
+      /* Query card v168 — re-pointed: Cancel with a change (the expanded asks tick them) asks "Discard your changes?"
+         in the drawer's footer; Discard leaves */
+      await page.locator(C("[data-qc167='profile'] [data-qc168='discard']")).click({ timeout: 1500 }).catch(() => {});
       await page.waitForTimeout(300);
     }
   }
@@ -611,7 +614,9 @@ async function frames(page: Page, eng: string) {
       await page.locator(C("[data-qc167='expand'][data-x='other']")).evaluate((e) => e.scrollIntoView({ block: "end", behavior: "instant" }));
       await shot("drawer-asks-both-open");
     }
-    await page.locator(C("[data-qc167='cancel']")).click(); await page.waitForTimeout(300);
+    await page.locator(C("[data-qc167='cancel']")).click();
+    await page.locator(C("[data-qc167='profile'] [data-qc168='discard']")).click({ timeout: 1500 }).catch(() => {}); /* v168: Cancel with a change asks */
+    await page.waitForTimeout(300);
   }
   await openCard(page, "pending");
   await page.locator(C("[data-qc152='reply-btn']")).first().click();

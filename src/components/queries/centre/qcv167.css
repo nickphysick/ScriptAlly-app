@@ -21,8 +21,7 @@
 .qc152 .nx-box.qc167-tile b { font-size: 15.5px !important; line-height: 22px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .qc152 .nx-box.qc167-tile i { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc152 .nx-box.qc167-tile b.qc167-notyet { font: italic 400 15px/22px var(--sp-serif) !important; color: #8a8076; }
-.qc152 .nx-box.qc167-tile .qc167-pn { position: absolute; right: 9px; top: 9px; display: grid; color: #2a3a52; opacity: 0; transition: opacity 0.18s ease; }
-.qc152 .nx-box.qc167-tile:hover .qc167-pn, .qc152 .nx-box.qc167-tile:focus-visible .qc167-pn { opacity: 1; }
+/* (a tile's own pencil glyph is Query card v168's EditPen now: qcv168.css) */
 .qc152 .nx-box.qc167-tile.is-ed { box-shadow: inset 0 0 0 1.5px #2a3a52; }
 
 /* "What {first} asks for": the sub-heading, the list (one box that edits it), or three ghost rows */
@@ -63,7 +62,7 @@
 .qc152 .qc167-fin { animation: qc167Fin 0.35s ease both; }
 
 @media (prefers-reduced-motion: reduce) {
-  .qc152 .qc167-g, .qc152 .qc167-ga, .qc152 [data-qc167-ed], .qc152 .qc167-gso, .qc152 .qc167-gsw .nx-tick, .qc152 .qc167-gsw .qc167-g, .qc152 .nx-box.qc167-tile .qc167-pn { transition: none; }
+  .qc152 .qc167-g, .qc152 .qc167-ga, .qc152 [data-qc167-ed], .qc152 .qc167-gso, .qc152 .qc167-gsw .nx-tick, .qc152 .qc167-gsw .qc167-g { transition: none; }
   .qc152 .qc167-fin { animation: none; }
 }
 

@@ -1,0 +1,37 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the tab is still Tracking",
+  "ok": true,
+  "got": "tracking"
+ },
+ {
+  "name": "the question shows in the step",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "…in its words",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Keep editing keeps the step and the words",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Discard: the tab is Materials",
+  "ok": true,
+  "got": "materials"
+ },
+ {
+  "name": "…and nothing was written",
+  "ok": true,
+  "got": ""
+ }
+]

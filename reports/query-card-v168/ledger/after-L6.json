@@ -1,0 +1,57 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the query went with three things",
+  "ok": true,
+  "got": "[{\"kind\":\"letter\"},{\"kind\":\"synopsis\"},{\"kind\":\"sample\",\"unit\":\"chapters\",\"n\":3}]"
+ },
+ {
+  "name": "open: the tab is still Materials",
+  "ok": true,
+  "got": "materials"
+ },
+ {
+  "name": "the group is open in place with its three chips",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "the cross and the tick sit in the group's heading, in place of its date",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "MatChips' own + Add is there",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the toast says Saved what went",
+  "ok": true,
+  "got": "Saved what wentUndo"
+ },
+ {
+  "name": "saved: the tab is still Materials",
+  "ok": true,
+  "got": "materials"
+ },
+ {
+  "name": "read back: the step went with two things",
+  "ok": true,
+  "got": "[{\"kind\":\"letter\"},{\"kind\":\"synopsis\"}]"
+ },
+ {
+  "name": "read back: its date is unchanged",
+  "ok": true,
+  "got": "2026-10-14T17:26:40.387Z → 2026-10-14T17:26:40.387Z"
+ },
+ {
+  "name": "Undo put the three back exactly",
+  "ok": true,
+  "got": "[{\"kind\":\"letter\"},{\"kind\":\"synopsis\"},{\"kind\":\"sample\",\"unit\":\"chapters\",\"n\":3}]"
+ }
+]

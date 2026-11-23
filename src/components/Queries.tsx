@@ -128,7 +128,7 @@ import { QcAsks167 } from "./queries/centre/QcAsks167";
 import { bookOf } from "../lib/queryActions/sample";
 import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
-import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcCardEdit152";
+import { STEP_METHODS as EDIT_METHODS } from "./queries/centre/QcStepEdit1522";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import { courtOf, expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
@@ -158,6 +158,7 @@ import { dependents, STEP_LABEL, type LogStep, type StepType } from "../lib/qcLo
 import type { MatEnv } from "./queries/centre/QcEdit152";
 import { QcComposer1522, type ComposerCtx, type ComposerSave, type Journey, type ReplyType } from "./queries/centre/QcComposer1522";
 import { QcStepEdit1522 } from "./queries/centre/QcStepEdit1522";
+import type { QuoteIn } from "./queries/centre/QcNotes158";
 import { holdsPages, planDetails1522, planReply, planSigned, planStepEdit, planTell, planUnpass } from "../lib/qc1522Write";
 import type { FootAct } from "../lib/qcFoot1522";
 import type { Snapshot } from "../lib/queryActions/snapshot";
@@ -6114,6 +6115,7 @@ export const Queries: React.FC<{
        and an undo toast inside the card. ⚠️ v152.1's "What needs changing?" fork, Fix a mistake, the record form and
        "See what changes" are gone. */
     let composer1522: React.ReactNode = null;
+    let quoteEdit168: ((qt: QuoteIn, text: string) => Promise<boolean>) | null = null;
     let edit1522: React.ReactNode = null;
     const card1522: NonNullable<React.ComponentProps<typeof QcQueryCard149>["card1522"]> = {};
     if (v152 && qcDesk && currentUser) {
@@ -6287,6 +6289,8 @@ export const Queries: React.FC<{
             onEditOffer={() => { setQc1522J(null); setQc1522Edit(offerStep?.activityId ?? null); }} />
         );
       }
+      /* a step's kind as the step plan names it */
+      const fixKind = (x: ThreadStepIn): FixStep["kind"] => (x.kind === "nudge" ? "nudge" : x.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[x.status ?? ""] ?? "queried"] ?? "queried");
       /* §2.4 the bubble edited in place */
       /* "__undated": the list's "Add date" asked for the first undated step's editor (Log a query v1.1) */
       const editKey = qc1522Edit === "__undated" ? steps1522.find((x) => x.ms == null && x.activityId && !x.kind)?.activityId ?? null : qc1522Edit;
@@ -6304,9 +6308,9 @@ export const Queries: React.FC<{
         const deleteText = `Delete this step? ${deps.length ? `${deps.map((d) => depName(d)).join(", ")} ${deps.length === 1 ? "depends" : "depend"} on it, so ${deps.length === 1 ? "it goes" : "they go"} too. ` : ""}${backTo ? `${first}’s card goes back to ${backTo}.` : "This removes the whole query."}`;
         const words0 = typeof (evStore.get(ed.activityId) as { replyNote?: unknown } | undefined)?.replyNote === "string" ? String((evStore.get(ed.activityId) as { replyNote?: string }).replyNote) : (ed.quote ?? "");
         const isQueryStep = ed.status === QueryStatus.QUERIED && !ed.kind;
-        const kind: FixStep["kind"] = ed.kind === "nudge" ? "nudge" : ed.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[ed.status ?? ""] ?? "queried"] ?? "queried";
+        const kind = fixKind(ed);
         edit1522 = (
-          <QcStepEdit1522 key={ed.activityId} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
+          <QcStepEdit1522 key={ed.activityId} id={ed.activityId} onReopen={() => { setQc1522J(null); setQc1522Draft(null); setQc1522Edit(ed.activityId!); }} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
             mats={storedMats(ed.activityId) ?? (ed.status === QueryStatus.QUERIED ? asMats(ed.chips.map((c) => c.label)) : [])}
             request={ed.status === QueryStatus.PARTIAL_REQUESTED || ed.status === QueryStatus.FULL_REQUESTED || ed.status === QueryStatus.REVISE_RESUBMIT}
             words={words0} first={first} env={env} nowMs={now} floorMs={i > 0 ? dated[i - 1].ms : null} ceilMs={i >= 0 && i < dated.length - 1 ? dated[i + 1].ms : null}
@@ -6326,7 +6330,8 @@ export const Queries: React.FC<{
                   pkg: k ? { id: k.id, name: k.packageName, edition: k.edition ?? 1 } : null, pkgChanged: !!pkgList && v.pkgId !== undefined && (v.pkgId ?? null) !== (ctx.packageId ?? null) });
                 plan.query = { ...plan.query, ...dp.query };
               }
-              done1522(await commitPlan(uid, plan), "Step saved", null, false);
+              /* Query card v168 — the card's toast says what was saved; its Undo restores the step's own snapshot */
+              done1522(await commitPlan(uid, plan), "Saved that step", null, false);
             }, false)}
             onDelete={() => run1522(async () => {
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
@@ -6336,21 +6341,54 @@ export const Queries: React.FC<{
             })} />
         );
       }
+      /* Query card v168 — the Materials tab edits each sent group's items in place: that step's own save (planStepEdit,
+         its materials only), with the step's date unchanged; one snapshot, so Undo puts it back exactly. An undated step,
+         or a request not yet answered, is not edited there. */
+      const matStep = (g: { activityId: string | null; pending: boolean }) => (g.pending || !g.activityId ? null : steps1522.find((x) => x.activityId === g.activityId && x.ms != null) ?? null);
+      card1522.matEdit = {
+        env, busy: qc152Busy,
+        of: (g) => {
+          const st = matStep(g);
+          return st && st.ms != null ? { mats: storedMats(st.activityId) ?? asMats(st.chips.map((c) => c.label)), stepMs: st.ms } : null;
+        },
+        save: (g, mats) => {
+          const st = matStep(g);
+          if (!st || !st.activityId || st.ms == null) return Promise.resolve(false);
+          return run1522(async () => {
+            const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+            const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+              { id: st.activityId!, kind: fixKind(st), dayMs: st.ms!, materials: mats }, null);
+            done1522(await commitPlan(uid, plan), "Saved what went", null, false);
+          }, false);
+        },
+      };
+      /* Query card v168 — the agent's words edited in place on the Notes tab: that response's step save (planStepEdit, its
+         `replyNote`), its date and materials unchanged; one snapshot, so Undo puts it back exactly */
+      quoteEdit168 = (qt, text) => {
+        const st = qt.activityId ? steps1522.find((x) => x.activityId === qt.activityId && x.ms != null) ?? null : null;
+        if (!st || !st.activityId || st.ms == null) return Promise.resolve(false);
+        return run1522(async () => {
+          const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+          const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+            { id: st.activityId!, kind: fixKind(st), dayMs: st.ms!, materials: storedMats(st.activityId) ?? asMats(st.chips.map((c) => c.label)) }, text);
+          done1522(await commitPlan(uid, plan), `Saved ${first}’s words`, null, false);
+        }, false);
+      };
+      /* Query card v168 §5 — the band's ⋯. Move: the old details save's agent field (planDetails1522), on the page's
+         batched writer; one snapshot, so Undo puts the query back with its agent exactly. Delete: the existing delete
+         behind its existing confirm (askDeleteQuery: "This can’t be undone"), unchanged, so no Undo. */
+      card1522.moveTo = {
+        agents: [...agents].map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) || null })).sort((a, b) => a.name.localeCompare(b.name)),
+        onMove: (agentId) => run1522(async () => {
+          const to = agents.find((a) => a.id === agentId);
+          const snap = await commitPlan(uid, planDetails1522(q, { agentId, method: q.sendMethod ?? "", pkg: null, pkgChanged: false }));
+          done1522(snap, `Moved to ${to ? agentPrimary(to) || "another agent" : "another agent"}`, null);
+        }),
+      };
+      card1522.onDeleteQuery = () => askDeleteQuery();
       card1522.composer = composer1522;
       card1522.draft = qc1522J ? qc1522Draft : null;
       card1522.editingId = edit1522 ? editKey : null;
-      /* Log a query v1.1 — editing in place: the agent, the agent's details and the notes, saved on the card's Save */
-      const detailsOf = (id: string): AgentDetails | null => {
-        const a = agents.find((x) => x.id === id);
-        if (!a) return null;
-        return {
-          weeks: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
-          nrmn: typeof a.noResponseMeansNo === "boolean" ? a.noResponseMeansNo : null,
-          asks: (a.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
-          method: a.submissionMethod ? String(a.submissionMethod) : null,
-          wishlist: a.mswlNotes ?? "", email: a.email ?? "", website: a.website ?? "",
-        };
-      };
       /* Query card v167 §C — the agent's profile, edited from the card's own drawers. ONE write: the agent card's save path
          (commitCardSave: its snapshot, the reply-time deadline fan-out, the data-quality flag), for every query with this
          agent. Undo restores that snapshot (the house rule: put back what the save changed, never a second write). */
@@ -6388,47 +6426,7 @@ export const Queries: React.FC<{
         const book167 = bookOf(manuscripts.find((m) => m.id === q.manuscriptId)?.wordCount ?? null);
         card1522.asksBody = (prof, set) => <QcAsks167 prof={prof} book={book167} onPatch={set} />;
       }
-      card1522.editData = {
-        agentId: q.agentId,
-        agents: [...agents].map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) || null })).sort((a, b) => a.name.localeCompare(b.name)),
-        detailsOf,
-        notes: journalEntries.filter((j) => j.queryId === q.id)
-          .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
-          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" })),
-      };
-      card1522.onSaveEdits = async (e) => {
-        if (qc152Busy) return false;
-        setQc152Busy(true);
-        try {
-          /* 1 · the agent the query is to: the old details save (planDetails1522), on the page's batched writer */
-          if (e.agentId) await commitPlan(uid, planDetails1522(q, { agentId: e.agentId, method: q.sendMethod ?? "", pkg: null, pkgChanged: false }));
-          /* 2 · the agent's own details: the agent card's save path (its snapshot, the reply-time fan-out, the flag) */
-          const target = agents.find((x) => x.id === e.detailsAgentId);
-          if (target && Object.keys(e.details).length) {
-            const d = e.details;
-            const patch: AgentEditPatch = {};
-            if ("weeks" in d) patch.responseTimeWeeks = d.weeks ?? null;
-            if ("nrmn" in d && typeof d.nrmn === "boolean") patch.noResponseMeansNo = d.nrmn;
-            if ("asks" in d) patch.materialsWanted = d.asks ?? [];
-            if ("method" in d && d.method) patch.submissionMethod = d.method;
-            if ("wishlist" in d) { patch.mswlNotes = (d.wishlist ?? "").trim(); patch.mswlCheckedAt = new Date().toISOString(); }
-            if ("email" in d) patch.email = (d.email ?? "").trim();
-            if ("website" in d) patch.website = (d.website ?? "").trim();
-            const out = await commitCardSave({ uid, agent: target, queries, patch, resolveTaskFlag: scriptDb.resolveTaskFlag });
-            if ("error" in out.res) throw new Error(String(out.res.error));
-          }
-          /* 3 · the notes: the notes path (journalEntries) */
-          for (const n of e.notes.updated) await updateJournalEntry(n.id, n.text);
-          for (const id of e.notes.deleted) await deleteJournalEntry(id);
-          for (const t of e.notes.added) await addJournalEntry(q.id, t);
-        } catch (err) {
-          console.error("[query card] edit-in-place save failed", err);
-          showToast({ message: "Couldn't save all the changes. Check the card and try again." });
-          return false;
-        } finally { setQc152Busy(false); }
-        setQc1522Toast({ msg: "Changes saved", undo: null });
-        return true;
-      };
+      /* (Query card v168 retired the whole-card edit layer's data and its Save: editData, onSaveEdits, detailsOf) */
       card1522.editNode = edit1522;
       card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: qc1522Toast.undo ? () => {
         const t = qc1522Toast; setQc1522Toast(null);
@@ -6498,6 +6496,17 @@ export const Queries: React.FC<{
             .then(() => showToast({ message: "On your to-do list for today" }));
         }}
         onNoteCork={(text) => { void addUserTask({ text, queryId: q.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }}
+        /* Query card v168 — a note edited in place: the journal's own edit (it writes only the words, so Undo writes the
+           old words back exactly). Deleted: the journal's own delete, asked once in the note; no Undo (the journal has no
+           restore that keeps the note's id and date). */
+        onEditNote={async (id, text) => {
+          const was = journalEntries.find((j) => j.id === id)?.entryText;
+          try { await updateJournalEntry(id, text); } catch { showToast({ message: "Couldn't save that note. Nothing was changed." }); return false; }
+          setQc1522Toast({ msg: "Saved that note", undo: was != null ? async () => { await updateJournalEntry(id, was); } : null, bump: false });
+          return true;
+        }}
+        onDeleteNote={(id) => { void deleteJournalEntry(id).then(() => setQc1522Toast({ msg: "Note deleted", undo: null, bump: false })); }}
+        onQuoteEdit={quoteEdit168}
         mode={qcCardMode}
         /* PHONE APP v2, PART 4 — on a phone a response is recorded in the response journey's flow layout, the same
            walk as every other journey; the card's inline form stays the desktop's */
@@ -6928,7 +6937,7 @@ export const Queries: React.FC<{
         : pipShown ? undefined
         : () => {
           const panel = document.querySelector("[data-qp='panel']");
-          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-editing], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
+          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-qc168-open], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
           if (busy) { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); return; }
           (fromAgent ? closeFromAgent : closeQueryCard)();
         }}

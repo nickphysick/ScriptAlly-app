@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the query is to Ava",
+  "ok": true,
+  "got": "q168-ag-ava"
+ },
+ {
+  "name": "the list asks Who's this query to?",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the toast says Moved to Bram Lark",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "read back: the query is to Bram",
+  "ok": false,
+  "got": "q168-ag-ava"
+ },
+ {
+  "name": "Undo: the query is to Ava again",
+  "ok": true,
+  "got": "q168-ag-ava"
+ }
+]

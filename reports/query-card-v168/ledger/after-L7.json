@@ -1,0 +1,47 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "query card: population: two entries or more",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "query card: the note's height is unchanged on hover",
+  "ok": true,
+  "got": "251,66 → 251,66"
+ },
+ {
+  "name": "query card: the next entry's top is unchanged",
+  "ok": true,
+  "got": "327,66 → 327,66"
+ },
+ {
+  "name": "query card: no hover row of actions",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "agent card: population: two entries or more",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "agent card: the note's height is unchanged on hover",
+  "ok": true,
+  "got": "244,66 → 244,66"
+ },
+ {
+  "name": "agent card: the next entry's top is unchanged",
+  "ok": true,
+  "got": "320,66 → 320,66"
+ },
+ {
+  "name": "agent card: no hover row of actions",
+  "ok": true,
+  "got": ""
+ }
+]

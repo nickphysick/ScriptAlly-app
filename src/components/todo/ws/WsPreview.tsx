@@ -135,7 +135,7 @@ export const PreviewQueryCard: React.FC<QueryCardProps> = ({ q, row, agent, quer
         mode="view" onMode={noop} onClose={noop} onStep={noop} onPrimary={noop} onCloseQuery={noop} onContactList={noop} onCopyEmail={noop}
         onAgentField={noop} onOpenPiece={noop} onAddNote={noop} onRespond={noopAsync} onSaveEdits={noopAsync}
         index={0} total={1} notes={[]} packageChoices={[]} packageKey={null} pieces={[]} stepChoices={[]} removable={() => []}
-        onReply152={noop} onEditStep152={noop} onPencil152={noop} />
+        onReply152={noop} onEditStep152={noop} />
     );
   }
   const desk = {
@@ -152,7 +152,7 @@ export const PreviewQueryCard: React.FC<QueryCardProps> = ({ q, row, agent, quer
       mode="view" onMode={noop} onClose={noop} onStep={noop} onPrimary={noop} onCloseQuery={noop} onContactList={noop} onCopyEmail={noop}
       onAgentField={noop} onOpenPiece={noop} onAddNote={noop} onRespond={noopAsync} onSaveEdits={noopAsync}
       index={0} total={1} notes={[]} packageChoices={[]} packageKey={null} pieces={[]} stepChoices={[]} removable={() => []}
-      onReply152={noop} onEditStep152={noop} onPencil152={noop} />
+      onReply152={noop} onEditStep152={noop} />
   );
 };
 

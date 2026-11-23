@@ -225,7 +225,9 @@ describe("Query card v161.2 — the card breathes while the drawer is open", () 
     expect(COMPOSER).toMatch(/const exit = \(\) => up\(close\);/);
     expect(COMPOSER).toMatch(/data-qc1522="discard" onClick=\{\(\) => \{ setConf\(false\); setDirty\(false\); close\(\); \}\}/);
     expect(COMPOSER.indexOf("const frameOf = ")).toBeLessThan(COMPOSER.indexOf("const close = "));
-    expect(CARD.match(/breatheClose\(e\.currentTarget\.closest<HTMLElement>\("\.spanel"\)\); p\.stepCard!\.go\((-1|1)\);/g)?.length).toBe(2);
+    /* Query card v168 — re-pointed: ‹ › go through the one-open rule (a changed thing open asks first), and the breath
+       stops at the press when the rule lets the click on, still before the host's swap */
+    expect(CARD.match(/const fr = e\.currentTarget\.closest<HTMLElement>\("\.spanel"\); g168\(\(\) => \{ breatheClose\(fr\); p\.stepCard!\.go\((-1|1)\); \}\);/g)?.length).toBe(2);
   });
 });
 

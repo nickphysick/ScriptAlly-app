@@ -7,8 +7,9 @@
  * the query's state, the head, the book, the tabs, the TRACKING THREAD (each step a message, the waits between them),
  * the Agent and Materials tabs, Notes unchanged, and the reply box as the footer.
  *
- * ⚠️ THE CARD WRITES NOTHING. The reply box's button, the pencil and each bubble's ✎ Edit hand back to the page; the
- *    derivations are lib/qcThread152 (pure). The phone's card is QcQueryCard149's own and is not touched.
+ * ⚠️ THE CARD WRITES NOTHING. The reply box's button, the band's ⋯ and every pencil hand back to the page; the
+ *    derivations are lib/qcThread152 (pure). Query card v168: ONE WAY TO EDIT — the pencil on the thing (QcEdit168);
+ *    the whole-card edit mode (the band's pencil, "Editing", the save bar, the double-click) is retired. The phone's card is QcQueryCard149's own and is not touched.
  * ⚠️ IT PORTALS WITH THE PANEL (document.body), so no page token reaches it: colours are literals and the faces are
  *    the `:root` --sp-* tokens. The tips are portalled again, to body, as fixed boxes — the panel leans, and a rotated
  *    ancestor would be the containing block of anything fixed inside it.
@@ -29,21 +30,17 @@ import "./qcv1522card.css";
 import "./qcv153thread.css";
 import { footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
 import { waitWords } from "../../../lib/qc1522";
-import { PopCtx, useOutsideClose } from "./QcEdit152";
+import { MatChips, PopCtx, useOutsideClose, type MatEnv } from "./QcEdit152";
+import type { StepMaterial } from "../../../lib/qc152Write";
 import { Bubble, StepGlyph } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import {
-  Ed, EdMenu, EditStrip, LeaveAsk, MenuItem, NotesEditPane, SaveBar, useEditLayer,
-  type CardEditData, type CardEdits,
-} from "./QcCardEdit152";
-import "./qcv152inplace.css";
 /* Stage colours v1 — last, so the stage colours sit over every earlier layer of the card */
 import "./sc1card.css";
 /* Query card v158 — the Agent, Materials and Notes tab bodies */
 import "./qcv158.css";
 import { AgentTab158, type ProfileKey } from "./QcAgent158";
 import { ProfileDrawer, journeyName167, type ProfileIn, type ProfilePatch } from "./QcProfile167";
-import { MaterialsTab158 } from "./QcMaterials158";
+import { MaterialsTab158, type MatEdit168 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
 import { breatheClose, bump, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
@@ -54,6 +51,9 @@ import { Track153 } from "./QcSlip153";
 import { bookLine164, stripStatus164 } from "../../../lib/qc164";
 import "./qcv164.css";
 import "./qcv167.css";
+/* Query card v168 — one way to edit: the pencil on the thing, the cross and the tick, one thing open at a time */
+import { CardMenu, CardMenuItem, Edit168Ctx, EditPen, mut168, useEditRule168 } from "./QcEdit168";
+import "./qcv168.css";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -98,14 +98,13 @@ export interface QcCard152Props {
   onTab: (t: CardTab152) => void;
   notes: React.ReactNode;
   onClose: () => void;
-  onPencil: () => void;
   onEditStep: (activityId: string | null) => void;
   onReply: (act: ReplyAct) => void;
   onAgentField: (field: "wishlist" | "email" | "website" | "method" | "reply" | "materials" | null) => void;
   onCopyEmail: () => void;
   /** §3–§4: the view the card shows — the reading card, or an editing or recording view (`editBody`) under the same
    *  band and head; any view but "read" straightens the lean (§2.1) */
-  view?: "read" | "record" | "fork" | "fix" | "details";
+  view?: "read" | "record" | "fork" | "fix";
   editBody?: React.ReactNode;
   /** Escape in an editing view: an open menu or calendar closes first, then the view steps back one level (§4.7) */
   onBack?: () => void;
@@ -127,9 +126,6 @@ export interface QcCard152Props {
    *  where the new step will go; the step being checked (a soft pulsing ring and "Checking"); the step just logged
    *  (a "Logged" stamp); a send of several things as "your materials" with a paperclip */
   desk?: { bookRow?: boolean; typing?: boolean; checkKey?: string | null; stampKey?: string | null; clip?: { key: string; items: string[]; version: string | null } | null };
-  /** Log a query v1.1 — editing in place: the pencil's edit mode (the agent, the agent's details, the notes) */
-  editData?: CardEditData;
-  onSaveEdits?: (e: CardEdits) => Promise<boolean>;
   /** Record a response v1, Phase 5 — the grid is behind the dim now, so the band carries ‹ › through the set the card was
    *  opened from (the ← → keys' set). Absent, or a set of one: no arrows. */
   stepCard?: { at: number; of: number; go: (d: 1 | -1) => void } | null;
@@ -143,6 +139,12 @@ export interface QcCard152Props {
   onSaveProfile?: (patch: ProfilePatch) => Promise<boolean>;
   /** v167 §C step 3 — the asks drawer's body (QcAsks167), drawn by the host that knows the book */
   asksBody?: (prof: ProfileIn, set: (p: ProfilePatch | null) => void) => React.ReactNode;
+  /** Query card v168 — the band's ⋯: move the query to another agent (the existing agent write; true when it landed),
+   *  from these agents; and delete it (the existing delete behind its existing confirm) */
+  moveTo?: { agents: { id: string; name: string; agency: string | null }[]; onMove: (agentId: string) => Promise<boolean> } | null;
+  onDeleteQuery?: (() => void) | null;
+  /** Query card v168 — the Materials tab's own editing: each group's step materials and their save (QcMaterials158) */
+  matEdit?: (Omit<MatEdit168, "chips"> & { env: MatEnv }) | null;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -221,8 +223,17 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const band = statusBand(r.status);
   const stageVars = { ["--band" as string]: band, ["--tint" as string]: sc.tint, ["--edge" as string]: sc.edge, ["--mark" as string]: sc.mark,
     ["--fdisc" as string]: quiet ? `linear-gradient(90deg, ${band}, #fff)` : band } as React.CSSProperties;
-  const jOpen = !!p.composer || !!p.editingId;
+  /* v168 — a step open in place is not a journey: the book, the tabs and the footer stay (only the composer folds them) */
+  const jOpen = !!p.composer;
   const tip = useTip();
+  /* v168 §7 — what is not edited here says why: the card's own tip box, after 250ms of hover or on keyboard focus */
+  const whyT = useRef(0);
+  const why = (body: string): Record<string, unknown> => {
+    const on = (e: React.SyntheticEvent<HTMLElement>) => { const el = e.currentTarget; window.clearTimeout(whyT.current); whyT.current = window.setTimeout(() => tip.show(el, body), 250); };
+    const off = () => { window.clearTimeout(whyT.current); tip.hide(); };
+    return { tabIndex: 0, "data-qc168-why": body, onMouseEnter: on, onFocus: on, onMouseLeave: off, onBlur: off };
+  };
+  useEffect(() => () => window.clearTimeout(whyT.current), []);
   const view = p.view ?? "read";
   const rootRef = useRef<HTMLDivElement>(null);
   const [popOpen, setPopOpen] = useState<string | null>(null);
@@ -230,12 +241,32 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   useLayoutEffect(() => { setRootEl(rootRef.current); }, []);
   const pop = { root: rootEl, open: popOpen, setOpen: setPopOpen };
   useOutsideClose(pop);
+  /* ══ v168 — ONE THING OPEN AT A TIME (QcEdit168). The card's own toast for "Changes discarded" (the cross's Undo
+     reopens the thing with its draft); a toast from the page replaces it. A card with no footer actions is a preview
+     (the To-do desk's card): it draws no pencils. */
+  const [local168, setLocal168] = useState<{ msg: string; onUndo: (() => void) | null; n: number } | null>(null);
+  useEffect(() => { setLocal168(null); }, [r.id]);
+  useEffect(() => { if (p.toast) setLocal168(null); }, [p.toast?.msg, !!p.toast]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!local168) return undefined;
+    const t = window.setTimeout(() => setLocal168(null), 5200);
+    return () => window.clearTimeout(t);
+  }, [local168?.n]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ed168 = useEditRule168(r.id, (msg, undo) => setLocal168({ msg, onUndo: undo, n: Date.now() }), () => rootRef.current);
+  const toast = local168 ? { msg: local168.msg, onUndo: local168.onUndo ? () => { const u = local168.onUndo; setLocal168(null); u?.(); } : null } : p.toast ?? null;
+  const live168 = !p.desk && !!p.onFoot;
+  /* every other door on the card goes through the rule: unchanged, what is open closes and the click goes on */
+  const g168 = (go: () => void) => ed168.guard(go);
+  /* v168 §5 — the band's ⋯ (in the pencil's place): its menu, and the move list by the agent's name */
+  const [bandMenu, setBandMenu] = useState<null | "menu" | "move">(null);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const nameRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setBandMenu(null); }, [r.id]);
+  const bandMore = live168 && (!!p.moveTo || !!p.onDeleteQuery);
   useEffect(() => { setPopOpen(null); }, [view, r.id]);
   /* ONE Escape handler for the editing views: the open popover first, then one level back */
   useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
   const bodyRef = useRef<HTMLDivElement>(null);
-  /* v1.1 — the edit layer: the pencil, or a double-click on a value, enters it; Esc closes a menu, then asks */
-  const ed = useEditLayer(p.editData, p.onSaveEdits, r.id);
   const inRef = useRef<HTMLDivElement>(null);
   /* ══ v167 §C/§D — THE PROFILE DRAWER: in the composer's slot; a journey already open waits under it, still mounted
      (hidden), so every answer and its step stay as they were. Saving, going back or Esc returns to it, focus on the
@@ -275,14 +306,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     try { ok = await p.onSaveProfile(patch); } finally { setProfBusy(false); }
     if (ok) { setJust({ k, n: Date.now() }); closeProf(); }
   };
-  useEscapeLayer(ed.on, () => {
-    if (ed.open) ed.setOpen(null);
-    else if (ed.leave) ed.keep();
-    else ed.ask();
-  }, ESC_LEVEL.pageModal);
   const queryStepId = d.steps.find((x) => x.status === QueryStatus.QUERIED && !x.kind)?.activityId ?? null;
   const openStep = (id: string | null) => { p.onTab("tracking"); p.onEditStep(id); };
-  const edAgent = ed.on && ed.dr ? p.editData?.agents.find((a) => a.id === ed.dr!.agentId) ?? null : null;
   const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
   const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs, steps: d.steps, quietWeeks: d.quietWeeks, reason: d.reason ?? null, nudged: d.nudged });
   const [buildId, setBuildId] = useState<string | null>(null);
@@ -308,8 +333,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
      at its end (only on arriving — on leaving, the box grows and nothing needs to move) */
   useLayoutEffect(() => {
     const el = bodyRef.current;
-    if (el && p.toast && p.tab === "tracking") el.scrollTop = el.scrollHeight;
-  }, [!!p.toast]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (el && toast && p.tab === "tracking" && !ed168.open) el.scrollTop = el.scrollHeight;
+  }, [!!toast]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* a chip's tip closes on any click elsewhere */
@@ -502,10 +527,10 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const prevToast = useRef<{ msg: string; undo: boolean; id: string } | null>(null);
   const [toastGone, setToastGone] = useState<{ msg: string; undo: boolean; k: number } | null>(null);
   useLayoutEffect(() => {
-    const was = prevToast.current, now = p.toast ? { msg: p.toast.msg, undo: !!p.toast.onUndo, id: r.id } : null;
+    const was = prevToast.current, now = toast ? { msg: toast.msg, undo: !!toast.onUndo, id: r.id } : null;
     if (was && was.id === r.id && (!now || now.msg !== was.msg) && !reduced()) setToastGone({ msg: was.msg, undo: was.undo, k: performance.now() });
     prevToast.current = now;
-  }, [p.toast?.msg, !!p.toast, r.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [toast?.msg, !!toast, r.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v158: no day pill above a day's first message (each bubble's stamp is its date) and no status line under the newest
      one (the footer says where the query stands); the wait between two messages is "N days later" at the side */
   const clipChip = (c: { items: string[]; version: string | null }) => (
@@ -525,7 +550,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   }, shown0);
   const trackingPane = (
     <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread" data-steps={msgIdx.length}>
-      {ed.on ? <div className="qc152-trknote" data-qc152="track-note">Steps are edited one at a time: hover a message for ✎ Edit</div> : null}
       {folded ? (
         <button type="button" className="qc152-coll" data-qc152="fold" onClick={() => setUnfold(true)}>{folded} earlier {folded === 1 ? "step" : "steps"} · show</button>
       ) : null}
@@ -550,10 +574,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : "", out ? "qc160-out" : ""].filter(Boolean).join(" ") || undefined}
               mark={checking ? <span className="qc153-chkw" data-qc153="checking">Checking</span> : stamped ? <span className="qc153-stamp" data-qc153="logged">Logged</span> : null}
               outer={{ "data-qc152": "msg", "data-rk": rk(it.key), "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId, "data-field": it.key === "field-nudge" ? "" : undefined,
+                "data-qc168-host": live168 && it.key !== "field-nudge" && !out ? "" : undefined,
                 ...(out ? { "data-leaving": "", "aria-hidden": true, inert: true } : {}), style: { animationDelay: `${i * 45}ms` } }}
-              /* v161 — a nudge drawn from the query's field has no activity to edit */
-              after={it.key === "field-nudge" ? null : <button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
-                onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
+              /* v161 — a nudge drawn from the query's field has no activity to edit. v168 — the pencil on the bubble's
+                 corner (the "✎ Edit" pill is gone); it opens that step where its bubble is */
+              after={it.key === "field-nudge" || !live168 || out ? null : <EditPen label={it.title} data={{ "data-qc168-k": `step:${it.activityId ?? it.key}` }}
+                onOpen={() => g168(() => p.onEditStep(it.activityId ?? null))} />} />
           </React.Fragment>
         );
       }), ...draftNode]}
@@ -572,35 +598,36 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const agentPane = (
     <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
       sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
-      onOpen={ed.on ? null : (k) => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials"))}
-      onFullCard={() => p.onAgentField(null)} editing={prof?.k ?? null} just={just} />
+      onOpen={(k) => g168(() => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")))}
+      onFullCard={() => g168(() => p.onAgentField(null))} editing={prof?.k ?? null} just={just}
+      heardWhy={why(d.lastHeardMs != null ? `From ${first}’s latest reply on Tracking` : `Fills in when you record ${first}’s reply`)} />
   );
 
-  /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
-     the same step editor the per-block Edit opened, on the latest sent step. */
+  /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). v168: each group edits
+     its own items here, saved through its step's own save with the date unchanged (the page's `matEdit`); a pending
+     group's ghost row keeps v167's door, the send journey. The tab never changes. */
   const groups = materialGroups(d.steps, { nowMs });
-  const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
+  const matEdit0 = live168 && p.matEdit ? {
+    ...p.matEdit,
+    chips: (id: string, mats: StepMaterial[], onChange: (m: StepMaterial[]) => void, stepMs: number) => (
+      <MatChips id={id} mats={mats} onChange={onChange} env={p.matEdit!.env} stepMs={stepMs} request={false} addLabel="+ Add" />),
+  } : null;
+  const matEdit = matEdit0 && mut168("6") ? { ...matEdit0, save: async (g: { activityId: string | null }) => { openStep(g.activityId ?? queryStepId); return false; } } : matEdit0;
   const matPane = (
-    <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null}
-      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null}
-      /* v167 — a group's ghost row: what went, in its send's step editor; what is going, in the send journey */
-      onAddTo={(g) => { if (g.pending) p.onFoot?.("sent"); else { const id = g.activityId ?? queryStepId; if (id) openStep(id); } }} />
+    <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null} edit={matEdit}
+      onAddTo={(g) => { if (g.pending) p.onFoot?.("sent"); }} />
   );
 
   return (
     <PopCtx.Provider value={pop}>
+    <Edit168Ctx.Provider value={ed168}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
-      data-lean={view === "read" && !jOpen && !ed.on && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
-      data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" style={stageVars}>
+      data-lean={view === "read" && !jOpen && !p.editingId && !ed168.open && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined}
+      data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" data-qc168-open={ed168.open ?? undefined} style={stageVars}>
       <div ref={inRef} className="qc152-in">
-        {ed.on ? (
-        <div className="qc152-band is-ed" data-qc152="band" data-edit="">
-          <EditStrip n={ed.keys.length} onStop={() => ed.ask()} />
-        </div>
-        ) : (
         <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined}
           style={{ background: bandBg, color: bandInk(r.status) }}>
-          {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
+          {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={() => g168(p.backTo!.onBack)}>← {p.backTo.label}</button> : null}
           {/* v164 — the four-step track and the status name; the footer says whose move it is */}
           <span className="qc164-st" data-qc164="status" role="img" aria-label={ss.label}>
             <span className="qc164-trk" data-qc164="track" aria-hidden="true"><Track153 t={ss.track} status={r.status} /></span>
@@ -608,28 +635,28 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           </span>
           <span className="qc164-sp" aria-hidden="true" />
           {p.stepCard && p.stepCard.of > 1 ? <>
-            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(-1); }}>{PREV}</button>
-            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(1); }}>{NEXT}</button>
+            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); g168(() => { breatheClose(fr); p.stepCard!.go(-1); }); }}>{PREV}</button>
+            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); g168(() => { breatheClose(fr); p.stepCard!.go(1); }); }}>{NEXT}</button>
           </> : null}
-          <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query"
-            onClick={() => (p.editData ? ed.start() : p.onPencil())}>{PEN}</button>
-          <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={p.onClose}>✕</button>
+          {/* v168 — no pencil on the band: each thing is edited where it is. Its ⋯ holds the two things that are the
+              whole query's: moving it to another agent, and deleting it */}
+          {mut168("1") ? <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query">{PEN}</button> : null}
+          {bandMore ? <button ref={moreRef} type="button" className="qc152-x" data-qc168="band-more" aria-label="More for this query" title="More"
+            aria-haspopup="menu" aria-expanded={bandMenu === "menu"} onClick={() => g168(() => setBandMenu((m) => (m === "menu" ? null : "menu")))}>⋯</button> : null}
+          <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={() => g168(p.onClose)}>✕</button>
         </div>
-        )}
         <div className="qc152-agent">
           <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
-          <div className="qc152-who">{p.editData ? (
-            <Ed k="agent" layer={ed} changed={ed.keys.includes("agent")} label="The agent this query is to"><span className="qc152-nm qcv-open-nm" data-qc149c="name">{edAgent?.name ?? r.agentName}</span></Ed>
-          ) : <div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div>}<div className="qc152-ag" data-qc164="agency">{(edAgent ? edAgent.agency : r.agency) || ""}</div></div>
+          <div className="qc152-who"><div ref={nameRef} className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div><div className="qc152-ag" data-qc164="agency">{r.agency || ""}</div></div>
           {/* v164 — no status label (the strip names it); the day sits at the row's end, by the strip's old rule */}
-          {d.state !== "closed" && r.dayN != null ? <span className="qc164-day" data-qc164="day">Day {r.dayN}</span> : null}
+          {d.state !== "closed" && r.dayN != null ? <span className="qc164-day" data-qc164="day" {...why("Counted from the day you queried. Change that date on its step in Tracking")}>Day {r.dayN}</span> : null}
         </div>
         {view !== "read" ? p.editBody : <>
         {desk.bookRow ? (
           /* v53 (D8): the To-do card's book is one row — its height goes to Tracking */
           <div className="qc153-bkrow" data-qc152="book" data-qc153="book-row"><span>Querying</span><b>{p.msTitle ?? "No manuscript"}</b></div>
         ) : (
-        <div className="qc152-ms" data-qc152="book">
+        <div className="qc152-ms" data-qc152="book" {...why("A query stays with its book")}>
           <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
           {/* v164 — no "QUERYING" label; the title in --sp-h-card; genre and word count one sentence-case line */}
           <div><b>{p.msTitle ?? "No manuscript"}</b>
@@ -638,46 +665,47 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         )}
         <div className="qc152-tabs" role="tablist" aria-label="The query">
           {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
-            <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
+            <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => (mut168("5") ? p.onTab(t) : g168(() => p.onTab(t)))}>
               {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
-              {ed.on && t === "notes" && ed.keys.includes("notes")
-                ? <span className="qc152-dot" data-qc152="tab-dot" aria-label="unsaved changes" /> : null}
             </button>
           ))}
         </div>
         <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
-          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
+          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{p.notes}</div>}
         </div>
-        {!ed.on && prof && profileIn ? (
+        {prof && profileIn ? (
           <ProfileDrawer key={`${r.id}:${prof.k}`} k={prof.k} prof={profileIn} journey={prof.journey} busy={profBusy} onBack={closeProf} onSave={(x) => void saveProf(x)}
             asks={p.asksBody ? (set) => p.asksBody!(profileIn, set) : undefined} />
         ) : null}
-        {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
-          : p.composer ? p.composer : prof ? null : d.foot ? (() => {
+        {p.composer ? p.composer : prof ? null : d.foot ? (() => {
           /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link. v158.1: with more than one action it is
              two rows (Foot, below) */
           const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
-          const primary = ft.button ? { label: ft.button.label, tone: ft.button.tone, act: ft.button.act as string, run: () => p.onFoot?.(ft.button!.act), hook: { "data-qc152": "reply-btn" } } : null;
-          const linkA = ft.link ? { label: ft.link.label, act: ft.link.act as string, run: () => p.onFoot?.(ft.link!.act), hook: { "data-qc1522": "foot-link" } } : null;
-          const repliedA = ft.replied ? { label: ft.replied.label, act: "resp", run: () => p.onFoot?.("resp"), hook: { "data-qc1522": "foot-replied" } } : null;
+          const primary = ft.button ? { label: ft.button.label, tone: ft.button.tone, act: ft.button.act as string, run: () => g168(() => p.onFoot?.(ft.button!.act)), hook: { "data-qc152": "reply-btn" } } : null;
+          const linkA = ft.link ? { label: ft.link.label, act: ft.link.act as string, run: () => g168(() => p.onFoot?.(ft.link!.act)), hook: { "data-qc1522": "foot-link" } } : null;
+          const repliedA = ft.replied ? { label: ft.replied.label, act: "resp", run: () => g168(() => p.onFoot?.("resp")), hook: { "data-qc1522": "foot-replied" } } : null;
           return <Foot late={ft.late} icon={ft.icon} lead={ft.lead} sub={ft.sub} primary={primary} others={[linkA, repliedA]}
             outer={{ "data-qc1522": "footer", "data-act": ft.button?.act ?? "none" }} />;
         })() : (
           <Foot late={box.late} icon={box.icon} lead={box.lead} sub={box.sub}
-            primary={{ label: box.button, tone: box.tone, act: box.act, arrow: true, run: () => p.onReply(box.act), hook: { "data-qc152": "reply-btn" } }}
-            others={[box.second ? { label: box.second.label, act: box.second.act, run: () => p.onReply(box.second!.act), hook: { "data-qc152": "reply-second" } } : null]}
+            primary={{ label: box.button, tone: box.tone, act: box.act, arrow: true, run: () => g168(() => p.onReply(box.act)), hook: { "data-qc152": "reply-btn" } }}
+            others={[box.second ? { label: box.second.label, act: box.second.act, run: () => g168(() => p.onReply(box.second!.act)), hook: { "data-qc152": "reply-second" } } : null]}
             outer={{ "data-act": box.act }} />
         )}
         </>}
-        {ed.on && ed.leave ? <LeaveAsk n={ed.keys.length} busy={ed.busy} onLose={ed.lose} onKeep={ed.keep} onSave={() => void ed.save()} /> : null}
-        {ed.on && ed.open && ed.dr && p.editData ? (
-          <EdMenu root={inRef.current} anchor={ed.anchor} onClose={() => ed.setOpen(null)}>
-            {ed.open === "agent" ? <>
-              <div className="ph">Who’s this query to?</div>
-              {p.editData.agents.map((a) => <MenuItem key={a.id} data={a.id} on={ed.dr!.agentId === a.id} label={a.name} sub={a.agency} onPick={() => { ed.setAgent(a.id); ed.setOpen(null); }} />)}
-              <div className="pf">Moves this query to another agent. Their details come with them.</div>
-            </> : null}
-          </EdMenu>
+        {bandMenu === "menu" ? (
+          <CardMenu root={inRef.current} anchor={moreRef.current} onClose={() => setBandMenu(null)} label="This query" hook="band-menu">
+            {p.moveTo ? <CardMenuItem label="Move to another agent" data={{ "data-act": "move" }} onPick={() => setBandMenu("move")} /> : null}
+            {p.onDeleteQuery ? <CardMenuItem label="Delete this query" rust data={{ "data-act": "delete" }} onPick={() => { setBandMenu(null); if (!mut168("12")) p.onDeleteQuery!(); }} /> : null}
+          </CardMenu>
+        ) : null}
+        {bandMenu === "move" && p.moveTo ? (
+          <CardMenu root={inRef.current} anchor={nameRef.current} onClose={() => setBandMenu(null)} label="Who’s this query to?" hook="move-menu">
+            <div className="ph">Who’s this query to?</div>
+            {p.moveTo.agents.map((a) => <CardMenuItem key={a.id} on={a.id === r.query.agentId} label={a.name} sub={a.agency} data={{ "data-v": a.id }}
+              onPick={() => { setBandMenu(null); if (a.id !== r.query.agentId && !mut168("11")) void p.moveTo!.onMove(a.id); }} />)}
+            <div className="pf">Moves this query to another agent. Their details come with them.</div>
+          </CardMenu>
         ) : null}
         {toastGone ? (
           /* v160 — the toast that timed out or was replaced leaves over 220ms (a copy: the live one is already gone) */
@@ -686,11 +714,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             <span>{toastGone.msg}</span>{toastGone.undo ? <button type="button" tabIndex={-1}>Undo</button> : null}
           </div>
         ) : null}
-        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const u = p.toast?.onUndo; if (u) pressThen(e.currentTarget.closest<HTMLElement>(".spanel"), u, true); }}>Undo</button> : null}</div> : null}
+        {toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{toast.msg}</span>{toast.onUndo ? <button type="button" data-qc1522="undo" onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const u = toast?.onUndo; if (u) pressThen(e.currentTarget.closest<HTMLElement>(".spanel"), u, true); }}>Undo</button> : null}</div> : null}
         {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}
       </div>
       {tip.node}
     </div>
+    </Edit168Ctx.Provider>
     </PopCtx.Provider>
   );
 };

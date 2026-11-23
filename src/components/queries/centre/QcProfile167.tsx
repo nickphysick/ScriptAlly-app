@@ -11,6 +11,9 @@
  * ⚠️ THE APP'S OWN PARTS: the reply time is `WeekSlider` as it stands (1–26, readout, "Unknown"); the methods are the
  *    agent card's `METHOD_PILLS`, in order, with their stored values and words; the sample is `SampleControl`.
  * ⚠️ THE AGENT IS ALWAYS NAMED, never "he", "she" or "they".
+ * Query card v168 — LEAVING WITH A CHANGE ASKS: Cancel, ✕, Esc and "Back to …" with something changed show the one
+ * question ("Discard your changes?" · Keep editing · Discard, QcEdit168 DiscardAsk) in the drawer's footer. The drawer
+ * holds the card's one-open rule while it is open, so any other door on the card asks here too. Nothing else changes.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { WeekSlider } from "../../forms/WeekSlider";
@@ -19,6 +22,7 @@ import { SubmissionMethod } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { ARROW, Seal } from "./QcGhost167";
 import type { ProfileKey } from "./QcAgent158";
+import { DiscardAsk, mut168, useHold168 } from "./QcEdit168";
 
 /** the agent's profile, as stored, for the drawers */
 export interface ProfileIn {
@@ -91,8 +95,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ k, prof, journey, 
   const [nrmn, setNrmn] = useState<boolean>(!!prof.nrmn);
   const [method, setMethod] = useState<string | null>(prof.method);
   const [askPatch, setAskPatch] = useState<ProfilePatch | null>(null);
-  /* one Escape handler: registered after any journey's, so it is the top one while this drawer is open */
-  useEscapeLayer(true, () => onBack(), ESC_LEVEL.pageModal);
   const first = useRef<HTMLDivElement>(null);
   useEffect(() => { first.current?.querySelector<HTMLElement>("input, button")?.focus({ preventScroll: true }); }, []);
 
@@ -107,6 +109,12 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ k, prof, journey, 
     if (k === "method") return method && method !== prof.method ? { method } : null;
     return askPatch;
   })();
+  /* v168 — the drawer holds the card while it is open; leaving with a change asks, in the footer */
+  const ed = useHold168("prof", !!patch, null, onBack, () => {});
+  const asking = ed.asking && ed.open === "prof";
+  const back = () => { if (patch && !mut168("10")) ed.leave(); else onBack(); };
+  /* one Escape handler: registered after any journey's, so it is the top one while this drawer is open */
+  useEscapeLayer(true, () => { if (asking) ed.keep(); else back(); }, ESC_LEVEL.pageModal);
 
   const body = k === "weeks" ? (
     <div data-qc167="reply-time">
@@ -131,16 +139,18 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ k, prof, journey, 
       <ProfileBand first={prof.first} initials={prof.initials} journey={journey} />
       <div className="qc1522-ch">
         <h3>{PROFILE_TITLE(k, prof.first)}</h3>
-        <button type="button" className="qc1522-x" aria-label="Close" data-qc167="close" onClick={onBack}>✕</button>
+        <button type="button" className="qc1522-x" aria-label="Close" data-qc167="close" onClick={back}>✕</button>
       </div>
       <div ref={first} className={`qc1522-cb${k === "asks" ? " qc167-ak" : ""}`} data-qc167="profile-body">{body}</div>
+      {asking ? <DiscardAsk className="bar" onKeep={ed.keep} onDiscard={ed.discard} /> : (
       <div className="qc1522-cf">
-        <button type="button" className="qc1522-btn gh" data-qc167="cancel" onClick={onBack}>{cancelWords(journey)}</button>
+        <button type="button" className="qc1522-btn gh" data-qc167="cancel" onClick={back}>{cancelWords(journey)}</button>
         <span className="sp" />
         <button type="button" className="qc1522-btn nv" data-qc167="save" disabled={!patch || busy} onClick={() => { if (patch) onSave(patch); }}>
           {busy ? "Saving…" : "Save to profile"}{busy ? null : ARROW}
         </button>
       </div>
+      )}
     </div>
   );
 };

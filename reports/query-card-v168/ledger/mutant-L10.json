@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the change made Save live",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Cancel with a change asks in the drawer's footer",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "…and the drawer is still open",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "Discard closes it",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing was written",
+  "ok": true,
+  "got": "8 → 8"
+ }
+]

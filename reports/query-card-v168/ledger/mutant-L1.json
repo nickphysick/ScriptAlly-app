@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no pencil on the band",
+  "ok": false,
+  "got": "1"
+ },
+ {
+  "name": "no [data-editing] on or in the card",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "⋯ holds exactly two items",
+  "ok": true,
+  "got": "[\"Move to another agent\",\"Delete this query\"]"
+ },
+ {
+  "name": "…Move to another agent, then Delete this query",
+  "ok": true,
+  "got": "[\"Move to another agent\",\"Delete this query\"]"
+ },
+ {
+  "name": "Delete this query is in rust words (--sp-rust)",
+  "ok": true,
+  "got": "rgb(122, 63, 49)"
+ }
+]

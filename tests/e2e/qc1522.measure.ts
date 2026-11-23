@@ -410,7 +410,8 @@ for (const vp of SIZES) {
       const OPEN: [string, string, string | null][] = [
         ["nudge", "[data-qc152='reply-btn']", null], ["agent", "[data-qc152='reply-btn']", "[data-qc1522='reply-types'] [data-v='req']"],
         ["agent", "[data-qc152='reply-btn']", "[data-qc1522='reply-types'] [data-v='more']"], ["offer", "[data-qc152='reply-btn']", "[data-qc1522='offer-choices'] [data-v='decline']"],
-        ["agent", "[data-qc152='pencil']", null],
+        /* Query card v168 — re-pointed: the band's pencil is gone; a step opened from its own pencil */
+        ["agent", "[data-qc152='thread'] [data-qc168='pen']", null],
       ];
       let fields = 0;
       for (const [key, sel, then] of OPEN) {
