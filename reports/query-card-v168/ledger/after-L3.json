@@ -1,0 +1,77 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the editor is where its bubble was (same place in the thread)",
+  "ok": true,
+  "got": "2 → step-edit"
+ },
+ {
+  "name": "only the one step is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the band is still drawn",
+  "ok": true,
+  "got": "54"
+ },
+ {
+  "name": "the ✕ is still drawn",
+  "ok": true,
+  "got": "36"
+ },
+ {
+  "name": "the tabs is still drawn",
+  "ok": true,
+  "got": "32"
+ },
+ {
+  "name": "the footer is still drawn",
+  "ok": true,
+  "got": "81"
+ },
+ {
+  "name": "the book is still drawn",
+  "ok": true,
+  "got": "69"
+ },
+ {
+  "name": "the cross and the tick are in the editor's heading row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the tick is disabled before a change",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the tick is enabled after a change",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no native <select> anywhere on the card",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no 'Steps are edited one at a time' line",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the cross closed it",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing was written",
+  "ok": true,
+  "got": "\"Loved the opening. Please send the full when you can.\""
+ }
+]

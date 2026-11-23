@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the note opened in place, its words in a field",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "…with Delete this note at its foot",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "read back: the note's new words",
+  "ok": true,
+  "got": "\"Met Ava at the Bath festival. Ava remembered the pitch. QC168-L8\""
+ },
+ {
+  "name": "Undo wrote the old words back",
+  "ok": true,
+  "got": "\"Met Ava at the Bath festival. Ava remembered the pitch.\""
+ },
+ {
+  "name": "Delete asks 'Delete this note?'",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "read back: the note is deleted",
+  "ok": true,
+  "got": "[\"q168-main-n1\"]"
+ },
+ {
+  "name": "restored",
+  "ok": true,
+  "got": ""
+ }
+]

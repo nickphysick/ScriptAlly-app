@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Tab reaches each step's pencil on the way",
+  "ok": true,
+  "got": "[\"step:q168-main-sent\",\"step:q168-main-freq\"]"
+ },
+ {
+  "name": "Enter opens the step",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Esc with a change asks",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Tab reaches the note's pencil",
+  "ok": true,
+  "got": "[\"note:q168-main-n1\"]"
+ },
+ {
+  "name": "Enter opens the note, its field focused",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Ctrl + Enter saved it (read back)",
+  "ok": false,
+  "got": "\"Met Ava at the Bath festival. Ava remembered the pitch.\""
+ },
+ {
+  "name": "restored",
+  "ok": true,
+  "got": "\"Met Ava at the Bath festival. Ava remembered the pitch.\""
+ }
+]

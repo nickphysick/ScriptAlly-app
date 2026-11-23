@@ -1,0 +1,17 @@
+[
+ {
+  "name": "no source imports or names a retired part",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no rule of qcv152inplace.css is loaded",
+  "ok": false,
+  "got": "2"
+ }
+]

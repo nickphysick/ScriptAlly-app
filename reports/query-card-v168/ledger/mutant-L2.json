@@ -1,0 +1,67 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: a bubble is drawn",
+  "ok": true,
+  "got": "[data-qc152='thread'] > [data-qc152='msg'][data-activity='q168-main-freq']"
+ },
+ {
+  "name": "a bubble: its pencil shows on hover",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "a bubble: nothing on the card moved or resized",
+  "ok": false,
+  "got": "39:DIV.qc152-th@0,239,524,358 → 39:DIV.qc152-th@0,239,524,384 | 60:DIV.qc152-m@18,371,439,95 → 60:DIV.qc152-m@18,371,439,121 | 62:DIV.qc152-bx@50,371,407,95 → 62:DIV.qc152-bx@50,371,407,121 | 71:SPAN.qc152-ts@414,448,33,12 → 71:SPAN.qc152-ts@414,474,33,12"
+ },
+ {
+  "name": "population: a tile is drawn",
+  "ok": true,
+  "got": "[data-qc167='tile'][data-k='reply']"
+ },
+ {
+  "name": "a tile: its pencil shows on hover",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "a tile: nothing on the card moved or resized",
+  "ok": false,
+  "got": "42:SMALL.@30,265,133,17 → 42:SMALL.@30,263,133,17 | 43:B.@30,285,133,22 → 43:B.@30,283,133,14 | 44:I.@30,310,133,17 → 44:I.@30,300,133,10"
+ },
+ {
+  "name": "population: a group is drawn",
+  "ok": true,
+  "got": ".nx-grp .nx-items[data-qc168-host]"
+ },
+ {
+  "name": "a group: its pencil shows on hover",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "a group: nothing on the card moved or resized",
+  "ok": false,
+  "got": "39:DIV.nx@0,239,524,280 → 39:DIV.nx@0,239,524,306 | 40:DIV.nx-rail@18,253,488,248 → 40:DIV.nx-rail@18,253,488,274 | 41:DIV.nx-grp@18,253,488,156 → 41:DIV.nx-grp@18,253,488,182 | 46:UL.nx-items@64,289,442,120 → 46:UL.nx-items@64,289,442,146"
+ },
+ {
+  "name": "population: a note is drawn",
+  "ok": true,
+  "got": "[data-qc158='note'][data-id='q168-main-n1']"
+ },
+ {
+  "name": "a note: its pencil shows on hover",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "a note: nothing on the card moved or resized",
+  "ok": false,
+  "got": "39:DIV.qc152-notes@0,239,524,364 → 39:DIV.qc152-notes@0,239,524,369 | 40:DIV.nx-notes@0,239,524,364 → 40:DIV.nx-notes@0,239,524,369 | 41:DIV.nx-nl@18,251,488,266 → 41:DIV.nx-nl@18,251,488,271 | 42:ARTICLE.nx-n@18,251,488,66 → 42:ARTICLE.nx-n@18,251,488,118"
+ }
+]

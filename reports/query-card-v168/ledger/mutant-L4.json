@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the editor is gone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the toast says Changes discarded",
+  "ok": true,
+  "got": "Changes discardedUndo"
+ },
+ {
+  "name": "the toast offers Undo",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Undo reopened the step",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "…with the typed words",
+  "ok": false,
+  "got": "\"Loved the opening. Please send the full when you can.\""
+ },
+ {
+  "name": "…and the tick is enabled (it is a change)",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "nothing was written",
+  "ok": true,
+  "got": ""
+ }
+]

@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Tracking: one step editor, the second one",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Notes: one note open, the second one",
+  "ok": true,
+  "got": "[\"q168-main-n2\"]"
+ },
+ {
+  "name": "anywhere on the card: one editor",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the other entries sit back (42%)",
+  "ok": true,
+  "got": "0.42"
+ }
+]

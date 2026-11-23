@@ -22,6 +22,7 @@
  *    list ("Who’s this query to?") and a note's ⋯ all use it. No second menu.
  */
 import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 const PEN = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
 const TICK = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7" /></svg>;
@@ -81,13 +82,12 @@ export function useEditRule168(resetKey: string, toast: (msg: string, undo: (() 
     root()?.querySelector<HTMLElement>("[data-qc168='ask']")?.scrollIntoView({ block: "nearest" });
   }, [asking]); // eslint-disable-line react-hooks/exhaustive-deps
   const shut = () => { const h = held.current; held.current = null; setOpen(null); setAsking(false); if (h) { seeds.current.delete(h.key); h.close(); } };
-  const ask = (go: (() => void) | null) => {
-    if (mut168("9")) { go?.(); return; }
-    then.current = go; setAsking(true);
-  };
+  const ask = (go: (() => void) | null) => { then.current = go; setAsking(true); };
   return {
     open, asking,
     guard: (go) => {
+      /* lock L9's mutation, "allow two": the click goes on and what was open stays open */
+      if (mut168("9")) { go(); return; }
       const h = held.current;
       if (!h) { go(); return; }
       if (h.dirty) { ask(go); return; }
@@ -198,11 +198,12 @@ export const CardMenu: React.FC<{ root: HTMLElement | null; anchor: HTMLElement 
   }, [root, anchor, children]);
   useEffect(() => {
     const off = (e: PointerEvent) => { const t = e.target as Node; if (ref.current?.contains(t) || anchor?.contains(t)) return; onClose(); };
-    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); onClose(); anchor?.focus(); } };
     document.addEventListener("pointerdown", off, true);
-    document.addEventListener("keydown", esc, true);
-    return () => { document.removeEventListener("pointerdown", off, true); document.removeEventListener("keydown", esc, true); };
+    return () => document.removeEventListener("pointerdown", off, true);
   }, [anchor, onClose]);
+  /* ONE Escape cascade (lib/escapeStack): the menu is a popup inside the card, so it hears the key before the card
+     (and any editor open in it) — a listener of its own would lose to the stack's window listener and close the card */
+  useEscapeLayer(true, () => { onClose(); anchor?.focus(); }, ESC_LEVEL.cardPopup);
   useEffect(() => { ref.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true }); }, []);
   return (
     <div ref={ref} className={`qc152-pp qc168-mn${root ? "" : " nm"}${!root && up ? " up" : ""}`} role="menu" aria-label={label} data-qc152="ed-menu" data-qc168={hook ?? "menu"} data-up={pos?.up || (!root && up) ? "" : undefined}
