@@ -1,0 +1,62 @@
+[
+ {
+  "where": "B4 the slider's input is the same node after moving it",
+  "ok": false,
+  "detail": "{\"same\":false,\"scroll\":0,\"b0\":0,\"note\":\"On your to-do list for Fri 27 Nov.\"}"
+ },
+ {
+  "where": "B4 the body's scroll is held",
+  "ok": true,
+  "detail": "{\"same\":false,\"scroll\":0,\"b0\":0,\"note\":\"On your to-do list for Fri 27 Nov.\"}"
+ },
+ {
+  "where": "B4 the date beneath follows",
+  "ok": true,
+  "detail": "On your to-do list for Fri 27 Nov."
+ },
+ {
+  "where": "B5 on the review",
+  "ok": true,
+  "detail": "check"
+ },
+ {
+  "where": "B5 nothing cut off at 1440 × 900 with no note (the body does not scroll)",
+  "ok": true,
+  "detail": "607 in 607"
+ },
+ {
+  "where": "B6 the recorded screen, with its stamp",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "B6 the head says it was recorded",
+  "ok": true,
+  "detail": "Recorded. A partial request!That’s 2 requests so far."
+ },
+ {
+  "where": "B6 Undo brings the review back",
+  "ok": true,
+  "detail": "check"
+ },
+ {
+  "where": "B6 after Undo the query is back where it was (Queried)",
+  "ok": true,
+  "detail": "Rosalind Vale: Queried"
+ },
+ {
+  "where": "B9 back at Who replied?, with the toast",
+  "ok": true,
+  "detail": "Recorded Rosalind’s reply.Undo"
+ },
+ {
+  "where": "B9 the head counts this sitting",
+  "ok": true,
+  "detail": "That’s 1 recorded.Who else replied?"
+ },
+ {
+  "where": "B9 the toast's Undo brings the review back",
+  "ok": true,
+  "detail": "check"
+ }
+]

@@ -1,0 +1,112 @@
+[
+ {
+  "where": "B1 population: rows on Who replied?",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "where": "B1 the search has focus",
+  "ok": true,
+  "detail": "find"
+ },
+ {
+  "where": "B1 groups in order",
+  "ok": true,
+  "detail": "[\"wait\",\"you\"]"
+ },
+ {
+  "where": "B1 longest wait first",
+  "ok": true,
+  "detail": "[464,322,264,258,255,246,237,232]"
+ },
+ {
+  "where": "B1 no closed query with nothing typed",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "B1 typing finds a closed query, under its heading",
+  "ok": true,
+  "detail": "{\"groups\":[\"Closed · a reply reopens it 1\"],\"closed\":1}"
+ },
+ {
+  "where": "B7 Escape clears the search first, the journey stays",
+  "ok": true,
+  "detail": "{\"find\":\"\",\"open\":true}"
+ },
+ {
+  "where": "B1 ↓ and ↵ pick",
+  "ok": true,
+  "detail": "reply"
+ },
+ {
+  "where": "B1 the picked query is the second row",
+  "ok": true,
+  "detail": "seed-query-19"
+ },
+ {
+  "where": "B2 the sub-line",
+  "ok": true,
+  "detail": "Queried since 16 Aug, 464 days ago."
+ },
+ {
+  "where": "B2 a Queried query's likely replies",
+  "ok": true,
+  "detail": "[\"pr\",\"fr\",\"no\"]"
+ },
+ {
+  "where": "B2 the rest behind Another kind of reply",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "B2 five steps before the reply is known",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "B2 a pick moves on by itself",
+  "ok": true,
+  "detail": "when"
+ },
+ {
+  "where": "B2 a partial's track: six steps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "B3 population: the month's days",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "where": "B3 no day in the future",
+  "ok": true,
+  "detail": "{\"n\":30,\"futureAllOff\":true,\"futureN\":7,\"month\":\"November 2026\",\"next\":true}"
+ },
+ {
+  "where": "B8 a done step on the track goes back to it",
+  "ok": true,
+  "detail": "reply"
+ },
+ {
+  "where": "B7 with answers, Escape shows the discard bar",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "B7 Escape again takes the bar away, the journey stays",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "B7 Discard closes",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "B7 with nothing answered, Escape just closes",
+  "ok": true,
+  "detail": ""
+ }
+]
