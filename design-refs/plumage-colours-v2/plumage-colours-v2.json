@@ -1,0 +1,18 @@
+{
+ "name": "Plumage colours v2",
+ "changes": "From v1: no with-you outline anywhere; Full is slate blue; Offer is duck egg, with soft stripes on card bands and strips only; grid cards carry the status name on a label across the band's bottom edge.",
+ "ink": "#1c130f",
+ "stages": {
+  "queried": "unchanged",
+  "partial": "unchanged (bandRequested #f1d9cf, band #e8c0af)",
+  "full": { "bandRequested": "#dbe4ee", "band": "#b9c9da", "tint": "#eff3f7", "edge": "#9fb3c8", "mark": "#6f8fb0", "rim": "#6f8fb0", "rimHi": "#dbe4ee" },
+  "offer": { "bandRequested": "#c5e0d8", "band": "#c5e0d8", "tint": "#eef6f3", "edge": "#a9cdc2", "mark": "#7fb3a5", "rim": "#7fb3a5", "rimHi": "#e2f0ec" },
+  "closed": "unchanged"
+ },
+ "offerStripes": "repeating-linear-gradient(118deg,#f6f0e5 0 22px,#f1d9cf 22px 44px,#dbe4ee 44px 66px)",
+ "offerStripesWhere": "the grid card's band and the slide-in card's strip only",
+ "offerInk": "#1c130f",
+ "accentInk": { "partial": "#7a4532", "full": "#3d5673", "offer": "#2f5a4e" },
+ "withYouOutline": "removed",
+ "statusLabel": { "where": "grid card only, across the band's bottom edge, 14px from the left", "height": "22px", "radius": "11px", "fill": "#ffffff", "edge": "1px inset, the stage's edge colour", "type": "Special Elite 13px, ink", "text": "the status name, as the app already words it" }
+}

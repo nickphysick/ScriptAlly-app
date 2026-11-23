@@ -24,7 +24,7 @@
  *   - Landscape (a phone on its side): one header row with the spans, a 184px name column with the full name, no dock.
  * ⚠️ COPY: never "overdue" or "late" (the engine's key `overdue` is an attribute only; the words are phoneV41's).
  */
-import { bandBackground } from "../../../lib/stageColours";
+import { statusBand } from "../../../lib/stageColours";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MONTHS_SHORT, dayMonth } from "../../../lib/dates";
@@ -309,7 +309,7 @@ export const BirdsViewV5: React.FC<{ switcher: React.ReactNode; corner: React.Re
                           {tk?.past.map((b, i) => <i key={i} className="pa5bv-p" style={{ ...at(b.l, b.w), background: statusFill(b.status) }} />)}
                           {cur ? (<>
                             {cur.rem > 0 ? <i className={`pa5bv-rm${cur.off ? " off" : ""}`} style={{ ...at(cur.l, cur.rem), background: statusFill(cur.status) }} /> : null}
-                            <i className="pa5bv-s" data-pa5="bv-solid" style={{ ...at(cur.l, cur.solid), background: bandBackground(String(cur.status)) }} />
+                            <i className="pa5bv-s" data-pa5="bv-solid" style={{ ...at(cur.l, cur.solid), background: statusBand(String(cur.status)) }} />
                             {cur.deep ? <i className="pa5bv-dp" data-pa5="bv-deep" style={{ ...at(cur.deep.l, cur.deep.w), background: statusFill(cur.status) }} /> : null}
                             {cur.notch != null ? <s data-pa5="bv-notch" style={at(cur.notch)} /> : null}
                           </>) : null}

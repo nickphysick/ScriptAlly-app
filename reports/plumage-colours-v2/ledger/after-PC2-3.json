@@ -1,0 +1,852 @@
+[
+ {
+  "name": "Partial Requested: population non-zero",
+  "ok": true,
+  "got": "6"
+ },
+ {
+  "name": "Partial Sent: population non-zero",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "Full Requested: population non-zero",
+  "ok": true,
+  "got": "7"
+ },
+ {
+  "name": "Full Sent: population non-zero",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "Revise & Resubmit: population non-zero",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Partial Requested seed-query-7: grid band #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: grid band #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Full Requested seed-query-9: grid band #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: grid band #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Partial Requested seed-query-20: grid band #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: grid band #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Full Requested rj-send: grid band #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Full Requested cv25-q-09: grid band #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Partial Requested cor-move-a: grid band #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: grid band #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: grid band #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: grid band #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Full Requested msv12-q-4: grid band #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Full Requested rj-dupe: grid band #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Queried seed-query-2: grid band #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: grid band #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent cor-pair: grid band #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent seed-query-23: grid band #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent seed-query-8: grid band #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: grid band #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: grid band #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: grid band #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Full Sent qc150l9-q: grid band #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Queried probe-un-both: grid band #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried probe-un-noagent: grid band #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried cv25-q-14: grid band #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried cv25-q-13: grid band #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried thin-q-close (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-22 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried msv12-q-1 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried msv12-q-7 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-4 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-19 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-2 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-1 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-6 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-3 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-5 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-4 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-query-10 (quiet): fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-ms2-a (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried rj-nudge (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-chase (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b (quiet): fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent cv25-q-10 (quiet): fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Partial Sent cv25-q-05 (quiet): fades from #e8c0af",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-6 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-pkgq-1 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-pkgq-2 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-5 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent cor-undo (quiet): fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried cor-move-b (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-pkgq-7 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-3 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-cal-near-q (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Partial Sent cv25-q-11 (quiet): fades from #e8c0af",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9 (quiet): fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-query-21 (quiet): fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10 (quiet): fades from #e8c0af",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent msv12-q-5 (quiet): fades from #b9c9da",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(185, 201, 218) 0px, rgb(185, 201, 218) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-remind (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried msv12-q-2 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried probe-dangling-pkg (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried probe-un-noms (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried probe-goalstress-today (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried cv25-q-04 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried cv25-q-03 (quiet): fades from #efe6d6",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "No Response msv12-q-8: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cv25-q-01: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-1: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-13: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cv25-q-12: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected rej-query-1: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cor-move-c: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Withdrawn seed-query-17: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-15: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-16: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected msv12-q-6: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "No Response seed-query-18: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cor-closed: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-14: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cv25-q-02: grid band #eceae6, flat",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "slide-in Partial Requested seed-query-7: strip #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "slide-in Partial Sent thin-q-gap-solo: strip #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "slide-in Full Requested seed-query-9: strip #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "slide-in Full Sent qc150l9-q: strip #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "slide-in Revise & Resubmit seed-query-11: strip #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "(recorded) Resubmitted: no live card in the seed to open",
+  "ok": true,
+  "got": "skipped"
+ },
+ {
+  "name": "(recorded) Signed: no live card in the seed to open",
+  "ok": true,
+  "got": "skipped"
+ },
+ {
+  "name": "slide-in: opened Partial requested, Full requested and R&R at least",
+  "ok": true,
+  "got": "Partial Requested, Partial Sent, Full Requested, Full Sent, Revise & Resubmit, Offer"
+ },
+ {
+  "name": "Birds-eye bars with a known status: population",
+  "ok": true,
+  "got": "70 of 70"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-close: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-22: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-1: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-7: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-4: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-19: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-2: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-1: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-6: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-3: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-5: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-cohort-4: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-10: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-ms2-a: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried rj-nudge: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-chase: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-ms2-b: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent cv25-q-10: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cv25-q-05: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-passed20-q: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-6: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-1: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-2: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-5: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent cor-undo: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Queried cor-move-b: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-pkgq-7: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-3: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested seed-query-7: bar #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-near-q: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cv25-q-11: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-pkgq-9: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent seed-query-21: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-pkgq-10: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent msv12-q-5: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Queried thin-q-remind: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Revise & Resubmit seed-query-11: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Queried msv12-q-2: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-query-2: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent thin-q-gap-solo: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent cor-pair: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-query-23: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-query-8: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-dangling-pkg: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-noms: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Partial Sent seed-pkgq-4: bar #e8c0af, flat",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-goalstress-today: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-soon-q: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-query-9: bar #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cv25-q-06: bar #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested seed-query-20: bar #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested msv12-q-3: bar #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Birds-eye Full Requested rj-send: bar #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Birds-eye Full Requested cv25-q-09: bar #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cor-move-a: bar #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Birds-eye Partial Requested cv25-q-07: bar #f1d9cf, flat",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-pkgq-3: bar #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Birds-eye Offer seed-query-12: bar #c5e0d8, flat",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Birds-eye Full Requested seed-cal-passed865-q: bar #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Birds-eye Full Requested msv12-q-4: bar #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Birds-eye Full Requested rj-dupe: bar #dbe4ee, flat",
+  "ok": true,
+  "got": "rgb(219, 228, 238) / none"
+ },
+ {
+  "name": "Birds-eye Offer cv25-q-08: bar #c5e0d8, flat",
+  "ok": true,
+  "got": "rgb(197, 224, 216) / none"
+ },
+ {
+  "name": "Birds-eye Queried seed-cal-bang-q: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Full Sent qc150l9-q: bar #b9c9da, flat",
+  "ok": true,
+  "got": "rgb(185, 201, 218) / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-both: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried probe-un-noagent: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-04: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-14: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-13: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Birds-eye Queried cv25-q-03: bar #efe6d6, flat",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ }
+]

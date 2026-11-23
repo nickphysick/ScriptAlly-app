@@ -1,0 +1,22 @@
+[
+ {
+  "name": "chromium: labels read",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "chromium: no label clipped or covered",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "webkit: labels read",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "webkit: no label clipped or covered",
+  "ok": true,
+  "got": "none"
+ }
+]

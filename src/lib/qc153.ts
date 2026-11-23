@@ -18,7 +18,7 @@ import { CLOSED_STATUSES, isClosedRow, lastHeardMs, liveLevel, shortDate } from 
 import { nextNum, type NextNum } from "./qc1512";
 import { stateOf } from "./queryState";
 import { MONTHS_SHORT } from "./dates";
-import { OFFER_INK, STAGE_COLOURS, STAGE_INK, stageOf, statusBand, type Stage } from "./stageColours";
+import { STAGE_COLOURS, stageOf, statusBand, type Stage } from "./stageColours";
 
 /* ── the header's colour ─────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -213,8 +213,6 @@ export function sectionSwatch(group: string, key: string): string {
   if (group === "status") return key === "closed" ? SLIP_TONE_FILL.closed : statusBand(key);
   return SLIP_TONE_FILL.queried;
 }
-/** the count's ink on a swatch: the paper on the offer's navy, ink on every other */
-export const swatchInk = (swatch: string): string => (swatch === STAGE_COLOURS.offer.band ? OFFER_INK : STAGE_INK);
 /** the groups that fold into one row: Gone quiet and Closed */
 export const isFoldKey = (group: string, key: string): boolean => (group === "attention" && (key === "quiet" || key === "closed")) || (group === "status" && key === "closed");
 export const FOLD_LINE: Record<"quiet" | "closed", string> = {

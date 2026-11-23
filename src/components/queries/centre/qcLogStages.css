@@ -440,6 +440,6 @@
    for the preview only (the grid card's own sheet is not edited; both are reported for the page):
    · the paperclip's focus ring: qcv154's `.qc1533-clip.qc1533-clip:focus { all: unset }` outranks its own :focus-visible
      ring, so Tab reached the paperclip with no ring at all;
-   · the track's hover label is 11.5px; nothing in this panel is under 12px. */
+   · (the track's hover label, 11.5px, was lifted to 12 here; Plumage colours v2 deleted that label, so its rule went
+     with it in the dev-line merge). */
 .laq .qc151 .qc154-card .qc1533-clip.qc1533-clip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 6px; }
-.laq .qc154-card .qc154-thl { font-size: 12px !important; }

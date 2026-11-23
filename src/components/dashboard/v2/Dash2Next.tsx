@@ -21,7 +21,7 @@ import { CAUGHT_UP } from "../v71/Dash71Task";
 import { StatusDot } from "../../StatusDot";
 import { AgentDisc } from "../../shared/AgentDisc";
 import { Frame } from "./Frame";
-import { STAGE_COLOURS, bandBackground, quietBackground, withYouOutline } from "../../../lib/stageColours";
+import { STAGE_COLOURS, quietBackground, statusBand } from "../../../lib/stageColours";
 import { nextButtons, nextKind, nextLead, nextRow, type NextLead, type Track } from "../../../lib/nextUp";
 import "./nextUp.css";
 
@@ -111,15 +111,14 @@ export const Dash2Next: React.FC<{
   /* Dashboard v3, Phase 3: the head takes the stage of the lead task's query; a task not about a query has a paper head.
      Gone quiet fades the head, as the Queries cards do. */
   const stage = !loading && lead?.stage ? lead.stage : null;
-  /* Plumage colours v1 — the head is the lead query's STATUS band, and a query with the writer carries the with-you
-     outline: 3px inset, its top corners the frame's inner radius (--sp-rc-in-r 13px less the 1px --sp-rc-edge = 12px) */
+  /* Plumage colours v1 — the head is the lead query's STATUS band, flat (v2: no outline; the stripes are for the two
+     query card bands only) */
   const st = lead?.status ?? null;
   const quietHead = lead?.kind === "quiet" && stage !== "offer";
-  const head = stage ? (quietHead ? quietBackground(st) : bandBackground(st)) : null;
-  const wy = stage && !quietHead ? withYouOutline(st) : null;
+  const head = stage ? (quietHead ? quietBackground(st) : statusBand(st)) : null;
   return (
     <Frame tone="paper" title="Next up" label="Next up" probe="next" loading={loading}
-      bandStyle={head ? { background: head, ...(wy ? { boxShadow: `inset 0 0 0 3px ${wy}`, borderRadius: "12px 12px 0 0" } : {}) } : undefined} data={{ stage: stage ?? "none" }}
+      bandStyle={head ? { background: head } : undefined} data={{ stage: stage ?? "none" }}
       meta={n > 0 && !loading ? <>{shown} of {n} · <button type="button" className="d2-link" data-d2="see-all" onClick={onSeeAll}>{SEE_ALL}</button></> : null}>
       <div className="d2-body d2-next" data-d2="next" data-n={n}>
         {loading ? (

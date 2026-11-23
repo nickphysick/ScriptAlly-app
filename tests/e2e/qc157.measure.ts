@@ -135,6 +135,12 @@ test.describe("Query Centre v157", () => {
       for (const c of got) {
         if (seen.has(`${c.status}${c.quiet}`)) continue;
         seen.add(`${c.status}${c.quiet}`);
+        /* Plumage colours v2: an offer's grid band is the soft stripes, with no flat colour of its own; they are measured
+           by tests/e2e/pc2.measure.ts PC2-4, so here an offer is only checked to be striped */
+        if ((c.status === "Offer" || c.status === "Signed") && !c.quiet) {
+          L.check(`${c.status}: band striped (PC2-4 reads the stripes)`, /^repeating-linear-gradient\(118deg/.test(c.image), `${c.id} ${c.image.slice(0, 40)}`);
+          continue;
+        }
         const want = rgb(statusBand(c.status));
         /* a quiet band is a gradient (no colour of its own): its first stop is the status's band (Plumage colours v1) */
         const v = c.quiet ? (c.image.match(/rgb\([^)]*\)/)?.[0] ?? "none") : c.color;
@@ -145,8 +151,8 @@ test.describe("Query Centre v157", () => {
       L.done(6);
     });
 
-    /* QC157-2 (the offer's foil) is retired by Plumage colours v1: the offer is flat navy, measured by
-       tests/e2e/pc1.measure.ts PC1-3 (no gradient layer, the paper name). */
+    /* QC157-2 (the offer's foil) is retired by Plumage colours v1; Plumage colours v2's offer stripes are measured by
+       tests/e2e/pc2.measure.ts PC2-4 (the stripes on the grid band, flat duck egg elsewhere). */
 
     test(`QC157-3 track — ${w}`, async ({ page }) => {
       test.skip(PHASE === "ref", "not on the reference");
@@ -159,10 +165,8 @@ test.describe("Query Centre v157", () => {
       for (const g of got) {
         for (const n of g.nodes) {
           const k = `${g.status}:${n.s}`; if (seen.has(k)) continue; seen.add(k);
-          /* Plumage colours v1: on the offer's navy a reached or faint step is the paper (the current step keeps its
-             white disc and ink mark) */
-          const offer = g.status === "Offer" || g.status === "Signed";
-          const want = n.s === "cur" ? "rgb(28, 19, 15)" : n.s === "reached" ? (offer ? "rgb(244, 238, 229)" : "rgb(28, 19, 15)") : offer ? "rgba(244, 238, 229, 0.5)" : "rgba(28, 19, 15, 0.42)";
+          /* Plumage colours v2: ink on every band, the offer's duck egg included (v1's paper on navy is retired) */
+          const want = n.s === "cur" || n.s === "reached" ? "rgb(28, 19, 15)" : "rgba(28, 19, 15, 0.42)";
           L.check(`${g.status} ${n.s} step: ${want}`, n.c === want, n.c);
         }
       }

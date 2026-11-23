@@ -33,7 +33,7 @@ import { Frame } from "./Frame";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { goingHeading, goingSub, type HowItsGoing } from "../../../lib/dash3";
-import { STAGE_COLOURS, OFFER_INK } from "../../../lib/stageColours";
+import { STAGE_COLOURS, STAGE_INK } from "../../../lib/stageColours";
 
 export const PLOT_H = 270;
 export const EDGE = 22;
@@ -71,7 +71,7 @@ export const Going: React.FC<{ g: HowItsGoing }> = ({ g }) => {
       <p className="d3-gsub" data-d3="going-sub">{goingSub(g)}</p>
       {bar("sent", QueryStatus.QUERIED, "Queries sent", g.sent, STAGE_COLOURS.queried.band)}
       {bar("asked", QueryStatus.FULL_REQUESTED, "Asked for more", g.asked, STAGE_COLOURS.full.band)}
-      {bar("offers", QueryStatus.OFFER, "Offers", g.offers, STAGE_COLOURS.offer.band, OFFER_INK)}
+      {bar("offers", QueryStatus.OFFER, "Offers", g.offers, STAGE_COLOURS.offer.band, STAGE_INK)}
     </div>
   );
 };

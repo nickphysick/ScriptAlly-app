@@ -27,7 +27,7 @@ import "./qcv1522card.css";
 import "./qcv161.css";
 import { StatusDot } from "../../StatusDot";
 import { breatheClose, breatheIn, breatheOpen, breatheType, pressAtPointer, pressThen } from "./qcMotion160";
-import { STAGE_COLOURS, bandBackground, stageOf } from "../../../lib/stageColours";
+import { STAGE_COLOURS, stageOf, statusBand } from "../../../lib/stageColours";
 
 const DAY = 86_400_000;
 const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -349,7 +349,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
       const statusOf = (r: (typeof REPLIES)[number]): QueryStatus | string =>
         r.k === "req" ? (c.queryOnly ? QueryStatus.PARTIAL_REQUESTED : QueryStatus.FULL_REQUESTED) : r.status ?? c.status ?? QueryStatus.QUERIED;
       const disc = (r: (typeof REPLIES)[number]) => (
-        <span className="d" data-qc161="disc" aria-hidden="true" style={{ background: bandBackground(statusOf(r)) }}>
+        <span className="d" data-qc161="disc" aria-hidden="true" style={{ background: statusBand(statusOf(r)) }}>
           <StatusDot status={statusOf(r)} overrideSize={18} tone="ink" decorative />
         </span>
       );

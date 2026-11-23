@@ -132,8 +132,8 @@
 .rsp15 [data-tone] { --tk: #1c130f; }
 .rsp15 [data-tone="queried"] { --st: #f8f4ed; --sb: #efe6d6; --dp: #e0d2bb; }
 .rsp15 [data-tone="partial"] { --st: #f9f0ec; --sb: #e8c0af; --dp: #e2b09c; }
-.rsp15 [data-tone="full"] { --st: #ededef; --sb: #b5b6c0; --dp: #a0a0ae; }
-.rsp15 [data-tone="offer"] { --st: #d9dce0; --sb: #2a3a52; --dp: #243247; }
+.rsp15 [data-tone="full"] { --st: #eff3f7; --sb: #b9c9da; --dp: #9fb3c8; }
+.rsp15 [data-tone="offer"] { --st: #eef6f3; --sb: #c5e0d8; --dp: #a9cdc2; }
 .rsp15 [data-tone="closed"] { --st: #f6f5f3; --sb: #eceae6; --dp: #dedbd5; }
 .rsp15 .rsp15-pl {
   margin-left: auto; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px 0 9px; border-radius: 999px;

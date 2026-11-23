@@ -58,8 +58,8 @@ describe("the Queries panel", () => {
     expect(labs.map((x) => x.match(/<span class="sf-nm">([^<]*)</)?.[1])).toEqual(["Queried", "Partial", "Full", "Offer", "Closed"]);
     expect(labs[0]).toContain(`background:${STAGE_COLOURS.queried.band}`);
     expect(labs[3]).toContain(`${STAGE_COLOURS.offer.band}`);
-    expect(labs[3]).not.toContain("linear-gradient"); /* Plumage colours v1: the offer is flat navy, in paper */
-    expect(labs[3]).toContain("color:#f4eee5");
+    expect(labs[3]).not.toContain("linear-gradient"); /* Plumage colours v2: the offer pill is flat duck egg, in ink */
+    expect(labs[3]).toContain("color:#1c130f");
     /* Closed has 0 and is off: inert */
     expect(labs[4]).toMatch(/disabled=""/);
     /* the bar: one segment per stage with a count, as wide as it, out of the tab order */

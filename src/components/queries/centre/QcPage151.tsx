@@ -34,7 +34,7 @@ import { QcCard154 } from "./QcCard154";
 import { QcBar153 } from "./QcBar153";
 import { AppliedRow, type AppliedChip } from "../../shell/AppliedRow";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
-import { sectionSwatch, standWords, swatchInk } from "../../../lib/qc153";
+import { sectionSwatch, standWords } from "../../../lib/qc153";
 import { STAGE_COLOURS } from "../../../lib/stageColours";
 import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
 import { LoadFailed } from "../../notes/LoadFailed";
@@ -444,7 +444,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                   <section key={s.key} className="qc153-grp" data-qc1511="group" data-k={s.key} aria-label={s.label || "Queries"}>
                     {s.label ? (
                       <div className="qc153-sec" data-qc153="heading" data-qc154="head" data-label={s.label} data-count={s.rows.length} data-offer={sectionSwatch(p.group, s.key) === STAGE_COLOURS.offer.band ? "" : undefined}
-                        style={{ "--sw": sectionSwatch(p.group, s.key), "--swi": swatchInk(sectionSwatch(p.group, s.key)) } as React.CSSProperties}>
+                        style={{ "--sw": sectionSwatch(p.group, s.key) } as React.CSSProperties}>
                         <b data-qc151="section">{s.label}</b><small data-qc1533="count">{s.rows.length}</small><i className="qc1533-rule" aria-hidden="true" />
                         {folds
                           ? <button type="button" className="qc153-lnk qc153-lnk--r" data-qc153="fold-away" aria-expanded={true} onClick={() => openFold(s.key, false)}>Fold away</button>

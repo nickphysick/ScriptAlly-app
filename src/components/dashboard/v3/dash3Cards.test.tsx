@@ -25,7 +25,8 @@ describe("DB3-3 · Next up's head is the lead task's stage", () => {
   it("a full request: the full band on the head, the full tint on the lead card", () => {
     const h = html(QueryStatus.FULL_REQUESTED);
     expect(h).toContain('data-stage="full"');
-    expect(h).toContain(`style="background:${statusBand(QueryStatus.FULL_REQUESTED)};box-shadow:inset 0 0 0 3px #b5b6c0;border-radius:12px 12px 0 0"`); /* the with-you outline */ /* Plumage colours v1: the status's band */
+    expect(h).toContain(`style="background:${statusBand(QueryStatus.FULL_REQUESTED)}"`); /* Plumage colours v1: the status's band; v2: no outline */
+    expect(h).not.toContain("inset 0 0 0 3px");
     expect(h).toContain(`style="background:${STAGE_COLOURS.full.tint}"`);
   });
   it("a task not about a query: a plain paper head, no stage fill", () => {
@@ -40,7 +41,7 @@ describe("DB3-3 · Next up's head is the lead task's stage", () => {
 });
 
 import { Dash2Active, Going, GOING_TITLE } from "../v2/Dash2Active";
-import { bandBackground } from "../../../lib/stageColours";
+import { statusBand as offerBand } from "../../../lib/stageColours";
 
 describe("DB3-4a · the chart's third view", () => {
   it("the toggle offers Active, Sent and How it's going", () => {
@@ -60,7 +61,8 @@ describe("DB3-4a · the chart's third view", () => {
     const text = h.replace(/<[^>]*>/g, " ");
     for (const w of [/\bgood\b/i, /\bgreat\b/i, /\bstrong\b/i, /\bweak\b/i, /\baverage\b/i, /\bbenchmark/i, /%/]) expect(text, String(w)).not.toMatch(w);
     const one = renderToStaticMarkup(<Going g={{ sent: 2, asked: 1, full: 0, offers: 1, closedNoRequest: 0 }} />);
-    expect(one).toContain(bandBackground("offer").slice(0, 30));
+    expect(one).toContain(offerBand("Offer")); /* Plumage colours v2: the chart's offer bar is flat duck egg, never the stripes */
+    expect(one).not.toContain("repeating-linear-gradient");
   });
 });
 

@@ -1,0 +1,272 @@
+[
+ {
+  "name": "Offer seed-query-12: grid band is not navy",
+  "ok": true,
+  "got": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "Offer seed-query-12 name: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 name: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 agency: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.58)"
+ },
+ {
+  "name": "(recorded) Offer seed-query-12 agency (ink at 0.58): lowest contrast on duck egg / stripes",
+  "ok": true,
+  "got": "4.02"
+ },
+ {
+  "name": "Offer seed-query-12 label: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 label: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 step reached: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 step cur: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 step cur: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 link done: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 link done: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 link done: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 link done: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer seed-query-12 link done: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer seed-query-12 link done: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer cv25-q-08: grid band is not navy",
+  "ok": true,
+  "got": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "Offer cv25-q-08 name: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer cv25-q-08 name: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer cv25-q-08 agency: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.58)"
+ },
+ {
+  "name": "(recorded) Offer cv25-q-08 agency (ink at 0.58): lowest contrast on duck egg / stripes",
+  "ok": true,
+  "got": "4.02"
+ },
+ {
+  "name": "Offer cv25-q-08 label: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer cv25-q-08 label: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer cv25-q-08 step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer cv25-q-08 step reached: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer cv25-q-08 step skip: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "(recorded) Offer cv25-q-08 step skip (ink at 0.42): lowest contrast on duck egg / stripes",
+  "ok": true,
+  "got": "2.57"
+ },
+ {
+  "name": "Offer cv25-q-08 step skip: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.42)"
+ },
+ {
+  "name": "(recorded) Offer cv25-q-08 step skip (ink at 0.42): lowest contrast on duck egg / stripes",
+  "ok": true,
+  "got": "2.57"
+ },
+ {
+  "name": "Offer cv25-q-08 step cur: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer cv25-q-08 step cur: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "Offer cv25-q-08 link skip: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.5)"
+ },
+ {
+  "name": "(recorded) Offer cv25-q-08 link skip (ink at 0.5): lowest contrast on duck egg / stripes",
+  "ok": true,
+  "got": "3.19"
+ },
+ {
+  "name": "Offer cv25-q-08 link skip: ink",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.5)"
+ },
+ {
+  "name": "(recorded) Offer cv25-q-08 link skip (ink at 0.5): lowest contrast on duck egg / stripes",
+  "ok": true,
+  "got": "3.19"
+ },
+ {
+  "name": "Offer cv25-q-08 link done: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer cv25-q-08 link done: ≥ 4.5:1 on duck egg and each stripe",
+  "ok": true,
+  "got": "13.07"
+ },
+ {
+  "name": "slide-in Offer seed-query-12: strip is not navy",
+  "ok": true,
+  "got": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "slide-in Offer seed-query-12: strip words in ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step reached: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer step cur: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "slide-in Offer band-word: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "bubble Offer: words in ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Stage filter pill (offer): words in ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "the Offers group heading's count: ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Birds-eye Offer seed-query-12: its label in ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Birds-eye Offer cv25-q-08: its label in ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ }
+]

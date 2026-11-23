@@ -32,7 +32,7 @@
 .qc152[data-qc164] .qc164-trk .qc153-trk.is-ended .qc153-nd:not(.qc153-nd--cur) { opacity: 0.6; }
 .qc152[data-qc164] .qc164-trk .qc153-trk.is-ended .qc153-ln { opacity: 0.5; }
 /* the grid card's badges are not drawn here */
-.qc152[data-qc164] .qc164-trk :is(.qc153-arw, .qc154-thl) { display: none; }
+.qc152[data-qc164] .qc164-trk .qc153-arw { display: none; }
 .qc152[data-qc164] .qc152-band .qc152-x { width: var(--sp-px-size) !important; height: var(--sp-px-size) !important; font-size: 14px !important; letter-spacing: 0 !important; }
 /* the day, at the name row's end (shown by the strip's old rule) */
 .qc152[data-qc164] .qc164-day { margin-left: auto; flex: none; align-self: center; font: 400 14px/1 var(--sp-serif); color: #6f655c; white-space: nowrap; }

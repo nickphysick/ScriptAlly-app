@@ -1,6 +1,6 @@
 /**
- * Query Centre v154 — the card (design-refs/query-centre-v154.html): no status word on show, but the word is still the
- * card's and the track's accessible name; on hover the Next box becomes the slip's own action, in the slip's words.
+ * Query Centre v154 — the card (design-refs/query-centre-v154.html): the word is the card's and the track's accessible
+ * name, and (Plumage colours v2) shown once, on the band's label; on hover the Next box becomes the slip's own action, in the slip's words.
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
@@ -12,7 +12,7 @@ import { card154, row154 } from "./qc154.fixture";
 const visible = (h: string) => h.replace(/<span class="qc154-sr"[^>]*>[^<]*<\/span>/g, "").replace(/<[^>]+>/g, " ");
 
 describe("the v154 card", () => {
-  it("shows no status word, but keeps it for screen readers: the card's name, the track's name and title", () => {
+  it("shows the status word once, on the band's label (Plumage colours v2), and keeps it for screen readers", () => {
     const h = card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"));
     expect(h).toContain('id="query-row-q1"');
     expect(h).toContain('role="button"');
@@ -21,8 +21,10 @@ describe("the v154 card", () => {
     expect(trk).toContain('aria-label="Where it stands: Partial requested"');
     expect(trk).toContain('title="Partial requested"');
     expect(h).toMatch(/<span class="qc154-sr"[^>]*>Partial requested<\/span>/);
-    /* the label under the current node is the hover's, hidden at rest by the sheet; strip it too */
-    expect(visible(h.replace(/<span class="qc154-thl"[^>]*>[^<]*<\/span>/g, ""))).not.toContain("Partial requested");
+    /* Plumage colours v2 — the hover label under the current node is gone; the band's label is the one word on show */
+    expect(h).not.toContain("qc154-thl");
+    expect(visible(h).split("Partial requested").length - 1).toBe(1);
+    expect(h).toMatch(/<span class="pc2-lbl" data-pc2="label" aria-hidden="true" style="--pc2-edge:#e2b09c">Partial requested<\/span>/);
     expect(h).toContain('data-tone="partial"');
     expect(h).toContain("105 days ago");
     expect(h.match(/data-qc154="fact"/g)?.length).toBe(2);
@@ -61,9 +63,10 @@ describe("the v154 card", () => {
     expect(card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"))).not.toMatch(/a2452a|8a3a28|b4553f/i);
     const css = readFileSync(new URL("./qcv154.css", import.meta.url), "utf8");
     expect(css).not.toMatch(/a2452a|8a3a28|b4553f/i);
-    /* Plumage colours v1 — the band is inline: a Partial requested card is the requested shade with its outline */
+    /* Plumage colours v1 — the band is inline: a Partial requested card is the requested shade; v2: no outline */
     const h = card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"));
-    expect(h).toMatch(/data-wy=""[^>]*style="--tone:#f1d9cf;--wy:#e8c0af"/);
+    expect(h).toMatch(/style="--tone:#f1d9cf"/);
+    expect(h).not.toMatch(/data-wy|--wy/);
     expect(css).toMatch(/\.qc154-nm \{[^}]*color: #1c130f/);
   });
 });

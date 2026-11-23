@@ -1,0 +1,887 @@
+[
+ {
+  "name": "cards read: population",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "seed-query-12: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-12: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-08: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-08: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-7: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-7: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-11: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-11: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-9: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-9: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-06: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-06: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-20: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-20: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-3: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-3: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "rj-send: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "rj-send: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-09: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-09: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cor-move-a: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cor-move-a: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-07: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-07: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-3: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-3: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-cal-passed865-q: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-cal-passed865-q: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-4: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-4: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "rj-dupe: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "rj-dupe: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-2: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-2: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-gap-solo: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-gap-solo: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cor-pair: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cor-pair: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-23: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-23: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-8: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-8: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-4: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-4: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-cal-soon-q: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-cal-soon-q: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-cal-bang-q: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-cal-bang-q: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "qc150l9-q: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "qc150l9-q: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "probe-un-both: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "probe-un-both: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "probe-un-noagent: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "probe-un-noagent: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-14: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-14: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-13: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-13: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-close: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-close: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-22: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-22: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-1: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-1: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-7: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-7: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-4: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-4: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-19: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-19: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-cohort-2: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-cohort-2: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-cohort-1: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-cohort-1: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-cohort-6: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-cohort-6: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-cohort-3: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-cohort-3: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-cohort-5: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-cohort-5: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-cohort-4: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-cohort-4: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-10: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-10: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-ms2-a: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-ms2-a: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "rj-nudge: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "rj-nudge: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-chase: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-chase: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-ms2-b: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-ms2-b: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-10: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-10: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-05: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-05: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-cal-passed20-q: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-cal-passed20-q: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-6: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-6: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-1: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-1: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-2: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-2: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-5: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-5: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cor-undo: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cor-undo: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cor-move-b: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cor-move-b: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-7: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-7: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-3: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-3: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-cal-near-q: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-cal-near-q: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-11: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-11: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-9: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-9: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-21: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-21: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-10: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-10: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-5: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-5: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "thin-q-remind: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "thin-q-remind: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-2: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-2: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "probe-dangling-pkg: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "probe-dangling-pkg: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "probe-un-noms: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "probe-un-noms: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "probe-goalstress-today: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "probe-goalstress-today: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-04: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-04: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-03: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-03: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-8: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-8: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-8: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-8: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-01: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-01: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-1: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-1: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-13: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-13: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-12: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-12: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "rej-query-1: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "rej-query-1: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cor-move-c: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cor-move-c: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-5: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-5: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-17: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-17: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-15: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-15: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-16: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-16: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "msv12-q-6: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "msv12-q-6: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-pkgq-6: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-pkgq-6: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-18: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-18: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cor-closed: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cor-closed: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "seed-query-14: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "seed-query-14: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ },
+ {
+  "name": "cv25-q-02: no \"With you\" text",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "cv25-q-02: no chevron or new arrow (one track arrow, one action arrow at most)",
+  "ok": true,
+  "got": "chev 0, track 1, chip 1"
+ }
+]

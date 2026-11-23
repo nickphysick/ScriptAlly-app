@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
-import { STAGE_COLOURS, bandBackground, bandInk, stageOf } from "../../lib/stageColours";
+import { STAGE_COLOURS, bandInk, stageOf, statusBand } from "../../lib/stageColours";
 import { kindTileStyle } from "../../lib/kindColours";
 import {
   GROUP_LABEL, PaletteItem, PaletteResult, PaletteRow, PaletteScope, SCOPE_CHIPS, highlightParts, isSelectable,
@@ -78,7 +78,7 @@ const Marked: React.FC<{ parts: HighlightPart[] }> = ({ parts }) => (
 const StatusChip: React.FC<{ status: string }> = ({ status }) => {
   const st = stageOf(status);
   return (
-    <span className="sv1-chip" data-stage={st} style={{ background: bandBackground(status), color: bandInk(status), borderColor: STAGE_COLOURS[st].edge }}>
+    <span className="sv1-chip" data-stage={st} style={{ background: statusBand(status), color: bandInk(status), borderColor: STAGE_COLOURS[st].edge }}>
       <StatusDot status={status as QueryStatus} overrideSize={14} tone="inherit" decorative />
       {status}
     </span>
@@ -298,7 +298,7 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
         <>
           {head(p.sub)}
           {p.status && st ? (
-            <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
+            <div className="sv1-pk-band" style={{ background: statusBand(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
               <StatusDot status={p.status as QueryStatus} overrideSize={22} tone="inherit" decorative />
               <div><b>{p.status}</b><span>{p.queriedLine}</span></div>
             </div>
@@ -310,7 +310,7 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
       const st = stageOf(p.status);
       body = (
         <>
-          <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
+          <div className="sv1-pk-band" style={{ background: statusBand(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
             <StatusDot status={p.status as QueryStatus} overrideSize={22} tone="inherit" decorative />
             <div><b>{p.status}</b><span>{p.who}</span></div>
           </div>
