@@ -211,6 +211,8 @@ describe("R12 · phone", () => {
     const r = currentDrawerRequest();
     expect([r?.mode, r?.queryId]).toEqual(["resp", "q1"]);
     closeQueryDrawer();
-    expect(read("src/components/Queries.tsx")).toContain("useEffect(() => (qmPhone ? undefined : subscribeResponse((r) => respOpenRef.current(r))), [qmPhone]);");
+    /* Record a response v2 — the listener is the response journey's panel now, and it still does not listen on a phone */
+    expect(read("src/components/queries/centre/RespondStagesPanel.tsx")).toContain("useEffect(() => (phone ? undefined : subscribeResponse((r) => {");
+    expect(read("src/components/Queries.tsx")).not.toContain("subscribeResponse(");
   });
 });

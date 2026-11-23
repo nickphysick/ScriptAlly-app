@@ -1,0 +1,26 @@
+{
+ "open": {
+  "path": "/dashboard",
+  "search": "",
+  "journey": true,
+  "track": true,
+  "step": "who",
+  "head": "Who replied?",
+  "composer": null,
+  "picker": false,
+  "qadDrawer": false,
+  "scrollY": 0
+ },
+ "after": {
+  "path": "/dashboard",
+  "search": "",
+  "journey": true,
+  "track": true,
+  "step": "reply",
+  "head": "What did Priya say?",
+  "composer": null,
+  "picker": false,
+  "qadDrawer": false,
+  "scrollY": 0
+ }
+}

@@ -205,7 +205,7 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
 import { QueryPanelHost } from "./queries/QueryPanelHost";
-import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, openQueryPanelFromAgent, queryPanelBack, releaseRightPanel, responseSaved, subscribeQueryPanel, subscribeResponse, subscribeRightPanel, type PanelBack, type PanelOrigin, type ResponseRequest } from "../lib/queryPanelStore";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, openQueryPanelFromAgent, queryPanelBack, releaseRightPanel, responseSaved, setPipResponder, subscribeQueryPanel, subscribeRightPanel, type PanelBack, type PanelOrigin, type ResponseRequest } from "../lib/queryPanelStore";
 import { QC155_LOAD, useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -2488,7 +2488,11 @@ export const Queries: React.FC<{
    * none, the card frame opens at "Who replied?". Not on the phone page: its doors keep the phone's own flow.
    */
   const respOpenRef = useRef<(r: ResponseRequest) => void>(() => {});
-  useEffect(() => (qmPhone ? undefined : subscribeResponse((r) => respOpenRef.current(r))), [qmPhone]);
+  /* Record a response v2 — the page no longer answers `openResponse`: the response journey (RespondStagesPanel, mounted
+     once for the workspace) does, over whatever page is on screen. The page keeps one part of it: the practice query,
+     whose guided walk drives its own practice journey (`openPipResp`, below). */
+  const pipRespRef = useRef<() => void>(() => {});
+  useEffect(() => setPipResponder(() => pipRespRef.current()), []);
   /* the picker chose: the panel becomes that query's — `?q` on this page, the store's request anywhere else */
   const pickOpenRef = useRef<(id: string) => void>(() => {});
   useEffect(() => subscribeDrawerPick((id) => pickOpenRef.current(id)), []);
@@ -6832,6 +6836,7 @@ export const Queries: React.FC<{
     } as OpenRequest);
     if (walkRef.current === "door") setWalk("journey");
   }, []);
+  pipRespRef.current = openPipResp;
   /* the journey's own step, read off its stepper (the cards follow it), and its end: saved → the last card;
      closed without a save → an early exit */
   useEffect(() => {

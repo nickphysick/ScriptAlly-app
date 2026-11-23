@@ -1,0 +1,232 @@
+[
+ {
+  "where": "the door list is not empty",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "where": "Dashboard band button: the door is on the page",
+  "ok": true,
+  "detail": "/dashboard"
+ },
+ {
+  "where": "Dashboard band button: the pathname is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Dashboard band button: the journey is on screen, with its track",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Dashboard band button: not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Dashboard band button: opens at Who replied?",
+  "ok": true,
+  "detail": "who"
+ },
+ {
+  "where": "Top bar Log a query menu: the door is on the page",
+  "ok": true,
+  "detail": "/dashboard"
+ },
+ {
+  "where": "Top bar Log a query menu: the pathname is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Top bar Log a query menu: the journey is on screen, with its track",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Top bar Log a query menu: not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Top bar Log a query menu: opens at Who replied?",
+  "ok": true,
+  "detail": "who"
+ },
+ {
+  "where": "Top bar menu on Queries: the door is on the page",
+  "ok": true,
+  "detail": "/queries"
+ },
+ {
+  "where": "Top bar menu on Queries: the pathname is unchanged",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "where": "Top bar menu on Queries: the journey is on screen, with its track",
+  "ok": true,
+  "detail": "{\"path\":\"/queries\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Top bar menu on Queries: not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/queries\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Top bar menu on Queries: opens at Who replied?",
+  "ok": true,
+  "detail": "who"
+ },
+ {
+  "where": "Queries page button: the door is on the page",
+  "ok": true,
+  "detail": "/queries"
+ },
+ {
+  "where": "Queries page button: the pathname is unchanged",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "where": "Queries page button: the journey is on screen, with its track",
+  "ok": true,
+  "detail": "{\"path\":\"/queries\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Queries page button: not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/queries\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Queries page button: opens at Who replied?",
+  "ok": true,
+  "detail": "who"
+ },
+ {
+  "where": "Analytics header: the door is on the page",
+  "ok": true,
+  "detail": "/queries/analytics"
+ },
+ {
+  "where": "Analytics header: the pathname is unchanged",
+  "ok": true,
+  "detail": "/queries/analytics → /queries/analytics"
+ },
+ {
+  "where": "Analytics header: the journey is on screen, with its track",
+  "ok": true,
+  "detail": "{\"path\":\"/queries/analytics\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Analytics header: not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/queries/analytics\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Analytics header: opens at Who replied?",
+  "ok": true,
+  "detail": "who"
+ },
+ {
+  "where": "Responses header: the door is on the page",
+  "ok": true,
+  "detail": "/queries/responses"
+ },
+ {
+  "where": "Responses header: the pathname is unchanged",
+  "ok": true,
+  "detail": "/queries/responses → /queries/responses"
+ },
+ {
+  "where": "Responses header: the journey is on screen, with its track",
+  "ok": true,
+  "detail": "{\"path\":\"/queries/responses\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Responses header: not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/queries/responses\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Responses header: opens at Who replied?",
+  "ok": true,
+  "detail": "who"
+ },
+ {
+  "where": "Query card footer: the door is on the page",
+  "ok": true,
+  "detail": "/queries?q=cv25-q-03"
+ },
+ {
+  "where": "Query card footer: the pathname is unchanged",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "where": "Query card footer: the journey is on screen, with its track",
+  "ok": false,
+  "detail": "{\"path\":\"/queries\",\"search\":\"?q=cv25-q-03\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":\"What did Priya say?\",\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Query card footer: not the card's reply box, not the old picker, not the old drawer",
+  "ok": false,
+  "detail": "{\"path\":\"/queries\",\"search\":\"?q=cv25-q-03\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":\"What did Priya say?\",\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Query card footer: opens at What did {First} say?",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "Agent card: the door is on the page",
+  "ok": true,
+  "detail": "/agents?agent=cv25-agent-03"
+ },
+ {
+  "where": "Agent card: the pathname is unchanged",
+  "ok": true,
+  "detail": "/agents → /agents"
+ },
+ {
+  "where": "Agent card: the journey is on screen, with its track",
+  "ok": true,
+  "detail": "{\"path\":\"/agents\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"reply\",\"head\":\"What did Priya say?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Agent card: not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/agents\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"reply\",\"head\":\"What did Priya say?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Agent card: opens at What did {First} say?",
+  "ok": true,
+  "detail": "reply"
+ },
+ {
+  "where": "Search palette (⌘K): the door is on the page",
+  "ok": true,
+  "detail": "/dashboard"
+ },
+ {
+  "where": "Search palette (⌘K): the pathname is unchanged",
+  "ok": false,
+  "detail": "/dashboard → /queries"
+ },
+ {
+  "where": "Search palette (⌘K): the journey is on screen, with its track",
+  "ok": false,
+  "detail": "{\"path\":\"/queries\",\"search\":\"?q=cv25-q-03\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Search palette (⌘K): not the card's reply box, not the old picker, not the old drawer",
+  "ok": true,
+  "detail": "{\"path\":\"/queries\",\"search\":\"?q=cv25-q-03\",\"journey\":false,\"track\":false,\"step\":null,\"head\":null,\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "Search palette (⌘K): opens at What did {First} say?",
+  "ok": false,
+  "detail": "null"
+ }
+]

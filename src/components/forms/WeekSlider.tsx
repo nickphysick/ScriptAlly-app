@@ -30,6 +30,12 @@ export interface WeekSliderProps {
   /** Add agent v1 — the label is drawn by the caller above the slider (the add journey and the card's edit sections);
    *  it stays for screen readers. */
   hideLabel?: boolean;
+  /** Record a response v2 — the readout for a value (default "{n} week(s)"): the same slider for days ("In 3 days") */
+  readout?: (n: number) => string;
+  /** Record a response v2 — the null state's word on the pill and the readout (default "Unknown": "No date", "They didn’t say") */
+  unknownLabel?: string;
+  /** Record a response v2 — the two end labels under the track (default "{min} week" / "{max} weeks") */
+  ends?: readonly [string, string];
 }
 
 /**
@@ -47,13 +53,18 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
   unknownHint,
   id,
   hideLabel = false,
+  readout,
+  unknownLabel = "Unknown",
+  ends,
 }) => {
   const auto = useId();
   const inputId = id ?? `sa-wk-${auto}`;
   const unknown = value === null;
   const pos = unknown ? min : value;
   const pct = ((pos - min) / (max - min)) * 100;
-  const fill = `linear-gradient(90deg,#2a3a52 0%,#2a3a52 ${pct}%,#e7ddd0 ${pct}%,#e7ddd0 100%)`;
+  /* Record a response v2 — the fill takes a surrounding `--sm` (the journey's status colour); unset, it is the navy it always was */
+  const fill = `linear-gradient(90deg,var(--sm,#2a3a52) 0%,var(--sm,#2a3a52) ${pct}%,#e7ddd0 ${pct}%,#e7ddd0 100%)`;
+  const words = (n: number) => (readout ? readout(n) : `${n} week${n === 1 ? "" : "s"}`);
 
   return (
     <div className="sa-fld">
@@ -63,7 +74,7 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
         </label>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <span className={`sa-wk-read${unknown ? " muted" : ""}`} aria-hidden="true">
-            {unknown ? "Unknown" : `${value} week${value === 1 ? "" : "s"}`}
+            {unknown ? unknownLabel : words(value)}
           </span>
           {onUnknown && (
             <span className="sa-wk-unk">
@@ -73,7 +84,7 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
                 aria-pressed={unknown}
                 onClick={onUnknown}
               >
-                Unknown
+                {unknownLabel}
               </button>
               {unknownHint && <span className="sa-wk-unktip">{unknownHint}</span>}
             </span>
@@ -89,12 +100,12 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
         step={1}
         value={pos}
         style={{ background: fill }}
-        aria-valuetext={unknown ? "Unknown" : `${value} week${value === 1 ? "" : "s"}`}
+        aria-valuetext={unknown ? unknownLabel : words(value)}
         onChange={(e) => onChange(Number(e.target.value))}
       />
       <div className="sa-wk-ends">
-        <span>{min} week</span>
-        <span>{max} weeks</span>
+        <span>{ends ? ends[0] : `${min} week`}</span>
+        <span>{ends ? ends[1] : `${max} weeks`}</span>
       </div>
     </div>
   );

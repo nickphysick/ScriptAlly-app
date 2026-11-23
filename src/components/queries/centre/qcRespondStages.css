@@ -1,0 +1,92 @@
+/*
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Record a response v2 — THE JOURNEY'S OWN PARTS, over Log a query's shell (qcLogStages.css, shared, never copied).
+ * Every rule is scoped to `.laq.rar`, so Log a query cannot change by a pixel. Values are the reference's
+ * (design-refs/record-a-response-v2, its `rr-*` rules); the colours are the app's stage colours, set on the root as
+ *   --sc  the disc (the status band; the requested shade while pages are asked for)
+ *   --st2 the wash (the stage's tint)
+ *   --sm  the mark (the stage's rim)
+ * by QcRespondStages from lib/stageColours. Buttons, chips and the track stay navy.
+ */
+
+/* the head: Log a query's navy, the Archivist's head clipped to a circle, no ring */
+.laq.rar .flh-m.rar-art { border-radius: 50%; box-shadow: none; object-fit: cover; }
+.laq.rar .flh-t span.br { display: block; }
+
+/* status marks in rows: the StatusDot on its status colour */
+.laq.rar .laq-g.is-st { width: 38px; height: 38px; background: var(--c, #efe6d6); color: #1c130f; }
+.laq.rar .laq-g.is-st svg { width: 21px; height: 21px; }
+.laq.rar .laq-g.is-st.is-rr { background: repeating-linear-gradient(118deg, #d3deea 0 7px, #b9c9da 7px 14px); }
+.laq.rar .laq-big > button.is-on .laq-g.is-st { background: var(--c, #efe6d6); }
+.laq.rar .laq-big > button .laq-tag { text-align: right; }
+.laq.rar .rar-hint { margin-top: 14px; }
+.laq.rar .rar-more { margin: 12px 2px 0; }
+.laq.rar .rar-rest { margin-top: 16px; }
+.laq.rar .rar-rest + .laq-big { margin-top: 10px; animation: laq-fadein .2s ease-out both; }
+
+/* chips that open under a chosen option */
+.laq.rar .rar-cl { display: block; padding: 0 14px 6px 44px; font: italic 400 13.5px/1.3 var(--sp-serif); color: var(--mut); }
+.laq.rar .rar-nch { padding: 0 14px 8px 44px; }
+
+/* their words, and the extras' own field */
+.laq.rar .rar-ta { all: unset; box-sizing: border-box; display: block; width: 100%; min-height: 168px; padding: 12px 14px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 16px/1.5 var(--sp-serif); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.laq.rar .rar-ta::placeholder { font-style: italic; color: #9a948b; }
+.laq.rar .rar-in { all: unset; box-sizing: border-box; display: block; width: 100%; height: 44px; padding: 0 12px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 16px var(--sp-serif); color: var(--ink); }
+.laq.rar .rar-in::placeholder { font-style: italic; color: #9a948b; }
+.laq.rar .rar-ta:focus, .laq.rar .rar-in:focus { box-shadow: inset 0 0 0 1.5px var(--sm, var(--navy)); }
+.laq.rar .rar-xc { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+
+/* the quote on the review: three lines at most */
+.laq.rar .rar-q { margin: 0; padding: 9px 16px 9px 18px; border-radius: 14px; background: var(--st2, #f8f4ed); box-shadow: inset 3px 0 0 var(--sm, #d9cfc2); font: italic 400 15px/1.45 var(--sp-serif); color: #3a302a; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* the review: what happens next, one quiet row a task */
+.laq.rar .rar-todo { margin-top: 10px; }
+.laq.rar .rar-todo.laq-todo { padding: 11px 14px; background: var(--st2, #fbf8f3); box-shadow: inset 0 0 0 1px var(--sc, #ddd3c6); }
+.laq.rar .rar-todo.laq-todo b { font-size: 16px; }
+.laq.rar .rar-todo .rar-when { flex: none; margin-left: auto; font: 400 15px var(--sp-type); color: var(--ink); white-space: nowrap; }
+.laq.rar .rar-todo .rar-when em { margin-right: 8px; font: italic 400 13.5px var(--sp-serif); color: var(--mut); }
+.laq.rar .rar-todo + .rar-todo { margin-top: 8px; }
+
+/* the review carries one more row than Log a query's, so its parts sit a little closer (nothing cut off at 1440 × 900) */
+.laq.rar .is-chk .laq-pv { margin-top: 14px; }
+.laq.rar .is-chk .rvw-h { margin-top: 14px; }
+.laq.rar .is-chk .rvw-t { padding: 10px 8px 9px; gap: 6px; }
+.laq.rar .is-chk .rvw-i { width: 40px; height: 40px; }
+.laq.rar .is-chk .rvw.is-1 .rvw-t, .laq.rar .is-chk .rvw.is-2 .rvw-t { padding: 9px 12px; }
+.laq.rar .is-chk .rvw.is-3 .rvw-t { flex-direction: row; text-align: left; padding: 9px 10px; gap: 8px; }
+.laq.rar .is-chk .rvw.is-3 .rvw-i { flex: none; width: 34px; height: 34px; }
+.laq.rar .is-chk .rvw.is-3 .rvw-i svg { width: 21px; height: 21px; }
+.laq.rar .is-chk .rvw.is-3 .rvw-t b { font-size: 14px; }
+.laq.rar .is-chk .rvw-n { margin: 6px 2px 6px; }
+.laq.rar .is-chk .rvb-c { padding: 10px 8px 8px; }
+.laq.rar .rvw.is-1 { grid-template-columns: minmax(0, 1fr); }
+.laq.rar .rvb-n i.is-dn { background: #e9e6e0 !important; color: #5b4f47 !important; }
+.laq.rar .rvb-n i.is-nil { display: none; }
+.laq.rar .laq-yl b { font-style: normal; font-weight: 600; color: var(--ink); }
+.laq.rar .laq-yay .laq-pv { align-self: stretch; text-align: left; }
+
+/* the sliders sit under their option, on white */
+.laq.rar .rar-sl { padding: 2px 14px 12px 44px; }
+.laq.rar .rar-sl .laq-wkb { background: #fff; margin-bottom: 0; }
+.laq.rar .rar-chk { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 32px; margin-top: 10px; font: 400 15.5px/1.3 var(--sp-serif); color: var(--ink); }
+.laq.rar .rar-chk:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 6px; }
+.laq.rar .rar-chk.is-on .laq-ck { background: var(--sm, var(--navy)); box-shadow: none; color: #fff; }
+
+/* ── the query's status colour through the form ── */
+.laq.rar .sa-wk-slider::-webkit-slider-thumb { background: var(--sm, #2a3a52); }
+.laq.rar .sa-wk-slider::-moz-range-thumb { background: var(--sm, #2a3a52); }
+.laq.rar .laq-gt.is-on { box-shadow: inset 0 0 0 1.5px var(--sm, #9a7233); background: var(--st2, #fbf7ef); }
+.laq.rar .laq-gt.is-on .laq-ck { background: var(--sm, #9a7233); }
+.laq.rar .laq-opt:hover { box-shadow: inset 0 0 0 1.5px var(--sm, #9a7233); }
+.laq.rar .laq-opt.is-on { box-shadow: inset 0 0 0 1.5px var(--sm, #9a7233); background: var(--st2, #f6efe2); }
+.laq.rar .laq-opt.is-on .laq-rdo { border-color: var(--sm, #9a7233); background: var(--sm, #9a7233); }
+.laq.rar .laq-nopt.is-on { box-shadow: inset 0 0 0 1.5px var(--sm, var(--navy)); background: var(--st2, #fff); }
+.laq.rar .laq-nopt.is-on .laq-rd { box-shadow: inset 0 0 0 5.5px var(--sm, var(--navy)); }
+.laq.rar .laq-asks { background: var(--sc, #efe7da); }
+.laq.rar .laq-af { border-top-color: rgba(28, 19, 15, .12); }
+.laq.rar .rvw-i { background: var(--sc, #efe7da); color: var(--ink); }
+.laq.rar .laq-big > button .laq-g:not(.is-st) { background: var(--sc, var(--paper)); }
+.laq.rar .laq-big > button.is-on { background: var(--st2, #f7f5f1); box-shadow: inset 0 0 0 1.5px var(--sm, var(--navy)); }
+.laq.rar .laq-calg > button.is-on { background: var(--sm, var(--navy)); }

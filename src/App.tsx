@@ -91,6 +91,7 @@ import { OnbLab } from "./components/onboarding/OnbLab";
 import { EmailDropLab } from "./components/emailImport/EmailDropLab";
 import { PsLab } from "./components/phone/PsLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
+import { RespondStagesPanel } from "./components/queries/centre/RespondStagesPanel";
 import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
 import { openNewAgentCard } from "./lib/agentCardStore";
@@ -352,7 +353,7 @@ function AppContent() {
       return;
     }
     if (subPageName === "Record a response") {
-      /* Record a response v1 — the one door: the card frame at "Who replied?" on every page (the phone keeps its flow) */
+      /* Record a response v2 — the one door: the response journey at "Who replied?", over the page on screen (the phone keeps its flow) */
       openResponse();
       return;
     }
@@ -879,6 +880,9 @@ function AppContent() {
       <PageBoundary name="panel:query-drawer" kind="panel" onClose={closeQueryDrawer}>
         <PracticeOverlay><QueryDrawer /></PracticeOverlay>
       </PageBoundary>
+      {/* Record a response v2 — THE response journey, mounted once for the workspace: every desktop door's `openResponse`
+          (lib/queryPanelStore) opens it over the page on screen. The phone does not mount a listener (its own flow). */}
+      <PageBoundary name="panel:record-response" kind="panel" onClose={() => {}}><RespondStagesPanel /></PageBoundary>
       <PageBoundary name="panel:undo-bar" kind="panel" onClose={hideUndoBar}><UndoBar /></PageBoundary>
 
       {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}

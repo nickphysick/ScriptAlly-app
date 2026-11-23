@@ -79,6 +79,11 @@ export function subscribeQueryPanel(f: () => void): () => void {
 
 
 /**
+ * Record a response v2 — THE ONE DOOR, NOW THE JOURNEY. Every desktop "Record a response" comes here, and the response
+ * journey (queries/centre/RespondStagesPanel, mounted once for the workspace) opens over the page: at "Who replied?"
+ * without a query, at "What did {First} say?" with one. The notes below are v1's (the card's composer), kept for the
+ * fields' meanings, which are unchanged.
+ *
  * Record a response v1, Phase 2 — THE ONE DOOR. Every desktop "Record a response" comes here.
  *   - with a query: that query's card opens in the side panel (`?q` on Queries) with its composer at "reply"; a CLOSED
  *     query's composer opens at "reopen", as the closed card's own Reopen does;
@@ -119,6 +124,16 @@ export function openResponse(opts: ResponseRequest = {}): boolean {
   for (const f of [...respSubs]) f(opts);
   return true;
 }
+/**
+ * Record a response v2 — THE PRACTICE QUERY'S WAY IN. Pip (lib/practiceQuery) is recorded by the Query Centre's guided
+ * walk, which drives its own practice journey and writes nothing; the journey's host hands a Pip request to it here.
+ */
+let pipResponder: (() => void) | null = null;
+export function setPipResponder(f: (() => void) | null): () => void {
+  pipResponder = f;
+  return () => { if (pipResponder === f) pipResponder = null; };
+}
+export function openPipResponse(): void { pipResponder?.(); }
 /** the composer saved a response on `id`: the door that opened it hears once (a pick from "Who replied?" binds it) */
 export function responseSaved(id: string): void {
   const w = savedWaiter;
@@ -132,7 +147,8 @@ export function responseSaved(id: string): void {
  * the window's right edge; whoever opens says so here, and the others close themselves.
  */
 /* "answer": Responses v2 §D — an answer opened on the Responses page, in the same container */
-export type RightPanelOwner = "query" | "feed" | "birds" | "agent" | "answer";
+/* "response": Record a response v2 — the response journey, opened over any page */
+export type RightPanelOwner = "query" | "feed" | "birds" | "agent" | "answer" | "response";
 let owner: RightPanelOwner | null = null;
 const ownerSubs = new Set<(o: RightPanelOwner | null) => void>();
 export const rightPanelOwner = (): RightPanelOwner | null => owner;
