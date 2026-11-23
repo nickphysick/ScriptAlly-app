@@ -52,7 +52,7 @@ import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { CARD_EDITING_EVENT, requestCardClose } from "./AgentCardPanel262";
 import { pickDraft, useAgentForm } from "../card/useAgentForm";
-import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, changeNames, type OfferKit } from "./AgentCard262Edit";
+import { EditGenres, EditHow, EditMaterials, EditWishlist, changeNames, contactHead, type ContactHeadParts, type OfferKit } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
 import { applyPatch, cardPatch, changedFields, draftOf, problemsOf, toContactDraft, type CardDraft, type CardProblemKey } from "../../../lib/cardDraft";
 import { cardOffers, offerPlan, type CardOffers, type CloseChoice, type OfferPlan, type RtChoice } from "../../../lib/cardOffers";
@@ -172,6 +172,41 @@ const OpenSec: React.FC<{ k: Sec262; heading: React.ReactNode; label: string; er
       <div className="ac acv21-body">{p.children}</div>
       {asking ? <DiscardAsk words={`Discard your changes to ${p.label}?`} onKeep={ed.keep} onDiscard={ed.discard} /> : null}
     </section>
+  );
+};
+/**
+ * Agent card v2.2 B3 — THE HEAD, EDITED IN PLACE. Name and contact details open in the head itself (no Contact details
+ * section drops into the tab, and the tab does not change): the name a field in the name's own type with the cross and the
+ * tick beside it where the pencil was; the agency under it; the place line becomes the country pills and the city (the
+ * built city offer under them); the contact line becomes email and website; "More contact details" opens MSWL, social and
+ * the submission link in the same place. It holds the one-open rule as a section does, and asks inside itself.
+ */
+const HeadOpen: React.FC<{ parts: ContactHeadParts; disc: React.ReactNode; pill: React.ReactNode; err?: string; busy: boolean; dirty: boolean; draft: unknown;
+  more: boolean; onMore: () => void; onCross: () => void; onTick: () => void; onTickDown?: () => void; onClose: () => void; onReopen: () => void }> = (p) => {
+  const key = "sec:contact";
+  const ed = useHold168(key, p.dirty, p.draft, p.onClose, p.onReopen);
+  const asking = ed.asking && ed.open === key;
+  return (
+    <div className="ag-head hed live" data-acv2="head" data-acv2-part="head" data-acv22="head-open" data-cl262="sec" data-k="contact" data-editing="" data-acv21="open">
+      <div className="qc152-agent" data-acv2="head-row">
+        {p.disc}
+        <div className="qc152-who">
+          <div className="ag-nmrow"><h2 className="qc152-nm qcv-open-nm" data-acv2="name">{p.parts.name}</h2>
+            <span className="ag-sx" data-acv21="sx"><CrossTick what="contact details" dirty={mut168("ac5") || p.dirty} busy={p.busy} onCross={p.onCross} onTick={p.onTick} onTickDown={p.onTickDown} /></span></div>
+          <div className="qc152-ag" data-acv2="agency">{p.parts.agency}</div>
+        </div>
+        {p.pill}
+      </div>
+      <div className="ag-hedk" data-acv22="head-fields">
+        {p.parts.agencyAsk}
+        {p.parts.place}
+        {p.parts.contact}
+        {p.more ? p.parts.more : null}
+        <button type="button" className="qc168-lk ag-hmorebtn" data-acv22="more" aria-expanded={p.more} onClick={p.onMore}>{p.more ? "Fewer contact details" : "More contact details"}</button>
+        {p.err ? <p className="acv21-err" role="alert" data-acv21="err">{p.err}</p> : null}
+        {asking ? <DiscardAsk words="Discard your changes to contact details?" onKeep={ed.keep} onDiscard={ed.discard} /> : null}
+      </div>
+    </div>
   );
 };
 /** Agent card v2 — the query box's door back: the tab the writer left, for this agent, read once when the card returns */
@@ -371,6 +406,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const [geoKept, setGeoKept] = useState<ReadonlySet<string>>(() => new Set());
   const contactOpen = open.includes("contact");
   useEffect(() => { if (!contactOpen) setGeoKept(new Set()); }, [contactOpen]);
+  /* v2.2 — "More contact details" opens by itself when any of the three holds a value, and when a door asks for one */
+  const [more, setMore] = useState(false);
   /* a problem a section's tick met (its own fields' problems, or a refused save), shown under its heading */
   const [secErr, setSecErr] = useState<Partial<Record<Sec262, string>>>({});
   const [busy, setBusy] = useState<Sec262 | "all" | null>(null);
@@ -385,12 +422,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /** open one section in place (beside any already open), its fields re-read from the agent as it is now; focus goes to
    *  its first control, or to the field asked for */
-  const openSec = (k: Sec262, field?: string, focus?: "website" | "email") => {
+  const openSec = (k: Sec262, field?: string, focus?: string) => {
     if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
     const go = () => {
       opened.current = { k, field, focus };
       setRevealSeq((n) => n + 1);
-      setTab("profile");
+      /* v2.2 — the head opens where it is: the tab you are on does not change (AC6's mutation switches to Profile) */
+      if (k !== "contact" || mut168("ac6")) setTab("profile");
       const cur = openRef.current;
       if (cur.includes(k)) return;
       if (!cur.length) resetRef.current(a);
@@ -403,8 +441,10 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (mut168("ac2") || mut168("ac3")) { go(); return; }
     rule.guard(go);
   };
-  /** Contact details, from the name's pencil, + Add email / + Add a website, and every door that asks for "who" */
-  const openAll = (focus?: "website" | "email") => openSec("contact", undefined, focus);
+  /** Contact details, from the name's pencil, + Add email / + Add a website, and every door that asks for "who"; a door
+   *  to one of the rarer three opens "More contact details" with it */
+  const moreAsk = useRef(false);
+  const openAll = (focus?: string) => { if (focus === "mswl" || focus === "social" || focus === "form") moreAsk.current = true; openSec("contact", undefined, focus); };
   /* Add agent v1 Phase 5 — a door's ask: open at its section (Contact details for "who"), or the Notes tab, once per seq */
   const applyAsk = (tab?: AgentCardTab, focus?: AgentCardField) => {
     const w = secsFor(tab, focus);
@@ -412,7 +452,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (w === "all") {
       /* Card offers v1 — a door at a contact link lands in it: whichever of website and email is missing first */
       const site0 = !(a.website ?? "").trim(), mail0 = !(a.email ?? "").trim();
-      const f = focus === "website" || focus === "email" ? (site0 ? "website" : mail0 ? "email" : focus) : undefined;
+      const f = focus === "website" || focus === "email" ? (site0 ? "website" : mail0 ? "email" : focus) : focus === "mswl" ? "mswl" : undefined;
       openAll(f);
       return;
     }
@@ -545,7 +585,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   /* revealing and focus: a section opened scrolls into view only by what it needs (plus 90px of air), or its heading
      comes to 70px below the band when it was hidden; focus goes to its first control (or the field asked for) without
      scrolling */
-  const opened = useRef<{ k: Sec262; focus?: "website" | "email"; field?: string } | null>(null);
+  const opened = useRef<{ k: Sec262; focus?: string; field?: string } | null>(null);
   /* a reveal asked for while the section is already open changes no state: this makes it a new ask */
   const [revealSeq, setRevealSeq] = useState(0);
   useEffect(() => {
@@ -553,6 +593,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     const sc = scrollRef.current;
     if (!o || !sc) return;
     opened.current = null;
+    /* v2.2 — the head is not in the scroller: its field takes the focus where it is */
+    if (o.k === "contact") {
+      const hd = cardRef.current?.querySelector<HTMLElement>("[data-acv22='head-open']");
+      const f = hd?.querySelector<HTMLInputElement>(mut168("ac10") ? "input[data-ae='name']" : o.focus ? `input[data-ae='${o.focus}'], [data-f='${o.focus}'] input` : "input[data-ae='name']");
+      if (f) { f.focus({ preventScroll: true }); const n = f.value?.length ?? 0; try { f.setSelectionRange(n, n); } catch { /* not a text field */ } }
+      return;
+    }
     const el = secEl(sc, o.k);
     if (!el) return;
     /* Agent card v2 — a fact box's "Add" lands in that field of "How {first} works" */
@@ -738,11 +785,32 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const hEmail = hv.email.trim(), hSite = hv.website.trim();
   const copyEmail = () => { void navigator.clipboard?.writeText(hEmail).then(() => showToast({ message: "Email address copied" }), () => {}); };
   const quiet = p.preview || !!cd;
-  const head = (
+  /* a section's props (the head's too): declared ABOVE every render-time reader (the head reads it) */
+  const sec = (k: Sec262) => {
+    const t = tickPress(k);
+    return { k, label: secName(k), err: secErr[k], busy: busy != null, dirty: secChanged(k).length > 0, draft: pickDraft(form.d, SEC_FIELDS[k]),
+      onCross: () => cross(k), onTick: t.onTick, onTickDown: t.onPointerDown,
+      onClose: () => { formRef.current.revert(SEC_FIELDS[k]); setSecErr((e) => ({ ...e, [k]: undefined })); setOpen((cur) => cur.filter((x) => x !== k)); },
+      onReopen: () => openSec(k) };
+  };
+  const discEl = (
+    <span className={`qc152-disc acv2-disc${tone === "nq" ? " nq" : tone === "closed" ? " cl" : ""}`} data-acv2="disc" data-tone={tone} aria-hidden="true"
+      style={tone === "nq" ? undefined : { boxShadow: `0 0 0 2.5px #fff, 0 0 0 4.5px ${col.edge}` }}>{initials}</span>
+  );
+  const pillEl = (
+    <span className={`qc152-pill${tone === "nq" ? " nq" : ""}`} data-qc152="pill" data-acv2="pill" data-stage={tone === "nq" ? undefined : tone} data-tone={tone}>
+      <span className="qc152-cap">{pill.status ? <StatusDot status={pill.status} overrideSize={17} tone="ink" decorative /> : NQ16}</span><span>{pill.word}</span>
+    </span>
+  );
+  const headParts = contactOpen && kit && !p.preview ? contactHead(form, { geo: { kept: geoKept, keep: (key) => setGeoKept((s0) => new Set([...s0, key])) } }) : null;
+  const moreHas = !!headParts?.moreHasValue;
+  useEffect(() => { if (contactOpen) { setMore(moreHas || moreAsk.current); moreAsk.current = false; } }, [contactOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+  const head = headParts ? (
+    <HeadOpen parts={headParts} disc={discEl} pill={pillEl} more={more} onMore={() => setMore((v) => !v)} {...sec("contact")} />
+  ) : (
     <div className="ag-head" data-acv2="head" data-acv2-part="head" data-live={cd ? "" : undefined} data-qc168-host={quiet ? undefined : ""}>
       <div className="qc152-agent" data-acv2="head-row">
-        <span className={`qc152-disc acv2-disc${tone === "nq" ? " nq" : tone === "closed" ? " cl" : ""}`} data-acv2="disc" data-tone={tone} aria-hidden="true"
-          style={tone === "nq" ? undefined : { boxShadow: `0 0 0 2.5px #fff, 0 0 0 4.5px ${col.edge}` }}>{initials}</span>
+        {discEl}
         <div className="qc152-who">
           <div className="ag-nmrow"><h2 className="qc152-nm qcv-open-nm" data-apc="name" data-acv2="name">{hName}</h2>
             {quiet ? null : <EditPen label={`${m.first}’s name and contact details`} onOpen={() => openSec("contact")} data={{ "data-cl262": "pen", "data-k": "contact" }} />}</div>
@@ -754,9 +822,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
             </div>
           ) : null}
         </div>
-        <span className={`qc152-pill${tone === "nq" ? " nq" : ""}`} data-qc152="pill" data-acv2="pill" data-stage={tone === "nq" ? undefined : tone} data-tone={tone}>
-          <span className="qc152-cap">{pill.status ? <StatusDot status={pill.status} overrideSize={17} tone="ink" decorative /> : NQ16}</span><span>{pill.word}</span>
-        </span>
+        {pillEl}
       </div>
       {hEmail || hSite || !quiet ? (
         <div className="ag-contact" data-acv2="contact" data-acv2-part="contact">
@@ -804,13 +870,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     "data-door": k,
     onClick: (e: React.MouseEvent) => { if ((e.target as Element).closest("button, a, input, textarea, [role='button']")) return; openSec(k); },
   });
-  const sec = (k: Sec262) => {
-    const t = tickPress(k);
-    return { k, label: secName(k), err: secErr[k], busy: busy != null, dirty: secChanged(k).length > 0, draft: pickDraft(form.d, SEC_FIELDS[k]),
-      onCross: () => cross(k), onTick: t.onTick, onTickDown: t.onPointerDown,
-      onClose: () => { formRef.current.revert(SEC_FIELDS[k]); setSecErr((e) => ({ ...e, [k]: undefined })); setOpen((cur) => cur.filter((x) => x !== k)); },
-      onReopen: () => openSec(k) };
-  };
+
   const factsShown = factBoxesShown(boxes);
   /* the fact boxes over the draft while How is open: the draft through the save's own patch, read by the same boxes */
   const draftBoxes = howOpen ? factBoxes(applyPatch(a, cardPatch(a, form.base, howPart, new Date(p.nowMs).toISOString())), (howPart.door ?? x.door) as typeof x.door) : boxes;
@@ -825,10 +885,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   );
   const profile = (
     <div className="nx acv2-pro" data-cl262="profile" data-cl24="pane" data-acv2="profile">
-      {isOpen("contact") && kit ? (
-        <OpenSec {...sec("contact")} heading="Contact details">
-          <EditContact form={form} agent={a} kit={kit} geo={{ kept: geoKept, keep: (key) => setGeoKept((s) => new Set([...s, key])) }} />
-        </OpenSec>
+      {/* v2.2 — no Contact details section: it is edited in the head (AC7's mutation draws a section here as well) */}
+      {isOpen("contact") && kit && mut168("ac7") ? (
+        <section className="acv2-sec ag-sec live" data-cl262="sec" data-k="contact-copy" data-acv21="open"><h4>Contact details</h4><div style={{ height: 320 }} /></section>
       ) : null}
       {gaps && !editing ? (
         <div className="ag-fin" data-acv2="finish" data-n={gaps.n}>

@@ -8,8 +8,7 @@
  * section saves its own fields (its tick, in AgentCard262); there is no save bar. Agent card v2.2: the rust `GuardBar` is
  * retired — one section is open at a time, and leaving it with a change asks inside it.
  *
- *   Contact details  Name and Agency side by side (the agency rule), Based in, Email and Website side by side, the
- *                    submission link (conditional), MSWL, Social            — powder
+ *   Contact details  edited in the head itself (Agent card v2.2: `contactHead`); no section drops into the tab
  *   Genres, Wishlist                                                         — blush
  *   Materials        "What {First} asks for — pick all that apply"          — sand
  *   How {First} works taking queries, how they take them, response time, if they don't reply — sand
@@ -303,71 +302,101 @@ export const CityOfferBox: React.FC<{ city: string; country: string; kept: Reado
   );
 };
 
-/** Contact details (edit everything): Name and Agency, Based in, Email and Website, the submission link, MSWL, Social */
-export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit; nameRef?: React.Ref<HTMLInputElement>;
-  /** Agent card v2.1 — the city offer's "Keep" answers, remembered while the section is open (city|country) */
-  geo?: { kept: ReadonlySet<string>; keep: (k: string) => void } }> = ({ form, nameRef, geo }) => {
+const MAIL15 = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
+const GLOBE15 = <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" /></svg>;
+
+/** the head's parts, edited in place (Agent card v2.2 B3) */
+export interface ContactHeadParts {
+  name: React.ReactNode;
+  agency: React.ReactNode;
+  /** the agency ask, under the name and agency, when the built rule asks for it */
+  agencyAsk: React.ReactNode;
+  /** where the place line was: the country pills and the city field, the built city offer under them */
+  place: React.ReactNode;
+  /** where the contact line was: email and website side by side, each with its icon and its built note */
+  contact: React.ReactNode;
+  /** behind "More contact details": the wishlist page (MSWL), social, and the submission link when the built rule shows it */
+  more: React.ReactNode;
+  /** any of the three holds a value */
+  moreHasValue: boolean;
+}
+
+/**
+ * Agent card v2.2 B3 — NAME AND CONTACT DETAILS, EDITED IN THE HEAD. Every field is the built control with its built rule,
+ * note and store (Contact list v26.2 C, Add agent v1, Agent card v2.1's Based in and city offer); only where each one is
+ * drawn changes: the name in the name's own place and type, the agency under it in its own capitals, the place line
+ * becomes the country pills and the city, the contact line becomes email and website side by side. The rarer three (MSWL,
+ * social, the submission link) wait behind "More contact details". It replaces the Contact details section's layout.
+ */
+export function contactHead(form: AgentForm, o: { nameRef?: React.Ref<HTMLInputElement>; geo?: { kept: ReadonlySet<string>; keep: (k: string) => void } }): ContactHeadParts {
   const d = form.d;
   const first = firstOf(d);
   const needAgency = !!d.name.trim() && !d.agency.trim() && !d.agencyUnknown;
   const link = (k: "website" | "form" | "mswl") => (!d[k].trim() ? null : linkOk(d[k])
     ? <span className="aap-note ok">✓ {hostOf(d[k])}</span> : <span className="aap-note bad" data-cl262="problem">That doesn’t look like a link</span>);
   const linkLabel = formLinkLabel(d.method);
-  return (
-    <div className="cl262-ctg" data-cl262="contact-form">
-      <div className="cl262-two">
-        <AaField label="Name" k="name">
-          <input ref={nameRef} className="aap-inp" data-ae="name" data-cl262="name-input" value={d.name} autoComplete="off" onChange={(e) => form.set({ name: e.target.value })} />
-          {form.dup ? <span className="aap-note bad" data-cl262="dup">Already on your list: {form.dup.name}</span> : null}
-        </AaField>
-        <AaField label="Agency" k="agency">
-          {d.agencyUnknown ? (
-            <div className="aap-agu cl262-agu" data-cl262="agency-unknown"><span>Agency unknown</span>
-              <button type="button" className="aap-mini" data-cl262="agency-undo" onClick={() => form.set({ agencyUnknown: false })}>Add it after all</button></div>
-          ) : (
-            <input className="aap-inp" data-ae="agency" data-cl262="agency-input" value={d.agency} autoComplete="off"
-              onChange={(e) => { const v = e.target.value; form.set({ agency: v, ...(v.trim() ? { agencyUnknown: false } : {}) }); }} />
-          )}
-        </AaField>
+  return {
+    name: (
+      <span className="ag-hf" data-aap="field" data-f="name">
+        <input ref={o.nameRef} className="aap-inp hin hin-nm" data-ae="name" data-cl262="name-input" value={d.name} placeholder="Name" aria-label="Name" autoComplete="off" onChange={(e) => form.set({ name: e.target.value })} />
+        {form.dup ? <span className="aap-note bad" data-cl262="dup">Already on your list: {form.dup.name}</span> : null}
+      </span>
+    ),
+    agency: (
+      <span className="ag-hf" data-aap="field" data-f="agency">
+        {d.agencyUnknown ? (
+          <span className="aap-agu cl262-agu" data-cl262="agency-unknown"><span>Agency unknown</span>
+            <button type="button" className="aap-mini" data-cl262="agency-undo" onClick={() => form.set({ agencyUnknown: false })}>Add it after all</button></span>
+        ) : (
+          <input className="aap-inp hin hin-ag" data-ae="agency" data-cl262="agency-input" value={d.agency} placeholder="Agency" aria-label="Agency" autoComplete="off"
+            onChange={(e) => { const v = e.target.value; form.set({ agency: v, ...(v.trim() ? { agencyUnknown: false } : {}) }); }} />
+        )}
+      </span>
+    ),
+    agencyAsk: needAgency ? (
+      <div className="aap-agask cl262-agask" role="status" data-cl262="agency-ask">
+        <b>Do you know {first}’s agency?</b>
+        <p>Having it on file stops you querying two agents at the same agency by mistake, and helps us keep agents’ details up to date. If you really can’t find it, you can carry on without it.</p>
+        <div className="aap-agask-b"><button type="button" className="aap-pill" data-cl262="agency-unknown-pill" onClick={() => form.set({ agencyUnknown: true, agency: "" })}>Agency unknown</button></div>
       </div>
-      {needAgency ? (
-        <div className="aap-agask cl262-agask" role="status" data-cl262="agency-ask">
-          <b>Do you know {first}’s agency?</b>
-          <p>Having it on file stops you querying two agents at the same agency by mistake, and helps us keep agents’ details up to date. If you really can’t find it, you can carry on without it.</p>
-          <div className="aap-agask-b"><button type="button" className="aap-pill" data-cl262="agency-unknown-pill" onClick={() => form.set({ agencyUnknown: true, agency: "" })}>Agency unknown</button></div>
-        </div>
-      ) : null}
-      <AaField label="Based in" k="country">
-        {/* Agent card v2.1 — two lines: the country control (Elsewhere's search beside the pills), then the city, full
-            width; the flag follows the country control and nothing else; a known city in another country gets an offer,
-            never a block */}
-        <div className="acv21-geo" data-acv21="geo">
+    ) : null,
+    place: (
+      <div className="ag-hbased" data-aap="field" data-f="country" data-acv21="geo">
+        <div className="ag-hgeo">
           <CountryPills country={d.country} onCountry={(c) => form.set({ country: c })} />
-          <input className="aap-inp" data-ae="city" value={d.city} placeholder="City, if you know it" autoComplete="off" onChange={(e) => form.set({ city: e.target.value })} />
+          <input className="aap-inp hin" data-ae="city" value={d.city} placeholder="City, if you know it" aria-label="City" autoComplete="off" onChange={(e) => form.set({ city: e.target.value })} />
         </div>
-        {geo ? <CityOfferBox city={d.city} country={d.country} kept={geo.kept} onKeep={geo.keep} onSet={(iso) => form.set({ country: iso })} /> : null}
-      </AaField>
-      <div className="cl262-two">
-        <AaField label="Email" k="email">
-          <input className="aap-inp" data-ae="email" inputMode="email" value={d.email} placeholder="name@agency.co.uk" autoComplete="off" onChange={(e) => form.set({ email: e.target.value })} />
-          {d.email.trim() ? (emailOk(d.email) ? <span className="aap-note ok">✓ Looks right</span> : <span className="aap-note bad" data-cl262="problem">That email doesn’t look right</span>) : null}
-        </AaField>
-        <AaField label="Website" k="website">
-          <input className="aap-inp" data-ae="website" value={d.website} placeholder="agency.co.uk" autoComplete="off" onChange={(e) => form.set({ website: e.target.value })} />{link("website")}
-        </AaField>
+        {o.geo ? <CityOfferBox city={d.city} country={d.country} kept={o.geo.kept} onKeep={o.geo.keep} onSet={(iso) => form.set({ country: iso })} /> : null}
       </div>
-      {linkLabel ? (
-        <AaField label={linkLabel} k="form">
-          <input className="aap-inp" data-ae="form" value={d.form} placeholder={formLinkPlaceholder(d.method)} autoComplete="off" onChange={(e) => form.set({ form: e.target.value })} />{link("form")}
+    ),
+    contact: (
+      <div className="ag-hct" data-acv22="head-contact">
+        <span className="ag-hf" data-aap="field" data-f="email">
+          <label>{MAIL15}<input className="aap-inp hin" data-ae="email" inputMode="email" value={d.email} placeholder="name@agency.co.uk" aria-label="Email" autoComplete="off" onChange={(e) => form.set({ email: e.target.value })} /></label>
+          {d.email.trim() ? (emailOk(d.email) ? <span className="aap-note ok">✓ Looks right</span> : <span className="aap-note bad" data-cl262="problem">That email doesn’t look right</span>) : null}
+        </span>
+        <span className="ag-hf" data-aap="field" data-f="website">
+          <label>{GLOBE15}<input className="aap-inp hin" data-ae="website" value={d.website} placeholder="agency.co.uk" aria-label="Website" autoComplete="off" onChange={(e) => form.set({ website: e.target.value })} /></label>
+          {link("website")}
+        </span>
+      </div>
+    ),
+    more: (
+      <div className="ag-hmore" data-acv22="head-more">
+        <AaField label="MSWL" k="mswl">
+          <input className="aap-inp" data-ae="mswl" value={d.mswl} placeholder="manuscriptwishlist.com/…" autoComplete="off" onChange={(e) => form.set({ mswl: e.target.value })} />{link("mswl")}
         </AaField>
-      ) : null}
-      <AaField label="MSWL" k="mswl">
-        <input className="aap-inp" data-ae="mswl" value={d.mswl} placeholder="manuscriptwishlist.com/…" autoComplete="off" onChange={(e) => form.set({ mswl: e.target.value })} />{link("mswl")}
-      </AaField>
-      <AaField label="Social" k="social"><SocialField social={d.social} onSocial={(s) => form.set({ social: s })} /></AaField>
-    </div>
-  );
-};
+        <AaField label="Social" k="social"><SocialField social={d.social} onSocial={(s) => form.set({ social: s })} /></AaField>
+        {linkLabel ? (
+          <AaField label={linkLabel} k="form">
+            <input className="aap-inp" data-ae="form" value={d.form} placeholder={formLinkPlaceholder(d.method)} autoComplete="off" onChange={(e) => form.set({ form: e.target.value })} />{link("form")}
+          </AaField>
+        ) : null}
+      </div>
+    ),
+    moreHasValue: !!(d.mswl.trim() || d.social.handle.trim() || (linkLabel && d.form.trim())),
+  };
+}
 
 /** the names the save bar lists, by draft field — two fields that are one thing to the writer share a name */
 export const FIELD_NAME: Partial<Record<keyof CardDraft, string>> = {
