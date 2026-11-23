@@ -8,7 +8,12 @@
  *          after Phase 2 the gate: none cut, population non-zero at each width)
  *   V23-E  Escape on the materials pop-up — opened by hover, by focus and by click, on the Queries page, Responses and
  *          Log a query's preview: is it closed 400ms later? (recon 0.5e; after Phase 3 the gate)
- *   (more below as the phases land)
+ *   V23-S  one count (Phase 1): on the seeded book (seedLaq2 + 21 + 22: 24 queries, three undated) the Dashboard's
+ *          "{n} queries sent", the Queries page header and Log a query's review ("queries sent" before this one, and
+ *          "Query number {n}" after it) agree; the Dashboard's line under the Sent weeks and "Add the dates" → the Queries
+ *          page showing only the undated; without the undated (seedLaq2 + 21) no line. Shots of the Sent card, both.
+ *   V23-T  the held task on the To-do page (Phase 4): its title is not a field, no unlink, "I've sent it" there, and
+ *          after a reload. Shot of the desk.
  * Readings to reports/log-a-query-v2-3/<tag>/readings.json. Run only through `npm run e2e:emu`.
  */
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
@@ -183,4 +188,148 @@ if (run("E")) test("V23-E · Escape on the materials pop-up: Queries page, Respo
     }
   }
   if (TAG !== "before") ok((READ.laqNextEscape as { leaveCheck: boolean }).leaveCheck, "log a query: the next Escape is the leave check");
+});
+
+const SEED = (extra: string) => execSync(`node tests/e2e/seedLaq2.mjs --clean && node tests/e2e/seedLaq2.mjs && node tests/e2e/seedLaq21.mjs${extra}`, { stdio: "ignore", timeout: 180_000 });
+const CLEAN = () => execSync("node tests/e2e/seedLaq2.mjs --clean", { stdio: "ignore", timeout: 180_000 });
+async function bookCtx(browser: Browser, vp = { width: 1512, height: 982 }) {
+  const r = await ctxAt(browser, vp);
+  await r.p.evaluate(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "laq2-ms"); } catch { /* none */ } });
+  return r;
+}
+/** the Dashboard's chart card in its Sent view: the count, the line (if any), a shot */
+async function sentCard(p: Page, shot: string) {
+  await p.goto("/dashboard");
+  const tog = p.locator('.d2 [data-d2="chart-toggle"] button[data-m="sent"]');
+  await tog.waitFor({ state: "visible", timeout: 60_000 });
+  await p.waitForTimeout(800);
+  await tog.click();
+  await p.waitForTimeout(700);
+  const card = p.locator('.d2 [data-d2-card="active"]').first();
+  await card.scrollIntoViewIfNeeded();
+  mkdirSync(OUT, { recursive: true });
+  await card.screenshot({ path: `${OUT}/${shot}.png`, animations: "disabled" });
+  return p.evaluate(() => {
+    const line = document.querySelector<HTMLElement>('.d2 [data-d2="undated"]');
+    const a = line?.querySelector<HTMLAnchorElement>('[data-d2="add-dates"]');
+    const cs = line ? getComputedStyle(line) : null;
+    const axis = document.querySelector<HTMLElement>('.d2 .d2-plot.is-sent .d2-axis span');
+    return { head: document.querySelector('.d2 [data-d2="chart-count"]')?.textContent?.trim() ?? "", line: line?.textContent?.trim() ?? null, href: a?.getAttribute("href") ?? null,
+      size: cs ? parseFloat(cs.fontSize) : null, color: cs?.color ?? null, axisSize: axis ? parseFloat(getComputedStyle(axis).fontSize) : null, axisColor: axis ? getComputedStyle(axis).color : null,
+      underPlot: (() => { const pl = document.querySelector('.d2 [data-d2="plot"]')?.getBoundingClientRect(); const l = line?.getBoundingClientRect(); return pl && l ? l.top - pl.bottom : null; })() };
+  });
+}
+const num = (t: string | null | undefined) => Number((t ?? "").match(/\d+/)?.[0] ?? NaN);
+
+if (run("S")) test("V23-S · one count of queries sent, the line under the Sent weeks, Add the dates", async ({ browser }) => {
+  try {
+    /* without undated queries: no line */
+    SEED("");
+    let { c, p } = await bookCtx(browser);
+    const none = await sentCard(p, "dashboard-sent-no-undated");
+    READ.sentNoUndated = none;
+    if (TAG !== "before") ok(none.line === null, "no undated: no line under the weeks", `${none.line}`);
+    await c.close();
+    /* with three undated among 24 */
+    SEED(" && node tests/e2e/seedLaq22.mjs");
+    ({ c, p } = await bookCtx(browser));
+    const s = await sentCard(p, "dashboard-sent-with-undated");
+    READ.sentWithUndated = s;
+    await p.goto("/queries");
+    await p.waitForSelector(`${PAGE} [data-qc151="title"]`, { timeout: 60_000 });
+    await p.waitForTimeout(1500);
+    const qHead = (await p.locator(`${PAGE} [data-qc151="title"]`).first().textContent())?.trim() ?? "";
+    /* Log a query's review, for one more agent on this book */
+    await p.goto("/dashboard");
+    const d = p.getByRole("button", { name: /^\+?\s*Log a query$/ }).locator("visible=true").first();
+    await d.waitFor({ state: "visible", timeout: 60_000 });
+    await d.click();
+    const R = p.locator('[data-qls="root"]');
+    await R.waitFor({ state: "visible", timeout: 30_000 });
+    await p.locator('[data-qls="find"]').fill("Harriet");
+    await p.locator('[data-qls="agent"][data-id="laq2-hv"]').click();
+    await p.locator('[data-qls="when-opt"][data-k="today"]').click();
+    await p.locator('[data-qls="use-ask"]').click();
+    await p.locator('[data-qls="how-opt"]').first().click();
+    await p.locator('[data-qls="nudge-continue"]').click();
+    await expect(R).toHaveAttribute("data-step", "check");
+    await p.waitForTimeout(1200);
+    const review = await p.locator('[data-qls="count"][data-k="sent"]').getAttribute("aria-label").catch(() => null);
+    await p.locator('[data-qls="log"]').click();
+    await p.locator('.laq-cnt[data-qls="count"]').waitFor({ state: "visible", timeout: 30_000 });
+    await p.waitForTimeout(2500);
+    const qnum = (await p.locator('.laq-cnt[data-qls="count"]').textContent())?.trim() ?? "";
+    const undo = p.getByRole("button", { name: /^Undo$/ }).first();
+    if (await undo.isVisible().catch(() => false)) { await undo.click(); await p.waitForTimeout(1500); }
+    READ.oneCount = { dashboard: s.head, queriesPage: qHead, review, queryNumber: qnum };
+    console.log(`one count: dashboard "${s.head}" · queries page "${qHead}" · review "${review}" · "${qnum}"`);
+    if (TAG !== "before") {
+      ok(num(s.head) === 24 && num(qHead) === 24, "the seeded book (24, three undated): the Dashboard and the Queries page both say 24", `${s.head} / ${qHead}`);
+      ok(num(review) === 25 && num(qnum) === 25, "Log a query: the review's queries sent with this one, and Query number, are 25", `${review} / ${qnum}`);
+      ok(s.line === "3 queries have no sent date, so they aren’t in the weeks above. Add the dates", "the line under the weeks, and the link", `${s.line}`);
+      ok(s.underPlot !== null && s.underPlot >= 0 && s.underPlot <= 16, "directly beneath the plot", `${s.underPlot}`);
+      ok(s.size !== null && s.size >= 12 && s.size === s.axisSize && s.color === s.axisColor, "in the card's small print (the axis's size and colour), nothing under 12px", `${s.size}px ${s.color} / axis ${s.axisSize}px ${s.axisColor}`);
+      /* Add the dates → the Queries page showing only those three */
+      await p.goto("/dashboard");
+      await p.locator('.d2 [data-d2="chart-toggle"] button[data-m="sent"]').click();
+      await p.waitForTimeout(600);
+      await p.locator('.d2 [data-d2="add-dates"]').click();
+      await p.waitForURL(/\/queries\?ids=/, { timeout: 30_000 });
+      await p.waitForTimeout(2500);
+      const shown = await p.evaluate((root) => [...document.querySelectorAll<HTMLElement>(`${root} [data-qc154="card"]`)].filter((c) => c.getBoundingClientRect().width > 0).map((c) => c.dataset.id ?? ""), PAGE);
+      const chip = await p.evaluate(() => [...document.querySelectorAll<HTMLElement>("button, span")].map((e) => e.textContent?.trim() ?? "").find((t) => /^No sent date · \d+/.test(t)) ?? null);
+      READ.addTheDates = { url: p.url(), shown, chip };
+      await p.screenshot({ path: `${OUT}/add-the-dates-queries-page.png` });
+      ok(shown.length === 3 && shown.every((id) => /^laq2-mi0[1-3]$|^laq2-/.test(id)), "Add the dates: the Queries page showing only the three undated", `${shown.join(",")}`);
+      ok(!!chip && /· 3$/.test(chip), "with the removable chip that says so", `${chip}`);
+    }
+    await c.close();
+  } finally { CLEAN(); }
+});
+
+if (run("T")) test("V23-T · the held task on the To-do page: fixed words, no unlink, I've sent it, after a reload", async ({ browser }) => {
+  try {
+    SEED("");
+    const { c, p } = await bookCtx(browser);
+    await p.goto("/dashboard");
+    const d = p.getByRole("button", { name: /^\+?\s*Log a query$/ }).locator("visible=true").first();
+    await d.waitFor({ state: "visible", timeout: 60_000 });
+    await d.click();
+    const R = p.locator('[data-qls="root"]');
+    await R.waitFor({ state: "visible", timeout: 30_000 });
+    await p.locator('[data-qls="find"]').fill("Harriet");
+    await p.locator('[data-qls="agent"][data-id="laq2-hv"]').click();
+    await p.locator('[data-qls="not-sent"]').click();
+    await p.locator('[data-qls="not-sent-task"]').waitFor({ state: "visible", timeout: 10_000 });
+    await p.waitForTimeout(800);
+    await p.locator('[data-qls="not-sent-done"]').click();
+    await R.waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+    const read = async () => {
+      const row = p.locator("[data-tws-row]", { hasText: "Send your query to Harriet Vance" }).first();
+      await row.waitFor({ state: "visible", timeout: 60_000 });
+      await row.click();
+      await p.waitForTimeout(600);
+      return p.evaluate(() => {
+        const own = document.querySelector<HTMLElement>('[data-tws="own"]');
+        return { fixed: own?.querySelector('[data-tws="fixed-title"]')?.textContent ?? null, field: !!own?.querySelector('textarea[aria-label="What needs doing"]'),
+          editable: !!own?.querySelector('[contenteditable="true"]'), unlink: !!own?.querySelector('[aria-label="Unlink"]'), sent: !!document.querySelector('[data-tws="held-sent"]'),
+          size: own?.querySelector('[data-tws="fixed-title"]') ? parseFloat(getComputedStyle(own.querySelector('[data-tws="fixed-title"]')!).fontSize) : null };
+      });
+    };
+    await p.goto("/todo");
+    const a = await read();
+    mkdirSync(OUT, { recursive: true });
+    await p.screenshot({ path: `${OUT}/todo-held-task.png` });
+    await p.reload();
+    const b = await read();
+    READ.heldTask = { a, b };
+    if (TAG !== "before") {
+      ok(a.fixed === "Send your query to Harriet Vance" && !a.field && !a.editable, "the title is the task's words, not a field", JSON.stringify(a));
+      ok(!a.unlink, "its agent cannot be unlinked", `${a.unlink}`);
+      ok(a.sent, "I've sent it is there");
+      ok(b.sent && b.fixed === a.fixed && !b.field, "after a reload: the same, and the button", JSON.stringify(b));
+      ok(a.size !== null && a.size >= 12, "the title ≥ 12px", `${a.size}`);
+    }
+    await c.close();
+  } finally { CLEAN(); }
 });
