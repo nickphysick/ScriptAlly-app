@@ -66,6 +66,21 @@
 .qc152 .nx-items.qc168-mats { padding: 10px 12px; }
 .qc152 .nx-grp.has-open > .qc168-gf { grid-column: 2; min-width: 0; }
 
+/* ── Notes: nothing moves on hover; a note opens where it is (its words in place, no box inside the box) ─────── */
+.qc152 .nx-n[data-qc168-host] > header { padding-right: 64px; }
+.qc152 .nx-n.qc168-open > header { padding-right: 0; }
+.qc152 .nx-n.qc168-open .nx-edit textarea, .qc152 .nx-n.qc168-open .nx-edit textarea:focus {
+  display: block; width: 100%; box-sizing: border-box; min-height: 66px; resize: none; overflow: hidden; margin: 0; padding: 2px 0;
+  border: 0 !important; outline: 0 !important; border-radius: 0; background: transparent; box-shadow: none !important;
+  font: 400 16px/1.45 var(--sp-serif) !important; color: #1c130f;
+}
+.qc152 .nx-n.them.qc168-open .nx-edit textarea { font-style: italic !important; }
+.qc152 .nx-n.them.qc168-open { background: var(--bt) !important; }
+/* while a note is open the writing box is not sticky */
+.qc152 .nx-notes.has-open .nx-nc { position: static; box-shadow: none; }
+.qc152 .qc168-mn.nm { top: 20px; right: 8px; min-width: 230px; }
+.qc152 .qc168-mn.nm.up { top: auto; bottom: calc(100% - 14px); }
+
 /* ── the card's small menu (the edit layer's anchored menu, kept) ─────────────────────────────────────────────── */
 .qc152 .qc152-pp { position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 340px; overflow: auto; padding: 6px; border-radius: 12px; background: #fff;
   box-shadow: 0 18px 40px -14px rgba(28, 19, 15, .35), 0 0 0 1px rgba(28, 19, 15, .08); animation: qc168-in .14s ease-out both; text-align: left; }

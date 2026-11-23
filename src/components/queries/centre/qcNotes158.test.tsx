@@ -6,7 +6,7 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { NotesTab158, notesList, quotePhrase, quotesOf, type NoteIn, type QuoteIn } from "./QcNotes158";
+import { NotesTab158, menuItems168, notesList, quotePhrase, quotesOf, type NoteIn, type QuoteIn } from "./QcNotes158";
 import { QueryStatus } from "../../../types";
 import { STAGE_COLOURS } from "../../../lib/stageColours";
 import type { ThreadStepIn } from "../../../lib/qcThread152";
@@ -36,12 +36,17 @@ describe("QC158-10 (source) notes and the agent's words, one list in date order"
     expect(h).not.toContain("not the agent's");
   });
   it("a quote has Send to Corkboard only: no Pin and no task", () => {
+    /* Query card v168 — re-pointed: the actions sit behind each entry's ⋯ (the card's small menu), so nothing moves on
+       hover; the disc is drawn, and what it holds is menuItems168's */
     const q = html([], quotes).match(/<article[^>]*data-qc158="quote"[^]*?<\/article>/g) ?? [];
     expect(q.length).toBe(2);
     for (const a of q) {
-      expect(a).toContain('data-act="cork"');
-      expect(a).not.toMatch(/data-act="(pin|task)"/);
+      expect(a).toContain('data-qc168="more"');
+      expect(a).toContain('aria-label="More for these words"');
+      expect(a).not.toContain("nx-acts");
     }
+    const all = { onPin: () => {}, onTask: () => {}, onCork: () => {} };
+    expect(menuItems168({ t: "quote", q: quotes[0] }, all).map((x) => x.k)).toEqual(["cork"]);
   });
   it("the phrases", () => {
     expect(quotePhrase(QueryStatus.REJECTED, null)).toBe("when passing");
@@ -73,14 +78,19 @@ describe("QC158-12 (source) note actions", () => {
     expect(list.map((e) => (e.t === "note" ? e.n.id : ""))).toEqual(["b", "a", "c"]);
     const h = html([note("a", 50, "old"), note("b", 10, "new", true)], []);
     expect(h.indexOf('data-id="b"')).toBeLessThan(h.indexOf('data-id="a"'));
-    expect(h).toMatch(/data-id="b"[^]*>Pinned<[^]*>Unpin</);
-    expect(h).toMatch(/data-id="a"[^]*>Pin to the top<[^]*>Make it a task<[^]*>Send to Corkboard</);
+    expect(h).toMatch(/data-id="b"[^]*>Pinned</);
+    /* v168 — re-pointed: behind ⋯ */
+    expect(h).toMatch(/data-id="a"[^]*aria-label="More for this note"/);
+    const all = { onPin: () => {}, onTask: () => {}, onCork: () => {} };
+    expect(menuItems168({ t: "note", n: note("b", 10, "new", true) }, all).map((x) => x.label)).toEqual(["Unpin", "Make it a task", "Send to Corkboard"]);
+    expect(menuItems168({ t: "note", n: note("a", 50, "old") }, all).map((x) => x.label)).toEqual(["Pin to the top", "Make it a task", "Send to Corkboard"]);
   });
   it("the page copies the text and leaves the note: a dated task, or an undated one (a Corkboard note); pinning unpins the others", () => {
     const q = readFileSync("src/components/Queries.tsx", "utf8");
     const at = q.indexOf("onNoteTask={(text) => {");
     expect(at).toBeGreaterThan(0);
-    const block = q.slice(q.indexOf("onPinNote={(id, on) => {"), q.indexOf("mode={qcCardMode}", at));
+    /* v168 — re-pointed: the block ends where the note's own edit and delete begin (they are the journal's writes) */
+    const block = q.slice(q.indexOf("onPinNote={(id, on) => {"), q.indexOf("onEditNote={async (id, text) => {", at));
     expect(block).toMatch(/addUserTask\(\{ text, queryId: q\.id, agentId: ag\?\.id, manuscriptId: q\.manuscriptId, dueDate: today \}\)/);
     expect(block).toMatch(/addUserTask\(\{ text, queryId: q\.id \}\)/);
     expect(block).toMatch(/pinJournalEntry\(j\.id, false\)/);
@@ -88,6 +98,7 @@ describe("QC158-12 (source) note actions", () => {
   });
   it("the To-do desk's read-only preview passes no actions, so none are drawn", () => {
     expect(html([note("a", 5, "x")], [], false)).not.toContain('data-qc158="act"');
+    expect(html([note("a", 5, "x")], [], false)).not.toContain('data-qc168="more"');
   });
 });
 

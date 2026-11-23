@@ -158,6 +158,7 @@ import { dependents, STEP_LABEL, type LogStep, type StepType } from "../lib/qcLo
 import type { MatEnv } from "./queries/centre/QcEdit152";
 import { QcComposer1522, type ComposerCtx, type ComposerSave, type Journey, type ReplyType } from "./queries/centre/QcComposer1522";
 import { QcStepEdit1522 } from "./queries/centre/QcStepEdit1522";
+import type { QuoteIn } from "./queries/centre/QcNotes158";
 import { holdsPages, planDetails1522, planReply, planSigned, planStepEdit, planTell, planUnpass } from "../lib/qc1522Write";
 import type { FootAct } from "../lib/qcFoot1522";
 import type { Snapshot } from "../lib/queryActions/snapshot";
@@ -6114,6 +6115,7 @@ export const Queries: React.FC<{
        and an undo toast inside the card. ⚠️ v152.1's "What needs changing?" fork, Fix a mistake, the record form and
        "See what changes" are gone. */
     let composer1522: React.ReactNode = null;
+    let quoteEdit168: ((qt: QuoteIn, text: string) => Promise<boolean>) | null = null;
     let edit1522: React.ReactNode = null;
     const card1522: NonNullable<React.ComponentProps<typeof QcQueryCard149>["card1522"]> = {};
     if (v152 && qcDesk && currentUser) {
@@ -6360,6 +6362,18 @@ export const Queries: React.FC<{
           }, false);
         },
       };
+      /* Query card v168 — the agent's words edited in place on the Notes tab: that response's step save (planStepEdit, its
+         `replyNote`), its date and materials unchanged; one snapshot, so Undo puts it back exactly */
+      quoteEdit168 = (qt, text) => {
+        const st = qt.activityId ? steps1522.find((x) => x.activityId === qt.activityId && x.ms != null) ?? null : null;
+        if (!st || !st.activityId || st.ms == null) return Promise.resolve(false);
+        return run1522(async () => {
+          const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
+          const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
+            { id: st.activityId!, kind: fixKind(st), dayMs: st.ms!, materials: storedMats(st.activityId) ?? asMats(st.chips.map((c) => c.label)) }, text);
+          done1522(await commitPlan(uid, plan), `Saved ${first}’s words`, null, false);
+        }, false);
+      };
       card1522.composer = composer1522;
       card1522.draft = qc1522J ? qc1522Draft : null;
       card1522.editingId = edit1522 ? editKey : null;
@@ -6522,6 +6536,17 @@ export const Queries: React.FC<{
             .then(() => showToast({ message: "On your to-do list for today" }));
         }}
         onNoteCork={(text) => { void addUserTask({ text, queryId: q.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }}
+        /* Query card v168 — a note edited in place: the journal's own edit (it writes only the words, so Undo writes the
+           old words back exactly). Deleted: the journal's own delete, asked once in the note; no Undo (the journal has no
+           restore that keeps the note's id and date). */
+        onEditNote={async (id, text) => {
+          const was = journalEntries.find((j) => j.id === id)?.entryText;
+          try { await updateJournalEntry(id, text); } catch { showToast({ message: "Couldn't save that note. Nothing was changed." }); return false; }
+          setQc1522Toast({ msg: "Saved that note", undo: was != null ? async () => { await updateJournalEntry(id, was); } : null, bump: false });
+          return true;
+        }}
+        onDeleteNote={(id) => { void deleteJournalEntry(id).then(() => setQc1522Toast({ msg: "Note deleted", undo: null, bump: false })); }}
+        onQuoteEdit={quoteEdit168}
         mode={qcCardMode}
         /* PHONE APP v2, PART 4 — on a phone a response is recorded in the response journey's flow layout, the same
            walk as every other journey; the card's inline form stays the desktop's */

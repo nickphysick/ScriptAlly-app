@@ -34,7 +34,7 @@ import { FlowHead, FLOW_WORDS, RECORD_LINE } from "../../shared/FlowHead";
 import { STAGE_STEPS, stageIndex } from "../../../lib/queriesPhone";
 import { QcCard152, type QcCard152Data, type QcCard152Props } from "./QcCard152";
 import type { ReplyAct } from "../../../lib/qcThread152";
-import { NotesTab158, quotesOf } from "./QcNotes158";
+import { NotesTab158, quotesOf, type QuoteIn } from "./QcNotes158";
 
 
 /** the band's tint and ink, and the pill's ground, per set (the landing card's With you / With the agent / Closed;
@@ -162,6 +162,10 @@ export interface QcQueryCard149Props {
   onPinNote?: (id: string, pinned: boolean) => void;
   onNoteTask?: (text: string) => void;
   onNoteCork?: (text: string) => void;
+  /** Query card v168 — a note edited or deleted in place, and the agent's words edited through their step (desktop) */
+  onEditNote?: ((id: string, text: string) => Promise<boolean>) | null;
+  onDeleteNote?: ((id: string) => void) | null;
+  onQuoteEdit?: ((q: QuoteIn, text: string) => Promise<boolean>) | null;
   mode: CardMode;
   onMode: (m: CardMode) => void;
   tab?: CardTab;
@@ -353,7 +357,8 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
         tab={tab} onTab={setTab}
         notes={<NotesTab158 first={p.agent.first || "the agent"} nowMs={nowMs} resetKey={r.id} onAdd={p.onAddNote}
           notes={p.notes.map((n) => ({ id: n.id, text: n.text, ms: n.ms ?? null, pinned: !!n.pinned }))} quotes={quotesOf(v152.steps)}
-          onPin={p.onPinNote ?? null} onTask={p.onNoteTask ?? null} onCork={p.onNoteCork ?? null} ghost />}
+          onPin={p.onPinNote ?? null} onTask={p.onNoteTask ?? null} onCork={p.onNoteCork ?? null} ghost
+          onEdit={p.onEditNote ?? null} onDelete={p.onDeleteNote ?? null} onQuoteEdit={p.onQuoteEdit ?? null} />}
         onClose={p.onClose}
         onPencil={() => (p.onPencil152 ? p.onPencil152() : p.onMode("edit"))}
         onEditStep={(id) => (p.onEditStep152 ? p.onEditStep152(id) : (setTab("tracking"), p.onMode("edit")))}

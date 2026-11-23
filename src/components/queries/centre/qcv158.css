@@ -73,8 +73,7 @@
 .qc152 .nx-n header .pin { margin-left: auto; color: #2a3a52; font-weight: 600 !important; }
 .qc152 .nx-n p { margin: 0; font: 400 16px/1.45 var(--sp-serif) !important; white-space: pre-wrap; color: #1c130f; }
 .qc152 .nx-n.them p { font-style: italic !important; }
-.qc152 .nx-acts { display: flex; gap: 14px; margin-top: 0; max-height: 0; opacity: 0; overflow: hidden; }
-.qc152 .nx-n:hover .nx-acts, .qc152 .nx-n:focus-within .nx-acts { margin-top: 8px; max-height: 30px; opacity: 1; }
+/* (the hover row of actions, .nx-acts, is retired by Query card v168: a note's pencil and ⋯ move nothing) */
 .qc152 .nx-nempty { margin: auto 0; text-align: center; }
 .qc152 .nx-nempty b { display: block; font: 400 19px var(--sp-type) !important; margin-bottom: 6px; color: #1c130f; }
 .qc152 .nx-nempty span { display: block; max-width: 34ch; margin: 0 auto; font: italic 400 15px/1.45 var(--sp-serif) !important; color: #7a7066; }

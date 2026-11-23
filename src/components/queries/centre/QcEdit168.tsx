@@ -41,6 +41,8 @@ export interface Hold168 {
   reopen: () => void;
 }
 export interface Edit168 {
+  /** true only for the default value: no card above holds the rule (a part may then hold its own) */
+  local?: boolean;
   /** the key of what is open, or null */
   open: string | null;
   /** the question is showing in what is open */
@@ -61,7 +63,7 @@ export interface Edit168 {
 }
 const noop = () => {};
 export const Edit168Ctx = createContext<Edit168>({
-  open: null, asking: false, guard: (go) => go(), leave: noop, cross: noop, keep: noop, discard: noop, seedOf: () => undefined, hold: noop, release: noop,
+  local: true, open: null, asking: false, guard: (go) => go(), leave: noop, cross: noop, keep: noop, discard: noop, seedOf: () => undefined, hold: noop, release: noop,
 });
 export const useEdit168 = () => useContext(Edit168Ctx);
 
@@ -178,7 +180,9 @@ export const DeleteAsk: React.FC<{ words: string; busy?: boolean; onKeep: () => 
 );
 
 /** the card's small menu, anchored to what opened it, flipping up when there is no room below the card's foot */
-export const CardMenu: React.FC<{ root: HTMLElement | null; anchor: HTMLElement | null; onClose: () => void; label?: string; children: React.ReactNode; hook?: string }> = ({ root, anchor, onClose, label, children, hook }) => {
+/* With no `root` the menu is placed by its CSS inside its (positioned) host: a note's ⋯ menu, under the disc, or above it
+   on the last note (`up`). */
+export const CardMenu: React.FC<{ root: HTMLElement | null; anchor: HTMLElement | null; onClose: () => void; label?: string; children: React.ReactNode; hook?: string; up?: boolean }> = ({ root, anchor, onClose, label, children, hook, up }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number; up: boolean } | null>(null);
   useLayoutEffect(() => {
@@ -201,8 +205,8 @@ export const CardMenu: React.FC<{ root: HTMLElement | null; anchor: HTMLElement 
   }, [anchor, onClose]);
   useEffect(() => { ref.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true }); }, []);
   return (
-    <div ref={ref} className="qc152-pp qc168-mn" role="menu" aria-label={label} data-qc152="ed-menu" data-qc168={hook ?? "menu"} data-up={pos?.up ? "" : undefined}
-      style={pos ? { top: pos.top, left: pos.left } : { top: -9999, left: -9999 }}>{children}</div>
+    <div ref={ref} className={`qc152-pp qc168-mn${root ? "" : " nm"}${!root && up ? " up" : ""}`} role="menu" aria-label={label} data-qc152="ed-menu" data-qc168={hook ?? "menu"} data-up={pos?.up || (!root && up) ? "" : undefined}
+      style={!root ? undefined : pos ? { top: pos.top, left: pos.left } : { top: -9999, left: -9999 }}>{children}</div>
   );
 };
 export const CardMenuItem: React.FC<{ label: string; sub?: string | null; on?: boolean; rust?: boolean; onPick: () => void; data?: Record<string, string> }> = ({ label, sub, on, rust, onPick, data }) => (
