@@ -1,0 +1,11 @@
+1886dee2dae0373d076429f67f757f185d5c4da8aa47bc2a8b72f0f6d04fef18  ./log-a-query-v2-2.html
+fdbd8bee4f4b74924ded977a2aa7194852b318d7696d849369fdff1bf80a1b39  ./screens/00-whole-page.png
+f17925ddc222f5c7a329dce125407211f6c592cd3dfc1a42b41093fcc8adfcbc  ./screens/01-review.png
+c8b159192f972567544aa0ad8af2f2b6099abd80171b176088e4efe4d2341e36  ./screens/02-review-materials-tile-open.png
+4c47a3849607fb00521b0359d1ac6a5f9203b0a55cb0c7e67ac44d28847beb5a  ./screens/03-note-box-open.png
+7eb669b679a3e6e03f7f518e83c8c96a0a188636b9b26cde567bd9a94045a4f7  ./screens/04-note-typed.png
+85a005ad992b5974d41febfa0280274450f1c5bd6db4df3086152bd721492bb9  ./screens/05-note-added.png
+72bc904265bf89ffe1e4830413473c80287f77d6c2590c86a9851d5888832e48  ./screens/06-note-being-edited.png
+436086218ec05781648e15a2a16685f735715cf6ce83a55ceacfe41d23747f23  ./screens/07-review-with-a-note-top.png
+93339b1a242bcff8a3570978df1274623f0ee42049ed541602aeec1676bc808f  ./screens/08-logged-stamp-on-the-corner.png
+cfac2c214d1e6e790dec585c332946ecde37efe71e766c5f24d460deb84566c2  ./screens/09-not-sent.png
