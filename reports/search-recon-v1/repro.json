@@ -1,0 +1,17 @@
+{
+ "storedBefore": null,
+ "barBook": [],
+ "noahCardsOnQueryCentre": [
+  "NB Noah Bright Bright Literary Offer Sent 10 Jun 166 days ago 2 Next No date yet answer the offer → Answer the offer Offer"
+ ],
+ "searchOnDefaultBook": {
+  "found": 1,
+  "right": "Not queried",
+  "peek": "NB\nNoah Bright\nBright Literary, London | Noah Bright\nBright Literary, London | Noah Bright | Bright Literary, London | Not queried for Murphy's Day Out. | Open agent\n↵\nLog a query to Noah\n⌘ ↵"
+ },
+ "searchWithSmokeTestStored": {
+  "found": 1,
+  "right": "Offer",
+  "peek": "NB\nNoah Bright\nBright Literary, London | Noah Bright\nBright Literary, London | Noah Bright | Bright Literary, London | Offer\nQueried 10 Jun for The Smoke Test | Open agent\n↵\nOpen the query\n⌘ ↵"
+ }
+}

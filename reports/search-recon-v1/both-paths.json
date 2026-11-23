@@ -1,0 +1,3720 @@
+{
+ "manuscriptsInOrder": [
+  {
+   "id": "cv25-ms",
+   "title": "Murphy's Day Out",
+   "createdDate": null
+  },
+  {
+   "id": "cv25-ms-empty",
+   "title": "Murphy's Day Out",
+   "createdDate": null
+  },
+  {
+   "id": "db60-pre",
+   "title": "DB60 Pre-query",
+   "createdDate": null
+  },
+  {
+   "id": "msv12-ms",
+   "title": "Harbour of Glass",
+   "createdDate": null
+  },
+  {
+   "id": "seed-ms-1",
+   "title": "The Smoke Test",
+   "createdDate": null
+  },
+  {
+   "id": "seed-ms-2",
+   "title": "The Quiet Second",
+   "createdDate": null
+  },
+  {
+   "id": "thin-ms",
+   "title": "The Quiet Fixture",
+   "createdDate": null
+  }
+ ],
+ "runs": [
+  {
+   "stored": null,
+   "active": "cv25-ms",
+   "activeTitle": "Murphy's Day Out",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "msv12-agent-1",
+     "name": "Mira Kovic",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "Queried · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-3",
+     "name": "Edda Voss",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-4",
+     "name": "Theo Abara",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-5",
+     "name": "Sun-hee Park",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-6",
+     "name": "Rosa Quintana",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "qc150l9-ag",
+     "name": "Wren Calloway",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rej-agent-1",
+     "name": "Imogen Rackham",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-1",
+     "name": "Imogen Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-2",
+     "name": "Tobias Hark",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-3",
+     "name": "Tamsin Probewell",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-1",
+     "name": "Elinor Hale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · ",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-11",
+     "name": "Iris Kwan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Revise & Resubmit · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-12",
+     "name": "Noah Bright",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-2",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Full Sent · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-1",
+     "name": "Bea Halloran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-2",
+     "name": "Rufus Oyelaran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-bang",
+     "name": "Alasdair Crewe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-near",
+     "name": "Wren Ashcombe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed20",
+     "name": "Cormac Bligh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed865",
+     "name": "Ottoline Frayn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-soon",
+     "name": "Hester Blaine",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-chase",
+     "name": "Tobias Quint",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-close",
+     "name": "Rosalind Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-remind",
+     "name": "Imogen Farr",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    }
+   ]
+  },
+  {
+   "stored": "cv25-ms",
+   "active": "cv25-ms",
+   "activeTitle": "Murphy's Day Out",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "msv12-agent-1",
+     "name": "Mira Kovic",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "Queried · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-3",
+     "name": "Edda Voss",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-4",
+     "name": "Theo Abara",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-5",
+     "name": "Sun-hee Park",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-6",
+     "name": "Rosa Quintana",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "qc150l9-ag",
+     "name": "Wren Calloway",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rej-agent-1",
+     "name": "Imogen Rackham",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-1",
+     "name": "Imogen Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-2",
+     "name": "Tobias Hark",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-3",
+     "name": "Tamsin Probewell",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-1",
+     "name": "Elinor Hale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · ",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-11",
+     "name": "Iris Kwan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Revise & Resubmit · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-12",
+     "name": "Noah Bright",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-2",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Full Sent · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-1",
+     "name": "Bea Halloran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-2",
+     "name": "Rufus Oyelaran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-bang",
+     "name": "Alasdair Crewe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-near",
+     "name": "Wren Ashcombe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed20",
+     "name": "Cormac Bligh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed865",
+     "name": "Ottoline Frayn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-soon",
+     "name": "Hester Blaine",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-chase",
+     "name": "Tobias Quint",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-close",
+     "name": "Rosalind Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-remind",
+     "name": "Imogen Farr",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    }
+   ]
+  },
+  {
+   "stored": "cv25-ms-empty",
+   "active": "cv25-ms-empty",
+   "activeTitle": "Murphy's Day Out",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "cv25-agent-01",
+     "name": "Eleanor Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-02",
+     "name": "William Tan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-03",
+     "name": "Priya Raman",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-04",
+     "name": "Daniel O’Rourke",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-05",
+     "name": "Sophie Dunn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-06",
+     "name": "Clara Beaumont",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-07",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-08",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-09",
+     "name": "Jonathan Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-10",
+     "name": "Aisha Kapoor",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-11",
+     "name": "Hester Quinn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-12",
+     "name": "George Ashworth",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-13",
+     "name": "Nadia Hussain",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-14",
+     "name": "Fenella Strand",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-1",
+     "name": "Mira Kovic",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "Queried · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-3",
+     "name": "Edda Voss",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-4",
+     "name": "Theo Abara",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-5",
+     "name": "Sun-hee Park",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-6",
+     "name": "Rosa Quintana",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "qc150l9-ag",
+     "name": "Wren Calloway",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rej-agent-1",
+     "name": "Imogen Rackham",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-1",
+     "name": "Imogen Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-2",
+     "name": "Tobias Hark",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-3",
+     "name": "Tamsin Probewell",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-1",
+     "name": "Elinor Hale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · ",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-11",
+     "name": "Iris Kwan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Revise & Resubmit · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-12",
+     "name": "Noah Bright",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-2",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Full Sent · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-1",
+     "name": "Bea Halloran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-2",
+     "name": "Rufus Oyelaran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-bang",
+     "name": "Alasdair Crewe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-near",
+     "name": "Wren Ashcombe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed20",
+     "name": "Cormac Bligh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed865",
+     "name": "Ottoline Frayn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-soon",
+     "name": "Hester Blaine",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-chase",
+     "name": "Tobias Quint",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-close",
+     "name": "Rosalind Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-remind",
+     "name": "Imogen Farr",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    }
+   ]
+  },
+  {
+   "stored": "db60-pre",
+   "active": "db60-pre",
+   "activeTitle": "DB60 Pre-query",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "cv25-agent-01",
+     "name": "Eleanor Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-02",
+     "name": "William Tan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-03",
+     "name": "Priya Raman",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-04",
+     "name": "Daniel O’Rourke",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-05",
+     "name": "Sophie Dunn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-06",
+     "name": "Clara Beaumont",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-07",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-08",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-09",
+     "name": "Jonathan Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-10",
+     "name": "Aisha Kapoor",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-11",
+     "name": "Hester Quinn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-12",
+     "name": "George Ashworth",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-13",
+     "name": "Nadia Hussain",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-14",
+     "name": "Fenella Strand",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-1",
+     "name": "Mira Kovic",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "Queried · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-3",
+     "name": "Edda Voss",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-4",
+     "name": "Theo Abara",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-5",
+     "name": "Sun-hee Park",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-6",
+     "name": "Rosa Quintana",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "qc150l9-ag",
+     "name": "Wren Calloway",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rej-agent-1",
+     "name": "Imogen Rackham",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-1",
+     "name": "Imogen Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-2",
+     "name": "Tobias Hark",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-3",
+     "name": "Tamsin Probewell",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-1",
+     "name": "Elinor Hale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · ",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-11",
+     "name": "Iris Kwan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Revise & Resubmit · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-12",
+     "name": "Noah Bright",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-2",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Full Sent · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-1",
+     "name": "Bea Halloran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-2",
+     "name": "Rufus Oyelaran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-bang",
+     "name": "Alasdair Crewe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-near",
+     "name": "Wren Ashcombe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed20",
+     "name": "Cormac Bligh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed865",
+     "name": "Ottoline Frayn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-soon",
+     "name": "Hester Blaine",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-chase",
+     "name": "Tobias Quint",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-close",
+     "name": "Rosalind Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-remind",
+     "name": "Imogen Farr",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    }
+   ]
+  },
+  {
+   "stored": "msv12-ms",
+   "active": "msv12-ms",
+   "activeTitle": "Harbour of Glass",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "cv25-agent-01",
+     "name": "Eleanor Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-02",
+     "name": "William Tan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-03",
+     "name": "Priya Raman",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-04",
+     "name": "Daniel O’Rourke",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-05",
+     "name": "Sophie Dunn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-06",
+     "name": "Clara Beaumont",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-07",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-08",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-09",
+     "name": "Jonathan Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-10",
+     "name": "Aisha Kapoor",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-11",
+     "name": "Hester Quinn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-12",
+     "name": "George Ashworth",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-13",
+     "name": "Nadia Hussain",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-14",
+     "name": "Fenella Strand",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Queried",
+     "contact": "Queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "qc150l9-ag",
+     "name": "Wren Calloway",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rej-agent-1",
+     "name": "Imogen Rackham",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-1",
+     "name": "Imogen Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-2",
+     "name": "Tobias Hark",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-3",
+     "name": "Tamsin Probewell",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-1",
+     "name": "Elinor Hale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · ",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-11",
+     "name": "Iris Kwan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Revise & Resubmit · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-12",
+     "name": "Noah Bright",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-2",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Full Sent · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-1",
+     "name": "Bea Halloran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-2",
+     "name": "Rufus Oyelaran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-bang",
+     "name": "Alasdair Crewe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-near",
+     "name": "Wren Ashcombe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed20",
+     "name": "Cormac Bligh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed865",
+     "name": "Ottoline Frayn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-soon",
+     "name": "Hester Blaine",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-chase",
+     "name": "Tobias Quint",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-close",
+     "name": "Rosalind Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-remind",
+     "name": "Imogen Farr",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    }
+   ]
+  },
+  {
+   "stored": "seed-ms-1",
+   "active": "seed-ms-1",
+   "activeTitle": "The Smoke Test",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "cv25-agent-01",
+     "name": "Eleanor Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-02",
+     "name": "William Tan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-03",
+     "name": "Priya Raman",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-04",
+     "name": "Daniel O’Rourke",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-05",
+     "name": "Sophie Dunn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-06",
+     "name": "Clara Beaumont",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-07",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-08",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-09",
+     "name": "Jonathan Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-10",
+     "name": "Aisha Kapoor",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-11",
+     "name": "Hester Quinn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-12",
+     "name": "George Ashworth",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-13",
+     "name": "Nadia Hussain",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-14",
+     "name": "Fenella Strand",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-1",
+     "name": "Mira Kovic",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "Queried · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-3",
+     "name": "Edda Voss",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-4",
+     "name": "Theo Abara",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-5",
+     "name": "Sun-hee Park",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-6",
+     "name": "Rosa Quintana",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-1",
+     "name": "Elinor Hale",
+     "search": "Partial Sent",
+     "contact": "Partial Sent",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · ",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Quiet Second"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Partial Sent",
+     "contact": "Full Sent",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "seed-agent-2",
+     "name": "Tom Ellery",
+     "search": "Rejected",
+     "contact": "Queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Full Sent · The Quiet Second"
+     ],
+     "kind": "B: several on the active book, search shows a closed one"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Partial Requested",
+     "contact": "Full Requested",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Queried",
+     "contact": "Partial Sent",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Rejected",
+     "contact": "Queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "B: several on the active book, search shows a closed one"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Full Sent",
+     "contact": "Full Sent",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Queried",
+     "contact": "Partial Requested",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Rejected",
+     "contact": "Partial Sent",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "B: several on the active book, search shows a closed one"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Full Sent",
+     "contact": "Full Sent",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    },
+    {
+     "agentId": "thin-ag-chase",
+     "name": "Tobias Quint",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-close",
+     "name": "Rosalind Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-remind",
+     "name": "Imogen Farr",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    }
+   ]
+  },
+  {
+   "stored": "seed-ms-2",
+   "active": "seed-ms-2",
+   "activeTitle": "The Quiet Second",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "cv25-agent-01",
+     "name": "Eleanor Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-02",
+     "name": "William Tan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-03",
+     "name": "Priya Raman",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-04",
+     "name": "Daniel O’Rourke",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-05",
+     "name": "Sophie Dunn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-06",
+     "name": "Clara Beaumont",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-07",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-08",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-09",
+     "name": "Jonathan Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-10",
+     "name": "Aisha Kapoor",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-11",
+     "name": "Hester Quinn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-12",
+     "name": "George Ashworth",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-13",
+     "name": "Nadia Hussain",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-14",
+     "name": "Fenella Strand",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-1",
+     "name": "Mira Kovic",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "Queried · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-3",
+     "name": "Edda Voss",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-4",
+     "name": "Theo Abara",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-5",
+     "name": "Sun-hee Park",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-6",
+     "name": "Rosa Quintana",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "qc150l9-ag",
+     "name": "Wren Calloway",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rej-agent-1",
+     "name": "Imogen Rackham",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-1",
+     "name": "Imogen Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-2",
+     "name": "Tobias Hark",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-3",
+     "name": "Tamsin Probewell",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-11",
+     "name": "Iris Kwan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Revise & Resubmit · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-12",
+     "name": "Noah Bright",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-1",
+     "name": "Bea Halloran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-2",
+     "name": "Rufus Oyelaran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-bang",
+     "name": "Alasdair Crewe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-near",
+     "name": "Wren Ashcombe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed20",
+     "name": "Cormac Bligh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed865",
+     "name": "Ottoline Frayn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-soon",
+     "name": "Hester Blaine",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-chase",
+     "name": "Tobias Quint",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-close",
+     "name": "Rosalind Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-remind",
+     "name": "Imogen Farr",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Queried · The Quiet Fixture"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    }
+   ]
+  },
+  {
+   "stored": "thin-ms",
+   "active": "thin-ms",
+   "activeTitle": "The Quiet Fixture",
+   "agents": 53,
+   "withQueries": 48,
+   "disagree": [
+    {
+     "agentId": "cv25-agent-01",
+     "name": "Eleanor Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-02",
+     "name": "William Tan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-03",
+     "name": "Priya Raman",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-04",
+     "name": "Daniel O’Rourke",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-05",
+     "name": "Sophie Dunn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-06",
+     "name": "Clara Beaumont",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-07",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-08",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-09",
+     "name": "Jonathan Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-10",
+     "name": "Aisha Kapoor",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-11",
+     "name": "Hester Quinn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-12",
+     "name": "George Ashworth",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-13",
+     "name": "Nadia Hussain",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "cv25-agent-14",
+     "name": "Fenella Strand",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Murphy's Day Out"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-1",
+     "name": "Mira Kovic",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "Queried · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-2",
+     "name": "Douglas Renner",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · Harbour of Glass",
+      "No Response · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-3",
+     "name": "Edda Voss",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-4",
+     "name": "Theo Abara",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-5",
+     "name": "Sun-hee Park",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "msv12-agent-6",
+     "name": "Rosa Quintana",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · Harbour of Glass"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "qc150l9-ag",
+     "name": "Wren Calloway",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rej-agent-1",
+     "name": "Imogen Rackham",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-1",
+     "name": "Imogen Vale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-2",
+     "name": "Tobias Hark",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "rj-agent-3",
+     "name": "Tamsin Probewell",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-1",
+     "name": "Elinor Hale",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Queried · ",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-10",
+     "name": "Peter Vance",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test",
+      "Full Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-11",
+     "name": "Iris Kwan",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Revise & Resubmit · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-12",
+     "name": "Noah Bright",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Offer · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-2",
+     "name": "Tom Ellery",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Full Sent · The Quiet Second"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-3",
+     "name": "Marcus Reed",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Requested · The Smoke Test",
+      "Full Requested · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-4",
+     "name": "Priya Nair",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Partial Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-5",
+     "name": "Joan Whitfield",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "Withdrawn · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-6",
+     "name": "Sam Okoro",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Rejected · The Smoke Test",
+      "No Response · The Smoke Test",
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-7",
+     "name": "Rachel Lin",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test",
+      "Queried · The Smoke Test",
+      "Partial Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-8",
+     "name": "David Marsh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Rejected · The Smoke Test",
+      "Partial Requested · The Smoke Test",
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-9",
+     "name": "Ana Duarte",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Sent · The Smoke Test",
+      "Full Sent · The Smoke Test",
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-1",
+     "name": "Bea Halloran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-agent-nowin-2",
+     "name": "Rufus Oyelaran",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Partial Sent · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-bang",
+     "name": "Alasdair Crewe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-near",
+     "name": "Wren Ashcombe",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed20",
+     "name": "Cormac Bligh",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-passed865",
+     "name": "Ottoline Frayn",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Full Requested · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "seed-cal-soon",
+     "name": "Hester Blaine",
+     "search": "Not queried",
+     "contact": "Not queried",
+     "qc": [
+      "Queried · The Smoke Test"
+     ],
+     "kind": "A: cards on the Query Centre, none on the active book"
+    },
+    {
+     "agentId": "thin-ag-gap",
+     "name": "Devendra Rao",
+     "search": "Queried",
+     "contact": "Partial Sent",
+     "qc": [
+      "Queried · The Quiet Fixture",
+      "Partial Sent · The Quiet Fixture"
+     ],
+     "kind": "C: several on the active book, search shows one of them"
+    }
+   ]
+  }
+ ]
+}
