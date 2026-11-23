@@ -1268,7 +1268,13 @@
     "public/images/qc/qc-plate-courier-figure.png": "b0e20bf289042551cfcb0ef2c08541101dedca014dc773199a5b1dd5873229a8",
     "public/images/qc/qc-plate-courier.png": "a87188273c3497ba113a5e17e91fa954871b0599f775c21e6d835664eeeac86b",
     "design-refs/plumage-colours-v2/plumage-colours-v2.json": "5fcea6ded9d740094460563f4d6a0cab4c164e0f9a745a0103e0c9425054ff11",
-    "design-refs/plumage-colours-v2/query-cards-v2.html": "af5c57513c98423b2cafea93b9378d597eff9bf3ff312e46b0769b240bbed7f5"
+    "design-refs/plumage-colours-v2/query-cards-v2.html": "af5c57513c98423b2cafea93b9378d597eff9bf3ff312e46b0769b240bbed7f5",
+    "design-refs/plumage-colours-v3/plumage-colours-v3.json": "90d6c888fdeeb0feac555493b252809a8be3f49318b9eb65257b197d1f002e8c",
+    "design-refs/plumage-colours-v3/query-cards-v3.html": "fe2310216138f05e21f25ce2c6acb2ce382661e0f56536974a637d37f340ee2e",
+    "design-refs/plumage-colours-v3/screens/01-cards-1500.png": "bb3443749bf5b8f16dd64e43a0f85c9b29de7bf58fd6645008f88e2c4719890a",
+    "design-refs/plumage-colours-v3/screens/02-materials-hover@2x.png": "9d211ff3dd30447cc6f70430b25417788c7cb8cf8fd0f0c3e994573d1876c466",
+    "design-refs/plumage-colours-v3/screens/03-revise-resubmit@2x.png": "20a45e302b82df4697348a27d2939db2b2e09cd1af1805ebd741085c4bb5070c",
+    "design-refs/plumage-colours-v3/screens/04-search-agent-tile@2x.png": "d1ed1e660d414157b1b56528e3a6064cedf186ae515898bfc019c50a266f6e95"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

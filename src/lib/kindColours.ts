@@ -4,7 +4,8 @@
  *
  * Plumage colours v1 (design-refs/plumage-colours-v1/plumage-colours-v1.json `kinds`) — THE KIND TILES: one colour per
  * kind of thing search finds, each taken from the hawk artwork. A query is the paper (a Queried band's colour; its status
- * is carried by the mark in ink and the chip beside it, never the tile); an agent the Scout's teal at 45%; a material
+ * is carried by the mark in ink and the chip beside it, never the tile); an agent the Scout's teal at 60% (Plumage
+ * colours v3, plumage-colours-v3.json `kinds.agent`; v1's was 45%); a material
  * the Archivist's oxblood; a task the Courier's midnight wing.
  *
  * ⚠️ TILES ONLY. A kind colour never fills a band, a strip, a bar or a chip.
@@ -16,7 +17,7 @@ export interface KindColour { tile: string; glyph: string; edge?: string }
 
 export const KIND_COLOURS: Readonly<Record<Kind, KindColour>> = {
   query: { tile: "#efe6d6", glyph: "#1c130f", edge: "#e0d2bb" },
-  agent: { tile: "#b0c1be", glyph: "#1c130f", edge: "#96aca9" },
+  agent: { tile: "#96aca9", glyph: "#1c130f", edge: "#7c9793" },
   material: { tile: "#903830", glyph: "#ffffff" },
   task: { tile: "#2e3f4f", glyph: "#ffffff" },
 };

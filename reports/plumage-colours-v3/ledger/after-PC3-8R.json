@@ -1,0 +1,27 @@
+[
+ {
+  "name": "a Responses card with a tile",
+  "ok": true,
+  "got": "cv25-q-09"
+ },
+ {
+  "name": "cv25-q-09: the hover opens on Responses",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "cv25-q-09: fully inside the viewport",
+  "ok": true,
+  "got": "14,624 284×155"
+ },
+ {
+  "name": "cv25-q-09: no ancestor cuts or masks it (drawn on <body>)",
+  "ok": true,
+  "got": "none · on body true"
+ },
+ {
+  "name": "cv25-q-09: every hit point is the hover",
+  "ok": true,
+  "got": "true,true,true,true,true"
+ }
+]

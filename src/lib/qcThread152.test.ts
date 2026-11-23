@@ -36,10 +36,10 @@ describe("the thread (v152 §2.3)", () => {
     expect(w.filter((x) => x.t === "wait").map((x) => x.t === "wait" ? [x.label, x.side] : null)).toEqual([["1 day later", "me"]]);
     expect(t.find((x) => x.t === "msg" && x.key === "pr")).toMatchObject({ date: "Not dated", dated: false, stamp: null, dayMs: null });
   });
-  it("v152.1 §2.2 yours paper (no tint), theirs the band of the status the reply set (Plumage colours v2); a pass and your closes grey", () => {
+  it("v152.1 §2.2 yours paper (no tint), theirs the band of the status the reply set (Plumage colours v3); a pass and your closes grey", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 90), st("fr", QueryStatus.FULL_REQUESTED, 60), st("rr", QueryStatus.REVISE_RESUBMIT, 40), st("x", QueryStatus.REJECTED, 20)], { ...ctx, state: "closed", replyMs: null });
     const m = t.filter((x) => x.t === "msg") as Extract<(typeof t)[number], { t: "msg" }>[];
-    expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#dbe4ee", "#b9c9da", "#eceae6"]);
+    expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#d3deea", "#d3deea", "#eceae6"]); /* v3: R&R on the Full requested band, flat off the card bands */;
     expect(m.map((x) => x.tint?.edge ?? null)).toEqual([null, "#9fb3c8", "#9fb3c8", "#dedbd5"]);
     expect(m.map((x) => x.grey)).toEqual([false, false, false, true]);
     /* v53 (D9): the thread reads as messages */

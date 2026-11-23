@@ -4,12 +4,30 @@
 
 ## Current state
 
-- **Colours (Plumage colours v2, 22 Nov 2026; branch `plumage-colours-v2`, NOT merged):** one table, `src/lib/stageColours.ts` (packs design-refs/plumage-colours-v1/ and design-refs/plumage-colours-v2/). The band is the STATUS's shade; nothing outlines a band; Full is slate blue, Offer duck egg with soft stripes on the grid card's band and the slide-in strip only; every grid card names its status on a label across the band's bottom edge. Section "Plumage colours v2" below has the rules; it supersedes v1's outline and navy offer.
+- **Colours (Plumage colours v3, 23 Nov 2026; branch `plumage-colours-v3`, NOT merged):** one table, `src/lib/stageColours.ts` (packs design-refs/plumage-colours-v1/, -v2/ and -v3/). The band is the STATUS's shade; nothing outlines a band; Full is slate blue (requested `#d3deea`), the offer flat duck egg on every surface; the only stripes are Revise & Resubmit's, on the grid card's band and the slide-in strip; every grid card names its status on a label on its top edge at the right, outside the frame, which clips again; the paperclip is a materials tile in the Sent box. Section "Plumage colours v3" below has the rules; it supersedes v2's stripes, label place and frame.
 - Newest build on this line: Query Centre v157 (18 Nov 2026; ref design-refs/query-centre-v157.html; report reports/query-centre-v157/REPORT.md; branch `query-centre-v157`, NOT merged). The grid card is `QcCard154.tsx`, styled by qcv154 → qcv1541 → qcv156 → qcv1561 → qcv157.
 - Stage colours come from one table, `src/lib/stageColours.ts` (band, tint, mark per stage). The grid card reads `band` only; `tint` and `mark` wait for the next pack.
 - Not yet on the slate ladder (they move in the next pack): the stage ring, Birds-eye, the log-a-query slip preview, the pull-out query card, Dashboard, activity feed, Analytics, Contact list, Responses, To-do, phone pages.
 
+## Plumage colours v3 — the offer solid, Revise & Resubmit striped, the label top right, materials as a tile (23 Nov 2026)
+
+Pack: design-refs/plumage-colours-v3/ (`plumage-colours-v3.json` the oracle; `query-cards-v3.html` and four screens for the look only). Report: reports/plumage-colours-v3/REPORT.md. Branch `plumage-colours-v3`, NOT merged.
+
+The rules (Nick's rulings on v2 as it looked on dev; baked, do not reopen):
+1. **The offer (and Signed) is flat duck egg `#c5e0d8` on every surface**, the grid band and slide-in strip included. `OFFER_STRIPES` and `STRIPE_PAPER` are deleted. No stripes, sheen or gradient on any offer surface.
+2. **Stripes mean Revise & Resubmit** (`RR_STRIPES`, through `bandBackground`): `repeating-linear-gradient(118deg, #d3deea 0 22px, #b9c9da 22px 44px)`, built from the table's two Full shades. **Two places only: the grid card's band (QcCard154, inline) and the slide-in card's strip (QcCard152).** Everywhere else R&R is flat Full requested `#d3deea` (`statusBand`). Resubmitted is flat Full sent `#b9c9da` everywhere.
+3. **Full requested is `#d3deea`** (and Full's rimHi). Full sent, tint, edge, mark and rim are v2's. Queried, Partial and Closed are v1's.
+4. **The status label is on the grid card's top edge at the right**: its centre on the frame's top edge, 14px in from the band's right edge; v2's look and words. It is drawn outside the frame (a child of the card, `pc3card.css`), and **the frame clips again** (`.qc154-in` overflow hidden). The facts keep v2's 18px top room (open question in the report).
+5. **The agency line is ink at 66%** (≥ 4.5:1 on every band; 4.68:1 on Full sent, the lowest).
+6. **The paperclip is gone from the grid card.** The materials tile (`QcMatTile`, `pc3tile.css`) sits in the Sent box, shown exactly when the paperclip was, named as it was. Its hover opens on hover and focus, closes on leave, blur and Escape; the paperclip pop-up's groups, order and words, drawn as chips. On the page it is portalled to `<body>` (fixed; nothing can cut it); in Log a query's preview it is portalled into the card, outside the frame, because Log a query's measurement reads it there. The tile and hover keep the paperclip's `data-qc1533="tab"`/`"pop"` hooks.
+7. **The agent kind tile in search is the Scout's teal at 60%**: `#96aca9`, edge `#7c9793`, ink glyph.
+8. **Duck egg is the one named exception to "No green"** (P7 in the settled rules), for the offer only. No other surface may be green.
+
+How it is built: `stageColours.ts`, `kindColours.ts`, `QcCard154.tsx`, `QcMatTile.tsx`, `pc3card.css`, `pc3tile.css`, `qcv154.css` (agency, the paperclip rules deleted). Locks: src/lib/stageColours.test.ts, src/lib/kindColours.test.ts, src/components/queries/centre/pc3card.test.tsx, tests/e2e/pc3.measure.ts PC3-1 … PC3-12 and the frames (pc2.measure.ts is retired, tests/e2e/RETIRED-plumage-colours-v2.md).
+
 ## Plumage colours v2 — no outline, slate blue Full, duck egg Offer, the status name on the grid card (22 Nov 2026)
+
+> Superseded by Plumage colours v3, above: its stripes on the offer (rule 4), its Full requested `#dbe4ee` and R&R on Full sent (rule 2), and its label's place and unclipped frame (rule 5). Rules 1, 3 and 6 stand.
 
 Pack: design-refs/plumage-colours-v2/ (`plumage-colours-v2.json` the oracle for Full, Offer, the stripes, the accent inks and the label; `query-cards-v2.html` for the card band, label and colours only, not the page). Report: reports/plumage-colours-v2/REPORT.md. Branch `plumage-colours-v2`, NOT merged.
 

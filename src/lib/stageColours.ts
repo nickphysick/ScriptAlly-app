@@ -2,12 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Plumage colours v2 (design-refs/plumage-colours-v2/plumage-colours-v2.json, over v1's plumage-colours-v1.json) — THE
+ * Plumage colours v3 (design-refs/plumage-colours-v3/plumage-colours-v3.json, over v2's and v1's packs) — THE
  * ONE TABLE of a query's colours, written once in TypeScript and taken from the mentor hawk's plumage: Queried the
  * paper, the partial his breast, the full a slate blue, the offer duck egg, closed its own grey.
  *
  * ⚠️ THE BAND IS THE STATUS'S SHADE. Partial and Full each have two shades: lighter while requested, deeper once sent
- *    (`statusBand`). Revise & Resubmit and Resubmitted sit on the Full sent band. Nothing draws an outline round a band
+ *    (`statusBand`). Revise & Resubmit sits on the Full requested band, Resubmitted on Full sent. Nothing draws an outline round a band
  *    (v2 removed v1's with-you outline): the grid card names its status on a label instead.
  *
  * THE USES: `band` is the stage's band where only the stage is known — the SENT shade for partial and full
@@ -16,9 +16,9 @@
  * border only, its breath and its landing light (qcMotion160). A status MARK is never a stage colour: it is ink.
  *
  * ⚠️ Text and marks are ink on every band, the offer's included (`bandInk`).
- * ⚠️ THE OFFER'S STRIPES (`OFFER_STRIPES`, through `bandBackground`) are for two card bands only: the grid card's band
- *    and the slide-in card's strip. Every other offer surface is flat duck egg (`statusBand`). No sheen, foil or
- *    animation on any offer surface (stageColours.test.ts sweeps `src/`).
+ * ⚠️ STRIPES MEAN REVISE & RESUBMIT (`RR_STRIPES`, through `bandBackground`), on two card bands only: the grid card's
+ *    band and the slide-in card's strip. Everywhere else R&R is flat Full requested (`statusBand`). The offer is flat
+ *    duck egg on every surface: no stripes, sheen, foil or animation (stageColours.test.ts sweeps `src/`).
  * ⚠️ Offer and Signed share the Offer stage.
  * ⚠️ Where a stylesheet must restate one of these hexes, stageColours.test.ts asserts it equals this table.
  */
@@ -30,7 +30,7 @@ export interface StageColour { band: string; bandRequested: string; tint: string
 export const STAGE_COLOURS: Record<Stage, StageColour> = {
   queried: { band: "#efe6d6", bandRequested: "#efe6d6", tint: "#f8f4ed", edge: "#e0d2bb", mark: "#dccdb3", rim: "#bfa87e", rimHi: "#f3ead9" },
   partial: { band: "#e8c0af", bandRequested: "#f1d9cf", tint: "#f9f0ec", edge: "#e2b09c", mark: "#d1805f", rim: "#d1805f", rimHi: "#f1d9cf" },
-  full: { band: "#b9c9da", bandRequested: "#dbe4ee", tint: "#eff3f7", edge: "#9fb3c8", mark: "#6f8fb0", rim: "#6f8fb0", rimHi: "#dbe4ee" },
+  full: { band: "#b9c9da", bandRequested: "#d3deea", tint: "#eff3f7", edge: "#9fb3c8", mark: "#6f8fb0", rim: "#6f8fb0", rimHi: "#d3deea" },
   offer: { band: "#c5e0d8", bandRequested: "#c5e0d8", tint: "#eef6f3", edge: "#a9cdc2", mark: "#7fb3a5", rim: "#7fb3a5", rimHi: "#e2f0ec" },
   closed: { band: "#eceae6", bandRequested: "#eceae6", tint: "#f6f5f3", edge: "#dedbd5", mark: "#a8a199", rim: "#857e74", rimHi: "#e6e3de" },
 };
@@ -57,10 +57,10 @@ const BY_STATUS = new Map<string, Stage>(
 /** a status's stage; anything unknown reads as Queried, the first stage */
 export const stageOf = (status: QueryStatus | string): Stage => BY_STATUS.get(status) ?? "queried";
 
-/** the statuses whose band is the lighter, requested shade */
-const REQUESTED: ReadonlySet<string> = new Set([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED]);
+/** the statuses whose band is the lighter, requested shade (v3: Revise & Resubmit too — a revision is asked for) */
+const REQUESTED: ReadonlySet<string> = new Set([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]);
 
-/** a status's band: the requested shade while partial or full pages are asked for, otherwise its stage's band */
+/** a status's band: the requested shade while partial, full or revised pages are asked for, otherwise its stage's band */
 export const statusBand = (status: QueryStatus | string | null | undefined): string => {
   const c = STAGE_COLOURS[stageOf(status ?? QueryStatus.QUERIED)];
   return status && REQUESTED.has(status) ? c.bandRequested : c.band;
@@ -71,17 +71,16 @@ export const bandInk = (_status?: QueryStatus | string | null): string => STAGE_
 /** the same, for a surface that only knows the stage */
 export const stageInk = (_s?: Stage): string => STAGE_INK;
 
-/** the stripes' paper (plumage-colours-v2.json `offerStripes`; not a stage's band) */
-export const STRIPE_PAPER = "#f6f0e5";
-/** the offer's soft stripes: the paper, the Partial requested band, the Full requested band, 22px each at 118°. They
- *  follow the table: change a requested shade and the stripes change with it. Card bands only (`bandBackground`). */
-export const OFFER_STRIPES =
-  `repeating-linear-gradient(118deg,${STRIPE_PAPER} 0 22px,${STAGE_COLOURS.partial.bandRequested} 22px 44px,${STAGE_COLOURS.full.bandRequested} 44px 66px)`;
+/** Revise & Resubmit's stripes (plumage-colours-v3.json `reviseResubmit.stripes`): the table's two Full shades, requested
+ *  then sent, 22px each at 118°. They follow the table. Card bands only (`bandBackground`). */
+export const RR_STRIPES =
+  `repeating-linear-gradient(118deg,${STAGE_COLOURS.full.bandRequested} 0 22px,${STAGE_COLOURS.full.band} 22px 44px)`;
 
-/** a CARD BAND's CSS `background` — the grid card's band and the slide-in card's strip, and nothing else: the offer's
- *  stripes for Offer and Signed, the flat status band for every other status. Every other surface reads `statusBand`. */
+/** a CARD BAND's CSS `background` — the grid card's band and the slide-in card's strip, and nothing else: the stripes
+ *  for Revise & Resubmit, the flat status band for every other status (the offer's included). Every other surface reads
+ *  `statusBand`. */
 export const bandBackground = (status: QueryStatus | string | null | undefined): string =>
-  status && stageOf(status) === "offer" ? OFFER_STRIPES : statusBand(status);
+  status === QueryStatus.REVISE_RESUBMIT ? RR_STRIPES : statusBand(status);
 /** gone quiet: the status's band fading to white (the grid card's v157 stops). A requested query is never quiet;
  *  nor is an offer. */
 export const quietBackground = (status: QueryStatus | string | null | undefined): string => {
