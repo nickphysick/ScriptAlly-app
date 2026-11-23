@@ -90,7 +90,8 @@ export const Track153: React.FC<{ t: SlipTrack; status?: string; quiet?: boolean
   </span>
 );
 
-const CLIP = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.6 1.6 0 0 0 2.3 2.3l5-5a2.9 2.9 0 0 0-4.1-4.1l-5.2 5.2a4.2 4.2 0 0 0 5.9 5.9l4.3-4.3" /></svg>;
+/** the paperclip glyph (Plumage colours v3: the grid card's materials tile draws it too, QcMatTile) */
+export const CLIP = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.6 1.6 0 0 0 2.3 2.3l5-5a2.9 2.9 0 0 0-4.1-4.1l-5.2 5.2a4.2 4.2 0 0 0 5.9 5.9l4.3-4.3" /></svg>;
 /** under this much room below the tab, the pop-up opens upwards */
 export const POP_FLIP_BELOW = 200;
 

@@ -291,7 +291,9 @@ describe("Plumage colours v1 · the Query Centre's stylesheets restate the table
     expect(tabAccent157(QueryStatus.SIGNED)).toEqual(TAB_ACCENT_157.offer);
     const mix = (h: string) => [1, 3, 5].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * 0.82 + 255 * 0.18));
     for (const a of Object.values(TAB_ACCENT_157)) expect(mix(a.ink)).toEqual([1, 3, 5].map((i) => parseInt(a.rest.slice(i, i + 2), 16)));
-    expect(readFileSync("src/components/queries/centre/QcCard154.tsx", "utf8")).toContain("accent={tabAccent157(r.status)}");
+    /* Plumage colours v3: the grid card no longer draws the paperclip (its materials are a tile, QcMatTile, in ink);
+       the accent is the unrendered slip's (QcSlip153 MatTab1533) */
+    expect(readFileSync("src/components/queries/centre/QcCard154.tsx", "utf8")).not.toMatch(/tabAccent157|MatTab1533/);
   });
   it("the unreachable stage ring keeps its own v153 fills (QcStageRing1531 is rendered by no route; AUDIT.md)", () => {
     expect(RING_BUCKETS.slice(0, 4).map((b) => b.fill)).toEqual(["#efe7da", "#ecd6d2", "#d9e1ea", "#e7d6dc"]);
