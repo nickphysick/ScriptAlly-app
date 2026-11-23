@@ -48,6 +48,8 @@ const NAME: Record<string, string> = {
   "Full Sent": "Full sent", "Revise & Resubmit": "Revise and resubmit", Resubmitted: "Resubmitted", Offer: "Offer", Signed: "Signed",
   Rejected: "Rejected", "No Response": "No response", Withdrawn: "Withdrawn",
 };
+/** the v1 pack's stage of a status (its edges are v1's for Queried, Partial and Closed) */
+const STAGE_OF = (s: string): string => (["Partial Requested", "Partial Sent"].includes(s) ? "partial" : ["Rejected", "No Response", "Withdrawn"].includes(s) ? "closed" : "queried");
 const FULL_STATUS = new Set(["Full Requested", "Full Sent", "Revise & Resubmit", "Resubmitted"]);
 const OFFER_STATUS = new Set(["Offer", "Signed"]);
 const statusBand = (s: string): string =>
@@ -262,31 +264,46 @@ test.describe("Plumage colours v2 — the rendered locks", () => {
       const out: { id: string; ok: boolean; got: string }[] = [];
       for (const c of [...document.querySelectorAll<HTMLElement>(`${root} [data-qc154="card"]`)].filter((x) => x.getBoundingClientRect().width > 0)) {
         const l = c.querySelector<HTMLElement>(".pc2-lbl"); if (!l) continue;
-        l.scrollIntoView({ block: "center" });
+        /* ⚠️ SCROLL THE CARD, NEVER THE LABEL: a clipping ancestor is a scroll container, and scrolling the label into
+           view scrolls the band's content up by the clipped amount, so the probe would undo the clip it looks for
+           (measured 23 Nov with a band set to overflow: hidden) */
+        c.scrollIntoView({ block: "center" });
         const was = l.style.pointerEvents; l.style.pointerEvents = "auto";
         const r = l.getBoundingClientRect();
         /* 12px in from each end, clear of the 11px rounded ends, where a hit test follows the curve */
         const pts = [[r.left + 12, r.bottom - 2], [r.right - 12, r.bottom - 2], [r.left + r.width / 2, r.bottom - 1.5], [r.left + 12, r.top + 2]];
         const hits = pts.map(([x, y]) => { const e = document.elementFromPoint(x, y); return !!e && (e === l || l.contains(e)); });
         l.style.pointerEvents = was;
-        out.push({ id: c.dataset.id ?? "", ok: hits.every(Boolean), got: hits.join(",") });
+        /* ⚠️ A HIT TEST DOES NOT SEE A CLIP: measured 23 Nov, a band with overflow: hidden cut every label in half on the
+           screen while elementFromPoint still answered the label. So the clip is read as geometry: every ancestor that
+           clips (overflow not visible) must hold the whole label inside its box. */
+        const cut: string[] = [];
+        for (let a = l.parentElement; a && a !== c.parentElement; a = a.parentElement) {
+          const cs = getComputedStyle(a);
+          if (cs.overflowX === "visible" && cs.overflowY === "visible") continue;
+          const b = a.getBoundingClientRect();
+          if (r.top < b.top - 0.5 || r.bottom > b.bottom + 0.5 || r.left < b.left - 0.5 || r.right > b.right + 0.5) cut.push(`${a.className.toString().split(" ")[0]} (${cs.overflowX}/${cs.overflowY}) cuts ${Math.max(0, r.bottom - b.bottom).toFixed(1)}px`);
+        }
+        out.push({ id: c.dataset.id ?? "", ok: hits.every(Boolean) && cut.length === 0, got: `${hits.join(",")}${cut.length ? ` · ${cut.join("; ")}` : ""}` });
       }
       return out;
     }, PAGE);
     L6.check("hit test: population", clip.length === cards.length, `${clip.length}`);
-    for (const h of clip) L6.check(`${h.id}: every corner of the label is hit (none clipped or covered)`, h.ok, h.got);
+    for (const h of clip) L6.check(`${h.id}: no ancestor clips the label, and every corner of it is hit (not covered)`, h.ok, h.got);
     /* and in pixels: the label's bottom edge line (the stage edge, inset 1px) is drawn, on one card per status */
     const shown = new Set<string>();
     for (const c of cards) {
       if (shown.has(c.status) || !c.labels[0]) continue;
       shown.add(c.status);
-      const el = page.locator(`${PAGE} [data-qc154='card'][data-id='${c.id}'] .pc2-lbl`);
-      await el.scrollIntoViewIfNeeded();
-      const r = (await el.boundingBox())!;
-      const shot = await page.screenshot({ clip: { x: r.x, y: r.y + r.height - 3, width: r.width, height: 3 } });
-      const px = await pixelRow(page, shot.toString("base64"));
-      const edgeHex = (OFFER_STATUS.has(c.status) ? V2.stages.offer.edge : FULL_STATUS.has(c.status) ? V2.stages.full.edge : null);
-      L6.check(`${c.status} ${c.id}: pixels — the label's bottom edge is drawn (not white) across its middle`, px.nonWhite >= 0.6, `${(px.nonWhite * 100).toFixed(0)}% non-white${edgeHex ? `, edge ${edgeHex}` : ""}`);
+      await page.locator(`${PAGE} [data-qc154='card'][data-id='${c.id}']`).evaluate((e) => e.scrollIntoView({ block: "center" }));
+      const r = (await page.locator(`${PAGE} [data-qc154='card'][data-id='${c.id}'] .pc2-lbl`).boundingBox())!;
+      const edgeHex = OFFER_STATUS.has(c.status) ? V2.stages.offer.edge : FULL_STATUS.has(c.status) ? V2.stages.full.edge : V1.stages[STAGE_OF(c.status)].edge;
+      const shot = await page.screenshot({ clip: { x: r.x, y: r.y + r.height - 4, width: r.width, height: 4 } });
+      const px = await edgeRow(page, shot.toString("base64"), hexArr(edgeHex));
+      /* the label's 1px inset edge, in its stage's edge colour, drawn along its bottom across the middle: a clip at the
+         band's edge leaves the card's body there instead (the white of the body passes for the label's white, so the
+         edge line is what is read) */
+      L6.check(`${c.status} ${c.id}: pixels — the label's bottom edge line (${edgeHex}) is on screen across its middle`, px >= 0.6, `${(px * 100).toFixed(0)}% of the middle near ${edgeHex}`);
     }
 
     /* PC2-8 — no "With you", no chevron, no new arrow */
@@ -506,12 +523,22 @@ test.describe("Plumage colours v2 — the rendered locks", () => {
       /* the label's clipping, read in this engine */
       const clip = await p.evaluate((root) => [...document.querySelectorAll<HTMLElement>(`${root} [data-qc154="card"]`)].filter((c) => c.getBoundingClientRect().width > 0).map((c) => {
         const l = c.querySelector<HTMLElement>(".pc2-lbl"); if (!l) return { id: c.dataset.id ?? "", ok: false };
-        l.scrollIntoView({ block: "center" });
+        /* ⚠️ SCROLL THE CARD, NEVER THE LABEL: a clipping ancestor is a scroll container, and scrolling the label into
+           view scrolls the band's content up by the clipped amount, so the probe would undo the clip it looks for
+           (measured 23 Nov with a band set to overflow: hidden) */
+        c.scrollIntoView({ block: "center" });
         const was = l.style.pointerEvents; l.style.pointerEvents = "auto";
         const r = l.getBoundingClientRect();
-        const ok = [[r.left + 12, r.bottom - 2], [r.right - 12, r.bottom - 2], [r.left + r.width / 2, r.bottom - 1.5]].every(([x, y]) => { const e = document.elementFromPoint(x, y); return !!e && (e === l || l.contains(e)); });
+        const hit = [[r.left + 12, r.bottom - 2], [r.right - 12, r.bottom - 2], [r.left + r.width / 2, r.bottom - 1.5]].every(([x, y]) => { const e = document.elementFromPoint(x, y); return !!e && (e === l || l.contains(e)); });
         l.style.pointerEvents = was;
-        return { id: c.dataset.id ?? "", ok };
+        let clipped = false;
+        for (let a = l.parentElement; a && a !== c.parentElement; a = a.parentElement) {
+          const cs = getComputedStyle(a);
+          if (cs.overflowX === "visible" && cs.overflowY === "visible") continue;
+          const b = a.getBoundingClientRect();
+          if (r.top < b.top - 0.5 || r.bottom > b.bottom + 0.5 || r.left < b.left - 0.5 || r.right > b.right + 0.5) clipped = true;
+        }
+        return { id: c.dataset.id ?? "", ok: hit && !clipped };
       }), PAGE);
       L.check(`${engine}: labels read`, clip.length >= 20, `${clip.length}`);
       L.check(`${engine}: no label clipped or covered`, clip.every((c) => c.ok), clip.filter((c) => !c.ok).map((c) => c.id).join(",") || "none");
@@ -576,16 +603,20 @@ function envLocal(k: string): string | null {
   return null;
 }
 
-/** the share of pixels in a screenshot strip that are not white (the label's edge line drawn) */
-async function pixelRow(page: Page, b64: string): Promise<{ nonWhite: number }> {
-  return page.evaluate(async (d) => {
+/** the share of the middle 60% of a strip's columns in which some row is within 24 of the edge colour (each channel) */
+async function edgeRow(page: Page, b64: string, edge: number[]): Promise<number> {
+  return page.evaluate(async ({ d, edge }) => {
     const img = new Image(); img.src = `data:image/png;base64,${d}`; await img.decode();
     const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
     const g = c.getContext("2d")!; g.drawImage(img, 0, 0);
-    /* the last row of the strip, the middle 60% (away from the rounded ends) */
-    const y = c.height - 1, x0 = Math.round(c.width * 0.2), x1 = Math.round(c.width * 0.8);
-    const row = g.getImageData(x0, y, x1 - x0, 1).data;
-    let n = 0; for (let i = 0; i < row.length; i += 4) if (row[i] < 250 || row[i + 1] < 250 || row[i + 2] < 250) n++;
-    return { nonWhite: n / ((x1 - x0) || 1) };
-  }, b64);
+    const x0 = Math.round(c.width * 0.2), x1 = Math.round(c.width * 0.8);
+    const px = g.getImageData(0, 0, c.width, c.height).data;
+    let n = 0;
+    for (let x = x0; x < x1; x++) {
+      let near = false;
+      for (let y = 0; y < c.height && !near; y++) { const i = (y * c.width + x) * 4; near = Math.abs(px[i] - edge[0]) <= 24 && Math.abs(px[i + 1] - edge[1]) <= 24 && Math.abs(px[i + 2] - edge[2]) <= 24; }
+      if (near) n++;
+    }
+    return n / ((x1 - x0) || 1);
+  }, { d: b64, edge });
 }

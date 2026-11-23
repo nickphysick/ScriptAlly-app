@@ -2210,494 +2210,494 @@
   "got": "88"
  },
  {
-  "name": "seed-query-12: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-12: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-08: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-08: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-7: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-7: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-11: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-11: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-9: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-9: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-06: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-06: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-20: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-20: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-3: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-3: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "rj-send: every corner of the label is hit (none clipped or covered)",
+  "name": "rj-send: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-09: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-09: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cor-move-a: every corner of the label is hit (none clipped or covered)",
+  "name": "cor-move-a: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-07: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-07: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-3: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-3: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-cal-passed865-q: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-cal-passed865-q: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-4: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-4: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "rj-dupe: every corner of the label is hit (none clipped or covered)",
+  "name": "rj-dupe: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-2: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-2: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-gap-solo: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-gap-solo: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cor-pair: every corner of the label is hit (none clipped or covered)",
+  "name": "cor-pair: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-23: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-23: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-8: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-8: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-4: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-4: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-cal-soon-q: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-cal-soon-q: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-cal-bang-q: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-cal-bang-q: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "qc150l9-q: every corner of the label is hit (none clipped or covered)",
+  "name": "qc150l9-q: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "probe-un-both: every corner of the label is hit (none clipped or covered)",
+  "name": "probe-un-both: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "probe-un-noagent: every corner of the label is hit (none clipped or covered)",
+  "name": "probe-un-noagent: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-14: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-14: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-13: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-13: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-close: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-close: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-22: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-22: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-1: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-1: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-7: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-7: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-4: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-4: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-19: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-19: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-cohort-2: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-cohort-2: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-cohort-1: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-cohort-1: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-cohort-6: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-cohort-6: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-cohort-3: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-cohort-3: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-cohort-5: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-cohort-5: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-cohort-4: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-cohort-4: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-10: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-10: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-ms2-a: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-ms2-a: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "rj-nudge: every corner of the label is hit (none clipped or covered)",
+  "name": "rj-nudge: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-chase: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-chase: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-ms2-b: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-ms2-b: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-10: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-10: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-05: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-05: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-cal-passed20-q: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-cal-passed20-q: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-6: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-6: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-1: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-1: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-2: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-2: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-5: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-5: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cor-undo: every corner of the label is hit (none clipped or covered)",
+  "name": "cor-undo: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cor-move-b: every corner of the label is hit (none clipped or covered)",
+  "name": "cor-move-b: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-7: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-7: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-3: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-3: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-cal-near-q: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-cal-near-q: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-11: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-11: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-9: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-9: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-21: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-21: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-10: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-10: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-5: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-5: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "thin-q-remind: every corner of the label is hit (none clipped or covered)",
+  "name": "thin-q-remind: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-2: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-2: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "probe-dangling-pkg: every corner of the label is hit (none clipped or covered)",
+  "name": "probe-dangling-pkg: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "probe-un-noms: every corner of the label is hit (none clipped or covered)",
+  "name": "probe-un-noms: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "probe-goalstress-today: every corner of the label is hit (none clipped or covered)",
+  "name": "probe-goalstress-today: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-04: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-04: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-03: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-03: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-8: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-8: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-8: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-8: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-01: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-01: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-1: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-1: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-13: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-13: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-12: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-12: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "rej-query-1: every corner of the label is hit (none clipped or covered)",
+  "name": "rej-query-1: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cor-move-c: every corner of the label is hit (none clipped or covered)",
+  "name": "cor-move-c: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-5: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-5: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-17: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-17: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-15: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-15: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-16: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-16: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "msv12-q-6: every corner of the label is hit (none clipped or covered)",
+  "name": "msv12-q-6: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-pkgq-6: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-pkgq-6: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-18: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-18: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cor-closed: every corner of the label is hit (none clipped or covered)",
+  "name": "cor-closed: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "seed-query-14: every corner of the label is hit (none clipped or covered)",
+  "name": "seed-query-14: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "cv25-q-02: every corner of the label is hit (none clipped or covered)",
+  "name": "cv25-q-02: no ancestor clips the label, and every corner of it is hit (not covered)",
   "ok": true,
   "got": "true,true,true,true"
  },
  {
-  "name": "Offer seed-query-12: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Offer seed-query-12: pixels — the label's bottom edge line (#a9cdc2) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white, edge #a9cdc2"
+  "got": "100% of the middle near #a9cdc2"
  },
  {
-  "name": "Partial Requested seed-query-7: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Partial Requested seed-query-7: pixels — the label's bottom edge line (#e2b09c) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white"
+  "got": "100% of the middle near #e2b09c"
  },
  {
-  "name": "Revise & Resubmit seed-query-11: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Revise & Resubmit seed-query-11: pixels — the label's bottom edge line (#9fb3c8) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white, edge #9fb3c8"
+  "got": "100% of the middle near #9fb3c8"
  },
  {
-  "name": "Full Requested seed-query-9: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Full Requested seed-query-9: pixels — the label's bottom edge line (#9fb3c8) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white, edge #9fb3c8"
+  "got": "100% of the middle near #9fb3c8"
  },
  {
-  "name": "Queried seed-query-2: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Queried seed-query-2: pixels — the label's bottom edge line (#e0d2bb) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white"
+  "got": "100% of the middle near #e0d2bb"
  },
  {
-  "name": "Partial Sent thin-q-gap-solo: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Partial Sent thin-q-gap-solo: pixels — the label's bottom edge line (#e2b09c) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white"
+  "got": "100% of the middle near #e2b09c"
  },
  {
-  "name": "Full Sent qc150l9-q: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Full Sent qc150l9-q: pixels — the label's bottom edge line (#9fb3c8) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white, edge #9fb3c8"
+  "got": "100% of the middle near #9fb3c8"
  },
  {
-  "name": "Rejected seed-pkgq-8: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Rejected seed-pkgq-8: pixels — the label's bottom edge line (#dedbd5) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white"
+  "got": "100% of the middle near #dedbd5"
  },
  {
-  "name": "No Response msv12-q-8: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "No Response msv12-q-8: pixels — the label's bottom edge line (#dedbd5) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white"
+  "got": "100% of the middle near #dedbd5"
  },
  {
-  "name": "Withdrawn seed-query-17: pixels — the label's bottom edge is drawn (not white) across its middle",
+  "name": "Withdrawn seed-query-17: pixels — the label's bottom edge line (#dedbd5) is on screen across its middle",
   "ok": true,
-  "got": "100% non-white"
+  "got": "100% of the middle near #dedbd5"
  },
  {
   "name": "slide-in Partial Requested seed-query-7: carries no band label",
