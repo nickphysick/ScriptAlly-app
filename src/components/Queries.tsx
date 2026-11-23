@@ -6374,6 +6374,18 @@ export const Queries: React.FC<{
           done1522(await commitPlan(uid, plan), `Saved ${first}’s words`, null, false);
         }, false);
       };
+      /* Query card v168 §5 — the band's ⋯. Move: the old details save's agent field (planDetails1522), on the page's
+         batched writer; one snapshot, so Undo puts the query back with its agent exactly. Delete: the existing delete
+         behind its existing confirm (askDeleteQuery: "This can’t be undone"), unchanged, so no Undo. */
+      card1522.moveTo = {
+        agents: [...agents].map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) || null })).sort((a, b) => a.name.localeCompare(b.name)),
+        onMove: (agentId) => run1522(async () => {
+          const to = agents.find((a) => a.id === agentId);
+          const snap = await commitPlan(uid, planDetails1522(q, { agentId, method: q.sendMethod ?? "", pkg: null, pkgChanged: false }));
+          done1522(snap, `Moved to ${to ? agentPrimary(to) || "another agent" : "another agent"}`, null);
+        }),
+      };
+      card1522.onDeleteQuery = () => askDeleteQuery();
       card1522.composer = composer1522;
       card1522.draft = qc1522J ? qc1522Draft : null;
       card1522.editingId = edit1522 ? editKey : null;

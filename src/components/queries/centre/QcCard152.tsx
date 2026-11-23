@@ -56,7 +56,7 @@ import { bookLine164, stripStatus164 } from "../../../lib/qc164";
 import "./qcv164.css";
 import "./qcv167.css";
 /* Query card v168 — one way to edit: the pencil on the thing, the cross and the tick, one thing open at a time */
-import { Edit168Ctx, EditPen, mut168, useEditRule168 } from "./QcEdit168";
+import { CardMenu, CardMenuItem, Edit168Ctx, EditPen, mut168, useEditRule168 } from "./QcEdit168";
 import "./qcv168.css";
 
 export interface QcCard152Data {
@@ -147,6 +147,10 @@ export interface QcCard152Props {
   onSaveProfile?: (patch: ProfilePatch) => Promise<boolean>;
   /** v167 §C step 3 — the asks drawer's body (QcAsks167), drawn by the host that knows the book */
   asksBody?: (prof: ProfileIn, set: (p: ProfilePatch | null) => void) => React.ReactNode;
+  /** Query card v168 — the band's ⋯: move the query to another agent (the existing agent write; true when it landed),
+   *  from these agents; and delete it (the existing delete behind its existing confirm) */
+  moveTo?: { agents: { id: string; name: string; agency: string | null }[]; onMove: (agentId: string) => Promise<boolean> } | null;
+  onDeleteQuery?: (() => void) | null;
   /** Query card v168 — the Materials tab's own editing: each group's step materials and their save (QcMaterials158) */
   matEdit?: (Omit<MatEdit168, "chips"> & { env: MatEnv }) | null;
 }
@@ -253,6 +257,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const live168 = !p.desk && !!p.onFoot;
   /* every other door on the card goes through the rule: unchanged, what is open closes and the click goes on */
   const g168 = (go: () => void) => ed168.guard(go);
+  /* v168 §5 — the band's ⋯ (in the pencil's place): its menu, and the move list by the agent's name */
+  const [bandMenu, setBandMenu] = useState<null | "menu" | "move">(null);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const nameRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setBandMenu(null); }, [r.id]);
+  const bandMore = live168 && (!!p.moveTo || !!p.onDeleteQuery);
   useEffect(() => { setPopOpen(null); }, [view, r.id]);
   /* ONE Escape handler for the editing views: the open popover first, then one level back */
   useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
@@ -641,16 +651,17 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); g168(() => { breatheClose(fr); p.stepCard!.go(-1); }); }}>{PREV}</button>
             <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); g168(() => { breatheClose(fr); p.stepCard!.go(1); }); }}>{NEXT}</button>
           </> : null}
-          <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query"
-            onClick={() => (p.editData ? ed.start() : p.onPencil())}>{PEN}</button>
+          {/* v168 — no pencil on the band: each thing is edited where it is. Its ⋯ holds the two things that are the
+              whole query's: moving it to another agent, and deleting it */}
+          {mut168("1") ? <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query">{PEN}</button> : null}
+          {bandMore ? <button ref={moreRef} type="button" className="qc152-x" data-qc168="band-more" aria-label="More for this query" title="More"
+            aria-haspopup="menu" aria-expanded={bandMenu === "menu"} onClick={() => g168(() => setBandMenu((m) => (m === "menu" ? null : "menu")))}>⋯</button> : null}
           <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={() => g168(p.onClose)}>✕</button>
         </div>
         )}
         <div className="qc152-agent">
           <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
-          <div className="qc152-who">{p.editData ? (
-            <Ed k="agent" layer={ed} changed={ed.keys.includes("agent")} label="The agent this query is to"><span className="qc152-nm qcv-open-nm" data-qc149c="name">{edAgent?.name ?? r.agentName}</span></Ed>
-          ) : <div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div>}<div className="qc152-ag" data-qc164="agency">{(edAgent ? edAgent.agency : r.agency) || ""}</div></div>
+          <div className="qc152-who"><div ref={nameRef} className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div><div className="qc152-ag" data-qc164="agency">{r.agency || ""}</div></div>
           {/* v164 — no status label (the strip names it); the day sits at the row's end, by the strip's old rule */}
           {d.state !== "closed" && r.dayN != null ? <span className="qc164-day" data-qc164="day">Day {r.dayN}</span> : null}
         </div>
@@ -708,6 +719,20 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               <div className="pf">Moves this query to another agent. Their details come with them.</div>
             </> : null}
           </EdMenu>
+        ) : null}
+        {bandMenu === "menu" ? (
+          <CardMenu root={inRef.current} anchor={moreRef.current} onClose={() => setBandMenu(null)} label="This query" hook="band-menu">
+            {p.moveTo ? <CardMenuItem label="Move to another agent" data={{ "data-act": "move" }} onPick={() => setBandMenu("move")} /> : null}
+            {p.onDeleteQuery ? <CardMenuItem label="Delete this query" rust data={{ "data-act": "delete" }} onPick={() => { setBandMenu(null); if (!mut168("12")) p.onDeleteQuery!(); }} /> : null}
+          </CardMenu>
+        ) : null}
+        {bandMenu === "move" && p.moveTo ? (
+          <CardMenu root={inRef.current} anchor={nameRef.current} onClose={() => setBandMenu(null)} label="Who’s this query to?" hook="move-menu">
+            <div className="ph">Who’s this query to?</div>
+            {p.moveTo.agents.map((a) => <CardMenuItem key={a.id} on={a.id === r.query.agentId} label={a.name} sub={a.agency} data={{ "data-v": a.id }}
+              onPick={() => { setBandMenu(null); if (a.id !== r.query.agentId && !mut168("11")) void p.moveTo!.onMove(a.id); }} />)}
+            <div className="pf">Moves this query to another agent. Their details come with them.</div>
+          </CardMenu>
         ) : null}
         {toastGone ? (
           /* v160 — the toast that timed out or was replaced leaves over 220ms (a copy: the live one is already gone) */

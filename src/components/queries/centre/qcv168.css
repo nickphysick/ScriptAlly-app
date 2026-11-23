@@ -81,6 +81,9 @@
 .qc152 .qc168-mn.nm { top: 20px; right: 8px; min-width: 230px; }
 .qc152 .qc168-mn.nm.up { top: auto; bottom: calc(100% - 14px); }
 
+/* ── the band's ⋯ (in the pencil's place, the same 26px band button) ──────────────────────────────────────────── */
+.qc152 .qc152-band .qc152-x[data-qc168="band-more"] { font: 700 18px/1 var(--sp-serif) !important; letter-spacing: 1px; }
+
 /* ── the card's small menu (the edit layer's anchored menu, kept) ─────────────────────────────────────────────── */
 .qc152 .qc152-pp { position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 340px; overflow: auto; padding: 6px; border-radius: 12px; background: #fff;
   box-shadow: 0 18px 40px -14px rgba(28, 19, 15, .35), 0 0 0 1px rgba(28, 19, 15, .08); animation: qc168-in .14s ease-out both; text-align: left; }
