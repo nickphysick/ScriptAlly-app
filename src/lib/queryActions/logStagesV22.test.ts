@@ -77,3 +77,31 @@ describe("LAQ22-N (source) saved as the Notes tab saves one; gone on Undo; not c
     expect(ui).toMatch(/closest\?\.\('\[data-qls="notes"\]'\)\) return;/);
   });
 });
+
+/* ── Phase 3 (D5): one count of queries sent ─────────────────────────────────────────────────────────────────── */
+import { reviewCounts } from "./logStages";
+import { QueryStatus, type Query } from "../../types";
+
+const qy = (i: number, dateSent: string): Query => ({ id: `q${i}`, userId: "u", agentId: `a${i}`, manuscriptId: "m", status: QueryStatus.QUERIED, dateSent } as unknown as Query);
+
+describe("LAQ22-S the review's 'queries sent' is the Queries page's count, and equals 'Query number {n}' (D5)", () => {
+  /* 28 queries for the book, five of them with no sent date */
+  const book = Array.from({ length: 28 }, (_, i) => qy(i, i < 5 ? "" : "2026-10-01"));
+  const unsaved = qy(99, "2026-11-23");
+  const now = new Date(2026, 10, 23, 12);
+  it("a book with five undated queries among 28: the review says 29", () => {
+    expect(reviewCounts(book, unsaved, now).sent).toEqual([28, 29]);
+  });
+  it("the logged screen's 'Query number' reads the same count, plus this query: 29", () => {
+    const host = readFileSync("src/components/queries/centre/LogStagesHost.tsx", "utf8");
+    const ui = readFileSync("src/components/queries/centre/QcLogStages.tsx", "utf8");
+    expect(host).toMatch(/count=\{queriesSentOf\(forBook\)\}/);
+    expect(host).toMatch(/bookQueries=\{forBook\}/);
+    expect(ui).toMatch(/const n = p\.count \+ 1;/);
+    expect(ui).toMatch(/Query number <Odometer n=\{L\.n\} \/>/);
+  });
+  it("the Queries page header still counts one per query of the book (Queries.tsx, read only)", () => {
+    const q = readFileSync("src/components/Queries.tsx", "utf8");
+    expect(q).toMatch(/counts=\{showGridSkeleton \|\| qcLoadFail \? null : \{ ms: qcLineTitle, sent: qcScoped\.length,/);
+  });
+});

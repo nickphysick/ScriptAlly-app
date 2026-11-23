@@ -18,7 +18,7 @@ import { ComponentType, QueryStatus, type Manuscript } from "../../../types";
 import { activePackageId, packagesFor } from "../../../lib/queryActions/packages";
 import { saveLog } from "../../../lib/queryActions/logSave";
 import { restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
-import { cardWeeks, cardWeeksToSave, firstName, planOf, stageAgents, type BookChoice, type Choice, type LogAnswers, type PlanContext, type StagePackage } from "../../../lib/queryActions/logStages";
+import { cardWeeks, cardWeeksToSave, firstName, planOf, queriesSentOf, stageAgents, type BookChoice, type Choice, type LogAnswers, type PlanContext, type StagePackage } from "../../../lib/queryActions/logStages";
 import { bookVersionsOf, latestVersion, readVersions } from "../../../lib/bookVersions";
 import { bookOf } from "../../../lib/queryActions/sample";
 import { previousQueryFor } from "../../../lib/requery";
@@ -179,7 +179,7 @@ export const LogStagesHost: React.FC<{
   return (
     <QcLogStages nowMs={nowMs} agents={model.stAgents} seedAgentId={seedAgentId} bookTitle={ms.title || "Untitled manuscript"}
       packages={model.stPackages} activePackageId={model.active} letters={model.ctx.letters} synopses={model.ctx.synopses} bookVersions={model.ctx.bookVersions}
-      count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={close}
+      count={queriesSentOf(forBook)} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={close}
       onCreateAgent={onCreateAgent} onNotSent={onNotSent} bookQueries={forBook}
       activeNow={liveCount(forBook)}
       onSave={onSave} seedPackageId={seedPackageId} again={again} leaveRef={leaveRef} />
