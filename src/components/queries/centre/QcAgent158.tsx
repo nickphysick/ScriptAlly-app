@@ -18,7 +18,8 @@ import { MaterialItemIcon } from "../../shared/MaterialIcon";
 import React from "react";
 import type { AskChip } from "../../../lib/qcThread152";
 import { dayLabel } from "../../../lib/qcThread152";
-import { ARROW, Bar, Ghost, PENCIL, Seal, editable } from "./QcGhost167";
+import { ARROW, Bar, Ghost, Seal, editable } from "./QcGhost167";
+import { EditPen } from "./QcEdit168";
 
 /** v167 — the three things the Agent tab edits, each in its own profile drawer */
 export type ProfileKey = "weeks" | "method" | "asks";
@@ -68,14 +69,16 @@ export const NxBox: React.FC<{ k: string; label: string; value: React.ReactNode;
 /** v167 — a fact box on the query card: a fixed 86px, the value on one line, a ghost bar where nothing is recorded */
 const Tile: React.FC<{ k: string; label: string; value: React.ReactNode | null; sub?: React.ReactNode; ghost: { w: number; words: string } | null;
   open: (() => void) | null; valueClass?: string; cls?: string; fin?: string; finKey?: string }> = ({ k, label, value, sub, ghost, open, valueClass, cls, fin, finKey }) => (
+  /* v168 — a tile with a value takes the pencil (the keyboard's way in; a click anywhere on the tile still opens it);
+     a ghost tile stays one "+ Add …" button, as v167 drew it */
   <div className={`nx-box qc167-tile${cls ?? ""}`} data-qc158="box" data-qc167="tile" data-k={k} data-ghost={value == null ? "" : undefined}
-    {...editable(value == null && ghost ? `${label}: + ${ghost.words}` : `${label}: edit`, open)}>
+    {...(open && value != null ? { onClick: open, "data-qc168-host": "", "data-qc167-ed": "" } : editable(value == null && ghost ? `${label}: + ${ghost.words}` : `${label}: edit`, open))}>
     <small>{label}</small>
     {value == null
       ? <b data-qc158="value" className="qc167-gv">{ghost ? <Ghost w={ghost.w} words={open ? ghost.words : null} /> : null}</b>
       : <b key={finKey} data-qc158="value" className={[valueClass, fin].filter(Boolean).join(" ") || undefined}>{value}</b>}
     <i key={`i-${finKey}`} data-qc167="sub" className={value != null && sub ? fin : undefined}>{value != null && sub ? sub : "\u00a0"}</i>
-    {open && value != null ? <span className="qc167-pn" aria-hidden="true">{PENCIL}</span> : null}
+    {open && value != null ? <EditPen label={label.toLowerCase()} onOpen={open} data={{ "data-qc168-k": `tile:${k}` }} /> : null}
   </div>
 );
 
@@ -106,7 +109,8 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
         <h4 data-qc167="asks-head">What {p.first} asks for</h4>
         {/* one wrapper whatever is recorded (the same shell): the list, or three ghost rows with the words over them */}
         {p.hasAsks ? (
-          <div className={`qc167-gsw${ed("asks")}`} data-qc167="asks-list" {...editable(`What ${p.first} asks for: edit`, open("asks"))}>
+          <div className={`qc167-gsw${ed("asks")}`} data-qc167="asks-list" {...(open("asks") ? { onClick: open("asks")!, "data-qc168-host": "", "data-qc167-ed": "" } : {})}>
+          {open("asks") ? <EditPen label={`what ${p.first} asks for`} onOpen={open("asks")!} data={{ "data-qc168-k": "tile:asks" }} /> : null}
           <ul key={finKey("asks")} className={`nx-list qc167-asks${fin("asks") ? ` ${fin("asks")}` : ""}`}>
             {p.asks.chips.map((c) => (
               <li key={c.label} data-qc158="ask" data-sent={c.sent ? "" : undefined}>
