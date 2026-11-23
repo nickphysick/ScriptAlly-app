@@ -20,6 +20,7 @@ import type { BoardCard } from "./todoBoard";
 import type { TodoRow } from "./dashTodo";
 import { nudgeCount } from "./dashTodo";
 import { drawerDoorForTask } from "./queryActions/entry";
+import { HELD_PREFIX, heldSendDoor } from "./queryActions/journeyCreated";
 import type { OpenRequest } from "./queryActions/drawerStore";
 import { agentInitials, agentPrimary } from "./agentDisplay";
 import { elapsedWhole } from "./elapsed";
@@ -123,7 +124,10 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 export function listPlan(found: Partial<Record<ListGroupKey, ListItem[]>>): ListPlan {
   const has = (k: ListGroupKey) => (found[k]?.length ?? 0) > 0;
   const work = (["req", "nudge", "quiet", "start", "house"] as const).filter(has);
-  const keys: ListGroupKey[] = work.length ? [...work] : has("ready") ? ["ready"] : ["coming"];
+  /* Log a query v2.1 · Phase 4 — a held "Send your query to {name}" (key `held:`) is the writer's own move, so "Ready to
+     query" stays on the list behind the work when it holds one; otherwise it is a caught-up group, as before */
+  const heldWaiting = (found.ready ?? []).some((it) => it.key.startsWith("held:"));
+  const keys: ListGroupKey[] = work.length ? [...work, ...(heldWaiting ? ["ready" as const] : [])] : has("ready") ? ["ready"] : ["coming"];
   const groups = keys.map((key) => ({ key, label: LIST_LABEL[key], items: found[key] ?? [] }));
   const first = keys[0];
   return {
@@ -363,14 +367,38 @@ export function houseItems(i: HouseInput): ListItem[] {
 
 /* ── 5: ready to query ─────────────────────────────────────────────────────────────────────── */
 
-export interface ReadyInput { agents: readonly Agent[]; queries: readonly Query[]; manuscript: Manuscript | null; now: Date }
+export interface ReadyInput { agents: readonly Agent[]; queries: readonly Query[]; manuscript: Manuscript | null; now: Date;
+  /** Log a query v2.1 · Phase 4 — the writer's tasks, for the held "Send your query to {name}" ones */
+  userTasks?: readonly UserTask[] }
 
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 export function readyItems(i: ReadyInput): ListItem[] {
   const msId = i.manuscript?.id ?? null;
   const step = nextStep({ agents: i.agents, queries: i.queries, msId, book: bookGenres(i.manuscript), todayIso: ymd(i.now) });
-  return step.ready.map((a) => {
+  /* Log a query v2.1 · Phase 4 — a query the writer put on hold in Log a query ("Not sent yet") leads this group: its
+     task's own door (`heldSendDoor`), "I've sent it", opens Log a query at Sent with the agent chosen. That agent is not
+     offered again below. */
+  const held = msId ? (i.userTasks ?? []).map((t) => ({ t, d: heldSendDoor(t) })).filter((x) => x.d && x.d.manuscriptId === msId) : [];
+  const heldIds = new Set<string>();
+  const heldOut: ListItem[] = [];
+  for (const { t, d } of held) {
+    const a = i.agents.find((x) => x.id === d!.agentId);
+    if (!a || heldIds.has(a.id)) continue;
+    heldIds.add(a.id);
+    heldOut.push({
+      key: `held:${t.id}`, group: "ready", tone: "house",
+      pre: HELD_PREFIX, who: agentPrimary(a), post: "",
+      initials: agentInitials(a),
+      fact: upper([(a.agency ?? "").trim(), "Not sent yet"].filter(Boolean).join(" · ")),
+      agency: upper((a.agency ?? "").trim()),
+      status: null, when: "", foot: "Not sent yet",
+      actLabel: "I’ve sent it",
+      action: { kind: "drawer", request: { ...d! } },
+      stages: null, note: "On hold in Log a query until it has gone.", date: null,
+    });
+  }
+  return [...heldOut, ...step.ready.filter((a) => !heldIds.has(a.id)).map((a) => {
     const genres = (a.genres ?? []).filter(Boolean);
     const genreLine = genres.length ? genres.slice(0, 2).join(", ") : "Genre not recorded";
     return {
@@ -388,7 +416,7 @@ export function readyItems(i: ReadyInput): ListItem[] {
       note: genres.length ? `Takes ${genres.slice(0, 3).join(", ").toLowerCase()}.` : "No genres are recorded for this agent yet.",
       date: null,
     };
-  });
+  })];
 }
 
 /* ── 6: coming up ──────────────────────────────────────────────────────────────────────────── */
@@ -458,7 +486,7 @@ export function dashList(i: DashListInput): ListPlan {
   const found: Partial<Record<ListGroupKey, ListItem[]>> = {
     ...boardItems({ rows: i.rows, cards: i.cards, queries: i.queries, agents: i.agents, activities: i.activities, qcRows }),
     house: houseItems({ agents: i.agents, queries: i.queries, qcRowsAll, userTasks: i.userTasks, manuscript: i.manuscript, user: i.user, now: i.now }),
-    ready: readyItems({ agents: i.agents, queries: i.queries, manuscript: i.manuscript, now: i.now }),
+    ready: readyItems({ agents: i.agents, queries: i.queries, manuscript: i.manuscript, now: i.now, userTasks: i.userTasks }),
     coming: comingItems(qcRows, nowMs),
     ...(i.start ? { start: [i.start] } : {}),
   };

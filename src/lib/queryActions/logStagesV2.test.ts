@@ -107,7 +107,9 @@ describe("v2 · Phase 3 — not sent yet", () => {
   });
   it("the host reuses the held task before it makes one, and the not-sent route never saves a query", () => {
     const host = readFileSync("src/components/queries/centre/LogStagesHost.tsx", "utf8");
-    const body = host.slice(host.indexOf("const onNotSent"), host.indexOf("const onSentAfterAll"));
+    /* v2.1 · Phase 4: "It has gone after all" (onSentAfterAll) is gone; the body ends at the way-out comment */
+    const body = host.slice(host.indexOf("const onNotSent"), host.indexOf("/* every way out"));
+    expect(body.length).toBeGreaterThan(50);
     expect(body.indexOf("heldTaskFor")).toBeLessThan(body.indexOf("addUserTask"));
     expect(body).not.toMatch(/saveLog|onSave/);
   });

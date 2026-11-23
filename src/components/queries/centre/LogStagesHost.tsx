@@ -26,8 +26,9 @@ import { quietWeeksOf } from "../../../lib/queryState";
 import { liveCount } from "../../../lib/dashBreakdown";
 import { agentFromDraft } from "../../../lib/agentCreate";
 import { emptyCardDraft, problemsOf } from "../../../lib/cardDraft";
-import { emptyCreated, toRemoveOnDiscard, toRemoveOnUndo, withAgent, withHeld, withLogged, withoutAgent, withoutHeld, withoutLogged, heldTaskFor, type JourneyCreated } from "../../../lib/queryActions/journeyCreated";
+import { emptyCreated, toRemoveOnDiscard, toRemoveOnUndo, withAgent, withHeld, withLogged, withoutAgent, withoutLogged, heldTaskFor, heldTaskText, heldToComplete, type JourneyCreated } from "../../../lib/queryActions/journeyCreated";
 import { useToast } from "../../toast/ToastProvider";
+import { localYMD } from "../../../lib/shellSidebar";
 import { QcLogStages, type Logged } from "./QcLogStages";
 import type { LogAgain } from "../../../lib/queryActions/drawerStore";
 import { useAgentSave } from "../../agents/card/useAgentSave";
@@ -52,7 +53,7 @@ export const LogStagesHost: React.FC<{
   onLogged?: (queryId: string, undo: () => Promise<void>) => void;
 }> = ({ ms, seedAgentId, onClose, onOpenCard, seedPackageId, again, leaveRef, onLogged }) => {
   const scriptDb = useScriptAllyDb();
-  const { currentUser, agents, queries, packages, versions, addJournalEntry, deleteJournalEntry, addAgent, deleteAgent, addUserTask, deleteUserTask } = scriptDb;
+  const { currentUser, agents, queries, packages, versions, addJournalEntry, deleteJournalEntry, addAgent, deleteAgent, addUserTask, updateUserTask } = scriptDb;
   const { showToast } = useToast();
   /* Undo runs later than the save: it reads the journal as it is then, not as it was when the save began */
   const live = useRef(scriptDb);
@@ -119,10 +120,16 @@ export const LogStagesHost: React.FC<{
     }
     const s0 = snap;
     made.current = withLogged(made.current, a.agentId);
+    /* v2.1 · Phase 4 — logging this agent's query for this book completes a held "Send your query to {name}" task
+       (made now or earlier); Undo opens it again */
+    const heldDone = heldToComplete(live.current.userTasks ?? [], a.agentId, ms.id).map((t) => t.id);
+    const doneAt = new Date().toISOString();
+    for (const tid of heldDone) await updateUserTask(tid, { done: true, completedAt: doneAt });
     /* the card first: its snapshot holds the new query, so the log's own undo must run after it. v2 — and an agent this
        journey added for it goes too, with its "Finish" task, when nothing else now uses it */
     const undo = async () => {
       if (undoCard) await undoCard();
+      for (const tid of heldDone) await updateUserTask(tid, { done: false, completedAt: null });
       await restoreSnapshot(s0);
       for (const j of live.current.journalEntries.filter((x) => x.queryId === id)) await deleteJournalEntry(j.id);
       const gone = toRemoveOnUndo(made.current, a.agentId);
@@ -151,19 +158,15 @@ export const LogStagesHost: React.FC<{
     }
     return { id: res.id, created: isNew };
   };
-  /* v2 · Phase 3 — "Not sent yet? Put it on your to-do list": one task per agent, however often it is pressed */
+  /* v2 · Phase 3 — "Not sent yet? Put it on your to-do list": one task per agent, however often it is pressed.
+     v2.1 · Phase 4 — dated today, so it is a task on the To-do page and the Dashboard (an undated one is a note, which
+     neither shows); its "I've sent it" (`heldSendDoor`) brings the writer back here, and logging completes it */
   const onNotSent = async (agentId: string, agentName: string): Promise<string | null> => {
     const had = heldTaskFor(made.current, agentId);
     if (had) return had;
-    const taskId = await addUserTask({ text: `Send your query to ${agentName}`, agentId, manuscriptId: ms.id });
+    const taskId = await addUserTask({ text: heldTaskText(agentName), agentId, manuscriptId: ms.id, dueDate: localYMD(Date.now()) });
     if (taskId) made.current = withHeld(made.current, agentId, taskId);
     return taskId ?? null;
-  };
-  /* "It has gone after all": that task goes */
-  const onSentAfterAll = async (agentId: string): Promise<void> => {
-    const t = heldTaskFor(made.current, agentId);
-    made.current = withoutHeld(made.current, agentId);
-    if (t) await deleteUserTask(t);
   };
   /* every way out (Cancel, ×, Discard, Done): an agent this journey added that nothing uses goes, with its task */
   const close = () => {
@@ -176,7 +179,7 @@ export const LogStagesHost: React.FC<{
     <QcLogStages nowMs={nowMs} agents={model.stAgents} seedAgentId={seedAgentId} bookTitle={ms.title || "Untitled manuscript"}
       packages={model.stPackages} activePackageId={model.active} letters={model.ctx.letters} synopses={model.ctx.synopses} bookVersions={model.ctx.bookVersions}
       count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={close}
-      onCreateAgent={onCreateAgent} onNotSent={onNotSent} onSentAfterAll={onSentAfterAll} bookQueries={forBook}
+      onCreateAgent={onCreateAgent} onNotSent={onNotSent} bookQueries={forBook}
       activeNow={liveCount(forBook)}
       onSave={onSave} seedPackageId={seedPackageId} again={again} leaveRef={leaveRef} />
   );

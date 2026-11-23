@@ -57,3 +57,25 @@ export function toRemoveOnUndo(c: JourneyCreated, agentId: string): CreatedAgent
 /** what is left to track once those are gone */
 export const withoutAgent = (c: JourneyCreated, id: string): JourneyCreated =>
   ({ agents: c.agents.filter((a) => a.id !== id), held: c.held.filter((h) => h.agentId !== id), logged: c.logged.filter((x) => x !== id) });
+
+/* ── v2.1 · Phase 4 — the held task brings the writer back ─────────────────────────────────────────────────────── */
+
+/** the not-sent task's words — the one writer (LogStagesHost `onNotSent`) and the one reader (`heldSendDoor`) share them */
+export const HELD_PREFIX = "Send your query to ";
+export const heldTaskText = (agentName: string): string => `${HELD_PREFIX}${agentName}`;
+export interface HeldDoor { mode: "log"; agentId: string; manuscriptId: string }
+/**
+ * "I've sent it": the Log a query door a held task carries — Log a query for that agent and book, which opens at Sent
+ * with the agent chosen. Derived from the task's own fields (no new stored field: the rules' `hasOnly()` has none to
+ * spare): an open task linked to an agent and a book, to no query, in the words the journey wrote.
+ * ⚠️ A writer who renames the task loses the button (the words are how it is known); the task itself is untouched.
+ */
+export function heldSendDoor(t: { text?: string; done?: boolean; agentId?: string | null; manuscriptId?: string | null; queryId?: string | null } | null | undefined): HeldDoor | null {
+  if (!t || t.done || !t.agentId || !t.manuscriptId || t.queryId) return null;
+  if (!(t.text ?? "").startsWith(HELD_PREFIX)) return null;
+  return { mode: "log", agentId: t.agentId, manuscriptId: t.manuscriptId };
+}
+/** logging this agent's query for this book completes these held tasks (the save does it; Undo reopens them) */
+export function heldToComplete<T extends { id: string; text?: string; done?: boolean; agentId?: string | null; manuscriptId?: string | null; queryId?: string | null }>(tasks: readonly T[], agentId: string, manuscriptId: string): T[] {
+  return tasks.filter((t) => { const d = heldSendDoor(t); return !!d && d.agentId === agentId && d.manuscriptId === manuscriptId; });
+}

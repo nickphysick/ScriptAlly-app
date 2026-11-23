@@ -254,6 +254,8 @@
 /* the hawk (v53 D6): a 34px picture beside a compact blush bubble, above the rail */
 .tws-mnote { display: flex; align-items: flex-start; gap: 12px; margin: 0 0 16px; }
 .tws-mnote img { width: 34px; flex: none; margin-top: 0; }
+/* Log a query v2.1 · Phase 4 — a held query's "I've sent it" sits beside the note */
+.tws-mnote > .tws-btn { flex: none; align-self: center; }
 .tws-mnote p {
   position: relative; margin: 0; padding: 9px 14px; border-radius: 12px; background: var(--tw-blush2); color: var(--tw-bubble-ink);
   font: 400 var(--sp-body-size)/1.4 var(--tw-serif);

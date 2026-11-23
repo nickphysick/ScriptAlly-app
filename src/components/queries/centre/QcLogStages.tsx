@@ -95,7 +95,6 @@ export interface QcLogStagesProps {
   onCreateAgent: (name: string, agency: string) => Promise<{ id: string; created: boolean } | { error: string }>;
   /** v2 · Phase 3 — "Not sent yet?": the to-do task's id (one per agent), and "It has gone after all" (removes it) */
   onNotSent: (agentId: string, agentName: string) => Promise<string | null>;
-  onSentAfterAll: (agentId: string) => Promise<void>;
   /** v2 · Phase 6 — this book's queries, for the review's two numbers (the Dashboard's own functions read them) */
   bookQueries: readonly Query[];
   /** v2 · Phase 7 — the Dashboard's active count for this book, live (read back after a save) */
@@ -567,19 +566,23 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     setNsBusy(false);
     if (id) set({ notSent: true, earlier: false, dir: "in" });
   };
+  /* v2.1 · Phase 4 (screen 04) — the task as it will appear, its "I've sent it" working from here too: back to Sent with
+     the agent chosen. The task stays; logging completes it (LogStagesHost). Footer: Done only. */
+  const heldName = agent?.name ?? (s.agentId ? addedNames.current[s.agentId] : null) ?? first;
   const notSentBody = () => (
     <>
       <h2 className="laq-qh">We’ll hold it for you.</h2>
-      <p className="laq-qs">Nothing is logged yet. It’s on your to-do list for when it goes.</p>
+      <p className="laq-qs">Nothing is logged yet. When it has gone, press “I’ve sent it” on the task and you’ll pick up right here, with {first} already chosen.</p>
       <div className="laq-todo" data-qls="not-sent-task">
         <i aria-hidden="true" />
-        <span><b>Send your query to {agent?.name ?? (s.agentId ? addedNames.current[s.agentId] : null) ?? first}</b><span>{agent?.agency || "No agency yet"} · added today</span></span>
+        <span><b>Send your query to {heldName}</b><span>{agent?.agency || "No agency yet"} · added today</span></span>
+        <button type="button" className="laq-tdb" data-qls="sent-after-all" onClick={() => set({ notSent: false, sent: null, dir: "back", step: "when" })}>I’ve sent it</button>
       </div>
+      <p className="laq-info" style={{ marginTop: 12 }}>The task sits on your To-do page and your Dashboard. The button works from both.</p>
     </>
   );
   const notSentFoot = (
     <>
-      <button type="button" className="laq-lnk" data-qls="sent-after-all" onClick={async () => { if (s.agentId) await p.onSentAfterAll(s.agentId); set({ notSent: false, sent: null, dir: "back", step: "when" }); }}>It has gone after all</button>
       <span className="laq-sp" />
       <button type="button" className="laq-btn" data-qls="not-sent-done" onClick={p.onClose}>Done</button>
     </>

@@ -27,6 +27,7 @@ import { RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../..
 import { openQueryPanel } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { heldSendDoor } from "../../../lib/queryActions/journeyCreated";
 import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
 import { TODO_OPEN_TASK_KEY } from "../../../lib/corkboard";
@@ -641,9 +642,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     /* the questions column */
     let main: React.ReactNode;
     if (own) {
+      const heldDoor = heldSendDoor(t.userTask);
       main = (
         <>
-          <div className="tws-mnote"><img src={MENTOR} alt="" /><p>{steps.length ? "This one’s yours. Tick the steps off as you go, then mark it done." : "This one’s yours. Mark it done when it’s finished, or break it into steps if it’s a big one."}</p></div>
+          {heldDoor
+            /* Log a query v2.1 · Phase 4 — a query put on hold in Log a query: "I've sent it" opens Log a query at Sent with
+               the agent chosen; logging it completes this task */
+            ? <div className="tws-mnote" data-tws="held"><img src={MENTOR} alt="" /><p>Not sent yet. When it has gone, press “I’ve sent it” and log it.</p>
+                <button type="button" className="tws-btn" data-k="k" data-tws="held-sent" onClick={() => openQueryDrawer(heldDoor)}>I’ve sent it</button></div>
+            : <div className="tws-mnote"><img src={MENTOR} alt="" /><p>{steps.length ? "This one’s yours. Tick the steps off as you go, then mark it done." : "This one’s yours. Mark it done when it’s finished, or break it into steps if it’s a big one."}</p></div>}
           <WsOwnTask task={t.userTask!} today={today} agents={agents} queries={queries} picking={linkPicking} setPicking={setLinkPicking}
             titleOf={(id) => manuscripts.find((m) => m.id === id)?.title?.trim() || null}
             w={{ update: (f) => updateUserTask(t.userTask!.id, f), done: () => void ownDone(t), said: (m) => flash(m) }} />

@@ -84,3 +84,38 @@ describe("v2.1 · Phase 3 — Not queried yet lists only agents with no query fo
   });
   it("the open list shows ten", () => expect(BUSY_SHOWN).toBe(10));
 });
+
+/* ── Phase 4 — the held task brings the writer back ── */
+import { heldSendDoor, heldTaskText, heldToComplete } from "./journeyCreated";
+import { listPlan, readyItems } from "../dashList";
+
+describe("v2.1 · Phase 4 — the held task's door", () => {
+  const held = { id: "t1", text: heldTaskText("Harriet Vance"), done: false, agentId: "hv", manuscriptId: "m1" };
+  it("an open held task opens Log a query for its agent and book", () => {
+    expect(heldSendDoor(held)).toEqual({ mode: "log", agentId: "hv", manuscriptId: "m1" });
+  });
+  it("no door when done, linked to a query, missing the agent or book, or renamed", () => {
+    expect(heldSendDoor({ ...held, done: true })).toBeNull();
+    expect(heldSendDoor({ ...held, queryId: "q1" })).toBeNull();
+    expect(heldSendDoor({ ...held, agentId: undefined })).toBeNull();
+    expect(heldSendDoor({ ...held, manuscriptId: undefined })).toBeNull();
+    expect(heldSendDoor({ ...held, text: "Chase Harriet" })).toBeNull();
+    expect(heldSendDoor({ text: "Finish Harriet Vance’s card", agentId: "hv", done: false })).toBeNull();
+  });
+  it("logging completes only that agent's held task for that book", () => {
+    const tasks = [held, { ...held, id: "t2", manuscriptId: "m2" }, { ...held, id: "t3", agentId: "x" }, { ...held, id: "t4", done: true }];
+    expect(heldToComplete(tasks, "hv", "m1").map((t) => t.id)).toEqual(["t1"]);
+  });
+  it("the Dashboard: the held task leads Ready to query with I've sent it, and stays on the list behind other work", () => {
+    const ms = { id: "m1", title: "Murphy's Day Out", genre: "Literary" } as never;
+    const ag = { id: "hv", name: "Harriet Vance", agency: "Vance & Wren", submissionStatus: SubmissionStatus.OPEN, genres: ["Literary"] } as unknown as Agent;
+    const items = readyItems({ agents: [ag], queries: [], manuscript: ms, now: new Date(NOW), userTasks: [held as never] });
+    expect(items[0]).toMatchObject({ key: "held:t1", group: "ready", actLabel: "I’ve sent it", pre: "Send your query to ", who: "Harriet Vance",
+      action: { kind: "drawer", request: { mode: "log", agentId: "hv", manuscriptId: "m1" } } });
+    expect(items.filter((x) => x.who === "Harriet Vance")).toHaveLength(1);
+    const work = { key: "w", group: "nudge" } as never;
+    expect(listPlan({ nudge: [work], ready: items }).groups.map((g) => g.key)).toEqual(["nudge", "ready"]);
+    const plain = readyItems({ agents: [ag], queries: [], manuscript: ms, now: new Date(NOW), userTasks: [] });
+    expect(listPlan({ nudge: [work], ready: plain }).groups.map((g) => g.key)).toEqual(["nudge"]);
+  });
+});
