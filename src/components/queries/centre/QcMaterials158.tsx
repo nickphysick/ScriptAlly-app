@@ -27,7 +27,11 @@ import type { StepMaterial } from "../../../lib/qc152Write";
 import { chipIcon } from "./QcBubble152";
 import { sentenceCase } from "./QcAgent158";
 import { Ghost, editable } from "./QcGhost167";
-import { CrossTick, DiscardAsk, EditPen, useEdit168, useHold168 } from "./QcEdit168";
+import { CrossTick, DiscardAsk, EditPen, mut168, useEdit168, useHold168 } from "./QcEdit168";
+
+/** v168.1 — a row says its name once: a right-hand detail that is the label's own words (ignoring case and spacing) is
+ *  not drawn (a step's recorded materials set `detail` to the label: qcCardView `stepChips`) */
+export const sameWords = (a: string, b: string): boolean => a.trim().replace(/\s+/g, " ").toLowerCase() === b.trim().replace(/\s+/g, " ").toLowerCase();
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 
 /** v168 — a group's own editor: what its step went with, and its one save (true when it landed) */
@@ -103,7 +107,7 @@ export const MaterialsTab158: React.FC<MaterialsTab158Props> = (p) => {
             {g.items.length ? g.items.map((c, i) => (
               <li key={`${c.label}-${i}`} data-qc158="item">
                 {chipIcon(c.icon, 20)}{sentenceCase(c.label)}
-                {g.pending ? <span className="r">not sent yet</span> : c.detail ? <span className="r">{c.detail}</span> : null}
+                {g.pending ? <span className="r">not sent yet</span> : c.detail && (mut168("16") || !sameWords(c.detail, c.label)) ? <span className="r" data-qc168="detail">{c.detail}</span> : null}
               </li>
             )) : (
               <li data-qc158="item" data-qc167="ghost-row" data-ghost="" className="qc167-grow"
