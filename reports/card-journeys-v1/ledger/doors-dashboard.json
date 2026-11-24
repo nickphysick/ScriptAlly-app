@@ -1,0 +1,22 @@
+[
+ {
+  "where": "G1 · subject",
+  "ok": true,
+  "detail": "lead \"offer\", button \"Record your answer\""
+ },
+ {
+  "where": "G1 · a journey over the Dashboard",
+  "ok": true,
+  "detail": "{\"journey\":\"offer\",\"rar\":false,\"card\":false,\"drawer\":false,\"path\":\"/dashboard\"}"
+ },
+ {
+  "where": "G1 · the path does not change",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "G1 · Escape leaves the Dashboard as it was",
+  "ok": true,
+  "detail": "{\"journey\":null,\"rar\":false,\"card\":false,\"drawer\":false,\"path\":\"/dashboard\"}"
+ }
+]

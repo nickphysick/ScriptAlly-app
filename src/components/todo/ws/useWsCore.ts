@@ -22,13 +22,13 @@ import { setAsideItems, setAsideLabel, switchedOffRules, RULE_TITLE, type SetAsi
 import { flagKeyForTask, taskFlagId } from "../../../lib/taskFlags";
 import { setAsideRules } from "../../../lib/todoSetAside";
 import { snoozeCardWrites } from "../snoozeWrites";
-import { openQueryPanel, openResponse, responseHosted } from "../../../lib/queryPanelStore";
+import { cardJourneyHosted, openCardJourney, openQueryPanel, openResponse, responseHosted } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { drawerDoorForTask } from "../../../lib/queryActions/entry";
 import { commitCardSave } from "../../../lib/agentCardSave";
 import { addDays, dayDiff, fmt, toDay, todayDay } from "../../../lib/queryActions/dates";
-import { ActivityType, type TaskFlag, type UserTask } from "../../../types";
+import { ActivityType, QueryStatus, type TaskFlag, type UserTask } from "../../../types";
 import { nrmnOf, lastSendDay } from "../../queryActions/journeys/common";
 import { buildFlow, type Answers, type Flow } from "./wsFlows";
 import { dayFromYmd } from "./WsControls";
@@ -218,6 +218,18 @@ export function useWsCore(now: number) {
   /** the flow `buildFlow` builds for a task on the desk (`sel` the row, `deskT` the row as the desk holds it) */
   const makeFlow = (sel: WsTask | null, deskT: WsTask | null, A: Answers, setA: (f: (a: Answers) => Answers) => void, flash: (m: string) => void): Flow | null => {
     if (!sel || !deskT || sel.kind === "own") return null;
+    /* Card journeys v1 — on the desktop a send, a revise-and-resubmit and an offer to answer are journeys: the desk's
+       button opens it over the page, and the desk hears when it saves. Not hosted (the phone): the inline flow, as before. */
+    const cjKind = sel.query && (sel.kind === "send" || sel.kind === "rr") ? "send" as const
+      : sel.query && sel.kind === "offer" && sel.query.status === QueryStatus.OFFER ? "offer" as const : null;
+    if (cjKind && cardJourneyHosted(cjKind)) {
+      const first = sel.agent ? (sel.agent.name ?? "").trim().split(/\s+/)[0] || "The agent" : "The agent";
+      return {
+        questions: [], sentence: null, draft: {}, commit: null,
+        door: { label: cjKind === "send" ? (sel.kind === "rr" ? "Mark resubmitted" : "Mark sent") : "Answer the offer",
+          open: () => { openCardJourney({ queryId: sel.query!.id, kind: cjKind, onSaved: () => flash(cjKind === "send" ? `Logged. Over to ${first}.` : `Your answer to ${first} is logged.`) }); } },
+      } as Flow;
+    }
     const facts = quietFacts(sel);
     const userFirst = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "";
     return buildFlow({

@@ -1,0 +1,27 @@
+[
+ {
+  "where": "G2 · subject",
+  "ok": true,
+  "detail": "1 send rows"
+ },
+ {
+  "where": "G2 · the desk's button",
+  "ok": true,
+  "detail": "\"Mark sent\""
+ },
+ {
+  "where": "G2 · a journey over the To-do page",
+  "ok": true,
+  "detail": "{\"journey\":\"send\",\"rar\":false,\"card\":false,\"drawer\":false,\"path\":\"/todo\"}"
+ },
+ {
+  "where": "G2 · the path does not change",
+  "ok": true,
+  "detail": "/todo → /todo"
+ },
+ {
+  "where": "G2 · Escape closes it",
+  "ok": true,
+  "detail": "{\"journey\":null,\"rar\":false,\"card\":false,\"drawer\":false,\"path\":\"/todo\"}"
+ }
+]

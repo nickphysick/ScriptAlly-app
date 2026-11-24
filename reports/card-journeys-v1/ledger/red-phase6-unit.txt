@@ -1,0 +1,86 @@
+
+ RUN  v3.2.7 /Users/nickphysick/ScriptAlly-cj1
+
+ ❯ src/lib/cardJourneyDoors.test.ts (4 tests | 3 failed) 5ms
+   × card journeys v1 · every door > E1 the drawer's doors open the journey while a host listens 4ms
+     → expected [] to deeply equal [ 'send:q1', 'close:q2', …(2) ]
+   ✓ card journeys v1 · every door > E2 with nothing listening, the drawer as before 0ms
+   × card journeys v1 · every door > E3 a task's step opens the journey over the page, not the card 0ms
+     → expected [] to deeply equal [ 'send:q9:false' ]
+   × card journeys v1 · every door > E4 the offer task answers; the desk asks for the journey 1ms
+     → expected { step: 1 } to deeply equal { step: 1, answer: true }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/cardJourneyDoors.test.ts > card journeys v1 · every door > E1 the drawer's doors open the journey while a host listens
+AssertionError: expected [] to deeply equal [ 'send:q1', 'close:q2', …(2) ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   "send:q1",[39m
+[32m-   "close:q2",[39m
+[32m-   "offer:q3",[39m
+[32m-   "offer:q4",[39m
+[32m- ][39m
+[31m+ [][39m
+
+ ❯ src/lib/cardJourneyDoors.test.ts:28:54
+     26|     openQueryDrawer({ mode: "offer", queryId: "q3" });
+     27|     openQueryDrawer({ mode: "offer", queryId: "q4", preset: { step: 1,…
+     28|     expect(got.map((r) => `${r.kind}:${r.queryId}`)).toEqual(["send:q1…
+       |                                                      ^
+     29|     expect(currentDrawerRequest()).toBeNull();
+     30|     openQueryDrawer({ mode: "offer", queryId: "q5", preset: { step: 1 …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/lib/cardJourneyDoors.test.ts > card journeys v1 · every door > E3 a task's step opens the journey over the page, not the card
+AssertionError: expected [] to deeply equal [ 'send:q9:false' ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [[39m
+[32m-   "send:q9:false",[39m
+[32m- ][39m
+[31m+ [][39m
+
+ ❯ src/lib/cardJourneyDoors.test.ts:44:70
+     42|     const off = subscribeCardJourney((r) => got.push(r));
+     43|     openQueryPanel("q9", "dashboard", { mode: "sent", queryId: "q9", p…
+     44|     expect(got.map((r) => `${r.kind}:${r.queryId}:${!!r.fromCard}`)).t…
+       |                                                                      ^
+     45|     expect(currentQueryPanel()).toBeNull();
+     46|     expect(currentDrawerRequest()).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/lib/cardJourneyDoors.test.ts > card journeys v1 · every door > E4 the offer task answers; the desk asks for the journey
+AssertionError: expected { step: 1 } to deeply equal { step: 1, answer: true }
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "answer": true,[39m
+[2m    "step": 1,[22m
+[2m  }[22m
+
+ ❯ src/lib/cardJourneyDoors.test.ts:50:63
+     48|   });
+     49|   it("E4 the offer task answers; the desk asks for the journey", () =>…
+     50|     expect(drawerDoorForTask("offer_received", "q1")?.preset).toEqual(…
+       |                                                               ^
+     51|     expect(drawerDoorForTask("offer_tell_all", "q1")?.preset).toEqual(…
+     52|     const desk = readFileSync("src/components/todo/ws/useWsCore.ts", "…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  20:52:16
+   Duration  270ms (transform 53ms, setup 0ms, collect 53ms, tests 5ms, environment 0ms, prepare 55ms)
+

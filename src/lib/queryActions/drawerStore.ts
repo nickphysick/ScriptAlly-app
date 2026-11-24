@@ -19,6 +19,8 @@ export type DrawerMode = "log" | "resp" | "sent" | "nudge" | "close" | "offer" |
 
 /** What a caller may pre-answer. Each journey reads only its own keys. */
 export interface DrawerPreset {
+  /** Card journeys v1 — an offer door that answers the offer (the task "answer the offer"), not one that tells the others */
+  answer?: boolean;
   /** D2: the response type, e.g. "pass" when D5's "They said no" hands over. */
   respType?: "partial" | "full" | "rr" | "pass" | "offer";
   /** D4: which path is chosen on "Where it stands". */
@@ -121,7 +123,19 @@ const notify = () => listeners.forEach((l) => l(current));
  * parked, a door asking for ANOTHER turns the parked chip into the ask — "Finish it" or "Discard
  * and start", never a silent replace — and a door asking for the SAME one resumes it.
  */
+/**
+ * Card journeys v1 — ON THE DESKTOP, MARK SENT, CLOSE AND ANSWERING AN OFFER ARE JOURNEYS. Every door that asks the drawer
+ * for one of them (the Dashboard's tasks, Birds-eye, the agent card, the Responses page, the To-do's "Open it") is handed
+ * to the journey instead, by the interceptor lib/queryActions/cardJourneys registers. It takes a request only while a
+ * journey host listens (never on the phone, which keeps every drawer journey) and only for a journey that is live.
+ */
+export interface DrawerInterceptor { takes: (r: OpenRequest) => boolean; open: (r: OpenRequest) => void }
+let interceptor: DrawerInterceptor | null = null;
+export function setDrawerInterceptor(i: DrawerInterceptor | null): void { interceptor = i; }
+export const drawerIntercepts = (r: OpenRequest): boolean => !!interceptor?.takes(r);
+
 export function openQueryDrawer(req: OpenRequest): void {
+  if (interceptor?.takes(req)) { interceptor.open(req); return; }
   spyJourney({ via: "drawer", mode: req.mode, queryId: req.queryId ?? null, agentId: (req as { agentId?: string }).agentId ?? null });
   if (parked) {
     if (sameJourney(parked.req, req)) { resumeQueryDrawer(req); return; }

@@ -11,7 +11,8 @@
  * ⚠️ NOTHING HERE WRITES. The plans are the existing writers' (lib/qc152Write `planRecord`, lib/qc1522Write `planSigned`,
  *    `planUnpass`), committed by the host in one batch under one snapshot.
  */
-import { setCardJourneyLive, type CardJourneyKind } from "../queryPanelStore";
+import { openCardJourney, rightPanelOwner, setCardJourneyLive, cardJourneyHosted, type CardJourneyKind } from "../queryPanelStore";
+import { setDrawerInterceptor, type OpenRequest } from "./drawerStore";
 
 export const CARD_JOURNEY_LIVE: Record<CardJourneyKind, boolean> = {
   send: true,
@@ -20,6 +21,29 @@ export const CARD_JOURNEY_LIVE: Record<CardJourneyKind, boolean> = {
   reopen: true,
 };
 setCardJourneyLive((k) => CARD_JOURNEY_LIVE[k]);
+
+/**
+ * Card journeys v1, Phase 6 — ONE JOURNEY PER ACTION, EVERYWHERE. The drawer's doors for these actions are handed to the
+ * journeys (lib/queryActions/drawerStore `setDrawerInterceptor`):
+ *   "sent"  → Mark sent;  "close" → Close;  "offer" → Answer an offer, unless the door is a task that TELLS the others
+ *   (opened at the offer's step 1 without `answer`): those keep the drawer's offer journey, whose tell list they need.
+ * Only while a host listens and the kind is live; never for the practice query (Pip has none of these).
+ * From the query's own side panel (a step into the panel) the card steps back behind the journey; a To-do desk's slot
+ * or a floating drawer opens it over the page.
+ */
+export function drawerKindOf(r: OpenRequest): CardJourneyKind | null {
+  if (r.mode === "sent") return "send";
+  if (r.mode === "close") return "close";
+  if (r.mode === "offer") return r.preset?.step === 1 && !r.preset?.answer ? null : "offer";
+  return null;
+}
+setDrawerInterceptor({
+  takes: (r) => { const k = drawerKindOf(r); return !!k && !!r.queryId && !r.queryId.startsWith("practice") && cardJourneyHosted(k); },
+  open: (r) => {
+    const k = drawerKindOf(r)!;
+    openCardJourney({ queryId: r.queryId!, kind: k, fromCard: !!r.panel && !r.panel.slot && rightPanelOwner() === "query" });
+  },
+});
 
 /** the steps of a card journey (Agent is always first and already answered) */
 export type CJStage = "agent" | "went" | "sent" | "reply" | "why" | "when" | "answer" | "others" | "nudge" | "log";

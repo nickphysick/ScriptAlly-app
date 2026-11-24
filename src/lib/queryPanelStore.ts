@@ -13,7 +13,7 @@
  * Module scope, like `drawerStore`: nothing to mount means nothing to forget.
  */
 import { spyJourney } from "./journeySpy";
-import { openQueryDrawer, type OpenRequest } from "./queryActions/drawerStore";
+import { drawerIntercepts, openQueryDrawer, type OpenRequest } from "./queryActions/drawerStore";
 /* "agent" (Contact list v16 §F): opened from an agent's panel, on its Queries tab — the query view carries a way back */
 export type PanelOrigin = "dashboard" | "feed" | "other" | "agent";
 export interface PanelRequest { id: string; from: PanelOrigin }
@@ -24,6 +24,12 @@ const tell = () => { for (const f of [...subs]) f(); };
 
 export const currentQueryPanel = (): PanelRequest | null => current;
 export function openQueryPanel(id: string, from: PanelOrigin = "other", step?: OpenRequest): void {
+  /* Card journeys v1 — a task's step that is a journey on the desktop opens over the page, not in the card */
+  if (step) {
+    const { panel: _p, ...rest } = step; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const direct = { ...rest, queryId: id } as OpenRequest;
+    if (drawerIntercepts(direct)) { openQueryDrawer(direct); return; }
+  }
   if (!(current?.id === id && current.from === from)) {
     back = null;
     current = { id, from };
