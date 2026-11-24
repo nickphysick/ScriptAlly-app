@@ -1118,6 +1118,22 @@ export interface Activity {
   bookVersionId?: string;
   /** Query actions v1 — see `EventKey`. */
   eventKey?: EventKey;
+  /* ── Feed wording v1: the subject a housekeeping row is about, CARRIED, never parsed out of `description` ──
+     All optional and born ABSENT (never null or ""): every row written before this pack has none. */
+  /** the agent's name (absent when the agent has none), or the manuscript's title */
+  subjectName?: string;
+  /** the agent's agency; absent on a manuscript row */
+  subjectAgency?: string;
+  /** a rename: the name (or title) before the save */
+  previousName?: string;
+  /** a delete: how many queries went with it; absent at zero */
+  removedQueries?: number;
+  /** an update: the GROUPS the save changed (lib/feedChange), never field names */
+  changed?: string[];
+  /** an update that moved a status: the new value ("Open", "Closed", "Ready to Query") */
+  changedTo?: string;
+  /** one row for a sweep of several agents: how many */
+  batchCount?: number;
 }
 
 export interface JournalEntry {

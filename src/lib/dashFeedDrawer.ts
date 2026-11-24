@@ -8,7 +8,7 @@
  * file only arranges them for the drawer: full-date day headings, the three summary figures, the
  * agent / you filter, and the step back to an earlier month.
  */
-import { ActivityType, QueryStatus } from "../types";
+import { QueryStatus } from "../types";
 import { FEED_DAYS, type FeedEntry, type FeedSeg } from "./dashFeed";
 import { STAGE_NAME, type QcRow } from "./qcSummary";
 import { MONTHS_SHORT } from "./dates";
@@ -54,18 +54,8 @@ function earlierFact(e: FeedEntry, row: QcRow | undefined): string {
   return "";
 }
 
-/**
- * What the writer did to their files, said the way the rest of the feed speaks ("You added …").
- * The log's own description is "Added X at Y", which names nobody as its subject.
- */
-const HOUSE_SAY: Record<string, (who: FeedSeg) => FeedSeg[]> = {
-  [ActivityType.AGENT_ADDED]: (w) => [{ t: "You added " }, w, { t: " to your contact list" }],
-  [ActivityType.AGENT_UPDATED]: (w) => [{ t: "You updated " }, w, { t: "'s details" }],
-  [ActivityType.AGENT_DELETED]: (w) => [{ t: "You removed " }, w, { t: " from your contact list" }],
-  [ActivityType.MANUSCRIPT_ADDED]: (w) => [{ t: "You added " }, w, { t: " to your manuscripts" }],
-  [ActivityType.MANUSCRIPT_UPDATED]: (w) => [{ t: "You updated the details of " }, w],
-  [ActivityType.MANUSCRIPT_DELETED]: (w) => [{ t: "You removed " }, w, { t: " from your manuscripts" }],
-};
+/* Feed wording v1: the writer's own housekeeping is worded where the row is derived (lib/feedHouse `houseSay`, via
+   `feedEntries`), so the drawer, the cards and the phone all say the same sentence. */
 const isManuscript = (t: string) => t.startsWith("Manuscript");
 
 export function drawerEvents(entries: readonly FeedEntry[], qcRows: readonly QcRow[], filter: FeedFilter = "all"): DrawerEvent[] {
@@ -76,8 +66,7 @@ export function drawerEvents(entries: readonly FeedEntry[], qcRows: readonly QcR
       const row = e.queryId ? byId.get(e.queryId) : undefined;
       const tag = e.status === QueryStatus.REJECTED ? passTag(row) : e.pill;
       const fact = e.dir === "in" ? earlierFact(e, row) : (e.requery?.text ?? "");
-      const house = e.app ? HOUSE_SAY[e.activityType] : undefined;
-      const say = house && e.who ? house(isManuscript(e.activityType) ? { t: e.who, em: true } : { t: e.who, who: true }) : e.say;
+      const say = e.say;
       /* a housekeeping event's line under it is the agency alone */
       const agency = e.app ? e.agency.split(" · ")[0] : e.agency;
       return { entry: e, say, tag, meta: [e.app && isManuscript(e.activityType) ? "" : agency, fact].filter(Boolean).join(" · ") };

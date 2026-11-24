@@ -119,6 +119,7 @@ import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge }
 import { writeActivity } from "./activityWrite";
 import { createManuscript, updateManuscriptFields } from "./manuscriptWrite";
 import { narrate } from "./narrate";
+import { agentSubject, manuscriptSubject, removedOf } from "./feedHouse";
 import { commitNudge } from "./nudgeWrite";
 import { undoNudge as undoNudgeWrite } from "./nudgeUndo";
 import { resolveGenre, matchKey } from "./genres";
@@ -1685,6 +1686,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         activityType: ActivityType.MANUSCRIPT_ADDED,
         description: `You added a new title ${newMs.title} to your manuscripts`,
         manuscriptId: newMs.id,
+        ...manuscriptSubject(newMs),
         queryId: "",
         date: new Date().toISOString(),
         details: ""
@@ -1713,6 +1715,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             activityType: ActivityType.MANUSCRIPT_UPDATED,
             description: "You updated a manuscript's details",
             manuscriptId: id,
+            ...manuscriptSubject({ title: typeof fields.title === "string" ? fields.title : msTitle }),
             queryId: "",
             date: new Date().toISOString(),
             details: ""
@@ -1777,6 +1780,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const uid = currentUser.id;
     // Capture title + query count BEFORE the cascade removes them — for the durable delete record.
     const msTitle = manuscripts.find(m => m.id === id)?.title || "a manuscript";
+    const msSubject = manuscriptSubject(manuscripts.find(m => m.id === id));
     // The ordered plan (cascade.ts, unit-locked): versions + packages → queries (each preceded by its
     // live-fetched activity subcollection) → global-feed projections → taskFlag stances (6A: stances
     // die with their records) → THE MANUSCRIPT LAST, so a mid-way failure leaves it (and a retry)
@@ -1835,6 +1839,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         activityType: ActivityType.MANUSCRIPT_DELETED,
         description: `You deleted “${msTitle}”${detail}`,
         manuscriptId: "",
+        ...msSubject,
+        ...removedOf(qn),
         queryId: "",
         date: new Date().toISOString(),
         details: orphanNote,
@@ -2362,6 +2368,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           ? `Added ${newAg.name} at ${newAg.agency}`
           : `Added ${newAg.agency}`,
         manuscriptId: "",
+        ...agentSubject(newAg),
         queryId: "",
         date: new Date().toISOString(),
         details: ""
@@ -2389,6 +2396,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const previousStarRating = existingAgent.starRating;
     const agentName = existingAgent.name;
     const agencyName = existingAgent.agency;
+    /* Feed wording v1: the row carries who it is about, as the agent stands AFTER the save */
+    const subject = agentSubject({ name: typeof fields.name === "string" ? fields.name : agentName, agency: typeof fields.agency === "string" ? fields.agency : agencyName });
 
     let writeSuccess = false;
     try {
@@ -2408,6 +2417,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             activityType: ActivityType.AGENT_UPDATED,
             description: `You updated details for ${agentName} at ${agencyName}`,
             manuscriptId: "",
+            ...subject,
             queryId: "",
             date: dateStr,
             details: "Submission status updated to Open"
@@ -2417,6 +2427,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             activityType: ActivityType.AGENT_UPDATED,
             description: `You updated details for ${agentName} at ${agencyName}`,
             manuscriptId: "",
+            ...subject,
             queryId: "",
             date: dateStr,
             details: "Submission status updated to Closed"
@@ -2429,6 +2440,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           activityType: ActivityType.AGENT_UPDATED,
           description: `You updated details for ${agentName} at ${agencyName}`,
           manuscriptId: "",
+          ...subject,
           queryId: "",
           date: dateStr,
           details: `Updated agent fit from ${previousStarRating} to ${fields.starRating}`
@@ -2440,6 +2452,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           activityType: ActivityType.AGENT_UPDATED,
           description: `You updated details for ${agentName} at ${agencyName}`,
           manuscriptId: "",
+          ...subject,
           queryId: "",
           date: dateStr,
           details: "Updated wishlist notes field"
@@ -2459,6 +2472,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             activityType: ActivityType.AGENT_UPDATED,
             description: `You updated details for ${agentName} at ${agencyName}`,
             manuscriptId: "",
+            ...subject,
             queryId: "",
             date: dateStr,
             details: ""
@@ -2509,7 +2523,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!currentUser) return;
     const uid = currentUser.id;
     // Capture name + query count BEFORE the cascade removes them — for the durable delete record.
-    const agentName = agents.find(a => a.id === id)?.name || "an agent";
+    /* Feed wording v1: a nameless agent is recorded by its agency, never "an agent" */
+    const gone = agents.find(a => a.id === id);
+    const agentName = gone?.name?.trim() || gone?.agency?.trim() || "an agent";
+    const goneSubject = agentSubject(gone);
     // The ordered plan (cascade.ts, unit-locked): queries (each preceded by its live-fetched activity
     // subcollection) → global-feed projections → taskFlag stances (query-keyed AND the agent's own
     // dq stance — 6A) → the agent's own stored tasks (Agent card v1, ruling 4: a reopen reminder
@@ -2544,6 +2561,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         activityType: ActivityType.AGENT_DELETED,
         description: `You deleted ${agentName}${detail}`,
         manuscriptId: "",
+        ...goneSubject,
+        ...removedOf(qn),
         queryId: "",
         date: new Date().toISOString(),
         details: "",

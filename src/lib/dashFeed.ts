@@ -35,6 +35,7 @@ import { recordSpecFor } from "./todoCalendar";
 import { stageSentAt } from "./dashBreakdown";
 import type { State } from "./queryCardFacts";
 import { isImportActivity, importSentence, importGroupLine, IMPORT_ROUTE_LABEL, type ImportCounts, type ImportRoute } from "./importEvent";
+import { foldAgentBursts, houseSay, sweepSay } from "./feedHouse";
 
 const MIN = 60_000, HOUR = 3_600_000, DAY = 86_400_000;
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -360,6 +361,9 @@ export const trustedElapsed = (anchor: number | null, eventAt: number, nowAt: nu
 
 /* ── the rows ──────────────────────────────────────────────────────────────────────────────────── */
 
+/** addAgent's own id for its Added row (`act-added-agent-{agentId}`) — the one row the live list may name. */
+const ADDED_AGENT_ID = "act-added-agent-";
+
 const AGENT_TYPES = new Set<string>([ActivityType.AGENT_ADDED, ActivityType.AGENT_UPDATED, ActivityType.AGENT_DELETED]);
 const MS_TYPES = new Set<string>([ActivityType.MANUSCRIPT_ADDED, ActivityType.MANUSCRIPT_UPDATED, ActivityType.MANUSCRIPT_DELETED]);
 
@@ -464,23 +468,32 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
     let who = "";
     let say: FeedSeg[] | null = null;
     let provenance = "";
+    /** the agency, where the row has one the sentence has not already said (a nameless agent's IS its subject) */
+    let agencyLine: string | null = null;
 
     if (AGENT_TYPES.has(a.activityType)) {
-      const desc = a.description;
-      let best: Agent | undefined;
-      let bestLen = 0;
-      for (const ag of i.agents) {
-        for (const token of [agentPrimary(ag), ag.agency]) {
-          const tok = (token ?? "").trim();
-          if (tok.length > bestLen && desc.includes(tok)) { best = ag; bestLen = tok.length; }
-        }
+      /* Feed wording v1 — THE SUBJECT IS CARRIED, NEVER GUESSED: the activity's own fields; for an Added row, the live
+         agent its id names; otherwise the row drops. A description is never printed as a name. */
+      const sweep = a.activityType === ActivityType.AGENT_UPDATED && (a.batchCount ?? 0) >= 2;
+      const live = a.activityType === ActivityType.AGENT_ADDED && a.id.startsWith(ADDED_AGENT_ID)
+        ? i.agents.find((ag) => ag.id === a.id.slice(ADDED_AGENT_ID.length)) : undefined;
+      const name = (a.subjectName ?? "").trim() || (a.subjectAgency ? "" : (live?.name ?? "").trim());
+      const agency = (a.subjectName || a.subjectAgency ? a.subjectAgency ?? "" : live?.agency ?? "").trim();
+      if (sweep) {
+        say = sweepSay(a.batchCount as number);
+        provenance = agentEventContext(a.activityType);
+        agencyLine = "";
+      } else {
+        who = name || agency;
+        if (!who) continue;
+        say = houseSay(a, { t: who, who: true }, agency);
+        provenance = provenanceOf(who, agency, agentEventContext(a.activityType));
+        agencyLine = provenanceOf(who, agency);
       }
-      who = best ? agentPrimary(best) : desc.trim();
-      provenance = best ? provenanceOf(who, best.agency, agentEventContext(a.activityType)) : "";
-      say = [{ t: a.description?.trim() || who }];
     } else if (MS_TYPES.has(a.activityType)) {
-      who = i.manuscripts.find((m) => m.id === a.manuscriptId)?.title?.trim() || a.description.trim();
-      say = [{ t: a.description?.trim() || who }];
+      who = (a.subjectName ?? "").trim() || (i.manuscripts.find((m) => m.id === a.manuscriptId)?.title ?? "").trim();
+      if (!who) continue;
+      say = houseSay(a, { t: who, em: true });
       provenance = provenanceOf(who, "your manuscripts");
     } else {
       const q = i.queries.find((x) => x.id === a.queryId);
@@ -497,8 +510,9 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       provenance = (agent?.agency ?? "").trim();
     }
 
-    /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row */
-    if (!who) continue;
+    /* ⚠️ NEVER AN EM DASH WHERE A NAME BELONGS — an unresolvable subject drops the row (a sweep names no one) */
+    if (!who && !(a.activityType === ActivityType.AGENT_UPDATED && (a.batchCount ?? 0) >= 2)) continue;
+    if (!say) continue;
 
     const dir: "in" | "out" = shape.kind === "housekeeping" ? "out"
       : (recordSpecFor(String(a.activityType), a.resultingStatus)?.dir ?? "out");
@@ -529,7 +543,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       /* ⚠️ A DEVICE THAT HAS NEVER SHOWN THE PAGE MARKS NOTHING. Everything would be new, which puts a
          rust rule beside all thirty days of it and says nothing at all. */
       isNew: i.seenAt !== null && t > i.seenAt,
-      dir, activityType: String(a.activityType), who, agency: provenance, need, met,
+      dir, activityType: String(a.activityType), who, agency: agencyLine ?? provenance, need, met,
       eventKey: typeof a.eventKey === "string" ? a.eventKey : null,
     });
   }
