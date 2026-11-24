@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: More is open",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the two labels share an offsetTop",
+  "ok": true,
+  "got": "240 / 240"
+ },
+ {
+  "name": "the two fields share an offsetTop",
+  "ok": true,
+  "got": "269 / 269"
+ },
+ {
+  "name": "the fields sit beneath their labels",
+  "ok": true,
+  "got": "240 → 269"
+ },
+ {
+  "name": "the label reads \"Wishlist page\"",
+  "ok": true,
+  "got": "Wishlist page"
+ }
+]

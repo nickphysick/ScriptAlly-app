@@ -21,15 +21,15 @@ import { openRoute } from "./measure";
 
 const TAG = (process.env.ACV22_TAG ?? "after") as "after" | "mutant";
 const ONLY = process.env.ACV22_ONLY ?? "";
-const run = (id: string) => (!ONLY && id !== "F") || ONLY.split(",").includes(id);
-const MUT = TAG === "mutant" ? (process.env.ACV22_MUT ?? "1,2,3,4,5,6,7,8,9,10,11,12,13,14").split(",") : [];
+const run = (id: string) => (!ONLY && !id.startsWith("F")) || ONLY.split(",").includes(id);
+const MUT = TAG === "mutant" ? (process.env.ACV22_MUT ?? "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16").split(",") : [];
 const DIR = "reports/agent-card-v2-2";
 const AC = "[data-cl262='panel'] [data-acv2='card']";
 const A = (s: string) => `${AC} ${s}`;
 const HEAD = A("[data-acv22='head-open']");
 const TOAST = A("[data-acv22='toast']");
 const VP = { width: 1512, height: 900 };
-const ADA = "acv22fx-ada", WREN = "acv22fx-wren";
+const ADA = "acv22fx-ada", WREN = "acv22fx-wren", NELL = "acv22fx-nell", VERA = "acv22fx-vera";
 test.setTimeout(600_000);
 mkdirSync(`${DIR}/ledger`, { recursive: true });
 mkdirSync(`${DIR}/frames`, { recursive: true });
@@ -56,13 +56,14 @@ class Ledger {
 const own = () => (MUT.includes(CUR) ? CUR : "");
 async function openAc(page: Page, id: string) {
   page.setDefaultTimeout(30_000);
-  await page.addInitScript((m) => { (window as unknown as { __qc168mut?: string[] }).__qc168mut = m && !["1", "4"].includes(m) ? [`ac${m}`] : []; }, own());
+  await page.addInitScript((m) => { (window as unknown as { __qc168mut?: string[] }).__qc168mut = m && !["1", "4", "16"].includes(m) ? [`ac${m}`] : []; }, own());
   await openCard(page, VP, { id });
   await page.locator(AC).first().waitFor({ timeout: 10_000 });
   await page.waitForTimeout(400);
   await mutate(page);
 }
-/* the in-page mutations: AC1 (the pencil static on hover), AC4 (the rust bar put back) */
+/* the in-page mutations: AC1 (the pencil static on hover), AC4 (the rust bar put back), AC16 (More's old layout: the
+   first field's 2px top against the next one's 20px, and the label "MSWL") */
 async function mutate(page: Page) {
   const m = own();
   if (m === "1") await page.addStyleTag({ content: ".qc152 .qc168-pen { display: none !important; } .qc152 [data-qc168-host]:hover .qc168-pen { display: grid !important; position: static !important; translate: none !important; }" });
@@ -70,6 +71,10 @@ async function mutate(page: Page) {
     const c = document.querySelector<HTMLElement>(`${ac} .qc152-in`);
     if (c && !c.querySelector("[data-m4]")) { const d = document.createElement("div"); d.dataset.m4 = "1"; d.className = "cl262-save is-guard"; d.setAttribute("data-cl262", "save-bar"); d.textContent = "Unsaved changes · Keep editing · Discard · Save all"; c.append(d); }
   }, AC);
+  if (m === "16") await page.evaluate(() => {
+    if (!document.getElementById("m16")) { const st = document.createElement("style"); st.id = "m16"; st.textContent = ".qc152 .ag-head .ag-hmore > .aap-f { margin-top: 20px !important; } .qc152 .ag-head .ag-hmore > .aap-f:first-child { margin-top: 2px !important; }"; document.head.append(st); }
+    document.querySelectorAll<HTMLElement>("[data-acv22='head-more'] [data-f='mswl'] > .aap-l").forEach((l) => { l.textContent = "MSWL"; });
+  });
 }
 const tab = async (page: Page, t: string) => { await page.locator(A(`[data-cl262='tab'][data-tab='${t}']`)).click(); await page.waitForTimeout(400); };
 const selected = (page: Page) => page.locator(A("[data-cl262='tab'][aria-selected='true']")).getAttribute("data-tab");
@@ -359,6 +364,78 @@ if (run("14")) test("AC14 · the preview carries no pencil and no ⋯", async ({
   L.check("no pencil", r.pens === 0, String(r.pens));
   L.check("no ⋯", r.more === 0, String(r.more));
   L.done(3);
+});
+
+/* ══ AC15 — v2.2.1: the delete confirm says what the menu says, for 0, 1 and 3 queries; no "Remove", no "their"; the
+   gate still waits for the typed name (never confirmed) ══ */
+if (run("15")) test("AC15 · the delete confirm's words", async ({ page }) => {
+  const L = new Ledger("AC15");
+  const norm = (t: string) => t.replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, " ").trim();
+  const cases = [
+    { id: NELL, n: 0, words: "Delete Nell Post? This can't be undone.", keep: "Keep Nell" },
+    { id: ADA, n: 1, words: "Delete Ada Quill? Your query to Ada goes too, and every step in it. Type Ada Quill to confirm.", keep: "Keep Ada" },
+    { id: VERA, n: 3, words: "Delete Vera Lark? Your 3 queries to Vera go too, and every step in them. Type Vera Lark to confirm.", keep: "Keep Vera" },
+  ];
+  for (const c of cases) {
+    await openAc(page, c.id);
+    await page.locator(A("[data-acv22='band-more']")).click();
+    await page.locator(A("[data-qc168='band-menu'] [data-act='delete']")).click().catch(() => {}); await page.waitForTimeout(400);
+    const gate = page.locator(A("[data-acv22='remove'] [data-cl24='remove-confirm']"));
+    const r = await gate.evaluate((g) => ({
+      p: (g.querySelector("p")?.textContent ?? ""), keep: (g.querySelector("[data-cl24='remove-keep']")?.textContent ?? ""), go: (g.querySelector("[data-cl24='remove-go']")?.textContent ?? ""),
+      all: `${g.textContent ?? ""} ${[...g.querySelectorAll("[aria-label], [placeholder]"), g].map((e) => `${e.getAttribute("aria-label") ?? ""} ${e.getAttribute("placeholder") ?? ""}`).join(" ")}`,
+      typed: !!g.querySelector("[data-cl24='remove-typed']"), disabled: !!(g.querySelector("[data-cl24='remove-go']") as HTMLButtonElement | null)?.disabled,
+    })).catch(() => null);
+    L.check(`${c.n} queries: the gate opens`, !!r, "");
+    L.check(`${c.n} queries: its words`, !!r && norm(r.p) === c.words, r ? norm(r.p) : "");
+    L.check(`${c.n} queries: "${c.keep}" and "Delete"`, !!r && norm(r.keep) === c.keep && norm(r.go) === "Delete", r ? `${norm(r.keep)} | ${norm(r.go)}` : "");
+    L.check(`${c.n} queries: no "Remove", no "their"`, !!r && !/remove|\btheir\b/i.test(r.all), r ? norm(r.all) : "");
+    if (c.n) L.check(`${c.n} queries: Delete waits for the typed name`, !!r && r.typed && r.disabled, r ? `typed ${r.typed} disabled ${r.disabled}` : "");
+    await page.locator(A("[data-cl24='remove-keep']")).click().catch(() => {});
+    L.check(`${c.n} queries: not confirmed (the agent is still there)`, !!dump(c.id).name, "");
+  }
+  L.done(17);
+});
+
+/* ══ AC16 — v2.2.1: with More open, its two labels share a line and its two fields share the line beneath; the first reads
+   "Wishlist page" ══ */
+if (run("16")) test("AC16 · More contact details lines up", async ({ page }) => {
+  const L = new Ledger("AC16");
+  await openAc(page, WREN);
+  await pen(page, "contact");
+  if (!(await page.locator(`${HEAD} [data-acv22='head-more']`).count())) await page.locator(`${HEAD} [data-acv22='more']`).click().catch(() => {});
+  await page.waitForTimeout(400);
+  await mutate(page);
+  const M = `${HEAD} [data-acv22='head-more']`;
+  L.check("population: More is open", await page.locator(M).count() === 1, "");
+  const tops = { l1: await offTop(page, `${M} [data-f='mswl'] > .aap-l`).catch(() => -1), l2: await offTop(page, `${M} [data-f='social'] > .aap-l`).catch(() => -2),
+    f1: await offTop(page, `${M} input[data-ae='mswl']`).catch(() => -1), f2: await offTop(page, `${M} input[data-aap='social']`).catch(() => -2) };
+  L.check("the two labels share an offsetTop", tops.l1 >= 0 && tops.l1 === tops.l2, `${tops.l1} / ${tops.l2}`);
+  L.check("the two fields share an offsetTop", tops.f1 >= 0 && tops.f1 === tops.f2, `${tops.f1} / ${tops.f2}`);
+  L.check("the fields sit beneath their labels", tops.f1 > tops.l1, `${tops.l1} → ${tops.f1}`);
+  const lab = ((await page.locator(`${M} [data-f='mswl'] > .aap-l`).textContent().catch(() => "")) ?? "").trim();
+  L.check("the label reads \"Wishlist page\"", lab === "Wishlist page", lab);
+  await page.locator(`${HEAD} [data-qc168='cross']`).click().catch(() => {});
+  L.done(5);
+});
+
+/* ══ F2 — v2.2.1 frames (Chromium): the delete confirm for 0, 1 and 3 queries; More open ══ */
+if (run("F2")) test("ACV22-F2 · the confirm and More, framed", async ({ page }) => {
+  const clip = () => page.evaluate(() => { const r = document.querySelector<HTMLElement>("[data-cl262='panel']")!.getBoundingClientRect(); return { x: Math.max(0, r.left - 24), y: Math.max(0, r.top - 16), width: Math.min(window.innerWidth - Math.max(0, r.left - 24), r.width + 48), height: Math.min(window.innerHeight - Math.max(0, r.top - 16), r.height + 32) }; });
+  for (const [id, n] of [[NELL, 0], [ADA, 1], [VERA, 3]] as const) {
+    await openAc(page, id);
+    await page.locator(A("[data-acv22='band-more']")).click();
+    await page.locator(A("[data-qc168='band-menu'] [data-act='delete']")).click(); await page.waitForTimeout(600);
+    await page.locator(A("[data-acv22='remove']")).scrollIntoViewIfNeeded().catch(() => {});
+    await page.screenshot({ path: `${DIR}/frames/chromium-1512-delete-confirm-${n}.png`, clip: await clip() });
+    await page.locator(A("[data-cl24='remove-keep']")).click();
+  }
+  await openAc(page, WREN);
+  await pen(page, "contact");
+  if (!(await page.locator(`${HEAD} [data-acv22='head-more']`).count())) await page.locator(`${HEAD} [data-acv22='more']`).click();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${DIR}/frames/chromium-1512-head-more-open.png`, clip: await clip() });
+  await page.locator(`${HEAD} [data-qc168='cross']`).click();
 });
 
 /* ══ F — frames ══ */

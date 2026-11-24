@@ -9,6 +9,7 @@
  *   acv22fx-nell  Nell Post, complete but with no email and no website (AC10: "+ Add email", "+ Add a website")
  *   acv22fx-wren  Wren Lark, a second complete UK agent the head's saves write to (AC8 reads each field back), with a
  *                 wishlist page link so "More contact details" opens by itself
+ *   acv22fx-vera  Vera Lark, with three queries (v2.2.1 AC15: the delete confirm's words for several queries)
  * ⚠️ SELF-CLEANING: every document carries the `acv22fx-` prefix; `--clean` removes them (each query's log first), and
  *    the agents AC14's add journey made ("Acv22 Preview …"). Through fsTarget, so the emulator by default.
  *
@@ -84,6 +85,15 @@ for (const [sk, res, type, ago, words] of [["sent", "Queried", "Query Sent", 30,
   b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: Q, manuscriptId: "seed-ms-1", activityType: type, description: `${res} · Ada Quill`, date: iso(ago), details: "", resultingStatus: res });
   b.set(doc(db, "users", uid, "queries", Q, "activity", act), { type: res, resultingStatus: res, createdAt: new Date(iso(ago)), note: `${res} · Ada Quill`, queryId: Q, agentName: "Ada Quill", manuscriptTitle: "seed",
     ...(sk === "sent" ? { materials: [{ kind: "letter" }, { kind: "synopsis" }] } : {}), ...(words ? { replyNote: words } : {}) });
+}
+const VERA = `${PREFIX}vera`;
+b.set(doc(db, "users", uid, "agents", VERA), full(VERA, "Vera Lark"));
+for (const k of [1, 2, 3]) {
+  const vq = `${PREFIX}q-vera-${k}`, act = `${vq}-sent`;
+  b.set(doc(db, "users", uid, "queries", vq), { id: vq, userId: uid, agentId: VERA, manuscriptId: "seed-ms-1", dateSent: iso(20 + k), status: "Queried", sendMethod: "Email",
+    personalisationNotes: "ACV22 fixture", packageId: "", materialsWanted: [], lastStatusChange: iso(20 + k) });
+  b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: vq, manuscriptId: "seed-ms-1", activityType: "Query Sent", description: "Queried · Vera Lark", date: iso(20 + k), details: "", resultingStatus: "Queried" });
+  b.set(doc(db, "users", uid, "queries", vq, "activity", act), { type: "Queried", resultingStatus: "Queried", createdAt: new Date(iso(20 + k)), note: "Queried · Vera Lark", queryId: vq, agentName: "Vera Lark", manuscriptTitle: "seed" });
 }
 await b.commit().catch((e) => { console.error(`acv22: refused: ${e.code}`); throw e; });
 console.log("acv22: seeded");

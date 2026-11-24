@@ -24,8 +24,8 @@ import { openCard as openAgentRow } from "./cl262Lib";
 
 const TAG = (process.env.QC168_TAG ?? "after") as "after" | "mutant";
 const ONLY = process.env.QC168_ONLY ?? "";
-const run = (id: string) => (!ONLY && id !== "F") || ONLY.split(",").includes(id);
-const MUT = TAG === "mutant" ? (process.env.QC168_MUT ?? "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17").split(",") : [];
+const run = (id: string) => (!ONLY && !id.startsWith("F")) || ONLY.split(",").includes(id);
+const MUT = TAG === "mutant" ? (process.env.QC168_MUT ?? "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19").split(",") : [];
 const DIR = "reports/query-card-v168";
 const PAGE = ".qc151.qc153";
 const CARD = "[data-qp='panel'] [data-qc152='card']";
@@ -37,6 +37,8 @@ const UNDO = C("[data-qc1522='undo']");
 const PROF = C("[data-qc167='profile']");
 const VP = { width: 1512, height: 900 };
 const QID = "q168-main";
+/** v168.2 — a partial asked for (Bram), so the footer opens the "send" journey and its materials (L18) */
+const RID = "q168-req";
 const ACT = (k: string) => `${QID}-${k}`;
 test.setTimeout(900_000);
 mkdirSync(`${DIR}/ledger`, { recursive: true });
@@ -87,14 +89,14 @@ async function openQc(page: Page) {
   await page.waitForTimeout(800);
   await page.mouse.move(2, 2);
 }
-async function openCard(page: Page): Promise<boolean> {
-  const c = page.locator(`${PAGE} [data-qc154='card'][data-id='${QID}']`).first();
+async function openCard(page: Page, id = QID): Promise<boolean> {
+  const c = page.locator(`${PAGE} [data-qc154='card'][data-id='${id}']`).first();
   if (!(await c.count())) return false;
   const x = page.locator(C("[data-qc149c='close']"));
   if (await x.count()) { await press(x).catch(() => {}); await page.locator(CARD).waitFor({ state: "detached", timeout: 5000 }).catch(() => {}); await page.waitForTimeout(400); }
   await c.scrollIntoViewIfNeeded();
   await press(c.locator("[data-qc154='name']"));
-  const ok = await page.locator(`${CARD}[data-id='${QID}']`).waitFor({ timeout: 15_000 }).then(() => true, () => false);
+  const ok = await page.locator(`${CARD}[data-id='${id}']`).waitFor({ timeout: 15_000 }).then(() => true, () => false);
   await page.waitForTimeout(900);
   await mutate(page);
   return ok;
@@ -111,7 +113,7 @@ async function undo(page: Page) { await page.locator(UNDO).click(); await page.w
 /* ── the in-page mutations (CSS/DOM): L2, L7, L13 ── */
 async function mutate(page: Page) {
   const m = own();
-  if (!["2", "7", "13", "17"].includes(m)) return;
+  if (!["2", "7", "13", "17", "18"].includes(m)) return;
   await page.evaluate((m) => {
     const css = (id: string, t: string) => { if (!document.getElementById(id)) { const s = document.createElement("style"); s.id = id; s.textContent = t; document.head.append(s); } };
     /* M2 the pencil placed in the flow on hover (it takes its own room) */
@@ -125,6 +127,8 @@ async function mutate(page: Page) {
     if (m === "13") css("m13", ".qc152 .qc152-ebar { display: flex; } .qc152 .qc152-edstrip { display: flex; }");
     /* M17 the step editor's chip words back in mono capitals */
     if (m === "17") css("m17", ".qc152 .qc1522-edit .qc152-mp { font-family: var(--sp-mono) !important; text-transform: uppercase !important; }");
+    /* M18 the journeys' chip words back in mono capitals, as v152 drew them (9.5px) */
+    if (m === "18") css("m18", ".qc152 .qc152-mp { font: 400 9.5px/1 var(--sp-mono) !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; }");
   }, m);
 }
 
@@ -547,6 +551,69 @@ if (run("17")) test("QC168-17 · a step's chips speak in the serif, never mono c
   L.done(5);
 });
 
+/* L18 — v168.2: in each journey that draws materials (the composer's "send": Mark the partial / full / revision sent),
+   no chip label or "+ Add" is mono, upper-cased or under 12px */
+if (run("18")) test("QC168-18 · a journey's chips speak in the serif, never mono capitals", async ({ page }) => {
+  const L = new Ledger("L18");
+  await openQc(page);
+  L.check("population: Bram's card opened (a partial asked for)", await openCard(page, RID), "");
+  await press(page.locator(C("[data-qc152='reply-btn']")));
+  const cp = C("[data-qc1522='composer'][data-j='send']");
+  const open = await page.locator(cp).waitFor({ timeout: 10_000 }).then(() => true, () => false);
+  L.check("population: the footer opened the send journey", open, (await page.locator(C("[data-qc1522='composer']")).getAttribute("data-j").catch(() => null)) ?? "none");
+  if (open && !(await page.locator(`${cp} [data-qc152='mat-chip']`).count())) {
+    await press(page.locator(`${cp} [data-qc152='mat-add']`));
+    await press(page.locator("[data-qc152='mat-kind'][data-k='letter']"));
+    await press(page.locator("[data-qc152='mat-done']")).catch(() => {});
+  }
+  await page.waitForTimeout(300);
+  await mutate(page);
+  const r = await page.locator(`${cp} [data-qc152='mat-chip'], ${cp} [data-qc152='mat-add']`).evaluateAll((es) => es.map((e) => { const cs = getComputedStyle(e); return { t: (e.textContent ?? "").trim(), fam: cs.fontFamily, up: cs.textTransform, px: parseFloat(cs.fontSize) }; }));
+  L.check("population: a chip and + Add", r.length >= 2 && r.some((x) => x.t === "+ Add"), JSON.stringify(r.map((x) => x.t)));
+  L.check("not mono", r.length > 0 && r.every((x) => !/mono/i.test(x.fam)), JSON.stringify(r.map((x) => x.fam.slice(0, 24))));
+  L.check("not upper-cased", r.length > 0 && r.every((x) => x.up !== "uppercase"), JSON.stringify(r.map((x) => x.up)));
+  L.check("nothing under 12px", r.length > 0 && r.every((x) => x.px >= 12), JSON.stringify(r.map((x) => x.px)));
+  L.check("the words are sentence case", r.length > 0 && r.every((x) => x.t === "+ Add" || /^[^a-z]*[A-Z0-9][^A-Z]*$/.test(x.t.replace(/ · .*$/, ""))), JSON.stringify(r.map((x) => x.t)));
+  /* leave: nothing saved (Cancel, then Discard when it asks) */
+  await press(page.locator(`${cp} [data-qc1522='cancel']`)).catch(() => {});
+  await page.waitForTimeout(300);
+  if (await page.locator(C("[data-qc1522='discard']")).count()) await press(page.locator(C("[data-qc1522='discard']")));
+  L.check("left without a write (the journey is closed)", await page.locator(cp).count() === 0, "");
+  L.done(7);
+});
+
+/* L19 — v168.2: a step's recorded material says its name once: no chip's detail is its label, so a bubble's tip shows the
+   label alone (no head over an empty line, no name said twice) */
+if (run("19")) test("QC168-19 · a material's name is said once, in the bubble's tip", async ({ page }) => {
+  const L = new Ledger("L19");
+  await openQc(page);
+  L.check("population: the card opened", await openCard(page), "");
+  await tab(page, "tracking");
+  const chips = page.locator(`${bubble("sent")} [data-qc152='chip'], ${bubble("fsent")} [data-qc152='chip']`);
+  const n = await chips.count();
+  L.check("population: the sent steps' materials (letter, synopsis, sample; the full)", n >= 4, String(n));
+  const got: { label: string; tip: string; head: string | null; body: string }[] = [];
+  for (let i = 0; i < n; i++) {
+    const c = chips.nth(i);
+    const label = ((await c.textContent()) ?? "").trim();
+    await c.scrollIntoViewIfNeeded(); await press(c); await page.waitForTimeout(250);
+    const t = await page.locator("[data-qc152='tip']").first().evaluate((e) => {
+      const b = e.querySelector("b");
+      const head = b ? (b.textContent ?? "") : null;
+      const all = (e.textContent ?? "");
+      return { tip: all.trim(), head, body: (head === null ? all : all.slice(head.length)).trim() };
+    }).catch(() => ({ tip: "", head: null, body: "" }));
+    got.push({ label, ...t });
+    /* the tip closes on the chip's blur (a click outside the panel would close the card) */
+    await c.evaluate((e) => (e as HTMLElement).blur()); await page.waitForTimeout(150);
+  }
+  L.check("every tip opens", got.length > 0 && got.every((g) => g.tip !== ""), JSON.stringify(got.map((g) => g.tip)));
+  L.check("each tip shows the label", got.length > 0 && got.every((g) => g.tip.includes(g.label)), JSON.stringify(got));
+  L.check("…once (the detail is not the label again)", got.length > 0 && got.every((g) => g.tip.split(g.label).length - 1 === 1), JSON.stringify(got.map((g) => g.tip)));
+  L.check("no head over an empty line", got.length > 0 && got.every((g) => g.head === null || g.body !== ""), JSON.stringify(got.map((g) => [g.head, g.body])));
+  L.done(6);
+});
+
 /* ══ F — the frames: a step open, a group open, a note open, the ⋯ menu, the move list, a why-tip, the toast ══════════ */
 async function frames(page: Page, eng: string) {
   domClick = eng === "webkit";
@@ -600,4 +667,23 @@ if (run("F")) test("QC168-F · frames, Chromium and WebKit", async ({ page, base
     await p.locator("#ws-sidebar, .ws-work, #app-stage-scroll").first().waitFor({ state: "attached", timeout: 60_000 });
     await frames(p, "webkit");
   } finally { await b.close(); }
+});
+
+/* F2 — v168.2 frames (Chromium): one journey's chips (Mark the partial sent) */
+if (run("F2")) test("QC168-F2 · a journey's chips, framed", async ({ page }) => {
+  await openQc(page);
+  await openCard(page, RID);
+  await page.locator(C("[data-qc152='reply-btn']")).click();
+  const cp = C("[data-qc1522='composer'][data-j='send']");
+  await page.locator(cp).waitFor({ timeout: 10_000 });
+  if (!(await page.locator(`${cp} [data-qc152='mat-chip']`).count())) {
+    await page.locator(`${cp} [data-qc152='mat-add']`).click();
+    await page.locator("[data-qc152='mat-kind'][data-k='letter']").click();
+    await page.locator("[data-qc152='mat-done']").click().catch(() => {});
+  }
+  await page.waitForTimeout(500);
+  const r = await page.evaluate((s) => { const e = document.querySelector<HTMLElement>(s)!.closest<HTMLElement>(".spanel")!.getBoundingClientRect(); return { x: Math.max(0, e.left - 20), y: Math.max(0, e.top - 20), width: Math.min(window.innerWidth - Math.max(0, e.left - 20), e.width + 40), height: Math.min(window.innerHeight - Math.max(0, e.top - 20), e.height + 40) }; }, CARD);
+  await page.screenshot({ path: `${DIR}/frames/chromium-1512-journey-send-chips.png`, clip: r });
+  await page.locator(`${cp} [data-qc1522='cancel']`).click().catch(() => {});
+  if (await page.locator(C("[data-qc1522='discard']")).count()) await page.locator(C("[data-qc1522='discard']")).click();
 });

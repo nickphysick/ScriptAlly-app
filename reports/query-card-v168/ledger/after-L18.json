@@ -1,0 +1,42 @@
+[
+ {
+  "name": "population: Bram's card opened (a partial asked for)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the footer opened the send journey",
+  "ok": true,
+  "got": "send"
+ },
+ {
+  "name": "population: a chip and + Add",
+  "ok": true,
+  "got": "[\"First 3 chapters · Post-R&R (T. Marsh)\",\"+ Add\"]"
+ },
+ {
+  "name": "not mono",
+  "ok": true,
+  "got": "[\"\\\"Source Serif 4\\\", Georgi\",\"\\\"Source Serif 4\\\", Georgi\"]"
+ },
+ {
+  "name": "not upper-cased",
+  "ok": true,
+  "got": "[\"none\",\"none\"]"
+ },
+ {
+  "name": "nothing under 12px",
+  "ok": true,
+  "got": "[14,14]"
+ },
+ {
+  "name": "the words are sentence case",
+  "ok": true,
+  "got": "[\"First 3 chapters · Post-R&R (T. Marsh)\",\"+ Add\"]"
+ },
+ {
+  "name": "left without a write (the journey is closed)",
+  "ok": true,
+  "got": ""
+ }
+]

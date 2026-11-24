@@ -1,0 +1,87 @@
+[
+ {
+  "name": "0 queries: the gate opens",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "0 queries: its words",
+  "ok": true,
+  "got": "Delete Nell Post? This can't be undone."
+ },
+ {
+  "name": "0 queries: \"Keep Nell\" and \"Delete\"",
+  "ok": true,
+  "got": "Keep Nell | Delete"
+ },
+ {
+  "name": "0 queries: no \"Remove\", no \"their\"",
+  "ok": true,
+  "got": "Delete Nell Post? This can't be undone.Keep NellDelete Delete Nell Post"
+ },
+ {
+  "name": "0 queries: not confirmed (the agent is still there)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1 queries: the gate opens",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1 queries: its words",
+  "ok": true,
+  "got": "Delete Ada Quill? Your query to Ada goes too, and every step in it. Type Ada Quill to confirm."
+ },
+ {
+  "name": "1 queries: \"Keep Ada\" and \"Delete\"",
+  "ok": true,
+  "got": "Keep Ada | Delete"
+ },
+ {
+  "name": "1 queries: no \"Remove\", no \"their\"",
+  "ok": true,
+  "got": "Delete Ada Quill? Your query to Ada goes too, and every step in it. Type Ada Quill to confirm.Keep AdaDelete Type Ada Quill to confirm Ada Quill Delete Ada Quill"
+ },
+ {
+  "name": "1 queries: Delete waits for the typed name",
+  "ok": true,
+  "got": "typed true disabled true"
+ },
+ {
+  "name": "1 queries: not confirmed (the agent is still there)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "3 queries: the gate opens",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "3 queries: its words",
+  "ok": true,
+  "got": "Delete Vera Lark? Your 3 queries to Vera go too, and every step in them. Type Vera Lark to confirm."
+ },
+ {
+  "name": "3 queries: \"Keep Vera\" and \"Delete\"",
+  "ok": true,
+  "got": "Keep Vera | Delete"
+ },
+ {
+  "name": "3 queries: no \"Remove\", no \"their\"",
+  "ok": true,
+  "got": "Delete Vera Lark? Your 3 queries to Vera go too, and every step in them. Type Vera Lark to confirm.Keep VeraDelete Type Vera Lark to confirm Vera Lark Delete Vera Lark"
+ },
+ {
+  "name": "3 queries: Delete waits for the typed name",
+  "ok": true,
+  "got": "typed true disabled true"
+ },
+ {
+  "name": "3 queries: not confirmed (the agent is still there)",
+  "ok": true,
+  "got": ""
+ }
+]

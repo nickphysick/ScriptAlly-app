@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the sent steps' materials (letter, synopsis, sample; the full)",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "every tip opens",
+  "ok": true,
+  "got": "[\"Query letterQuery letter\",\"SynopsisSynopsis\",\"First 3 chaptersFirst 3 chapters\",\"Full manuscriptFull manuscript\"]"
+ },
+ {
+  "name": "each tip shows the label",
+  "ok": true,
+  "got": "[{\"label\":\"Query letter\",\"tip\":\"Query letterQuery letter\",\"head\":\"Query letter\",\"body\":\"Query letter\"},{\"label\":\"Synopsis\",\"tip\":\"SynopsisSynopsis\",\"head\":\"Synopsis\",\"body\":\"Synopsis\"},{\"label\":\"First 3 chapters\",\"tip\":\"First 3 chaptersFirst 3 chapters\",\"head\":\"First 3 chapters\",\"body\":\"First 3 chapters\"},{\"label\":\"Full manuscript\",\"tip\":\"Full manuscriptFull manuscript\",\"head\":\"Full manuscript\",\"body\":\"Full manuscript\"}]"
+ },
+ {
+  "name": "…once (the detail is not the label again)",
+  "ok": false,
+  "got": "[\"Query letterQuery letter\",\"SynopsisSynopsis\",\"First 3 chaptersFirst 3 chapters\",\"Full manuscriptFull manuscript\"]"
+ },
+ {
+  "name": "no head over an empty line",
+  "ok": true,
+  "got": "[[\"Query letter\",\"Query letter\"],[\"Synopsis\",\"Synopsis\"],[\"First 3 chapters\",\"First 3 chapters\"],[\"Full manuscript\",\"Full manuscript\"]]"
+ }
+]

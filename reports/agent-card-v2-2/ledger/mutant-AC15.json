@@ -1,0 +1,87 @@
+[
+ {
+  "name": "0 queries: the gate opens",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "0 queries: its words",
+  "ok": false,
+  "got": "Remove Nell Post? This can't be undone."
+ },
+ {
+  "name": "0 queries: \"Keep Nell\" and \"Delete\"",
+  "ok": false,
+  "got": "Keep | Remove"
+ },
+ {
+  "name": "0 queries: no \"Remove\", no \"their\"",
+  "ok": false,
+  "got": "Remove Nell Post? This can't be undone.KeepRemove Remove Nell Post"
+ },
+ {
+  "name": "0 queries: not confirmed (the agent is still there)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1 queries: the gate opens",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1 queries: its words",
+  "ok": false,
+  "got": "Remove Ada Quill? This deletes 1 query and their history. Type their name to confirm."
+ },
+ {
+  "name": "1 queries: \"Keep Ada\" and \"Delete\"",
+  "ok": false,
+  "got": "Keep | Remove"
+ },
+ {
+  "name": "1 queries: no \"Remove\", no \"their\"",
+  "ok": false,
+  "got": "Remove Ada Quill? This deletes 1 query and their history. Type their name to confirm.KeepRemove Type Ada Quill to confirm Ada Quill Remove Ada Quill"
+ },
+ {
+  "name": "1 queries: Delete waits for the typed name",
+  "ok": true,
+  "got": "typed true disabled true"
+ },
+ {
+  "name": "1 queries: not confirmed (the agent is still there)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "3 queries: the gate opens",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "3 queries: its words",
+  "ok": false,
+  "got": "Remove Vera Lark? This deletes 3 queries and their history. Type their name to confirm."
+ },
+ {
+  "name": "3 queries: \"Keep Vera\" and \"Delete\"",
+  "ok": false,
+  "got": "Keep | Remove"
+ },
+ {
+  "name": "3 queries: no \"Remove\", no \"their\"",
+  "ok": false,
+  "got": "Remove Vera Lark? This deletes 3 queries and their history. Type their name to confirm.KeepRemove Type Vera Lark to confirm Vera Lark Remove Vera Lark"
+ },
+ {
+  "name": "3 queries: Delete waits for the typed name",
+  "ok": true,
+  "got": "typed true disabled true"
+ },
+ {
+  "name": "3 queries: not confirmed (the agent is still there)",
+  "ok": true,
+  "got": ""
+ }
+]

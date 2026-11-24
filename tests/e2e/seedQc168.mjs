@@ -105,6 +105,18 @@ for (const [sk, res, type, ago, m, words] of STEPS) {
   b.set(doc(db, "users", uid, "queries", Q, "activity", act), { type: res, resultingStatus: res, createdAt: new Date(iso(ago)), note: `${res} · Ava Lark`, queryId: Q, agentName: "Ava Lark", manuscriptTitle: "seed",
     ...(m ? { materials: m } : {}), ...(words ? { replyNote: words } : {}) });
 }
+/* v168.2 — Bram's query: a partial asked for, so the footer opens the "send" journey and its materials (L18) */
+const R = `${PREFIX}req`;
+b.set(doc(db, "users", uid, "queries", R), {
+  id: R, userId: uid, agentId: BRAM, manuscriptId: "seed-ms-1", dateSent: iso(30), status: "Partial Requested", sendMethod: "Email",
+  personalisationNotes: "QC168 fixture", packageId: "", materialsWanted: [], lastStatusChange: iso(6),
+});
+for (const [sk, res, type, ago, m] of [["sent", "Queried", "Query Sent", 30, [{ kind: "letter" }]], ["preq", "Partial Requested", "Status Changed", 6, null]]) {
+  const act = `${R}-${sk}`;
+  b.set(doc(db, "users", uid, "activities", act), { id: act, userId: uid, queryId: R, manuscriptId: "seed-ms-1", activityType: type, description: `${res} · Bram Lark`, date: iso(ago), details: "", resultingStatus: res });
+  b.set(doc(db, "users", uid, "queries", R, "activity", act), { type: res, resultingStatus: res, createdAt: new Date(iso(ago)), note: `${res} · Bram Lark`, queryId: R, agentName: "Bram Lark", manuscriptTitle: "seed",
+    ...(m ? { materials: m } : {}) });
+}
 for (const k of Object.keys(NOTES)) b.set(doc(db, "users", uid, "journalEntries", `${Q}-${k}`), noteDoc(k));
 await b.commit().catch((e) => { console.error(`q168: refused: ${e.code}`); throw e; });
 console.log("q168: seeded");
