@@ -89,3 +89,17 @@
 .laq.rar .laq-big > button .laq-g:not(.is-st) { background: var(--sc, var(--paper)); }
 .laq.rar .laq-big > button.is-on { background: var(--st2, #f7f5f1); box-shadow: inset 0 0 0 1.5px var(--sm, var(--navy)); }
 .laq.rar .laq-calg > button.is-on { background: var(--sm, var(--navy)); }
+
+/* ── v2.1 · the query's card opens OVER the journey (design-refs/record-a-response-v2-1, `.panel.is-under.is-back`) ──
+   The journey's panel stays mounted behind the card and steps back: 40px to the left, scaled to .955 from the middle of
+   its right edge, under the same .45 dim over the whole panel, head included; 300ms, eased; still under reduced motion.
+   The page is dimmed once: the card's own scrim (the next .spanel-scrim in the body) is clear while the journey is under. */
+.spanel[data-rar="panel"] { transform-origin: 100% 50%; transition: transform 300ms cubic-bezier(.2, .8, .2, 1); }
+.spanel[data-rar="panel"]::after { content: ""; position: absolute; inset: 0; z-index: 60; border-radius: inherit; background: rgba(28, 19, 15, .45); opacity: 0; pointer-events: none; transition: opacity 300ms ease-out; }
+/* 40px past the card's own right edge: --rar-under-dx is how much further in the card stands than the journey (RespondStagesPanel) */
+.spanel[data-rar="panel"][data-under] { transform: translateX(calc(-40px - var(--rar-under-dx, 0px))) scale(.955); }
+.spanel[data-rar="panel"][data-under]::after { opacity: 1; }
+.spanel[data-rar="panel"][data-under] ~ .spanel-scrim { background: transparent; }
+/* a click anywhere on the dimmed journey closes the card (the catcher sits over the dim; it takes no focus) */
+.spanel[data-rar="panel"] .rar-under-hit { position: absolute; inset: 0; z-index: 61; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .spanel[data-rar="panel"], .spanel[data-rar="panel"]::after { transition: none; } }

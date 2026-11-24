@@ -1,0 +1,206 @@
+[
+ {
+  "screen": "01-agent-step.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "02-agent-not-found.png",
+  "pct": null
+ },
+ {
+  "screen": "03-add-agent-in-the-journey.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "04-sent-step-with-not-sent-link.png",
+  "pct": 0.2,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "05-not-sent-yet.png",
+  "pct": 2.4,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "06-catching-up-materials-nothing-on-card.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "07-pieces-named-sample-open.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "08-nudge-no-response-time.png",
+  "pct": 0.3,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "09-nudge-past-the-date.png",
+  "pct": 0.1,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "10-review-past-the-date.png",
+  "pct": 7,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "100-step2-sent.png",
+  "pct": 0.2,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "100-step3-materials.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "100-step4-how.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "100-step5-nudge.png",
+  "pct": 0.6,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "100-step6-log.png",
+  "pct": 10,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "11-logged-past-the-date.png",
+  "pct": 3.7,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "12-materials-what-they-ask-for.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "13-leave-check.png",
+  "pct": 0.2,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "14-nudge-from-card.png",
+  "pct": 0.6,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "15-review.png",
+  "pct": 10,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "150-step2-sent.png",
+  "pct": 0.4,
+  "ref": "756×852",
+  "built": "756×852"
+ },
+ {
+  "screen": "150-step3-materials.png",
+  "pct": 0,
+  "ref": "756×852",
+  "built": "756×852"
+ },
+ {
+  "screen": "150-step4-how.png",
+  "pct": 0,
+  "ref": "756×852",
+  "built": "756×852"
+ },
+ {
+  "screen": "150-step5-nudge.png",
+  "pct": 0.2,
+  "ref": "756×852",
+  "built": "756×852"
+ },
+ {
+  "screen": "150-step6-log.png",
+  "pct": 11.6,
+  "ref": "756×852",
+  "built": "756×852"
+ },
+ {
+  "screen": "16-review-paperclip-open.png",
+  "pct": null
+ },
+ {
+  "screen": "17-after-log-and-start-another.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "18-logged-close-if-no-reply.png",
+  "pct": 4.1,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "19-pieces-nothing-saved.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "20-review-no-date-no-reminder.png",
+  "pct": 9.6,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "21-logged-no-date-no-reminder.png",
+  "pct": 4.3,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "22-materials-no-packages-skips-the-tiles.png",
+  "pct": 0,
+  "ref": "540×868",
+  "built": "540×868"
+ },
+ {
+  "screen": "seam-100.png",
+  "pct": null
+ },
+ {
+  "screen": "seam-110.png",
+  "pct": null
+ },
+ {
+  "screen": "seam-125.png",
+  "pct": null
+ },
+ {
+  "screen": "seam-150.png",
+  "pct": null
+ }
+]

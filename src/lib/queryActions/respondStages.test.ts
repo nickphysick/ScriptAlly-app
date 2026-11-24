@@ -16,6 +16,8 @@
  *   M8  the two numbers are the app's own counts, and a query already counted changes nothing
  *   M9  the headline follows the reply
  *   M10 the colour: the query's own status, then the status it moves to, from the stage colour table
+ *   M11 v2.1 — the recorded screen's head, big line and sentence agree with the status the card beneath shows
+ *       (`newStatus`), for every kind and branch; no sentence narrates the status change
  */
 import { describe, expect, it, vi } from "vitest";
 /* the writers import the app's Firebase handle; the plans never touch it */
@@ -23,7 +25,7 @@ vi.mock("../firebase", () => ({ db: {}, auth: {} }));
 import { QueryStatus, type Query } from "../../types";
 import { STAGE_COLOURS } from "../stageColours";
 import {
-  GENERIC, askedMaterials, headline, likelyKinds, newStatus, otherKinds, planOfResponse, queryAfter, respCounts, stagesOf, toneOf, toneStatus, type RespAnswers,
+  GENERIC, askedMaterials, headline, likelyKinds, recordedCopy, newStatus, otherKinds, planOfResponse, queryAfter, respCounts, stagesOf, toneOf, toneStatus, type RespAnswers,
 } from "./respondStages";
 
 const NOW = new Date(2026, 10, 23, 12).getTime();
@@ -147,5 +149,41 @@ describe("M10 · the colour", () => {
     /* the mark is the stage's rim (its strongest), not its paler mark: they differ on Queried and Closed */
     expect(toneOf(QueryStatus.QUERIED)?.mark).toBe(STAGE_COLOURS.queried.rim);
     expect(toneOf(QueryStatus.REJECTED)?.mark).toBe(STAGE_COLOURS.closed.rim);
+  });
+});
+
+describe("M11 · the recorded screen agrees with the card beneath (v2.1)", () => {
+  const D = (d: number) => new Date(2026, 10, 23 + d).getTime();
+  const head = (a: RespAnswers) => headline({ kind: a.kind, first: "Rosalind", recorded: true, sitting: 0, picked: true, requests: 3, activeLeft: 12, offers: 1, rrNext: a.rrNext, sentQ: a.sentQ })[0];
+  const copy = (a: RespAnswers) => { const c = recordedCopy(a, "Rosalind", { othersN: 4, activeLeft: 12 }); return { ...c, text: c.line.filter((x) => x != null).join("") }; };
+  /* every kind and branch: [answers, the card's status, head, big line, sentence, slot] */
+  const cases: [string, RespAnswers, QueryStatus, string, string, string, string][] = [
+    ["partial, gone, reminder", base({ sentQ: "yes", expectBy: D(56), nudgeOn: D(56) }), QueryStatus.PARTIAL_SENT, "Recorded. Partial sent!", "Your partial is with Rosalind.", "We’ll remind you to nudge on Mon 18 Jan.", "celebration · partial sent"],
+    ["partial, gone, reply date only", base({ sentQ: "yes", expectBy: D(56), nudgeOn: null }), QueryStatus.PARTIAL_SENT, "Recorded. Partial sent!", "Your partial is with Rosalind.", "A reply is expected by Mon 18 Jan.", "celebration · partial sent"],
+    ["partial, gone, no reply date", base({ sentQ: "yes", expectBy: null, nudgeOn: null }), QueryStatus.PARTIAL_SENT, "Recorded. Partial sent!", "Your partial is with Rosalind.", "There’s no reply date yet.", "celebration · partial sent"],
+    ["full, gone, reminder", base({ kind: "fr", sentQ: "yes", expectBy: D(56), nudgeOn: D(56) }), QueryStatus.FULL_SENT, "Recorded. Full sent!", "Your full is with Rosalind.", "We’ll remind you to nudge on Mon 18 Jan.", "celebration · full sent"],
+    ["full, gone, no reply date", base({ kind: "fr", sentQ: "yes", expectBy: null, nudgeOn: null }), QueryStatus.FULL_SENT, "Recorded. Full sent!", "Your full is with Rosalind.", "There’s no reply date yet.", "celebration · full sent"],
+    ["partial, not yet", base({ sentQ: "no", sendBy: D(3) }), QueryStatus.PARTIAL_REQUESTED, "Recorded. A partial request!", "Rosalind wants to read more.", "Sending your partial is on your to-do list for Thu 26 Nov.", "celebration · partial request"],
+    ["partial, not yet, no date", base({ sentQ: "no", sendBy: null }), QueryStatus.PARTIAL_REQUESTED, "Recorded. A partial request!", "Rosalind wants to read more.", "Sending your partial is on your to-do list.", "celebration · partial request"],
+    ["full, not yet", base({ kind: "fr", sentQ: "no", sendBy: D(3) }), QueryStatus.FULL_REQUESTED, "Recorded. A full request!", "Rosalind wants the whole book.", "Sending your full is on your to-do list for Thu 26 Nov.", "celebration · full request"],
+    ["offer, tell the others", base({ kind: "of", sentQ: null, ofBy: D(7), others: "task" }), QueryStatus.OFFER, "Recorded. An offer!", "Rosalind has made an offer.", "Answering it is on your to-do list for Mon 30 Nov. So is telling the other 4 agents.", "celebration · offer"],
+    ["offer, no date, not now", base({ kind: "of", sentQ: null, ofBy: null, others: "no" }), QueryStatus.OFFER, "Recorded. An offer!", "Rosalind has made an offer.", "Answering it is on your to-do list.", "celebration · offer"],
+    ["revise, will revise", base({ kind: "rr", sentQ: null, rrNext: "yes", rrBy: D(28) }), QueryStatus.REVISE_RESUBMIT, "Recorded.", "Rosalind asked for changes.", "Resubmitting is on your to-do list for Mon 21 Dec.", "the mentor · revise and resubmit"],
+    ["revise, not sure", base({ kind: "rr", sentQ: null, rrNext: "unsure" }), QueryStatus.REVISE_RESUBMIT, "Recorded.", "Rosalind asked for changes.", "The query stays open, with you.", "the mentor · revise and resubmit"],
+    ["revise, close", base({ kind: "rr", sentQ: null, rrNext: "close" }), QueryStatus.WITHDRAWN, "Recorded.", "Rosalind asked for changes.", "The query is closed. 12 are still out.", "the mentor · revise and resubmit"],
+    ["pass", base({ kind: "no", sentQ: null }), QueryStatus.REJECTED, "Recorded.", "Rosalind passed.", "The query is closed and in your Rejection collection. 12 queries are still with agents.", "the mentor · a pass"],
+  ];
+  it.each(cases)("%s", (_n, a, status, h, big, line, slot) => {
+    expect(newStatus(a)).toBe(status);
+    const c = copy(a);
+    expect([head(a), c.big, c.text, c.slot]).toEqual([h, big, line, slot]);
+    expect(`${head(a)} ${c.big} ${c.text}`).not.toMatch(/so the query is now|the query is now|is now (partial|full)/i);
+  });
+  it("a request that has gone never talks about the request or the to-do", () => {
+    for (const k of ["pr", "fr"] as const) for (const [e, n] of [[D(56), D(56)], [D(56), null], [null, null]] as const) {
+      const a = base({ kind: k, sentQ: "yes", expectBy: e, nudgeOn: n });
+      expect(newStatus(a)).toBe(k === "pr" ? QueryStatus.PARTIAL_SENT : QueryStatus.FULL_SENT);
+      expect(`${head(a)} ${copy(a).big} ${copy(a).text}`).not.toMatch(/request!|wants to read more|whole book|to-do list/);
+    }
   });
 });

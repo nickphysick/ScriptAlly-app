@@ -1,0 +1,152 @@
+[
+ {
+  "where": "partial, gone, reminder: the card beneath shows Partial sent",
+  "ok": true,
+  "detail": "Partial sent · RVRosalind ValeVale & MarchettiPartial sentSent16 Aug 2025over a year ago3Reply expected by19 Jan 2027Nudge on 19 Jan 2027Partial sentRecorded24 NOV"
+ },
+ {
+  "where": "partial, gone, reminder: the head",
+  "ok": true,
+  "detail": "Recorded. Partial sent!That’s 2 requests so far."
+ },
+ {
+  "where": "partial, gone, reminder: the big line",
+  "ok": true,
+  "detail": "Your partial is with Rosalind."
+ },
+ {
+  "where": "partial, gone, reminder: the sentence",
+  "ok": true,
+  "detail": "We’ll remind you to nudge on Tue 19 Jan."
+ },
+ {
+  "where": "partial, gone, reminder: the illustration slot",
+  "ok": true,
+  "detail": "celebration · partial sent170×96"
+ },
+ {
+  "where": "partial, gone, reminder: nothing narrates the status change",
+  "ok": true,
+  "detail": "We’ll remind you to nudge on Tue 19 Jan."
+ },
+ {
+  "where": "full, gone, reminder: the card beneath shows Full sent",
+  "ok": true,
+  "detail": "Full sent · RVRosalind ValeVale & MarchettiFull sentSent16 Aug 2025over a year ago3Reply expected by19 Jan 2027Nudge on 19 Jan 2027Full sentRecorded24 NOV"
+ },
+ {
+  "where": "full, gone, reminder: the head",
+  "ok": true,
+  "detail": "Recorded. Full sent!That’s 2 requests so far."
+ },
+ {
+  "where": "full, gone, reminder: the big line",
+  "ok": true,
+  "detail": "Your full is with Rosalind."
+ },
+ {
+  "where": "full, gone, reminder: the sentence",
+  "ok": true,
+  "detail": "We’ll remind you to nudge on Tue 19 Jan."
+ },
+ {
+  "where": "full, gone, reminder: the illustration slot",
+  "ok": true,
+  "detail": "celebration · full sent170×96"
+ },
+ {
+  "where": "full, gone, reminder: nothing narrates the status change",
+  "ok": true,
+  "detail": "We’ll remind you to nudge on Tue 19 Jan."
+ },
+ {
+  "where": "partial, gone, reply date only: the card beneath shows Partial sent",
+  "ok": true,
+  "detail": "Partial sent · RVRosalind ValeVale & MarchettiPartial sentSent16 Aug 2025over a year ago3Reply expected by19 Jan 2027Partial sentRecorded24 NOV"
+ },
+ {
+  "where": "partial, gone, reply date only: the head",
+  "ok": true,
+  "detail": "Recorded. Partial sent!That’s 2 requests so far."
+ },
+ {
+  "where": "partial, gone, reply date only: the big line",
+  "ok": true,
+  "detail": "Your partial is with Rosalind."
+ },
+ {
+  "where": "partial, gone, reply date only: the sentence",
+  "ok": true,
+  "detail": "A reply is expected by Tue 19 Jan."
+ },
+ {
+  "where": "partial, gone, reply date only: the illustration slot",
+  "ok": true,
+  "detail": "celebration · partial sent170×96"
+ },
+ {
+  "where": "partial, gone, reply date only: nothing narrates the status change",
+  "ok": true,
+  "detail": "A reply is expected by Tue 19 Jan."
+ },
+ {
+  "where": "partial, gone, no reply date: the card beneath shows Partial sent",
+  "ok": true,
+  "detail": "Partial sent · RVRosalind ValeVale & MarchettiPartial sentSent16 Aug 2025over a year ago3Reply expected by16 Feb 2027Partial sentRecorded24 NOV"
+ },
+ {
+  "where": "partial, gone, no reply date: the head",
+  "ok": true,
+  "detail": "Recorded. Partial sent!That’s 2 requests so far."
+ },
+ {
+  "where": "partial, gone, no reply date: the big line",
+  "ok": true,
+  "detail": "Your partial is with Rosalind."
+ },
+ {
+  "where": "partial, gone, no reply date: the sentence",
+  "ok": true,
+  "detail": "There’s no reply date yet."
+ },
+ {
+  "where": "partial, gone, no reply date: the illustration slot",
+  "ok": true,
+  "detail": "celebration · partial sent170×96"
+ },
+ {
+  "where": "partial, gone, no reply date: nothing narrates the status change",
+  "ok": true,
+  "detail": "There’s no reply date yet."
+ },
+ {
+  "where": "partial, not yet sent: the card beneath shows Partial requested",
+  "ok": true,
+  "detail": "Partial requested · RVRosalind ValeVale & MarchettiPartial requestedSent16 Aug 2025over a year ago3Next3 days leftasked todayPartial requestedRecorded24 NOV"
+ },
+ {
+  "where": "partial, not yet sent: the head",
+  "ok": true,
+  "detail": "Recorded. A partial request!That’s 2 requests so far."
+ },
+ {
+  "where": "partial, not yet sent: the big line",
+  "ok": true,
+  "detail": "Rosalind wants to read more."
+ },
+ {
+  "where": "partial, not yet sent: the sentence",
+  "ok": true,
+  "detail": "Sending your partial is on your to-do list for Fri 27 Nov."
+ },
+ {
+  "where": "partial, not yet sent: the illustration slot",
+  "ok": true,
+  "detail": "celebration · partial request170×96"
+ },
+ {
+  "where": "partial, not yet sent: nothing narrates the status change",
+  "ok": true,
+  "detail": "Sending your partial is on your to-do list for Fri 27 Nov."
+ }
+]

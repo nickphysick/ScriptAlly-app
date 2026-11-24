@@ -1,0 +1,121 @@
+{
+  "checks": 50,
+  "review3@1": {
+    "headLeft": 951,
+    "cardLeft": 951,
+    "cardRight": 1437,
+    "colRight": 1437,
+    "scrolls": false,
+    "sub": [
+      "This is the card you’ll see on your Queries page."
+    ],
+    "tiles": [
+      "letter:Letter B",
+      "synopsis:One-page synopsis",
+      "chapters:First 3 chapters"
+    ],
+    "pkg": "your Full submission package",
+    "counts": [
+      "active:3+1active queries",
+      "sent:5+1queries sent"
+    ],
+    "foot": false
+  },
+  "review3@1.5": {
+    "headLeft": 494,
+    "cardLeft": 494,
+    "cardRight": 944,
+    "colRight": 944,
+    "scrolls": true,
+    "sub": [
+      "This is the card you’ll see on your Queries page."
+    ],
+    "tiles": [
+      "letter:Letter B",
+      "synopsis:One-page synopsis",
+      "chapters:First 3 chapters"
+    ],
+    "pkg": "your Full submission package",
+    "counts": [
+      "active:3+1active queries",
+      "sent:5+1queries sent"
+    ],
+    "foot": false
+  },
+  "review3@1.5:scrolls": true,
+  "review2": {
+    "headLeft": 969,
+    "cardLeft": 969,
+    "cardRight": 1455,
+    "colRight": 1455,
+    "scrolls": false,
+    "sub": [
+      "This is the card you’ll see on your Queries page."
+    ],
+    "tiles": [
+      "letter:Covering letter",
+      "synopsis:Synopsis"
+    ],
+    "pkg": "",
+    "counts": [
+      "active:1+1active queries",
+      "sent:1+1queries sent"
+    ],
+    "foot": false
+  },
+  "review1": {
+    "headLeft": 969,
+    "cardLeft": 969,
+    "cardRight": 1455,
+    "colRight": 1455,
+    "scrolls": false,
+    "sub": [
+      "This is the card you’ll see on your Queries page."
+    ],
+    "tiles": [
+      "letter:Covering letter"
+    ],
+    "pkg": "",
+    "counts": [
+      "active:1+1active queries",
+      "sent:1+1queries sent"
+    ],
+    "foot": false
+  },
+  "ready": [
+    "laq2-ns",
+    "laq2-hv",
+    "laq2-cr"
+  ],
+  "busy": [
+    {
+      "id": "laq2-to",
+      "t": "TOTheo OkaforOkafor & FinchNo reply · closed 2 Nov",
+      "tab": -1,
+      "tag": "DIV"
+    },
+    {
+      "id": "laq2-ra",
+      "t": "RARosalind AshbyAshby & LoweQueried · sent 3 Oct",
+      "tab": -1,
+      "tag": "DIV"
+    },
+    {
+      "id": "laq2-so",
+      "t": "SOSamuel OseiBlackfriars AgencyPartial requested",
+      "tab": -1,
+      "tag": "DIV"
+    },
+    {
+      "id": "laq2-ih",
+      "t": "IHImogen HartHart LiteraryPassed · 12 Sep",
+      "tab": -1,
+      "tag": "DIV"
+    }
+  ],
+  "dashHeld": "lead",
+  "at": "2026-11-24T11:36:36.658Z",
+  "under12": [],
+  "hoverMoves": [],
+  "noRing": []
+}

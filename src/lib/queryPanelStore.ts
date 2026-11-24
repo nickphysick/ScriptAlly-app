@@ -151,15 +151,33 @@ export function responseSaved(id: string): void {
 export type RightPanelOwner = "query" | "feed" | "birds" | "agent" | "answer" | "response";
 let owner: RightPanelOwner | null = null;
 const ownerSubs = new Set<(o: RightPanelOwner | null) => void>();
+/**
+ * Record a response v2.1 — LENDING THE PLACE. The owner can lend the right-hand edge for one panel over it (the response
+ * journey lends it to the query's card): it stays mounted behind, the next claim sits over it, and when that one releases,
+ * the lender has the place back (its subscribers hear its name, not null). A fresh claim by the lender itself takes it back.
+ */
+const lenders: RightPanelOwner[] = [];
+export function lendRightPanel(o: RightPanelOwner): void {
+  if (owner !== o || lenders.includes(o)) return;
+  lenders.push(o);
+}
+export const isLent = (o: RightPanelOwner): boolean => lenders.includes(o);
+/** the lender is leaving (or claiming afresh): it is no longer waiting for its place */
+export function unlendRightPanel(o: RightPanelOwner): void {
+  const i = lenders.indexOf(o);
+  if (i >= 0) lenders.splice(i, 1);
+}
 export const rightPanelOwner = (): RightPanelOwner | null => owner;
 export function claimRightPanel(o: RightPanelOwner): void {
+  unlendRightPanel(o);
   if (owner === o) return;
   owner = o;
   for (const f of [...ownerSubs]) f(owner);
 }
 export function releaseRightPanel(o: RightPanelOwner): void {
   if (owner !== o) return;
-  owner = null;
+  /* a lender waiting behind has its place back */
+  owner = lenders.pop() ?? null;
   for (const f of [...ownerSubs]) f(owner);
 }
 export function subscribeRightPanel(f: (o: RightPanelOwner | null) => void): () => void {
