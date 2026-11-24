@@ -1,0 +1,96 @@
+[
+ {
+  "where": "on How",
+  "ok": true,
+  "detail": "how"
+ },
+ {
+  "where": "before a door is chosen: no reopening question",
+  "ok": true,
+  "detail": "asked"
+ },
+ {
+  "where": "Open: the reopening question is not in the page",
+  "ok": true,
+  "detail": "asked"
+ },
+ {
+  "where": "Not sure: the reopening question is not in the page",
+  "ok": true,
+  "detail": "asked"
+ },
+ {
+  "where": "Closed: When does Lowri reopen to queries?",
+  "ok": true,
+  "detail": "no question"
+ },
+ {
+  "where": "it starts as Not sure",
+  "ok": true,
+  "detail": "set"
+ },
+ {
+  "where": "labelled Reopens",
+  "ok": true,
+  "detail": "Reopens"
+ },
+ {
+  "where": "Not sure says it stays as something to add",
+  "ok": true,
+  "detail": "Not known yet. It stays on Lowri’s card as something to add."
+ },
+ {
+  "where": "the readout names the date and the weeks",
+  "ok": false,
+  "detail": "Not sure"
+ },
+ {
+  "where": "set: This goes on Lowri’s card.",
+  "ok": false,
+  "detail": "Not known yet. It stays on Lowri’s card as something to add."
+ },
+ {
+  "where": "dated: the big number equals the ring's own count",
+  "ok": true,
+  "detail": "1 vs {\"n\":1,\"block\":true,\"adds\":[\"reply\",\"materials\",\"genres\",\"wishlist\",\"reopen\"]}"
+ },
+ {
+  "where": "PREMISE (read, not gated) · dated: a Reopening date gap on the preview",
+  "ok": true,
+  "detail": "gap shown: true — the card's rule clears it with a reopen reminder, not a date"
+ },
+ {
+  "where": "a date saves to reopensOn",
+  "ok": false,
+  "detail": "undefined vs 2027-02-02"
+ },
+ {
+  "where": "and the door is Closed",
+  "ok": true,
+  "detail": "Closed"
+ },
+ {
+  "where": "the Not sure pill clears it",
+  "ok": true,
+  "detail": "still set"
+ },
+ {
+  "where": "Not sure: the Reopening date gap shows",
+  "ok": true,
+  "detail": "{\"n\":1,\"block\":true,\"adds\":[\"reply\",\"materials\",\"genres\",\"wishlist\",\"reopen\"]}"
+ },
+ {
+  "where": "Not sure: the big number equals the ring's own count",
+  "ok": true,
+  "detail": "1 vs {\"n\":1,\"block\":true,\"adds\":[\"reply\",\"materials\",\"genres\",\"wishlist\",\"reopen\"]}"
+ },
+ {
+  "where": "PREMISE (read, not gated) · Not sure is one lower than dated",
+  "ok": true,
+  "detail": "dated 1, not sure 1"
+ },
+ {
+  "where": "Not sure saves no reopensOn",
+  "ok": true
+ }
+]

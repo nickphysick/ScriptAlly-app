@@ -1,0 +1,37 @@
+[
+ {
+  "where": "full: 6 of 6",
+  "ok": true,
+  "detail": "6 of 6"
+ },
+ {
+  "where": "full: no Finish block",
+  "ok": true,
+  "detail": "{\"n\":6,\"block\":false,\"adds\":[]}"
+ },
+ {
+  "where": "full: the number is the ring's",
+  "ok": true,
+  "detail": "{\"n\":6,\"block\":false,\"adds\":[]}"
+ },
+ {
+  "where": "name and agency: the number is the ring's",
+  "ok": true,
+  "detail": "2 vs {\"n\":2,\"block\":true,\"adds\":[\"reply\",\"materials\",\"genres\",\"wishlist\"]}"
+ },
+ {
+  "where": "name and agency: the gaps are the card's buttons",
+  "ok": true,
+  "detail": "{\"n\":2,\"block\":true,\"adds\":[\"reply\",\"materials\",\"genres\",\"wishlist\"]}"
+ },
+ {
+  "where": "Agency unknown: the number is the ring's",
+  "ok": true,
+  "detail": "1 vs {\"n\":1,\"block\":true,\"adds\":[\"reply\",\"materials\",\"genres\",\"wishlist\",\"agency\"]}"
+ },
+ {
+  "where": "Agency unknown: the gaps are the card's buttons",
+  "ok": true,
+  "detail": "{\"n\":1,\"block\":true,\"adds\":[\"reply\",\"materials\",\"genres\",\"wishlist\",\"agency\"]}"
+ }
+]

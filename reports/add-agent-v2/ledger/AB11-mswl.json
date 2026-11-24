@@ -1,0 +1,17 @@
+[
+ {
+  "where": "the step reads Carry on once the link is in",
+  "ok": true,
+  "detail": "Carry on"
+ },
+ {
+  "where": "saved once",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "the MSWL entry carries the link",
+  "ok": true,
+  "detail": "[{\"platform\":\"MSWL\",\"handle\":\"https://agency.co.uk/juniper-ashdown\"}]"
+ }
+]

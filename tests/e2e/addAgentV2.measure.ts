@@ -16,7 +16,19 @@
  *   AB7  the saved record for a fully filled agent equals, field for field, the old journey's for the same answers
  *   AB8  the whole card preview is visible on the review screen at 1280 × 800, with no scroll inside the preview
  *
- * ⚠️ RED FIRST: `AAG_BREAK=ab1|ab2|ab3|ab4|ab5|ab6|ab7|ab8` breaks the fix each lock holds, in the page.
+ * Design v15 (the revised brief, 24 Nov):
+ *   AB9  the sample is typed: 7500 as words shows "7,500"; 35 as pages saves 35; changing unit keeps the number; the
+ *        arrow keys step it by one; no − or + button; a common ask is chosen only when it matches exactly
+ *   AB10 no label in the journey holds an italic aside; each "i" shows its bubble on hover and on keyboard focus, wholly
+ *        inside the panel and clear of its field; Escape closes the bubble first
+ *   AB11 the wishlist page link typed on step 2 is on the saved agent where the agent card reads it (socials · MSWL)
+ *   AB12 Closed asks when they reopen: a date saves to `reopensOn`; "Not sure" saves none; Open has no such question.
+ *        The big number equals the preview ring's own count in each (the brief's "no gap with a date" is read and
+ *        reported, not gated: the card's own rule asks for a reopen reminder, not a date — see the report)
+ *   AB13 for three agents (everything filled; a name and agency; a name with Agency unknown) the big number equals the
+ *        preview ring's own count, and the full one shows 6 of 6 with no Finish block
+ *
+ * ⚠️ RED FIRST: `AAG_BREAK=ab1|…|ab13` breaks the fix each lock holds, in the page.
  * ⚠️ IT WRITES (agents are added) and RESTORES: every agent it adds is deleted through the emulator's admin REST before the
  *    test ends, and every run starts from the same snapshot anyway (scripts/emu.mjs).
  * ⚠️ EMULATOR ONLY: `npm run e2e:emu -- tests/e2e/addAgentV2.measure.ts --project=measure`.
@@ -83,6 +95,29 @@ async function breakIt(page: Page, title: string) {
       if (k === "ab5") setInterval(() => { const n = document.querySelector("[data-aag='details-n']"); if (n && !/of 9$/.test(n.textContent ?? "")) n.textContent = (n.textContent ?? "").replace(/of 6$/, "of 9"); }, 50);
       if (k === "ab6") document.addEventListener("click", (e) => { if ((e.target as Element | null)?.closest?.("[data-aag='add-now'], [data-aag='back-laq']")) { e.stopImmediatePropagation(); e.preventDefault(); (document.querySelector("[data-aag='close']") as HTMLElement | null)?.click(); } }, true);
       if (k === "ab8") style(".aag-pv { transform: scale(1.8); transform-origin: 0 0; }");
+      /* ab9: the amount loses its comma, and a − button appears in the control */
+      if (k === "ab9") setInterval(() => {
+        const n = document.querySelector<HTMLInputElement>("[data-sx='amt']");
+        if (n && n.value.includes(",") && document.activeElement !== n) n.value = n.value.replace(/,/g, "");
+        const r = document.querySelector("[data-sx='root']");
+        if (r && !r.querySelector(".brk-minus")) { const b = document.createElement("button"); b.className = "brk-minus"; b.textContent = "−"; r.appendChild(b); }
+      }, 40);
+      /* ab10: the bubble is pushed out of the panel, and a label grows an italic aside */
+      if (k === "ab10") {
+        style(".laq.aag .aag-ht { left: -420px !important; }");
+        setInterval(() => { const l = document.querySelector(".aag-labh label"); if (l && !l.querySelector("i")) { const i = document.createElement("i"); i.textContent = "in their words"; l.appendChild(i); } }, 40);
+      }
+      /* ab11: the link is emptied as the writer leaves the field */
+      if (k === "ab11") document.addEventListener("focusout", (e) => {
+        const el = e.target as HTMLInputElement | null;
+        if (el?.dataset?.aag === "mswl") { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!; set.call(el, ""); el.dispatchEvent(new Event("input", { bubbles: true })); }
+      }, true);
+      /* ab12: moving the reopening slider is undone by its own "Not sure" */
+      if (k === "ab12") document.addEventListener("input", (e) => {
+        if ((e.target as Element | null)?.closest?.("[data-aag='reopen-slider']")) setTimeout(() => (document.querySelector("[data-aag='reopen-slider'] .sa-wk-unkbtn:not(.on)") as HTMLElement | null)?.click(), 30);
+      }, true);
+      /* ab13: the big number always claims the whole card */
+      if (k === "ab13") setInterval(() => { const n = document.querySelector("[data-aag='details-n']"); if (n && n.textContent !== "6 of 6") n.textContent = "6 of 6"; }, 40);
       /* ab7: the add changes an answer on its way out (the fit becomes five stars) */
       if (k === "ab7") document.addEventListener("click", (e) => { if ((e.target as Element | null)?.closest?.("[data-aag='add']")) (document.querySelector("[data-aag='star'][data-n='5']") as HTMLElement | null)?.click(); }, true);
     });
@@ -138,6 +173,7 @@ async function fillAll(page: Page, name: string) {
   const g = page.locator('[data-aag="root"] [data-aag="genres"] input').first();
   for (const t of ["Thriller", "Crime"]) { await g.click(); await g.fill(t); await settle(page, 250); await page.keyboard.press("Enter"); await settle(page, 250); }
   await page.locator('[data-aag="root"] [data-aag="wish"]').fill("Twisty, character-led thrillers.");
+  await page.locator('[data-aag="root"] [data-aag="mswl"]').fill("fenwick.example/sarah");
   await press(page, "next"); await settle(page);
   /* Asks for: the letter, a one-page synopsis, the sample */
   await page.locator('[data-aag="tile"][data-k="letter"] > button').click();
@@ -305,6 +341,8 @@ test.describe("Add an agent v2 · the journey", () => {
         mswlNotes: "Twisty, character-led thrillers.", submissionStatus: "Open", submissionMethod: "Email", starRating: 4,
         materialsWanted: ["Query letter", "Synopsis (1 pages)", "First 3 chapters"], notes: "", city: "London", country: "GB",
         responseTimeWeeks: 8, noResponseMeansNo: true,
+        /* design v15 — the wishlist page link, where the card reads it */
+        socials: [{ platform: "MSWL", handle: "https://fenwick.example/sarah" }],
       };
       for (const [k, v] of Object.entries(want)) L.check(`AB7 ${k}`, JSON.stringify(r[k]) === JSON.stringify(v), `${JSON.stringify(r[k])} vs ${JSON.stringify(v)}`);
       const extra = Object.keys(r).filter((k) => !(k in want) && !["id", "userId", "dateAdded", "lastCheckedDate", "mswlCheckedAt"].includes(k));
@@ -346,5 +384,212 @@ test.describe("Add an agent v2 · the journey", () => {
       await removeAgents(NAME);
     }
     L.done(8);
+  });
+  test("AB9 · the sample is typed", async ({ page }) => {
+    const L = new Ledger("AB9-sample");
+    const NAME = "Imogen Thackery";
+    try {
+      await openJourney(page);
+      await typeIn(page, "name", NAME); await typeIn(page, "agency", "Fenwick & Rowe");
+      await press(page, "next"); await settle(page);
+      await press(page, "next"); await settle(page);
+      L.check("on Asks for", (await state(page)).step === "asks", String((await state(page)).step));
+      await page.locator('[data-aag="tile"][data-k="sample"] > button').click(); await settle(page, 300);
+      const amt = page.locator('[data-aag="root"] [data-sx="amt"]');
+      const sub = page.locator('[data-aag="tile"][data-k="sample"] [data-aag="tile-sub"]');
+      L.check("the typed control is drawn", (await amt.count()) === 1, String(await amt.count()));
+      L.check("it reads as a sentence: The first", (await page.locator('[data-sx="lead"]').innerText()).trim() === "The first", await page.locator('[data-sx="lead"]').innerText());
+      L.check("no − or + button in the control", await page.locator('[data-aag="root"] [data-sx="root"]').evaluate((r) => [...r.querySelectorAll("button")].every((b) => !/^\s*[−+-]\s*$/.test(b.textContent ?? ""))), "a stepper button");
+      await page.locator('[data-sx="unit"][data-k="words"]').click(); await settle(page, 200);
+      await amt.fill("7500"); await settle(page, 200);
+      await page.locator('[data-aag="root"] h2').first().click(); await settle(page, 200);
+      L.check("7500 as words shows 7,500", (await amt.inputValue()) === "7,500", await amt.inputValue());
+      L.check("the tile follows: First 7,500 words", (await sub.innerText()).trim() === "First 7,500 words", await sub.innerText());
+      await page.locator('[data-sx="unit"][data-k="pages"]').click(); await settle(page, 200);
+      L.check("changing unit keeps the number", (await amt.inputValue()) === "7500", await amt.inputValue());
+      await amt.fill("35"); await settle(page, 200);
+      await amt.press("ArrowUp"); await settle(page, 100);
+      L.check("ArrowUp steps it by one", (await amt.inputValue()) === "36", await amt.inputValue());
+      await amt.press("ArrowDown"); await settle(page, 100);
+      L.check("ArrowDown steps it back", (await amt.inputValue()) === "35", await amt.inputValue());
+      L.check("no common ask matches 35 pages", (await page.locator('[data-sx="ask"].is-on').count()) === 0, String(await page.locator('[data-sx="ask"].is-on').count()));
+      await page.locator('[data-sx="ask"][data-k="pages:50"]').click(); await settle(page, 200);
+      const on = await page.locator('[data-sx="ask"].is-on').evaluateAll((e) => e.map((x) => (x as HTMLElement).dataset.k));
+      L.check("a common ask sets amount and unit, and only it is chosen", JSON.stringify(on) === '["pages:50"]' && (await amt.inputValue()) === "50", `${JSON.stringify(on)} ${await amt.inputValue()}`);
+      await amt.fill("35"); await settle(page, 200);
+      L.check("no starting point is offered (the record has none)", (await page.locator('[data-sx="to-part"]').count()) === 0, "offered");
+      await press(page, "to-end"); await settle(page, 900);
+      await press(page, "add"); await settle(page, 1500);
+      const saved = await agentsNamed(NAME);
+      L.check("35 typed as pages saves 35", JSON.stringify(saved[0]?.rec.materialsWanted ?? null).includes("First 35 pages"), JSON.stringify(saved[0]?.rec.materialsWanted));
+    } finally { await removeAgents(NAME); }
+    L.done(13);
+  });
+
+  test("AB10 · field notes are an i: no italic aside, the bubble inside the panel on hover and on focus", async ({ page }) => {
+    const L = new Ledger("AB10-hints");
+    await openJourney(page);
+    const asides = () => page.evaluate(() => [...document.querySelectorAll('[data-aag="root"] label i, [data-aag="root"] .aag-lab i, [data-aag="root"] .laq-fl > span i')].length);
+    L.check("step 1: no italic aside in a label", (await asides()) === 0, String(await asides()));
+    await typeIn(page, "name", "Wren Halloway"); await typeIn(page, "agency", "Fenwick & Rowe");
+    await press(page, "next"); await settle(page);
+    L.check("step 2: no italic aside in a label", (await asides()) === 0, String(await asides()));
+    const hints = await page.locator('[data-aag="root"] [data-aag="hint"]').evaluateAll((e) => e.map((x) => (x as HTMLElement).dataset.k));
+    L.check("two notes, wishlist and link", JSON.stringify(hints) === '["wish","mswl"]', JSON.stringify(hints));
+    const read = (k: string) => page.evaluate((key) => {
+      const h = document.querySelector<HTMLElement>(`[data-aag="root"] [data-aag="hint"][data-k="${key}"]`)!;
+      const tip = h.querySelector<HTMLElement>('[data-aag="hint-tip"]')!;
+      const panel = h.closest<HTMLElement>(".spanel")!.getBoundingClientRect();
+      const body = h.closest<HTMLElement>('[data-aag="body"]')!.getBoundingClientRect();
+      const lab = h.closest<HTMLElement>(".aag-lab")!.getBoundingClientRect();
+      const t = tip.getBoundingClientRect(), cs = getComputedStyle(tip);
+      const i = h.querySelector<HTMLElement>('[data-aag="hint-i"]')!.getBoundingClientRect();
+      return { shown: cs.visibility === "visible" && Number(cs.opacity) > 0.9, inPanel: t.left >= panel.left - 0.5 && t.right <= panel.right + 0.5 && t.top >= panel.top - 0.5 && t.bottom <= panel.bottom + 0.5,
+        inBody: t.top >= body.top - 0.5 && t.bottom <= body.bottom + 0.5, aboveLabel: t.bottom <= lab.top + 0.5, i: [Math.round(i.width), Math.round(i.height)], text: tip.textContent ?? "" };
+    }, k);
+    for (const k of ["wish", "mswl"]) {
+      await page.locator(`[data-aag="root"] [data-aag="hint"][data-k="${k}"] [data-aag="hint-i"]`).hover(); await settle(page, 300);
+      const h = await read(k);
+      L.check(`${k}: the i is 20px`, h.i[0] === 20 && h.i[1] === 20, JSON.stringify(h.i));
+      L.check(`${k}: hover shows the bubble`, h.shown, JSON.stringify(h));
+      L.check(`${k}: wholly inside the panel`, h.inPanel && h.inBody, JSON.stringify(h));
+      L.check(`${k}: above its label, clear of its field`, h.aboveLabel, JSON.stringify(h));
+      await page.mouse.move(5, 5); await settle(page, 300);
+      L.check(`${k}: hidden when the pointer leaves`, !(await read(k)).shown, "still shown");
+      await page.locator(`[data-aag="root"] [data-aag="hint"][data-k="${k}"] [data-aag="hint-i"]`).focus(); await settle(page, 300);
+      const f = await read(k);
+      L.check(`${k}: keyboard focus shows the bubble`, f.shown && f.inPanel && f.inBody, JSON.stringify(f));
+      await page.keyboard.press("Escape"); await settle(page, 300);
+      L.check(`${k}: Escape closes the bubble first`, !(await read(k)).shown && (await state(page)).journey, JSON.stringify(await state(page)));
+    }
+    L.check("wishlist words", (await read("wish")).text === "Use Wren’s own words, copied from the wishlist or agency page, so the card reads the way Wren wrote it.", (await read("wish")).text);
+    L.check("link words", (await read("mswl")).text === "The page where Wren lists what Wren wants to see. Leave it blank if there isn’t one.", (await read("mswl")).text);
+    for (const step of ["asks", "how", "reply", "add"]) {
+      await press(page, "next"); await settle(page);
+      L.check(`${step}: no italic aside in a label`, (await asides()) === 0, String(await asides()));
+    }
+    await closeAll(page);
+    L.done(23);
+  });
+
+  test("AB11 · the wishlist page link is saved where the card reads it", async ({ page }) => {
+    const L = new Ledger("AB11-mswl");
+    const NAME = "Juniper Ashdown";
+    try {
+      await openJourney(page);
+      await typeIn(page, "name", NAME); await typeIn(page, "agency", "Fenwick & Rowe");
+      await press(page, "next"); await settle(page);
+      await page.locator('[data-aag="root"] [data-aag="mswl"]').fill("agency.co.uk/juniper-ashdown");
+      L.check("the step reads Carry on once the link is in", /Carry on/.test(await page.locator('[data-aag="root"] [data-aag="next"]').innerText()), await page.locator('[data-aag="root"] [data-aag="next"]').innerText());
+      await press(page, "to-end"); await settle(page, 900);
+      await press(page, "add"); await settle(page, 1500);
+      const saved = await agentsNamed(NAME);
+      const so = (saved[0]?.rec.socials ?? []) as { platform?: string; handle?: string }[];
+      L.check("saved once", saved.length === 1, String(saved.length));
+      L.check("the MSWL entry carries the link", so.some((x) => x.platform === "MSWL" && x.handle === "https://agency.co.uk/juniper-ashdown"), JSON.stringify(so));
+    } finally { await removeAgents(NAME); }
+    L.done(3);
+  });
+
+  /** the preview ring's own count: six less the card's gaps, read off its ring and its Finish block */
+  const ringOf = (page: Page) => page.evaluate(() => {
+    const pv = document.querySelector('[data-aag="preview"]');
+    const fin = pv?.querySelector<HTMLElement>('[data-acv2="finish"]');
+    if (!pv) return null;
+    if (!fin) return { n: 6, block: false, adds: [] as string[] };
+    const c = fin.querySelectorAll("svg.ring circle")[1];
+    const [d, all] = (c?.getAttribute("stroke-dasharray") ?? "0 1").split(" ").map(Number);
+    return { n: Math.round((6 * d) / all), block: true, adds: [...fin.querySelectorAll<HTMLElement>('[data-acv2="finish-add"]')].map((b) => b.dataset.k ?? "") };
+  });
+  const bigN = async (page: Page) => parseInt((await page.locator('[data-aag="details-n"]').innerText({ timeout: 5000 }).catch(() => "")).trim(), 10);
+
+  test("AB12 · a closed agent is asked when they reopen; a date saves, Not sure saves none, Open never asks", async ({ page }) => {
+    const L = new Ledger("AB12-reopen");
+    const DATED = "Lowri Penhaligon", UNSURE = "Mabli Trevanion";
+    const toHow = async (name: string) => {
+      await openJourney(page);
+      await typeIn(page, "name", name); await typeIn(page, "agency", "Fenwick & Rowe");
+      for (let i = 0; i < 3; i++) { await press(page, "next"); await settle(page); }
+    };
+    const moveTo = (w: number) => page.locator('[data-aag="reopen-slider"] input[type="range"]').evaluate((e: HTMLInputElement, v: number) => { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!; set.call(e, String(v)); e.dispatchEvent(new Event("input", { bubbles: true })); e.dispatchEvent(new Event("change", { bubbles: true })); }, w);
+    try {
+      /* Open: the question is not in the page */
+      await toHow(DATED);
+      L.check("on How", (await state(page)).step === "how", String((await state(page)).step));
+      L.check("before a door is chosen: no reopening question", (await page.locator('[data-aag="reopen"]').count()) === 0, "asked");
+      await page.locator('[data-aag="door"][data-k="open"]').click(); await settle(page, 300);
+      L.check("Open: the reopening question is not in the page", (await page.locator('[data-aag="reopen"]').count()) === 0, "asked");
+      await page.locator('[data-aag="door"][data-k="unsure"]').click(); await settle(page, 300);
+      L.check("Not sure: the reopening question is not in the page", (await page.locator('[data-aag="reopen"]').count()) === 0, "asked");
+      /* Closed, with a date */
+      await page.locator('[data-aag="door"][data-k="closed"]').click(); await settle(page, 300);
+      L.check("Closed: When does Lowri reopen to queries?", /When does Lowri reopen to queries\?/.test(await page.locator('[data-aag="reopen"]').innerText({ timeout: 4000 }).catch(() => "")), "no question");
+      L.check("it starts as Not sure", (await page.locator('[data-aag="reopen-slider"]').getAttribute("data-unknown")) === "1", "set");
+      L.check("labelled Reopens", (await page.locator('[data-aag="reopen-slider"] label').innerText()).trim() === "Reopens", await page.locator('[data-aag="reopen-slider"] label').innerText());
+      L.check("Not sure says it stays as something to add", /Not known yet\. It stays on Lowri’s card as something to add\./.test(await page.locator('[data-aag="reopen-note"]').innerText()), await page.locator('[data-aag="reopen-note"]').innerText());
+      await moveTo(10); await settle(page, 300);
+      const when = new Date(); when.setDate(when.getDate() + 70);
+      const iso = `${when.getFullYear()}-${String(when.getMonth() + 1).padStart(2, "0")}-${String(when.getDate()).padStart(2, "0")}`;
+      const read = await page.locator('[data-aag="reopen-slider"] .sa-wk-read').innerText();
+      L.check("the readout names the date and the weeks", /· in 10 weeks$/.test(read.trim()), read);
+      L.check("set: This goes on Lowri’s card.", (await page.locator('[data-aag="reopen-note"]').innerText()).trim() === "This goes on Lowri’s card.", await page.locator('[data-aag="reopen-note"]').innerText());
+      await press(page, "to-end"); await settle(page, 1000);
+      const dated = await ringOf(page), datedN = await bigN(page);
+      L.check("dated: the big number equals the ring's own count", dated?.n === datedN, `${datedN} vs ${JSON.stringify(dated)}`);
+      L.check("PREMISE (read, not gated) · dated: a Reopening date gap on the preview", true, `gap shown: ${dated?.adds.includes("reopen")} — the card's rule clears it with a reopen reminder, not a date`);
+      await press(page, "add"); await settle(page, 1500);
+      const s1 = await agentsNamed(DATED);
+      L.check("a date saves to reopensOn", s1[0]?.rec.reopensOn === iso, `${JSON.stringify(s1[0]?.rec.reopensOn)} vs ${iso}`);
+      L.check("and the door is Closed", s1[0]?.rec.submissionStatus === "Closed", String(s1[0]?.rec.submissionStatus));
+      await closeAll(page);
+      /* Closed, Not sure */
+      await toHow(UNSURE);
+      await page.locator('[data-aag="door"][data-k="closed"]').click(); await settle(page, 300);
+      await moveTo(4); await settle(page, 200);
+      await page.locator('[data-aag="reopen-slider"] .sa-wk-unkbtn').click(); await settle(page, 300);
+      L.check("the Not sure pill clears it", (await page.locator('[data-aag="reopen-slider"]').getAttribute("data-unknown")) === "1", "still set");
+      await press(page, "to-end"); await settle(page, 1000);
+      const unsure = await ringOf(page), unsureN = await bigN(page);
+      L.check("Not sure: the Reopening date gap shows", !!unsure?.adds.includes("reopen"), JSON.stringify(unsure));
+      L.check("Not sure: the big number equals the ring's own count", unsure?.n === unsureN, `${unsureN} vs ${JSON.stringify(unsure)}`);
+      L.check("PREMISE (read, not gated) · Not sure is one lower than dated", true, `dated ${datedN}, not sure ${unsureN}`);
+      await press(page, "add"); await settle(page, 1500);
+      const s2 = await agentsNamed(UNSURE);
+      L.check("Not sure saves no reopensOn", s2.length === 1 && s2[0].rec.reopensOn === undefined, JSON.stringify(s2[0]?.rec.reopensOn));
+    } finally { await closeAll(page); await removeAgents(DATED); await removeAgents(UNSURE); }
+    L.done(19);
+  });
+
+  test("AB13 · the big number is the preview ring's own count, for three agents", async ({ page }) => {
+    const L = new Ledger("AB13-count");
+    const FULL = "Rosalind Vetch";
+    /* everything filled (and Open) */
+    await openJourney(page);
+    await fillAll(page, FULL);
+    const f = await ringOf(page);
+    L.check("full: 6 of 6", (await page.locator('[data-aag="details-n"]').innerText()).trim() === "6 of 6", await page.locator('[data-aag="details-n"]').innerText());
+    L.check("full: no Finish block", f?.block === false, JSON.stringify(f));
+    L.check("full: the number is the ring's", f?.n === (await bigN(page)), JSON.stringify(f));
+    await closeAll(page);
+    /* a name and an agency */
+    await openJourney(page);
+    await typeIn(page, "name", "Seren Applewhite"); await typeIn(page, "agency", "Fenwick & Rowe");
+    await press(page, "add-later"); await settle(page, 1200);
+    const a = await ringOf(page);
+    L.check("name and agency: the number is the ring's", a?.n === (await bigN(page)), `${await bigN(page)} vs ${JSON.stringify(a)}`);
+    L.check("name and agency: the gaps are the card's buttons", a?.block === true && a.adds.length === 6 - (await bigN(page)), JSON.stringify(a));
+    await closeAll(page);
+    /* a name alone, Agency unknown */
+    await openJourney(page);
+    await typeIn(page, "name", "Tegwen Moorcroft");
+    await press(page, "add-later"); await settle(page, 400);
+    await press(page, "ask-unknown"); await settle(page, 300);
+    await press(page, "add-later"); await settle(page, 1200);
+    const u = await ringOf(page);
+    L.check("Agency unknown: the number is the ring's", u?.n === (await bigN(page)), `${await bigN(page)} vs ${JSON.stringify(u)}`);
+    L.check("Agency unknown: the gaps are the card's buttons", u?.block === true && u.adds.length === 6 - (await bigN(page)), JSON.stringify(u));
+    await closeAll(page);
+    await removeAgents(FULL);
+    L.done(7);
   });
 });

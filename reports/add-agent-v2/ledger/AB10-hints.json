@@ -1,0 +1,117 @@
+[
+ {
+  "where": "step 1: no italic aside in a label",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "step 2: no italic aside in a label",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "two notes, wishlist and link",
+  "ok": true,
+  "detail": "[\"wish\",\"mswl\"]"
+ },
+ {
+  "where": "wish: the i is 20px",
+  "ok": true,
+  "detail": "[20,20]"
+ },
+ {
+  "where": "wish: hover shows the bubble",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"Use Wren’s own words, copied from the wishlist or agency page, so the card reads the way Wren wrote it.\"}"
+ },
+ {
+  "where": "wish: wholly inside the panel",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"Use Wren’s own words, copied from the wishlist or agency page, so the card reads the way Wren wrote it.\"}"
+ },
+ {
+  "where": "wish: above its label, clear of its field",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"Use Wren’s own words, copied from the wishlist or agency page, so the card reads the way Wren wrote it.\"}"
+ },
+ {
+  "where": "wish: hidden when the pointer leaves",
+  "ok": true,
+  "detail": "still shown"
+ },
+ {
+  "where": "wish: keyboard focus shows the bubble",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"Use Wren’s own words, copied from the wishlist or agency page, so the card reads the way Wren wrote it.\"}"
+ },
+ {
+  "where": "wish: Escape closes the bubble first",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"wish\",\"dim\":true}"
+ },
+ {
+  "where": "mswl: the i is 20px",
+  "ok": true,
+  "detail": "[20,20]"
+ },
+ {
+  "where": "mswl: hover shows the bubble",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"The page where Wren lists what Wren wants to see. Leave it blank if there isn’t one.\"}"
+ },
+ {
+  "where": "mswl: wholly inside the panel",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"The page where Wren lists what Wren wants to see. Leave it blank if there isn’t one.\"}"
+ },
+ {
+  "where": "mswl: above its label, clear of its field",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"The page where Wren lists what Wren wants to see. Leave it blank if there isn’t one.\"}"
+ },
+ {
+  "where": "mswl: hidden when the pointer leaves",
+  "ok": true,
+  "detail": "still shown"
+ },
+ {
+  "where": "mswl: keyboard focus shows the bubble",
+  "ok": true,
+  "detail": "{\"shown\":true,\"inPanel\":true,\"inBody\":true,\"aboveLabel\":true,\"i\":[20,20],\"text\":\"The page where Wren lists what Wren wants to see. Leave it blank if there isn’t one.\"}"
+ },
+ {
+  "where": "mswl: Escape closes the bubble first",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"wish\",\"dim\":true}"
+ },
+ {
+  "where": "wishlist words",
+  "ok": true,
+  "detail": "Use Wren’s own words, copied from the wishlist or agency page, so the card reads the way Wren wrote it."
+ },
+ {
+  "where": "link words",
+  "ok": true,
+  "detail": "The page where Wren lists what Wren wants to see. Leave it blank if there isn’t one."
+ },
+ {
+  "where": "asks: no italic aside in a label",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "how: no italic aside in a label",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "reply: no italic aside in a label",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "add: no italic aside in a label",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -57,6 +57,6 @@
  {
   "where": "AB3 saved as Agency unknown",
   "ok": true,
-  "detail": "{\"name\":\"Quentin Arbuthnot\",\"agency\":\"\",\"email\":\"\",\"website\":\"\",\"genres\":[],\"mswlNotes\":\"\",\"submissionStatus\":\"Unknown\",\"submissionMethod\":\"Email\",\"agencyUnknown\":true,\"materialsWanted\":[],\"notes\":\"\",\"country\":\"GB\",\"id\":\"agent-nagg8qns5\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"dateAdded\":\"2026-11-24T12:50:49.722Z\",\"lastCheckedDate\":\"2026-11-24T12:50:49.722Z\"}"
+  "detail": "{\"name\":\"Quentin Arbuthnot\",\"agency\":\"\",\"email\":\"\",\"website\":\"\",\"genres\":[],\"mswlNotes\":\"\",\"submissionStatus\":\"Unknown\",\"submissionMethod\":\"Email\",\"agencyUnknown\":true,\"materialsWanted\":[],\"notes\":\"\",\"country\":\"GB\",\"id\":\"agent-onzk7ry10\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"dateAdded\":\"2026-11-24T14:38:33.070Z\",\"lastCheckedDate\":\"2026-11-24T14:38:33.070Z\"}"
  }
 ]

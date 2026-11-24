@@ -1,0 +1,67 @@
+[
+ {
+  "where": "on Asks for",
+  "ok": true,
+  "detail": "asks"
+ },
+ {
+  "where": "the typed control is drawn",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "it reads as a sentence: The first",
+  "ok": true,
+  "detail": "The first"
+ },
+ {
+  "where": "no − or + button in the control",
+  "ok": true,
+  "detail": "a stepper button"
+ },
+ {
+  "where": "7500 as words shows 7,500",
+  "ok": true,
+  "detail": "7,500"
+ },
+ {
+  "where": "the tile follows: First 7,500 words",
+  "ok": true,
+  "detail": "First 7,500 words"
+ },
+ {
+  "where": "changing unit keeps the number",
+  "ok": true,
+  "detail": "7500"
+ },
+ {
+  "where": "ArrowUp steps it by one",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "where": "ArrowDown steps it back",
+  "ok": true,
+  "detail": "35"
+ },
+ {
+  "where": "no common ask matches 35 pages",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "a common ask sets amount and unit, and only it is chosen",
+  "ok": true,
+  "detail": "[\"pages:50\"] 50"
+ },
+ {
+  "where": "no starting point is offered (the record has none)",
+  "ok": true,
+  "detail": "offered"
+ },
+ {
+  "where": "35 typed as pages saves 35",
+  "ok": true,
+  "detail": "[\"First 35 pages\"]"
+ }
+]

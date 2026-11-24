@@ -120,6 +120,11 @@
   "detail": "true vs true"
  },
  {
+  "where": "AB7 socials",
+  "ok": true,
+  "detail": "[{\"platform\":\"MSWL\",\"handle\":\"https://fenwick.example/sarah\"}] vs [{\"platform\":\"MSWL\",\"handle\":\"https://fenwick.example/sarah\"}]"
+ },
+ {
   "where": "AB7 no field the old journey would not have written",
   "ok": true,
   "detail": ""
