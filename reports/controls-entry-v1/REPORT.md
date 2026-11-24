@@ -128,7 +128,7 @@ The to-do engine keeps its own clock (`taskDue`, `replyTask`, `comingUp` and `to
 
 ## The rules change, for Nick to deploy to prod
 
-Written out in [rules-prod.diff](rules-prod.diff), against the dev line's rules. ⚠️ Prod's `release/live-1` rules are 210 lines behind the dev line, so this goes on top of the rest of the dev line's rules work, not alone. In words:
+Written out in [../rules-budget-v1/rules-prod.diff](../rules-budget-v1/rules-prod.diff), which now covers this pack and Rules budget v1 together (it replaced this folder's own diff, 24 Nov), against the dev line's rules. ⚠️ Prod's `release/live-1` rules are 210 lines behind the dev line, so this goes on top of the rest of the dev line's rules work, not alone. In words:
 1. `isValidActivityNested`: add `'replyKind', 'replyDate'` to the `hasOnly` list. Validate `replyKind in ['chaser', 'holding', 'note']` and `replyDate is string && size() <= 32`.
 2. `isValidActivity` (the feed): add `data.activityType == 'Agent Reply'`, and the same two validators.
 3. The feed's update allowlist (`affectedKeys().hasOnly`): add `'replyKind', 'replyDate'`.

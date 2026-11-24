@@ -1,0 +1,19 @@
+{
+ "label": "after",
+ "database": "(default)",
+ "project": "scriptally-dev",
+ "optionalFields": 66,
+ "at": "2026-11-24T21:59:24.925Z",
+ "createFullest": "denied: 7 PERMISSION_DENIED: Missing or insufficient permissions.",
+ "createSmallest": "allowed",
+ "threshold": null,
+ "updateOneFieldOnFullest": "allowed",
+ "widestReply": {
+  "keys": 29,
+  "outcome": "allowed"
+ },
+ "cleanup": {
+  "delete": "allowed",
+  "stillExists": false
+ }
+}
