@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v18.3 §F.1 — THE TOP BAR'S PAGE SLOT: one element in the shell's bar, immediately left of the "?", that a
+ * Contact list v18.3 §F.1 — THE TOP BAR'S PAGE SLOT: one element in the shell's bar, left of Search (Add an agent v2), that a
  * page may portal its own control into (today, the Contact list's "Getting started" pill). The shell owns the element;
  * the page owns what goes in it. A page-owned slot rather than a page-specific branch inside the shell: the shell names
  * no page and imports nothing of one.

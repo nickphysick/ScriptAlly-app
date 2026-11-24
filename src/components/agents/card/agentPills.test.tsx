@@ -1,6 +1,7 @@
 /**
  * Add agent v1 Phase 1 — the shared controls' pure rules (agentPills.tsx). The rendered behaviour is locked on the page
- * (tests/e2e/addAgentV1.measure.ts, AA1–AA14); this file holds the words and the small derivations both hosts read.
+ * (tests/e2e/addAgentV1.measure.ts, deleted by Add an agent v2 with the desktop panel it measured); this file holds the
+ * words and the small derivations both hosts read.
  */
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";

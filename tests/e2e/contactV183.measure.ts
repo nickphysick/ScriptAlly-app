@@ -329,61 +329,7 @@ test("CL1833-E5 · closes: a scroll with every pointer event suppressed, a small
 
 
 /* ───────────────────────── D · adding an agent ───────────────────────── */
-test("D1 · add: the panel's act view, no centred card, Add disabled until a name, saves through addAgent, then the panel shows them", async ({ page }) => {
-  test.setTimeout(300_000);
-  const L = new Ledger("D1");
-  const g0 = guideNow();
-  try {
-    quietGuide();
-    await open(page, SIZES[0], "D1");
-    await page.locator(".aglist [data-cl17='add']").filter({ visible: true }).first().click();
-    await page.waitForTimeout(900);
-    await shot(page, "10-add-agent-empty-1512");
-    const r = await page.evaluate(() => {
-      const panel = document.querySelector<HTMLElement>('[data-ap="panel-new"]');
-      const save = panel?.querySelector<HTMLButtonElement>('[data-ae="save"]');
-      const ag = panel?.querySelector<HTMLInputElement>('[data-ae="agency"]');
-      return {
-        panel: !!panel && panel.getBoundingClientRect().height > 0, title: panel?.querySelector(".qad-h2")?.textContent?.trim() ?? null,
-        centred: !!document.querySelector(".ac-root:not(.qad-root), [data-ac='card'], .agc-add, [data-ac-host='center']"),
-        disabled: !!save?.disabled, paste: !!panel?.querySelector('[data-ae="paste"]'),
-        agPh: ag?.getAttribute("placeholder") ?? "", agList: ag?.getAttribute("list") ?? null, lists: panel?.querySelectorAll("datalist").length ?? 0,
-      };
-    });
-    L.check("the agent panel opens in a new-agent state", r.panel, `${r.panel}`);
-    L.check('its title is "Add an agent"', r.title === "Add an agent", `${r.title}`);
-    L.check("no centred add card in the DOM", !r.centred, `${r.centred}`);
-    L.check("Add to your list is disabled until a name or agency", r.disabled, `${r.disabled}`);
-    L.check('no "Paste a link" field', !r.paste, `${r.paste}`);
-    L.check("the agency field has no placeholder and no datalist", !r.agPh && !r.agList && r.lists === 0, JSON.stringify(r));
-    if (r.panel) {
-      /* the spy: the existing add path writes the agent and its AGENT_ADDED line — Firestore says whether it ran */
-      await page.locator('[data-ap="panel-new"] [data-ae="name"]').fill("Zz Probe Agent");
-      await page.waitForTimeout(200);
-      L.check("Add enables once a name is typed", !(await page.locator('[data-ap="panel-new"] [data-ae="save"]').isDisabled()), "");
-      await shot(page, "11-add-agent-filled-1512");
-      await page.locator('[data-ap="panel-new"] [data-ae="save"]').click();
-      await page.waitForTimeout(2500);
-      const after = await page.evaluate(() => {
-        const p = [...document.querySelectorAll<HTMLElement>('[data-ap="panel"]')].find((e) => e.getBoundingClientRect().height > 0);
-        const foot = document.querySelector<HTMLElement>('[data-ap="panel-new"] [data-ae="foot"]')?.textContent ?? "";
-        return { id: p?.dataset.apId ?? null, name: p?.textContent?.includes("Zz Probe Agent") ?? false, capped: /capped at \d+ agents/i.test(foot), foot };
-      });
-      const stored = after.id ? await agentDoc(after.id) : null;
-      /* ⚠️ THE HARNESS ACCOUNT IS FREE AND OVER THE CAP: addAgent refuses every add there, and says so. The refusal is
-         the existing add path answering (its own words, in the editor's foot), so it is the spy's reading; the after-add
-         half ("then the panel shows the new agent") can only be read where the add lands, and is tallied, not faked. */
-      L.check("the save reached the existing add path (it wrote the agent, or answered with its cap)", stored?.name === "Zz Probe Agent" || after.capped, JSON.stringify(after));
-      if (stored) L.check("then the panel shows the new agent", !!after.id && after.name, JSON.stringify(after));
-      else console.log("[D1] the account is capped: the after-add branch was not entered");
-    }
-  } finally {
-    const out = sh("node tests/e2e/cleanupProbeAgent.mjs");
-    console.log(`[D1] cleanup: ${out.trim()}`);
-    guideRestore(g0);
-  }
-  L.done(8);
-});
+/* D1 — DELETED by Add an agent v2 (24 Nov 2026): its subject, the old add-agent panel, no longer opens on a desktop. What covers adding an agent now: tests/e2e/addAgentV2.measure.ts (AB1–AB8). */
 
 test("D2 · policy: 'Response policy' with its two values, writing noResponseMeansNo as before", async ({ page }) => {
   test.setTimeout(300_000);
@@ -512,7 +458,7 @@ const centreY = (page: Page, sel: string) => page.evaluate((s) => { const e = [.
 
 /* RE-POINTED by v19 §K: the checklist has six tasks ("Pin the list" is the third), so the count reads n/6 and "all done"
    includes the pin. The claims are unchanged. */
-test("F1 · pill: left of the '?', centred with the bar, its words and count; gone after Hide it and after all five", async ({ page }) => {
+test("F1 · pill: left of Search, centred with the bar, its words and count; gone after Hide it and after all five", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("F1");
   const g0 = guideNow();
@@ -525,17 +471,19 @@ test("F1 · pill: left of the '?', centred with the bar, its words and count; go
       await shot(page, `18-guide-closed-${vp.width}`);
       const r = await page.evaluate(() => {
         const v = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((x) => x.getBoundingClientRect().height > 0) ?? null;
-        const p = v("[data-pck='pill']"), help = v(".ws-help");
+        /* RE-POINTED by Add an agent v2 (24 Nov 2026): the page slot sits left of Search, so Search, Quick actions and Help
+           keep one place on every page (quickActions.measure.ts QA1); the pill keeps its 10px, now before Search */
+        const p = v("[data-pck='pill']"), help = v(".ws-sfield");
         const cy = (e: HTMLElement | null) => (e ? e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2 : null);
         return {
           has: !!p, inBar: !!p?.closest(".ws-pagebar"), leftOfHelp: !!p && !!help && p.getBoundingClientRect().right <= help.getBoundingClientRect().left,
           gap: p && help ? help.getBoundingClientRect().left - p.getBoundingClientRect().right : null,
-          ys: [cy(p), cy(v(".ws-search")), cy(v(".ws-appctl--cap")), cy(help)], text: p?.querySelector(".pck-pt")?.textContent ?? null, n: p?.querySelector("[data-pck='count']")?.textContent ?? null,
+          ys: [cy(p), cy(v(".ws-search")), cy(v(".ws-appctl--cap")), cy(v(".ws-help"))], text: p?.querySelector(".pck-pt")?.textContent ?? null, n: p?.querySelector("[data-pck='count']")?.textContent ?? null,
         };
       });
       L.check(`${w} the pill is in the top bar`, r.has && r.inBar, JSON.stringify(r));
-      L.check(`${w} it sits left of the "?" with 10 ±1 between`, r.leftOfHelp && near(r.gap, 10, 1), `${r.gap}`);
-      L.check(`${w} its centre equals Search's, Log a query's and the "?"'s ±1`, r.ys.every((y) => near(y, r.ys[0] ?? NaN, 1)), JSON.stringify(r.ys));
+      L.check(`${w} it sits left of Search with 10 ±1 between`, r.leftOfHelp && near(r.gap, 10, 1), `${r.gap}`);
+      L.check(`${w} its centre equals Search's, Quick actions' and the "?"'s ±1`, r.ys.every((y) => near(y, r.ys[0] ?? NaN, 1)), JSON.stringify(r.ys));
       /* RETARGETED by Help system v1 C.1 (the ring pill): the words are "{Page} guide" and the count "{n} of {N}" */
       L.check(`${w} it reads "Contact list guide"`, r.text === "Contact list guide", `${r.text}`);
       L.check(`${w} and "2 of 6"`, r.n === "2 of 6", `${r.n}`);

@@ -1,0 +1,162 @@
+[
+ {
+  "where": "1280 /dashboard the button is drawn",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /dashboard it reads Quick actions",
+  "ok": true,
+  "detail": "Quick actions"
+ },
+ {
+  "where": "1280 /dashboard 36px high",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "where": "1280 /queries the button is drawn",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /queries it reads Quick actions",
+  "ok": true,
+  "detail": "Quick actions"
+ },
+ {
+  "where": "1280 /queries 36px high",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "where": "1280 /agents the button is drawn",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /agents it reads Quick actions",
+  "ok": true,
+  "detail": "Quick actions"
+ },
+ {
+  "where": "1280 /agents 36px high",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "where": "1280 /agents the guide pill sits left of Search, 10px off",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "where": "1280 /queries left = Dashboard's",
+  "ok": false,
+  "detail": "1049.3125 vs 1055.3125"
+ },
+ {
+  "where": "1280 /queries right = Dashboard's",
+  "ok": false,
+  "detail": "1200 vs 1206"
+ },
+ {
+  "where": "1280 /queries centre = Dashboard's",
+  "ok": true,
+  "detail": "74 vs 74"
+ },
+ {
+  "where": "1280 /agents left = Dashboard's",
+  "ok": true,
+  "detail": "1055.3125 vs 1055.3125"
+ },
+ {
+  "where": "1280 /agents right = Dashboard's",
+  "ok": true,
+  "detail": "1206 vs 1206"
+ },
+ {
+  "where": "1280 /agents centre = Dashboard's",
+  "ok": true,
+  "detail": "74 vs 74"
+ },
+ {
+  "where": "1512 /dashboard the button is drawn",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /dashboard it reads Quick actions",
+  "ok": true,
+  "detail": "Quick actions"
+ },
+ {
+  "where": "1512 /dashboard 36px high",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "where": "1512 /queries the button is drawn",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /queries it reads Quick actions",
+  "ok": true,
+  "detail": "Quick actions"
+ },
+ {
+  "where": "1512 /queries 36px high",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "where": "1512 /agents the button is drawn",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /agents it reads Quick actions",
+  "ok": true,
+  "detail": "Quick actions"
+ },
+ {
+  "where": "1512 /agents 36px high",
+  "ok": true,
+  "detail": "36"
+ },
+ {
+  "where": "1512 /agents the guide pill sits left of Search, 10px off",
+  "ok": true,
+  "detail": "10"
+ },
+ {
+  "where": "1512 /queries left = Dashboard's",
+  "ok": false,
+  "detail": "1281.3125 vs 1287.3125"
+ },
+ {
+  "where": "1512 /queries right = Dashboard's",
+  "ok": false,
+  "detail": "1432 vs 1438"
+ },
+ {
+  "where": "1512 /queries centre = Dashboard's",
+  "ok": true,
+  "detail": "74 vs 74"
+ },
+ {
+  "where": "1512 /agents left = Dashboard's",
+  "ok": true,
+  "detail": "1287.3125 vs 1287.3125"
+ },
+ {
+  "where": "1512 /agents right = Dashboard's",
+  "ok": true,
+  "detail": "1438 vs 1438"
+ },
+ {
+  "where": "1512 /agents centre = Dashboard's",
+  "ok": true,
+  "detail": "74 vs 74"
+ }
+]

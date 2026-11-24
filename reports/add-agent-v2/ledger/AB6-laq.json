@@ -1,0 +1,42 @@
+[
+ {
+  "where": "the journey opens over Log a query",
+  "ok": true,
+  "detail": "no journey"
+ },
+ {
+  "where": "Log a query steps back",
+  "ok": true,
+  "detail": "not stepped back"
+ },
+ {
+  "where": "the typed name came with it",
+  "ok": true,
+  "detail": "Ottoline Breck"
+ },
+ {
+  "where": "its primary reads Add and go back to your query",
+  "ok": true,
+  "detail": "label"
+ },
+ {
+  "where": "added: the line",
+  "ok": true,
+  "detail": "line"
+ },
+ {
+  "where": "Log a query is open again",
+  "ok": true,
+  "detail": "{\"open\":true,\"aag\":false,\"stepped\":false,\"who\":\"Ottoline\"}"
+ },
+ {
+  "where": "no longer stepped back",
+  "ok": true,
+  "detail": "{\"open\":true,\"aag\":false,\"stepped\":false,\"who\":\"Ottoline\"}"
+ },
+ {
+  "where": "the new agent is chosen",
+  "ok": true,
+  "detail": "Ottoline"
+ }
+]

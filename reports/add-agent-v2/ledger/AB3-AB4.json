@@ -1,0 +1,62 @@
+[
+ {
+  "where": "AB4 the slate box names the agent",
+  "ok": true,
+  "detail": "no box"
+ },
+ {
+  "where": "AB4 it offers the card",
+  "ok": true,
+  "detail": "no button"
+ },
+ {
+  "where": "AB4 Carry on is disabled",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "where": "AB4 Add now, finish later is disabled",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "where": "AB4 pressing it anyway stays on step one",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "AB4 Enter stays on step one",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "AB3 the agency is asked for",
+  "ok": true,
+  "detail": "no ask"
+ },
+ {
+  "where": "AB3 Agency unknown is marked",
+  "ok": true,
+  "detail": "not marked"
+ },
+ {
+  "where": "AB3 added: the added screen",
+  "ok": true,
+  "detail": "done"
+ },
+ {
+  "where": "AB3 in two actions",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "where": "AB3 one agent saved",
+  "ok": true,
+  "detail": "0 → 1"
+ },
+ {
+  "where": "AB3 saved as Agency unknown",
+  "ok": true,
+  "detail": "{\"name\":\"Quentin Arbuthnot\",\"agency\":\"\",\"email\":\"\",\"website\":\"\",\"genres\":[],\"mswlNotes\":\"\",\"submissionStatus\":\"Unknown\",\"submissionMethod\":\"Email\",\"agencyUnknown\":true,\"materialsWanted\":[],\"notes\":\"\",\"country\":\"GB\",\"id\":\"agent-nagg8qns5\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\",\"dateAdded\":\"2026-11-24T12:50:49.722Z\",\"lastCheckedDate\":\"2026-11-24T12:50:49.722Z\"}"
+ }
+]

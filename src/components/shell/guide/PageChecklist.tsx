@@ -5,7 +5,7 @@
  * Contact list v18.3 §F — A PAGE'S "GETTING STARTED" GUIDE, built so any page can supply one (the Contact list and the
  * Query Centre do). Help system v1 (Part C) re-dressed it:
  *
- *   the pill      in the top bar's page slot (`lib/barSlot`), left of the "?": a ring, "{Page} guide", "{n} of {N}";
+ *   the pill      in the top bar's page slot (`lib/barSlot`), left of Search: a ring, "{Page} guide", "{n} of {N}";
  *                 finished in this visit it turns sage, "{Page}: Learned ✓", and is gone next visit
  *   the checklist a popover under the pill (in the one pop-up layer): the scout, the items with SKIP and LEARN MORE on
  *                 hover, "{n} of {N} done", "Don't show this again". It closes INTO the pill (it shrinks to the caret,

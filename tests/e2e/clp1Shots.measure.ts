@@ -68,38 +68,7 @@ test.skip("CLP shots · each state", async ({ page }) => {
   await page.screenshot({ path: `${OUT}/state-none-1440.png` });
 });
 
-test("CLP shots · the add and Agent fit feedback", async ({ page }) => {
-  test.setTimeout(300_000);
-  const vp = { width: 1440, height: 900 };
-  emu("pro");
-  await openCl(page, vp);
-  await page.locator(".aglist [data-cl27='add']:visible").first().click();
-  await page.locator("[data-aaj='journey']").waitFor({ timeout: 20_000 });
-  const name = `Marcus Shot${Date.now().toString(36).slice(-4)}`;
-  await page.locator("[data-aaj='name']").fill(name);
-  await page.locator("[data-aaj='agency']").fill("Lark Literary");
-  await page.locator("[data-aaj='add']").click();
-  await page.locator("[data-aaj='done']").waitFor({ timeout: 20_000 });
-  await unkill(page);
-  await page.locator("[data-aaj='done']").click();
-  await page.waitForTimeout(450);
-  await page.screenshot({ path: `${OUT}/feedback-added-1440.png` });
-  await page.locator(".sa-toast .sa-toast-undo").first().click();
-  await page.waitForTimeout(1500);
-  if ((JSON.parse(emu("agents")) as { name: string }[]).some((a) => a.name === name)) throw new Error("the shot's add was not undone");
-  await page.screenshot({ path: `${OUT}/feedback-removed-1440.png` });
-  /* Agent fit: a star, the snackbar, then its Undo */
-  await page.locator(".aglist [data-cl26='row']:visible").first().click();
-  await page.locator("[data-cl262='fit'] [data-star]").first().waitFor({ timeout: 15_000 });
-  await page.waitForTimeout(700);
-  const was = await page.locator("[data-cl262='fit'] [data-star][aria-checked='true']").count();
-  await page.locator("[data-cl262='fit'] [data-star='4']").first().click();
-  await page.waitForTimeout(800);
-  await page.screenshot({ path: `${OUT}/feedback-fit-1440.png` });
-  await page.locator(".sa-toast .sa-toast-undo").first().click();
-  await page.waitForTimeout(1500);
-  if (!was && (await page.locator("[data-cl262='fit'] [data-star][aria-checked='true']").count())) throw new Error("the shot's rating was not undone");
-});
+/* CLP shots · the add and Agent fit feedback — DELETED by Add an agent v2 (24 Nov 2026): its subject, the old add-agent panel, no longer opens on a desktop. What covers adding an agent now: tests/e2e/addAgentV2.measure.ts (AB1–AB8). */
 
 test("CLP shots · a 720px-wide content column", async ({ page }) => {
   test.setTimeout(120_000);

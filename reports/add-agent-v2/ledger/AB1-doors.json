@@ -1,0 +1,152 @@
+[
+ {
+  "where": "Quick actions (Dashboard): the door is there",
+  "ok": true,
+  "detail": "not found"
+ },
+ {
+  "where": "Quick actions (Dashboard): the journey is open",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Quick actions (Dashboard): the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Quick actions (Dashboard): the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Quick actions (Dashboard): on Who are you adding?",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "Quick actions (Queries): the door is there",
+  "ok": true,
+  "detail": "not found"
+ },
+ {
+  "where": "Quick actions (Queries): the journey is open",
+  "ok": true,
+  "detail": "{\"path\":\"/queries\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Quick actions (Queries): the route is unchanged",
+  "ok": true,
+  "detail": "/queries → /queries"
+ },
+ {
+  "where": "Quick actions (Queries): the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/queries\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Quick actions (Queries): on Who are you adding?",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "Dashboard's Add an agent: the door is there",
+  "ok": true,
+  "detail": "not found"
+ },
+ {
+  "where": "Dashboard's Add an agent: the journey is open",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Dashboard's Add an agent: the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Dashboard's Add an agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Dashboard's Add an agent: on Who are you adding?",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "Contact list header: the door is there",
+  "ok": true,
+  "detail": "not found"
+ },
+ {
+  "where": "Contact list header: the journey is open",
+  "ok": true,
+  "detail": "{\"path\":\"/agents\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Contact list header: the route is unchanged",
+  "ok": true,
+  "detail": "/agents → /agents"
+ },
+ {
+  "where": "Contact list header: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/agents\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Contact list header: on Who are you adding?",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "Search palette (a typed name): the door is there",
+  "ok": true,
+  "detail": "not found"
+ },
+ {
+  "where": "Search palette (a typed name): the journey is open",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Search palette (a typed name): the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Search palette (a typed name): the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Search palette (a typed name): on Who are you adding?",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "Log a query's Add a new agent: the door is there",
+  "ok": true,
+  "detail": "not found"
+ },
+ {
+  "where": "Log a query's Add a new agent: the journey is open",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Log a query's Add a new agent: the route is unchanged",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ },
+ {
+  "where": "Log a query's Add a new agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"journey\":true,\"step\":\"agent\",\"dim\":true}"
+ },
+ {
+  "where": "Log a query's Add a new agent: on Who are you adding?",
+  "ok": true,
+  "detail": "agent"
+ }
+]

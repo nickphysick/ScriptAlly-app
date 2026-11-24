@@ -1,0 +1,57 @@
+[
+ {
+  "where": "Enter opens with focus on the first row",
+  "ok": true,
+  "detail": "query"
+ },
+ {
+  "where": "the button says it is open",
+  "ok": true,
+  "detail": "aria-expanded"
+ },
+ {
+  "where": "↓ moves to Record a response",
+  "ok": true,
+  "detail": "record"
+ },
+ {
+  "where": "↓ moves to Add an agent",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "↓ wraps, never to Add a manuscript",
+  "ok": true,
+  "detail": "query"
+ },
+ {
+  "where": "Add a manuscript is shown",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "it is not a row",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "it reads coming soon",
+  "ok": true,
+  "detail": "Add a manuscript\ncoming soon"
+ },
+ {
+  "where": "Escape closes it",
+  "ok": true,
+  "detail": "still open"
+ },
+ {
+  "where": "and focus is back on the button",
+  "ok": true,
+  "detail": "quick-btn"
+ },
+ {
+  "where": "a click outside closes it",
+  "ok": true,
+  "detail": "still open"
+ }
+]

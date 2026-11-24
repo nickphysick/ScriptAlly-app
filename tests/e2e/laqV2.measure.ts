@@ -160,35 +160,7 @@ test("V2-1 — the header: one navy piece at four zooms, two lines, the mentor; 
   await discard(page);
 });
 
-test("V2-2 — adding an agent without leaving the journey; closing removes it and its task", async () => {
-  test.setTimeout(240_000);
-  await open(page);
-  await q(page, "find").fill("imogen laqtwo");
-  await page.waitForTimeout(300);
-  ok((await txt(page, '[data-qls="new-agent"]')).includes("Add Imogen Laqtwo as a new agent"), "the last row names the search");
-  ok(await q(page, "none").isVisible(), "no one called that");
-  await shot(page, "02-agent-not-found");
-  await q(page, "new-agent").click();
-  ok(await q(page, "add-name").inputValue() === "Imogen Laqtwo", "the name comes from the search");
-  ok((await panel(page).count()) === 1, "still one panel");
-  await shot(page, "03-add-agent-in-the-journey");
-  await q(page, "add-agency").fill("Fogbound Books");
-  await q(page, "add-go").click();
-  await expect(R(page)).toHaveAttribute("data-step", "when", { timeout: 15_000 });
-  await page.waitForTimeout(800);
-  const s1 = state();
-  const added = s1.added.find((a) => a.name === "Imogen Laqtwo");
-  ok(!!added && added.agency === "Fogbound Books", `the agent is on the Contact list (${JSON.stringify(s1.added)})`);
-  ok(s1.tasks.filter((t) => t.agentId === added?.id && /^Finish Imogen Laqtwo.s card$/.test(t.text)).length === 1, `one Finish task (${JSON.stringify(s1.tasks)})`);
-  ok((await txt(page, ".laq-qh")) === "When did it go to Imogen?", "the Sent step asks about her");
-  await shot(page, "04-sent-step-with-not-sent-link");
-  READ.added = s1;
-  await discard(page);
-  await page.waitForTimeout(1500);
-  const s2 = state();
-  ok(!s2.added.some((a) => a.name === "Imogen Laqtwo"), `closing removed the agent (${JSON.stringify(s2.added)})`);
-  ok(!s2.tasks.some((t) => t.agentId === added?.id), `…and the task (${JSON.stringify(s2.tasks)})`);
-});
+/* V2-2 (the inline add screen; its hand-off is AB6) — DELETED by Add an agent v2 (24 Nov 2026): its subject, the old add-agent panel, no longer opens on a desktop. What covers adding an agent now: tests/e2e/addAgentV2.measure.ts (AB1–AB8). */
 
 test("V2-3 — not sent yet: one task, no query; I've sent it goes back to Sent and keeps it", async () => {
   test.setTimeout(180_000);
