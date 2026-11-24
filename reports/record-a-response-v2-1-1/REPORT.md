@@ -61,6 +61,10 @@ Every surface that reads the resolver now agrees: the recorded screen's card, th
 
 Dev moved during the work. Add an agent v2 deployed `dev/…-rar21-aa2` @ 57a574fc1, and building that tip gives
 `index-DGzm90Vh.js`, the bundle dev was serving, so that is the line. It already contains everything above, including the
-agent card work. This branch was merged into it as `dev/…-rar21-aa2-rar211` and deployed: **https://scriptally-dev.web.app,
-bundle `index-B2Tm2l4_.js`**. That name was taken from a build of the same source before this commit and checked against
-the served page after the deploy. Hosting only; no rules or functions.
+agent card work. This branch was merged into it as `dev/…-rar21-aa2-rar211` @ fb4409d8e and deployed:
+**https://scriptally-dev.web.app, bundle `index-DRi4YNaV.js`**, checked against the served page after the deploy. Dev
+still served `index-DGzm90Vh.js` immediately before. Hosting only; no rules or functions.
+
+A correction: the code commit (edd4d67c7) named `index-B2Tm2l4_.js` here. I took that name from a build made before
+the commit existed, but the dev build embeds the commit's short SHA (`vite.config`, `git rev-parse`), so no bundle name
+can be known before its commit. This report-only commit corrects it; the code is still one commit.
