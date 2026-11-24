@@ -1,4 +1,4 @@
-ee5f10b8f4f0567558ef864a160ee8a750340a5cafc29133e682a569f03e1189  add-agent-v2.html
+b88878cca16d1d108e9a22fa969e5ce5d09617b7e7a1e209c8f446ed41859e46  add-agent-v2.html
 aee2350da66f23a8f9777d2c22c30efcc493485bf79edeb4a73a357ab79e7961  screens/01-quick-actions-menu.png
 3c5462063316a54f1d91f92b63e12d6c819a7dfb8714af41f102ebc1ee4e76a9  screens/02-agent-empty.png
 d45c6869161203f370ec0ff0a7bbe36ef49cb73cc84a800b9854de27606f1ff4  screens/03-agent-already-on-list.png
@@ -20,4 +20,3 @@ ca6c5e2682594fdf60f1828f9750508b24ce3dd494ebed74e8911c813e7b5a34  screens/14-rev
 31145ceb5edb6ce9e3048dfaa81d65e401c9779bbd13161dac04fb53fe9e0f71  screens/19-discard-check.png
 3d1db7cbd2a1bbe8ebabcc02c71ad380c24596178263859156868e6971c18c42  screens/20-from-log-a-query.png
 f5983de6904e515a15a766ad7bd3904d7d5a376630a0850813eb37883ec1757b  screens/21-from-log-a-query-added.png
-207781b1ad1256cce20d6e2fec0d8af2332357b8d334bf0834540c48542f837e  cc-prompt-add-agent-v2.md

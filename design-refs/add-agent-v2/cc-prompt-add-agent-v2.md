@@ -1,5 +1,7 @@
 # Add an agent v2 — the journey rebuilt as the third in the family, and "Quick actions" in the top bar
 
+Revised 24 Nov (design v15). This replaces the earlier Add an agent v2 prompt; do not run both.
+
 Dev only. Desktop only (768px and up). UK spelling throughout.
 
 ## Global rules
@@ -19,13 +21,15 @@ Dev only. Desktop only (768px and up). UK spelling throughout.
 
 Commit the pack to `design-refs/add-agent-v2/` as Phase 0:
 
-- `add-agent-v2.html` — the normative, clickable mock. SHA256 `ee5f10b8f4f0567558ef864a160ee8a750340a5cafc29133e682a569f03e1189`
-- `screens/01` to `screens/21` — every state, numbered in journey order
-- `SHA256SUMS`
+- `add-agent-v2.html` — the normative, clickable mock (design v15). SHA256 `b88878cca16d1d108e9a22fa969e5ce5d09617b7e7a1e209c8f446ed41859e46`
+- `screens/01` to `screens/21` — from the earlier pack, a guide to the states and their order only. They were drawn before v15 and are out of date for step 2, step 3's sample, step 4 and the review screen's count. Where a screen and the html differ, the html wins.
+- `SHA256SUMS` — covers the html
+
+This pack holds the html and its sum. If the earlier pack's `screens/` are to hand, commit them beside it; if not, carry on from the html alone and say so in the report.
 
 Verify the hash before reading the ref. If the file is absent or the hash differs, STOP and report. Do not fall back to `design-refs/add-agent-v1/` or any older ref.
 
-The grey review bar at the top of the mock is not part of the design. The mock redraws the agent card preview inside an embedded frame only so that it can stand alone; in the app the preview is the real agent card component (see B7).
+The grey review bar at the top of the mock is not part of the design. Its switches open on the ruled design ("An “i” to hover" and "Typed, with common asks"); their other positions are earlier options, kept for comparison, and are not to be built. The mock redraws the agent card preview inside an embedded frame only so that it can stand alone; in the app the preview is the real agent card component (see B5).
 
 ## Step 0 — recon gate (read only, then report before editing)
 
@@ -35,11 +39,14 @@ Report each of these, then carry on unless a red gate fires.
 2. The Log a query journey as built: its panel, header, track, stage body and footer components and its stylesheet (`qcLogStages.css`, the `.laq-*` and `.flh-*` classes). The Record a response v2 journey: how it reuses those parts and how it carries its own identity (the Archivist's head, the status colour).
 3. The Add an agent journey as built ("Adding new agent", add agent v1): its component, every field it saves and the exact shape each is saved in, and every door that opens it. Expect at least: the top bar menu, the Dashboard header's "Add an agent", the Contact list's own add control, the Contact list empty state, Log a query's "add a new agent" on its first step, and any To-do or Next up task.
 4. The top bar's "Log a query" split button and its menu in `WorkspaceShell` (`.ws-pagebar`): the component, what each row opens, and whether any page swaps it for something else.
-5. The agent card component (agent card v2.2) and whether it can be drawn read-only from an unsaved agent object.
+5. The agent card component (agent card v2.2) and whether it can be drawn read-only from an unsaved agent object. It already takes a `preview` prop that hides its pencils and its ⋯ menu (`AgentCard262.tsx`, locked as acv22 AC14); confirm that is enough.
 6. Whether the Contact list really ranks or can sort by Agent fit, and the exact wording of the Agent fit "i" pop-up as built.
 7. Where the Scout illustration lives in the repo, and the files used for the Mentor's head in Log a query's header and the Archivist's head in Record a response's.
-8. Which fields from the ref the agent record cannot store today (check each: synopsis length, "another way" free text for how they take queries, "Not sure" for open to queries, a country name for Elsewhere, the suggested extras under "Something else").
-9. Every existing test that names the old add-agent journey or the top bar split button, and whether each is live or already stale (the cl251 B3 spec is known stale and may already be dealt with by After Log a query v1).
+8. Which fields from the ref the agent record cannot store today (check each: synopsis length, "another way" free text for how they take queries, "Not sure" for open to queries, a country name for Elsewhere, the suggested extras under "Something else", the wishlist page link (`mswl` on the agent card), the reopening date (`reopensOn`), and a sample of any whole number of pages, words or chapters with an optional starting point).
+9. The card's own count of what is missing: `GAP_ORDER` and the gap rules in `src/lib/contactHousekeeping.ts`, and `finishShare` and `finishItems` in `src/lib/agentCardV2.ts`. Expect six (reply time, what they ask for, genres, wishlist, reopening date for a closed agent, agency). Report the six and each rule.
+10. The app's sample picker as built (the one Log a query and the query card use): its component, every place it is drawn, the shape it saves, and whether that shape can hold any whole number.
+11. The app's date slider as built (the one Log a query uses for dates), and how the agent card saves a reopening date.
+12. Every existing test that names the old add-agent journey or the top bar split button, and whether each is live or already stale (the cl251 B3 spec is known stale and may already be dealt with by After Log a query v1).
 
 Red gates — STOP and report:
 
@@ -113,16 +120,28 @@ As `screens/02` to `07`. "Who are you adding?" / "A name is enough to start. The
 
 ### Phase B3 — steps 2 and 3, Wishlist and Asks for
 
-Step 2, as `screens/08`. "What is Sarah looking for?" / "From their wishlist or their agency page."
+Step 2, as the ref. "What is Sarah looking for?" / "From their wishlist or their agency page."
 
 - Genres: the app's existing type-to-find genre field (the one the To-do desk uses), with the manuscript's own genres marked "Your book". Chosen genres sit above as slate chips with a cross.
-- Wishlist, "in Sarah's words": a text box, 400 characters, "Paste it from their wishlist or agency page".
+- Wishlist: a text box, 400 characters, "Paste it from their wishlist or agency page". Its label carries a small "i" (below), not the italic "in Sarah's words".
+- "Link to Sarah's wishlist page": one optional field beneath, placeholder "agency.co.uk/sarah-jones", saved where the agent card saves its wishlist page link (`mswl`). It does not count towards the card's ring. Its label carries an "i" too.
+- The "i": the same round "i" Agent fit uses on the review screen, 20px, beside the label. Hovering it, or focusing it with the keyboard, shows a dark bubble above the label; it is never cut off by the panel and never covers the field. Words:
+  - Wishlist — "Use Sarah's own words, copied from the wishlist or agency page, so the card reads the way Sarah wrote it."
+  - Link — "The page where Sarah lists what Sarah wants to see. Leave it blank if there isn't one."
+- No label in this journey carries an italic aside. Anything a label needs to explain goes in an "i".
 
-Step 3, as `screens/09` and `10`. "What does Sarah ask for?" / "Tick everything on their submissions page." Four tiles that tick, each opening in place:
+Step 3, as `screens/09` and `10`, with the sample as the ref draws it. "What does Sarah ask for?" / "Tick everything on their submissions page." Four tiles that tick, each opening in place:
 
 - Query letter.
 - Synopsis — opens to One page, Two pages, They don't say.
-- A sample, sub-heading "Pages, chapters or words" — opens to the app's own sample control (pages, words or chapters, stepper, quick amounts, from the opening or a specific section), free quantities allowed.
+- A sample, sub-heading "Pages, chapters or words" — opens to the typed sample control the ref draws:
+  - One line that reads as a sentence: "The first", a box to type the amount in, then Pages / Words / Chapters. Any whole number from 1. Words show with a thousands comma (7,500). The up and down arrow keys change it by one. No − and + buttons.
+  - Changing between pages, words and chapters keeps the typed number.
+  - "Often asked for": five chips, each setting amount and unit together — 3 chapters, 5 pages, 10 pages, 50 pages, 10,000 words. A chip shows as chosen only when it matches exactly.
+  - Under a dashed rule: "From the opening." and the link "Sarah asks for a different part". The link swaps the line for "Starting at page [box]" (or chapter, by unit), typed, with "Back to the opening"; the sentence then starts "Any" in place of "The first".
+  - The tile's sub-heading follows as the writer types ("First 3 chapters", "7,500 words from page 1").
+  - It saves the same shape the app's sample picker saves (Step 0 item 10). If that shape cannot hold a value this control allows, stop and report; do not invent storage.
+  - Build it as one new shared part beside the existing picker. Do not change the existing picker or any place it is drawn; list those places in the report so Nick can rule on moving them over.
 - Something else, no sub-heading — opens to the four suggested extras Record a response v2 offers (Author bio, Series outline, Comp titles, Chapter outline), plus a free-text field.
 
 Nothing is pre-ticked.
@@ -134,6 +153,7 @@ Step 4, as `screens/11`. "How does Sarah take queries?" / "It goes on Sarah's ca
 - Email, Online form, QueryManager, Post, Another way. Another way opens a text field.
 - Email and Website fields beneath, side by side. Choosing Email moves focus to Email; choosing Online form or QueryManager relabels Website as "Link to the form" and moves focus to it.
 - "Is Sarah open to queries?" — Open, Closed, Not sure. Not sure saves as not known.
+- Choosing Closed opens, in place beneath, "When does Sarah reopen to queries?": the app's own date slider (Step 0 item 11), labelled "Reopens", starting as "Not sure", showing the date and how many weeks away it is, with a "Not sure" pill that clears it. Under it, when set: "This goes on Sarah's card." When not: "Not known yet. It stays on Sarah's card as something to add." The ref draws a week slider running from next week to a year as a stand-in; the app's own date slider wins. A date saves to `reopensOn` in the shape the agent card saves it; "Not sure" saves nothing. Open and Not sure never show the question. Do not say QueryHawk will remind the writer unless the code does.
 
 Step 5, as `screens/12` and `13`. "How long does Sarah take to reply?" / "Most agents say on their submissions page."
 
@@ -148,9 +168,9 @@ On steps 2 to 5 the footer is Back at the left; "Skip to the end" and the primar
 As `screens/14` to `16` and `18`. "Ready to add Sarah?" / "This is Sarah's card, as it will sit in your Contact list."
 
 - The real agent card component, read-only, drawn from the unsaved agent and scaled down so the whole card is visible at once without scrolling inside it. Not a redrawn copy. It shows the card's own "Finish Sarah's profile" block for whatever is missing.
-- Agent fit beneath it: five stars, "Not rated yet" until one is chosen, then the label (Poor fit, Worth a try, Good fit, Great fit, Dream agent). Clicking the chosen star again clears it. The stars on the card preview above light up as the writer rates. Agent fit moves here from the first screen.
+- Agent fit beneath it: five stars, "Not rated yet" until one is chosen, then the label (Poor fit, Worth a try, Good fit, Great fit, Dream agent — read from `FIT_WORDS` in `agentPills.tsx`, never from `FitStars`' own list). Clicking the chosen star again clears it. The stars on the card preview above light up as the writer rates. Agent fit moves here from the first screen.
 - The "i" opens the explanation above the stars, never cut off by the panel's edges. Use the wording the app already has for Agent fit; only say it ranks the Contact list if Step 0 item 6 found that it does.
-- The two big numbers, in Log a query's "big numbers" style: agents on file with a "+1" badge in slate, and "N of 9" details on the card, counted the way the card's own profile ring counts them.
+- The two big numbers, in Log a query's "big numbers" style: agents on file with a "+1" badge in slate, and "N of 6" details on the card. N and the 6 are the card's own count (Step 0 item 9: `finishShare` and the gaps behind the "Finish Sarah's profile" block), read from that code and never counted a second way. The number and the preview's ring can never disagree.
 - Footer: Back; "Add and start another"; primary "Add to your list".
 
 ### Phase B6 — added
@@ -189,9 +209,13 @@ Measured on the rendered page, each proved red first:
 - The panel's box, header height and track geometry match Log a query's to the pixel at 1280 and 1512.
 - A name alone, with "Agency unknown", can be added in two actions from the first screen.
 - A name already on the list cannot be added.
-- An agent added with everything filled shows 9 of 9 and no "Finish profile" block; with a name and agency only, 1 of 9.
+- An agent added with everything filled and marked Open shows 6 of 6 and no "Finish profile" block. For three agents (everything filled; a name and agency only; a name alone with "Agency unknown") the big number equals the preview ring's own count.
+- Closed with a reopening date: no "Reopening date" gap on the preview. Closed with "Not sure": the gap shows and the big number is one lower. Open: the reopening question is not in the page.
+- The sample accepts 7500 typed as words and shows "7,500"; 35 typed as pages saves 35; changing unit keeps the number; no − or + button is in the control.
+- No label in the journey holds an italic aside; each "i" shows its bubble on hover and on keyboard focus, wholly inside the panel.
+- The wishlist page link typed in step 2 is on the saved agent where the agent card reads it.
 - From inside Log a query: after adding, Log a query is on the step it was left on with the new agent chosen.
-- The saved record for a fully filled agent equals, field for field, what the old journey would have saved for the same answers.
+- The saved record for a fully filled agent equals, field for field, what the old journey would have saved for the same answers, plus the wishlist page link and the reopening date.
 - The whole card preview is visible on the review screen at 1280 × 800 with no scroll inside the preview.
 
 A suite that cannot find its subject has failed, not skipped. Rewrite or delete old add-agent specs that can no longer find theirs, and say which.
@@ -209,6 +233,10 @@ A suite that cannot find its subject has failed, not skipped. Rewrite or delete 
 - The review and added screens show the real agent card, small enough to see whole.
 - The form's accent is the agent card's slate, not teal and not the ochre Log a query uses for materials.
 - Dates and durations use the app's slider; no fixed date pills.
+- The review screen counts six, the card's own count. The card's ring does not change.
+- A closed agent is asked when they reopen. The wishlist page link is asked on step 2. Social is not asked; it stays on the card.
+- Field notes are an "i" to hover, never an italic aside beside a label.
+- The sample amount is typed, with five common asks as chips.
 - Copy never uses "he" or "she" for an agent; first name, or "the agent".
 
 ## Do not touch
@@ -217,6 +245,8 @@ A suite that cannot find its subject has failed, not skipped. Rewrite or delete 
 - The query card and its parts, and the agent card's own editing (Agent card v2.2.1 / Query card v168.2 is pending in another session). Read-only use of the agent card component is fine; if the preview needs a new prop on it, add the smallest one and report it.
 - Record a response's journey files (v2.1 is pending in another session), beyond reusing shared parts.
 - Log a query's steps, beyond the hand-off in B7.
+- The existing sample picker, and every place it is drawn (Log a query, Record a response, the query card).
+- What the agent card's ring counts, Housekeeping's gaps, and `finishShare`.
 - Phone layouts below 768px.
 - Prod, `main`, database rules, anything that spends API money.
 
@@ -226,7 +256,7 @@ A suite that cannot find its subject has failed, not skipped. Rewrite or delete 
 2. The dev line you cut from, and what was and was not on it.
 3. Phase by phase: landed or not, the commit, and the measurement that proves it. A phase whose measurement has not run is not landed.
 4. Every door, and what it opens now.
-5. Ruled fields with no home in the agent record, and what you left out because of it.
+5. Ruled fields with no home in the agent record, and what you left out because of it. The card's six, as found. Every place the existing sample picker is drawn.
 6. Anything in the ref's copy the code does not do.
 7. Old tests rewritten or removed.
 8. Baseline against final for `tsc`, build and Vitest.
