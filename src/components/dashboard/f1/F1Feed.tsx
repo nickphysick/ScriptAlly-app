@@ -116,10 +116,10 @@ const Big: React.FC<{ c: F1Big; onOpen: (queryId: string) => void; onFold?: () =
 );
 
 /* Feed wording v1.1 · a row about one query opens it on a click anywhere but a link: the row's own link, stretched over
-   the row (df1-go), sits beside the names' links rather than around them */
+   the row (df1-rowgo), sits beside the names' links rather than around them */
 const Mini: React.FC<{ m: F1Mini }> = ({ m }) => (
   <div className="df1-mini" data-df1="mini" data-dir={m.dir} data-status={m.status ?? ""} data-glyph={m.glyph} data-go={m.go ?? undefined}>
-    {m.go && <Link to={m.go} className="df1-go" data-df1="row-go" aria-label={`Open the query: ${sayText(m.say)}`} />}
+    {m.go && <Link to={m.go} className="df1-rowgo" data-df1="row-go" aria-label={`Open the query: ${sayText(m.say)}`} />}
     {/* Feed wording v1.1 · one icon per kind of event (shared/FeedIcon); a row about a query's status keeps its StatusDot */}
     <span className={`df1-mg df1-mg--${m.glyph}`} aria-hidden="true" data-df1="mark" data-icon={m.icon ?? "status"}>
       {m.icon ? <FeedIcon kind={m.icon} /> : m.status ? <StatusDot status={m.status} overrideSize={20} decorative /> : null}

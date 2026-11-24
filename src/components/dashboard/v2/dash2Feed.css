@@ -68,14 +68,14 @@
 
 /* ════ FEED WORDING v1.1 · NAMES ARE LINKS (Part 3) ════
    A link never sits inside a button: a collapsed card is a container whose toggle (the chevron's button) is stretched over
-   the row by its ::after, and a small row about a query carries its own link (df1-go) stretched the same way. The names'
+   the row by its ::after, and a small row about a query carries its own link (df1-rowgo) stretched the same way. The names'
    links (shared/feedSay.css) sit above both, so a click on a name goes to the name and anywhere else to the row. */
 .d58.d2 .d2-feed .df1-crow { position: relative; }
 .d58.d2 .d2-feed .df1-crow-t { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; }
 .d58.d2 .d2-feed .df1-crow-t::after { content: ""; position: absolute; inset: 0; border-radius: 12px; }
 .d58.d2 .d2-feed .df1-crow-t:focus-visible { outline: none; }
 .d58.d2 .d2-feed .df1-mini { position: relative; }
-.d58.d2 .d2-feed .df1-go { position: absolute; inset: 0; border-radius: 12px; }
-.d58.d2 .d2-feed .df1-go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.d58.d2 .d2-feed .df1-rowgo { position: absolute; inset: 0; border-radius: 12px; }
+.d58.d2 .d2-feed .df1-rowgo:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58.d2 .d2-feed .df1-mini[data-go] { cursor: pointer; }
 .d58.d2 .d2-feed .df1-mini[data-go]:hover { background: #f8f4ed; }
