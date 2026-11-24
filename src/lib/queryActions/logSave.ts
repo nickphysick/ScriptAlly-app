@@ -13,6 +13,7 @@ import { sampleToMaterial } from "../sentSample";
 import type { useScriptAllyDb } from "../db";
 import { QueryStatus, SubmissionMethod, type Agent, type QueryMaterial } from "../../types";
 import { addDays, dayIso, reminderAnchors } from "./dates";
+import { writerExpectedUnknownWrite } from "../expectedDate";
 import { sentPieces, summaryWith, type PackageCard } from "./packages";
 import type { Materials } from "./sample";
 
@@ -53,6 +54,9 @@ export interface LogPlan {
   expect: Date | null;
   /** the writer moved the reply date off the agent's usual */
   writerExpected: boolean;
+  /** Log a query · Unknown v1 — the writer chose Unknown on the Nudge step (desktop journey only; the phone and the old
+   *  journey never set it). The record stamps that statement with no date, so the agent's weeks never stand in for it. */
+  replyUnknown?: boolean;
   ifNo: IfNo;
   nudgeDate: Date | null;
   requery: boolean;
@@ -103,6 +107,9 @@ export function logPayload(p: LogPlan): { payload: Record<string, unknown>; summ
        ago is not), so the close date was never written. `addQuery` keeps a stated `responseDeadline` on a Queried query. */
     ...(p.ifNo === "close" && p.expect ? { status: QueryStatus.QUERIED, responseDeadline: closeDateIso(p.expect) } : {}),
     ...(p.writerExpected && p.expect ? { writerExpectedDate: dayIso(p.expect), writerExpectedSetAt: new Date().toISOString() } : {}),
+    /* Log a query · Unknown v1 (Nick, 24 Nov: as Record a response v2.1.1) — Unknown is the writer's statement that no reply
+       date is known: the stamp with no date (lib/expectedDate `writerExpectedUnknownWrite`), which beats the agent's weeks */
+    ...(p.replyUnknown && !p.expect ? { writerExpectedSetAt: writerExpectedUnknownWrite().writerExpectedSetAt } : {}),
     ...(p.requery ? { requery: true } : {}),
     ...(p.nrmnOverride != null ? { nrmnOverride: p.nrmnOverride } : {}),
   };
