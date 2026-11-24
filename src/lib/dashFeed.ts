@@ -28,7 +28,6 @@
 import { MONTHS_SHORT } from "./dates";
 import { EVENT_LABEL, isEventKey } from "./queryActions/eventKeys";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus } from "../types";
-import { agentPrimary } from "./agentDisplay";
 import { requeryLine } from "./requery";
 import { eventShape, markSentOffered } from "./feedConversation";
 import { recordSpecFor } from "./todoCalendar";
@@ -460,7 +459,6 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
     if (isImportActivity(a)) {
       const title = (i.manuscripts.find((m) => m.id === a.manuscriptId)?.title ?? "").trim();
       const c = a.importCounts;
-      const d = new Date(t);
       out.push({
         id: a.id, at: t,
         time: feedClock(t),
@@ -535,7 +533,6 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       ? { label: NEED_LABEL[shape.status] as string } : null;
     const met = need || !evQuery ? null : metOn(shape.status, evQuery, i.activities, t);
 
-    const d = new Date(t);
     out.push({
       id: a.id,
       at: t,

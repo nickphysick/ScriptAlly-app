@@ -21,7 +21,10 @@ const row = (id: string, desc: string, d: number) =>
 describe("the feed and the Fortnight view agree on 'Added' rows", () => {
   const cases: [string, Activity[]][] = [
     ["one row per agent", [row("act-added-agent-a1", "Added Rowan Cleaver at Cleaver & Co", 2), row("act-added-agent-a2", "Added Imogen Vale at Vale Literary", 3)]],
-    ["a duplicate, should one be written again", [row("act-added-agent-a1", "Added Rowan Cleaver at Cleaver & Co", 2), row("act-old", "Added Rowan Cleaver at Cleaver & Co", 2)]],
+    /* feed wording v1: a row written today carries its subject, so the duplicate does too (a row that carries none,
+       and is not keyed by its agent's id, is dropped by the feed — baked decision 1) */
+    ["a duplicate, should one be written again", [row("act-added-agent-a1", "Added Rowan Cleaver at Cleaver & Co", 2),
+      { ...row("act-old", "Added Rowan Cleaver at Cleaver & Co", 2), subjectName: "Rowan Cleaver", subjectAgency: "Cleaver & Co" }]],
   ];
   for (const [name, acts] of cases) {
     it(name, () => {

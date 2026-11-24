@@ -1,0 +1,72 @@
+[
+ {
+  "name": "the add journey finished",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the email saved",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the rename saved",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the journey's rows on the feed",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "a row for each step, newest first, in the pack's words",
+  "ok": true,
+  "got": "[\"You removed Fwone Renamedxn25t from your contact list\",\"You renamed Fwone Probexn25t to Fwone Renamedxn25t\",\"You updated Fwone Probexn25t's contact details\",\"You added Fwone Probexn25t to your contact list\"]"
+ },
+ {
+  "name": "the person's bold run holds the name alone (on the rename, only the NEW name)",
+  "ok": true,
+  "got": "[[\"Fwone Renamedxn25t\"],[\"Fwone Renamedxn25t\"],[\"Fwone Probexn25t\"],[\"Fwone Probexn25t\"]]"
+ },
+ {
+  "name": "named once: You removed Fwone Renamedxn25t from your contact list",
+  "ok": true,
+  "got": "0/1/0"
+ },
+ {
+  "name": "no full stop, no dash: You removed Fwone Renamedxn25t from your contact list",
+  "ok": true,
+  "got": "You removed Fwone Renamedxn25t from your contact list"
+ },
+ {
+  "name": "named once: You renamed Fwone Probexn25t to Fwone Renamedxn25t",
+  "ok": true,
+  "got": "1/1/0"
+ },
+ {
+  "name": "no full stop, no dash: You renamed Fwone Probexn25t to Fwone Renamedxn25t",
+  "ok": true,
+  "got": "You renamed Fwone Probexn25t to Fwone Renamedxn25t"
+ },
+ {
+  "name": "named once: You updated Fwone Probexn25t's contact details",
+  "ok": true,
+  "got": "1/0/0"
+ },
+ {
+  "name": "no full stop, no dash: You updated Fwone Probexn25t's contact details",
+  "ok": true,
+  "got": "You updated Fwone Probexn25t's contact details"
+ },
+ {
+  "name": "named once: You added Fwone Probexn25t to your contact list",
+  "ok": true,
+  "got": "1/0/0"
+ },
+ {
+  "name": "no full stop, no dash: You added Fwone Probexn25t to your contact list",
+  "ok": true,
+  "got": "You added Fwone Probexn25t to your contact list"
+ }
+]

@@ -31,7 +31,8 @@ describe("the feed: who wrote it", () => {
       act({ id: "pass", date: at(4), resultingStatus: QueryStatus.REJECTED }),
       act({ id: "offer", date: at(5), resultingStatus: QueryStatus.OFFER }),
       act({ id: "q", date: at(6), activityType: ActivityType.QUERY_SENT, resultingStatus: QueryStatus.QUERIED }),
-      act({ id: "added", date: at(7), queryId: undefined, activityType: ActivityType.AGENT_ADDED, description: "Added Jonathan Marsh at The Marsh Agency" }),
+      /* feed wording v1: the subject is carried (an Added row neither keyed by its agent's id nor carrying one drops) */
+      act({ id: "added", date: at(7), queryId: undefined, activityType: ActivityType.AGENT_ADDED, description: "Added Jonathan Marsh at The Marsh Agency", subjectName: "Jonathan Marsh", subjectAgency: "The Marsh Agency" }),
     ], query({ status: QueryStatus.FULL_REQUESTED }));
     const dir = Object.fromEntries(e.map((x) => [x.id, x.dir]));
     expect(dir).toEqual({ req: "in", sent: "out", nudge: "out", pass: "in", offer: "in", q: "out", added: "out" });

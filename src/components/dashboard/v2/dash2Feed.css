@@ -27,9 +27,11 @@
 .d58.d2 .d2-feed .df1-crow:focus-visible, .d2-feed .df1-fold:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58.d2 .d2-feed .df1-cg { display: grid; place-items: center; }
 .d58.d2 .d2-feed .df1-ctx { min-width: 0; }
-.d58.d2 .d2-feed .df1-ctx b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 16px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Feed wording v1 (Part E) — the headline wraps to at most two lines, never a one-line ellipsis; the row grows with it */
+.d58.d2 .d2-feed .df1-ctx b { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; font-family: var(--d58-type) !important; font-weight: 400; font-size: 16px; line-height: 1.25; overflow: hidden; white-space: normal; overflow-wrap: break-word; }
 .d58.d2 .d2-feed .df1-ctx small { display: block; margin-top: 2px; font-family: var(--d58-serif); font-size: 13px; line-height: 1.35; color: var(--d2-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.d58.d2 .d2-feed .df1-crow time { font-family: var(--d58-mono) !important; font-size: 11.5px; color: #8a8178; white-space: nowrap; }
+/* …and the time stays top-aligned with the headline's first line (its line box is the headline's: 16px × 1.25) */
+.d58.d2 .d2-feed .df1-crow time { align-self: start; line-height: 20px; font-family: var(--d58-mono) !important; font-size: 11.5px; color: #8a8178; white-space: nowrap; }
 .d58.d2 .d2-feed .df1-cv { display: grid; place-items: center; width: 16px; height: 16px; color: var(--d2-muted); }
 .d58.d2 .d2-feed .df1-cv svg { width: 16px; height: 16px; }
 /* the opened card: the full v2 card, with a round fold button top right */

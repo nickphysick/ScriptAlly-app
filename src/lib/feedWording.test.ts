@@ -417,3 +417,31 @@ describe("Part D — the cards", () => {
     expect(f1).toContain("feedClock(");
   });
 });
+
+/* ═══ Part E — nothing cut off (source half; the rendered half is tests/e2e/feedWordingV1.measure.ts FW-E) ══════ */
+describe("Part E — the collapsed card's headline wraps to two lines; its sub-line stays one", () => {
+  const css = readFileSync("src/components/dashboard/v2/dash2Feed.css", "utf8");
+  const rule = (sel: string) => { const i = css.indexOf(`${sel} {`); return css.slice(i, css.indexOf("}", i)); };
+  it("the headline: clamped at two lines, wrapping, no one-line ellipsis", () => {
+    const b = rule(".d58.d2 .d2-feed .df1-ctx b");
+    expect(b).toContain("-webkit-line-clamp: 2");
+    expect(b).toContain("white-space: normal");
+    expect(b).not.toContain("nowrap");
+    expect(b).not.toContain("text-overflow: ellipsis");
+  });
+  it("the sub-line: one line, as built", () => {
+    expect(rule(".d58.d2 .d2-feed .df1-ctx small")).toContain("white-space: nowrap");
+  });
+  it("the time sits at the top, on the headline's line box", () => {
+    const t = rule(".d58.d2 .d2-feed .df1-crow time");
+    expect(t).toContain("align-self: start");
+    expect(t).toContain("line-height: 20px");
+  });
+});
+
+describe("the phone's Today reads the first person run as the name", () => {
+  it("on a rename row that run is the NEW name", () => {
+    const e = feed([act({ activityType: ActivityType.AGENT_UPDATED, changed: ["name"], previousName: "Nadia Hussein", subjectName: "Nadia Hussain", subjectAgency: "Hussain Literary", description: "x" })]);
+    expect(e[0].say.find((s) => s.who)?.t).toBe("Nadia Hussain");
+  });
+});

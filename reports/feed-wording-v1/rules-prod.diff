@@ -1,0 +1,51 @@
+diff --git a/firestore.rules b/firestore.rules
+index b2416a71f..a7e974c48 100644
+--- a/firestore.rules
++++ b/firestore.rules
+@@ -640,7 +640,9 @@ service cloud.firestore {
+           'replyNote', 'toldCount', 'toldDeadline',
+           // Query Centre v152.2: a pass's "open to more work" and its Wall-of-no opt-out (§5), "Something else"'s words
+           // (§5), how a nudge went (§4.2), and the offer step's "tell the rest later" flag (§6.1). All OPTIONAL.
+-          'openToMore', 'offWall', 'askedFor', 'sentVia', 'tellLater'
++          'openToMore', 'offWall', 'askedFor', 'sentVia', 'tellLater',
++          // Feed wording v1 (see isValidActivity): the carried subject and an update's groups. All OPTIONAL.
++          'subjectName', 'subjectAgency', 'previousName', 'removedQueries', 'changed', 'changedTo', 'batchCount'
+         ])
+         && (!data.keys().hasAny(['reconstructed']) || data.reconstructed == true)
+         && data.type is string && data.type.size() <= 128
+@@ -680,7 +682,16 @@ service cloud.firestore {
+         && (!data.keys().hasAny(['offWall']) || data.offWall is bool)
+         && (!data.keys().hasAny(['askedFor']) || (data.askedFor is string && data.askedFor.size() <= 80))
+         && (!data.keys().hasAny(['sentVia']) || (data.sentVia is string && data.sentVia.size() <= 32))
+-        && (!data.keys().hasAny(['tellLater']) || data.tellLater is bool);
++        && (!data.keys().hasAny(['tellLater']) || data.tellLater is bool)
++        // Feed wording v1: the subject a housekeeping row is about, carried at write time, and what an update changed.
++        // All OPTIONAL — every row written before has none.
++        && (!data.keys().hasAny(['subjectName']) || (data.subjectName is string && data.subjectName.size() <= 200))
++        && (!data.keys().hasAny(['subjectAgency']) || (data.subjectAgency is string && data.subjectAgency.size() <= 200))
++        && (!data.keys().hasAny(['previousName']) || (data.previousName is string && data.previousName.size() <= 200))
++        && (!data.keys().hasAny(['changedTo']) || (data.changedTo is string && data.changedTo.size() <= 200))
++        && (!data.keys().hasAny(['removedQueries']) || (data.removedQueries is int && data.removedQueries >= 0))
++        && (!data.keys().hasAny(['batchCount']) || (data.batchCount is int && data.batchCount >= 0))
++        && (!data.keys().hasAny(['changed']) || (data.changed is list && data.changed.size() <= 12));
+     }
+ 
+     // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
+@@ -820,7 +831,16 @@ service cloud.firestore {
+         // touching; the client is the single writer and never puts one on another type.
+         && (!data.keys().hasAny(['bookVersionId']) || (data.bookVersionId is string && data.bookVersionId.size() <= 128))
+         // Query actions v1 (K5, 27 Sep): the drawer's structured event key.
+-        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64));
++        && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64))
++        // Feed wording v1: the subject a housekeeping row is about, carried at write time, and what an update changed.
++        // All OPTIONAL — every row written before has none.
++        && (!data.keys().hasAny(['subjectName']) || (data.subjectName is string && data.subjectName.size() <= 200))
++        && (!data.keys().hasAny(['subjectAgency']) || (data.subjectAgency is string && data.subjectAgency.size() <= 200))
++        && (!data.keys().hasAny(['previousName']) || (data.previousName is string && data.previousName.size() <= 200))
++        && (!data.keys().hasAny(['changedTo']) || (data.changedTo is string && data.changedTo.size() <= 200))
++        && (!data.keys().hasAny(['removedQueries']) || (data.removedQueries is int && data.removedQueries >= 0))
++        && (!data.keys().hasAny(['batchCount']) || (data.batchCount is int && data.batchCount >= 0))
++        && (!data.keys().hasAny(['changed']) || (data.changed is list && data.changed.size() <= 12));
+     }
+ 
+     function isValidJournalEntry(data, userId) {

@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: the long card is on the page",
+  "ok": true,
+  "got": "1 collapsed rows"
+ },
+ {
+  "name": "its headline is the whole text",
+  "ok": true,
+  "got": "Your full manuscript is with Penhallow, Treloar & Kitto Literary"
+ },
+ {
+  "name": "it wraps onto a second line, never a one-line ellipsis",
+  "ok": true,
+  "got": "{\"q\":\"fw1-q-long-xtp1j\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":2,\"need\":6,\"w\":125,\"rowW\":278,\"cols\":\"22px 125.25px 48.3125px 16px\",\"timeW\":48,\"feedW\":278,\"clipped\":true,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":0,\"rowH\":86}"
+ },
+ {
+  "name": "fw1-q-long-xtp1j: at most two lines, no one-line ellipsis",
+  "ok": true,
+  "got": "{\"q\":\"fw1-q-long-xtp1j\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":2,\"need\":6,\"w\":125,\"rowW\":278,\"cols\":\"22px 125.25px 48.3125px 16px\",\"timeW\":48,\"feedW\":278,\"clipped\":true,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":0,\"rowH\":86}"
+ },
+ {
+  "name": "fw1-q-long-xtp1j: the sub-line stays one line",
+  "ok": true,
+  "got": "{\"q\":\"fw1-q-long-xtp1j\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":2,\"need\":6,\"w\":125,\"rowW\":278,\"cols\":\"22px 125.25px 48.3125px 16px\",\"timeW\":48,\"feedW\":278,\"clipped\":true,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":0,\"rowH\":86}"
+ },
+ {
+  "name": "fw1-q-long-xtp1j: the time is level with the headline's first line",
+  "ok": true,
+  "got": "0"
+ }
+]
