@@ -15,7 +15,7 @@ import { setCardJourneyLive, type CardJourneyKind } from "../queryPanelStore";
 
 export const CARD_JOURNEY_LIVE: Record<CardJourneyKind, boolean> = {
   send: true,
-  close: false,
+  close: true,
   offer: false,
   reopen: false,
 };

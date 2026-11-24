@@ -1,0 +1,87 @@
+[
+ {
+  "where": "X1 · subject",
+  "ok": true,
+  "detail": "seed-cal-soon-q"
+ },
+ {
+  "where": "X1 · the head",
+  "ok": true,
+  "detail": "Closing this one. Let’s log the details."
+ },
+ {
+  "where": "X1 · why",
+  "ok": true,
+  "detail": "Why are you closing it? / Queried 8 Sep, 77 days ago."
+ },
+ {
+  "where": "X1 · three reasons",
+  "ok": true,
+  "detail": "noreply withdraw passed"
+ },
+ {
+  "where": "X1 · the track",
+  "ok": true,
+  "detail": "agent:done why:now log:todo"
+ },
+ {
+  "where": "X1 · straight to the review",
+  "ok": true,
+  "detail": "agent:done why:done log:now"
+ },
+ {
+  "where": "X1 · the review",
+  "ok": true,
+  "detail": "Ready to close it?"
+ },
+ {
+  "where": "X1 · the card as it will be",
+  "ok": true,
+  "detail": "preview status No Response"
+ },
+ {
+  "where": "X1 · the reminder line",
+  "ok": true,
+  "detail": "\"Any reminder to nudge Hester comes off your to-do list.\""
+ },
+ {
+  "where": "X1 · active −1, closed +1",
+  "ok": true,
+  "detail": "active-1 closed1"
+ },
+ {
+  "where": "X1 · Add a note, \"Close query\"",
+  "ok": true,
+  "detail": "Close query"
+ },
+ {
+  "where": "X1 · nothing cut off at 1440 × 900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "X1 · the head",
+  "ok": true,
+  "detail": "\"Closed. 38 queries still out.\""
+ },
+ {
+  "where": "X1 · the big line",
+  "ok": true,
+  "detail": "Hester’s query is closed."
+ },
+ {
+  "where": "X1 · the sentence",
+  "ok": true,
+  "detail": "It’s marked as no reply. A reply later reopens it."
+ },
+ {
+  "where": "X1 · the stamp",
+  "ok": true,
+  "detail": "Closed 24 NOV"
+ },
+ {
+  "where": "X1 · Undo brings back the review",
+  "ok": true,
+  "detail": "review true"
+ }
+]

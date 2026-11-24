@@ -5,7 +5,8 @@
  * Card journeys v1 — the measurement helpers the journey specs share: find a card whose footer offers an action, press
  * it, and read the card and the journey as stacked.
  */
-import { type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 
 export const VP = { width: 1440, height: 900 };
@@ -77,5 +78,42 @@ export async function tabReachesCard(page: Page, id: string, presses = 30): Prom
     if (inCard) return true;
   }
   return false;
+}
+
+
+const DIR = "reports/card-journeys-v1";
+export const C = (k: string) => `[data-cj="root"] [data-cj="${k}"]`;
+export class Ledger {
+  rows: { where: string; ok: boolean; detail: string }[] = [];
+  constructor(public name: string) {}
+  check(where: string, ok: unknown, detail: string) { this.rows.push({ where, ok: !!ok, detail }); this.save(); console.log(`  ${ok ? "✓" : "✗"} ${where} — ${detail}`); }
+  save() { mkdirSync(`${DIR}/ledger`, { recursive: true }); writeFileSync(`${DIR}/ledger/${this.name}.json`, JSON.stringify(this.rows, null, 1)); }
+  done(floor: number) {
+    this.save();
+    console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+  }
+}
+export const text = (page: Page, sel: string) => page.locator(sel).first().innerText().then((t) => t.replace(/\s+/g, " ").trim()).catch(() => "");
+export const trackOf = (page: Page) => page.locator(`${C("step")}`).evaluateAll((els) => els.map((e) => `${e.getAttribute("data-k")}:${e.getAttribute("data-state")}`));
+/** nothing in the body or foot reaches past the column, and the column itself is inside the window */
+export async function cutOff(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const root = document.querySelector<HTMLElement>('[data-cj="root"]');
+    const body = root?.querySelector<HTMLElement>('[data-cj="body"]');
+    if (!root || !body) return ["no journey"];
+    const out: string[] = [];
+    const rb = root.getBoundingClientRect();
+    if (rb.right > innerWidth + 0.5 || rb.bottom > innerHeight + 0.5 || rb.left < -0.5) out.push(`column ${Math.round(rb.left)}–${Math.round(rb.right)} × ${Math.round(rb.bottom)}`);
+    const bb = body.getBoundingClientRect();
+    for (const el of body.querySelectorAll<HTMLElement>("b, span, p, h2, button, li")) {
+      const r = el.getBoundingClientRect();
+      if (r.width < 1) continue;
+      if (r.right > bb.right + 1 || r.left < bb.left - 1) out.push(`${el.tagName} "${(el.innerText || "").slice(0, 30)}" ${Math.round(r.left)}–${Math.round(r.right)}`);
+      if (el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).textOverflow === "ellipsis") out.push(`ellipsis "${(el.innerText || "").slice(0, 30)}"`);
+    }
+    return out.slice(0, 6);
+  });
 }
 
