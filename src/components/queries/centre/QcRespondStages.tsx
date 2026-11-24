@@ -697,10 +697,10 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
         const now = !allDone && s.step === k;
         const d = allDone || (!now && isDone(s, k));
         const cls = `laq-s${now ? " is-n" : ""}${d ? " is-d" : ""}`;
-        const inner = <><span className="laq-nd" aria-hidden="true">{d ? "✓" : i + 1}</span><span className="laq-l">{STAGE_LABEL[k]}{d && k !== "check" ? <b data-rar="step-value">{value(k)}</b> : null}</span></>;
+        const inner = <><span className="laq-nd" aria-hidden="true">{d ? "✓" : i + 1}</span><span className="laq-l">{STAGE_LABEL[k]}{d && k !== "check" ? <StepValue text={value(k)} /> : null}</span></>;
         const canGo = d && !allDone && !(k === "who" && fixed);
         return (
-          <div key={k} role="listitem" className={`laq-si${d ? " is-done" : ""}`}>
+          <div key={k} role="listitem" className={`laq-si${d ? " is-done" : ""}`} aria-label={d && k !== "check" ? `${STAGE_LABEL[k]}: ${value(k)}` : undefined}>
             {canGo
               ? <button type="button" className={cls} data-rar="step" data-k={k} data-state="done" aria-label={`${STAGE_LABEL[k]}: ${value(k)}. Change it`} onClick={() => go(k)}>{inner}</button>
               : <span className={cls} data-rar="step" data-k={k} data-state={now ? "now" : d ? "done" : "todo"} aria-current={now ? "step" : undefined}>{inner}</span>}
@@ -813,6 +813,22 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
       </div>
     </div>
   );
+};
+
+/**
+ * v2.1 — A STEP'S VALUE ON THE TRACK. A long name ("Penhallow Literary Agency", an agency with no named agent) was cut
+ * mid-word by the box's ellipsis ("Penhallow Lite…"). When the whole value does not fit, it shows its first word
+ * ("Penhallow"); the full value stays in the step's accessible label. Measured after layout, before paint.
+ */
+const StepValue: React.FC<{ text: string }> = ({ text }) => {
+  const ref = useRef<HTMLElement>(null);
+  const [short, setShort] = useState(false);
+  useLayoutEffect(() => { setShort(false); }, [text]);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!short && el && /\s/.test(text.trim()) && el.scrollWidth > el.clientWidth + 1) setShort(true);
+  });
+  return <b ref={ref} data-rar="step-value" data-short={short ? "true" : undefined}>{short ? text.trim().split(/\s+/)[0] : text}</b>;
 };
 
 const TASK = <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5b4f47" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2.5" /><path d="M5.3 8.2l1.9 1.9 3.6-4" /></svg>;
