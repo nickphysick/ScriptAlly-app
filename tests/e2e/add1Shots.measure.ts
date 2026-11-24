@@ -30,7 +30,7 @@ test("ADD1 shots · the new-agent panel from the Dashboard, the Query Centre and
     if (await page.locator("[data-ap='panel-new'] [data-ae='discard']").filter({ visible: true }).count()) await vis("[data-ap='panel-new'] [data-ae='discard']").click();
     await page.waitForTimeout(500);
   };
-  const capture = async () => { await vis(".ws-capr").click(); await page.waitForTimeout(300); await vis("[data-cap='agent']").click(); };
+  const capture = async () => { await vis("[data-shell=quick-btn]").click(); await page.waitForTimeout(300); await vis("[data-quick='agent']").click(); };
   try {
     sh("node tests/e2e/guideFlags.mjs --seen");
     for (const vp of SIZES) {
@@ -41,7 +41,7 @@ test("ADD1 shots · the new-agent panel from the Dashboard, the Query Centre and
       await cancel();
 
       await openRoute(page, "/queries", vp);
-      await vis(".ws-capl").click();
+      await vis("[data-shell=quick-btn]").click(); await page.waitForTimeout(300); await vis("[data-quick='query']").click();
       await vis("[data-qad-agent-input]").fill("Imogen Ashcombe");
       await page.waitForTimeout(400);
       await vis("[data-qad-new-agent]").dispatchEvent("mousedown");

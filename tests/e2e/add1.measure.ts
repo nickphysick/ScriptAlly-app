@@ -111,9 +111,9 @@ type Door = { name: string; route: string; wide?: boolean; open: (page: Page) =>
 const LOG_NAME = `${ADD1_PREFIX}a1-typed`;
 const DOORS: Door[] = [
   { name: "Dashboard header", route: "/dashboard", wide: true, open: (p) => press(p, "[data-d58='btn-agent']") },
-  { name: "top-bar capture (Dashboard)", route: "/dashboard", open: async (p) => (await press(p, ".ws-capr")) && (await p.waitForTimeout(300), press(p, "[data-cap='agent']")) },
-  { name: "top-bar capture (Query Centre)", route: "/queries", open: async (p) => (await press(p, ".ws-capr")) && (await p.waitForTimeout(300), press(p, "[data-cap='agent']")) },
-  { name: "top-bar capture (Discover)", route: "/agents/discover", open: async (p) => (await press(p, ".ws-capr")) && (await p.waitForTimeout(300), press(p, "[data-cap='agent']")) },
+  { name: "top-bar capture (Dashboard)", route: "/dashboard", open: async (p) => (await press(p, "[data-shell=quick-btn]")) && (await p.waitForTimeout(300), press(p, "[data-quick='agent']")) },
+  { name: "top-bar capture (Query Centre)", route: "/queries", open: async (p) => (await press(p, "[data-shell=quick-btn]")) && (await p.waitForTimeout(300), press(p, "[data-quick='agent']")) },
+  { name: "top-bar capture (Discover)", route: "/agents/discover", open: async (p) => (await press(p, "[data-shell=quick-btn]")) && (await p.waitForTimeout(300), press(p, "[data-quick='agent']")) },
   {
     name: "search palette", route: "/dashboard",
     open: async (p) => {
@@ -126,7 +126,7 @@ const DOORS: Door[] = [
   {
     name: "Log a query picker", route: "/queries", prefill: LOG_NAME,
     open: async (p) => {
-      if (!(await press(p, ".ws-capl"))) return false;
+      if (!(await (await press(p, "[data-shell=quick-btn]")) && (await p.waitForTimeout(300), press(p, "[data-quick='query']")))) return false;
       try { await p.locator("[data-qad-agent-input]").filter({ visible: true }).first().fill(LOG_NAME, { timeout: 8000 }); } catch { return false; }
       await p.waitForTimeout(400);
       return press(p, "[data-qad-new-agent]", { mousedown: true });
@@ -201,7 +201,7 @@ test("ADD1-A2 · an add from the Dashboard stays on the Dashboard, and the agent
         const urls: string[] = [await page.evaluate(() => location.pathname + location.search)];
         const door = vp.width >= 1440 ? "the header's Add an agent" : "the top-bar capture";
         const opened = vp.width >= 1440 ? await press(page, "[data-d58='btn-agent']")
-          : (await press(page, ".ws-capr")) && (await page.waitForTimeout(300), press(page, "[data-cap='agent']"));
+          : (await press(page, "[data-shell=quick-btn]")) && (await page.waitForTimeout(300), press(page, "[data-quick='agent']"));
         L.check(`${w} ${door} could be pressed`, opened, "missing");
         const got = await waitPanel(page);
         await page.waitForTimeout(400);
@@ -259,7 +259,7 @@ test("ADD1-A3 · Log a query: a new agent added from the picker is the one picke
         const w = `@${vp.width}`;
         const name = `${ADD1_PREFIX}a3-${vp.width}`;
         await openRoute(page, "/queries", vp);
-        L.check(`${w} Log a query could be pressed`, await press(page, ".ws-capl"), "missing");
+        L.check(`${w} Log a query could be pressed`, (await press(page, "[data-shell=quick-btn]")) && (await page.waitForTimeout(300), await press(page, "[data-quick='query']")), "missing");
         let typed = false;
         try { await page.locator("[data-qad-agent-input]").filter({ visible: true }).first().fill(name, { timeout: 8000 }); typed = true; } catch { /* below */ }
         L.check(`${w} the picker took the name`, typed, "no picker");

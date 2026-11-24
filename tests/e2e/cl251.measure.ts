@@ -153,7 +153,7 @@ test("CL251-B1 B3 · the headers: Log a query (v2), Adding new agent (B2 retired
   };
   /* the Contact list: the top bar's Log a query, in place */
   await openCl24(page, vp);
-  await page.locator(".ws-cap--bar .ws-capl").first().click(T).catch(() => {});
+  await page.locator("[data-shell=quick-btn]").first().click(T).catch(() => {}); await page.waitForTimeout(300); await page.locator("[data-quick='query']").first().click(T).catch(() => {});
   await page.waitForTimeout(1200);
   await checkLog("Contact list");
   await page.keyboard.press("Escape"); await page.waitForTimeout(500);
@@ -220,7 +220,7 @@ test.skip("CL251-C1 C2 C3 C4 C5 · headings one size; no list health in the coun
   }
   /* C4 — the top bar's Log a query stays on /agents and opens the panel */
   await openCl24(page, SIZES[0]);
-  await page.locator(".ws-cap--bar .ws-capl").first().click(T).catch(() => {});
+  await page.locator("[data-shell=quick-btn]").first().click(T).catch(() => {}); await page.waitForTimeout(300); await page.locator("[data-quick='query']").first().click(T).catch(() => {});
   await page.waitForTimeout(1300);
   const path = new URL(page.url()).pathname;
   const panel = await box(page, "[data-cl24='panel'] [data-qc149f='log']");

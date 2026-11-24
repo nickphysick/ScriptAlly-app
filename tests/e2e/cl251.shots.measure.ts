@@ -52,7 +52,7 @@ for (const w of [1512, 1280]) test(`CL251 screens @ ${w}`, async ({ page }) => {
   await shot(page, "12-sort-rating-1512");
   /* 03/04 — the log, in place on the Contact list */
   await openCl24(page, vp);
-  await page.locator(".ws-cap--bar .ws-capl").first().click(T); await page.waitForTimeout(1200);
+  await page.locator("[data-shell=quick-btn]").first().click(T); await page.waitForTimeout(300); await page.locator("[data-quick='query']").first().click(T); await page.waitForTimeout(1200);
   await shot(page, "03-log-pick-1512");
   await page.locator("[data-qls='agent'][data-group='ready']").first().click(T); await page.waitForTimeout(800);
   await shot(page, "04-log-details-1512");

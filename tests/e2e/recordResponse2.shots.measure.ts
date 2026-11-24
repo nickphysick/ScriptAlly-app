@@ -199,8 +199,8 @@ test("S6 · whole pages: from a card, the discard bar, closed on the same page, 
   await click(page, "leave-discard"); await settle(page, 900);
   await whole(page, "41-closed-same-page"); done("41");
   await openApp(page, "/queries", VP);
-  await page.locator("[data-shell='capture'][data-placement='bar'] .ws-capr").filter({ visible: true }).first().click(); await settle(page, 300);
-  await page.locator("[data-cap='record']").filter({ visible: true }).first().click();
+  await page.locator("[data-shell=quick-btn]").filter({ visible: true }).first().click(); await settle(page, 300);
+  await page.locator("[data-quick='record']").filter({ visible: true }).first().click();
   await page.locator('[data-rar="root"]').waitFor({ timeout: 10_000 });
   await whole(page, "42-whole-page-top-bar-queries"); done("42");
   expect(taken.length).toBeGreaterThan(0);

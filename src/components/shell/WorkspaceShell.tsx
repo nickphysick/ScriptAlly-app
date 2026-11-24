@@ -52,7 +52,7 @@ import { Rect as TipRect } from "../../lib/deskTooltip";
 import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
 import { ShortcutsSheet } from "./ShortcutsSheet";
 import "./shellMenus.css";
-import { SidebarCapture } from "./SidebarCapture";
+import { QuickActions } from "./QuickActions";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
 } from "../../lib/accountRoutes";
@@ -1337,10 +1337,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <span className="ws-esc" aria-hidden="true">esc</span>
                 </button>
 
-                {/* ══ "LOG A QUERY" — moved here from the sidebar (ink shell v1). Its two segments keep their
-                    contracts (`invokeCapture` and the add-manuscript route); only its place and skin moved. */}
+                {/* ══ "QUICK ACTIONS" (Add an agent v2, Part A) — the bar's one create button, in the slot the "Log a
+                    query" split button held. Its rows are the existing doors (shell/QuickActions). */}
                 <span className="ws-appctl ws-appctl--cap">
-                  <SidebarCapture placement="bar" collapsed={false} onNavigate={onNavigate} />
+                  <QuickActions onNavigate={onNavigate} />
                 </span>
 
                 {/**

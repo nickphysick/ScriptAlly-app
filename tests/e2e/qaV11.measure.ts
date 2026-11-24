@@ -152,8 +152,8 @@ test.describe("v1.1 — Record a response with no query", () => {
     await liftMotionSuppression(page);
     const { qs, ags } = await all();
     const live = new Set(qs.filter((q) => !TERMINAL.has(String(q.status))).map((q) => q.id));
-    await page.locator(".ws-pagebar .ws-capr").filter({ visible: true }).first().click();
-    await page.locator(".ws-capi", { hasText: /^Record a response/ }).first().click();
+    await page.locator("[data-shell=quick-btn]").filter({ visible: true }).first().click();
+    await page.locator(".mn-r", { hasText: /^Record a response/ }).first().click();
     const P = '[data-qp="panel"]';
     await expect(page.locator(`${P} [data-qad-qpick]`), "the picker did not open in the panel").toBeVisible();
     const listed = await page.locator(`${P} [data-qad-query]`).evaluateAll((els) => els.map((e) => e.getAttribute("data-qad-query")));

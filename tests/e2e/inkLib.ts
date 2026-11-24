@@ -81,12 +81,12 @@ const DOM_MUTATIONS: Record<string, string> = {
   /* the card removed, leaving only the bar's (absent) route */
   "ink13-nocard": `(() => { document.querySelectorAll('.ws-fbk').forEach((e) => e.remove()); })()`,
   /* the arrow and "?" swap handlers: each click is stopped before React sees it and the OTHER is pressed */
-  "ms1-swap": `(() => { const a = document.querySelector('.ws-cap--bar .ws-capr'); const h = document.querySelector('[data-shell="help"]');
+  "ms1-swap": `(() => { const a = document.querySelector('[data-shell=quick-btn]'); const h = document.querySelector('[data-shell="help"]');
     a && a.addEventListener('click', (e) => { if (e.isTrusted) { e.stopImmediatePropagation(); h && h.click(); } }, true); })()`,
-  "ms2-swap": `(() => { const a = document.querySelector('.ws-cap--bar .ws-capr'); const h = document.querySelector('[data-shell="help"]');
+  "ms2-swap": `(() => { const a = document.querySelector('[data-shell=quick-btn]'); const h = document.querySelector('[data-shell="help"]');
     h && h.addEventListener('click', (e) => { if (e.isTrusted) { e.stopImmediatePropagation(); a && a.click(); } }, true); })()`,
   /* Add a manuscript re-enabled: the disabled mark taken off every entry as it appears */
-  "ms4-enable": `(() => { const strip = () => document.querySelectorAll('[data-cap="manuscript"], [data-ms="add"], .sp-res--soon, .sv1-row--soon').forEach((e) => e.removeAttribute('aria-disabled'));
+  "ms4-enable": `(() => { const strip = () => document.querySelectorAll('[data-quick="manuscript"], [data-ms="add"], .sp-res--soon, .sv1-row--soon').forEach((e) => e.removeAttribute('aria-disabled'));
     strip(); new MutationObserver(strip).observe(document.body, { subtree: true, childList: true, attributes: true }); })()`,
   /* "Queries Hub" put back in search */
   "ms8-hub": `(() => { const fix = () => document.querySelectorAll('.sp-pal .sp-t1, .sp-pal .sv1-t1').forEach((e) => { if (e.textContent === 'Query Centre') e.textContent = 'Queries Hub'; });

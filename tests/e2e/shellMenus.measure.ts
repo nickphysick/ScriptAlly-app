@@ -80,7 +80,7 @@ async function pixelContrast(page: Page, sel: string, index = 0): Promise<number
 }
 
 async function openCapture(page: Page) {
-  await page.locator(".ws-cap--bar .ws-capr").click();
+  await page.locator("[data-shell=quick-btn]").click();
   await page.waitForTimeout(250);
 }
 async function openHelp(page: Page) {
@@ -99,22 +99,24 @@ async function openSearch(page: Page) {
 
 test.describe("shell menus", () => {
   /* ── MS1 · the arrow opens the capture menu ───────────────────────────────────────────────────── */
-  test("MS1 · the arrow opens the capture menu, 8px below the button, right edges together", async ({ page }) => {
+  /* Add an agent v2 — the menu is Quick actions' (design-refs/add-agent-v2, screen 01): 6px below the button, right edges
+     together, 344 wide, the button in the darker cream while it is open */
+  test("MS1 · Quick actions opens its menu, 6px below the button, right edges together", async ({ page }) => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/queries", w, { scope: "ms1" });
       await openCapture(page);
       expect(await page.locator('[data-shell="help-menu"]').count(), `${w}: the arrow opened Help`).toBe(0);
-      const m = await vis(page, '[data-shell="capture-menu"].is-open');
+      const m = await vis(page, '[data-shell=quick-menu].is-open');
       expect(m, `${w}: the capture menu is open`).not.toBeNull();
       /* and it is SEEN: the pixel at its centre belongs to it (it was clipped once) */
-      const hit = await page.evaluate(({ x, y }) => !!document.elementFromPoint(x, y)?.closest('[data-shell="capture-menu"]'), { x: m!.x + m!.w / 2, y: m!.y + m!.h / 2 });
+      const hit = await page.evaluate(({ x, y }) => !!document.elementFromPoint(x, y)?.closest('[data-shell=quick-menu]'), { x: m!.x + m!.w / 2, y: m!.y + m!.h / 2 });
       expect(hit, `${w}: the menu is on top at its own centre, not clipped`).toBe(true);
-      const b = (await vis(page, ".ws-cap--bar .ws-capb"))!;
-      expect(near(m!.y, b.b + 8), `${w}: top ${m!.y} vs button foot + 8 ${b.b + 8}`).toBe(true);
+      const b = (await vis(page, "[data-shell=quick]"))!;
+      expect(near(m!.y, b.b + 6), `${w}: top ${m!.y} vs button foot + 6 ${b.b + 6}`).toBe(true);
       expect(near(m!.r, b.r), `${w}: right ${m!.r} vs button right ${b.r}`).toBe(true);
-      expect(m!.w, `${w}: at least 220 wide`).toBeGreaterThanOrEqual(219.5);
-      const lit = await page.evaluate(() => getComputedStyle(document.querySelector(".ws-cap--bar .ws-capr")!).backgroundColor);
-      expect(lit, `${w}: the arrow half is lit while open`).toMatch(/rgba\(27, 36, 51, 0\.1\)/);
+      expect(near(m!.w, 344), `${w}: ${m!.w} wide`).toBe(true);
+      const lit = await page.evaluate(() => getComputedStyle(document.querySelector("[data-shell=quick-btn]")!).backgroundColor);
+      expect(lit, `${w}: the button takes the darker cream while open`).toBe("rgb(228, 220, 207)");
       await closeAll(page);
     }
   });
@@ -124,7 +126,7 @@ test.describe("shell menus", () => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/queries", w, { scope: "ms2" });
       await openHelp(page);
-      expect(await page.locator('[data-shell="capture-menu"].is-open').count(), `${w}: "?" opened the capture menu`).toBe(0);
+      expect(await page.locator('[data-shell=quick-menu].is-open').count(), `${w}: "?" opened the capture menu`).toBe(0);
       const m = await vis(page, '[data-shell="help-menu"]');
       expect(m, `${w}: the Help menu is open`).not.toBeNull();
       const h = (await vis(page, '[data-shell="help"]'))!;
@@ -147,7 +149,8 @@ test.describe("shell menus · the language", () => {
     await page.addInitScript(() => { (window as unknown as { __SA_INK_TABS: number }).__SA_INK_TABS = 5; });
     await inkOpen(page, "/manuscripts", w, { scope });
     const menus: [string, () => Promise<void>, string][] = [
-      ["capture", () => openCapture(page), '[data-shell="capture-menu"].is-open'],
+      /* Add an agent v2 — "Quick actions" left the house menu language for the journeys' own frame (screen 01);
+         its geometry is MS1's and quickActions.measure.ts' */
       ["help", () => openHelp(page), '[data-shell="help-menu"]'],
       ["account", async () => { await page.locator(".ws-uacct").click(); await page.waitForTimeout(350); }, '[data-shell="account-menu"]'],
       ["selector", async () => { await page.locator("#ws-sidebar [data-shell='switcher'] .ws-ms-btn").click(); await page.waitForTimeout(350); }, '.ws-ms-menu--port[data-open="true"]'],
@@ -235,7 +238,7 @@ test.describe("shell menus · the language", () => {
           return;
         }
         const ctl = {
-          capture: ".ws-cap--bar .ws-capb", help: '[data-shell="help"]',
+          capture: "[data-shell=quick]", help: '[data-shell="help"]',
           selector: "#ws-sidebar [data-shell='switcher'] .ws-ms-btn", more: ".ws-ftmore",
         }[name]!;
         const c = (await vis(page, ctl))!;
@@ -271,7 +274,8 @@ test.describe("shell menus · the language", () => {
       expect(await page.getByText(/Manuscript Title/).count(), `${where}: the add form opened`).toBe(0);
       await closeAll(page);
     };
-    await check("capture menu", '[data-shell="capture-menu"] [data-cap="manuscript"]', '[data-shell="capture-menu"]', () => openCapture(page));
+    /* Add an agent v2 — Quick actions shows Add a manuscript as plain text, "coming soon" in italics, no SOON tag and no
+       row at all (screen 01): quickActions.measure.ts QA4 holds it */
     await check("selector menu", '.ws-ms-menu--port [data-ms="add"]', ".ws-ms-menu--port", async () => {
       await page.locator("#ws-sidebar [data-shell='switcher'] .ws-ms-btn").click(); await page.waitForTimeout(350);
     });

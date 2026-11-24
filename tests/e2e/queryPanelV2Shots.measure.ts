@@ -67,8 +67,8 @@ test("shots", async ({ page }) => {
         await shot(page, `act-review-${w}`);
         await leave(page);
         /* the top-right picker, with a query open */
-        await page.locator(".ws-pagebar .ws-capr").filter({ visible: true }).first().click(); await page.waitForTimeout(300);
-        await page.locator(".ws-capi", { hasText: /^Record a response/ }).first().click(); await page.waitForTimeout(900);
+        await page.locator("[data-shell=quick-btn]").filter({ visible: true }).first().click(); await page.waitForTimeout(300);
+        await page.locator(".mn-r", { hasText: /^Record a response/ }).first().click(); await page.waitForTimeout(900);
         await shot(page, `act-picker-${w}`);
         await leave(page);
       }
