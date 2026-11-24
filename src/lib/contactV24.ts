@@ -201,7 +201,7 @@ export function footLinks(set: SetKey): FootLink[] {
   return ["record", "edit", "open"];
 }
 export const FOOT_WORD: Record<FootLink, string> = {
-  record: "Record a response", edit: "Edit agent", open: "Open query", log: "Log a query", remove: "Remove", see: "See the query",
+  record: "Record a response", edit: "Edit agent", open: "Open query", log: "Log a query", remove: "Delete", see: "See the query",
 };
 
 /** the full-screen list row's right: Your move shows its due date ("30 SEP" / "DUE NOW"); querying and closed the dot

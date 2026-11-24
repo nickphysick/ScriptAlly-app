@@ -34,6 +34,7 @@ import { firstNameOf, methodAnswer } from "../../../lib/agentPanel";
 import { hrefFor } from "../../../lib/quickAdd";
 import { canDestroy } from "../../../lib/cascade";
 import { CARD_TONE } from "../../queries/centre/QcQueryCard149";
+import { mut168 } from "../../queries/centre/QcEdit168";
 import { socialOf } from "./ContactFilters24";
 import { StateDisc } from "./ContactSheet24";
 import { SET_BAND, bandRight, callBox, footLinks, FOOT_WORD, type CallBox, type Colleagues, type FootLink, type SetKey } from "../../../lib/contactV24";
@@ -410,23 +411,34 @@ export const History: React.FC<{ entries: readonly HistEntry[]; first: string; n
 
 /** the footer: the clock line, the links by set, ‹ n / M › */
 /**
- * THE REMOVE GATE (§7): "Remove {name}?"; with queries to the agent, the count and "Type their name to confirm", and
- * Remove waits for the typed name (canDestroy). Lifted out of the footer as it stood by Agent card v2.2 (B6) so the v2
- * card's band ⋯ reaches the same gate: the words, the rule and the delete are unchanged. No Undo.
+ * THE DELETE GATE (§7). Lifted out of the footer by Agent card v2.2 (B6) so the v2 card's band ⋯ reaches the same gate.
+ * Agent card v2.2.1 — it says what the menu says ("Delete this agent"), and names the agent:
+ *   no queries — "Delete {name}? This can’t be undone."
+ *   one        — "Delete {name}? Your query to {first} goes too, and every step in it. Type {name} to confirm."
+ *   several    — "Delete {name}? Your {n} queries to {first} go too, and every step in them. Type {name} to confirm."
+ * Buttons "Keep {first}" and "Delete". With queries, Delete waits for the typed name (canDestroy): the rule and the
+ * delete are unchanged. No Undo.
  */
 export const RemoveConfirm: React.FC<{ agent: Agent; deleteQueries: number; onKeep: () => void; onDelete: () => void }> = ({ agent: a, deleteQueries, onKeep, onDelete }) => {
   const [typed, setTyped] = useState("");
   useEffect(() => { setTyped(""); }, [a.id]);
   const name = (a.name ?? "").trim() || (a.agency ?? "").trim();
+  const first = firstNameOf(a);
   const heavy = deleteQueries > 0;
   const ready = !heavy || canDestroy(typed.toLowerCase(), name.toLowerCase(), false);
+  /* AC15's mutation (off production): the v2.2 words back */
+  const old = mut168("ac15");
+  const words = old ? `Remove ${name}?${heavy ? ` This deletes ${deleteQueries} ${deleteQueries === 1 ? "query" : "queries"} and their history. Type their name to confirm.` : " This can’t be undone."}`
+    : !heavy ? `Delete ${name}? This can’t be undone.`
+    : deleteQueries === 1 ? `Delete ${name}? Your query to ${first} goes too, and every step in it. Type ${name} to confirm.`
+    : `Delete ${name}? Your ${deleteQueries} queries to ${first} go too, and every step in them. Type ${name} to confirm.`;
   return (
-    <div className="cl24c-del" data-cl24="remove-confirm" role="group" aria-label={`Remove ${name}`}>
-      <p>Remove {name}?{heavy ? ` This deletes ${deleteQueries} ${deleteQueries === 1 ? "query" : "queries"} and their history. Type their name to confirm.` : " This can’t be undone."}</p>
-      {heavy ? <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={name} aria-label="Type the agent’s name" data-cl24="remove-typed" /> : null}
+    <div className="cl24c-del" data-cl24="remove-confirm" role="group" aria-label={`${old ? "Remove" : "Delete"} ${name}`}>
+      <p>{words}</p>
+      {heavy ? <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={name} aria-label={`Type ${name} to confirm`} data-cl24="remove-typed" /> : null}
       <span className="qc149c-sp" />
-      <button type="button" data-cl24="remove-keep" onClick={onKeep}>Keep</button>
-      <button type="button" className="go" data-cl24="remove-go" disabled={!ready} onClick={onDelete}>Remove</button>
+      <button type="button" data-cl24="remove-keep" onClick={onKeep}>{old ? "Keep" : `Keep ${first}`}</button>
+      <button type="button" className="go" data-cl24="remove-go" disabled={!ready} onClick={onDelete}>{old ? "Remove" : "Delete"}</button>
     </div>
   );
 };
