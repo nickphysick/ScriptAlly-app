@@ -17,7 +17,7 @@ import { formatDate } from "./dates";
 
 export interface LedgerSentence { text: string; manner?: string }
 export interface LedgerRowLike {
-  kind?: "nudge" | "holding";
+  kind?: "nudge" | "reply";
   status: QueryStatus;
   reconstructed?: boolean;
   /** `buildTimelineRows`' title: for a nudge it carries the outcome ("Nudged — no reply"). */
@@ -58,7 +58,7 @@ export function sendManner(method: string | undefined | null): string | undefine
 
 export function ledgerSentence(row: LedgerRowLike, opts: { sendMethod?: string | null; revisionRound?: number | null } = {}): LedgerSentence {
   if (row.kind === "nudge") return { text: LEDGER_NUDGE, manner: /no reply/i.test(row.title) ? "no reply" : undefined };
-  if (row.kind === "holding") return { text: LEDGER_HOLDING, manner: "no decision yet" };
+  if (row.kind === "reply") return { text: LEDGER_HOLDING, manner: "no decision yet" };
   const text = LEDGER_SENTENCE[row.status] ?? row.title;
   /* a starting step the import wrote, never a recorded event: it keeps its sentence and says where it came from */
   if (row.reconstructed) return { text, manner: LEDGER_RECONSTRUCTED };

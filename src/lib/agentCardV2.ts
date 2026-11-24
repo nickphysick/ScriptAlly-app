@@ -97,7 +97,10 @@ export function acFoot(x: AgentFacts, first: string, call: CallBox | null, nowMs
   /* your move */
   if (st === QueryStatus.PARTIAL_REQUESTED || st === QueryStatus.FULL_REQUESTED) {
     const full = st === QueryStatus.FULL_REQUESTED;
-    return { row: "send", icon: { k: "stage", status: st }, lead: `${first} asked for your ${full ? "full" : "partial"}`, sub: "Send it, then log it here",
+    return { row: "send", icon: { k: "stage", status: st }, lead: `${first} asked for your ${full ? "full" : "partial"}`,
+      /* Controls: entry v1 (Phase 4) — the footer's date as on the query card: the Send by (stored, or moved by a chaser),
+         with its weekday as the ref draws it ("Send by Fri 4 Dec"); without one, the old line */
+      sub: q.expectedMs != null ? `Send by ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date(q.expectedMs).getDay()]} ${acDay(q.expectedMs, nowMs)}` : "Send it, then log it here",
       button: act ? { label: full ? "Mark full sent" : "Mark partial sent", tone: "navy", act } : null, link: null };
   }
   if (st === QueryStatus.OFFER) {

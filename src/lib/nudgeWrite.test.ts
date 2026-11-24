@@ -26,7 +26,7 @@ const twin = () => writeActivity(fs, UID, { ...writes.activity, id: ACT });
 const flag = async () => { fakeStore.writes.push(FLAG); if (fakeStore.failing(FLAG)) throw new Error("flag denied"); fakeStore.docs.set(FLAG, { snoozedUntil: "x" }); };
 /** The feed twin as it behaved before Phase 1: a failed write threw. */
 const throwingTwin = async () => { throw new Error(`Firestore write failed at ${FEED}`); };
-const run = (writeTwin = twin) => commitNudge(fs, UID, QID, ACT, writes, { writeTwin, writeFlag: flag });
+const run = (writeTwin = twin) => commitNudge(fs, UID, QID, ACT, writes, { writeTwin, writeFlag: flag }, q);
 const nudgeDate = () => fakeStore.docs.get(QDOC)?.nudgeDate;
 
 describe("commitNudge — the writes behind logNudge", () => {

@@ -18,6 +18,7 @@
  * task flag only hides the nudge task until the check-back date; if it cannot be written the task
  * simply shows again, so it is logged and the nudge still reports success.
  */
+import { withReminderStamp } from "./reminderStamp";
 import { doc, writeBatch, type Firestore } from "firebase/firestore";
 import { logFirestoreFailure } from "./firestoreErrorLog";
 import { narrate } from "./narrate";
@@ -28,10 +29,13 @@ export const NUDGE_FAILED = "Failed to log nudge.";
 export async function commitNudge(
   firestore: Firestore, uid: string, queryId: string, actId: string, writes: NudgeWriteSet,
   after: { writeTwin: () => Promise<unknown>; writeFlag: () => Promise<unknown> },
+  /** the query before the nudge: a check-in re-booked for the day it already had is not a newly set reminder */
+  prior: { nudgeDate?: unknown } | null,
 ): Promise<{ success: boolean; error?: string }> {
   const batch = writeBatch(firestore);
   batch.set(doc(firestore, "users", uid, "queries", queryId, "activity", actId), writes.nested);
-  batch.update(doc(firestore, "users", uid, "queries", queryId), writes.queryUpdates);
+  /* follow-up 2 — the check-in booked with the nudge carries when it was set (lib/reminderStamp) */
+  batch.update(doc(firestore, "users", uid, "queries", queryId), withReminderStamp(writes.queryUpdates, prior));
   try {
     await batch.commit();
   } catch (e) {

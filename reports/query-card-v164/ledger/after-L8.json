@@ -16,8 +16,8 @@
  },
  {
   "name": "q152-materials #1: the agent's bubble is its stage band (partial)",
-  "ok": true,
-  "got": "rgb(228, 235, 242)"
+  "ok": false,
+  "got": "rgb(241, 217, 207)"
  },
  {
   "name": "q152-undated #0: the writer's bubble is white",
@@ -26,8 +26,8 @@
  },
  {
   "name": "q152-undated #1: the agent's bubble is its stage band (partial)",
-  "ok": true,
-  "got": "rgb(228, 235, 242)"
+  "ok": false,
+  "got": "rgb(241, 217, 207)"
  },
  {
   "name": "q152-undated #2: the writer's bubble is white",
@@ -42,7 +42,7 @@
  {
   "name": "q152-fullreq #1: the agent's bubble is tinted, not white",
   "ok": true,
-  "got": "rgb(183, 201, 222)"
+  "got": "rgb(211, 222, 234)"
  },
  {
   "name": "q152-long #0: the writer's bubble is white",
@@ -51,8 +51,8 @@
  },
  {
   "name": "q152-long #1: the agent's bubble is its stage band (partial)",
-  "ok": true,
-  "got": "rgb(228, 235, 242)"
+  "ok": false,
+  "got": "rgb(241, 217, 207)"
  },
  {
   "name": "q152-long #2: the writer's bubble is white",
@@ -62,7 +62,7 @@
  {
   "name": "q152-long #3: the agent's bubble is tinted, not white",
   "ok": true,
-  "got": "rgb(183, 201, 222)"
+  "got": "rgb(211, 222, 234)"
  },
  {
   "name": "q152-long #4: the writer's bubble is white",
@@ -77,7 +77,7 @@
  {
   "name": "q152-rr #1: the agent's bubble is tinted, not white",
   "ok": true,
-  "got": "rgb(183, 201, 222)"
+  "got": "rgb(211, 222, 234)"
  },
  {
   "name": "q152-rr #2: the writer's bubble is white",
@@ -87,7 +87,7 @@
  {
   "name": "q152-rr #3: the agent's bubble is tinted, not white",
   "ok": true,
-  "got": "rgb(183, 201, 222)"
+  "got": "rgb(211, 222, 234)"
  },
  {
   "name": "q152-offer #0: the writer's bubble is white",
@@ -97,7 +97,7 @@
  {
   "name": "q152-offer #1: the agent's bubble is tinted, not white",
   "ok": true,
-  "got": "rgb(239, 205, 201)"
+  "got": "rgb(197, 224, 216)"
  },
  {
   "name": "q152-closed #0: the writer's bubble is white",
@@ -117,7 +117,7 @@
  {
   "name": "q152-passed #1: the agent's bubble is tinted, not white",
   "ok": true,
-  "got": "rgb(183, 201, 222)"
+  "got": "rgb(211, 222, 234)"
  },
  {
   "name": "q152-passed #2: the writer's bubble is white",
@@ -138,5 +138,30 @@
   "name": "q152-withdrew #1: the writer's bubble is white",
   "ok": true,
   "got": "rgb(255, 255, 255)"
+ },
+ {
+  "name": "q152-holding: population — the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-holding: exactly one reply step found",
+  "ok": true,
+  "got": "[\"Hal sent a holding reply\"]"
+ },
+ {
+  "name": "q152-holding: the small note (oc oc-note), not a full bubble",
+  "ok": true,
+  "got": "qc152-m them oc oc-note"
+ },
+ {
+  "name": "q152-holding: the ref's box #f6f3ee, 12px, no shadow",
+  "ok": true,
+  "got": "rgb(246, 243, 238) 12px none"
+ },
+ {
+  "name": "q152-holding: names a holding reply, quotes their words, the speech-bubble mark",
+  "ok": true,
+  "got": "Hal sent a holding reply · “Thanks — reading now.” · mark=true"
  }
 ]

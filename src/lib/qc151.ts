@@ -65,10 +65,13 @@ export function trackOf(r: Pick<QcRow, "status" | "furthest">): Track {
 const AGENT_MOVES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED,
 ]);
-export function lastHeardMs(r: Pick<QcRow, "history">): number | null {
+/** Controls: entry v1 (Nick's ruling 5) — the latest reply from the agent OF ANY KIND: a status they moved, or a reply
+ *  entry (a chaser, a holding reply, a note), as the card's Agent tab reads it */
+export function lastHeardMs(r: Pick<QcRow, "history"> & { reply?: { ms: number } | null }): number | null {
   let best: number | null = null;
   for (const s of r.history.spans) if (AGENT_MOVES.has(s.status) && (best == null || s.startMs > best)) best = s.startMs;
-  return best;
+  const e = r.reply?.ms ?? null;
+  return e != null && (best == null || e >= best) ? e : best;
 }
 
 /** "2 Jul", or "2 Jul 2025" in another year */

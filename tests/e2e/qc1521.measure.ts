@@ -57,10 +57,14 @@ async function open(page: Page, vp: VP, o: { group?: string } = {}) {
       localStorage.setItem("sa.guide.queries", "1");
       localStorage.setItem("sa.guide.queries-explainer", "1");
       localStorage.removeItem("sa.pinList.queries");
+      /* the seed's queries are on seed-ms-1 (The Smoke Test); the page is scoped to the active manuscript */
+      localStorage.setItem("scriptally_active_manuscript_id", "seed-ms-1");
+      sessionStorage.setItem("qh.qc.folds153", JSON.stringify([]));
     } catch { /* private mode */ }
   }, o.group ?? "attention");
   await openRoute(page, "/queries", vp);
-  await page.locator("[data-qc151='row'][data-id^='q152-']").first().waitFor({ timeout: 30_000 }).catch(() => {});
+  /* Controls: entry v1 close-out — the list's card is QcCard154 now ([data-qc154='card']); [data-qc151='row'] was retired */
+  await page.locator("[data-qc154='card'][data-id^='q152-'], [data-qc151='row'][data-id^='q152-']").first().waitFor({ timeout: 30_000 }).catch(() => {});
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1200);
   await page.mouse.move(5, 5);
@@ -71,9 +75,9 @@ const click = (page: Page, sel: string) => page.locator(sel).first().click({ tim
 /** open a fixture's card by its row, and wait for the panel to settle */
 async function openCard(page: Page, key: string) {
   await page.evaluate((id) => {
-    const r = document.querySelector<HTMLElement>(`[data-qc151='row'][data-id='${id}']`);
+    const r = [...document.querySelectorAll<HTMLElement>(`[data-qc154='card'][data-id='${id}'], [data-qc151='row'][data-id='${id}']`)].find((e) => e.getBoundingClientRect().height > 0);
     r?.scrollIntoView({ block: "center" });
-    (r?.querySelector<HTMLElement>("[data-qcv='row-first'], td") ?? r)?.click();
+    (r?.querySelector<HTMLElement>("[data-qc154='name'], [data-qcv='row-first'], td") ?? r)?.click();
   }, `q152-${key}`);
   await page.locator(`[data-qp='panel'] [data-qc152='card'][data-id='q152-${key}']`).waitFor({ timeout: 15_000 }).catch(() => {});
   await page.waitForTimeout(900);
@@ -178,6 +182,7 @@ const readThread = (page: Page) => page.evaluate((c) => {
       /* the bubble's RENDERED words: innerText on a hidden element falls back to its raw text, so the title alone
          cannot say whether a reader sees it (L9's first mutation stayed green on exactly that) */
       seen: bx.innerText, date: m.querySelector<HTMLElement>("[data-qc152='msg-date']")?.innerText.trim() ?? "",
+      note: m.classList.contains("oc-note"), mark: !!m.querySelector("[data-qc152='glyph'] [data-mark='reply']"), radius: getComputedStyle(bx).borderTopLeftRadius,
       bg: getComputedStyle(bx).backgroundColor, edge: getComputedStyle(bx).boxShadow, glyphBg: g ? getComputedStyle(g).backgroundColor : "none", glyphW: g ? g.offsetWidth : 0,
       navy: [bx, ...bx.querySelectorAll<HTMLElement>("*")].some((e) => getComputedStyle(e).backgroundColor === "rgb(42, 58, 82)"),
       follows: m.querySelector<HTMLElement>("[data-qc152='follows']")?.innerText.replace(/\s+/g, " ").trim() ?? "",
@@ -242,10 +247,13 @@ for (const vp of SIZES) {
         const t = await readThread(page);
         L.check(`${k}: population`, !!t && t.msgs.length >= 2, `${t?.msgs.length}`);
         for (const m of t?.msgs ?? []) {
-          /* v152.1 follow-up: a holding reply is white with the agent hairline (grey means passed) */
-          if (m.kind === "holding") {
-            L.check(`${k} · holding reply: white, the agent hairline #e3dbd0, its note quoted, the hold glyph`,
-              m.bg === "rgb(255, 255, 255)" && m.edge.includes("rgb(227, 219, 208)") && m.quotes[0] === "“Thanks — reading now.”" && m.glyphW === 26, `${m.bg} ${m.edge} ${JSON.stringify(m.quotes)}`);
+          /* Controls: entry v1 — an agent's reply that moves nothing (an old holding reply included) is the small note:
+             the ref's #f6f3ee box, 12px, no shadow, their words quoted, the speech-bubble mark (was: v152.1's white
+             bubble with the agent hairline) */
+          if (m.kind === "reply") {
+            L.check(`${k} · holding reply: the small note (oc-note), #f6f3ee, 12px, no shadow, its note quoted, the speech-bubble mark`,
+              m.note && m.bg === "rgb(246, 243, 238)" && m.radius === "12px" && m.edge === "none" && m.quotes.some((q) => q.includes("Thanks — reading now.")) && m.mark && !m.navy,
+              `note=${m.note} ${m.bg} ${m.radius} ${m.edge} ${JSON.stringify(m.quotes)} mark=${m.mark}`);
             seen.add("holding");
             continue;
           }
@@ -258,6 +266,28 @@ for (const vp of SIZES) {
       }
       L.check("every agent tint in the table was seen, and the holding reply", ["Partial Requested", "Full Requested", "Revise & Resubmit", "Offer", "Rejected", "holding"].every((s) => seen.has(s)), JSON.stringify([...seen]));
       L.done(40);
+    });
+
+    /* Controls: entry v1 close-out — the holding reply on its own, so its claim is read apart from L3's v152.1 colour
+       table (which v164 replaced: the writer's bubbles white, the agent's their stage band — qc164.measure L8). The
+       fixture is an OLD "Holding reply" row (seedQc152 "holding"); it must be FOUND, or the lock has failed. */
+    test("L3H · the holding reply is the small note: #f6f3ee, 12px, no shadow, their words, the speech-bubble mark", async ({ page }) => {
+      test.skip(!run("L3H"));
+      const L = new Ledger(`L3H-${vp.width}`);
+      await open2(page, vp);
+      await openCard(page, "holding");
+      const t = await readThread(page);
+      const replies = (t?.msgs ?? []).filter((m) => m.kind === "reply");
+      L.check("holding: population (the card's thread, Query sent and the reply)", !!t && t.msgs.length === 2, JSON.stringify(t?.msgs.map((m) => `${m.kind}:${m.title}`)));
+      L.check("holding: exactly one reply step found", replies.length === 1, String(replies.length));
+      for (const m of replies) {
+        L.check("holding: the small note (oc-note), not a full bubble", m.note, `note=${m.note}`);
+        L.check("holding: the ref's box #f6f3ee, 12px, no shadow", m.bg === "rgb(246, 243, 238)" && m.radius === "12px" && m.edge === "none", `${m.bg} ${m.radius} ${m.edge}`);
+        L.check("holding: names a holding reply", /holding reply/.test(m.title), m.title);
+        L.check("holding: their words quoted", m.quotes.some((q) => q.includes("Thanks — reading now.")), JSON.stringify(m.quotes));
+        L.check("holding: the speech-bubble mark, no navy", m.mark && !m.navy, `mark=${m.mark} navy=${m.navy}`);
+      }
+      L.done(7);
     });
 
     test("L4 · waits: every wait the same height; one beside an undated step is left blank (re-pointed by v152.2 §1.7: it showed —)", async ({ page }) => {

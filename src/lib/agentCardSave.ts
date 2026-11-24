@@ -15,6 +15,7 @@
  * ⚠️ NEVER THROUGH `updateAgent`: that writer appends an activity, so an undo through it would append
  * a second entry — the house undo rule.
  */
+import { withReminderStamp } from "./reminderStamp";
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Agent, Query } from "../types";
@@ -91,7 +92,7 @@ export async function commitCardSave(a: CardSaveArgs): Promise<CardSaveOutcome> 
   const ref = (id: string) => doc(db, "users", uid, "queries", id);
   if (plan) {
     /* Update its dates: the reply date moves by itself (it is derived); a stored nudge that sat where the old window put it moves */
-    for (const m of plan.moveNudge) { try { await updateDoc(ref(m.id), { nudgeDate: dayIso(new Date(m.nudgeMs)) }); } catch { failed.push(m.id); } }
+    for (const m of plan.moveNudge) { try { await updateDoc(ref(m.id), withReminderStamp({ nudgeDate: dayIso(new Date(m.nudgeMs)) }, (mine.find((q) => q.id === m.id) ?? null) as { nudgeDate?: unknown } | null)); } catch { failed.push(m.id); } }
     /* Keep them as they are: the old date, held as the query's own (stamped, so it wins on recency); the nudge stays */
     for (const k of plan.keep) { try { await updateDoc(ref(k.id), writerExpectedWrite(dayIso(new Date(k.expMs)))); } catch { failed.push(k.id); } }
     /* Close it as no reply: the app's one path (status, activity row, nudge removed, the Wall of no) */

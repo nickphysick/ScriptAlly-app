@@ -26,6 +26,7 @@ import type { BoardCard } from "./todoBoard";
 import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket } from "./todoBuckets";
 import { snoozedCards, boardEligible, flagForCard } from "./todoColumns";
 import { taskDue, type DueFact } from "./taskDue";
+import { entryDatesFor, entryYmd } from "./agentReply";
 import { queriesMissingMaterials } from "./queryMaterialsGap";
 import { recordSweepRow, type RecordSweepRow } from "./materialsSweep";
 import { sendSpecFor } from "./todoDock";
@@ -201,6 +202,8 @@ export function dueFor(c: BoardCard, db: TaskData, flags: TaskFlag[]): DueFact {
   const ag = agentId ? db.agents.find((a) => a.id === agentId) : undefined;
   const ut = c.userTaskId ? db.userTasks.find((t) => t.id === c.userTaskId) : undefined;
   const flag = flagForCard(c, flags);
+  /* Controls: entry v1 — the dates as the agent's latest reply entry moves them (the cards' own read-through) */
+  const en = q ? entryDatesFor(q, db.activities) : null;
   return taskDue({
     card: c,
     ...(q ? { query: {
@@ -211,11 +214,13 @@ export function dueFor(c: BoardCard, db: TaskData, flags: TaskFlag[]): DueFact {
       fullRequestedDate: q.fullRequestedDate,
       partialSentDate: q.partialSentDate,
       fullSentDate: q.fullSentDate,
-      nudgeDate: q.nudgeDate,
+      nudgeDate: entryYmd(en?.reminderMs ?? null) ?? q.nudgeDate,
       lastNudgeSentDate: q.lastNudgeSentDate,
       sendReminderDate: isoOf(q.sendReminderDate),
       statusMovedAt: isoOf(q.lastStatusChange),
       lastReplyAt: isoOf(q.responseReceivedAt),
+      sendByAt: entryYmd(en?.sendByMs ?? null),
+      replyDateAt: entryYmd(en?.replyDateMs ?? null),
     } } : {}),
     ...(ag ? { agent: { responseTimeWeeks: ag.responseTimeWeeks, noResponseMeansNo: ag.noResponseMeansNo } } : {}),
     ...(ut ? { userTask: { dueDate: ut.dueDate } } : {}),

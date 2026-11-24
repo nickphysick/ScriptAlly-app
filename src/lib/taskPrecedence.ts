@@ -33,6 +33,9 @@ const DAY = 86400000;
 export type ReplyTask = "nudge" | "close" | "none";
 
 export interface ReplyTaskInput {
+  /** Controls: entry v1 — the new reply date the agent gave in a reply entry after the latest send (lib/agentReply
+   *  `entryDatesFor`): it IS the deadline, the nudge is due on it and not before, and it ends the case for closing */
+  replyDateMs?: number | null;
   status: QueryStatus;
   dateSent?: string; // ISO
   responseDeadline?: string; // ISO — stored; else computed from dateSent + window
@@ -97,6 +100,8 @@ export function replyDeadlineMs(inp: ReplyTaskInput): number {
   const { status, responseTimeWeeks } = inp;
   const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED;
   if (!awaiting) return NaN;
+  /* Controls: entry v1 — the agent's own new date outranks the stored deadline and the window: it needs no window */
+  if (inp.replyDateMs != null && Number.isFinite(inp.replyDateMs)) return inp.replyDateMs;
   if (!responseTimeWeeks || responseTimeWeeks <= 0) return NaN;
   const stored = ms(inp.responseDeadline);
   if (!Number.isNaN(stored)) return stored;
@@ -183,14 +188,16 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
     return repliedAfterNudge ? "none" : "close";
   }
 
-  if (now < deadlineMs + NUDGE_GRACE_DAYS * DAY) return "none"; // still inside window + grace
+  /* Controls: entry v1 — a date the agent gave is due ON that date: no grace after it, and nothing before it */
+  const dated = inp.replyDateMs != null && Number.isFinite(inp.replyDateMs);
+  if (now < deadlineMs + (dated ? 0 : NUDGE_GRACE_DAYS * DAY)) return "none"; // still inside window + grace
 
   const sentMs = ms(inp.dateSent);
 
   /* ⚠️ PHASE 5 (D6) · A REPLY SINCE THE WINDOW EXPIRED ENDS THE CASE FOR CLOSING. Computed once
      here and applied to BOTH close routes below, so the stated-pass branch cannot reach past a
      reply either: `noResponseMeansNo` says what SILENCE means, and this is not silence. */
-  const repliedSince = inp.repliedSinceMs != null && inp.repliedSinceMs > deadlineMs;
+  const repliedSince = dated || (inp.repliedSinceMs != null && inp.repliedSinceMs > deadlineMs);
 
   if (noResponseMeansNo) return repliedSince ? "none" : "close"; // stated pass — never nudge
 
@@ -225,10 +232,14 @@ export function replyTaskFor(
   /* §3 — a future reminder on this query, from the caller's own task store. Optional so the
      existing call sites keep their exact behaviour; the feed that builds the suggestion passes it. */
   reminderScheduled?: boolean,
+  /* Controls: entry v1 — the query's dates as its latest reply entry moves them (lib/agentReply `entryDatesFor`, or a
+     Query Centre row's `replyDateMs`); optional so a caller with no feed keeps its old answer */
+  entry?: { replyDateMs?: number | null; reminderMs?: number | null },
 ): ReplyTask {
   if (!agent) return "none";
   return replyTask({
     reminderScheduled,
+    replyDateMs: entry?.replyDateMs ?? null,
     status: query.status,
     dateSent: query.dateSent,
     responseDeadline: query.responseDeadline,
@@ -236,7 +247,7 @@ export function replyTaskFor(
     noResponseMeansNo: !!agent.noResponseMeansNo,
     lastNudgeSentDate: query.lastNudgeSentDate,
     /* the writer's own reminder, from the field it is stored in — one name, one place */
-    writerNudgeDate: query.nudgeDate,
+    writerNudgeDate: entry?.reminderMs != null ? new Date(entry.reminderMs).toISOString() : query.nudgeDate,
     now,
   });
 }

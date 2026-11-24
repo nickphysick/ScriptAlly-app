@@ -30,7 +30,7 @@ import {
   draggableTask, EXPECTED_PILL, expectedLine, toYmd,
 } from "./todoCalendar";
 import { windowDays } from "./todoTimeline";
-import { HOLDING_REPLY_TYPE } from "./holdingReply";
+import { LEGACY_HOLDING_TYPE as HOLDING_REPLY_TYPE } from "./agentReply";
 import { TASK_TYPES } from "./todoActions";
 import { boardStreamForTaskType } from "./todoBoard";
 

@@ -48,6 +48,10 @@ export type DueSource =
   | "window"
   /** the check-in the writer booked when they nudged */
   | "check-in"
+  /** Controls: entry v1 — the Send by of a request (stored, or moved by the agent's chaser) */
+  | "send-by"
+  /** Controls: entry v1 — the new reply date the agent gave in a reply entry */
+  | "reply"
   | "none";
 
 export interface DueFact {
@@ -78,6 +82,10 @@ export interface DueQuery {
   sendReminderDate?: string;
   statusMovedAt?: string;
   lastReplyAt?: string;
+  /** Controls: entry v1 — the request's Send by, read through the agent's latest reply entry (lib/agentReply `entryDatesFor`) */
+  sendByAt?: string;
+  /** Controls: entry v1 — the new reply date from the agent's latest reply entry, when it moves this wait */
+  replyDateAt?: string;
 }
 
 export interface DueInput {
@@ -223,6 +231,8 @@ export function taskDue(i: DueInput): DueFact {
       if (card.taskType !== "offer_received") {
         const r = ymdOf(q?.sendReminderDate);
         if (r) return fact(r, "reminder");
+        /* Controls: entry v1 — a request's Send by is its day: the stored one, or the date the agent's chaser gave */
+        if (bucket === "send") { const s = ymdOf(q?.sendByAt); if (s) return fact(s, "send-by"); }
       }
       /* ⚠️ THE ANCHOR IS `waitAnchorMs`'s — the request date for a send, the status change for an
          offer or an R&R — so the Due chip names the same day the ticket's "Asked on" / "Came in"
@@ -249,6 +259,8 @@ export function taskDue(i: DueInput): DueFact {
          query in hand, so it is read, not re-decided. */
       const n = ymdOf(q?.nudgeDate);
       if (n) return fact(n, card.reason === "nudge-again" ? "check-in" : "reminder");
+      /* Controls: entry v1 — the date the agent gave in a reply entry: the nudge is due on it, not before */
+      { const r = ymdOf(q?.replyDateAt); if (r) return fact(r, "reply"); }
       return fact(windowYmd(q, agent), "window");
     }
 
@@ -256,6 +268,7 @@ export function taskDue(i: DueInput): DueFact {
       /* the expected reply: the booked check-in once the query has been chased, else the window */
       const n = q?.lastNudgeSentDate ? ymdOf(q?.nudgeDate) : null;
       if (n) return fact(n, "check-in");
+      { const r = ymdOf(q?.replyDateAt); if (r) return fact(r, "reply"); }
       return fact(windowYmd(q, agent), "window");
     }
 

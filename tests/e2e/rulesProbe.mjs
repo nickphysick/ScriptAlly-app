@@ -894,4 +894,33 @@ console.log("\nSubmission packages v39 — the colour:");
   try { await deleteDoc(pref); console.log("  · probe package removed"); } catch (e) { console.log(`  ⚠️  could not remove probe-pk39: ${e.message}`); }
 }
 
+/* ── Controls: entry v1 (24 Nov) ───────────────────────────────────────────────────────────────────
+ * The agent's reply that moves nothing: nested `replyKind` / `replyDate` (hasOnly + validated), the feed's
+ * 'Agent Reply' type, and its two keys on the feed's update allowlist.
+ */
+console.log("\nControls: entry v1 — the agent's reply that moves nothing:");
+{
+  const nref = nat("probe-agent-reply");
+  const fref = doc(db, "users", uid, "activities", "probe-agent-reply");
+  const at = new Date().toISOString();
+  await attempt("nested 'Agent reply' + kind + date", "ce1 P1", () => setDoc(nref, { type: "Agent reply", createdAt: at, note: "", queryId: "seed-query-1",
+    agentName: "Probe", replyKind: "chaser", replyDate: "2026-12-04", replyNote: "Any news?" }));
+  await attempt("nested kind outside the three…", "ce1 P1 (expect DENIED)", () => updateDoc(nref, { replyKind: "decision" }));
+  await attempt("feed 'Agent Reply' + kind + date", "ce1 P1", () => setDoc(fref, { id: "probe-agent-reply", userId: uid, queryId: "seed-query-1", manuscriptId: "seed-ms-1",
+    activityType: "Agent Reply", description: "probe", date: at, details: "Any news?", replyKind: "chaser", replyDate: "2026-12-04" }));
+  await attempt("feed kind + date corrected (UPDATE)", "ce1 P1", () => updateDoc(fref, { replyKind: "holding", replyDate: "2027-01-15" }));
+  for (const r of [nref, fref]) { try { await deleteDoc(r); } catch (e) { console.log(`  ⚠️  could not remove ${r.id}: ${e.message}`); } }
+  console.log("  · probe entries removed");
+}
+
+/* ── Controls: entry v1 · follow-up 2 (24 Nov) — the reminder's set-at stamp on the query ─────────────────────────── */
+console.log("\nControls: entry v1 follow-up 2 — the reminder's set-at stamp:");
+{
+  const qref = doc(db, "users", uid, "queries", "seed-query-1");
+  const before = (await getDoc(qref)).data() ?? {};
+  await attempt("query nudgeSetAt (UPDATE)", "ce1 F2", () => updateDoc(qref, { nudgeSetAt: new Date().toISOString() }));
+  await attempt("nudgeSetAt not a string…", "ce1 F2 (expect DENIED)", () => updateDoc(qref, { nudgeSetAt: 12 }));
+  try { await updateDoc(qref, { nudgeSetAt: typeof before.nudgeSetAt === "string" ? before.nudgeSetAt : deleteField() }); console.log("  · restored"); } catch (e) { console.log(`  ⚠️  could not restore: ${e.message}`); }
+}
+
 process.exit(0);

@@ -26,7 +26,7 @@
 import type { QueryStatus } from "../types";
 import { computeRecomputedFields, type RawActivityDoc, type RecomputedFields } from "./recomputeQuery";
 import { chapterise, type ChapterableRow } from "./timelineChapters";
-import { waitAnchor, type StoredHoldingReply } from "./holdingReply";
+import { waitAnchor, type StoredHoldingReply } from "./agentReply";
 import { resolveExpectedDate, type ExpectedSource } from "./expectedDate";
 import { formatDate } from "./dates";
 

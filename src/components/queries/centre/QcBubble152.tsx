@@ -16,6 +16,9 @@ import type { ThreadChip } from "../../../lib/qcThread152";
 import React from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
+/* Controls: entry v1 — the note between steps (every `reply` step, on every card that draws a thread) */
+import "./qcv168oc.css";
+import { ReplyMark } from "./ReplyMark";
 
 /** §2.4 the nudge's glyph: a ring with "!" (nudge-icons.html, option A) */
 export const NUDGE_MARK = (
@@ -26,9 +29,10 @@ export const NUDGE_MARK = (
 const HOLD = <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="#1c130f" strokeWidth="1.6" aria-hidden="true"><circle cx="10" cy="10" r="7" /><path d="M7 10h6" strokeLinecap="round" /></svg>;
 
 /** the glyph for a step: a StatusDot for a status, the "!" for a nudge, the offer's for telling others about one */
-export function StepGlyph({ status, kind }: { status: QueryStatus | null; kind: "nudge" | "holding" | "told" | null }) {
+export function StepGlyph({ status, kind }: { status: QueryStatus | null; kind: "nudge" | "reply" | "told" | null }) {
   if (kind === "nudge") return NUDGE_MARK;
-  if (kind === "holding") return HOLD;
+  /* follow-up 4 — the ref's speech bubble, its own mark (never a StatusDot: the entry has no status) */
+  if (kind === "reply") return <ReplyMark />;
   if (kind === "told") return <StatusDot status={QueryStatus.OFFER} overrideSize={18} decorative />;
   return status ? <StatusDot status={status} overrideSize={18} decorative /> : HOLD;
 }
@@ -50,7 +54,7 @@ const VIA_ICON: Record<"email" | "form" | "post", React.ReactNode> = {
 export interface BubbleProps {
   side: "me" | "them";
   status: QueryStatus | null;
-  kind: "nudge" | "holding" | "told" | null;
+  kind: "nudge" | "reply" | "told" | null;
   title: string;
   date: string;
   dated: boolean;
@@ -80,9 +84,17 @@ export interface BubbleProps {
   className?: string;
   /** Query card v164 — the agent's words under the title, before what went (the slide-in card passes it) */
   wordsFirst?: boolean;
+  /** Controls: entry v1 — the small note between steps: its date line ("Send by Fri 4 Dec"), right under the title and
+   *  before their words (design-refs/controls-entry-v1 `.oc-sub`) */
+  noteSub?: string | null;
 }
 
-export const Bubble: React.FC<BubbleProps> = (b) => {
+export const Bubble: React.FC<BubbleProps> = (b0) => {
+  /* Controls: entry v1 — THE AGENT'S REPLY THAT MOVES NOTHING IS A SMALL NOTE BETWEEN STEPS, never a full bubble (every
+     kind, the holding-reply pack's rows too): `oc oc-note` (qcv168oc.css, the ref's rules) and its date line under the
+     title as `.oc-sub`, before their words. Every renderer of a thread step gets it here. */
+  const note = b0.kind === "reply";
+  const b: BubbleProps = note ? { ...b0, noteSub: b0.noteSub ?? b0.sub ?? null, sub: null, className: ["oc oc-note", b0.className].filter(Boolean).join(" ") } : b0;
   const style = b.tint ? ({ ["--bt" as string]: b.tint.fill, ["--be" as string]: b.tint.edge } as React.CSSProperties) : undefined;
   const icon = b.side === "me" && b.viaIcon ? <i className="qc152-via" data-qc152="via-icon" data-via={b.viaIcon}>{VIA_ICON[b.viaIcon]}</i> : null;
   /* the stamp sits in the bubble's bottom-right corner; a hidden copy at the end of the last line keeps its room, so the
@@ -93,7 +105,7 @@ export const Bubble: React.FC<BubbleProps> = (b) => {
   const viaText = b.via && !(b.side === "me" && b.viaIcon) ? b.via : null;
   /* v164 (`wordsFirst`, the slide-in card only) — their words sit under the title, before what went; the stamp's room goes
      on whichever line is last */
-  const tail = b.sub ? "sub" : b.wordsFirst ? (b.chips || viaText ? "r2" : b.quote ? "quote" : "r1") : b.quote ? "quote" : b.chips || viaText ? "r2" : "r1";
+  const tail = b.sub ? "sub" : b.noteSub && !b.quote && !b.chips && !viaText ? "note" : b.wordsFirst ? (b.chips || viaText ? "r2" : b.quote ? "quote" : "r1") : b.quote ? "quote" : b.chips || viaText ? "r2" : "r1";
   const quote = b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”{tail === "quote" ? room : null}</div> : null;
   return (
     <div {...(b.outer as React.HTMLAttributes<HTMLDivElement>)} className={`qc152-m ${b.side}${b.draft ? " drf" : ""}${b.className ? ` ${b.className}` : ""}`}>
@@ -111,6 +123,7 @@ export const Bubble: React.FC<BubbleProps> = (b) => {
               {b.draft ? <span className="qc152-drt" data-qc152="draft-mark">· draft</span> : null}
               {tail === "r1" ? room : null}
             </div>
+            {b.noteSub ? <div className="oc-sub" data-qc152="note-sub">{b.noteSub}{tail === "note" ? room : null}</div> : null}
             {b.wordsFirst ? quote : null}
             {b.chips || viaText ? <div className="qc152-r2">{b.chips}{viaText ? <em data-qc152="via">{viaText}</em> : null}{tail === "r2" ? room : null}</div> : null}
             {b.wordsFirst ? null : quote}

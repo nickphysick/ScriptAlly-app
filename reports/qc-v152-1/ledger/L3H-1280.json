@@ -1,0 +1,37 @@
+[
+ {
+  "where": "holding: population (the card's thread, Query sent and the reply)",
+  "ok": true,
+  "detail": "[\":You sent Hal your query\",\"reply:Hal sent a holding reply\"]"
+ },
+ {
+  "where": "holding: exactly one reply step found",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "holding: the small note (oc-note), not a full bubble",
+  "ok": true,
+  "detail": "note=true"
+ },
+ {
+  "where": "holding: the ref's box #f6f3ee, 12px, no shadow",
+  "ok": true,
+  "detail": "rgb(246, 243, 238) 12px none"
+ },
+ {
+  "where": "holding: names a holding reply",
+  "ok": true,
+  "detail": "Hal sent a holding reply"
+ },
+ {
+  "where": "holding: their words quoted",
+  "ok": true,
+  "detail": "[\"“Thanks — reading now.”\"]"
+ },
+ {
+  "where": "holding: the speech-bubble mark, no navy",
+  "ok": true,
+  "detail": "mark=true navy=false"
+ }
+]

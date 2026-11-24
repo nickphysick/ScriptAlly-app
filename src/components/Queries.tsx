@@ -57,6 +57,7 @@ import { ToolbarButton } from "./shared/ToolbarButton";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
+import { replyDayIso } from "../lib/agentReply";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -597,7 +598,7 @@ export const Queries: React.FC<{
     deleteQuery,
     recordMaterialsSent,
     markSentWithReceipt,
-    recordHoldingReply,
+    recordAgentReply,
     deleteJournalEntry,
     updateJournalEntry,
     pinJournalEntry,
@@ -925,15 +926,20 @@ export const Queries: React.FC<{
        * to append a rung carrying a `resultingStatus` and let `recomputeQuery` derive from it. A
        * holding reply has no status, so routing it through there would mean either inventing one or
        * threading a "no status" case through the one function whose whole contract is that there
-       * always is one. `buildHoldingReplyWrites` is its sibling — same twin-store shape, same
+       * always is one. `buildAgentReplyWrites` (lib/agentReply) is its sibling — same twin-store shape, same
        * shared id — and the two cannot be confused because neither can produce the other's writes.
        */
       let res: { undo: () => Promise<void> | void };
       if (respDraft.outcome === "holding") {
-        const r = await recordHoldingReply(q.id, {
-          repliedOn: new Date(`${respDraft.dateArrived}T12:00:00`).toISOString(),
-          weeks: respDraft.replyWeeks.trim() ? Number(respDraft.replyWeeks) : null,
-          note: respDraft.theirWords,
+        /* Controls: entry v1 — a holding reply is the agent-reply entry's kind `holding`; their weeks become its new
+           date, counted from the day it arrived (the rule old rows are read by) */
+        const arrived = new Date(`${respDraft.dateArrived}T12:00:00`);
+        const wk = respDraft.replyWeeks.trim() ? Number(respDraft.replyWeeks) : 0;
+        const r = await recordAgentReply(q.id, {
+          kind: "holding",
+          on: arrived.toISOString(),
+          words: respDraft.theirWords,
+          date: wk > 0 ? replyDayIso(arrived.getTime() + wk * 7 * 86_400_000) : null,
         });
         if (!r.success) throw new Error(r.error || "Failed to record the reply.");
         res = r;
@@ -1057,6 +1063,7 @@ export const Queries: React.FC<{
             writerExpectedDate: res.prior.writerExpectedDate ?? deleteField(),
             writerExpectedSetAt: res.prior.writerExpectedSetAt ?? deleteField(),
             nudgeDate: res.prior.nudgeDate ?? deleteField(),
+            nudgeSetAt: res.prior.nudgeSetAt ?? deleteField(),
           } as never);
         } : undefined,
       });
@@ -1098,6 +1105,7 @@ export const Queries: React.FC<{
           await deleteActivities([res.activityId!]);
           await updateQuery(q.id, {
             nudgeDate: res.prior?.nudgeDate ?? deleteField(),
+            nudgeSetAt: (res.prior as { nudgeSetAt?: string } | undefined)?.nudgeSetAt ?? deleteField(),
             lastNudgeSentDate: res.prior?.lastNudgeSentDate ?? deleteField(),
           } as never);
         } : undefined,
@@ -1161,6 +1169,7 @@ export const Queries: React.FC<{
    */
   const commitQuickSnooze = async (q: Query, days: number) => {
     const prior = q.nudgeDate;
+    const priorSetAt = (q as { nudgeSetAt?: string }).nudgeSetAt;
     const next = new Date(Date.now() + days * 86400000).toISOString();
     setQuick(null);
     try {
@@ -1172,7 +1181,7 @@ export const Queries: React.FC<{
            suppression lifted. An undo that merely snoozed by a negative number would leave a
            second dismissal behind. */
         undo: async () => {
-          await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
+          await updateQuery(q.id, { nudgeDate: prior, nudgeSetAt: priorSetAt ?? deleteField() } as unknown as Partial<Query>);
           /* ⚠️ `"lift"`, NOT `("fixed snooze", 0)`. Zero is falsy, so the old call resolved to
              `snoozedUntil: undefined`, which `upsertTaskFlag` reads as KEEP — the suppression
              stayed exactly where it was and the snooze count went up on the way past. Both halves
@@ -1196,6 +1205,7 @@ export const Queries: React.FC<{
      The claim is true now because the callee was repaired, not because the caller was careful. */
   const commitStopNudging = async (q: Query) => {
     const prior = q.nudgeDate;
+    const priorSetAt = (q as { nudgeSetAt?: string }).nudgeSetAt;
     setQuick(null);
     try {
       await dismissTask("nudge_overdue", q.id, "permanent");
@@ -1203,7 +1213,7 @@ export const Queries: React.FC<{
         message: "Nudges stopped for this query",
         undo: async () => {
           await dismissTask("nudge_overdue", q.id, "lift");
-          if (prior) await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
+          if (prior) await updateQuery(q.id, { nudgeDate: prior, nudgeSetAt: priorSetAt ?? deleteField() } as unknown as Partial<Query>);
           showToast({ message: "Restored" });
         },
       });
@@ -6329,6 +6339,8 @@ export const Queries: React.FC<{
         const rest = orderSteps152(steps1522.filter((x) => !x.kind && x.status && !gone.has(x.activityId ?? ""))).pop();
         const backTo = rest?.status ? STAGE_NAME[rest.status] ?? null : null;
         const deleteText = `Delete this step? ${deps.length ? `${deps.map((d) => depName(d)).join(", ")} ${deps.length === 1 ? "depends" : "depend"} on it, so ${deps.length === 1 ? "it goes" : "they go"} too. ` : ""}${backTo ? `${first}’s card goes back to ${backTo}.` : "This removes the whole query."}`;
+        /* Controls: entry v1 — a reply that moved nothing: nothing depends on it, and the status stays where it is */
+        const deleteText1 = ed.kind === "reply" ? `Delete this step? ${first}’s card stays at ${STAGE_NAME[q.status as QueryStatus] ?? q.status}.` : deleteText;
         const words0 = typeof (evStore.get(ed.activityId) as { replyNote?: unknown } | undefined)?.replyNote === "string" ? String((evStore.get(ed.activityId) as { replyNote?: string }).replyNote) : (ed.quote ?? "");
         const isQueryStep = ed.status === QueryStatus.QUERIED && !ed.kind;
         const kind = fixKind(ed);
@@ -6337,12 +6349,22 @@ export const Queries: React.FC<{
             mats={storedMats(ed.activityId) ?? (ed.status === QueryStatus.QUERIED ? asMats(ed.chips.map((c) => c.label)) : [])}
             request={ed.status === QueryStatus.PARTIAL_REQUESTED || ed.status === QueryStatus.FULL_REQUESTED || ed.status === QueryStatus.REVISE_RESUBMIT}
             words={words0} first={first} env={env} nowMs={now} floorMs={i > 0 ? dated[i - 1].ms : null} ceilMs={i >= 0 && i < dated.length - 1 ? dated[i + 1].ms : null}
-            deleteText={deleteText} busy={qc152Busy}
+            deleteText={deleteText1} busy={qc152Busy}
+            reply={ed.kind === "reply" && ed.reply ? { kind: ed.reply.kind, dateMs: ed.reply.dateMs, withYou: ed.reply.withYou } : null}
             /* Log a query v1.1 — the query's method and package are edited on its first step, and nowhere else */
             how={isQueryStep ? { value: q.sendMethod ?? null, options: EDIT_METHODS } : null}
             pkg={isQueryStep && pkgList ? { value: ctx.packageId ?? null, options: pkgList } : null}
             onCancel={() => setQc1522Edit(null)}
             onSave={(v) => run1522(async () => {
+              /* Controls: entry v1 — the agent's reply that moves nothing is corrected through editActivity, never a step
+                 plan (whose kinds are statuses: it would be written back as a Query sent). The snapshot keeps Undo exact. */
+              if (ed.kind === "reply") {
+                const snap = await takeSnapshot(uid, [q.id]);
+                const moved = ed.ms == null || new Date(ed.ms).setHours(0, 0, 0, 0) !== v.dayMs;
+                await editActivity(q.id, ed.activityId!, { ...(moved ? { date: new Date(new Date(v.dayMs).setHours(12, 0, 0, 0)).toISOString() } : {}), reply: { words: v.words || null, ...(v.reply ? { kind: v.reply.kind, date: v.reply.date } : {}) } });
+                done1522(snap, "Saved that step", null, false);
+                return;
+              }
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
               const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
                 { id: ed.activityId!, kind, dayMs: v.dayMs, materials: v.mats }, side152(ed) === "them" ? v.words : null);
@@ -6357,6 +6379,13 @@ export const Queries: React.FC<{
               done1522(await commitPlan(uid, plan), "Saved that step", null, false);
             }, false)}
             onDelete={() => run1522(async () => {
+              /* Controls: entry v1 — and deleted through deleteActivity (both stores); nothing depends on it */
+              if (ed.kind === "reply") {
+                const snap = await takeSnapshot(uid, [q.id]);
+                await deleteActivity(ed.activityId!);
+                done1522(snap, "Step deleted", null);
+                return;
+              }
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
               const marked = queries.filter((x) => x.offerRefQueryId === q.id).map((x) => x.id);
               const plan = planFix({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks, marked }, [], [ed.activityId!, ...deps.map((d) => d.id)], null);
@@ -6391,6 +6420,13 @@ export const Queries: React.FC<{
         const st = qt.activityId ? steps1522.find((x) => x.activityId === qt.activityId && x.ms != null) ?? null : null;
         if (!st || !st.activityId || st.ms == null) return Promise.resolve(false);
         return run1522(async () => {
+          /* Controls: entry v1 — a reply entry's words, through editActivity (see the step editor above) */
+          if (st.kind === "reply") {
+            const snap = await takeSnapshot(uid, [q.id]);
+            await editActivity(q.id, st.activityId!, { reply: { words: text || null } });
+            done1522(snap, `Saved ${first}’s words`, null, false);
+            return;
+          }
           const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
           const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
             { id: st.activityId!, kind: fixKind(st), dayMs: st.ms!, materials: storedMats(st.activityId) ?? asMats(st.chips.map((c) => c.label)) }, text);

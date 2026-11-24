@@ -22,6 +22,9 @@ import { StepGlyph } from "./QcBubble152";
 /* Query card v161.1 — a step's delete presses the card in, as every save that bumps does */
 import { pressAtPointer, pressThen } from "./qcMotion160";
 import { CrossTick, DiscardAsk, useHold168, useEdit168 } from "./QcEdit168";
+import { WeekSlider } from "../../forms/WeekSlider";
+import { REPLY_KINDS, replyDayIso, type ReplyKind } from "../../../lib/agentReply";
+import { MONTHS_SHORT } from "../../../lib/dates";
 
 const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 
@@ -37,7 +40,7 @@ export interface StepEditProps {
   onReopen: () => void;
   side: "me" | "them";
   status: QueryStatus | null;
-  kind: "nudge" | "holding" | "told" | null;
+  kind: "nudge" | "reply" | "told" | null;
   title: string;
   ms: number;
   mats: StepMaterial[];
@@ -57,12 +60,30 @@ export interface StepEditProps {
    *  of a query are edited here and nowhere else) */
   how?: { value: string | null; options: { v: string; label: string }[] } | null;
   pkg?: { value: string | null; options: { id: string; name: string }[] } | null;
-  onSave: (v: { dayMs: number; mats: StepMaterial[]; words: string; how?: string | null; pkgId?: string | null }) => Promise<boolean>;
+  /** Controls: entry v1 · follow-up 3 — an agent-reply entry: its kind and its new date, edited here (saved through
+   *  editActivity by the caller); the date on the app's slider, counted from the entry's own day */
+  reply?: { kind: ReplyKind; dateMs: number | null; withYou: boolean } | null;
+  onSave: (v: { dayMs: number; mats: StepMaterial[]; words: string; how?: string | null; pkgId?: string | null; reply?: { kind: ReplyKind; date: string | null } }) => Promise<boolean>;
   onDelete: () => Promise<boolean>;
   onCancel: () => void;
 }
 
-type StepDraft = { d: number; mats: StepMaterial[]; words: string; how: string | null; pkgId: string | null };
+type StepDraft = { d: number; mats: StepMaterial[]; words: string; how: string | null; pkgId: string | null; rk?: ReplyKind; rn?: number | null };
+const DAYMS = 86_400_000;
+const KIND_WORDS: Record<ReplyKind, string> = { chaser: "Chaser", holding: "Holding reply", note: "Note" };
+const WD3 = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const w3dm = (ms: number) => { const x = new Date(ms); return `${WD3[x.getDay()]} ${x.getDate()} ${MONTHS_SHORT[x.getMonth()]}`; };
+/** the slider's number for a stored new date: days after the entry's day (with you), weeks (with the agent); null = No date */
+export function replySliderOf(entryDayMs: number, dateMs: number | null, withYou: boolean): number | null {
+  if (dateMs == null) return null;
+  const days = Math.round((sod(dateMs) - sod(entryDayMs)) / DAYMS);
+  return withYou ? Math.min(30, Math.max(0, days)) : Math.min(26, Math.max(1, Math.round(days / 7)));
+}
+/** …and back: the day it names, as "YYYY-MM-DD" (local noon), or null */
+export function replyDateOf(entryDayMs: number, n: number | null, withYou: boolean): string | null {
+  if (n == null) return null;
+  return replyDayIso(sod(entryDayMs) + (withYou ? n : n * 7) * DAYMS + DAYMS / 2);
+}
 
 export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
   const pop = React.useContext(PopCtx);
@@ -74,9 +95,12 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
   const [words, setWords] = useState(seed?.words ?? p.words);
   const [how, setHow] = useState<string | null>(seed ? seed.how : p.how?.value ?? null);
   const [pkgId, setPkgId] = useState<string | null>(seed ? seed.pkgId : p.pkg?.value ?? null);
+  /* follow-up 3 — an entry's kind and its new date (the slider's number: days with you, weeks with the agent; null = No date) */
+  const [rk, setRk] = useState<ReplyKind | undefined>(seed?.rk ?? p.reply?.kind);
+  const [rn, setRn] = useState<number | null>(seed && "rn" in seed ? seed.rn ?? null : p.reply ? replySliderOf(p.ms, p.reply.dateMs, p.reply.withYou) : null);
   const [del, setDel] = useState(false);
   const [dirty, setDirty] = useState(!!seed);
-  const draft: StepDraft = { d, mats, words, how, pkgId };
+  const draft: StepDraft = { d, mats, words, how, pkgId, ...(p.reply ? { rk, rn } : {}) };
   const ed = useHold168(key, dirty, draft, p.onCancel, p.onReopen);
   const asking = ed.asking && ed.open === key;
   useEscapeLayer(true, () => {
@@ -85,7 +109,8 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
     if (asking) { ed.keep(); return; }
     ed.leave();
   }, ESC_LEVEL.pageModal);
-  const save = () => void p.onSave({ dayMs: d, mats, words: words.trim(), ...(p.how ? { how } : {}), ...(p.pkg ? { pkgId } : {}) });
+  const save = () => void p.onSave({ dayMs: d, mats, words: words.trim(), ...(p.how ? { how } : {}), ...(p.pkg ? { pkgId } : {}),
+    ...(p.reply && rk ? { reply: { kind: rk, date: replyDateOf(d, rn, p.reply.withYou) } } : {}) });
   const blocked = (ms: number) => {
     if (ms > sod(p.nowMs)) return "In the future";
     if (p.floorMs != null && ms < sod(p.floorMs)) return "Before the step above";
@@ -114,9 +139,25 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
                 onClick={() => { setPkgId(o.id || null); setDirty(true); }}>{o.name}</button>)}
             </div>
           </> : null}
-          {p.kind !== "nudge" && p.kind !== "told" ? <>
+          {p.kind !== "nudge" && p.kind !== "told" && p.kind !== "reply" ? <>
             <label>Materials</label>
             <div><MatChips id="edit" mats={mats} onChange={(m) => { setMats(m); setDirty(true); }} env={p.env} stepMs={d} request={p.request} addLabel="+ Add" /></div>
+          </> : null}
+          {p.reply && rk ? <>
+            <label>What it was</label>
+            <div className="qc1522-sseg" role="radiogroup" aria-label="What kind of reply" data-qc1522="edit-reply-kind">
+              {REPLY_KINDS.map((k) => <button key={k} type="button" role="radio" aria-checked={rk === k} className={rk === k ? "on" : undefined} data-v={k}
+                onClick={() => { setRk(k); setDirty(true); }}>{KIND_WORDS[k]}</button>)}
+            </div>
+            <label>{p.reply.withYou ? "Send it by" : "Reply time"}</label>
+            <div className="qc1522-wkb" data-qc1522="edit-reply-date">
+              {p.reply.withYou
+                ? <WeekSlider label="Send it by" hideLabel value={rn} min={0} max={30} readout={(n) => (n === 0 ? "The same day" : n === 1 ? "The next day" : `${n} days later`)}
+                    unknownLabel="No date" ends={["Same day", "30 days"]} onChange={(n) => { setRn(n); setDirty(true); }} onUnknown={() => { setRn(rn == null ? 0 : null); setDirty(true); }} />
+                : <WeekSlider label="Reply time" hideLabel value={rn} min={1} max={26} readout={(n) => `${n} ${n === 1 ? "week" : "weeks"}`}
+                    unknownLabel="No date" ends={["1 week", "26 weeks"]} onChange={(n) => { setRn(n); setDirty(true); }} onUnknown={() => { setRn(rn == null ? 1 : null); setDirty(true); }} />}
+              <p className="qc1522-wkx" data-qc1522="edit-reply-date-note">{rn == null ? "No new date: nothing moves but Last heard." : <>{p.reply.withYou ? "Send by" : "Reply expected by"} <b>{w3dm(Date.parse(`${replyDateOf(d, rn, p.reply.withYou)}T12:00:00`))}</b>, counted from their email.</>}</p>
+            </div>
           </> : null}
           {p.side === "them" ? <>
             <label>Their words</label>

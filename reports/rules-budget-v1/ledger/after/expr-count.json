@@ -1,0 +1,542 @@
+{
+ "smallest": {
+  "outcome": "allowed",
+  "fields": 7,
+  "changedKeys": 2,
+  "total": 1807,
+  "isValidQuery": 0,
+  "isValidQueryChange": 1707,
+  "updateRule": 36,
+  "topLines": [
+   {
+    "line": 636,
+    "n": 42,
+    "src": "&& (!changed.hasAny(['materialsRequestedType', 'materialsRequestedQuantity', 'fullVersionSent', 'expectedSendD"
+   },
+   {
+    "line": 630,
+    "n": 38,
+    "src": "&& (!('revisionRound' in written) || ((data.revisionRound is int && data.revisionRound >= 1 && data.revisionRo"
+   },
+   {
+    "line": 656,
+    "n": 38,
+    "src": "&& (!('requestFrom' in written) || ((data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 1"
+   },
+   {
+    "line": 626,
+    "n": 32,
+    "src": "&& (!('partialRequestedDate' in written) || ((data.partialRequestedDate is string && data.partialRequestedDate"
+   },
+   {
+    "line": 627,
+    "n": 32,
+    "src": "&& (!('partialSentDate' in written) || ((data.partialSentDate is string && data.partialSentDate.size() <= 64) "
+   },
+   {
+    "line": 628,
+    "n": 32,
+    "src": "&& (!('fullRequestedDate' in written) || ((data.fullRequestedDate is string && data.fullRequestedDate.size() <"
+   },
+   {
+    "line": 629,
+    "n": 32,
+    "src": "&& (!('fullSentDate' in written) || ((data.fullSentDate is string && data.fullSentDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 633,
+    "n": 32,
+    "src": "&& (!('rejectedDate' in written) || ((data.rejectedDate is string && data.rejectedDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 637,
+    "n": 32,
+    "src": "&& (!('materialsRequestedType' in written) || ((data.materialsRequestedType is string && data.materialsRequest"
+   },
+   {
+    "line": 639,
+    "n": 32,
+    "src": "&& (!('fullVersionSent' in written) || ((data.fullVersionSent is string && data.fullVersionSent.size() <= 512)"
+   },
+   {
+    "line": 642,
+    "n": 32,
+    "src": "&& (!('rrNotes' in written) || ((data.rrNotes is string && data.rrNotes.size() <= 16384) || data.get('rrNotes'"
+   },
+   {
+    "line": 643,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackType' in written) || ((data.rejectionFeedbackType is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 644,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackText' in written) || ((data.rejectionFeedbackText is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 645,
+    "n": 32,
+    "src": "&& (!('rejectionReflection' in written) || ((data.rejectionReflection is string && data.rejectionReflection.si"
+   },
+   {
+    "line": 646,
+    "n": 32,
+    "src": "&& (!('rejectionLesson' in written) || ((data.rejectionLesson is string && data.rejectionLesson.size() <= 1638"
+   }
+  ]
+ },
+ "smallest (again)": {
+  "outcome": "allowed",
+  "fields": 7,
+  "changedKeys": 2,
+  "total": 1807,
+  "isValidQuery": 0,
+  "isValidQueryChange": 1707,
+  "updateRule": 36,
+  "topLines": [
+   {
+    "line": 636,
+    "n": 42,
+    "src": "&& (!changed.hasAny(['materialsRequestedType', 'materialsRequestedQuantity', 'fullVersionSent', 'expectedSendD"
+   },
+   {
+    "line": 630,
+    "n": 38,
+    "src": "&& (!('revisionRound' in written) || ((data.revisionRound is int && data.revisionRound >= 1 && data.revisionRo"
+   },
+   {
+    "line": 656,
+    "n": 38,
+    "src": "&& (!('requestFrom' in written) || ((data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 1"
+   },
+   {
+    "line": 626,
+    "n": 32,
+    "src": "&& (!('partialRequestedDate' in written) || ((data.partialRequestedDate is string && data.partialRequestedDate"
+   },
+   {
+    "line": 627,
+    "n": 32,
+    "src": "&& (!('partialSentDate' in written) || ((data.partialSentDate is string && data.partialSentDate.size() <= 64) "
+   },
+   {
+    "line": 628,
+    "n": 32,
+    "src": "&& (!('fullRequestedDate' in written) || ((data.fullRequestedDate is string && data.fullRequestedDate.size() <"
+   },
+   {
+    "line": 629,
+    "n": 32,
+    "src": "&& (!('fullSentDate' in written) || ((data.fullSentDate is string && data.fullSentDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 633,
+    "n": 32,
+    "src": "&& (!('rejectedDate' in written) || ((data.rejectedDate is string && data.rejectedDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 637,
+    "n": 32,
+    "src": "&& (!('materialsRequestedType' in written) || ((data.materialsRequestedType is string && data.materialsRequest"
+   },
+   {
+    "line": 639,
+    "n": 32,
+    "src": "&& (!('fullVersionSent' in written) || ((data.fullVersionSent is string && data.fullVersionSent.size() <= 512)"
+   },
+   {
+    "line": 642,
+    "n": 32,
+    "src": "&& (!('rrNotes' in written) || ((data.rrNotes is string && data.rrNotes.size() <= 16384) || data.get('rrNotes'"
+   },
+   {
+    "line": 643,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackType' in written) || ((data.rejectionFeedbackType is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 644,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackText' in written) || ((data.rejectionFeedbackText is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 645,
+    "n": 32,
+    "src": "&& (!('rejectionReflection' in written) || ((data.rejectionReflection is string && data.rejectionReflection.si"
+   },
+   {
+    "line": 646,
+    "n": 32,
+    "src": "&& (!('rejectionLesson' in written) || ((data.rejectionLesson is string && data.rejectionLesson.size() <= 1638"
+   }
+  ]
+ },
+ "fullest": {
+  "outcome": "allowed",
+  "fields": 73,
+  "changedKeys": 2,
+  "total": 1807,
+  "isValidQuery": 0,
+  "isValidQueryChange": 1707,
+  "updateRule": 36,
+  "topLines": [
+   {
+    "line": 636,
+    "n": 42,
+    "src": "&& (!changed.hasAny(['materialsRequestedType', 'materialsRequestedQuantity', 'fullVersionSent', 'expectedSendD"
+   },
+   {
+    "line": 630,
+    "n": 38,
+    "src": "&& (!('revisionRound' in written) || ((data.revisionRound is int && data.revisionRound >= 1 && data.revisionRo"
+   },
+   {
+    "line": 656,
+    "n": 38,
+    "src": "&& (!('requestFrom' in written) || ((data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 1"
+   },
+   {
+    "line": 626,
+    "n": 32,
+    "src": "&& (!('partialRequestedDate' in written) || ((data.partialRequestedDate is string && data.partialRequestedDate"
+   },
+   {
+    "line": 627,
+    "n": 32,
+    "src": "&& (!('partialSentDate' in written) || ((data.partialSentDate is string && data.partialSentDate.size() <= 64) "
+   },
+   {
+    "line": 628,
+    "n": 32,
+    "src": "&& (!('fullRequestedDate' in written) || ((data.fullRequestedDate is string && data.fullRequestedDate.size() <"
+   },
+   {
+    "line": 629,
+    "n": 32,
+    "src": "&& (!('fullSentDate' in written) || ((data.fullSentDate is string && data.fullSentDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 633,
+    "n": 32,
+    "src": "&& (!('rejectedDate' in written) || ((data.rejectedDate is string && data.rejectedDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 637,
+    "n": 32,
+    "src": "&& (!('materialsRequestedType' in written) || ((data.materialsRequestedType is string && data.materialsRequest"
+   },
+   {
+    "line": 639,
+    "n": 32,
+    "src": "&& (!('fullVersionSent' in written) || ((data.fullVersionSent is string && data.fullVersionSent.size() <= 512)"
+   },
+   {
+    "line": 642,
+    "n": 32,
+    "src": "&& (!('rrNotes' in written) || ((data.rrNotes is string && data.rrNotes.size() <= 16384) || data.get('rrNotes'"
+   },
+   {
+    "line": 643,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackType' in written) || ((data.rejectionFeedbackType is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 644,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackText' in written) || ((data.rejectionFeedbackText is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 645,
+    "n": 32,
+    "src": "&& (!('rejectionReflection' in written) || ((data.rejectionReflection is string && data.rejectionReflection.si"
+   },
+   {
+    "line": 646,
+    "n": 32,
+    "src": "&& (!('rejectionLesson' in written) || ((data.rejectionLesson is string && data.rejectionLesson.size() <= 1638"
+   }
+  ]
+ },
+ "fullest (again)": {
+  "outcome": "allowed",
+  "fields": 73,
+  "changedKeys": 2,
+  "total": 1807,
+  "isValidQuery": 0,
+  "isValidQueryChange": 1707,
+  "updateRule": 36,
+  "topLines": [
+   {
+    "line": 636,
+    "n": 42,
+    "src": "&& (!changed.hasAny(['materialsRequestedType', 'materialsRequestedQuantity', 'fullVersionSent', 'expectedSendD"
+   },
+   {
+    "line": 630,
+    "n": 38,
+    "src": "&& (!('revisionRound' in written) || ((data.revisionRound is int && data.revisionRound >= 1 && data.revisionRo"
+   },
+   {
+    "line": 656,
+    "n": 38,
+    "src": "&& (!('requestFrom' in written) || ((data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 1"
+   },
+   {
+    "line": 626,
+    "n": 32,
+    "src": "&& (!('partialRequestedDate' in written) || ((data.partialRequestedDate is string && data.partialRequestedDate"
+   },
+   {
+    "line": 627,
+    "n": 32,
+    "src": "&& (!('partialSentDate' in written) || ((data.partialSentDate is string && data.partialSentDate.size() <= 64) "
+   },
+   {
+    "line": 628,
+    "n": 32,
+    "src": "&& (!('fullRequestedDate' in written) || ((data.fullRequestedDate is string && data.fullRequestedDate.size() <"
+   },
+   {
+    "line": 629,
+    "n": 32,
+    "src": "&& (!('fullSentDate' in written) || ((data.fullSentDate is string && data.fullSentDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 633,
+    "n": 32,
+    "src": "&& (!('rejectedDate' in written) || ((data.rejectedDate is string && data.rejectedDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 637,
+    "n": 32,
+    "src": "&& (!('materialsRequestedType' in written) || ((data.materialsRequestedType is string && data.materialsRequest"
+   },
+   {
+    "line": 639,
+    "n": 32,
+    "src": "&& (!('fullVersionSent' in written) || ((data.fullVersionSent is string && data.fullVersionSent.size() <= 512)"
+   },
+   {
+    "line": 642,
+    "n": 32,
+    "src": "&& (!('rrNotes' in written) || ((data.rrNotes is string && data.rrNotes.size() <= 16384) || data.get('rrNotes'"
+   },
+   {
+    "line": 643,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackType' in written) || ((data.rejectionFeedbackType is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 644,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackText' in written) || ((data.rejectionFeedbackText is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 645,
+    "n": 32,
+    "src": "&& (!('rejectionReflection' in written) || ((data.rejectionReflection is string && data.rejectionReflection.si"
+   },
+   {
+    "line": 646,
+    "n": 32,
+    "src": "&& (!('rejectionLesson' in written) || ((data.rejectionLesson is string && data.rejectionLesson.size() <= 1638"
+   }
+  ]
+ },
+ "fullest, recomputeQuery's patch": {
+  "outcome": "allowed",
+  "fields": 73,
+  "changedKeys": 10,
+  "total": 1811,
+  "isValidQuery": 0,
+  "isValidQueryChange": 1711,
+  "updateRule": 36,
+  "topLines": [
+   {
+    "line": 636,
+    "n": 42,
+    "src": "&& (!changed.hasAny(['materialsRequestedType', 'materialsRequestedQuantity', 'fullVersionSent', 'expectedSendD"
+   },
+   {
+    "line": 630,
+    "n": 38,
+    "src": "&& (!('revisionRound' in written) || ((data.revisionRound is int && data.revisionRound >= 1 && data.revisionRo"
+   },
+   {
+    "line": 656,
+    "n": 38,
+    "src": "&& (!('requestFrom' in written) || ((data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 1"
+   },
+   {
+    "line": 626,
+    "n": 32,
+    "src": "&& (!('partialRequestedDate' in written) || ((data.partialRequestedDate is string && data.partialRequestedDate"
+   },
+   {
+    "line": 627,
+    "n": 32,
+    "src": "&& (!('partialSentDate' in written) || ((data.partialSentDate is string && data.partialSentDate.size() <= 64) "
+   },
+   {
+    "line": 628,
+    "n": 32,
+    "src": "&& (!('fullRequestedDate' in written) || ((data.fullRequestedDate is string && data.fullRequestedDate.size() <"
+   },
+   {
+    "line": 629,
+    "n": 32,
+    "src": "&& (!('fullSentDate' in written) || ((data.fullSentDate is string && data.fullSentDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 633,
+    "n": 32,
+    "src": "&& (!('rejectedDate' in written) || ((data.rejectedDate is string && data.rejectedDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 637,
+    "n": 32,
+    "src": "&& (!('materialsRequestedType' in written) || ((data.materialsRequestedType is string && data.materialsRequest"
+   },
+   {
+    "line": 639,
+    "n": 32,
+    "src": "&& (!('fullVersionSent' in written) || ((data.fullVersionSent is string && data.fullVersionSent.size() <= 512)"
+   },
+   {
+    "line": 642,
+    "n": 32,
+    "src": "&& (!('rrNotes' in written) || ((data.rrNotes is string && data.rrNotes.size() <= 16384) || data.get('rrNotes'"
+   },
+   {
+    "line": 643,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackType' in written) || ((data.rejectionFeedbackType is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 644,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackText' in written) || ((data.rejectionFeedbackText is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 645,
+    "n": 32,
+    "src": "&& (!('rejectionReflection' in written) || ((data.rejectionReflection is string && data.rejectionReflection.si"
+   },
+   {
+    "line": 646,
+    "n": 32,
+    "src": "&& (!('rejectionLesson' in written) || ((data.rejectionLesson is string && data.rejectionLesson.size() <= 1638"
+   }
+  ]
+ },
+ "fullest, one field (rrNotes)": {
+  "outcome": "allowed",
+  "fields": 73,
+  "changedKeys": 1,
+  "total": 1807,
+  "isValidQuery": 0,
+  "isValidQueryChange": 1707,
+  "updateRule": 36,
+  "topLines": [
+   {
+    "line": 636,
+    "n": 42,
+    "src": "&& (!changed.hasAny(['materialsRequestedType', 'materialsRequestedQuantity', 'fullVersionSent', 'expectedSendD"
+   },
+   {
+    "line": 630,
+    "n": 38,
+    "src": "&& (!('revisionRound' in written) || ((data.revisionRound is int && data.revisionRound >= 1 && data.revisionRo"
+   },
+   {
+    "line": 656,
+    "n": 38,
+    "src": "&& (!('requestFrom' in written) || ((data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 1"
+   },
+   {
+    "line": 626,
+    "n": 32,
+    "src": "&& (!('partialRequestedDate' in written) || ((data.partialRequestedDate is string && data.partialRequestedDate"
+   },
+   {
+    "line": 627,
+    "n": 32,
+    "src": "&& (!('partialSentDate' in written) || ((data.partialSentDate is string && data.partialSentDate.size() <= 64) "
+   },
+   {
+    "line": 628,
+    "n": 32,
+    "src": "&& (!('fullRequestedDate' in written) || ((data.fullRequestedDate is string && data.fullRequestedDate.size() <"
+   },
+   {
+    "line": 629,
+    "n": 32,
+    "src": "&& (!('fullSentDate' in written) || ((data.fullSentDate is string && data.fullSentDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 633,
+    "n": 32,
+    "src": "&& (!('rejectedDate' in written) || ((data.rejectedDate is string && data.rejectedDate.size() <= 64) || data.g"
+   },
+   {
+    "line": 637,
+    "n": 32,
+    "src": "&& (!('materialsRequestedType' in written) || ((data.materialsRequestedType is string && data.materialsRequest"
+   },
+   {
+    "line": 639,
+    "n": 32,
+    "src": "&& (!('fullVersionSent' in written) || ((data.fullVersionSent is string && data.fullVersionSent.size() <= 512)"
+   },
+   {
+    "line": 642,
+    "n": 32,
+    "src": "&& (!('rrNotes' in written) || ((data.rrNotes is string && data.rrNotes.size() <= 16384) || data.get('rrNotes'"
+   },
+   {
+    "line": 643,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackType' in written) || ((data.rejectionFeedbackType is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 644,
+    "n": 32,
+    "src": "&& (!('rejectionFeedbackText' in written) || ((data.rejectionFeedbackText is string && data.rejectionFeedbackT"
+   },
+   {
+    "line": 645,
+    "n": 32,
+    "src": "&& (!('rejectionReflection' in written) || ((data.rejectionReflection is string && data.rejectionReflection.si"
+   },
+   {
+    "line": 646,
+    "n": 32,
+    "src": "&& (!('rejectionLesson' in written) || ((data.rejectionLesson is string && data.rejectionLesson.size() <= 1638"
+   }
+  ]
+ },
+ "threshold (rule order)": {
+  "optionalFields": 66,
+  "firstDeniedAt": null,
+  "firstDeniedField": null,
+  "allowedAgainAfterFirstDenial": []
+ },
+ "threshold (reversed)": {
+  "optionalFields": 66,
+  "firstDeniedAt": null,
+  "firstDeniedField": null,
+  "allowedAgainAfterFirstDenial": []
+ },
+ "create (fullest)": {
+  "outcome": "denied: 7 PERMISSION_DENIED: \nfalse for 'create' @ L7, Unable to evaluate the expression as the maximum of 1000 expressions to evaluate has been reached. for 'create' @ L1235, false for 'update' @ L7, Unable ",
+  "fields": 73
+ },
+ "update (every optional field changed)": {
+  "outcome": "denied: 7 PERMISSION_DENIED: \nfalse for 'update' @ L7, Unable to evaluate the expression as the maximum of 1000 expressions to evaluate has been reached. for 'update' @ L1243, false for 'update' @ L7, Unable ",
+  "changedKeys": 61
+ },
+ "threshold (changed keys, fullest query)": {
+  "firstDeniedAt": 29,
+  "allowedUpTo": 28
+ }
+}

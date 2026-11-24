@@ -195,7 +195,7 @@ const validNestedActivity = () => ({
  *       saveQueryEdits.ts (:126), smartImportCommit.ts (:216)
  *   dateProvisional  smartImportCommit.ts:222 (true) - saveQueryEdits.ts:161 (false on a date edit)
  *   reminderDate     logNudge.ts:133
- *   replyWeeks       holdingReply.ts:126
+ *   replyWeeks       agentReply.ts (read from legacy rows; new rows write replyDate)
  */
 const currentNestedActivity = () => ({
   type: 'Partial Requested',
@@ -228,7 +228,7 @@ const legacyNestedActivity = () => ({
 
 /**
  * `type` IS NOT A QueryStatus AND MUST NEVER TAKE THE ENUM CHECK. Four non-enum values are
- * load-bearing — 'Nudge sent' (logNudge.ts:86), 'Holding reply' (holdingReply.ts:43),
+ * load-bearing — 'Nudge sent' (logNudge.ts:86), 'Holding reply' (agentReply.ts LEGACY_HOLDING_NESTED_TYPE),
  * 'Offer accepted'/'Offer declined' (offerDecision.ts:28-29) — and QueryTimeline.tsx:280,304
  * FILTERS on them to render the nudge and holding-reply rows. Enum-constraining `type` would deny
  * every nudge, holding reply and offer decision AND blank those rows. The enum belongs on

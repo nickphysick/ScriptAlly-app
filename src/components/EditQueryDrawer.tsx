@@ -38,7 +38,7 @@ import { materialIconKind } from "../lib/materialIcon";
 import { MaterialItemIcon } from "./shared/MaterialIcon";
 import { computeResponseDeadline } from "../lib/responseDeadline";
 import { writerExpectedIso } from "../lib/expectedDate";
-import { HOLDING_REPLY_TYPE } from "../lib/holdingReply";
+import { isAgentReplyFeed } from "../lib/agentReply";
 import { editMaterialsUpdate, isPackageLocked } from "../lib/packageMetrics";
 import {
   validateTimeline, appendNoteFor, ADVANCE_OPTIONS, RECLASSIFY_OPTIONS, TimelineError,
@@ -285,7 +285,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
      */
     const beenInTouch = query.hasAgentResponded === true
       || activities.some((ev) => ev.queryId === query.id
-        && (ev as { activityType?: string }).activityType === HOLDING_REPLY_TYPE);
+        && isAgentReplyFeed(ev));
     if (beenInTouch) setReassign({ search: reassign?.search ?? "", guardId: a.id });
     else { setDraftAgentId(a.id); setReassign(null); }
   };

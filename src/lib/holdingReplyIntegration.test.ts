@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { HOLDING_REPLY_NESTED_TYPE, HOLDING_REPLY_TYPE } from "./holdingReply";
+import { LEGACY_HOLDING_NESTED_TYPE as HOLDING_REPLY_NESTED_TYPE, LEGACY_HOLDING_TYPE as HOLDING_REPLY_TYPE } from "./agentReply";
 import { queryAmbientStatus } from "./queryAmbient";
 import { closureOffer, pastWindowLine, silencePolicyLine, nudgeOutcomeLabel } from "./nudgeState";
 import { replyTask } from "./taskPrecedence";
@@ -38,7 +38,8 @@ describe("Phase 2 · the tracker re-bases; the list does not", () => {
   it("a reply-stated window becomes the expected date, attributed to them", () => {
     const a = queryAmbientStatus(q(), "agent", undefined, NOW, 8, [reply(4, 2)]);
     expect(a.windowSource, "the agency's standing weeks outranked what they said last week").toBe("reply");
-    expect(a.expMs).toBe(NOW - 4 * DAY + 14 * DAY);
+    /* Controls: entry v1 — the stated weeks read as a new DATE (a day, at local noon), counted from the reply's own date */
+    expect(a.expMs).toBe(new Date(NOW - 4 * DAY + 14 * DAY).setHours(12, 0, 0, 0));
     expect(a.overdue, "a query inside a freshly stated window reads as overdue").toBe(false);
   });
 
@@ -81,7 +82,7 @@ describe("Phase 2/5 · the silence has ended", () => {
   it("a nudge followed by a holding reply reads as answered", () => {
     const nudgeMs = NOW - 30 * DAY;
     expect(nudgeOutcomeLabel(nudgeMs, [])).toBe("Nudged — no reply");
-    expect(nudgeOutcomeLabel(nudgeMs, [{ status: "", kind: "holding", timeMs: NOW - 4 * DAY }]),
+    expect(nudgeOutcomeLabel(nudgeMs, [{ status: "", kind: "reply", timeMs: NOW - 4 * DAY }]),
       "the nudge still says 'no reply' above the reply that answered it").toBe("Nudged");
   });
 });

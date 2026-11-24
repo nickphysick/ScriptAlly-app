@@ -403,7 +403,9 @@ export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
   switch (t.kind) {
     case "fix": case "batch": return null;
     case "quiet": return t.quietDays == null ? null : { n: String(t.quietDays), words: plural(t.quietDays, "day quiet", "days quiet"), late: false };
-    case "send": case "rr": return waiting();
+    /* Controls: entry v1 — a request with a Send by shows that day ("10 days left", "Today", "{n} days past expected");
+       without one, how long it has waited */
+    case "send": case "rr": return t.dueSource === "send-by" && t.dueDays != null ? dueFigure(t.dueDays) : waiting();
     case "nudge": return t.dueDays == null ? waiting() : nudgeFigure(t.dueDays, t.dueSource);
     case "offer": return offerFigure(t, nowMs);
     case "own": return t.dueDays == null ? null : ownFigure(t.dueDays);

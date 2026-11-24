@@ -11,7 +11,7 @@ import { whereItStands, type QcRow } from "./qcSummary";
 import { anyToMs } from "./qcStages";
 import { shortDate } from "./qc151";
 import { nextFact } from "./qc153";
-import { nudgeMsOf, stateOf, type StateInput } from "./queryState";
+import { nudgeMsOf, reminderOf, stateOf, type StateInput } from "./queryState";
 import type { RowAct } from "./qc1512";
 import type { DrawerMode } from "./queryActions/drawerStore";
 
@@ -78,7 +78,8 @@ export function nextBox154(r: QcRow, nowMs: number): NextBox154 {
     const from = r.stageStartMs ?? r.sentMs;
     const bar = from != null && due > from ? Math.min(1, Math.max(0, (nowMs - from) / (due - from))) : 0;
     /* the planned nudge (`Query.nudgeDate`), shown only while it is still to come: never "now", never a pass */
-    const n = anyToMs((r.query as { nudgeDate?: unknown } | undefined)?.nudgeDate);
+    /* Controls: entry v1 — read through the agent's latest reply entry (lib/queryState `reminderOf`, Nick's ruling 2) */
+    const n = r.query ? reminderOf(r as unknown as Parameters<typeof reminderOf>[0]) : null;
     const nudgeOn = n != null && sod(n) >= sod(nowMs) ? shortDate(n, nowMs) : null;
     return { kind: "wait", due: shortDate(due, nowMs), bar, nudgeOn };
   }

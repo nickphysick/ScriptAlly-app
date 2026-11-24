@@ -10,7 +10,7 @@
  */
 import { ActivityType } from "../types";
 import type { FeedEntry } from "./dashFeed";
-import { HOLDING_REPLY_TYPE } from "./holdingReply";
+import { LEGACY_HOLDING_TYPE } from "./agentReply";
 
 export type FeedIconKind =
   | "agent_added" | "agent_updated" | "agent_removed" | "agents_several"
@@ -29,7 +29,7 @@ export function feedIconKind(e: Pick<FeedEntry, "activityType" | "eventKey" | "s
     case ActivityType.MANUSCRIPT_UPDATED: return "manuscript_updated";
     case ActivityType.MANUSCRIPT_DELETED: return "manuscript_removed";
     case ActivityType.NUDGE_SENT: return "nudge";
-    case HOLDING_REPLY_TYPE: case "Agent Reply": return "holding_reply";
+    case LEGACY_HOLDING_TYPE: case "Agent Reply": return "holding_reply";
   }
   if (e.eventKey === "nudge_sent") return "nudge";
   if (e.eventKey === "offer_told") return "others_told";

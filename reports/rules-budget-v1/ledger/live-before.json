@@ -1,0 +1,18 @@
+{
+ "label": "before",
+ "database": "(default)",
+ "project": "scriptally-dev",
+ "optionalFields": 65,
+ "at": "2026-11-24T19:32:27.093Z",
+ "createFullest": "denied: 7 PERMISSION_DENIED: Missing or insufficient permissions.",
+ "createSmallest": "allowed",
+ "threshold": {
+  "firstDeniedAt": 17,
+  "field": "rrNotes",
+  "outcome": "denied: 7 PERMISSION_DENIED: Missing or insufficient permissions."
+ },
+ "cleanup": {
+  "delete": "allowed",
+  "stillExists": false
+ }
+}
