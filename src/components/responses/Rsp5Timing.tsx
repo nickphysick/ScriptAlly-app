@@ -31,20 +31,18 @@ export const Rsp5Timing: React.FC<{ items: readonly Item[]; waiting: number; qui
   const [tip, setTip] = useState<{ bar: string; kind: FirstKind; left: number } | null>(null);
   const show = (bar: string, kind: FirstKind) => (e: React.SyntheticEvent<HTMLElement>) => setTip({ bar, kind, left: e.currentTarget.offsetLeft });
   return (
-    <section className="rsp5-sec" data-rsp5="timing" data-rsp5-sec="timing" aria-labelledby="rsp5-timing-h">
-      <div className="rsp5-h2row">
-        <div className="rsp5-h2">
-          <span className="rsp5-art rsp5-art--sm" aria-hidden="true">Art: hawk with a pocket watch</span>
-          <div>
-            <h2 id="rsp5-timing-h" className="rsp5-h2t">How long agents took</h2>
-            <p className="rsp5-sub" data-rsp5="timing-line">
-              {top
-                ? <>Most of your answers came <b>{top.label.toLowerCase()}</b> after you queried.{wait != null ? <> Your typical wait for a reply is <b>{plural(wait, "day", "days")}</b>.</> : null}</>
-                : <>Once agents start answering, you&rsquo;ll see how long they tend to take.</>}
-            </p>
-          </div>
-        </div>
+    <section className="rsp5-sec rsp6-card rsp6-card--oat" data-rsp5="timing" data-rsp5-sec="timing" aria-labelledby="rsp5-timing-h">
+      <div className="rsp6-cin">
+      <div className="rsp6-cbh">
+        <h2 id="rsp5-timing-h">How long agents took</h2>
+        {wait != null ? <span className="rsp6-cbr" data-rsp6="typical-wait">Typical wait <b>{plural(wait, "day", "days")}</b></span> : null}
       </div>
+      <div className="rsp6-cbb">
+      <p className="rsp6-lead" data-rsp5="timing-line">
+        {top
+          ? <>Most of your answers came <b>{top.label.toLowerCase()}</b> after you queried.</>
+          : <>Once agents start answering, you&rsquo;ll see how long they tend to take.</>}
+      </p>
       <div className="rsp5-well" data-rsp5="timing-well">
         <div className="rsp5-tkey" aria-hidden="true">
           {KINDS.map((k) => <span key={k}><i className={`rsp5-kq rsp5-kq--${k}`} />{KIND_LABEL[k]}</span>)}
@@ -78,6 +76,8 @@ export const Rsp5Timing: React.FC<{ items: readonly Item[]; waiting: number; qui
           <b>{waiting}</b> still waiting{quiet ? <>, and <b>{quiet}</b> {quiet === 1 ? "has" : "have"} gone past the reply time the agent gives. Their nudge and close dates are on your To-do list.</> : "."}
           {undated ? <> {plural(undated, "answer has", "answers have")} no date recorded, so {undated === 1 ? "it isn’t" : "they aren’t"} in the bars.</> : null}
         </p>
+      </div>
+      </div>
       </div>
     </section>
   );

@@ -403,3 +403,105 @@ export const pctOf = (a: number, b: number): number | null => (b ? Math.round((a
 /** the showcase needs this many answers before it fills in; below it, the warming-up cards */
 export const WARM_NEED = 5;
 export const isEarlyDays = (answered: number): boolean => answered > 0 && answered < WARM_NEED;
+
+/* ══ Responses v6 (design-refs/responses-v6/responses-v6.html) ══════════════════════════════════════════════════════
+ * ⚠️ ONE RESPONSE RATE ON THE PAGE: replies (asked for more + passed) over QUERIED (answered + still waiting). A no-reply
+ *    close and a still-waiting query count in the denominator and never in the numerator (D3). "Answers", which counts
+ *    no-reply closes, is no longer shown anywhere. `replyRate` above is v5's (over answered) and the page no longer reads it.
+ */
+export function responseRate(c: Pick<PageCounts, "replies" | "sent">): number | null {
+  return c.sent ? Math.round((c.replies / c.sent) * 100) : null;
+}
+
+/** the header's tally line: one mark per query queried, asked for more first, then passed, then everything else */
+export type TallyMark = "more" | "passed" | "faint";
+export function tallyMarks(c: Pick<PageCounts, "more" | "passed" | "sent">): TallyMark[] {
+  return Array.from({ length: c.sent }, (_, i) => (i < c.more ? "more" : i < c.more + c.passed ? "passed" : "faint"));
+}
+
+/** a stat card's row: its words, the status whose glyph it wears, and its count. Rows at zero are left out. */
+export interface BreakRow { key: string; label: string; glyph: QueryStatus; n: number }
+/** Asked for more, by what was asked: a partial (requested or sent), the full (requested or sent), a revision, an offer */
+export function requestBreakdown(items: readonly RespItem[]): BreakRow[] {
+  const rows: BreakRow[] = [
+    { key: "partial", label: "Partial", glyph: QueryStatus.PARTIAL_REQUESTED, n: 0 },
+    { key: "full", label: "Full", glyph: QueryStatus.FULL_REQUESTED, n: 0 },
+    { key: "rr", label: "Revise & resubmit", glyph: QueryStatus.REVISE_RESUBMIT, n: 0 },
+    { key: "offer", label: "Offer", glyph: QueryStatus.OFFER, n: 0 },
+  ];
+  for (const i of items) if (i.group === "more") rows.find((r) => r.key === i.answer)!.n++;
+  return rows.filter((r) => r.n > 0);
+}
+/** Passed, by how far the query got (`furthest`, the Query Centre's) */
+export function passBreakdown(items: readonly RespItem[]): BreakRow[] {
+  const rows: BreakRow[] = [
+    { key: "query", label: "At the query", glyph: QueryStatus.QUERIED, n: 0 },
+    { key: "partial", label: "After a partial", glyph: QueryStatus.PARTIAL_SENT, n: 0 },
+    { key: "full", label: "After the full", glyph: QueryStatus.FULL_SENT, n: 0 },
+  ];
+  for (const i of items) if (i.group === "passed") rows.find((r) => r.key === i.furthest)!.n++;
+  return rows.filter((r) => r.n > 0);
+}
+
+/** D4 — below this many replies, a writer with no requests is told it's early days; from it, they're given advice */
+export const NO_REQUESTS_ADVICE_AT = 10;
+/** the Asked for more card's state when no agent has asked for more: null when there are requests or no replies at all */
+export function noRequestsState(c: Pick<PageCounts, "more" | "replies">): "early" | "advice" | null {
+  if (c.more > 0 || c.replies === 0) return null;
+  return c.replies < NO_REQUESTS_ADVICE_AT ? "early" : "advice";
+}
+
+/**
+ * "When replies are due" (the empty page's timeline). ⚠️ D6 — EVERY DISC'S DATE IS `QcRow.expectedMs` AND ITS BLUSH IS
+ * `goneQuiet`, the Query Centre's own derivations; nothing here re-derives either. A disc is a still-waiting query whose
+ * agent states a reply time and whose row has an expected date; the rest without a stated time are the chips beneath.
+ * Positions are fractions of the axis (from four days before the first query to a fortnight past the last due date).
+ */
+export interface WaitDisc<R extends RespRowInput = RespRowInput> { row: R; ms: number; at: number; from: number | null; quiet: boolean; next: boolean; days: number }
+export interface WaitTimeline<R extends RespRowInput = RespRowInput> {
+  t0: number; t1: number; discs: WaitDisc<R>[]; noTime: R[]; today: number; weekFrom: number; weekTo: number; weekCount: number;
+  ticks: { at: number; label: string }[]; next: WaitDisc<R> | null; firstSentMs: number | null;
+}
+export function waitTimeline<R extends RespRowInput>(rows: readonly R[], nowMs: number, weeksOf: (r: R) => number | null): WaitTimeline<R> {
+  const wait = waitingRows(rows);
+  const quiet = new Set(goneQuiet(rows, nowMs).map((r) => r.id));
+  const dated = wait.filter((r) => weeksOf(r) != null && r.expectedMs != null).sort((a, b) => a.expectedMs! - b.expectedMs! || a.id.localeCompare(b.id));
+  const noTime = wait.filter((r) => weeksOf(r) == null).sort((a, b) => (a.sentMs ?? 0) - (b.sentMs ?? 0));
+  const sents = wait.map((r) => r.sentMs).filter((v): v is number => v != null);
+  const firstSentMs = sents.length ? Math.min(...sents) : null;
+  const lastDue = dated.length ? dated[dated.length - 1].expectedMs! : nowMs;
+  const t0 = Math.min(firstSentMs ?? nowMs, nowMs) - 4 * DAY;
+  const t1 = Math.max(lastDue, nowMs) + 14 * DAY;
+  const at = (ms: number) => (ms - t0) / (t1 - t0);
+  const nextRow = dated.find((r) => r.expectedMs! > nowMs) ?? null;
+  const discs = dated.map((r) => ({
+    row: r, ms: r.expectedMs!, at: at(r.expectedMs!), from: r.sentMs != null ? at(r.sentMs) : null,
+    quiet: quiet.has(r.id), next: r === nextRow, days: Math.round((r.expectedMs! - nowMs) / DAY),
+  }));
+  const ticks: { at: number; label: string }[] = [];
+  const d = new Date(t0); d.setDate(1); d.setHours(12, 0, 0, 0); d.setMonth(d.getMonth() + 1);
+  while (d.getTime() < t1) { ticks.push({ at: at(d.getTime()), label: MONTHS_LONG[d.getMonth()] }); d.setMonth(d.getMonth() + 1); }
+  const weekTo = nowMs + 7 * DAY;
+  return {
+    t0, t1, discs, noTime, today: at(nowMs), weekFrom: at(nowMs), weekTo: at(weekTo),
+    weekCount: discs.filter((x) => x.ms > nowMs && x.ms <= weekTo).length, ticks, next: discs.find((x) => x.next) ?? null, firstSentMs,
+  };
+}
+/** stack discs into lanes so no two in a lane are closer than `minGap` (a fraction of the axis): the first lane that fits */
+export function stackLanes(ats: readonly number[], minGap: number): number[] {
+  const last: number[] = [];
+  return ats.map((a) => { let l = 0; while (last[l] != null && a - last[l] < minGap) l++; last[l] = a; return l; });
+}
+
+/**
+ * The answer panel can hold a query still waiting (the empty page's timeline opens one): the same shape as an answer,
+ * in its own group, with no answer. Built only for the panel; `respItems` never makes one, so no count can see it.
+ */
+export type PanelGroup = RespGroup | "waiting";
+export type PanelItem<R extends RespRowInput = RespRowInput> = Omit<RespItem<R>, "group" | "answer"> & { group: PanelGroup; answer: RespAnswer | null };
+export function waitingItem<R extends RespRowInput>(row: R): PanelItem<R> {
+  return {
+    id: row.id, row, group: "waiting", answer: null, state: null, yourMove: false, answerMs: null, queriedMs: row.sentMs,
+    waitDays: null, pagesSentMs: null, dueMs: row.expectedMs, afterPartial: false, personal: false, note: null, furthest: row.furthest,
+  };
+}

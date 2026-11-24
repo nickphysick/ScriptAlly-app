@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Render smokes — Responses v5 (`/queries/responses`). See `src/test/pageSmoke.tsx` for why these exist and why they
+ * Render smokes — Responses v6 (`/queries/responses`; v5 before it). See `src/test/pageSmoke.tsx` for why these exist and why they
  * assert almost nothing: one distinctive string per state, enough to prove the page rendered rather than merely did
  * not crash.
  *
@@ -39,16 +39,24 @@ describe("/queries/responses renders", () => {
   it("renders the Nothing back yet page with a query out", () => {
     const html = renderPageSeeded(page(), "/queries/responses");
     expect(html).toContain("What this page will show you");
-    expect(html).toContain("query out with an agent");
+    expect(html).toContain("When replies are due");
+    expect(html).toContain("Nothing back yet");
   });
 
   it("renders the populated page once an answer is on file, through every section's derivation", () => {
     const html = renderPageSeededWith(page(), "/queries/responses", { queries: ANSWERED });
-    expect(html).toContain("At a glance");
+    expect(html).toContain("response rate");
     expect(html).toContain("Agents who want to read on");
     expect(html).toContain("What your answers tell you");
     expect(html).toContain("How long agents took");
     expect(html).toContain("Your wall of no");
     expect(html).not.toContain("While you wait");
+  });
+
+  it("renders the no-requests state: replies but nobody asked for more, and no request row", () => {
+    const html = renderPageSeededWith(page(), "/queries/responses", { queries: ANSWERED.filter((q) => q.id !== "q-part") });
+    expect(html).toContain("It’s early days");
+    expect(html).not.toContain("Agents who want to read on");
+    expect(html).toContain("Your wall of no");
   });
 });

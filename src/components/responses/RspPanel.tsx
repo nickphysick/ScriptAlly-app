@@ -17,7 +17,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalSto
 import type { Agent } from "../../types";
 import { QueryStatus } from "../../types";
 import type { QcRow } from "../../lib/qcSummary";
-import { FAR_WORDS, firstAnswer, firstNameOf, hasNote, plural, respDate, type RespItem } from "../../lib/responses";
+import { FAR_WORDS, firstAnswer, firstNameOf, hasNote, plural, respDate, type PanelItem, type RespItem } from "../../lib/responses";
+import { pillFill } from "./Rsp6Requests";
 import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../lib/queryPanelStore";
 import { askDrawerToLeave, currentDrawerRequest, openQueryDrawer, subscribeDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
@@ -28,20 +29,28 @@ import { cardAct, STEP_WORD } from "./RspCarousel";
 import "../queries/queryPanelHost.css";
 import "./responses5.css";
 
-type Item = RespItem<QcRow>;
+/** an answer, or (v6) a query still waiting, opened from the empty page's timeline */
+type Item = PanelItem<QcRow>;
+const asAnswer = (i: Item): RespItem<QcRow> | null => (i.group === "waiting" ? null : (i as RespItem<QcRow>));
 
 /** the status strip's colour, by the answer (the reference's `col`) */
-export const stripTone = (i: Item): "of" | "you" | "ag" | "cl" =>
-  i.group !== "more" ? "cl" : i.state === "offer" ? "of" : i.yourMove ? "you" : "ag";
+export const stripTone = (i: Item): "of" | "you" | "ag" | "cl" | "q" =>
+  i.group === "waiting" ? "q" : i.group !== "more" ? "cl" : i.state === "offer" ? "of" : i.yourMove ? "you" : "ag";
 
 /** the footer's primary and the journey it runs: a request's own card action, else Edit the response */
 export function panelAct(i: Item): { label: string; mode: DrawerMode } {
-  if (i.group === "more") { const a = cardAct(i); return { label: a.label, mode: a.mode }; }
+  if (i.group === "waiting") return { label: "Record a response", mode: "resp" };
+  if (i.group === "more") { const a = cardAct(i as RespItem<QcRow>); return { label: a.label, mode: a.mode }; }
   return { label: "Edit the response", mode: "edit" };
 }
 
 /** What they said, when there is no note: one sentence of what the record says */
-export function saidPlain(i: Item, f: { weeks: number | null; nrmn: boolean }): string {
+export function saidPlain(i: Item, f: { weeks: number | null; nrmn: boolean }, nowMs?: number): string {
+  if (i.group === "waiting") {
+    const wk = i.queriedMs != null && nowMs != null ? Math.floor((nowMs - i.queriedMs) / (7 * 86_400_000)) : null;
+    const first = firstNameOf(i.row.agentName);
+    return `No answer yet. ${f.weeks ? `${first} gives ${plural(f.weeks, "week", "weeks")}.${wk != null ? ` It’s been ${plural(wk, "week", "weeks")}.` : ""}` : "No reply time saved for this agent."}`;
+  }
   if (i.group === "noReply") {
     const w = i.waitDays != null ? Math.round(i.waitDays / 7) : null;
     return `No reply.${w != null ? ` Closed after ${plural(w, "week", "weeks")}${f.nrmn ? ", as their guidelines say no reply means no" : ""}.` : ""}`;
@@ -64,9 +73,10 @@ export const RspPanel: React.FC<{
   const r = item.row;
   const first = firstNameOf(r.agentName);
   const facts = { weeks: agent?.responseTimeWeeks && agent.responseTimeWeeks > 0 ? agent.responseTimeWeeks : null, nrmn: !!agent?.noResponseMeansNo };
-  const fa = firstAnswer(item);
+  const ans = asAnswer(item);
+  const fa = ans ? firstAnswer(ans) : null;
   const act = panelAct(item);
-  const note = hasNote(item) ? item.note : null;
+  const note = ans && hasNote(ans) ? item.note : null;
 
   /* a journey stepped into this panel (the drawer's request carries `panel`) */
   const drawerReq = useSyncExternalStore(subscribeDrawer, currentDrawerRequest, currentDrawerRequest);
@@ -149,7 +159,7 @@ export const RspPanel: React.FC<{
   };
 
   const d = (ms: number | null) => (ms == null ? "–" : respDate(ms, nowMs));
-  const answerWord = note ? "With a note" : item.group === "noReply" ? "No reply" : item.group === "passed" ? "Form reply" : "Request";
+  const answerWord = note ? "With a note" : item.group === "waiting" ? "Not yet" : item.group === "noReply" ? "No reply" : item.group === "passed" ? "Form reply" : "Request";
   const journey: { status: QueryStatus; ms: number }[] = [
     ...(item.queriedMs != null ? [{ status: QueryStatus.QUERIED, ms: item.queriedMs }] : []),
     ...r.history.spans.filter((s) => s.status !== QueryStatus.QUERIED && STEP_WORD[s.status]).map((s) => ({ status: s.status, ms: s.startMs })),
@@ -168,17 +178,17 @@ export const RspPanel: React.FC<{
           </span>
           <button type="button" className="rsp5-dx" ref={closeBtn} data-rsn="close" aria-label="Close this answer" onClick={onClose}>{"×"}</button>
         </header>
-        <div className="rsp5-dst" data-rsn="status" data-tone={stripTone(item)}>
+        <div className="rsp5-dst" data-rsn="status" data-tone={stripTone(item)} style={{ background: pillFill(r.status) }}>
           <StatusDot status={r.status} overrideSize={16} decorative />{STEP_WORD[r.status] ?? r.status}
         </div>
         <div className="rsp5-dbody" data-rsn="body">
           <div>
             <h5>What they said</h5>
-            {note ? <p className="rsp5-dq" data-rsn="said">{"“"}{note}{"”"}</p> : <p className="rsp5-dplain" data-rsn="said">{saidPlain(item, facts)}</p>}
+            {note ? <p className="rsp5-dq" data-rsn="said">{"“"}{note}{"”"}</p> : <p className="rsp5-dplain" data-rsn="said">{saidPlain(item, facts, nowMs)}</p>}
           </div>
           <div className="rsp5-dfacts" data-rsn="facts">
             <div><small>Queried</small><b>{d(item.queriedMs)}</b></div>
-            <div><small>{item.group === "noReply" ? "Closed" : "Answered"}</small><b>{d(item.answerMs)}</b></div>
+            <div><small>{item.group === "waiting" ? "Waiting" : item.group === "noReply" ? "Closed" : "Answered"}</small><b>{item.group === "waiting" ? (r.dayN != null ? `day ${r.dayN}` : "–") : d(item.answerMs)}</b></div>
             <div><small>First answer took</small><b>{fa ? plural(fa.days, "day", "days") : "–"}</b></div>
             <div><small>They give</small><b>{facts.weeks ? plural(facts.weeks, "week", "weeks") : "Not saved"}</b></div>
             <div><small>Got as far as</small><b>{FAR_WORDS[item.furthest].replace("The full manuscript", "The full")}</b></div>

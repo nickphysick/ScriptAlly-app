@@ -18,7 +18,7 @@ import React from "react";
 import { QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import {
-  firstNameOf, hasNote, passDepth, noteSplit, pctOf, plural, respDate, speedByKind, typicalWait, WARM_NEED,
+  firstAnswer, firstNameOf, hasNote, passDepth, noteSplit, pctOf, plural, respDate, speedByKind, typicalWait, WARM_NEED,
   type PageCounts, type RespItem,
 } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
@@ -98,7 +98,12 @@ export const Rsp5Showcase: React.FC<{ items: readonly Item[]; answered: number; 
   }
   const sp = speedByKind(items);
   const days = (v: number | null) => (v == null ? "–" : `${v}d`);
-  const q = sp.quickest;
+  /* v6 — with no requests the first item's subject is the quickest answer of any kind (the ref's `quickR || quickest pass`) */
+  const q = sp.quickest ?? items.reduce<{ item: Item; first: NonNullable<ReturnType<typeof firstAnswer>> } | null>((best, i) => {
+    const f = i.group === "passed" ? firstAnswer(i) : null;
+    return f && f.kind === "passed" && (!best || f.days < best.first.days) ? { item: i, first: f } : best;
+  }, null);
+  const qIsRequest = !!sp.quickest;
   const depth = passDepth(items);
   const notes = noteSplit(items);
   const notePasses = items.filter((i) => i.group === "passed" && hasNote(i)).sort((a, b) => (b.answerMs ?? 0) - (a.answerMs ?? 0));
@@ -113,14 +118,14 @@ export const Rsp5Showcase: React.FC<{ items: readonly Item[]; answered: number; 
       <div className="rsp5-sh" data-rsp5="show" data-k="speed">
         <div className="rsp5-stage">
           <div className="rsp5-subj">
-            <div className="rsp5-hd rsp5-hd--bl">
+            <div className={`rsp5-hd ${q && !qIsRequest ? "rsp5-hd--cl" : "rsp5-hd--bl"}`}>
               <span className="rsp5-ico">{q ? <StatusDot status={q.first.status} overrideSize={16} decorative /> : null}</span>
               {q ? q.item.row.agentName : "Your first answers"}
             </div>
             <div className="rsp5-bd">
               {q && q.item.queriedMs != null ? <div className="rsp5-mrow"><StatusDot status={QueryStatus.QUERIED} overrideSize={14} decorative />Queried {respDate(q.item.queriedMs, nowMs)}</div> : null}
               {q ? <div className="rsp5-mrow"><StatusDot status={q.first.status} overrideSize={14} decorative />{STEP_WORD[q.first.status]} {respDate(q.first.ms, nowMs)}</div> : null}
-              {q ? <div className="rsp5-mrow rsp5-mrow--note">Your quickest request: {plural(q.first.days, "day", "days")}</div> : null}
+              {q ? <div className="rsp5-mrow rsp5-mrow--note">Your quickest {qIsRequest ? "request" : "answer"}: {plural(q.first.days, "day", "days")}</div> : null}
             </div>
           </div>
           <Over title="Typical wait for each kind" bars={[
@@ -158,7 +163,7 @@ export const Rsp5Showcase: React.FC<{ items: readonly Item[]; answered: number; 
       <div className="rsp5-sh" data-rsp5="show" data-k="notes">
         <div className="rsp5-stage">
           <div className="rsp5-subj">
-            <div className="rsp5-hd rsp5-hd--bl"><span className="rsp5-ico rsp5-ico--q">{"“"}</span>{ex ? ex.row.agentName : "No notes yet"}</div>
+            <div className="rsp5-hd rsp5-hd--cl"><span className="rsp5-ico rsp5-ico--q">{"“"}</span>{ex ? ex.row.agentName : "No notes yet"}</div>
             <div className="rsp5-bd">{ex?.note ? <p className="rsp5-quote rsp5-quote--sm">{firstSentence(ex.note)}</p> : null}</div>
           </div>
           <Over title="Passes with a note" bars={[

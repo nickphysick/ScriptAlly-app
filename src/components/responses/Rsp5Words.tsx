@@ -51,7 +51,6 @@ export const Rsp5Words: React.FC<{ items: readonly Item[]; nowMs: number; onOpen
     <section className="rsp5-words" data-rsp5="words" data-rsp5-sec="words" aria-labelledby="rsp5-words-h">
       <div className="rsp5-h2row">
         <div className="rsp5-h2">
-          <span className="rsp5-art rsp5-art--sm" aria-hidden="true">Art: letters pinned to a board</span>
           <div>
             <h2 id="rsp5-words-h" className="rsp5-h2t">In their words</h2>
             <p className="rsp5-sub">Every personal note an agent sent with their answer, exactly as you recorded it.</p>
