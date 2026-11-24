@@ -159,13 +159,19 @@ describe("⚠️ the legacy edit sheet is unreachable from the live page", () =>
     const calls = [...src.matchAll(/editActivity\(/g)].length;
     /* exactly three: the desk's commit and its undo closure — both inside CorrectionEdit's onSave — and (v149, the pack's
        baked decision: editing happens IN the query card) the card's edit save, the one other sanctioned route, asserted
-       below to sit inside that save and nowhere else. The law is "no stray editActivity", not "one route". */
-    expect(calls, `editActivity is called ${calls} times; expected 3 (desk commit + undo, the card's edit save)`).toBe(3);
+       below to sit inside that save and nowhere else. The law is "no stray editActivity", not "one route".
+       Controls: entry v1 — and two more, each inside a `kind === "reply"` branch of the query card's own step editing (the
+       step editor's save and the Notes tab's words): the agent's reply that moves nothing is corrected through
+       editActivity, never a step plan. Asserted below to sit inside those branches. */
+    expect(calls, `editActivity is called ${calls} times; expected 5 (desk commit + undo, the card's edit save, the two reply corrections)`).toBe(5);
+    const replyCalls = ["if (ed.kind === \"reply\") {\n                const snap = await takeSnapshot(uid, [q.id]);\n                const moved", "if (st.kind === \"reply\") {"]
+      .map((h) => { const i = src.indexOf(h); return i < 0 ? -1 : [...src.slice(i, src.indexOf("return;", i)).matchAll(/editActivity\(/g)].length; });
+    expect(replyCalls, "each reply branch calls editActivity once").toEqual([1, 1]);
     const cs = src.indexOf("const onSaveEdits = async (e: CardEdits)");
     const ce = src.indexOf("return (\n      <QcQueryCard149", cs);
     expect(cs, "the card's edit save").toBeGreaterThan(-1);
     expect(ce, "the end of the card's block").toBeGreaterThan(cs);
-    expect([...src.slice(cs, ce).matchAll(/editActivity\(/g)].length, "the card's edit save calls editActivity once").toBe(1);
+    expect([...src.slice(cs, ce).matchAll(/editActivity\(/g)].length, "the card's block: its edit save once, and the two reply corrections (Controls: entry v1)").toBe(3);
     /* the correcting host's OWN desk — the verb desk (respond-nudge) shares the component and
        carries no editActivity, so a first-match slice reported an escape that never happened */
     const guard = src.indexOf("{correcting && activeQuery && (");

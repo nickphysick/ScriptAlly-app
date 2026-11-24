@@ -27,6 +27,7 @@ import type { Activity, Query } from "../types";
 import { QueryStatus } from "../types";
 import { getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { isSendStatus } from "./timelineChapters";
+import { MONTHS_SHORT } from "./dates";
 
 /** The per-query log's `type`. Sentence case, and deliberately not a QueryStatus member. */
 export const AGENT_REPLY_NESTED_TYPE = "Agent reply" as const;
@@ -221,7 +222,7 @@ export function replyHeardWords(kind: ReplyKind, chase: ChaseOf): string {
 }
 
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+const MON = MONTHS_SHORT;
 /** The date line (baked): "Send by Fri 4 Dec" with you, "Reply expected by 15 Jan" with the agent. */
 export function replyDateLine(dateMs: number | null, withYou: boolean): string | null {
   if (dateMs == null) return null;
