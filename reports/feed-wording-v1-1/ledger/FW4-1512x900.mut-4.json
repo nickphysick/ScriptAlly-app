@@ -1,0 +1,67 @@
+[
+ {
+  "name": "agent_added: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "agent_updated: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "agent_removed: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "agents_several: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "manuscript_added: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "manuscript_updated: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "manuscript_removed: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "others_told: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "call_booked: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "nudge: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "import: drawn by its own key (population 0)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "no gear in the feed",
+  "ok": false,
+  "got": "12"
+ },
+ {
+  "name": "ink on card rows, quiet on quiet lines, the nudge's bell rust",
+  "ok": false,
+  "got": "[{\"icon\":\"gear\",\"drawn\":\"\",\"glyph\":\"bell\",\"color\":\"rgb(122, 63, 49)\",\"text\":\"You nudged Fwelve Named57zfd, 30 days after you queried4:34p\",\"mine\":true}]"
+ }
+]

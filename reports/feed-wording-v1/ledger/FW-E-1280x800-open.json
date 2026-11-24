@@ -10,23 +10,18 @@
   "got": "Your full manuscript is with Penhallow, Treloar & Kitto Literary"
  },
  {
-  "name": "it wraps onto a second line, never a one-line ellipsis",
+  "name": "it wraps, and shows its whole text (no ellipsis, nothing clipped)",
   "ok": true,
-  "got": "{\"q\":\"fw1-q-long-xtp1j\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":2,\"need\":6,\"w\":125,\"rowW\":278,\"cols\":\"22px 125.25px 48.3125px 16px\",\"timeW\":48,\"feedW\":278,\"clipped\":true,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":0,\"rowH\":86}"
+  "got": "{\"q\":\"fw1-q-long-5cakn\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":3,\"need\":3,\"w\":186,\"rowW\":278,\"cols\":\"22px 185.562px 16px\",\"timeW\":43,\"feedW\":278,\"clipped\":false,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":68.8,\"rowH\":112}"
  },
  {
-  "name": "fw1-q-long-xtp1j: at most two lines, no one-line ellipsis",
+  "name": "fw1-q-long-5cakn: the whole headline shows, no ellipsis",
   "ok": true,
-  "got": "{\"q\":\"fw1-q-long-xtp1j\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":2,\"need\":6,\"w\":125,\"rowW\":278,\"cols\":\"22px 125.25px 48.3125px 16px\",\"timeW\":48,\"feedW\":278,\"clipped\":true,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":0,\"rowH\":86}"
+  "got": "{\"q\":\"fw1-q-long-5cakn\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":3,\"need\":3,\"w\":186,\"rowW\":278,\"cols\":\"22px 185.562px 16px\",\"timeW\":43,\"feedW\":278,\"clipped\":false,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":68.8,\"rowH\":112}"
  },
  {
-  "name": "fw1-q-long-xtp1j: the sub-line stays one line",
+  "name": "fw1-q-long-5cakn: the sub-line stays one line",
   "ok": true,
-  "got": "{\"q\":\"fw1-q-long-xtp1j\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":2,\"need\":6,\"w\":125,\"rowW\":278,\"cols\":\"22px 125.25px 48.3125px 16px\",\"timeW\":48,\"feedW\":278,\"clipped\":true,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":0,\"rowH\":86}"
- },
- {
-  "name": "fw1-q-long-xtp1j: the time is level with the headline's first line",
-  "ok": true,
-  "got": "0"
+  "got": "{\"q\":\"fw1-q-long-5cakn\",\"text\":\"Your full manuscript is with Penhallow, Treloar & Kitto Literary\",\"lines\":3,\"need\":3,\"w\":186,\"rowW\":278,\"cols\":\"22px 185.562px 16px\",\"timeW\":43,\"feedW\":278,\"clipped\":false,\"ellipsis\":false,\"subLines\":1,\"subNowrap\":true,\"timeDy\":68.8,\"rowH\":112}"
  }
 ]

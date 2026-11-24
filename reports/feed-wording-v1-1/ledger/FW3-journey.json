@@ -1,0 +1,47 @@
+[
+ {
+  "name": "population: the Added row's name link",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Enter on the name lands on the Contact list",
+  "ok": true,
+  "got": "http://127.0.0.1:4321/agents"
+ },
+ {
+  "name": "…with that agent's card open",
+  "ok": true,
+  "got": "Agent fit★★★★★i14 / 55⋯✕FNFwelve Named5d8ccNAMED5D8CC BOOKSPartial requested+ Ad"
+ },
+ {
+  "name": "population: a manuscript title link",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "the title lands on the Manuscripts page",
+  "ok": true,
+  "got": "http://127.0.0.1:4321/manuscripts"
+ },
+ {
+  "name": "population: the query row",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "the row is a clickable row",
+  "ok": true,
+  "got": "pointer"
+ },
+ {
+  "name": "what takes a click on the row's mark is the row's own link",
+  "ok": true,
+  "got": "A.df1-rowgo"
+ },
+ {
+  "name": "the row lands on that query in the Query Centre",
+  "ok": true,
+  "got": "http://127.0.0.1:4321/queries?q=fw11-5d8cc-q-rej"
+ }
+]

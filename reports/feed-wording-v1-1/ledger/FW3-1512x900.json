@@ -1,0 +1,62 @@
+[
+ {
+  "name": "population: the live agent's person runs",
+  "ok": true,
+  "got": "7"
+ },
+ {
+  "name": "every one is an <a> to /agents?agent=fw11-5d8cc-ag-named",
+  "ok": true,
+  "got": "[{\"a\":\"/agents?agent=fw11-5d8cc-ag-named\",\"inButton\":false},{\"a\":\"/agents?agent=fw11-5d8cc-ag-named\",\"inButton\":false},{\"a\":\"/agents?agent=fw11-5d8cc-ag-named\",\"inButton\":false},{\"a\":\"/agents?agent=fw11-5d8cc-ag-named\",\"inButton\":false},{\"a\":\"/agents?agent=fw11-5d8cc-ag-named\",\"inButton\":false},{\"a\":\"/agents?agent=fw11-5d8cc-ag-named\",\"inButton\":false},{\"a\":\"/agents?agent=fw11-5d8cc-ag-named\",\"inButton\":false}]"
+ },
+ {
+  "name": "population: the deleted agent's run",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "the deleted agent's run is not a link",
+  "ok": true,
+  "got": "[{\"a\":null,\"inButton\":false}]"
+ },
+ {
+  "name": "no link sits inside a button",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "population: the collapsed card's name link",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "clicking the name navigates to the Contact list",
+  "ok": true,
+  "got": "/agents"
+ },
+ {
+  "name": "…and does not open the card",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "what takes a click on the card's time is its toggle",
+  "ok": true,
+  "got": "BUTTON.df1-cv df1-crow-t"
+ },
+ {
+  "name": "clicking the card elsewhere opens it in place",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "…and does not navigate",
+  "ok": true,
+  "got": "/dashboard"
+ },
+ {
+  "name": "focus moves to the fold button",
+  "ok": true,
+  "got": "fold"
+ }
+]

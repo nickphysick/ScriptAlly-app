@@ -1,0 +1,125 @@
+{
+ "pops": {
+  "small": {
+   "n": 5,
+   "sigs": [
+    "\"Source Serif 4\", Georgia, serif|14.5px|19.575px|400"
+   ]
+  },
+  "collapsed": {
+   "n": 1,
+   "sigs": [
+    "\"Special Elite\", \"Courier New\", Courier, monospace|16px|21.6px|400"
+   ]
+  },
+  "open": {
+   "n": 1,
+   "sigs": [
+    "\"Special Elite\", \"Courier New\", Courier, monospace|16px|21.6px|400"
+   ]
+  }
+ },
+ "subs": {
+  "collapsed": {
+   "n": 1,
+   "sigs": [
+    "\"Source Serif 4\", Georgia, serif|14px|18.9px|400"
+   ]
+  },
+  "open": {
+   "n": 1,
+   "sigs": [
+    "\"Source Serif 4\", Georgia, serif|14px|18.9px|400"
+   ]
+  }
+ },
+ "times": {
+  "small": {
+   "n": 5,
+   "sigs": [
+    "\"JetBrains Mono\", ui-monospace, monospace|11.5px|15.525px|400"
+   ]
+  },
+  "quiet": {
+   "n": 7,
+   "sigs": [
+    "\"JetBrains Mono\", ui-monospace, monospace|11.5px|15.525px|400"
+   ]
+  },
+  "collapsed": {
+   "n": 1,
+   "sigs": [
+    "\"JetBrains Mono\", ui-monospace, monospace|11.5px|15.525px|400"
+   ]
+  },
+  "open": {
+   "n": 1,
+   "sigs": [
+    "\"JetBrains Mono\", ui-monospace, monospace|11.5px|15.525px|400"
+   ]
+  }
+ },
+ "small": [
+  "df1-t:11.5px:6:19pm",
+  "SMALL:11px:25 Oct",
+  "SMALL:11px:Today",
+  "df1-t:11.5px:6:09pm",
+  "df1-t:11.5px:5:59pm",
+  "df1-t:11.5px:5:49pm",
+  "df1-t:11.5px:5:39pm",
+  "df1-t:11.5px:5:29pm",
+  "df1-t:11.5px:5:19pm",
+  "df1-t:11.5px:5:09pm",
+  "df1-t:11.5px:4:59pm",
+  "df1-t:11.5px:4:49pm",
+  "df1-t:11.5px:4:39pm",
+  "df1-t:11.5px:4:29pm",
+  "df1-t:11.5px:4:19pm",
+  "df1-t:11.5px:4:09pm"
+ ],
+ "elite": [
+  {
+   "ok": false,
+   "what": "A.fs-lk:Fwelve Named51mpi"
+  },
+  {
+   "ok": false,
+   "what": "SPAN.df1-hl:Fwelve Named51mpi as"
+  },
+  {
+   "ok": true,
+   "what": "B.:30"
+  },
+  {
+   "ok": true,
+   "what": "B.:Queried"
+  },
+  {
+   "ok": true,
+   "what": "B.:Partial asked"
+  },
+  {
+   "ok": true,
+   "what": "B.:Send partial"
+  },
+  {
+   "ok": false,
+   "what": "A.fs-lk:Penhallow, Treloar &"
+  },
+  {
+   "ok": false,
+   "what": "SPAN.df1-hl:Penhallow, Treloar &"
+  }
+ ],
+ "colours": [
+  "rgb(28, 19, 15)",
+  "rgb(59, 50, 44)",
+  "rgb(107, 96, 88)",
+  "rgb(163, 154, 145)",
+  "rgb(42, 58, 82)",
+  "rgb(91, 79, 71)"
+ ],
+ "n": 64,
+ "disc": 0,
+ "rightTime": 0
+}

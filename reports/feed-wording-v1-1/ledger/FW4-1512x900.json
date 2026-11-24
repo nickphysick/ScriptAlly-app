@@ -1,0 +1,67 @@
+[
+ {
+  "name": "agent_added: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"agent_added\",\"drawn\":\"agent_added\",\"glyph\":\"house\",\"color\":\"rgb(107, 96, 88)\",\"text\":\"You added Fwelve Named5d8cc to your contact list5:38pm\",\"mine\":true}]"
+ },
+ {
+  "name": "agent_updated: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"agent_updated\",\"drawn\":\"agent_updated\",\"glyph\":\"house\",\"color\":\"rgb(107, 96, 88)\",\"text\":\"You updated Fwelve Named5d8cc's agent fit6:08pm\",\"mine\":true}]"
+ },
+ {
+  "name": "agent_removed: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"agent_removed\",\"drawn\":\"agent_removed\",\"glyph\":\"house\",\"color\":\"rgb(107, 96, 88)\",\"text\":\"You removed Fwgone Agent5d8cc from your contact list5:28pm\",\"mine\":true}]"
+ },
+ {
+  "name": "agents_several: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"agents_several\",\"drawn\":\"agents_several\",\"glyph\":\"house\",\"color\":\"rgb(107, 96, 88)\",\"text\":\"You updated 3 agents' details5:58pm\",\"mine\":false}]"
+ },
+ {
+  "name": "manuscript_added: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"manuscript_added\",\"drawn\":\"manuscript_added\",\"glyph\":\"house\",\"color\":\"rgb(107, 96, 88)\",\"text\":\"You added The Smoke Test to your manuscripts5:18pm\",\"mine\":false}]"
+ },
+ {
+  "name": "manuscript_updated: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"manuscript_updated\",\"drawn\":\"manuscript_updated\",\"glyph\":\"house\",\"color\":\"rgb(107, 96, 88)\",\"text\":\"You updated the details of The Smoke Test5:48pm\",\"mine\":false}]"
+ },
+ {
+  "name": "manuscript_removed: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"manuscript_removed\",\"drawn\":\"manuscript_removed\",\"glyph\":\"house\",\"color\":\"rgb(107, 96, 88)\",\"text\":\"You removed The Smoke Test from your manuscripts5:08pm\",\"mine\":false}]"
+ },
+ {
+  "name": "others_told: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"others_told\",\"drawn\":\"others_told\",\"glyph\":\"event\",\"color\":\"rgb(28, 19, 15)\",\"text\":\"You told 2 other agents about the offer from Fwelve Named5d8\",\"mine\":true}]"
+ },
+ {
+  "name": "call_booked: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"call_booked\",\"drawn\":\"call_booked\",\"glyph\":\"event\",\"color\":\"rgb(28, 19, 15)\",\"text\":\"You booked a call with Fwelve Named5d8cc about The Smoke Tes\",\"mine\":true}]"
+ },
+ {
+  "name": "nudge: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"nudge\",\"drawn\":\"nudge\",\"glyph\":\"bell\",\"color\":\"rgb(122, 63, 49)\",\"text\":\"You nudged Fwelve Named5d8cc, 30 days after you queried4:38p\",\"mine\":true}]"
+ },
+ {
+  "name": "import: drawn by its own key (population 1)",
+  "ok": true,
+  "got": "[{\"icon\":\"import\",\"drawn\":\"import\",\"glyph\":\"import\",\"color\":\"rgb(28, 19, 15)\",\"text\":\"You imported your list: 2 agents and 3 queries for The Smoke\",\"mine\":false}]"
+ },
+ {
+  "name": "no gear in the feed",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "ink on card rows, quiet on quiet lines, the nudge's bell rust",
+  "ok": true,
+  "got": "[]"
+ }
+]

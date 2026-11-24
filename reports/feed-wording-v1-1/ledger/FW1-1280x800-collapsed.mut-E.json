@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: the agency-only card is on the page, collapsed",
+  "ok": true,
+  "got": "{\"text\":\"Penhallow, Treloar & Kitto Literary asked you to revise and resubmit\",\"lines\":2,\"clipped\":true,\"clamp\":\"2\",\"overflow\":\"hidden\",\"ellipsis\":false,\"w\":186,\"sub\":19}"
+ },
+ {
+  "name": "its headline is the builder's longest for an agency-only agent",
+  "ok": true,
+  "got": "Penhallow, Treloar & Kitto Literary asked you to revise and resubmit"
+ },
+ {
+  "name": "it wraps and shows its whole text: no clamp, nothing clipped, no ellipsis",
+  "ok": false,
+  "got": "{\"text\":\"Penhallow, Treloar & Kitto Literary asked you to revise and resubmit\",\"lines\":2,\"clipped\":true,\"clamp\":\"2\",\"overflow\":\"hidden\",\"ellipsis\":false,\"w\":186,\"sub\":19}"
+ }
+]

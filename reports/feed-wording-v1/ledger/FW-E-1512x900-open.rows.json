@@ -1,19 +1,19 @@
 [
  {
-  "q": "fw1-q-long-xv79k",
+  "q": "fw1-q-long-5cakn",
   "text": "Your full manuscript is with Penhallow, Treloar & Kitto Literary",
-  "lines": 1,
-  "need": 1,
-  "w": 184,
+  "lines": 3,
+  "need": 3,
+  "w": 244,
   "rowW": 336,
-  "cols": "22px 184px 48.3125px 16px",
-  "timeW": 48,
+  "cols": "22px 244.312px 16px",
+  "timeW": 43,
   "feedW": 336,
-  "clipped": true,
-  "ellipsis": true,
+  "clipped": false,
+  "ellipsis": false,
   "subLines": 1,
   "subNowrap": true,
-  "timeDy": 9.8,
-  "rowH": 66
+  "timeDy": 68.8,
+  "rowH": 112
  }
 ]

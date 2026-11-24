@@ -1,0 +1,97 @@
+[
+ {
+  "name": "population: small sentences",
+  "ok": true,
+  "got": "5"
+ },
+ {
+  "name": "population: collapsed sentences",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "population: open sentences",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "every sentence: one family, size, line-height and weight (small rows, collapsed cards, open tops)",
+  "ok": true,
+  "got": "[\"\\\"Source Serif 4\\\", Georgia, serif|16px|21.6px|400\"]"
+ },
+ {
+  "name": "…and it is Source Serif 16, 1.35, regular",
+  "ok": true,
+  "got": "\"Source Serif 4\", Georgia, serif|16px|21.6px|400"
+ },
+ {
+  "name": "population: collapsed sub-lines",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "population: open sub-lines",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "every card sub-line: one style, 14",
+  "ok": true,
+  "got": "[\"\\\"Source Serif 4\\\", Georgia, serif|14px|18.9px|400\"]"
+ },
+ {
+  "name": "population: small times",
+  "ok": true,
+  "got": "5"
+ },
+ {
+  "name": "population: quiet times",
+  "ok": true,
+  "got": "7"
+ },
+ {
+  "name": "population: collapsed times",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "population: open times",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "every time: one family, size and weight (JetBrains Mono 12)",
+  "ok": true,
+  "got": "[\"\\\"JetBrains Mono\\\", ui-monospace, monospace|12px|400\"]"
+ },
+ {
+  "name": "no time column on the right",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "the open card starts with its own row: no disc, no name line, no separate headline",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "population: text elements read (64)",
+  "ok": true,
+  "got": "64"
+ },
+ {
+  "name": "nothing in the feed renders under 12px",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "Special Elite only on figures and journey labels",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "no text colour outside ink, muted, quiet and the button tokens",
+  "ok": true,
+  "got": "[\"rgb(28, 19, 15)\",\"rgb(59, 50, 44)\",\"rgb(107, 96, 88)\",\"rgb(42, 58, 82)\",\"rgb(91, 79, 71)\"]"
+ }
+]
