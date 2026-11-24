@@ -1,0 +1,6 @@
+subject seed-query-9
+PROBE saved with Unknown + no nudge: true
+  [console] [card journey · send] save failed FirebaseError: PERMISSION_DENIED: 
+false for 'create' @ L7, false for 'create' @ L1136, false for 'update' @ L7, false for 'update' @ L1136, false for 'create' @ L7, false for 'create' @ L1144, false for 'update' @ L7, evaluation error at L1145:26 for 'update' @ L1145, false for 'update' @ L7, Unable to evaluate the expression as the maximum of 1000 expressions to
+  ✘  2 [measure] › tests/e2e/cardJourneysSend.measure.ts:89:3 › card journeys v1 · Mark sent from a Full Requested card (55.7s)
+

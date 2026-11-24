@@ -13,7 +13,7 @@
  * Module scope, like `drawerStore`: nothing to mount means nothing to forget.
  */
 import { spyJourney } from "./journeySpy";
-import { openQueryDrawer, type OpenRequest } from "./queryActions/drawerStore";
+import { drawerIntercepts, openQueryDrawer, type OpenRequest } from "./queryActions/drawerStore";
 /* "agent" (Contact list v16 §F): opened from an agent's panel, on its Queries tab — the query view carries a way back */
 export type PanelOrigin = "dashboard" | "feed" | "other" | "agent";
 export interface PanelRequest { id: string; from: PanelOrigin }
@@ -24,6 +24,12 @@ const tell = () => { for (const f of [...subs]) f(); };
 
 export const currentQueryPanel = (): PanelRequest | null => current;
 export function openQueryPanel(id: string, from: PanelOrigin = "other", step?: OpenRequest): void {
+  /* Card journeys v1 — a task's step that is a journey on the desktop opens over the page, not in the card */
+  if (step) {
+    const { panel: _p, ...rest } = step; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const direct = { ...rest, queryId: id } as OpenRequest;
+    if (drawerIntercepts(direct)) { openQueryDrawer(direct); return; }
+  }
   if (!(current?.id === id && current.from === from)) {
     back = null;
     current = { id, from };
@@ -139,6 +145,50 @@ export function responseSaved(id: string): void {
   const w = savedWaiter;
   if (!w || (w.id && w.id !== id)) return;
   savedWaiter = null;
+  w.f(id);
+}
+
+/**
+ * Card journeys v1 — THE OTHER FOUR JOURNEYS' ONE DOOR. Mark sent, Close, Answer an offer and Reopen open as stepped
+ * journeys in Record a response's own panel (queries/centre/RespondStagesPanel), over whatever page is on screen.
+ *   fromCard  → opened from the query's own card: the card lends its place and steps back behind the journey; finishing
+ *               or leaving gives the place back and the card comes forward (showing whatever the save changed)
+ * While nothing listens (the phone), `openCardJourney` returns false and the door keeps its own flow. A kind not yet live
+ * (lib/queryActions/cardJourneys `CARD_JOURNEY_LIVE`) is refused the same way, so each journey switches on by itself.
+ */
+export type CardJourneyKind = "send" | "close" | "offer" | "reopen";
+export interface CardJourneyRequest {
+  queryId: string;
+  kind: CardJourneyKind;
+  from?: PanelOrigin;
+  fromCard?: boolean;
+  /** the agent card a query was opened from: it comes back when the journey closes */
+  back?: PanelBack;
+  /** the door's own contract: told once the journey has saved on this query */
+  onSaved?: (queryId: string) => void;
+}
+const cjSubs = new Set<(r: CardJourneyRequest) => void>();
+let cjLive: (k: CardJourneyKind) => boolean = () => false;
+/** the journeys' module says which kinds are live (kept out of this store so the store has no journey imports) */
+export function setCardJourneyLive(f: (k: CardJourneyKind) => boolean): void { cjLive = f; }
+export function subscribeCardJourney(f: (r: CardJourneyRequest) => void): () => void {
+  cjSubs.add(f);
+  return () => { cjSubs.delete(f); };
+}
+export const cardJourneyHosted = (k: CardJourneyKind): boolean => cjSubs.size > 0 && cjLive(k);
+let cjWaiter: { id: string; f: (id: string) => void } | null = null;
+export function openCardJourney(r: CardJourneyRequest): boolean {
+  if (!cardJourneyHosted(r.kind)) return false;
+  spyJourney({ via: "card-journey", mode: r.kind, queryId: r.queryId });
+  cjWaiter = r.onSaved ? { id: r.queryId, f: r.onSaved } : null;
+  for (const f of [...cjSubs]) f(r);
+  return true;
+}
+/** a card journey saved on `id`: the door that opened it hears once */
+export function cardJourneySaved(id: string): void {
+  const w = cjWaiter;
+  if (!w || w.id !== id) return;
+  cjWaiter = null;
   w.f(id);
 }
 

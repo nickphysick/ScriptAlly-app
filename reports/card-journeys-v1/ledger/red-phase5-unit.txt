@@ -1,0 +1,58 @@
+
+ RUN  v3.2.7 /Users/nickphysick/ScriptAlly-cj1
+
+ ❯ src/components/queries/centre/cjReopen.test.ts (5 tests | 1 failed) 5ms
+   ✓ card journeys v1 · Reopen takes the close off > P1/P2 Rejected: the close comes off, back to Partial Sent 2ms
+   ✓ card journeys v1 · Reopen takes the close off > P1/P2 No Response: the close comes off, back to Partial Sent 0ms
+   ✓ card journeys v1 · Reopen takes the close off > P1/P2 Withdrawn: the close comes off, back to Partial Sent 0ms
+   ✓ card journeys v1 · Reopen takes the close off > P3 the reminder 0ms
+   × card journeys v1 · Reopen takes the close off > P4 the journey is live 3ms
+     → expected undefined to be { kind: 'reopen', …(11) } // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/queries/centre/cjReopen.test.ts > card journeys v1 · Reopen takes the close off > P4 the journey is live
+AssertionError: expected undefined to be { kind: 'reopen', …(11) } // Object.is equality
+
+[32m- Expected:[39m 
+{
+  "body": [Function body],
+  "carry": [Function carry],
+  "check": {
+    "button": "Reopen query",
+    "extras": [Function extras],
+    "title": [Function title],
+  },
+  "done": [Function done],
+  "finish": [Function finish],
+  "head": [Function head],
+  "init": [Function init],
+  "kind": "reopen",
+  "stages": [Function stages],
+  "tone": [Function tone],
+  "value": [Function value],
+  "write": {
+    "counts": [Function counts],
+    "plans": [Function plans],
+  },
+}
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ src/components/queries/centre/cjReopen.test.ts:46:29
+     44|   });
+     45|   it("P4 the journey is live", () => {
+     46|     expect(CJ_SPECS.reopen).toBe(REOPEN_SPEC);
+       |                             ^
+     47|     expect(CARD_JOURNEY_LIVE.reopen).toBe(true);
+     48|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  20:37:11
+   Duration  744ms (transform 368ms, setup 0ms, collect 577ms, tests 5ms, environment 0ms, prepare 41ms)
+

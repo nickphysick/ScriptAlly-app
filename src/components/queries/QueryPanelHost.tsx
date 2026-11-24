@@ -12,7 +12,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
-import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../lib/queryPanelStore";
+import { claimRightPanel, isLent, releaseRightPanel, subscribeRightPanel } from "../../lib/queryPanelStore";
 import { SidePanel } from "../shell/SidePanel";
 import { askDrawerToLeave, currentDrawerRequest } from "../../lib/queryActions/drawerStore";
 import "./queryPanelHost.css";
@@ -32,14 +32,29 @@ export const QueryPanelHost: React.FC<{
   const idRef = useRef(id);
   idRef.current = id;
 
-  useEscapeLayer(!step, () => closeRef.current(), ESC_LEVEL.pageDrawer);
+  /* Card journeys v1 — UNDER A JOURNEY. A journey opened from this card (lib/queryPanelStore `openCardJourney`, fromCard)
+     borrows the right-hand place: this panel stays mounted, steps back and dims (queryPanelHost.css `[data-under]`), its
+     content is inert (no Tab, no keys) and its Escape is off, so Escape belongs to the journey. A click on the dimmed card
+     lands on the journey's scrim, whose press is the journey's leave (its check runs). When the journey gives the place back, the card is forward again. */
+  const [under, setUnder] = useState(false);
+  useEscapeLayer(!step && !under, () => closeRef.current(), ESC_LEVEL.pageDrawer);
 
   /* one right-hand panel at a time: opening this closes the feed and Birds-eye drawers, and theirs close this */
   useEffect(() => {
     claimRightPanel("query");
-    const off = subscribeRightPanel((o) => { if (o && o !== "query") closeRef.current(); });
+    const off = subscribeRightPanel((o) => {
+      if (o === "query") { setUnder(false); return; }
+      if (o && isLent("query")) { setUnder(true); return; }
+      if (o) closeRef.current();
+    });
     return () => { off(); releaseRightPanel("query"); };
   }, []);
+  /* the whole panel is inert while under: no Tab, no keys, and a click passes through it to the journey's scrim beneath
+     (z 65, later in the body than this panel), whose press is the journey's own leave */
+  useLayoutEffect(() => {
+    const el = document.querySelector<HTMLElement>(`[data-side-panel][data-qp="panel"][data-qp-id="${CSS.escape(id)}"]`);
+    if (el) el.inert = under;
+  }, [under, id]);
 
   /* a step belongs to the query it was opened on: choosing another row, or closing the panel, asks it to leave
      (parked with answers, cancelled without — decision 8) */
@@ -83,7 +98,7 @@ export const QueryPanelHost: React.FC<{
   }, []);
 
   return (
-    <SidePanel label="Query" step={step} onScrim={onScrim} className="qsp" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined} attrs={{ "data-qp": "panel", "data-qp-id": id, "data-qp-from": from }}>
+    <SidePanel label="Query" step={step} onScrim={onScrim} className="qsp" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined} attrs={{ "data-qp": "panel", "data-qp-id": id, "data-qp-from": from, "data-under": under ? "true" : undefined }}>
       {children}
     </SidePanel>
   );

@@ -1,0 +1,69 @@
+
+ RUN  v3.2.7 /Users/nickphysick/ScriptAlly-cj1
+
+ ❯ src/components/queries/centre/cjClose.test.ts (4 tests | 2 failed) 9ms
+   ✓ card journeys v1 · Close saves through the card's own close > K1 no reply: No Response, today, no When step 2ms
+   × card journeys v1 · Close saves through the card's own close > K2 withdrawn: asks when, Withdrawn on that day 5ms
+     → expected NaN to be greater than 0
+   ✓ card journeys v1 · Close saves through the card's own close > K3 the reminder and the close plan come off 0ms
+   × card journeys v1 · Close saves through the card's own close > K4 the journey is live 1ms
+     → expected undefined to be { kind: 'close', …(10) } // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/queries/centre/cjClose.test.ts > card journeys v1 · Close saves through the card's own close > K2 withdrawn: asks when, Withdrawn on that day
+AssertionError: expected NaN to be greater than 0
+ ❯ src/components/queries/centre/cjClose.test.ts:38:104
+     36|     expect(stepOf(p).resultingStatus).toBe(QueryStatus.WITHDRAWN);
+     37|     expect(stepOf(p).eventKey).toBe("withdrawn");
+     38|     expect(new Date(String((stepOf(p).createdAt as { toMillis: () => n…
+       |                                                                                                        ^
+     39|     expect(new Date((stepOf(p).createdAt as { toMillis: () => number }…
+     40|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/queries/centre/cjClose.test.ts > card journeys v1 · Close saves through the card's own close > K4 the journey is live
+AssertionError: expected undefined to be { kind: 'close', …(10) } // Object.is equality
+
+[32m- Expected:[39m 
+{
+  "body": [Function body],
+  "check": {
+    "button": "Close query",
+    "extras": [Function extras],
+    "title": [Function title],
+  },
+  "done": [Function done],
+  "finish": [Function finish],
+  "head": [Function head],
+  "init": [Function init],
+  "kind": "close",
+  "stages": [Function stages],
+  "tone": [Function tone],
+  "value": [Function value],
+  "write": {
+    "counts": [Function counts],
+    "plans": [Function plans],
+  },
+}
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ src/components/queries/centre/cjClose.test.ts:48:28
+     46|   });
+     47|   it("K4 the journey is live", () => {
+     48|     expect(CJ_SPECS.close).toBe(CLOSE_SPEC);
+       |                            ^
+     49|     expect(CARD_JOURNEY_LIVE.close).toBe(true);
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  20:22:29
+   Duration  1.10s (transform 490ms, setup 0ms, collect 837ms, tests 9ms, environment 0ms, prepare 63ms)
+

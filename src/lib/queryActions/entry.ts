@@ -171,7 +171,7 @@ export function primaryDoor(status: QueryStatus | string): Door | null {
  * drawer here, and only the drawer writes. Returns null for a task whose journey is not yet live
  * in the drawer, so the caller keeps its old route (the one-journey-at-a-time cut-over).
  */
-export interface TaskDoor { mode: DrawerMode; queryId: string; preset?: { nudgeTab?: "sent" | "plan"; closeWhy?: "noreply"; step?: number } }
+export interface TaskDoor { mode: DrawerMode; queryId: string; preset?: { nudgeTab?: "sent" | "plan"; closeWhy?: "noreply"; step?: number; answer?: boolean } }
 export function drawerDoorForTask(
   taskType: string | undefined,
   queryId: string | undefined,
@@ -188,7 +188,7 @@ export function drawerDoorForTask(
     taskType === "partial_requested" || taskType === "full_requested" || taskType === "revise_resubmit" ? { mode: "sent", queryId }
     : taskType === "nudge_overdue" ? { mode: "nudge", queryId, preset: { nudgeTab: "sent" } }
     : taskType === "no_response_close" ? { mode: "close", queryId, preset: { closeWhy: "noreply" } }
-    : taskType === "offer_received" ? { mode: "offer", queryId, preset: { step: 1 } }
+    : taskType === "offer_received" ? { mode: "offer", queryId, preset: { step: 1, answer: true } }
     /* v152.2 §6.1 — the tell-agents card hangs on the offering query itself */
     : taskType === "offer_tell_all" ? { mode: "offer", queryId, preset: { step: 1 } }
     : taskType === "offer_send_full" ? { mode: "sent", queryId }

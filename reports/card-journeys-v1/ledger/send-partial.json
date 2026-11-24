@@ -1,0 +1,92 @@
+[
+ {
+  "where": "partial · subject",
+  "ok": true,
+  "detail": "card seed-query-7"
+ },
+ {
+  "where": "S1 partial · first step asks what went",
+  "ok": true,
+  "detail": "\"What did you send Rachel?\""
+ },
+ {
+  "where": "S1 partial · the track",
+  "ok": true,
+  "detail": "agent:done went:now sent:todo reply:todo log:todo"
+ },
+ {
+  "where": "S1 partial · the head",
+  "ok": true,
+  "detail": "\"Your partial’s gone. Great work! Let’s log the details.\""
+ },
+ {
+  "where": "S1 partial · when did it go",
+  "ok": true,
+  "detail": "\"When did it go to Rachel?\" / \"Rachel asked on 5 Aug.\""
+ },
+ {
+  "where": "S1 partial · reply time",
+  "ok": true,
+  "detail": "\"When might Rachel reply?\", slider 1, \"Reply expected by Tue 19 Jan.\", nudge tick 1"
+ },
+ {
+  "where": "S2 partial · the review",
+  "ok": true,
+  "detail": "Ready to mark it sent?"
+ },
+ {
+  "where": "S2 partial · the card as it will be",
+  "ok": true,
+  "detail": "preview status Partial Sent"
+ },
+ {
+  "where": "S2 partial · what went, the task, a note, the numbers",
+  "ok": true,
+  "detail": "1 tiles, \"Nudge Rachel if there’s no reply to-doTue 19 Jan\", add-note 1, 2 numbers"
+ },
+ {
+  "where": "S2 partial · the button",
+  "ok": true,
+  "detail": "Mark sent"
+ },
+ {
+  "where": "S2 partial · nothing cut off at 1440 × 900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "S3 partial · the head",
+  "ok": true,
+  "detail": "\"Logged. Partial sent! Over to Rachel.\""
+ },
+ {
+  "where": "S3 partial · the big line",
+  "ok": true,
+  "detail": "\"Your partial is with Rachel.\""
+ },
+ {
+  "where": "S3 partial · one of the three sentences, no narration",
+  "ok": true,
+  "detail": "\"We’ll remind you to nudge on Tue 19 Jan.\""
+ },
+ {
+  "where": "S3 partial · the stamp",
+  "ok": true,
+  "detail": "Logged 24 NOV"
+ },
+ {
+  "where": "S3 partial · the finish button",
+  "ok": true,
+  "detail": "\"Back to Rachel’s card\", card under true"
+ },
+ {
+  "where": "S3 partial · Undo restores",
+  "ok": true,
+  "detail": "the grid card reads Partial Requested"
+ },
+ {
+  "where": "S5 partial · back to the card, showing the send",
+  "ok": true,
+  "detail": "journey false, under false, card says \"Partial sent\": true"
+ }
+]

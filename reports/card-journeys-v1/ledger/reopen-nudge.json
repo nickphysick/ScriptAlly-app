@@ -1,0 +1,92 @@
+[
+ {
+  "where": "R1 · subject",
+  "ok": true,
+  "detail": "msv12-q-8"
+ },
+ {
+  "where": "R1 · the head",
+  "ok": true,
+  "detail": "Opening this one back up. Let’s log the details."
+ },
+ {
+  "where": "R1 · why reopen it",
+  "ok": true,
+  "detail": "Why reopen it? / Closed 24 Nov: no reply."
+ },
+ {
+  "where": "R1 · too soon says where it goes back to",
+  "ok": true,
+  "detail": "I closed it too soon It goes back to queried, as it was."
+ },
+ {
+  "where": "R1 · how long will you give",
+  "ok": true,
+  "detail": "How long will you give Douglas?"
+ },
+ {
+  "where": "R1 · the slider",
+  "ok": true,
+  "detail": "We’ll remind you to nudge on Tue 22 Dec."
+ },
+ {
+  "where": "R2 · the track",
+  "ok": true,
+  "detail": "agent:done why:done nudge:done log:now"
+ },
+ {
+  "where": "R2 · the review",
+  "ok": true,
+  "detail": "Ready to reopen it?"
+ },
+ {
+  "where": "R2 · the card back where it stood",
+  "ok": true,
+  "detail": "preview status Queried"
+ },
+ {
+  "where": "R2 · the nudge task",
+  "ok": true,
+  "detail": "1 task rows"
+ },
+ {
+  "where": "R2 · active +1, closed −1",
+  "ok": true,
+  "detail": "active1 closed-1"
+ },
+ {
+  "where": "R2 · Reopen query",
+  "ok": true,
+  "detail": "Reopen query"
+ },
+ {
+  "where": "R2 · nothing cut off at 1440 × 900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "R2 · the head",
+  "ok": true,
+  "detail": "Reopened. 7 queries are out."
+ },
+ {
+  "where": "R2 · the big line",
+  "ok": true,
+  "detail": "Douglas’s query is open again."
+ },
+ {
+  "where": "R2 · the sentence",
+  "ok": true,
+  "detail": "We’ll remind you to nudge on Tue 22 Dec."
+ },
+ {
+  "where": "R2 · the stamp",
+  "ok": true,
+  "detail": "Reopened 24 NOV"
+ },
+ {
+  "where": "R2 · Undo brings back the review",
+  "ok": true,
+  "detail": "review true"
+ }
+]

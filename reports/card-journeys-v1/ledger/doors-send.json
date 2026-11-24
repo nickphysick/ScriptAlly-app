@@ -1,0 +1,67 @@
+[
+ {
+  "where": "send · subject",
+  "ok": true,
+  "detail": "card seed-query-7 offers the action"
+ },
+ {
+  "where": "J1 send · a journey, not the card's form",
+  "ok": true,
+  "detail": "journey true (send), track true, composer in card false"
+ },
+ {
+  "where": "J1 send · the path does not change",
+  "ok": true,
+  "detail": "/queries?q=seed-query-7 → /queries?q=seed-query-7"
+ },
+ {
+  "where": "J2 send · the card stays, stepped back",
+  "ok": true,
+  "detail": "card true, under true, scale 0.955, dx -40"
+ },
+ {
+  "where": "J2 send · the card is dimmed",
+  "ok": true,
+  "detail": "::after opacity 1"
+ },
+ {
+  "where": "J2 send · the card is inert",
+  "ok": true,
+  "detail": "inert true"
+ },
+ {
+  "where": "J2 send · the Agent step is done and fixed",
+  "ok": true,
+  "detail": "{\"tag\":\"SPAN\",\"state\":\"done\"}"
+ },
+ {
+  "where": "J2 send · the Archivist's head, navy",
+  "ok": true,
+  "detail": "art true, head rgb(42, 58, 82)"
+ },
+ {
+  "where": "J2 send · Tab never reaches the card",
+  "ok": true,
+  "detail": "30 presses of Tab"
+ },
+ {
+  "where": "J3 send · Escape closes the journey",
+  "ok": true,
+  "detail": "journey false"
+ },
+ {
+  "where": "J3 send · the card comes forward",
+  "ok": true,
+  "detail": "card true, under false, inert false, scale 1"
+ },
+ {
+  "where": "J4 send · ✕ closes it",
+  "ok": true,
+  "detail": "journey false, card true, under false"
+ },
+ {
+  "where": "J4 send · a click on the dimmed card closes it",
+  "ok": true,
+  "detail": "journey false, card true, under false"
+ }
+]

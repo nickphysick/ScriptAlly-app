@@ -1,0 +1,3 @@
+/* Card journeys v1 — the four card journeys sit in Record a response's shell (.laq.rar): only what is theirs is here. */
+/* a line on the review that is not a tile or a task ("Any reminder to nudge … comes off your to-do list.") */
+.laq.rar.cj .cj-line { margin: 14px 4px 4px; font-size: 15px; line-height: 1.45; color: #5b4f47; }

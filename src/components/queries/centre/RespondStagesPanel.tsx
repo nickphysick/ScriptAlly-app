@@ -20,6 +20,10 @@
  *    card. A click anywhere on the dimmed journey lands on a catcher over it (`under-hit`) and is the card's own Escape
  *    (its leave checks run), as a click on any panel's scrim is. When the card releases the place, the journey has it back
  *    exactly as it was (the same screen, the same scroll) and focus returns to “Open {First}’s card”.
+ * ⚠️ CARD JOURNEYS v1 — the same panel hosts Mark sent, Close, Answer an offer and Reopen (CardJourneyHost), opened through
+ *    `openCardJourney`. From the query's own card (`fromCard`) the card lends its place and steps back BEHIND the journey
+ *    (the v2.1 stacking the other way round); Close's "{First} passed" and Reopen's "replied after all" hand over to
+ *    Record a response in this same panel.
  * ⚠️ THE PHONE DOES NOT LISTEN (below 768px nothing subscribes), so `openResponse` keeps the phone's own flow there.
  * ⚠️ THE PRACTICE QUERY (Pip) is handed to the Query Centre's guided walk, which drives its own practice journey and
  *    writes nothing (lib/practiceQuery); it never reaches this host.
@@ -28,25 +32,38 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useIsMobile } from "../../shell/mobileChrome";
 import { SidePanel } from "../../shell/SidePanel";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import { claimRightPanel, isLent, lendRightPanel, openPipResponse, openQueryPanel, releaseRightPanel, subscribeResponse, subscribeRightPanel, unlendRightPanel, type ResponseRequest } from "../../../lib/queryPanelStore";
+import { claimRightPanel, isLent, lendRightPanel, openPipResponse, openQueryPanel, releaseRightPanel, rightPanelOwner, subscribeCardJourney, subscribeResponse, subscribeRightPanel, unlendRightPanel, type CardJourneyKind, type CardJourneyRequest, type ResponseRequest } from "../../../lib/queryPanelStore";
 import { isPracticeId } from "../../../lib/practiceQuery";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { useScriptAllyDb } from "../../../lib/db";
 import { RespondStagesHost, kindOfReply } from "./RespondStagesHost";
+import { CardJourneyHost } from "./CardJourneyHost";
+
+/** Card journeys v1 — the panel hosts Record a response and the four card journeys, one at a time */
+type PanelReq = ({ journey: "response" } & ResponseRequest & { fromCard?: boolean }) | ({ journey: CardJourneyKind } & CardJourneyRequest);
+const LABEL: Record<PanelReq["journey"], string> = { response: "Record a response", send: "Mark sent", close: "Close the query", offer: "Answer the offer", reopen: "Reopen the query" };
 
 export const RespondStagesPanel: React.FC = () => {
   const phone = useIsMobile();
   const { queries } = useScriptAllyDb();
-  const [req, setReq] = useState<(ResponseRequest & { n: number }) | null>(null);
+  const [req, setReq] = useState<(PanelReq & { n: number }) | null>(null);
   const n = useRef(0);
   useEffect(() => (phone ? undefined : subscribeResponse((r) => {
     if (r.queryId && isPracticeId(r.queryId)) { openPipResponse(); return; }
-    setReq({ ...r, n: ++n.current });
+    setReq({ ...r, journey: "response", n: ++n.current });
+  })), [phone]);
+  /* Card journeys v1 — Mark sent, Close, Answer an offer, Reopen (the practice query has none of these) */
+  useEffect(() => (phone ? undefined : subscribeCardJourney((r) => {
+    if (isPracticeId(r.queryId)) return;
+    setReq({ ...r, journey: r.kind, n: ++n.current });
   })), [phone]);
   /* behind the query's card: the journey lent its place */
   const [behind, setBehind] = useState(false);
   useEffect(() => {
     if (!req) return undefined;
+    /* Card journeys v1 — opened from the query's own card: the card lends its place and stays behind, stepped back
+       (QueryPanelHost `under`); releasing hands the place back to it, and it comes forward */
+    if (req.fromCard && rightPanelOwner() === "query") lendRightPanel("query");
     claimRightPanel("response");
     setBehind(false);
     return () => { unlendRightPanel("response"); releaseRightPanel("response"); };
@@ -90,10 +107,16 @@ export const RespondStagesPanel: React.FC = () => {
   useEscapeLayer(!!req && !behind, () => close(), ESC_LEVEL.drawer);
   if (!req || phone) return null;
   const status = req.queryId ? queries.find((q) => q.id === req.queryId)?.status ?? null : null;
+  /* "{First} passed" inside Close, "{First} replied after all" inside Reopen: Record a response takes over in the same
+     panel (same request number, so the panel and its claim stay), at "When did {First} reply?" with Passed chosen, or
+     at "What did {First} say?" */
+  const handOver = (reply: "passed" | null) => setReq((o) => (o ? { journey: "response", queryId: o.queryId, from: o.from, back: o.back, fromCard: o.fromCard, reply, n: o.n } : o));
   return (
-    <SidePanel label="Record a response" className="qsp" attrs={{ "data-rar": "panel", "data-under": behind ? "true" : undefined }} onScrim={() => (leaveRef.current ? leaveRef.current() : close())}>
-      <RespondStagesHost key={req.n} seedQueryId={req.queryId ?? null} seedKind={kindOfReply(req.reply, status)} leaveRef={leaveRef} onClose={close} behind={behind}
-        onOpenCard={(id) => { lendRightPanel("response"); setBehind(true); openQueryPanel(id, req.from ?? "other"); }} />
+    <SidePanel label={LABEL[req.journey]} className="qsp" attrs={{ "data-rar": "panel", "data-journey": req.journey, "data-under": behind ? "true" : undefined }} onScrim={() => (leaveRef.current ? leaveRef.current() : close())}>
+      {req.journey === "response"
+        ? <RespondStagesHost key={`r${req.n}`} seedQueryId={req.queryId ?? null} seedKind={kindOfReply(req.reply, status)} leaveRef={leaveRef} onClose={close} behind={behind}
+            onOpenCard={(id) => { lendRightPanel("response"); setBehind(true); openQueryPanel(id, req.from ?? "other"); }} />
+        : <CardJourneyHost key={`c${req.n}`} queryId={req.queryId} kind={req.journey} fromCard={!!req.fromCard} leaveRef={leaveRef} onClose={close} onHandOver={handOver} />}
       {behind ? <div className="rar-under-hit" data-rar="under-hit" aria-hidden="true"
         onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))} /> : null}
     </SidePanel>

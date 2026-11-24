@@ -1,0 +1,72 @@
+[
+ {
+  "where": "X2 · subject",
+  "ok": true,
+  "detail": "seed-cal-soon-q"
+ },
+ {
+  "where": "X2 · the track gains When",
+  "ok": true,
+  "detail": "agent:done why:done when:now log:todo"
+ },
+ {
+  "where": "X2 · when did you withdraw it",
+  "ok": true,
+  "detail": "When did you withdraw it?"
+ },
+ {
+  "where": "X2 · the review",
+  "ok": true,
+  "detail": "Ready to close it?"
+ },
+ {
+  "where": "X2 · the card as it will be",
+  "ok": true,
+  "detail": "preview status Withdrawn"
+ },
+ {
+  "where": "X2 · the reminder line",
+  "ok": true,
+  "detail": "\"Any reminder to nudge Hester comes off your to-do list.\""
+ },
+ {
+  "where": "X2 · active −1, closed +1",
+  "ok": true,
+  "detail": "active-1 closed1"
+ },
+ {
+  "where": "X2 · Add a note, \"Close query\"",
+  "ok": true,
+  "detail": "Close query"
+ },
+ {
+  "where": "X2 · nothing cut off at 1440 × 900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "X2 · the head",
+  "ok": true,
+  "detail": "\"Closed. 38 queries still out.\""
+ },
+ {
+  "where": "X2 · the big line",
+  "ok": true,
+  "detail": "Hester’s query is closed."
+ },
+ {
+  "where": "X2 · the sentence",
+  "ok": true,
+  "detail": "It’s marked as withdrawn."
+ },
+ {
+  "where": "X2 · the stamp",
+  "ok": true,
+  "detail": "Closed 24 NOV"
+ },
+ {
+  "where": "X2 · Undo brings back the review",
+  "ok": true,
+  "detail": "review true"
+ }
+]

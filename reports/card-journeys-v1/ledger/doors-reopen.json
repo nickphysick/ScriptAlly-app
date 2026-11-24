@@ -1,0 +1,67 @@
+[
+ {
+  "where": "reopen · subject",
+  "ok": true,
+  "detail": "card msv12-q-8 offers the action"
+ },
+ {
+  "where": "J1 reopen · a journey, not the card's form",
+  "ok": true,
+  "detail": "journey true (reopen), track true, composer in card false"
+ },
+ {
+  "where": "J1 reopen · the path does not change",
+  "ok": true,
+  "detail": "/queries?q=msv12-q-8 → /queries?q=msv12-q-8"
+ },
+ {
+  "where": "J2 reopen · the card stays, stepped back",
+  "ok": true,
+  "detail": "card true, under true, scale 0.955, dx -40"
+ },
+ {
+  "where": "J2 reopen · the card is dimmed",
+  "ok": true,
+  "detail": "::after opacity 1"
+ },
+ {
+  "where": "J2 reopen · the card is inert",
+  "ok": true,
+  "detail": "inert true"
+ },
+ {
+  "where": "J2 reopen · the Agent step is done and fixed",
+  "ok": true,
+  "detail": "{\"tag\":\"SPAN\",\"state\":\"done\"}"
+ },
+ {
+  "where": "J2 reopen · the Archivist's head, navy",
+  "ok": true,
+  "detail": "art true, head rgb(42, 58, 82)"
+ },
+ {
+  "where": "J2 reopen · Tab never reaches the card",
+  "ok": true,
+  "detail": "30 presses of Tab"
+ },
+ {
+  "where": "J3 reopen · Escape closes the journey",
+  "ok": true,
+  "detail": "journey false"
+ },
+ {
+  "where": "J3 reopen · the card comes forward",
+  "ok": true,
+  "detail": "card true, under false, inert false, scale 1"
+ },
+ {
+  "where": "J4 reopen · ✕ closes it",
+  "ok": true,
+  "detail": "journey false, card true, under false"
+ },
+ {
+  "where": "J4 reopen · a click on the dimmed card closes it",
+  "ok": true,
+  "detail": "journey false, card true, under false"
+ }
+]

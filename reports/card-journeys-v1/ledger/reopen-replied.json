@@ -1,0 +1,17 @@
+[
+ {
+  "where": "R4 · subject",
+  "ok": true,
+  "detail": "msv12-q-8"
+ },
+ {
+  "where": "R4 · the same panel, now Record a response",
+  "ok": true,
+  "detail": "{\"panels\":1,\"journey\":\"response\",\"rar\":\"reply\",\"cj\":false,\"q\":\"What did Douglas say?\"}"
+ },
+ {
+  "where": "R4 · at What did {First} say?",
+  "ok": true,
+  "detail": "reply · \"What did Douglas say?\""
+ }
+]

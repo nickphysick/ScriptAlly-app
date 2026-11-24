@@ -48,3 +48,14 @@ html :where(.qsp) select, html :where(.qsp) textarea, html :where(.qsp) label, h
 
 /* while any side panel is open, the floating tabs (Birds-eye, Activity feed, Housekeeping) stand down */
 body.spanel-open .ftab { opacity: 0; pointer-events: none; }
+
+/* ── Card journeys v1 · a journey opened from the card sits OVER it (design-refs/card-journeys-v1, screens 02/12/21/30) ──
+   v2.1's stacking, the other way round: the card stays mounted behind and steps back 40px left, scaled to .955 from the
+   middle of its right edge, under a .45 dim over the whole card, head included; 300ms, eased. The page is dimmed once: the
+   journey's scrim (the next .spanel-scrim in the body) is clear while the card is under, and still takes the press. */
+.spanel[data-qp="panel"] { transform-origin: 100% 50%; transition: transform 300ms cubic-bezier(.2, .8, .2, 1); }
+.spanel[data-qp="panel"]::after { content: ""; position: absolute; inset: 0; z-index: 60; border-radius: inherit; background: rgba(28, 19, 15, .45); opacity: 0; pointer-events: none; transition: opacity 300ms ease-out; }
+.spanel[data-qp="panel"][data-under] { transform: translateX(-40px) scale(.955); }
+.spanel[data-qp="panel"][data-under]::after { opacity: 1; }
+.spanel[data-qp="panel"][data-under] ~ .spanel-scrim { background: transparent; }
+@media (prefers-reduced-motion: reduce) { .spanel[data-qp="panel"], .spanel[data-qp="panel"]::after { transition: none; } }

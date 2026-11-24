@@ -1,0 +1,17 @@
+[
+ {
+  "where": "X3 · subject",
+  "ok": true,
+  "detail": "seed-cal-soon-q"
+ },
+ {
+  "where": "X3 · the same panel, now Record a response",
+  "ok": true,
+  "detail": "{\"panels\":1,\"journey\":\"response\",\"rar\":\"when\",\"cj\":false,\"reply\":\"✓ReplyPassed\",\"q\":\"When did Hester reply?\"}"
+ },
+ {
+  "where": "X3 · at When did {First} reply?, Passed chosen",
+  "ok": true,
+  "detail": "when · \"When did Hester reply?\" · reply step \"✓ReplyPassed\""
+ }
+]
