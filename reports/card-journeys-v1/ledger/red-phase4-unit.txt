@@ -1,0 +1,57 @@
+
+ RUN  v3.2.7 /Users/nickphysick/ScriptAlly-cj1
+
+ ❯ src/components/queries/centre/cjOffer.test.ts (4 tests | 1 failed) 8ms
+   ✓ card journeys v1 · Answer an offer saves through the card's own answer > O1 accepted: Signed, on the day; Others only with other queries open 2ms
+   ✓ card journeys v1 · Answer an offer saves through the card's own answer > O2 the tell marks, only with the task 0ms
+   ✓ card journeys v1 · Answer an offer saves through the card's own answer > O3 turned down: Withdrawn, offer declined 1ms
+   × card journeys v1 · Answer an offer saves through the card's own answer > O4 the journey is live 5ms
+     → expected undefined to be { kind: 'offer', …(10) } // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/queries/centre/cjOffer.test.ts > card journeys v1 · Answer an offer saves through the card's own answer > O4 the journey is live
+AssertionError: expected undefined to be { kind: 'offer', …(10) } // Object.is equality
+
+[32m- Expected:[39m 
+{
+  "body": [Function body],
+  "check": {
+    "button": "Log answer",
+    "extras": [Function extras],
+    "title": [Function title],
+  },
+  "done": [Function done],
+  "finish": [Function finish],
+  "head": [Function head],
+  "init": [Function init],
+  "kind": "offer",
+  "stages": [Function stages],
+  "tone": [Function tone],
+  "value": [Function value],
+  "write": {
+    "counts": [Function counts],
+    "extraIds": [Function extraIds],
+    "plans": [Function plans],
+  },
+}
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ src/components/queries/centre/cjOffer.test.ts:53:28
+     51|   });
+     52|   it("O4 the journey is live", () => {
+     53|     expect(CJ_SPECS.offer).toBe(OFFER_SPEC);
+       |                            ^
+     54|     expect(CARD_JOURNEY_LIVE.offer).toBe(true);
+     55|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  20:28:17
+   Duration  1.12s (transform 484ms, setup 0ms, collect 790ms, tests 8ms, environment 0ms, prepare 106ms)
+

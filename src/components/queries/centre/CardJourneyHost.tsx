@@ -16,7 +16,7 @@ import { useScriptAllyDb } from "../../../lib/db";
 import { ComponentType, type Agent, type Query } from "../../../types";
 import { buildQcRows } from "../../../lib/qcSummary";
 import { quietWeeksOf, stampRows } from "../../../lib/queryState";
-import { commitMany, readFeed, readLog } from "../../../lib/qc152Write";
+import { commitMany, readFeed, readLog, refusedMarks } from "../../../lib/qc152Write";
 import { restoreSnapshot } from "../../../lib/queryActions/snapshot";
 import { bookOf } from "../../../lib/queryActions/sample";
 import { bookVersionsOf, latestVersion, readVersions } from "../../../lib/bookVersions";
@@ -63,7 +63,7 @@ export const CardJourneyHost: React.FC<{
     return {
       q, first: firstOf(a, "the agent"), nowMs, book: bookOf(ms?.wordCount), synopses, versions: vs,
       weeks: a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
-      othersN: othersFor(q, queries as Query[], isLive).length, log,
+      othersN: othersFor(q, queries as Query[], isLive).length, otherIds: othersFor(q, queries as Query[], isLive).map((o) => o.id), log,
       book_queries: (queries as Query[]).filter((x) => x.manuscriptId === q.manuscriptId),
     };
   }, [queryId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -97,10 +97,24 @@ export const CardJourneyHost: React.FC<{
     const q = ctx.q;
     const pv = previewOf(s);
     let snap;
+    let refused: string[] = [];
     try {
       const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
-      const plans = spec.write.plans({ uid, q, agent: agentOf(q), ms: msOf(q), existing, feed, nowMs: Date.now(), quietWeeks }, s, ctx);
-      snap = await commitMany(uid, plans, spec.write.extraIds?.(s, ctx) ?? []);
+      const pcNow = { uid, q, agent: agentOf(q), ms: msOf(q), existing, feed, nowMs: Date.now(), quietWeeks };
+      const plans = spec.write.plans(pcNow, s, ctx);
+      const extra = spec.write.extraIds?.(s, ctx) ?? [];
+      try {
+        snap = await commitMany(uid, plans, extra);
+      } catch (e) {
+        /* Record a response's own ruling (v152.1): a sibling at the rules' field ceiling refuses its mark and with it the
+           batch. Probe each mark on its own (`refusedMarks`), save the step and every accepted sibling in one batch, and
+           name the refused ones, never dropping them silently. */
+        if (!extra.length || (e as { code?: string })?.code !== "permission-denied") throw e;
+        refused = await refusedMarks(uid, plans[plans.length - 1]);
+        if (!refused.length) throw e;
+        const kept = { ...ctx, otherIds: (ctx.otherIds ?? []).filter((x) => !refused.includes(x)) };
+        snap = await commitMany(uid, spec.write.plans(pcNow, s, kept), spec.write.extraIds?.(s, kept) ?? []);
+      }
     } catch (e) {
       console.error(`[card journey · ${kind}] save failed`, e);
       showToast({ message: "Couldn't save that. Nothing was changed." });
@@ -108,6 +122,10 @@ export const CardJourneyHost: React.FC<{
     }
     const before = new Set(live.current.journalEntries.filter((j) => j.queryId === q.id).map((j) => j.id));
     for (const t of notes) await addJournalEntry(q.id, t);
+    if (refused.length) {
+      const names = refused.map((rid) => { const x = queries.find((y) => y.id === rid); const ag = agents.find((y) => y.id === x?.agentId); return ag?.name || ag?.agency || "an agent"; });
+      showToast({ message: `Logged. Couldn’t mark ${names.join(", ")} to tell.` });
+    }
     cardJourneySaved(q.id);
     const undo = async () => {
       await restoreSnapshot(snap!);

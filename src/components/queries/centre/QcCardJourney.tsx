@@ -57,6 +57,8 @@ export interface CJCtx {
   weeks: number | null;
   /** the other open queries on this book (an offer's "tell the others") */
   othersN: number;
+  /** …and their ids (the tell marks) */
+  otherIds?: readonly string[];
   /** this query's feed rows, oldest first */
   log: readonly Activity[];
   /** the book's queries now (the numbers) */

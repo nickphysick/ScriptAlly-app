@@ -1,0 +1,47 @@
+[
+ {
+  "where": "F3 · subject",
+  "ok": true,
+  "detail": "seed-query-12"
+ },
+ {
+  "where": "F3 · no Others step",
+  "ok": true,
+  "detail": "agent:done answer:done when:done log:now"
+ },
+ {
+  "where": "F3 · the card as it will be",
+  "ok": true,
+  "detail": "preview status Withdrawn"
+ },
+ {
+  "where": "F3 · nothing cut off at 1440 × 900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "F3 · the head",
+  "ok": true,
+  "detail": "Logged. 38 queries still out."
+ },
+ {
+  "where": "F3 · the big line",
+  "ok": true,
+  "detail": "You turned Noah’s offer down."
+ },
+ {
+  "where": "F3 · the sentence",
+  "ok": true,
+  "detail": "The query is closed. 38 queries are still with agents."
+ },
+ {
+  "where": "F3 · the stamp",
+  "ok": true,
+  "detail": "Logged 24 NOV"
+ },
+ {
+  "where": "F3 · Undo brings back the review",
+  "ok": true,
+  "detail": "review true"
+ }
+]

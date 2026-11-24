@@ -9,8 +9,10 @@ import type { CardJourneyKind } from "../../../lib/queryPanelStore";
 import type { CJSpec } from "./QcCardJourney";
 import { SEND_SPEC } from "./cjSend";
 import { CLOSE_SPEC } from "./cjClose";
+import { OFFER_SPEC } from "./cjOffer";
 
 export const CJ_SPECS: Partial<Record<CardJourneyKind, CJSpec<any>>> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   send: SEND_SPEC,
   close: CLOSE_SPEC,
+  offer: OFFER_SPEC,
 };

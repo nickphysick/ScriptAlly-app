@@ -1,0 +1,87 @@
+[
+ {
+  "where": "F1 · subject",
+  "ok": true,
+  "detail": "seed-query-12"
+ },
+ {
+  "where": "F1 · the head",
+  "ok": true,
+  "detail": "An answer for Noah. Let’s log the details."
+ },
+ {
+  "where": "F1 · what did you tell",
+  "ok": true,
+  "detail": "What did you tell Noah? / Noah offered on 19 Aug."
+ },
+ {
+  "where": "F1 · two answers",
+  "ok": true,
+  "detail": "yes no"
+ },
+ {
+  "where": "F1 · when did you tell",
+  "ok": true,
+  "detail": "When did you tell Noah?"
+ },
+ {
+  "where": "F1 · others",
+  "ok": true,
+  "detail": "38 of your queries are still with other agents."
+ },
+ {
+  "where": "F1 · the track",
+  "ok": true,
+  "detail": "agent:done answer:done when:done others:now log:todo"
+ },
+ {
+  "where": "F2 · the task row",
+  "ok": true,
+  "detail": "Tell the other 38 agents you’ve signed to-doToday"
+ },
+ {
+  "where": "F2 · the review",
+  "ok": true,
+  "detail": "Ready to log your answer?"
+ },
+ {
+  "where": "F2 · the card as it will be",
+  "ok": true,
+  "detail": "preview status Signed"
+ },
+ {
+  "where": "F2 · Log answer",
+  "ok": true,
+  "detail": "Log answer"
+ },
+ {
+  "where": "F2 · nothing cut off at 1440 × 900",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "F2 · the head",
+  "ok": true,
+  "detail": "Logged. You said yes! Congratulations."
+ },
+ {
+  "where": "F2 · the big line",
+  "ok": true,
+  "detail": "You’re signing with Noah."
+ },
+ {
+  "where": "F2 · the sentence",
+  "ok": true,
+  "detail": "Telling the other 38 agents is on your to-do list for today."
+ },
+ {
+  "where": "F2 · the stamp",
+  "ok": true,
+  "detail": "Signed 24 NOV"
+ },
+ {
+  "where": "F2 · Undo brings back the review",
+  "ok": true,
+  "detail": "review true"
+ }
+]
