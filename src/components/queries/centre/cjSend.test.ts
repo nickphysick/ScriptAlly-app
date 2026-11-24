@@ -10,6 +10,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("../../../lib/firebase", () => ({ db: {}, auth: {} }));
 import { QueryStatus, type Query } from "../../../types";
 import { SEND_SPEC, type SendState } from "./cjSend";
+import { matLabel } from "../../../lib/qc152Write";
 import { CJ_SPECS } from "./cardJourneySpecs";
 import { CARD_JOURNEY_LIVE } from "../../../lib/queryActions/cardJourneys";
 import type { CJCtx } from "./QcCardJourney";
@@ -60,6 +61,14 @@ describe("card journeys v1 · Mark sent saves through the card's own send", () =
     expect("writerExpectedDate" in unknown && unknown.writerExpectedDate === undefined).toBe(true);
     expect(typeof unknown.writerExpectedSetAt).toBe("string");
     expect(unknown.nudgeDate).toBeUndefined();
+  });
+  it("M5 a sample asked with no size starts at the size the asked-for card names", () => {
+    for (const asked of [{ kind: "sample", unit: "pages" }, { kind: "sample" }, { kind: "sample", unit: "words", n: 3000 }]) {
+      const c = { ...ctx(q({})), log: [{ id: "r1", queryId: "q1", date: "2026-11-14T12:00:00.000Z", resultingStatus: QueryStatus.PARTIAL_REQUESTED, materials: [asked] } as never] };
+      const s = SEND_SPEC.init(c);
+      const went = SEND_SPEC.write.plans(pc(c.q), { ...s, wentOk: true, sentMs: NOW, replyOk: true }, c)[0].set.find((x) => x.path.includes("/activity/"))!.data.materials[0];
+      expect(matLabel(went as never)).toBe(matLabel(asked as never));
+    }
   });
   it("M4 every step is asked, and the journey is live", () => {
     const c = ctx(q({}));

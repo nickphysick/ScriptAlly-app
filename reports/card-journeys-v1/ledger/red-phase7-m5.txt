@@ -1,0 +1,35 @@
+
+ RUN  v3.2.7 /Users/nickphysick/ScriptAlly-cj1
+
+ ❯ src/components/queries/centre/cjSend.test.ts (5 tests | 1 failed) 17ms
+   ✓ card journeys v1 · Mark sent saves through the card's own send > M1 a partial: Partial Sent, with what went 5ms
+   ✓ card journeys v1 · Mark sent saves through the card's own send > M2 the full, an offer's full, and a resubmission 1ms
+   ✓ card journeys v1 · Mark sent saves through the card's own send > M3 the reply time and the nudge 1ms
+   × card journeys v1 · Mark sent saves through the card's own send > M5 a sample asked with no size starts at the size the asked-for card names 8ms
+     → expected '50 pages' to be '10 pages' // Object.is equality
+   ✓ card journeys v1 · Mark sent saves through the card's own send > M4 every step is asked, and the journey is live 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/queries/centre/cjSend.test.ts > card journeys v1 · Mark sent saves through the card's own send > M5 a sample asked with no size starts at the size the asked-for card names
+AssertionError: expected '50 pages' to be '10 pages' // Object.is equality
+
+Expected: [32m"[7m1[27m0 pages"[39m
+Received: [31m"[7m5[27m0 pages"[39m
+
+ ❯ src/components/queries/centre/cjSend.test.ts:70:39
+     68|       const s = SEND_SPEC.init(c);
+     69|       const went = SEND_SPEC.write.plans(pc(c.q), { ...s, wentOk: true…
+     70|       expect(matLabel(went as never)).toBe(matLabel(asked as never));
+       |                                       ^
+     71|     }
+     72|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  21:46:11
+   Duration  1.67s (transform 695ms, setup 0ms, collect 1.14s, tests 17ms, environment 0ms, prepare 63ms)
+
