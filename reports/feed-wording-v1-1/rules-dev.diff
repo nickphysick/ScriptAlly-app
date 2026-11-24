@@ -1,0 +1,58 @@
+--- dev live before (ruleset 0d1f1704 = controls-entry-v1)
++++ dev line …-laqdoor-fw11 8a26b1f3e (ruleset 5294dad5)
+@@ -644,6 +644,10 @@
+           // Query Centre v152.2: a pass's "open to more work" and its Wall-of-no opt-out (§5), "Something else"'s words
+           // (§5), how a nudge went (§4.2), and the offer step's "tell the rest later" flag (§6.1). All OPTIONAL.
+           'openToMore', 'offWall', 'askedFor', 'sentVia', 'tellLater',
++          // Feed wording v1 (see isValidActivity): the carried subject and an update's groups. All OPTIONAL.
++          'subjectName', 'subjectAgency', 'previousName', 'removedQueries', 'changed', 'changedTo', 'batchCount',
++          // Feed wording v1.1: the agent a housekeeping row is about, by id (the feed links the name by it). OPTIONAL.
++          'subjectId',
+           // Controls: entry v1 (24 Nov): the agent's reply that moves nothing (type 'Agent reply') — its kind and the new
+           // date it gave. Both OPTIONAL; the words ride on 'replyNote' above.
+           'replyKind', 'replyDate'
+@@ -687,6 +691,16 @@
+         && (!data.keys().hasAny(['askedFor']) || (data.askedFor is string && data.askedFor.size() <= 80))
+         && (!data.keys().hasAny(['sentVia']) || (data.sentVia is string && data.sentVia.size() <= 32))
+         && (!data.keys().hasAny(['tellLater']) || data.tellLater is bool)
++        // Feed wording v1: the subject a housekeeping row is about, carried at write time, and what an update changed.
++        // All OPTIONAL — every row written before has none.
++        && (!data.keys().hasAny(['subjectName']) || (data.subjectName is string && data.subjectName.size() <= 200))
++        && (!data.keys().hasAny(['subjectAgency']) || (data.subjectAgency is string && data.subjectAgency.size() <= 200))
++        && (!data.keys().hasAny(['subjectId']) || (data.subjectId is string && data.subjectId.size() <= 128))
++        && (!data.keys().hasAny(['previousName']) || (data.previousName is string && data.previousName.size() <= 200))
++        && (!data.keys().hasAny(['changedTo']) || (data.changedTo is string && data.changedTo.size() <= 200))
++        && (!data.keys().hasAny(['removedQueries']) || (data.removedQueries is int && data.removedQueries >= 0))
++        && (!data.keys().hasAny(['batchCount']) || (data.batchCount is int && data.batchCount >= 0))
++        && (!data.keys().hasAny(['changed']) || (data.changed is list && data.changed.size() <= 12))
+         && (!data.keys().hasAny(['replyKind']) || (data.replyKind is string && data.replyKind in ['chaser', 'holding', 'note']))
+         && (!data.keys().hasAny(['replyDate']) || (data.replyDate is string && data.replyDate.size() <= 32));
+     }
+@@ -832,6 +846,18 @@
+         && (!data.keys().hasAny(['bookVersionId']) || (data.bookVersionId is string && data.bookVersionId.size() <= 128))
+         // Query actions v1 (K5, 27 Sep): the drawer's structured event key.
+         && (!data.keys().hasAny(['eventKey']) || (data.eventKey is string && data.eventKey.size() <= 64))
++        // Feed wording v1: the subject a housekeeping row is about, carried at write time, and what an update changed.
++        // All OPTIONAL — every row written before has none.
++        && (!data.keys().hasAny(['subjectName']) || (data.subjectName is string && data.subjectName.size() <= 200))
++        && (!data.keys().hasAny(['subjectAgency']) || (data.subjectAgency is string && data.subjectAgency.size() <= 200))
++        && (!data.keys().hasAny(['subjectId']) || (data.subjectId is string && data.subjectId.size() <= 128))
++        && (!data.keys().hasAny(['previousName']) || (data.previousName is string && data.previousName.size() <= 200))
++        && (!data.keys().hasAny(['changedTo']) || (data.changedTo is string && data.changedTo.size() <= 200))
++        && (!data.keys().hasAny(['removedQueries']) || (data.removedQueries is int && data.removedQueries >= 0))
++        && (!data.keys().hasAny(['batchCount']) || (data.batchCount is int && data.batchCount >= 0))
++        && (!data.keys().hasAny(['changed']) || (data.changed is list && data.changed.size() <= 12))
++        // Feed wording v1.1: a "told other agents" step's feed row carries its count, as its log step does. OPTIONAL.
++        && (!data.keys().hasAny(['toldCount']) || (data.toldCount is int && data.toldCount >= 1 && data.toldCount <= 500))
+         // Controls: entry v1 (24 Nov): an 'Agent Reply' twin's kind and new date, the nested row's own two keys.
+         && (!data.keys().hasAny(['replyKind']) || (data.replyKind is string && data.replyKind in ['chaser', 'holding', 'note']))
+         && (!data.keys().hasAny(['replyDate']) || (data.replyDate is string && data.replyDate.size() <= 32));
+@@ -1175,6 +1201,8 @@
+           incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey',
+             // Query Centre v152.2 §6.1: the offer step's "tell the rest later" flag, set or cleared on its feed twin
+             'tellLater',
++            // Feed wording v1.1: a told step's edit moves its count on the feed twin with its words
++            'toldCount',
+             // Controls: entry v1 (24 Nov): an 'Agent Reply' twin's kind and new date, corrected through editActivity
+             'replyKind', 'replyDate'])
+         );
