@@ -21,7 +21,7 @@ let env: RulesTestEnvironment;
 
 beforeAll(async () => {
   env = await initializeTestEnvironment({
-    projectId: "demo-scriptally-qa",
+    projectId: "demo-scriptally-ce1", // its own project: it shared "-qa" with queryActions, and the two files ran in parallel, each clearing the other's seeds (Rules budget v1)
     firestore: { rules: readFileSync(RULES_PATH, "utf8"), host: "127.0.0.1", port: 8080 },
   });
 });
