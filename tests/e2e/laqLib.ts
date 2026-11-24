@@ -67,3 +67,19 @@ export async function carryOnMaterials(page: Page): Promise<string> {
   await page.locator('[data-qls="pieces-continue"]').click();
   return "pieces";
 }
+
+/**
+ * Add an agent v2 (commit 9c6d983ff) retired the top bar's "Log a query" split button: the one way into Log a query from
+ * any page's header is now "Quick actions" → its "Log a query" row (`[data-quick="query"]`, shell/QuickActions). The row is
+ * a menuitem, not a button, so `getByRole("button", { name: "Log a query" })` no longer finds a header door; with the
+ * laq2 + laq21 fixture it found nothing on /dashboard and timed out. Returns once the row has been pressed; the caller
+ * waits for the journey's root.
+ */
+export async function pressQuickLogAQuery(page: Page): Promise<void> {
+  const btn = page.locator("[data-shell=quick-btn]").filter({ visible: true }).first();
+  await btn.waitFor({ state: "visible", timeout: 60_000 });
+  await btn.click();
+  const row = page.locator("[data-shell=quick-menu].is-open [data-quick='query']");
+  await row.waitFor({ state: "visible", timeout: 10_000 });
+  await row.click();
+}
