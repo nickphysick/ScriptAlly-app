@@ -13,7 +13,7 @@
  */
 import React from "react";
 import { QueryStatus, type Query } from "../../../types";
-import { planRecord, matLabel, type StepMaterial } from "../../../lib/qc152Write";
+import { planRecord, matLabel, UNIT, type StepMaterial } from "../../../lib/qc152Write";
 import { holdsPages } from "../../../lib/qc1522Write";
 import { liveCount } from "../../../lib/dashBreakdown";
 import { sendKindOf, type SentKind } from "../../../lib/queryActions/sendKind";
@@ -108,7 +108,9 @@ export const SEND_SPEC: CJSpec<SendState> = {
     const k = sendKindOf(c.q);
     const r = requestOf(c, k);
     const samp = r.mats.find((m) => m.kind === "sample");
-    const wsamp: Sample = { unit: samp?.unit === "words" ? "words" : samp?.unit === "chapters" ? "chapters" : "pages", amt: samp?.n ?? 50, from: 1, sect: false, fu: null };
+    /* the sample as asked: with no stored size, the unit's own default — the size "What {First} asked for" names (matLabel) */
+    const unit = samp?.unit === "words" ? "words" : samp?.unit === "pages" ? "pages" : "chapters";
+    const wsamp: Sample = { unit, amt: samp?.n ?? UNIT[samp?.unit ?? "chapters"].def, from: 1, sect: false, fu: null };
     const verId = c.versions.find((v) => v.current)?.id ?? c.versions[0]?.id ?? null;
     return {
       k, asked: r.mats, askMs: r.ms,
