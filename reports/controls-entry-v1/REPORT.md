@@ -1,12 +1,13 @@
 # Controls: entry v1: the reply that sits between steps
 
-> **⚠️ DEV HOSTING IS STILL HELD (Nick, 24 Nov).** Dev serves `index-DQIDPfLr.js`, which nothing pushed or local builds. Nick is finding which session deployed it. Then: rebase `controls-entry-v1` onto that work, build, deploy, and confirm the hash. Not cleared at the time of writing (checked 16:45).
+> **⚠️ DEV HOSTING IS STILL HELD (Nick, 24 Nov).** Dev serves `index-DQIDPfLr.js`, which nothing pushed or local builds. Nick is finding which session deployed it. Then: rebase `controls-entry-v1` onto that work, build, deploy, and confirm the hash. Not cleared at the time of writing (checked 18:21 UTC, still `index-DQIDPfLr.js`).
 >
-> **⚠️ BEFORE THE PROD RULES DEPLOY:** the query update rule is at Firestore's 1,000-expression limit in the emulator. Every rules run on this branch, and the run against the rules before it, denies 4 to 10 cases ("maximum of 1000 expressions … @ L1115"), different cases each time. Follow-up 2 adds one optional clause to that rule. Real dev Firestore accepted the probe's `nudgeSetAt` update. Owner: rules, to measure the expression count before prod.
+> **⚠️ BEFORE THE PROD RULES DEPLOY: THE QUERY UPDATE RULE'S EXPRESSION LIMIT, MEASURED (close-out 4).** In the emulator, an update to a query is **denied once about 17 or 18 of its optional fields are present** (on top of the 7 required), every time, with "maximum of 1000 expressions … @ L1115". The flaky denials in the rules suite are this. Almost all the cost is `isValidQuery` re-checking all 65 optional fields on every update. Real dev Firestore accepted the probe's update, so production may count differently, but this was not proved for a full document. Detail under "Close-outs", item 4. Not touched here: its own prompt.
 
 Branch `controls-entry-v1`, cut from the dev line `…-rar211-laqunk` (f3659638d). Nothing is merged and main is untouched.
 - **First pass:** b4f13f669 (pack), a23138a06 and 551b4e4c1 (Phase 1), 2de908052 and 1a69db877 (Phase 2), c1cfe0bec (Phase 3), 172ae304d (Phases 4 and 5), e5c51a031 (report).
-- **Follow-ups:** 5f19ecc52 (1), 142b2f31c (2), 450653f04 (3), f782c5b22 (4), 4fb825e8c (measure), plus this report. See "Follow-ups" at the end.
+- **Follow-ups:** 5f19ecc52 (1), 142b2f31c (2), 450653f04 (3), f782c5b22 (4), 4fb825e8c (measure), 535de8e9d (report). See "Follow-ups".
+- **Close-outs:** dbb25f981 (1), f9a2b4086 (2), 6c8c4b1c2 (3), plus the measurement and this report (4). See "Close-outs" at the end.
 
 **Dev Firestore rules are deployed** (latest 24 Nov 16:45:13Z, ruleset `0d1f1704…`, probed). **Dev hosting is NOT deployed.**
 
@@ -148,10 +149,10 @@ Command: `npm run deploy:rules` (Nick's).
 
 Done in the follow-ups: the to-do engine (1), the reminder's set-at stamp (2), correcting the kind and new date in the card (3), and the note's glyph (4).
 
-- **The emulator's 1,000-expression limit on the query and feed update rules** (see the top). It predates this branch. Owner: rules, before the prod deploy.
-- **Existing e2e measures that drew the old full holding bubble** (`qc1521`'s "holding" fixture) will see the note and the speech bubble now. Not re-run. Owner: the next Query Centre measurement pass.
-- **The old reading-pane timeline** (`QueryTimeline`'s own rows) still draws every non-status row (nudges and reply entries alike) as its one 9px ring. That is its own grammar, and the cards do not use it. Owner: Nick, if that pane is still in use.
-- **The To-do list's `comingUp`** (the "coming up" dates) still reads `nudgeDate` and the agent's window directly, not through the entry. The tasks and their figures do read it. Owner: the to-do pass.
+- **The query update rule's expression limit** (top; measured in close-out 4). Owner: its own prompt, before the prod deploy.
+- **The old reading-pane timeline** (`QueryTimeline`'s own rows) still draws every non-status row (nudges and reply entries alike) as its one 9px ring. Left as it is (Nick, 24 Nov).
+- **`qc1521.measure` L3's colour table** (v152.1's paper and tints) is red for every step, because v164 replaced it (the writer white, the agent their stage band; `qc164` L8 holds the current rule). **`qc164` L8's partial band** is red on 3 steps: it expects `#e4ebf2`, and Plumage colours v3 made it `#f1d9cf`. Both predate this branch. Owner: the next Query Centre measurement pass.
+- **`holdingReply.measure`** drives the retired f12 page (red since 18 Aug, RED-BACKLOG "re-point"), asserts no bubble, and writes without restoring. Owner: Controls: journeys v1, which rebuilds recording a reply.
 - **Prod rules** (above). Owner: Nick.
 
 ## Follow-ups (24 Nov, Nick's four)
@@ -203,3 +204,64 @@ Fresh worktree on `controls-entry-v1`, one commit each, same gates. Dev hosting 
 
 ### The measure (4fb825e8c)
 [controlsEntry.measure.ts](../../tests/e2e/controlsEntry.measure.ts) ran over five queries, before and after their entries: **119/119**, including every first-pass reading. The ledger and shots are in this folder.
+
+## Close-outs (24 Nov, Nick's three plus the count)
+
+Fresh worktree (`ScriptAlly-ce1c`) on `controls-entry-v1`, one commit each, same gates. Dev hosting held throughout. The old reading-pane timeline is left as it is.
+
+### 1. `nudgeSetAt` is stamped only when a write changes the reminder (dbb25f981)
+
+**Confirmed, with one gap fixed.** `withReminderStamp` leaves a patch alone when it does not name `nudgeDate`, and when it names the same day as the query before the write. So an edit that does not touch the reminder never stamps. The gap: `commitNudge` never handed the stamp the query before the nudge. Logging a nudge whose check-in fell on the day the reminder already had stamped it "now". After an entry, a reminder set before the entry then read as set after it, and stopped moving.
+- `prior` is now a required argument. `logNudge` passes the query it read. The agent card's "move the reminders" passes the query it moves.
+- Two writers pass `null` and say why: `addQuery` creates the query, and `saveQueryEdits`' patch never names the reminder.
+- [reminderStampUnrelated.test.ts](../../src/lib/reminderStampUnrelated.test.ts) makes unrelated edits after an entry through each writer's real shape, then reads the reminder through `entryDatesFor`: it still moves. The shapes are a whole-query save, a card save re-sending the same day in another spelling, a patch with no reminder, and a nudge re-booked for the same day through the real `commitNudge`. Each runs with a stamp from before the entry and with none.
+- **Red first:**
+  - against `nudgeWrite.ts` as it was, case 3 (the nudge writer) is red at both stamps;
+  - against a stamp that fires on every write that carries the reminder, cases 1–3 are red (5 of 11).
+- Related tests: 5,084 green.
+
+### 2. The To-do list's "coming up" dates read through the one check (f9a2b4086)
+
+**A correction to my earlier report:** `lib/todoTray` `comingUp` has no rendered surface. Only its unit test calls it, so the "coming up" dates I named are not on the page today. It now reads each query through `entryDatesFor`: the planned nudge or check-in via the entry's reminder, and the reply date via `expectedFor(q, a, reply)`.
+- [todoComingUpEntry.test.ts](../../src/lib/todoComingUpEntry.test.ts) asserts its dates are the one check's.
+- Red first against the old `todoTray.ts`: the nudge stayed on 29 Nov instead of 3 Jan, and the reply date stayed on 30 Dec instead of 3 Jan.
+
+**Measured on the rendered page,** [ce1TodoOneDate.measure.ts](../../tests/e2e/ce1TodoOneDate.measure.ts), **9/9.** The To-do page draws a query's date in three places: the tray row's figure, the desk's header and the query card in the desk. Each is read and turned into a day.
+- **fr:** row "10 days left", desk "10 days left", card "Send by Fri 4 Dec" and "by 4 Dec". All 4 Dec.
+- **n** (the undated note): row and desk "180 days past expected", card "Reply was due 28 May · 180 days ago". All 28 May.
+- **Population:** both tasks found; no task for q, rm or ra, whose entries give later dates.
+
+### 3. The older holding-bubble measures, re-run (6c8c4b1c2)
+
+- **`qc1521.measure`.** L3 had been looking for `kind === "holding"`, which this branch renamed `reply`. It had also stopped finding any card at all: the list renders QcCard154 now, not the retired `[data-qc151='row']`. `open` and `openCard` are re-pointed. The holding reply has its own lock, **L3H: 7/7 at 1280 and 7/7 at 1512.**
+  - Population: the card's thread holds Query sent and one reply step.
+  - The reply step is `oc-note`, `#f6f3ee`, 12px, no shadow, "Hal sent a holding reply", “Thanks — reading now.”, and the speech-bubble mark.
+  - `qc1521Mutate.sh` L3H now breaks the note's `#f6f3ee`, since `HOLDING_TINT` no longer paints it. That mutation was not run.
+- **`qc164.measure` L8.** It never opened the holding fixture (not in its CARDS), so its "a holding reply stays white" branch found nothing. Now any reply step must be the small note, and a `q152-holding` block opens the card and must find exactly one reply step. **All 5 holding checks pass.** That run's other 3 reds are the partial band (Deferred).
+- **`holdingReply.measure`** is unchanged (Deferred): it asserts no bubble.
+
+### 4. The query update rule's expression count (measurement only)
+
+[tests/rules/queryExprCount.test.ts](../../tests/rules/queryExprCount.test.ts), skipped unless `SA_EXPR_COUNT=1`. Readings are in [ledger/expr-count.json](ledger/expr-count.json).
+- **The threshold (the real measure).** The update was the same each time: `nudgeDate` plus `nudgeSetAt`. It ran on a query with the 7 required fields plus the first *k* optional fields, for every *k* from 0 to 65.
+  - In the rule's order, it was allowed up to 16 and **denied from 17** (`rrNotes`) on.
+  - In reverse order, **denied from 18** on.
+  - Never allowed again after the first denial.
+  - So the limit is set by how many fields are present, not by any one field. A query with every optional field present is denied every time ("maximum of 1000 expressions … @ L1115").
+- **Where the cost is** (the emulator's rule-coverage report, one update, the smallest document):
+  - 1,603 coverage evaluations: `isValidQuery` 1,531 (95%), the `affectedKeys().hasOnly([...])` allowlist 23, the rest `isOwner` and `isValidId`.
+  - Coverage counts every node, so it is not the limit's own unit. That document was allowed at 1,603. Read these as shares, not as a count against 1,000.
+- **The clauses that cost the most:**
+  1. **Every optional clause costs about the same even when its field is absent** (about 24 coverage units each). There are 65 of them, so re-validating every field on every update is nearly the whole bill.
+  2. Among single clauses: `materialsRequestedQuantity` (38: four type checks), `materialsWanted` (32: list or map, then size), and the 12-way `status` enum (26). The `&&` chain's own joins (line 465, 141) are counted once per clause.
+  3. The update allowlist itself is cheap (23).
+
+  The shape of a fix, for that prompt: validate only the keys the update changes, rather than the whole merged document. Not done here.
+
+### Gates
+
+- tsc: 0 errors.
+- Related Vitest suites green at each commit (5,084 after 1; 187 after 2).
+- e2e builds clean.
+- Measures: one-date 9/9; qc1521 L3H 7/7 at both widths; qc164 lock 1, holding checks 5/5 (3 pre-existing partial-band reds).
+- Full suite once at the tip: 951 files and 13,492 tests passing (4 skipped). It was 949 files and 13,478 at the follow-ups' tip.
