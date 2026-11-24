@@ -65,7 +65,8 @@ export function importSentence(c: Pick<ImportCounts, "agents" | "queries">, manu
   if (c.queries > 0) parts.push({ t: n(c.queries, "query", "queries"), who: true });
   const lead = parts.length === 2 ? "You imported your list: " : "You imported ";
   const body = parts.length === 2 ? [parts[0], { t: " and " }, parts[1]] : parts;
-  return [{ t: lead }, ...body, ...(manuscript ? [{ t: " for " }, { t: manuscript, em: true }] : []), { t: "." }];
+  /* Feed wording v1: no feed sentence ends with a full stop — this one is the stored description too */
+  return [{ t: lead }, ...body, ...(manuscript ? [{ t: " for " }, { t: manuscript, em: true }] : [])];
 }
 
 /** The mono group line, in the design's order; a group at zero is left out. Words are the desk's. */

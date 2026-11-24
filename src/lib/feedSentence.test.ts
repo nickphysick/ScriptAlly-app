@@ -66,7 +66,7 @@ describe("describeEvent", () => {
 
   it("drops the book rather than inventing one, and still reads as a sentence", () => {
     expect(text(describeEvent(QueryStatus.REJECTED, "Ruth Alderman", "", 24 * 86_400_000)))
-      .toBe("Ruth Alderman passed on, 24 days after you queried");
+      .toBe("Ruth Alderman passed, 24 days after you queried"); // feed wording v1: no dangling "on"
   });
 
   /**
@@ -85,7 +85,8 @@ describe("describeEvent", () => {
     const app = text(describeEvent(QueryStatus.NO_RESPONSE, "Ruth Alderman", "Murphy's Day Out", 90 * 86_400_000, "x", true));
     expect(mine).toContain("You closed your query to Ruth Alderman");
     expect(app, "where the app may have closed it, it does not say the writer did")
-      .toContain("No reply recorded from Ruth Alderman");
+      .toContain("Your query to Ruth Alderman"); // feed wording v1: no subject to get wrong
+    expect(app).not.toMatch(/^You /);
     for (const t of [mine, app]) expect(t).not.toMatch(/ignored|never replied|failed to|did not bother/i);
   });
 

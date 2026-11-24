@@ -36,6 +36,7 @@ import { stageSentAt } from "./dashBreakdown";
 import type { State } from "./queryCardFacts";
 import { isImportActivity, importSentence, importGroupLine, IMPORT_ROUTE_LABEL, type ImportCounts, type ImportRoute } from "./importEvent";
 import { foldAgentBursts, houseSay, sweepSay } from "./feedHouse";
+import { HOLDING_REPLY_TYPE as HOLDING_REPLY } from "./holdingReply";
 
 const MIN = 60_000, HOUR = 3_600_000, DAY = 86_400_000;
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -236,86 +237,93 @@ export const describeEvent = (
    * activity a real field at write time is the proper fix and it needs a rules line.
    */
   autoCloseArmed?: boolean,
+  /** Feed wording v1: the event's own key, for the offer declined through the drawer (`offer_declined`) */
+  eventKey?: string | null,
 ): FeedSeg[] | null => {
+  /* Feed wording v1 (one voice): no sentence ends with a full stop, none carries a dash. [X] the person, [T] the
+     manuscript; where the record has no title, the sentence is the one that needs none. */
+  const they: FeedSeg[] = who ? [{ t: who, who: true }] : [];
+  const book: FeedSeg[] = msTitle ? [{ t: msTitle, em: true }] : [];
+  const ofT: FeedSeg[] = msTitle ? [{ t: " of " }, ...book] : [];
+  const forT: FeedSeg[] = msTitle ? [{ t: " for " }, ...book] : [];
+  const clause = elapsedClause(elapsedMs);
   /**
    * ⚠️ THE NUDGE IS BUILT, NEVER READ OFF THE RECORD (Nick, 20 Sep). `logNudge` stores
    * "Nudge sent to {agent} at {agency}"; printing that would put a second vocabulary in a feed
    * written in one voice, and it is the writer's own act, so the subject is "You".
    */
   if (!status && activityType === ActivityType.NUDGE_SENT && who) {
-    const head: FeedSeg[] = [{ t: "You nudged " }, { t: who, who: true }];
-    const clause = elapsedClause(elapsedMs);
-    if (clause) head.push({ t: ` — ${clause} since your query` });
-    return head;
+    return [{ t: "You nudged " }, ...they, ...(clause ? [{ t: `, ${clause} after you queried` }] : [])];
   }
-  if (!status || !who) return null;
+  if (!who) return null;
+  /* the rows that carry no status of their own (Step 0.4): a holding reply, and the To-do board's offer accepted */
+  if (!status && activityType === HOLDING_REPLY) {
+    return [...they, { t: " sent a holding reply" }, ...(msTitle ? [{ t: " about " }, ...book] : [])];
+  }
+  if (!status && activityType === ActivityType.OFFER_ACCEPTED) {
+    return [{ t: "You accepted the offer from " }, ...they, ...forT];
+  }
+  if (!status) return null;
   /* see `autoCloseArmed` — "you closed it" only where the app could not have */
   const byWriter = !autoCloseArmed;
-  const book: FeedSeg[] = msTitle ? [{ t: " " }, { t: msTitle, em: true }] : [];
-  const to: FeedSeg[] = [{ t: " to " }, { t: who, who: true }];
-  const they: FeedSeg[] = [{ t: who, who: true }];
+  const to: FeedSeg[] = [{ t: " to " }, ...they];
   let head: FeedSeg[] | null = null;
+  /* an offer declined is recorded as a withdrawal; the feed says what the writer did */
+  const declined = activityType === ActivityType.OFFER_DECLINED || eventKey === "offer_declined";
   switch (status) {
     case QueryStatus.QUERIED:
-      head = msTitle ? [{ t: "You sent your query for" }, ...book, ...to] : [{ t: "You queried " }, ...they];
+      head = msTitle ? [{ t: "You sent your query for " }, ...book, ...to] : [{ t: "You queried " }, ...they];
       break;
     case QueryStatus.PARTIAL_REQUESTED:
-      head = [...they, { t: " asked to read part of" }, ...book];
+      head = [...they, { t: " asked for a partial" }, ...ofT];
       break;
     case QueryStatus.PARTIAL_SENT:
-      head = [{ t: "You sent the partial of" }, ...book, ...to];
+      head = [{ t: "You sent the partial" }, ...ofT, ...to];
       break;
     case QueryStatus.FULL_REQUESTED:
-      head = [...they, { t: " asked for the full manuscript of" }, ...book];
+      head = [...they, { t: " asked for the full manuscript" }, ...ofT];
       break;
     case QueryStatus.FULL_SENT:
-      head = [{ t: "You sent the full manuscript of" }, ...book, ...to];
+      head = [{ t: "You sent the full manuscript" }, ...ofT, ...to];
       break;
     case QueryStatus.REVISE_RESUBMIT:
-      head = [...they, { t: " invited a revise and resubmit on" }, ...book];
+      head = [...they, { t: " asked you to revise and resubmit" }, ...(msTitle ? [{ t: " " }, ...book] : [])];
       break;
     case QueryStatus.RESUBMITTED:
-      head = [{ t: "You sent the revised manuscript of" }, ...book, ...to];
+      head = [{ t: "You sent the revised manuscript" }, ...ofT, ...to];
       break;
     case QueryStatus.OFFER:
-      head = [...they, { t: " offered representation for" }, ...book];
+      head = [...they, { t: " offered to represent " }, ...(msTitle ? book : [{ t: "you" }])];
       break;
     case QueryStatus.SIGNED:
-      head = [{ t: "You accepted the offer from " }, ...they, ...(msTitle ? [{ t: " for" }, ...book] : [])];
+      head = [{ t: "You accepted the offer from " }, ...they, ...forT];
       break;
     case QueryStatus.REJECTED:
-      head = [...they, { t: " passed on" }, ...book];
+      head = [...they, { t: " passed" }, ...(msTitle ? [{ t: " on " }, ...book] : [])];
       break;
     case QueryStatus.WITHDRAWN:
-      head = [{ t: "You withdrew your query for" }, ...book, { t: " from " }, ...they];
+      head = declined
+        ? [{ t: "You declined the offer from " }, ...they, ...forT]
+        : [{ t: "You withdrew your query" }, ...forT, { t: " from " }, ...they];
       break;
     /**
      * ⚠️ THE SUBJECT IS THE WRITER, BECAUSE CLOSING IS THE WRITER'S ACT (Nick, 20 Sep) — and the
-     * feed is written in their voice throughout. The old sentence ("No reply recorded from …") was
-     * right about one thing and it is carried over: **it names what the writer did, never what the
-     * agent did not do.** "Without a reply" is a fact about the record; "they ignored you" would be
-     * a claim about a person who may have replied somewhere this app never saw.
+     * feed is written in their voice throughout. It names what the writer did, never what the agent
+     * did not do: "without a reply" is a fact about the record.
      *
-     * ⚠️ AND THE AUTOMATIC CLOSE KEEPS THE OLD SENTENCE, which is the whole reason the branch
-     * splits. Where housekeeping closed it, the APP closed it, and a sentence beginning "You" would
-     * hand the writer an act they never performed.
+     * ⚠️ AND WHERE THE APP COULD HAVE CLOSED IT, THE SENTENCE HAS NO SUBJECT TO GET WRONG: "Your query
+     * … closed without a reply" is true whichever of the two closed it.
      */
     case QueryStatus.NO_RESPONSE:
-      head = byWriter
-        ? [{ t: "You closed your query" }, ...to, ...(msTitle ? [{ t: " for" }, ...book] : [])]
-        : [{ t: "No reply recorded from " }, ...they, { t: " about" }, ...book];
+      if (byWriter) {
+        return [{ t: "You closed your query" }, ...to, ...forT, { t: clause ? ` after ${clause} without a reply` : " without a reply" }];
+      }
+      head = [{ t: "Your query" }, ...to, ...forT, { t: " closed without a reply" }];
       break;
     default:
       return null;
   }
-  const clause = elapsedClause(elapsedMs);
-  if (clause && status !== QueryStatus.QUERIED) {
-    /* a close the writer made reads "after N without a reply"; everything else keeps "after you
-       queried", which is the anchor those sentences are counted from */
-    head.push(status === QueryStatus.NO_RESPONSE && byWriter
-      ? { t: ` after ${clause} without a reply` }
-      : { t: `, ${clause} after you queried` });
-  }
+  if (clause && status !== QueryStatus.QUERIED) head.push({ t: `, ${clause} after you queried` });
   return head;
 };
 
@@ -506,6 +514,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
         shape.status, who, (msTitle ?? "").trim(), trustedElapsed(anchorAt, t, nowMs),
         String(a.activityType),
         q?.ifNoResponse === "Mark as no response automatically",
+        typeof a.eventKey === "string" ? a.eventKey : null,
       )
         ?? [{ t: a.description?.trim() || who }];
       provenance = (agent?.agency ?? "").trim();

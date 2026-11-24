@@ -259,15 +259,22 @@ const miniOf = (ev: DrawerEvent): F1Mini => {
   return { type: "mini", id: e.id, dir: e.dir, status: e.status, glyph, say: ev.say, time: e.time, at: e.at, queryId: e.queryId };
 };
 
-/** The writer's queries sent on one day, as one row: "You queried A, B and C." (one: "You queried A with Title.") */
-function sentTogether(group: readonly DrawerEvent[]): F1Mini {
+/**
+ * The writer's queries sent on one day, as one row: "You sent your query for Tidewrack to A, B and C" where every send
+ * was for one book, else "You queried A, B and C".
+ */
+function sentTogether(group: readonly DrawerEvent[], ctx: F1Ctx): F1Mini {
   const names = group.map((g) => g.entry.who).filter((w): w is string => !!w);
-  const say: FeedSeg[] = [{ t: "You queried " }];
+  const titles = new Set(group.map((g) => {
+    const q = ctx.queries.find((x) => x.id === g.entry.queryId);
+    return (ctx.manuscripts.find((m) => m.id === q?.manuscriptId)?.title ?? "").trim();
+  }));
+  const title = titles.size === 1 ? [...titles][0] : "";
+  const say: FeedSeg[] = title ? [{ t: "You sent your query for " }, { t: title, em: true }, { t: " to " }] : [{ t: "You queried " }];
   names.forEach((n, i) => {
     if (i > 0) say.push({ t: i === names.length - 1 ? " and " : ", " });
     say.push({ t: n, who: true });
   });
-  say.push({ t: "." });
   const last = group[0];
   return { ...miniOf(last), id: `sent-${group.map((g) => g.entry.id).join("+")}`, say };
 }
@@ -293,7 +300,7 @@ export function f1Days(events: readonly DrawerEvent[], filter: FeedFilter, ctx: 
     let sentPlaced = false;
     for (const ev of evs) {
       if (isQuerySend(ev.entry) && sends.length > 1) {
-        if (!sentPlaced) { items.push(sentTogether(sends)); sentPlaced = true; }
+        if (!sentPlaced) { items.push(sentTogether(sends, ctx)); sentPlaced = true; }
         continue;
       }
       const kind = bigKind(ev.entry);

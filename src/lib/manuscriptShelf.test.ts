@@ -197,7 +197,7 @@ describe("manuscriptActivity", () => {
 
   it("the feed's own sentence, with the version and the package beneath it", () => {
     const by = Object.fromEntries(run().rows.map((r) => [r.id, r]));
-    expect(sayText(by["pr-q1"].say)).toMatch(/^Edda Voss asked to read part of Harbour of Glass/);
+    expect(sayText(by["pr-q1"].say)).toMatch(/^Edda Voss asked for a partial of Harbour of Glass/); // feed wording v1
     expect(by["pr-q1"].sub, "a request names its package's version").toBe("Fast-paced opening · Autumn round");
     expect(by["full-q2"].sub, "a versioned send names its own version").toBe("Dual timeline edit · Agents with MSWL");
     expect(sayText(by["nudge-q2"].say)).toMatch(/^You nudged Rosa Quintana/);

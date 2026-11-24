@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { ActivityType, type Activity, type Agent, type Manuscript } from "../types";
-import { feedEntries, sayText, type FeedEntry } from "./dashFeed";
+import { feedEntries, sayText, type FeedEntry, type FeedSeg } from "./dashFeed";
 import { drawerEvents } from "./dashFeedDrawer";
 
 const NOW = new Date(2026, 10, 24, 15, 0, 0);
@@ -129,7 +129,7 @@ describe("Part A — the rules allow the carried keys on both stores", () => {
 });
 
 /* ═══ Part B — agent and manuscript updates say what changed ═══════════════════════════════════════ */
-import { agentChange, agentUpdateActivity, manuscriptChange, houseSay, foldAgentBursts, AGENT_SILENT, AGENT_GROUP_OF } from "./feedHouse";
+import { agentChange, agentUpdateActivity, manuscriptChange, houseSay, foldAgentBursts, AGENT_SILENT, AGENT_GROUP_OF, type HouseFields } from "./feedHouse";
 import { ManuscriptStatus, SubmissionStatus } from "../types";
 
 const AG = { id: "ag1", userId: "u", name: "Nadia Hussain", agency: "Hussain Literary", email: "n@h.co", website: "", genres: ["Crime"],
@@ -254,5 +254,113 @@ describe("Part B — both agent save paths write ONE row through the one helper"
   });
   it("updateManuscript narrates only when the save changed something", () => {
     expect(body("updateManuscript")).toContain("msChange.changed.length > 0");
+  });
+});
+
+/* ═══ Part C — one voice ═══════════════════════════════════════════════════════════════════════════ */
+import { describeEvent } from "./dashFeed";
+import { QueryStatus } from "../types";
+import { importSentence } from "./importEvent";
+import { f1Days, type F1Ctx } from "./dashF1Feed";
+import type { DrawerEvent } from "./dashFeedDrawer";
+
+const D3 = 3 * 86_400_000;
+const T = "Tidewrack";
+const ev = (status: QueryStatus | null, title = T, elapsed: number | null = D3, type = "Status Changed", armed = false, key: string | null = null) =>
+  describeEvent(status, "Nadia Hussain", title, elapsed, type, armed, key)!;
+
+describe("Part C — housekeeping", () => {
+  const P = { t: "Nadia Hussain", who: true } as const, B = { t: T, em: true } as const;
+  it.each([
+    [{ activityType: ActivityType.AGENT_ADDED }, P, "You added Nadia Hussain to your contact list"],
+    [{ activityType: ActivityType.AGENT_DELETED }, P, "You removed Nadia Hussain from your contact list"],
+    [{ activityType: ActivityType.AGENT_DELETED, removedQueries: 1 }, P, "You removed Nadia Hussain from your contact list, along with 1 query"],
+    [{ activityType: ActivityType.AGENT_DELETED, removedQueries: 4 }, P, "You removed Nadia Hussain from your contact list, along with 4 queries"],
+    [{ activityType: ActivityType.AGENT_ADDED }, { t: "Penhallow Literary", who: true }, "You added Penhallow Literary to your contact list"],
+    [{ activityType: ActivityType.MANUSCRIPT_ADDED }, B, "You added Tidewrack to your manuscripts"],
+    [{ activityType: ActivityType.MANUSCRIPT_DELETED }, B, "You removed Tidewrack from your manuscripts"],
+    [{ activityType: ActivityType.MANUSCRIPT_DELETED, removedQueries: 1 }, B, "You removed Tidewrack from your manuscripts, along with 1 query"],
+    [{ activityType: ActivityType.MANUSCRIPT_DELETED, removedQueries: 2 }, B, "You removed Tidewrack from your manuscripts, along with 2 queries"],
+  ] as [HouseFields, FeedSeg, string][])("%j → %s", (a, x, want) => {
+    const say = houseSay(a, x)!;
+    expect(sayText(say)).toBe(want);
+    expect(say.filter((s) => s.who || s.em).map((s) => s.t)).toEqual([x.t]);
+  });
+  it("a sweep names how many, and no one", () => {
+    const e = feed([act({ activityType: ActivityType.AGENT_UPDATED, batchCount: 6, description: "You updated 6 agents' details" })]);
+    expect(e.map((x) => sayText(x.say))).toEqual(["You updated 6 agents' details"]);
+    expect(e[0].say.some((s) => s.who)).toBe(false);
+  });
+});
+
+describe("Part C — query events", () => {
+  it.each([
+    [ev(QueryStatus.QUERIED), "You sent your query for Tidewrack to Nadia Hussain"],
+    [ev(QueryStatus.QUERIED, ""), "You queried Nadia Hussain"],
+    [ev(QueryStatus.PARTIAL_REQUESTED), "Nadia Hussain asked for a partial of Tidewrack, 3 days after you queried"],
+    [ev(QueryStatus.PARTIAL_REQUESTED, "", null), "Nadia Hussain asked for a partial"],
+    [ev(QueryStatus.PARTIAL_SENT, T, null), "You sent the partial of Tidewrack to Nadia Hussain"],
+    [ev(QueryStatus.FULL_REQUESTED, T, null), "Nadia Hussain asked for the full manuscript of Tidewrack"],
+    [ev(QueryStatus.FULL_SENT, T, null), "You sent the full manuscript of Tidewrack to Nadia Hussain"],
+    [ev(QueryStatus.FULL_SENT, "", null), "You sent the full manuscript to Nadia Hussain"],
+    [ev(QueryStatus.REVISE_RESUBMIT, T, null), "Nadia Hussain asked you to revise and resubmit Tidewrack"],
+    [ev(QueryStatus.RESUBMITTED, T, null), "You sent the revised manuscript of Tidewrack to Nadia Hussain"],
+    [ev(QueryStatus.OFFER, T, null), "Nadia Hussain offered to represent Tidewrack"],
+    [ev(QueryStatus.SIGNED, T, null), "You accepted the offer from Nadia Hussain for Tidewrack"],
+    [ev(QueryStatus.REJECTED, T, null), "Nadia Hussain passed on Tidewrack"],
+    [ev(QueryStatus.REJECTED, T), "Nadia Hussain passed on Tidewrack, 3 days after you queried"],
+    [ev(QueryStatus.WITHDRAWN, T, null), "You withdrew your query for Tidewrack from Nadia Hussain"],
+    [ev(QueryStatus.NO_RESPONSE, T), "You closed your query to Nadia Hussain for Tidewrack after 3 days without a reply"],
+    [ev(QueryStatus.NO_RESPONSE, T, null, "x", true), "Your query to Nadia Hussain for Tidewrack closed without a reply"],
+    [ev(null, T, D3, ActivityType.NUDGE_SENT), "You nudged Nadia Hussain, 3 days after you queried"],
+    [ev(null, T, null, ActivityType.NUDGE_SENT), "You nudged Nadia Hussain"],
+    [ev(null, T, null, "Holding Reply"), "Nadia Hussain sent a holding reply about Tidewrack"],
+    [ev(null, T, null, ActivityType.OFFER_ACCEPTED), "You accepted the offer from Nadia Hussain for Tidewrack"],
+    [ev(QueryStatus.WITHDRAWN, T, null, ActivityType.OFFER_DECLINED), "You declined the offer from Nadia Hussain for Tidewrack"],
+    [ev(QueryStatus.WITHDRAWN, T, null, "Status Changed", false, "offer_declined"), "You declined the offer from Nadia Hussain for Tidewrack"],
+  ])("%#: %s", (say, want) => {
+    expect(sayText(say)).toBe(want);
+    expect(say.filter((s) => s.who).map((s) => s.t)).toEqual(["Nadia Hussain"]);
+    expect(say.filter((s) => s.em).every((s) => s.t === T)).toBe(true);
+  });
+  it("the import's sentence (and so its stored description) has no full stop", () => {
+    expect(sayText(importSentence({ agents: 2, queries: 3 }, T))).toBe("You imported your list: 2 agents and 3 queries for Tidewrack");
+  });
+  it("several sent on one day: with one title, and without", () => {
+    const e = (id: string, who: string, queryId: string): DrawerEvent => ({
+      entry: { id, at: new Date(at(10)).getTime(), time: "2:50pm", dayLabel: "Today", pill: "Query sent", status: QueryStatus.QUERIED, state: null, app: false,
+        say: [], provenance: "", action: null, requery: null, queryId, isNew: false, dir: "out", activityType: "Query Sent", who, agency: "", need: null, met: null } as FeedEntry,
+      say: [], tag: "", meta: "",
+    });
+    const ctx = (titles: string[]): F1Ctx => ({ queries: titles.map((_, i) => ({ id: `q${i}`, manuscriptId: `m${i}` })) as never, agents: [],
+      manuscripts: titles.map((t, i) => ({ id: `m${i}`, title: t })) as never, qcRows: [], userName: "", now: NOW });
+    const evs = [e("a", "Ann Lee", "q0"), e("b", "Bo Kim", "q1"), e("c", "Cy Ray", "q2")];
+    const one = f1Days(evs, "all", ctx([T, T, T]))[0].items[0];
+    expect(one.type === "mini" && sayText(one.say)).toBe("You sent your query for Tidewrack to Ann Lee, Bo Kim and Cy Ray");
+    const mixed = f1Days(evs, "all", ctx([T, "Saltmarsh", T]))[0].items[0];
+    expect(mixed.type === "mini" && sayText(mixed.say)).toBe("You queried Ann Lee, Bo Kim and Cy Ray");
+  });
+});
+
+describe("Part C — no feed sentence ends in a full stop, and none contains a dash", () => {
+  it("every sentence the feed builds, over every status, type and branch", () => {
+    const all: string[] = [];
+    for (const st of [...Object.values(QueryStatus), null] as (QueryStatus | null)[]) {
+      for (const title of [T, ""]) for (const el of [D3, null]) for (const type of ["Status Changed", ActivityType.NUDGE_SENT, "Holding Reply", ActivityType.OFFER_ACCEPTED, ActivityType.OFFER_DECLINED]) {
+        for (const armed of [false, true]) { const s = describeEvent(st, "Nadia Hussain", title, el, type, armed); if (s) all.push(sayText(s)); }
+      }
+    }
+    for (const t of Object.values(ActivityType)) {
+      for (const changed of [[], ["name"], ["agency"], ["open"], ["fit", "wishlist"], ["fit", "wishlist", "genres"], ["title"], ["status"]]) {
+        const s = houseSay({ activityType: t, changed, previousName: "Old", changedTo: "Closed", removedQueries: 2 } as HouseFields, { t: "X", who: true }, "Agency");
+        if (s) all.push(sayText(s));
+      }
+    }
+    all.push(sayText(importSentence({ agents: 1, queries: 1 }, T)), sayText(importSentence({ agents: 0, queries: 2 }, "")));
+    expect(all.length).toBeGreaterThan(100);
+    for (const t of all) {
+      expect(t.trimEnd().endsWith("."), t).toBe(false);
+      expect(t.includes(" — ") || t.includes(" – "), t).toBe(false);
+    }
   });
 });

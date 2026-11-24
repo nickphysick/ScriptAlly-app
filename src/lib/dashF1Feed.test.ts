@@ -111,7 +111,7 @@ describe("DF1-D · mini rows, the switch and the days", () => {
     const d = f1Days(evs, "all", ctx);
     expect(d.map((x) => x.items.length)).toEqual([1, 1, 1]);
     const say = d[2].items[0].type === "mini" ? d[2].items[0].say.map((s) => s.t).join("") : "";
-    expect(say).toBe("You queried Joanna Pike, Sam Adeyemi and Rhiannon Hale.");
+    expect(say).toBe("You queried Joanna Pike, Sam Adeyemi and Rhiannon Hale"); // feed wording v1: no full stop
   });
   it("Agents shows only what agents did; You only what you did", () => {
     const inn = f1Days(evs, "in", ctx).flatMap((d) => d.items);

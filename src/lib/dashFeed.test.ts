@@ -178,7 +178,7 @@ describe("the two sentences the record can now carry", () => {
   it("a nudge is built from the event, never read off the stored description", () => {
     const say = describeEvent(null, "William Tan", "The Salt Road", 84 * 24 * 60 * MIN, ActivityType.NUDGE_SENT);
     const words = (say ?? []).map((sg) => sg.t).join("");
-    expect(words).toBe("You nudged William Tan — 84 days since your query");
+    expect(words).toBe("You nudged William Tan, 84 days after you queried"); // feed wording v1: one voice, no dash
     /* the agent is its own run, so a renderer can find them inside the sentence */
     expect((say ?? []).some((sg) => sg.who && sg.t === "William Tan")).toBe(true);
     /* and nothing here reads the record's own prose */
@@ -202,7 +202,8 @@ describe("the two sentences the record can now carry", () => {
       .toBe("You closed your query to Marcus Reed for The Salt Road after 820 days without a reply");
 
     const armed = describeEvent(QueryStatus.NO_RESPONSE, "Marcus Reed", "The Salt Road", 820 * 24 * 60 * MIN, "x", true);
-    expect((armed ?? []).map((sg) => sg.t).join("")).toContain("No reply recorded from Marcus Reed");
+    /* feed wording v1: where the app might have closed it, the sentence has no subject to get wrong */
+    expect((armed ?? []).map((sg) => sg.t).join("")).toBe("Your query to Marcus Reed for The Salt Road closed without a reply, 820 days after you queried");
   });
 
   /* ⚠️ AND IT NEVER SAYS WHAT THE AGENT DID NOT DO — the reasoning the old sentence guarded, carried

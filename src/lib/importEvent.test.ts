@@ -21,18 +21,18 @@ const text = (segs: { t: string }[]) => segs.map((s) => s.t).join("");
 
 describe("D · the sentence, every branch", () => {
   const cases: [number, number, string][] = [
-    [8, 8, "You imported your list: 8 agents and 8 queries for Import Test Book."],
-    [1, 1, "You imported your list: 1 agent and 1 query for Import Test Book."],
-    [1, 2, "You imported your list: 1 agent and 2 queries for Import Test Book."],
-    [2, 1, "You imported your list: 2 agents and 1 query for Import Test Book."],
-    [0, 6, "You imported 6 queries for Import Test Book."],
-    [0, 1, "You imported 1 query for Import Test Book."],
-    [3, 0, "You imported 3 agents for Import Test Book."],
-    [1, 0, "You imported 1 agent for Import Test Book."],
+    [8, 8, "You imported your list: 8 agents and 8 queries for Import Test Book"],
+    [1, 1, "You imported your list: 1 agent and 1 query for Import Test Book"],
+    [1, 2, "You imported your list: 1 agent and 2 queries for Import Test Book"],
+    [2, 1, "You imported your list: 2 agents and 1 query for Import Test Book"],
+    [0, 6, "You imported 6 queries for Import Test Book"],
+    [0, 1, "You imported 1 query for Import Test Book"],
+    [3, 0, "You imported 3 agents for Import Test Book"],
+    [1, 0, "You imported 1 agent for Import Test Book"],
   ];
   for (const [a, q, want] of cases) it(`${a} agents, ${q} queries`, () => expect(text(importSentence({ agents: a, queries: q }, "Import Test Book"))).toBe(want));
   it("with no manuscript (an agents-only matcher run) it names none", () => {
-    expect(text(importSentence({ agents: 3, queries: 0 }, ""))).toBe("You imported 3 agents.");
+    expect(text(importSentence({ agents: 3, queries: 0 }, ""))).toBe("You imported 3 agents");
   });
   it("the counts are bold and the manuscript is set apart", () => {
     const s = importSentence({ agents: 8, queries: 8 }, "Import Test Book");
@@ -90,7 +90,7 @@ describe("D · the event, and the feed's row", () => {
     const e = entries[0];
     expect(feedFamily(e)).toBe("import");
     expect(e.pill).toBe("Imported");
-    expect(text(e.say)).toBe("You imported your list: 8 agents and 4 queries for Import Test Book.");
+    expect(text(e.say)).toBe("You imported your list: 8 agents and 4 queries for Import Test Book");
     expect(e.imported?.groups).toEqual(importGroupLine(counts));
     expect(e.imported?.routeLabel).toBe(IMPORT_ROUTE_LABEL.smart);
   });

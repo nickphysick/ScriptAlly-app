@@ -240,7 +240,7 @@ describe('commitSmartImport — orchestration', () => {
     expect(events[0].activityType).toBe('Status Changed');
     expect(events[0].manuscriptId).toBe('ms1');
     expect(events[0].importCounts).toEqual({ agents: 2, queries: 2, withAgents: 2, withYou: 0, closed: 0 });
-    expect(events[0].description).toBe('You imported your list: 2 agents and 2 queries for My Novel.');
+    expect(events[0].description).toBe('You imported your list: 2 agents and 2 queries for My Novel');
   });
 });
 
