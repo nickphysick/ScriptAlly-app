@@ -18,6 +18,9 @@
  *    (`addAgent(agentFromDraft(draft))`); this component collects the answers (lib/queryActions/addAgentStages).
  * ⚠️ THE CARD ON THE REVIEW AND ADDED SCREENS IS THE REAL AGENT CARD (the host's `renderCard`), drawn read-only from the
  *    unsaved agent and scaled to fit whole — never a redrawn copy.
+ * Design v15: field notes are an "i" to hover or focus (`Hint`), never an italic aside beside a label; step 2 asks for the
+ * wishlist page link (the card's `mswl`); step 3's sample is the typed control (`SampleTyped`, opening only — the agent
+ * record has no starting point); step 4 asks a closed agent when they reopen (the app's slider, saved as `reopensOn`).
  * ⚠️ THE "N of 6" IS THE CARD'S OWN COUNT: its profile ring is over the six details Housekeeping asks about
  *    (`finishShare`, lib/agentCardV2), and the host's `gapsOf` is that list (`agentGaps`). The reference's "of 9" is a
  *    count the app does not keep.
@@ -27,7 +30,7 @@ import type { Agent } from "../../../types";
 import { FlowHead } from "../../shared/FlowHead";
 import { WeekSlider } from "../../forms/WeekSlider";
 import { CountryCombobox } from "../../forms/CountryCombobox";
-import { SampleControl } from "../../queryActions/controls";
+import { SampleTyped } from "../../queryActions/SampleTyped";
 import { GenreChips, FIT_TIP, FIT_WORDS } from "../../agents/card/agentPills";
 import type { Book } from "../../../lib/queryActions/sample";
 import { flagFor } from "../../../lib/territory";
@@ -41,6 +44,8 @@ import {
 } from "../../../lib/queryActions/addAgentStages";
 import { normaliseCountry } from "../../../lib/territory";
 import { dayMonth } from "../../../lib/dates";
+import { addDays, ymd } from "../../../lib/queryActions/dates";
+import { dayMonY } from "../../../lib/queryActions/logStages";
 import type { CardDraft } from "../../../lib/cardDraft";
 import { ICON, useReducedMotion } from "./QcLogStages";
 import "./qcLogStages.css";
@@ -100,6 +105,8 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
   const [added, setAdded] = useState<(AddedAgent & { onFile: number; gaps: number; agent: Agent }) | null>(null);
   const [leaveAsk, setLeaveAsk] = useState(false);
   const [info, setInfo] = useState(false);
+  /** design v15 — the field note showing (on hover or keyboard focus), by key */
+  const [hint, setHint] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -143,15 +150,17 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
 
   /* ── moving ── */
   const go = (k: AStage, dir?: "in" | "back") => {
-    setErr(null); setInfo(false); setLeaveAsk(false);
+    setErr(null); setInfo(false); setHint(null); setLeaveAsk(false);
     setS((o) => ({ ...o, seen: { ...o.seen, [o.step]: true }, dir: dir ?? (A_STAGES.indexOf(k) > A_STAGES.indexOf(o.step) ? "in" : "back"), step: k }));
   };
   /** the step whose answers the record cannot take yet (an email that is not one, a sample under its floor) */
   const blocked = (): { step: AStage; msg: string } | null => {
     const pr = problemsOf(draft);
+    if (pr.mswl) return { step: "wish", msg: pr.mswl };
     if (pr.email) return { step: "how", msg: pr.email };
     if (pr.website || pr.form) return { step: "how", msg: (pr.website ?? pr.form)! };
-    if (pr.smp) return { step: "asks", msg: pr.smp };
+    /* design v15 — the typed sample holds any whole number from 1 up to what the record stores (MAT_QTY), so the
+       picker's own 500-word floor (`problemsOf`'s smp, CREATE_QTY) is not this journey's rule */
     return null;
   };
   /** carry on from step one: a name, no twin, and the agency asked for once */
@@ -162,7 +171,7 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
   };
   const next = () => {
     if (s.step === "agent" && !fromAgent()) return;
-    if (s.step === "asks" || s.step === "how") { const b = blocked(); if (b && b.step === s.step) { setErr(b.msg); return; } }
+    if (s.step === "wish" || s.step === "asks" || s.step === "how") { const b = blocked(); if (b && b.step === s.step) { setErr(b.msg); return; } }
     go(A_STAGES[A_STAGES.indexOf(s.step) + 1], "in");
   };
   const toEnd = () => {
@@ -207,6 +216,7 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
   const leave = () => { if (answered) setLeaveAsk(true); else p.onClose(); };
   if (p.leaveRef) p.leaveRef.current = leave;
   useEscapeLayer(!p.behind, () => {
+    if (hint) { setHint(null); return; }
     if (info) { setInfo(false); return; }
     if (leaveAsk) { setLeaveAsk(false); return; }
     leave();
@@ -249,6 +259,15 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
         onChange={(e) => onChange(e.target.value)} onFocus={o.onFocus} onBlur={o.onBlur}
         onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (s.step === "agent") { if (p.fromLog) addNow(); else next(); } else next(); } }} />
     </label>
+  );
+  /** design v15 — the field note: the round "i" beside a label; its dark bubble sits above the label on hover or focus */
+  const hintI = (k: string, text: string) => (
+    <span className={`aag-h${hint === k ? " is-on" : ""}`} data-aag="hint" data-k={k}
+      onMouseEnter={() => setHint(k)} onMouseLeave={() => setHint((h) => (h === k ? null : h))}>
+      <span className="aag-i aag-hi" tabIndex={0} role="button" aria-label="More about this" aria-describedby={`aag-ht-${k}`} data-aag="hint-i"
+        onFocus={() => setHint(k)} onBlur={() => setHint((h) => (h === k ? null : h))}>i</span>
+      <span className="aag-ht" role="tooltip" id={`aag-ht-${k}`} data-aag="hint-tip">{text}</span>
+    </span>
   );
   const opt = (grp: string, k: string, label: string, on: boolean, pick: () => void) => (
     <button key={k} type="button" className={`laq-opt${on ? " is-on" : ""}`} role="radio" aria-checked={on} data-aag={grp} data-k={k} onClick={pick}>
@@ -351,8 +370,13 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
         <GenreChips genres={s.genres} onGenres={(g) => set({ genres: g })} options={p.genre.options} onNew={p.genre.onNew} inputRef={genreRef} />
       </div>
       <div className="aag-gap" />
-      <label className="aag-lab" htmlFor="aag-wish">Wishlist<i>in {poss} words</i></label>
+      <div className="aag-lab aag-labh"><label htmlFor="aag-wish">Wishlist</label>{hintI("wish", `Use ${poss} own words, copied from the wishlist or agency page, so the card reads the way ${first} wrote it.`)}</div>
       <textarea id="aag-wish" className="aag-ta" data-aag="wish" maxLength={400} placeholder="Paste it from their wishlist or agency page" value={s.wish} onChange={(e) => set({ wish: e.target.value })} />
+      <div className="aag-gap" />
+      <div className="aag-lab aag-labh"><label htmlFor="aag-mswl">Link to {poss} wishlist page</label>{hintI("mswl", `The page where ${first} lists what ${first} wants to see. Leave it blank if there isn’t one.`)}</div>
+      <input id="aag-mswl" className="aag-in" data-aag="mswl" value={s.mswl} placeholder="agency.co.uk/sarah-jones" autoComplete="off" onChange={(e) => set({ mswl: e.target.value })}
+        onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); next(); } }} />
+      {err ? <p className="laq-err" role="alert" data-aag="error">{err}</p> : null}
     </>
   );
 
@@ -379,7 +403,7 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
         {tile("syn", "Synopsis", s.ask.syn ? synSub : null,
           <div className="aag-len" role="radiogroup" aria-label="How long a synopsis">{SYN.map(([k, l]) => chip(k, l, s.synLen === k, () => set({ synLen: s.synLen === k ? "" : k }), "syn"))}</div>)}
         {tile("sample", "A sample", s.ask.sample ? sampleName(s.samp) : "Pages, chapters or words",
-          <div className="laq-qsamp" data-aag="sample-control"><SampleControl name="aag" sample={s.samp} book={p.book} openingOnly onChange={(x) => set({ samp: x })} /></div>)}
+          <div className="aag-samp" data-aag="sample-control"><SampleTyped name="aag" sample={s.samp} first={first} onChange={(x) => set({ samp: x })} data="aag" /></div>)}
         {tile("other", "Something else", null,
           <input className="aag-in" data-aag="other-tx" value={s.otherTx} maxLength={40} placeholder="Type what they ask for" aria-label="Something else they ask for" autoComplete="off"
             autoFocus onChange={(e) => set({ otherTx: e.target.value })} />)}
@@ -388,7 +412,20 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
     </>
   );
 
-  /* ── step 4 · How ── */
+  /* ── step 4 · How — design v15: a closed agent is asked when they reopen, on the app's own slider (weeks from today, as
+     the slider counts), saved as the date the card saves (`reopensOn`, local YYYY-MM-DD); "Not sure" saves nothing ── */
+  const reopenAt = (w: number) => addDays(new Date(nowMs), w * 7);
+  const reopenBlock = () => (
+    <div className="aag-ro" data-aag="reopen">
+      <h3 className="laq-qh is-q2">When does {first} reopen to queries?</h3>
+      <div className="laq-wkb aag-wk" data-aag="reopen-slider" data-unknown={s.roNone ? "1" : "0"}>
+        <WeekSlider label="Reopens" value={s.roNone ? null : s.ro} min={1} max={52} unknownLabel="Not sure" ends={["Next week", "In a year"]}
+          readout={(w) => `${dayMonY(reopenAt(w).getTime(), nowMs)} · in ${w} ${w === 1 ? "week" : "weeks"}`}
+          onChange={(w) => set({ ro: w, roNone: false, reopens: ymd(reopenAt(w)) })} onUnknown={() => set({ roNone: true, reopens: "" })} />
+        <p className="laq-wkx" data-aag="reopen-note">{s.roNone ? `Not known yet. It stays on ${poss} card as something to add.` : `This goes on ${poss} card.`}</p>
+      </div>
+    </div>
+  );
   const pickMethod = (k: string) => {
     const nk = s.method === k ? "" : k;
     set({ method: nk });
@@ -416,6 +453,7 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
         {opt("door", "closed", "Closed", s.door === "closed", () => set({ door: s.door === "closed" ? "" : "closed" }))}
         {opt("door", "unsure", "Not sure", s.door === "unsure", () => set({ door: s.door === "unsure" ? "" : "unsure" }))}
       </div>
+      {s.door === "closed" ? reopenBlock() : null}
     </>
   );
 
@@ -445,7 +483,7 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
   );
   const fitBlock = () => (
     <div className="aag-fitb" data-aag="fit">
-      {info ? <div className="aag-pop" role="tooltip" id="aag-fit-tip" data-aag="fit-tip">{FIT_TIP}<b className="aag-popk">1 poor fit · 2 worth a try · 3 good fit · 4 great fit · 5 dream agent</b></div> : null}
+      {info ? <div className="aag-pop" role="tooltip" id="aag-fit-tip" data-aag="fit-tip">{FIT_TIP}<b className="aag-popk">{[1, 2, 3, 4, 5].map((n) => `${n} ${FIT_WORDS[n].toLowerCase()}`).join(" · ")}</b></div> : null}
       <b>Agent fit</b>
       <button type="button" className="aag-i" data-aag="fit-info" aria-label="What Agent fit means" aria-expanded={info} aria-describedby={info ? "aag-fit-tip" : undefined} onClick={() => setInfo((v) => !v)}>i</button>
       <span role="radiogroup" aria-label="Agent fit" className="aag-stars">

@@ -132,4 +132,31 @@ describe("Add an agent v2 · the model", () => {
     const greens = [...css.matchAll(/#([0-9a-f]{6})\b/gi)].map((m) => m[1]).filter((h) => { const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); return g > r + 8 && g > b + 8; });
     expect(greens).toEqual([]);
   });
+  it("AA2-U14 · design v15: the wishlist page link is saved where the agent card reads it (the MSWL entry in socials)", () => {
+    const a = agentFromDraft(draftOfAnswers({ ...full(), mswl: "agency.co.uk/sarah-jones" }, normaliseCountry)) as Record<string, unknown>;
+    expect(a.socials).toEqual([{ platform: "MSWL", handle: "https://agency.co.uk/sarah-jones" }]);
+    expect(agentFromDraft(draftOfAnswers(full(), normaliseCountry)).socials).toBeUndefined();
+    expect(stepHasAnswer({ ...freshA("Jo March"), mswl: "x.co" }, "wish")).toBe(true);
+    expect(problemsOf(draftOfAnswers({ ...full(), mswl: "not a link" }, normaliseCountry)).mswl).toBeTruthy();
+  });
+
+  it("AA2-U15 · design v15: a closed agent's reopening date saves to reopensOn; Not sure, Open and Not known save nothing", () => {
+    const closed = { ...full(), door: "closed" as const, ro: 6, roNone: false, reopens: "2027-01-05" };
+    expect(agentFromDraft(draftOfAnswers(closed, normaliseCountry)).reopensOn).toBe("2027-01-05");
+    expect(agentFromDraft(draftOfAnswers({ ...closed, roNone: true }, normaliseCountry)).reopensOn).toBeUndefined();
+    expect(agentFromDraft(draftOfAnswers({ ...closed, door: "open" }, normaliseCountry)).reopensOn).toBeUndefined();
+    expect(agentFromDraft(draftOfAnswers({ ...closed, door: "unsure" }, normaliseCountry)).reopensOn).toBeUndefined();
+    expect(freshA().roNone).toBe(true);
+  });
+
+  it("AA2-U16 · design v15: the typed sample saves its number as typed, in the record's own token", () => {
+    const w = agentFromDraft(draftOfAnswers({ ...full(), samp: { unit: "words", amt: 7500, from: 1, sect: false, fu: null } }, normaliseCountry));
+    expect(w.materialsWanted).toContain("7,500 words");
+    /* under the picker's 500-word floor, and the record still holds it */
+    const few = agentFromDraft(draftOfAnswers({ ...full(), samp: { unit: "words", amt: 300, from: 1, sect: false, fu: null } }, normaliseCountry));
+    expect(few.materialsWanted).toContain("300 words");
+    const p = agentFromDraft(draftOfAnswers({ ...full(), samp: { unit: "pages", amt: 35, from: 1, sect: false, fu: null } }, normaliseCountry));
+    expect(p.materialsWanted).toContain("First 35 pages");
+    expect(sampleName({ unit: "words", amt: 7500, from: 1, sect: false, fu: null })).toBe("First 7,500 words");
+  });
 });

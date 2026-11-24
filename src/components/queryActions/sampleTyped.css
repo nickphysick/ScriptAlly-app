@@ -1,0 +1,15 @@
+/* The typed sample control (Add an agent v2, design v15) — the ref's `sx-*` parts, values as drawn. Its accent is the
+   surrounding `--ag` (the add journey's slate), else that slate. Fonts are the app's own (--sp-serif, --sp-type). */
+.sx-row { display: flex; align-items: center; gap: 10px; }
+.sx-w { font: 400 16px var(--sp-serif); color: var(--laq-ink, #1c130f); }
+.sx-n { all: unset; box-sizing: border-box; width: 104px; height: 44px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #c9d2dd; font: 400 20px var(--sp-type); text-align: center; color: var(--laq-ink, #1c130f); }
+.sx-n:focus { box-shadow: inset 0 0 0 1.5px var(--ag, #5e7189); }
+.sx-n.sm { width: 64px; height: 36px; font-size: 17px; margin: 0 6px; }
+.sx-seg { display: inline-flex; margin-left: auto; padding: 3px; gap: 2px; border-radius: 11px; background: rgba(94, 113, 137, .16); }
+.sx-seg button { all: unset; box-sizing: border-box; cursor: pointer; padding: 8px 12px; border-radius: 9px; font: 400 14.5px/1.2 var(--sp-serif); color: #44536a; }
+.sx-seg button.on { background: #fff; color: var(--laq-ink, #1c130f); box-shadow: 0 1px 2px rgba(28, 19, 15, .14); }
+.sx-seg button:focus-visible, .sx-lk:focus-visible { outline: 2px solid var(--laq-navy, #2a3a52); outline-offset: 1px; }
+.sx-com { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 14px; }
+.sx-com > span { flex: 0 0 100%; font: 400 13.5px var(--sp-serif); color: var(--laq-mut, #6f645b); margin-bottom: 2px; }
+.sx-from { margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(94, 113, 137, .35); font: 400 14.5px/1.4 var(--sp-serif); color: #5b4f47; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.sx-lk { all: unset; cursor: pointer; margin-left: 6px; color: var(--laq-navy, #2a3a52); text-decoration: underline; text-underline-offset: 3px; }
