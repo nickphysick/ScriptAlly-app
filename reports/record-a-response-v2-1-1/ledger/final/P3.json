@@ -1,0 +1,22 @@
+[
+ {
+  "where": "the seeded agency is on Who replied?",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "the step shows the first word",
+  "ok": true,
+  "detail": "Penhallow"
+ },
+ {
+  "where": "nothing is cut (the value fits its box)",
+  "ok": true,
+  "detail": "59 in 59"
+ },
+ {
+  "where": "the full name is in the step's accessible label",
+  "ok": true,
+  "detail": "Agent: Penhallow Literary Agency | Agent: Penhallow Literary Agency. Change it"
+ }
+]

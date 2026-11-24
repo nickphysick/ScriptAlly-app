@@ -19,6 +19,7 @@ import { planRecord, withRecompute, type PlanCtx, type StepMaterial, type WriteP
 import { holdsPages, type OtherQ } from "../qc1522Write";
 import type { RawActivityDoc } from "../recomputeFields";
 import { dayIso } from "./dates";
+import { writerExpectedUnknownWrite } from "../expectedDate";
 import { MONTHS_SHORT } from "../dates";
 import { WEEKDAY } from "./logStages";
 import { capFirst, sampleName, type Sample } from "./sample";
@@ -203,7 +204,9 @@ export function planOfResponse(c: PlanCtx & { feed: RawActivityDoc[] }, a: RespA
   if ((a.kind === "pr" || a.kind === "fr") && a.sentQ === "yes") {
     const sent = planRecord({ ...c, existing }, a.kind === "pr" ? "partial_sent" : "full_sent", a.sentMs, wentMaterials(a));
     if (a.expectBy != null) { sent.query.writerExpectedDate = iso(a.expectBy); sent.query.writerExpectedSetAt = new Date(c.nowMs).toISOString(); }
-    else { sent.query.writerExpectedDate = undefined; sent.query.writerExpectedSetAt = undefined; }
+    /* v2.1.1 — Unknown is the writer's statement: the stamp with no date, so the card shows "No date yet" rather than
+       falling back to the house window (lib/expectedDate `writerExpectedUnknownWrite`) */
+    else Object.assign(sent.query, writerExpectedUnknownWrite(new Date(c.nowMs)));
     sent.query.nudgeDate = a.nudgeOn != null ? iso(a.nudgeOn) : undefined;
     push(sent);
   }

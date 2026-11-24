@@ -96,6 +96,14 @@ export function writerExpectedWrite(iso: string, now: Date = new Date()): Record
 }
 
 /**
+ * Record a response v2.1.1 — THE WRITER'S "UNKNOWN": the stamp with no date (the date field is cleared). It is the writer
+ * stating, now, that the reply time is not known; `resolveExpectedDate` lets it beat every fallback.
+ */
+export function writerExpectedUnknownWrite(now: Date = new Date()): { writerExpectedDate: undefined; writerExpectedSetAt: string } {
+  return { [WRITER_EXPECTED_FIELD]: undefined, [WRITER_EXPECTED_SET_AT_FIELD]: now.toISOString() } as { writerExpectedDate: undefined; writerExpectedSetAt: string };
+}
+
+/**
  * The AGENCY's window, derived: their current stated weeks from the send anchor.
  *
  * ⚠️ `null` WHEN THEY STATE NOTHING, and that is the whole point of deriving it. There is no stored
@@ -180,6 +188,17 @@ export function resolveExpectedDate(
   const mine = writerExpectedMs(query);
   if (mine != null) statements.push({ ms: mine, source: "writer", statedAt: writerExpectedSetAtMs(query) ?? -Infinity });
   if (replyStated) statements.push({ ms: replyStated.ms, source: "reply", statedAt: replyStated.statedAt });
+
+  /* Record a response v2.1.1 — ⚠️ THE WRITER'S "UNKNOWN" IS A STATEMENT TOO. A stamp with no date
+     (`writerExpectedUnknownWrite`) is the writer saying, at that moment, that no reply date is known. It
+     beats every fallback (the agency's window, the house window a caller passes in): Unknown chosen by
+     the writer wins over a guess. Recency still holds — a reply stated after it wins, one before loses.
+     Every other write path sets or clears the two fields together, so only that save makes this row. */
+  const unknownAt = mine == null ? writerExpectedSetAtMs(query) : null;
+  if (unknownAt != null) {
+    const later = replyStated && replyStated.statedAt > unknownAt ? replyStated : null;
+    return later ? { ms: later.ms, source: "reply" } : { ms: null, source: "writer" };
+  }
 
   if (statements.length) {
     /* ⚠️ `>` NOT `>=`, so a tie keeps the FIRST — the writer's. Two statements at the same instant
