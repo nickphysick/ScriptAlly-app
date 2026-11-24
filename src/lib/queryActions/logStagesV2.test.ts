@@ -85,11 +85,15 @@ describe("v2 · Phase 2 — adding an agent without leaving", () => {
     expect(toRemoveOnDiscard(c)).toEqual([]);
     expect(toRemoveOnUndo(c, "existing")).toBeNull();
   });
-  it("the host records an agent only when its id was not on the list before (the twin case is not recorded)", () => {
+  /* Add an agent v2 · B7 — the inline "Who’s the new agent?" screen is retired: "Add a new agent" opens the add journey
+     over this one, and the agent it adds is chosen here as a pick from the list is */
+  it("the host hands Add a new agent to the add journey, over Log a query, and never writes an agent itself", () => {
     const host = readFileSync("src/components/queries/centre/LogStagesHost.tsx", "utf8");
-    expect(host).toMatch(/const isNew = !before\.has\(res\.id\);\s*if \(isNew\)/);
-    expect(host).toMatch(/await addAgent\(agentFromDraft\(d\)\)/);
-    expect(host).not.toMatch(/openNewAgentCard/);
+    expect(host).toMatch(/openAddAgent\(\{ name: name\.trim\(\) \|\| undefined, over: "laq", onAdded: done \}\)/);
+    expect(host).not.toMatch(/addAgent\(|openNewAgentCard|onCreateAgent/);
+    const flow = readFileSync("src/components/queries/centre/QcLogStages.tsx", "utf8");
+    expect(flow).toMatch(/p\.onAddNew\(titleName\(s\.find\), \(id, nm\) => \{[\s\S]{0,80}answer\(\{ agentId: id/);
+    expect(flow).not.toMatch(/data-qls="add-go"|Who’s the new agent\?/);
   });
 });
 

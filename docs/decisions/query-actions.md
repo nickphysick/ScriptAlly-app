@@ -2,6 +2,7 @@
 
 ## Current state
 
+- **Add an agent v2 (24 Nov 2026, branch `add-agent-v2`, NOT merged)** — "Quick actions" replaces the top bar's split button; Add an agent becomes the third journey in Log a query's shell, opened in place from every desktop door: section "Add an agent v2" below.
 - **Log a query v2.3 (23 Nov 2026, branch `log-a-query-v2-3`, NOT merged)** — Nick's four rulings on the decisions page v1: one count of queries sent, the compact materials tile, Escape on its pop-up, the held task's fixed words: section "Log a query v2.3" below.
 - **Log a query v2.2 (23 Nov 2026, branch `log-a-query-v2-2`, NOT merged)** — the journey round Plumage colours v3's card, notes as the query card shows them, one count of queries sent, words: section "Log a query v2.2" below.
 - **Log a query v2.1 (23 Nov 2026, branch `log-a-query-v2-1`, NOT merged)** — the review screen of mock v24, step one's already-queried agents, the held task's "I've sent it", a query sent today counting today: section "Log a query v2.1" below.
@@ -9,6 +10,17 @@
 - Query actions v1 + v1.1 (27–28 Sep): every page finishes in the one query drawer; ref design-refs/query-actions-v11.html, report reports/query-actions-v1/. Prod rules for its fields are Nick's.
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
+
+## Add an agent v2 — the third journey, and Quick actions (24 Nov 2026; ref design-refs/add-agent-v2/; report reports/add-agent-v2/REPORT.md; branch `add-agent-v2`, NOT merged)
+
+- **One create button in the bar: "Quick actions"** (`shell/QuickActions.tsx`). Rows: Log a query, Record a response, Add an agent, each by its journey's own head file; "Add a manuscript … coming soon" is text, not a row. Every row goes through `invokeCapture` and App's interceptions. `SidebarCapture` and its `.ws-cap*` CSS are deleted.
+- **One add journey on a desktop: `openAddAgent` (lib/addAgentStore) → `AddAgentPanel` → `QcAddAgent`.** `openNewAgentCard` hands off to it whenever a desktop host is listening, so every old door (Dashboard, Contact list, empty state, search's typed name, the To-do starting task, the bar) reaches it unchanged. The phone has no listener and keeps its own flows. The v1 panel (`AgentPanelNew` + `AddAgentJourney`) is now reached only by the phone's LogJourney.
+- **The save is still `addAgent(agentFromDraft(draft))`.** The answers map onto `CardDraft` in `lib/queryActions/addAgentStages` (`draftOfAnswers`), so the record equals the old journey's for the same answers (AA2-U2, AB7).
+- **No storage was invented.** The sample control is opening-only (`materialsWanted` has no "from"). "Something else" is the record's one Other text (40); the four suggested extras are left out (Author bio is stripped on write, the others have no token). Elsewhere uses the app's `CountryCombobox` (ISO).
+- **The card's count is over six details, not nine.** The card's ring is `finishShare` over Housekeeping's `agentGaps`. The review shows "N of 6" and the added line counts the same gaps.
+- **The preview is the real card:** `PreviewAgentCard` (todo/ws/WsPreview) with one new optional prop, `withGaps`, drawn from the unsaved agent and scaled to fit (`CardFit`, at most 0.62).
+- **From inside Log a query:** its "Add a new agent" calls `onAddNew` → `openAddAgent({ over: "laq" })`. Log a query steps back (`body.aag-over-laq`), and the new agent is chosen through Log a query's own `answer`, as a pick from the list is. Its inline "Who’s the new agent?" screen and `onCreateAgent` are deleted. An agent added this way stays on the list if the query is discarded.
+- **Locks:** unit `quickActions.test.tsx`, `addAgentStages.test.ts`, `logStagesV2.test.ts` (host hand-off); e2e `quickActions.measure.ts` (QA1–QA4, `QA_BREAK`), `addAgentV2.measure.ts` (AB1–AB8, `AAG_BREAK`); shots `addAgentV2.shots.measure.ts`.
 
 ## Log a query v2.3 — the decisions page v1 (23 Nov 2026; ref design-refs/log-a-query-v2-3/; report reports/log-a-query-v2-3/REPORT.md; branch `log-a-query-v2-3`, NOT merged)
 

@@ -1,0 +1,138 @@
+/*
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Add an agent v2 — THE JOURNEY'S OWN PARTS, over Log a query's shell (qcLogStages.css, shared, never copied). Every rule
+ * is scoped to `.laq.aag`, so Log a query and Record a response cannot change by a pixel. Values are the reference's
+ * (design-refs/add-agent-v2, its "Add an agent's own identity" and `ag-*` rules, here `aag-*` because the app already
+ * has global `.ag-*` rules — Contact list's — that would leak in).
+ *
+ * The accent is the agent card's band slate: --ag #5e7189, --ag-d #3d5069, --ag-l #c3cedb, --ag-t #eef2f6. Buttons and
+ * the track stay navy. No green.
+ */
+.laq.aag { --ag: #5e7189; --ag-d: #3d5069; --ag-l: #c3cedb; --ag-t: #eef2f6; --sm: #5e7189; }
+
+/* the head: Log a query's navy, the Scout's head round, the second line in light slate */
+.laq.aag .flh-t span.br { display: block; }
+.laq.aag .flh .flh-hd h3.flh-t .is-c { color: var(--ag-l); }
+.laq.aag .flh .flh-m.aag-art { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; box-shadow: none; }
+
+/* the slate through the form */
+.laq.aag .sa-wk-slider::-webkit-slider-thumb { background: var(--ag); }
+.laq.aag .sa-wk-slider::-moz-range-thumb { background: var(--ag); }
+.laq.aag .laq-gt.is-on { box-shadow: inset 0 0 0 1.5px var(--ag); background: var(--ag-t); }
+.laq.aag .laq-gt.is-on .laq-ck { background: var(--ag); }
+.laq.aag .laq-opt:hover { box-shadow: inset 0 0 0 1.5px var(--ag); }
+.laq.aag .laq-opt.is-on { box-shadow: inset 0 0 0 1.5px var(--ag); background: var(--ag-t); }
+.laq.aag .laq-opt.is-on .laq-rdo { border-color: var(--ag); background: var(--ag); }
+.laq.aag .laq-chip.is-on, .laq.aag .qad-chip.on { background: var(--ag); color: #fff; box-shadow: none; }
+.laq.aag .laq-fl input:focus, .laq.aag .aag-in:focus, .laq.aag .aag-ta:focus { box-shadow: inset 0 0 0 1.5px var(--ag); }
+.laq.aag .rvb.is-big .rvb-n i { background: #dfe6ee; color: var(--ag-d); }
+
+/* fields */
+.laq.aag .laq-fl { position: relative; }
+.laq.aag .laq-fl input::placeholder { font-style: italic; color: #9a948b; }
+.laq.aag .laq-fl input:disabled { background: #f6f3ee; }
+.laq.aag .aag-in { all: unset; box-sizing: border-box; display: block; width: 100%; height: 44px; padding: 0 12px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 16px var(--sp-serif); color: var(--laq-ink); }
+.laq.aag .aag-in::placeholder { font-style: italic; color: #9a948b; }
+.laq.aag .aag-mtx { margin-top: 8px; }
+.laq.aag .aag-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.laq.aag .aag-two .laq-fl { margin-bottom: 0; }
+.laq.aag .aag-lab { display: block; margin: 0 0 6px; font: 500 15px var(--sp-serif); }
+.laq.aag .aag-lab i { font: italic 400 13.5px var(--sp-serif); color: var(--laq-mut); margin-left: 6px; }
+.laq.aag .aag-cn { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.laq.aag .aag-c { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px 0 11px; border-radius: 19px; background: #fff; box-shadow: inset 0 0 0 1.2px rgba(28, 19, 15, .22); font: 500 15px var(--sp-serif); }
+.laq.aag .aag-c .fi { flex: none; width: 20px; height: 15px; border-radius: 2.5px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .12); background-size: cover; }
+.laq.aag .aag-c:hover { box-shadow: inset 0 0 0 1.5px var(--ag); }
+.laq.aag .aag-c.is-on { background: var(--ag); color: #fff; box-shadow: none; }
+.laq.aag .aag-c:focus-visible, .laq.aag .aag-star:focus-visible, .laq.aag .aag-i:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq.aag .aag-city { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.laq.aag .aag-city.is-2 { grid-template-columns: 1fr 1fr; }
+.laq.aag .aag-cty { min-width: 0; }
+.laq.aag .aag-lk { margin: -8px 2px 14px; font: 400 14px var(--sp-serif); color: var(--laq-mut); }
+.laq.aag .aag-box { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; padding: 11px 14px; border-radius: 12px; background: var(--ag-t); box-shadow: inset 3px 0 0 var(--ag); font: 400 14.5px/1.45 var(--sp-serif); color: #3a302a; animation: laq-fadein .2s ease-out both; }
+.laq.aag .aag-box b { font-weight: 600; color: var(--laq-ink); }
+.laq.aag .aag-box p { flex: 1 1 auto; min-width: 0; margin: 0; }
+.laq.aag .aag-box .laq-tdb { height: 34px; line-height: 34px; padding: 0 13px; font-size: 13.5px; }
+.laq.aag .aag-box.is-ask { display: block; background: #efe7da; box-shadow: none; }
+.laq.aag .aag-box.is-ask div { display: flex; gap: 8px; margin-top: 10px; }
+.laq.aag .aag-agw { position: relative; }
+.laq.aag .aag-sug { position: absolute; left: 0; right: 0; top: 76px; z-index: 5; padding: 5px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9, 0 18px 30px -14px rgba(28, 19, 15, .4); }
+.laq.aag .aag-sug button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: baseline; gap: 10px; width: 100%; padding: 8px 10px; border-radius: 8px; font: 500 15.5px var(--sp-serif); }
+.laq.aag .aag-sug button:hover, .laq.aag .aag-sug button:focus-visible { background: var(--ag-t); }
+.laq.aag .aag-sug button span { margin-left: auto; font: italic 400 13.5px var(--sp-serif); color: var(--laq-mut); }
+
+/* genres: the agent card's own field, in this journey's slate */
+/* the field's plain dress (agentPills.css), laid out as the reference's: the chosen genres as slate chips with a cross, the
+   find field under them, the suggestions as chips beneath */
+.laq.aag .aag-genres .aap-gp { gap: 6px; min-height: 0; padding: 0; background: none; box-shadow: none; cursor: default; }
+.laq.aag .aag-genres .aap-gp:focus-within { box-shadow: none; }
+.laq.aag .aag-genres .aap-chip { height: 32px; gap: 2px; padding: 0 4px 0 12px; border-radius: 16px; background: var(--ag); color: #fff; font: 400 14px/1 var(--laq-tw); }
+.laq.aag .aag-genres .aap-chip button { width: 24px; height: 24px; font: 400 16px/24px var(--sp-serif); color: #fff; }
+.laq.aag .aag-genres .aap-chip button:hover { background: rgba(255, 255, 255, .2); color: #fff; }
+.laq.aag .aag-genres .aap-gp input { order: 99; flex: 1 0 100%; box-sizing: border-box; height: 42px; margin-top: 2px; padding: 0 14px 0 42px; border: 0; outline: 0; border-radius: 12px; font: 400 16px var(--sp-serif); color: var(--laq-ink);
+  background: #f3eee6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17' viewBox='0 0 20 20' fill='none' stroke='%232a3a52' stroke-width='1.9' stroke-linecap='round'%3E%3Ccircle cx='8.6' cy='8.6' r='5.6'/%3E%3Cpath d='M12.8 12.8l4 4'/%3E%3C/svg%3E") no-repeat 15px 50%; }
+.laq.aag .aag-genres .aap-gp input::placeholder { font-style: italic; color: #9a948b; }
+.laq.aag .aag-genres .aap-gp input:focus { box-shadow: inset 0 0 0 1.5px var(--ag); }
+.laq.aag .aag-genres .aap-glist { margin-top: 8px; }
+.laq.aag .aag-genres .aap-glist button.hi { background: var(--ag-t); }
+.laq.aag .aag-genres .aap-sug { margin-top: 10px; min-height: 30px; }
+.laq.aag .aag-genres .aap-sug button { padding: 6px 11px; border-radius: 18px; box-shadow: inset 0 0 0 1.2px rgba(28, 19, 15, .22); font: 400 13px/1.3 var(--laq-tw); color: var(--laq-ink); }
+.laq.aag .aag-genres .aap-sug button:hover { box-shadow: inset 0 0 0 1.5px var(--ag); }
+.laq.aag .aag-genres .aap-sug button em { font: italic 400 12.5px var(--sp-serif); color: var(--ag-d); }
+/* fields take the slate edge on focus, not Log a query's 2px ring */
+.laq.aag .laq-fl input:focus-visible, .laq.aag .aag-in:focus-visible, .laq.aag .aag-ta:focus-visible { outline: none; }
+.laq.aag .aag-ta { all: unset; box-sizing: border-box; display: block; width: 100%; min-height: 96px; padding: 11px 14px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 16px/1.5 var(--sp-serif); color: var(--laq-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.laq.aag .aag-ta::placeholder { font-style: italic; color: #9a948b; }
+.laq.aag .aag-gap { height: 18px; }
+.laq.aag .aag-o3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.laq.aag .aag-len { display: flex; flex-wrap: wrap; gap: 6px; }
+.laq.aag .laq-wkb .sa-wk-read { color: var(--ag-d); }
+.laq.aag .laq-wkb .sa-wk-unkbtn.on { background: var(--ag); color: #fff; }
+
+/* the review: the card, small enough to see whole; the stars; the two numbers */
+.laq.aag .aag-pv { position: relative; flex: none; margin: 10px auto 0; border-radius: 13px; }
+.laq.aag .aag-pvin { position: absolute; left: 0; top: 0; width: 560px; transform-origin: 0 0; pointer-events: none; }
+.laq.aag .aag-pvin .cl262-card { margin: 0; }
+.laq.aag .aag-stamp { position: absolute; left: auto; right: -14px; top: auto; bottom: 18px; z-index: 6; padding: 6px 12px 5px; border: 2.5px double var(--ag-d); border-radius: 8px; background: rgba(255, 255, 255, .88); color: var(--ag-d); font: 400 19px/1 var(--laq-tw) !important; letter-spacing: .06em; transform: rotate(-8deg); text-align: center; pointer-events: none; }
+.laq.aag .aag-stamp small { display: block; margin-top: 3px; font: 400 11px/1 var(--laq-tw) !important; letter-spacing: .08em; }
+.laq.aag .aag-fitb { position: relative; flex: none; display: flex; align-items: center; gap: 4px; margin: 14px 0 0; padding: 10px 14px; border-radius: 14px; background: #f6f3ee; }
+.laq.aag .aag-fitb > b { font: 400 16px/1.3 var(--laq-tw); margin-right: 2px; }
+.laq.aag .aag-i { all: unset; box-sizing: border-box; cursor: pointer; display: grid; place-items: center; width: 22px; height: 22px; margin-right: auto; border-radius: 50%; box-shadow: inset 0 0 0 1.3px #8c8177; font: italic 600 13px/1 var(--sp-serif); color: #5b4f47; }
+.laq.aag .aag-stars { display: inline-flex; }
+.laq.aag .aag-star { all: unset; cursor: pointer; display: grid; place-items: center; width: 32px; height: 34px; font: 400 26px/1 var(--sp-serif); color: #d6cdc0; transition: transform .12s ease, color .12s ease; }
+.laq.aag .aag-star.is-on { color: var(--ag); }
+.laq.aag .aag-star:hover { transform: scale(1.15); }
+.laq.aag .aag-fitl { width: 104px; text-align: right; font: italic 400 14.5px var(--sp-serif); color: var(--laq-mut); white-space: nowrap; }
+.laq.aag .aag-fitl.is-on { font-style: normal; font-weight: 600; color: var(--laq-ink); }
+.laq.aag .aag-pop { position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); z-index: 8; padding: 12px 14px; border-radius: 12px; background: #1c130f; color: #f4eee5; font: 400 14.5px/1.45 var(--sp-serif); box-shadow: 0 18px 30px -14px rgba(28, 19, 15, .5); animation: laq-fadein .18s ease-out both; }
+.laq.aag .aag-pop > b:first-child { display: block; margin-bottom: 4px; font-weight: 600; color: #fff; }
+.laq.aag .aag-pop b.aag-popk { display: block; margin-top: 6px; font-weight: 400; color: #c9bfb3; }
+.laq.aag .laq-sb.is-chk { padding-top: 16px; }
+.laq.aag .laq-sb.is-chk .laq-qs { margin-bottom: 0; }
+.laq.aag .laq-sb.is-chk .rvb-c { padding: 10px 8px 4px; }
+.laq.aag .aag-rvbw { margin-top: auto; padding-top: 12px; }
+
+/* the added screen */
+.laq.aag .aag-scout { display: block; width: 118px; height: 116px; object-fit: contain; animation: laq-rise .55s .05s cubic-bezier(.2, 1.2, .4, 1) both; }
+.laq.aag .laq-yay .laq-yh { margin: 8px 0 4px; font-size: 28px; }
+.laq.aag .laq-yay .aag-pv { margin-top: 12px; }
+
+.laq.aag .laq-lnk[hidden], .laq.aag .laq-btn[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .laq.aag .aag-star, .laq.aag .aag-scout, .laq.aag .aag-box, .laq.aag .aag-pop { transition: none; animation: none; } }
+
+/* from inside Log a query: it steps back behind this one, dimmed (screen 20) */
+body.aag-over-laq .spanel[data-laq="panel"] { transform: translateX(-72px); filter: brightness(.62) saturate(.8); pointer-events: none; transition: transform .32s cubic-bezier(.2, .8, .2, 1), filter .2s ease-out; }
+.spanel.qsp.qsp[data-aag="panel"]:has(> .spanel-own > .laq) { z-index: 70; }
+@media (prefers-reduced-motion: reduce) { body.aag-over-laq .spanel[data-laq="panel"] { transition: none; } }
+
+/* an agent already on the list: its card stands over the journey, which steps back behind it, dimmed, until the card
+   closes (`body.aag-behind`, AddAgentPanel). The journey and its dim go under the card's own scrim (60) and panel (61). */
+body.aag-behind .spanel.qsp.qsp[data-aag="panel"]:has(> .spanel-own > .laq) { z-index: 59; transform: translateX(-72px); filter: brightness(.62) saturate(.8); pointer-events: none; transition: transform .32s cubic-bezier(.2, .8, .2, 1), filter .2s ease-out; }
+body.aag-behind .spanel-scrim:has(+ .spanel[data-aag="panel"]) { z-index: 58; }
+@media (prefers-reduced-motion: reduce) { body.aag-behind .spanel.qsp.qsp[data-aag="panel"]:has(> .spanel-own > .laq) { transition: none; } }
+
+/* the preview is the whole card at its natural height (the reference's FIX for its card frame): the card's own fixed
+   height and its scrolling body are let out, here only, so the scale can show all of it with nothing scrolling inside */
+.laq.aag .aag-pvin :is(.qc152, .qc152-in, .cl262-card, .tws-agcard) { height: auto !important; max-height: none !important; min-height: 0 !important; }
+.laq.aag .aag-pvin .qc152-in > .qc152-body, .laq.aag .aag-pvin .qc152-body { flex: none !important; height: auto !important; max-height: none !important; overflow: visible !important; }

@@ -27,6 +27,8 @@ import { agentFacts, agentRows } from "../../../lib/contactList";
 import { agentHistory } from "../../../lib/agentHistory";
 import { heardWords, replyWeeksOf, storyBlocks } from "../../../lib/contactStory255";
 import { colleaguesOf, genreFit } from "../../../lib/contactV24";
+import { GAP_FOCUS, agentGaps } from "../../../lib/contactHousekeeping";
+import type { AgentCardField } from "../../../lib/agentCardStore";
 import { genreLabel } from "../../../lib/genres";
 import { bookGenreHit, bookGenres } from "../../../lib/genreMatch";
 import type { Draft } from "./wsFlows";
@@ -176,6 +178,9 @@ export interface AgentCardProps {
   personalGenres: Parameters<typeof genreLabel>[1];
   draft: Draft | null;
   nowMs: number;
+  /** Add an agent v2 — draw the card's own "Finish {first}’s profile" block, from Housekeeping's gaps (the add journey's
+   *  preview of an unsaved agent); absent everywhere else, so the desk's card is unchanged */
+  withGaps?: boolean;
 }
 
 /** the desk's section names, as the address book card names them (lib/contactCard262's Sec262) */
@@ -187,7 +192,7 @@ const CARD_SEC: Record<string, Sec262> = { how: "how", wishlist: "wishlist", sen
  * `storyBlocks`, `genreFit`, `colleaguesOf`); every handler is inert and there is no edit kit, because the preview is a
  * picture of the card — a click on it opens the real one.
  */
-export const PreviewAgentCard: React.FC<AgentCardProps> = ({ agent: a0, queries, activities, agents, manuscript, manuscripts, personalGenres, draft, nowMs }) => {
+export const PreviewAgentCard: React.FC<AgentCardProps> = ({ agent: a0, queries, activities, agents, manuscript, manuscripts, personalGenres, draft, nowMs, withGaps }) => {
   const agent: Agent = draft?.agentPatch ? { ...a0, ...draft.agentPatch } : a0;
   const msId = manuscript?.id ?? null;
   const qcRows = useMemo(() => buildQcRows(queries.filter((q) => q.agentId === agent.id || (!!a0.agency && agents.some((x) => x.id === q.agentId && x.agency === a0.agency))), agents.map((x) => (x.id === agent.id ? agent : x)), activities as Activity[], nowMs),
@@ -211,6 +216,10 @@ export const PreviewAgentCard: React.FC<AgentCardProps> = ({ agent: a0, queries,
     fit: genreFit(agent.genres, book, manuscript?.title ?? null, word),
     colleagues: colleaguesOf(x, [x, ...peers]), onOpenAgent: noop,
     deleteQueries: 0, onDelete: noop,
+    ...(withGaps ? (() => {
+      const g = agentGaps(agent, { hasReopenTask: false }, []);
+      return { gaps: g.length ? { n: g.length, focus: GAP_FOCUS[g[0]].focus as AgentCardField, tab: GAP_FOCUS[g[0]].tab, keys: g } : null };
+    })() : {}),
   };
   const sec = draft?.section ? CARD_SEC[draft.section] ?? null : null;
   return (

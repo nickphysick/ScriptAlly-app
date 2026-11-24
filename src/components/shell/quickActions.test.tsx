@@ -33,7 +33,7 @@ describe("Quick actions", () => {
   it("QA-U3 · the heads are the files the journeys' own headers draw", () => {
     expect(read("../queries/centre/QcLogStages.tsx")).toContain(`src="${MENTOR_HEAD}"`);
     expect(read("../queries/centre/QcRespondStages.tsx")).toContain(`"${ARCHIVIST_HEAD}"`);
-    expect(SCOUT_HEAD).toBe("/images/scout-head.png");
+    expect(read("../queries/centre/QcAddAgent.tsx")).toContain(`"${SCOUT_HEAD}"`);
   });
 
   it("QA-U4 · the button reads Quick actions; the menu has no heading, and Add a manuscript is not a row and has no badge", () => {

@@ -92,6 +92,7 @@ import { EmailDropLab } from "./components/emailImport/EmailDropLab";
 import { PsLab } from "./components/phone/PsLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
 import { RespondStagesPanel } from "./components/queries/centre/RespondStagesPanel";
+import { AddAgentPanel } from "./components/queries/centre/AddAgentPanel";
 import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
 import { openNewAgentCard } from "./lib/agentCardStore";
@@ -346,9 +347,8 @@ function AppContent() {
       return;
     }
     if (subPageName === "Add an agent") {
-      /* RETIRE THE ADD-AGENT POP-UP — on EVERY route the slide-in new-agent panel (v18.3 §D), through the ONE opener
-         the Contact list's own button uses; its frame is mounted app-level by AgentCardHost, so it opens over the
-         page you are on and nothing navigates. On /agents the page hears the same request (AgentList). */
+      /* Add an agent v2 — through the ONE opener every door uses: on a desktop it opens the add journey over the page on
+         screen (lib/addAgentStore); the phone keeps its own flow. Nothing navigates. */
       openNewAgentCard({ from: "button", host: "panel" });
       return;
     }
@@ -883,6 +883,8 @@ function AppContent() {
       {/* Record a response v2 — THE response journey, mounted once for the workspace: every desktop door's `openResponse`
           (lib/queryPanelStore) opens it over the page on screen. The phone does not mount a listener (its own flow). */}
       <PageBoundary name="panel:record-response" kind="panel" onClose={() => {}}><RespondStagesPanel /></PageBoundary>
+      {/* Add an agent v2 — the add journey, opened in place from every desktop door (lib/addAgentStore) */}
+      <PageBoundary name="panel:add-agent" kind="panel" onClose={() => {}}><AddAgentPanel /></PageBoundary>
       <PageBoundary name="panel:undo-bar" kind="panel" onClose={hideUndoBar}><UndoBar /></PageBoundary>
 
       {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}
