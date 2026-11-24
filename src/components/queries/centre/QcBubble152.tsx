@@ -26,9 +26,9 @@ export const NUDGE_MARK = (
 const HOLD = <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="#1c130f" strokeWidth="1.6" aria-hidden="true"><circle cx="10" cy="10" r="7" /><path d="M7 10h6" strokeLinecap="round" /></svg>;
 
 /** the glyph for a step: a StatusDot for a status, the "!" for a nudge, the offer's for telling others about one */
-export function StepGlyph({ status, kind }: { status: QueryStatus | null; kind: "nudge" | "holding" | "told" | null }) {
+export function StepGlyph({ status, kind }: { status: QueryStatus | null; kind: "nudge" | "reply" | "told" | null }) {
   if (kind === "nudge") return NUDGE_MARK;
-  if (kind === "holding") return HOLD;
+  if (kind === "reply") return HOLD;
   if (kind === "told") return <StatusDot status={QueryStatus.OFFER} overrideSize={18} decorative />;
   return status ? <StatusDot status={status} overrideSize={18} decorative /> : HOLD;
 }
@@ -50,7 +50,7 @@ const VIA_ICON: Record<"email" | "form" | "post", React.ReactNode> = {
 export interface BubbleProps {
   side: "me" | "them";
   status: QueryStatus | null;
-  kind: "nudge" | "holding" | "told" | null;
+  kind: "nudge" | "reply" | "told" | null;
   title: string;
   date: string;
   dated: boolean;

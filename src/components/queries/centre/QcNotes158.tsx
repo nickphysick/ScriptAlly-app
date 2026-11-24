@@ -30,11 +30,11 @@ import { dayLabel, sideOf, tintOf, type ThreadStepIn } from "../../../lib/qcThre
 import { Bar } from "./QcGhost167";
 
 export interface NoteIn { id: string; text: string; ms: number | null; pinned: boolean; /** Agent card v2 — an undated note drawn first among the notes (the agent's old notes string) */ top?: boolean }
-export interface QuoteIn { key: string; status: QueryStatus | null; kind: "holding" | null; text: string; ms: number | null; fill: string; edge: string; /** v168 — the response's activity, whose words these are */ activityId?: string | null; /** Agent card v2.2 — the query they were said on */ queryId?: string | null }
+export interface QuoteIn { key: string; status: QueryStatus | null; kind: "reply" | null; text: string; ms: number | null; fill: string; edge: string; /** v168 — the response's activity, whose words these are */ activityId?: string | null; /** Agent card v2.2 — the query they were said on */ queryId?: string | null }
 
 /** "when asking for the partial", "when passing", "with the offer" — what the response was, in the agent's name */
-export function quotePhrase(status: QueryStatus | null, kind: "holding" | null): string {
-  if (kind === "holding") return "when replying";
+export function quotePhrase(status: QueryStatus | null, kind: "reply" | null): string {
+  if (kind === "reply") return "when replying";
   switch (status) {
     case QueryStatus.PARTIAL_REQUESTED: return "when asking for the partial";
     case QueryStatus.FULL_REQUESTED: return "when asking for the full";
@@ -50,7 +50,7 @@ export function quotePhrase(status: QueryStatus | null, kind: "holding" | null):
 export function quotesOf(steps: readonly ThreadStepIn[]): QuoteIn[] {
   return steps.filter((s) => sideOf(s) === "them" && (s.quote ?? "").trim()).map((s) => {
     const t = tintOf(s) ?? { fill: "#ffffff", edge: "#e3dbd0" };
-    return { key: s.key, status: s.status, kind: s.kind === "holding" ? "holding" : null, text: (s.quote ?? "").trim(), ms: s.ms ?? null, fill: t.fill, edge: t.edge, activityId: s.activityId ?? null };
+    return { key: s.key, status: s.status, kind: s.kind === "reply" ? "reply" : null, text: (s.quote ?? "").trim(), ms: s.ms ?? null, fill: t.fill, edge: t.edge, activityId: s.activityId ?? null };
   });
 }
 

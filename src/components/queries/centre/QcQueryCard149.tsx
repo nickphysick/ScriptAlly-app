@@ -447,7 +447,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
               {p.story.map((s, si) => (
                 <li key={s.key} className={`qc149c-st${p.freshKey && (s.activityId === p.freshKey || s.key === p.freshKey) ? " fresh" : ""}${sheetView && !allStory && si < p.story.length - 3 ? " qc149c-old" : ""}`}
                   data-qc149c="step" data-status={s.status ?? undefined} data-kind={s.kind ?? undefined} data-activity={s.activityId}>
-                  {s.kind === "nudge" ? NUDGE_G : s.kind === "holding" ? HOLD_G : s.status ? <span className="qc149c-g"><StatusDot status={s.status} overrideSize={17} /></span> : HOLD_G}
+                  {s.kind === "nudge" ? NUDGE_G : s.kind === "reply" ? HOLD_G : s.status ? <span className="qc149c-g"><StatusDot status={s.status} overrideSize={17} /></span> : HOLD_G}
                   <div className="qc149c-sb">
                     <div className="qc149c-tl">
                       <span className="qc149c-t" data-qc149c="step-title">{s.title}{s.qualifier ? <> <em data-qc149c="step-qual">{s.qualifier}</em></> : null}</span>

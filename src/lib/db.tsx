@@ -133,7 +133,7 @@ import { contentsChanged } from "./packageEditions";
 import { contentWriteAllowed, isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
-import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
+import { buildAgentReplyWrites, isAgentReplyFeed, REPLY_DATE_FIELD, REPLY_KIND_FIELD, type AgentReplyInput, type ReplyKind } from "./agentReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
 import { planSampleRetirement, retirementReport } from "./retireSamples";
@@ -491,10 +491,10 @@ interface DbContextType {
     note?: string;
     bookVersionId?: string;
   }) => Promise<{ activityId: string; prior: { writerExpectedDate?: string; writerExpectedSetAt?: string; nudgeDate?: string } } | void>;
-  /** Phase 3 — a reply that decides nothing. Non-status by construction; see lib/holdingReply.ts. */
-  recordHoldingReply: (
+  /** Controls: entry v1 — the agent's reply that moves nothing (a chaser, a holding reply, a note). See lib/agentReply.ts. */
+  recordAgentReply: (
     queryId: string,
-    input: { repliedOn: string; weeks?: number | null; note?: string },
+    input: AgentReplyInput,
   ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => Promise<void>;
@@ -568,6 +568,8 @@ interface DbContextType {
      */
     patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
       & { bookVersionId?: string | null }
+      /** Controls: entry v1 — an agent-reply entry's kind, new date ("YYYY-MM-DD"; null clears) and words (null clears) */
+      & { reply?: { kind?: ReplyKind; date?: string | null; words?: string | null } }
   ) => Promise<void>;
 
   // User Actions
@@ -1111,7 +1113,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     for (const a of activities) {
 
-      if ((a as { activityType?: string }).activityType !== HOLDING_REPLY_TYPE || !a.queryId) continue;
+      if (!isAgentReplyFeed(a) || !a.queryId) continue;
 
       const t = new Date(a.date as string).getTime();
 
@@ -3804,6 +3806,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
      */
     patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
       & { bookVersionId?: string | null }
+      /** Controls: entry v1 — an agent-reply entry's kind, new date ("YYYY-MM-DD"; null clears) and words (null clears) */
+      & { reply?: { kind?: ReplyKind; date?: string | null; words?: string | null } }
   ) => {
     if (!currentUser) return;
 
@@ -3844,6 +3848,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           ? deleteField()
           : patch.bookVersionId;
       }
+      /* Controls: entry v1 — an agent-reply entry is corrected HERE, like every other step: its kind, its new date and
+         its words, on both stores. Absent clears with `deleteField()`, the rule for every optional field on the log;
+         the feed twin keeps the words in `details`. Nothing is recomputed from these (no status), and every surface
+         they move reads them on render. */
+      const feedPatch: Record<string, any> = { ...patch };
+      delete feedPatch.reply;
+      if (patch.reply) {
+        const r = patch.reply;
+        if (r.kind !== undefined) { subPatch[REPLY_KIND_FIELD] = r.kind; feedPatch[REPLY_KIND_FIELD] = r.kind; }
+        if (r.date !== undefined) { subPatch[REPLY_DATE_FIELD] = r.date ? r.date : deleteField(); feedPatch[REPLY_DATE_FIELD] = r.date ? r.date : deleteField(); }
+        if (r.words !== undefined) { const w = r.words?.trim(); subPatch.replyNote = w ? w.slice(0, 500) : deleteField(); feedPatch.details = w ? w.slice(0, 500) : ""; }
+      }
       /**
        * ⚠️ BOTH STORES OR NEITHER (26 Aug). The projection patch was a swallowed best-effort whose
        * comment read "Projection row has an independent id — cosmetic only, recompute doesn't read
@@ -3879,7 +3895,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         if (Object.keys(subPatch).length > 0) {
           batch.update(subRef, subPatch);
         }
-        if (feedId) batch.update(doc(db, "users", currentUser.id, "activities", feedId), patch as Record<string, any>);
+        if (feedId && Object.keys(feedPatch).length > 0) batch.update(doc(db, "users", currentUser.id, "activities", feedId), feedPatch);
         await batch.commit();
       }
       await recompute(queryId);
@@ -4075,7 +4091,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   /**
-   * PHASE 3 — record a reply that decides nothing.
+   * Controls: entry v1 — record the agent's reply that moves nothing: a chaser, a holding reply or a note (it
+   * replaces the holding-reply pack's `recordHoldingReply`; lib/agentReply.ts says what the entry does).
    *
    * ⚠️ THE TWIN-WRITE CONVENTION, AND DELIBERATELY NOT `recordQueryResponse`. That function is the
    * app's single RESPONSE path and its whole contract is that a rung carries a `resultingStatus`;
@@ -4091,9 +4108,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * law). Everything the reply affected was derived from those two documents' existence, so
    * removing them restores the previous state exactly.
    */
-  const recordHoldingReply = async (
+  const recordAgentReply = async (
     queryId: string,
-    input: { repliedOn: string; weeks?: number | null; note?: string },
+    input: AgentReplyInput,
   ): Promise<{ success: boolean; error?: string; undo: () => Promise<void> }> => {
     const noop = async () => {};
     if (!currentUser) return { success: false, error: "Session required.", undo: noop };
@@ -4101,7 +4118,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!q) return { success: false, error: "Query not found.", undo: noop };
     const agent = agents.find(a => a.id === q.agentId) || null;
 
-    const writes = buildHoldingReplyWrites(q, agent, input);
+    const writes = buildAgentReplyWrites(q, agent, input);
     const actId = "act-" + Math.random().toString(36).substr(2, 9);
     try {
       await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
@@ -4111,7 +4128,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
     /* ⚠️ PROJECTION, AND IT CANNOT COST THE UNDO (timeline writer fix v1): the row already landed;
        a throw here used to lose the undo closure below for a reply that was recorded. */
-    await narrate(() => addActivity({ ...writes.activity, id: actId }), `holding reply ${actId}`);
+    await narrate(() => addActivity({ ...writes.activity, id: actId }), `agent reply ${actId}`);
     return {
       success: true,
       undo: async () => {
@@ -4230,7 +4247,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
            to the interface's Promise<void>. */
         recordMaterialsSent: async (a) => { await recordMaterialsSent(a); },
         markSentWithReceipt: recordMaterialsSent,
-        recordHoldingReply,
+        recordAgentReply,
         undoQueryStatus,
         updateQuery,
         writeVersionChange,

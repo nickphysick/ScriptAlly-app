@@ -32,6 +32,7 @@ import { methodAnswer, panelDoor } from "./agentPanel";
 import { materialIconKind, type MaterialIconKind } from "./materialIcon";
 import { SAMPLE_MATERIAL } from "./sentSample";
 import type { QueryMaterial } from "../types";
+import type { AgentReply } from "./agentReply";
 
 export type ChipTone = "ask" | "ok" | "plain";
 /** Material icons v1: the six material kinds are `MaterialIconKind` (the shared drawing); `full`, `bell` and `notes`
@@ -44,7 +45,9 @@ export interface StoryStep {
   key: string;
   activityId?: string;
   status: QueryStatus | null;
-  kind: "nudge" | "holding" | null;
+  kind: "nudge" | "reply" | null;
+  /** Controls: entry v1 — a `reply` step's entry */
+  reply?: AgentReply;
   title: string;
   /** the italic qualifier after the title: "by email", "the revision" */
   qualifier: string | null;
@@ -54,7 +57,7 @@ export interface StoryStep {
   chips: StoryChip[];
 }
 /** a timeline row as buildTimelineRows makes it — only what the story reads */
-export interface StoryRow { key: string; activityId?: string; status: QueryStatus; kind?: "nudge" | "holding"; reconstructed?: boolean; timeMs?: number | null; title: string }
+export interface StoryRow { key: string; activityId?: string; status: QueryStatus; kind?: "nudge" | "reply"; reply?: AgentReply; reconstructed?: boolean; timeMs?: number | null; title: string }
 
 const STEP_TITLE: Record<string, string> = {
   [QueryStatus.QUERIED]: "Query sent", [QueryStatus.PARTIAL_REQUESTED]: "Partial requested", [QueryStatus.PARTIAL_SENT]: "Partial sent",
@@ -107,7 +110,7 @@ export function storySteps({ rows, query: q, manuscript, sentWithQuery }: StoryI
     /* an empty or unreadable createdAt is no date (an undated step), never NaN on the page */
     const base = { key: r.key, activityId: r.activityId, ms: typeof r.timeMs === "number" && Number.isFinite(r.timeMs) ? r.timeMs : null };
     if (r.kind === "nudge") return { ...base, status: null, kind: "nudge", title: "Nudge sent", qualifier: methodQualifier(q.sendMethod), note: null, chips: [] };
-    if (r.kind === "holding") return { ...base, status: null, kind: "holding", title: "Holding reply", qualifier: null, note: null, chips: [] };
+    if (r.kind === "reply") return { ...base, status: null, kind: "reply", reply: r.reply, title: "Reply", qualifier: null, note: r.reply?.words ?? null, chips: [] };
     const s = r.status;
     if (r.reconstructed) return { ...base, status: s, kind: null, title: r.title, qualifier: STAGE_NAME[s]?.toLowerCase() ?? null, note: null, chips: [] };
     let qualifier: string | null = null, note: string | null = null;

@@ -28,6 +28,7 @@ import { cardMaterials, stateFor, turnFor, type CardMaterials, type State } from
 import type { DerivableActivity } from "./queryDerivation";
 import { anyToMs, dayN, isClosedStatus, stageHistory, type StageHistory } from "./qcStages";
 import { nudgePhase } from "./nudgeWindow";
+import { latestFeedReplies, replyHeardMs, replySendByMs, replyStatement, type AgentReply } from "./agentReply";
 
 const DAY = 86_400_000;
 
@@ -144,14 +145,25 @@ export interface QcRow {
   dayN: number | null;
   closedHow: ClosedHow | null;
   furthest: Furthest;
+  /** Controls: entry v1 — the latest agent-reply entry (a chaser, a holding reply, a note), any stage; null when none */
+  reply: AgentReply | null;
+  /** …and its instant when it came after the latest send (this wait): it ends Gone quiet (lib/queryState) */
+  heardMs: number | null;
+  /** …and its new date when it moves this stage's date (the reminder reads through it, lib/agentReply replyReminderMs) */
+  replyDateMs: number | null;
 }
 
 export const REPLY_RESTART_DAYS = 28;
-export function expectedFor(q: Query, agent: Agent | undefined | null): { ms: number | null; kind: ExpectedKind | null } {
+/**
+ * Controls: entry v1 — `reply` is the query's latest agent-reply entry (lib/agentReply `latestFeedReply`). With a date
+ * it moves Send by (with you, when it came after the request) or Reply expected (with the agent, weighed by recency
+ * against the writer's own date in `resolveExpectedDate`). Without one it moves neither. Callers with no log pass none.
+ */
+export function expectedFor(q: Query, agent: Agent | undefined | null, reply?: AgentReply | null): { ms: number | null; kind: ExpectedKind | null } {
   const status = q.status as QueryStatus;
   const court = courtOf(status);
   if (court === "closed") return { ms: null, kind: null };
-  if (court === "you") return { ms: anyToMs(q.expectedSendDate), kind: "sendBy" };
+  if (court === "you") return { ms: replySendByMs(reply, anyToMs(q.lastStatusChange), anyToMs(q.expectedSendDate)), kind: "sendBy" };
   if (court === "offer") return { ms: anyToMs(q.offerResponseDeadline), kind: "offer" };
   const sends = [q.dateSent, q.partialSentDate, q.fullSentDate].map(anyToMs).filter((t): t is number => t != null);
   /* v152 (Nick's ruling on the recon) — the agent's one stated reply time is for the QUERY; a partial or a full reads
@@ -159,11 +171,13 @@ export function expectedFor(q: Query, agent: Agent | undefined | null): { ms: nu
   const weeks = status === QueryStatus.PARTIAL_SENT ? STAGE_RESPONSE_WINDOWS.partial
     : status === QueryStatus.FULL_SENT || status === QueryStatus.RESUBMITTED ? STAGE_RESPONSE_WINDOWS.full
     : agent?.responseTimeWeeks ?? null;
-  const r = resolveExpectedDate(q, sends.length ? Math.max(...sends) : null, weeks, null);
+  const lastSend = sends.length ? Math.max(...sends) : null;
+  const stated = replyStatement(reply, lastSend);
+  const r = resolveExpectedDate(q, lastSend, weeks, stated);
   /* v152.2 §7 — a pass taken off by mistake restarts the wait from that day: a reply is expected four weeks on, unless a
      send since has its own date */
   const restart = anyToMs(q.replyRestartedOn);
-  if (restart != null && (!sends.length || restart > Math.max(...sends))) return { ms: restart + REPLY_RESTART_DAYS * 86_400_000, kind: "reply" };
+  if (restart != null && (!sends.length || restart > Math.max(...sends)) && !(stated && stated.statedAt > restart)) return { ms: restart + REPLY_RESTART_DAYS * 86_400_000, kind: "reply" };
   return { ms: r.ms, kind: "reply" };
 }
 
@@ -179,12 +193,16 @@ export function buildQcRows(queries: readonly Query[], agents: readonly Agent[],
     if (t != null && t > (lastAct.get(a.queryId) ?? 0)) lastAct.set(a.queryId, t);
   }
   const reach = new Map(analyticsRows([...queries], [...activities], [...agents], nowMs).map((r) => [r.id, r]));
+  const replies = latestFeedReplies(activities);
   return queries.map((q) => {
     const status = q.status as QueryStatus;
     const agent = agentById.get(q.agentId);
     const history = stageHistory(q, log.get(q.id));
-    const exp = expectedFor(q, agent);
+    const reply = replies.get(q.id) ?? null;
+    const exp = expectedFor(q, agent, reply);
     const court = courtOf(status);
+    const lastSendMs = [q.dateSent, q.partialSentDate, q.fullSentDate].map(anyToMs).reduce<number | null>((m, t) => (t != null && (m == null || t > m) ? t : m), null);
+    const st = replyStatement(reply, lastSendMs);
     const { materials, materialsRecorded } = cardMaterials(q.materialsWanted);
     const sentMs = anyToMs(q.dateSent);
     const r = reach.get(q.id);
@@ -201,6 +219,7 @@ export function buildQcRows(queries: readonly Query[], agents: readonly Agent[],
       dayN: dayN(q, history, nowMs),
       closedHow: status === QueryStatus.REJECTED ? "passed" : status === QueryStatus.NO_RESPONSE ? "noReply" : status === QueryStatus.WITHDRAWN ? "withdrawn" : null,
       furthest: r?.reachedFull ? "full" : r?.reachedRequest ? "partial" : "query",
+      reply, heardMs: replyHeardMs(reply, lastSendMs), replyDateMs: st ? st.ms : null,
     };
   });
 }

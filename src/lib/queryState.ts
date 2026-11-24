@@ -67,6 +67,10 @@ export interface StateInput {
   query: { lastNudgeSentDate?: string | null; nudgeDate?: string | null; dateSent?: unknown; partialSentDate?: unknown; fullSentDate?: unknown };
   /** the agent's "no reply means no", the query's override already applied */
   nrmn: boolean;
+  /** Controls: entry v1 — the latest agent-reply entry this wait (QcRow `heardMs`): it ends Gone quiet for the window */
+  heardMs?: number | null;
+  /** …and its new date (QcRow `replyDateMs`): a reminder set to fall before it reads as due on it */
+  replyDateMs?: number | null;
 }
 export interface Ctx { quietWeeks: number; nowMs: number }
 
@@ -85,13 +89,35 @@ function thisStage(r: StateInput, ms: number | null, nowMs: number): number | nu
 export function nudgeMsOf(r: StateInput, nowMs: number): number | null {
   return thisStage(r, anyToMs(r.query.lastNudgeSentDate), nowMs);
 }
+/** Controls: entry v1 — the writer's reminder read through the agent's latest reply entry: one that falls before the new
+ *  reply date the agent gave reads as due on that date (Nick's ruling 2; lib/agentReply `replyReminderMs`) */
+export function reminderOf(r: Pick<StateInput, "query" | "replyDateMs">): number | null {
+  const t = anyToMs(r.query.nudgeDate);
+  if (t == null) return null;
+  return r.replyDateMs != null && t < r.replyDateMs ? r.replyDateMs : t;
+}
 /** the writer's own reminder, when its day has come this stage and no nudge is logged: the query is nudge due (v161) */
 export function remindedMs(r: StateInput, nowMs: number): number | null {
   if (nudgeMsOf(r, nowMs) != null) return null;
-  return thisStage(r, anyToMs(r.query.nudgeDate), nowMs);
+  return thisStage(r, reminderOf(r), nowMs);
 }
 
 export function queryState(r: StateInput, c: Ctx): QueryState {
+  const base = clockState(r, c);
+  if (base !== "quiet" || r.heardMs == null) return base;
+  /* Controls: entry v1 — A REPLY ENTRY ENDS GONE QUIET. The agent has written (a chaser, a holding reply, a note), so
+     the silence the state names is over until a full quiet window passes from it again. With no new date it moves
+     nothing else: past the reply date it is still nudge due. */
+  if (c.nowMs - r.heardMs > heardWindow(r, c)) return base;
+  const nudge = nudgeMsOf(r, c.nowMs);
+  if (nudge != null && r.heardMs >= nudge) return "agent";
+  return r.expectedMs != null && r.expectedMs < c.nowMs ? "nudge" : "agent";
+}
+/** how long a reply entry holds Gone quiet off: the quiet window, or the undated stage's own mark */
+function heardWindow(r: StateInput, c: Ctx): number {
+  return r.expectedMs == null && nudgeMsOf(r, c.nowMs) == null ? CLOSE_UNDATED_DAYS * DAY : c.quietWeeks * 7 * DAY;
+}
+function clockState(r: StateInput, c: Ctx): QueryState {
   const court = courtOf(r.status as QueryStatus);
   if (court === "closed") return "closed";
   if (court === "offer") return "offer";
@@ -121,7 +147,9 @@ export function replyExpectedMs(r: StateInput, c: Ctx): number | null {
 
 /** a Gone quiet query's "N days quiet", counted from the reply date (§1.5) */
 export function daysQuiet(r: StateInput, c: Ctx): number | null {
-  const from = r.expectedMs ?? (r.stageStartMs != null ? r.stageStartMs + CLOSE_UNDATED_DAYS * DAY : null);
+  const from0 = r.expectedMs ?? (r.stageStartMs != null ? r.stageStartMs + CLOSE_UNDATED_DAYS * DAY : null);
+  /* Controls: entry v1 — after a reply entry, quiet counts from when its window ran out */
+  const from = r.heardMs != null && from0 != null ? Math.max(from0, r.heardMs + heardWindow(r, c)) : from0;
   return from == null ? null : Math.max(0, Math.floor((c.nowMs - from) / DAY));
 }
 

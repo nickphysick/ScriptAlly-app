@@ -37,7 +37,7 @@ export interface StepEditProps {
   onReopen: () => void;
   side: "me" | "them";
   status: QueryStatus | null;
-  kind: "nudge" | "holding" | "told" | null;
+  kind: "nudge" | "reply" | "told" | null;
   title: string;
   ms: number;
   mats: StepMaterial[];

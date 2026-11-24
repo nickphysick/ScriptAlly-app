@@ -42,7 +42,7 @@ describe("every addActivity call in db.tsx is narration or a checked record", ()
   it("the census, by shape", () => {
     const tally = Object.fromEntries(HANDLED.map(([name, re]) => [name, calls.filter((c) => re.test(c)).length]));
     expect(tally).toEqual({
-      "narrate(() => addActivity": 5,                         // addAgent, updateAgent, deleteAgent, recordHoldingReply, recordOfferDecision
+      "narrate(() => addActivity": 5,                         // addAgent, updateAgent, deleteAgent, recordAgentReply, recordOfferDecision
       "a write core's narrator (createManuscript)": 1,       // addManuscript
       "a write core's narrator (updateManuscriptFields)": 1, // updateManuscript
       "commitNudge's writeTwin": 1,                          // logNudge

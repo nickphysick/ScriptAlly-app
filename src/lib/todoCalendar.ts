@@ -25,7 +25,7 @@
  * completed user tasks). They never roll.
  */
 import { Activity, ActivityType, Agent, Query, QueryStatus, TaskFlag, UserTask } from "../types";
-import { HOLDING_REPLY_TYPE } from "./holdingReply";
+import { AGENT_REPLY_TYPE, LEGACY_HOLDING_TYPE, REPLY_KIND_FIELD, type ReplyKind } from "./agentReply";
 import type { TaskType } from "./todoActions";
 import { BoardCard, terseDoneLabel } from "./todoBoard";
 import { BoardColumns } from "./todoColumns";
@@ -254,11 +254,11 @@ export const BY_STATUS = "by-status" as const;
 export type RecordRule = RecordSpec | typeof BY_STATUS | null;
 
 /**
- * The global feed's `activityType` universe: the enum, plus the one type written into it by cast.
- * `HOLDING_REPLY_TYPE` is Title Case because that is the GLOBAL feed's spelling — the per-query
- * nested twin is "Holding reply". Quoting the constant rather than the literal keeps the two apart.
+ * The global feed's `activityType` universe: the enum, plus the two types written into it by cast — the agent's
+ * reply that moves nothing (Controls: entry v1, `AGENT_REPLY_TYPE`) and its predecessor, the holding-reply pack's
+ * `LEGACY_HOLDING_TYPE`, still read. Title Case is the GLOBAL feed's spelling; the nested twins are sentence case.
  */
-export type RecordType = ActivityType | typeof HOLDING_REPLY_TYPE;
+export type RecordType = ActivityType | typeof AGENT_REPLY_TYPE | typeof LEGACY_HOLDING_TYPE;
 
 /**
  * ⚠️ THE WHITELIST, STATED ONCE. `null` is a decision, not an omission — each carries its reason.
@@ -280,8 +280,10 @@ export const RECORD_TYPES: Record<RecordType, RecordRule> = {
      consequential decision in the record under the generic word "Closed". */
   [ActivityType.OFFER_ACCEPTED]: { label: "Offer accepted", dir: "out" },
   [ActivityType.OFFER_DECLINED]: { label: "Offer declined", dir: "out" },
-  /* the agency's holding line — they replied, with no decision yet */
-  [HOLDING_REPLY_TYPE]: { label: "Holding reply", dir: "in" },
+  /* the agent's reply that moves nothing — a chaser, a holding reply, a note (labelled by kind, `recordSpecFor`) —
+     and the holding-reply pack's rows, which are its kind `holding` */
+  [AGENT_REPLY_TYPE]: { label: "Note", dir: "in" },
+  [LEGACY_HOLDING_TYPE]: { label: "Holding reply", dir: "in" },
 
   /* generic types: the status names the event (see RECORD_STATUS) */
   [ActivityType.STATUS_CHANGED]: BY_STATUS,
@@ -367,10 +369,14 @@ export function exchangeLine(r: Pick<RecordItem, "exchange" | "gapDays" | "turne
  * The rule in one sentence: **the type names the event unless the type is generic, in which case
  * the status does** — and anything the tables leave unclassified is excluded.
  */
+export const REPLY_RECORD_LABEL: Record<ReplyKind, string> = { chaser: "Chaser", holding: "Holding reply", note: "Note" };
 export function recordSpecFor(
   activityType: string,
   resultingStatus?: string,
+  /** an `AGENT_REPLY_TYPE` row's kind, which names it */
+  replyKind?: unknown,
 ): RecordSpec | null {
+  if (activityType === AGENT_REPLY_TYPE) return { label: REPLY_RECORD_LABEL[replyKind as ReplyKind] ?? "Note", dir: "in" };
   const rule = RECORD_TYPES[activityType as RecordType];
   if (rule === undefined || rule === null) return null;
   if (rule !== BY_STATUS) return rule;
@@ -417,7 +423,7 @@ export function recordDays(
   const seen = new Map<string, { n: number; ms: number; dir: RecordDir }>();
 
   for (const act of ordered) {
-    const spec = recordSpecFor(act.activityType as string, act.resultingStatus as string | undefined);
+    const spec = recordSpecFor(act.activityType as string, act.resultingStatus as string | undefined, (act as unknown as Record<string, unknown>)[REPLY_KIND_FIELD]);
     if (!spec) continue;
     const query = queryById.get(act.queryId);
     if (!query) continue;

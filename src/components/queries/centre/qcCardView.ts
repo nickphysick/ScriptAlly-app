@@ -12,7 +12,8 @@
 import type { Agent, Manuscript, Query, SubmissionPackage } from "../../../types";
 import { QueryStatus } from "../../../types";
 import type { QcRow } from "../../../lib/qcSummary";
-import { buildQcRows } from "../../../lib/qcSummary";
+import { buildQcRows, courtOf } from "../../../lib/qcSummary";
+import { chaseOf } from "../../../lib/agentReply";
 import { sentView } from "../../queryActions/SentHow";
 import {
   agentView as qcAgentView, bookChips as qcBookChips, methodQualifier, nextStepOf, storySteps, stripOf, submissionWords, undatedIds,
@@ -126,7 +127,7 @@ export function buildCardView(i: CardViewIn) {
     const quoteOf = (x: (typeof story)[number]): string | null => {
       const own = evData(x.activityId)?.replyNote;
       if (typeof own === "string" && own.trim()) return own.trim();
-      if (x.kind === "holding") { const n = evData(x.activityId)?.note; return typeof n === "string" && n.trim() ? n.trim() : null; }
+      if (x.kind === "reply") return x.reply?.words ?? null;
       const leg = x.status && !x.kind ? LEGACY[x.status] : undefined;
       return leg && leg.trim() && latestOf(x.status) === x.key ? leg.trim() : null;
     };
@@ -152,8 +153,14 @@ export function buildCardView(i: CardViewIn) {
       }
       return { askedFor, sub, event: ev };
     };
+    /* Controls: entry v1 — a reply entry reads the request standing when it came: what a chaser chases, and whether its
+       date is a Send by (with you) or a Reply expected by (with the agent) */
+    const standing = new Map<string, QueryStatus | null>();
+    { let at: QueryStatus | null = null; for (const y of story) { if (y.kind === "reply") standing.set(y.key, at); else if (y.status && !y.kind) at = y.status; } }
     const tSteps: ThreadStepIn[] = story.map((x) => ({
       key: x.key, activityId: x.activityId, status: x.status, kind: x.kind, ms: x.ms,
+      reply: x.kind === "reply" && x.reply ? { kind: x.reply.kind, chase: chaseOf(standing.get(x.key)), dateMs: x.reply.dateMs,
+        withYou: courtOf((standing.get(x.key) ?? QueryStatus.QUERIED) as QueryStatus) === "you" } : null,
       chips: x.status === QueryStatus.QUERIED && !x.kind ? (stepChips(x.activityId).length ? stepChips(x.activityId) : queryChips) : stepChips(x.activityId),
       via: x.status === QueryStatus.QUERIED && !x.kind ? methodQualifier(q.sendMethod)
         : x.kind === "nudge" ? methodQualifier(q.sendMethod)

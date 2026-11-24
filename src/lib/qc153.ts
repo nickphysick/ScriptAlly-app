@@ -18,6 +18,7 @@ import { CLOSED_STATUSES, isClosedRow, lastHeardMs, liveLevel, shortDate } from 
 import { nextNum, type NextNum } from "./qc1512";
 import { stateOf } from "./queryState";
 import { MONTHS_SHORT } from "./dates";
+import { chaseOf, replyHeardWords, type AgentReply } from "./agentReply";
 import { STAGE_COLOURS, stageOf, statusBand, type Stage } from "./stageColours";
 
 /* ── the header's colour ─────────────────────────────────────────────────────────────────────────────────────── */
@@ -100,9 +101,14 @@ export function queriedFact(r: Pick<QcRow, "sentMs">, nowMs: number): Fact {
   return { value: shortDate(r.sentMs, nowMs), line: n > 365 ? "over a year ago" : n === 0 ? "today" : n === 1 ? "1 day ago" : `${n} days ago` };
 }
 /** Last heard: the date and the event in lower case, or "No reply yet" */
-export function heardFact(r: Pick<QcRow, "history">, nowMs: number): Fact {
+export function heardFact(r: Pick<QcRow, "history"> & { reply?: AgentReply | null }, nowMs: number): Fact {
   const ms = lastHeardMs(r);
   if (ms == null) return { value: "No reply yet", line: null, soft: true };
+  /* Controls: entry v1 — a reply entry names itself: "chased the full", "a holding reply", "a note" */
+  if (r.reply && r.reply.ms === ms) {
+    const at = [...r.history.spans].filter((s) => s.startMs <= ms).sort((a, b) => a.startMs - b.startMs).pop()?.status ?? null;
+    return { value: shortDate(ms, nowMs), line: replyHeardWords(r.reply.kind, chaseOf(at)) };
+  }
   /* the AGENT's move on that day: a query sent the same day shares the date and must not name it */
   const span = r.history.spans.find((s) => s.startMs === ms && (slipDir(s.status) === "in" || s.status === QueryStatus.REJECTED));
   return { value: shortDate(ms, nowMs), line: span ? standWords(span).toLowerCase() : null };
@@ -156,15 +162,17 @@ const dayMs = (v: unknown): number | null => {
 };
 /** the writer's own nudge reminder, when its day is still to come (a passed one is NOT a nudge: it makes the query nudge
  *  due, lib/queryState `remindedMs`; only a logged nudge counts, `nudgeMsOf` — Query card v161) */
-export function scheduledNudgeMs(r: Pick<QcRow, "query">, nowMs: number): number | null {
-  const t = dayMs((r.query as { nudgeDate?: string } | null)?.nudgeDate);
+export function scheduledNudgeMs(r: Pick<QcRow, "query"> & { replyDateMs?: number | null }, nowMs: number): number | null {
+  /* Controls: entry v1 — read through the agent's latest reply entry (lib/queryState `reminderOf`) */
+  const t0 = dayMs((r.query as { nudgeDate?: string } | null)?.nudgeDate);
+  const t = t0 != null && r.replyDateMs != null && t0 < r.replyDateMs ? r.replyDateMs : t0;
   return t != null && sod(t) >= sod(nowMs) ? t : null;
 }
 /**
  * v1.3 D — the Next box's line under "Reply expected by": the nudge the writer booked, else the close they chose (the
  * day `responseDeadline` falls on, which is when the auto-close fires), else none. Retires "reply by …".
  */
-export function planLine(r: Pick<QcRow, "query">, nowMs: number): string {
+export function planLine(r: Pick<QcRow, "query"> & { replyDateMs?: number | null }, nowMs: number): string {
   const nudge = scheduledNudgeMs(r, nowMs);
   if (nudge != null) return `Nudge scheduled for ${nextDay(nudge, nowMs)}`;
   const q = r.query as { ifNoResponse?: string; responseDeadline?: string } | null;

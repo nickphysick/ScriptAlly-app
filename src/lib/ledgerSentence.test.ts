@@ -26,7 +26,7 @@ describe("the ledger's sentences", () => {
     expect(ledgerSentence({ kind: "nudge", status: S.QUERIED, title: "Nudged" })).toEqual({ text: "You nudged them", manner: undefined });
   });
   it("a holding reply, a reconstructed step, a no-reply close and a second full each say their own thing", () => {
-    expect(ledgerSentence({ kind: "holding", status: S.PARTIAL_REQUESTED, title: "x" })).toEqual({ text: "They replied", manner: "no decision yet" });
+    expect(ledgerSentence({ kind: "reply", status: S.PARTIAL_REQUESTED, title: "x" })).toEqual({ text: "They replied", manner: "no decision yet" });
     expect(ledgerSentence({ status: S.FULL_SENT, reconstructed: true, title: "Recorded from the imported status", sub: "Full sent" })).toEqual({ text: "You sent the full manuscript", manner: "from the imported status" });
     expect(ledgerSentence({ status: S.NO_RESPONSE, title: "x" }).manner).toBe("no reply");
     expect(ledgerSentence({ status: S.FULL_SENT, title: "x" }, { revisionRound: 2 }).manner).toBe("version 2");

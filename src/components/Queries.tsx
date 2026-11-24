@@ -57,6 +57,7 @@ import { ToolbarButton } from "./shared/ToolbarButton";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
+import { replyDayIso } from "../lib/agentReply";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -597,7 +598,7 @@ export const Queries: React.FC<{
     deleteQuery,
     recordMaterialsSent,
     markSentWithReceipt,
-    recordHoldingReply,
+    recordAgentReply,
     deleteJournalEntry,
     updateJournalEntry,
     pinJournalEntry,
@@ -925,15 +926,20 @@ export const Queries: React.FC<{
        * to append a rung carrying a `resultingStatus` and let `recomputeQuery` derive from it. A
        * holding reply has no status, so routing it through there would mean either inventing one or
        * threading a "no status" case through the one function whose whole contract is that there
-       * always is one. `buildHoldingReplyWrites` is its sibling — same twin-store shape, same
+       * always is one. `buildAgentReplyWrites` (lib/agentReply) is its sibling — same twin-store shape, same
        * shared id — and the two cannot be confused because neither can produce the other's writes.
        */
       let res: { undo: () => Promise<void> | void };
       if (respDraft.outcome === "holding") {
-        const r = await recordHoldingReply(q.id, {
-          repliedOn: new Date(`${respDraft.dateArrived}T12:00:00`).toISOString(),
-          weeks: respDraft.replyWeeks.trim() ? Number(respDraft.replyWeeks) : null,
-          note: respDraft.theirWords,
+        /* Controls: entry v1 — a holding reply is the agent-reply entry's kind `holding`; their weeks become its new
+           date, counted from the day it arrived (the rule old rows are read by) */
+        const arrived = new Date(`${respDraft.dateArrived}T12:00:00`);
+        const wk = respDraft.replyWeeks.trim() ? Number(respDraft.replyWeeks) : 0;
+        const r = await recordAgentReply(q.id, {
+          kind: "holding",
+          on: arrived.toISOString(),
+          words: respDraft.theirWords,
+          date: wk > 0 ? replyDayIso(arrived.getTime() + wk * 7 * 86_400_000) : null,
         });
         if (!r.success) throw new Error(r.error || "Failed to record the reply.");
         res = r;
