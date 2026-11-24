@@ -152,7 +152,12 @@ harness Dashboard, the beta strip) and the card's own position and height (findi
 
 ## Deploy
 
-Pending: see the commit after this one.
+Dev had moved on during the work: it served `index-DV1b7uNl.js` from `dev/…-rar2-acv221` (agent card v2.2.1, which
+already carried Record a response v2). As CLAUDE.md requires, this branch was merged into that line as a new branch,
+`dev/…-rar2-acv221-rar21` @ 11c168069 (a clean merge; tsc 0 and the 67 related unit tests green on the merged tree), and that
+was deployed. **https://scriptally-dev.web.app serves `index-aKhG_Q-p.js`**, checked against the build after the deploy.
+The deploy also checked that dev still served `index-DV1b7uNl.js` immediately before it. Hosting only; no rules or
+functions.
 
 ## Left as the brief says
 
