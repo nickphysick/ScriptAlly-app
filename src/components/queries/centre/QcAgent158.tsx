@@ -35,6 +35,8 @@ export interface AgentTab158Props {
   queriedVia: string | null;
   sentMs: number | null;
   lastHeardMs: number | null;
+  /** Controls: entry v1 — what the latest reply was, of any kind ("chased the full", "a holding reply") */
+  lastHeardWhat?: string | null;
   asks: { chips: AskChip[] };
   hasAsks: boolean;
   /** v167 — open a profile drawer at a detail (null: not editable here, e.g. while the pencil's edit mode is on) */
@@ -104,7 +106,7 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
         {/* Last heard is the thread's, never the profile's: not editable, and "Not yet" (smaller, italic, grey) until a reply */}
         <Tile k="heard" label="Last heard" open={null} ghost={null} extra={p.heardWhy}
           value={p.lastHeardMs != null ? dayLabel(p.lastHeardMs, p.nowMs) : "Not yet"} valueClass={p.lastHeardMs != null ? undefined : "qc167-notyet"}
-          sub={heardSub} />
+          sub={p.lastHeardMs != null && p.lastHeardWhat ? p.lastHeardWhat : heardSub} />
       </div>
 
       <section data-qc158="asks" data-qc167="asks">

@@ -24,7 +24,7 @@ import { buildTimelineRows } from "../../reading-pane/QueryTimeline";
 import { nudgeMsOf, stampRows, stateOf, queryState as qsOf } from "../../../lib/queryState";
 /** v161 — the key of a nudge drawn from `lastNudgeSentDate` (no activity behind it, so it has no ✎ Edit) */
 export const FIELD_NUDGE_KEY = "field-nudge";
-import { dayLabel as dayLabel152, sideOf as side152, type ThreadStepIn } from "../../../lib/qcThread152";
+import { dayLabel as dayLabel152, heardWhat, sideOf as side152, type ThreadStepIn } from "../../../lib/qcThread152";
 import { getActivityTime } from "../../../lib/queryDerivation";
 import { anyToMs } from "../../../lib/qcStages";
 import { storedLabels, TOLD_TYPE, type StepMaterial } from "../../../lib/qc152Write";
@@ -160,7 +160,7 @@ export function buildCardView(i: CardViewIn) {
     const tSteps: ThreadStepIn[] = story.map((x) => ({
       key: x.key, activityId: x.activityId, status: x.status, kind: x.kind, ms: x.ms,
       reply: x.kind === "reply" && x.reply ? { kind: x.reply.kind, chase: chaseOf(standing.get(x.key)), dateMs: x.reply.dateMs,
-        withYou: courtOf((standing.get(x.key) ?? QueryStatus.QUERIED) as QueryStatus) === "you" } : null,
+        withYou: courtOf((standing.get(x.key) ?? QueryStatus.QUERIED) as QueryStatus) === "you", stage: standing.get(x.key) ?? null } : null,
       chips: x.status === QueryStatus.QUERIED && !x.kind ? (stepChips(x.activityId).length ? stepChips(x.activityId) : queryChips) : stepChips(x.activityId),
       via: x.status === QueryStatus.QUERIED && !x.kind ? methodQualifier(q.sendMethod)
         : x.kind === "nudge" ? methodQualifier(q.sendMethod)
@@ -205,6 +205,8 @@ export function buildCardView(i: CardViewIn) {
       asks: (ag?.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
       sentLabels: sent.map((x) => x.label),
       lastHeardMs: heard?.ms ?? null,
+      /* Controls: entry v1 — and what it was, of any kind */
+      lastHeardWhat: heard ? heardWhat(heard) : null,
       how: submissionWords(ag),
       quietWeeks,
       reason,

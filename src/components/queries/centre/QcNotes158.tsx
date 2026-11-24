@@ -26,11 +26,12 @@ import { CardMenu, CardMenuItem, CrossTick, DeleteAsk, DiscardAsk, Edit168Ctx, E
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
-import { dayLabel, sideOf, tintOf, type ThreadStepIn } from "../../../lib/qcThread152";
+import { agentTint, dayLabel, sideOf, tintOf, type ThreadStepIn } from "../../../lib/qcThread152";
+import { replyPhrase } from "../../../lib/agentReply";
 import { Bar } from "./QcGhost167";
 
 export interface NoteIn { id: string; text: string; ms: number | null; pinned: boolean; /** Agent card v2 — an undated note drawn first among the notes (the agent's old notes string) */ top?: boolean }
-export interface QuoteIn { key: string; status: QueryStatus | null; kind: "reply" | null; text: string; ms: number | null; fill: string; edge: string; /** v168 — the response's activity, whose words these are */ activityId?: string | null; /** Agent card v2.2 — the query they were said on */ queryId?: string | null }
+export interface QuoteIn { key: string; status: QueryStatus | null; kind: "reply" | null; text: string; ms: number | null; fill: string; edge: string; /** v168 — the response's activity, whose words these are */ activityId?: string | null; /** Agent card v2.2 — the query they were said on */ queryId?: string | null; /** Controls: entry v1 — a reply entry's phrase ("when chasing the full") */ phrase?: string | null }
 
 /** "when asking for the partial", "when passing", "with the offer" — what the response was, in the agent's name */
 export function quotePhrase(status: QueryStatus | null, kind: "reply" | null): string {
@@ -49,8 +50,12 @@ export function quotePhrase(status: QueryStatus | null, kind: "reply" | null): s
  *  the Band and Edge of the stage the response moved the query to (a holding reply its white) */
 export function quotesOf(steps: readonly ThreadStepIn[]): QuoteIn[] {
   return steps.filter((s) => sideOf(s) === "them" && (s.quote ?? "").trim()).map((s) => {
-    const t = tintOf(s) ?? { fill: "#ffffff", edge: "#e3dbd0" };
-    return { key: s.key, status: s.status, kind: s.kind === "reply" ? "reply" : null, text: (s.quote ?? "").trim(), ms: s.ms ?? null, fill: t.fill, edge: t.edge, activityId: s.activityId ?? null };
+    /* Controls: entry v1 — a reply entry's words wear the stage it came in when that was the agent's (a chaser of the
+       full is the full's blue), else the holding white; its phrase names its kind */
+    const st = s.kind === "reply" ? s.reply?.stage ?? null : null;
+    const t = (st && sideOf({ status: st, kind: null }) === "them" ? agentTint(st) : null) ?? tintOf(s) ?? { fill: "#ffffff", edge: "#e3dbd0" };
+    const phrase = s.kind === "reply" && s.reply ? replyPhrase(s.reply.kind, s.reply.chase) : null;
+    return { key: s.key, status: s.status, kind: s.kind === "reply" ? "reply" : null, text: (s.quote ?? "").trim(), ms: s.ms ?? null, fill: t.fill, edge: t.edge, activityId: s.activityId ?? null, phrase };
   });
 }
 
@@ -208,7 +213,7 @@ const NoteRow: React.FC<{ e: Row; p: NotesTab158Props; open: boolean; setOpen: (
   const header = e.t === "note"
     ? <><b>You</b>{e.n.ms != null ? <span>· {dayLabel(e.n.ms, p.nowMs)}</span> : null}{e.n.pinned ? <span className="pin" data-qc158="pinned">Pinned</span> : null}</>
     : <>{e.q.status ? <StatusDot status={e.q.status} overrideSize={14} tone="ink" decorative /> : null}<b>{p.first}</b>
-      <span>{quotePhrase(e.q.status, e.q.kind)}{e.q.ms != null ? ` · ${dayLabel(e.q.ms, p.nowMs)}` : ""}</span></>;
+      <span>{e.q.phrase ?? quotePhrase(e.q.status, e.q.kind)}{e.q.ms != null ? ` · ${dayLabel(e.q.ms, p.nowMs)}` : ""}</span></>;
   const outer = e.t === "note"
     ? { className: `nx-n${open ? " qc168-open" : ""}`, "data-qc158": "note", "data-id": e.n.id, "data-pinned": e.n.pinned ? "" : undefined, "data-new": isNew ? "" : undefined }
     : { className: `nx-n them${open ? " qc168-open" : ""}`, "data-qc158": "quote", "data-status": e.q.status ?? undefined, style: { ["--bt" as string]: e.q.fill, ["--be" as string]: e.q.edge } as React.CSSProperties };

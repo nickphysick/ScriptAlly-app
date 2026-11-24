@@ -23,7 +23,7 @@ import { STAGE_COLOURS, stageOf, statusBand } from "./stageColours";
 import { classifyMaterial } from "./agentMaterials";
 import type { QueryState } from "./queryState";
 import { waitWords } from "./qc1522";
-import { replyDateLine, replyTitle, type ChaseOf, type ReplyKind } from "./agentReply";
+import { replyDateLine, replyHeardWords, replyTitle, type ChaseOf, type ReplyKind } from "./agentReply";
 
 const DAY = 86_400_000;
 /** whole CALENDAR days from b to a (local midnights): a wait between two dated steps is the days between the dates, never
@@ -48,7 +48,7 @@ export interface ThreadStepIn {
   /** a step that is not a status: your nudge, their holding reply, and (v152.1 §2.5) telling other agents about an offer */
   kind: "nudge" | "reply" | "told" | null;
   /** Controls: entry v1 — a `reply` step: its kind, what a chaser chases, its new date and which way the query faced */
-  reply?: { kind: ReplyKind; chase: ChaseOf; dateMs: number | null; withYou: boolean } | null;
+  reply?: { kind: ReplyKind; chase: ChaseOf; dateMs: number | null; withYou: boolean; /** the status standing when it came */ stage?: QueryStatus | null } | null;
   ms: number | null;
   chips: ThreadChip[];
   /** Query sent's "by email"; a close's reason; told's "offer deadline 16 Oct" (v152.1 §2.5) */
@@ -492,3 +492,17 @@ export function materialGroups(steps: readonly ThreadStepIn[], c: { nowMs: numbe
 }
 /** a request block's date words: "8 days late" / "by 15 Oct" */
 export const requestLate = (dueMs: number | null, nowMs: number) => leftWords(dueMs, nowMs);
+
+/**
+ * Controls: entry v1 (Nick's ruling 5) — Last heard's line on the Agent tab: what the latest reply from the agent WAS,
+ * of any kind ("chased the full", "a holding reply", "a note", "asked for the full", "passed"). Null on your side.
+ */
+const HEARD: Partial<Record<string, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "asked for a partial", [QueryStatus.FULL_REQUESTED]: "asked for the full",
+  [QueryStatus.REVISE_RESUBMIT]: "asked for a revision", [QueryStatus.OFFER]: "made an offer", [QueryStatus.REJECTED]: "passed",
+};
+export function heardWhat(s: Pick<ThreadStepIn, "status" | "kind" | "reply">): string | null {
+  if (sideOf(s) !== "them") return null;
+  if (s.kind === "reply") return replyHeardWords(s.reply?.kind ?? "holding", s.reply?.chase ?? null);
+  return (s.status && HEARD[s.status]) || null;
+}

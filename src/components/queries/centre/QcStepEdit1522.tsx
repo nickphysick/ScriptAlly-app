@@ -114,7 +114,7 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
                 onClick={() => { setPkgId(o.id || null); setDirty(true); }}>{o.name}</button>)}
             </div>
           </> : null}
-          {p.kind !== "nudge" && p.kind !== "told" ? <>
+          {p.kind !== "nudge" && p.kind !== "told" && p.kind !== "reply" ? <>
             <label>Materials</label>
             <div><MatChips id="edit" mats={mats} onChange={(m) => { setMats(m); setDirty(true); }} env={p.env} stepMs={d} request={p.request} addLabel="+ Add" /></div>
           </> : null}

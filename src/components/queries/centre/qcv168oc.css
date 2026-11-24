@@ -1,0 +1,18 @@
+/*
+ * Controls: entry v1 — the agent's reply that moves nothing, drawn as a small note between steps.
+ * PORTED WHOLESALE from design-refs/controls-entry-v1/controls-v2.html ("the out-of-cycle reply, on the real thread"):
+ * its `.oc`, `.oc-note` and `.oc-sub` rules, onto the card's own bubble part (QcBubble152 adds `oc oc-note` to every
+ * `reply` step). Two mappings only: the ref's quote line `.qw` is the card's `.qc152-qt`, and the ref's `oc-under`
+ * halves of shared selectors are left out (Nick's ruling 4: the note, never tucked under the request).
+ */
+.qc152 .qc152-m.oc .oc-sub{margin-top:2px;font:400 13.5px/1.4 var(--sp-serif);color:#6f655c}
+.qc152 .qc152-m.oc-note{max-width:82%}
+.qc152 .qc152-m.oc-note .qc152-bx{padding:7px 12px 8px 9px!important;border-radius:12px!important;background:#f6f3ee!important;box-shadow:none!important}
+.qc152 .qc152-m.oc-note .qc152-g0{width:26px!important;height:26px!important;background:transparent!important;box-shadow:none!important;color:#6f655c}
+.qc152 .qc152-m.oc-note .qc152-g0 svg{width:17px!important;height:17px!important}
+.qc152 .qc152-m.oc-note .qc152-r1 b{font:500 14.5px/1.3 var(--sp-serif)!important}
+.qc152 .qc152-m.oc-note .qc152-qt{font-size:13.5px;margin:4px 0 1px}
+.qc152 .qc152-m.oc-note .qc152-av{margin-top:5px}
+.qc152 .qc152-m.oc .qc152-bx{animation:ocIn .35s ease-out both}
+@keyframes ocIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.qc152 .qc152-m.oc .qc152-bx{animation:none}}
