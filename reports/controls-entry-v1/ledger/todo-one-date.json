@@ -1,0 +1,65 @@
+{
+ "rows": [
+  {
+   "where": "population · fr's send task is on the page",
+   "ok": true,
+   "detail": "task-full-ce1-fr, task-nudge-ce1-n"
+  },
+  {
+   "where": "population · n's nudge task is on the page",
+   "ok": true,
+   "detail": "task-full-ce1-fr, task-nudge-ce1-n"
+  },
+  {
+   "where": "population · no task yet for q, rm or ra (their entries give later dates)",
+   "ok": true,
+   "detail": "task-full-ce1-fr, task-nudge-ce1-n"
+  },
+  {
+   "where": "task-full-ce1-fr · the row, the desk and the card were all read",
+   "ok": true,
+   "detail": "row \"10 days left\" · desk \"10 days left\" · card true"
+  },
+  {
+   "where": "task-full-ce1-fr · one date everywhere on the page",
+   "ok": true,
+   "detail": "row: 2026-12-04 · desk: 2026-12-04 · card \"Send by Fri 4 Dec\": 2026-12-04 · card \"by 4 Dec\": 2026-12-04"
+  },
+  {
+   "where": "task-nudge-ce1-n · the row, the desk and the card were all read",
+   "ok": true,
+   "detail": "row \"180 days past expected\" · desk \"180 days past expected\" · card true"
+  },
+  {
+   "where": "task-nudge-ce1-n · one date everywhere on the page",
+   "ok": true,
+   "detail": "row: 2026-05-28 · desk: 2026-05-28 · card \"Reply was due 28 May · 180 days ago\": 2026-05-28"
+  },
+  {
+   "where": "fr · the card names the entry's Send by, and it is the row's day",
+   "ok": true,
+   "detail": "[\"Send by Fri 4 Dec\",\"by 4 Dec\"]"
+  }
+ ],
+ "readings": {
+  "task-full-ce1-fr": {
+   "figure": "10 days left",
+   "deskFig": "10 days left",
+   "lines": [
+    "Send by Fri 4 Dec",
+    "by 4 Dec"
+   ],
+   "hasCard": true,
+   "text": "Send Imogen your full Imogen Faraday · Faraday & Sloane 10 days left 13/113 ‹ › Imogen asked for your full manuscript. Once you’ve sent it, log it here and I’ll work out when Imogen’s reply is due. 1 What went with it? Tick everything you sent. Query letter Synopsis Full manuscript What Imogen asked for 2 Which version? 3 When did it go? 4 Check it, then log it 1 of 4 Next → Full requested IF Imogen Faraday Faraday & Sloane Day 236 Querying The Smoke Test Tracking Agent Materials Notes You sent Imogen your query Covering letter 2 Apr 233 days later IF Imogen asked for your full manuscript 21 N"
+  },
+  "task-nudge-ce1-n": {
+   "figure": "180 days past expected",
+   "deskFig": "180 days past expected",
+   "lines": [
+    "Reply was due 28 May · 180 days ago"
+   ],
+   "hasCard": true,
+   "text": "Nudge Nadia Nadia Brook · Brook House 180 days past expected 18/113 ‹ › Nadia usually takes about 8 weeks to reply, and that’s gone by. A short, friendly nudge is completely normal. Let me know once you’ve sent it. 1 Have you sent the nudge? Yes, I nudged Nadia A short note asking if it reached them 2 When did you send it? 3 Check it, then log it 1 of 3 Next → Queried NB Nadia Brook Brook House Day 236 Querying The Smoke Test Tracking Agent Materials Notes You sent Nadia your query Covering letter 2 Apr 236 days later NB Nadia sent a note “I’m away until 7 December, so there’s no rush.” 24 Nov"
+  }
+ }
+}
