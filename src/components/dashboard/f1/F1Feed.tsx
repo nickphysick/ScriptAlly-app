@@ -27,7 +27,7 @@ import { buildQcRows } from "../../../lib/qcSummary";
 import { F1_EARLIER, F1_END, F1_NOTHING, F1_WINDOW_DAYS, f1Days, f1From, type F1Big, type F1Mini } from "../../../lib/dashF1Feed";
 import { StatusDot } from "../../StatusDot";
 import { FeedSay } from "../../shared/FeedSay";
-import { BellGlyph, GearGlyph } from "../v58/Dash58Feed";
+import { FeedIcon } from "../../shared/FeedIcon";
 
 export const F1_SWITCH: readonly { key: FeedFilter; label: string }[] = [
   { key: "all", label: "All activity" },
@@ -38,12 +38,6 @@ export const F1_SWITCH: readonly { key: FeedFilter; label: string }[] = [
 
 /* Feed wording v1.1 · every sentence is drawn by the one renderer, names as links (shared/FeedSay) */
 const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => <FeedSay say={say} />;
-
-const ImportGlyph = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5" />
-  </svg>
-);
 
 const Chevron = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>);
 const FoldGlyph = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>);
@@ -126,9 +120,9 @@ const Big: React.FC<{ c: F1Big; onOpen: (queryId: string) => void; onFold?: () =
 const Mini: React.FC<{ m: F1Mini }> = ({ m }) => (
   <div className="df1-mini" data-df1="mini" data-dir={m.dir} data-status={m.status ?? ""} data-glyph={m.glyph} data-go={m.go ?? undefined}>
     {m.go && <Link to={m.go} className="df1-go" data-df1="row-go" aria-label={`Open the query: ${sayText(m.say)}`} />}
-    <span className={`df1-mg df1-mg--${m.glyph}`} aria-hidden="true">
-      {m.glyph === "status" && m.status ? <StatusDot status={m.status} overrideSize={20} decorative />
-        : m.glyph === "house" ? <GearGlyph /> : m.glyph === "import" ? <ImportGlyph /> : <BellGlyph />}
+    {/* Feed wording v1.1 · one icon per kind of event (shared/FeedIcon); a row about a query's status keeps its StatusDot */}
+    <span className={`df1-mg df1-mg--${m.glyph}`} aria-hidden="true" data-df1="mark" data-icon={m.icon ?? "status"}>
+      {m.icon ? <FeedIcon kind={m.icon} /> : m.status ? <StatusDot status={m.status} overrideSize={20} decorative /> : null}
     </span>
     {/* Feed wording v1.1 · the time sits under the sentence, on its own line; no right-hand time column */}
     <span className="df1-mtx"><span data-df1="mini-say" data-say="1"><Segs say={m.say} /></span><time className="df1-t" data-df1="time">{m.time}</time></span>

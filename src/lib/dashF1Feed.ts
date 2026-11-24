@@ -26,6 +26,7 @@ import type { DrawerEvent, FeedFilter } from "./dashFeedDrawer";
 import { anyToMs } from "./qcStages";
 import { dayMonth } from "./dates";
 import type { QcRow } from "./qcSummary";
+import { feedIconKind, type FeedIconKind } from "./feedIcon";
 import { readSummary } from "./queryActions/packages";
 import { sentRecordOf } from "./queryActions/sentRecord";
 
@@ -84,8 +85,11 @@ export interface F1Mini {
   id: string;
   dir: "in" | "out";
   status: QueryStatus | null;
-  /** the nudge's bell, the writer's own housekeeping, the import — rows with no status of their own */
-  glyph: "status" | "bell" | "house" | "import";
+  /** the nudge's bell, the writer's own housekeeping, the import, another status-less event (told, call, a reply) —
+   *  what dresses the mark; `icon` is what it draws */
+  glyph: "status" | "bell" | "house" | "import" | "event";
+  /** Feed wording v1.1 (Part 4) · the event's one icon (lib/feedIcon); null draws the row's StatusDot */
+  icon: FeedIconKind | null;
   say: readonly FeedSeg[];
   time: string;
   at: number;
@@ -248,9 +252,13 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
 
 const miniOf = (ev: DrawerEvent): F1Mini => {
   const e = ev.entry;
-  const glyph: F1Mini["glyph"] = e.imported ? "import" : e.app ? "house" : !e.status || e.activityType === ActivityType.NUDGE_SENT ? "bell" : "status";
+  const icon = feedIconKind(e);
+  /* v1.1 · the bell is the nudge's alone; an event with an icon of its own draws it in ink. An event with neither (an
+     offer accepted on the To-do board, which carries no status) keeps the bell, as built — reported. */
+  const glyph: F1Mini["glyph"] = e.imported ? "import" : e.app ? "house"
+    : e.activityType === ActivityType.NUDGE_SENT ? "bell" : icon ? "event" : !e.status ? "bell" : "status";
   const go = !e.app && !e.imported && e.queryId ? `/queries?q=${encodeURIComponent(e.queryId)}` : null;
-  return { type: "mini", id: e.id, dir: e.dir, status: e.status, glyph, say: ev.say, time: e.time, at: e.at, queryId: e.queryId, go };
+  return { type: "mini", id: e.id, dir: e.dir, status: e.status, glyph, icon: glyph === "status" ? null : icon ?? (glyph === "bell" ? "nudge" : null), say: ev.say, time: e.time, at: e.at, queryId: e.queryId, go };
 };
 
 /**

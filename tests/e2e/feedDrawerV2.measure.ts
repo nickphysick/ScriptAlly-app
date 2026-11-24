@@ -221,7 +221,7 @@ async function readRows(page: Page) {
         whoWeight: who ? getComputedStyle(who).fontWeight : null, meta: !!meta,
         disc: disc && ds ? { w: disc.getBoundingClientRect().width, bg: ds.backgroundColor, ring: ds.boxShadow } : null,
         dot: dotSvg ? { w: dotSvg.getBoundingClientRect().width, color: getComputedStyle(dotSvg).color } : null,
-        glyph: glyph ? { kind: glyph.getAttribute("data-d58") ?? "", w: glyph.getBoundingClientRect().width, color: getComputedStyle(glyph).color } : null,
+        glyph: glyph ? { kind: glyph.getAttribute("data-feed-icon") ?? glyph.getAttribute("data-d58") ?? "", w: glyph.getBoundingClientRect().width, color: getComputedStyle(glyph).color } : null,
         timeH: time ? time.getBoundingClientRect().height : null, timeLh: time ? parseFloat(getComputedStyle(time).lineHeight) : null, timeR: time ? time.getBoundingClientRect().right : null,
         act: e.querySelector<HTMLElement>('[data-d58="ev-act"]')?.textContent?.trim() ?? null, done: e.querySelector<HTMLElement>('[data-d58="ev-done"]')?.textContent?.trim() ?? null,
       };
@@ -299,7 +299,8 @@ test("FD2 B1 B2 B3 B4 B7 · the rows: families, tints, marks, housekeeping, fit"
     L.check("B3 population: rows with a status", at, withStatus.length >= 5, `${withStatus.length}`);
     L.check("B3 a row with a status holds a 24px StatusDot in ink, on a 34px disc", at, badDot.length === 0, badDot.slice(0, 2).map((r) => `${r.status}: ${JSON.stringify(r.dot)} disc ${r.disc?.w}`).join(" · ") || `${withStatus.length} dots`);
     const nudges = d.rows.filter((r) => r.family === "nudge"), house = d.rows.filter((r) => r.family === "housekeeping");
-    L.check("B3 a nudge holds the bell, housekeeping the gear, both in ink", at, nudges.every((r) => r.glyph?.kind === "ev-bell" && near(r.glyph.w, 16, 0.5) && r.glyph.color === INK) && house.length > 0 && house.every((r) => r.glyph?.kind === "ev-gear" && near(r.glyph.w, 11, 0.5) && r.glyph.color === INK), `${nudges.length} nudges · ${house.length} housekeeping`);
+    /* feed wording v1.1 (Part 4): the gear left the feed — housekeeping draws its own kind's icon (shared/FeedIcon) */
+    L.check("B3 a nudge holds the bell, housekeeping its own icon, both in ink", at, nudges.every((r) => r.glyph?.kind === "nudge" && r.glyph.color === INK) && house.length > 0 && house.every((r) => /^(agent|agents|manuscript)_/.test(r.glyph?.kind ?? "") && r.glyph?.color === INK), `${nudges.length} nudges · ${house.length} housekeeping`);
     /* B4 */
     const badH = house.filter((r) => r.h > 36 || r.tag || r.meta || (r.whoWeight !== null && Number(r.whoWeight) >= 600) || !near(r.saySize, 13, 0.5));
     L.check("B4 housekeeping is one line: 36 tall at most, no tag, no meta, the person not bold", at, house.length > 0 && badH.length === 0, badH.slice(0, 2).map((r) => `${r.h.toFixed(1)} tall · tag ${!!r.tag} · meta ${r.meta} · weight ${r.whoWeight}`).join(" · ") || `${house.length} rows, tallest ${Math.max(...house.map((r) => r.h)).toFixed(1)}`);

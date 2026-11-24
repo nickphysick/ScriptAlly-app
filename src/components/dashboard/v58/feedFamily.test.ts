@@ -77,10 +77,12 @@ describe("feed drawer v2 — the row (FD2 B3, B4, B5)", () => {
     expect(offer).toContain('data-family="offer"');
     expect(offer).toContain("Decide on the offer →");
   });
-  it("a row with a status holds the StatusDot; a nudge the bell; housekeeping the gear", () => {
-    expect(html({ status: QueryStatus.QUERIED, dir: "out" })).not.toMatch(/ev-bell|ev-gear/);
-    expect(html({ activityType: ActivityType.NUDGE_SENT, dir: "out" })).toContain('data-d58="ev-bell"');
-    expect(html({ activityType: ActivityType.AGENT_ADDED, app: true, dir: "out" })).toContain('data-d58="ev-gear"');
+  /* feed wording v1.1 (Part 4): the gear has left the drawer; one icon per kind of event (shared/FeedIcon) */
+  it("a row with a status holds the StatusDot; a nudge the bell; an agent added its own icon, never the gear", () => {
+    expect(html({ status: QueryStatus.QUERIED, dir: "out" })).not.toMatch(/data-feed-icon/);
+    expect(html({ activityType: ActivityType.NUDGE_SENT, dir: "out" })).toContain('data-feed-icon="nudge"');
+    expect(html({ activityType: ActivityType.AGENT_ADDED, app: true, dir: "out", who: "Nadia Hussain" })).toContain('data-feed-icon="agent_added"');
+    expect(html({ activityType: ActivityType.AGENT_ADDED, app: true, dir: "out" })).not.toMatch(/ev-gear/);
   });
   it("housekeeping is one line: no tag, no meta, no action", () => {
     const h = html({ activityType: ActivityType.AGENT_ADDED, app: true, dir: "out", need: { label: "x" } });

@@ -13,7 +13,8 @@
  */
 import { createPortal } from "react-dom";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Plus, Reply, UserPlus, BookPlus, Send, LayoutGrid, Settings, HelpCircle, Book } from "lucide-react";
+import { Plus, Reply, UserPlus, Send, LayoutGrid, Settings, HelpCircle, Book } from "lucide-react";
+import { FeedIcon } from "../shared/FeedIcon";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { invokeCapture } from "./railNav";
@@ -68,7 +69,8 @@ const ID_ICON: Record<string, React.ReactNode> = {
   "act:query": <Send aria-hidden="true" />,
   "act:record": <Reply aria-hidden="true" />,
   "act:agent": <UserPlus aria-hidden="true" />,
-  "act:manuscript": <BookPlus aria-hidden="true" />,
+  /* feed wording v1.1: the feed's own "manuscript added" drawing, so search and the feed match */
+  "act:manuscript": <FeedIcon kind="manuscript_added" bare />,
   "page:account": <Settings aria-hidden="true" />,
   "page:task-settings": <Settings aria-hidden="true" />,
   "page:help": <HelpCircle aria-hidden="true" />,

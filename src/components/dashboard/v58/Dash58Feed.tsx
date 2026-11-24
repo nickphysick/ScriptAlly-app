@@ -22,6 +22,8 @@ import { QueryStatus } from "../../../types";
 import { useOverlay } from "../../shell/useOverlay";
 import { StatusDot } from "../../StatusDot";
 import { FeedSay } from "../../shared/FeedSay";
+import { FeedIcon } from "../../shared/FeedIcon";
+import { feedIconKind } from "../../../lib/feedIcon";
 import { feedEntries, type FeedSeg } from "../../../lib/dashFeed";
 import {
   FEED_FILTERS, SUMMARY_NOUN, SUMMARY_NONE, defaultFrom, drawerDays, drawerEvents, drawerSummary, earlierWindow, rangeLabel,
@@ -35,24 +37,8 @@ import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 /* Feed wording v1.1 · the drawer draws its sentences through the feed's one renderer, so its names are the same links */
 const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => <FeedSay say={say} />;
 
-/* The two marks that are not a status. Exported so the phone dashboard's Recent rows draw the feed's own disc. */
-export const BellGlyph = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-bell">
-    <path d="M6 16V11a6 6 0 1112 0v5l2 2H4z" /><path d="M10 20a2 2 0 004 0" />
-  </svg>
-);
-export const GearGlyph = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-gear">
-    <circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
-  </svg>
-);
-
-/* The import's mark: a file with an arrow coming out of it (ref feed-import.dc.html). */
-const ImportGlyph = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-d58="ev-import">
-    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5" />
-  </svg>
-);
+/* Feed wording v1.1 (Part 4): the gear, the bell and the import's file were this file's own drawings; the drawer now
+   draws the feed's one icon per kind of event (shared/FeedIcon, lib/feedIcon), as the dashboard feed does. */
 
 /**
  * THE IMPORT'S ROW (import review v1, Part D; ref design-refs/onboarding/import-review-v1/feed-import.dc.html).
@@ -65,7 +51,7 @@ const ImportRow: React.FC<{ ev: DrawerEvent; onOpenQueries: () => void }> = ({ e
   return (
     <article className="d58-ev d58-evimp" data-d58="ev" data-family="import" data-dir={e.dir} data-need="0" data-met="0" data-status="" data-atype={e.activityType} data-app="0"
       data-counts={JSON.stringify(im.counts)}>
-      <span className="d58-evico d58-evimpdisc" data-d58="ev-disc"><ImportGlyph /></span>
+      <span className="d58-evico d58-evimpdisc" data-d58="ev-disc"><FeedIcon kind="import" /></span>
       <div className="d58-evmain">
         <div className="d58-evtop"><span className="d58-evtag" data-d58="ev-tag">{tag}</span><time>{e.time}</time></div>
         <p className="d58-evsay" data-d58="ev-say"><Segs say={say} /></p>
@@ -96,7 +82,7 @@ export const FeedRow: React.FC<{ ev: DrawerEvent; onAct: (queryId: string, mode:
       data-status={e.status ?? ""} data-atype={e.activityType} data-app={e.app ? "1" : "0"}
     >
       <span className="d58-evico" data-d58="ev-disc">
-        {house ? <GearGlyph /> : family === "nudge" || !e.status ? <BellGlyph /> : <StatusDot status={e.status} overrideSize={24} decorative />}
+        {(() => { const k = feedIconKind(e); return k ? <FeedIcon kind={k} /> : !e.status ? <FeedIcon kind="nudge" /> : <StatusDot status={e.status} overrideSize={24} decorative />; })()}
       </span>
       <div className="d58-evmain">
         {!house && <div className="d58-evtop"><span className="d58-evtag" data-d58="ev-tag">{tag}</span><time>{e.time}</time></div>}

@@ -13,9 +13,10 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowRight, BookPlus, HelpCircle, LayoutGrid, ListChecks, Mail, MessageSquare, Package, Reply, Send,
+  ArrowRight, HelpCircle, LayoutGrid, ListChecks, Mail, MessageSquare, Package, Reply, Send,
   Settings, StickyNote, Upload, UserPlus,
 } from "lucide-react";
+import { FeedIcon } from "../shared/FeedIcon";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { STAGE_COLOURS, bandInk, stageOf, statusBand } from "../../lib/stageColours";
@@ -37,7 +38,8 @@ const ID_ICON: Record<string, React.ReactNode> = {
   "act:agent": <UserPlus aria-hidden="true" />,
   "act:import": <Upload aria-hidden="true" />,
   "act:feedback": <MessageSquare aria-hidden="true" />,
-  "act:manuscript": <BookPlus aria-hidden="true" />,
+  /* feed wording v1.1: the feed's own "manuscript added" drawing, so search and the feed match */
+  "act:manuscript": <FeedIcon kind="manuscript_added" bare />,
   "made:new-agent": <UserPlus aria-hidden="true" />,
   "page:account": <Settings aria-hidden="true" />,
   "page:task-settings": <Settings aria-hidden="true" />,
