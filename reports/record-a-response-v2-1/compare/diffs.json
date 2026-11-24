@@ -1,0 +1,44 @@
+[
+ {
+  "screen": "01-recorded-partial-sent.png",
+  "pct": 11.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "02-card-over-journey-whole-page.png",
+  "pct": 39.8,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "03-card-closed-journey-back-whole-page.png",
+  "pct": 29.6,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "04-recorded-full-sent.png",
+  "pct": 11.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "05-recorded-partial-sent-no-reminder.png",
+  "pct": 11.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "06-recorded-partial-sent-no-reply-date.png",
+  "pct": 11.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "07-recorded-partial-not-sent-unchanged.png",
+  "pct": 11.5,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ }
+]
