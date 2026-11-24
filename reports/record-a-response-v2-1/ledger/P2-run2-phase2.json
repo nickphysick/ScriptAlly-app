@@ -1,0 +1,152 @@
+[
+ {
+  "where": "open: the journey is still in the page",
+  "ok": true,
+  "detail": "true · done"
+ },
+ {
+  "where": "open: the card is open",
+  "ok": true,
+  "detail": "{\"l\":860,\"t\":100,\"r\":1400,\"b\":800,\"w\":540,\"h\":700}"
+ },
+ {
+  "where": "open: the journey is marked under and inert",
+  "ok": true,
+  "detail": "true · true"
+ },
+ {
+  "where": "open: the journey is dimmed .45 over the whole panel",
+  "ok": true,
+  "detail": "1 · rgba(28, 19, 15, 0.45)"
+ },
+ {
+  "where": "open: the journey is scaled to .955 and moved 40px left",
+  "ok": true,
+  "detail": "matrix(0.955, 0, 0, 0.955, -40, 0)"
+ },
+ {
+  "where": "open: about 15px of the journey's left edge shows beside the card",
+  "ok": false,
+  "detail": "-8.3px"
+ },
+ {
+  "where": "open: the journey's right edge sits behind the card",
+  "ok": true,
+  "detail": "journey 868.3–1384, card 860–1400"
+ },
+ {
+  "where": "open: the journey shows above and below the card",
+  "ok": true,
+  "detail": "above 64.5px, below 64.5px"
+ },
+ {
+  "where": "open: the journey is narrower than before by the scale",
+  "ok": true,
+  "detail": "515.7 vs 540 × .955"
+ },
+ {
+  "where": "open: the path is unchanged",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/dashboard (was /dashboard)"
+ },
+ {
+  "where": "open: Tab never reaches the journey's controls",
+  "ok": true,
+  "detail": "0 of 12 presses landed in the journey"
+ },
+ {
+  "where": "Escape: the card is gone",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "Escape: the same recorded screen is back, forward",
+  "ok": true,
+  "detail": "done · under null · inert false · Your partial is with Rosalind."
+ },
+ {
+  "where": "Escape: the journey is back in its place (no step back)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "Escape: focus is on “Open {First}’s card”",
+  "ok": true,
+  "detail": "open-card"
+ },
+ {
+  "where": "Escape: the same scroll",
+  "ok": true,
+  "detail": "0 (was 0)"
+ },
+ {
+  "where": "Escape: the path is unchanged",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/dashboard (was /dashboard)"
+ },
+ {
+  "where": "the card's ✕: the card is gone",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "the card's ✕: the same recorded screen is back, forward",
+  "ok": true,
+  "detail": "done · under null · inert false · Your partial is with Rosalind."
+ },
+ {
+  "where": "the card's ✕: the journey is back in its place (no step back)",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "the card's ✕: focus is on “Open {First}’s card”",
+  "ok": true,
+  "detail": "open-card"
+ },
+ {
+  "where": "the card's ✕: the same scroll",
+  "ok": true,
+  "detail": "0 (was 0)"
+ },
+ {
+  "where": "the card's ✕: the path is unchanged",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/dashboard (was /dashboard)"
+ },
+ {
+  "where": "a click on the dimmed journey: it landed on the journey's visible edge",
+  "ok": false,
+  "detail": "{\"j\":{\"l\":868.3,\"t\":35.5,\"r\":1384,\"b\":864.5,\"w\":515.7,\"h\":828.9},\"c\":{\"l\":860,\"t\":100,\"r\":1400,\"b\":800,\"w\":540,\"h\":700}}"
+ },
+ {
+  "where": "a click on the dimmed journey: the card is gone",
+  "ok": false,
+  "detail": "{\"l\":860,\"t\":100,\"r\":1400,\"b\":800,\"w\":540,\"h\":700}"
+ },
+ {
+  "where": "a click on the dimmed journey: the same recorded screen is back, forward",
+  "ok": false,
+  "detail": "done · under true · inert true · Your partial is with Rosalind."
+ },
+ {
+  "where": "a click on the dimmed journey: the journey is back in its place (no step back)",
+  "ok": false,
+  "detail": "matrix(0.955, 0, 0, 0.955, -40, 0)"
+ },
+ {
+  "where": "a click on the dimmed journey: focus is on “Open {First}’s card”",
+  "ok": false,
+  "detail": "BODY"
+ },
+ {
+  "where": "a click on the dimmed journey: the same scroll",
+  "ok": true,
+  "detail": "0 (was 0)"
+ },
+ {
+  "where": "a click on the dimmed journey: the path is unchanged",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/dashboard (was /dashboard)"
+ }
+]

@@ -11,11 +11,15 @@
  *   P2  "Open {First}'s card" opens the query's card OVER the journey: the journey stays in the page, dimmed and stepped
  *       back (its box measured against the card's), takes no Tab; Escape closes only the card; the same recorded screen
  *       comes back with focus on "Open {First}'s card"; Undo still restores; the path never changes
+ *   P3  the track: a long name under a finished step ("Penhallow Literary Agency", an agency with no named agent, seeded by
+ *       tests/e2e/seedRar21.mjs and removed after) shows its first word, never a word cut mid-way; the full name is in
+ *       the step's accessible label
  *
  * Each case records and then undoes, so the harness account is left as it was.
  * ⚠️ EMULATOR ONLY: `npm run e2e:emu -- tests/e2e/recordResponse21.measure.ts --project=measure`.
  */
 import { expect, test, type Page } from "@playwright/test";
+import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 
@@ -128,12 +132,14 @@ async function stack(page: Page) {
   return page.evaluate(() => {
     const j = document.querySelector<HTMLElement>('[data-side-panel][data-rar="panel"]');
     const c = [...document.querySelectorAll<HTMLElement>('[data-side-panel][data-qp="panel"]')].find((x) => x.getBoundingClientRect().width > 0) ?? null;
+    /* the card leans (Query card v164): its layout box, not its rotated bounding box; the journey's is its transformed box */
+    const lay = (e: HTMLElement | null) => (e ? { l: e.offsetLeft, t: e.offsetTop, r: e.offsetLeft + e.offsetWidth, b: e.offsetTop + e.offsetHeight, w: e.offsetWidth, h: e.offsetHeight } : null);
     const box = (e: HTMLElement | null) => { if (!e) return null; const r = e.getBoundingClientRect(); return { l: Math.round(r.left * 10) / 10, t: Math.round(r.top * 10) / 10, r: Math.round(r.right * 10) / 10, b: Math.round(r.bottom * 10) / 10, w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10 }; };
     return {
-      journey: !!j, under: j?.getAttribute("data-under") ?? null, inert: !!j?.inert, dim: j ? getComputedStyle(j, "::after").opacity : null,
+      journey: !!j, under: j?.getAttribute("data-under") ?? null, inert: !!j?.querySelector<HTMLElement>('[data-rar="root"]')?.inert, dim: j ? getComputedStyle(j, "::after").opacity : null,
       dimBg: j ? getComputedStyle(j, "::after").backgroundColor : null, transform: j ? getComputedStyle(j).transform : null,
       step: document.querySelector('[data-rar="root"]')?.getAttribute("data-step") ?? null,
-      jBox: box(j), cBox: box(c), card: !!c, path: location.pathname + location.hash.replace(/\?.*$/, ""), href: location.href,
+      jBox: box(j), cBox: lay(c), cBound: box(c), cTransform: c ? getComputedStyle(c).transform : null, card: !!c, path: location.pathname + location.hash.replace(/\?.*$/, ""), href: location.href,
       focus: (document.activeElement as HTMLElement | null)?.getAttribute("data-rar") ?? document.activeElement?.tagName ?? null,
       inJourney: !!j && j.contains(document.activeElement), bodyScroll: document.querySelector<HTMLElement>('[data-rar="body"]')?.scrollTop ?? null,
       doneHead: document.querySelector('[data-rar="done-head"]')?.textContent ?? null,
@@ -169,16 +175,18 @@ test("P2 · the card opens over the journey, and closing it brings the journey b
   await openCard();
   const s1 = await stack(page);
   mkdirSync(DIR, { recursive: true });
-  writeFileSync(`${DIR}/ledger/P2-boxes.json`, JSON.stringify({ viewport: VP, recorded: s0.jBox, stacked: { journey: s1.jBox, card: s1.cBox, transform: s1.transform, dim: s1.dim, dimBg: s1.dimBg } }, null, 1));
+  writeFileSync(`${DIR}/ledger/P2-boxes.json`, JSON.stringify({ viewport: VP, recorded: s0.jBox, stacked: { journey: s1.jBox, cardLayout: s1.cBox, cardBounding: s1.cBound, cardTransform: s1.cTransform, transform: s1.transform, dim: s1.dim, dimBg: s1.dimBg } }, null, 1));
   L.check("open: the journey is still in the page", s1.journey && s1.step === "done", `${s1.journey} · ${s1.step}`);
   L.check("open: the card is open", s1.card, JSON.stringify(s1.cBox));
   L.check("open: the journey is marked under and inert", s1.under === "true" && s1.inert, `${s1.under} · ${s1.inert}`);
   L.check("open: the journey is dimmed .45 over the whole panel", s1.dim === "1" && /rgba\(28, 19, 15, 0\.45\)/.test(s1.dimBg ?? ""), `${s1.dim} · ${s1.dimBg}`);
-  L.check("open: the journey is scaled to .955 and moved 40px left", /^matrix\(0\.955, 0, 0, 0\.955, /.test(s1.transform ?? ""), String(s1.transform));
+  L.check("open: the journey is scaled to .955 and moved 40px past the card's right edge", /^matrix\(0\.955, 0, 0, 0\.955, /.test(s1.transform ?? "") && !!s1.cBox && !!s0.jBox
+    && Math.abs(-parseFloat((s1.transform ?? "").split(",")[4]) - (40 + (s0.jBox.r - s1.cBox.r))) <= 0.6, `${s1.transform} · card right ${s1.cBox?.r}, journey right ${s0.jBox?.r}`);
   const j = s1.jBox, c = s1.cBox;
   if (j && c) {
     L.check("open: about 15px of the journey's left edge shows beside the card", c.l - j.l >= 10 && c.l - j.l <= 22, `${(c.l - j.l).toFixed(1)}px`);
     L.check("open: the journey's right edge sits behind the card", j.r < c.r && j.r > c.l, `journey ${j.l}–${j.r}, card ${c.l}–${c.r}`);
+    L.check("open: the journey shows above and below the card", j.t < c.t && j.b > c.b, `above ${(c.t - j.t).toFixed(1)}px, below ${(j.b - c.b).toFixed(1)}px`);
     L.check("open: the journey is narrower than before by the scale", Math.abs(j.w - (s0.jBox?.w ?? 0) * 0.955) <= 1.5, `${j.w} vs ${s0.jBox?.w} × .955`);
   } else L.check("open: both boxes measured", false, JSON.stringify({ j, c }));
   L.check("open: the path is unchanged", s1.path === s0.path, `${s1.href} (was ${s0.path})`);
@@ -198,7 +206,8 @@ test("P2 · the card opens over the journey, and closing it brings the journey b
   /* 4 — a click on the dimmed journey */
   await openCard();
   const s4 = await stack(page);
-  if (s4.jBox && s4.cBox) await page.mouse.click(s4.jBox.l + Math.max(4, (s4.cBox.l - s4.jBox.l) / 2), (s4.jBox.t + s4.jBox.b) / 2);
+  if (s4.jBox && s4.cBox) await page.mouse.click(s4.jBox.l + Math.max(3, (s4.cBox.l - s4.jBox.l) / 2), (s4.jBox.t + s4.jBox.b) / 2);
+  L.check("a click on the dimmed journey: it landed on the journey's visible edge", !!s4.jBox && !!s4.cBox && s4.cBox.l - s4.jBox.l > 6, JSON.stringify({ j: s4.jBox, c: s4.cBox }));
   await back("a click on the dimmed journey");
 
   /* 5 — Undo still restores the snapshot */
@@ -211,5 +220,33 @@ test("P2 · the card opens over the journey, and closing it brings the journey b
   await openFromDashboard(page);
   const st = await page.locator(`${R("who-row")}[data-id="${qid}"]`).first().getAttribute("data-status").catch(() => null);
   L.check("Undo after the card: the query is back at Queried", st === "Queried", `${qid}: ${st}`);
-  L.done(28);
+  L.done(30);
+});
+
+/* ── P3 · the track's long name ── */
+test("P3 · a long name under a finished step shows its first word, the full name in its label", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("P3");
+  execSync("node tests/e2e/seedRar21.mjs --clean && node tests/e2e/seedRar21.mjs", { stdio: "ignore", timeout: 60_000 });
+  try {
+    await openFromDashboard(page);
+    await page.keyboard.type("Penhallow"); await settle(page, 900);
+    const row = page.locator(`${R("who-row")}[data-id="rar21-qpa"]`);
+    L.check("the seeded agency is on Who replied?", (await row.count()) === 1, String(await row.count()));
+    await row.click(); await settle(page, 900);
+    const r = await page.evaluate(() => {
+      const st = document.querySelector<HTMLElement>('[data-rar="step"][data-k="who"]');
+      const b = st?.querySelector<HTMLElement>('[data-rar="step-value"]');
+      const li = st?.closest<HTMLElement>('[role="listitem"]');
+      return { text: b?.textContent ?? null, sw: b?.scrollWidth ?? null, cw: b?.clientWidth ?? null, li: li?.getAttribute("aria-label") ?? null, own: st?.getAttribute("aria-label") ?? null };
+    });
+    L.check("the step shows the first word", r.text === "Penhallow", String(r.text));
+    L.check("nothing is cut (the value fits its box)", r.sw != null && r.cw != null && r.sw <= r.cw + 1, `${r.sw} in ${r.cw}`);
+    L.check("the full name is in the step's accessible label", /Penhallow Literary Agency/.test(`${r.li ?? ""} ${r.own ?? ""}`), `${r.li} | ${r.own}`);
+    await page.keyboard.press("Escape"); await settle(page, 300);
+    if (await page.locator(R("leave-discard")).count()) { await page.locator(R("leave-discard")).click(); await settle(page, 500); }
+  } finally {
+    execSync("node tests/e2e/seedRar21.mjs --clean", { stdio: "ignore", timeout: 60_000 });
+  }
+  L.done(4);
 });

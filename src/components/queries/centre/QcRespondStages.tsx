@@ -77,6 +77,10 @@ export interface QcRespondStagesProps {
   /** the review's card and numbers, from the save's own plans */
   previewOf: (queryId: string, a: RespAnswers) => { row: QcRow; packageName: string | null; counts: RespCounts } | null;
   onSave: (queryId: string, a: RespAnswers, notes: string[]) => Promise<RespSaved | null>;
+  /** v2.1 — the saved query's row as the page has it now (the recorded screen's card) */
+  rowOf?: (queryId: string) => QcRow | null;
+  /** v2.1 — the query's card is open over the journey: no Escape, no keys */
+  behind?: boolean;
   onClose: () => void;
   leaveRef?: React.MutableRefObject<(() => void) | null>;
 }
@@ -639,7 +643,7 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
   if (p.leaveRef) p.leaveRef.current = leave;
   /* ESCAPE, one layer above the panel (lib/escapeStack): the materials pop-up is its own layer above this; then a note being
      edited, an empty writing box, the search on step one, the open calendar, the discard bar, and last the leave check */
-  useEscapeLayer(true, () => {
+  useEscapeLayer(!p.behind, () => {
     if (phase !== "flow") { p.onClose(); return; }
     if (s.noteEdit) { setS((o) => ({ ...o, noteEdit: null })); return; }
     if (s.noteOpen && !s.draft.trim()) { setS((o) => ({ ...o, noteOpen: false })); return; }
@@ -736,7 +740,7 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
               <IlloSlot name={slot} width={170} height={96} />
               <h2 className="laq-yh" data-rar="done-head">{yh}</h2>
               <p className="laq-yl" data-rar="done-line">{yl}</p>
-              <div className="laq-slipw">{card(pv.row, pv.packageName, true, A.when)}</div>
+              <div className="laq-slipw">{card((saved.before.qid ? p.rowOf?.(saved.before.qid) : null) ?? pv.row, pv.packageName, true, A.when)}</div>
             </div>
           </div>
           <div className="laq-cf" data-rar="foot">

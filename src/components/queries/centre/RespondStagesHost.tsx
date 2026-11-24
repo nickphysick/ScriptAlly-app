@@ -37,7 +37,9 @@ export const RespondStagesHost: React.FC<{
   /** "Open {First}'s card": the query's card in the side panel, over the same page */
   onOpenCard: (queryId: string) => void;
   leaveRef?: React.MutableRefObject<(() => void) | null>;
-}> = ({ seedQueryId, seedKind, onClose, onOpenCard, leaveRef }) => {
+  /** v2.1 — the query's card is open over the journey: it takes no keys */
+  behind?: boolean;
+}> = ({ seedQueryId, seedKind, onClose, onOpenCard, leaveRef, behind = false }) => {
   const scriptDb = useScriptAllyDb();
   const { currentUser, queries, agents, manuscripts, activities, versions, addJournalEntry, deleteJournalEntry } = scriptDb;
   const { showToast } = useToast();
@@ -94,6 +96,10 @@ export const RespondStagesHost: React.FC<{
     return { row, packageName: (q as { sentPackageName?: string }).sentPackageName ?? null, counts: respCounts(book, q, after, a.kind) };
   };
 
+  /* v2.1 — once saved, the card on the recorded screen is the query as the page has it now, so whatever was changed on
+     its card while that card was open over the journey shows when the journey comes back */
+  const rowOf = (id: string) => rows.find((r) => r.id === id) ?? null;
+
   if (!currentUser) return null;
 
   const onSave = async (id: string, a: RespAnswers, notes: string[]): Promise<RespSaved | null> => {
@@ -143,7 +149,7 @@ export const RespondStagesHost: React.FC<{
 
   return (
     <QcRespondStages nowMs={nowMs} queries={list} seedQueryId={seedQueryId && list.some((x) => x.id === seedQueryId) ? seedQueryId : null} seedKind={seedKind ?? null}
-      ctxOf={ctxOf} previewOf={previewOf} onSave={onSave} onClose={onClose} leaveRef={leaveRef} />
+      ctxOf={ctxOf} previewOf={previewOf} rowOf={rowOf} onSave={onSave} onClose={onClose} leaveRef={leaveRef} behind={behind} />
   );
 };
 

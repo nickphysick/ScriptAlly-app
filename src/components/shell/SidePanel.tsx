@@ -29,6 +29,7 @@ export const SIDE_SLOT = "[data-side-slot]";
    the other was still dimming: the shell's bar then rose above the scrim (queryPanelHost.css). The scrim below holds
    the count, so the agent card's scrim (not a SidePanel) counts with every SidePanel's. */
 let dims = 0;
+let opens = 0;
 const syncDim = () => { document.body.classList.toggle("spanel-dim", dims > 0); };
 
 /**
@@ -78,9 +79,11 @@ export const SidePanel: React.FC<{
     leaveGhost(el, scrim);
   }, []);
   /* the Birds-eye tab and anything else that stands down while a panel is open read this */
+  /* counted (Record a response v2.1): a card closing over the response journey must not take it off while the journey
+     is still open */
   useEffect(() => {
-    document.body.classList.add("spanel-open");
-    return () => { document.body.classList.remove("spanel-open"); };
+    opens++; document.body.classList.add("spanel-open");
+    return () => { opens--; if (!opens) document.body.classList.remove("spanel-open"); };
   }, []);
   /* whether the page is dimmed behind it (the scrim holds the count of `body.spanel-dim`): the shell's bar rises over
      the panel only while it is not */
