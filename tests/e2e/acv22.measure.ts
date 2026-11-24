@@ -340,7 +340,8 @@ if (run("13")) test("AC13 · Delete this agent reaches the existing gate", async
   L.done(4);
 });
 
-/* ══ AC14 — the add journey's finish screen (p.preview) shows no pencil and no ⋯ ══ */
+/* ══ AC14 — the add journey's preview (p.preview) shows no pencil and no ⋯. Re-pointed by Add an agent v2 (24 Nov 2026)
+   from the old finish screen to the new review (`[data-aag="preview"]`). ══ */
 if (run("14")) test("AC14 · the preview carries no pencil and no ⋯", async ({ page }) => {
   const L = new Ledger("AC14");
   page.setDefaultTimeout(30_000);
@@ -348,13 +349,13 @@ if (run("14")) test("AC14 · the preview carries no pencil and no ⋯", async ({
   await openRoute(page, "/agents", VP);
   await page.evaluate(() => { try { for (const k of ["contacts", "queries", "manuscripts", "agents"]) localStorage.setItem(`sa.guide.${k}`, "1"); } catch { /* */ } });
   await page.locator("[data-cl27='add']:visible, [data-cl26='add']:visible").first().click();
-  await page.locator("[data-aaj='journey']").waitFor({ timeout: 20_000 });
-  await page.locator("[data-aaj='name']").fill(`Acv22 Preview ${Date.now().toString(36).slice(-4)}`);
-  await page.locator("[data-aaj='agency']").fill("Preview Literary");
-  await page.locator("[data-aaj='add']").click();
-  await page.locator("[data-aaj='fit'] [data-cl262='profile']").waitFor({ timeout: 20_000 });
+  await page.locator("[data-aag='root']").waitFor({ timeout: 20_000 });
+  await page.locator("[data-aag='root'] [data-aag='name']").fill(`Acv22 Preview ${Date.now().toString(36).slice(-4)}`);
+  await page.locator("[data-aag='root'] [data-aag='agency']").fill("Preview Literary");
+  await page.locator("[data-aag='root'] [data-aag='add-later']").click();
+  await page.locator("[data-aag='preview'] [data-cl262='profile']").waitFor({ timeout: 20_000 });
   await page.waitForTimeout(800);
-  const r = await page.evaluate(() => { const c = document.querySelector("[data-aaj='fit'] .cl262-card")!; return { face: !!c.querySelector("[data-acv2='band']"), pens: c.querySelectorAll("[data-qc168='pen']").length, more: c.querySelectorAll("[data-qc168='band-more']").length }; });
+  const r = await page.evaluate(() => { const c = document.querySelector("[data-aag='preview'] .cl262-card")!; return { face: !!c.querySelector("[data-acv2='band']"), pens: c.querySelectorAll("[data-qc168='pen']").length, more: c.querySelectorAll("[data-qc168='band-more']").length }; });
   L.check("population: the preview face", r.face, "");
   L.check("no pencil", r.pens === 0, String(r.pens));
   L.check("no ⋯", r.more === 0, String(r.more));

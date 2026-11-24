@@ -178,8 +178,8 @@ export interface AgentCardProps {
   personalGenres: Parameters<typeof genreLabel>[1];
   draft: Draft | null;
   nowMs: number;
-  /** Add an agent v2 — draw the card's own "Finish {first}’s profile" block, from Housekeeping's gaps (the add journey's
-   *  preview of an unsaved agent); absent everywhere else, so the desk's card is unchanged */
+  /** Add an agent v2 — the add journey's preview of an unsaved agent: the card's own "Finish {first}’s profile" block, from
+   *  Housekeeping's gaps, in the card's add-journey face (`preview`); absent everywhere else, so the desk's card is unchanged */
   withGaps?: boolean;
 }
 
@@ -218,7 +218,8 @@ export const PreviewAgentCard: React.FC<AgentCardProps> = ({ agent: a0, queries,
     deleteQueries: 0, onDelete: noop,
     ...(withGaps ? (() => {
       const g = agentGaps(agent, { hasReopenTask: false }, []);
-      return { gaps: g.length ? { n: g.length, focus: GAP_FOCUS[g[0]].focus as AgentCardField, tab: GAP_FOCUS[g[0]].tab, keys: g } : null };
+      /* and the card's own add-journey face (`preview`, Agent card v2.2 AC14): no pencil, no ⋯, nothing that edits */
+      return { preview: true, gaps: g.length ? { n: g.length, focus: GAP_FOCUS[g[0]].focus as AgentCardField, tab: GAP_FOCUS[g[0]].tab, keys: g } : null };
     })() : {}),
   };
   const sec = draft?.section ? CARD_SEC[draft.section] ?? null : null;

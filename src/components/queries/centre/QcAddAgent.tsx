@@ -40,6 +40,7 @@ import {
   sampleName, stepHasAnswer, stepValue, type AStage, type AState, type Country,
 } from "../../../lib/queryActions/addAgentStages";
 import { normaliseCountry } from "../../../lib/territory";
+import { dayMonth } from "../../../lib/dates";
 import type { CardDraft } from "../../../lib/cardDraft";
 import { ICON, useReducedMotion } from "./QcLogStages";
 import "./qcLogStages.css";
@@ -469,7 +470,7 @@ export const QcAddAgent: React.FC<QcAddAgentProps> = (p) => {
 
   /* ── the added screen ── */
   if (added) {
-    const today = new Date(nowMs).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
+    const today = dayMonth(nowMs).toUpperCase();
     return (
       <div ref={rootRef} className="laq aag" data-aag="root" data-step="done">
         <div className="laq-in">
