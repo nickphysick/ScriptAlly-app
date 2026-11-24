@@ -16,3 +16,6 @@
 .qc152 .qc152-m.oc .qc152-bx{animation:ocIn .35s ease-out both}
 @keyframes ocIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.qc152 .qc152-m.oc .qc152-bx{animation:none}}
+/* follow-up 3 — the step editor's date for an entry: the app's WeekSlider, and the day it names under it */
+.qc1522-wkb{min-width:0}
+.qc1522-wkb .qc1522-wkx{margin:6px 0 0;font:400 13.5px/1.4 var(--sp-serif);color:#6f655c}

@@ -6344,6 +6344,7 @@ export const Queries: React.FC<{
             request={ed.status === QueryStatus.PARTIAL_REQUESTED || ed.status === QueryStatus.FULL_REQUESTED || ed.status === QueryStatus.REVISE_RESUBMIT}
             words={words0} first={first} env={env} nowMs={now} floorMs={i > 0 ? dated[i - 1].ms : null} ceilMs={i >= 0 && i < dated.length - 1 ? dated[i + 1].ms : null}
             deleteText={deleteText1} busy={qc152Busy}
+            reply={ed.kind === "reply" && ed.reply ? { kind: ed.reply.kind, dateMs: ed.reply.dateMs, withYou: ed.reply.withYou } : null}
             /* Log a query v1.1 — the query's method and package are edited on its first step, and nowhere else */
             how={isQueryStep ? { value: q.sendMethod ?? null, options: EDIT_METHODS } : null}
             pkg={isQueryStep && pkgList ? { value: ctx.packageId ?? null, options: pkgList } : null}
@@ -6354,7 +6355,7 @@ export const Queries: React.FC<{
               if (ed.kind === "reply") {
                 const snap = await takeSnapshot(uid, [q.id]);
                 const moved = ed.ms == null || new Date(ed.ms).setHours(0, 0, 0, 0) !== v.dayMs;
-                await editActivity(q.id, ed.activityId!, { ...(moved ? { date: new Date(new Date(v.dayMs).setHours(12, 0, 0, 0)).toISOString() } : {}), reply: { words: v.words || null } });
+                await editActivity(q.id, ed.activityId!, { ...(moved ? { date: new Date(new Date(v.dayMs).setHours(12, 0, 0, 0)).toISOString() } : {}), reply: { words: v.words || null, ...(v.reply ? { kind: v.reply.kind, date: v.reply.date } : {}) } });
                 done1522(snap, "Saved that step", null, false);
                 return;
               }

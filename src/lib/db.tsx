@@ -134,7 +134,7 @@ import { contentWriteAllowed, isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { withReminderStamp } from "./reminderStamp";
-import { buildAgentReplyWrites, entryDatesFor, latestFeedReplies, isAgentReplyFeed, REPLY_DATE_FIELD, REPLY_KIND_FIELD, type AgentReplyInput, type ReplyKind } from "./agentReply";
+import { AGENT_REPLY_NESTED_TYPE, AGENT_REPLY_TYPE, LEGACY_HOLDING_NESTED_TYPE, readNestedReply, replyDayIso, buildAgentReplyWrites, entryDatesFor, latestFeedReplies, isAgentReplyFeed, REPLY_DATE_FIELD, REPLY_KIND_FIELD, type AgentReplyInput, type ReplyKind } from "./agentReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
 import { planSampleRetirement, retirementReport } from "./retireSamples";
@@ -3871,6 +3871,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         if (r.kind !== undefined) { subPatch[REPLY_KIND_FIELD] = r.kind; feedPatch[REPLY_KIND_FIELD] = r.kind; }
         if (r.date !== undefined) { subPatch[REPLY_DATE_FIELD] = r.date ? r.date : deleteField(); feedPatch[REPLY_DATE_FIELD] = r.date ? r.date : deleteField(); }
         if (r.words !== undefined) { const w = r.words?.trim(); subPatch.replyNote = w ? w.slice(0, 500) : deleteField(); feedPatch.details = w ? w.slice(0, 500) : ""; }
+      }
+      /* follow-up 3 — A CORRECTED HOLDING-REPLY-PACK ROW BECOMES THE NEW TYPE, on both stores: its legacy prose and stored
+         weeks go, so clearing its date cannot bring the weeks back (the legacy reader falls back to them). Its words come
+         from the patch, or are carried over from the prose. */
+      if (patch.reply) {
+        const cur = (await getDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", activityId))).data() as Record<string, unknown> | undefined;
+        const legacy = readNestedReply(cur ? { ...cur, id: activityId } : null);
+        if (cur && cur.type === LEGACY_HOLDING_NESTED_TYPE && legacy) {
+          Object.assign(subPatch, { type: AGENT_REPLY_NESTED_TYPE, note: "", replyWeeks: deleteField() });
+          feedPatch.activityType = AGENT_REPLY_TYPE;
+          if (!(REPLY_KIND_FIELD in subPatch)) { subPatch[REPLY_KIND_FIELD] = legacy.kind; feedPatch[REPLY_KIND_FIELD] = legacy.kind; }
+          if (!(REPLY_DATE_FIELD in subPatch) && legacy.dateMs != null) { const d0 = replyDayIso(legacy.dateMs); subPatch[REPLY_DATE_FIELD] = d0; feedPatch[REPLY_DATE_FIELD] = d0; }
+          if (patch.reply.words === undefined && legacy.words) { subPatch.replyNote = legacy.words; feedPatch.details = legacy.words; }
+        }
       }
       /**
        * ⚠️ BOTH STORES OR NEITHER (26 Aug). The projection patch was a swallowed best-effort whose
