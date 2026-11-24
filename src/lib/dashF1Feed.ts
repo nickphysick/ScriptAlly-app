@@ -21,7 +21,7 @@
  * only while the query still stands at the request (`FeedEntry.need`).
  */
 import { ActivityType, QueryStatus, type Agent, type Manuscript, type Query } from "../types";
-import type { FeedEntry, FeedSeg } from "./dashFeed";
+import { feedClock, provenanceOf, type FeedEntry, type FeedSeg } from "./dashFeed";
 import type { DrawerEvent, FeedFilter } from "./dashFeedDrawer";
 import { anyToMs } from "./qcStages";
 import { dayMonth } from "./dates";
@@ -36,7 +36,6 @@ const MONTH = ["January", "February", "March", "April", "May", "June", "July", "
 const midnight = (ms: number) => { const d = new Date(ms); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); };
 /** midnight yesterday — by calendar, so it holds on the days the clocks change */
 const isYesterday = (key: number, today: number) => { const t = new Date(today); return key === new Date(t.getFullYear(), t.getMonth(), t.getDate() - 1).getTime(); };
-const clock = (ms: number) => new Date(ms).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
 
 /** The feed shows seven days at a time: today and the six before it. */
 export const F1_WINDOW_DAYS = 7;
@@ -109,12 +108,12 @@ export function dayHeading(key: number, now: Date): { first: string; rest: strin
   return { first: WEEKDAY[d.getDay()], rest: `${d.getDate()} ${MONTH[d.getMonth()]}` };
 }
 
-/** "Today at 11:40" / "Yesterday at 13:05" / "28 Oct at 11:20" */
+/** "Today at 11:40am" / "Yesterday at 1:05pm" / "28 Oct at 11:20am" — the feed's own clock (feed wording v1) */
 export function whenLine(ms: number, now: Date): string {
   const today = midnight(now.getTime());
   const key = midnight(ms);
   const day = key === today ? "Today" : isYesterday(key, today) ? "Yesterday" : dayMonth(ms);
-  return `${day} at ${clock(ms)}`;
+  return `${day} at ${feedClock(ms)}`;
 }
 
 /** A journey stop's date: "Today", a weekday within the week, else "9 Oct" */
@@ -215,14 +214,14 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
     const by = anyToMs(q.expectedSendDate);
     if (by != null) figs.push({ label: "Send by", value: dayMonth(by) });
   } else if (kind === "offer") {
-    headline = e.status === QueryStatus.SIGNED ? `You signed with ${first}` : `${first} made an offer on ${title}`;
+    headline = e.status === QueryStatus.SIGNED ? `You signed with ${first}` : `${first} offered to represent ${title}`;
     const offerMs = span?.startMs ?? e.at;
     if (sentMs != null) figs.push({ label: "Weeks querying", value: String(Math.max(0, Math.round((offerMs - sentMs) / (7 * DAY)))) });
     const by = anyToMs(q.offerResponseDeadline);
     if (by != null) figs.push({ label: "Reply by", value: dayMonth(by) });
   } else {
     const full = e.status === QueryStatus.FULL_SENT;
-    headline = full ? `The whole book is with ${first}` : `Your partial is with ${first}`;
+    headline = full ? `Your full manuscript is with ${first}` : `Your partial is with ${first}`;
     const sendMs = span?.startMs ?? e.at;
     if (full && typeof ms?.wordCount === "number" && ms.wordCount > 0) figs.push({ label: "Words", value: ms.wordCount.toLocaleString("en-GB") });
     if (sentMs != null) figs.push({ label: "Days since query", value: String(days(sentMs, sendMs)) });
@@ -237,6 +236,8 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
     mats = named.length ? named.slice(0, 3) : null;
   }
   const out = e.dir === "out";
+  /* ⚠️ A NAME IS NEVER SAID TWICE (feed wording v1): a nameless agent's agency IS its name, so it is said once */
+  const agencyOnce = provenanceOf(who, agency);
   const due = figs.slice(0, 2).find((f) => f.label === "Send by" || f.label === "Reply by");
   const when = whenLine(e.at, ctx.now);
   const sentWord = e.status === QueryStatus.FULL_SENT ? "a full manuscript" : "a partial";
@@ -245,11 +246,12 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
     initials: out ? initialsOf(ctx.userName || "You") : initialsOf(who),
     name: out && kind === "sent" ? `You sent ${sentWord}` : who,
     meta: out && kind === "sent"
-      ? `${when} · to ${[who, agency].filter(Boolean).join(", ")}`
-      : [when, agency].filter(Boolean).join(" · "),
+      ? `${when} · to ${[who, agencyOnce].filter(Boolean).join(", ")}`
+      : [when, agencyOnce].filter(Boolean).join(" · "),
     headline, figs: figs.slice(0, 2), stops: journeyStops(row, q, !!e.need, ctx.now), pkg, mats,
-    sub: due ? `${due.label} ${due.value}` : [who, agency].filter(Boolean).join(" · "),
-    day: when.replace(/ at .*$/, ""),
+    sub: due ? `${due.label} ${due.value}` : [who, agencyOnce].filter(Boolean).join(" · "),
+    /* under its own day heading, a card of today or yesterday shows its time, not the heading's word again */
+    day: /^(Today|Yesterday) at /.test(when) ? feedClock(e.at) : when.replace(/ at .*$/, ""),
   };
 }
 

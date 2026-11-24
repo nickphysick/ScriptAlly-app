@@ -364,3 +364,56 @@ describe("Part C — no feed sentence ends in a full stop, and none contains a d
     }
   });
 });
+
+/* ═══ Part D — the cards ════════════════════════════════════════════════════════════════════════════ */
+import { bigCard, whenLine, type F1Big } from "./dashF1Feed";
+import type { Query } from "../types";
+
+describe("Part D — the cards", () => {
+  const today1140 = new Date(2026, 10, 24, 11, 40).getTime();
+  const card = (status: QueryStatus, dir: "in" | "out", agent: Partial<Agent>, atMs = today1140) => {
+    const q = { id: "q1", agentId: "a1", manuscriptId: "m1", status, dateSent: "2026-09-28T10:00:00.000Z" } as unknown as Query;
+    const e = { id: "e", at: atMs, time: "", dayLabel: "", pill: "", status, state: null, app: false, say: [], provenance: "", action: null, requery: null,
+      queryId: "q1", isNew: false, dir, activityType: "Status Changed", who: agent.name || agent.agency || "", agency: agent.agency ?? "", need: null, met: null } as FeedEntry;
+    const kind = status === QueryStatus.OFFER ? "offer" : dir === "out" ? "sent" : "request";
+    return bigCard({ entry: e, say: [], tag: "", meta: "" }, kind, {
+      queries: [q], agents: [{ id: "a1", name: "", agency: "", ...agent } as Agent], manuscripts: [{ id: "m1", title: T } as Manuscript], qcRows: [], userName: "Bea Carter", now: NOW,
+    }) as F1Big;
+  };
+  const named = { name: "Nadia Hussain", agency: "Hussain Literary" };
+  it.each([
+    [QueryStatus.PARTIAL_SENT, "out", "Your partial is with Nadia"],
+    [QueryStatus.FULL_SENT, "out", "Your full manuscript is with Nadia"],
+    [QueryStatus.OFFER, "in", "Nadia offered to represent Tidewrack"],
+    [QueryStatus.FULL_REQUESTED, "in", "Nadia asked for the full manuscript"],
+    [QueryStatus.PARTIAL_REQUESTED, "in", "Nadia asked for a partial"],
+  ] as [QueryStatus, "in" | "out", string][])("%s headline: %s", (st, dir, want) => {
+    expect(card(st, dir, named).headline).toBe(want);
+  });
+  it("a nameless agent's agency is said once, in the sub-line and the meta, in and out", () => {
+    const pen = { name: "", agency: "Penhallow Literary" };
+    const inn = card(QueryStatus.PARTIAL_REQUESTED, "in", pen);
+    const out = card(QueryStatus.FULL_SENT, "out", pen);
+    for (const c of [inn, out]) for (const line of [c.sub, c.meta]) expect(line.split("Penhallow Literary").length - 1, line).toBeLessThanOrEqual(1);
+    expect(inn.sub).toBe("Penhallow Literary");
+    expect(out.meta).toBe("Today at 11:40am · to Penhallow Literary");
+    expect(out.headline).toBe("Your full manuscript is with Penhallow Literary");
+  });
+  it("the when-line is the feed's 12-hour clock", () => {
+    expect(whenLine(today1140, NOW)).toBe("Today at 11:40am");
+    expect(whenLine(new Date(2026, 10, 23, 13, 5).getTime(), NOW)).toBe("Yesterday at 1:05pm");
+    expect(whenLine(new Date(2026, 9, 28, 11, 20).getTime(), NOW)).toBe("28 Oct at 11:20am");
+  });
+  it("a collapsed card of today or yesterday shows its time; an older one, its date, as built", () => {
+    expect(card(QueryStatus.FULL_SENT, "out", named).day).toBe("11:40am");
+    expect(card(QueryStatus.FULL_SENT, "out", named, new Date(2026, 10, 23, 13, 5).getTime()).day).toBe("1:05pm");
+    expect(card(QueryStatus.FULL_SENT, "out", named, new Date(2026, 10, 18, 9, 0).getTime()).day).toBe("18 Nov");
+  });
+  it("one clock formatter for the rows and the cards", () => {
+    const f1 = readFileSync("src/lib/dashF1Feed.ts", "utf8");
+    const feedSrc = readFileSync("src/lib/dashFeed.ts", "utf8");
+    expect(f1).not.toContain("toLocaleTimeString");
+    expect(feedSrc.match(/toLocaleTimeString/g)).toHaveLength(1);
+    expect(f1).toContain("feedClock(");
+  });
+});

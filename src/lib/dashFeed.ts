@@ -394,6 +394,10 @@ export const provenanceOf = (subject: string, ...parts: (string | undefined)[]):
     .join(" · ");
 };
 
+/** The feed's clock, "11:40am" — the ONE formatter for the rows and the cards (feed wording v1). */
+export const feedClock = (ms: number): string =>
+  new Date(ms).toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase();
+
 /** "Today" / "Yesterday" / "Wed 19 Aug" — the ref's three forms. */
 export const dayLabelFor = (at: number, now: Date): string => {
   const d = new Date(at);
@@ -459,7 +463,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       const d = new Date(t);
       out.push({
         id: a.id, at: t,
-        time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
+        time: feedClock(t),
         dayLabel: dayLabelFor(t, i.now),
         pill: EVENT_LABEL.imported, status: null, state: null, app: false,
         say: importSentence(c, title), provenance: "", action: null, requery: null, queryId: null,
@@ -535,7 +539,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
     out.push({
       id: a.id,
       at: t,
-      time: d.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "").toLowerCase(),
+      time: feedClock(t),
       dayLabel: dayLabelFor(t, i.now),
       pill,
       status: shape.status,
