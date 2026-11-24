@@ -1,0 +1,47 @@
+[
+ {
+  "where": "unknown · subject",
+  "ok": true,
+  "detail": "cv25-q-06"
+ },
+ {
+  "where": "S1 unknown · first step asks what went",
+  "ok": true,
+  "detail": "\"What did you send Clara?\""
+ },
+ {
+  "where": "S1 unknown · the track",
+  "ok": true,
+  "detail": "agent:done went:now sent:todo reply:todo log:todo"
+ },
+ {
+  "where": "S1 unknown · the head",
+  "ok": true,
+  "detail": "\"Your partial’s gone. Great work! Let’s log the details.\""
+ },
+ {
+  "where": "S1 unknown · when did it go",
+  "ok": true,
+  "detail": "\"When did it go to Clara?\" / \"Clara asked on 2 Sep.\""
+ },
+ {
+  "where": "S1 unknown · reply time",
+  "ok": true,
+  "detail": "\"When might Clara reply?\", slider 1, \"Reply expected by Tue 16 Feb.\", nudge tick 1"
+ },
+ {
+  "where": "S4 · the review's card has no reply date",
+  "ok": true,
+  "detail": "\"CB Clara Beaumont Harbour Lane Partial sent Sent 2 Sep 83 days ago 1 Reply expected by No date yet No reminder set Partial sent\""
+ },
+ {
+  "where": "S4 · no nudge task",
+  "ok": true,
+  "detail": "0 task rows"
+ },
+ {
+  "where": "S4 · the finish says so",
+  "ok": true,
+  "detail": "There’s no reply date yet."
+ }
+]

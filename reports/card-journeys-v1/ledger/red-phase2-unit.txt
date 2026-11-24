@@ -1,0 +1,74 @@
+
+ RUN  v3.2.7 /Users/nickphysick/ScriptAlly-cj1
+
+ ❯ src/components/queries/centre/cjSend.test.ts (4 tests | 2 failed) 7ms
+   ✓ card journeys v1 · Mark sent saves through the card's own send > M1 a partial: Partial Sent, with what went 2ms
+   ✓ card journeys v1 · Mark sent saves through the card's own send > M2 the full, an offer's full, and a resubmission 0ms
+   × card journeys v1 · Mark sent saves through the card's own send > M3 the reply time and the nudge 3ms
+     → expected '2027-01-19T12:00:00.000Z' to be '2027-01-19' // Object.is equality
+   × card journeys v1 · Mark sent saves through the card's own send > M4 every step is asked, and the journey is live 1ms
+     → expected undefined to be { kind: 'send', …(11) } // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/queries/centre/cjSend.test.ts > card journeys v1 · Mark sent saves through the card's own send > M3 the reply time and the nudge
+AssertionError: expected '2027-01-19T12:00:00.000Z' to be '2027-01-19' // Object.is equality
+
+Expected: [32m"2027-01-19"[39m
+Received: [31m"2027-01-19[7mT12:00:00.000Z[27m"[39m
+
+ ❯ src/components/queries/centre/cjSend.test.ts:54:38
+     52|     const c = ctx(q({}));
+     53|     const dated = SEND_SPEC.write.plans(pc(c.q), answered(c, { wk: 8, …
+     54|     expect(dated.writerExpectedDate).toBe("2027-01-19");
+       |                                      ^
+     55|     expect(typeof dated.writerExpectedSetAt).toBe("string");
+     56|     expect(dated.nudgeDate).toBe("2027-01-19");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/queries/centre/cjSend.test.ts > card journeys v1 · Mark sent saves through the card's own send > M4 every step is asked, and the journey is live
+AssertionError: expected undefined to be { kind: 'send', …(11) } // Object.is equality
+
+[32m- Expected:[39m 
+{
+  "body": [Function body],
+  "carry": [Function carry],
+  "check": {
+    "button": "Mark sent",
+    "extras": [Function extras],
+    "title": [Function title],
+  },
+  "done": [Function done],
+  "finish": [Function finish],
+  "head": [Function head],
+  "init": [Function init],
+  "kind": "send",
+  "stages": [Function stages],
+  "tone": [Function tone],
+  "value": [Function value],
+  "write": {
+    "counts": [Function counts],
+    "plans": [Function plans],
+  },
+}
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ src/components/queries/centre/cjSend.test.ts:67:27
+     65|     const c = ctx(q({}));
+     66|     expect(SEND_SPEC.stages(SEND_SPEC.init(c), c)).toEqual(["agent", "…
+     67|     expect(CJ_SPECS.send).toBe(SEND_SPEC);
+       |                           ^
+     68|     expect(CARD_JOURNEY_LIVE.send).toBe(true);
+     69|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  19:50:46
+   Duration  1.08s (transform 540ms, setup 0ms, collect 856ms, tests 7ms, environment 0ms, prepare 39ms)
+

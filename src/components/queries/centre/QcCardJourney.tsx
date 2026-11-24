@@ -144,7 +144,7 @@ export function QcCardJourney<S>(p: QcCardJourneyProps<S>): React.ReactElement {
   const [s, setS] = useState<S>(() => spec.init(c));
   const touched = useRef(false);
   const stagesNow = (x: S) => spec.stages(x, c);
-  const nextOf = (x: S): CJStage => { const sg = stagesNow(x); for (const k of sg) if (k !== "log" && !spec.done(x, k, c)) return k; return "log"; };
+  const nextOf = (x: S): CJStage => { const sg = stagesNow(x); for (const k of sg) if (k !== "agent" && k !== "log" && !spec.done(x, k, c)) return k; return "log"; };
   const [step, setStep] = useState<CJStage>(() => nextOf(s));
   const [dir, setDir] = useState<"in" | "back" | "">("");
   const [leaveAsk, setLeaveAsk] = useState(false);

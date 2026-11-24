@@ -1,0 +1,57 @@
+[
+ {
+  "where": "full · subject",
+  "ok": true,
+  "detail": "card seed-query-9"
+ },
+ {
+  "where": "S1 full · first step asks what went",
+  "ok": true,
+  "detail": "\"What did you send Ana?\""
+ },
+ {
+  "where": "S1 full · the track",
+  "ok": true,
+  "detail": "agent:done went:now sent:todo reply:todo log:todo"
+ },
+ {
+  "where": "S1 full · the head",
+  "ok": true,
+  "detail": "\"Your full’s gone. Great work! Let’s log the details.\""
+ },
+ {
+  "where": "S1 full · when did it go",
+  "ok": true,
+  "detail": "\"When did it go to Ana?\" / \"Ana asked on 8 Jul.\""
+ },
+ {
+  "where": "S1 full · reply time",
+  "ok": true,
+  "detail": "\"When might Ana reply?\", slider 1, \"Reply expected by Tue 19 Jan.\", nudge tick 1"
+ },
+ {
+  "where": "S2 full · the review",
+  "ok": true,
+  "detail": "Ready to mark it sent?"
+ },
+ {
+  "where": "S2 full · the card as it will be",
+  "ok": true,
+  "detail": "preview status Full Sent"
+ },
+ {
+  "where": "S2 full · what went, the task, a note, the numbers",
+  "ok": true,
+  "detail": "1 tiles, \"Nudge Ana if there’s no reply to-doTue 19 Jan\", add-note 1, 2 numbers"
+ },
+ {
+  "where": "S2 full · the button",
+  "ok": true,
+  "detail": "Mark sent"
+ },
+ {
+  "where": "S2 full · nothing cut off at 1440 × 900",
+  "ok": true,
+  "detail": "[]"
+ }
+]
