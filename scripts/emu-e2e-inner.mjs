@@ -9,6 +9,7 @@
  */
 import { spawn, spawnSync } from "node:child_process";
 import { resolve } from "node:path";
+import { coversLoadSensitive, oneMinuteLoad, waitForCalmLoad } from "./load-guard.mjs";
 
 const ROOT = resolve(new URL("..", import.meta.url).pathname);
 const PORT = 4321; // ⚠️ NOT 4190: that port is on the fetch spec's blocklist, so Node and Chromium both refuse it
@@ -28,6 +29,12 @@ for (let i = 0; ; i++) {
 
 const env = { ...process.env, SA_E2E_BASE_URL: BASE, SA_E2E_DIST: "dist-emu" };
 delete env.ALLOW_LIVE_FIRESTORE;
-const r = spawnSync("npx", ["playwright", "test", ...process.argv.slice(2)], { cwd: ROOT, env, stdio: "inherit" });
+/* the load guard (scripts/load-guard.mjs): print the 1-minute load; for Log a query and Record a response specs (or the
+   whole suite), wait up to five minutes while it is above 6. It waits — it never retries and never raises a timeout. */
+const args = process.argv.slice(2);
+if (coversLoadSensitive(args)) await waitForCalmLoad();
+else console.log(`[load-guard] 1-minute load ${oneMinuteLoad().toFixed(2)} at the start of the run`);
+const r = spawnSync("npx", ["playwright", "test", ...args], { cwd: ROOT, env, stdio: "inherit" });
+console.log(`[load-guard] 1-minute load ${oneMinuteLoad().toFixed(2)} at the end of the run`);
 stop();
 process.exit(r.status ?? 1);

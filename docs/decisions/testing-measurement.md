@@ -8,6 +8,8 @@
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
 
+- **Load guard (24 Nov 2026):** `npm run e2e:emu` prints the 1-minute load at the start and end of every run. For Log a query (`laq*`) and Record a response (`recordResponse*`, `recordCleanup`) measure specs, or a run that names no spec, it waits up to five minutes while the load is above 6 (`scripts/load-guard.mjs`, locked by `src/test/loadGuard.test.ts`). It waits; it never retries and never raises a timeout. **In a report, a red from those specs at a load above 6 is "unproven" until it is rerun below 6.** Why: reports/laq-specs-door-v1/REPORT.md (three reds at load 8–11, all green on a rerun at 2–5).
+
 ## Standing notes moved from CLAUDE.md’s cross-cutting sections
 
 Each block below sat inside a larger CLAUDE.md section (named in its heading) and is moved verbatim.

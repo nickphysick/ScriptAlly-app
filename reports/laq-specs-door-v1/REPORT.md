@@ -3,6 +3,61 @@
 Branch `laq-specs-door-v1`, cut from the dev line `…-rar211-laqunk` (f3659638d, bundle `index-CoYsbCK9.js`).
 Test-only: no app code changed.
 
+## Round 3 (24 Nov, ~15:30–16:30Z): deploy, laqV2's door, the load guard
+
+### False premises
+- None outright. One correction to round 2 below: laqV2's Dashboard button was named there as "`SetUpCard`'s `go-log`
+  or `Dash58Header`'s". It is `SetUpCard`'s (measured, see 2).
+- The deploy brief said "deploy 51245eb7a". It was deployed. The branch tip has since moved ahead with this round's
+  commit, which is test and tooling only, so the bundle dev serves is still the one built from 51245eb7a.
+
+### 1. Deploy
+- Dev had not moved. Before the deploy it served `index-DObz1PwS.js` (built from bc9297997, the `…-laqunk-aa215`
+  line).
+- I built `51245eb7a` from a clean detached checkout of the pushed tip (`npm run build:dev`, target check OK): `index-DQIDPfLr.js`.
+- **The app's behaviour is unchanged.** `git diff --name-only bc9297997 51245eb7a` touches only `tests/` and `reports/`.
+  The built `index` differs from the served one only in `release:"bc9297997"` → `"51245eb7a"` and in the chunk names
+  that stamp changes. `AppRoot` (7,969,594 bytes both) is identical once chunk names are normalised.
+- Deployed with `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. The served-hash
+  check (`|| exit`) was inside the command. **Dev now serves `index-DQIDPfLr.js`** from
+  `dev/…-rar211-laqunk-aa215-laqdoor` @ 51245eb7a.
+
+### 2. laqV2: what it was pressing, and the switch
+- A temporary probe in `open()`, not committed, logged the matched element on each open. All 22 opens across
+  `laq2-ms`, `laq2-ms0` and `laq2-msn` matched the same element:
+  **`button.fv1-btn[data-fv1="go-log"]`, "Log a query →", in `SetUpCard`** (`src/components/dashboard/fv1/SetUpCard.tsx:143`).
+  It sits on the Dashboard's "Let's get you set up" start card
+  (`section[data-fv1="setup"][data-fv2="start-card"][data-path="ready"]`, in `div[data-d2="setup"]` in the middle
+  column). That card shows because the base data's manuscripts have no queries. That run: 10 passed.
+- `open()` now calls `pressQuickLogAQuery()` (laqLib). Nothing else in the spec changed.
+  `npm run e2e:emu -- tests/e2e/laqV2.measure.ts --project=measure`: **10 passed (2.4m)**, V2-1, V2-3…V2-10, with a load
+  of 5.20 at the start and 3.77 at the end.
+- There is no red-before for this switch. The spec was never red; it was leaning on a page button that only the base
+  data draws.
+
+### 3. The load guard
+- New `scripts/load-guard.mjs`, called by the shared runner `scripts/emu-e2e-inner.mjs` (behind every
+  `npm run e2e:emu`) just before Playwright starts.
+  - Every run prints `[load-guard] 1-minute load N at the start of the run`, and the same at the end.
+  - Runs that include a Log a query spec (`laq*.measure.ts`), a Record a response spec (`recordResponse*`,
+    `recordCleanup`), or no named spec (the whole suite): while the 1-minute load is above 6, it polls every 10s for up
+    to 5 minutes.
+  - If the load never drops, the run goes ahead and prints that a red in it is UNPROVEN until rerun below 6.
+- It waits only. It adds no retries and raises no timeouts; the lock checks for both.
+- While it waits, the run holds the test slot, so other heavy jobs queue behind it.
+- **Measured:** the probe run started at load 9.93, waited 130s, ran at 5.41 and passed 10 of 10.
+- **Locked:** `src/test/loadGuard.test.ts`, 6 tests. Limit 6 and 5 minutes; which specs are covered; runs at once at 6
+  or under; waits, then runs; gives up after 5 minutes and prints UNPROVEN; the runner calls the guard before Playwright
+  and prints the load after it; no retries or timeouts. The runner test was red against the old runner and green
+  against the new one.
+- **The reporting rule** ("a red at load above 6 is unproven until rerun below it") is in
+  `docs/decisions/testing-measurement.md`, Current state.
+
+### Gates
+- Baseline on 51245eb7a: tsc clean, build clean, Vitest 945 files / 13,427 tests passed.
+- After: tsc clean, build clean; loadGuard, heavySlot, emuGuard and firestoreTarget 32 of 32.
+- No screenshots or readings committed: every run's rewrites under `reports/log-a-query-v2/` were reverted.
+
 ## False premises (follow-ups, 24 Nov afternoon)
 1. **"laqV2 may fail for the same reason."** It does not. Run unchanged on `laq-specs-door-v1`
    (`npm run e2e:emu -- tests/e2e/laqV2.measure.ts --project=measure`): **10 passed (2.1m)**, V2-1, V2-3…V2-10. Its
