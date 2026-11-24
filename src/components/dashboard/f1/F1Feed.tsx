@@ -48,13 +48,19 @@ const ImportGlyph = () => (
 const Chevron = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>);
 const FoldGlyph = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>);
 
+/** Feed wording v1.1 · a card's sub-line: the agency or the title in italic, then the time ("Hussain Literary · 9:40am") */
+const SubLine: React.FC<{ c: F1Big; df1: string }> = ({ c, df1 }) => (
+  <small className="df1-sub" data-df1={df1}>
+    {c.sub.length > 0 && <><Segs say={c.sub} /> · </>}<time className="df1-t" data-df1="time">{c.time}</time>
+  </small>
+);
+
 /** A big event whose query no longer needs the writer: one line, a button that opens the card in place. */
 const Collapsed = React.forwardRef<HTMLButtonElement, { c: F1Big; onToggle: () => void }>(({ c, onToggle }, ref) => (
   <button ref={ref} type="button" className="df1-crow" data-df1="collapsed" data-kind={c.kind} data-dir={c.dir} data-status={c.status} data-query={c.queryId}
     aria-expanded="false" onClick={onToggle}>
     <span className="df1-cg"><StatusDot status={c.status} overrideSize={20} decorative /></span>
-    <span className="df1-ctx"><b data-df1="collapsed-headline">{c.headline}</b><small data-df1="collapsed-sub">{c.sub}</small></span>
-    <time>{c.day}</time>
+    <span className="df1-ctx"><span className="df1-hl" data-df1="collapsed-headline" data-say="1"><Segs say={c.headline} /></span><SubLine c={c} df1="collapsed-sub" /></span>
     <span className="df1-cv"><Chevron /></span>
   </button>
 ));
@@ -65,13 +71,10 @@ const Big: React.FC<{ c: F1Big; onOpen: (queryId: string) => void; onFold?: () =
     {onFold && (
       <button ref={foldRef} type="button" className="df1-fold" data-df1="fold" aria-expanded="true" aria-label="Collapse" onClick={onFold}><FoldGlyph /></button>
     )}
-    <div className="df1-eh">
-      <span className={`df1-disc${c.dir === "out" ? " is-me" : ""}`} aria-hidden="true">{c.initials}</span>
-      <div className="df1-ehw"><b>{c.name}</b><small data-df1="big-meta">{c.meta}</small></div>
-    </div>
-    <div className="df1-et">
-      <span className="df1-eico"><StatusDot status={c.status} overrideSize={22} decorative /></span>
-      <h3 className="df1-eh3" data-df1="big-headline">{c.headline}</h3>
+    {/* Feed wording v1.1 · the card starts with its own row: the mark, the sentence (full name), the sub-line and time */}
+    <div className="df1-erow" data-df1="big-top">
+      <span className="df1-cg"><StatusDot status={c.status} overrideSize={20} decorative /></span>
+      <span className="df1-ctx"><span className="df1-hl" data-df1="big-headline" data-say="1"><Segs say={c.top} /></span><SubLine c={c} df1="big-sub" /></span>
     </div>
     {c.figs.length > 0 && (
       <div className="df1-figs" data-df1="figs">
@@ -97,7 +100,7 @@ const Big: React.FC<{ c: F1Big; onOpen: (queryId: string) => void; onFold?: () =
       )}
       <div className="df1-jf">
         <span>{c.pkg ? <>Sent with <span className="df1-chip" data-df1="pkg">{c.pkg}</span></> : null}</span>
-        <button type="button" className="df1-btn" data-df1="open-query" onClick={() => onOpen(c.queryId)}>Open query</button>
+        <button type="button" className="sp-btn sp-btn--line df1-btn" data-df1="open-query" onClick={() => onOpen(c.queryId)}>Open query</button>
       </div>
     </div>
     {c.mats && (
@@ -119,8 +122,8 @@ const Mini: React.FC<{ m: F1Mini }> = ({ m }) => (
       {m.glyph === "status" && m.status ? <StatusDot status={m.status} overrideSize={20} decorative />
         : m.glyph === "house" ? <GearGlyph /> : m.glyph === "import" ? <ImportGlyph /> : <BellGlyph />}
     </span>
-    <span className="df1-mtx" data-df1="mini-say"><Segs say={m.say} /></span>
-    <time>{m.time}</time>
+    {/* Feed wording v1.1 · the time sits under the sentence, on its own line; no right-hand time column */}
+    <span className="df1-mtx"><span data-df1="mini-say" data-say="1"><Segs say={m.say} /></span><time className="df1-t" data-df1="time">{m.time}</time></span>
   </div>
 );
 

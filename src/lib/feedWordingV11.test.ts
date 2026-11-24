@@ -97,3 +97,106 @@ describe("Part 1 — the collapsed headline has no line cap", () => {
     }
   });
 });
+
+/* ═══ Part 2 — one voice (source half; the rendered half is tests/e2e/feedWordingV11.measure.ts FW2) ══════════════════
+   `FW11_REF=<commit>` reads every file below at that commit instead of the working tree, which is how the red-first
+   proof runs against the tree before this part without moving a file. */
+import { execSync } from "node:child_process";
+import { bigCard, type F1Big } from "./dashF1Feed";
+const REF = process.env.FW11_REF ?? "";
+const src = (p: string) => (REF ? execSync(`git show ${REF}:${p}`, { encoding: "utf8" }) : readFileSync(p, "utf8"));
+const feedCss = () => src("src/components/dashboard/v2/dash2Feed.css");
+const df1Css = () => src("src/components/dashboard/f1/df1.css");
+const ruleOf = (css: string, sel: string) => { const i = css.indexOf(`${sel} {`); return i < 0 ? "" : css.slice(i, css.indexOf("}", i)); };
+
+describe("Part 2 — one voice: every row's sentence, sub-line and time", () => {
+  it("the sentence: Source Serif at the body size, 1.35, regular — in a small row, a collapsed card and an open card's top", () => {
+    const r = ruleOf(feedCss(), ".d58.d2 .d2-feed :is(.df1-mtx, .df1-hl)");
+    expect(r).toContain("font-family: var(--d58-serif) !important");
+    expect(r).toContain("font-size: var(--sp-body-size)");
+    expect(r).toContain("line-height: 1.35");
+    expect(r).toContain("font-weight: 400");
+    expect(ruleOf(feedCss(), ".d58.d2 .d2-feed :is(.df1-mtx, .df1-hl) b")).toContain("font-weight: 600");
+  });
+  it("sub-lines: 14 in the caption colour, one line; times: JetBrains Mono 12 in the caption colour", () => {
+    const sub = ruleOf(feedCss(), ".d58.d2 .d2-feed .df1-sub");
+    expect(sub).toContain("font-size: var(--sp-sec-size)");
+    expect(sub).toContain("color: var(--sp-quiet)");
+    expect(sub).toContain("white-space: nowrap");
+    const t = ruleOf(feedCss(), ".d58.d2 .d2-feed .df1-t");
+    expect(t).toContain("font-family: var(--d58-mono) !important");
+    expect(t).toContain("font-size: 12px");
+    expect(t).toContain("color: var(--sp-quiet)");
+  });
+  it("the time sits under the sentence: no right-hand time column on a collapsed card", () => {
+    expect(ruleOf(feedCss(), ".d58.d2 .d2-feed .df1-crow")).toContain("grid-template-columns: 22px minmax(0, 1fr) 16px");
+    expect(ruleOf(feedCss(), ".d58.d2 .d2-feed .df1-mtx > .df1-t")).toContain("display: block");
+  });
+  it("day headings: 14, the day in 600", () => {
+    expect(ruleOf(df1Css(), ".df1-day > b")).toContain("font-weight: 600");
+  });
+  it("the writer's housekeeping is a quiet line: no card, no shadow, 14 in --sp-muted", () => {
+    const q = ruleOf(feedCss(), '.d58.d2 .d2-feed .df1-mini[data-glyph="house"]');
+    expect(q).toContain("box-shadow: none");
+    expect(q).toContain("background: none");
+    expect(q).toContain("border: 0");
+    const t = ruleOf(feedCss(), '.d58.d2 .d2-feed .df1-mini[data-glyph="house"] .df1-mtx');
+    expect(t).toContain("font-size: var(--sp-sec-size)");
+    expect(t).toContain("color: var(--sp-muted)");
+  });
+  it("small rows and collapsed cards share one outline", () => {
+    const mini = ruleOf(df1Css(), ".df1-mini");
+    expect(mini).toContain("border: 1px solid #ece2d8");
+    expect(mini).toContain("box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05)");
+    expect(mini).toContain("align-items: flex-start");
+  });
+  it("'Open query' is the small outline button: 30 high, radius 8, Source Serif 600 14", () => {
+    const b = ruleOf(feedCss(), ".d58.d2 .d2-feed .df1-btn.sp-btn");
+    expect(b).toContain("height: 30px");
+    expect(b).toContain("border-radius: 8px");
+    expect(b).toContain("font: 600 var(--sp-sec-size)/1 var(--sp-serif) !important");
+    expect(src("src/components/dashboard/f1/F1Feed.tsx")).toContain('className="sp-btn sp-btn--line df1-btn"');
+  });
+  it("nothing in the feed's rules is under 12px", () => {
+    const css = df1Css();
+    const feed = css.slice(css.indexOf(".df1-sw {"), css.indexOf("/* ── Part E: \"Your next task\""));
+    const all = feed + feedCss();
+    const sizes = [...all.matchAll(/font-size:\s*([\d.]+)px/g)].map((m) => Number(m[1]));
+    expect(sizes.length, "population: feed font sizes").toBeGreaterThan(5);
+    expect(sizes.filter((n) => n < 12)).toEqual([]);
+  });
+  it("Special Elite in the feed only on an open card's figures and journey labels", () => {
+    const css = df1Css();
+    const feed = css.slice(css.indexOf(".df1-sw {"), css.indexOf("/* ── Part E: \"Your next task\""));
+    const rules = (feed + feedCss()).replace(/\/\*[\s\S]*?\*\//g, "").split("}").filter((r) => /--d58-type|--sp-type|Special Elite/.test(r)).map((r) => r.trim().split("{")[0].trim());
+    expect(rules.length, "population").toBeGreaterThan(0);
+    expect(rules.sort()).toEqual([".d58 .df1-figs b", ".d58 .df1-trk b"]);
+  });
+  it("the open card starts with its own row: no disc, no name line, no separate headline", () => {
+    const tsx = src("src/components/dashboard/f1/F1Feed.tsx");
+    expect(tsx).toContain('data-df1="big-top"');
+    expect(tsx).not.toMatch(/df1-disc|df1-ehw|df1-eh3/);
+  });
+});
+
+describe("Part 2 — the card's sentence is runs, and its sub-line never repeats a name", () => {
+  const NOWC = new Date(2026, 10, 24, 15, 0);
+  const card = (ag: Partial<Agent>, status = QueryStatus.FULL_SENT, dir: "in" | "out" = "out") => {
+    const q = { id: "q1", agentId: "a1", manuscriptId: "m1", status, dateSent: "2026-09-28T10:00:00.000Z" } as unknown as Query;
+    const e = { id: "e", at: new Date(2026, 10, 24, 9, 40).getTime(), status, dir, app: false, queryId: "q1", who: ag.name || ag.agency || "", agency: ag.agency ?? "" } as never;
+    return bigCard({ entry: e, say: [], tag: "", meta: "" }, status === QueryStatus.OFFER ? "offer" : dir === "out" ? "sent" : "request", {
+      queries: [q], agents: [{ id: "a1", name: "", agency: "", ...ag } as Agent], manuscripts: [{ id: "m1", title: "Tidewrack" } as Manuscript], qcRows: [], userName: "", now: NOWC,
+    }) as F1Big;
+  };
+  it("the headline and the top are runs with the person as the `who` run", () => {
+    const c = card({ name: "Nadia Hussain", agency: "Hussain Literary" });
+    expect(Array.isArray(c.headline)).toBe(true);
+    expect(c.headline.filter((s) => s.who).map((s) => s.t)).toEqual(["Nadia"]);
+    expect(c.top.filter((s) => s.who).map((s) => s.t)).toEqual(["Nadia Hussain"]);
+  });
+  it("an offer's title is the italic run; the sub-line does not repeat it", () => {
+    const c = card({ name: "", agency: "Penhallow Literary" }, QueryStatus.OFFER, "in");
+    expect(c.top.filter((s) => s.em).map((s) => s.t)).toEqual(["Tidewrack"]);
+    expect(c.sub).toEqual([]);
+  });
+});

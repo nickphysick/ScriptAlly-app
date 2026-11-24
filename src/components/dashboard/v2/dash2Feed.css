@@ -14,7 +14,7 @@
 /* ── v2.1 Part D · a big event whose query no longer needs the writer: one line, opened in place on a click ── */
 .d58.d2 .d2-feed .df1-crow {
   --t: #fdfaf5;
-  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto 16px; gap: 12px; align-items: center; width: 100%; box-sizing: border-box;
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) 16px; gap: 12px; align-items: start; width: 100%; box-sizing: border-box;
   margin: 0 0 8px; padding: 12px 14px; border: 1px solid #ece2d8; border-radius: 12px; background: var(--t);
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05); text-align: left; cursor: pointer; color: var(--d2-ink);
 }
@@ -25,22 +25,43 @@
 .d58.d2 .d2-feed .df1-crow[data-kind="offer"] { --t: #eef6f3; }
 .d58.d2 .d2-feed .df1-crow:hover { border-color: #d9c8ba; }
 .d58.d2 .d2-feed .df1-crow:focus-visible, .d2-feed .df1-fold:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
-.d58.d2 .d2-feed .df1-cg { display: grid; place-items: center; }
+.d58.d2 .d2-feed .df1-cg { display: grid; place-items: center; margin-top: 1px; }
 .d58.d2 .d2-feed .df1-ctx { min-width: 0; }
-/* Feed wording v1.1 (Nick's ruling on v1 Part E) — no line cap: the headline wraps to as many lines as it needs and
-   never ends in an ellipsis; the row grows with it */
-.d58.d2 .d2-feed .df1-ctx b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 16px; line-height: 1.25; overflow: visible; white-space: normal; overflow-wrap: break-word; }
-.d58.d2 .d2-feed .df1-ctx small { display: block; margin-top: 2px; font-family: var(--d58-serif); font-size: 13px; line-height: 1.35; color: var(--d2-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* …and the time stays top-aligned with the headline's first line (its line box is the headline's: 16px × 1.25) */
-.d58.d2 .d2-feed .df1-crow time { align-self: start; line-height: 20px; font-family: var(--d58-mono) !important; font-size: 11.5px; color: #8a8178; white-space: nowrap; }
-.d58.d2 .d2-feed .df1-cv { display: grid; place-items: center; width: 16px; height: 16px; color: var(--d2-muted); }
+.d58.d2 .d2-feed .df1-cv { display: grid; place-items: center; width: 16px; height: 16px; margin-top: 3px; color: var(--d2-muted); }
 .d58.d2 .d2-feed .df1-cv svg { width: 16px; height: 16px; }
 /* the opened card: the full v2 card, with a round fold button top right */
 .d58.d2 .d2-feed .df1-entry.is-opened { position: relative; }
-.d58.d2 .d2-feed .df1-entry.is-opened .df1-eh { padding-right: 36px; }
+.d58.d2 .d2-feed .df1-entry.is-opened .df1-erow { padding-right: 36px; }
 .d58.d2 .d2-feed .df1-fold {
   position: absolute; top: 12px; right: 12px; z-index: 1; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
   display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 1px #e7ddd2; color: var(--d2-muted);
 }
 .d58.d2 .d2-feed .df1-fold svg { width: 15px; height: 15px; }
 .d58.d2 .d2-feed .df1-fold:hover { color: var(--d2-ink); box-shadow: inset 0 0 0 1px #d9c8ba; }
+
+
+/* ════ FEED WORDING v1.1 · ONE VOICE (ref design-refs/feed-type-v1/feed-type-v1.html, its switches at their defaults) ════
+   Every row's sentence — a small row, a collapsed card, an open card's top — is Source Serif at the body size, 1.35,
+   regular; the person is the semibold `who` run, a manuscript title the italic `em` run. Sub-lines are 14 in the caption
+   colour, one line. Times are JetBrains Mono 12 in the caption colour, UNDER the sentence: on their own line in a small
+   row, after the sub-line on a card. Special Elite is left on an open card's figures and journey labels only (df1.css).
+   Nothing in the feed is under 12. */
+.d58.d2 .d2-feed :is(.df1-mtx, .df1-hl) { font-family: var(--d58-serif) !important; font-size: var(--sp-body-size); font-weight: 400; line-height: 1.35; color: var(--d2-ink); overflow-wrap: break-word; }
+.d58.d2 .d2-feed .df1-hl { display: block; }
+.d58.d2 .d2-feed :is(.df1-mtx, .df1-hl) b { font-weight: 600; }
+.d58.d2 .d2-feed :is(.df1-mtx, .df1-hl, .df1-sub) i { font-style: italic; }
+.d58.d2 .d2-feed .df1-sub { display: block; margin-top: 2px; font-family: var(--d58-serif) !important; font-size: var(--sp-sec-size); font-weight: 400; line-height: 1.35; color: var(--sp-quiet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d58.d2 .d2-feed .df1-t { font-family: var(--d58-mono) !important; font-size: 12px; font-weight: 400; color: var(--sp-quiet); white-space: nowrap; }
+.d58.d2 .d2-feed .df1-mtx > .df1-t { display: block; margin-top: 2px; line-height: 1.35; }
+
+/* an open card starts with its own row: the same mark, sentence, sub-line and time as its collapsed row */
+.d58.d2 .d2-feed .df1-erow { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; align-items: start; }
+.d58.d2 .d2-feed .df1-erow + .df1-figs { margin-top: 12px; }
+
+/* "Open query" is the small outline button: 30 high, radius 8, navy edge and text, Source Serif 600 14 */
+.d58.d2 .d2-feed .df1-btn.sp-btn { height: 30px; padding: 0 12px; border-radius: 8px; font: 600 var(--sp-sec-size)/1 var(--sp-serif) !important; }
+
+/* the writer's housekeeping (agent and manuscript added, updated, removed; sweeps) is a quiet line: no card, no shadow */
+.d58.d2 .d2-feed .df1-mini[data-glyph="house"] { margin-bottom: 4px; padding: 4px 14px; border: 0; background: none; box-shadow: none; }
+.d58.d2 .d2-feed .df1-mini[data-glyph="house"] .df1-mtx { font-size: var(--sp-sec-size); color: var(--sp-muted); }
+.d58.d2 .d2-feed .df1-mini[data-glyph="house"] + :not(.df1-mini[data-glyph="house"]) { margin-top: 10px; }

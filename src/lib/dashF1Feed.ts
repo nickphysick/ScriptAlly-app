@@ -21,7 +21,7 @@
  * only while the query still stands at the request (`FeedEntry.need`).
  */
 import { ActivityType, QueryStatus, type Agent, type Manuscript, type Query } from "../types";
-import { feedClock, provenanceOf, type FeedEntry, type FeedSeg } from "./dashFeed";
+import { feedClock, provenanceOf, sayText, type FeedEntry, type FeedSeg } from "./dashFeed";
 import type { DrawerEvent, FeedFilter } from "./dashFeedDrawer";
 import { anyToMs } from "./qcStages";
 import { dayMonth } from "./dates";
@@ -61,24 +61,22 @@ export interface F1Big {
   dir: "in" | "out";
   queryId: string;
   status: QueryStatus;
-  /** the disc: the agent's initials, or the writer's */
-  initials: string;
-  /** "Nadia Hussain", or "You sent a full manuscript" */
-  name: string;
-  /** "Today at 11:40 · Hussain Literary", or "28 Oct at 11:20 · to Rae Abbott, Abbott Books" */
-  meta: string;
-  headline: string;
+  /** the collapsed row's sentence, in runs: "Nadia asked for the full manuscript" (the person by first name) */
+  headline: FeedSeg[];
+  /** Feed wording v1.1 · an open card's top: the same sentence with the person's full name. The disc, the name line and
+   *  the separate headline are gone; an open card starts with its own row. */
+  top: FeedSeg[];
   figs: F1Fig[];
   stops: F1Stop[];
   /** the package the query went with, if it went with one */
   pkg: string | null;
   /** the materials that went, on a full request only */
   mats: F1Mat[] | null;
-  /** Dashboard v2.1 · the collapsed row's sub-line: the card's own deadline figure ("Send by 26 Nov"), else
-   *  "{agent} · {agency}" */
-  sub: string;
-  /** Dashboard v2.1 · the collapsed row's date: the card's own when, without its time ("Yesterday", "28 Oct") */
-  day: string;
+  /** Feed wording v1.1 · the sub-line, collapsed and open: the agency, or (where the sentence already gives it, or there
+   *  is none) the manuscript's title in italic. Never a name the sentence already says. May be empty. */
+  sub: FeedSeg[];
+  /** the event's time on the feed's clock, "9:40am" — set after the sub-line; the day is the heading above it */
+  time: string;
 }
 
 export interface F1Mini {
@@ -106,14 +104,6 @@ export function dayHeading(key: number, now: Date): { first: string; rest: strin
   if (key === today) return { first: "Today", rest: full };
   if (isYesterday(key, today)) return { first: "Yesterday", rest: full };
   return { first: WEEKDAY[d.getDay()], rest: `${d.getDate()} ${MONTH[d.getMonth()]}` };
-}
-
-/** "Today at 11:40am" / "Yesterday at 1:05pm" / "28 Oct at 11:20am" — the feed's own clock (feed wording v1) */
-export function whenLine(ms: number, now: Date): string {
-  const today = midnight(now.getTime());
-  const key = midnight(ms);
-  const day = key === today ? "Today" : isYesterday(key, today) ? "Yesterday" : dayMonth(ms);
-  return `${day} at ${feedClock(ms)}`;
 }
 
 /** A journey stop's date: "Today", a weekday within the week, else "9 Oct" */
@@ -175,7 +165,6 @@ export function journeyStops(row: QcRow | undefined, q: Query, need: boolean, no
 }
 
 const firstName = (a: Agent | undefined, fallback: string) => ((a?.name ?? "").trim().split(/\s+/)[0] || fallback);
-const initialsOf = (s: string) => s.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "?";
 const days = (a: number, b: number) => Math.max(0, Math.round((b - a) / DAY));
 
 export interface F1Ctx {
@@ -183,7 +172,7 @@ export interface F1Ctx {
   agents: readonly Agent[];
   manuscripts: readonly Manuscript[];
   qcRows: readonly QcRow[];
-  /** the writer's name, for their own disc */
+  /** the writer's name (the open card's disc is gone in feed wording v1.1; kept for the callers) */
   userName: string;
   now: Date;
 }
@@ -198,30 +187,33 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
   const who = (agent?.name ?? "").trim() || e.who || "The agent";
   const first = firstName(agent, who);
   const agency = (agent?.agency ?? e.agency ?? "").trim();
-  const title = (ms?.title ?? "").trim() || "your manuscript";
+  const msTitle = (ms?.title ?? "").trim();
   const spans = row?.history.spans ?? [];
   const at = spans.findIndex((s) => s.status === e.status);
   const span = at >= 0 ? spans[at] : undefined;
   const prev = at > 0 ? spans[at - 1] : undefined;
   const sentMs = anyToMs(q.dateSent);
   const figs: F1Fig[] = [];
-  let headline: string;
+  /* the sentence once, in runs, for any name: the collapsed row says the first name, the open card's top the full one */
+  let say: (name: string) => FeedSeg[];
+  const p = (name: string): FeedSeg => ({ t: name, who: true });
+  const book: FeedSeg[] = msTitle ? [{ t: msTitle, em: true }] : [{ t: "your manuscript" }];
   if (kind === "request") {
-    headline = e.status === QueryStatus.FULL_REQUESTED ? `${first} asked for the full manuscript`
-      : e.status === QueryStatus.PARTIAL_REQUESTED ? `${first} asked for a partial`
-        : `${first} asked you to revise and resubmit`;
+    const what = e.status === QueryStatus.FULL_REQUESTED ? " asked for the full manuscript"
+      : e.status === QueryStatus.PARTIAL_REQUESTED ? " asked for a partial" : " asked you to revise and resubmit";
+    say = (n) => [p(n), { t: what }];
     if (span && prev) figs.push({ label: "Days to reply", value: String(days(prev.startMs, span.startMs)) });
     const by = anyToMs(q.expectedSendDate);
     if (by != null) figs.push({ label: "Send by", value: dayMonth(by) });
   } else if (kind === "offer") {
-    headline = e.status === QueryStatus.SIGNED ? `You signed with ${first}` : `${first} offered to represent ${title}`;
+    say = e.status === QueryStatus.SIGNED ? (n) => [{ t: "You signed with " }, p(n)] : (n) => [p(n), { t: " offered to represent " }, ...book];
     const offerMs = span?.startMs ?? e.at;
     if (sentMs != null) figs.push({ label: "Weeks querying", value: String(Math.max(0, Math.round((offerMs - sentMs) / (7 * DAY)))) });
     const by = anyToMs(q.offerResponseDeadline);
     if (by != null) figs.push({ label: "Reply by", value: dayMonth(by) });
   } else {
     const full = e.status === QueryStatus.FULL_SENT;
-    headline = full ? `Your full manuscript is with ${first}` : `Your partial is with ${first}`;
+    say = (n) => [{ t: full ? "Your full manuscript is with " : "Your partial is with " }, p(n)];
     const sendMs = span?.startMs ?? e.at;
     if (full && typeof ms?.wordCount === "number" && ms.wordCount > 0) figs.push({ label: "Words", value: ms.wordCount.toLocaleString("en-GB") });
     if (sentMs != null) figs.push({ label: "Days since query", value: String(days(sentMs, sendMs)) });
@@ -235,23 +227,18 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
     const named = pieces.map((p) => ({ name: p.key === "sample" ? "Opening sample" : p.label, version: (p.value ?? "").trim() }));
     mats = named.length ? named.slice(0, 3) : null;
   }
-  const out = e.dir === "out";
   /* ⚠️ A NAME IS NEVER SAID TWICE (feed wording v1): a nameless agent's agency IS its name, so it is said once */
   const agencyOnce = provenanceOf(who, agency);
-  const due = figs.slice(0, 2).find((f) => f.label === "Send by" || f.label === "Reply by");
-  const when = whenLine(e.at, ctx.now);
-  const sentWord = e.status === QueryStatus.FULL_SENT ? "a full manuscript" : "a partial";
+  const headline = say(first);
+  /* ⚠️ A SUB-LINE NEVER REPEATS WHAT THE SENTENCE GIVES (v1.1 small fixes): the agency, else the title in italic */
+  const said = sayText(say(who)).toLowerCase();
+  const sub: FeedSeg[] = agencyOnce && !said.includes(agencyOnce.toLowerCase()) ? [{ t: agencyOnce }]
+    : msTitle && !said.includes(msTitle.toLowerCase()) ? [{ t: msTitle, em: true }] : [];
   return {
     type: "big", id: e.id, kind, dir: e.dir, queryId: q.id, status: e.status,
-    initials: out ? initialsOf(ctx.userName || "You") : initialsOf(who),
-    name: out && kind === "sent" ? `You sent ${sentWord}` : who,
-    meta: out && kind === "sent"
-      ? `${when} · to ${[who, agencyOnce].filter(Boolean).join(", ")}`
-      : [when, agencyOnce].filter(Boolean).join(" · "),
-    headline, figs: figs.slice(0, 2), stops: journeyStops(row, q, !!e.need, ctx.now), pkg, mats,
-    sub: due ? `${due.label} ${due.value}` : [who, agencyOnce].filter(Boolean).join(" · "),
-    /* under its own day heading, a card of today or yesterday shows its time, not the heading's word again */
-    day: /^(Today|Yesterday) at /.test(when) ? feedClock(e.at) : when.replace(/ at .*$/, ""),
+    headline, top: say(who),
+    figs: figs.slice(0, 2), stops: journeyStops(row, q, !!e.need, ctx.now), pkg, mats,
+    sub, time: feedClock(e.at),
   };
 }
 

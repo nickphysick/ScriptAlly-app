@@ -7,10 +7,10 @@
  */
 import { describe, it, expect } from "vitest";
 import { ActivityType, QueryStatus, type Agent, type Manuscript, type Query } from "../types";
-import type { FeedEntry } from "./dashFeed";
+import { sayText, type FeedEntry } from "./dashFeed";
 import type { DrawerEvent } from "./dashFeedDrawer";
 import type { QcRow } from "./qcSummary";
-import { bigKind, dayHeading, f1Days, f1From, journeyStops, stopDate, whenLine, type F1Big, type F1Ctx } from "./dashF1Feed";
+import { bigKind, dayHeading, f1Days, f1From, journeyStops, stopDate, type F1Big, type F1Ctx } from "./dashF1Feed";
 
 const NOW = new Date(2026, 9, 30, 15, 0); // Friday 30 October 2026, 15:00
 const at = (d: number, h = 11, m = 40) => new Date(2026, 9, d, h, m).getTime();
@@ -57,10 +57,11 @@ describe("DF1-D · a full request's big card", () => {
   const c = days[0].items[0] as F1Big;
   it("says who, when and what, like a person", () => {
     expect(c.type).toBe("big");
-    expect(c.name).toBe("Nadia Hussain");
-    expect(c.initials).toBe("NH");
-    expect(c.meta).toBe("Today at 11:40am · Hussain Literary");
-    expect(c.headline).toBe("Nadia asked for the full manuscript");
+    /* feed wording v1.1: the disc and the name line are gone; the open card's top is its row, with the full name */
+    expect(sayText(c.top)).toBe("Nadia Hussain asked for the full manuscript");
+    expect(sayText(c.sub)).toBe("Hussain Literary");
+    expect(c.time).toBe("11:40am");
+    expect(sayText(c.headline)).toBe("Nadia asked for the full manuscript");
   });
   it("its two figures come from the record: days since the stage before, and the send-by date", () => {
     expect(c.figs).toEqual([{ label: "Days to reply", value: "21" }, { label: "Send by", value: "26 Nov" }]);
@@ -90,10 +91,10 @@ describe("DF1-D · the writer's own full", () => {
     const row = { ...ROW, history: { ...ROW.history, spans: [...ROW.history.spans, span(QueryStatus.FULL_SENT, 28, 9)] } } as unknown as QcRow;
     const d = f1Days([ev(entry({ id: "s", queryId: "q1", status: QueryStatus.FULL_SENT, dir: "out", at: at(28, 11, 20) }))], "all", { ...ctx, queries: [q], qcRows: [row] });
     const c = d[0].items[0] as F1Big;
-    expect(c.name).toBe("You sent a full manuscript");
-    expect(c.initials).toBe("BC");
-    expect(c.meta).toBe("28 Oct at 11:20am · to Nadia Hussain, Hussain Literary");
-    expect(c.headline).toBe("Your full manuscript is with Nadia");
+    expect(sayText(c.top)).toBe("Your full manuscript is with Nadia Hussain");
+    expect(sayText(c.sub)).toBe("Hussain Literary");
+    expect(c.time).toBe("11:20am");
+    expect(sayText(c.headline)).toBe("Your full manuscript is with Nadia");
     expect(c.figs).toEqual([{ label: "Words", value: "92,400" }, { label: "Days since query", value: "30" }]);
     expect(c.mats).toBeNull();
   });
@@ -129,10 +130,8 @@ describe("DF1-D · mini rows, the switch and the days", () => {
   it("Yesterday holds across the clocks changing (25 October)", () => {
     const MON = new Date(2026, 9, 26, 12);
     expect(dayHeading(new Date(2026, 9, 25).getTime(), MON).first).toBe("Yesterday");
-    expect(whenLine(new Date(2026, 9, 25, 9, 0).getTime(), MON)).toBe("Yesterday at 9:00am");
   });
   it("dates and windows", () => {
-    expect(whenLine(at(29, 13, 5), NOW)).toBe("Yesterday at 1:05pm");
     expect(stopDate(at(29), NOW)).toBe("Thu");
     expect(stopDate(at(9, 12, 0), NOW)).toBe("9 Oct");
     expect(f1From(NOW)).toBe(new Date(2026, 9, 24).getTime());
@@ -143,16 +142,16 @@ describe("DF1-D · mini rows, the switch and the days", () => {
   });
 });
 
-describe("DB21-D · a big event's collapsed row", () => {
-  it("says the deadline where the card has one", () => {
+describe("DB21-D · a big event's collapsed row (feed wording v1.1: the ref's sub-line)", () => {
+  it("its sub-line is the agency the sentence does not give, then the time (the deadline is a figure on the card)", () => {
     const c = f1Days([ev(entry({ id: "r", queryId: "q1", status: QueryStatus.FULL_REQUESTED, dir: "in", who: "Nadia Hussain" }))], "all", ctx)[0].items[0] as F1Big;
-    expect(c.sub).toBe("Send by 26 Nov");
-    expect(c.day).toBe("11:40am"); // feed wording v1: under its own day heading, the time
+    expect(sayText(c.sub)).toBe("Hussain Literary");
+    expect(c.time).toBe("11:40am");
   });
-  it("otherwise names the agent and the agency, and the day without its time", () => {
+  it("an older card shows its time too: the day is the heading above it", () => {
     const q = { ...Q, status: QueryStatus.FULL_SENT, expectedSendDate: undefined } as unknown as Query;
     const c = f1Days([ev(entry({ id: "s", queryId: "q1", status: QueryStatus.FULL_SENT, dir: "out", at: at(28, 11, 20) }))], "all", { ...ctx, queries: [q] })[0].items[0] as F1Big;
-    expect(c.sub).toBe("Nadia Hussain · Hussain Literary");
-    expect(c.day).toBe("28 Oct");
+    expect(sayText(c.sub)).toBe("Hussain Literary");
+    expect(c.time).toBe("11:20am");
   });
 });

@@ -180,8 +180,8 @@ test.describe("Feed wording v1", () => {
     test(`FW-E · a long headline shows its whole text · ${tag}`, async ({ page }) => {
       const L = new Ledger(`FW-E-${tag}`);
       await openDash(page, lay, lay.collapsed);
-      if (MUT === "E") await page.addStyleTag({ content: ".d58.d2 .d2-feed .df1-ctx b { display: block !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }" });
-      if (MUT === "C") await page.addStyleTag({ content: ".d58.d2 .d2-feed .df1-ctx b { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; overflow: hidden !important; }" });
+      if (MUT === "E") await page.addStyleTag({ content: ".d58.d2 .d2-feed .df1-hl { display: block !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }" });
+      if (MUT === "C") await page.addStyleTag({ content: ".d58.d2 .d2-feed .df1-hl { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; overflow: hidden !important; }" });
       await page.waitForTimeout(300);
       const sel = `.d2 [data-df1="collapsed"][data-query="${LONG.queryId}"]`;
       await page.locator(sel).first().waitFor({ timeout: 15_000 }).catch(() => {});

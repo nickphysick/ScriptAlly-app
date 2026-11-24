@@ -367,7 +367,7 @@ describe("Part C — no feed sentence ends in a full stop, and none contains a d
 });
 
 /* ═══ Part D — the cards ════════════════════════════════════════════════════════════════════════════ */
-import { bigCard, whenLine, type F1Big } from "./dashF1Feed";
+import { bigCard, type F1Big } from "./dashF1Feed";
 import type { Query } from "../types";
 
 describe("Part D — the cards", () => {
@@ -389,26 +389,23 @@ describe("Part D — the cards", () => {
     [QueryStatus.FULL_REQUESTED, "in", "Nadia asked for the full manuscript"],
     [QueryStatus.PARTIAL_REQUESTED, "in", "Nadia asked for a partial"],
   ] as [QueryStatus, "in" | "out", string][])("%s headline: %s", (st, dir, want) => {
-    expect(card(st, dir, named).headline).toBe(want);
+    expect(sayText(card(st, dir, named).headline)).toBe(want);
   });
-  it("a nameless agent's agency is said once, in the sub-line and the meta, in and out", () => {
+  it("a nameless agent's agency is said once, in the sentence; the sub-line gives the title instead (v1.1)", () => {
     const pen = { name: "", agency: "Penhallow Literary" };
     const inn = card(QueryStatus.PARTIAL_REQUESTED, "in", pen);
     const out = card(QueryStatus.FULL_SENT, "out", pen);
-    for (const c of [inn, out]) for (const line of [c.sub, c.meta]) expect(line.split("Penhallow Literary").length - 1, line).toBeLessThanOrEqual(1);
-    expect(inn.sub).toBe("Penhallow Literary");
-    expect(out.meta).toBe("Today at 11:40am · to Penhallow Literary");
-    expect(out.headline).toBe("Your full manuscript is with Penhallow Literary");
+    for (const c of [inn, out]) {
+      const all = `${sayText(c.top)} ${sayText(c.sub)}`;
+      expect(all.split("Penhallow Literary").length - 1, all).toBe(1);
+      expect(c.sub).toEqual([{ t: T, em: true }]);
+    }
+    expect(sayText(out.headline)).toBe("Your full manuscript is with Penhallow Literary");
   });
-  it("the when-line is the feed's 12-hour clock", () => {
-    expect(whenLine(today1140, NOW)).toBe("Today at 11:40am");
-    expect(whenLine(new Date(2026, 10, 23, 13, 5).getTime(), NOW)).toBe("Yesterday at 1:05pm");
-    expect(whenLine(new Date(2026, 9, 28, 11, 20).getTime(), NOW)).toBe("28 Oct at 11:20am");
-  });
-  it("a collapsed card of today or yesterday shows its time; an older one, its date, as built", () => {
-    expect(card(QueryStatus.FULL_SENT, "out", named).day).toBe("11:40am");
-    expect(card(QueryStatus.FULL_SENT, "out", named, new Date(2026, 10, 23, 13, 5).getTime()).day).toBe("1:05pm");
-    expect(card(QueryStatus.FULL_SENT, "out", named, new Date(2026, 10, 18, 9, 0).getTime()).day).toBe("18 Nov");
+  it("every card shows its time on the feed's 12-hour clock (v1.1: the day is the heading above it)", () => {
+    expect(card(QueryStatus.FULL_SENT, "out", named).time).toBe("11:40am");
+    expect(card(QueryStatus.FULL_SENT, "out", named, new Date(2026, 10, 23, 13, 5).getTime()).time).toBe("1:05pm");
+    expect(card(QueryStatus.FULL_SENT, "out", named, new Date(2026, 10, 18, 9, 0).getTime()).time).toBe("9:00am");
   });
   it("one clock formatter for the rows and the cards", () => {
     const f1 = readFileSync("src/lib/dashF1Feed.ts", "utf8");
@@ -419,27 +416,8 @@ describe("Part D — the cards", () => {
   });
 });
 
-/* ═══ Part E — nothing cut off (source half; the rendered half is tests/e2e/feedWordingV1.measure.ts FW-E) ══════ */
-describe("Part E — the collapsed card's headline wraps; its sub-line stays one", () => {
-  const css = readFileSync("src/components/dashboard/v2/dash2Feed.css", "utf8");
-  const rule = (sel: string) => { const i = css.indexOf(`${sel} {`); return css.slice(i, css.indexOf("}", i)); };
-  it("the headline: wrapping, no one-line ellipsis (v1.1: and no line cap)", () => {
-    const b = rule(".d58.d2 .d2-feed .df1-ctx b");
-    expect(b).not.toContain("line-clamp");
-    expect(b).toContain("white-space: normal");
-    expect(b).not.toContain("nowrap");
-    expect(b).not.toContain("text-overflow: ellipsis");
-  });
-  it("the sub-line: one line, as built", () => {
-    expect(rule(".d58.d2 .d2-feed .df1-ctx small")).toContain("white-space: nowrap");
-  });
-  it("the time sits at the top, on the headline's line box", () => {
-    const t = rule(".d58.d2 .d2-feed .df1-crow time");
-    expect(t).toContain("align-self: start");
-    expect(t).toContain("line-height: 20px");
-  });
-});
-
+/* Part E's source half moved to src/lib/feedWordingV11.test.ts (v1.1 Part 1 and Part 2): the headline lost its line cap
+   and the time moved under the sentence. */
 describe("the phone's Today reads the first person run as the name", () => {
   it("on a rename row that run is the NEW name", () => {
     const e = feed([act({ activityType: ActivityType.AGENT_UPDATED, changed: ["name"], previousName: "Nadia Hussein", subjectName: "Nadia Hussain", subjectAgency: "Hussain Literary", description: "x" })]);
