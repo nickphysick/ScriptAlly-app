@@ -585,6 +585,134 @@ service cloud.firestore {
         && (data.get('agentRecheckOn', null) == null || (data.agentRecheckOn is string && data.agentRecheckOn.size() <= 64));
     }
 
+    // ⚠️ RULES BUDGET v1 (24 Nov) — AN UPDATE VALIDATES ONLY THE KEYS IT CHANGES.
+    // `isValidQuery` re-checked all 66 optional fields on every update, present or not, and an update to a query
+    // holding ~17 of them ran past Firestore's 1,000-expression limit and was DENIED — on real dev as in the
+    // emulator (reports/rules-budget-v1/REPORT.md). Here every check is gated on its key being in
+    // `changed` (the update's affectedKeys(), deletions included), so a field that is not changing is not
+    // re-checked: it was checked when it was written. A changed key meets EXACTLY the check `isValidQuery` gives
+    // it — tests/rules/queryUpdateBudget.test.ts compares the two clause by clause, so the copies cannot drift.
+    // Create still runs `isValidQuery` whole. The update allowlist (hasOnly) is unchanged and still runs first.
+    function isValidQueryStatus(data) {
+      return data.status in ['Queried', 'Partial Requested', 'Partial Sent', 'Full Requested', 'Full Sent', 'Revise & Resubmit', 'Offer', 'Rejected', 'Withdrawn', 'No Response', 'Resubmitted', 'Signed'];
+    }
+    function isValidQuerySendMethod(data) {
+      return data.sendMethod in ['Email', 'Online Form', 'Query Manager', 'Post'];
+    }
+    // `is number` is `is int || is float`, so this is isValidQuery's four-way type test in two.
+    function isValidQueryMaterialsQuantity(data) {
+      return (data.materialsRequestedQuantity is string || data.materialsRequestedQuantity is number) || data.get('materialsRequestedQuantity', null) == null;
+    }
+    function isValidQueryMaterialsWanted(data) {
+      return ((data.materialsWanted is list || data.materialsWanted is map) && data.materialsWanted.size() <= 20) || data.get('materialsWanted', null) == null;
+    }
+    // The update's checks, called by the update rule AFTER its allowlist (which stays in the match block, unchanged).
+    //
+    // An OPTIONAL key is checked only when it is WRITTEN (added or given a new value, null included): removing an
+    // optional key was always allowed (isValidQuery's `get(f, null) == null`), so a removal needs no check, and a
+    // removal is the dearest check there is. A REQUIRED key is checked whenever it is affected, removal included,
+    // so removing one is still denied.
+    function isValidQueryUpdate(data, d, userId) {
+      return isValidQueryChange(data, d.affectedKeys(), d.addedKeys().union(d.changedKeys()), userId);
+    }
+    // Every key's check sits inside a group gated on `changed.hasAny(<that group's keys>)`, so an update pays for
+    // the groups it touches, not for all 73 keys. The groups are the app's own writes, so a wide write wastes few gates. ⚠️ A key gated inside a group MUST be in that group's hasAny list,
+    // or its check never runs — tests/rules/queryUpdateBudget.test.ts asserts the lists and the gates match.
+    function isValidQueryChange(data, changed, written, userId) {
+      return true
+        // recomputeQuery's ten
+        && (!changed.hasAny(['status', 'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate', 'revisionRound', 'hasAgentResponded', 'responseReceivedAt', 'rejectedDate', 'lastStatusChange']) || (true
+          && (!('status' in changed) || isValidQueryStatus(data))
+          && (!('partialRequestedDate' in written) || ((data.partialRequestedDate is string && data.partialRequestedDate.size() <= 64) || data.get('partialRequestedDate', null) == null))
+          && (!('partialSentDate' in written) || ((data.partialSentDate is string && data.partialSentDate.size() <= 64) || data.get('partialSentDate', null) == null))
+          && (!('fullRequestedDate' in written) || ((data.fullRequestedDate is string && data.fullRequestedDate.size() <= 64) || data.get('fullRequestedDate', null) == null))
+          && (!('fullSentDate' in written) || ((data.fullSentDate is string && data.fullSentDate.size() <= 64) || data.get('fullSentDate', null) == null))
+          && (!('revisionRound' in written) || ((data.revisionRound is int && data.revisionRound >= 1 && data.revisionRound <= 100) || data.get('revisionRound', null) == null))
+          && (!('hasAgentResponded' in written) || (data.hasAgentResponded is bool || data.get('hasAgentResponded', null) == null))
+          && (!('responseReceivedAt' in written) || ((data.responseReceivedAt is timestamp || data.responseReceivedAt is string) || data.get('responseReceivedAt', null) == null))
+          && (!('rejectedDate' in written) || ((data.rejectedDate is string && data.rejectedDate.size() <= 64) || data.get('rejectedDate', null) == null))
+          && (!('lastStatusChange' in written) || ((data.lastStatusChange is timestamp || data.lastStatusChange is string) || data.get('lastStatusChange', null) == null))))
+        // a response's details (planResponse)
+        && (!changed.hasAny(['materialsRequestedType', 'materialsRequestedQuantity', 'fullVersionSent', 'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText', 'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes']) || (true
+          && (!('materialsRequestedType' in written) || ((data.materialsRequestedType is string && data.materialsRequestedType.size() <= 256) || data.get('materialsRequestedType', null) == null))
+          && (!('materialsRequestedQuantity' in written) || isValidQueryMaterialsQuantity(data))
+          && (!('fullVersionSent' in written) || ((data.fullVersionSent is string && data.fullVersionSent.size() <= 512) || data.get('fullVersionSent', null) == null))
+          && (!('expectedSendDate' in written) || ((data.expectedSendDate is timestamp || data.expectedSendDate is string) || data.get('expectedSendDate', null) == null))
+          && (!('sendReminderDate' in written) || ((data.sendReminderDate is timestamp || data.sendReminderDate is string) || data.get('sendReminderDate', null) == null))
+          && (!('rrNotes' in written) || ((data.rrNotes is string && data.rrNotes.size() <= 16384) || data.get('rrNotes', null) == null))
+          && (!('rejectionFeedbackType' in written) || ((data.rejectionFeedbackType is string && data.rejectionFeedbackType.size() <= 256) || data.get('rejectionFeedbackType', null) == null))
+          && (!('rejectionFeedbackText' in written) || ((data.rejectionFeedbackText is string && data.rejectionFeedbackText.size() <= 16384) || data.get('rejectionFeedbackText', null) == null))
+          && (!('rejectionReflection' in written) || ((data.rejectionReflection is string && data.rejectionReflection.size() <= 16384) || data.get('rejectionReflection', null) == null))
+          && (!('rejectionLesson' in written) || ((data.rejectionLesson is string && data.rejectionLesson.size() <= 16384) || data.get('rejectionLesson', null) == null))
+          && (!('rejectedFromStatus' in written) || ((data.rejectedFromStatus is string && data.rejectedFromStatus.size() <= 64) || data.get('rejectedFromStatus', null) == null))
+          && (!('offerDate' in written) || ((data.offerDate is timestamp || data.offerDate is string) || data.get('offerDate', null) == null))
+          && (!('offerResponseDeadline' in written) || ((data.offerResponseDeadline is timestamp || data.offerResponseDeadline is string) || data.get('offerResponseDeadline', null) == null))
+          && (!('offerNotes' in written) || ((data.offerNotes is string && data.offerNotes.size() <= 16384) || data.get('offerNotes', null) == null))
+          && (!('closingReason' in written) || ((data.closingReason is string && data.closingReason.size() <= 256) || data.get('closingReason', null) == null))
+          && (!('closingNotes' in written) || ((data.closingNotes is string && data.closingNotes.size() <= 16384) || data.get('closingNotes', null) == null))))
+        // what was asked for
+        && (!changed.hasAny(['requestSynopsis', 'requestFrom', 'requestFromUnit']) || (true
+          && (!('requestSynopsis' in written) || (data.requestSynopsis is bool || data.get('requestSynopsis', null) == null))
+          && (!('requestFrom' in written) || ((data.requestFrom is int && data.requestFrom >= 1 && data.requestFrom <= 10000000) || data.get('requestFrom', null) == null))
+          && (!('requestFromUnit' in written) || (data.requestFromUnit in ['chapter', 'page', 'word'] || data.get('requestFromUnit', null) == null))))
+        // the reminder
+        && (!changed.hasAny(['nudgeDate', 'nudgeSetAt', 'lastNudgeSentDate', 'closePlan']) || (true
+          && (!('nudgeDate' in written) || ((data.nudgeDate is string && data.nudgeDate.size() <= 64) || data.get('nudgeDate', null) == null))
+          && (!('nudgeSetAt' in written) || ((data.nudgeSetAt is string && data.nudgeSetAt.size() <= 64) || data.get('nudgeSetAt', null) == null))
+          && (!('lastNudgeSentDate' in written) || ((data.lastNudgeSentDate is string && data.lastNudgeSentDate.size() <= 64) || data.get('lastNudgeSentDate', null) == null))
+          && (!('closePlan' in written) || ((data.closePlan is string && data.closePlan.size() <= 64) || data.get('closePlan', null) == null))))
+        // the writer's expected date
+        && (!changed.hasAny(['writerExpectedDate', 'writerExpectedSetAt', 'lastSentLabel']) || (true
+          && (!('writerExpectedDate' in written) || ((data.writerExpectedDate is string && data.writerExpectedDate.size() <= 64) || data.get('writerExpectedDate', null) == null))
+          && (!('writerExpectedSetAt' in written) || ((data.writerExpectedSetAt is string && data.writerExpectedSetAt.size() <= 64) || data.get('writerExpectedSetAt', null) == null))
+          && (!('lastSentLabel' in written) || ((data.lastSentLabel is string && data.lastSentLabel.size() <= 256) || data.get('lastSentLabel', null) == null))))
+        // what was sent (sentCorrectionFields, materialsLinkWrites)
+        && (!changed.hasAny(['sentHow', 'packageId', 'sentPackageId', 'sentPackageEdition', 'sentPackageName', 'basedOnPackageId', 'basedOnPackageEdition', 'sentChanges', 'sentMaterials', 'sentVersions', 'sentCorrectedAt', 'sentCorrectedFrom', 'bookVersionId', 'materialsWanted']) || (true
+          && (!('sentHow' in written) || (data.sentHow in ['package', 'individual', 'unrecorded'] || data.get('sentHow', null) == null))
+          && (!('packageId' in changed) || (data.packageId is string && data.packageId.size() <= 128))
+          && (!('sentPackageId' in written) || ((data.sentPackageId is string && data.sentPackageId.size() <= 128) || data.get('sentPackageId', null) == null))
+          && (!('sentPackageEdition' in written) || ((data.sentPackageEdition is int && data.sentPackageEdition >= 1 && data.sentPackageEdition <= 1000) || data.get('sentPackageEdition', null) == null))
+          && (!('sentPackageName' in written) || ((data.sentPackageName is string && data.sentPackageName.size() <= 256) || data.get('sentPackageName', null) == null))
+          && (!('basedOnPackageId' in written) || ((data.basedOnPackageId is string && data.basedOnPackageId.size() <= 128) || data.get('basedOnPackageId', null) == null))
+          && (!('basedOnPackageEdition' in written) || ((data.basedOnPackageEdition is int && data.basedOnPackageEdition >= 1 && data.basedOnPackageEdition <= 1000) || data.get('basedOnPackageEdition', null) == null))
+          && (!('sentChanges' in written) || ((data.sentChanges is list && data.sentChanges.size() <= 10) || data.get('sentChanges', null) == null))
+          && (!('sentMaterials' in written) || ((data.sentMaterials is string && data.sentMaterials.size() <= 1024) || data.get('sentMaterials', null) == null))
+          && (!('sentVersions' in written) || ((data.sentVersions is list && data.sentVersions.size() <= 10) || data.get('sentVersions', null) == null))
+          && (!('sentCorrectedAt' in written) || ((data.sentCorrectedAt is string && data.sentCorrectedAt.size() <= 64) || data.get('sentCorrectedAt', null) == null))
+          && (!('sentCorrectedFrom' in written) || ((data.sentCorrectedFrom is string && data.sentCorrectedFrom.size() <= 1024) || data.get('sentCorrectedFrom', null) == null))
+          && (!('bookVersionId' in written) || (isValidId(data.bookVersionId) || data.get('bookVersionId', null) == null))
+          && (!('materialsWanted' in written) || isValidQueryMaterialsWanted(data))))
+        // the offer marks on other queries
+        && (!changed.hasAny(['offerRefQueryId', 'offerTold', 'offerToldOn', 'offerReply', 'offerCall', 'offerCallOn']) || (true
+          && (!('offerRefQueryId' in written) || ((data.offerRefQueryId is string && data.offerRefQueryId.size() <= 128) || data.get('offerRefQueryId', null) == null))
+          && (!('offerTold' in written) || (data.offerTold is bool || data.get('offerTold', null) == null))
+          && (!('offerToldOn' in written) || ((data.offerToldOn is string && data.offerToldOn.size() <= 64) || data.get('offerToldOn', null) == null))
+          && (!('offerReply' in written) || (data.offerReply in ['wait', 'full', 'aside', 'offer'] || data.get('offerReply', null) == null))
+          && (!('offerCall' in written) || (data.offerCall in ['none', 'booked', 'done'] || data.get('offerCall', null) == null))
+          && (!('offerCallOn' in written) || ((data.offerCallOn is string && data.offerCallOn.size() <= 64) || data.get('offerCallOn', null) == null))))
+        // the query's own edits (commitQueryEdits)
+        && (!changed.hasAny(['dateSent', 'sendMethod', 'personalisationNotes', 'agentId', 'manuscriptId', 'ifNoResponse', 'rejectionType', 'agentComments']) || (true
+          && (!('dateSent' in written) || ((data.dateSent is string && data.dateSent.size() <= 64) || data.get('dateSent', null) == null))
+          && (!('sendMethod' in changed) || isValidQuerySendMethod(data))
+          && (!('personalisationNotes' in written) || ((data.personalisationNotes is string && data.personalisationNotes.size() <= 16384) || data.get('personalisationNotes', null) == null))
+          && (!('agentId' in changed) || (data.agentId is string && data.agentId.size() <= 128))
+          && (!('manuscriptId' in changed) || (data.manuscriptId is string && data.manuscriptId.size() <= 128))
+          && (!('ifNoResponse' in written) || ((data.ifNoResponse is string && data.ifNoResponse.size() <= 256) || data.get('ifNoResponse', null) == null))
+          && (!('rejectionType' in written) || ((data.rejectionType is string && data.rejectionType.size() <= 256) || data.get('rejectionType', null) == null))
+          && (!('agentComments' in written) || ((data.agentComments is string && data.agentComments.size() <= 16384) || data.get('agentComments', null) == null))))
+        // the rest
+        && (!changed.hasAny(['id', 'userId', 'responseDeadline', 'closureOfferDismissed', 'replyRestartedOn', 'withdrawTold', 'agentRecheckOn', 'requery', 'nrmnOverride']) || (true
+          && (!('id' in changed) || (data.id is string && data.id.size() <= 128))
+          && (!('userId' in changed) || data.userId == userId)
+          && (!('responseDeadline' in written) || ((data.responseDeadline is string && data.responseDeadline.size() <= 64) || data.get('responseDeadline', null) == null))
+          && (!('closureOfferDismissed' in written) || (data.closureOfferDismissed is bool || data.get('closureOfferDismissed', null) == null))
+          && (!('replyRestartedOn' in written) || ((data.replyRestartedOn is string && data.replyRestartedOn.size() <= 32) || data.get('replyRestartedOn', null) == null))
+          && (!('withdrawTold' in written) || (data.withdrawTold is bool || data.get('withdrawTold', null) == null))
+          && (!('agentRecheckOn' in written) || ((data.agentRecheckOn is string && data.agentRecheckOn.size() <= 64) || data.get('agentRecheckOn', null) == null))
+          && (!('requery' in written) || (data.requery is bool || data.get('requery', null) == null))
+          && (!('nrmnOverride' in written) || (data.nrmnOverride is bool || data.get('nrmnOverride', null) == null))));
+    }
+
     /**
      * ⚠️ THE AUTHORITATIVE STORE — AND UNTIL 26 Aug 2026 IT WAS THE LOOSELY-VALIDATED ONE.
      * `recomputeQuery` derives status and every pipeline date from THIS collection
@@ -1138,7 +1266,7 @@ service cloud.firestore {
         // transition. The door this leaves open (a client update writing a non-derived status)
         // is closed at the source instead: queryStatusWriters.test.ts locks the known query
         // mutation paths to zero bare status write keys.
-        allow update: if isOwner(userId) && isValidId(queryId) && isValidQuery(incoming(), userId) && (
+        allow update: if isOwner(userId) && isValidId(queryId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
             'manuscriptId', 'dateSent',
             'status', 'personalisationNotes', 'sendMethod', 'nudgeDate', 'nudgeSetAt', 'lastNudgeSentDate', 'responseDeadline',
@@ -1168,7 +1296,7 @@ service cloud.firestore {
             // Versions v2 (D3) — "Which version went?" and Change, and the first-save backfill.
             'bookVersionId'
           ])
-        );
+        ) && isValidQueryUpdate(incoming(), incoming().diff(existing()), userId);
 
         match /activity/{activityId} {
           allow get, delete: if isOwner(userId) && isValidId(activityId);
