@@ -11,6 +11,9 @@
  *   P2  "Open {First}'s card" opens the query's card OVER the journey: the journey stays in the page, dimmed and stepped
  *       back (its box measured against the card's), takes no Tab; Escape closes only the card; the same recorded screen
  *       comes back with focus on "Open {First}'s card"; Undo still restores; the path never changes
+ *   P4  v2.1.1 — a partial recorded as sent with the reply time Unknown: the recorded screen says "There's no reply date
+ *       yet." and the card beneath agrees ("Reply expected by" / "No date yet", no window bar, no nudge line); the query's
+ *       own card, opened from there, shows no reply date either
  *   P3  the track: a long name under a finished step ("Penhallow Literary Agency", an agency with no named agent, seeded by
  *       tests/e2e/seedRar21.mjs and removed after) shows its first word, never a word cut mid-way; the full name is in
  *       the step's accessible label
@@ -249,4 +252,38 @@ test("P3 · a long name under a finished step shows its first word, the full nam
     execSync("node tests/e2e/seedRar21.mjs --clean", { stdio: "ignore", timeout: 60_000 });
   }
   L.done(4);
+});
+
+/* ── P4 · v2.1.1: Unknown on "Yes, it's gone" — the sentence and the card agree ── */
+test("P4 · a partial sent with the reply time Unknown: the recorded sentence and the card agree", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("P4");
+  await openFromDashboard(page);
+  await toSent(page, "pr", "yes", "unknown");
+  await record(page);
+  const d = await page.evaluate(() => {
+    const t = (e: Element | null | undefined) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+    const nx = document.querySelector('[data-rar="done"] [data-qc154="fact"][data-k="next"]');
+    return {
+      line: t(document.querySelector('[data-rar="done-line"]')),
+      label: t(nx?.querySelector(".qc154-fl")), value: t(nx?.querySelector("b")), noDate: !!nx?.querySelector('[data-qc154="no-date"]'),
+      bar: !!nx?.querySelector('[data-qc154="window"]'), nudge: !!nx?.querySelector('[data-qc154="nudge-on"]'), box: t(nx),
+    };
+  });
+  L.check("the recorded sentence", d.line === "There’s no reply date yet.", d.line);
+  L.check("the card's box: Reply expected by / No date yet", d.label === "Reply expected by" && d.value === "No date yet" && d.noDate, d.box);
+  L.check("the card's box: no window bar", !d.bar, d.box);
+  L.check("the card's box: no nudge line", !d.nudge, d.box);
+  /* the query's own card, over the journey */
+  await page.locator(R("open-card")).click();
+  await page.locator('[data-side-panel][data-qp="panel"]').first().waitFor({ timeout: 15_000 });
+  await settle(page, 900);
+  const card = await page.locator('[data-side-panel][data-qp="panel"]').first().innerText();
+  const m = card.match(/Reply expected by[^\n]*/);
+  L.check("the query's own card shows no reply date", !/Reply expected by \d/.test(card), m ? m[0] : "(no “Reply expected by” line)");
+  await page.keyboard.press("Escape"); await settle(page, 900);
+  await undo(page);
+  await page.keyboard.press("Escape"); await settle(page, 300);
+  if (await page.locator(R("leave-discard")).count()) { await page.locator(R("leave-discard")).click(); await settle(page, 500); }
+  L.done(5);
 });

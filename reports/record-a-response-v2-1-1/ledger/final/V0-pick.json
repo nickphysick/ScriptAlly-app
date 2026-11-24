@@ -1,0 +1,12 @@
+[
+ {
+  "where": "the door opened something",
+  "ok": true,
+  "detail": "{\"path\":\"/dashboard\",\"search\":\"\",\"journey\":true,\"track\":true,\"step\":\"who\",\"head\":\"Who replied?\",\"composer\":null,\"picker\":false,\"qadDrawer\":false,\"scrollY\":0}"
+ },
+ {
+  "where": "a pick leaves the route",
+  "ok": true,
+  "detail": "/dashboard → /dashboard"
+ }
+]
