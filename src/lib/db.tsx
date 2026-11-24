@@ -133,7 +133,7 @@ import { contentsChanged } from "./packageEditions";
 import { contentWriteAllowed, isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
-import { buildAgentReplyWrites, isAgentReplyFeed, REPLY_DATE_FIELD, REPLY_KIND_FIELD, type AgentReplyInput, type ReplyKind } from "./agentReply";
+import { buildAgentReplyWrites, entryDatesFor, latestFeedReplies, isAgentReplyFeed, REPLY_DATE_FIELD, REPLY_KIND_FIELD, type AgentReplyInput, type ReplyKind } from "./agentReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
 import { planSampleRetirement, retirementReport } from "./retireSamples";
@@ -1126,6 +1126,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     const lastHoldingReplyFor = (id: string): number | null => holdingReplyByQuery.get(id) ?? null;
+    /* Controls: entry v1 — every query's latest reply entry, once, for the read-through below (lib/agentReply) */
+    const latestReplies = latestFeedReplies(activities);
     const now = new Date();
     const todayISO = now.toISOString().slice(0, 10);
 
@@ -1258,8 +1260,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // Nudge/close precedence: one decision, one task (close SUCCEEDS nudge, never competes).
       // No reply window → neither fires (only a nudge the writer booked, Log a query v1.3); the data_quality_poor
       // "set a window" item does instead.
+      /* Controls: entry v1 — the dates as the agent's latest reply entry moves them: the cards' own read-through */
+      const entry = entryDatesFor(q, null, latestReplies.get(q.id) ?? null);
       const reply = replyTask({
         status: q.status,
+        replyDateMs: entry.replyDateMs,
         dateSent: q.dateSent,
         responseDeadline: q.responseDeadline,
         responseTimeWeeks: agent.responseTimeWeeks,
@@ -1268,7 +1273,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         lastNudgeSentDate: q.lastNudgeSentDate,
         closePlan: q.closePlan,
         /* the writer's own reminder date — raises the SAME nudge when it arrives (Phase 2) */
-        writerNudgeDate: q.nudgeDate,
+        writerNudgeDate: entry.reminderMs != null ? new Date(entry.reminderMs).toISOString() : q.nudgeDate,
         /* §3 — a nudge the writer has already scheduled supersedes both answers. The predicate is
            `scheduledReminder`'s, which is what the tracker's ghost rung draws from, so the feed and
            the timeline cannot disagree about whether a chase is booked. */

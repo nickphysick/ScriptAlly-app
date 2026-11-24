@@ -317,3 +317,47 @@ export function replyRowLabel(kind: ReplyKind): string {
   if (kind === "note") return "They sent a note";
   return "They replied — no decision yet";
 }
+
+/* ── the read-through, for surfaces that hold a query and the feed (Controls: entry v1, follow-up 1) ───────────── */
+
+const anyMs = (v: unknown): number | null => {
+  if (v == null || v === "") return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string") { const t = /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(`${v}T12:00:00`).getTime() : Date.parse(v); return Number.isFinite(t) ? t : null; }
+  const o = v as { toMillis?: () => number; seconds?: number };
+  if (typeof o.toMillis === "function") return o.toMillis();
+  if (typeof o.seconds === "number") return o.seconds * 1000;
+  return null;
+};
+export interface EntryDates {
+  reply: AgentReply | null;
+  /** the entry's new reply date, when it moves this wait (after the latest send) — else null */
+  replyDateMs: number | null;
+  /** Send by, through the entry (with you, after the request) — else the stored one, else null */
+  sendByMs: number | null;
+  /** the writer's reminder, through the entry — else the stored one, else null */
+  reminderMs: number | null;
+}
+/**
+ * ⚠️ THE ONE READ-THROUGH for a surface holding a query and the global feed: the same primitives the Query Centre's
+ * rows use (`replyStatement`, `replySendByMs`, `replyReminderMs`), so the To-do list, the task generator and the cards
+ * cannot come to disagree about which date an entry moved.
+ */
+export function entryDatesFor(
+  q: { id: string; dateSent?: unknown; partialSentDate?: unknown; fullSentDate?: unknown; lastStatusChange?: unknown; expectedSendDate?: unknown; nudgeDate?: unknown },
+  activities: readonly Partial<Activity>[] | null | undefined,
+  replyOf?: AgentReply | null,
+): EntryDates {
+  const reply = replyOf !== undefined ? replyOf : latestFeedReply(q.id, activities);
+  const sends = [q.dateSent, q.partialSentDate, q.fullSentDate].map(anyMs).filter((t): t is number => t != null);
+  const lastSend = sends.length ? Math.max(...sends) : null;
+  const st = replyStatement(reply, lastSend);
+  return {
+    reply,
+    replyDateMs: st ? st.ms : null,
+    sendByMs: replySendByMs(reply, anyMs(q.lastStatusChange), anyMs(q.expectedSendDate)),
+    reminderMs: replyReminderMs(anyMs(q.nudgeDate), reply, lastSend),
+  };
+}
+/** local "YYYY-MM-DD" of an instant, or undefined — the shape the task readers take a day in */
+export const entryYmd = (ms: number | null): string | undefined => (ms == null ? undefined : replyDayIso(ms));

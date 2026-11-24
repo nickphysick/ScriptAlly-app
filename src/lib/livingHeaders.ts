@@ -22,6 +22,7 @@ import type { Agent } from "../types";
 import { QueryStatus } from "../types";
 import type { QcRow } from "./qcSummary";
 import { replyTaskFor } from "./taskPrecedence";
+import { reminderOf } from "./queryState";
 import { dayMonth, formatDate } from "./dates";
 import { agentPrimary } from "./agentDisplay";
 import type { LivingLine, LivingRun } from "./livingLine";
@@ -59,7 +60,7 @@ const OWED_WORD: Partial<Record<QueryStatus, string>> = {
 
 /** The queries whose nudge is due — the To-do generator's own rule. */
 export function nudgesDue(ctx: PressingContext): QcRow[] {
-  return ctx.rows.filter((r) => r.court === "agent" && replyTaskFor(r.query, ctx.agentsById.get(r.query.agentId), ctx.nowMs) === "nudge");
+  return ctx.rows.filter((r) => r.court === "agent" && replyTaskFor(r.query, ctx.agentsById.get(r.query.agentId), ctx.nowMs, undefined, { replyDateMs: (r as { replyDateMs?: number | null }).replyDateMs ?? null, reminderMs: reminderOf(r as never) }) === "nudge");
 }
 
 /**
