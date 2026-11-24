@@ -39,7 +39,8 @@ describe("narratesManuscriptWrite", () => {
     // Retargeted 8 Nov 2026 (timeline writer fix v1): same law, new spelling. The MANUSCRIPT_UPDATED
     // narrator is passed only when narratesManuscriptWrite(fields) is true, and "only after the write
     // landed" moved into lib/manuscriptWrite.ts (held by manuscriptWrite.test.ts).
-    expect(body).toMatch(/narratesManuscriptWrite\(fields\)\s*\?\s*\(\) => addActivity\(\{\s*activityType: ActivityType\.MANUSCRIPT_UPDATED/);
+    // Retargeted 24 Nov 2026 (feed wording v1): the same gate, and a save that changed nothing narrates nothing either.
+    expect(body).toMatch(/narratesManuscriptWrite\(fields\) && msChange\.changed\.length > 0\s*\?\s*\(\) => addActivity\(\{\s*activityType: ActivityType\.MANUSCRIPT_UPDATED/);
     expect(body).toContain("ActivityType.MANUSCRIPT_UPDATED");
   });
 });

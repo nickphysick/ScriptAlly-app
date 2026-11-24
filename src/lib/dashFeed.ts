@@ -438,7 +438,8 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
     return sent !== null && sent < logged ? sent : logged;
   };
 
-  for (const { a, t } of i.activities
+  /* Feed wording v1: updates to one agent less than ten minutes apart read as one row (display only) */
+  for (const { a, t } of foldAgentBursts(i.activities)
     .map((x) => ({ a: x, t: whenOf(x) }))
     .filter((x) => Number.isFinite(x.t) && x.t >= from && x.t <= nowMs)
     .sort((x, y) => y.t - x.t)) {

@@ -119,7 +119,7 @@ import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge }
 import { writeActivity } from "./activityWrite";
 import { createManuscript, updateManuscriptFields } from "./manuscriptWrite";
 import { narrate } from "./narrate";
-import { agentSubject, manuscriptSubject, removedOf } from "./feedHouse";
+import { agentSubject, agentUpdateActivity, manuscriptChange, manuscriptSubject, removedOf } from "./feedHouse";
 import { commitNudge } from "./nudgeWrite";
 import { undoNudge as undoNudgeWrite } from "./nudgeUndo";
 import { resolveGenre, matchKey } from "./genres";
@@ -434,7 +434,7 @@ interface DbContextType {
   
   // Agent Actions
   addAgent: (a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
-  updateAgent: (id: string, fields: Partial<Agent>) => Promise<void>;
+  updateAgent: (id: string, fields: Partial<Agent>, opts?: { quiet?: boolean }) => Promise<void>;
   saveAgentEdits: (agentId: string, patch: AgentEditPatch, extraWrites?: AgentExtraWrite[]) => Promise<SaveAgentResult>;
   deleteAgent: (id: string) => Promise<void>;
   /** Set aside / bring back — reversible: drops from suggestions + idle bucket, keeps queries/history. */
@@ -1702,6 +1702,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const msTitle = existingMs.title;
 
     const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
+    const msChange = manuscriptChange(existingMs, fields as Record<string, unknown>);
     const updates = {
       ...fields,
       ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
@@ -1710,12 +1711,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        A comps-only write is list maintenance and narrates nothing — lib/manuscriptFeed.ts. */
     const landed = await updateManuscriptFields(
       db, currentUser.id, id, updates,
-      narratesManuscriptWrite(fields)
+      /* Feed wording v1: what the save changed (title, status, else details); a save that changed nothing narrates nothing */
+      narratesManuscriptWrite(fields) && msChange.changed.length > 0
         ? () => addActivity({
             activityType: ActivityType.MANUSCRIPT_UPDATED,
             description: "You updated a manuscript's details",
             manuscriptId: id,
             ...manuscriptSubject({ title: typeof fields.title === "string" ? fields.title : msTitle }),
+            changed: msChange.changed,
+            ...(msChange.previousName ? { previousName: msChange.previousName } : {}),
+            ...(msChange.changedTo ? { changedTo: msChange.changedTo } : {}),
             queryId: "",
             date: new Date().toISOString(),
             details: ""
@@ -2389,15 +2394,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // states the same rule). Creation stamps it (addAgent); a future explicit "mark as checked"
   // action is the only other legitimate writer. Comment kept ABOVE the function so the artefact
   // lock (agentLastChecked.test.ts) can assert the body never mentions the field.
-  const updateAgent = async (id: string, fields: Partial<Agent>) => {
+  const updateAgent = async (id: string, fields: Partial<Agent>, opts: { quiet?: boolean } = {}) => {
     if (!currentUser) return;
     const existingAgent = agents.find(a => a.id === id);
     if (!existingAgent) return;
-    const previousStarRating = existingAgent.starRating;
-    const agentName = existingAgent.name;
-    const agencyName = existingAgent.agency;
-    /* Feed wording v1: the row carries who it is about, as the agent stands AFTER the save */
-    const subject = agentSubject({ name: typeof fields.name === "string" ? fields.name : agentName, agency: typeof fields.agency === "string" ? fields.agency : agencyName });
 
     let writeSuccess = false;
     try {
@@ -2407,84 +2407,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/agents/${id}`);
     }
 
-    if (writeSuccess) {
-      const activitiesToCreate = [];
-      const dateStr = new Date().toISOString();
-
-      if (fields.submissionStatus !== undefined) {
-        if (fields.submissionStatus === SubmissionStatus.OPEN) {
-          activitiesToCreate.push({
-            activityType: ActivityType.AGENT_UPDATED,
-            description: `You updated details for ${agentName} at ${agencyName}`,
-            manuscriptId: "",
-            ...subject,
-            queryId: "",
-            date: dateStr,
-            details: "Submission status updated to Open"
-          });
-        } else if (fields.submissionStatus === SubmissionStatus.CLOSED) {
-          activitiesToCreate.push({
-            activityType: ActivityType.AGENT_UPDATED,
-            description: `You updated details for ${agentName} at ${agencyName}`,
-            manuscriptId: "",
-            ...subject,
-            queryId: "",
-            date: dateStr,
-            details: "Submission status updated to Closed"
-          });
-        }
-      }
-
-      if (fields.starRating !== undefined) {
-        activitiesToCreate.push({
-          activityType: ActivityType.AGENT_UPDATED,
-          description: `You updated details for ${agentName} at ${agencyName}`,
-          manuscriptId: "",
-          ...subject,
-          queryId: "",
-          date: dateStr,
-          details: `Updated agent fit from ${previousStarRating} to ${fields.starRating}`
-        });
-      }
-
-      if (fields.mswlNotes !== undefined && fields.mswlNotes !== "") {
-        activitiesToCreate.push({
-          activityType: ActivityType.AGENT_UPDATED,
-          description: `You updated details for ${agentName} at ${agencyName}`,
-          manuscriptId: "",
-          ...subject,
-          queryId: "",
-          date: dateStr,
-          details: "Updated wishlist notes field"
-        });
-      }
-
-      const hasSpecificKeys = fields.submissionStatus !== undefined || 
-                               fields.starRating !== undefined || 
-                               (fields.mswlNotes !== undefined && fields.mswlNotes !== "");
-
-      if (!hasSpecificKeys) {
-        const otherKeys = Object.keys(fields).filter(
-          k => k !== "submissionStatus" && k !== "starRating" && k !== "mswlNotes" && fields[k as keyof Partial<Agent>] !== undefined
-        );
-        if (otherKeys.length > 0) {
-          activitiesToCreate.push({
-            activityType: ActivityType.AGENT_UPDATED,
-            description: `You updated details for ${agentName} at ${agencyName}`,
-            manuscriptId: "",
-            ...subject,
-            queryId: "",
-            date: dateStr,
-            details: ""
-          });
-        }
-      }
-
-      /* ⚠️ NARRATION (timeline writer fix v1): the update already landed, and one missing entry never
-         stops the next one being written. */
-      for (const act of activitiesToCreate) {
-        await narrate(() => addActivity(act), `agent ${id} updated`);
-      }
+    /* Feed wording v1 — ONE row per save, saying which groups changed (lib/feedHouse `agentUpdateActivity`); a save
+       that changed nothing, or only notes, writes none. `quiet`: a sweep writes its own one row for the lot.
+       ⚠️ NARRATION (timeline writer fix v1): the update already landed; a missing entry cannot fail it. */
+    if (writeSuccess && !opts.quiet) {
+      const act = agentUpdateActivity(existingAgent, fields as Record<string, unknown>, new Date().toISOString());
+      if (act) await narrate(() => addActivity(act), `agent ${id} updated`);
     }
   };
 
@@ -2516,7 +2444,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       allExtra = extraWrites.concat(fanOut);
     }
 
-    return commitAgentEdits(db, currentUser.id, agentId, patch, allExtra);
+    const stored = agents.find(a => a.id === agentId);
+    return commitAgentEdits(db, currentUser.id, agentId, patch, allExtra).then(async (res) => {
+      /* Feed wording v1: the same one row as every agent save; narration never fails the save */
+      const act = "error" in res || !stored ? null : agentUpdateActivity(stored, patch as Record<string, unknown>, new Date().toISOString());
+      if (act) await narrate(() => addActivity(act), `agent ${agentId} updated`);
+      return res;
+    });
   };
 
   const deleteAgent = async (id: string) => {

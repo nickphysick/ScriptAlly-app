@@ -101,7 +101,7 @@ export interface HousekeepingSweepProps {
 export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onClose, onNavigate, onToast }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, currentUser,
-    upsertTaskFlag, updateUserProfile, updateAgent, resolveTaskFlag,
+    upsertTaskFlag, updateUserProfile, updateAgent, resolveTaskFlag, addActivity, deleteActivity,
   } = useScriptAllyDb();
 
   const [qi, setQi] = useState(0);
@@ -434,7 +434,7 @@ export const HousekeepingSweep: React.FC<HousekeepingSweepProps> = ({ items, onC
         <button type="button" className="tdb-ffskip" onClick={advance}>Skip the rest</button>
         <button type="button" className="tdb-ffpri" disabled={!filledIds.length || saving} onClick={async () => {
           // THE batch save — shared with the quick rail's card-flip (hkSave.saveHkRows).
-          const res = await saveHkRows(g, rows, noMeansNo, found, new Date().toISOString(), { agents, updateAgent, resolveTaskFlag });
+          const res = await saveHkRows(g, rows, noMeansNo, found, new Date().toISOString(), { agents, updateAgent, resolveTaskFlag, addActivity, deleteActivity });
           onToast(res.failed ? `Saved ${res.ok}; ${res.failed} failed.` : `Saved ${res.ok}.`, res.undo ? { label: "Undo all", fn: res.undo } : undefined);
           advance();
         }}>Save {filledIds.length || ""} & continue →</button>

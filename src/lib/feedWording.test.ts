@@ -127,3 +127,132 @@ describe("Part A — the rules allow the carried keys on both stores", () => {
     for (const k of ["subjectName", "subjectAgency", "previousName", "removedQueries", "changed", "changedTo", "batchCount"]) expect(f).toContain(`'${k}'`);
   });
 });
+
+/* ═══ Part B — agent and manuscript updates say what changed ═══════════════════════════════════════ */
+import { agentChange, agentUpdateActivity, manuscriptChange, houseSay, foldAgentBursts, AGENT_SILENT, AGENT_GROUP_OF } from "./feedHouse";
+import { ManuscriptStatus, SubmissionStatus } from "../types";
+
+const AG = { id: "ag1", userId: "u", name: "Nadia Hussain", agency: "Hussain Literary", email: "n@h.co", website: "", genres: ["Crime"],
+  mswlNotes: "Dark", starRating: 3, submissionStatus: SubmissionStatus.OPEN, submissionMethod: "Email", materialsWanted: [],
+  dateAdded: "", lastCheckedDate: "", notes: "" } as unknown as Agent;
+const X = { t: "Nadia Hussain", who: true } as const;
+const upd = (changed: string[], over: Partial<Activity> = {}) => sayText(houseSay({ activityType: ActivityType.AGENT_UPDATED, changed, ...over }, X, "Hussain Literary")!);
+
+describe("Part B — what a save changed", () => {
+  it("fit, wishlist and open status in one save is ONE activity naming the three groups", () => {
+    const a = agentUpdateActivity(AG, { starRating: 5, mswlNotes: "Darker", submissionStatus: SubmissionStatus.CLOSED }, "2026-11-24T10:00:00Z");
+    expect(a).not.toBeNull();
+    expect(a!.changed).toEqual(["open", "fit", "wishlist"]);
+    expect(a!.changedTo).toBe("Closed");
+    expect(a!.details).toBe("Submission status updated to Closed");
+    expect(a!.subjectName).toBe("Nadia Hussain");
+    expect(a!.subjectAgency).toBe("Hussain Literary");
+  });
+  it("a notes-only save writes none; nor does a save that changes nothing", () => {
+    expect(agentUpdateActivity(AG, { notes: "rang her", agentNotes: "x", pinnedNoteId: "n1", mswlCheckedAt: "2026-11-24" }, "t")).toBeNull();
+    expect(agentUpdateActivity(AG, { name: "Nadia Hussain", genres: ["Crime"], starRating: 3, website: null as unknown as string }, "t")).toBeNull();
+    expect(agentUpdateActivity(AG, {}, "t")).toBeNull();
+  });
+  it("a rename carries the old name; an agency move the new agency", () => {
+    const r = agentUpdateActivity(AG, { name: "Nadia Hussain-Reid" }, "t")!;
+    expect(r).toMatchObject({ changed: ["name"], previousName: "Nadia Hussain", subjectName: "Nadia Hussain-Reid" });
+    expect(agentUpdateActivity(AG, { agency: "Penhallow Literary" }, "t")).toMatchObject({ changed: ["agency"], subjectAgency: "Penhallow Literary" });
+  });
+  it("every field maps to one group or is silent, never both", () => {
+    for (const k of Object.keys(AGENT_GROUP_OF)) expect(AGENT_SILENT.has(k), k).toBe(false);
+    expect(agentChange(AG, { email: "x@y.z", city: "Leeds" }).changed).toEqual(["contact"]);
+    expect(agentChange(AG, { responseTimeWeeks: 6 }).changed).toEqual(["replyTime"]);
+    expect(agentChange(AG, { materialsWanted: ["Synopsis"] }).changed).toEqual(["asks"]);
+    expect(agentChange(AG, { reopensOn: "2026-12-01" }).changed).toEqual(["reopens"]);
+  });
+  it("a manuscript save: title, status, else details; comps-only and unchanged say nothing", () => {
+    const ms = { id: "m1", title: "Tidewrack", status: ManuscriptStatus.DRAFTING, genre: "Crime" } as unknown as Manuscript;
+    expect(manuscriptChange(ms, { title: "Saltmarsh" })).toEqual({ changed: ["title"], previousName: "Tidewrack" });
+    expect(manuscriptChange(ms, { status: ManuscriptStatus.READY_TO_QUERY })).toEqual({ changed: ["status"], changedTo: "Ready to Query" });
+    expect(manuscriptChange(ms, { genre: "Thriller" })).toEqual({ changed: ["details"] });
+    expect(manuscriptChange(ms, { comps: [] as never }).changed).toEqual([]);
+    expect(manuscriptChange(ms, { title: "Tidewrack" }).changed).toEqual([]);
+  });
+});
+
+describe("Part B — the update sentences", () => {
+  it.each([
+    [["name"], { previousName: "Nadia Hussein" }, "You renamed Nadia Hussein to Nadia Hussain"],
+    [["agency"], {}, "You moved Nadia Hussain to Hussain Literary"],
+    [["open"], { changedTo: "Open" }, "You marked Nadia Hussain as open to queries"],
+    [["open"], { changedTo: "Closed" }, "You marked Nadia Hussain as closed to queries"],
+    [["open"], { changedTo: "Unknown" }, "You marked whether Nadia Hussain is open to queries as not known"],
+    [["fit"], {}, "You updated Nadia Hussain's agent fit"],
+    [["wishlist"], {}, "You updated Nadia Hussain's wishlist"],
+    [["genres"], {}, "You updated Nadia Hussain's genres"],
+    [["contact"], {}, "You updated Nadia Hussain's contact details"],
+    [["replyTime"], {}, "You updated Nadia Hussain's reply time"],
+    [["asks"], {}, "You updated what Nadia Hussain asks for"],
+    [["reopens"], {}, "You updated when Nadia Hussain reopens"],
+    [["fit", "wishlist"], {}, "You updated Nadia Hussain's agent fit and wishlist"],
+    [["genres", "contact"], {}, "You updated Nadia Hussain's genres and contact details"],
+    [["wishlist", "replyTime"], {}, "You updated Nadia Hussain's wishlist and reply time"],
+    [["open", "fit"], {}, "You updated Nadia Hussain's details"],
+    [["name", "fit"], { previousName: "N" }, "You updated Nadia Hussain's details"],
+    [["fit", "wishlist", "genres"], {}, "You updated Nadia Hussain's details"],
+  ] as [string[], Partial<Activity>, string][])("%j → %s", (changed, over, want) => {
+    expect(upd(changed, over)).toBe(want);
+  });
+  it("in a rename only the NEW name is a person run; the old name is plain text", () => {
+    const say = houseSay({ activityType: ActivityType.AGENT_UPDATED, changed: ["name"], previousName: "Nadia Hussein" }, X)!;
+    expect(say.filter((s) => s.who).map((s) => s.t)).toEqual(["Nadia Hussain"]);
+    expect(say.find((s) => s.t.includes("Nadia Hussein"))?.who).toBeFalsy();
+  });
+  it.each([
+    [{ changed: ["title"], previousName: "Tidewrack" }, "You renamed Tidewrack to Saltmarsh"],
+    [{ changed: ["status"], changedTo: ManuscriptStatus.READY_TO_QUERY }, "You marked Saltmarsh as ready to query"],
+    [{ changed: ["status"], changedTo: ManuscriptStatus.ON_SUBMISSION }, "You marked Saltmarsh as on submission"],
+    [{ changed: ["details"] }, "You updated the details of Saltmarsh"],
+    [{ changed: ["title", "status"], previousName: "T", changedTo: ManuscriptStatus.SHELVED }, "You updated the details of Saltmarsh"],
+    [{}, "You updated the details of Saltmarsh"],
+  ] as [Partial<Activity>, string][])("manuscript %j → %s", (over, want) => {
+    expect(sayText(houseSay({ activityType: ActivityType.MANUSCRIPT_UPDATED, ...over }, { t: "Saltmarsh", em: true })!)).toBe(want);
+  });
+});
+
+describe("Part B — bursts", () => {
+  const u = (id: string, minsAgo: number, over: Partial<Activity>) =>
+    act({ id, activityType: ActivityType.AGENT_UPDATED, date: at(minsAgo), subjectName: "Nadia Hussain", subjectAgency: "Hussain Literary", ...over });
+  it("three updates to one agent within 10 minutes show as one row, at the newest time, from the union of groups", () => {
+    const entries = feed([u("u1", 30, { changed: ["fit"] }), u("u2", 26, { changed: ["wishlist"] }), u("u3", 21, { changed: ["genres"] })]);
+    expect(entries.map((e) => e.id)).toEqual(["u3"]);
+    expect(sayText(entries[0].say)).toBe("You updated Nadia Hussain's details");
+    expect(entries[0].at).toBe(new Date(at(21)).getTime());
+  });
+  it("11 minutes apart, two", () => {
+    expect(feed([u("u1", 30, { changed: ["fit"] }), u("u2", 19, { changed: ["wishlist"] })]).map((e) => e.id)).toEqual(["u2", "u1"]);
+  });
+  it("a rename inside the burst still folds, and says it as a rename from the first name", () => {
+    const rows = foldAgentBursts([
+      u("u1", 30, { changed: ["name"], subjectName: "Nadia H", previousName: "Nadia Hussein" }),
+      u("u2", 25, { changed: ["name"], subjectName: "Nadia Hussain", previousName: "Nadia H" }),
+    ]);
+    expect(rows.map((r) => r.id)).toEqual(["u2"]);
+    expect(rows[0].previousName).toBe("Nadia Hussein");
+  });
+  it("a different agent never folds in", () => {
+    expect(feed([u("u1", 30, { changed: ["fit"] }), u("u2", 28, { changed: ["fit"], subjectName: "Rae Abbott", subjectAgency: "Abbott Books" })])).toHaveLength(2);
+  });
+});
+
+describe("Part B — both agent save paths write ONE row through the one helper", () => {
+  const db = readFileSync("src/lib/db.tsx", "utf8");
+  const body = (fn: string) => { const i = db.indexOf(`const ${fn} = `); return db.slice(i, db.indexOf("\n  };\n", i)); };
+  it("updateAgent: one agentUpdateActivity, no per-field rows, quiet for a sweep", () => {
+    const b = body("updateAgent");
+    expect(b.match(/agentUpdateActivity\(/g)).toHaveLength(1);
+    expect(b).not.toContain("activitiesToCreate");
+    expect(b).toContain("!opts.quiet");
+  });
+  it("saveAgentEdits: one agentUpdateActivity after the commit", () => {
+    expect(body("saveAgentEdits").match(/agentUpdateActivity\(/g)).toHaveLength(1);
+  });
+  it("updateManuscript narrates only when the save changed something", () => {
+    expect(body("updateManuscript")).toContain("msChange.changed.length > 0");
+  });
+});

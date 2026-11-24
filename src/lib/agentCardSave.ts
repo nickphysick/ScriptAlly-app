@@ -15,7 +15,7 @@
  * ⚠️ NEVER THROUGH `updateAgent`: that writer appends an activity, so an undo through it would append
  * a second entry — the house undo rule.
  */
-import { doc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Agent, Query } from "../types";
 import { commitAgentEdits, type AgentEditPatch, type SaveAgentResult } from "./saveAgentEdits";
@@ -28,6 +28,8 @@ import { restoreSnapshot, takeSnapshot, type Snapshot } from "./queryActions/sna
 import { writerExpectedWrite } from "./expectedDate";
 import { dayIso } from "./queryActions/dates";
 import type { OfferPlan } from "./cardOffers";
+import { agentUpdateActivity } from "./feedHouse";
+import { writeActivity } from "./activityWrite";
 
 export interface CardSaveArgs {
   uid: string;
@@ -74,6 +76,16 @@ export async function commitCardSave(a: CardSaveArgs): Promise<CardSaveOutcome> 
     : [];
   const res = await commitAgentEdits(db, uid, agent.id, patch, extras);
   if ("error" in res) return { res };
+  /* Feed wording v1 — ONE Agent Updated row for the save, saying which groups changed (none for a notes-only or
+     unchanged save). Narration: `writeActivity` never throws, and a failed row leaves the save standing. The Undo
+     deletes the row it wrote (the house undo: take back what the action created, never a compensating entry). */
+  const feedAct = agentUpdateActivity(agent, patch as Record<string, unknown>, new Date().toISOString());
+  let feedId: string | null = null;
+  if (feedAct) {
+    const w = await writeActivity(db, uid, feedAct);
+    if (w.success) feedId = w.id;
+    else console.error(`[feed] agent ${agent.id} updated: the entry was not written; the save itself stands.`);
+  }
   /* the queries' own writes, each on its own after the agent's: a query that fails is named, and the agent's write stands */
   const failed: string[] = [];
   const ref = (id: string) => doc(db, "users", uid, "queries", id);
@@ -101,7 +113,9 @@ export async function commitCardSave(a: CardSaveArgs): Promise<CardSaveOutcome> 
     res,
     failed,
     undo: async () => {
-      try { if (qs) await restoreSnapshot(qs); await restoreAgentSnapshot(s); return true; } catch { return false; }
+      try { if (qs) await restoreSnapshot(qs); await restoreAgentSnapshot(s); } catch { return false; }
+      if (feedId) { try { await deleteDoc(doc(db, "users", uid, "activities", feedId)); } catch { console.error(`[feed] the undone save's entry ${feedId} could not be removed`); } }
+      return true;
     },
   };
 }

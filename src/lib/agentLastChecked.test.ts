@@ -17,7 +17,7 @@ const read = (rel: string) => readFileSync(resolve(here, rel), 'utf8');
 describe('lastCheckedDate = last verified, not last edited', () => {
   it('updateAgent does not stamp — or even mention — lastCheckedDate (an edit is not a verification)', () => {
     const src = read('db.tsx');
-    const anchor = 'const updateAgent = async (id: string, fields: Partial<Agent>)';
+    const anchor = 'const updateAgent = async (id: string, fields: Partial<Agent>'; // feed wording v1 added an opts argument
     expect(src).toContain(anchor); // anchor before slicing
     const end = 'const saveAgentEdits = (';
     expect(src).toContain(end); // the next provider function — closes the slice
