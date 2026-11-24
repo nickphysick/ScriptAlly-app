@@ -491,6 +491,9 @@ service cloud.firestore {
           data.sendMethod == 'Post'
         )
         && (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))
+        // Controls: entry v1 · follow-up 2 (24 Nov) — WHEN the writer set that reminder (an ISO instant, never a day due).
+        // Optional: a reminder with none counts as set before any reply entry (lib/reminderStamp).
+        && (data.get('nudgeSetAt', null) == null || (data.nudgeSetAt is string && data.nudgeSetAt.size() <= 64))
         && (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate.size() <= 64))
         && (data.get('responseDeadline', null) == null || (data.responseDeadline is string && data.responseDeadline.size() <= 64))
         && (data.get('partialRequestedDate', null) == null || (data.partialRequestedDate is string && data.partialRequestedDate.size() <= 64))
@@ -1112,7 +1115,7 @@ service cloud.firestore {
         allow update: if isOwner(userId) && isValidId(queryId) && isValidQuery(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
             'manuscriptId', 'dateSent',
-            'status', 'personalisationNotes', 'sendMethod', 'nudgeDate', 'lastNudgeSentDate', 'responseDeadline',
+            'status', 'personalisationNotes', 'sendMethod', 'nudgeDate', 'nudgeSetAt', 'lastNudgeSentDate', 'responseDeadline',
             'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate',
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
             'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',

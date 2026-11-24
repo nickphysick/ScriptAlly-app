@@ -115,7 +115,8 @@ describe("P2 — the nudge reaches the AUTHORITATIVE store (and only once)", () 
     const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     const core = strip(readFileSync(resolve(__dirname, "./nudgeWrite.ts"), "utf8"));
     const auth = core.indexOf('batch.set(doc(firestore, "users", uid, "queries", queryId, "activity", actId), writes.nested)');
-    const date = core.indexOf('batch.update(doc(firestore, "users", uid, "queries", queryId), writes.queryUpdates)');
+    /* Controls: entry v1 · follow-up 2 — the query's nudge fields now pass through the reminder's set-at stamp */
+    const date = core.indexOf('batch.update(doc(firestore, "users", uid, "queries", queryId), withReminderStamp(writes.queryUpdates))');
     const commit = core.indexOf("await batch.commit()");
     const twin = core.indexOf("after.writeTwin");
     expect(auth).toBeGreaterThan(-1);

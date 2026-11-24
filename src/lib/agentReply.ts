@@ -28,6 +28,7 @@ import { QueryStatus } from "../types";
 import { getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { isSendStatus } from "./timelineChapters";
 import { MONTHS_SHORT } from "./dates";
+import { nudgeSetAtMs } from "./reminderStamp";
 
 /** The per-query log's `type`. Sentence case, and deliberately not a QueryStatus member. */
 export const AGENT_REPLY_NESTED_TYPE = "Agent reply" as const;
@@ -175,12 +176,13 @@ export function replySendByMs(reply: AgentReply | null | undefined, requestMs: n
 
 /**
  * The writer's nudge reminder, read through the entry (Nick's ruling 2): a reminder that falls before the agent's new
- * reply date reads as due ON that date. ⚠️ `nudgeDate` has no set-at stamp, so "set before the entry" is read as "falls
- * before the new date"; a reminder the writer deliberately set earlier, after the entry, is moved too. Controls:
- * journeys v1 asks the writer and can stamp it.
+ * reply date reads as due ON that date — but only one SET before the entry (`nudgeSetAt`, lib/reminderStamp; no stamp
+ * counts as before). One the writer set after the entry stays where they put it (follow-up 2).
  */
-export function replyReminderMs(reminderMs: number | null, reply: AgentReply | null | undefined, lastSendMs: number | null): number | null {
+export function replyReminderMs(reminderMs: number | null, reply: AgentReply | null | undefined, lastSendMs: number | null, setAtMs: number | null = null): number | null {
   if (reminderMs == null) return null;
+  /* follow-up 2 — a reminder set AFTER the entry stays where the writer put it; no stamp counts as before (lib/reminderStamp) */
+  if (setAtMs != null && reply && setAtMs > reply.ms) return reminderMs;
   const st = replyStatement(reply, lastSendMs);
   return st && reminderMs < st.ms ? st.ms : reminderMs;
 }
@@ -356,7 +358,7 @@ export function entryDatesFor(
     reply,
     replyDateMs: st ? st.ms : null,
     sendByMs: replySendByMs(reply, anyMs(q.lastStatusChange), anyMs(q.expectedSendDate)),
-    reminderMs: replyReminderMs(anyMs(q.nudgeDate), reply, lastSend),
+    reminderMs: replyReminderMs(anyMs(q.nudgeDate), reply, lastSend, nudgeSetAtMs(q)),
   };
 }
 /** local "YYYY-MM-DD" of an instant, or undefined — the shape the task readers take a day in */

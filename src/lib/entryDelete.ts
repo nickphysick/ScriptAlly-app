@@ -67,7 +67,7 @@ export const NUDGE_FIELDS = ["lastNudgeSentDate", "closePlan"] as const;
  * The wait a send began — the reply the writer expects, the nudge planned for it, the send's label. Every send
  * writes them, so they describe the LATEST send: gone when that send is the entry deleted.
  */
-export const WAIT_FIELDS = ["writerExpectedDate", "writerExpectedSetAt", "nudgeDate", "lastSentLabel"] as const;
+export const WAIT_FIELDS = ["writerExpectedDate", "writerExpectedSetAt", "nudgeDate", "nudgeSetAt", "lastSentLabel"] as const;
 
 export const JOURNEY_FIELDS: readonly string[] = [...OWED_FIELDS, ...REQUEST_FIELDS, ...OFFER_FIELDS, ...CLOSE_FIELDS, ...NUDGE_FIELDS, ...WAIT_FIELDS];
 

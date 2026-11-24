@@ -18,6 +18,7 @@
  * Only the per-query write is fatal; the global feed and the agent-preference write
  * are best-effort and never block the undo toast.
  */
+import { withReminderStamp } from "./reminderStamp";
 import {
   doc,
   collection,
@@ -357,7 +358,7 @@ export async function recordQueryResponse(
   // 5. PRIMARY write — must succeed. Response details + (for real responses) the per-query
   //    timeline entry, then the recompute that derives status/dates/flags from the updated log.
   try {
-    await updateDoc(queryRef, updates);
+    await updateDoc(queryRef, withReminderStamp(updates as Record<string, unknown>, preSnapshot as unknown as Record<string, unknown>));
     if (appendsActivity) await setDoc(activityDocRef, activityPayload);
     await recomputeQuery(userId, queryId);
   } catch (err) {

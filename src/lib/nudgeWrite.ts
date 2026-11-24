@@ -18,6 +18,7 @@
  * task flag only hides the nudge task until the check-back date; if it cannot be written the task
  * simply shows again, so it is logged and the nudge still reports success.
  */
+import { withReminderStamp } from "./reminderStamp";
 import { doc, writeBatch, type Firestore } from "firebase/firestore";
 import { logFirestoreFailure } from "./firestoreErrorLog";
 import { narrate } from "./narrate";
@@ -31,7 +32,8 @@ export async function commitNudge(
 ): Promise<{ success: boolean; error?: string }> {
   const batch = writeBatch(firestore);
   batch.set(doc(firestore, "users", uid, "queries", queryId, "activity", actId), writes.nested);
-  batch.update(doc(firestore, "users", uid, "queries", queryId), writes.queryUpdates);
+  /* follow-up 2 — the check-in booked with the nudge carries when it was set (lib/reminderStamp) */
+  batch.update(doc(firestore, "users", uid, "queries", queryId), withReminderStamp(writes.queryUpdates));
   try {
     await batch.commit();
   } catch (e) {

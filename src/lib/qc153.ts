@@ -16,7 +16,7 @@ import { QueryStatus } from "../types";
 import { STAGE_NAME, type QcRow } from "./qcSummary";
 import { CLOSED_STATUSES, isClosedRow, lastHeardMs, liveLevel, shortDate } from "./qc151";
 import { nextNum, type NextNum } from "./qc1512";
-import { stateOf } from "./queryState";
+import { reminderOf, stateOf } from "./queryState";
 import { MONTHS_SHORT } from "./dates";
 import { chaseOf, replyHeardWords, type AgentReply } from "./agentReply";
 import { STAGE_COLOURS, stageOf, statusBand, type Stage } from "./stageColours";
@@ -162,17 +162,16 @@ const dayMs = (v: unknown): number | null => {
 };
 /** the writer's own nudge reminder, when its day is still to come (a passed one is NOT a nudge: it makes the query nudge
  *  due, lib/queryState `remindedMs`; only a logged nudge counts, `nudgeMsOf` — Query card v161) */
-export function scheduledNudgeMs(r: Pick<QcRow, "query"> & { replyDateMs?: number | null }, nowMs: number): number | null {
-  /* Controls: entry v1 — read through the agent's latest reply entry (lib/queryState `reminderOf`) */
-  const t0 = dayMs((r.query as { nudgeDate?: string } | null)?.nudgeDate);
-  const t = t0 != null && r.replyDateMs != null && t0 < r.replyDateMs ? r.replyDateMs : t0;
+export function scheduledNudgeMs(r: Pick<QcRow, "query"> & { replyDateMs?: number | null; reply?: { ms: number } | null }, nowMs: number): number | null {
+  /* Controls: entry v1 — read through the agent's latest reply entry: the one rule, lib/queryState `reminderOf` */
+  const t = r.query ? reminderOf(r as unknown as Parameters<typeof reminderOf>[0]) : null;
   return t != null && sod(t) >= sod(nowMs) ? t : null;
 }
 /**
  * v1.3 D — the Next box's line under "Reply expected by": the nudge the writer booked, else the close they chose (the
  * day `responseDeadline` falls on, which is when the auto-close fires), else none. Retires "reply by …".
  */
-export function planLine(r: Pick<QcRow, "query"> & { replyDateMs?: number | null }, nowMs: number): string {
+export function planLine(r: Pick<QcRow, "query"> & { replyDateMs?: number | null; reply?: { ms: number } | null }, nowMs: number): string {
   const nudge = scheduledNudgeMs(r, nowMs);
   if (nudge != null) return `Nudge scheduled for ${nextDay(nudge, nowMs)}`;
   const q = r.query as { ifNoResponse?: string; responseDeadline?: string } | null;

@@ -17,6 +17,7 @@
  * ⚠️ EVERY STEP CARRIES ITS MATERIALS on both stores (`materials`, a list of maps). A request carries what was asked;
  *    a send, what went. Steps written before v152 carry none.
  */
+import { withReminderStamp } from "./reminderStamp";
 import { collection, deleteField, doc, getDoc, getDocs, setDoc, Timestamp, updateDoc, writeBatch, type DocumentData } from "firebase/firestore";
 import { db } from "./firebase";
 import { ActivityType, QueryStatus, type Agent, type EventKey, type Manuscript, type Query } from "../types";
@@ -268,7 +269,8 @@ export async function commitPlan(uid: string, plan: WritePlan, after?: () => Pro
   for (const s of plan.set) b.set(doc(db, `users/${uid}/${s.path}`), s.data);
   for (const p of plan.del) b.delete(doc(db, `users/${uid}/${p}`));
   for (const u of plan.update ?? []) b.update(doc(db, `users/${uid}/${u.path}`), u.data);
-  const patch = Object.fromEntries(Object.entries(plan.query).map(([k, v]) => [k, v === undefined ? deleteField() : v]));
+  /* follow-up 2 — a reminder set or changed carries when; the snapshot is its prior (lib/reminderStamp) */
+  const patch = withReminderStamp(Object.fromEntries(Object.entries(plan.query).map(([k, v]) => [k, v === undefined ? deleteField() : v])), snap.docs.get(`users/${uid}/queries/${plan.queryId}`));
   if (Object.keys(patch).length) b.update(doc(db, `users/${uid}/queries/${plan.queryId}`), patch);
   await b.commit();
   if (after) { try { await after(); } catch (e) { console.error("v152: a follow-up write failed (non-fatal)", e); } }
@@ -425,7 +427,7 @@ export async function commitMany(uid: string, plans: readonly WritePlan[], extra
     for (const s of plan.set) b.set(doc(db, `users/${uid}/${s.path}`), s.data);
     for (const p of plan.del) b.delete(doc(db, `users/${uid}/${p}`));
     for (const u of plan.update ?? []) b.update(doc(db, `users/${uid}/${u.path}`), u.data);
-    const patch = Object.fromEntries(Object.entries(plan.query).map(([k, v]) => [k, v === undefined ? deleteField() : v]));
+    const patch = withReminderStamp(Object.fromEntries(Object.entries(plan.query).map(([k, v]) => [k, v === undefined ? deleteField() : v])), snap.docs.get(`users/${uid}/queries/${plan.queryId}`));
     if (Object.keys(patch).length) b.update(doc(db, `users/${uid}/queries/${plan.queryId}`), patch);
   }
   await b.commit();

@@ -79,3 +79,25 @@ describe("the feed twin", () => {
     await assertFails(setDoc(doc(me(), `users/${U}/activities/a-1`), { ...feed("note"), activityType: "Agent Mood" }));
   });
 });
+
+/* Controls: entry v1 · follow-up 2 — the reminder's set-at stamp on the query (red against the rules before it) */
+describe("the reminder's set-at stamp", () => {
+  const q = (extra: Record<string, unknown> = {}) => ({
+    id: "q-1", userId: U, manuscriptId: "ms-1", agentId: "ag-1", packageId: "", status: "Queried", sendMethod: "Email", ...extra,
+  });
+  it("a reminder and its stamp may be set together (UPDATE)", async () => {
+    await seed(`users/${U}/queries/q-1`, q());
+    await assertSucceeds(updateDoc(doc(me(), `users/${U}/queries/q-1`), { nudgeDate: "2026-12-01", nudgeSetAt: "2026-11-24T12:00:00.000Z" }));
+  });
+  it("and cleared together", async () => {
+    await seed(`users/${U}/queries/q-1`, q({ nudgeDate: "2026-12-01", nudgeSetAt: "2026-11-24T12:00:00.000Z" }));
+    await assertSucceeds(updateDoc(doc(me(), `users/${U}/queries/q-1`), { nudgeDate: deleteField(), nudgeSetAt: deleteField() }));
+  });
+  it("a query may be CREATED with one", async () => {
+    await assertSucceeds(setDoc(doc(me(), `users/${U}/queries/q-1`), q({ nudgeDate: "2026-12-01", nudgeSetAt: "2026-11-24T12:00:00.000Z" })));
+  });
+  it("a stamp that is not a string is denied", async () => {
+    await seed(`users/${U}/queries/q-1`, q());
+    await assertFails(updateDoc(doc(me(), `users/${U}/queries/q-1`), { nudgeSetAt: 12 }));
+  });
+});

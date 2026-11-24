@@ -133,6 +133,7 @@ import { contentsChanged } from "./packageEditions";
 import { contentWriteAllowed, isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
+import { withReminderStamp } from "./reminderStamp";
 import { buildAgentReplyWrites, entryDatesFor, latestFeedReplies, isAgentReplyFeed, REPLY_DATE_FIELD, REPLY_KIND_FIELD, type AgentReplyInput, type ReplyKind } from "./agentReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
@@ -490,7 +491,7 @@ interface DbContextType {
      */
     note?: string;
     bookVersionId?: string;
-  }) => Promise<{ activityId: string; prior: { writerExpectedDate?: string; writerExpectedSetAt?: string; nudgeDate?: string } } | void>;
+  }) => Promise<{ activityId: string; prior: { writerExpectedDate?: string; writerExpectedSetAt?: string; nudgeDate?: string; nudgeSetAt?: string } } | void>;
   /** Controls: entry v1 — the agent's reply that moves nothing (a chaser, a holding reply, a note). See lib/agentReply.ts. */
   recordAgentReply: (
     queryId: string,
@@ -587,7 +588,7 @@ interface DbContextType {
    */
   /* ⚠️ `checkBackDate` IS OPTIONAL — absent is "Don't ask again" (journey round, Phase 5): the nudge
      is recorded, no `nudgeDate` is written, and the dismissal is PERMANENT rather than dated. */
-  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }>;
+  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; nudgeSetAt?: string; lastNudgeSentDate?: string } }>;
   /** Undo a nudge by the row id `logNudge` returned, putting the nudge fields back from `prior` — one batch, never through the feed (lib/nudgeUndo). Rejects if nothing changed. */
   undoNudge: (queryId: string, activityId: string, prior: { nudgeDate?: string; lastNudgeSentDate?: string }) => Promise<void>;
   recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
@@ -2717,7 +2718,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        * the whole batch, the query with it.
        */
       const batch = writeBatch(db);
-      batch.set(doc(db, "users", currentUser.id, "queries", id), newQ);
+      batch.set(doc(db, "users", currentUser.id, "queries", id), withReminderStamp(newQ as unknown as Record<string, unknown>));
       for (const act of seeded) {
         batch.set(doc(db, "users", currentUser.id, "activities", act.id), act);
         batch.set(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
@@ -3020,7 +3021,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     try {
       if (Object.keys(qUpdates).length > 0) {
-        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), qUpdates);
+        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), withReminderStamp(qUpdates as Record<string, unknown>, targetQ));
       }
       // Two stores, two surfaces (same split recordQueryResponse uses):
       //  - the per-query `activity` subcollection is the AUTHORITATIVE log — recompute derives
@@ -3050,6 +3051,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedDate === "string" ? { writerExpectedDate: (targetQ as unknown as Record<string, string>).writerExpectedDate } : {}),
         ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedSetAt === "string" ? { writerExpectedSetAt: (targetQ as unknown as Record<string, string>).writerExpectedSetAt } : {}),
         ...(typeof (targetQ as unknown as Record<string, unknown>).nudgeDate === "string" ? { nudgeDate: (targetQ as unknown as Record<string, string>).nudgeDate } : {}),
+        /* follow-up 2 — and when it was set, so an Undo puts the pair back exactly */
+        ...(typeof (targetQ as unknown as Record<string, unknown>).nudgeSetAt === "string" ? { nudgeSetAt: (targetQ as unknown as Record<string, string>).nudgeSetAt } : {}),
       };
       const actId = "act-" + Math.random().toString(36).substr(2, 9);
       const subRef = doc(db, "users", currentUser.id, "queries", queryId, "activity", actId);
@@ -3517,6 +3520,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!currentUser) return;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
+    /* Controls: entry v1 · follow-up 2 — a reminder set or changed here carries when (lib/reminderStamp) */
+    fields = withReminderStamp(fields as Record<string, unknown>, targetQ) as Partial<Query>;
 
     try {
       /* A correction onto a never-sent package stamps its first-sent lock in the SAME batch as the
@@ -3778,6 +3783,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             const rec = reconcileNudge(remaining);
             await updateDoc(doc(db, "users", currentUser.id, "queries", target.queryId), {
               nudgeDate: rec.nudgeDate ?? (deleteField() as unknown as string),
+              /* follow-up 2 — the check-in that comes back was set when its nudge was logged */
+              nudgeSetAt: rec.nudgeDate && rec.lastNudgeSentDate ? rec.lastNudgeSentDate : (deleteField() as unknown as string),
               lastNudgeSentDate: rec.lastNudgeSentDate ?? (deleteField() as unknown as string),
             });
             if (!rec.hasNudges) await resolveTaskFlag(flagKeyForTask("nudge_overdue", target.queryId));
@@ -4049,7 +4056,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const logNudge = async (
     queryId: string,
     args: { checkBackDate?: string; note?: string; eventDate?: string }
-  ): Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }> => {
+  ): Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; nudgeSetAt?: string; lastNudgeSentDate?: string } }> => {
     if (!currentUser) return { success: false, error: "Session required." };
     const q = queries.find(item => item.id === queryId);
     if (!q) return { success: false, error: "Query not found." };
@@ -4060,6 +4067,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        return gains optional receipt members every existing caller ignores. */
     const prior = {
       ...(typeof (q as unknown as Record<string, unknown>).nudgeDate === "string" ? { nudgeDate: (q as unknown as Record<string, string>).nudgeDate } : {}),
+      ...(typeof (q as unknown as Record<string, unknown>).nudgeSetAt === "string" ? { nudgeSetAt: (q as unknown as Record<string, string>).nudgeSetAt } : {}),
       ...(typeof (q as unknown as Record<string, unknown>).lastNudgeSentDate === "string" ? { lastNudgeSentDate: (q as unknown as Record<string, string>).lastNudgeSentDate } : {}),
     };
 

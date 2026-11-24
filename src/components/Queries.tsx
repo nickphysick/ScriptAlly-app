@@ -1063,6 +1063,7 @@ export const Queries: React.FC<{
             writerExpectedDate: res.prior.writerExpectedDate ?? deleteField(),
             writerExpectedSetAt: res.prior.writerExpectedSetAt ?? deleteField(),
             nudgeDate: res.prior.nudgeDate ?? deleteField(),
+            nudgeSetAt: res.prior.nudgeSetAt ?? deleteField(),
           } as never);
         } : undefined,
       });
@@ -1104,6 +1105,7 @@ export const Queries: React.FC<{
           await deleteActivities([res.activityId!]);
           await updateQuery(q.id, {
             nudgeDate: res.prior?.nudgeDate ?? deleteField(),
+            nudgeSetAt: (res.prior as { nudgeSetAt?: string } | undefined)?.nudgeSetAt ?? deleteField(),
             lastNudgeSentDate: res.prior?.lastNudgeSentDate ?? deleteField(),
           } as never);
         } : undefined,
@@ -1167,6 +1169,7 @@ export const Queries: React.FC<{
    */
   const commitQuickSnooze = async (q: Query, days: number) => {
     const prior = q.nudgeDate;
+    const priorSetAt = (q as { nudgeSetAt?: string }).nudgeSetAt;
     const next = new Date(Date.now() + days * 86400000).toISOString();
     setQuick(null);
     try {
@@ -1178,7 +1181,7 @@ export const Queries: React.FC<{
            suppression lifted. An undo that merely snoozed by a negative number would leave a
            second dismissal behind. */
         undo: async () => {
-          await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
+          await updateQuery(q.id, { nudgeDate: prior, nudgeSetAt: priorSetAt ?? deleteField() } as unknown as Partial<Query>);
           /* ⚠️ `"lift"`, NOT `("fixed snooze", 0)`. Zero is falsy, so the old call resolved to
              `snoozedUntil: undefined`, which `upsertTaskFlag` reads as KEEP — the suppression
              stayed exactly where it was and the snooze count went up on the way past. Both halves
@@ -1202,6 +1205,7 @@ export const Queries: React.FC<{
      The claim is true now because the callee was repaired, not because the caller was careful. */
   const commitStopNudging = async (q: Query) => {
     const prior = q.nudgeDate;
+    const priorSetAt = (q as { nudgeSetAt?: string }).nudgeSetAt;
     setQuick(null);
     try {
       await dismissTask("nudge_overdue", q.id, "permanent");
@@ -1209,7 +1213,7 @@ export const Queries: React.FC<{
         message: "Nudges stopped for this query",
         undo: async () => {
           await dismissTask("nudge_overdue", q.id, "lift");
-          if (prior) await updateQuery(q.id, { nudgeDate: prior } as Partial<Query>);
+          if (prior) await updateQuery(q.id, { nudgeDate: prior, nudgeSetAt: priorSetAt ?? deleteField() } as unknown as Partial<Query>);
           showToast({ message: "Restored" });
         },
       });

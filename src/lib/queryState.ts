@@ -29,6 +29,7 @@ import { QueryStatus } from "../types";
 import { courtOf } from "./qcSummary";
 import { CLOSE_UNDATED_DAYS } from "./nudgeWindow";
 import { anyToMs } from "./qcStages";
+import { nudgeSetAtMs } from "./reminderStamp";
 import { queryClock, CLOCK_DEFAULTS, CLOCK_QUIET_PATH, QUIET_CHOICES } from "./queryClock";
 
 const DAY = 86_400_000;
@@ -71,6 +72,8 @@ export interface StateInput {
   heardMs?: number | null;
   /** …and its new date (QcRow `replyDateMs`): a reminder set to fall before it reads as due on it */
   replyDateMs?: number | null;
+  /** …and the entry itself (QcRow `reply`): a reminder SET after it stays put (follow-up 2, lib/reminderStamp) */
+  reply?: { ms: number } | null;
 }
 export interface Ctx { quietWeeks: number; nowMs: number }
 
@@ -91,9 +94,14 @@ export function nudgeMsOf(r: StateInput, nowMs: number): number | null {
 }
 /** Controls: entry v1 — the writer's reminder read through the agent's latest reply entry: one that falls before the new
  *  reply date the agent gave reads as due on that date (Nick's ruling 2; lib/agentReply `replyReminderMs`) */
-export function reminderOf(r: Pick<StateInput, "query" | "replyDateMs">): number | null {
-  const t = anyToMs(r.query.nudgeDate);
+export function reminderOf(r: Pick<StateInput, "query" | "replyDateMs" | "reply">): number | null {
+  /* a day ("YYYY-MM-DD") is that LOCAL day at noon, never UTC midnight (the evening before, west of Greenwich) */
+  const raw = r.query.nudgeDate;
+  const t = typeof raw === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? new Date(`${raw}T12:00:00`).getTime() : anyToMs(raw);
   if (t == null) return null;
+  /* follow-up 2 — set after the entry: where the writer put it. No stamp counts as set before. */
+  const setAt = nudgeSetAtMs(r.query);
+  if (setAt != null && r.reply && setAt > r.reply.ms) return t;
   return r.replyDateMs != null && t < r.replyDateMs ? r.replyDateMs : t;
 }
 /** the writer's own reminder, when its day has come this stage and no nudge is logged: the query is nudge due (v161) */
