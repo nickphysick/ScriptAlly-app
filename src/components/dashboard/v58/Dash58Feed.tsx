@@ -21,6 +21,7 @@ import type { Activity, Agent, Manuscript, Query } from "../../../types";
 import { QueryStatus } from "../../../types";
 import { useOverlay } from "../../shell/useOverlay";
 import { StatusDot } from "../../StatusDot";
+import { FeedSay } from "../../shared/FeedSay";
 import { feedEntries, type FeedSeg } from "../../../lib/dashFeed";
 import {
   FEED_FILTERS, SUMMARY_NOUN, SUMMARY_NONE, defaultFrom, drawerDays, drawerEvents, drawerSummary, earlierWindow, rangeLabel,
@@ -31,9 +32,8 @@ import { buildQcRows } from "../../../lib/qcSummary";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 
 
-const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => (
-  <>{say.map((s, i) => (s.who ? <b key={i}>{s.t}</b> : s.em ? <i key={i}>{s.t}</i> : <React.Fragment key={i}>{s.t}</React.Fragment>))}</>
-);
+/* Feed wording v1.1 · the drawer draws its sentences through the feed's one renderer, so its names are the same links */
+const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => <FeedSay say={say} />;
 
 /* The two marks that are not a status. Exported so the phone dashboard's Recent rows draw the feed's own disc. */
 export const BellGlyph = () => (

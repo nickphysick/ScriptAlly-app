@@ -398,7 +398,7 @@ describe("Part D — the cards", () => {
     for (const c of [inn, out]) {
       const all = `${sayText(c.top)} ${sayText(c.sub)}`;
       expect(all.split("Penhallow Literary").length - 1, all).toBe(1);
-      expect(c.sub).toEqual([{ t: T, em: true }]);
+      expect(c.sub).toEqual([{ t: T, em: true, to: "/manuscripts" }]); // v1.1 Part 3: the title links to the Manuscripts page
     }
     expect(sayText(out.headline)).toBe("Your full manuscript is with Penhallow Literary");
   });

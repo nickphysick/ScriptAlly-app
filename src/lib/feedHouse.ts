@@ -23,11 +23,13 @@ import { CLOSED_DETAIL } from "./agentList";
 
 /* ── 1 · the subject ───────────────────────────────────────────────────────────────────────────── */
 
-/** The agent's subject fields: the name only when it has one, the agency only when it has one. */
-export function agentSubject(a: Pick<Agent, "name" | "agency"> | undefined): Pick<Activity, "subjectName" | "subjectAgency"> {
+/** The agent's subject fields: the name only when it has one, the agency only when it has one, and (feed wording v1.1)
+ *  the agent's id, which is what the feed links the name by. */
+export function agentSubject(a: (Pick<Agent, "name" | "agency"> & { id?: string }) | undefined): Pick<Activity, "subjectName" | "subjectAgency" | "subjectId"> {
   const name = (a?.name ?? "").trim();
   const agency = (a?.agency ?? "").trim();
-  return { ...(name ? { subjectName: name } : {}), ...(agency ? { subjectAgency: agency } : {}) };
+  const id = (a?.id ?? "").trim();
+  return { ...(name ? { subjectName: name } : {}), ...(agency ? { subjectAgency: agency } : {}), ...(id ? { subjectId: id } : {}) };
 }
 
 /** A manuscript's subject: its title, in `subjectName`. */
@@ -120,6 +122,7 @@ export function agentUpdateActivity(stored: Agent, patch: Partial<Record<string,
   const c = agentChange(stored, patch);
   if (c.changed.length === 0) return null;
   const after = {
+    id: stored.id,
     name: typeof patch.name === "string" ? patch.name : stored.name,
     agency: typeof patch.agency === "string" ? patch.agency : stored.agency,
   };
@@ -240,8 +243,8 @@ export function houseSay(a: HouseFields, x: FeedSeg, agency = ""): FeedSeg[] | n
   }
 }
 
-/** A sweep's sentence — no person run, because it names no one. */
-export const sweepSay = (n: number): FeedSeg[] => [{ t: `You updated ${n} agents' details` }];
+/** A sweep's sentence — no person run, because it names no one. Its "{n} agents' details" goes to the Contact list. */
+export const sweepSay = (n: number): FeedSeg[] => [{ t: "You updated " }, { t: `${n} agents' details`, to: "/agents" }];
 
 /* ── the burst ─────────────────────────────────────────────────────────────────────────────────── */
 

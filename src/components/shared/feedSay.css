@@ -1,0 +1,10 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Feed wording v1.1 (Part 3) — a name in a feed sentence is a link that looks like the text around it: its colour and
+ * weight are inherited, it underlines on hover, and it takes the app's one focus ring.
+ */
+a.fs-lk { color: inherit; font: inherit; text-decoration: none; border-radius: 3px; cursor: pointer; position: relative; z-index: 1; }
+a.fs-lk:hover { text-decoration: underline; text-underline-offset: 2px; }
+a.fs-lk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

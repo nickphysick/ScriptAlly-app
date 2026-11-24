@@ -61,8 +61,9 @@ const n = (k: number, one: string, many: string) => `${k} ${k === 1 ? one : many
  */
 export function importSentence(c: Pick<ImportCounts, "agents" | "queries">, manuscript: string): FeedSeg[] {
   const parts: FeedSeg[] = [];
-  if (c.agents > 0) parts.push({ t: n(c.agents, "agent", "agents"), who: true });
-  if (c.queries > 0) parts.push({ t: n(c.queries, "query", "queries"), who: true });
+  /* feed wording v1.1: the counts are links — the agents to the Contact list, the queries to the Query Centre */
+  if (c.agents > 0) parts.push({ t: n(c.agents, "agent", "agents"), who: true, to: "/agents" });
+  if (c.queries > 0) parts.push({ t: n(c.queries, "query", "queries"), who: true, to: "/queries" });
   const lead = parts.length === 2 ? "You imported your list: " : "You imported ";
   const body = parts.length === 2 ? [parts[0], { t: " and " }, parts[1]] : parts;
   /* Feed wording v1: no feed sentence ends with a full stop — this one is the stored description too */

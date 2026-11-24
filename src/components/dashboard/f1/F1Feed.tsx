@@ -18,14 +18,15 @@
  * `lib/dashF1Feed`'s, over `feedEntries` (the one resolver every feed surface narrates from).
  */
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Activity, Agent, Manuscript, Query } from "../../../types";
 import type { FeedSeg } from "../../../lib/dashFeed";
-import { feedEntries } from "../../../lib/dashFeed";
+import { feedEntries, sayText } from "../../../lib/dashFeed";
 import { drawerEvents, type FeedFilter } from "../../../lib/dashFeedDrawer";
 import { buildQcRows } from "../../../lib/qcSummary";
 import { F1_EARLIER, F1_END, F1_NOTHING, F1_WINDOW_DAYS, f1Days, f1From, type F1Big, type F1Mini } from "../../../lib/dashF1Feed";
 import { StatusDot } from "../../StatusDot";
+import { FeedSay } from "../../shared/FeedSay";
 import { BellGlyph, GearGlyph } from "../v58/Dash58Feed";
 
 export const F1_SWITCH: readonly { key: FeedFilter; label: string }[] = [
@@ -35,9 +36,8 @@ export const F1_SWITCH: readonly { key: FeedFilter; label: string }[] = [
 ];
 
 
-const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => (
-  <>{say.map((s, i) => (s.who ? <b key={i}>{s.t}</b> : s.em ? <i key={i}>{s.t}</i> : <React.Fragment key={i}>{s.t}</React.Fragment>))}</>
-);
+/* Feed wording v1.1 · every sentence is drawn by the one renderer, names as links (shared/FeedSay) */
+const Segs: React.FC<{ say: readonly FeedSeg[] }> = ({ say }) => <FeedSay say={say} />;
 
 const ImportGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -55,14 +55,19 @@ const SubLine: React.FC<{ c: F1Big; df1: string }> = ({ c, df1 }) => (
   </small>
 );
 
-/** A big event whose query no longer needs the writer: one line, a button that opens the card in place. */
+/**
+ * A big event whose query no longer needs the writer: one line that opens the card in place on a click.
+ * ⚠️ A LINK MUST NOT SIT INSIDE A BUTTON (v1.1 Part 3): the row is a container, and the toggle (the chevron's button,
+ * stretched over the whole row by its ::after) and the names' links are siblings. A click on a name goes to that name;
+ * anywhere else lands on the toggle. The toggle keeps aria-expanded and the focus hand-over (the ref is the toggle).
+ */
 const Collapsed = React.forwardRef<HTMLButtonElement, { c: F1Big; onToggle: () => void }>(({ c, onToggle }, ref) => (
-  <button ref={ref} type="button" className="df1-crow" data-df1="collapsed" data-kind={c.kind} data-dir={c.dir} data-status={c.status} data-query={c.queryId}
-    aria-expanded="false" onClick={onToggle}>
+  <div className="df1-crow" data-df1="collapsed" data-kind={c.kind} data-dir={c.dir} data-status={c.status} data-query={c.queryId}>
     <span className="df1-cg"><StatusDot status={c.status} overrideSize={20} decorative /></span>
     <span className="df1-ctx"><span className="df1-hl" data-df1="collapsed-headline" data-say="1"><Segs say={c.headline} /></span><SubLine c={c} df1="collapsed-sub" /></span>
-    <span className="df1-cv"><Chevron /></span>
-  </button>
+    <button ref={ref} type="button" className="df1-cv df1-crow-t" data-df1="collapsed-toggle" aria-expanded="false"
+      aria-label={sayText(c.headline)} onClick={onToggle}><Chevron /></button>
+  </div>
 ));
 Collapsed.displayName = "Collapsed";
 
@@ -116,8 +121,11 @@ const Big: React.FC<{ c: F1Big; onOpen: (queryId: string) => void; onFold?: () =
   </article>
 );
 
+/* Feed wording v1.1 · a row about one query opens it on a click anywhere but a link: the row's own link, stretched over
+   the row (df1-go), sits beside the names' links rather than around them */
 const Mini: React.FC<{ m: F1Mini }> = ({ m }) => (
-  <div className="df1-mini" data-df1="mini" data-dir={m.dir} data-status={m.status ?? ""} data-glyph={m.glyph}>
+  <div className="df1-mini" data-df1="mini" data-dir={m.dir} data-status={m.status ?? ""} data-glyph={m.glyph} data-go={m.go ?? undefined}>
+    {m.go && <Link to={m.go} className="df1-go" data-df1="row-go" aria-label={`Open the query: ${sayText(m.say)}`} />}
     <span className={`df1-mg df1-mg--${m.glyph}`} aria-hidden="true">
       {m.glyph === "status" && m.status ? <StatusDot status={m.status} overrideSize={20} decorative />
         : m.glyph === "house" ? <GearGlyph /> : m.glyph === "import" ? <ImportGlyph /> : <BellGlyph />}

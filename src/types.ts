@@ -1134,6 +1134,9 @@ export interface Activity {
   changedTo?: string;
   /** one row for a sweep of several agents: how many */
   batchCount?: number;
+  /** Feed wording v1.1: the agent a housekeeping row is about, by id, so the feed can link the name to its card (never
+   *  found from the name). Absent on every row written before, and on manuscript rows (they carry `manuscriptId`). */
+  subjectId?: string;
   /** Feed wording v1.1: a "told other agents" step's feed row carries its count, as its log step does (never read back
    *  out of `description`). Absent on every told row written before. */
   toldCount?: number;

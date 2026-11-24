@@ -21,7 +21,7 @@
  * only while the query still stands at the request (`FeedEntry.need`).
  */
 import { ActivityType, QueryStatus, type Agent, type Manuscript, type Query } from "../types";
-import { feedClock, provenanceOf, sayText, type FeedEntry, type FeedSeg } from "./dashFeed";
+import { agentHref, feedClock, MANUSCRIPTS_HREF, provenanceOf, sayText, type FeedEntry, type FeedSeg } from "./dashFeed";
 import type { DrawerEvent, FeedFilter } from "./dashFeedDrawer";
 import { anyToMs } from "./qcStages";
 import { dayMonth } from "./dates";
@@ -91,6 +91,9 @@ export interface F1Mini {
   at: number;
   /** the query the row is about (the activity's own), or null — first visit v2 hangs the nudge-email ask under one */
   queryId: string | null;
+  /** Feed wording v1.1 · where a click on the row (anywhere but a link) goes: a row about one query opens it. The
+   *  writer's housekeeping, the import and a several-queries row have none — only their links. */
+  go: string | null;
 }
 
 export type F1Item = F1Big | F1Mini;
@@ -196,8 +199,9 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
   const figs: F1Fig[] = [];
   /* the sentence once, in runs, for any name: the collapsed row says the first name, the open card's top the full one */
   let say: (name: string) => FeedSeg[];
-  const p = (name: string): FeedSeg => ({ t: name, who: true });
-  const book: FeedSeg[] = msTitle ? [{ t: msTitle, em: true }] : [{ t: "your manuscript" }];
+  /* v1.1 · the person links to their card while they are on the list; the title to the Manuscripts page */
+  const p = (name: string): FeedSeg => ({ t: name, who: true, ...(agent ? { to: agentHref(agent.id) } : {}) });
+  const book: FeedSeg[] = msTitle ? [{ t: msTitle, em: true, to: MANUSCRIPTS_HREF }] : [{ t: "your manuscript" }];
   if (kind === "request") {
     const what = e.status === QueryStatus.FULL_REQUESTED ? " asked for the full manuscript"
       : e.status === QueryStatus.PARTIAL_REQUESTED ? " asked for a partial" : " asked you to revise and resubmit";
@@ -233,7 +237,7 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
   /* ⚠️ A SUB-LINE NEVER REPEATS WHAT THE SENTENCE GIVES (v1.1 small fixes): the agency, else the title in italic */
   const said = sayText(say(who)).toLowerCase();
   const sub: FeedSeg[] = agencyOnce && !said.includes(agencyOnce.toLowerCase()) ? [{ t: agencyOnce }]
-    : msTitle && !said.includes(msTitle.toLowerCase()) ? [{ t: msTitle, em: true }] : [];
+    : msTitle && !said.includes(msTitle.toLowerCase()) ? [{ t: msTitle, em: true, to: MANUSCRIPTS_HREF }] : [];
   return {
     type: "big", id: e.id, kind, dir: e.dir, queryId: q.id, status: e.status,
     headline, top: say(who),
@@ -245,7 +249,8 @@ export function bigCard(ev: DrawerEvent, kind: F1Kind, ctx: F1Ctx): F1Big | null
 const miniOf = (ev: DrawerEvent): F1Mini => {
   const e = ev.entry;
   const glyph: F1Mini["glyph"] = e.imported ? "import" : e.app ? "house" : !e.status || e.activityType === ActivityType.NUDGE_SENT ? "bell" : "status";
-  return { type: "mini", id: e.id, dir: e.dir, status: e.status, glyph, say: ev.say, time: e.time, at: e.at, queryId: e.queryId };
+  const go = !e.app && !e.imported && e.queryId ? `/queries?q=${encodeURIComponent(e.queryId)}` : null;
+  return { type: "mini", id: e.id, dir: e.dir, status: e.status, glyph, say: ev.say, time: e.time, at: e.at, queryId: e.queryId, go };
 };
 
 /**
@@ -253,19 +258,21 @@ const miniOf = (ev: DrawerEvent): F1Mini => {
  * was for one book, else "You queried A, B and C".
  */
 function sentTogether(group: readonly DrawerEvent[], ctx: F1Ctx): F1Mini {
-  const names = group.map((g) => g.entry.who).filter((w): w is string => !!w);
+  /* v1.1 · each agent's own run, so each name carries its own link */
+  const people: FeedSeg[] = group.filter((g) => !!g.entry.who).map((g) => g.say.find((s) => s.who) ?? { t: g.entry.who, who: true });
   const titles = new Set(group.map((g) => {
     const q = ctx.queries.find((x) => x.id === g.entry.queryId);
     return (ctx.manuscripts.find((m) => m.id === q?.manuscriptId)?.title ?? "").trim();
   }));
   const title = titles.size === 1 ? [...titles][0] : "";
-  const say: FeedSeg[] = title ? [{ t: "You sent your query for " }, { t: title, em: true }, { t: " to " }] : [{ t: "You queried " }];
-  names.forEach((n, i) => {
-    if (i > 0) say.push({ t: i === names.length - 1 ? " and " : ", " });
-    say.push({ t: n, who: true });
+  const say: FeedSeg[] = title ? [{ t: "You sent your query for " }, { t: title, em: true, to: MANUSCRIPTS_HREF }, { t: " to " }] : [{ t: "You queried " }];
+  people.forEach((n, i) => {
+    if (i > 0) say.push({ t: i === people.length - 1 ? " and " : ", " });
+    say.push(n);
   });
   const last = group[0];
-  return { ...miniOf(last), id: `sent-${group.map((g) => g.entry.id).join("+")}`, say };
+  /* several queries: no one query to open, so no row click — only the names */
+  return { ...miniOf(last), id: `sent-${group.map((g) => g.entry.id).join("+")}`, say, go: null };
 }
 
 const isQuerySend = (e: FeedEntry) => e.dir === "out" && e.status === QueryStatus.QUERIED && !e.app && !e.imported;

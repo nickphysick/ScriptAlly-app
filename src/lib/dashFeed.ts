@@ -44,8 +44,18 @@ const MONTHS = MONTHS_SHORT;
 /** How far back the feed reads. The ref's chip says so on the card: "30 days". */
 export const FEED_DAYS = 30;
 
-/** One run of a sentence. `em` marks the manuscript, `who` the person. */
-export type FeedSeg = { t: string; em?: boolean; who?: boolean };
+/** One run of a sentence. `em` marks the manuscript, `who` the person. `to` (feed wording v1.1) is where the run links:
+ *  set only when the subject is still on its list, and always resolved from an id, never from the words. */
+export type FeedSeg = { t: string; em?: boolean; who?: boolean; to?: string };
+
+/** An agent's card on the Contact list (AgentList opens `?agent={id}`). */
+export const agentHref = (id: string): string => `/agents?agent=${encodeURIComponent(id)}`;
+/** A manuscript title links to the Manuscripts page, not to one manuscript (v1.1 baked decision 4). */
+export const MANUSCRIPTS_HREF = "/manuscripts";
+
+/** Sets each person run's and each title run's link, where the sentence's subject is live. */
+export const linkRuns = (say: FeedSeg[], agentTo: string | null, msTo: string | null): FeedSeg[] =>
+  say.map((s) => (s.to ? s : s.who && agentTo ? { ...s, to: agentTo } : s.em && msTo ? { ...s, to: msTo } : s));
 
 export interface FeedEntry {
   id: string;
@@ -474,7 +484,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
         time: feedClock(t),
         dayLabel: dayLabelFor(t, i.now),
         pill: EVENT_LABEL.imported, status: null, state: null, app: false,
-        say: importSentence(c, title), provenance: "", action: null, requery: null, queryId: null,
+        say: linkRuns(importSentence(c, title), null, title ? MANUSCRIPTS_HREF : null), provenance: "", action: null, requery: null, queryId: null,
         isNew: i.seenAt !== null && t > i.seenAt,
         /* one "thing you did"; never "From agents" */
         dir: "out", activityType: String(a.activityType), who: title, agency: "", need: null, met: null,
@@ -498,6 +508,9 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       const sweep = a.activityType === ActivityType.AGENT_UPDATED && (a.batchCount ?? 0) >= 2;
       const live = a.activityType === ActivityType.AGENT_ADDED && a.id.startsWith(ADDED_AGENT_ID)
         ? i.agents.find((ag) => ag.id === a.id.slice(ADDED_AGENT_ID.length)) : undefined;
+      /* v1.1 · the link: the id the row carries (or its Added id), only while that agent is still on the list */
+      const linkId = a.subjectId || (a.id.startsWith(ADDED_AGENT_ID) ? a.id.slice(ADDED_AGENT_ID.length) : "");
+      const agentTo = linkId && i.agents.some((ag) => ag.id === linkId) ? agentHref(linkId) : null;
       const name = (a.subjectName ?? "").trim() || (a.subjectAgency ? "" : (live?.name ?? "").trim());
       const agency = (a.subjectName || a.subjectAgency ? a.subjectAgency ?? "" : live?.agency ?? "").trim();
       if (sweep) {
@@ -507,14 +520,15 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
       } else {
         who = name || agency;
         if (!who) continue;
-        say = houseSay(a, { t: who, who: true }, agency);
+        say = houseSay(a, { t: who, who: true, ...(agentTo ? { to: agentTo } : {}) }, agency);
         provenance = provenanceOf(who, agency, agentEventContext(a.activityType));
         agencyLine = provenanceOf(who, agency);
       }
     } else if (MS_TYPES.has(a.activityType)) {
       who = (a.subjectName ?? "").trim() || (i.manuscripts.find((m) => m.id === a.manuscriptId)?.title ?? "").trim();
       if (!who) continue;
-      say = houseSay(a, { t: who, em: true });
+      const msLive = !!a.manuscriptId && i.manuscripts.some((m) => m.id === a.manuscriptId);
+      say = houseSay(a, { t: who, em: true, ...(msLive ? { to: MANUSCRIPTS_HREF } : {}) });
       provenance = provenanceOf(who, "your manuscripts");
     } else {
       const q = i.queries.find((x) => x.id === a.queryId);
@@ -530,6 +544,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
         typeof a.toldCount === "number" ? a.toldCount : null,
       )
         ?? [{ t: a.description?.trim() || who }];
+      say = linkRuns(say, agent ? agentHref(agent.id) : null, msTitle?.trim() ? MANUSCRIPTS_HREF : null);
       provenance = (agent?.agency ?? "").trim();
     }
 

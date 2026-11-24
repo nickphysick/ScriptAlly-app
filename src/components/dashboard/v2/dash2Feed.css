@@ -24,7 +24,7 @@
 .d58.d2 .d2-feed .df1-crow[data-kind="request"]:is([data-status="Full Requested"], [data-status="Revise & Resubmit"]) { --t: #eff3f7; }
 .d58.d2 .d2-feed .df1-crow[data-kind="offer"] { --t: #eef6f3; }
 .d58.d2 .d2-feed .df1-crow:hover { border-color: #d9c8ba; }
-.d58.d2 .d2-feed .df1-crow:focus-visible, .d2-feed .df1-fold:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.d58.d2 .d2-feed .df1-crow:has(.df1-crow-t:focus-visible), .d2-feed .df1-fold:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58.d2 .d2-feed .df1-cg { display: grid; place-items: center; margin-top: 1px; }
 .d58.d2 .d2-feed .df1-ctx { min-width: 0; }
 .d58.d2 .d2-feed .df1-cv { display: grid; place-items: center; width: 16px; height: 16px; margin-top: 3px; color: var(--d2-muted); }
@@ -65,3 +65,17 @@
 .d58.d2 .d2-feed .df1-mini[data-glyph="house"] { margin-bottom: 4px; padding: 4px 14px; border: 0; background: none; box-shadow: none; }
 .d58.d2 .d2-feed .df1-mini[data-glyph="house"] .df1-mtx { font-size: var(--sp-sec-size); color: var(--sp-muted); }
 .d58.d2 .d2-feed .df1-mini[data-glyph="house"] + :not(.df1-mini[data-glyph="house"]) { margin-top: 10px; }
+
+/* ════ FEED WORDING v1.1 · NAMES ARE LINKS (Part 3) ════
+   A link never sits inside a button: a collapsed card is a container whose toggle (the chevron's button) is stretched over
+   the row by its ::after, and a small row about a query carries its own link (df1-go) stretched the same way. The names'
+   links (shared/feedSay.css) sit above both, so a click on a name goes to the name and anywhere else to the row. */
+.d58.d2 .d2-feed .df1-crow { position: relative; }
+.d58.d2 .d2-feed .df1-crow-t { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; }
+.d58.d2 .d2-feed .df1-crow-t::after { content: ""; position: absolute; inset: 0; border-radius: 12px; }
+.d58.d2 .d2-feed .df1-crow-t:focus-visible { outline: none; }
+.d58.d2 .d2-feed .df1-mini { position: relative; }
+.d58.d2 .d2-feed .df1-go { position: absolute; inset: 0; border-radius: 12px; }
+.d58.d2 .d2-feed .df1-go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.d58.d2 .d2-feed .df1-mini[data-go] { cursor: pointer; }
+.d58.d2 .d2-feed .df1-mini[data-go]:hover { background: #f8f4ed; }

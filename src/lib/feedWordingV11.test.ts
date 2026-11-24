@@ -200,3 +200,115 @@ describe("Part 2 — the card's sentence is runs, and its sub-line never repeats
     expect(c.sub).toEqual([]);
   });
 });
+
+/* ═══ Part 3 — names are links (logic half; the rendered half is tests/e2e/feedWordingV11.measure.ts FW3) ════════════ */
+import { renderToString } from "react-dom/server";
+import React from "react";
+import { FeedSay } from "../components/shared/FeedSay";
+import { agentSubject, agentUpdateActivity } from "./feedHouse";
+import { f1Days, type F1Ctx, type F1Mini } from "./dashF1Feed";
+import { drawerEvents } from "./dashFeedDrawer";
+
+describe("Part 3 — every person run for a live agent links to that agent's card, by the event's id", () => {
+  const twinA = { id: "ag-a", name: "Sam Lee", agency: "North Books" } as Agent;
+  const twinB = { id: "ag-b", name: "Sam Lee", agency: "South Books" } as Agent;
+  const qA = { id: "qa", agentId: "ag-a", manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: at(60 * 24 * 3) } as Query;
+  const qB = { id: "qb", agentId: "ag-b", manuscriptId: "m1", status: QueryStatus.REJECTED, dateSent: at(60 * 24 * 3) } as Query;
+  const rows: Activity[] = [
+    row({ id: "r1", queryId: "qa", activityType: ActivityType.STATUS_CHANGED, resultingStatus: QueryStatus.PARTIAL_REQUESTED, date: at(50) }),
+    row({ id: "r2", queryId: "qb", activityType: ActivityType.STATUS_CHANGED, resultingStatus: QueryStatus.REJECTED, date: at(49) }),
+    row({ id: "act-added-agent-ag-b", queryId: "", manuscriptId: "", activityType: ActivityType.AGENT_ADDED, subjectName: "Sam Lee", subjectAgency: "South Books", date: at(48) }),
+    row({ id: "r4", queryId: "", manuscriptId: "", activityType: ActivityType.AGENT_UPDATED, subjectName: "Sam Lee", subjectAgency: "North Books", subjectId: "ag-a", changed: ["fit"], date: at(47) }),
+    /* a deleted agent: its id is no longer on the list, so its name is plain text */
+    row({ id: "r5", queryId: "", manuscriptId: "", activityType: ActivityType.AGENT_DELETED, subjectName: "Ruth Gone", subjectAgency: "Gone Ltd", subjectId: "ag-gone", date: at(46) }),
+    /* written before v1.1: no id carried, so no link — never found by the name */
+    row({ id: "r6", queryId: "", manuscriptId: "", activityType: ActivityType.AGENT_UPDATED, subjectName: "Sam Lee", subjectAgency: "North Books", changed: ["wishlist"], date: at(25) }), // > 10 min from r4: not a burst
+  ];
+  const entries = feedEntries({ activities: rows, queries: [qA, qB], agents: [twinA, twinB], manuscripts: [ms], now: NOW, seenAt: null });
+  const href = (id: string) => entries.find((e) => e.id === id)!.say.find((s) => s.who)!.to;
+  it("population: every row is on the feed", () => expect(entries).toHaveLength(rows.length));
+  it("two agents share a name: each row links to its own agent", () => {
+    expect(href("r1")).toBe("/agents?agent=ag-a");
+    expect(href("r2")).toBe("/agents?agent=ag-b");
+    expect(href("act-added-agent-ag-b")).toBe("/agents?agent=ag-b");
+    expect(href("r4")).toBe("/agents?agent=ag-a");
+  });
+  it("an agent no longer on the contact list is plain text; so is a row that carries no id", () => {
+    expect(href("r5")).toBeUndefined();
+    expect(href("r6")).toBeUndefined();
+  });
+  it("the manuscript title links to the Manuscripts page while the manuscript exists", () => {
+    const e = entries.find((x) => x.id === "r1")!;
+    expect(e.say.find((s) => s.em)).toEqual({ t: "Tidewrack", em: true, to: "/manuscripts" });
+    const gone = feedEntries({ activities: [row({ id: "g", queryId: "", activityType: ActivityType.MANUSCRIPT_DELETED, manuscriptId: "m-gone", subjectName: "Saltmarsh" })],
+      queries: [], agents: [], manuscripts: [ms], now: NOW, seenAt: null });
+    expect(gone[0].say.find((s) => s.em)?.to).toBeUndefined();
+    const live = feedEntries({ activities: [row({ id: "l", queryId: "", activityType: ActivityType.MANUSCRIPT_UPDATED, manuscriptId: "m1", subjectName: "Tidewrack", changed: ["details"] })],
+      queries: [], agents: [], manuscripts: [ms], now: NOW, seenAt: null });
+    expect(live[0].say.find((s) => s.em)?.to).toBe("/manuscripts");
+  });
+  it("the sweep's '{n} agents' details' goes to the Contact list; the import's counts to the Contact list and the Query Centre", () => {
+    const sw = feedEntries({ activities: [row({ id: "s", queryId: "", manuscriptId: "", activityType: ActivityType.AGENT_UPDATED, batchCount: 3 })], queries: [], agents: [], manuscripts: [], now: NOW, seenAt: null });
+    expect(sw[0].say).toEqual([{ t: "You updated " }, { t: "3 agents' details", to: "/agents" }]);
+    const imp = feedEntries({ activities: [row({ id: "i", queryId: "", activityType: "Imported" as never, eventKey: "imported" as never, manuscriptId: "m1",
+      importCounts: { agents: 2, queries: 3, withAgents: 1, withYou: 1, closed: 1 }, importRoute: "smart" } as never)], queries: [], agents: [], manuscripts: [ms], now: NOW, seenAt: null });
+    expect(imp, "population: the import row").toHaveLength(1);
+    expect(imp[0].say.filter((s) => s.to).map((s) => [s.t, s.to])).toEqual([["2 agents", "/agents"], ["3 queries", "/queries"], ["Tidewrack", "/manuscripts"]]);
+  });
+  it("a small row about one query opens it; housekeeping, the import and several-queries rows have no row click", () => {
+    const evs = drawerEvents(entries, []);
+    const ctx: F1Ctx = { queries: [qA, qB], agents: [twinA, twinB], manuscripts: [ms], qcRows: [], userName: "", now: NOW };
+    const minis = f1Days(evs, "all", ctx).flatMap((d) => d.items).filter((x): x is F1Mini => x.type === "mini");
+    expect(minis.length).toBeGreaterThan(0);
+    for (const m of minis) expect(m.go, m.id).toBe(m.glyph === "status" ? `/queries?q=${m.queryId}` : null);
+    expect(minis.some((m) => m.go)).toBe(true);
+  });
+  it("several queries sent on one day: each agent's name carries its own link, and the row has none", () => {
+    const sends = [qA, qB].map((q, k) => row({ id: `send${k}`, queryId: q.id, activityType: ActivityType.STATUS_CHANGED, resultingStatus: QueryStatus.QUERIED, date: at(20 + k) }));
+    const qs = [{ ...qA, status: QueryStatus.QUERIED }, { ...qB, status: QueryStatus.QUERIED }] as Query[];
+    const ev2 = drawerEvents(feedEntries({ activities: sends, queries: qs, agents: [twinA, twinB], manuscripts: [ms], now: NOW, seenAt: null }), []);
+    const it2 = f1Days(ev2, "all", { queries: qs, agents: [twinA, twinB], manuscripts: [ms], qcRows: [], userName: "", now: NOW })[0].items[0] as F1Mini;
+    expect(it2.say.filter((s) => s.who).map((s) => s.to)).toEqual(["/agents?agent=ag-a", "/agents?agent=ag-b"]);
+    expect(it2.go).toBeNull();
+  });
+});
+
+describe("Part 3 — the writes carry the agent's id", () => {
+  it("agentSubject and agentUpdateActivity carry subjectId", () => {
+    expect(agentSubject({ id: "ag1", name: "Nadia Hussain", agency: "Hussain Literary" })).toEqual({ subjectName: "Nadia Hussain", subjectAgency: "Hussain Literary", subjectId: "ag1" });
+    expect(agentUpdateActivity({ ...agent, starRating: 3 } as Agent, { starRating: 4 }, at(1))?.subjectId).toBe("ag1");
+  });
+  it("addAgent and deleteAgent pass the whole agent (with its id) to agentSubject", () => {
+    const db = readFileSync("src/lib/db.tsx", "utf8");
+    expect(db).toContain("...agentSubject(newAg),");
+    expect(db).toContain("const goneSubject = agentSubject(gone);");
+  });
+  it("the rules allow subjectId on both stores", () => {
+    const rules = readFileSync("firestore.rules", "utf8");
+    const nested = rules.slice(rules.indexOf("function isValidActivityNested(data)"), rules.indexOf("// (isValidTopLevelActivity is gone"));
+    const top = rules.slice(rules.indexOf("function isValidActivity(data, userId)"), rules.indexOf("function isValidJournalEntry"));
+    expect(nested).toMatch(/hasOnly\(\[[\s\S]*'subjectId'[\s\S]*\]\)/);
+    for (const v of [nested, top]) expect(v).toContain("(!data.keys().hasAny(['subjectId']) || (data.subjectId is string && data.subjectId.size() <= 128))");
+  });
+});
+
+describe("Part 3 — the renderer", () => {
+  it("a run with a link is a real <a> with its href; a run without one is plain", () => {
+    const html = renderToString(React.createElement(FeedSay, { say: [{ t: "You added " }, { t: "Nadia", who: true, to: "/agents?agent=ag1" }, { t: " and " }, { t: "Ruth", who: true }, { t: " for " }, { t: "Tidewrack", em: true, to: "/manuscripts" }] }));
+    expect(html).toContain('<b><a href="/agents?agent=ag1" class="fs-lk" data-feed-link="who">Nadia</a></b>');
+    expect(html).toContain("<b>Ruth</b>");
+    expect(html).toContain('<i><a href="/manuscripts" class="fs-lk" data-feed-link="em">Tidewrack</a></i>');
+    expect(html).not.toContain("target=");
+  });
+  it("no link sits inside a button: the collapsed card is a container, its toggle a sibling of the sentence", () => {
+    const tsx = readFileSync("src/components/dashboard/f1/F1Feed.tsx", "utf8");
+    const col = tsx.slice(tsx.indexOf("const Collapsed = React.forwardRef"), tsx.indexOf('Collapsed.displayName'));
+    expect(col).toContain('<div className="df1-crow" data-df1="collapsed"');
+    expect(col).toMatch(/<button ref=\{ref\}[^>]*aria-expanded="false"[^>]*>(?:(?!<\/button>)[\s\S])*<\/button>\n\s*<\/div>/);
+    const btn = col.slice(col.indexOf("<button"), col.indexOf("</button>"));
+    expect(btn).not.toMatch(/Segs|FeedSay|SubLine/);
+  });
+  it("the feed, the drawer and the cards draw sentences through FeedSay", () => {
+    for (const f of ["src/components/dashboard/f1/F1Feed.tsx", "src/components/dashboard/v58/Dash58Feed.tsx"]) expect(readFileSync(f, "utf8")).toContain("<FeedSay say={say} />");
+  });
+});
