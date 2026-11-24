@@ -24,7 +24,7 @@ import { openCard as openAgentCard, CARD as AGENT_CARD } from "./cl262Lib";
 test.setTimeout(900_000);
 const DIR = "reports/controls-entry-v1";
 const VP = { width: 1440, height: 900 };
-const KEYS = ["fr", "q", "n", "rm"] as const;
+const KEYS = ["fr", "q", "n", "rm", "ra"] as const;
 type Key = (typeof KEYS)[number];
 const QCARD = "[data-qp='panel'] [data-qc152='card']";
 const settle = (page: Page, ms = 500) => page.waitForTimeout(ms);
@@ -75,6 +75,7 @@ async function readQueryCard(page: Page, k: Key) {
         stamp: m.querySelector<HTMLElement>("[data-qc152='msg-date']")?.innerText.trim() ?? null,
         bg: getComputedStyle(bx).backgroundColor, radius: getComputedStyle(bx).borderTopLeftRadius, shadow: getComputedStyle(bx).boxShadow,
         subFont: (() => { const e = m.querySelector<HTMLElement>(".oc-sub"); return e ? `${getComputedStyle(e).fontSize} ${getComputedStyle(e).color}` : null; })(),
+        mark: !!m.querySelector("[data-qc152='glyph'] [data-mark='reply']"),
         order, width: Math.round(m.getBoundingClientRect().width), threadWidth: Math.round((m.parentElement as HTMLElement).getBoundingClientRect().width),
       };
     });
@@ -106,6 +107,7 @@ async function readAgentCard(page: Page, k: Key) {
   await page.locator(`${AGENT_CARD} [data-cl262='tab'][data-tab='history']`).click(); await settle(page, 1200);
   const history = await page.evaluate((sel) => [...document.querySelectorAll<HTMLElement>(`${sel} [data-cl262='history'] [data-qc152='msg'][data-kind='reply']`)].map((m) => ({
     cls: m.className, title: m.querySelector<HTMLElement>("[data-qc152='msg-title']")?.innerText ?? "", bg: getComputedStyle(m.querySelector<HTMLElement>(".qc152-bx")!).backgroundColor,
+    mark: !!m.querySelector("[data-mark='reply']"),
   })), AGENT_CARD);
   const allMsgs = await page.locator(`${AGENT_CARD} [data-cl262='history'] [data-qc152='msg']`).count();
   await page.screenshot({ path: `${DIR}/shots/${k}-agent-history-${PHASE}.png`, clip: (await page.locator(AGENT_CARD).first().boundingBox()) ?? undefined }).catch(() => {});
@@ -129,6 +131,20 @@ async function readTodo(page: Page) {
   });
 }
 
+/* ── the Dashboard's Next up: every row naming a ce1 agent ─────────────────────────────────────────────────────────── */
+const CE1_NAMES = ["Imogen", "Jules", "Nadia", "Rafe", "Ada"];
+async function readNextUp(page: Page) {
+  await openRoute(page, "/dashboard", VP);
+  await page.locator("[data-d2='next']").first().waitFor({ timeout: 60_000 }).catch(() => {});
+  await settle(page, 1500);
+  return page.evaluate((names) => {
+    const root = [...document.querySelectorAll<HTMLElement>("[data-d2='next']")].find((e) => e.getBoundingClientRect().height > 0);
+    if (!root) return { found: false, n: 0, rows: [] as string[] };
+    const rows = [...root.querySelectorAll<HTMLElement>("[data-d2='next-top'], [data-d2='next-row']")].map((e) => (e.innerText || "").replace(/\s+/g, " ").trim());
+    return { found: true, n: Number(root.dataset.n ?? 0), rows: rows.filter((t) => names.some((nm) => t.includes(nm))) };
+  }, CE1_NAMES);
+}
+
 let PHASE = "before";
 async function readAll(page: Page) {
   mkdirSync(`${DIR}/shots`, { recursive: true });
@@ -138,7 +154,8 @@ async function readAll(page: Page) {
   const agents: Record<string, Awaited<ReturnType<typeof readAgentCard>>> = {};
   for (const k of ["fr", "q"] as const) agents[k] = await readAgentCard(page, k);
   const todo = await readTodo(page);
-  return { slips, cards, agents, todo };
+  const nextUp = await readNextUp(page);
+  return { slips, cards, agents, todo, nextUp };
 }
 
 const DAY = 86_400_000;
@@ -147,6 +164,8 @@ const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const ahead = (d: number) => new Date(Date.now() + d * DAY);
 const dm = (d: Date) => `${d.getDate()} ${MON[d.getMonth()]}`;
 const wdm = (d: Date) => `${WD[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`;
+/** the day the seed dates each entry: today, or yesterday for "ra" (its reminder was set after it) */
+const entryDay = (k: string) => dm(k === "ra" ? new Date(Date.now() - DAY) : new Date());
 
 test("Controls: entry v1 — the entry on the rendered page", async ({ page }) => {
   const L = new Ledger();
@@ -165,9 +184,9 @@ test("Controls: entry v1 — the entry on the rendered page", async ({ page }) =
     for (const k of KEYS) L.check(`population · ${k}`, before.slips[k] && after.slips[k] && before.cards[k] && after.cards[k], `slip and card found for ce1-${k}`);
 
     /* P3 · Tracking: one small note per query, never a full bubble */
-    const words = { fr: "Any news on the manuscript?", q: "Still on my pile", n: "away until 7 December", rm: "Reading now" } as Record<Key, string>;
-    const titles = { fr: "Imogen chased the full", q: "Jules sent a holding reply", n: "Nadia sent a note", rm: "Rafe sent a holding reply" } as Record<Key, string>;
-    const subs = { fr: `Send by ${wdm(ahead(10))}`, q: `Reply expected by ${dm(ahead(52))}`, n: null, rm: `Reply expected by ${dm(ahead(40))}` } as Record<Key, string | null>;
+    const words = { fr: "Any news on the manuscript?", q: "Still on my pile", n: "away until 7 December", rm: "Reading now", ra: "back to you in the new year" } as Record<Key, string>;
+    const titles = { fr: "Imogen chased the full", q: "Jules sent a holding reply", n: "Nadia sent a note", rm: "Rafe sent a holding reply", ra: "Ada sent a holding reply" } as Record<Key, string>;
+    const subs = { fr: `Send by ${wdm(ahead(10))}`, q: `Reply expected by ${dm(ahead(52))}`, n: null, rm: `Reply expected by ${dm(ahead(40))}`, ra: `Reply expected by ${dm(ahead(40))}` } as Record<Key, string | null>;
     for (const k of KEYS) {
       const b = before.cards[k], a = after.cards[k], n = a.notes[0];
       L.check(`P3 tracking · ${k} · no note before`, b.notes.length === 0, `${b.notes.length} reply steps before`);
@@ -178,16 +197,16 @@ test("Controls: entry v1 — the entry on the rendered page", async ({ page }) =
       L.check(`P3 tracking · ${k} · title`, n.title.trim() === titles[k], n.title);
       L.check(`P3 tracking · ${k} · date line`, (n.sub ?? null) === subs[k], String(n.sub));
       L.check(`P3 tracking · ${k} · their words`, (n.quote ?? "").includes(words[k]), String(n.quote));
-      L.check(`P3 tracking · ${k} · stamp`, n.stamp === dm(new Date()), String(n.stamp));
+      L.check(`P3 tracking · ${k} · stamp`, n.stamp === entryDay(k), String(n.stamp));
       const o = n.order.filter((x): x is number => x != null);
       L.check(`P3 tracking · ${k} · order title, date line, words, date`, o.every((v, i) => i === 0 || v >= o[i - 1]), JSON.stringify(n.order));
       L.check(`P3 tracking · ${k} · narrower than a step`, n.width <= Math.ceil(n.threadWidth * 0.82) + 1, `${n.width} of ${n.threadWidth}`);
       L.check(`P3 band · ${k} · band, stage, track and Day unchanged`, a.band === b.band && a.stage === b.stage && a.track === b.track && a.day === b.day, `${b.band}/${b.stage}/${b.day} → ${a.band}/${a.stage}/${a.day}`);
       L.check(`P3 status · ${k} · the slip's status unchanged`, after.slips[k]?.status === before.slips[k]?.status, `${before.slips[k]?.status} → ${after.slips[k]?.status}`);
-      L.check(`P3 agent tab · ${k} · Last heard is today`, a.heard.includes(dm(new Date())) && !b.heard.includes(dm(new Date())), `${b.heard} → ${a.heard}`);
-      const what = { fr: "chased the full", q: "a holding reply", n: "a note", rm: "a holding reply" }[k];
+      L.check(`P3 agent tab · ${k} · Last heard is the entry's day`, a.heard.includes(entryDay(k)) && !b.heard.includes(entryDay(k)), `${b.heard} → ${a.heard}`);
+      const what = { fr: "chased the full", q: "a holding reply", n: "a note", rm: "a holding reply", ra: "a holding reply" }[k];
       L.check(`P3 agent tab · ${k} · says what it was`, a.heard.includes(what), a.heard);
-      const phrase = { fr: "when chasing the full", q: "in a holding reply", n: "in a note", rm: "in a holding reply" }[k];
+      const phrase = { fr: "when chasing the full", q: "in a holding reply", n: "in a note", rm: "in a holding reply", ra: "in a holding reply" }[k];
       L.check(`P3 notes · ${k} · their words with the phrase`, a.quotes.some((x) => x.includes(phrase) && x.includes(words[k])) && !b.quotes.some((x) => x.includes(words[k])), a.quotes.join(" | "));
     }
     /* P3 · the footer: only the date line changes, and only where the entry gave a date */
@@ -216,6 +235,24 @@ test("Controls: entry v1 — the entry on the rendered page", async ({ page }) =
       L.check(`P5 to-do · ${r.key} · recorded`, true, `${was ? `${was.title} · ${was.due}` : "(absent before)"} → ${r.title} · ${r.due}`);
     }
     for (const r of before.todo.rows.filter((x) => !after.todo.rows.some((y) => y.key === x.key))) L.check(`P5 to-do · ${r.key} · recorded`, true, `${r.title} · ${r.due} → (gone after)`);
+
+    /* ── follow-ups ── */
+    /* 1 · the To-do list reads through the entry */
+    const tAfter = (k: string) => after.todo.rows.find((r) => r.key === k);
+    L.check("F1 to-do · fr · the send task shows its Send by", (tAfter("task-full-ce1-fr")?.due ?? "") === "10 days left", String(tAfter("task-full-ce1-fr")?.due));
+    L.check("F1 to-do · q · no nudge and no close before the agent's date", !tAfter("task-nudge-ce1-q") && !tAfter("task-no-res-close-ce1-q"),
+      after.todo.rows.filter((r) => r.key.endsWith("ce1-q")).map((r) => `${r.key}: ${r.due}`).join(", ") || "no ce1-q task");
+    L.check("F1 to-do · q · it was a task before (the population)", before.todo.rows.some((r) => r.key.endsWith("ce1-q")), before.todo.rows.filter((r) => r.key.endsWith("ce1-q")).map((r) => r.key).join(", "));
+    L.check("F1 to-do · no row anywhere says a ce1 entry's query is 180 days past expected unless it has no date (n)", after.todo.rows.filter((r) => /past expected/.test(r.due)).every((r) => r.key.endsWith("ce1-n")),
+      after.todo.rows.map((r) => `${r.key}: ${r.due}`).join(" · "));
+    L.check("F1 next up · found", before.nextUp.found && after.nextUp.found, `${before.nextUp.n} → ${after.nextUp.n} rows; ce1 after: ${after.nextUp.rows.join(" | ") || "none shown"}`);
+    L.check("F1 next up · no ce1 row says past expected for a dated entry", !after.nextUp.rows.some((t) => /Jules|Imogen|Rafe|Ada/.test(t) && /past expected|gone quiet|Consider closing/i.test(t)), after.nextUp.rows.join(" | ") || "none shown");
+    /* 2 · the reminder set after the entry stays; the one with no stamp moves */
+    L.check("F2 reminder · ra · set after the entry: stays where the writer put it", (after.slips.ra?.next ?? "").includes(`Nudge on ${dm(ahead(5))}`), `${before.slips.ra?.next} → ${after.slips.ra?.next}`);
+    L.check("F2 reminder · rm · no stamp: moves to the new date", (after.slips.rm?.next ?? "").includes(`Nudge on ${dm(ahead(40))}`), `${before.slips.rm?.next} → ${after.slips.rm?.next}`);
+    /* 4 · the speech-bubble mark on every note */
+    for (const k of KEYS) L.check(`F4 mark · ${k} · the note draws the speech bubble`, after.cards[k].notes.length === 1 && after.cards[k].notes[0].mark, String(after.cards[k].notes[0]?.mark));
+    for (const k of ["fr", "q"] as const) L.check(`F4 mark · ${k} · in the agent card's History too`, after.agents[k].history.length === 1 && after.agents[k].history[0].mark, after.agents[k].history.map((h) => `${h.cls} mark=${h.mark}`).join(", "));
     L.save({ before, after });
   } finally {
     seed("--clean");

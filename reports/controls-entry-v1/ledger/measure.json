@@ -21,6 +21,11 @@
    "detail": "slip and card found for ce1-rm"
   },
   {
+   "where": "population · ra",
+   "ok": true,
+   "detail": "slip and card found for ce1-ra"
+  },
+  {
    "where": "P3 tracking · fr · no note before",
    "ok": true,
    "detail": "0 reply steps before"
@@ -81,7 +86,7 @@
    "detail": "Full Requested → Full Requested"
   },
   {
-   "where": "P3 agent tab · fr · Last heard is today",
+   "where": "P3 agent tab · fr · Last heard is the entry's day",
    "ok": true,
    "detail": "Last heard 21 Nov asked for the full → Last heard 24 Nov chased the full"
   },
@@ -156,7 +161,7 @@
    "detail": "Queried → Queried"
   },
   {
-   "where": "P3 agent tab · q · Last heard is today",
+   "where": "P3 agent tab · q · Last heard is the entry's day",
    "ok": true,
    "detail": "Last heard Not yet since 2 Apr → Last heard 24 Nov a holding reply"
   },
@@ -231,7 +236,7 @@
    "detail": "Queried → Queried"
   },
   {
-   "where": "P3 agent tab · n · Last heard is today",
+   "where": "P3 agent tab · n · Last heard is the entry's day",
    "ok": true,
    "detail": "Last heard Not yet since 2 Apr → Last heard 24 Nov a note"
   },
@@ -306,7 +311,7 @@
    "detail": "Queried → Queried"
   },
   {
-   "where": "P3 agent tab · rm · Last heard is today",
+   "where": "P3 agent tab · rm · Last heard is the entry's day",
    "ok": true,
    "detail": "Last heard Not yet since 4 Nov → Last heard 24 Nov a holding reply"
   },
@@ -319,6 +324,81 @@
    "where": "P3 notes · rm · their words with the phrase",
    "ok": true,
    "detail": "Rafe in a holding reply · 24 Nov “Reading now — give me a few weeks.” ⋯"
+  },
+  {
+   "where": "P3 tracking · ra · no note before",
+   "ok": true,
+   "detail": "0 reply steps before"
+  },
+  {
+   "where": "P3 tracking · ra · one note after",
+   "ok": true,
+   "detail": "1 reply steps, 0 without oc-note"
+  },
+  {
+   "where": "P3 tracking · ra · the note's class",
+   "ok": true,
+   "detail": "qc152-m them oc oc-note"
+  },
+  {
+   "where": "P3 tracking · ra · the ref's box",
+   "ok": true,
+   "detail": "rgb(246, 243, 238) r12px none"
+  },
+  {
+   "where": "P3 tracking · ra · title",
+   "ok": true,
+   "detail": "Ada sent a holding reply"
+  },
+  {
+   "where": "P3 tracking · ra · date line",
+   "ok": true,
+   "detail": "Reply expected by 3 Jan"
+  },
+  {
+   "where": "P3 tracking · ra · their words",
+   "ok": true,
+   "detail": "“Reading now — back to you in the new year.”"
+  },
+  {
+   "where": "P3 tracking · ra · stamp",
+   "ok": true,
+   "detail": "23 Nov"
+  },
+  {
+   "where": "P3 tracking · ra · order title, date line, words, date",
+   "ok": true,
+   "detail": "[484.5997009277344,507.5907287597656,530.472412109375,568.204345703125]"
+  },
+  {
+   "where": "P3 tracking · ra · narrower than a step",
+   "ok": true,
+   "detail": "403 of 531"
+  },
+  {
+   "where": "P3 band · ra · band, stage, track and Day unchanged",
+   "ok": true,
+   "detail": "Queried/queried/Day 20 → Queried/queried/Day 20"
+  },
+  {
+   "where": "P3 status · ra · the slip's status unchanged",
+   "ok": true,
+   "detail": "Queried → Queried"
+  },
+  {
+   "where": "P3 agent tab · ra · Last heard is the entry's day",
+   "ok": true,
+   "detail": "Last heard Not yet since 4 Nov → Last heard 23 Nov a holding reply"
+  },
+  {
+   "where": "P3 agent tab · ra · says what it was",
+   "ok": true,
+   "detail": "Last heard 23 Nov a holding reply"
+  },
+  {
+   "where": "P3 notes · ra · their words with the phrase",
+   "ok": true,
+   "detail": "Ada in a holding reply · 23 Nov “Reading now — back to you in the new year.” ⋯"
   },
   {
    "where": "P3 footer · fr · Send by follows",
@@ -396,6 +476,11 @@
    "detail": "Reply expected by 30 Dec Nudge on 29 Nov → Open the card → Reply expected by 3 Jan 2027 Nudge on 3 Jan 2027 → Open the card"
   },
   {
+   "where": "P5 next · ra · recorded",
+   "ok": true,
+   "detail": "Reply expected by 30 Dec Nudge on 29 Nov → Open the card → Reply expected by 3 Jan 2027 Nudge on 29 Nov → Open the card"
+  },
+  {
    "where": "P5 next · q · follows the new reply date",
    "ok": true,
    "detail": "Reply expected by 15 Jan 2027 → Open the card"
@@ -413,22 +498,17 @@
   {
    "where": "P5 to-do · found the page",
    "ok": true,
-   "detail": "before 3 rows, after 3"
+   "detail": "before 3 rows, after 2"
   },
   {
    "where": "P5 to-do · task-full-ce1-fr · recorded",
    "ok": true,
-   "detail": "Send Imogen your full · 3 days waiting → Send Imogen your full · 3 days waiting"
+   "detail": "Send Imogen your full · 3 days waiting → Send Imogen your full · 10 days left"
   },
   {
    "where": "P5 to-do · task-nudge-ce1-n · recorded",
    "ok": true,
    "detail": "(absent before) → Nudge Nadia · 180 days past expected"
-  },
-  {
-   "where": "P5 to-do · task-nudge-ce1-q · recorded",
-   "ok": true,
-   "detail": "(absent before) → Nudge Jules · 180 days past expected"
   },
   {
    "where": "P5 to-do · task-no-res-close-ce1-n · recorded",
@@ -439,6 +519,81 @@
    "where": "P5 to-do · task-no-res-close-ce1-q · recorded",
    "ok": true,
    "detail": "Jules’ gone quiet · 236 days quiet → (gone after)"
+  },
+  {
+   "where": "F1 to-do · fr · the send task shows its Send by",
+   "ok": true,
+   "detail": "10 days left"
+  },
+  {
+   "where": "F1 to-do · q · no nudge and no close before the agent's date",
+   "ok": true,
+   "detail": "no ce1-q task"
+  },
+  {
+   "where": "F1 to-do · q · it was a task before (the population)",
+   "ok": true,
+   "detail": "task-no-res-close-ce1-q"
+  },
+  {
+   "where": "F1 to-do · no row anywhere says a ce1 entry's query is 180 days past expected unless it has no date (n)",
+   "ok": true,
+   "detail": "task-full-ce1-fr: 10 days left · task-nudge-ce1-n: 180 days past expected"
+  },
+  {
+   "where": "F1 next up · found",
+   "ok": true,
+   "detail": "33 → 32 rows; ce1 after: IF Send your full to Imogen Faraday 3 days"
+  },
+  {
+   "where": "F1 next up · no ce1 row says past expected for a dated entry",
+   "ok": true,
+   "detail": "IF Send your full to Imogen Faraday 3 days"
+  },
+  {
+   "where": "F2 reminder · ra · set after the entry: stays where the writer put it",
+   "ok": true,
+   "detail": "Reply expected by 30 Dec Nudge on 29 Nov → Open the card → Reply expected by 3 Jan 2027 Nudge on 29 Nov → Open the card"
+  },
+  {
+   "where": "F2 reminder · rm · no stamp: moves to the new date",
+   "ok": true,
+   "detail": "Reply expected by 30 Dec Nudge on 29 Nov → Open the card → Reply expected by 3 Jan 2027 Nudge on 3 Jan 2027 → Open the card"
+  },
+  {
+   "where": "F4 mark · fr · the note draws the speech bubble",
+   "ok": true,
+   "detail": "true"
+  },
+  {
+   "where": "F4 mark · q · the note draws the speech bubble",
+   "ok": true,
+   "detail": "true"
+  },
+  {
+   "where": "F4 mark · n · the note draws the speech bubble",
+   "ok": true,
+   "detail": "true"
+  },
+  {
+   "where": "F4 mark · rm · the note draws the speech bubble",
+   "ok": true,
+   "detail": "true"
+  },
+  {
+   "where": "F4 mark · ra · the note draws the speech bubble",
+   "ok": true,
+   "detail": "true"
+  },
+  {
+   "where": "F4 mark · fr · in the agent card's History too",
+   "ok": true,
+   "detail": "qc152-m them oc oc-note mark=true"
+  },
+  {
+   "where": "F4 mark · q · in the agent card's History too",
+   "ok": true,
+   "detail": "qc152-m them oc oc-note mark=true"
   }
  ],
  "readings": {
@@ -460,6 +615,11 @@
      "next": "Gone quiet Nudge or close since 28 May → Nudge or close"
     },
     "rm": {
+     "status": "Queried",
+     "heard": null,
+     "next": "Reply expected by 30 Dec Nudge on 29 Nov → Open the card"
+    },
+    "ra": {
      "status": "Queried",
      "heard": null,
      "next": "Reply expected by 30 Dec Nudge on 29 Nov → Open the card"
@@ -513,6 +673,18 @@
      "fullBubbles": 0,
      "heard": "Last heard Not yet since 4 Nov",
      "quotes": []
+    },
+    "ra": {
+     "band": "Queried",
+     "stage": "queried",
+     "track": 3108,
+     "day": "Day 20",
+     "footLead": "Waiting on Ada",
+     "footSub": "Reply expected by 30 Dec",
+     "notes": [],
+     "fullBubbles": 0,
+     "heard": "Last heard Not yet since 4 Nov",
+     "quotes": []
     }
    },
    "agents": {
@@ -554,6 +726,13 @@
       "due": "236 days quiet"
      }
     ]
+   },
+   "nextUp": {
+    "found": true,
+    "n": 33,
+    "rows": [
+     "IF Send your full to Imogen Faraday 3 days"
+    ]
    }
   },
   "after": {
@@ -577,6 +756,11 @@
      "status": "Queried",
      "heard": null,
      "next": "Reply expected by 3 Jan 2027 Nudge on 3 Jan 2027 → Open the card"
+    },
+    "ra": {
+     "status": "Queried",
+     "heard": null,
+     "next": "Reply expected by 3 Jan 2027 Nudge on 29 Nov → Open the card"
     }
    },
    "cards": {
@@ -598,6 +782,7 @@
        "radius": "12px",
        "shadow": "none",
        "subFont": "13.5px rgb(111, 101, 92)",
+       "mark": true,
        "order": [
         578.156982421875,
         601.1480102539062,
@@ -632,6 +817,7 @@
        "radius": "12px",
        "shadow": "none",
        "subFont": "13.5px rgb(111, 101, 92)",
+       "mark": true,
        "order": [
         484.5997009277344,
         507.5907287597656,
@@ -666,6 +852,7 @@
        "radius": "12px",
        "shadow": "none",
        "subFont": null,
+       "mark": true,
        "order": [
         484.5997009277344,
         null,
@@ -700,6 +887,7 @@
        "radius": "12px",
        "shadow": "none",
        "subFont": "13.5px rgb(111, 101, 92)",
+       "mark": true,
        "order": [
         484.5997009277344,
         507.5907287597656,
@@ -715,6 +903,41 @@
      "quotes": [
       "Rafe in a holding reply · 24 Nov “Reading now — give me a few weeks.” ⋯"
      ]
+    },
+    "ra": {
+     "band": "Queried",
+     "stage": "queried",
+     "track": 3108,
+     "day": "Day 20",
+     "footLead": "Waiting on Ada",
+     "footSub": "Reply expected by 3 Jan 2027",
+     "notes": [
+      {
+       "cls": "qc152-m them oc oc-note",
+       "title": "Ada sent a holding reply",
+       "sub": "Reply expected by 3 Jan",
+       "quote": "“Reading now — back to you in the new year.”",
+       "stamp": "23 Nov",
+       "bg": "rgb(246, 243, 238)",
+       "radius": "12px",
+       "shadow": "none",
+       "subFont": "13.5px rgb(111, 101, 92)",
+       "mark": true,
+       "order": [
+        484.5997009277344,
+        507.5907287597656,
+        530.472412109375,
+        568.204345703125
+       ],
+       "width": 403,
+       "threadWidth": 531
+      }
+     ],
+     "fullBubbles": 0,
+     "heard": "Last heard 23 Nov a holding reply",
+     "quotes": [
+      "Ada in a holding reply · 23 Nov “Reading now — back to you in the new year.” ⋯"
+     ]
     }
    },
    "agents": {
@@ -727,7 +950,8 @@
       {
        "cls": "qc152-m them oc oc-note",
        "title": "Imogen chased the full",
-       "bg": "rgb(246, 243, 238)"
+       "bg": "rgb(246, 243, 238)",
+       "mark": true
       }
      ],
      "allMsgs": 3,
@@ -744,7 +968,8 @@
       {
        "cls": "qc152-m them oc oc-note",
        "title": "Jules sent a holding reply",
-       "bg": "rgb(246, 243, 238)"
+       "bg": "rgb(246, 243, 238)",
+       "mark": true
       }
      ],
      "allMsgs": 2,
@@ -759,18 +984,20 @@
      {
       "key": "task-full-ce1-fr",
       "title": "Send Imogen your full",
-      "due": "3 days waiting"
+      "due": "10 days left"
      },
      {
       "key": "task-nudge-ce1-n",
       "title": "Nudge Nadia",
       "due": "180 days past expected"
-     },
-     {
-      "key": "task-nudge-ce1-q",
-      "title": "Nudge Jules",
-      "due": "180 days past expected"
      }
+    ]
+   },
+   "nextUp": {
+    "found": true,
+    "n": 32,
+    "rows": [
+     "IF Send your full to Imogen Faraday 3 days"
     ]
    }
   }

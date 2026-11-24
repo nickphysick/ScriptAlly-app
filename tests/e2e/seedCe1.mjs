@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Controls: entry v1 — four queries, each with its own agent, for tests/e2e/controlsEntry.measure.ts. Written as the
+ * Controls: entry v1 — five queries, each with its own agent, for tests/e2e/controlsEntry.measure.ts. Written as the
  * harness through the client SDK, so the emulator's firestore.rules judge every write (the entry's keys included).
  * ⚠️ Emulator only (fsTarget), and SELF-CLEANING: every document carries the `ce1-` prefix; `--clean` removes them,
  *    each query's activity log first.
@@ -11,9 +11,10 @@
  *   q    Queried 236 days ago, gone quiet                 + a HOLDING reply today, "Reply expected by" in 52 days
  *   n    Queried 236 days ago, gone quiet                 + a NOTE today, no date
  *   rm   Queried 20 days ago, a reminder in 5 days        + a HOLDING reply today, "Reply expected by" in 40 days
+ *   ra   as rm, but the reminder was SET after the entry   + a HOLDING reply yesterday, in 40 days (follow-up 2: stays put)
  *
- *   node tests/e2e/seedCe1.mjs            # the four queries, no entries
- *   node tests/e2e/seedCe1.mjs --entries  # add the four entries (both stores, the same id)
+ *   node tests/e2e/seedCe1.mjs            # the five queries, no entries
+ *   node tests/e2e/seedCe1.mjs --entries  # add the five entries (both stores, the same id)
  *   node tests/e2e/seedCe1.mjs --clean    # remove everything ce1-
  */
 import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
@@ -65,6 +66,8 @@ export const FIXTURES = [
   ["q", "Jules", "Okafor", "Okafor Literary", "Queried", 236, null, {}],
   ["n", "Nadia", "Brook", "Brook House", "Queried", 236, null, {}],
   ["rm", "Rafe", "Moss", "Moss & Hale", "Queried", 20, null, { nudgeDate: ymd(-5) }],
+  /* follow-up 2 — the reminder SET AFTER the entry (stamped now; its entry is dated yesterday): it stays put */
+  ["ra", "Ada", "Reyes", "Reyes Literary", "Queried", 20, null, { nudgeDate: ymd(-5), nudgeSetAt: new Date(NOW).toISOString() }],
 ];
 /** [key, kind, new date (days ahead, or null), their words] — all dated today */
 export const ENTRIES = [
@@ -72,6 +75,7 @@ export const ENTRIES = [
   ["q", "holding", 52, "Still on my pile, I’m afraid. I hope to get to it in the new year."],
   ["n", "note", null, "I’m away until 7 December, so there’s no rush."],
   ["rm", "holding", 40, "Reading now — give me a few weeks."],
+  ["ra", "holding", 40, "Reading now — back to you in the new year.", 1],
 ];
 const MS = "seed-ms-1";
 const title = (kind, first, status) => kind === "holding" ? `${first} sent a holding reply` : kind === "note" ? `${first} sent a note`
@@ -79,9 +83,9 @@ const title = (kind, first, status) => kind === "holding" ? `${first} sent a hol
 
 if (process.argv.includes("--entries")) {
   const b = writeBatch(db);
-  for (const [key, kind, ahead, words] of ENTRIES) {
+  for (const [key, kind, ahead, words, daysAgo] of ENTRIES) {
     const [, first, last, , status] = FIXTURES.find((f) => f[0] === key);
-    const Q = `${P}${key}`, act = `${Q}-entry`, at = new Date(NOW - 60_000).toISOString();
+    const Q = `${P}${key}`, act = `${Q}-entry`, at = new Date(NOW - (daysAgo ? daysAgo * DAY : 60_000)).toISOString();
     const date = ahead == null ? null : ymd(-ahead);
     b.set(doc(db, "users", uid, "queries", Q, "activity", act), { type: "Agent reply", createdAt: at, note: "", queryId: Q, agentName: `${first} ${last}`,
       replyKind: kind, ...(date ? { replyDate: date } : {}), replyNote: words });
