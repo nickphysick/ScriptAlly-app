@@ -18,6 +18,7 @@ import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 /* Controls: entry v1 — the note between steps (every `reply` step, on every card that draws a thread) */
 import "./qcv168oc.css";
+import { ReplyMark } from "./ReplyMark";
 
 /** §2.4 the nudge's glyph: a ring with "!" (nudge-icons.html, option A) */
 export const NUDGE_MARK = (
@@ -30,7 +31,8 @@ const HOLD = <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke=
 /** the glyph for a step: a StatusDot for a status, the "!" for a nudge, the offer's for telling others about one */
 export function StepGlyph({ status, kind }: { status: QueryStatus | null; kind: "nudge" | "reply" | "told" | null }) {
   if (kind === "nudge") return NUDGE_MARK;
-  if (kind === "reply") return HOLD;
+  /* follow-up 4 — the ref's speech bubble, its own mark (never a StatusDot: the entry has no status) */
+  if (kind === "reply") return <ReplyMark />;
   if (kind === "told") return <StatusDot status={QueryStatus.OFFER} overrideSize={18} decorative />;
   return status ? <StatusDot status={status} overrideSize={18} decorative /> : HOLD;
 }

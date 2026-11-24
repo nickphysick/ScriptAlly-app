@@ -117,3 +117,27 @@ describe("edited and deleted through the card's step editor, by editActivity and
     expect(readFileSync("src/components/queries/centre/QcStepEdit1522.tsx", "utf8")).toContain('p.kind !== "reply" ? <>\n            <label>Materials</label>');
   });
 });
+
+/* ── follow-up 4 — the note's glyph is the ref's speech bubble, its own mark, never a StatusDot ─────────────────── */
+describe("follow-up 4 · the speech-bubble mark", () => {
+  const ref = readFileSync("design-refs/controls-entry-v1/controls-v2.html", "utf8").replace(/\\"/g, '"');
+  const mark = readFileSync("src/components/queries/centre/ReplyMark.tsx", "utf8");
+  it("is the ref's HOLDG, path for path", () => {
+    for (const d of ["M5 6.5h14v9.5h-8l-3.5 3v-3H5z", "M9 11.25h.01M12 11.25h.01M15 11.25h.01"]) {
+      expect(ref, `the ref no longer draws ${d}`).toContain(d);
+      expect(mark).toContain(`d="${d}"`);
+    }
+    expect(mark.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("StatusDot");
+  });
+  it.each([chaser, holding, note])("every reply step's bubble draws it (%#), and no status ring", (s) => {
+    const m = msgOf(s);
+    const h = renderToStaticMarkup(<Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated tint={m.tint} grey={false} initials="JM" />);
+    const glyph = h.slice(h.indexOf('data-qc152="glyph"'), h.indexOf("</span>", h.indexOf('data-qc152="glyph"')));
+    expect(glyph).toContain('data-mark="reply"');
+    expect(glyph).not.toMatch(/sd-|status-dot|StatusDot/i);
+  });
+  it("the older card's step list and the Notes headers draw it too", () => {
+    expect(readFileSync("src/components/queries/centre/QcQueryCard149.tsx", "utf8")).toContain('s.kind === "reply" ? <span className="qc149c-g"><ReplyMark size={17} /></span>');
+    expect(readFileSync("src/components/queries/centre/QcNotes158.tsx", "utf8")).toContain('e.q.kind === "reply" ? <ReplyMark size={14} className="nx-rmk" />');
+  });
+});

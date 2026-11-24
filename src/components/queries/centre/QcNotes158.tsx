@@ -21,6 +21,7 @@
  * ⚠️ COLOUR IS THE STAGE: an agent's words take the Band of the stage that response moved the query to, with its Edge
  *    (set as --bt / --be from lib/qcThread152 tintOf). Marks are ink.
  */
+import { ReplyMark } from "./ReplyMark";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CardMenu, CardMenuItem, CrossTick, DeleteAsk, DiscardAsk, Edit168Ctx, EditPen, MoreDisc, mut168, useEdit168, useEditRule168, useHold168 } from "./QcEdit168";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -212,7 +213,7 @@ const NoteRow: React.FC<{ e: Row; p: NotesTab158Props; open: boolean; setOpen: (
   const items = menuItems168(e, p);
   const header = e.t === "note"
     ? <><b>You</b>{e.n.ms != null ? <span>· {dayLabel(e.n.ms, p.nowMs)}</span> : null}{e.n.pinned ? <span className="pin" data-qc158="pinned">Pinned</span> : null}</>
-    : <>{e.q.status ? <StatusDot status={e.q.status} overrideSize={14} tone="ink" decorative /> : null}<b>{p.first}</b>
+    : <>{e.q.kind === "reply" ? <ReplyMark size={14} className="nx-rmk" /> : e.q.status ? <StatusDot status={e.q.status} overrideSize={14} tone="ink" decorative /> : null}<b>{p.first}</b>
       <span>{e.q.phrase ?? quotePhrase(e.q.status, e.q.kind)}{e.q.ms != null ? ` · ${dayLabel(e.q.ms, p.nowMs)}` : ""}</span></>;
   const outer = e.t === "note"
     ? { className: `nx-n${open ? " qc168-open" : ""}`, "data-qc158": "note", "data-id": e.n.id, "data-pinned": e.n.pinned ? "" : undefined, "data-new": isNew ? "" : undefined }
