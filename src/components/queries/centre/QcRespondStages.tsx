@@ -33,7 +33,7 @@ import { calMonth, monthLong, addNote, editNote, deleteNote, notesToSave, type B
 import { materialIconKind } from "../../../lib/materialIcon";
 import {
   ALL_KINDS, EXTRAS, KIND, STAGE_LABEL, addDaysMs, askedList, daysSince, dm, extrasAsked, headline, likelyKinds, plural, sampleWords, sod,
-  stagesOf, taskLine, toneOf, toneStatus, w3dm, wdm, wentList, whenWord, type RKind, type RStage, type RespAnswers, type RespCounts,
+  recordedCopy, stagesOf, taskLine, toneOf, toneStatus, w3dm, wdm, wentList, whenWord, type RKind, type RStage, type RespAnswers, type RespCounts,
 } from "../../../lib/queryActions/respondStages";
 import { ICON, useReducedMotion } from "./QcLogStages";
 import "./qcv158.css";
@@ -710,6 +710,7 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
     kind: phase === "done" ? saved?.a.kind ?? null : s.kind, first: phase === "done" ? saved?.first ?? first : first, recorded: phase === "done", sitting, picked: !!s.qid,
     requests: counts?.lead.k === "requests" ? counts.lead.n : null, activeLeft: counts?.lead.k === "active" ? counts.lead.n : null,
     offers: counts?.lead.k === "offer" ? counts.lead.n : null, rrNext: phase === "done" ? saved?.a.rrNext ?? null : s.rrNext,
+    sentQ: phase === "done" ? saved?.a.sentQ ?? null : null,
   });
   const top = (allDone: boolean) => (
     <div className="laq-top rar-top" data-laq="top">
@@ -722,17 +723,10 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
 
   /* ── the recorded screen ── */
   if (phase === "done" && saved && pv) {
-    const A = saved.a, f = saved.first, t = taskLine(A, f), ns = A.kind;
-    const yh = ns === "pr" ? `${f} wants to read more.` : ns === "fr" ? `${f} wants the whole book.` : ns === "of" ? `${f} has made an offer.` : ns === "rr" ? `${f} asked for changes.` : `${f} passed.`;
-    const slot = ns === "pr" ? "celebration · partial request" : ns === "fr" ? "celebration · full request" : ns === "of" ? "celebration · offer" : ns === "rr" ? "the mentor · revise and resubmit" : "the mentor · a pass";
-    const left = counts?.lead.k === "active" ? counts.lead.n : null;
-    const nsName = (STAGE_NAME[(A.sentQ === "yes" ? (ns === "pr" ? QueryStatus.PARTIAL_SENT : QueryStatus.FULL_SENT) : QueryStatus.QUERIED)] ?? "").toLowerCase();
-    const yl: React.ReactNode = ns === "pr" || ns === "fr"
-      ? (A.sentQ === "yes" ? <>It went {whenWord(A.sentMs, nowMs).toLowerCase()}, so the query is now {nsName}.{t ? <> We’ll remind you to nudge on <b>{t[1]}</b>.</> : " There’s no reminder set."}</>
-        : <>Sending {ns === "fr" ? "your full" : "your partial"} is on your to-do list{A.sendBy != null && t ? <> for <b>{t[1]}</b>.</> : "."}</>)
-      : ns === "of" ? <>Answering it is on your to-do list{A.ofBy != null && t ? <> for <b>{t[1]}</b></> : ""}.{A.others === "task" ? ` So is telling the other ${plural(ctx?.othersN ?? 0, "agent")}.` : ""}</>
-      : ns === "rr" ? (A.rrNext === "yes" ? <>Resubmitting is on your to-do list{A.rrBy != null && t ? <> for <b>{t[1]}</b>.</> : "."}</> : A.rrNext === "close" ? <>The query is closed.{left != null ? ` ${left} ${left === 1 ? "is" : "are"} still out.` : ""}</> : "The query stays open, with you.")
-      : <>The query is closed and in your Rejection collection.{left != null ? ` ${plural(left, "query")} ${left === 1 ? "is" : "are"} still with agents.` : ""}</>;
+    const A = saved.a, f = saved.first;
+    const rc = recordedCopy(A, f, { othersN: ctx?.othersN ?? 0, activeLeft: counts?.lead.k === "active" ? counts.lead.n : null });
+    const slot = rc.slot, yh = rc.big;
+    const yl: React.ReactNode = <>{rc.line[0]}{rc.line[1] != null ? <b>{rc.line[1]}</b> : null}{rc.line[2]}</>;
     return (
       <div ref={rootRef} className="laq rar" data-rar="root" data-step="done" style={toneStyle}>
         <div className="laq-in">

@@ -1,0 +1,72 @@
+[
+ {
+  "where": "open: the journey is still in the page",
+  "ok": false,
+  "detail": "false · null"
+ },
+ {
+  "where": "open: the card is open",
+  "ok": true,
+  "detail": "{\"l\":850.3,\"t\":92.6,\"r\":1409.7,\"b\":807.4,\"w\":559.3,\"h\":714.8}"
+ },
+ {
+  "where": "open: the journey is marked under and inert",
+  "ok": false,
+  "detail": "null · false"
+ },
+ {
+  "where": "open: the journey is dimmed .45 over the whole panel",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "where": "open: the journey is scaled to .955 and moved 40px left",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "open: both boxes measured",
+  "ok": false,
+  "detail": "{\"j\":null,\"c\":{\"l\":850.3,\"t\":92.6,\"r\":1409.7,\"b\":807.4,\"w\":559.3,\"h\":714.8}}"
+ },
+ {
+  "where": "open: the path is unchanged",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/dashboard (was /dashboard)"
+ },
+ {
+  "where": "open: Tab never reaches the journey's controls",
+  "ok": true,
+  "detail": "0 of 12 presses landed in the journey"
+ },
+ {
+  "where": "Escape: the card is gone",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "Escape: the same recorded screen is back, forward",
+  "ok": false,
+  "detail": "null · under null · inert false · null"
+ },
+ {
+  "where": "Escape: the journey is back in its place (no step back)",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "Escape: focus is on “Open {First}’s card”",
+  "ok": false,
+  "detail": "H1"
+ },
+ {
+  "where": "Escape: the same scroll",
+  "ok": false,
+  "detail": "null (was 0)"
+ },
+ {
+  "where": "Escape: the path is unchanged",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/dashboard (was /dashboard)"
+ }
+]

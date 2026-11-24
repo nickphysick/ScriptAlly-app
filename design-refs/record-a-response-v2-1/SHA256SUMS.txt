@@ -1,0 +1,8 @@
+3a27c9594183137589ad07049583f73a3c2a9cc79a8f80e0ac06557989084ae7  ./record-a-response-v2-1.html
+c3ab48da4a5faa851fcd194999dcaf82c073a1ec186c0291d5043219571d4bad  ./screens/01-recorded-partial-sent.png
+63ecea98db537f1c607334b4fe6683a978664b40f8a67c4edd629aeedb908e26  ./screens/02-card-over-journey-whole-page.png
+dc52be91fe8bc0fc28f05ba911075abdc1b688812fa5780983f901f779fff439  ./screens/03-card-closed-journey-back-whole-page.png
+f2af533bed463761ccc9eb97d93203356430443d344664417b8f49846da0ea30  ./screens/04-recorded-full-sent.png
+fc5f1d81d557a314af3d2d2cb1190d042cd0f7dcc10c105cc1e74fc0a1d4720c  ./screens/05-recorded-partial-sent-no-reminder.png
+8edf4a1be8abb2335fe9f5c0de7436cc2576bd70c857226ab958732e8a35320a  ./screens/06-recorded-partial-sent-no-reply-date.png
+8f078558fd7f8739779828df946105b4aa303755d57380d123ae55dd0a466080  ./screens/07-recorded-partial-not-sent-unchanged.png

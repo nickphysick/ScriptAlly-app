@@ -266,10 +266,12 @@ export function respCounts(book: readonly Query[], before: Query, after: Query, 
 /* ── the head, the track, the colour ─────────────────────────────────────────────────────────────────────── */
 
 /** the headline, by where the writer is (the design's `head()`); line two in the head's blush */
-export function headline(o: { kind: RKind | null; first: string; recorded: boolean; sitting: number; picked: boolean; requests: number | null; activeLeft: number | null; offers: number | null; rrNext: RespAnswers["rrNext"] }): [string, string] {
+export function headline(o: { kind: RKind | null; first: string; recorded: boolean; sitting: number; picked: boolean; requests: number | null; activeLeft: number | null; offers: number | null; rrNext: RespAnswers["rrNext"]; sentQ?: RespAnswers["sentQ"] }): [string, string] {
   const { kind: k, first: f } = o;
   if (o.recorded) {
-    if (k === "pr" || k === "fr") return [`Recorded. ${k === "pr" ? "A partial request!" : "A full request!"}`, o.requests != null ? `That’s ${o.requests} ${o.requests === 1 ? "request" : "requests"} so far.` : "Let’s keep going."];
+    /* v2.1 — once what was asked for has gone, the head is about the send (the card beneath says Partial / Full sent) */
+    const sent = o.sentQ === "yes";
+    if (k === "pr" || k === "fr") return [`Recorded. ${k === "pr" ? (sent ? "Partial sent!" : "A partial request!") : (sent ? "Full sent!" : "A full request!")}`, o.requests != null ? `That’s ${o.requests} ${o.requests === 1 ? "request" : "requests"} so far.` : "Let’s keep going."];
     if (k === "of") return ["Recorded. An offer!", o.offers === 1 ? "Your first. Enjoy it." : "Enjoy it."];
     if (k === "rr") return ["Recorded.", o.rrNext === "close" ? "The query is closed." : `${f} wants another look.`];
     if (k === "no") return ["Recorded.", o.activeLeft != null ? `${o.activeLeft} ${o.activeLeft === 1 ? "query" : "queries"} still out.` : "On to the next."];
@@ -322,4 +324,44 @@ export function taskLine(a: RespAnswers, first: string): [string, string] | null
   if (a.kind === "rr" && a.rrNext === "yes") return [`Revise and resubmit to ${first}`, a.rrBy != null ? w3dm(a.rrBy) : "No date"];
   if (a.kind === "of") return [`Answer ${first}’s offer`, a.ofBy != null ? w3dm(a.ofBy) : "No date"];
   return null;
+}
+
+/**
+ * Record a response v2.1 — THE RECORDED SCREEN'S WORDS, from what was saved (design-refs/record-a-response-v2-1,
+ * `recordedHtml`). PURE, so every kind and branch is locked against the status the card beneath shows (`newStatus`).
+ *   slot  the illustration slot's label
+ *   big   the big line
+ *   line  the sentence beneath: [before, bold, after] (bold is null when nothing is bold)
+ * ⚠️ NO SENTENCE NARRATES THE STATUS CHANGE ("It went today, so the query is now partial sent" is gone): the card beneath
+ *    already shows it. A request that has gone talks about the send; one not yet sent is unchanged.
+ */
+export interface RecordedCopy { slot: string; big: string; line: [string, string | null, string] }
+export function recordedCopy(a: RespAnswers, first: string, o: { othersN: number; activeLeft: number | null }): RecordedCopy {
+  const f = first, k = a.kind, t = taskLine(a, f);
+  if (k === "pr" || k === "fr") {
+    const noun = k === "pr" ? "partial" : "full";
+    if (a.sentQ === "yes") {
+      const line: RecordedCopy["line"] = t ? ["We’ll remind you to nudge on ", t[1], "."]
+        : a.expectBy != null ? ["A reply is expected by ", w3dm(a.expectBy), "."] : ["There’s no reply date yet.", null, ""];
+      return { slot: `celebration · ${noun} sent`, big: `Your ${noun} is with ${f}.`, line };
+    }
+    return {
+      slot: `celebration · ${noun} request`, big: k === "pr" ? `${f} wants to read more.` : `${f} wants the whole book.`,
+      line: a.sendBy != null && t ? [`Sending your ${noun} is on your to-do list for `, t[1], "."] : [`Sending your ${noun} is on your to-do list.`, null, ""],
+    };
+  }
+  if (k === "of") {
+    const tell = a.others === "task" ? ` So is telling the other ${plural(o.othersN, "agent")}.` : "";
+    return { slot: "celebration · offer", big: `${f} has made an offer.`,
+      line: a.ofBy != null && t ? ["Answering it is on your to-do list for ", t[1], `.${tell}`] : [`Answering it is on your to-do list.${tell}`, null, ""] };
+  }
+  const left = o.activeLeft;
+  if (k === "rr") {
+    const line: RecordedCopy["line"] = a.rrNext === "yes" ? (a.rrBy != null && t ? ["Resubmitting is on your to-do list for ", t[1], "."] : ["Resubmitting is on your to-do list.", null, ""])
+      : a.rrNext === "close" ? [`The query is closed.${left != null ? ` ${left} ${left === 1 ? "is" : "are"} still out.` : ""}`, null, ""]
+      : ["The query stays open, with you.", null, ""];
+    return { slot: "the mentor · revise and resubmit", big: `${f} asked for changes.`, line };
+  }
+  return { slot: "the mentor · a pass", big: `${f} passed.`,
+    line: [`The query is closed and in your Rejection collection.${left != null ? ` ${left} ${left === 1 ? "query is" : "queries are"} still with agents.` : ""}`, null, ""] };
 }
