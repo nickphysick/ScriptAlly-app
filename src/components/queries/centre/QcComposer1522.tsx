@@ -201,7 +201,8 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   /* §3.1 the draft: what you're about to add, as a dashed bubble at the end of the thread */
   const draft: ThreadStepIn | null = useMemo(() => {
     const base = { key: "__draft", ms: day, chips: [] as ThreadChip[] };
-    const chips = (ms: StepMaterial[]): ThreadChip[] => ms.map((m) => ({ label: labelOf(m), detail: labelOf(m), icon: stepMaterialIcon(m) }));
+    /* v168.2 — the draft's chips as a saved step's: the label once, no detail */
+    const chips = (ms: StepMaterial[]): ThreadChip[] => ms.map((m) => ({ label: labelOf(m), detail: "", icon: stepMaterialIcon(m) }));
     switch (j) {
       case "send": return { ...base, status: c.sendKind === "partial_sent" ? QueryStatus.PARTIAL_SENT : c.sendKind === "resubmitted" ? QueryStatus.RESUBMITTED : QueryStatus.FULL_SENT, kind: null, chips: chips(mats) };
       case "nudge": return { ...base, status: null, kind: "nudge", via: `by ${via === "QueryManager" ? "QueryManager" : via.toLowerCase()}` };

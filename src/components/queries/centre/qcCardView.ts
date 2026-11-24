@@ -32,6 +32,7 @@ import { bookVersionsOf } from "../../../lib/bookVersions";
 import { hrefFor } from "../../../lib/quickAdd";
 import { fieldDay, type CardStep } from "./QcQueryCard149";
 import type { QcCard152Data } from "./QcCard152";
+import { mut168 } from "./QcEdit168";
 import type { Activity } from "../../../types";
 
 export const capWord = (t: string) => t.replace(/^./, (c) => c.toUpperCase());
@@ -108,8 +109,10 @@ export function buildCardView(i: CardViewIn) {
          read a `label` they never carry, so every step's own materials drew nothing. Read them as the writer wrote them. */
       const vs = bookVersionsOf(ms);
       const o = { free, versionName: (id: string) => vs.find((v) => v.id === id)?.name ?? null, originalId: vs[0]?.id ?? null };
-      /* one entry at a time, so each label keeps its own stored item for its icon (Material icons v1) */
-      return m.flatMap((x) => storedLabels([x], o).map((label) => ({ label, detail: label,
+      /* one entry at a time, so each label keeps its own stored item for its icon (Material icons v1). Query card v168.2 —
+         a material's name is said once: the label already carries what adds something (a length, a version), so a
+         step's own materials have no `detail` (it was the label again). Stored data is not rewritten. */
+      return m.flatMap((x) => storedLabels([x], o).map((label) => ({ label, detail: mut168("19") ? label : "",
         icon: typeof x === "string" ? materialIconKind(x) : x && typeof x === "object" && "kind" in x ? stepMaterialIcon(x as StepMaterial) : null })));
     };
     /* v152.1 §2.6 — what the agent said: the step's own `replyNote`; on an older query, the one text the query holds for

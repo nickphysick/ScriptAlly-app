@@ -30,7 +30,8 @@ import { Ghost, editable } from "./QcGhost167";
 import { CrossTick, DiscardAsk, EditPen, mut168, useEdit168, useHold168 } from "./QcEdit168";
 
 /** v168.1 — a row says its name once: a right-hand detail that is the label's own words (ignoring case and spacing) is
- *  not drawn (a step's recorded materials set `detail` to the label: qcCardView `stepChips`) */
+ *  not drawn. v168.2: a step's recorded materials no longer carry one (qcCardView `stepChips`); the guard stays for any
+ *  other source that does. */
 export const sameWords = (a: string, b: string): boolean => a.trim().replace(/\s+/g, " ").toLowerCase() === b.trim().replace(/\s+/g, " ").toLowerCase();
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 

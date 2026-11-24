@@ -491,7 +491,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   }, [motionN, motionDone, !p.motion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* v164 — what went is ONE LINE: a paperclip, then each item in Source Serif, joined by " · ". Each item is still its
-     own button and does what its chip did (the tip, with its detail). */
+     own button and does what its chip did (the tip, with its detail). v168.2: a chip with no detail (a step's own
+     materials) shows its label alone, never a head over an empty line. */
   const chips = (cs: ThreadChip[], key: string) => cs.length ? (
     <span className="qc152-chs qc164-went" data-qc152="chips">
       {CLIP}
@@ -499,7 +500,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         <React.Fragment key={`${key}-${i}`}>
           {i ? <span className="qc164-sep" aria-hidden="true"> · </span> : null}
           <button type="button" className="qc152-ch" data-qc152="chip"
-            onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
+            onClick={(e) => { e.stopPropagation(); if (c.detail) tip.show(e.currentTarget, c.detail, c.label); else tip.show(e.currentTarget, c.label); }}
             onBlur={() => tip.hide()}>{c.label}</button>
         </React.Fragment>
       ))}
