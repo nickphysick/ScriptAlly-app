@@ -52,7 +52,7 @@ class Ledger {
 /** one named break per lock, in the page (the src breaks are hs1Mutate.sh's) */
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* render the menu back inside .ws-pagebar: its stacking context (z 3) puts the page's own layers over it */
-  "HS1-A1": { js: `(() => { const go = () => { const bar = [...document.querySelectorAll('.ws-pagebar')].find((b) => b.getBoundingClientRect().height > 0); for (const m of document.querySelectorAll('#qh-popovers > [data-shell="help-menu"], #qh-popovers > [data-shell="capture-menu"], #qh-popovers > [data-pck="popover"]')) if (bar && m.parentElement !== bar) bar.appendChild(m); }; new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); go(); })()` },
+  "HS1-A1": { js: `(() => { const go = () => { const bar = [...document.querySelectorAll('.ws-pagebar')].find((b) => b.getBoundingClientRect().height > 0); for (const m of document.querySelectorAll('#qh-popovers > [data-shell="help-menu"], #qh-popovers > [data-shell=quick-menu], #qh-popovers > [data-pck="popover"]')) if (bar && m.parentElement !== bar) bar.appendChild(m); }; new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); go(); })()` },
   /* restore the shortcuts row */
   "HS1-B1": { js: `(() => { const go = () => { const m = document.querySelector('[data-shell="help-menu"] [data-hm="links"]'); if (m && !m.querySelector('[data-mut-kb]')) { const b = document.createElement('button'); b.setAttribute('role', 'menuitem'); b.setAttribute('data-mut-kb', ''); b.className = 'hm-row'; b.textContent = 'Keyboard shortcuts'; m.appendChild(b); } }; new MutationObserver(go).observe(document.body, { childList: true, subtree: true }); })()` },
   /* make Continue open the checklist instead */
@@ -146,7 +146,7 @@ test("HS1-A1 · on top: the Help menu, the Log a query menu and the checklist ar
         L.check(`${w} the page scrolled (precondition)`, top > 0, `scrollTop ${top}`);
         for (const [name, opener, sel] of [
           ["help menu", ".ws-help", "[data-shell='help-menu']"],
-          ["Log a query menu", ".ws-capr", "[data-shell='capture-menu'].is-open"],
+          ["Log a query menu", "[data-shell=quick-btn]", "[data-shell=quick-menu].is-open"],
           ["checklist", "[data-pck='pill']", "[data-pck='popover']"],
         ] as const) {
           const pressed = await vis(page, opener).click({ timeout: 8000 }).then(() => true, () => false);

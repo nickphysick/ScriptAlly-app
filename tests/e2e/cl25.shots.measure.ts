@@ -37,8 +37,8 @@ for (const w of [1512, 1280]) test(`CL25 screens @ ${w}`, async ({ page }) => {
   await shot(page, `05-full-screen-${w}`);
   if (w === 1512) {
     await openCl24(page, vp);
-    await page.locator(".ws-cap--bar .ws-capr").first().click(T); await page.waitForTimeout(300);
-    await page.locator("[data-cap='record']").first().click(T); await page.waitForTimeout(1200);
+    await page.locator("[data-shell=quick-btn]").first().click(T); await page.waitForTimeout(300);
+    await page.locator("[data-quick='record']").first().click(T); await page.waitForTimeout(1200);
     await shot(page, `08-drawer-record-${w}`);
     await openQc149(page, vp);
     await page.locator("[data-qc149='log']").first().click(T); await page.waitForTimeout(1200);

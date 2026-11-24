@@ -1,0 +1,41 @@
+/*
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Add an agent v2, Part A — "Quick actions" and its menu. Values are the reference's own (design-refs/add-agent-v2,
+ * its `.tb-b.is-one`, `.tb-plus`, `.mn*` rules), class names kept; scoped to the bar and the pop-up layer.
+ */
+
+/* the button: a cream pill, 36px, fully rounded, a navy disc with a plus; the darker cream while its menu is open */
+.ws-pagebar .tb-b { display: inline-flex; align-items: stretch; height: 36px; border-radius: 18px; background: #f3eee6; color: #1c130f; box-shadow: 0 1px 0 rgba(0, 0, 0, .25); }
+.ws-pagebar .tb-b .tb-m { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px 0 9px; border-radius: 18px; font: 600 15px var(--sp-serif); white-space: nowrap; color: #1c130f; }
+.ws-pagebar .tb-b .tb-m:hover { background: #fffaf3; }
+.ws-pagebar .tb-b.is-open .tb-m, .ws-pagebar .tb-b.is-open .tb-m:hover { background: #e4dccf; }
+.ws-pagebar .tb-b .tb-m:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
+.ws-pagebar .tb-plus { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #2a3a52; color: #f3eee6; transition: transform .2s ease; }
+.ws-pagebar .tb-b.is-open .tb-plus { transform: rotate(45deg); }
+/* the slot it sits in folds to nothing in settings mode (`.ws-appctl`'s overflow); nothing in it needs clipping otherwise */
+.ws-app:not(.set-mode) .ws-appctl--cap { overflow: visible; }
+
+/* the menu: the journeys' frame — a white rim, an inner hairline — under the button, right edges together */
+.qa-menu.mn { position: fixed; z-index: 1; box-sizing: border-box; width: 344px; padding: 7px; border-radius: 20px; background: #fff; box-shadow: 0 30px 60px -28px rgba(28, 19, 15, .55), 0 0 0 1px rgba(28, 19, 15, .08); opacity: 0; transform: translateY(-6px) scale(.98); transform-origin: 85% 0; pointer-events: none; visibility: hidden; transition: opacity .16s ease-out, transform .2s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .2s; }
+.qa-menu.mn.is-open { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition: opacity .16s ease-out, transform .2s cubic-bezier(.2, .8, .2, 1), visibility 0s; }
+.qa-menu .mn-in { border-radius: 14px; box-shadow: inset 0 0 0 1px #d9c8ba; padding: 6px; }
+.qa-menu .mn-r { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 10px; border-radius: 10px; }
+.qa-menu .mn-r:hover, .qa-menu .mn-r:focus-visible { background: #f6f3ee; }
+.qa-menu .mn-r:focus-visible { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qa-menu .mn-d { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: #2a3a52; overflow: hidden; }
+.qa-menu .mn-d img { display: block; width: 38px; height: 38px; object-fit: contain; }
+.qa-menu .mn-d img.is-sc { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.qa-menu .mn-t { flex: 1 1 auto; min-width: 0; }
+.qa-menu .mn-t b { display: block; font: 400 17.5px/1.25 var(--sp-type); color: #1c130f; }
+.qa-menu .mn-t span { display: block; font: 400 14px/1.35 var(--sp-serif); color: #6f645b; }
+.qa-menu .mn-a { flex: none; color: #b3a89b; opacity: 0; transform: translateX(-4px); transition: .15s ease; }
+.qa-menu .mn-r:hover .mn-a, .qa-menu .mn-r:focus-visible .mn-a { opacity: 1; transform: none; color: #2a3a52; }
+.qa-menu .mn-soon { display: flex; align-items: center; gap: 12px; margin: 6px 4px 0; padding: 10px 6px 6px; border-top: 1px dashed rgba(28, 19, 15, .18); font: 400 15px var(--sp-serif); color: #8a8076; }
+.qa-menu .mn-soon i { margin-left: auto; font: italic 400 14px var(--sp-serif); color: #9a8f84; }
+.qa-menu .mn-soon svg { flex: none; margin-left: 13px; margin-right: 15px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qa-menu.mn, .qa-menu.mn.is-open, .ws-pagebar .tb-plus, .qa-menu .mn-a { transition: none; }
+}

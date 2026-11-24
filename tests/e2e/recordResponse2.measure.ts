@@ -75,14 +75,14 @@ interface Door { door: string; route: string; at: "who" | "reply"; press: (page:
 export const DOORS: Door[] = [
   { door: "Dashboard band button", route: "/dashboard", at: "who", press: (p) => clickVisible(p, "[data-d2='record']") },
   { door: "Top bar Log a query menu", route: "/dashboard", at: "who", press: async (p) => {
-    if (!(await clickVisible(p, "[data-shell='capture'][data-placement='bar'] .ws-capr"))) return false;
+    if (!(await clickVisible(p, "[data-shell=quick-btn]"))) return false;
     await settle(p, 300);
-    return clickVisible(p, "[data-cap='record']");
+    return clickVisible(p, "[data-quick='record']");
   } },
   { door: "Top bar menu on Queries", route: "/queries", at: "who", press: async (p) => {
-    if (!(await clickVisible(p, "[data-shell='capture'][data-placement='bar'] .ws-capr"))) return false;
+    if (!(await clickVisible(p, "[data-shell=quick-btn]"))) return false;
     await settle(p, 300);
-    return clickVisible(p, "[data-cap='record']");
+    return clickVisible(p, "[data-quick='record']");
   } },
   { door: "Queries page button", route: "/queries", at: "who", press: (p) => clickVisible(p, "[data-qc149='record'], [data-qcv='oh-record']") },
   { door: "Analytics header", route: "/queries/analytics", at: "who", press: (p) => clickVisible(p, "[data-a26='record'], button:has-text('Record a response')") },

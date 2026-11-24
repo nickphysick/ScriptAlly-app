@@ -109,7 +109,7 @@ test.describe("ink shell", () => {
       for (const route of ROUTES) {
         await inkOpen(page, route, w, { scope: "ink7" });
         const s = (await rect(page, ".ws-sfield"))!;
-        const cap = (await rect(page, ".ws-cap--bar"))!;
+        const cap = (await rect(page, '[data-shell=quick]'))!;
         expect(s, "the field is drawn").not.toBeNull();
         expect(near(s.w, 168), `${route}: width ${s.w}`).toBe(true);
         expect(near(cap.x - s.r, 12), `${route}: gap ${cap.x - s.r}`).toBe(true);
@@ -123,28 +123,24 @@ test.describe("ink shell", () => {
   });
 
   /* ── INK8 · capture ───────────────────────────────────────────────────────────────────────────── */
-  test("INK8 · Log a query is in the bar, not the sidebar, and its segments call the existing contracts", async ({ page }) => {
+  test("INK8 · Quick actions is in the bar, not the sidebar, and its rows open the three journeys (Add an agent v2)", async ({ page }) => {
     await inkOpen(page, "/queries", 1440, { scope: "ink8" });
-    expect(await page.locator(".ws-pagebar [data-shell='capture'][data-placement='bar']").count()).toBe(1);
-    expect(await page.locator("#ws-sidebar [data-shell='capture']").count(), "a capture control in the sidebar").toBe(0);
-    await page.locator(".ws-cap--bar .ws-capr").click();
-    const rows = await page.locator(".ws-cap--bar [role='menuitem']").allInnerTexts();
-    /* RE-POINTED (follow-up 2, found by v131's Step 0): the third row carries its SOON tag now, so the
-       row's LABEL is its first line — and the row is disabled, which is follow-up 2's 1(b) */
-    expect(rows.map((r) => r.split("\n")[0].trim())).toEqual(["Record a response", "Add an agent", "Add a manuscript"]);
-    expect(await page.locator(".ws-cap--bar [data-cap='manuscript']").getAttribute("aria-disabled")).toBe("true");
+    expect(await page.locator(".ws-pagebar [data-shell=quick]").count()).toBe(1);
+    expect(await page.locator("#ws-sidebar [data-shell=quick]").count(), "a create control in the sidebar").toBe(0);
+    await page.locator("[data-shell=quick-btn]").click();
+    const rows = await page.locator("[data-shell=quick-menu] [role='menuitem']").allInnerTexts();
+    expect(rows.map((r) => r.split("\n")[0].trim())).toEqual(["Log a query", "Record a response", "Add an agent"]);
+    /* Add a manuscript is shown, coming soon, and is not a row */
+    expect(await page.locator("[data-shell=quick-menu] [data-quick='manuscript']").getAttribute("role")).toBeNull();
     await page.keyboard.press("Escape");
-    await page.locator(".ws-cap--bar .ws-capl").click();
-    await expect(page.locator(".qad-root.is-open .qad-drawer"), "Log a query opens the query drawer").toBeVisible();
-    await page.keyboard.press("Escape");
-    await expect(page.locator(".qad-root.is-open .qad-drawer")).toHaveCount(0);
+    await expect(page.locator("[data-shell=quick-menu].is-open")).toHaveCount(0);
   });
 
   /* ── INK9 · help apart ────────────────────────────────────────────────────────────────────────── */
   test("INK9 · Help sits after an 18px gap and a rule; no Give feedback in the bar", async ({ page }) => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/queries", w, { scope: "ink9" });
-      const cap = (await rect(page, ".ws-cap--bar"))!;
+      const cap = (await rect(page, '[data-shell=quick]'))!;
       const help = (await rect(page, ".ws-helpwrap"))!;
       expect(near(help.x - cap.r, 18), `gap ${help.x - cap.r}`).toBe(true);
       const rule = (await css(page, ".ws-pagebar .ws-helpwrap", ["width", "background-color", "content"], "::before"))!;

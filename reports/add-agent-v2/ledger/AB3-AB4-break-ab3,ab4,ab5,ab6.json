@@ -1,0 +1,61 @@
+[
+ {
+  "where": "AB4 the slate box names the agent",
+  "ok": true,
+  "detail": "no box"
+ },
+ {
+  "where": "AB4 it offers the card",
+  "ok": true,
+  "detail": "no button"
+ },
+ {
+  "where": "AB4 Carry on is disabled",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "where": "AB4 Add now, finish later is disabled",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "where": "AB4 pressing it anyway stays on step one",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "AB4 Enter stays on step one",
+  "ok": true,
+  "detail": "agent"
+ },
+ {
+  "where": "AB3 the agency is asked for",
+  "ok": false,
+  "detail": "no ask"
+ },
+ {
+  "where": "AB3 Agency unknown is marked",
+  "ok": false,
+  "detail": "not marked"
+ },
+ {
+  "where": "AB3 added: the added screen",
+  "ok": false,
+  "detail": "agent"
+ },
+ {
+  "where": "AB3 in two actions",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "where": "AB3 one agent saved",
+  "ok": false,
+  "detail": "0 → 0"
+ },
+ {
+  "where": "AB3 saved as Agency unknown",
+  "ok": false
+ }
+]

@@ -1,0 +1,362 @@
+[
+ {
+  "where": "1280 /dashboard query: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /dashboard query: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /dashboard query: the route is unchanged",
+  "ok": false,
+  "detail": "/dashboard → /broken"
+ },
+ {
+  "where": "1280 /dashboard query: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /dashboard record: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /dashboard record: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /dashboard record: the route is unchanged",
+  "ok": false,
+  "detail": "/dashboard → /broken"
+ },
+ {
+  "where": "1280 /dashboard record: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /dashboard agent: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /dashboard agent: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1280 /dashboard agent: the route is unchanged",
+  "ok": false,
+  "detail": "/dashboard → /broken"
+ },
+ {
+  "where": "1280 /dashboard agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1280 /queries query: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /queries query: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /queries query: the route is unchanged",
+  "ok": false,
+  "detail": "/queries → /broken"
+ },
+ {
+  "where": "1280 /queries query: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /queries record: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /queries record: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /queries record: the route is unchanged",
+  "ok": false,
+  "detail": "/queries → /broken"
+ },
+ {
+  "where": "1280 /queries record: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /queries agent: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /queries agent: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1280 /queries agent: the route is unchanged",
+  "ok": false,
+  "detail": "/queries → /broken"
+ },
+ {
+  "where": "1280 /queries agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1280 /agents query: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /agents query: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /agents query: the route is unchanged",
+  "ok": false,
+  "detail": "/agents → /broken"
+ },
+ {
+  "where": "1280 /agents query: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /agents record: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /agents record: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /agents record: the route is unchanged",
+  "ok": false,
+  "detail": "/agents → /broken"
+ },
+ {
+  "where": "1280 /agents record: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1280 /agents agent: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1280 /agents agent: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1280 /agents agent: the route is unchanged",
+  "ok": false,
+  "detail": "/agents → /broken"
+ },
+ {
+  "where": "1280 /agents agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1512 /dashboard query: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /dashboard query: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /dashboard query: the route is unchanged",
+  "ok": false,
+  "detail": "/dashboard → /broken"
+ },
+ {
+  "where": "1512 /dashboard query: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /dashboard record: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /dashboard record: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /dashboard record: the route is unchanged",
+  "ok": false,
+  "detail": "/dashboard → /broken"
+ },
+ {
+  "where": "1512 /dashboard record: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /dashboard agent: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /dashboard agent: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1512 /dashboard agent: the route is unchanged",
+  "ok": false,
+  "detail": "/dashboard → /broken"
+ },
+ {
+  "where": "1512 /dashboard agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1512 /queries query: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /queries query: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /queries query: the route is unchanged",
+  "ok": false,
+  "detail": "/queries → /broken"
+ },
+ {
+  "where": "1512 /queries query: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /queries record: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /queries record: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /queries record: the route is unchanged",
+  "ok": false,
+  "detail": "/queries → /broken"
+ },
+ {
+  "where": "1512 /queries record: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /queries agent: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /queries agent: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1512 /queries agent: the route is unchanged",
+  "ok": false,
+  "detail": "/queries → /broken"
+ },
+ {
+  "where": "1512 /queries agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1512 /agents query: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /agents query: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /agents query: the route is unchanged",
+  "ok": false,
+  "detail": "/agents → /broken"
+ },
+ {
+  "where": "1512 /agents query: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":true,\"rar\":false,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /agents record: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /agents record: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /agents record: the route is unchanged",
+  "ok": false,
+  "detail": "/agents → /broken"
+ },
+ {
+  "where": "1512 /agents record: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":true,\"aag\":false,\"dim\":true}"
+ },
+ {
+  "where": "1512 /agents agent: the row is there",
+  "ok": true,
+  "detail": "missing"
+ },
+ {
+  "where": "1512 /agents agent: the journey is on screen",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ },
+ {
+  "where": "1512 /agents agent: the route is unchanged",
+  "ok": false,
+  "detail": "/agents → /broken"
+ },
+ {
+  "where": "1512 /agents agent: the desk is dimmed",
+  "ok": true,
+  "detail": "{\"path\":\"/broken\",\"laq\":false,\"rar\":false,\"aag\":true,\"dim\":true}"
+ }
+]

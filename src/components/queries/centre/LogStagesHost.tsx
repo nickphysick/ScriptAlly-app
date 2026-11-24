@@ -25,9 +25,8 @@ import { bookOf } from "../../../lib/queryActions/sample";
 import { previousQueryFor } from "../../../lib/requery";
 import { quietWeeksOf } from "../../../lib/queryState";
 import { liveCount } from "../../../lib/dashBreakdown";
-import { agentFromDraft } from "../../../lib/agentCreate";
-import { emptyCardDraft, problemsOf } from "../../../lib/cardDraft";
-import { emptyCreated, toRemoveOnDiscard, toRemoveOnUndo, withAgent, withHeld, withLogged, withoutAgent, withoutLogged, heldTaskFor, heldTaskText, heldToComplete, type JourneyCreated } from "../../../lib/queryActions/journeyCreated";
+import { openAddAgent } from "../../../lib/addAgentStore";
+import { emptyCreated, toRemoveOnDiscard, toRemoveOnUndo, withHeld, withLogged, withoutAgent, withoutLogged, heldTaskFor, heldTaskText, heldToComplete, type JourneyCreated } from "../../../lib/queryActions/journeyCreated";
 import { useToast } from "../../toast/ToastProvider";
 import { localYMD } from "../../../lib/shellSidebar";
 import { QcLogStages, type Logged } from "./QcLogStages";
@@ -54,7 +53,7 @@ export const LogStagesHost: React.FC<{
   onLogged?: (queryId: string, undo: () => Promise<void>) => void;
 }> = ({ ms, seedAgentId, onClose, onOpenCard, seedPackageId, again, leaveRef, onLogged }) => {
   const scriptDb = useScriptAllyDb();
-  const { currentUser, agents, queries, packages, versions, addJournalEntry, deleteJournalEntry, addAgent, deleteAgent, addUserTask, updateUserTask } = scriptDb;
+  const { currentUser, agents, queries, packages, versions, addJournalEntry, deleteJournalEntry, deleteAgent, addUserTask, updateUserTask } = scriptDb;
   const { showToast } = useToast();
   /* Undo runs later than the save: it reads the journal as it is then, not as it was when the save began */
   const live = useRef(scriptDb);
@@ -67,8 +66,6 @@ export const LogStagesHost: React.FC<{
   /* v2 — what this journey created (an agent, its "Finish" task, a not-sent task), for discard and Undo
      (lib/queryActions/journeyCreated) */
   const made = useRef<JourneyCreated>(emptyCreated());
-  const agentsNow = useRef(agents);
-  agentsNow.current = agents;
 
   const model = useMemo(() => {
     /* v2.1 (D4) — every query for this book, active or closed: an agent with a closed one is already queried */
@@ -143,22 +140,11 @@ export const LogStagesHost: React.FC<{
     return { id, undo, openCard: () => onOpenCard(id), agentGoesOnUndo: () => !!toRemoveOnUndo(made.current, a.agentId) };
   };
 
-  /* v2 · Phase 2 — "Add and carry on": the new agent card's own create (the same draft mapping, the same `addAgent` with
-     its duplicate merge and its AGENT_ADDED activity, the same name/agency rule), then one task to finish the card */
-  const onCreateAgent = async (name: string, agency: string): Promise<{ id: string; created: boolean } | { error: string }> => {
-    const d = { ...emptyCardDraft(), name: name.trim(), agency: agency.trim(), agencyUnknown: !agency.trim() };
-    const pr = problemsOf(d);
-    if (!d.name) return { error: "Add their name to carry on." };
-    if (pr.name || pr.agency) return { error: (pr.name ?? pr.agency)! };
-    const before = new Set(agentsNow.current.map((x) => x.id));
-    const res = await addAgent(agentFromDraft(d));
-    if (!res.success || !res.id) return { error: res.error ?? "Couldn’t add the agent." };
-    const isNew = !before.has(res.id);
-    if (isNew) {
-      const taskId = await addUserTask({ text: `Finish ${d.name}’s card`, agentId: res.id });
-      made.current = withAgent(made.current, res.id, taskId ?? null);
-    }
-    return { id: res.id, created: isNew };
+  /* Add an agent v2 · B7 — "Add a new agent" is the add journey, opened over this one (lib/addAgentStore): it adds the
+     agent through the one add every door uses, and hands this journey the new agent's id once it is on the list. An agent
+     added there was added on purpose (its own "is on your list" screen), so discarding this query leaves it on the list. */
+  const onAddNew = (name: string, done: (id: string, name: string) => void) => {
+    openAddAgent({ name: name.trim() || undefined, over: "laq", onAdded: done });
   };
   /* v2 · Phase 3 — "Not sent yet? Put it on your to-do list": one task per agent, however often it is pressed.
      v2.1 · Phase 4 — dated today, so it is a task on the To-do page and the Dashboard (an undated one is a note, which
@@ -181,7 +167,7 @@ export const LogStagesHost: React.FC<{
     <QcLogStages nowMs={nowMs} agents={model.stAgents} seedAgentId={seedAgentId} bookTitle={ms.title || "Untitled manuscript"}
       packages={model.stPackages} activePackageId={model.active} letters={model.ctx.letters} synopses={model.ctx.synopses} bookVersions={model.ctx.bookVersions}
       count={queriesSent(forBook, nowMs)} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={close}
-      onCreateAgent={onCreateAgent} onNotSent={onNotSent} bookQueries={forBook}
+      onAddNew={onAddNew} onNotSent={onNotSent} bookQueries={forBook}
       activeNow={liveCount(forBook)}
       onSave={onSave} seedPackageId={seedPackageId} again={again} leaveRef={leaveRef} />
   );

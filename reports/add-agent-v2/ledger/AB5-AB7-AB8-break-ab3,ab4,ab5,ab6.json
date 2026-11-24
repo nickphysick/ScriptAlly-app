@@ -1,0 +1,127 @@
+[
+ {
+  "where": "AB5 lean: 2 of 6",
+  "ok": false,
+  "detail": "2 of 9"
+ },
+ {
+  "where": "AB5 lean: the card's Finish block shows",
+  "ok": true,
+  "detail": "no block"
+ },
+ {
+  "where": "on the review",
+  "ok": true,
+  "detail": "add"
+ },
+ {
+  "where": "AB5 full: 6 of 6",
+  "ok": false,
+  "detail": "6 of 9"
+ },
+ {
+  "where": "AB5 full: no Finish block",
+  "ok": true,
+  "detail": "a block"
+ },
+ {
+  "where": "AB8 the preview is inside the visible body",
+  "ok": true,
+  "detail": "{\"inBody\":true,\"card\":true,\"scrollers\":0,\"bodyScroll\":116,\"p\":[278.1875,650.1875,201,708]}"
+ },
+ {
+  "where": "AB8 the card fits its frame",
+  "ok": true,
+  "detail": "{\"inBody\":true,\"card\":true,\"scrollers\":0,\"bodyScroll\":116,\"p\":[278.1875,650.1875,201,708]}"
+ },
+ {
+  "where": "AB8 nothing scrolls inside the preview",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "AB7 saved once",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "AB7 name",
+  "ok": true,
+  "detail": "\"Sarah Jonesworth\" vs \"Sarah Jonesworth\""
+ },
+ {
+  "where": "AB7 agency",
+  "ok": true,
+  "detail": "\"Fenwick & Rowe\" vs \"Fenwick & Rowe\""
+ },
+ {
+  "where": "AB7 email",
+  "ok": true,
+  "detail": "\"sarah@fenwick.example\" vs \"sarah@fenwick.example\""
+ },
+ {
+  "where": "AB7 website",
+  "ok": true,
+  "detail": "\"https://fenwick.example\" vs \"https://fenwick.example\""
+ },
+ {
+  "where": "AB7 genres",
+  "ok": true,
+  "detail": "[\"Thriller\",\"Crime\"] vs [\"Thriller\",\"Crime\"]"
+ },
+ {
+  "where": "AB7 mswlNotes",
+  "ok": true,
+  "detail": "\"Twisty, character-led thrillers.\" vs \"Twisty, character-led thrillers.\""
+ },
+ {
+  "where": "AB7 submissionStatus",
+  "ok": true,
+  "detail": "\"Open\" vs \"Open\""
+ },
+ {
+  "where": "AB7 submissionMethod",
+  "ok": true,
+  "detail": "\"Email\" vs \"Email\""
+ },
+ {
+  "where": "AB7 starRating",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "where": "AB7 materialsWanted",
+  "ok": true,
+  "detail": "[\"Query letter\",\"Synopsis (1 pages)\",\"First 3 chapters\"] vs [\"Query letter\",\"Synopsis (1 pages)\",\"First 3 chapters\"]"
+ },
+ {
+  "where": "AB7 notes",
+  "ok": true,
+  "detail": "\"\" vs \"\""
+ },
+ {
+  "where": "AB7 city",
+  "ok": true,
+  "detail": "\"London\" vs \"London\""
+ },
+ {
+  "where": "AB7 country",
+  "ok": true,
+  "detail": "\"GB\" vs \"GB\""
+ },
+ {
+  "where": "AB7 responseTimeWeeks",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "where": "AB7 noResponseMeansNo",
+  "ok": true,
+  "detail": "true vs true"
+ },
+ {
+  "where": "AB7 no field the old journey would not have written",
+  "ok": true,
+  "detail": ""
+ }
+]

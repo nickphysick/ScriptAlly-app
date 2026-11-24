@@ -16,6 +16,7 @@ import { useSyncExternalStore } from "react";
 import type { Agent } from "../types";
 import type { CardDraft } from "./cardDraft";
 import type { AgentDataNeed } from "./agentDataQuality";
+import { openAddAgent } from "./addAgentStore";
 
 /** The editor's four tabs — the mock's own keys: Contact · Wishlist · Submissions · Notes. */
 export type AgentCardTab = "who" | "want" | "work" | "notes";
@@ -126,6 +127,10 @@ export function dataNeedTarget(needs: readonly AgentDataNeed[]): { tab: AgentCar
  * already typed (a name into the log-a-query picker); `onCreated` hands the new agent's id back to the flow waiting.
  */
 export function openNewAgentCard(opts: Pick<AgentCardOptions, "originRect" | "from" | "host" | "prefill" | "onCreated" | "over"> = {}): void {
+  /* Add an agent v2 — ON A DESKTOP EVERY DOOR OPENS THE ADD JOURNEY (AddAgentPanel, listening only at 768px and up): the
+     name already typed goes with it, and a flow waiting on the new agent is handed its id once it is added. The phone
+     has no listener, so it keeps the panel below. */
+  if (openAddAgent({ name: opts.prefill?.name?.trim() || undefined, ...(opts.onCreated ? { onAdded: (id: string) => opts.onCreated!(id) } : {}) })) return;
   returnFocus = takeOpener();
   current = { ...opts, agentId: null, seq: ++seq };
   notify();

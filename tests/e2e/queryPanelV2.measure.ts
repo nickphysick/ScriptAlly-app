@@ -57,7 +57,7 @@ const MUTATIONS: Record<string, { css?: string; js?: string }> = {
   /* the fork's "Something changed since" opens the standalone drawer */
   V8: { js: `(() => { if (window.__m8) return; window.__m8 = true; document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest(".cor-branch"); if (!b || !/Something changed since/.test(b.textContent || "")) return; e.stopImmediatePropagation(); e.preventDefault(); const id = document.querySelector('${PANEL}').dataset.qpId; window.__saQueryDrawer.open({ mode: "resp", queryId: id }); }, true); })()` },
   /* the shell's "Record a response" opens the standalone drawer */
-  V9: { js: `(() => { if (window.__m9) return; window.__m9 = true; document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest(".ws-capi"); if (!b || !/^Record a response/.test((b.textContent || "").trim())) return; e.stopImmediatePropagation(); e.preventDefault(); window.__saQueryDrawer.open({ mode: "resp" }); }, true); })()` },
+  V9: { js: `(() => { if (window.__m9) return; window.__m9 = true; document.addEventListener("click", (e) => { const b = e.target.closest && e.target.closest(".mn-r"); if (!b || !/^Record a response/.test((b.textContent || "").trim())) return; e.stopImmediatePropagation(); e.preventDefault(); window.__saQueryDrawer.open({ mode: "resp" }); }, true); })()` },
   /* the history list dropped */
   V10: { css: `.qsp .qat-hist { display: none !important; }` },
   /* V13 has no in-page mutation: its two are SOURCE mutations (a build with every link in every state, and with
@@ -195,7 +195,7 @@ test.describe("Query panel v2", () => {
           const p = document.querySelector<HTMLElement>('[data-qp="panel"]')!;
           const mast = p.querySelector<HTMLElement>(".qcv-open-mast"); const nm = p.querySelector<HTMLElement>(".qcv-open-nm"); const on = p.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
           const bar = [...document.querySelectorAll<HTMLElement>(".ws-pagebar")].find((b) => b.getBoundingClientRect().height > 0)!;
-          const log = [...document.querySelectorAll<HTMLElement>(".ws-pagebar .ws-capl")].find((b) => b.getBoundingClientRect().height > 0)!;
+          const log = [...document.querySelectorAll<HTMLElement>("[data-shell=quick-btn]")].find((b) => b.getBoundingClientRect().height > 0)!;
           const lr = log.getBoundingClientRect(); const at = document.elementFromPoint(lr.left + lr.width / 2, lr.top + lr.height / 2);
           const search = [...document.querySelectorAll<HTMLElement>(".ws-pagebar .ws-search")].find((b) => b.getBoundingClientRect().height > 0);
           const sr = search?.getBoundingClientRect(); const sat = sr ? document.elementFromPoint(sr.left + sr.width / 2, sr.top + sr.height / 2) : null;
@@ -220,9 +220,9 @@ test.describe("Query panel v2", () => {
         L.check("V2", `${c} "Log a query" and Search are on top at their own centres`, m.logHit && m.searchHit, `log ${m.logHit} · search ${m.searchHit}`);
       }
       /* …and its menu drops over the panel, where it can be pressed */
-      await page.locator(".ws-pagebar .ws-capr").filter({ visible: true }).first().click();
+      await page.locator("[data-shell=quick-btn]").filter({ visible: true }).first().click();
       await page.waitForTimeout(350);
-      const menu = await page.evaluate(() => { const b = [...document.querySelectorAll<HTMLElement>(".ws-capi")].find((x) => x.getBoundingClientRect().height > 0); if (!b) return "no menu"; const r = b.getBoundingClientRect(); const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return at && (at === b || b.contains(at)) ? "ok" : `covered by .${(at as HTMLElement | null)?.className ?? "nothing"}`; });
+      const menu = await page.evaluate(() => { const b = [...document.querySelectorAll<HTMLElement>(".mn-r")].find((x) => x.getBoundingClientRect().height > 0); if (!b) return "no menu"; const r = b.getBoundingClientRect(); const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return at && (at === b || b.contains(at)) ? "ok" : `covered by .${(at as HTMLElement | null)?.className ?? "nothing"}`; });
       L.check("V2", `${w} the bar's menu opens over the panel`, menu === "ok", menu);
       await page.keyboard.press("Escape");
     }
@@ -265,8 +265,8 @@ test.describe("Query panel v2", () => {
         }
       }
       /* the picker */
-      await page.locator(".ws-pagebar .ws-capr").filter({ visible: true }).first().click(); await page.waitForTimeout(300);
-      await page.locator(".ws-capi", { hasText: /^Record a response/ }).first().evaluate((e) => (e as HTMLElement).click()); await page.waitForTimeout(900);
+      await page.locator("[data-shell=quick-btn]").filter({ visible: true }).first().click(); await page.waitForTimeout(300);
+      await page.locator(".mn-r", { hasText: /^Record a response/ }).first().evaluate((e) => (e as HTMLElement).click()); await page.waitForTimeout(900);
       await scan("the picker");
       await leaveStep(page);
       L.check("V3", `${w} the sweep had something to read`, scanned > 400, `${scanned} elements over ${L.rows.length} scans`);
@@ -826,8 +826,8 @@ test.describe("Query panel v2", () => {
       await openRow(page, `${ROW}[data-qid="seed-query-10"]`);
       const name = (await page.locator(`${PANEL} .qcv-open-nm`).innerText()).trim();
       await page.evaluate(() => { (document.querySelector('[data-qp="panel"]') as unknown as { __same: boolean }).__same = true; });
-      await page.locator(".ws-pagebar .ws-capr").filter({ visible: true }).first().click(); await page.waitForTimeout(300);
-      await page.locator(".ws-capi", { hasText: /^Record a response/ }).first().click({ timeout: 5000 });
+      await page.locator("[data-shell=quick-btn]").filter({ visible: true }).first().click(); await page.waitForTimeout(300);
+      await page.locator(".mn-r", { hasText: /^Record a response/ }).first().click({ timeout: 5000 });
       await page.waitForTimeout(900);
       const a = await surfaces(page);
       const pick = await page.evaluate(() => { const p = document.querySelector('[data-qp="panel"]'); const first = p?.querySelector<HTMLElement>("[data-qad-query]"); const h = p?.querySelector("[data-qad-qpick-open]"); return { first: first?.dataset.qadQuery ?? null, firstName: first?.querySelector("b")?.textContent ?? "", heading: h?.textContent ?? "", headingFirst: !!h && !!first && (h.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0, rows: p?.querySelectorAll("[data-qad-query]").length ?? 0 }; });

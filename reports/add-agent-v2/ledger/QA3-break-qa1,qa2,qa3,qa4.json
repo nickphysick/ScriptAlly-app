@@ -1,0 +1,62 @@
+[
+ {
+  "where": "1280 /dashboard: no chevron segment",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "where": "1280 /dashboard: one Quick actions",
+  "ok": true,
+  "detail": "count"
+ },
+ {
+  "where": "1280 /queries: no chevron segment",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "where": "1280 /queries: one Quick actions",
+  "ok": true,
+  "detail": "count"
+ },
+ {
+  "where": "1280 /agents: no chevron segment",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "where": "1280 /agents: one Quick actions",
+  "ok": true,
+  "detail": "count"
+ },
+ {
+  "where": "1512 /dashboard: no chevron segment",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "where": "1512 /dashboard: one Quick actions",
+  "ok": true,
+  "detail": "count"
+ },
+ {
+  "where": "1512 /queries: no chevron segment",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "where": "1512 /queries: one Quick actions",
+  "ok": true,
+  "detail": "count"
+ },
+ {
+  "where": "1512 /agents: no chevron segment",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "where": "1512 /agents: one Quick actions",
+  "ok": true,
+  "detail": "count"
+ }
+]

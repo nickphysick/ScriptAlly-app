@@ -101,7 +101,7 @@ async function readBar(page: Page): Promise<BarRead> {
     const pl = bar?.querySelector<HTMLElement>('[data-pck="pill"]') ?? null;
     const pt = pl?.querySelector<HTMLElement>(".pck-pt");
     const pn = pl?.querySelector<HTMLElement>(".pck-pn");
-    const cap = bar?.querySelector<HTMLElement>(".ws-capb");
+    const cap = bar?.querySelector<HTMLElement>('[data-shell=quick]');
     return {
       tabs,
       search: sf && vis(sf) ? { x: sf.getBoundingClientRect().left, w: sf.getBoundingClientRect().width, labelShown: vis(sl), foldAttr: sf.hasAttribute("data-fold") } : null,

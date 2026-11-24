@@ -114,7 +114,7 @@ test.describe("ink fix-ups", () => {
       await openQc(page, w);
       await applyMutation(page, "hc6");
       const help = (await rect(page, ".ws-pagebar .ws-help"))!;
-      const cap = (await rect(page, ".ws-cap--bar"))!;
+      const cap = (await rect(page, '[data-shell=quick]'))!;
       expect(help, "Help is drawn").not.toBeNull();
       expect([Math.round(help.w), Math.round(help.h)], `${w}: size`).toEqual([34, 34]);
       expect((await css(page, ".ws-pagebar .ws-help", ["border-radius"]))!["border-radius"]).toBe("50%");

@@ -93,8 +93,10 @@ export interface QcLogStagesProps {
   /** the book's sizes, for the sample control's ceilings and presets */
   book: Book;
   onClose: () => void;
-  /** v2 · Phase 2 — "Add and carry on": the new agent card's own create; `created` is false when it merged into a twin */
-  onCreateAgent: (name: string, agency: string) => Promise<{ id: string; created: boolean } | { error: string }>;
+  /** Add an agent v2 · B7 — "Add a new agent" opens the add journey over this one (it steps back behind, dimmed): the
+   *  name typed in the search goes with it, and `done` is called once, with the new agent, when it is added. Cancel there
+   *  leaves this journey exactly as it was. */
+  onAddNew: (name: string, done: (id: string, name: string) => void) => void;
   /** v2 · Phase 3 — "Not sent yet?": the to-do task's id (one per agent), and "It has gone after all" (removes it) */
   onNotSent: (agentId: string, agentName: string) => Promise<string | null>;
   /** v2 · Phase 6 — this book's queries, for the review's two numbers (the Dashboard's own functions read them) */
@@ -158,8 +160,6 @@ export interface FlowState {
   replySet: boolean;
   /** v1.3 — the month "Pick a date" shows, as year·12 + month */
   nCal: number | null;
-  /** v2 · Phase 2 — the add-an-agent screen, in this panel (prefilled from the search) */
-  adding: { name: string; agency: string; error: string | null; busy: boolean } | null;
   /** v2 · Phase 3 — the not-sent screen is showing */
   notSent: boolean;
 }
@@ -170,7 +170,7 @@ export const freshState = (nowMs: number): FlowState => ({
   mat: "fork", packageId: null, pieces: { letterId: null, synopsisId: null, sample: null }, piecesSet: false,
   picked: { letterId: null, synopsisId: null, sample: null }, piecesTouched: false, pOpen: { letter: false, syn: false, sample: false },
   via: null, notes: [], noteOpen: false, draft: "", noteEdit: null, carried: null, pkgSeed: null, reply: null, replySet: false, nCal: null,
-  adding: null, notSent: false,
+  notSent: false,
 });
 
 export const answered = (s: FlowState, k: StageKey): boolean =>
@@ -420,46 +420,14 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     sbRef.current?.querySelector<HTMLElement>(".laq-big > button.is-hi")?.scrollIntoView({ block: "nearest" });
   }, [hi, s.step]);
 
-  /* v2 · Phase 2 — the add-an-agent screen, in this panel: the name from the search, an agency if they know it */
-  const startAdd = () => set({ adding: { name: titleName(s.find), agency: "", error: null, busy: false }, dir: "in" });
-  /** agents added here, by id → their name, until the Contact list's listener brings the record in */
+  /* Add an agent v2 · B7 — "Add a new agent" is the add journey, over this one; the agent it adds is chosen here, as a pick
+     from the list is (`choose`'s own answer), and nothing else on this journey moves */
+  /** agents added from here, by id → their name, until the Contact list's listener brings the record in */
   const addedNames = useRef<Record<string, string>>({});
-  const createdIds = useRef<Set<string>>(new Set());
-  const addAgent = async () => {
-    const ad = s.adding;
-    if (!ad || ad.busy || !ad.name.trim()) return;
-    setS((o) => (o.adding ? { ...o, adding: { ...o.adding, busy: true, error: null } } : o));
-    const r = await p.onCreateAgent(titleName(ad.name), ad.agency);
-    if ("error" in r) { setS((o) => (o.adding ? { ...o, adding: { ...o.adding, busy: false, error: r.error } } : o)); return; }
-    addedNames.current[r.id] = titleName(ad.name);
-    if (r.created) createdIds.current.add(r.id);
-    answer({ adding: null, agentId: r.id, find: "", via: null, reply: null, replySet: false, nCal: null });
-  };
-  const addBody = () => {
-    const ad = s.adding!;
-    const upd = (patch: Partial<NonNullable<FlowState["adding"]>>) => set({ adding: { ...ad, ...patch, error: null } });
-    const key = (e: React.KeyboardEvent) => { if (e.key === "Enter" && ad.name.trim()) { e.preventDefault(); void addAgent(); } };
-    return (
-      <>
-        <h2 className="laq-qh">Who’s the new agent?</h2>
-        <p className="laq-qs">Just the name for now. You’ll carry straight on with this query.</p>
-        <label className="laq-fl"><span>Name</span>
-          <input data-qls="add-name" autoComplete="off" value={ad.name} autoFocus={!ad.name} onChange={(e) => upd({ name: e.target.value })} onKeyDown={key} /></label>
-        <label className="laq-fl"><span>Agency<i>if you know it</i></span>
-          <input data-qls="add-agency" autoComplete="off" value={ad.agency} autoFocus={!!ad.name} onChange={(e) => upd({ agency: e.target.value })} onKeyDown={key} /></label>
-        {ad.error ? <p className="laq-err" data-qls="add-error" role="alert">{ad.error}</p> : null}
-        <p className="laq-info" data-qls="add-info">They go on your Contact list now. Filling in the rest of their card goes on your to-do list, so it doesn’t hold this up.</p>
-      </>
-    );
-  };
-  const addFoot = (
-    <>
-      <button type="button" className="laq-lnk" data-qls="add-back" onClick={() => set({ adding: null, dir: "back" })}>Back</button>
-      <span className="laq-sp" />
-      <button type="button" className="laq-btn" data-qls="add-go" disabled={!s.adding?.name.trim() || s.adding?.busy} aria-busy={s.adding?.busy || undefined}
-        onClick={() => void addAgent()}>Add and carry on {ICON.arrow}</button>
-    </>
-  );
+  const startAdd = () => p.onAddNew(titleName(s.find), (id, nm) => {
+    addedNames.current[id] = nm;
+    answer({ agentId: id, find: "", via: null, reply: null, replySet: false, nCal: null });
+  });
 
   const whoBody = () => {
     let i = 0;
@@ -1104,7 +1072,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     </>
   );
 
-  const body = s.notSent ? notSentBody() : s.adding ? addBody() : s.step === "who" ? whoBody() : s.step === "when" ? whenBody() : s.step === "what" ? whatBody() : s.step === "how" ? howBody()
+  const body = s.notSent ? notSentBody() : s.step === "who" ? whoBody() : s.step === "when" ? whenBody() : s.step === "what" ? whatBody() : s.step === "how" ? howBody()
     : s.step === "nudge" ? nudgeBody() : checkBody();
   /* materials fork v1 — the fork's Back is the stage's (to Sent); a branch's Back is the fork. The pieces screen's right
      side is the tip until Carry on can be pressed, in one slot of the button's height, so nothing moves when it swaps */
@@ -1134,7 +1102,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         onClick={() => { if (rp) answer({ reply: rp, replySet: true }); }}>Continue {ICON.arrow}</button>
     </>
   );
-  const foot = s.notSent ? notSentFoot : s.adding ? addFoot : s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && mat === "pcs" ? piecesFoot
+  const foot = s.notSent ? notSentFoot : s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && mat === "pcs" ? piecesFoot
     : s.step === "what" && mat === "pkg" ? matBack("Pick a package to carry on")
     : s.step === "nudge" ? nudgeFoot : s.step === "check" ? checkFoot : backFoot("Pick one to carry on");
 
@@ -1195,7 +1163,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     <div ref={rootRef} className="laq" data-qc149f="log" data-qls="root" data-step={s.step}>
       <div className={`laq-in${bump ? " is-bump" : ""}`}>
         {top}
-        <div ref={sbRef} key={s.notSent ? "not-sent" : s.adding ? "adding" : s.step === "what" ? `what:${mat}` : s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
+        <div ref={sbRef} key={s.notSent ? "not-sent" : s.step === "what" ? `what:${mat}` : s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
         <div className={`laq-cf${leaveAsk ? " is-leave" : ""}`} data-qls="foot">{leaveAsk ? leaveFoot : foot}</div>
         <div className={`laq-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">
           {toast ? <>{toast.text}<button type="button" data-qls="toast-undo" onClick={toast.undo}>Undo</button></> : null}

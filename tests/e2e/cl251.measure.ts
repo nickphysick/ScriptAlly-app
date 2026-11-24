@@ -153,7 +153,7 @@ test("CL251-B1 B3 · the headers: Log a query (v2), Adding new agent (B2 retired
   };
   /* the Contact list: the top bar's Log a query, in place */
   await openCl24(page, vp);
-  await page.locator(".ws-cap--bar .ws-capl").first().click(T).catch(() => {});
+  await page.locator("[data-shell=quick-btn]").first().click(T).catch(() => {}); await page.waitForTimeout(300); await page.locator("[data-quick='query']").first().click(T).catch(() => {});
   await page.waitForTimeout(1200);
   await checkLog("Contact list");
   await page.keyboard.press("Escape"); await page.waitForTimeout(500);
@@ -169,21 +169,9 @@ test("CL251-B1 B3 · the headers: Log a query (v2), Adding new agent (B2 retired
      the card frame's composer, so on desktop that button and that mode are no longer reached. What covers recording now:
      recordResponse1.measure.ts (R1 one dialog per door, R3 the composer "What did {first} say?" in the same panel, R12
      the phone's own flow). The header's per-pick lines have no rendered check on desktop (reported in v2.2's REPORT). */
-  /* B3 — "+ Add an agent" on the Contact list */
-  await openCl24(page, vp);
-  await page.locator("[data-cl24='add']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  await mutate(page, "B3", ".apn [data-flh='line'] { display: none !important; }");
-  const ag = await head(page, "[data-ap='panel-new']");
-  B3.check("population", !!ag, `the new-agent panel ${ag ? "open" : "missing"}`);
-  B3.check("title", ag?.title === "Adding new agent", `title "${ag?.title}"`);
-  B3.check("line", ag?.line === AGENT_LINE, `line "${ag?.line?.slice(0, 50)}…"`);
-  /* re-pointed (Contact list v25.2 C2): the new-agent state is the card's edit mode under its v25.1 header — the old
-     editor's three tabs are its sections now (Who they are, What they're looking for, How to query them, How to reach
-     them). What B3 guards is that the editor under the header is whole: the sections, and the name field first. */
-  const tabs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-ap='panel-new'] [data-cl252='edit-mode'] [data-cl252='sec']")].map((t) => t.dataset.sec ?? ""));
-  B3.check("the editor under the header is whole", ["who", "want", "work", "reach"].every((k) => tabs.includes(k)) && !!(await page.$("[data-ap='panel-new'] [data-ae='name']")), tabs.join(" · "));
-  doneAll([B1, BASE ? 0 : 12], [B3, BASE ? 0 : 4]);
+  /* B3 — DELETED by Add an agent v2 (24 Nov 2026): the "Adding new agent" panel no longer opens on a desktop; the add
+     journey's header is tests/e2e/addAgentV2.measure.ts AB2. */
+  doneAll([B1, BASE ? 0 : 12]);
 });
 
 /* ═════════ C · the tidy-ups ═════════ */
@@ -220,7 +208,7 @@ test.skip("CL251-C1 C2 C3 C4 C5 · headings one size; no list health in the coun
   }
   /* C4 — the top bar's Log a query stays on /agents and opens the panel */
   await openCl24(page, SIZES[0]);
-  await page.locator(".ws-cap--bar .ws-capl").first().click(T).catch(() => {});
+  await page.locator("[data-shell=quick-btn]").first().click(T).catch(() => {}); await page.waitForTimeout(300); await page.locator("[data-quick='query']").first().click(T).catch(() => {});
   await page.waitForTimeout(1300);
   const path = new URL(page.url()).pathname;
   const panel = await box(page, "[data-cl24='panel'] [data-qc149f='log']");

@@ -31,7 +31,7 @@ test("ms shots", async ({ page }) => {
   await page.screenshot({ path: `${OUT}/2-your-menu.png` });
   await page.keyboard.press("Escape"); await page.waitForTimeout(300);
   /* 5 · the arrow */
-  await page.locator(".ws-cap--bar .ws-capr").click(); await page.waitForTimeout(300);
+  await page.locator("[data-shell=quick-btn]").click(); await page.waitForTimeout(300);
   await page.screenshot({ path: `${OUT}/5-arrow.png` });
   await page.keyboard.press("Escape"); await page.waitForTimeout(300);
   /* the selector's menu and the +N menu */

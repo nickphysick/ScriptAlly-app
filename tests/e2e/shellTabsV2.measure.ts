@@ -414,7 +414,7 @@ const C2_BREAK = `.ws-pagebar .ws-sfield[data-fold] { width: 168px !important; p
 test("ST2-C2 · at 1100 wide no tab is cut or overlapped; search folds first; Log a query keeps its size — rail", async ({ page }) => {
   test.setTimeout(400_000);
   await sidebarMode(page, "rail");
-  const capW = async () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".ws-pagebar .ws-capb")].find((e) => e.getBoundingClientRect().width > 0)?.getBoundingClientRect().width ?? 0);
+  const capW = async () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-shell=quick]")].find((e) => e.getBoundingClientRect().width > 0)?.getBoundingClientRect().width ?? 0);
   await openRoute(page, "/materials/letters", WIDE);
   const capWide = await capW();
   expect(capWide, "Log a query is drawn").toBeGreaterThan(0);

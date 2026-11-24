@@ -52,7 +52,7 @@ import { Rect as TipRect } from "../../lib/deskTooltip";
 import { manuscriptViewHref, manuscriptViewPath } from "./manuscriptScope";
 import { ShortcutsSheet } from "./ShortcutsSheet";
 import "./shellMenus.css";
-import { SidebarCapture } from "./SidebarCapture";
+import { QuickActions } from "./QuickActions";
 import {
   ACCOUNT_ROUTES, accountSectionForPath, isAccountPath, AccountSectionId,
 } from "../../lib/accountRoutes";
@@ -1304,6 +1304,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     ⚠️ SHELL TABS v2: WHEN THE TABS WOULD NOT KEEP THEIR NAMES, SEARCH FOLDS FIRST to a 38px icon button
                     (`data-fold`, set by the strip's own fit — `planWithFolds`); the tabs and "Log a query" keep their
                     size. Its aria-label already names it, so the folded button loses nothing for a screen reader. */}
+                {/* v18.3 §F.1 — THE PAGE SLOT: a page may portal one control here (`lib/barSlot`); an empty slot takes no width.
+                    ⚠️ ADD AN AGENT v2: IT SITS LEFT OF SEARCH, so Search, Quick actions and Help keep one place on every
+                    page (QA1); it was left of the "?", where a page's guide pill pushed the create button 220px left.
+                    ⚠️ SHELL TABS v2.1: IT FOLDS SECOND. When even the folded search leaves the tabs short, the slot's
+                    control (the guide pill) folds to a 38px icon (`data-fold`; inkShell.css), and only then may a tab
+                    lose its name. Quick actions and Help never fold. */}
+                <span className="ws-pageslot" data-shell="page-slot" data-fold={slotFolded ? "" : undefined} ref={setBarSlot} />
                 <span className="ws-appctl">
                   <button
                     ref={setSearchRefs}
@@ -1337,10 +1344,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   <span className="ws-esc" aria-hidden="true">esc</span>
                 </button>
 
-                {/* ══ "LOG A QUERY" — moved here from the sidebar (ink shell v1). Its two segments keep their
-                    contracts (`invokeCapture` and the add-manuscript route); only its place and skin moved. */}
+                {/* ══ "QUICK ACTIONS" (Add an agent v2, Part A) — the bar's one create button, in the slot the "Log a
+                    query" split button held. Its rows are the existing doors (shell/QuickActions). */}
                 <span className="ws-appctl ws-appctl--cap">
-                  <SidebarCapture placement="bar" collapsed={false} onNavigate={onNavigate} />
+                  <QuickActions onNavigate={onNavigate} />
                 </span>
 
                 {/**
@@ -1349,12 +1356,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   * apart from the workspace group: an 18px gap and a hairline rule (CSS).
                   */}
                 <span className="ws-helpwrap" ref={helpWrapRef}>
-                  {/* v18.3 §F.1 — THE PAGE SLOT: a page may portal one control here, left of the "?" (`lib/barSlot`). The
-                      shell names no page; an empty slot takes no width.
-                      ⚠️ SHELL TABS v2.1: IT FOLDS SECOND. When even the folded search leaves the tabs short, the slot's
-                      control (the guide pill) folds to a 38px icon (`data-fold`; inkShell.css), and only then may a tab
-                      lose its name. "Log a query" and Help never fold. */}
-                  <span className="ws-pageslot" data-shell="page-slot" data-fold={slotFolded ? "" : undefined} ref={setBarSlot} />
                   {/* ⚠️ "?" ALWAYS OPENS THE HELP MENU NOW (follow-up 2, 1c) — Help centre, the page guide
                       where the page has one, and Keyboard shortcuts (the existing ShortcutsSheet, through
                       its own event). It was a direct link to /help on every page without a guide. */}

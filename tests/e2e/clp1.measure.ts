@@ -281,50 +281,7 @@ test.skip("CLP6 · More filters folds and unfolds Where they stand and Submissio
 });
 
 /* ═════════ CLP7 · add → the row, the postmark, the snackbar, Undo ═════════ */
-test("CLP7 · after an add: the row in view, the postmark, the snackbar; Undo removes the agent", async ({ page }) => {
-  test.setTimeout(300_000);
-  const L = new Ledger("CLP7");
-  emu("pro");
-  await openCl(page);
-  const name = `Quill ${RUN}`;
-  await page.locator(".aglist [data-cl27='add']:visible").first().click();
-  await page.locator("[data-aaj='journey']").waitFor({ timeout: 20_000 });
-  await page.locator("[data-aaj='name']").fill(name);
-  await page.locator("[data-aaj='agency']").fill("Lark Literary");
-  await page.locator("[data-aaj='add']").click();
-  await page.locator("[data-aaj='done']").waitFor({ timeout: 20_000 });
-  await page.locator("[data-aaj='done']").click();
-  await page.waitForTimeout(700);
-  const r = await page.evaluate((nm) => {
-    const sc = [...document.querySelectorAll<HTMLElement>(".agl-wpg .wpg-scroll")].find((e) => e.offsetHeight)!.getBoundingClientRect();
-    const row = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='row']")].find((e) => e.offsetHeight && e.textContent?.includes(nm));
-    const rb = row?.getBoundingClientRect();
-    const stamp = [...document.querySelectorAll<HTMLElement>("[data-clp='stamp']")].find((e) => e.getBoundingClientRect().width > 0);
-    const toast = [...document.querySelectorAll<HTMLElement>(".sa-toast")].map((t) => ({ text: (t.textContent ?? "").replace(/\s+/g, " ").trim(), undo: !!t.querySelector(".sa-toast-undo") }));
-    const host = document.querySelector(".sa-toasts");
-    return {
-      row: !!row, inView: !!rb && rb.top >= sc.top && rb.bottom <= sc.bottom, tint: row ? row.hasAttribute("data-clp-new") : false,
-      stamp: stamp ? [...stamp.querySelectorAll("b, span")].map((x) => (x.textContent ?? "").trim()).join(" ") : null, panel: document.querySelectorAll("[data-aaj='journey'], [data-cl262='panel']").length,
-      toast, role: host?.getAttribute("role") ?? null,
-    };
-  }, name);
-  L.check("the panel closed", r.panel === 0, String(r.panel));
-  L.check("the new row is in view", r.row && r.inView, JSON.stringify(r));
-  L.check("the row is tinted", r.tint, String(r.tint));
-  L.check("the rust postmark over it: ADDED and the date", !!r.stamp && /^ADDED \d{1,2} [A-Z]{3}$/.test(r.stamp), String(r.stamp));
-  L.check("one snackbar: “{Name} added to your list”, with Undo", r.toast.length === 1 && r.toast[0].text.startsWith(`${name} added to your list`) && r.toast[0].undo, JSON.stringify(r.toast));
-  L.check("role=status", r.role === "status", String(r.role));
-  if (r.toast.length) {
-    await page.locator(".sa-toast .sa-toast-undo").first().click();
-    /* the snackbar first (it lives 5s), then the emulator (a node process: slow under load) */
-    await page.locator(".sa-toast", { hasText: `${name} removed` }).first().waitFor({ timeout: 4000 }).catch(() => {});
-    const t2 = await page.locator(".sa-toast").allTextContents();
-    L.check("and says “{Name} removed”", t2.some((t) => t.includes(`${name} removed`)), JSON.stringify(t2));
-    const left = JSON.parse(emu("agents")) as { name: string }[];
-    L.check("Undo removed the agent (emulator)", !left.some((a) => a.name === name), String(left.filter((a) => a.name === name).length));
-  }
-  L.done(8);
-});
+/* CLP7 — DELETED by Add an agent v2 (24 Nov 2026): its subject, the old add-agent panel, no longer opens on a desktop. What covers adding an agent now: tests/e2e/addAgentV2.measure.ts (AB1–AB8). */
 
 /* ═════════ CLP8 · Agent fit → the snackbar; Undo restores ═════════ */
 test("CLP8 · a star saves on the click, the snackbar says so, Undo restores the old rating", async ({ page }) => {
