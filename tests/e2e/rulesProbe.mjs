@@ -913,4 +913,14 @@ console.log("\nControls: entry v1 — the agent's reply that moves nothing:");
   console.log("  · probe entries removed");
 }
 
+/* ── Controls: entry v1 · follow-up 2 (24 Nov) — the reminder's set-at stamp on the query ─────────────────────────── */
+console.log("\nControls: entry v1 follow-up 2 — the reminder's set-at stamp:");
+{
+  const qref = doc(db, "users", uid, "queries", "seed-query-1");
+  const before = (await getDoc(qref)).data() ?? {};
+  await attempt("query nudgeSetAt (UPDATE)", "ce1 F2", () => updateDoc(qref, { nudgeSetAt: new Date().toISOString() }));
+  await attempt("nudgeSetAt not a string…", "ce1 F2 (expect DENIED)", () => updateDoc(qref, { nudgeSetAt: 12 }));
+  try { await updateDoc(qref, { nudgeSetAt: typeof before.nudgeSetAt === "string" ? before.nudgeSetAt : deleteField() }); console.log("  · restored"); } catch (e) { console.log(`  ⚠️  could not restore: ${e.message}`); }
+}
+
 process.exit(0);

@@ -1,8 +1,18 @@
 diff --git a/firestore.rules b/firestore.rules
-index b2416a71f..58ff12943 100644
+index b2416a71f..efc45bdf7 100644
 --- a/firestore.rules
 +++ b/firestore.rules
-@@ -640,7 +640,10 @@ service cloud.firestore {
+@@ -491,6 +491,9 @@ service cloud.firestore {
+           data.sendMethod == 'Post'
+         )
+         && (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))
++        // Controls: entry v1 · follow-up 2 (24 Nov) — WHEN the writer set that reminder (an ISO instant, never a day due).
++        // Optional: a reminder with none counts as set before any reply entry (lib/reminderStamp).
++        && (data.get('nudgeSetAt', null) == null || (data.nudgeSetAt is string && data.nudgeSetAt.size() <= 64))
+         && (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate.size() <= 64))
+         && (data.get('responseDeadline', null) == null || (data.responseDeadline is string && data.responseDeadline.size() <= 64))
+         && (data.get('partialRequestedDate', null) == null || (data.partialRequestedDate is string && data.partialRequestedDate.size() <= 64))
+@@ -640,7 +643,10 @@ service cloud.firestore {
            'replyNote', 'toldCount', 'toldDeadline',
            // Query Centre v152.2: a pass's "open to more work" and its Wall-of-no opt-out (§5), "Something else"'s words
            // (§5), how a nudge went (§4.2), and the offer step's "tell the rest later" flag (§6.1). All OPTIONAL.
@@ -14,7 +24,7 @@ index b2416a71f..58ff12943 100644
          ])
          && (!data.keys().hasAny(['reconstructed']) || data.reconstructed == true)
          && data.type is string && data.type.size() <= 128
-@@ -680,7 +683,9 @@ service cloud.firestore {
+@@ -680,7 +686,9 @@ service cloud.firestore {
          && (!data.keys().hasAny(['offWall']) || data.offWall is bool)
          && (!data.keys().hasAny(['askedFor']) || (data.askedFor is string && data.askedFor.size() <= 80))
          && (!data.keys().hasAny(['sentVia']) || (data.sentVia is string && data.sentVia.size() <= 32))
@@ -25,7 +35,7 @@ index b2416a71f..58ff12943 100644
      }
  
      // (isValidTopLevelActivity is gone with the RETIRED users/{uid}/activity store — Tier 3 ·
-@@ -770,6 +775,9 @@ service cloud.firestore {
+@@ -770,6 +778,9 @@ service cloud.firestore {
            // construction: it carries no resultingStatus, so recomputeQuery cannot see it and no
            // derived field can move. Deploys WITH writerExpectedSetAt as one release.
            data.activityType == 'Holding Reply' ||
@@ -35,7 +45,7 @@ index b2416a71f..58ff12943 100644
            data.activityType == 'Offer Accepted' ||
            data.activityType == 'Offer Declined' ||
            data.activityType == 'Query Sent' ||
-@@ -820,7 +828,10 @@ service cloud.firestore {
+@@ -820,7 +831,10 @@ service cloud.firestore {
          // touching; the client is the single writer and never puts one on another type.
          && (!data.keys().hasAny(['bookVersionId']) || (data.bookVersionId is string && data.bookVersionId.size() <= 128))
          // Query actions v1 (K5, 27 Sep): the drawer's structured event key.
@@ -47,7 +57,16 @@ index b2416a71f..58ff12943 100644
      }
  
      function isValidJournalEntry(data, userId) {
-@@ -1160,7 +1171,9 @@ service cloud.firestore {
+@@ -1101,7 +1115,7 @@ service cloud.firestore {
+         allow update: if isOwner(userId) && isValidId(queryId) && isValidQuery(incoming(), userId) && (
+           incoming().diff(existing()).affectedKeys().hasOnly([
+             'manuscriptId', 'dateSent',
+-            'status', 'personalisationNotes', 'sendMethod', 'nudgeDate', 'lastNudgeSentDate', 'responseDeadline',
++            'status', 'personalisationNotes', 'sendMethod', 'nudgeDate', 'nudgeSetAt', 'lastNudgeSentDate', 'responseDeadline',
+             'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate',
+             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
+             'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',
+@@ -1160,7 +1174,9 @@ service cloud.firestore {
            // correct on the page the writer is standing on.
            incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey',
              // Query Centre v152.2 §6.1: the offer step's "tell the rest later" flag, set or cleared on its feed twin

@@ -1,8 +1,21 @@
 # Controls: entry v1: the reply that sits between steps
 
-Branch `controls-entry-v1`, cut from the dev line `…-rar211-laqunk` (f3659638d). Commits: b4f13f669 (pack), a23138a06 and 551b4e4c1 (Phase 1), 2de908052 and 1a69db877 (Phase 2), c1cfe0bec (Phase 3), 172ae304d (Phases 4 and 5), plus this report. Nothing is merged and main is untouched. **Dev Firestore rules are deployed. Dev hosting is NOT deployed** (see "Deploy").
+> **⚠️ DEV HOSTING IS STILL HELD (Nick, 24 Nov).** Dev serves `index-DQIDPfLr.js`, which nothing pushed or local builds. Nick is finding which session deployed it. Then: rebase `controls-entry-v1` onto that work, build, deploy, and confirm the hash. Not cleared at the time of writing (checked 16:45).
+>
+> **⚠️ BEFORE THE PROD RULES DEPLOY:** the query update rule is at Firestore's 1,000-expression limit in the emulator. Every rules run on this branch, and the run against the rules before it, denies 4 to 10 cases ("maximum of 1000 expressions … @ L1115"), different cases each time. Follow-up 2 adds one optional clause to that rule. Real dev Firestore accepted the probe's `nudgeSetAt` update. Owner: rules, to measure the expression count before prod.
 
-Gates, against the baseline: tsc was 0 errors and is 0. The build was clean and is clean. Vitest was 944 files and 13,415 tests passing; it is now 946 files and 13,441 tests passing (full suite). tsc needs `NODE_OPTIONS=--max-old-space-size=8192` on this tree; at the default heap it aborts with V8 exit 134.
+Branch `controls-entry-v1`, cut from the dev line `…-rar211-laqunk` (f3659638d). Nothing is merged and main is untouched.
+- **First pass:** b4f13f669 (pack), a23138a06 and 551b4e4c1 (Phase 1), 2de908052 and 1a69db877 (Phase 2), c1cfe0bec (Phase 3), 172ae304d (Phases 4 and 5), e5c51a031 (report).
+- **Follow-ups:** 5f19ecc52 (1), 142b2f31c (2), 450653f04 (3), f782c5b22 (4), 4fb825e8c (measure), plus this report. See "Follow-ups" at the end.
+
+**Dev Firestore rules are deployed** (latest 24 Nov 16:45:13Z, ruleset `0d1f1704…`, probed). **Dev hosting is NOT deployed.**
+
+Gates at the branch tip, against the session baseline:
+- tsc: 0 errors, as before.
+- Build: clean, as before.
+- Vitest: was 944 files and 13,415 tests passing; now 949 files and 13,478 tests passing (full suite).
+
+tsc needs `NODE_OPTIONS=--max-old-space-size=8192` on this tree; at the default heap it aborts with V8 exit 134.
 
 ## False premises (Step 0, ruled on by Nick on 24 Nov)
 
@@ -106,7 +119,7 @@ Full recon: [STEP0.md](STEP0.md).
 
 The last row needed a fix found by measuring: `lib/qc154` read `nudgeDate` raw. It now reads through `reminderOf`.
 
-**The to-do task's date does NOT follow:**
+**The to-do task's date did NOT follow** (fixed in follow-up 1, below):
 - "Send Imogen your full · 3 days waiting" is unchanged. The task shows no Send by.
 - The gone-quiet query that now expects a reply on 15 Jan changes from "gone quiet" to **"Nudge Jules · 180 days past expected"**. That is wrong: the agent has just given a new date.
 
@@ -118,6 +131,7 @@ Written out in [rules-prod.diff](rules-prod.diff), against the dev line's rules.
 1. `isValidActivityNested`: add `'replyKind', 'replyDate'` to the `hasOnly` list. Validate `replyKind in ['chaser', 'holding', 'note']` and `replyDate is string && size() <= 32`.
 2. `isValidActivity` (the feed): add `data.activityType == 'Agent Reply'`, and the same two validators.
 3. The feed's update allowlist (`affectedKeys().hasOnly`): add `'replyKind', 'replyDate'`.
+4. Follow-up 2, `isValidQuery`: add an optional `nudgeSetAt` (`is string && size() <= 64`), and add `'nudgeSetAt'` to the query update allowlist. Read the expression-limit warning at the top first.
 
 Command: `npm run deploy:rules` (Nick's).
 
@@ -132,10 +146,60 @@ Command: `npm run deploy:rules` (Nick's).
 
 ## Deferred, with owners
 
-- **The to-do engine reading the entry** (Send by on the "send the full" task; no "nudge past expected" task after an entry with a new date). Owner: a to-do pass after Controls: journeys v1. It touches `taskDue`, `replyTask`, `comingUp` and `todoBuckets`.
-- **The reminder's set-at stamp.** `nudgeDate` has none, so "a reminder set before the entry" is read as "a reminder falling before the new date". A reminder the writer sets earlier, after the entry, is also moved. Owner: Controls: journeys v1, which asks the writer.
-- **Correcting an entry's kind and new date in the card.** `editActivity` supports both. The card's existing step editor offers When, Their words and Delete. Owner: Controls: journeys v1.
-- **The note's glyph** (speech bubble in the ref, the holding mark here). Owner: Nick, to rule.
-- **Existing e2e measures that drew the old full holding bubble** (`qc1521`'s "holding" fixture) will see the note now. Not re-run. Owner: the next Query Centre measurement pass.
-- **The emulator's 1,000-expression flake** on the feed and query update rules. It predates this change. Owner: rules.
+Done in the follow-ups: the to-do engine (1), the reminder's set-at stamp (2), correcting the kind and new date in the card (3), and the note's glyph (4).
+
+- **The emulator's 1,000-expression limit on the query and feed update rules** (see the top). It predates this branch. Owner: rules, before the prod deploy.
+- **Existing e2e measures that drew the old full holding bubble** (`qc1521`'s "holding" fixture) will see the note and the speech bubble now. Not re-run. Owner: the next Query Centre measurement pass.
+- **The old reading-pane timeline** (`QueryTimeline`'s own rows) still draws every non-status row (nudges and reply entries alike) as its one 9px ring. That is its own grammar, and the cards do not use it. Owner: Nick, if that pane is still in use.
+- **The To-do list's `comingUp`** (the "coming up" dates) still reads `nudgeDate` and the agent's window directly, not through the entry. The tasks and their figures do read it. Owner: the to-do pass.
 - **Prod rules** (above). Owner: Nick.
+
+## Follow-ups (24 Nov, Nick's four)
+
+Fresh worktree on `controls-entry-v1`, one commit each, same gates. Dev hosting held throughout.
+
+### 1. The To-do list reads through the entry (5f19ecc52)
+- **The one read-through.** `lib/agentReply` `entryDatesFor` gives a query's reply date, Send by and reminder as its latest entry moves them, built from the cards' own primitives. The task generator (db.tsx), `replyTaskFor` (the living header) and `taskDue` (via `taskCardFacts` `dueFor`) all read it.
+- **`replyTask`.** A dated entry's date is the deadline, with no window needed. The nudge is due on that date, with no grace and not before. A dated entry ends the case for closing.
+- **`taskDue`.** The send task's day is its Send by (source "send-by"). A nudge or close task's day is the entry's reply date (source "reply").
+- **The row.** A send row with a Send by says "N days left".
+- **Red first** on the measured case, against the to-do files as they were: 6 red (the measured case, its day, the adapter, the send day, the generator). [todoEntry.test.ts](../../src/lib/todoEntry.test.ts) has 9 cases.
+- **Measured.** The fr send task reads "10 days left". The q query's close task is gone, with no nudge task before 52 days out. Only the undated note's query is "past expected". Next up shows no ce1 row as past expected; it showed "Send your full to Imogen Faraday".
+
+### 2. The reminder records when it was set (142b2f31c)
+- **The field.** `Query.nudgeSetAt`, an ISO instant, set by `lib/reminderStamp` `withReminderStamp`:
+  - set or changed: now;
+  - cleared: cleared the same way;
+  - rewritten on the same day: untouched;
+  - a patch that already names it (an Undo): untouched.
+- **Stamped at the write funnels, not at each of the roughly twenty controls:**
+  - db: `updateQuery`, `addQuery`, `recordMaterialsSent`;
+  - `commitPlan` and `commitMany` (each uses its own snapshot as the prior);
+  - `commitNudge`, the agent card save, `recordResponse`, `saveQueryEdits`.
+
+  Every Undo restores the prior stamp. A source lock fails on any file that writes a query and names the reminder without stamping it, except the two that hand the stamp over themselves (`nudgeUndo` and `stepSaves`), each named with its reason.
+- **Reading.** Only a reminder set before the entry moves. One set after it stays. No stamp counts as before. `qc153`'s Next-box reminder now reads through the same `reminderOf`, which takes a date-only reminder as local noon, never UTC midnight.
+- **Rules.** `isValidQuery` gains an optional `nudgeSetAt`, and the query update allowlist gains it.
+  - Against the rules before this change, the three allowed cases were red and the denial was green.
+  - Deployed to dev and probed: the update was ACCEPTED and a non-string was DENIED.
+- **Locks.** [reminderStamp.test.ts](../../src/lib/reminderStamp.test.ts) has 18 cases. With the set-at check removed, the two "set after stays" cases went red.
+- **Measured.** "ra" (set after its entry) keeps "Nudge on 29 Nov". "rm" (no stamp) moves to "Nudge on 3 Jan 2027".
+
+### 3. The step editor changes the kind and the new date (450653f04)
+- **What it was:** Chaser, Holding reply or Note.
+- **The new date** is on the app's WeekSlider, counted from the entry's own day, as Record a response draws it:
+  - with you: "Send it by", in days 0 to 30;
+  - with the agent: "Reply time", in weeks 1 to 26;
+  - "No date" clears it, and the day it names shows underneath.
+- **Saving** goes through `editActivity`, with the snapshot Undo.
+- **A corrected old holding-reply row** becomes the new type on both stores, so clearing its date cannot bring its stored weeks back.
+- **Locks.** [controlsEntryEditor.test.tsx](../../src/components/queries/centre/controlsEntryEditor.test.tsx) has 5 cases. They're red against HEAD by construction (neither the controls nor their helpers existed). Not driven on the rendered page (it would write); the measure covers what an edited entry moves.
+
+### 4. The note's glyph is the ref's speech bubble (f782c5b22)
+- **The mark.** [ReplyMark.tsx](../../src/components/queries/centre/ReplyMark.tsx) is the ref's `HOLDG`, path for path, drawn as its own mark. It is never StatusDot.
+- **Where it's drawn:** every reply step (all kinds, old holding replies included) on every card thread, the agent card's History and the To-do preview (through `StepGlyph`), the older card's step list, and the Notes headers.
+- **Locks.** +4 cases in [controlsEntry.test.tsx](../../src/components/queries/centre/controlsEntry.test.tsx), red against the bubble at HEAD.
+- **Measured** on all five notes and in History.
+
+### The measure (4fb825e8c)
+[controlsEntry.measure.ts](../../tests/e2e/controlsEntry.measure.ts) ran over five queries, before and after their entries: **119/119**, including every first-pass reading. The ledger and shots are in this folder.
