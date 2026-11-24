@@ -383,7 +383,7 @@ export function contactHead(form: AgentForm, o: { nameRef?: React.Ref<HTMLInputE
     ),
     more: (
       <div className="ag-hmore" data-acv22="head-more">
-        <AaField label="MSWL" k="mswl">
+        <AaField label="Wishlist page" k="mswl">
           <input className="aap-inp" data-ae="mswl" value={d.mswl} placeholder="manuscriptwishlist.com/…" autoComplete="off" onChange={(e) => form.set({ mswl: e.target.value })} />{link("mswl")}
         </AaField>
         <AaField label="Social" k="social"><SocialField social={d.social} onSocial={(s) => form.set({ social: s })} /></AaField>
@@ -401,7 +401,7 @@ export function contactHead(form: AgentForm, o: { nameRef?: React.Ref<HTMLInputE
 /** the names the save bar lists, by draft field — two fields that are one thing to the writer share a name */
 export const FIELD_NAME: Partial<Record<keyof CardDraft, string>> = {
   name: "name", agency: "agency", agencyUnknown: "agency", country: "country", city: "city", email: "email", website: "website",
-  form: "submission link", mswl: "MSWL", social: "social", rating: "agent fit", genres: "genres", wishlist: "wishlist", mats: "materials",
+  form: "submission link", mswl: "wishlist page", social: "social", rating: "agent fit", genres: "genres", wishlist: "wishlist", mats: "materials",
   door: "taking queries", reopens: "reopening date", method: "how they take queries", methodOther: "how they take queries",
   weeks: "response time", nrn: "response policy",
 };

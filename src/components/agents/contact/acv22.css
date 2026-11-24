@@ -56,6 +56,9 @@
 .qc152 .ag-head .ag-hct label { display: flex; align-items: center; gap: 7px; min-width: 0; color: #6f655c; }
 .qc152 .ag-head .ag-hct label .aap-inp.hin { flex: 1 1 auto; height: 30px; }
 .qc152 .ag-head .ag-hmore { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+/* v2.2.1 — the two labels on one line, their fields level beneath: every field in More starts at the same top (the
+   pills sheet gives a first field 2px and the next 20px, which set Social 18px below the wishlist page) */
+.qc152 .ag-head .ag-hmore > .aap-f, .qc152 .ag-head .ag-hmore > .aap-f:first-child { margin-top: 0; }
 .qc152 .ag-head .ag-hmore > [data-f='form'] { grid-column: 1 / -1; }
 .qc152 .ag-head .ag-hmore .aap-inp { height: 34px; }
 .qc152 .ag-head .ag-hmorebtn { display: inline-block; font-size: 13.5px !important; white-space: nowrap; }
