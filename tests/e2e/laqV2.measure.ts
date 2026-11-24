@@ -23,6 +23,7 @@ import { expect, test, type Browser, type BrowserContext, type Page } from "@pla
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { ensureSignedIn } from "./measure";
+import { pressQuickLogAQuery } from "./laqLib";
 
 const OUT = "reports/log-a-query-v2";
 const SHOTS = `${OUT}/shots`;
@@ -55,9 +56,7 @@ async function open(p: Page, ms = "laq2-ms") {
   await p.evaluate((id) => { try { localStorage.setItem("scriptally_active_manuscript_id", id); } catch { /* none */ } }, ms);
   await p.goto("/dashboard");
   await p.waitForTimeout(300);
-  const d = p.getByRole("button", { name: /^\+?\s*Log a query$/ }).locator("visible=true").first();
-  await d.waitFor({ state: "visible", timeout: 60_000 });
-  await d.click();
+  await pressQuickLogAQuery(p); /* the header's door since add-agent v2 (laqLib), not the Dashboard's set-up card */
   await R(p).waitFor({ state: "visible", timeout: 30_000 });
   await p.waitForTimeout(350);
 }
