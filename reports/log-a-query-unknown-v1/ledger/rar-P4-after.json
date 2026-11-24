@@ -1,0 +1,27 @@
+[
+ {
+  "where": "the recorded sentence",
+  "ok": true,
+  "detail": "There’s no reply date yet."
+ },
+ {
+  "where": "the card's box: Reply expected by / No date yet",
+  "ok": true,
+  "detail": "Reply expected byNo date yetNo reminder set"
+ },
+ {
+  "where": "the card's box: no window bar",
+  "ok": true,
+  "detail": "Reply expected byNo date yetNo reminder set"
+ },
+ {
+  "where": "the card's box: no nudge line",
+  "ok": true,
+  "detail": "Reply expected byNo date yetNo reminder set"
+ },
+ {
+  "where": "the query's own card shows no reply date",
+  "ok": true,
+  "detail": "(no “Reply expected by” line)"
+ }
+]

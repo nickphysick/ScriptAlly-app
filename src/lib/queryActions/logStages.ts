@@ -499,12 +499,14 @@ const IF_NO_OF: Record<ReplyChoice, IfNo> = { nudge: "nudge", close: "close", no
  * the WRITER'S whenever it is not the card's own weeks (`writerExpected`, as the old journey's "moved off the usual");
  * Unknown saves none. Close it needs a reply date, so with Unknown it falls back to no reminder.
  */
-export function replyPlan(r: ReplyAnswers, agent: Pick<Agent, "responseTimeWeeks">, sentMs: number, nowMs: number = sentMs): Pick<LogPlan, "expect" | "writerExpected" | "ifNo" | "nudgeDate" | "nrmnOverride"> {
+export function replyPlan(r: ReplyAnswers, agent: Pick<Agent, "responseTimeWeeks">, sentMs: number, nowMs: number = sentMs): Pick<LogPlan, "expect" | "writerExpected" | "ifNo" | "nudgeDate" | "nrmnOverride" | "replyUnknown"> {
   const expect = expectOf(sentMs, r.wk);
   const choice: ReplyChoice = r.ifNo === "close" && !expect ? "none" : r.ifNo;
   return {
     expect,
     writerExpected: !!expect && r.wk !== cardWeeks(agent),
+    /* Unknown v1 — the slider's Unknown: the save stamps it, so the card shows no date rather than the agent's weeks */
+    replyUnknown: r.wk == null,
     ifNo: IF_NO_OF[choice],
     /* v2 — "I'll nudge {First} now": a nudge reminder for today, the same field the chips set */
     nudgeDate: nudgeDateOf({ ...r, ifNo: choice }, sentMs, nowMs),

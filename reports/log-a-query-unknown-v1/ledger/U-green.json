@@ -1,0 +1,32 @@
+[
+ {
+  "where": "U4 the control: the card's weeks still give a date",
+  "ok": true,
+  "detail": "Reply expected by19 Jan 2027Nudge on 26 Jan 2027"
+ },
+ {
+  "where": "U1 the Nudge step says there is no reply date",
+  "ok": true,
+  "detail": "No reply date, so choose when to be reminded below."
+ },
+ {
+  "where": "U1 the review's card: Reply expected by / No date yet, no bar",
+  "ok": true,
+  "detail": "Reply expected byNo date yetNudge on 19 Jan 2027"
+ },
+ {
+  "where": "U1 the reminder the writer kept is its line",
+  "ok": true,
+  "detail": "Reply expected byNo date yetNudge on 19 Jan 2027"
+ },
+ {
+  "where": "U2 the logged screen's card: the same",
+  "ok": true,
+  "detail": "Reply expected byNo date yetNudge on 19 Jan 2027"
+ },
+ {
+  "where": "U3 Undo leaves no fixture query behind",
+  "ok": true,
+  "detail": "0 left"
+ }
+]
