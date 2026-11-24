@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk activity feed: type rules v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1c130f; --navy: #2a3a52; --muted: #5b4f47; --quiet: #6b6058; --rust: #7a3f31; --page: #f2eee8;
+    --type: "Special Elite", "Courier New", Courier, monospace;
+    --serif: "Source Serif 4", Georgia, serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--page); color: var(--ink); font-family: var(--serif); font-size: 16px; line-height: 1.5; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
+  h1 { margin: 0 0 8px; font-family: var(--type); font-weight: 400; font-size: 28px; line-height: 1.2; }
+  .lede { margin: 0 0 24px; max-width: 760px; color: var(--muted); }
+  h2 { margin: 0 0 8px; font-family: var(--type); font-weight: 400; font-size: 20px; line-height: 1.25; }
+  h3 { margin: 0 0 4px; font-weight: 600; font-size: 16px; }
+
+  /* the board's own switches: the app's boxed view switch (box radius 12, buttons 34 high, radius 9) */
+  .controls { display: flex; flex-wrap: wrap; gap: 16px 24px; margin-bottom: 24px; }
+  .ctl > span { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+  .seg { display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 12px; background: #ece7de; }
+  .seg button { height: 34px; padding: 0 14px; border: 0; border-radius: 9px; background: none; cursor: pointer; font-family: var(--serif); font-size: 14px; font-weight: 600; color: #3b322c; white-space: nowrap; }
+  .seg button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(28,19,15,.12); }
+  .seg button:focus-visible, .feed button:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  .board { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 40px; align-items: start; }
+  @media (max-width: 900px) { .board { grid-template-columns: minmax(0, 1fr); } }
+
+  /* the stage: a slice of the dashboard's page, the feed column at its real width */
+  .stage { position: relative; padding: 16px 28px 0 16px; border-radius: 16px; background: var(--page); box-shadow: inset 0 0 0 1px #ddd5ca; overflow: hidden; }
+  .stage-in { position: relative; width: var(--w, 386px); max-width: 100%; height: 760px; display: flex; flex-direction: column; }
+  .hawk { position: absolute; right: -4px; bottom: 0; height: 232px; width: auto; pointer-events: none; filter: drop-shadow(-4px 6px 10px rgba(28,19,15,.18)); z-index: 5; }
+  [data-hawk="off"] .hawk { display: none; }
+
+  /* ════════ THE FEED, AS BUILT (values read from df1.css, dash2Feed.css, dash3.css on feed-wording-v1) ════════ */
+  .feed { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; font-family: var(--serif); color: var(--ink); }
+  .feed :is(p, span, div, button, label, small, b, time) { font-family: inherit; }
+  .sw { flex: none; display: flex; margin-bottom: 10px; padding: 3px; border-radius: 12px; background: #ece7de; }
+  .sw button { flex: 1 1 0; height: 34px; border: 0; border-radius: 9px; background: none; cursor: pointer; font-size: 14px; font-weight: 600; color: #3b322c; }
+  .sw button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(28,19,15,.12); }
+  .fscroll { flex: 1 1 0; min-height: 0; overflow-y: auto; margin: 0 -6px; padding: 0 6px 8px; -webkit-mask-image: linear-gradient(#000 calc(100% - 24px), transparent); mask-image: linear-gradient(#000 calc(100% - 24px), transparent); }
+
+  .mail { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; padding: 8px 8px 8px 12px; border-radius: 12px; background: #f8e8e5; box-shadow: inset 0 0 0 1px #dfb1ac; font-size: 14px; }
+  .mail svg { flex: none; width: 15px; height: 15px; fill: none; stroke: #a0675a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .mail span { flex: 1 1 auto; min-width: 0; }
+  .mail button { height: 32px; padding: 0 12px; border: 0; border-radius: 16px; background: transparent; box-shadow: inset 0 0 0 1px #e3d5c9; font-weight: 600; font-size: 14px; white-space: nowrap; cursor: pointer; color: var(--ink); }
+  .mail button.is-x { box-shadow: none; color: var(--quiet); padding: 0 6px; }
+
+  .day { display: flex; align-items: baseline; gap: 8px; margin: 12px 2px 8px; font-size: 14px; line-height: 1.4; }
+  .day > b { font-weight: 700; }
+  .day > span { color: var(--quiet); }
+  .day::after { content: ""; flex: 1 1 0; height: 1px; background: #ddd5ca; transform: translateY(-4px); }
+
+  /* small rows */
+  .mini { display: flex; align-items: center; gap: 11px; margin-bottom: 8px; padding: 12px 14px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(28,19,15,.07); font-size: 14.5px; line-height: 1.35; }
+  .mg { flex: none; display: grid; width: 20px; height: 20px; }
+  .mg > svg { width: 20px; height: 20px; }
+  .mg--bell { color: var(--rust); }
+  .mg--house { color: #a39c94; }
+  .mtx { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+  .mtx b { font-weight: 700; }
+  .mtx i { font-style: italic; }
+  .mini time.t-right { flex: none; font-family: var(--mono); font-size: 11.5px; color: #a39a91; white-space: nowrap; }
+
+  /* collapsed cards */
+  .crow { --t: #fdfaf5; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto 16px; gap: 12px; align-items: center; width: 100%; margin: 0 0 8px; padding: 12px 14px; border: 1px solid #ece2d8; border-radius: 12px; background: var(--t); box-shadow: 0 1px 2px rgba(28,19,15,.05); text-align: left; cursor: pointer; color: var(--ink); }
+  .crow[data-kind="request"] { --t: #f9f0ec; }
+  .crow[data-kind="request"][data-status="Full Requested"] { --t: #eff3f7; }
+  .crow:hover { border-color: #d9c8ba; }
+  .cg { display: grid; place-items: center; }
+  .ctx { min-width: 0; }
+  .ctx .hl { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; font-family: var(--type); font-weight: 400; font-size: 16px; line-height: 1.25; overflow: hidden; overflow-wrap: break-word; }
+  .ctx .hl b { font-weight: 400; }
+  .ctx small { display: block; margin-top: 2px; font-size: 13px; line-height: 1.35; color: var(--quiet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .crow time.t-right { align-self: start; line-height: 20px; font-family: var(--mono); font-size: 11.5px; color: #8a8178; white-space: nowrap; }
+  .cv { display: grid; place-items: center; width: 16px; height: 16px; color: var(--quiet); }
+  .cv svg { width: 16px; height: 16px; }
+  .t-under { display: none; font-family: var(--mono); }
+
+  /* open cards */
+  .entry { --t: #fdfaf5; position: relative; margin-bottom: 10px; padding: 16px 16px 14px; border-radius: 16px; border: 1px solid #ece2d8; background: #fff; box-shadow: 0 1px 2px rgba(28,19,15,.08), 0 14px 28px -18px rgba(28,19,15,.3); }
+  .entry[data-kind="request"] { --t: #f9f0ec; }
+  .entry[data-kind="request"][data-status="Full Requested"] { --t: #eff3f7; }
+  .entry.is-opened .eh { padding-right: 36px; }
+  .fold { position: absolute; top: 12px; right: 12px; z-index: 1; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 1px #e7ddd2; color: var(--quiet); }
+  .fold svg { width: 15px; height: 15px; }
+  .eh { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .disc { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: #2a3a52; color: #fff; font-size: 13px; font-weight: 600; }
+  .disc.is-me { background: #8a4a3c; }
+  .ehw { min-width: 0; }
+  .ehw b { display: block; font-size: 15.5px; font-weight: 600; line-height: 1.3; }
+  .ehw small { display: block; font-size: 13px; line-height: 1.35; color: var(--quiet); }
+  .et { display: flex; align-items: center; gap: 10px; margin: 12px 0 10px; }
+  .eico { flex: none; width: 24px; display: grid; place-items: center; }
+  .eh3 { margin: 0; font-family: var(--type); font-weight: 400; font-size: 21px; line-height: 1.25; color: var(--ink); }
+  .figs { display: flex; margin-left: 34px; }
+  .figs > div { padding-right: 14px; margin-right: 14px; border-right: 1px solid #efe8de; }
+  .figs > div:last-child { border: 0; margin-right: 0; }
+  .figs small { display: block; font-size: 12.5px; color: var(--quiet); }
+  .figs b { display: block; margin-top: 1px; font-family: var(--type); font-weight: 400; font-size: 19px; line-height: 1.2; }
+  .journey { margin-top: 12px; padding: 14px 14px 10px; border-radius: 10px; background: var(--t); }
+  .trk { display: flex; margin: 0; padding: 0; list-style: none; }
+  .trk > li { position: relative; flex: 1 1 0; min-width: 0; }
+  .trk > li.is-last { flex: none; width: 88px; }
+  .trk > li.is-next { opacity: .5; }
+  .sd { position: relative; z-index: 1; display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--t); }
+  .sd > * { display: block; }
+  .ln { position: absolute; top: 8px; left: 21px; right: 3px; height: 2px; background: var(--ink); }
+  .trk > li.is-to .ln { height: 0; background: none; border-top: 2px dashed rgba(28,19,15,.3); }
+  .trk b { display: block; margin-top: 6px; padding-right: 4px; font-family: var(--type); font-weight: 400; font-size: 11.5px; line-height: 1.2; }
+  .trk small { display: block; margin-top: 1px; font-size: 11px; color: var(--quiet); }
+  .jf { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(28,19,15,.08); font-size: 13px; color: var(--quiet); }
+  .chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #ece8f3; box-shadow: inset 0 0 0 1px #ddd6ea; font-size: 12px; font-weight: 600; color: var(--ink); }
+  .obtn { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 0; border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; cursor: pointer; }
+  .fend { padding: 10px 0 14px; text-align: center; font-size: 14px; color: var(--quiet); }
+
+  /* ════════ THE RULEBOOK, APPLIED (options A, B and C share all of this) ════════ */
+  .feed:not([data-style="built"]) .day > b { font-weight: 600; }
+  .feed:not([data-style="built"]) .mini { font-size: 16px; }
+  .feed:not([data-style="built"]) .mtx b { font-weight: 600; }
+  .feed:not([data-style="built"]) :is(.mini, .crow) time.t-right { font-size: 12px; color: var(--quiet); }
+  .feed:not([data-style="built"]) .ctx .hl { display: block; overflow: visible; }
+  .feed:not([data-style="built"]) .ctx small { font-size: 14px; }
+  .feed:not([data-style="built"]) .ehw b { font-size: 16px; }
+  .feed:not([data-style="built"]) .ehw small { font-size: 14px; }
+  .feed:not([data-style="built"]) .eh3 { font-size: 20px; }
+  .feed:not([data-style="built"]) .figs small { font-size: 12px; }
+  .feed:not([data-style="built"]) .figs b { font-size: 20px; }
+  .feed:not([data-style="built"]) .trk b { font-size: 12px; }
+  .feed:not([data-style="built"]) .trk small { font-size: 12px; }
+  .feed:not([data-style="built"]) .jf { font-size: 14px; }
+  .feed:not([data-style="built"]) .obtn { border-radius: 8px; box-shadow: inset 0 0 0 1.5px var(--navy); font-size: 14px; color: var(--navy); }
+  .feed:not([data-style="built"]) .obtn:hover { background: rgba(42,58,82,.06); }
+
+  /* A · one voice: a collapsed card's headline is the small row's sentence */
+  .feed[data-style="a"] .ctx .hl { font-family: var(--serif); font-size: 16px; line-height: 1.35; }
+  .feed[data-style="a"] .ctx .hl b { font-weight: 600; }
+
+  /* 1 · the open card starts with its own row */
+  .erow { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 12px; align-items: start; }
+  .entry.is-opened .erow { padding-right: 36px; }
+  .erow .cg { margin-top: 1px; }
+  .erow .hl { display: block; font-size: 16px; line-height: 1.35; overflow-wrap: break-word; }
+  .erow .hl b { font-weight: 600; }
+  .erow small { display: block; margin-top: 2px; font-size: 14px; line-height: 1.35; color: var(--quiet); }
+  .erow time.t-right { line-height: 22px; font-family: var(--mono); font-size: 12px; color: var(--quiet); white-space: nowrap; }
+  .erow + .figs { margin-top: 12px; }
+
+  /* 2 · typewriter inside an open card */
+  .eh3 b { font-weight: 400; }
+  .feed:is([data-tw="nums"], [data-tw="none"]) .eh3 { font-family: var(--serif); font-size: 16px; line-height: 1.35; }
+  .feed:is([data-tw="nums"], [data-tw="none"]) .eh3 b { font-weight: 600; }
+  .feed:is([data-tw="nums"], [data-tw="none"]) .trk b { font-family: var(--serif); font-weight: 600; }
+  .feed[data-tw="none"] .figs b { font-family: var(--serif); font-weight: 600; }
+
+  /* 3 · housekeeping as quiet lines */
+  .feed[data-house="quiet"] .mini[data-glyph="house"] { margin-bottom: 4px; padding: 4px 14px; background: none; box-shadow: none; border: 0; font-size: 14px; color: var(--muted); }
+  .feed[data-house="quiet"] .mini[data-glyph="house"] + :not(.mini[data-glyph="house"]) { margin-top: 10px; }
+
+  /* 5 · small fixes */
+  .feed[data-fix="on"] .mini { align-items: flex-start; border: 1px solid #ece2d8; box-shadow: 0 1px 2px rgba(28,19,15,.05); }
+  .feed[data-fix="on"] .mini .mg { margin-top: 1px; }
+  .feed[data-fix="on"] .mini time.t-right { line-height: 22px; }
+  .feed[data-fix="on"][data-house="quiet"] .mini[data-glyph="house"] { border: 0; box-shadow: none; }
+  .feed[data-fix="on"] .crow { align-items: start; }
+  .feed[data-fix="on"] .crow .cg { margin-top: 1px; }
+  .feed[data-fix="on"] .crow .cv { margin-top: 3px; }
+  .feed[data-fix="on"] .crow time.t-right { line-height: 22px; }
+  .feed[data-fix="on"] .mg--house { color: var(--quiet); }
+  .sub-fix { display: none; font-style: italic; }
+  .feed[data-fix="on"] .sub-fix { display: inline; }
+  .feed[data-fix="on"] .sub-built { display: none; }
+  .ctl[data-off] { opacity: .45; }
+
+  /* names are links: semibold as before, underlined on hover, the app's focus ring */
+  .lk { color: inherit; text-decoration: none; cursor: pointer; border-radius: 3px; }
+  .lk:hover { text-decoration: underline; text-underline-offset: 2px; }
+  .lk:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .mini[data-go] { cursor: pointer; }
+  .feed:not([data-style="built"]) .mini[data-go]:hover { background: #f8f4ed; }
+  .went { min-height: 44px; margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: #fff; box-shadow: 0 1px 3px rgba(28,19,15,.07); font-size: 14px; color: var(--muted); }
+  .went b { font-weight: 600; color: var(--ink); }
+
+  /* the time under the sentence */
+  .feed[data-time="under"] time.t-right { display: none; }
+  .feed[data-time="under"] .crow { grid-template-columns: 22px minmax(0, 1fr) 16px; }
+  .feed[data-time="under"] .t-under { display: inline; font-size: 12px; color: var(--quiet); }
+  .feed[data-time="under"] .mtx .t-under { display: block; margin-top: 2px; }
+  .feed[data-time="under"] .erow { grid-template-columns: 22px minmax(0, 1fr); }
+  .feed[data-style="built"][data-time="under"] .t-under { font-size: 11.5px; color: #a39a91; }
+
+  /* the notes beside the mock */
+  .notes { min-width: 0; }
+  .card { margin-bottom: 16px; padding: 20px 24px; border-radius: 16px; background: #fff; box-shadow: 0 1px 3px rgba(28,19,15,.07); }
+  .card p { margin: 0 0 8px; }
+  .card p:last-child { margin-bottom: 0; }
+  .rules { margin: 8px 0 0; padding: 0; list-style: none; }
+  .rules li { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-top: 1px solid #efe8de; font-size: 14px; line-height: 1.45; }
+  .rules li b { font-weight: 600; }
+  .rules li span { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45; }
+  th, td { padding: 8px 12px 8px 0; text-align: left; vertical-align: top; border-top: 1px solid #efe8de; }
+  th { border-top: 0; font-weight: 600; }
+  td:last-child, th:last-child { padding-right: 0; }
+  td.was { color: var(--muted); }
+  .hint { font-size: 14px; color: var(--quiet); margin: 8px 0 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Activity feed: one set of type rules</h1>
+  <p class="lede">Names are now links: click any agent, manuscript title or query row in the mock and the line under it says where it goes. One voice is in. The switches numbered 1 to 5 are the further improvements on offer, each set to the choice I’d make; flip any of them to see the alternative. “As built” shows the feed as it is on the branch. Click a collapsed card to open it.</p>
+
+  <div class="controls">
+    <div class="ctl"><span>Compare</span>
+      <div class="seg" data-ctl="style">
+        <button type="button" data-v="built">As built</button>
+        <button type="button" data-v="a">One voice</button>
+      </div>
+    </div>
+    <div class="ctl" data-imp><span>1 · Top of an open card</span>
+      <div class="seg" data-ctl="top">
+        <button type="button" data-v="name">Name, then headline</button>
+        <button type="button" data-v="row">Same as its row</button>
+      </div>
+    </div>
+    <div class="ctl" data-imp><span>2 · Typewriter inside an open card</span>
+      <div class="seg" data-ctl="tw">
+        <button type="button" data-v="all">Headline, numbers, labels</button>
+        <button type="button" data-v="nums">Numbers only</button>
+        <button type="button" data-v="none">None</button>
+      </div>
+    </div>
+    <div class="ctl" data-imp><span>3 · Housekeeping rows</span>
+      <div class="seg" data-ctl="house">
+        <button type="button" data-v="cards">Cards</button>
+        <button type="button" data-v="quiet">Quiet lines</button>
+      </div>
+    </div>
+    <div class="ctl" data-imp><span>4 · Time</span>
+      <div class="seg" data-ctl="time">
+        <button type="button" data-v="right">On the right</button>
+        <button type="button" data-v="under">Under the sentence</button>
+      </div>
+    </div>
+    <div class="ctl" data-imp><span>5 · Small fixes</span>
+      <div class="seg" data-ctl="fix">
+        <button type="button" data-v="off">Off</button>
+        <button type="button" data-v="on">On</button>
+      </div>
+    </div>
+    <div class="ctl"><span>Screen width</span>
+      <div class="seg" data-ctl="w">
+        <button type="button" data-v="278">1280</button>
+        <button type="button" data-v="337">1512</button>
+        <button type="button" data-v="386">Your screenshot</button>
+      </div>
+    </div>
+    <div class="ctl"><span>Hawk</span>
+      <div class="seg" data-ctl="hawk">
+        <button type="button" data-v="on">Shown</button>
+        <button type="button" data-v="off">Hidden</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="board">
+    <div><div class="stage" id="stage" data-hawk="on">
+      <div class="stage-in">
+        <section class="feed" id="feed" data-style="a" data-time="right" aria-label="Activity feed">
+          <div class="sw" role="group" aria-label="Show">
+            <button type="button" aria-pressed="true">All activity</button>
+            <button type="button" aria-pressed="false">Agents</button>
+            <button type="button" aria-pressed="false">You</button>
+          </div>
+          <div class="fscroll" id="list"></div>
+        </section>
+      </div>
+      <img class="hawk" src="mentor-leaning.png" alt="">
+    </div>
+    <p class="went" id="went" aria-live="polite">Click a name, a manuscript title or a query row to see where it goes.</p>
+    </div>
+
+    <div class="notes">
+      <div class="card">
+        <h2>Why some was still typewriter</h2>
+        <p>On purpose, but it clearly didn’t read that way. One voice made every row in the list serif. Inside an open card I had left three things in the typewriter face: the headline (the rulebook’s card heading is Special Elite 20), the figures and the journey labels. Switch 2 lets you take those out.</p>
+      </div>
+      <div class="card">
+        <h2>Five improvements, set to my picks</h2>
+        <ul class="rules">
+          <li><b>1 · Top of an open card</b><span>Today an open card says the name twice: “Nadia Hussain”, then “Nadia asked for…”. My pick: an open card starts with exactly the row you clicked, and the figures and journey unfold beneath it.</span></li>
+          <li><b>2 · Typewriter inside</b><span>My pick: numbers only. Typewriter numerals are part of the look on the rest of the dashboard; sentences and labels go serif. You chose to keep it on the numbers and the journey labels.</span></li>
+          <li><b>3 · Housekeeping rows</b><span>Adding and editing agents fills the feed with cards as heavy as an agent’s reply. My pick: quiet lines with no card, so replies and requests stand out.</span></li>
+          <li><b>4 · Time</b><span>My pick: under the sentence. The sentence gets the full width, and no time sits under the hawk.</span></li>
+          <li><b>5 · Small fixes</b><span>Marks line up with the first line of text, not the middle of the row. Small rows and collapsed cards share one outline. The gear is dark enough to pass contrast. A sub-line never repeats a name already in the sentence; it shows the manuscript instead.</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Where the feed breaks the rulebook today</h2>
+        <p>Checked against the settled design rules in CLAUDE.md (consistency rulings v2 to v4). One voice fixes every row of this table, whatever the switches say.</p>
+        <table>
+          <thead><tr><th>Rule</th><th>The feed as built</th><th>In One voice</th></tr></thead>
+          <tbody>
+            <tr><td>Body text is 16 or 14</td><td class="was">Row sentences 14.5, sub-lines 13, card name 15.5</td><td>Sentences and names 16, sub-lines 14</td></tr>
+            <tr><td>Nothing under 12</td><td class="was">Times 11.5, journey labels 11.5, journey dates 11</td><td>All 12</td></tr>
+            <tr><td>Two muted colours only</td><td class="was">Times in two paler greys (#a39a91, #8a8178)</td><td>Times in the caption colour, #6b6058</td></tr>
+            <tr><td>Two weights: regular and semibold</td><td class="was">Names and the day in bold (700)</td><td>Semibold (600)</td></tr>
+            <tr><td>Card heading is Special Elite 20</td><td class="was">Open card headline 21, its figures 19</td><td>Both 20</td></tr>
+            <tr><td>Small outline button</td><td class="was">"Open query" at 13 with a grey edge</td><td>14, navy edge and text, radius 8</td></tr>
+            <tr><td>Nothing cut off</td><td class="was">Collapsed headline stops after two lines</td><td>Wraps in full</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>The feed’s type rules</h2>
+        <ul class="rules">
+          <li><b>Names</b><span>Semibold, wherever they appear in a sentence.</span></li>
+          <li><b>Manuscript titles</b><span>Italic, same size as the sentence.</span></li>
+          <li><b>Sub-lines</b><span>Source Serif 14 in the caption colour, one line.</span></li>
+          <li><b>Times</b><span>JetBrains Mono 12 in the caption colour, 12-hour clock.</span></li>
+          <li><b>Day headings</b><span>Source Serif 14, the day in semibold.</span></li>
+          <li><b>Sentences</b><span>Source Serif 16, in every row and at the top of every card.</span></li>
+          <li><b>Typewriter</b><span>Only where switch 2 puts it.</span></li>
+          <li><b>Links</b><span>An agent’s name opens their agent card. A manuscript title opens the Manuscripts page. A row about a query opens that query. Someone no longer on the contact list is plain text. Links look like the text around them and underline on hover.</span></li>
+          <li><b>Importance</b><span>Shown by the tint and the status mark, never by size or weight.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var state = { style: 'a', top: 'row', tw: 'all', house: 'quiet', time: 'under', fix: 'on', w: '386', hawk: 'on' };
+  try { var saved = JSON.parse(localStorage.getItem('qh-feed-type-v3') || 'null'); if (saved) for (var k in state) if (saved[k]) state[k] = saved[k]; } catch (e) {}
+  var opened = {};
+
+  function dot(status, size) {
+    var dashed = /Requested/.test(status) ? ' stroke-dasharray="6 4"' : '';
+    var centre = /Partial/.test(status) ? '<path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none"/>'
+      : /Full/.test(status) ? '<circle cx="12" cy="12" r="6.5" fill="currentColor" stroke="none"/>' : '';
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"' + dashed + '/>' + centre + '</svg>';
+  }
+  var GEAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>';
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  var FOLD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
+  var BELL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/></svg>';
+
+  /* [text, kind]: w = the person, e = the manuscript */
+  /* w = a person on the contact list, x = a person no longer on it (no link), e = the manuscript */
+  function say(runs) {
+    return runs.map(function (r) {
+      if (typeof r === 'string') return r;
+      if (r[1] === 'x') return '<b>' + r[0] + '</b>';
+      if (r[1] === 'w') return '<b><span class="lk" role="link" tabindex="0" data-go="' + (r[2] || r[0]) + '\u2019s agent card, on the Contact list">' + r[0] + '</span></b>';
+      return '<i><span class="lk" role="link" tabindex="0" data-go="' + r[0] + ', on the Manuscripts page">' + r[0] + '</span></i>';
+    }).join('');
+  }
+
+  var DAYS = [
+    { first: 'Today', rest: 'Tuesday 24 November', items: [
+      { type: 'big', open: true, id: 'nadia', kind: 'request', status: 'Full Requested', initials: 'NH', me: false, name: 'Nadia Hussain', meta: 'Today at 9:40am · Hussain Literary',
+        hl: [['Nadia', 'w', 'Nadia Hussain'], ' asked for the full manuscript'], rowhl: [['Nadia Hussain', 'w'], ' asked for the full manuscript'], sub: 'Hussain Literary', time: '9:40am', figs: [['Days to reply', '12'], ['Send by', '2 Dec']],
+        stops: [['Queried', '12 Nov', 'Queried'], ['Full Requested', 'Today', 'Full asked'], ['Full Sent', 'by 2 Dec', 'Send full', 'next']], pkg: 'Standard package' },
+      { type: 'big', id: 'pen-sent', kind: 'sent', status: 'Partial Sent', initials: 'NK', me: true, name: 'You sent a partial', meta: 'Today at 9:12am · to Penhallow Literary',
+        hl: ['Your partial is with ', ['Penhallow Literary', 'w']], sub: 'Penhallow Literary', time: '9:12am', when: 'Today', figs: [['Days since query', '6'], ['Days to send', '1']],
+        stops: [['Queried', '18 Nov', 'Queried'], ['Partial Sent', 'Today', 'Partial']], pkg: null },
+      { type: 'mini', glyph: 'house', say: ['You updated ', ['John Eustace', 'w'], '’s wishlist'], time: '8:05am' }
+    ] },
+    { first: 'Yesterday', rest: 'Monday 23 November', items: [
+      { type: 'mini', glyph: 'house', say: ['You added ', ['John Eustace', 'w'], ' to your contact list'], time: '6:55pm' },
+      { type: 'mini', glyph: 'house', say: ['You removed ', ['Jack Sparrow', 'x'], ' from your contact list'], time: '3:47pm' },
+      { type: 'mini', glyph: 'house', say: ['You added ', ['Jack Sparrow', 'x'], ' to your contact list'], time: '3:31pm' },
+      { type: 'big', id: 'pen-req', kind: 'request', status: 'Partial Requested', initials: 'PL', me: false, name: 'Penhallow Literary', meta: 'Yesterday at 11:20am',
+        hl: [['Penhallow Literary', 'w'], ' asked for a partial'], sub: 'Penhallow Literary', time: '11:20am', when: 'Yesterday', figs: [['Days to reply', '5']],
+        stops: [['Queried', '18 Nov', 'Queried'], ['Partial Sent', 'Today', 'Partial']], pkg: null },
+      { type: 'mini', glyph: 'status', status: 'Queried', go: 'Your query to Sergeant Angel, in the Query Centre', say: ['You sent your query for ', ['Murphy’s Day Out', 'e'], ' to ', ['Sergeant Angel', 'w']], time: '10:42am' },
+      { type: 'mini', glyph: 'house', say: ['You added ', ['Sergeant Angel', 'w'], ' to your contact list'], time: '10:40am' }
+    ] }
+  ];
+
+  function mini(m) {
+    var g = m.glyph === 'status' ? dot(m.status, 20) : GEAR;
+    return '<div class="mini" data-glyph="' + m.glyph + '"' + (m.go ? ' data-go="' + m.go + '"' : '') + '><span class="mg mg--' + m.glyph + '">' + g + '</span><span class="mtx">' + say(m.say) + '<span class="t-under">' + m.time + '</span></span><time class="t-right">' + m.time + '</time></div>';
+  }
+  /* small fix: a sub-line never repeats a name the sentence already gives; it shows the manuscript */
+  function subline(c) {
+    var names = c.hl.filter(function (r) { return typeof r !== 'string'; }).map(function (r) { return r[0]; });
+    return names.indexOf(c.sub) < 0 ? c.sub : '<span class="sub-built">' + c.sub + '</span><span class="sub-fix">Murphy\u2019s Day Out</span>';
+  }
+  function collapsed(c) {
+    return '<button type="button" class="crow" data-kind="' + c.kind + '" data-status="' + c.status + '" data-open="' + c.id + '" aria-expanded="false">' +
+      '<span class="cg">' + dot(c.status, 20) + '</span>' +
+      '<span class="ctx"><span class="hl">' + say(c.hl) + '</span><small>' + subline(c) + '<span class="t-under"> · ' + c.time + '</span></small></span>' +
+      '<time class="t-right">' + c.time + '</time><span class="cv">' + CHEV + '</span></button>';
+  }
+  function big(c, foldable) {
+    var stops = c.stops.map(function (s, i) {
+      var last = i === c.stops.length - 1, toNext = !last && c.stops[i + 1][3] === 'next';
+      return '<li class="' + [last ? 'is-last' : '', toNext ? 'is-to' : '', s[3] === 'next' ? 'is-next' : ''].join(' ') + '"><span class="sd">' + dot(s[0], 18) + '</span>' + (last ? '' : '<span class="ln"></span>') + '<b>' + s[2] + '</b><small>' + s[1] + '</small></li>';
+    }).join('');
+    return '<article class="entry' + (foldable ? ' is-opened' : '') + '" data-kind="' + c.kind + '" data-status="' + c.status + '">' +
+      (foldable ? '<button type="button" class="fold" data-fold="' + c.id + '" aria-expanded="true" aria-label="Collapse">' + FOLD + '</button>' : '') +
+      (state.top === 'row' && state.style !== 'built'
+        ? '<div class="erow"><span class="cg">' + dot(c.status, 20) + '</span><span class="ctx"><span class="hl">' + say(c.rowhl || c.hl) + '</span><small>' + subline(c) + '<span class="t-under"> \u00b7 ' + c.time + '</span></small></span><time class="t-right">' + c.time + '</time></div>'
+        : '<div class="eh"><span class="disc' + (c.me ? ' is-me' : '') + '">' + c.initials + '</span><div class="ehw"><b>' + c.name + '</b><small>' + c.meta + '</small></div></div>' +
+          '<div class="et"><span class="eico">' + dot(c.status, 22) + '</span><h3 class="eh3">' + say(c.hl) + '</h3></div>') +
+      '<div class="figs">' + c.figs.map(function (f) { return '<div><small>' + f[0] + '</small><b>' + f[1] + '</b></div>'; }).join('') + '</div>' +
+      '<div class="journey"><ol class="trk">' + stops + '</ol><div class="jf"><span>' + (c.pkg ? 'Sent with <span class="chip">' + c.pkg + '</span>' : '') + '</span><button type="button" class="obtn" data-go="This query, in the Query Centre">Open query</button></div></div></article>';
+  }
+
+  var list = document.getElementById('list'), feed = document.getElementById('feed'), stage = document.getElementById('stage');
+  function render() {
+    var top = list.scrollTop;
+    var html = '<section class="mail">' + BELL + '<span>Email me when a nudge is due</span><button type="button">Yes</button><button type="button" class="is-x">Not now</button></section>';
+    DAYS.forEach(function (d) {
+      html += '<div class="day"><b>' + d.first + '</b><span>' + d.rest + '</span></div>';
+      d.items.forEach(function (it) {
+        html += it.type === 'mini' ? mini(it) : it.open ? big(it, false) : opened[it.id] ? big(it, true) : collapsed(it);
+      });
+    });
+    html += '<div class="fend">That’s the last 7 days.</div>';
+    list.innerHTML = html;
+    list.scrollTop = top;
+  }
+  function apply() {
+    var built = state.style === 'built';
+    feed.setAttribute('data-style', state.style);
+    feed.setAttribute('data-time', built ? 'right' : state.time);
+    feed.setAttribute('data-tw', built ? 'all' : state.tw);
+    feed.setAttribute('data-house', built ? 'cards' : state.house);
+    feed.setAttribute('data-fix', built ? 'off' : state.fix);
+    stage.setAttribute('data-hawk', state.hawk);
+    stage.style.setProperty('--w', state.w + 'px');
+    document.querySelectorAll('.ctl[data-imp]').forEach(function (c) {
+      if (built) c.setAttribute('data-off', ''); else c.removeAttribute('data-off');
+      c.querySelectorAll('button').forEach(function (x) { x.disabled = built; });
+    });
+    document.querySelectorAll('.seg[data-ctl]').forEach(function (seg) {
+      var key = seg.getAttribute('data-ctl');
+      seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-v') === state[key])); });
+    });
+    render();
+    try { localStorage.setItem('qh-feed-type-v3', JSON.stringify(state)); } catch (e) {}
+  }
+  document.querySelectorAll('.seg[data-ctl]').forEach(function (seg) {
+    seg.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button'); if (!b) return;
+      state[seg.getAttribute('data-ctl')] = b.getAttribute('data-v'); apply();
+    });
+  });
+  list.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter' && ev.target.classList.contains('lk')) { ev.preventDefault(); ev.stopPropagation(); ev.target.click(); }
+  });
+  list.addEventListener('click', function (ev) {
+    var g = ev.target.closest('.lk') || ev.target.closest('.obtn') || (!ev.target.closest('[data-open]') && ev.target.closest('.mini[data-go]'));
+    if (g) { document.getElementById('went').innerHTML = 'Opens: <b>' + g.getAttribute('data-go') + '</b>'; return; }
+    var o = ev.target.closest('[data-open]'), f = ev.target.closest('[data-fold]');
+    if (o) { opened[o.getAttribute('data-open')] = true; render(); var nf = list.querySelector('[data-fold="' + o.getAttribute('data-open') + '"]'); if (nf) nf.focus({ preventScroll: true }); }
+    else if (f) { delete opened[f.getAttribute('data-fold')]; render(); var nr = list.querySelector('[data-open="' + f.getAttribute('data-fold') + '"]'); if (nr) nr.focus({ preventScroll: true }); }
+  });
+  /* the feed's own All / Agents / You switch is drawn for context only */
+  apply();
+})();
+</script>
+</body>
+</html>

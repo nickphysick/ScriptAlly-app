@@ -1134,6 +1134,9 @@ export interface Activity {
   changedTo?: string;
   /** one row for a sweep of several agents: how many */
   batchCount?: number;
+  /** Feed wording v1.1: a "told other agents" step's feed row carries its count, as its log step does (never read back
+   *  out of `description`). Absent on every told row written before. */
+  toldCount?: number;
 }
 
 export interface JournalEntry {

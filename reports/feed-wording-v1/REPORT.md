@@ -199,3 +199,9 @@ written today does).
 
 None. Dev hosting: STOP (false premise 6). Dev rules: held (would revoke controls-entry-v1's). Prod and `main`
 untouched. Branch `feed-wording-v1` pushed.
+
+## Owed
+
+- The Holding Reply / Agent Reply row needs a pill, the sentence built here (locked in `src/lib/feedWording.test.ts`) and
+  its icon (`holding_reply`, feed wording v1.1 Part 4) once controls-entry-v1 is on the dev line. `feedPill` is left alone
+  until then (v1.1 ruling).

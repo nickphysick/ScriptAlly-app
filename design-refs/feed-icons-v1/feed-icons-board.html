@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk feed icons v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1c130f; --navy:#2a3a52; --muted:#5b4f47; --quiet:#6b6058; --rust:#7a3f31; --page:#f2eee8;
+    --type:"Special Elite","Courier New",Courier,monospace; --serif:"Source Serif 4",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font-family:var(--serif); font-size:16px; line-height:1.5; }
+  .wrap { max-width:1180px; margin:0 auto; padding:32px 24px 64px; }
+  h1 { margin:0 0 8px; font-family:var(--type); font-weight:400; font-size:28px; line-height:1.2; }
+  h2 { margin:0 0 8px; font-family:var(--type); font-weight:400; font-size:20px; line-height:1.25; }
+  .lede { margin:0 0 24px; max-width:760px; color:var(--muted); }
+  .controls { display:flex; flex-wrap:wrap; gap:16px 24px; margin-bottom:24px; }
+  .ctl > span { display:block; margin-bottom:6px; font-size:14px; font-weight:600; }
+  .seg { display:inline-flex; flex-wrap:wrap; padding:3px; border-radius:12px; background:#ece7de; }
+  .seg button { height:34px; padding:0 14px; border:0; border-radius:9px; background:none; cursor:pointer; font-family:var(--serif); font-size:14px; font-weight:600; color:#3b322c; white-space:nowrap; }
+  .seg button[aria-pressed="true"] { background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(28,19,15,.12); }
+  .seg button:focus-visible { outline:2px solid var(--navy); outline-offset:2px; }
+  .board { display:grid; grid-template-columns:auto minmax(0,1fr); gap:40px; align-items:start; }
+  @media (max-width:900px) { .board { grid-template-columns:minmax(0,1fr); } }
+  .stage { padding:16px; border-radius:16px; box-shadow:inset 0 0 0 1px #ddd5ca; }
+  .feed { width:386px; max-width:100%; }
+  .day { display:flex; align-items:baseline; gap:8px; margin:12px 2px 8px; font-size:14px; line-height:1.4; }
+  .day:first-child { margin-top:2px; }
+  .day > b { font-weight:600; } .day > span { color:var(--quiet); }
+  .day::after { content:""; flex:1 1 0; height:1px; background:#ddd5ca; transform:translateY(-4px); }
+  .mini { display:flex; align-items:flex-start; gap:11px; margin-bottom:8px; padding:12px 14px; border-radius:12px; background:#fff; border:1px solid #ece2d8; box-shadow:0 1px 2px rgba(28,19,15,.05); font-size:16px; line-height:1.35; }
+  .mini.quiet { margin-bottom:4px; padding:4px 14px; background:none; border:0; box-shadow:none; font-size:14px; color:var(--muted); }
+  .mini.quiet + .mini:not(.quiet), .mini.quiet + .day { margin-top:10px; }
+  .mg { flex:none; display:grid; width:20px; height:20px; margin-top:1px; color:var(--ink); }
+  .mini.quiet .mg { color:var(--quiet); }
+  .mg.rust { color:var(--rust); }
+  .sg { color: var(--sign, currentColor); }
+  [data-sty="rust"] .sg, [data-sty="badgerust"] .sg { --sign: var(--rust); }
+  .tile { display:inline-grid; place-items:center; width:26px; height:26px; margin:-3px; border-radius:8px; color:var(--ink); vertical-align:middle; }
+  .tile.agent { background:#96aca9; box-shadow:inset 0 0 0 1px #7c9793; }
+  .tile.ms { background:#efe6d6; box-shadow:inset 0 0 0 1px #e0d2bb; }
+  td.ic .tile { margin:0 10px 0 0; } td.ic .tile svg { margin:0; }
+  .mtx { flex:1 1 auto; min-width:0; }
+  .mtx b { font-weight:600; } .mtx i { font-style:italic; }
+  .mtx time { display:block; margin-top:2px; font-family:var(--mono); font-size:12px; color:var(--quiet); }
+  .card { margin-bottom:16px; padding:20px 24px; border-radius:16px; background:#fff; box-shadow:0 1px 3px rgba(28,19,15,.07); }
+  .card p { margin:0 0 8px; } .card p:last-child { margin-bottom:0; }
+  .hint { font-size:14px; color:var(--quiet); }
+  table { width:100%; border-collapse:collapse; font-size:14px; line-height:1.45; }
+  th, td { padding:10px 12px 10px 0; text-align:left; vertical-align:middle; border-top:1px solid #efe8de; }
+  th { border-top:0; font-weight:600; }
+  td.ic { width:92px; white-space:nowrap; }
+  td.ic svg { vertical-align:middle; margin-right:10px; }
+  td.why { color:var(--muted); }
+  .fam { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .fam figure { margin:0; width:92px; padding:12px 6px 8px; border-radius:12px; background:#faf7f2; box-shadow:inset 0 0 0 1px #efe8de; text-align:center; }
+  .fam figure.new { background:#fff; box-shadow:inset 0 0 0 1.5px var(--navy); }
+  .fam figcaption { margin-top:6px; font-size:12px; line-height:1.3; color:var(--muted); }
+  .fam h3 { flex:0 0 100%; margin:12px 0 0; font-size:16px; font-weight:600; }
+  .fam h3:first-child { margin-top:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Feed icons: one per kind of event</h1>
+  <p class="lede">Your picks are in: set A, the open book, the reply arrow and the megaphone. The Styling switch has four ways to make the set feel more like QueryHawk without redrawing anything.</p>
+
+  <div class="controls">
+    <div class="ctl"><span>Icon set</span>
+      <div class="seg" data-ctl="set">
+        <button type="button" data-v="now">As built</button>
+        <button type="button" data-v="a">A · Person and book</button>
+        <button type="button" data-v="b">B · Index card</button>
+      </div>
+    </div>
+    <div class="ctl"><span>Styling</span>
+      <div class="seg" data-ctl="sty">
+        <button type="button" data-v="plain">Plain ink (before)</button>
+        <button type="button" data-v="rust">Rust signs</button>
+        <button type="button" data-v="badge">Solid signs</button>
+        <button type="button" data-v="badgerust">Solid rust signs</button>
+        <button type="button" data-v="tile">Plumage tiles</button>
+      </div>
+    </div>
+    <div class="ctl"><span>Line weight</span>
+      <div class="seg" data-ctl="lw">
+        <button type="button" data-v="1.8">As the material icons</button>
+        <button type="button" data-v="2">As the status marks</button>
+      </div>
+    </div>
+    <div class="ctl"><span>Manuscript</span>
+      <div class="seg" data-ctl="ms">
+        <button type="button" data-v="open">Open book</button>
+        <button type="button" data-v="shelf">Shelf</button>
+        <button type="button" data-v="ribbon">Book with ribbon</button>
+        <button type="button" data-v="book">Closed book (before)</button>
+      </div>
+    </div>
+    <div class="ctl"><span>Holding reply</span>
+      <div class="seg" data-ctl="hold">
+        <button type="button" data-v="hourglass">Hourglass</button>
+        <button type="button" data-v="reply">Reply arrow</button>
+        <button type="button" data-v="speech">Speech bubble</button>
+      </div>
+    </div>
+    <div class="ctl"><span>Told the other agents</span>
+      <div class="seg" data-ctl="told">
+        <button type="button" data-v="megaphone">Megaphone</button>
+        <button type="button" data-v="send">Paper plane</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="board">
+    <div class="stage"><div class="feed" id="feed"></div></div>
+    <div>
+      <div class="card" id="note"></div>
+      <div class="card">
+        <h2>What each event gets</h2>
+        <table><thead><tr><th>Event</th><th>Icon</th><th>Why this drawing</th></tr></thead><tbody id="map"></tbody></table>
+      </div>
+      <div class="card">
+        <h2>Beside the icons you already have</h2>
+        <p class="hint">Same grid, same line weight and rounded ends as the material icons. New ones are outlined in navy.</p>
+        <div class="fam" id="fam"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var SEAL = "M12 2.4A2.78 2.78 0 0 1 16.8 3.69A2.78 2.78 0 0 1 20.31 7.2A2.78 2.78 0 0 1 21.6 12A2.78 2.78 0 0 1 20.31 16.8A2.78 2.78 0 0 1 16.8 20.31A2.78 2.78 0 0 1 12 21.6A2.78 2.78 0 0 1 7.2 20.31A2.78 2.78 0 0 1 3.69 16.8A2.78 2.78 0 0 1 2.4 12A2.78 2.78 0 0 1 3.69 7.2A2.78 2.78 0 0 1 7.2 3.69A2.78 2.78 0 0 1 12 2.4ZM12 6.7L13.41 10.36L17.33 10.57L14.28 13.04L15.29 16.83L12 14.7L8.71 16.83L9.72 13.04L6.67 10.57L10.59 10.36Z";
+  var maskN = 0;
+  var LINE = { 'ADD@P': 'M19 8v6M22 11h-6', 'DEL@P': 'M22 11h-6', 'PEN@P': 'M21.4 16.6a1 1 0 0 0-3-3l-4 4a2 2 0 0 0-.5.9l-.8 2.8a.5.5 0 0 0 .6.6l2.9-.8a2 2 0 0 0 .8-.5z',
+    'ADD@C': 'M19.5 17v5M17 19.5h5', 'DEL@C': 'M17 19.5h5', 'PEN@C': 'M22.1 16.3a.85.85 0 0 0-1.9-1.9l-3.3 3.3a1.5 1.5 0 0 0-.4.7l-.5 1.9a.4.4 0 0 0 .5.5l1.9-.5a1.5 1.5 0 0 0 .7-.4z' };
+  function resolve(inner) {
+    return inner.replace(/\{(ADD|DEL|PEN)@(P|C)\}/g, function (_, what, at) {
+      if (!/^badge/.test(state.sty) || state.set === 'now') return '<g class="sg"><path d="' + LINE[what + '@' + at] + '"/></g>';
+      var x = at === 'P' ? 19 : 20, y = at === 'P' ? 11.5 : 20, id = 'k' + (++maskN);
+      var g = what === 'ADD' ? 'M' + x + ' ' + (y - 2) + 'v4M' + (x - 2) + ' ' + y + 'h4' : what === 'DEL' ? 'M' + (x - 2) + ' ' + y + 'h4' : 'M' + (x - 1.6) + ' ' + (y + 1.6) + 'l3.2-3.2';
+      return '<mask id="' + id + '" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff" stroke="none"/><path d="' + g + '" stroke="#000" stroke-width="1.7" fill="none"/></mask>' +
+        '<g class="sg"><circle cx="' + x + '" cy="' + y + '" r="3.9" fill="currentColor" stroke="none" mask="url(#' + id + ')"/></g>';
+    });
+  }
+  function svg(inner, size, sw) { inner = resolve(inner); sw = sw || +state.lw; return '<svg width=""' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.8) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; }
+  var PERSON = '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>';
+  var BOOK = '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>';
+  var OPENP = '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>', TYPEP = '<path d="M8 10V3h8v7"/><path d="M10.5 6.5h3"/><rect x="3" y="10" width="18" height="8" rx="2"/><path d="M7 14h.01M10.3 14h.01M13.7 14h.01M17 14h.01"/><path d="M6 21.5h12"/>', SHELFP = '<path d="M4 4v16M8 8v12M12 6v14M16 6l4 14"/>', RIBP = '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M10 2v7.5l2.5-2 2.5 2V2"/>';
+  /* the drawing at four-fifths, top left, its line kept at 1.8, so a sign fits in the bottom-right corner */
+  function SM(inner) { return '<g transform="scale(.8)" stroke-width="2.25">' + inner + '</g>'; }
+  var SIGN_ADD = '{ADD@C}', SIGN_DEL = '{DEL@C}', SIGN_PEN = '{PEN@C}';
+  var CARD = '<rect x="3" y="5.5" width="18" height="13" rx="2"/><circle cx="8.4" cy="10.6" r="1.8"/><path d="M5.6 15.6c.4-1.6 1.5-2.4 2.8-2.4s2.4.8 2.8 2.4"/>';
+  var I = {
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',
+    bell: '<path d="M6 16V11a6 6 0 1112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/>',
+    imp: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5"/>',
+    /* set A: the drawings search already uses for "Add an agent" and "Add a manuscript", and their siblings */
+    a_add: PERSON + '{ADD@P}',
+    a_del: PERSON + '{DEL@P}',
+    a_upd: '<path d="M11.5 15H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/>{PEN@P}',
+    a_many: PERSON + '<path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    /* set B: the index card, after the Author bio card */
+    b_add: CARD + '<path d="M16 10v5M13.5 12.5h5"/>',
+    b_del: CARD + '<path d="M13.5 12.5h5"/>',
+    b_upd: CARD + '<path d="M13.7 15.3l.4-1.8 3.5-3.5 1.4 1.4-3.5 3.5z"/>',
+    b_many: '<path d="M7 4h12a2 2 0 0 1 2 2v9"/><rect x="3" y="7.5" width="15" height="12" rx="2"/><circle cx="8" cy="12.3" r="1.7"/><path d="M5.4 16.9c.4-1.5 1.4-2.2 2.6-2.2s2.2.7 2.6 2.2"/><path d="M13 12h2.5M13 15h1.5"/>',
+    book_add: BOOK + '<path d="M12 7v6M9 10h6"/>',
+    book_del: BOOK + '<path d="M9 10h6"/>',
+    book_upd: BOOK + '<path d="M8 7h6M8 11h8"/>',
+    book_plain: BOOK,
+    open_add: SM(OPENP) + SIGN_ADD,
+    open_del: SM(OPENP) + SIGN_DEL,
+    open_upd: SM(OPENP) + SIGN_PEN,
+    open_plain: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+    type_add: SM(TYPEP) + SIGN_ADD,
+    type_del: SM(TYPEP) + SIGN_DEL,
+    type_upd: SM(TYPEP) + SIGN_PEN,
+    type_plain: '<path d="M8 10V3h8v7"/><path d="M10.5 6.5h3"/><rect x="3" y="10" width="18" height="8" rx="2"/><path d="M7 14h.01M10.3 14h.01M13.7 14h.01M17 14h.01"/><path d="M6 21.5h12"/>',
+    shelf_add: SM(SHELFP) + SIGN_ADD,
+    shelf_del: SM(SHELFP) + SIGN_DEL,
+    shelf_upd: SM(SHELFP) + SIGN_PEN,
+    shelf_plain: '<path d="M4 4v16M8 8v12M12 6v14M16 6l4 14"/>',
+    ribbon_add: SM(RIBP) + SIGN_ADD,
+    ribbon_del: SM(RIBP) + SIGN_DEL,
+    ribbon_upd: SM(RIBP) + SIGN_PEN,
+    ribbon_plain: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M10 2v7.5l2.5-2 2.5 2V2"/>',
+    hourglass: '<path d="M5 22h14M5 2h14"/><path d="M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22"/><path d="M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4a2 2 0 0 0 .6-1.4V2"/>',
+    reply: '<path d="M9 17l-5-5 5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>',
+    speech: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    megaphone: '<path d="M3 11l18-5v12L3 14z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+    send: '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+    /* existing */
+    letter: '<path d="M6.5 11V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v6"/><path d="M9.5 6.75h5M9.5 9.5h3"/><path d="M3 11.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7.5l-9 5.5z"/>',
+    synopsis: '<rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="8.9" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="8.9" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="8.9" cy="16" r="1" fill="currentColor" stroke="none"/><path d="M11.75 8h3.75M11.75 12h3.75M11.75 16h3.75"/>',
+    pages: '<rect x="7.5" y="5.5" width="12" height="15.5" rx="2"/><path d="M4.5 17.5V5a2 2 0 0 1 2-2h9"/>',
+    chapters: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M11.2 8.2l1.3-1v4.3"/><path d="M8.5 14.5h7M8.5 17.5h7"/>',
+    bio: CARD + '<path d="M14 10.25h4M14 13.5h2.75"/>'
+  };
+  I.phone = '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>';
+  function ring(kind) {
+    var dashed = /req/.test(kind) ? ' stroke-dasharray="6 4"' : '';
+    var c = /partial/.test(kind) ? '<path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none"/>' : /full/.test(kind) ? '<circle cx="12" cy="12" r="6.5" fill="currentColor" stroke="none"/>' : /closed/.test(kind) ? '<path d="M7.5 12h9"/>' : '';
+    return '<circle cx="12" cy="12" r="10"' + dashed + '/>' + c;
+  }
+  var state = { set: 'a', ms: 'open', hold: 'reply', told: 'megaphone', sty: 'rust', lw: '1.8' };
+  try { var sv = JSON.parse(localStorage.getItem('qh-feed-icons-v4') || 'null'); if (sv) for (var k in state) if (sv[k]) state[k] = sv[k]; } catch (e) {}
+
+  function pick(key) {
+    var s = state.set;
+    if (s === 'now') return ({ hold: null, told: I.bell, call: I.bell, nudge: I.bell, imp: I.imp })[key] || (key === 'hold' ? null : I.gear);
+    var p = s === 'b' ? 'b_' : 'a_';
+    return ({ a_add: I[p + 'add'], a_upd: I[p + 'upd'], a_del: I[p + 'del'], a_many: I[p + 'many'], m_add: I[state.ms + '_add'], m_upd: I[state.ms + '_upd'], m_del: I[state.ms + '_del'], m_plain: I[state.ms + '_plain'],
+      hold: I[state.hold], told: I[state.told], call: I.phone, nudge: I.bell, imp: I.imp })[key];
+  }
+  var ROWS = [
+    ['d', 'Today', 'Tuesday 24 November'],
+    ['r', 'hold', '<b>Nadia Hussain</b> sent a holding reply about <i>Murphy’s Day Out</i>', '9:40am'],
+    ['r', 'call', 'You booked a call with <b>Tom Okafor</b> about <i>Murphy’s Day Out</i>', '9:15am'],
+    ['r', 'told', 'You told <b>3 other agents</b> about the offer from <b>Tom Okafor</b>', '9:05am'],
+    ['r', 'nudge', 'You nudged <b>Sergeant Angel</b>, 21 days after you queried', '8:50am', 'rust'],
+    ['q', 'a_many', 'You updated <b>6 agents’</b> details', '8:20am'],
+    ['q', 'a_upd', 'You updated <b>John Eustace</b>’s wishlist', '8:05am'],
+    ['d', 'Yesterday', 'Monday 23 November'],
+    ['q', 'a_add', 'You added <b>John Eustace</b> to your contact list', '6:55pm'],
+    ['q', 'a_del', 'You removed <b>Jack Sparrow</b> from your contact list', '3:47pm'],
+    ['q', 'm_upd', 'You updated the details of <i>Murphy’s Day Out</i>', '2:10pm'],
+    ['r', 'ring', 'You sent your query for <i>Murphy’s Day Out</i> to <b>Sergeant Angel</b>', '10:42am'],
+    ['r', 'imp', 'You imported your list: <b>12 agents</b> and <b>9 queries</b> for <i>Murphy’s Day Out</i>', '10:30am'],
+    ['q', 'm_add', 'You added <i>Murphy’s Day Out</i> to your manuscripts', '10:12am']
+  ];
+  var MSWHY = { open: 'An open book', type: 'A page in a typewriter', shelf: 'Books on the shelf, as on the Manuscripts page', ribbon: 'A closed book with a ribbon marker', book: 'A closed book, face on' };
+  var MAP = [
+    ['Agent added', 'a_add', 'A person with a plus. Search already uses this exact drawing for “Add an agent”.', 'An agent’s index card with a plus.'],
+    ['Agent’s details updated', 'a_upd', 'The same person with a pencil.', 'The same card with a pencil.'],
+    ['Agent removed', 'a_del', 'The same person with a minus.', 'The same card with a minus.'],
+    ['Several agents updated', 'a_many', 'Two people.', 'Two cards.'],
+    ['Manuscript added', 'm_add', MSWHY, null, ' with a plus.'],
+    ['Manuscript\u2019s details updated', 'm_upd', MSWHY, null, ' with a pencil.'],
+    ['Manuscript removed', 'm_del', MSWHY, null, ' with a minus.'],
+    ['Holding reply', 'hold', 'No icon today: the row doesn’t show at all yet. Pick from the switch.'],
+    ['Told the other agents', 'told', 'Borrows the bell today. Pick from the switch.'],
+    ['Call booked', 'call', 'Borrows the bell today. A phone.'],
+    ['Nudge', 'nudge', 'Keeps the bell, in rust.'],
+    ['Import', 'imp', 'Keeps its file with an arrow.']
+  ];
+  var STY = {
+    plain: ['Plain ink (before)', 'Everything in one ink, as on the last board.', 'Correct, but it could be any app\u2019s icon set.'],
+    rust: ['Rust signs (my pick)', 'The thing stays in ink; what happened to it (the plus, pencil or minus) is in your rust, the same accent the nudge\u2019s bell already uses.', 'One rule, no redrawing, and it follows the ruling that rust is the one colour for small accents.'],
+    badge: ['Solid signs', 'The plus, pencil and minus become small solid discs with the sign cut out, echoing the solid centres of your status marks.', 'Closest to the status marks, but at feed size the disc is about 6px across, so the sign inside is hard to read. It works better at the larger sizes in the table.'],
+    badgerust: ['Solid rust signs', 'The solid discs, in rust.', 'The strongest of the five. On quiet housekeeping lines it may be louder than you want.'],
+    tile: ['Plumage tiles', 'Each icon sits on a small tile in its kind\u2019s colour from the hawk artwork, as search does: agents on the Scout\u2019s teal, manuscripts on the paper.', 'Ties the feed to search and the plumage colours, but puts colour blocks on rows you chose to keep quiet. A manuscript tile colour has not been ruled; I used the query paper.']
+  };
+  var NOTE = {
+    now: ['As built', 'One gear for every kind of housekeeping, drawn with eight spokes, which is why it reads as a sun. The call and “told the other agents” rows borrow the nudge’s bell.'],
+    a: ['A · Person and book (my pick)', 'An agent is a person and a manuscript is a book, each with a small sign for what happened. Two of these drawings are already in the app, on search’s “Add an agent” and “Add a manuscript”, so the feed and search would match.'],
+    b: ['B · Index card', 'An agent is an index card, picking up the Contact list’s card-index idea and the Author bio icon’s card. More your own, but at 20px it is hard to tell from Author bio, which is the “too similar” problem you had with the material icons.']
+  };
+  /* plumage tiles: an agent's events on the Scout's teal, a manuscript's on the paper, as search's kind tiles */
+  function tiled(key, inner, size) {
+    var kind = state.sty === 'tile' && state.set !== 'now' ? (/^a_/.test(key) ? 'agent' : /^m_/.test(key) ? 'ms' : '') : '';
+    return kind ? '<span class="tile ' + kind + '">' + svg(inner, Math.round(size * .8)) + '</span>' : svg(inner, size);
+  }
+  function render() {
+    document.body.setAttribute('data-sty', state.set === 'now' ? 'plain' : state.sty);
+    var h = '';
+    ROWS.forEach(function (r) {
+      if (r[0] === 'd') { h += '<div class="day"><b>' + r[1] + '</b><span>' + r[2] + '</span></div>'; return; }
+      var inner = r[1] === 'ring' ? ring('queried') : pick(r[1]);
+      if (inner === null) return;
+      h += '<div class="mini' + (r[0] === 'q' ? ' quiet' : '') + '"><span class="mg' + (r[4] ? ' rust' : '') + '">' + (r[1] === 'ring' ? svg(inner, 20, 2) : tiled(r[1], inner, 20)) + '</span><span class="mtx">' + r[2] + '<time>' + r[3] + '</time></span></div>';
+    });
+    document.getElementById('feed').innerHTML = h;
+    var st = STY[state.sty];
+    document.getElementById('note').innerHTML = state.set === 'now' ? '<h2>' + NOTE.now[0] + '</h2><p>' + NOTE.now[1] + '</p>' : '<h2>' + st[0] + '</h2><p>' + st[1] + '</p><p class="hint">' + st[2] + '</p>';
+    document.getElementById('map').innerHTML = MAP.map(function (m) {
+      var inner = pick(m[1]);
+      return '<tr><td>' + m[0] + '</td><td class="ic">' + (inner ? tiled(m[1], inner, 20) + svg(inner, 32) : '–') + '</td><td class="why">' + (m[4] ? (state.set === 'now' ? 'The gear.' : MSWHY[state.ms] + m[4]) : state.set === 'b' && m[3] ? m[3] : m[2]) + '</td></tr>';
+    }).join('');
+    var fam = '<h3>Status marks</h3>' + [['queried', 'Queried'], ['partial-req', 'Partial requested'], ['partial', 'Partial sent'], ['full-req', 'Full requested'], ['full', 'Full sent'], ['closed', 'Closed']].map(function (x) { return '<figure>' + svg(ring(x[0]), 28, 2) + '<figcaption>' + x[1] + '</figcaption></figure>'; }).join('') +
+      '<figure>' + svg('<path d="' + SEAL + '" fill="currentColor" fill-rule="evenodd" stroke="none"/>', 28) + '<figcaption>Offer</figcaption></figure>' +
+      '<h3>Materials</h3>' + [['letter', 'Query letter'], ['synopsis', 'Synopsis'], ['pages', 'Sample pages'], ['chapters', 'Sample chapters'], ['bio', 'Author bio']].map(function (x) { return '<figure>' + svg(I[x[0]], 28) + '<figcaption>' + x[1] + '</figcaption></figure>'; }).join('') +
+      '<h3>Feed events</h3>' + [['nudge', 'Nudge', 0], ['imp', 'Import', 0], ['a_add', 'Agent added', 1], ['a_upd', 'Agent updated', 1], ['a_del', 'Agent removed', 1], ['a_many', 'Several agents', 1], ['m_plain', 'Manuscript', 1], ['m_add', 'Manuscript added', 1], ['m_upd', 'Manuscript updated', 1], ['m_del', 'Manuscript removed', 1], ['hold', 'Holding reply', 1], ['told', 'Told the others', 1], ['call', 'Call booked', 1]].map(function (x) {
+        var inner = pick(x[0]); return inner ? '<figure' + (x[2] && state.set !== 'now' ? ' class="new"' : '') + '>' + svg(inner, 28) + '<figcaption>' + x[1] + '</figcaption></figure>' : '';
+      }).join('');
+    document.getElementById('fam').innerHTML = fam;
+    document.querySelectorAll('.seg[data-ctl]').forEach(function (seg) {
+      var key = seg.getAttribute('data-ctl');
+      seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === state[key])); b.disabled = state.set === 'now' && key !== 'set'; });
+    });
+    try { localStorage.setItem('qh-feed-icons-v4', JSON.stringify(state)); } catch (e) {}
+  }
+  document.querySelectorAll('.seg[data-ctl]').forEach(function (seg) {
+    seg.addEventListener('click', function (ev) { var b = ev.target.closest('button'); if (!b || b.disabled) return; state[seg.getAttribute('data-ctl')] = b.getAttribute('data-v'); render(); });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

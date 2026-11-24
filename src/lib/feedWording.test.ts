@@ -181,7 +181,8 @@ describe("Part B — the update sentences", () => {
     [["agency"], {}, "You moved Nadia Hussain to Hussain Literary"],
     [["open"], { changedTo: "Open" }, "You marked Nadia Hussain as open to queries"],
     [["open"], { changedTo: "Closed" }, "You marked Nadia Hussain as closed to queries"],
-    [["open"], { changedTo: "Unknown" }, "You marked whether Nadia Hussain is open to queries as not known"],
+    /* v1.1 ruling: Unknown has no sentence of its own (src/lib/feedWordingV11.test.ts) */
+    [["open"], { changedTo: "Unknown" }, "You updated Nadia Hussain's details"],
     [["fit"], {}, "You updated Nadia Hussain's agent fit"],
     [["wishlist"], {}, "You updated Nadia Hussain's wishlist"],
     [["genres"], {}, "You updated Nadia Hussain's genres"],
@@ -419,12 +420,12 @@ describe("Part D — the cards", () => {
 });
 
 /* ═══ Part E — nothing cut off (source half; the rendered half is tests/e2e/feedWordingV1.measure.ts FW-E) ══════ */
-describe("Part E — the collapsed card's headline wraps to two lines; its sub-line stays one", () => {
+describe("Part E — the collapsed card's headline wraps; its sub-line stays one", () => {
   const css = readFileSync("src/components/dashboard/v2/dash2Feed.css", "utf8");
   const rule = (sel: string) => { const i = css.indexOf(`${sel} {`); return css.slice(i, css.indexOf("}", i)); };
-  it("the headline: clamped at two lines, wrapping, no one-line ellipsis", () => {
+  it("the headline: wrapping, no one-line ellipsis (v1.1: and no line cap)", () => {
     const b = rule(".d58.d2 .d2-feed .df1-ctx b");
-    expect(b).toContain("-webkit-line-clamp: 2");
+    expect(b).not.toContain("line-clamp");
     expect(b).toContain("white-space: normal");
     expect(b).not.toContain("nowrap");
     expect(b).not.toContain("text-overflow: ellipsis");

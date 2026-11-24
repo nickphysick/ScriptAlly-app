@@ -238,6 +238,8 @@ export const describeEvent = (
   autoCloseArmed?: boolean,
   /** Feed wording v1: the event's own key, for the offer declined through the drawer (`offer_declined`) */
   eventKey?: string | null,
+  /** Feed wording v1.1: a "told other agents" row's carried count (`Activity.toldCount`) */
+  toldCount?: number | null,
 ): FeedSeg[] | null => {
   /* Feed wording v1 (one voice): no sentence ends with a full stop, none carries a dash. [X] the person, [T] the
      manuscript; where the record has no title, the sentence is the one that needs none. */
@@ -261,6 +263,14 @@ export const describeEvent = (
   }
   if (!status && activityType === ActivityType.OFFER_ACCEPTED) {
     return [{ t: "You accepted the offer from " }, ...they, ...forT];
+  }
+  /* Feed wording v1.1 (Nick's rulings): the offer's two status-less steps. A told row written before v1.1 carries no
+     count, so it has no sentence here and reads its stored words, as built. */
+  if (!status && eventKey === "offer_told" && typeof toldCount === "number" && toldCount >= 1) {
+    return [{ t: `You told ${toldCount} other ${toldCount === 1 ? "agent" : "agents"} about the offer from ` }, ...they];
+  }
+  if (!status && eventKey === "offer_call") {
+    return [{ t: "You booked a call with " }, ...they, ...(msTitle ? [{ t: " about " }, ...book] : [])];
   }
   if (!status) return null;
   /* see `autoCloseArmed` — "you closed it" only where the app could not have */
@@ -517,6 +527,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
         String(a.activityType),
         q?.ifNoResponse === "Mark as no response automatically",
         typeof a.eventKey === "string" ? a.eventKey : null,
+        typeof a.toldCount === "number" ? a.toldCount : null,
       )
         ?? [{ t: a.description?.trim() || who }];
       provenance = (agent?.agency ?? "").trim();

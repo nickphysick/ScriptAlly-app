@@ -192,7 +192,9 @@ export function planRecord(c: PlanCtx, kind: RecordKind, dayMs: number, material
     const sub: DocumentData = { type: TOLD_TYPE, createdAt, note: `Told ${count} other agent${count === 1 ? "" : "s"} about ${name}’s offer`, ...base,
       eventKey: TOLD_EVENT, toldCount: count, toldDeadline: dayIso(new Date(t.deadlineMs)) };
     const feedRow: DocumentData = { id, userId: c.uid, queryId: q.id, manuscriptId: q.manuscriptId || "", activityType: ActivityType.STATUS_CHANGED,
-      description: toldLine(count, agent?.name || agent?.agency), date: iso, details: "", eventKey: TOLD_EVENT, logEntryId: id };
+      description: toldLine(count, agent?.name || agent?.agency), date: iso, details: "", eventKey: TOLD_EVENT, logEntryId: id,
+      /* feed wording v1.1: the feed's sentence reads the count it carries, never the description's figure */
+      toldCount: count };
     return { queryId: q.id, set: [{ path: `queries/${q.id}/activity/${id}`, data: sub }, { path: `activities/${id}`, data: feedRow }], del: [], query: {}, update: markTold(q, t.others, tMs) };
   }
   const note = REPLY_KINDS.includes(kind) ? (extra.replyNote ?? "").trim().slice(0, REPLY_NOTE_MAX) : "";
@@ -355,7 +357,7 @@ export function planFix(c: PlanCtx & { feed: RawActivityDoc[] }, draft: readonly
       f.date = new Date(getActivityTime(next.createdAt)).toISOString();
       if (mats.length) f.materials = mats; else delete f.materials;
       /* a told step's feed row keeps its count in its words */
-      if (s.kind === "told" && typeof next.toldCount === "number") f.description = toldLine(next.toldCount, c.agent?.name || c.agent?.agency);
+      if (s.kind === "told" && typeof next.toldCount === "number") { f.description = toldLine(next.toldCount, c.agent?.name || c.agent?.agency); f.toldCount = next.toldCount; }
       set.push({ path: `activities/${tw.id}`, data: f });
     }
   }

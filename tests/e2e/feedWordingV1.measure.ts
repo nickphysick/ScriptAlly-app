@@ -9,9 +9,9 @@
  *       dashboard feed shows a row for each, naming the agent once, the name its own bold run. The page clock is
  *       moved on 11 minutes between the edit, the rename and the delete, so the burst rule (10 minutes) keeps them
  *       apart, as a writer's day would.
- * FW-E  a collapsed card with a long headline shows its whole text in at most two lines, the sub-line one, the time
- *       level with the first line, at 1280 × 800 and 1512 × 900, the sidebar open and collapsed.
- *       `FW1_MUTATE=E` puts the one-line ellipsis back in the page: FW-E must go red.
+ * FW-E  a collapsed card with a long headline shows its WHOLE text (v1.1 ruling: no line cap), the sub-line one line,
+ *       at 1280 × 800 and 1512 × 900, the sidebar open and collapsed.
+ *       `FW1_MUTATE=E` puts the one-line ellipsis back in the page, `FW1_MUTATE=C` the two-line cap: FW-E must go red.
  *
  * ⚠️ EVERY WRITE IS TAKEN BACK IN THE SAME RUN: the journey's agent deletes itself, and its four feed rows and FW-E's
  * seeded agent, query and row are removed in `afterAll`.
@@ -180,7 +180,8 @@ test.describe("Feed wording v1", () => {
     test(`FW-E · a long headline shows its whole text · ${tag}`, async ({ page }) => {
       const L = new Ledger(`FW-E-${tag}`);
       await openDash(page, lay, lay.collapsed);
-      if (MUT === "E") await page.addStyleTag({ content: ".d58.d2 .d2-feed .df1-ctx b { display: block !important; white-space: nowrap !important; text-overflow: ellipsis !important; } .d58.d2 .d2-feed .df1-crow time { align-self: center !important; }" });
+      if (MUT === "E") await page.addStyleTag({ content: ".d58.d2 .d2-feed .df1-ctx b { display: block !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }" });
+      if (MUT === "C") await page.addStyleTag({ content: ".d58.d2 .d2-feed .df1-ctx b { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; overflow: hidden !important; }" });
       await page.waitForTimeout(300);
       const sel = `.d2 [data-df1="collapsed"][data-query="${LONG.queryId}"]`;
       await page.locator(sel).first().waitFor({ timeout: 15_000 }).catch(() => {});
@@ -205,31 +206,18 @@ test.describe("Feed wording v1", () => {
       const want = `Your full manuscript is with ${LONG.agency}`;
       L.check("population: the long card is on the page", !!long, `${r.length} collapsed rows`);
       L.check("its headline is the whole text", long?.text === want, long?.text ?? "");
-      /* the seeded headline is longer than one line in every layout here: it must WRAP, not end in a one-line ellipsis */
-      L.check("it wraps onto a second line, never a one-line ellipsis", !!long && long.lines === 2 && !long.ellipsis, JSON.stringify(long));
+      /* the seeded headline is longer than one line in every layout here: it must WRAP, in full, with no cap */
+      L.check("it wraps, and shows its whole text (no ellipsis, nothing clipped)", !!long && long.lines >= 2 && !long.ellipsis && !long.clipped, JSON.stringify(long));
       for (const x of r) {
-        L.check(`${x.q}: at most two lines, no one-line ellipsis`, x.lines <= 2 && !x.ellipsis, JSON.stringify(x));
+        L.check(`${x.q}: the whole headline shows, no ellipsis`, !x.clipped && !x.ellipsis, JSON.stringify(x));
         L.check(`${x.q}: the sub-line stays one line`, x.subLines === 1 && x.subNowrap, JSON.stringify(x));
-        L.check(`${x.q}: the time is level with the headline's first line`, Math.abs(x.timeDy) <= 1, String(x.timeDy));
       }
       if (process.env.FW1_SHOTS && long) {
         mkdirSync(`${DIR}/shots`, { recursive: true });
         await page.locator(sel).first().screenshot({ path: `${DIR}/shots/long-${tag}${MUT ? `-mut-${MUT}` : ""}.png` });
       }
-      L.done(6);
+      L.done(5);
     });
   }
 
-  /* ⚠️ THE BRIEF'S OTHER HALF, WHICH THIS COLUMN CANNOT MEET: "a collapsed card with a long headline shows its full
-     text". The feed column is 278px; the headline gets 125px at 1280 and 184px at 1512, so even "Your full manuscript
-     is with Nadia" needs three lines, and two lines (the brief's cap) clip it. Recorded as an expected failure until
-     Nick rules (reports/feed-wording-v1/REPORT.md, Part E): it goes green the day the clamp or the column changes. */
-  test("FW-E · the long headline's whole text fits in its two lines (EXPECTED TO FAIL — see the report)", async ({ page }) => {
-    test.fail(true, "the 125–184px headline column needs 4–6 lines for this headline; the brief caps it at two");
-    await openDash(page, { width: 1512, height: 900 });
-    const sel = `.d2 [data-df1="collapsed"][data-query="${LONG.queryId}"] [data-df1="collapsed-headline"]`;
-    await page.locator(sel).first().waitFor({ timeout: 15_000 });
-    const r = await page.locator(sel).first().evaluate((b) => ({ s: b.scrollHeight, c: b.clientHeight }));
-    expect(r.s, JSON.stringify(r)).toBeLessThanOrEqual(r.c + 1);
-  });
 });

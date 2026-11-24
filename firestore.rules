@@ -840,7 +840,9 @@ service cloud.firestore {
         && (!data.keys().hasAny(['changedTo']) || (data.changedTo is string && data.changedTo.size() <= 200))
         && (!data.keys().hasAny(['removedQueries']) || (data.removedQueries is int && data.removedQueries >= 0))
         && (!data.keys().hasAny(['batchCount']) || (data.batchCount is int && data.batchCount >= 0))
-        && (!data.keys().hasAny(['changed']) || (data.changed is list && data.changed.size() <= 12));
+        && (!data.keys().hasAny(['changed']) || (data.changed is list && data.changed.size() <= 12))
+        // Feed wording v1.1: a "told other agents" step's feed row carries its count, as its log step does. OPTIONAL.
+        && (!data.keys().hasAny(['toldCount']) || (data.toldCount is int && data.toldCount >= 1 && data.toldCount <= 500));
     }
 
     function isValidJournalEntry(data, userId) {
@@ -1180,7 +1182,9 @@ service cloud.firestore {
           // correct on the page the writer is standing on.
           incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId', 'bookVersionId', 'eventKey',
             // Query Centre v152.2 §6.1: the offer step's "tell the rest later" flag, set or cleared on its feed twin
-            'tellLater'])
+            'tellLater',
+            // Feed wording v1.1: a told step's edit moves its count on the feed twin with its words
+            'toldCount'])
         );
       }
 

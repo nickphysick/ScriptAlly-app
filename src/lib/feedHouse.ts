@@ -197,8 +197,8 @@ function agentUpdatedSay(a: HouseFields, x: FeedSeg): FeedSeg[] {
       case "open":
         if (a.changedTo === SubmissionStatus.OPEN) return [{ t: "You marked " }, x, { t: " as open to queries" }];
         if (a.changedTo === SubmissionStatus.CLOSED) return [{ t: "You marked " }, x, { t: " as closed to queries" }];
-        /* the app's own word for the third value is "Not known" (lib/agentPanel) */
-        return [{ t: "You marked whether " }, x, { t: " is open to queries as not known" }];
+        /* Feed wording v1.1 (Nick's ruling): the third value has no sentence of its own */
+        return details;
       case "fit": return [{ t: "You updated " }, x, { t: "'s agent fit" }];
       case "wishlist": return [{ t: "You updated " }, x, { t: "'s wishlist" }];
       case "genres": return [{ t: "You updated " }, x, { t: "'s genres" }];
