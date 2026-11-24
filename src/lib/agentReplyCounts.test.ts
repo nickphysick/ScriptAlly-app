@@ -97,7 +97,7 @@ describe("counts like a holding reply", () => {
     const title = (evs: Record<string, unknown>[]) => buildTimelineRows(evs as never, q, agents[0] as never).find((r) => r.kind === "nudge")?.title;
     expect(title([nudge])).toBe("Nudged — no reply");
     expect(title([nudge, e]), `a ${kind} did not answer the nudge`).toBe("Nudged");
-    expect(e.type).toBe(AGENT_REPLY_NESTED_TYPE);
+    expect((e as Record<string, unknown>).type).toBe(AGENT_REPLY_NESTED_TYPE);
   });
 });
 
