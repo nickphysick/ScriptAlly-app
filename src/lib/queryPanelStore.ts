@@ -143,6 +143,50 @@ export function responseSaved(id: string): void {
 }
 
 /**
+ * Card journeys v1 — THE OTHER FOUR JOURNEYS' ONE DOOR. Mark sent, Close, Answer an offer and Reopen open as stepped
+ * journeys in Record a response's own panel (queries/centre/RespondStagesPanel), over whatever page is on screen.
+ *   fromCard  → opened from the query's own card: the card lends its place and steps back behind the journey; finishing
+ *               or leaving gives the place back and the card comes forward (showing whatever the save changed)
+ * While nothing listens (the phone), `openCardJourney` returns false and the door keeps its own flow. A kind not yet live
+ * (lib/queryActions/cardJourneys `CARD_JOURNEY_LIVE`) is refused the same way, so each journey switches on by itself.
+ */
+export type CardJourneyKind = "send" | "close" | "offer" | "reopen";
+export interface CardJourneyRequest {
+  queryId: string;
+  kind: CardJourneyKind;
+  from?: PanelOrigin;
+  fromCard?: boolean;
+  /** the agent card a query was opened from: it comes back when the journey closes */
+  back?: PanelBack;
+  /** the door's own contract: told once the journey has saved on this query */
+  onSaved?: (queryId: string) => void;
+}
+const cjSubs = new Set<(r: CardJourneyRequest) => void>();
+let cjLive: (k: CardJourneyKind) => boolean = () => false;
+/** the journeys' module says which kinds are live (kept out of this store so the store has no journey imports) */
+export function setCardJourneyLive(f: (k: CardJourneyKind) => boolean): void { cjLive = f; }
+export function subscribeCardJourney(f: (r: CardJourneyRequest) => void): () => void {
+  cjSubs.add(f);
+  return () => { cjSubs.delete(f); };
+}
+export const cardJourneyHosted = (k: CardJourneyKind): boolean => cjSubs.size > 0 && cjLive(k);
+let cjWaiter: { id: string; f: (id: string) => void } | null = null;
+export function openCardJourney(r: CardJourneyRequest): boolean {
+  if (!cardJourneyHosted(r.kind)) return false;
+  spyJourney({ via: "card-journey", mode: r.kind, queryId: r.queryId });
+  cjWaiter = r.onSaved ? { id: r.queryId, f: r.onSaved } : null;
+  for (const f of [...cjSubs]) f(r);
+  return true;
+}
+/** a card journey saved on `id`: the door that opened it hears once */
+export function cardJourneySaved(id: string): void {
+  const w = cjWaiter;
+  if (!w || w.id !== id) return;
+  cjWaiter = null;
+  w.f(id);
+}
+
+/**
  * ONE RIGHT-HAND PANEL AT A TIME. The query panel, the activity feed drawer and the Birds-eye drawer share
  * the window's right edge; whoever opens says so here, and the others close themselves.
  */

@@ -820,7 +820,7 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
  * mid-word by the box's ellipsis ("Penhallow Lite…"). When the whole value does not fit, it shows its first word
  * ("Penhallow"); the full value stays in the step's accessible label. Measured after layout, before paint.
  */
-const StepValue: React.FC<{ text: string }> = ({ text }) => {
+export const StepValue: React.FC<{ text: string }> = ({ text }) => {
   const ref = useRef<HTMLElement>(null);
   const [short, setShort] = useState(false);
   useLayoutEffect(() => { setShort(false); }, [text]);

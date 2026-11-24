@@ -1,0 +1,52 @@
+[
+ {
+  "where": "send · subject",
+  "ok": true,
+  "detail": "card seed-query-7 offers the action"
+ },
+ {
+  "where": "J1 send · a journey, not the card's form",
+  "ok": false,
+  "detail": "journey false (null), track false, composer in card true"
+ },
+ {
+  "where": "J1 send · the path does not change",
+  "ok": true,
+  "detail": "/queries?q=seed-query-7 → /queries?q=seed-query-7"
+ },
+ {
+  "where": "J2 send · the card stays, stepped back",
+  "ok": false,
+  "detail": "card true, under false, scale 1, dx 0"
+ },
+ {
+  "where": "J2 send · the card is dimmed",
+  "ok": false,
+  "detail": "::after opacity 0"
+ },
+ {
+  "where": "J2 send · the card is inert",
+  "ok": false,
+  "detail": "inert false"
+ },
+ {
+  "where": "J2 send · the Agent step is done and fixed",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "J2 send · the Archivist's head, navy",
+  "ok": false,
+  "detail": "art false, head null"
+ },
+ {
+  "where": "J3 send · Escape closes the journey",
+  "ok": true,
+  "detail": "journey false"
+ },
+ {
+  "where": "J3 send · the card comes forward",
+  "ok": false,
+  "detail": "card true, under false, inert false, scale 1"
+ }
+]
