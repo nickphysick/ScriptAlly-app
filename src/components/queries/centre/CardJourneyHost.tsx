@@ -11,7 +11,7 @@
  * ⚠️ THE PREVIEW IS THE SAVE'S OWN PLAN: the card on the review is the Queries page's grid card for the query exactly as
  *    the plans leave it (`queryAfter`, the plans' own feed rows), never a mock-up.
  */
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { ComponentType, type Agent, type Query } from "../../../types";
 import { buildQcRows } from "../../../lib/qcSummary";
@@ -25,6 +25,7 @@ import { cardJourneySaved, type CardJourneyKind } from "../../../lib/queryPanelS
 import { useToast } from "../../toast/ToastProvider";
 import { feedRowsOf, othersFor, queryAfter } from "../../../lib/queryActions/respondStages";
 import { QcCardJourney, type CJCtx, type CJSaved, type CJSpec } from "./QcCardJourney";
+import type { RawActivityDoc } from "../../../lib/recomputeFields";
 import { CJ_SPECS } from "./cardJourneySpecs";
 
 const isLiveVersion = (v: { status?: string; retiredAt?: unknown }) => (v.status ?? "Active") !== "Retired" && !v.retiredAt;
@@ -68,6 +69,17 @@ export const CardJourneyHost: React.FC<{
     };
   }, [queryId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* the query's own log and feed, read once as the journey opens: the review previews from the same records the save will
+     read (the page's feed rows can lack what the log has, e.g. an older close's resultingStatus) */
+  const [logs, setLogs] = useState<{ existing: RawActivityDoc[]; feed: RawActivityDoc[] } | null>(null);
+  useEffect(() => {
+    const uid0 = currentUser?.id;
+    if (!uid0) return undefined;
+    let live0 = true;
+    Promise.all([readLog(uid0, queryId), readFeed(uid0, queryId)]).then(([existing, feed]) => { if (live0) setLogs({ existing, feed }); }).catch(() => {});
+    return () => { live0 = false; };
+  }, [queryId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!currentUser || !ctx || !spec) return null;
   const uid = currentUser.id;
   const agentOf = (q: Query) => agents.find((x) => x.id === q.agentId) ?? null;
@@ -78,9 +90,10 @@ export const CardJourneyHost: React.FC<{
     const q = ctx.q;
     const log = localLog(q);
     let plans;
-    try { plans = spec.write.plans({ uid, q, agent: agentOf(q), ms: msOf(q), existing: log, feed: log, nowMs: Date.now(), quietWeeks }, s, ctx); } catch { return null; }
+    try { plans = spec.write.plans({ uid, q, agent: agentOf(q), ms: msOf(q), existing: logs?.existing ?? log, feed: logs?.feed ?? log, nowMs: Date.now(), quietWeeks }, s, ctx); } catch { return null; }
     const after = queryAfter(q, plans);
-    const acts = [...activities.filter((x) => x.queryId === q.id && !plans.some((p) => p.del.includes(`queries/${q.id}/activity/${x.id}`))), ...feedRowsOf(plans)];
+    const gone = new Set(plans.flatMap((p) => p.del).filter((d) => d.startsWith("activities/")).map((d) => d.slice("activities/".length)));
+    const acts = [...activities.filter((x) => x.queryId === q.id && !gone.has(x.id) && !plans.some((p) => p.del.includes(`queries/${q.id}/activity/${x.id}`))), ...feedRowsOf(plans)];
     const [row0] = buildQcRows([after], agents, acts, nowMs);
     if (!row0) return null;
     const [row] = stampRows([row0], agents, { quietWeeks, nowMs });

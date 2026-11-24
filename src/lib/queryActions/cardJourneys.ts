@@ -17,7 +17,7 @@ export const CARD_JOURNEY_LIVE: Record<CardJourneyKind, boolean> = {
   send: true,
   close: true,
   offer: true,
-  reopen: false,
+  reopen: true,
 };
 setCardJourneyLive((k) => CARD_JOURNEY_LIVE[k]);
 
