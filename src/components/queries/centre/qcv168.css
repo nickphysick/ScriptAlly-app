@@ -78,9 +78,7 @@
 .qc152 .qc168-addrow .qc168-lk { font: 400 14.5px var(--sp-serif) !important; }
 /* v168.1 — a reading row that still carries a detail keeps clear of the group's pencil (at the box's top right) */
 .qc152 .nx-items[data-qc168-host] > li:first-child:has(> .r) { padding-right: 42px; }
-/* v168.1 — the step editor's chips keep their shape; their words are sentence case in the serif, never mono capitals */
-.qc152 .qc1522-edit .qc152-mp { font: 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #1c130f; }
-.qc152 .qc1522-edit .qc152-mx { font: 400 14px/26px var(--sp-serif) !important; }
+/* v168.1's step-editor-only chip rule is retired: v168.2 draws every chip in the serif (qcv152edit.css §4.4) */
 
 /* ── Notes: nothing moves on hover; a note opens where it is (its words in place, no box inside the box) ─────── */
 .qc152 .nx-n[data-qc168-host] > header { padding-right: 64px; }

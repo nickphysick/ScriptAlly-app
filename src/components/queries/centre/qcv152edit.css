@@ -118,8 +118,10 @@
 .qc152 .qc152-mpw { display: inline-flex; align-items: stretch; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 1px #d9d0c3; }
 .qc152 .qc152-mpw.open { box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .qc152 .qc152-mpw.plus { background: transparent; box-shadow: none; border: 1px dashed #c9bcab; }
-.qc152 .qc152-mp { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 26px; padding: 0 9px; font: 400 9.5px/1 var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #5f5a53; }
-.qc152 .qc152-mx { all: unset; cursor: pointer; padding: 0 8px 0 2px; font: 400 10px/26px var(--sp-serif); color: #8f8a82; }
+/* Query card v168.2 — wherever the chips draw (the step editor, every journey), their words are sentence case in the
+   serif at 14px, never mono capitals; their shape is unchanged */
+.qc152 .qc152-mp { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 26px; padding: 0 9px; font: 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #1c130f; }
+.qc152 .qc152-mx { all: unset; cursor: pointer; padding: 0 8px 0 2px; font: 400 14px/26px var(--sp-serif) !important; color: #8f8a82; }
 .qc152 .qc152-mx:hover { color: #8a3a28; }
 .qc152-pop2.qc152-mpop { width: min(320px, calc(100% - 16px)); padding: 10px 12px; }
 .qc152-pop2 .qc152-mph { display: flex; flex-direction: column; gap: 2px; margin: 2px 2px 8px; }
