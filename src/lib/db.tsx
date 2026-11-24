@@ -2718,7 +2718,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        * the whole batch, the query with it.
        */
       const batch = writeBatch(db);
-      batch.set(doc(db, "users", currentUser.id, "queries", id), withReminderStamp(newQ as unknown as Record<string, unknown>));
+      batch.set(doc(db, "users", currentUser.id, "queries", id), withReminderStamp(newQ as unknown as Record<string, unknown>, null));
       for (const act of seeded) {
         batch.set(doc(db, "users", currentUser.id, "activities", act.id), act);
         batch.set(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
@@ -4103,7 +4103,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           ? writes.dismissal.resurfaceDate
           : MUTED_UNTIL,
       }),
-    });
+    }, q as unknown as { nudgeDate?: unknown });
     return r.success ? { success: true, activityId: actId, prior } : { success: false, error: r.error };
   };
 

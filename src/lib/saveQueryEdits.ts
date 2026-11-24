@@ -199,7 +199,8 @@ export async function commitQueryEdits(
       if (f.rejectionType !== undefined) queryPatch.rejectionType = f.rejectionType;
       if (f.agentComments !== undefined) queryPatch.agentComments = f.agentComments;
     }
-    if (Object.keys(queryPatch).length > 0) batch.update(queryRef, withReminderStamp(queryPatch as Record<string, unknown>));
+    /* null prior: this patch never names the reminder (the fields above), so the stamp is never written from here */
+    if (Object.keys(queryPatch).length > 0) batch.update(queryRef, withReminderStamp(queryPatch as Record<string, unknown>, null));
 
     /**
      * ⚠️ THE STAMP RIDES THE SAME COMMIT AS THE LINK. This is the whole of D1: the two writes are

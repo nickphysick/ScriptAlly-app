@@ -68,13 +68,13 @@ describe("the read-through: only a reminder set before the entry moves", () => {
 describe("every writer of a query's reminder stamps it", () => {
   const FUNNELS: [string, string][] = [
     ["src/lib/db.tsx", "fields = withReminderStamp(fields as Record<string, unknown>, targetQ) as Partial<Query>;"],
-    ["src/lib/db.tsx", "withReminderStamp(newQ as unknown as Record<string, unknown>)"],
+    ["src/lib/db.tsx", "withReminderStamp(newQ as unknown as Record<string, unknown>, null)"],
     ["src/lib/db.tsx", "withReminderStamp(qUpdates as Record<string, unknown>, targetQ)"],
     ["src/lib/qc152Write.ts", "const patch = withReminderStamp(Object.fromEntries(Object.entries(plan.query)"],
-    ["src/lib/nudgeWrite.ts", "withReminderStamp(writes.queryUpdates)"],
-    ["src/lib/agentCardSave.ts", "withReminderStamp({ nudgeDate: dayIso(new Date(m.nudgeMs)) })"],
+    ["src/lib/nudgeWrite.ts", "withReminderStamp(writes.queryUpdates, prior)"],
+    ["src/lib/agentCardSave.ts", "withReminderStamp({ nudgeDate: dayIso(new Date(m.nudgeMs)) }, (mine.find((q) => q.id === m.id)"],
     ["src/lib/recordResponse.ts", "withReminderStamp(updates as Record<string, unknown>, preSnapshot"],
-    ["src/lib/saveQueryEdits.ts", "withReminderStamp(queryPatch as Record<string, unknown>)"],
+    ["src/lib/saveQueryEdits.ts", "withReminderStamp(queryPatch as Record<string, unknown>, null)"],
   ];
   it.each(FUNNELS)("%s stamps at its write", (file, line) => {
     expect(readFileSync(file, "utf8")).toContain(line);

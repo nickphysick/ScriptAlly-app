@@ -33,8 +33,13 @@ const dayOf = (v: unknown): string | null => {
  * The query patch with the reminder's set-at stamp: set or changed → now; cleared → cleared with the same value
  * (undefined stays undefined, a `deleteField()` sentinel is reused); the same day as before → untouched (a save that
  * rewrites the reminder unchanged has not set it). No `nudgeDate` in the patch → untouched.
+ *
+ * ⚠️ THE PRIOR IS REQUIRED (close-out, 24 Nov). It is the query as it stood before this write, so a write that carries
+ * the reminder unchanged (a whole-query save, a nudge re-booked for the same day) does not read as setting it. `null` is
+ * only for a write with nothing before it (a new query) or one whose patch can never name the reminder — and a null
+ * prior with a reminder in the patch stamps, so every writer that can carry one passes the query it read.
  */
-export function withReminderStamp<T extends Record<string, unknown>>(patch: T, prior?: { nudgeDate?: unknown } | null, now: Date = new Date()): T {
+export function withReminderStamp<T extends Record<string, unknown>>(patch: T, prior: { nudgeDate?: unknown } | null, now: Date = new Date()): T {
   if (!patch || !Object.prototype.hasOwnProperty.call(patch, "nudgeDate") || Object.prototype.hasOwnProperty.call(patch, NUDGE_SET_AT_FIELD)) return patch;
   const v = (patch as Record<string, unknown>).nudgeDate;
   if (clears(v)) return { ...patch, [NUDGE_SET_AT_FIELD]: v };

@@ -29,11 +29,13 @@ export const NUDGE_FAILED = "Failed to log nudge.";
 export async function commitNudge(
   firestore: Firestore, uid: string, queryId: string, actId: string, writes: NudgeWriteSet,
   after: { writeTwin: () => Promise<unknown>; writeFlag: () => Promise<unknown> },
+  /** the query before the nudge: a check-in re-booked for the day it already had is not a newly set reminder */
+  prior: { nudgeDate?: unknown } | null,
 ): Promise<{ success: boolean; error?: string }> {
   const batch = writeBatch(firestore);
   batch.set(doc(firestore, "users", uid, "queries", queryId, "activity", actId), writes.nested);
   /* follow-up 2 — the check-in booked with the nudge carries when it was set (lib/reminderStamp) */
-  batch.update(doc(firestore, "users", uid, "queries", queryId), withReminderStamp(writes.queryUpdates));
+  batch.update(doc(firestore, "users", uid, "queries", queryId), withReminderStamp(writes.queryUpdates, prior));
   try {
     await batch.commit();
   } catch (e) {
