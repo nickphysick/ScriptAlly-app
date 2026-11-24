@@ -148,4 +148,9 @@ laq-specs-door fix covered V21/V22 only); V23-E red in the combined run at load,
 | Vitest | 13,264 passed, 1 failed, 10 files not loading (functions/ + AI SDK) | 13,634 passed, 0 failed (W3 widened to name the card journeys' shell); functions/node_modules linked, so those files load |
 
 ## Deploy
-See below (added after the deploy).
+- Branch `card-journeys-v1` @ f63e58902 (pushed). Dev line `dev/…-aa215-laqdoor-fw11-cj1` @ 517993fac (pushed):
+  `…-laqdoor-fw11` (feed wording v1.1, the line dev served: `index-e4fcj4k2.js`, built from 8a26b1f3e) + this branch.
+- Dev hosting only (no rules, no functions), from a clean checkout of the pushed tip: https://scriptally-dev.web.app
+  serves **`index-D_RqjKeC.js`** (checked against the build). Prod untouched; `main` untouched.
+- Note: the first merge into the dev line (4feeb9e0a) carries its message through `-m`, not `-F`; it has no backticks,
+  nothing was lost, and it is left as it is (no amend).
