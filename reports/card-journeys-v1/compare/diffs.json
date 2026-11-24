@@ -1,0 +1,236 @@
+[
+ {
+  "screen": "01-send-card-before-whole-page.png",
+  "pct": 33,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "02-send-journey-over-card-whole-page.png",
+  "pct": 27.8,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "03-send-what-went.png",
+  "pct": 7.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "04-send-what-went-scrolled.png",
+  "pct": 10.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "05-send-when.png",
+  "pct": 4.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "06-send-when-calendar.png",
+  "pct": 6.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "07-send-reply-time.png",
+  "pct": 5.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "08-send-reply-time-unknown.png",
+  "pct": 4.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "09-send-review.png",
+  "pct": 7.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "10-send-logged.png",
+  "pct": 11.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "11-send-card-after-whole-page.png",
+  "pct": 34.6,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "12-close-card-before-whole-page.png",
+  "pct": 31.6,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "13-close-why.png",
+  "pct": 4.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "14-close-hand-over-pass.png",
+  "pct": 5.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "15-close-review-no-reply.png",
+  "pct": 5,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "16-close-closed-no-reply.png",
+  "pct": 5.4,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "17-close-card-after-whole-page.png",
+  "pct": 30.9,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "18-close-when-withdrawn.png",
+  "pct": 4.8,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "19-close-review-withdrawn.png",
+  "pct": 5.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "20-close-closed-withdrawn.png",
+  "pct": 5.4,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "21-offer-card-before-whole-page.png",
+  "pct": 37,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "22-offer-answer.png",
+  "pct": 5.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "23-offer-when.png",
+  "pct": 5.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "24-offer-others.png",
+  "pct": 4.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "25-offer-review-accepted.png",
+  "pct": 5.8,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "26-offer-signed.png",
+  "pct": 10.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "27-offer-card-after-accepted-whole-page.png",
+  "pct": 35,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "28-offer-review-declined.png",
+  "pct": 5.3,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "29-offer-declined.png",
+  "pct": 8.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "30-reopen-card-before-whole-page.png",
+  "pct": 30.8,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "31-reopen-why.png",
+  "pct": 4.1,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "32-reopen-hand-over-reply.png",
+  "pct": 7.9,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "33-reopen-nudge.png",
+  "pct": 5.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "34-reopen-nudge-no-reminder.png",
+  "pct": 4.2,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "35-reopen-review.png",
+  "pct": 5.5,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "36-reopen-reopened.png",
+  "pct": 10.7,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ },
+ {
+  "screen": "37-reopen-card-after-whole-page.png",
+  "pct": 31.2,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "38-send-from-dashboard-whole-page.png",
+  "pct": 32.5,
+  "ref": "2800×1752",
+  "built": "2880×1800"
+ },
+ {
+  "screen": "39-discard-bar.png",
+  "pct": 7.6,
+  "ref": "1052×1690",
+  "built": "1080×1736"
+ }
+]

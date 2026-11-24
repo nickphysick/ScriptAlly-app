@@ -10,8 +10,9 @@
  *   W1  Log a query's props: the readout, the ends, the Unknown pill and the value text are v1's words
  *   W2  the null state reads "Unknown" on the pill and the readout, as before
  *   W3  `--sm` is set only by the response journey (its own stylesheet and component) and, from Add an agent v2, by the add
- *       journey's own stylesheet (qcAddAgent.css, scoped `.laq.aag`: its slider in the agent card's slate): Log a query's
- *       fill is navy
+ *       journey's own stylesheet (qcAddAgent.css, scoped `.laq.aag`: its slider in the agent card's slate), and from Card
+ *       journeys v1 by the card journeys' shell (QcCardJourney: Record a response's shell, toned the same way): Log a
+ *       query's fill is navy
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -39,7 +40,7 @@ describe("Log a query's slider draws as before (v2.1)", () => {
     expect(text(h)).toEqual(["Response time", "Unknown", "Unknown", "1 week", "26 weeks"]);
     expect(h).toContain('aria-valuetext="Unknown"');
   });
-  it("W3 only the response and add journeys set --sm", () => {
+  it("W3 only the response, add and card journeys set --sm", () => {
     const root = join(__dirname, "..", "..");
     const hits: string[] = [];
     const walk = (d: string) => {
@@ -54,6 +55,6 @@ describe("Log a query's slider draws as before (v2.1)", () => {
     };
     walk(root);
     expect(hits.length, "the scan found the journey's own setter").toBeGreaterThan(0);
-    expect(hits.filter((h) => !/RespondStages|qcRespondStages|qcAddAgent\.css/.test(h))).toEqual([]);
+    expect(hits.filter((h) => !/RespondStages|qcRespondStages|qcAddAgent\.css|QcCardJourney\.tsx/.test(h))).toEqual([]);
   });
 });
