@@ -13,6 +13,7 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 import { requestAccountEmail } from "./accountEmail";
+import { isNotInvited, NotInvitedError } from "./notInvited";
 
 /** The email shape check lives in emailShape.ts so the public site can use it without Firebase Auth. */
 export { EMAIL_RE, isValidEmail } from "./emailShape";
@@ -58,6 +59,7 @@ export const signInWithGoogle = async (): Promise<{ ok: boolean }> => {
     if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
       return { ok: false }; // user dismissed the popup — stay silent
     }
+    if (isNotInvited(err)) throw new NotInvitedError();
     throw new Error(mapAuthError(code));
   }
 };
@@ -115,6 +117,7 @@ export const finishSignInLink = async (email: string): Promise<void> => {
     const code = err?.code;
     if (code === "auth/invalid-action-code" || code === "auth/expired-action-code") throw new Error(SIGNIN_LINK_SPENT);
     if (code === "auth/invalid-email") throw new Error(SIGNIN_LINK_WRONG_EMAIL);
+    if (isNotInvited(err)) throw new NotInvitedError();
     throw new Error(mapAuthError(code));
   }
 };

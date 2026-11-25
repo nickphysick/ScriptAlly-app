@@ -132,6 +132,9 @@ describe("the Firestore handle has exactly one home", () => {
       /* the sixteenth (Non-workspace v1.1, 5b): emailSettings reads and writes one writer's notifyPrefs and
          marketingConsent from a signed link — on prod that is the named database, so it is on the one handle */
       "emailSettings.ts",
+      /* the seventeenth (App site v1, Phase 1): the invite check reads inviteCodes before every new account — on prod
+         that is the named database, and a read of (default) there would refuse every invited writer */
+      "inviteGate.ts",
     ];
     /* Non-workspace v1, Phase 5: exported functions that touch no Firestore at all, held to exactly that below. */
     const noFirestore = ["signOutOthers.ts"];

@@ -14,6 +14,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_DATABASE_ID: string;
   /** "true" makes the build landing-only (see src/lib/siteMode.ts). Set in .env.production only. */
   readonly VITE_LANDING_ONLY?: string;
+  /** App site v1: the landing site's origin, where a refused writer is sent to join the waitlist (src/lib/notInvited.ts). */
+  readonly VITE_LANDING_URL?: string;
   /** GA4 measurement id for the public site. Set in .env.production only; empty = no analytics, no bar. */
   readonly VITE_GA_MEASUREMENT_ID?: string;
 }

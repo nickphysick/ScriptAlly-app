@@ -157,6 +157,7 @@ import { activeManuscriptOf, eventPath, logEvent } from "./events";
 import { manuscriptComps } from "./comps";
 import { isFirstAgentWin, isFirstQueryWin, winCopy } from "./dashFirstVisit";
 import { identifyForErrors } from "./sentry";
+import { isNotInvited, NotInvitedError } from "./notInvited";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -1642,6 +1643,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       return true;
     } catch (error: any) {
       console.error("Sign up failure:", error);
+      if (isNotInvited(error)) throw new NotInvitedError();
       throw new Error(friendlyAuthError(error?.code));
     }
   };

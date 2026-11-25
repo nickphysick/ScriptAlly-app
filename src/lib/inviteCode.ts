@@ -134,8 +134,10 @@ export async function redeemKeptCode(): Promise<"none" | "redeemed" | "refused" 
 }
 
 /** One call to the gate. `mode` picks check (no account needed), redeem (signed in) or fresh (a new 48-hour link). */
-export async function callFoundersCode(mode: "check" | "redeem" | "fresh", code: string): Promise<unknown> {
+export async function callFoundersCode(mode: "check" | "redeem" | "fresh" | "allow", code: string, email?: string): Promise<unknown> {
   const { getFunctions, httpsCallable } = await import("firebase/functions");
-  const res = await httpsCallable(getFunctions(undefined, "europe-west2"), "redeemInviteCode")({ mode, code: normaliseInviteCode(code) });
+  /* "allow" (App site v1): the other address a code-holder chose, so the server's invite check lets it make the account. */
+  const body = mode === "allow" ? { mode, code: normaliseInviteCode(code), email } : { mode, code: normaliseInviteCode(code) };
+  const res = await httpsCallable(getFunctions(undefined, "europe-west2"), "redeemInviteCode")(body);
   return res.data;
 }
