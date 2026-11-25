@@ -10,7 +10,7 @@ import type { EyeRow } from "./qcBirdsEye";
 import type { QcRow } from "./qcSummary";
 import { beLine } from "./qc150";
 import {
-  BW_GROUPS, DAY, GAP, GPMAX, MAXZ, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP,
+  BW_GROUPS, DAY, GAP, GPMAX, GPMIN, MAXZ, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP,
   aheadTx, axisExt, barBox, bwCounts, bwFilter, bwGroups, bwRow, chipForCourt, dm, groupOf, headingTop, level, makeWorld, num,
   rowSegs, rulerMarks, shortName, spaced, stageTx, zoomForRows, type BwRow,
 } from "./birdsWorld";
@@ -130,10 +130,12 @@ describe("Phone Birds-eye world v1 — the engine", () => {
     expect(s.length).toBeLessThan(m.length);
     const cal = rulerMarks("calendar", axisExt([], "calendar"), X, NOW).map((x) => x[1]);
     expect(cal).toEqual(["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"]);
-    /* real data widens the axis, never narrows it */
-    const wide = axisExt(rows(), "reply");
-    expect(wide.D0).toBeLessThanOrEqual(-187);
-    expect(wide.D1).toBeGreaterThanOrEqual(70);
+    /* the ref's extents, whatever the data (a stage beyond them is held at the edge by wxd) */
+    expect(axisExt(rows(), "reply")).toEqual({ D0: -140, D1: 70, lab: "Reply due" });
+    expect(axisExt(rows(), "calendar")).toEqual({ D0: -180, D1: 60, lab: "Today" });
+    const w = makeWorld({ groups: bwGroups(rows()), ext: axisExt(rows(), "reply"), vpW: 390, vpH: 784, bot: 90 });
+    expect(w.wxd(-400)).toBe(0);
+    expect(w.wxd(400)).toBe(WX);
   });
   const world = (vpH = 784, land = false) => makeWorld({ groups: bwGroups(rows()), ext: axisExt(rows(), "reply"), vpW: 390, vpH, bot: 90, land });
   it("the scales: SX grows as z^0.25 then faster from the Timeline level; SY = fitSY·z; fitSY up to 3×", () => {
@@ -156,6 +158,13 @@ describe("Phone Birds-eye world v1 — the engine", () => {
     const z2 = w.zT() * 1.5;
     expect(w.SX(z2)).toBeCloseTo(w.fitS() * Math.pow(z2, XP) * (1 + 0.5 * 3), 9);
     expect(w.SY(2)).toBeCloseTo(w.fitSY() * 2, 9);
+  });
+  it("a long campaign fits with its gaps at the 30px floor, so headings never overlap", () => {
+    const many = makeWorld({ groups: bwGroups(Array.from({ length: 70 }, (_, i) => ({ ...rows()[i % 8], id: `r${i}` }))), ext: axisExt([], "reply"), vpW: 390, vpH: 784, bot: 90 });
+    expect(many.gapPx(1)).toBe(GPMIN);
+    const last = many.fitView().oy + many.yOff(many.H - 12, 1);
+    expect(last).toBeLessThanOrEqual(784 - 90 + 8);
+    expect(last).toBeGreaterThan(784 - 90 - 24);
   });
   it("rows grow to 100px and gaps to 44px; the bent mapping round-trips within 0.5px", () => {
     const w = world();

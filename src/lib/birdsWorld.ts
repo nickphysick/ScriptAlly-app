@@ -29,6 +29,9 @@ const startOfDay = (ms: number): number => { const d = new Date(ms); d.setHours(
 /* ── the ref's constants ── */
 export const WX = 600, RH = 30, GAP = 40, MAXZ = 6.5, XP = 0.25;
 export const RULE = 28, TOPFIT = 140, TOPFOLD = 96, RPMAX = 100, GPMAX = 44;
+/** ⚠️ the build's floor under a group's gap: a small heading (22px) and its 6px, so headings never overlap however many
+ *  rows the fit has to hold (the ref's 22 rows never took a gap under 26px; the harness's 70 took it to 6) */
+export const GPMIN = 30;
 /** the levels, by row height on screen (ref `LV`) */
 export const LV: readonly (readonly [number, BwLevel])[] = [[0, "Overview"], [22, "Names"], [44, "Figures"], [72, "Dates"], [86, "Timeline"]];
 export type BwLevel = "Overview" | "Names" | "Figures" | "Dates" | "Timeline";
@@ -188,11 +191,11 @@ export function aheadTx(lead: string, date: string, w: number): string {
 
 /* ── the axis ── */
 export interface BwAxisExt { D0: number; D1: number; lab: string }
-/** the ref's extents are the minimum; real data widens them to the earliest stage and the latest date, a week clear */
-export function axisExt(rows: readonly BwRow[], axis: BwAxis): BwAxisExt {
-  let D0 = axis === "reply" ? -140 : -180, D1 = axis === "reply" ? 70 : 60;
-  for (const r of rows) for (const s of rowSegs(r, axis)) { D0 = Math.min(D0, Math.floor(s.a) - 7); D1 = Math.max(D1, Math.ceil(s.b) + 7); }
-  return { D0, D1, lab: axis === "reply" ? "Reply due" : "Today" };
+/** the ref's extents, as they are: −140…+70 days on the reply date, −180…+60 on the calendar. A stage or a date beyond
+ *  them is held at the edge (`wxd` clamps, as the ref's does) — widening to the data let one two-year-old query squeeze
+ *  every bar into a sliver (measured on the harness, 25 Nov). `rows` is kept for the signature. */
+export function axisExt(_rows: readonly BwRow[], axis: BwAxis): BwAxisExt {
+  return axis === "reply" ? { D0: -140, D1: 70, lab: "Reply due" } : { D0: -180, D1: 60, lab: "Today" };
 }
 /** the ruler's marks: weeks either side of the reply date (every four), or the months on the calendar */
 export function rulerMarks(axis: BwAxis, ext: BwAxisExt, X: (d: number) => number, nowMs: number): [number, string][] {
@@ -252,11 +255,17 @@ export function makeWorld(o: WorldOpts): World {
      fitted rows overflow. Here time keeps the width fit (the ref's own comment: "time keeps the width fit") and rows
      take the height, whichever way — so every live query is on screen fitted. With the ref's 22 rows both are its. */
   const fitS = () => (vpW - 32) / WX;
-  const fitSY = () => Math.min(fitS() * 3, (vpH - top0 - RULE - bot) / (H + 8));
+  const nRows = G.reduce((a, g) => a + g.rows.length, 0), avail = vpH - top0 - RULE - bot;
+  const fitSY = () => {
+    const free = avail / (H + 8);
+    /* the ref's fit, unless its gaps would fall under the floor: then the gaps sit at the floor and the rows share the rest */
+    const s = GAP * free >= GPMIN || !nRows ? free : Math.max(0.01, (avail - G.length * GPMIN - 8) / (nRows * RH));
+    return Math.min(fitS() * 3, s);
+  };
   const zT = () => 86 / (RH * fitSY());
   const SX = (z: number) => fitS() * Math.pow(z, XP) * (1 + (Math.max(0, z - zT()) / zT()) * 3);
   const SY = (z: number) => fitSY() * z;
-  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(GAP * SY(z), GPMAX);
+  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(Math.max(GAP * SY(z), GPMIN), GPMAX);
   const yOff = (wy: number, z: number): number => {
     const rp = rowPx(z) / RH, gp = gapPx(z) / GAP; let off = 0;
     for (const g of G) {

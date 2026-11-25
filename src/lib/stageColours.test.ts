@@ -254,8 +254,11 @@ describe("Plumage colours v1 · the phone", () => {
     const q = readFileSync("src/components/phone/v4/QueryPageV4.tsx", "utf8");
     expect(q).toContain("background: statusBand(String(v.row.status)), color: bandInk(String(v.row.status))");
     expect(q).toContain("background: t.status ? statusBand(t.status) : statusFill(t.status)");
-    for (const f of ["src/components/phone/v5/BirdsBlockV5.tsx", "src/components/phone/v5/BirdsViewV5.tsx"])
-      expect([f, /background: statusBand\(String\(cur\.status\)\)/.test(readFileSync(f, "utf8"))]).toEqual([f, true]);
+    const f = "src/components/phone/v5/BirdsBlockV5.tsx";
+    expect([f, /background: statusBand\(String\(cur\.status\)\)/.test(readFileSync(f, "utf8"))]).toEqual([f, true]);
+    /* Phone Birds-eye world v1 (BirdsViewV5's successor): each stage's bar is its status band, read through the engine */
+    expect(readFileSync("src/lib/birdsWorld.ts", "utf8")).toContain("export const bandOf = (status: string): string => statusBand(status);");
+    expect(readFileSync("src/components/phone/birds/drawWorld.ts", "utf8")).toContain("background:${bandOf(s.st)}");
   });
 });
 

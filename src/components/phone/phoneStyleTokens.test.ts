@@ -7,7 +7,7 @@
  *   - every `--ps-*` token the sheet lists is declared in phoneTokens.css with the sheet's own value (read from the ref,
  *     so a drift on either side is red);
  *   - `--pa-page` reads the desktop's page colour (`--ws-page`, oat at :root), and that colour is the sheet's #f2eee8;
- *   - ruling 1b: `--pa-inset-legacy` keeps the old #f8f6f2 and is read by exactly the thirteen insets named in the
+ *   - ruling 1b: `--pa-inset-legacy` keeps the old #f8f6f2 and is read by exactly the insets named in the
  *     ruling — a fourteenth reader is a new use of a holding value, which the ruling forbids;
  *   - ruling 1a: the two fades that started from a hard-coded old page colour now start from the page's own channels.
  */
@@ -45,7 +45,6 @@ const LEGACY_READERS = [
   "src/components/agents/phone/agentsPhone.css .pa-aq",
   "src/components/agents/phone/agentsPhone.css .pa-dwish",
   "src/components/phone/v5/phoneV5.css .pa5-gc-where",
-  "src/components/phone/v5/phoneV5.css .pa5bv-xpi",
   "src/components/phone/phoneShell.css .pa-mtile .pa-mi",
   "src/components/phone/pages/settingsPhone.css .pa-set .sc-cf",
   "src/components/phone/pages/pagesPhone.css .pa-pg .pa-annote",
@@ -86,7 +85,7 @@ describe("Phone style v1 — the tokens", () => {
     expect([1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(", ")).toBe("242, 238, 232");
   });
 
-  it("ruling 1b: --pa-inset-legacy holds #f8f6f2 and is read by exactly the thirteen named insets", () => {
+  it("ruling 1b: --pa-inset-legacy holds #f8f6f2 and is read by exactly the named insets (thirteen; twelve since Phone Birds-eye world v1 retired BirdsViewV5)", () => {
     expect(declared().get("--pa-inset-legacy")).toBe("#f8f6f2");
     const found: string[] = [];
     for (const f of cssFiles("src")) {

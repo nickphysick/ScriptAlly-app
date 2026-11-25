@@ -163,7 +163,7 @@ async function openPhone(page: Page, path: string, vp: { width: number; height: 
   if (!wk) await page.setViewportSize(vp);
   await go(page, path);
 }
-async function go(page: Page, path: string, wait = '[data-pa5="dock"], [data-pa5="birds-view"].land') {
+async function go(page: Page, path: string, wait = '[data-pa5="dock"], [data-bw="world"].land') {
   await page.goto(path);
   await page.locator(wait).first().waitFor({ timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
@@ -208,14 +208,13 @@ async function touchDrag(page: Page, x0: number, y0: number, x1: number, y1: num
 /* ══ the mutations: each the smallest change on the rendered page that should turn exactly its own lock red ══ */
 const MUT_LOCK: Record<string, [string, string]> = {
   badge: ["today", "PA5-1"], nodiscover: ["reach", "PA5-2"], tabsaway: ["today", "PA5-3"], nofilter: ["today", "PA5-4"],
-  window12: ["today", "PA5-5"], ring: ["today", "PA5-6"], lineabove: ["today", "PA5-7"], v41rows: ["view", "PA5-8"],
+  window12: ["today", "PA5-5"], ring: ["today", "PA5-6"], lineabove: ["today", "PA5-7"],
   recompute: ["view", "PA5-9"], swipedone: ["todo", "PA5-10"], direct: ["gaps", "PA5-11"], phoneresults: ["materials", "PA5-12"],
   shrinktabs: ["sizes", "PA5-13"], overdue: ["words", "PA5-14"], shared: ["desktop", "PA5-15"],
 };
 const CSS_MUT: Record<string, string> = {
   tabsaway: ".pa5-tabs { position: static !important; }",
-  lineabove: ".pa5-be-now, .pa5bv-now { z-index: 60 !important; }",
-  v41rows: ".pa5bv-top { min-height: 48px !important; height: 48px !important; }",
+  lineabove: ".pa5-be-now { z-index: 60 !important; }",
   nodiscover: "[data-pa5='discover-row'] { display: none !important; }",
   shrinktabs: ".pa5-tabs [data-pa5='tab'] { font-size: 12px !important; min-height: 36px !important; height: 36px !important; padding-top: 0 !important; padding-bottom: 0 !important; }",
   shared: "body { letter-spacing: 0.4px !important; }",
@@ -242,18 +241,18 @@ async function mutate(page: Page) {
       const line = be.querySelector<HTMLElement>('[data-pa5="be-now"]'); if (line) line.style.left = "calc(116px + (100% - 116px) * 0.6)";
     }
     /* PA5-6: a ring back on each past-date bar, at its notch */
-    if (m === "ring") for (const n of w.__v('[data-pa5="be-notch"], [data-pa5="bv-notch"]')) {
+    if (m === "ring") for (const n of w.__v('[data-pa5="be-notch"]')) {
       if (n.nextElementSibling?.classList.contains("pa5x-ring")) continue;
       const r = document.createElement("span"); r.className = "pa5x-ring";
       r.setAttribute("style", `position:absolute;left:${n.style.left || "0"};top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #2a3a52;border-radius:50%;box-sizing:border-box`);
       n.after(r);
     }
     /* PA5-9: the phone dates its own bars (each current stage three days later) */
-    if (m === "recompute") for (const r of document.querySelectorAll<HTMLElement>('[data-pa5="be-row"], [data-pa5="bv-row"]')) if (r.dataset.from) r.dataset.from = String(Number(r.dataset.from) + 3 * 86400000);
+    if (m === "recompute") for (const r of document.querySelectorAll<HTMLElement>('[data-pa5="be-row"], [data-bw="row"]')) if (r.dataset.from) r.dataset.from = String(Number(r.dataset.from) + 3 * 86400000);
     /* PA5-12: the phone counts its own result (every query sent with the package counted as asking for more) */
     if (m === "phoneresults") for (const c of document.querySelectorAll<HTMLElement>('[data-pa5="pkg-card"], [data-pa5="mat-header-pkg"]')) if (c.dataset.sent) c.dataset.requests = c.dataset.sent;
     /* PA5-14: a group labelled "Overdue" */
-    if (m === "overdue") { const g = w.__v(".pa5bv-gt")[0]; if (g) g.textContent = "Overdue"; }
+    if (m === "overdue") { const g = w.__v('[data-bw="group"]')[0]; if (g) g.textContent = "Overdue"; }
     /* PA5-10: a right swipe marks the task done (presses the journey's save the moment it opens) */
     if (m === "swipedone" && !w.__pa5mut) {
       w.__pa5mut = true;
@@ -421,13 +420,13 @@ group("today", "PA5-1 · 3 · 4 · 5 · 6 · 7", async (page, info) => {
     });
     /* the harness's block shows the eight nearest their date, all dated before the 9-week window; the open queries whose
        date passed in the last eight weeks (the aid, at today's date: the same rows, nothing else) fall inside it */
-    /* the open queries whose date passed inside the last eight weeks (read off the full view, unfolded: the same engine) */
-    await go(page, "/queries/all?view=birds");
-    for (let i = 0; i < 6; i++) { const f = page.locator('[data-pa5="bv-fold"]').filter({ visible: true }).first(); if (!(await f.count())) break; await f.click().catch(() => {}); await page.waitForTimeout(300); }
-    const recent = await page.evaluate(() => { const lo = Date.now() - 56 * 86400000; return [...document.querySelectorAll<HTMLElement>('[data-pa5="bv-row"][data-past="1"]')].filter((r) => Number(r.dataset.due) >= lo).map((r) => r.dataset.id!); });
+    /* (Phone Birds-eye world v1: the second population — the open queries past their date in the last eight weeks — was
+       read off BirdsViewV5's unfolded rows; the world draws only the rows on screen, so that population is retired and
+       the harness's own rows carry these checks) */
+    const recent: string[] = [];
     await go(page, "/dashboard");
     await press(page, '[data-pa5="tab"][data-tab="queries"]');
-    for (const [st, aid] of [["the harness", null], [`the ${recent.length} past their date in the last eight weeks`, { ids: recent }]] as const) {
+    for (const [st, aid] of ([["the harness", null]] as const).concat(recent.length ? [[`the ${recent.length} past their date in the last eight weeks`, { ids: recent }] as never] : [])) {
       await beAid(page, aid as { ids: string[] } | null);
       await mutate(page);
       const past = await readPast();
@@ -565,7 +564,7 @@ group("reach", "PA5-2", async (page, info) => {
 });
 
 /* ══ PA5-8 density · PA5-9 engine · PA5-6/7 in the full view · landscape ══ */
-group("view", "PA5-8 · 9 · 6 · 7 (view) · landscape", async (page, info) => {
+group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async (page, info) => {
   const L = new Ledger(`view-${info.project.name}`);
   const vp = isWebKit(page) ? WK_PHONE : PHONES[0];
   await openPhone(page, "/dashboard", vp);
@@ -598,67 +597,15 @@ group("view", "PA5-8 · 9 · 6 · 7 (view) · landscape", async (page, info) => 
   });
   L.check("PA5-9", `block: each bar drawn from its row's date (population ${drawn.n})`, drawn.n > 0 && drawn.off.length === 0, drawn.off.slice(0, 4).join(" | "));
 
-  /* the full view */
+  /* the full view: Phone Birds-eye world v1. Its fitted overview has every live query on screen, so every row is drawn.
+     Retired with BirdsViewV5 (the world's own locks are tests/e2e/phoneBirdsWorld.measure.ts): PA41-8 (groups fold at
+     five), PA5-8's 28px rows, 18 in sight and the fixed name column on a drag, PA5-6's notch and deeper segment in the
+     view, and the 184px landscape name column. */
   await press(page, '[data-pa5="be-foot"]');
-  await page.locator('[data-pa5="birds-view"]').filter({ visible: true }).first().waitFor();
+  await page.locator('[data-bw="world"]').first().waitFor();
   await page.waitForTimeout(800);
   await mutate(page);
-  /* PA41-8, carried: a group over five shows five and "Show N more" */
-  const gs = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa41="vgroup"]').map((g) => ({ k: g.dataset.k!, n: Number(g.dataset.n), shown: g.querySelectorAll('[data-pa5="bv-row"]').length, more: g.querySelector('[data-pa5="bv-fold"]')?.textContent ?? null })));
-  const big = gs.filter((g) => g.n > 5);
-  L.check("PA41-8", `(kept) groups over five fold (population ${gs.map((g) => `${g.k} ${g.n}`).join(", ")})`, big.length > 0 && big.every((g) => g.shown === 5 && g.more === `Show ${g.n - 5} more`), JSON.stringify(big));
-  /* unfold every group (Show N more) */
-  for (let i = 0; i < 6; i++) { const f = page.locator('[data-pa5="bv-fold"]').filter({ visible: true }).first(); if (!(await f.count())) break; await f.click().catch(() => {}); await page.waitForTimeout(400); }
-  await mutate(page);
-  const phone = await page.evaluate(() => Object.fromEntries((window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="bv-row"]').map((r) => [r.dataset.id!, { from: Number(r.dataset.from || NaN), to: Number(r.dataset.to || NaN), pasts: r.dataset.pasts ?? "" }])));
-
-  /* PA5-8: at 390 × 844, the header scrolled away: ≥ 18 rows fully visible; the name column holds on a 120px drag */
-  if (!isWebKit(page)) {
-    const top0 = await page.evaluate(() => { const r = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="bv-row"]')[0]; const sc = document.getElementById("app-stage-scroll")!; return r ? r.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop : 0; });
-    await stageTo(page, top0 + 400); await page.waitForTimeout(400);
-    await stageTo(page, top0 + 500); await page.waitForTimeout(900);
-    await mutate(page);
-    const dense = await page.evaluate(() => {
-      const v = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v;
-      const head = document.querySelector<HTMLElement>(".pa4-pushed, [data-pa4='pushed']")?.getBoundingClientRect();
-      const ruler = v('[data-pa5="bv-ruler"]')[0]?.getBoundingClientRect();
-      const dock = document.querySelector<HTMLElement>('[data-pa5="dock"]');
-      const dockTop = dock && dock.dataset.tucked !== "1" ? dock.getBoundingClientRect().top : innerHeight;
-      const top = Math.max(head?.bottom ?? 0, ruler?.bottom ?? 0);
-      const rows = v('[data-pa5="bv-row"]:not(.op)').map((r) => r.getBoundingClientRect());
-      const full = rows.filter((r) => r.top >= top - 0.5 && r.bottom <= dockTop + 0.5).length;
-      return { full, top: Math.round(top), dockTop: Math.round(dockTop), tucked: dock?.dataset.tucked, rowH: rows[0] ? Math.round(rows[0].height * 10) / 10 : 0, total: rows.length };
-    });
-    L.check("PA5-8", `390x844 · rows fully visible with the header scrolled away (population ${dense.total})`, dense.total >= 18 && dense.full >= 18, JSON.stringify(dense));
-    L.check("PA5-8", "390x844 · rows are 28px edge to edge", Math.abs(dense.rowH - 28) <= 0.5, String(dense.rowH));
-    /* a track at the middle of the screen, clear of the sticky header and the ruler */
-    const box = await page.evaluate(() => { const v = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v; const t = v('[data-pa5="bv-row"] .pa5bv-trk').map((e) => e.getBoundingClientRect()).find((r) => r.top > innerHeight / 2 - 20); return t ? { x: t.left, y: t.top, width: t.width, height: t.height } : null; });
-    if (box) {
-      const read = () => page.evaluate(() => { const v = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v; const n = v('[data-pa5="bv-names"]')[4]?.getBoundingClientRect(); return { nl: n?.left ?? NaN, nr: n?.right ?? NaN, x: Number(v('[data-pa5="birds-view"]')[0]?.dataset.x ?? NaN), page: document.getElementById("app-stage-scroll")?.scrollTop ?? -1 }; });
-      const a = await read();
-      /* towards the past (the track rests near its latest end, so a drag the other way can be at its stop) */
-      await touchDrag(page, box.x + box.width / 2 - 60, box.y + box.height / 2, box.x + box.width / 2 + 60, box.y + box.height / 2);
-      await page.waitForTimeout(1500);
-      const b = await read();
-      L.check("PA5-8", "a 120px drag moves the track, and the name column does not move", Math.abs(b.x - a.x) >= 60 && Math.abs(b.nl - a.nl) < 0.5 && Math.abs(b.nr - a.nr) < 0.5, `${JSON.stringify(a)} → ${JSON.stringify(b)}`);
-    } else L.check("PA5-8", "a track on screen (population)", false, "none");
-  }
-
-  /* PA5-6 / PA5-7 in the full view: carries on, no ring; the line under an opened detail */
-  const vpast = await page.evaluate(() => {
-    const v = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v;
-    const rows = v('[data-pa5="bv-row"][data-past="1"]');
-    const ln = v('[data-pa5="bv-now"]')[0]?.getBoundingClientRect();
-    const out = rows.filter((r) => { const b = r.getBoundingClientRect(); return b.top > 0 && b.bottom < innerHeight; }).map((r) => {
-      const n = r.querySelector<HTMLElement>('[data-pa5="bv-notch"]')?.getBoundingClientRect(), d = r.querySelector<HTMLElement>('[data-pa5="bv-deep"]')?.getBoundingClientRect();
-      return { notch: n ? n.left + n.width / 2 : null, dl: d?.left ?? null, dr: d?.right ?? null, lx: ln ? ln.left + ln.width / 2 : NaN };
-    }).filter((p) => p.notch != null && p.notch > 120 && p.lx > 120);
-    const rings = v(".pa5bv-trk *").filter((e) => { const cs = getComputedStyle(e); return parseFloat(cs.borderRadius) >= e.getBoundingClientRect().width / 2 - 0.5 && parseFloat(cs.borderTopWidth) > 0; }).length;
-    return { n: rows.length, out, rings };
-  });
-  L.check("PA5-6", `view: rows past their date (population ${vpast.n}, ${vpast.out.length} on screen)`, vpast.n > 0, "");
-  L.check("PA5-6", "view: the deeper segment runs from the notch to today", vpast.out.every((p) => p.dl != null && p.dr != null && Math.abs(p.dl - p.notch!) <= 1.5 && Math.abs(p.dr - p.lx) <= 2), JSON.stringify(vpast.out.slice(0, 3)));
-  L.check("PA5-6", "view: no ring on a bar", vpast.rings === 0, String(vpast.rings));
+  const phone = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((r) => [r.dataset.id!, { from: Number(r.dataset.from || NaN), to: Number(r.dataset.to || NaN), pasts: r.dataset.pasts ?? "" }])));
 
   /* PA5-9 (view half) against the desktop Birds-eye at 1512 */
   if (!isWebKit(page)) {
@@ -688,13 +635,8 @@ group("view", "PA5-8 · 9 · 6 · 7 (view) · landscape", async (page, info) => 
     await page.goto("/dashboard"); await page.waitForTimeout(3500);
     const wide = await page.evaluate(() => ({ dock: !!document.querySelector('[data-pa5="dock"]'), today: !!(window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="today"]').length, mobile: matchMedia("(max-width: 767.98px)").matches }));
     L.check("PA5-8", "844x390 is the desktop layout (no dock, no phone Today)", !wide.dock && !wide.today && !wide.mobile, JSON.stringify(wide));
-    /* the phone landscape layout at 740 × 360 */
-    await page.setViewportSize(LAND);
-    await go(page, "/queries/all?view=birds");
-    const land = await page.evaluate(() => ({ land: !!document.querySelector('[data-pa5="birds-view"].land'), dock: getComputedStyle(document.querySelector('[data-pa5="dock"]') as Element).display, names: Math.round(document.querySelector<HTMLElement>('[data-pa5="bv-row"] .pa5bv-nm')?.getBoundingClientRect().width ?? 0) }));
-    L.check("PA5-8", "740x360 · landscape: 184px names, no dock", land.land && land.dock === "none" && Math.abs(land.names - 184) <= 1, JSON.stringify(land));
   }
-  L.done(isWebKit(page) ? 4 : 14, MUT_LOCK[MUT]?.[1]);
+  L.done(isWebKit(page) ? 1 : 6, MUT_LOCK[MUT]?.[1]);
 });
 
 /* ══ PA5-10 the card: the verb and a right swipe open the same journey; cancel records nothing; save; Undo ══ */
@@ -900,14 +842,16 @@ const sweep = (page: Page, roots: string): Promise<Sweep> => page.evaluate((rs) 
     if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > vw) continue;
     /* Phone style v1 (Nick's pending question 1, as proposed): 12 is allowed only where the element is marked
        `data-ps-cap` — the dock's labels, a chart's axis labels, a numeral's unit (P12). It was "dock labels" alone. */
-    const cap = !!e.closest("[data-ps-cap]");
+    /* Phone Birds-eye world v1: the world's type and targets are its ref's (12px ruler and pill, 32px chips, 40px header
+       icons), named for Nick in that report — the census does not hold it to the 14px / 48px floor */
+    const cap = !!e.closest("[data-ps-cap]") || !!e.closest('[data-bw="world"]');
     if ([...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) {
       out.texts++;
       if (!cap && parseFloat(cs.fontSize) < 13.99) out.smallText.push(`${String(e.className).slice(0, 30)} "${e.textContent?.trim().slice(0, 20)}" ${cs.fontSize}`);
     }
     if (e.matches("button:not([disabled]), a[href], [role='button'], [role='tab'], input, textarea, select") && !e.closest("[aria-hidden='true']")) {
       out.taps++;
-      const row28 = e.matches('[data-pa5="be-row"], .pa5bv-top');
+      const row28 = e.matches('[data-pa5="be-row"]') || !!e.closest('[data-bw="world"]');
       if (!row28 && (r.width < 47.5 || r.height < 47.5)) out.smallTap.push(`${String(e.className || e.tagName).slice(0, 30)} "${e.textContent?.trim().slice(0, 20)}" ${Math.round(r.width)}×${Math.round(r.height)}`);
     }
     if (r.right > vw + 1) { let a = e.parentElement, sc = false; while (a) { const ov = getComputedStyle(a).overflowX; if (/auto|scroll|hidden|clip/.test(ov)) { sc = true; break; } a = a.parentElement; } if (!sc) out.wide.push(`${String(e.className).slice(0, 30)} right ${Math.round(r.right)}`); }
@@ -991,7 +935,7 @@ group("words", "PA5-14", async (page, info) => {
     ["Materials · Versions", async () => { await press(page, '[data-pa5="tab"][data-tab="versions"]'); }],
     ["Materials · Comps", async () => { await press(page, '[data-pa5="tab"][data-tab="comps"]'); }],
     ["Profile", async () => { await go(page, "/you"); }],
-    ["the full Birds-eye view, unfolded", async () => { await go(page, "/queries/all?view=birds"); for (let i = 0; i < 6; i++) { const f = page.locator('[data-pa5="bv-fold"]').filter({ visible: true }).first(); if (!(await f.count())) break; await f.click().catch(() => {}); await page.waitForTimeout(300); } }],
+    ["the full Birds-eye view (the world)", async () => { await go(page, "/queries/all?view=birds"); }],
     ["the full list", async () => { await go(page, "/queries/all"); await press(page, '[data-pa4="view"][data-k="list"]'); }],
     ["the gaps sheet", async () => { await go(page, "/dashboard"); await press(page, '[data-pa5="tab"][data-tab="agents"]'); await press(page, '[data-pa5="fill-gaps"]'); }],
     ["the feedback sheet", async () => { await page.keyboard.press("Escape"); await go(page, "/dashboard"); await press(page, '[data-pa5="today-hd"] [data-pa5="feedback-btn"]'); }],
@@ -1137,8 +1081,7 @@ test.describe("PA5 pairs", () => {
     await page.screenshot(shot("13-birds-dense-built"));
     /* the five campaign states of the Birds-eye block (the review aid; the harness is Everyday) */
     await go(page, "/queries/all?view=birds");
-    for (let i = 0; i < 6; i++) { const f = page.locator('[data-pa5="bv-fold"]').filter({ visible: true }).first(); if (!(await f.count())) break; await f.click().catch(() => {}); await page.waitForTimeout(300); }
-    const open = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="bv-row"]').map((r) => ({ id: r.dataset.id!, past: r.dataset.past === "1" })));
+    const open = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((r) => ({ id: r.dataset.id!, past: r.dataset.past === "1" })));
     const sent = new Map(H_QUERIES.map((q) => [q.id, tsMs(q.dateSent)]));
     const now = Date.now();
     const states: [string, { now?: number; ids?: string[] } | null][] = [

@@ -393,7 +393,7 @@ test.describe("PSL lead", () => {
 
 /* ══ PS1R — THE AUDIT (Phase 5): PS1 in REPORT mode on every other phone screen, with touch, loads, icons and the two
    rulings read on the same screens. Nothing fails the run except a screen the probe cannot reach (that is FAILED). ══ */
-const LEGACY = [".pf-av.pf-empty", ".pf-lctray", ".pa-addrow", ".pa-anote", ".pa-aq", ".pa-dwish", ".pa5-gc-where", ".pa5bv-xpi",
+const LEGACY = [".pf-av.pf-empty", ".pf-lctray", ".pa-addrow", ".pa-anote", ".pa-aq", ".pa-dwish", ".pa5-gc-where",
   ".pa-mtile .pa-mi", ".pa-set .sc-cf", ".pa-pg .pa-annote", ".pa3 .pa3-row", ".pa3 .pa3-opt.on"];
 const press = async (page: Page, sel: string) => { const l = page.locator(sel).filter({ visible: true }).first(); await l.click({ timeout: 12_000 }); await page.waitForTimeout(900); };
 const go = async (page: Page, path: string) => { await page.goto(path); await page.locator("#root > *").first().waitFor({ state: "attached", timeout: 30_000 }); await settle(page, 2000); };

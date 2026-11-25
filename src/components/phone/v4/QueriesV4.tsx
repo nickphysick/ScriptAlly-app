@@ -7,6 +7,8 @@
  * the app's own (`COURT_LABEL`), never "Need you" (PA4-9). A row is the seal with its StatusDot badge, the name, the time
  * since the last event and v3's one line; with-you rows are bold with the blush dot, with-the-agent rows carry the thin
  * progress line. A row opens the query page.
+ * Phone Birds-eye world v1: the Birds-eye side is the zoomable world (components/phone/birds/BirdsWorld), replacing
+ * v5's BirdsViewV5. It covers the pushed header, so it carries its own back (history, else the list) and List.
  */
 import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,7 +17,7 @@ import { openV3, openV3Query } from "../v3/v3Store";
 import { COURT_LABEL, courtRows, V3_COURTS, type V3Court, type V3Query } from "../../../lib/phoneV3";
 import { QueryStatus } from "../../../types";
 import { CAST, Cta, Hero, IconBtn, LapCard, Link4, Seal } from "./V4Parts";
-import { BirdsViewV5 } from "../v5/BirdsViewV5";
+import { BirdsWorld } from "../birds/BirdsWorld";
 import { bvSwitchSearch, isBeCourt } from "../../../lib/phoneV5";
 import "./phoneV4.css";
 
@@ -106,8 +108,8 @@ export const QueriesV4: React.FC = () => {
   return (
     <div className="pa4 pa4-queries" data-pa4="queries" data-chip={chip} data-view={bird ? "bird" : "list"}>
       {bird ? (
-        <BirdsViewV5 switcher={<ViewSwitch bird onPick={(b) => pickView(b)} />} corner={corner}
-          court={isBeCourt(chip) ? chip : null} onShowAll={() => pickView(true, "all")} />
+        <BirdsWorld court={isBeCourt(chip) ? chip : null} onList={() => pickView(false, "all")}
+          onBack={() => { const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0; if (idx > 0) navigate(-1); else pickView(false, "all"); }} />
       ) : (<>
         <Hero pa4="queries-hero" kick="Queries"
           head={<>{c.you} need{c.you === 1 ? "s" : ""} you.<br />{c.agent} {c.agent === 1 ? "is" : "are"} with agents.</>}

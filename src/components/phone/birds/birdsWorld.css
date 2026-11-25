@@ -7,9 +7,8 @@
       < the controls (11). The view layer is NOT an isolated stacking context, so the hawk can sit over the header. */
 @media (max-width: 767.98px) {
   .bw {
-    --bw-rule: #efebe4; --bw-edge: #e2dbd0;
-    --bw-sh: 0 0 0 1px rgba(31, 38, 51, 0.06), 0 1px 2px rgba(31, 38, 51, 0.04);
-    --bw-shr: 0 0 0 1px rgba(31, 38, 51, 0.06), 0 12px 32px rgba(31, 38, 51, 0.16);
+    /* the ref's rule is the sheet's; its edge (#e2dbd0) is the stage table's closed edge, the nearest the sheet allows */
+    --bw-rule: #efebe4; --bw-edge: #dedbd5;
     position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #fff; color: var(--pa-ink); font: 400 16px/1.5 var(--pa-sans);
     -webkit-font-smoothing: antialiased;
   }
@@ -22,7 +21,7 @@
   .bw-hd.col { height: 96px; }
   .bw-t2 { display: flex; align-items: center; gap: 4px; }
   .bw .bw-t2 .bw-h { flex: 1; min-width: 0; margin: 0; font: 400 20px/1.2 var(--pa-type) !important; color: #fff; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bw-ib { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; border-radius: 22px; padding: 0; }
+  .bw-ib { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; border-radius: 999px; padding: 0; }
   .bw-ib svg { width: 24px; height: 24px; }
   .bw-ib.back { margin-left: -12px; }
   .bw-fon { flex: none; height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: #fff; color: var(--pa-navy) !important; font: 600 14px var(--pa-sans) !important; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; }
@@ -57,12 +56,12 @@
   .bw-bar.ahead { background: none; border: 1.5px dashed; border-left: 0; border-radius: 0 999px 999px 0; }
   .bw-bar.ahead.tx { justify-content: flex-end; }
   .bw-bar.ahead.tx small { color: var(--pa-muted); }
-  .bw-tick { position: absolute; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--pa-navy); }
+  .bw-tick { position: absolute; width: 2px; margin-left: -1px; background: var(--pa-navy); }
   .bw-nmrow { position: absolute; display: flex; align-items: center; white-space: nowrap; pointer-events: none; }
   .bw-nm { white-space: nowrap; font: 600 16px/1.2 var(--pa-sans); color: var(--pa-ink); text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
   .bw-nm.sm { font-size: 14px; }
   .bw-sub { position: absolute; white-space: nowrap; font: 400 14px/1.2 var(--pa-sans); color: var(--pa-body); pointer-events: none; text-shadow: 0 0 3px #fff; }
-  .bw-fig { position: absolute; z-index: 2; display: inline-flex; align-items: baseline; gap: 4px; height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.94); box-shadow: 0 0 0 1px rgba(31, 38, 51, 0.06); font: 400 14px/26px var(--pa-sans); color: var(--pa-body); white-space: nowrap; pointer-events: none; box-sizing: border-box; }
+  .bw-fig { position: absolute; z-index: 2; display: inline-flex; align-items: baseline; gap: 4px; height: 26px; padding: 0 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.94); outline: 1px solid rgba(31, 38, 51, 0.06); font: 400 14px/26px var(--pa-sans); color: var(--pa-body); white-space: nowrap; pointer-events: none; box-sizing: border-box; }
   .bw-fig b { font: 400 20px/26px var(--pa-type); color: var(--pa-ink); }
   /* the glyph track (ref `.gt`) */
   .bw-gt { display: inline-flex; align-items: center; flex: none; margin-right: 8px; }
@@ -71,7 +70,7 @@
   .bw-gt i.done { opacity: 0.7; }
   .bw-gt i.now { opacity: 1; }
   .bw-gt i.now svg { width: 78%; height: 78%; }
-  .bw-gt u { width: 6px; height: 1.5px; background: #c9c2b6; flex: none; }
+  .bw-gt u { width: 6px; height: 1.5px; background: #dedbd5; flex: none; }
   .bw-gt u.on { background: var(--pa-ink); opacity: 0.6; }
   /* the line, its pill and the ruler (ref `.fline`, `.flab.top`, `.ruler`) */
   .bw-fline { position: absolute; z-index: 9; width: 2px; margin-left: -1px; background: var(--pa-navy); opacity: 0.85; pointer-events: none; }
@@ -80,21 +79,21 @@
   .bw-rtick { position: absolute; bottom: 0; height: 8px; width: 2px; margin-left: -1px; background: var(--pa-navy); }
   .bw-rm { position: absolute; top: 7px; transform: translateX(-50%); font: 400 12px var(--pa-sans); color: var(--pa-muted); white-space: nowrap; pointer-events: none; }
   .bw .bw-flab { position: absolute; z-index: 10; transform: translateX(-50%); height: 20px; padding: 0 8px; border: 0; border-radius: 999px; background: var(--pa-navy); color: #fff !important; font: 600 12px/20px var(--pa-sans) !important; white-space: nowrap; cursor: pointer; }
-  .bw .bw-flab.off { background: #fff; color: var(--pa-navy) !important; box-shadow: inset 0 0 0 1.5px var(--pa-navy); }
+  .bw .bw-flab.off { background: #fff; color: var(--pa-navy) !important; border: 1.5px solid var(--pa-navy); line-height: 17px !important; box-sizing: border-box; }
 
   /* the controls (ref `.zc`, `.fit`, `.mini`, `.hint`): above the line; their bottom follows the dock (--bw-bot) */
-  .bw-zc { position: absolute; right: 12px; bottom: var(--bw-cb, 96px); z-index: 11; display: flex; flex-direction: column; border-radius: 16px; background: #fff; box-shadow: var(--bw-shr); overflow: hidden; }
+  .bw-zc { position: absolute; right: 12px; bottom: var(--bw-cb, 96px); z-index: 11; display: flex; flex-direction: column; border-radius: 16px; background: #fff; box-shadow: var(--ps-sh-raised); overflow: hidden; }
   .bw-zc button { width: 48px; height: 48px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; color: var(--pa-ink); padding: 0; }
   .bw-zc button + button { border-top: 1px solid var(--bw-rule); }
   .bw-zc svg { width: 22px; height: 22px; }
-  .bw-zc button:disabled { color: #c8c2b8; cursor: default; }
-  .bw .bw-fit { position: absolute; left: 50%; bottom: var(--bw-cb, 96px); transform: translateX(-50%); z-index: 11; height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--pa-navy); color: #fff !important; font: 600 14px var(--pa-sans) !important; box-shadow: var(--bw-shr); cursor: pointer; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; }
+  .bw-zc button:disabled { color: var(--pa-faint); cursor: default; }
+  .bw .bw-fit { position: absolute; left: 50%; bottom: var(--bw-cb, 96px); transform: translateX(-50%); z-index: 11; height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--pa-navy); color: #fff !important; font: 600 14px var(--pa-sans) !important; box-shadow: var(--ps-sh-raised); cursor: pointer; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; }
   .bw .bw-fit.hide { opacity: 0; pointer-events: none; transform: translate(-50%, 8px); }
-  .bw-mini { position: absolute; left: 12px; bottom: var(--bw-cb, 96px); z-index: 11; width: 92px; height: 64px; border-radius: 12px; background: rgba(255, 255, 255, 0.94); box-shadow: var(--bw-shr); overflow: hidden; transition: opacity 0.2s; pointer-events: none; }
+  .bw-mini { position: absolute; left: 12px; bottom: var(--bw-cb, 96px); z-index: 11; width: 92px; height: 64px; border-radius: 16px; background: rgba(255, 255, 255, 0.94); box-shadow: var(--ps-sh-raised); overflow: hidden; transition: opacity 0.2s; pointer-events: none; }
   .bw-mini.hide { opacity: 0; }
-  .bw-mini i { position: absolute; height: 2px; border-radius: 1px; }
-  .bw-mini b { position: absolute; border: 1.5px solid var(--pa-navy); border-radius: 3px; background: rgba(42, 58, 82, 0.06); box-sizing: border-box; }
-  .bw-hint { position: absolute; left: 50%; top: 180px; transform: translateX(-50%); z-index: 11; padding: 8px 14px; border-radius: 999px; background: var(--pa-navy); color: #fff; font: 600 14px var(--pa-sans); white-space: nowrap; box-shadow: var(--bw-shr); transition: opacity 0.4s; pointer-events: none; }
+  .bw-mini i { position: absolute; height: 2px; }
+  .bw-mini b { position: absolute; border: 1.5px solid var(--pa-navy); background: rgba(42, 58, 82, 0.06); box-sizing: border-box; }
+  .bw-hint { position: absolute; left: 50%; top: 180px; transform: translateX(-50%); z-index: 11; padding: 8px 14px; border-radius: 999px; background: var(--pa-navy); color: #fff; font: 600 14px var(--pa-sans); white-space: nowrap; box-shadow: var(--ps-sh-raised); transition: opacity 0.4s; pointer-events: none; }
   .bw-hint.hide { opacity: 0; }
   .bw-empty { position: absolute; left: 24px; right: 24px; top: 200px; z-index: 5; margin: 0; font: 400 16px/1.5 var(--pa-sans); color: var(--pa-body); text-align: center; }
 

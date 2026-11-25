@@ -1,0 +1,290 @@
+[
+ {
+  "lock": "BW-1",
+  "where": "every live query is drawn (population 70)",
+  "ok": true,
+  "detail": "70 drawn of 70"
+ },
+ {
+  "lock": "BW-1",
+  "where": "every row is on screen, between the ruler and the dock",
+  "ok": true,
+  "detail": "70 of 70; top 168, dock 711"
+ },
+ {
+  "lock": "BW-1",
+  "where": "the last row ends within 24px of the space above the dock",
+  "ok": true,
+  "detail": "last 695.0, dock 711.0"
+ },
+ {
+  "lock": "BW-1",
+  "where": "the line's pill is on screen",
+  "ok": true,
+  "detail": "{\"l\":217.5,\"r\":291.8125,\"t\":144}"
+ },
+ {
+  "lock": "BW-1",
+  "where": "the header is fitted (140px), the chips showing",
+  "ok": true,
+  "detail": "140"
+ },
+ {
+  "lock": "BW-5",
+  "where": "a heading under the hawk's shadow (population)",
+  "ok": true,
+  "detail": "{\"headPt\":[185.94660186767578,456.203125],\"hawkOverHead\":true,\"A\":[\"bw-hs\",\"bw-hsw\",\"bw-gh0 sm\",\"bw-gband\",\"bw-w\",\"bw-vp\"],\"linePt\":[254.65625,260.48876953125],\"lineOverHawk\":true,\"B\":[\"bw-fline\",\"bw-hs\",\"bw-hit\",\"bw-gband\",\"bw-pz\",\"bw-w\"],\"pillOverHawk\":true,\"C\":[\"bw-flab\",\"bw-rzone\",\"bw-ruler\",\"bw-w\"],\"hawkOpacity\":0.1}"
+ },
+ {
+  "lock": "BW-5",
+  "where": "the hawk's shadow paints above a group heading",
+  "ok": true,
+  "detail": "[\"bw-hs\",\"bw-hsw\",\"bw-gh0 sm\",\"bw-gband\",\"bw-w\",\"bw-vp\"]"
+ },
+ {
+  "lock": "BW-5",
+  "where": "the line paints above the hawk",
+  "ok": true,
+  "detail": "[\"bw-fline\",\"bw-hs\",\"bw-hit\",\"bw-gband\",\"bw-pz\",\"bw-w\"]"
+ },
+ {
+  "lock": "BW-5",
+  "where": "the line's pill paints above everything at its point",
+  "ok": true,
+  "detail": "[\"bw-flab\",\"bw-rzone\",\"bw-ruler\",\"bw-w\"]"
+ },
+ {
+  "lock": "BW-5",
+  "where": "the hawk shows at .10 over the overview",
+  "ok": true,
+  "detail": "0.1"
+ },
+ {
+  "lock": "BW-5",
+  "where": "the + / − buttons paint above the line",
+  "ok": true,
+  "detail": "[\"BUTTON\",\"bw-zc\",\"bw-fline\",\"bw-hs\",\"bw-hit\",\"bw-gband\"]"
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 30px (29.7 on screen, Names): name · figure · sub line · in-bar words = 1000",
+  "ok": true,
+  "detail": "1000 {\"name\":28,\"fig\":0,\"sub\":0,\"words\":0,\"chips\":0}"
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 30px: no stage chip or pill",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "BW-9",
+  "where": "rows at 30px: never \"overdue\" or \"late\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 56px (55.8 on screen, Figures): name · figure · sub line · in-bar words = 1100",
+  "ok": false,
+  "detail": "1000 {\"name\":15,\"fig\":0,\"sub\":0,\"words\":0,\"chips\":0}"
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 56px: no stage chip or pill",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "BW-9",
+  "where": "rows at 56px: never \"overdue\" or \"late\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 84px (83.8 on screen, Dates): name · figure · sub line · in-bar words = 1110",
+  "ok": false,
+  "detail": "1000 {\"name\":10,\"fig\":0,\"sub\":0,\"words\":0,\"chips\":0}"
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 84px: no stage chip or pill",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "BW-9",
+  "where": "rows at 84px: never \"overdue\" or \"late\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 100px (99.8 on screen, Timeline): name · figure · sub line · in-bar words = 1111",
+  "ok": false,
+  "detail": "1001 {\"name\":9,\"fig\":0,\"sub\":0,\"words\":19,\"chips\":0}"
+ },
+ {
+  "lock": "BW-2",
+  "where": "rows at 100px: no stage chip or pill",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "BW-9",
+  "where": "rows at 100px: never \"overdue\" or \"late\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-3",
+  "where": "a query with three or more stages on screen (population 1 rows, 3 bars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-3",
+  "where": "each stage bar's left edge is within 2px of its date's x",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-3",
+  "where": "each stage bar is its stage's colour",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-3",
+  "where": "each stage's words drop as its room runs out (stageTx)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-3",
+  "where": "a short stage shows its date without its name (population 0)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-4",
+  "where": "fully zoomed (z 24.66): no row is taller than 100px",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-4",
+  "where": "fully zoomed: group gaps are at most 44px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-4",
+  "where": "the first group heading sits within 16px below the ruler",
+  "ok": true,
+  "detail": "124 vs ruler 124"
+ },
+ {
+  "lock": "BW-4",
+  "where": "zoomed in, the header folds to 96px",
+  "ok": true,
+  "detail": "96"
+ },
+ {
+  "lock": "BW-6",
+  "where": "\"← Reply due\": the line cannot leave by this side at this zoom (recorded)",
+  "ok": true,
+  "detail": "pill at 117.921875"
+ },
+ {
+  "lock": "BW-6",
+  "where": "panned past the line: the pill reads \"Reply due →\" at the edge",
+  "ok": true,
+  "detail": "Reply due → l 289.34375 r 378"
+ },
+ {
+  "lock": "BW-6",
+  "where": "\"Reply due →\" is outlined (white, a navy ring)",
+  "ok": true,
+  "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"shadow\":\"rgb(42, 58, 82) 0px 0px 0px 1.5px inset\"}"
+ },
+ {
+  "lock": "BW-6",
+  "where": "a tap on \"Reply due →\" glides the line back on screen (62% across)",
+  "ok": true,
+  "detail": "240.796875"
+ },
+ {
+  "lock": "BW-6",
+  "where": "a tap on the pill opens no row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "the line was taken off screen (population 1 sides)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-7",
+  "where": "Ctrl+wheel: the row under the pointer stays under it (within 4px)",
+  "ok": true,
+  "detail": "seed-query-8 drift 0.01"
+ },
+ {
+  "lock": "BW-7",
+  "where": "a pinch: the row under the fingers stays under them (within 4px)",
+  "ok": true,
+  "detail": "seed-query-8 drift 0.01"
+ },
+ {
+  "lock": "BW-8",
+  "where": "with motion (the control): the hawk drifts, a drag glides on, replay runs",
+  "ok": true,
+  "detail": "{\"drift\":\"bw-hsdrift\",\"glide\":57.997153378420215,\"moved\":161.55494421403515,\"replay\":\"running\"}"
+ },
+ {
+  "lock": "BW-8",
+  "where": "reduced motion: the hawk does not drift",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "BW-8",
+  "where": "reduced motion: a drag stops where it is let go",
+  "ok": true,
+  "detail": "{\"drift\":\"none\",\"glide\":0,\"moved\":161.55494421403515,\"replay\":\"idle\"}"
+ },
+ {
+  "lock": "BW-8",
+  "where": "reduced motion: replay never runs",
+  "ok": true,
+  "detail": "idle"
+ },
+ {
+  "lock": "BW-10",
+  "where": "740x360: the same world, the header folded (96px)",
+  "ok": true,
+  "detail": "{\"h\":96,\"n\":70}"
+ },
+ {
+  "lock": "BW-10",
+  "where": "740x360: no dock",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "BW-10",
+  "where": "740x360: every row on screen, fitted",
+  "ok": true,
+  "detail": "70/70"
+ },
+ {
+  "lock": "BW-10",
+  "where": "844x390 is above the breakpoint (the desktop layout): the false premise, recorded",
+  "ok": true,
+  "detail": "{\"at740\":true,\"at844\":false}"
+ }
+]
