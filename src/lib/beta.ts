@@ -20,8 +20,10 @@ import { MONTHS_SHORT } from "./dates";
 export const BETA_MODE = true;
 
 /**
- * ⚠️ NON-WORKSPACE V1 (12 Nov): ARMED ON DEV ONLY — on when the bundle targets `scriptally-dev`, off on prod, locally
- * and in the emulator. `redeemInviteCode` ships to dev in the same deploy. Prod's gate is Nick's to arm.
+ * ⚠️ APP SITE V1 (Phase 2): ARMED BY THE BUILD — `VITE_INVITE_GATE=true` in `.env.development` and `.env.production`,
+ * so dev and the prod app site (app.queryhawk.net) show the founder's code screen; the emulator's build leaves it off.
+ * (Non-workspace v1 armed it on dev only, by the bundle's project id.) The landing build never draws the screen.
+ * The lock that counts is on the server: `inviteGate` refuses any account no unused code names.
  * Signing in is never gated: the gate stands only in front of creating an account.
  *
  * ⚠️ THE INVITE GATE IS A SEPARATE FLAG FOR A REASON.
@@ -35,10 +37,10 @@ export const BETA_MODE = true;
  * Folding it into BETA_MODE would have made one flag mean "show the beta furniture" and "lock the
  * door" at once, and the safe half is the reason to leave the flag on.
  *
- * Nick: deploy `functions:redeemInviteCode` and `firestore:rules`, seed at least one
- * `inviteCodes/{CODE}` document, redeem a code end to end, THEN set this true.
+ * Before an environment builds with it on: deploy `functions:redeemInviteCode` and `functions:inviteGate`, seed at
+ * least one `inviteCodes/{CODE}` document, and redeem a code end to end.
  */
-export const INVITE_GATE_ENABLED: boolean = import.meta.env.VITE_FIREBASE_PROJECT_ID === "scriptally-dev";
+export const INVITE_GATE_ENABLED: boolean = import.meta.env.VITE_INVITE_GATE === "true";
 
 /**
  * Where the strip's dismissal is remembered.

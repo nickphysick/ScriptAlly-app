@@ -77,9 +77,14 @@ describe("⚠️ \"founder's code\", never \"invite code\", in anything a reader
   });
 });
 
-describe("the gate is armed on dev only", () => {
-  it("reads the bundle's project, so prod's build is off", () => {
-    const beta = readFileSync(resolve(__dirname, "beta.ts"), "utf8");
-    expect(beta).toContain('export const INVITE_GATE_ENABLED: boolean = import.meta.env.VITE_FIREBASE_PROJECT_ID === "scriptally-dev";');
+describe("the gate is armed by the build (App site v1, Phase 2)", () => {
+  const read = (f: string) => readFileSync(resolve(__dirname, "../..", f), "utf8");
+  it("reads VITE_INVITE_GATE, not the project, so prod's app build can arm it", () => {
+    expect(read("src/lib/beta.ts")).toContain('export const INVITE_GATE_ENABLED: boolean = import.meta.env.VITE_INVITE_GATE === "true";');
+  });
+  it("on for dev and every production build (the landing build never draws the screen); off in the emulator", () => {
+    expect(read(".env.development")).toMatch(/^VITE_INVITE_GATE=true$/m);
+    expect(read(".env.production")).toMatch(/^VITE_INVITE_GATE=true$/m);
+    expect(read(".env.emulator")).not.toMatch(/^VITE_INVITE_GATE=/m);
   });
 });

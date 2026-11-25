@@ -16,6 +16,8 @@ interface ImportMetaEnv {
   readonly VITE_LANDING_ONLY?: string;
   /** App site v1: the landing site's origin, where a refused writer is sent to join the waitlist (src/lib/notInvited.ts). */
   readonly VITE_LANDING_URL?: string;
+  /** App site v1: "true" shows the founder's code screen in front of creating an account (src/lib/beta.ts). */
+  readonly VITE_INVITE_GATE?: string;
   /** GA4 measurement id for the public site. Set in .env.production only; empty = no analytics, no bar. */
   readonly VITE_GA_MEASUREMENT_ID?: string;
 }
