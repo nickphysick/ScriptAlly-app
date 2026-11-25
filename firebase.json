@@ -8,6 +8,9 @@
     ],
     "predeploy": [
       "npm --prefix functions run build"
+    ],
+    "postdeploy": [
+      "node \"$PROJECT_DIR/scripts/invite-gate-check.mjs\""
     ]
   },
   "firestore": {

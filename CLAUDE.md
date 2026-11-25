@@ -82,7 +82,7 @@ Forty-three page sections that only the dev line's old CLAUDE.md held (Contact l
 - Left alone deliberately: the per-query `activity` loops in `deleteManuscript`/`deleteAgent`.
 
 ## Deployment
-- **`/Users/nickphysick/ScriptAlly-live` is the only prod deploy folder. Prod only ever ships the pushed tip of `release/live-1`** (preflight check 4c fails otherwise). Small landing changes: commit on `release/live-1`, push, then `npm run deploy:live-hosting` (Nick's to run). Never deploy prod from a scratch worktree.
+- **`/Users/nickphysick/ScriptAlly-live` is the only prod deploy folder. Prod only ever ships the pushed tip of `main`**, checked out detached there (`git switch --detach origin/main`; preflight check 4c fails otherwise). `release/live-1` is retired. Landing changes: commit on `main`, push, then `npm run deploy:live-hosting` (Nick's to run). Never deploy prod from a scratch worktree.
 - **Every `firebase deploy` names its target with `--project`.** A bare deploy resolves `.firebaserc`'s `default`, which is **prod** (`gen-lang-client-0801391782`).
 - **Dev hosting (on request):** `npm run build:dev && firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev` → https://scriptally-dev.web.app. Hosting-only unless functions or rules changed.
 - **Dev can carry several unmerged branches.** Before any dev deploy, name the branch the served bundle was built from; if it is not yours, merge yours into it as a new branch and deploy that. A bundle-hash mismatch is a stop.
@@ -91,7 +91,8 @@ Forty-three page sections that only the dev line's old CLAUDE.md held (Contact l
 - **Dev Firestore rules are Claude's to deploy; prod remains Nick's.** One command: `firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev`. Never prod, never hosting in the same act. Before: grep `firestore.rules` for the fields it should carry (missing → STOP, the tree is wrong). After: verify by the release `updateTime` under `--debug` (the success line never names the database), wait for propagation, then run `node tests/e2e/rulesProbe.mjs`.
 - **`rulesProbe.mjs` returns a vintage** (which commit the deployed ruleset stops at), not a yes/no — use it instead of inferring from a denial. A denial can also be the document id: `isValidId` requires `^[a-zA-Z0-9_-]+$`; sanitise generated ids at construction.
 - **Each project has exactly ONE Firestore database:** prod → `ai-studio-ae82196c-c59e-40b9-b209-9fb02f67ade6` (no `(default)`); dev → `(default)`. Prod rules: `npm run deploy:rules` (Nick). Functions are europe-west2; a transient dev "Internal error" — retry.
-- **Functions run on Node 22** (`engines.node` in `functions/package.json`); `release/live-1` still says 20 and needs the same change before any prod functions deploy.
+- **Functions run on Node 22** (`engines.node` in `functions/package.json`).
+- **Every functions deploy ends with `scripts/invite-gate-check.mjs`** (firebase.json `functions.postdeploy`): it points the invite check's `beforeCreate` trigger at its run.app address (firebase-functions 6.x refuses the cloudfunctions.net one, and every sign-up then fails) and verifies it. A red there fails the deploy: fix it before anything else. Deploy the check alone with `npm run deploy:invite-gate -- --project <id>`.
 - **Prod:** Nick only; `git push`, then a deploy naming the prod alias (app site `scriptally-app`).
 - Waitlist and founding-invite deploy rules (`/api/waitlist` not in `firebase.json`, the rewrite block, deploy order function → rules → hosting, verify idempotency, the prod counter): docs/decisions/landing-public.md.
 

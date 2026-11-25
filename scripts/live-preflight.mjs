@@ -21,8 +21,9 @@ import { pushedState } from "./livePushed.mjs";
 const ROOT = process.cwd();
 const PROJECT = "prod"; // .firebaserc alias for gen-lang-client-0801391782
 const PROD_ENV_FILE = "functions/.env.gen-lang-client-0801391782";
-/* landing-live was fast-forwarded into release/live-1 (18 Oct), and the runbook runs from there. */
-const BRANCHES = ["release/live-1"];
+/* Prod deploys from main (25 Nov; release/live-1 retired). The deploy folder holds main's pushed tip DETACHED,
+   because the primary checkout already holds the main branch and git allows it in one worktree only. */
+const BRANCHES = ["main"];
 const LIVE_TITLE = "QueryHawk: Your smart querying companion";
 /** Every lab hash App.tsx routes; `#/plans` is the DEV hash, not the `/plans` path. Kept equal to
  *  `LAB_HASHES` in src/lib/prodBuild.test.ts (that file's P1 is the same claim, at build time). */
@@ -133,8 +134,10 @@ if (!existsSync(join(distDir, "index.html"))) {
 const diff = sh("git", ["diff", "--name-only", "HEAD"]).trim();
 line(diff === "", "4a · no uncommitted change to a tracked file", diff ? diff.split("\n").join(", ") : "");
 const branch = sh("git", ["rev-parse", "--abbrev-ref", "HEAD"]).trim();
-line(BRANCHES.includes(branch), "4b · HEAD is " + BRANCHES.join(" or "),
-  BRANCHES.includes(branch) ? `${branch} ${sh("git", ["rev-parse", "--short", "HEAD"]).trim()}` : `on ${branch}`);
+/* "HEAD" is a detached checkout: allowed, because 4c below then requires it to be origin's main exactly. */
+const onLine = BRANCHES.includes(branch) || branch === "HEAD";
+line(onLine, "4b · HEAD is " + BRANCHES.join(" or ") + ", or detached",
+  onLine ? `${branch} ${sh("git", ["rev-parse", "--short", "HEAD"]).trim()}` : `on ${branch}`);
 /* ⚠️ PROD SHIPS THE PUSHED TIP, EXACTLY (4 Nov). Prod was once built from 9 unpushed local commits and
    then rolled back by a deploy from the pushed tip. scripts/livePushed.mjs; locked in src/lib/livePushed.test.ts. */
 const pushed = pushedState(ROOT, BRANCHES[0]);
