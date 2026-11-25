@@ -219,6 +219,8 @@ export interface BwView { z: number; ox: number; oy: number }
 export interface World {
   G: BwG[]; H: number; ext: BwAxisExt; PPD: number; LINE: number;
   vpW: number; vpH: number; bot: number; land: boolean;
+  /** the zoom ceiling: the ref's 6.5, raised so rows can always reach 100px */
+  maxZ: number;
   wxd: (d: number) => number;
   topFor: (z: number) => number;
   fitS: () => number; fitSY: () => number; zT: () => number;
@@ -245,8 +247,12 @@ export function makeWorld(o: WorldOpts): World {
   const wxd = (d: number) => (Math.max(ext.D0, Math.min(ext.D1, d)) - ext.D0) * PPD;
   const top0 = land ? TOPFOLD : TOPFIT;
   const topFor = (z: number) => (land || z > 1.05 ? TOPFOLD : TOPFIT);
-  const fitS = () => Math.min((vpW - 32) / WX, (vpH - top0 - RULE - bot) / (H + 8));
-  const fitSY = () => Math.min(fitS() * 3, Math.max(fitS(), (vpH - top0 - RULE - bot) / (H + 8)));
+  /* ⚠️ A DEPARTURE FOR REAL DATA. The ref's `fitS` is min(width fit, height fit) and its `fitSY` never goes under it:
+     right for its 22 rows (the width binds), but a campaign of 35 squeezes time into a third of the screen, and the
+     fitted rows overflow. Here time keeps the width fit (the ref's own comment: "time keeps the width fit") and rows
+     take the height, whichever way — so every live query is on screen fitted. With the ref's 22 rows both are its. */
+  const fitS = () => (vpW - 32) / WX;
+  const fitSY = () => Math.min(fitS() * 3, (vpH - top0 - RULE - bot) / (H + 8));
   const zT = () => 86 / (RH * fitSY());
   const SX = (z: number) => fitS() * Math.pow(z, XP) * (1 + (Math.max(0, z - zT()) / zT()) * 3);
   const SY = (z: number) => fitSY() * z;
@@ -272,14 +278,18 @@ export function makeWorld(o: WorldOpts): World {
     const last = G[G.length - 1];
     return last ? last.y + GAP + last.rows.length * RH + (o2 - off) : o2;
   };
+  /* ⚠️ MAXZ IS THE REF'S 6.5 WHEN ITS ROWS CAN REACH 100px WITHIN IT (the ref's own data: 6.5 × 30 × 0.667 = 130px, so
+     1.3× the cap). A longer campaign starts with shorter rows, so the ceiling rises to keep that same 1.3× headroom —
+     otherwise the Dates and Timeline levels could never be reached. */
+  const maxZ = Math.max(MAXZ, (1.3 * RPMAX) / (RH * fitSY()));
   const clamp = (v: BwView): BwView => {
-    const z = Math.min(MAXZ, Math.max(1, v.z)); const ww = WX * SX(z), hh = yOff(H, z), pad = 16;
+    const z = Math.min(maxZ, Math.max(1, v.z)); const ww = WX * SX(z), hh = yOff(H, z), pad = 16;
     const ox = ww + 2 * pad <= vpW ? (vpW - ww) / 2 : Math.min(pad, Math.max(vpW - ww - pad, v.ox));
     const T = topFor(z), oy = hh + T + RULE + bot <= vpH ? T + RULE + 8 : Math.min(T + RULE + 8, Math.max(vpH - hh - bot, v.oy));
     return { z, ox, oy };
   };
   const fitView = (): BwView => ({ z: 1, ox: (vpW - WX * SX(1)) / 2, oy: top0 + RULE + 8 });
-  return { G, H, ext, PPD, LINE: wxd(0), vpW, vpH, bot, land, wxd, topFor, fitS, fitSY, zT, SX, SY, rowPx, gapPx, yOff, yWorld, clamp, fitView };
+  return { G, H, ext, PPD, LINE: wxd(0), vpW, vpH, bot, land, maxZ, wxd, topFor, fitS, fitSY, zT, SX, SY, rowPx, gapPx, yOff, yWorld, clamp, fitView };
 }
 /** the zoom that gives rows `rp` px (ref `zoomToRows`'s z) */
 export const zoomForRows = (w: World, rp: number): number => Math.max(1, rp / RH / w.fitSY());

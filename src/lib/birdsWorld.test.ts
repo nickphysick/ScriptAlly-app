@@ -138,8 +138,18 @@ describe("Phone Birds-eye world v1 — the engine", () => {
   const world = (vpH = 784, land = false) => makeWorld({ groups: bwGroups(rows()), ext: axisExt(rows(), "reply"), vpW: 390, vpH, bot: 90, land });
   it("the scales: SX grows as z^0.25 then faster from the Timeline level; SY = fitSY·z; fitSY up to 3×", () => {
     const w = world();
-    expect(w.fitS()).toBeCloseTo(Math.min((390 - 32) / WX, (784 - TOPFIT - RULE - 90) / (w.H + 8)), 9);
-    expect(w.fitSY()).toBeCloseTo(Math.min(w.fitS() * 3, Math.max(w.fitS(), (784 - TOPFIT - RULE - 90) / (w.H + 8))), 9);
+    expect(w.fitS()).toBeCloseTo((390 - 32) / WX, 9);
+    expect(w.fitSY()).toBeCloseTo(Math.min(w.fitS() * 3, (784 - TOPFIT - RULE - 90) / (w.H + 8)), 9);
+    /* the fitted rows end inside the screen, whatever the campaign's size */
+    for (const n of [3, 22, 60]) {
+      const many = makeWorld({ groups: [{ t: "Plenty of time", rows: Array.from({ length: n }, () => rows()[3]) }], ext: axisExt(rows(), "reply"), vpW: 390, vpH: 784, bot: 90 });
+      const f = many.fitView();
+      /* the ref's own fit leaves its 8px top margin to the reserve: within 8px of it, never into the dock */
+      expect(f.oy + many.yOff(many.H - 12, 1)).toBeLessThanOrEqual(784 - 90 + 8);
+      /* and rows can always be zoomed to 100px */
+      expect(many.rowPx(many.maxZ)).toBe(RPMAX);
+      expect(many.maxZ).toBeGreaterThanOrEqual(MAXZ);
+    }
     expect(w.zT()).toBeCloseTo(86 / (RH * w.fitSY()), 9);
     const z = Math.min(w.zT() * 0.9, 1.5);
     expect(w.SX(z)).toBeCloseTo(w.fitS() * Math.pow(z, XP), 9);
@@ -149,13 +159,13 @@ describe("Phone Birds-eye world v1 — the engine", () => {
   });
   it("rows grow to 100px and gaps to 44px; the bent mapping round-trips within 0.5px", () => {
     const w = world();
-    for (const z of [1, 2, 4, MAXZ]) {
+    for (const z of [1, 2, 4, w.maxZ]) {
       expect(w.rowPx(z)).toBeLessThanOrEqual(RPMAX);
       expect(w.gapPx(z)).toBeLessThanOrEqual(GPMAX);
       for (let wy = 0; wy <= w.H; wy += 7.3) expect(Math.abs(w.yOff(w.yWorld(w.yOff(wy, z), z), z) - w.yOff(wy, z))).toBeLessThan(0.5);
     }
-    expect(w.rowPx(MAXZ)).toBe(RPMAX);
-    expect(w.gapPx(MAXZ)).toBe(GPMAX);
+    expect(w.rowPx(w.maxZ)).toBe(RPMAX);
+    expect(w.gapPx(w.maxZ)).toBe(GPMAX);
     /* the first row starts one gap in */
     expect(w.yOff(GAP, 1)).toBeCloseTo(w.gapPx(1), 6);
     expect(zoomForRows(w, 56) * RH * w.fitSY()).toBeCloseTo(56, 6);
@@ -165,7 +175,8 @@ describe("Phone Birds-eye world v1 — the engine", () => {
     expect(w.topFor(1)).toBe(TOPFIT);
     expect(w.topFor(1.06)).toBe(TOPFOLD);
     expect(w.fitView()).toEqual({ z: 1, ox: (390 - WX * w.SX(1)) / 2, oy: TOPFIT + RULE + 8 });
-    expect(w.clamp({ z: 99, ox: 0, oy: 0 }).z).toBe(MAXZ);
+    expect(w.clamp({ z: 99, ox: 0, oy: 0 }).z).toBe(w.maxZ);
+    expect(w.maxZ).toBe(Math.max(MAXZ, (1.3 * RPMAX) / (RH * w.fitSY())));
     expect(w.clamp({ z: 0.2, ox: 0, oy: 0 }).z).toBe(1);
     const c = w.clamp({ z: 3, ox: 9999, oy: 9999 });
     expect(c.ox).toBe(16);
