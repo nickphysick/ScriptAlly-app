@@ -32,6 +32,10 @@ export const CONFIGS = [
      and .firebaseapp.com, which is also prod's auth domain — Firebase's own /__/auth/* pages do
      not receive these headers, checked on dev's default site). */
   { file: "firebase.holding.json", env: ".env.production", csp: "report-only", kind: "holding" },
+  /* App site v1: the prod app site (app.queryhawk.net), report-only like the landing it sits beside, and dev's
+     landing mirror, enforcing like the rest of dev. */
+  { file: "firebase.app.json", env: ".env.production", csp: "report-only", kind: "app" },
+  { file: "firebase.dev-landing.json", env: ".env.development", csp: "enforce", kind: "app" },
 ];
 
 const readEnv = (file) => {

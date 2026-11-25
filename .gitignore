@@ -1,6 +1,9 @@
 node_modules/
 build/
 dist/
+# App site v1: the prod app site's build and dev's landing mirror (package.json build:prod-app, build:dev-landing)
+dist-app/
+dist-landing/
 coverage/
 .DS_Store
 *.log

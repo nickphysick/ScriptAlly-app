@@ -8,7 +8,8 @@
  * The Firebase project is baked into the bundle at build time from Vite env files. This is the
  * single check that would have caught the morning a prod-configured bundle went to the dev site.
  *
- *   node scripts/assert-build-target.mjs <dev|prod>
+ *   node scripts/assert-build-target.mjs <dev|prod> [outDir]     (outDir defaults to dist; App site v1 builds
+ *                                                                 the app site into dist-app, dev's landing into dist-landing)
  *
  * Expected project IDs are read from the SAME env files Vite uses (.env.development /
  * .env.production), so this never drifts from the real config.
@@ -50,7 +51,7 @@ const intended = target === "dev" ? DEV_ID : PROD_ID;
 const forbidden = target === "dev" ? PROD_ID : DEV_ID;
 
 // Concatenate every built JS bundle and scan for both project IDs.
-const assetsDir = "dist/assets";
+const assetsDir = join(process.argv[3] || "dist", "assets");
 let bundle = "";
 try {
   for (const f of readdirSync(assetsDir)) {
