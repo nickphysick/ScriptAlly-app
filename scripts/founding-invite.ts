@@ -32,8 +32,9 @@ export const USAGE =
   "       add --project <id> --send --confirm (with ALLOW_LIVE_FIRESTORE=1) to create the codes and send";
 
 export const DEFAULT_OUT = "reports/non-workspace-v1/emails/invites-dry-run";
-/** The prod app's own hosting site; override with --app-url. Only shapes the dry run's links. */
-export const DRY_APP_URL = "https://scriptally-app.web.app";
+/** The prod app site (App site v1); override with --app-url. Only shapes the dry run's links: a real send takes
+ *  APP_PUBLIC_URL from the environment it runs in. */
+export const DRY_APP_URL = "https://app.queryhawk.net";
 const DRY_PUBLIC_URL = "https://queryhawk.net";
 /** The dry run signs nothing real: its unsubscribe links carry this and say so. */
 const DRY_SALT = "dry-run-not-a-real-salt";

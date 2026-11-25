@@ -8,6 +8,9 @@
  *  - "redeem" — SIGNED IN. Marks the code used by this account (in a transaction, single use) and then
  *               sets the founding flag through THE ONE SETTER, `markFoundingFlags` (foundingStats.ts),
  *               so the cap and the order rules are the nightly backstop's own. No second path writes it.
+ *  - "allow"  — no account needed (App site v1). "Use a different one": an unused code with a live link records the
+ *               other address as `allowedEmail`, so the invite check (`inviteGate`) lets that address make the
+ *               account. One other address at a time; the answer is always `{ ok: true }`, like "fresh".
  *  - "fresh"  — no account needed. An invite link has run out: its place is still held, and the code
  *               gets a new 48-hour link. Sending the fresh email is `sendFreshInvite`'s job. Rate-limited per
  *               code (one send every 10 minutes, five in any 24 hours); over the limit the answer is the same
@@ -23,7 +26,7 @@
  * ⚠️ REDEEM IS IDEMPOTENT FOR THE SAME ACCOUNT. A writer whose first redeem call dropped on the way
  *    back can call again; another account presenting a used code is refused.
  *
- * Code doc: inviteCodes/{CODE} = { issuedToEmail, name?, foundingNo?, linkExpiresAt?, createdAt,
+ * Code doc: inviteCodes/{CODE} = { issuedToEmail, allowedEmail?, name?, foundingNo?, linkExpiresAt?, createdAt,
  *                                   usedAt?, usedBy?, usedByUid?, freshSentAt?: number[] (ms, last 24h) }
  */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
@@ -33,6 +36,7 @@ import { db } from "./firestore";
 import { listAllUsers, markFoundingFlags, type Account } from "./foundingStats";
 import { RESEND_API_KEY } from "./email";
 import { IP_HASH_SALT } from "./waitlistMail";
+import { allowEmailFor } from "./inviteGateCore";
 
 const FieldValue = admin.firestore.FieldValue;
 
@@ -158,13 +162,25 @@ export async function freshLink(store: Firestore, rawCode: unknown, deps: CodeDe
   return { ok: true };
 }
 
+/** Record the other address an unused, live code may make its account with. Silent either way. */
+export async function allowEmail(store: Firestore, rawCode: unknown, rawEmail: unknown, deps: CodeDeps = {}): Promise<{ ok: true }> {
+  const ref = store.doc(`inviteCodes/${codeDocId(normaliseCode(rawCode))}`);
+  const now = (deps.now ?? Date.now)();
+  await store.runTransaction(async (tx) => {
+    const s = await tx.get(ref);
+    const { write } = allowEmailFor({ exists: s.exists, usedAt: s.get("usedAt"), linkExpiresAt: ms(s.get("linkExpiresAt")) }, rawEmail, now);
+    if (write) tx.update(ref, { allowedEmail: write });
+  });
+  return { ok: true };
+}
+
 /* Non-workspace v1, 9d: the fresh-link path now SENDS the invite, so the callable binds the mail key and the salt
    the invite's unsubscribe link is signed with (both already exist wherever the waitlist function deploys). */
 export const redeemInviteCode = onCall(
   { region: "europe-west2", timeoutSeconds: 60, memory: "256MiB", secrets: [RESEND_API_KEY, IP_HASH_SALT] },
   async (request) => {
     const data = (request.data ?? {}) as Record<string, unknown>;
-    const mode = data.mode === "redeem" || data.mode === "fresh" ? data.mode : "check";
+    const mode = data.mode === "redeem" || data.mode === "fresh" || data.mode === "allow" ? data.mode : "check";
     try {
       switch (mode) {
         case "check":
@@ -173,6 +189,8 @@ export const redeemInviteCode = onCall(
           const { sendFreshInvite } = await import("./inviteSend");
           return await freshLink(db, data.code, { sendFreshInvite });
         }
+        case "allow":
+          return await allowEmail(db, data.code, data.email);
         case "redeem": {
           if (!request.auth?.uid) throw new HttpsError("unauthenticated", MSG.signIn);
           const email = typeof request.auth.token?.email === "string" ? request.auth.token.email : null;

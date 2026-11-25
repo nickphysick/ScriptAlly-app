@@ -1,0 +1,350 @@
+{
+ "smallest": {
+  "outcome": "allowed",
+  "fields": 7,
+  "total": 1603,
+  "isValidQuery": 1531,
+  "updateAllowlist": 23,
+  "topLines": [
+   {
+    "line": 465,
+    "n": 141,
+    "src": "return data.id is string && data.id.size() <= 128"
+   },
+   {
+    "line": 506,
+    "n": 38,
+    "src": "&& (data.get('materialsRequestedQuantity', null) == null || (data.materialsRequestedQuantity is string || data"
+   },
+   {
+    "line": 543,
+    "n": 32,
+    "src": "&& (data.get('materialsWanted', null) == null || ((data.materialsWanted is list || data.materialsWanted is map"
+   },
+   {
+    "line": 471,
+    "n": 26,
+    "src": "data.status == 'Queried' ||"
+   },
+   {
+    "line": 485,
+    "n": 24,
+    "src": "&& (data.get('dateSent', null) == null || (data.dateSent is string && data.dateSent.size() <= 64))"
+   },
+   {
+    "line": 486,
+    "n": 24,
+    "src": "&& (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisa"
+   },
+   {
+    "line": 493,
+    "n": 24,
+    "src": "&& (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))"
+   },
+   {
+    "line": 496,
+    "n": 24,
+    "src": "&& (data.get('nudgeSetAt', null) == null || (data.nudgeSetAt is string && data.nudgeSetAt.size() <= 64))"
+   },
+   {
+    "line": 497,
+    "n": 24,
+    "src": "&& (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate"
+   },
+   {
+    "line": 498,
+    "n": 24,
+    "src": "&& (data.get('responseDeadline', null) == null || (data.responseDeadline is string && data.responseDeadline.si"
+   },
+   {
+    "line": 499,
+    "n": 24,
+    "src": "&& (data.get('partialRequestedDate', null) == null || (data.partialRequestedDate is string && data.partialRequ"
+   },
+   {
+    "line": 500,
+    "n": 24,
+    "src": "&& (data.get('partialSentDate', null) == null || (data.partialSentDate is string && data.partialSentDate.size("
+   },
+   {
+    "line": 501,
+    "n": 24,
+    "src": "&& (data.get('fullRequestedDate', null) == null || (data.fullRequestedDate is string && data.fullRequestedDate"
+   },
+   {
+    "line": 502,
+    "n": 24,
+    "src": "&& (data.get('fullSentDate', null) == null || (data.fullSentDate is string && data.fullSentDate.size() <= 64))"
+   },
+   {
+    "line": 505,
+    "n": 24,
+    "src": "&& (data.get('materialsRequestedType', null) == null || (data.materialsRequestedType is string && data.materia"
+   }
+  ]
+ },
+ "smallest (again)": {
+  "outcome": "allowed",
+  "fields": 7,
+  "total": 1603,
+  "isValidQuery": 1531,
+  "updateAllowlist": 23,
+  "topLines": [
+   {
+    "line": 465,
+    "n": 141,
+    "src": "return data.id is string && data.id.size() <= 128"
+   },
+   {
+    "line": 506,
+    "n": 38,
+    "src": "&& (data.get('materialsRequestedQuantity', null) == null || (data.materialsRequestedQuantity is string || data"
+   },
+   {
+    "line": 543,
+    "n": 32,
+    "src": "&& (data.get('materialsWanted', null) == null || ((data.materialsWanted is list || data.materialsWanted is map"
+   },
+   {
+    "line": 471,
+    "n": 26,
+    "src": "data.status == 'Queried' ||"
+   },
+   {
+    "line": 485,
+    "n": 24,
+    "src": "&& (data.get('dateSent', null) == null || (data.dateSent is string && data.dateSent.size() <= 64))"
+   },
+   {
+    "line": 486,
+    "n": 24,
+    "src": "&& (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisa"
+   },
+   {
+    "line": 493,
+    "n": 24,
+    "src": "&& (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))"
+   },
+   {
+    "line": 496,
+    "n": 24,
+    "src": "&& (data.get('nudgeSetAt', null) == null || (data.nudgeSetAt is string && data.nudgeSetAt.size() <= 64))"
+   },
+   {
+    "line": 497,
+    "n": 24,
+    "src": "&& (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate"
+   },
+   {
+    "line": 498,
+    "n": 24,
+    "src": "&& (data.get('responseDeadline', null) == null || (data.responseDeadline is string && data.responseDeadline.si"
+   },
+   {
+    "line": 499,
+    "n": 24,
+    "src": "&& (data.get('partialRequestedDate', null) == null || (data.partialRequestedDate is string && data.partialRequ"
+   },
+   {
+    "line": 500,
+    "n": 24,
+    "src": "&& (data.get('partialSentDate', null) == null || (data.partialSentDate is string && data.partialSentDate.size("
+   },
+   {
+    "line": 501,
+    "n": 24,
+    "src": "&& (data.get('fullRequestedDate', null) == null || (data.fullRequestedDate is string && data.fullRequestedDate"
+   },
+   {
+    "line": 502,
+    "n": 24,
+    "src": "&& (data.get('fullSentDate', null) == null || (data.fullSentDate is string && data.fullSentDate.size() <= 64))"
+   },
+   {
+    "line": 505,
+    "n": 24,
+    "src": "&& (data.get('materialsRequestedType', null) == null || (data.materialsRequestedType is string && data.materia"
+   }
+  ]
+ },
+ "fullest": {
+  "outcome": "denied: 7 PERMISSION_DENIED: \nfalse for 'update' @ L7, Unable to evaluate the expression as the maximum of 1000 expressions to evaluate has been reached. for 'update' @ L1115, false for 'update' @ L7, Unable ",
+  "fields": 72,
+  "total": 1314,
+  "isValidQuery": 1247,
+  "updateAllowlist": 14,
+  "topLines": [
+   {
+    "line": 465,
+    "n": 116,
+    "src": "return data.id is string && data.id.size() <= 128"
+   },
+   {
+    "line": 506,
+    "n": 38,
+    "src": "&& (data.get('materialsRequestedQuantity', null) == null || (data.materialsRequestedQuantity is string || data"
+   },
+   {
+    "line": 543,
+    "n": 32,
+    "src": "&& (data.get('materialsWanted', null) == null || ((data.materialsWanted is list || data.materialsWanted is map"
+   },
+   {
+    "line": 21,
+    "n": 27,
+    "src": "return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');"
+   },
+   {
+    "line": 471,
+    "n": 26,
+    "src": "data.status == 'Queried' ||"
+   },
+   {
+    "line": 485,
+    "n": 24,
+    "src": "&& (data.get('dateSent', null) == null || (data.dateSent is string && data.dateSent.size() <= 64))"
+   },
+   {
+    "line": 486,
+    "n": 24,
+    "src": "&& (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisa"
+   },
+   {
+    "line": 493,
+    "n": 24,
+    "src": "&& (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))"
+   },
+   {
+    "line": 496,
+    "n": 24,
+    "src": "&& (data.get('nudgeSetAt', null) == null || (data.nudgeSetAt is string && data.nudgeSetAt.size() <= 64))"
+   },
+   {
+    "line": 497,
+    "n": 24,
+    "src": "&& (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate"
+   },
+   {
+    "line": 498,
+    "n": 24,
+    "src": "&& (data.get('responseDeadline', null) == null || (data.responseDeadline is string && data.responseDeadline.si"
+   },
+   {
+    "line": 499,
+    "n": 24,
+    "src": "&& (data.get('partialRequestedDate', null) == null || (data.partialRequestedDate is string && data.partialRequ"
+   },
+   {
+    "line": 500,
+    "n": 24,
+    "src": "&& (data.get('partialSentDate', null) == null || (data.partialSentDate is string && data.partialSentDate.size("
+   },
+   {
+    "line": 501,
+    "n": 24,
+    "src": "&& (data.get('fullRequestedDate', null) == null || (data.fullRequestedDate is string && data.fullRequestedDate"
+   },
+   {
+    "line": 502,
+    "n": 24,
+    "src": "&& (data.get('fullSentDate', null) == null || (data.fullSentDate is string && data.fullSentDate.size() <= 64))"
+   }
+  ]
+ },
+ "fullest (again)": {
+  "outcome": "denied: 7 PERMISSION_DENIED: \nfalse for 'update' @ L7, Unable to evaluate the expression as the maximum of 1000 expressions to evaluate has been reached. for 'update' @ L1115, false for 'update' @ L7, Unable ",
+  "fields": 72,
+  "total": 1314,
+  "isValidQuery": 1247,
+  "updateAllowlist": 14,
+  "topLines": [
+   {
+    "line": 465,
+    "n": 116,
+    "src": "return data.id is string && data.id.size() <= 128"
+   },
+   {
+    "line": 506,
+    "n": 38,
+    "src": "&& (data.get('materialsRequestedQuantity', null) == null || (data.materialsRequestedQuantity is string || data"
+   },
+   {
+    "line": 543,
+    "n": 32,
+    "src": "&& (data.get('materialsWanted', null) == null || ((data.materialsWanted is list || data.materialsWanted is map"
+   },
+   {
+    "line": 21,
+    "n": 27,
+    "src": "return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');"
+   },
+   {
+    "line": 471,
+    "n": 26,
+    "src": "data.status == 'Queried' ||"
+   },
+   {
+    "line": 485,
+    "n": 24,
+    "src": "&& (data.get('dateSent', null) == null || (data.dateSent is string && data.dateSent.size() <= 64))"
+   },
+   {
+    "line": 486,
+    "n": 24,
+    "src": "&& (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisa"
+   },
+   {
+    "line": 493,
+    "n": 24,
+    "src": "&& (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))"
+   },
+   {
+    "line": 496,
+    "n": 24,
+    "src": "&& (data.get('nudgeSetAt', null) == null || (data.nudgeSetAt is string && data.nudgeSetAt.size() <= 64))"
+   },
+   {
+    "line": 497,
+    "n": 24,
+    "src": "&& (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate"
+   },
+   {
+    "line": 498,
+    "n": 24,
+    "src": "&& (data.get('responseDeadline', null) == null || (data.responseDeadline is string && data.responseDeadline.si"
+   },
+   {
+    "line": 499,
+    "n": 24,
+    "src": "&& (data.get('partialRequestedDate', null) == null || (data.partialRequestedDate is string && data.partialRequ"
+   },
+   {
+    "line": 500,
+    "n": 24,
+    "src": "&& (data.get('partialSentDate', null) == null || (data.partialSentDate is string && data.partialSentDate.size("
+   },
+   {
+    "line": 501,
+    "n": 24,
+    "src": "&& (data.get('fullRequestedDate', null) == null || (data.fullRequestedDate is string && data.fullRequestedDate"
+   },
+   {
+    "line": 502,
+    "n": 24,
+    "src": "&& (data.get('fullSentDate', null) == null || (data.fullSentDate is string && data.fullSentDate.size() <= 64))"
+   }
+  ]
+ },
+ "threshold (rule order)": {
+  "optionalFields": 65,
+  "firstDeniedAt": 17,
+  "firstDeniedField": "rrNotes",
+  "allowedAgainAfterFirstDenial": []
+ },
+ "threshold (reversed)": {
+  "optionalFields": 65,
+  "firstDeniedAt": 18,
+  "firstDeniedField": "basedOnPackageEdition",
+  "allowedAgainAfterFirstDenial": []
+ }
+}

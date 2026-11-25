@@ -234,12 +234,14 @@ if (TAG !== "before" && run("1")) test("QC164-1/2/3/8/9 · strip name and track,
     L3.check(`${id}: the day is in the name row, not the strip`, !s.dayInBand && (step == null ? s.day == null : /^Day \d+$/.test(s.day ?? "")), `${s.day} · in band ${s.dayInBand}`);
     /* L8 — the writer's bubbles white; the agent's their stage band (a holding reply white) */
     const bx = await page.evaluate((card) => [...document.querySelectorAll<HTMLElement>(`${card} [data-qc152='thread'] > [data-qc152='msg']`)].map((m) => ({
-      side: m.dataset.side, status: m.dataset.status ?? "", kind: m.dataset.kind ?? "", bg: getComputedStyle(m.querySelector<HTMLElement>("[data-qc152='bubble']")!).backgroundColor,
+      side: m.dataset.side, status: m.dataset.status ?? "", kind: m.dataset.kind ?? "", note: m.classList.contains("oc-note"), bg: getComputedStyle(m.querySelector<HTMLElement>("[data-qc152='bubble']")!).backgroundColor,
       quote: m.querySelector<HTMLElement>("[data-qc152='quote']") ? (() => { const q = m.querySelector<HTMLElement>("[data-qc152='quote']")!; const cs = getComputedStyle(q); const cl = q.cloneNode(true) as HTMLElement; cl.querySelectorAll(".qc152-tsp").forEach((x) => x.remove()); return { text: cl.textContent ?? "", clamp: cs.webkitLineClamp || (cs as unknown as Record<string, string>).lineClamp, h: q.offsetHeight, lh: parseFloat(cs.lineHeight), rule: cs.borderLeftWidth + " " + cs.borderLeftColor }; })() : null,
     })), CARD);
     for (const [i, b] of bx.entries()) {
       if (b.side === "me") L8.check(`${id} #${i}: the writer's bubble is white`, b.bg === "rgb(255, 255, 255)", b.bg);
-      else if (b.kind === "holding") L8.check(`${id} #${i}: a holding reply stays white`, b.bg === "rgb(255, 255, 255)", b.bg);
+      /* Controls: entry v1 — an agent's reply that moves nothing (chaser, holding, note; an old holding reply too) is the
+         small note on the ref's #f6f3ee, never a full bubble; its own block below proves one is found */
+      else if (b.kind === "reply") L8.check(`${id} #${i}: an agent's reply is the small note (#f6f3ee)`, b.note && b.bg === "rgb(246, 243, 238)", `${b.bg} note=${b.note}`);
       else {
         const stg = /Partial/.test(b.status) ? "partial" : b.status === "Queried" ? "queried" : null;
         if (stg) L8.check(`${id} #${i}: the agent's bubble is its stage band (${stg})`, b.bg === rgb(BAND[stg]), b.bg);
@@ -256,6 +258,23 @@ if (TAG !== "before" && run("1")) test("QC164-1/2/3/8/9 · strip name and track,
     } else if (!stored) {
       L9.check(`${id}: no words stored, no quote element`, qs.length === 0, String(qs.length));
     }
+  }
+  /* L8 · the holding reply (seedQc152 "holding": an OLD "Holding reply" row, 10 days ago, "Thanks — reading now.") — it
+     was a full white bubble until Controls: entry v1, and is now the small note. A card that shows no reply step has
+     failed this check, not passed it. */
+  const hOpened = await openCard(page, "q152-holding");
+  L8.check("q152-holding: population — the card opened", hOpened, "");
+  const h = hOpened ? await page.evaluate((card) => [...document.querySelectorAll<HTMLElement>(`${card} [data-qc152='thread'] > [data-qc152='msg'][data-kind='reply']`)].map((m) => {
+    const bx = m.querySelector<HTMLElement>("[data-qc152='bubble']")!;
+    return { cls: m.className, bg: getComputedStyle(bx).backgroundColor, radius: getComputedStyle(bx).borderTopLeftRadius, shadow: getComputedStyle(bx).boxShadow,
+      title: m.querySelector<HTMLElement>("[data-qc152='msg-title']")?.innerText.trim() ?? "", quote: m.querySelector<HTMLElement>("[data-qc152='quote']")?.innerText.trim() ?? "",
+      mark: !!m.querySelector("[data-qc152='glyph'] [data-mark='reply']") };
+  }), CARD) : [];
+  L8.check("q152-holding: exactly one reply step found", h.length === 1, JSON.stringify(h.map((x) => x.title)));
+  for (const r of h) {
+    L8.check("q152-holding: the small note (oc oc-note), not a full bubble", /\boc\b/.test(r.cls) && /\boc-note\b/.test(r.cls), r.cls);
+    L8.check("q152-holding: the ref's box #f6f3ee, 12px, no shadow", r.bg === "rgb(246, 243, 238)" && r.radius === "12px" && r.shadow === "none", `${r.bg} ${r.radius} ${r.shadow}`);
+    L8.check("q152-holding: names a holding reply, quotes their words, the speech-bubble mark", /holding reply/.test(r.title) && r.quote.includes("Thanks — reading now.") && r.mark, `${r.title} · ${r.quote} · mark=${r.mark}`);
   }
   for (const L of [L1, L2, L3, L8, L9]) L.done(5);
 });

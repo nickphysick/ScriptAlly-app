@@ -27,6 +27,7 @@ import { elapsedPhrase } from "./elapsed";
 import { agentPrimary } from "./agentDisplay";
 import { dayMonth, formatDate } from "./dates";
 import { expectedFor } from "./qcSummary";
+import { entryDatesFor, latestFeedReplies } from "./agentReply";
 import { isSweepCard } from "./todoColumns";
 import type { HkGroup } from "./todoHousekeeping";
 
@@ -531,15 +532,21 @@ export type UpcomingKind = "nudge" | "check" | "reply" | "own" | "back";
 export interface Upcoming { ms: number; ymd: string; name: string; line: string; anchorMs: number; kind: UpcomingKind; queryId?: string; agentId?: string }
 /**
  * The next three dates a task will land: an agent's reply date passing, a nudge check-back, and an
- * own task's date. Read from `expectedFor` (the Query Centre's own clock) and the stored dates.
+ * own task's date. Read from `expectedFor` (the Query Centre's own clock) and the stored dates, both through the
+ * agent's latest reply entry (`entryDatesFor`).
  */
 export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
   const today = localYmd(now);
   const out: Upcoming[] = [];
+  /* Controls: entry v1 · close-out 2 — the dates read through the agent's latest reply entry, by the one check the
+     tasks and the cards use (lib/agentReply `entryDatesFor`): a reminder set before the entry lands on its new date,
+     and the reply date is the entry's when it gave one */
+  const replies = latestFeedReplies(db.activities ?? []);
   for (const q of db.queries) {
     const a = db.agents.find((x) => x.id === q.agentId);
     const name = a ? agentPrimary(a) : "An agent";
-    const nudgeAt = anyMs(q.nudgeDate);
+    const entry = entryDatesFor(q, null, replies.get(q.id) ?? null);
+    const nudgeAt = entry.reminderMs ?? NaN;
     const nudged = anyMs(q.lastNudgeSentDate);
     if (Number.isFinite(nudgeAt) && Number.isFinite(nudged) && localYmd(nudgeAt) > today) {
       out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The check-back after your nudge.", anchorMs: nudged, kind: "check", queryId: q.id, agentId: a?.id });
@@ -551,7 +558,7 @@ export function comingUp(db: TrayDb, now: number, limit = 3): Upcoming[] {
       out.push({ ms: nudgeAt, ymd: localYmd(nudgeAt), name, line: "The nudge you planned.", anchorMs: lastSendMs(q), kind: "nudge", queryId: q.id, agentId: a?.id });
       continue;
     }
-    const e = expectedFor(q, a);
+    const e = expectedFor(q, a, entry.reply);
     if (e.kind === "reply" && e.ms != null && localYmd(e.ms) > today) {
       out.push({ ms: e.ms, ymd: localYmd(e.ms), name, line: `${(q.status as string) === QueryStatus.QUERIED ? "Query" : String(q.status)} with the agent. The reply date passes.`, anchorMs: lastSendMs(q), kind: "reply", queryId: q.id, agentId: a?.id });
     }

@@ -21,7 +21,7 @@
  */
 import { deleteField, doc, getDoc, writeBatch, type Firestore } from "firebase/firestore";
 
-export interface NudgePrior { nudgeDate?: string; lastNudgeSentDate?: string }
+export interface NudgePrior { nudgeDate?: string; nudgeSetAt?: string; lastNudgeSentDate?: string }
 
 export async function undoNudge(
   fs: Firestore, uid: string, queryId: string, activityId: string, prior: NudgePrior,
@@ -35,6 +35,8 @@ export async function undoNudge(
   if (twin.exists()) batch.delete(feedRef);
   batch.update(doc(fs, "users", uid, "queries", queryId), {
     nudgeDate: prior.nudgeDate ?? deleteField(),
+    /* follow-up 2 — the reminder's set-at stamp comes back with it (lib/reminderStamp) */
+    nudgeSetAt: prior.nudgeSetAt ?? deleteField(),
     lastNudgeSentDate: prior.lastNudgeSentDate ?? deleteField(),
   });
   await batch.commit();

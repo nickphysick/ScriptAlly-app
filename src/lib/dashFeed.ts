@@ -30,12 +30,12 @@ import { EVENT_LABEL, isEventKey } from "./queryActions/eventKeys";
 import { Activity, ActivityType, Agent, Manuscript, Query, QueryStatus } from "../types";
 import { requeryLine } from "./requery";
 import { eventShape, markSentOffered } from "./feedConversation";
-import { recordSpecFor } from "./todoCalendar";
+import { recordSpecFor, REPLY_RECORD_LABEL } from "./todoCalendar";
+import { isAgentReplyFeed, LEGACY_HOLDING_TYPE, REPLY_KINDS, REPLY_KIND_FIELD, type ReplyKind } from "./agentReply";
 import { stageSentAt } from "./dashBreakdown";
 import type { State } from "./queryCardFacts";
 import { isImportActivity, importSentence, importGroupLine, IMPORT_ROUTE_LABEL, type ImportCounts, type ImportRoute } from "./importEvent";
 import { foldAgentBursts, houseSay, sweepSay } from "./feedHouse";
-import { HOLDING_REPLY_TYPE as HOLDING_REPLY } from "./holdingReply";
 
 const MIN = 60_000, HOUR = 3_600_000, DAY = 86_400_000;
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -184,7 +184,16 @@ const TYPE_PILL: Partial<Record<string, string>> = {
   [ActivityType.MANUSCRIPT_DELETED]: "Manuscript removed",
 };
 
+/* Controls: entry v1 — the agent's reply that moves nothing has a pill of its own, by kind ("Chaser", "Holding reply",
+   "Note"), so it reaches the drawer; it was dropped before (no pill), and `recordSpecFor` files it on the agent's side. */
+const replyPill = (a: object): string | null => {
+  const r = a as Record<string, unknown>;
+  if (!isAgentReplyFeed(r)) return null;
+  const k = r.activityType === LEGACY_HOLDING_TYPE ? "holding" : (REPLY_KINDS as readonly unknown[]).includes(r[REPLY_KIND_FIELD]) ? (r[REPLY_KIND_FIELD] as ReplyKind) : "note";
+  return REPLY_RECORD_LABEL[k];
+};
 export const feedPill = (a: Pick<Activity, "activityType" | "resultingStatus"> & { eventKey?: Activity["eventKey"] }): string | null =>
+  replyPill(a) ??
   /* Query actions v1 (K5) — the structured key first; the status and the type for older rows. */
   (isEventKey(a.eventKey) ? EVENT_LABEL[a.eventKey] : undefined) ??
   (a.resultingStatus ? STATUS_PILL[a.resultingStatus] : undefined) ?? TYPE_PILL[a.activityType] ?? null;
@@ -268,7 +277,7 @@ export const describeEvent = (
   }
   if (!who) return null;
   /* the rows that carry no status of their own (Step 0.4): a holding reply, and the To-do board's offer accepted */
-  if (!status && activityType === HOLDING_REPLY) {
+  if (!status && activityType === LEGACY_HOLDING_TYPE) {
     return [...they, { t: " sent a holding reply" }, ...(msTitle ? [{ t: " about " }, ...book] : [])];
   }
   if (!status && activityType === ActivityType.OFFER_ACCEPTED) {
@@ -553,7 +562,7 @@ export const feedEntries = (i: FeedInput): FeedEntry[] => {
     if (!say) continue;
 
     const dir: "in" | "out" = shape.kind === "housekeeping" ? "out"
-      : (recordSpecFor(String(a.activityType), a.resultingStatus)?.dir ?? "out");
+      : (recordSpecFor(String(a.activityType), a.resultingStatus, (a as unknown as Record<string, unknown>)[REPLY_KIND_FIELD])?.dir ?? "out");
     const evQuery = a.queryId ? i.queries.find((x) => x.id === a.queryId) : undefined;
     const need = evQuery && shape.status && NEED_LABEL[shape.status] && evQuery.status === shape.status
       ? { label: NEED_LABEL[shape.status] as string } : null;

@@ -12,8 +12,8 @@
  */
 import { describe, it, expect } from "vitest";
 import { queryAmbientStatus, agentRepliesForManuscript, recordPlaceLine } from "./queryAmbient";
-import { waitAnchor } from "./holdingReply";
-import { HOLDING_REPLY_NESTED_TYPE, HOLDING_REPLY_TYPE } from "./holdingReply";
+import { waitAnchor } from "./agentReply";
+import { LEGACY_HOLDING_NESTED_TYPE as HOLDING_REPLY_NESTED_TYPE, LEGACY_HOLDING_TYPE as HOLDING_REPLY_TYPE } from "./agentReply";
 import { QueryStatus } from "../types";
 
 const DAY = 86400000;

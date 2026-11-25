@@ -12,7 +12,7 @@
  {
   "name": "q152-agent: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Queried✕"
+  "got": "Queried⋯✕"
  },
  {
   "name": "q152-agent: the status's accessible name",
@@ -37,7 +37,7 @@
  {
   "name": "q152-quiet: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Queried✕"
+  "got": "Queried⋯✕"
  },
  {
   "name": "q152-quiet: the status's accessible name",
@@ -62,7 +62,7 @@
  {
   "name": "q152-materials: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Partial requested✕"
+  "got": "Partial requested⋯✕"
  },
  {
   "name": "q152-materials: the status's accessible name",
@@ -87,7 +87,7 @@
  {
   "name": "q152-undated: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Partial sent✕"
+  "got": "Partial sent⋯✕"
  },
  {
   "name": "q152-undated: the status's accessible name",
@@ -112,7 +112,7 @@
  {
   "name": "q152-fullreq: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Full requested✕"
+  "got": "Full requested⋯✕"
  },
  {
   "name": "q152-fullreq: the status's accessible name",
@@ -137,7 +137,7 @@
  {
   "name": "q152-long: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Full sent✕"
+  "got": "Full sent⋯✕"
  },
  {
   "name": "q152-long: the status's accessible name",
@@ -162,7 +162,7 @@
  {
   "name": "q152-rr: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Revise & resubmit✕"
+  "got": "Revise & resubmit⋯✕"
  },
  {
   "name": "q152-rr: the status's accessible name",
@@ -187,7 +187,7 @@
  {
   "name": "q152-offer: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Offer✕"
+  "got": "Offer⋯✕"
  },
  {
   "name": "q152-offer: the status's accessible name",
@@ -212,7 +212,7 @@
  {
   "name": "q152-closed: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Passed✕"
+  "got": "Passed⋯✕"
  },
  {
   "name": "q152-closed: the status's accessible name",
@@ -237,7 +237,7 @@
  {
   "name": "q152-passed: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Passed✕"
+  "got": "Passed⋯✕"
  },
  {
   "name": "q152-passed: the status's accessible name",
@@ -262,7 +262,7 @@
  {
   "name": "q152-withdrew: no \"Your move\" / \"With the agent\" in the strip",
   "ok": true,
-  "got": "Withdrawn✕"
+  "got": "Withdrawn⋯✕"
  },
  {
   "name": "q152-withdrew: the status's accessible name",

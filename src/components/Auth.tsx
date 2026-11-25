@@ -11,8 +11,9 @@
  *    `redeemKeptCode`), which is what lets the server set the founding flag through its one setter.
  * ⚠️ THE GATE IS PRESENTATION; THE GATE THAT COUNTS IS THE CALLABLE. A browser check gates nothing — the account is
  *    created by the Auth SDK, which anyone can call from a console.
- * ⚠️ GOOGLE ON THE SIGN-IN TAB STILL CREATES AN ACCOUNT WHEN NONE EXISTS. Closing that needs a `beforeUserCreated`
- *    blocking trigger, not built (unchanged from before this phase).
+ * ⚠️ GOOGLE ON THE SIGN-IN TAB STILL CREATES AN ACCOUNT WHEN NONE EXISTS — and so can a sign-in link. The server
+ *    closes both: `inviteGate` (functions/src/inviteGate.ts, App site v1) refuses any new account no unused code names,
+ *    and every door here shows that refusal as one message that sends the writer to the waitlist (`notInvited`).
  * ⚠️ IN-APP NAVIGATION, NOT href, for "Back to site" and the Terms and Privacy links: leaving the screen any other way
  *    loses the deep link the visitor arrived on. Clearing the pre-auth hash matters for the same reason.
  */
@@ -31,6 +32,7 @@ import {
   signInWithGoogle, sendReset, isValidEmail, sendSignInLink, arrivedFromSignInLink, finishSignInLink, keptSignInEmail,
   sendConfirmation,
 } from "../lib/authActions";
+import { NOT_INVITED_COPY, NOT_INVITED_LEAD, NOT_INVITED_LINK, isNotInvited, waitlistHref } from "../lib/notInvited";
 import "./auth.css";
 
 /** The flock: the Founders page's own drawing. The hawk portrait greets a locked-out or expired visitor. */
@@ -112,6 +114,8 @@ export interface AuthLabState {
   showInvite?: boolean;
   /** Draw a screen with a code status already answered. */
   code?: { code: string; status: CodeStatus };
+  /** Draw the server's refusal (App site v1): this email has no invitation. */
+  notInvited?: boolean;
 }
 
 const firstName = (name: string | null) => (name ? name.trim().split(/\s+/)[0] || null : null);
@@ -192,6 +196,8 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
     return e ? { code: e } : {};
   });
   const [banner, setBanner] = useState<string | null>(null);
+  /* The server refused the account (no invitation for this address): drawn apart from the banner, with its link. */
+  const [notInvited, setNotInvited] = useState<boolean>(!!lab?.notInvited);
   const [busy, setBusy] = useState(false);
   const [linkSentTo, setLinkSentTo] = useState<string | null>(null);
   const [resetSentTo, setResetSentTo] = useState<string | null>(lab?.resetSent ? (lab.email ?? "") : null);
@@ -207,7 +213,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
   });
 
   const go = (s: Screen, focusId?: string) => {
-    setScreen(s); setErrs({}); setBanner(null); setLinkSentTo(null); setFreshSent(false);
+    setScreen(s); setErrs({}); setBanner(null); setNotInvited(false); setLinkSentTo(null); setFreshSent(false);
     if (s !== "reset") setResetSentTo(null);
     if (focusId) focusNext(focusId);
   };
@@ -280,25 +286,29 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
     if (!name.trim()) { setErrs({ name: AUTH_COPY.noName }); focusNext("au-name"); return; }
     if (password.length < 8) { setErrs({ pw: password ? AUTH_COPY.pwShort(password.length) : AUTH_COPY.pwNone }); focusNext("au-pw"); return; }
     if (gateOn() && status?.status !== "ok") { go("code", "au-code"); return; }
-    setErrs({});
+    setErrs({}); setNotInvited(false);
     setBusy(true);
     try {
+      /* "Use a different one": the server's invite check knows only the invited address, so tell it the other one first. */
+      if (otherEmail && status?.status === "ok") await callFoundersCode("allow", code, em).catch(() => undefined);
       await signup(name.trim(), em, password); // the auth listener takes over; App redeems the kept code
       /* "We'll send one confirmation to the new address" — made true here: an address other than the invite's gets one. */
       if (otherEmail) await sendConfirmation().catch(() => undefined);
     } catch (err: any) {
+      if (isNotInvited(err)) { setNotInvited(true); setBusy(false); return; }
       setBanner(err?.message || "Something went wrong. Please try again.");
       setBusy(false);
     }
   };
 
   const onGoogle = async () => {
-    setBanner(null); setErrs({});
+    setBanner(null); setErrs({}); setNotInvited(false);
     if (screen === "invite" && gateOn() && status?.status !== "ok") { go("code", "au-code"); return; }
     setBusy(true);
     try {
       await signInWithGoogle(); // success unmounts this screen; App redeems a kept code. Cancel is silent.
     } catch (err: any) {
+      if (isNotInvited(err)) { setNotInvited(true); return; }
       setBanner(err?.message || "Something went wrong. Please try again.");
     } finally {
       setBusy(false);
@@ -347,6 +357,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
     try {
       await finishSignInLink(em);
     } catch (err: any) {
+      if (isNotInvited(err)) { setNotInvited(true); setBusy(false); return; }
       setErrs({ email: err?.message }); focusNext("au-email"); setBusy(false);
     }
   };
@@ -356,7 +367,10 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
     const kept = keptSignInEmail();
     if (!kept) { focusNext("au-email"); return; }
     setEmail(kept); setBusy(true);
-    finishSignInLink(kept).catch((err: any) => { setErrs({ email: err?.message }); setBusy(false); });
+    finishSignInLink(kept).catch((err: any) => {
+      if (isNotInvited(err)) { setNotInvited(true); setBusy(false); return; }
+      setErrs({ email: err?.message }); setBusy(false);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -390,6 +404,11 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
 
   const Flock = () => <img className="sf-flock" src={`${FLOCK.src}?v=${FLOCK.version}`} width={FLOCK.width} height={FLOCK.height} alt="" />;
   const Port = ({ cls = "au-port" }: { cls?: string }) => <img className={cls} src={PORT.src} width={PORT.width} height={PORT.height} alt="" />;
+  const NotInvited = () => notInvited ? (
+    <p className="sf-msg sf-msg--error" role="alert" data-auth="not-invited">
+      {NOT_INVITED_COPY} {NOT_INVITED_LEAD}<a className="sf-link sf-link--in" href={waitlistHref()}>{NOT_INVITED_LINK}</a>.
+    </p>
+  ) : null;
   const err = (k: string, id: string) => errs[k] ? <p className="sf-err" id={`${id}-e`} role="alert">{errs[k]}</p> : null;
   const invalid = (k: string, id: string) => (errs[k] ? { "aria-invalid": true as const, "aria-describedby": `${id}-e` } : {});
   const Agree = () => (
@@ -509,6 +528,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
             </div>
             <PwField id="au-pw" label={AUTH_COPY.password} hint={AUTH_COPY.pwHint} auto="new-password" value={password} onChange={setPassword} err={errs.pw} />
             {banner && <p className="sf-msg sf-msg--error" role="alert">{banner}</p>}
+            <NotInvited />
             <button type="submit" className="sf-btn sf-btn--full au-gap" disabled={busy}>{AUTH_COPY.create}</button>
             <Agree />
           </form>
@@ -536,6 +556,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
               id="au-pw" label={AUTH_COPY.password} auto="current-password" value={password} onChange={setPassword} err={errs.pw}
               extra={<button type="button" className="sf-link sf-link--quiet" onClick={() => go("reset", "au-reset")}>{AUTH_COPY.forgot}</button>}
             />
+            <NotInvited />
             <button type="submit" className="sf-btn sf-btn--full au-gap" disabled={busy}>{AUTH_COPY.signin}</button>
             <p className="sf-under"><button type="button" className="sf-link sf-link--in" onClick={onLinkInstead} disabled={busy} data-auth="link-instead">{AUTH_COPY.linkInstead}</button></p>
           </form>
@@ -550,6 +571,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
               <input className="sf-in" id="au-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} {...invalid("email", "au-email")} />
               {err("email", "au-email")}
             </div>
+            <NotInvited />
             <button type="submit" className="sf-btn sf-btn--full au-gap" disabled={busy}>{AUTH_COPY.linkConfirm}</button>
             <p className="sf-under"><button type="button" className="sf-link sf-link--in" onClick={toSignin}>{AUTH_COPY.backToSignin}</button></p>
           </form>

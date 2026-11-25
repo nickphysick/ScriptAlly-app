@@ -54,7 +54,7 @@ describe("INV-1 · the dry run writes no Firestore doc and sends nothing", () =>
     const r = rigOf();
     await run(WRITERS, r.deps);
     const [html, text] = [...r.files.values()];
-    expect(html).toContain('href="https://scriptally-app.web.app/join/QH-7K2M-9XTD"');
+    expect(html).toContain('href="https://app.queryhawk.net/join/QH-7K2M-9XTD"');
     expect(text).toContain("Subject: Your QueryHawk invite: your wave is open");
     for (const body of r.files.values()) expect(body).not.toMatch(/maya@example\.com|tom@example\.com/);
   });

@@ -72,6 +72,8 @@ export interface QcCard152Data {
   asks: string[];
   sentLabels: string[];
   lastHeardMs: number | null;
+  /** Controls: entry v1 — what the latest reply was ("chased the full") */
+  lastHeardWhat?: string | null;
   how: string | null;
   /** v152.1 §3 the footer: the quiet window (weeks) and a close's reason */
   quietWeeks?: number;
@@ -603,7 +605,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
      The agent is always named, never a pronoun. */
   const agentPane = (
     <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
-      sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
+      sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} lastHeardWhat={d.lastHeardWhat ?? null} asks={ask} hasAsks={d.asks.length > 0}
       onOpen={(k) => g168(() => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")))}
       onFullCard={() => g168(() => p.onAgentField(null))} editing={prof?.k ?? null} just={just}
       heardWhy={why(d.lastHeardMs != null ? `From ${first}’s latest reply on Tracking` : `Fills in when you record ${first}’s reply`)} />

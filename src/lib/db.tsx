@@ -134,7 +134,8 @@ import { contentsChanged } from "./packageEditions";
 import { contentWriteAllowed, isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
-import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
+import { withReminderStamp } from "./reminderStamp";
+import { AGENT_REPLY_NESTED_TYPE, AGENT_REPLY_TYPE, LEGACY_HOLDING_NESTED_TYPE, readNestedReply, replyDayIso, buildAgentReplyWrites, entryDatesFor, latestFeedReplies, isAgentReplyFeed, REPLY_DATE_FIELD, REPLY_KIND_FIELD, type AgentReplyInput, type ReplyKind } from "./agentReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
 import { planSampleRetirement, retirementReport } from "./retireSamples";
@@ -156,6 +157,7 @@ import { activeManuscriptOf, eventPath, logEvent } from "./events";
 import { manuscriptComps } from "./comps";
 import { isFirstAgentWin, isFirstQueryWin, winCopy } from "./dashFirstVisit";
 import { identifyForErrors } from "./sentry";
+import { isNotInvited, NotInvitedError } from "./notInvited";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -491,11 +493,11 @@ interface DbContextType {
      */
     note?: string;
     bookVersionId?: string;
-  }) => Promise<{ activityId: string; prior: { writerExpectedDate?: string; writerExpectedSetAt?: string; nudgeDate?: string } } | void>;
-  /** Phase 3 — a reply that decides nothing. Non-status by construction; see lib/holdingReply.ts. */
-  recordHoldingReply: (
+  }) => Promise<{ activityId: string; prior: { writerExpectedDate?: string; writerExpectedSetAt?: string; nudgeDate?: string; nudgeSetAt?: string } } | void>;
+  /** Controls: entry v1 — the agent's reply that moves nothing (a chaser, a holding reply, a note). See lib/agentReply.ts. */
+  recordAgentReply: (
     queryId: string,
-    input: { repliedOn: string; weeks?: number | null; note?: string },
+    input: AgentReplyInput,
   ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>, opts?: { stampPackage?: string }) => Promise<void>;
@@ -569,6 +571,8 @@ interface DbContextType {
      */
     patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
       & { bookVersionId?: string | null }
+      /** Controls: entry v1 — an agent-reply entry's kind, new date ("YYYY-MM-DD"; null clears) and words (null clears) */
+      & { reply?: { kind?: ReplyKind; date?: string | null; words?: string | null } }
   ) => Promise<void>;
 
   // User Actions
@@ -586,7 +590,7 @@ interface DbContextType {
    */
   /* ⚠️ `checkBackDate` IS OPTIONAL — absent is "Don't ask again" (journey round, Phase 5): the nudge
      is recorded, no `nudgeDate` is written, and the dismissal is PERMANENT rather than dated. */
-  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }>;
+  logNudge: (queryId: string, args: { checkBackDate?: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; nudgeSetAt?: string; lastNudgeSentDate?: string } }>;
   /** Undo a nudge by the row id `logNudge` returned, putting the nudge fields back from `prior` — one batch, never through the feed (lib/nudgeUndo). Rejects if nothing changed. */
   undoNudge: (queryId: string, activityId: string, prior: { nudgeDate?: string; lastNudgeSentDate?: string }) => Promise<void>;
   recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
@@ -1112,7 +1116,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     for (const a of activities) {
 
-      if ((a as { activityType?: string }).activityType !== HOLDING_REPLY_TYPE || !a.queryId) continue;
+      if (!isAgentReplyFeed(a) || !a.queryId) continue;
 
       const t = new Date(a.date as string).getTime();
 
@@ -1125,6 +1129,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     const lastHoldingReplyFor = (id: string): number | null => holdingReplyByQuery.get(id) ?? null;
+    /* Controls: entry v1 — every query's latest reply entry, once, for the read-through below (lib/agentReply) */
+    const latestReplies = latestFeedReplies(activities);
     const now = new Date();
     const todayISO = now.toISOString().slice(0, 10);
 
@@ -1257,8 +1263,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // Nudge/close precedence: one decision, one task (close SUCCEEDS nudge, never competes).
       // No reply window → neither fires (only a nudge the writer booked, Log a query v1.3); the data_quality_poor
       // "set a window" item does instead.
+      /* Controls: entry v1 — the dates as the agent's latest reply entry moves them: the cards' own read-through */
+      const entry = entryDatesFor(q, null, latestReplies.get(q.id) ?? null);
       const reply = replyTask({
         status: q.status,
+        replyDateMs: entry.replyDateMs,
         dateSent: q.dateSent,
         responseDeadline: q.responseDeadline,
         responseTimeWeeks: agent.responseTimeWeeks,
@@ -1267,7 +1276,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         lastNudgeSentDate: q.lastNudgeSentDate,
         closePlan: q.closePlan,
         /* the writer's own reminder date — raises the SAME nudge when it arrives (Phase 2) */
-        writerNudgeDate: q.nudgeDate,
+        writerNudgeDate: entry.reminderMs != null ? new Date(entry.reminderMs).toISOString() : q.nudgeDate,
         /* §3 — a nudge the writer has already scheduled supersedes both answers. The predicate is
            `scheduledReminder`'s, which is what the tracker's ghost rung draws from, so the feed and
            the timeline cannot disagree about whether a chase is booked. */
@@ -1634,6 +1643,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       return true;
     } catch (error: any) {
       console.error("Sign up failure:", error);
+      if (isNotInvited(error)) throw new NotInvitedError();
       throw new Error(friendlyAuthError(error?.code));
     }
   };
@@ -2663,7 +2673,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        * the whole batch, the query with it.
        */
       const batch = writeBatch(db);
-      batch.set(doc(db, "users", currentUser.id, "queries", id), newQ);
+      batch.set(doc(db, "users", currentUser.id, "queries", id), withReminderStamp(newQ as unknown as Record<string, unknown>, null));
       for (const act of seeded) {
         batch.set(doc(db, "users", currentUser.id, "activities", act.id), act);
         batch.set(doc(db, "users", currentUser.id, "queries", id, "activity", act.id), logDoc(act));
@@ -2966,7 +2976,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     try {
       if (Object.keys(qUpdates).length > 0) {
-        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), qUpdates);
+        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), withReminderStamp(qUpdates as Record<string, unknown>, targetQ));
       }
       // Two stores, two surfaces (same split recordQueryResponse uses):
       //  - the per-query `activity` subcollection is the AUTHORITATIVE log — recompute derives
@@ -2996,6 +3006,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedDate === "string" ? { writerExpectedDate: (targetQ as unknown as Record<string, string>).writerExpectedDate } : {}),
         ...(typeof (targetQ as unknown as Record<string, unknown>).writerExpectedSetAt === "string" ? { writerExpectedSetAt: (targetQ as unknown as Record<string, string>).writerExpectedSetAt } : {}),
         ...(typeof (targetQ as unknown as Record<string, unknown>).nudgeDate === "string" ? { nudgeDate: (targetQ as unknown as Record<string, string>).nudgeDate } : {}),
+        /* follow-up 2 — and when it was set, so an Undo puts the pair back exactly */
+        ...(typeof (targetQ as unknown as Record<string, unknown>).nudgeSetAt === "string" ? { nudgeSetAt: (targetQ as unknown as Record<string, string>).nudgeSetAt } : {}),
       };
       const actId = "act-" + Math.random().toString(36).substr(2, 9);
       const subRef = doc(db, "users", currentUser.id, "queries", queryId, "activity", actId);
@@ -3463,6 +3475,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!currentUser) return;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
+    /* Controls: entry v1 · follow-up 2 — a reminder set or changed here carries when (lib/reminderStamp) */
+    fields = withReminderStamp(fields as Record<string, unknown>, targetQ) as Partial<Query>;
 
     try {
       /* A correction onto a never-sent package stamps its first-sent lock in the SAME batch as the
@@ -3724,6 +3738,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             const rec = reconcileNudge(remaining);
             await updateDoc(doc(db, "users", currentUser.id, "queries", target.queryId), {
               nudgeDate: rec.nudgeDate ?? (deleteField() as unknown as string),
+              /* follow-up 2 — the check-in that comes back was set when its nudge was logged */
+              nudgeSetAt: rec.nudgeDate && rec.lastNudgeSentDate ? rec.lastNudgeSentDate : (deleteField() as unknown as string),
               lastNudgeSentDate: rec.lastNudgeSentDate ?? (deleteField() as unknown as string),
             });
             if (!rec.hasNudges) await resolveTaskFlag(flagKeyForTask("nudge_overdue", target.queryId));
@@ -3757,6 +3773,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
      */
     patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
       & { bookVersionId?: string | null }
+      /** Controls: entry v1 — an agent-reply entry's kind, new date ("YYYY-MM-DD"; null clears) and words (null clears) */
+      & { reply?: { kind?: ReplyKind; date?: string | null; words?: string | null } }
   ) => {
     if (!currentUser) return;
 
@@ -3797,6 +3815,32 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           ? deleteField()
           : patch.bookVersionId;
       }
+      /* Controls: entry v1 — an agent-reply entry is corrected HERE, like every other step: its kind, its new date and
+         its words, on both stores. Absent clears with `deleteField()`, the rule for every optional field on the log;
+         the feed twin keeps the words in `details`. Nothing is recomputed from these (no status), and every surface
+         they move reads them on render. */
+      const feedPatch: Record<string, any> = { ...patch };
+      delete feedPatch.reply;
+      if (patch.reply) {
+        const r = patch.reply;
+        if (r.kind !== undefined) { subPatch[REPLY_KIND_FIELD] = r.kind; feedPatch[REPLY_KIND_FIELD] = r.kind; }
+        if (r.date !== undefined) { subPatch[REPLY_DATE_FIELD] = r.date ? r.date : deleteField(); feedPatch[REPLY_DATE_FIELD] = r.date ? r.date : deleteField(); }
+        if (r.words !== undefined) { const w = r.words?.trim(); subPatch.replyNote = w ? w.slice(0, 500) : deleteField(); feedPatch.details = w ? w.slice(0, 500) : ""; }
+      }
+      /* follow-up 3 — A CORRECTED HOLDING-REPLY-PACK ROW BECOMES THE NEW TYPE, on both stores: its legacy prose and stored
+         weeks go, so clearing its date cannot bring the weeks back (the legacy reader falls back to them). Its words come
+         from the patch, or are carried over from the prose. */
+      if (patch.reply) {
+        const cur = (await getDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", activityId))).data() as Record<string, unknown> | undefined;
+        const legacy = readNestedReply(cur ? { ...cur, id: activityId } : null);
+        if (cur && cur.type === LEGACY_HOLDING_NESTED_TYPE && legacy) {
+          Object.assign(subPatch, { type: AGENT_REPLY_NESTED_TYPE, note: "", replyWeeks: deleteField() });
+          feedPatch.activityType = AGENT_REPLY_TYPE;
+          if (!(REPLY_KIND_FIELD in subPatch)) { subPatch[REPLY_KIND_FIELD] = legacy.kind; feedPatch[REPLY_KIND_FIELD] = legacy.kind; }
+          if (!(REPLY_DATE_FIELD in subPatch) && legacy.dateMs != null) { const d0 = replyDayIso(legacy.dateMs); subPatch[REPLY_DATE_FIELD] = d0; feedPatch[REPLY_DATE_FIELD] = d0; }
+          if (patch.reply.words === undefined && legacy.words) { subPatch.replyNote = legacy.words; feedPatch.details = legacy.words; }
+        }
+      }
       /**
        * ⚠️ BOTH STORES OR NEITHER (26 Aug). The projection patch was a swallowed best-effort whose
        * comment read "Projection row has an independent id — cosmetic only, recompute doesn't read
@@ -3832,7 +3876,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         if (Object.keys(subPatch).length > 0) {
           batch.update(subRef, subPatch);
         }
-        if (feedId) batch.update(doc(db, "users", currentUser.id, "activities", feedId), patch as Record<string, any>);
+        if (feedId && Object.keys(feedPatch).length > 0) batch.update(doc(db, "users", currentUser.id, "activities", feedId), feedPatch);
         await batch.commit();
       }
       await recompute(queryId);
@@ -3981,7 +4025,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const logNudge = async (
     queryId: string,
     args: { checkBackDate?: string; note?: string; eventDate?: string }
-  ): Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; lastNudgeSentDate?: string } }> => {
+  ): Promise<{ success: boolean; error?: string; activityId?: string; prior?: { nudgeDate?: string; nudgeSetAt?: string; lastNudgeSentDate?: string } }> => {
     if (!currentUser) return { success: false, error: "Session required." };
     const q = queries.find(item => item.id === queryId);
     if (!q) return { success: false, error: "Query not found." };
@@ -3992,6 +4036,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        return gains optional receipt members every existing caller ignores. */
     const prior = {
       ...(typeof (q as unknown as Record<string, unknown>).nudgeDate === "string" ? { nudgeDate: (q as unknown as Record<string, string>).nudgeDate } : {}),
+      ...(typeof (q as unknown as Record<string, unknown>).nudgeSetAt === "string" ? { nudgeSetAt: (q as unknown as Record<string, string>).nudgeSetAt } : {}),
       ...(typeof (q as unknown as Record<string, unknown>).lastNudgeSentDate === "string" ? { lastNudgeSentDate: (q as unknown as Record<string, string>).lastNudgeSentDate } : {}),
     };
 
@@ -4013,7 +4058,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           ? writes.dismissal.resurfaceDate
           : MUTED_UNTIL,
       }),
-    });
+    }, q as unknown as { nudgeDate?: unknown });
     return r.success ? { success: true, activityId: actId, prior } : { success: false, error: r.error };
   };
 
@@ -4028,7 +4073,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   /**
-   * PHASE 3 — record a reply that decides nothing.
+   * Controls: entry v1 — record the agent's reply that moves nothing: a chaser, a holding reply or a note (it
+   * replaces the holding-reply pack's `recordHoldingReply`; lib/agentReply.ts says what the entry does).
    *
    * ⚠️ THE TWIN-WRITE CONVENTION, AND DELIBERATELY NOT `recordQueryResponse`. That function is the
    * app's single RESPONSE path and its whole contract is that a rung carries a `resultingStatus`;
@@ -4044,9 +4090,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * law). Everything the reply affected was derived from those two documents' existence, so
    * removing them restores the previous state exactly.
    */
-  const recordHoldingReply = async (
+  const recordAgentReply = async (
     queryId: string,
-    input: { repliedOn: string; weeks?: number | null; note?: string },
+    input: AgentReplyInput,
   ): Promise<{ success: boolean; error?: string; undo: () => Promise<void> }> => {
     const noop = async () => {};
     if (!currentUser) return { success: false, error: "Session required.", undo: noop };
@@ -4054,7 +4100,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!q) return { success: false, error: "Query not found.", undo: noop };
     const agent = agents.find(a => a.id === q.agentId) || null;
 
-    const writes = buildHoldingReplyWrites(q, agent, input);
+    const writes = buildAgentReplyWrites(q, agent, input);
     const actId = "act-" + Math.random().toString(36).substr(2, 9);
     try {
       await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
@@ -4064,7 +4110,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
     /* ⚠️ PROJECTION, AND IT CANNOT COST THE UNDO (timeline writer fix v1): the row already landed;
        a throw here used to lose the undo closure below for a reply that was recorded. */
-    await narrate(() => addActivity({ ...writes.activity, id: actId }), `holding reply ${actId}`);
+    await narrate(() => addActivity({ ...writes.activity, id: actId }), `agent reply ${actId}`);
     return {
       success: true,
       undo: async () => {
@@ -4183,7 +4229,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
            to the interface's Promise<void>. */
         recordMaterialsSent: async (a) => { await recordMaterialsSent(a); },
         markSentWithReceipt: recordMaterialsSent,
-        recordHoldingReply,
+        recordAgentReply,
         undoQueryStatus,
         updateQuery,
         writeVersionChange,

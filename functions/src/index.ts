@@ -8,6 +8,7 @@ export { sendBetaFeedback } from "./betaFeedback";
 export { addFeedbackNote, markFeedbackSeen } from "./feedbackNotes";
 export { sendWeeklyPulse } from "./weeklyPulse";
 export { redeemInviteCode } from "./inviteCode";
+export { inviteGate } from "./inviteGate";
 export { sendAccountEmail } from "./accountEmails";
 export { waitlistRetention } from "./waitlistRetention";
 export { foundingStatsOnFeedback, foundingStatsNightly } from "./foundingStats";

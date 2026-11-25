@@ -206,7 +206,7 @@ export function nudgeOutcomeLabel(
    * status by construction and never will.
    */
   const answered = laterEvents.some((e) => (e.timeMs ?? 0) > nudgeMs
-    && (e.kind === "holding" || statusDirection(e.status) === "in"));
+    && (e.kind === "reply" || statusDirection(e.status) === "in"));
   return answered ? "Nudged" : "Nudged — no reply";
 }
 

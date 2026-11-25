@@ -139,8 +139,8 @@ describe("the Materials tab, by what it went with (v158 §4; QC158-8/9's source 
 
 describe("v152.1 follow-up: a holding reply", () => {
   it("is white with the agent hairline, never the pass's grey, and carries its note", () => {
-    const t = buildThread([st("q", QueryStatus.QUERIED, 30), st("h", null, 10, { kind: "holding", quote: "Thanks — reading now." })], { ...ctx, state: "agent", replyMs: null });
-    const h = t.find((x) => x.t === "msg" && x.kind === "holding") as Extract<(typeof t)[number], { t: "msg" }>;
+    const t = buildThread([st("q", QueryStatus.QUERIED, 30), st("h", null, 10, { kind: "reply", quote: "Thanks — reading now." })], { ...ctx, state: "agent", replyMs: null });
+    const h = t.find((x) => x.t === "msg" && x.kind === "reply") as Extract<(typeof t)[number], { t: "msg" }>;
     expect(h).toMatchObject({ side: "them", tint: { fill: "#ffffff", edge: "#e3dbd0" }, grey: false, quote: "Thanks — reading now." });
   });
 });
@@ -164,7 +164,7 @@ describe("v53 (D9) — the thread reads as messages", () => {
       [{ status: QueryStatus.WITHDRAWN, kind: null, event: "offer_declined" }, "You turned down Jonathan’s offer"],
       [{ status: QueryStatus.SIGNED, kind: null }, "You accepted Jonathan’s offer"],
       [{ status: null, kind: "nudge" }, "You nudged Jonathan"],
-      [{ status: null, kind: "holding" }, "Jonathan sent a holding reply"],
+      [{ status: null, kind: "reply" }, "Jonathan sent a holding reply"],
       [{ status: null, kind: "told", toldCount: 2 }, "You told 2 agents about the offer"],
     ];
     for (const [s, words] of all) expect(msgTitle(s, "Jonathan")).toBe(words);

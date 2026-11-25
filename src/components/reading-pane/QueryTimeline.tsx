@@ -24,7 +24,7 @@ import { sendMethodLabel } from "../../lib/agentDisplay";
 /* §4 — the app's ONE response-window slider, now that its DOM id is instance-unique. */
 import { WeekSlider } from "../forms/WeekSlider";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
-import { HOLDING_REPLY_NESTED_TYPE, HOLDING_REPLY_LABEL, replyStatedWindow, holdingReplyTimes } from "../../lib/holdingReply";
+import { readNestedReply, replyRowLabel, replyStatedWindow, agentReplyTimes, type AgentReply } from "../../lib/agentReply";
 import { dropSupersededProvisional, byEventOrder } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
 import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, silencePolicyLine, windowAttribution, type ReminderTask } from "../../lib/nudgeState";
@@ -124,7 +124,9 @@ export interface RowSpec {
    */
   /* ⚠️ NON-STATUS FAMILIES. Both borrow a glyph decoratively and neither enters the status dedupe:
      a nudge is the writer touching the agent, a holding reply is the agent touching back. */
-  kind?: "nudge" | "holding";
+  kind?: "nudge" | "reply";
+  /** Controls: entry v1 — a `reply` row's entry (its kind, new date and words) */
+  reply?: AgentReply;
   /**
    * A RECONSTRUCTION, NEVER A REAL EVENT (clean-up pass, 28 Sep): a starting step the migration
    * wrote for a query whose log was empty. It reads "Recorded from the imported status", its mark
@@ -320,7 +322,8 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
     }));
 
   /**
-   * PHASE 4 — the holding reply's row. Incoming, and it opens no chapter (D5): `kind` is set, and
+   * PHASE 4 — the agent's reply that moves nothing (Controls: entry v1: a chaser, a holding reply or a note; the
+   * holding-reply pack's rows read as kind `holding`). Incoming, and it opens no chapter (D5): `kind` is set, and
    * `chapterise` only ever opens on a REQUEST, so an event inside the current round stays inside it.
    *
    * ⚠️ EVERY ONE RENDERS, LIKE A NUDGE AND UNLIKE A STATUS. Two acknowledgements a month apart are
@@ -329,18 +332,20 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
    * the same borrowing the nudge row makes.
    */
   const holdingRows: RowSpec[] = (events || [])
-    .filter((evt) => evt.type === HOLDING_REPLY_NESTED_TYPE)
-    .map((evt, i) => ({
+    .map((evt) => ({ evt, rep: readNestedReply(evt as Record<string, unknown>) }))
+    .filter((x): x is { evt: typeof x.evt; rep: AgentReply } => x.rep != null)
+    .map(({ evt, rep }, i) => ({
       key: `h-${typeof evt.id === "string" ? evt.id : i}`,
-      kind: "holding" as const,
+      kind: "reply" as const,
+      reply: rep,
       status: QueryStatus.PARTIAL_REQUESTED, // decorative only — the incoming ring
-      title: HOLDING_REPLY_LABEL,
+      title: replyRowLabel(rep.kind),
       date: fmtShort(getTime(evt.createdAt)),
       activityId: typeof evt.id === "string" ? evt.id : undefined,
       dateISO: isoDay(getTime(evt.createdAt)),
       /* ⚠️ ROW 2 IS THEIR WORDS AS A QUIET QUOTED LINE, and only when there are any — an empty
          second row would draw the two-row grammar over one row's worth of fact. */
-      note: typeof evt.note === "string" ? evt.note : "",
+      note: rep.words ?? "",
       timeMs: getTime(evt.createdAt),
     }));
 
@@ -810,7 +815,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
    */
   const nudges = nudgeTimes(events, NUDGE_NESTED_TYPE, (v) => getTime(v));
   /* PHASE 5 — when the agent last got in touch without deciding. Null when they never have. */
-  const holdingTimes = holdingReplyTimes(events as never);
+  const holdingTimes = agentReplyTimes(events as never);
   const lastHoldingReplyMs = holdingTimes.length ? holdingTimes[holdingTimes.length - 1] : null;
   const offer = closureOffer({
     times: nudges,

@@ -14,7 +14,7 @@ import { Query, QueryStatus } from "../types";
 import { elapsedPhrase } from "./elapsed";
 /* §1 (provenance pack) — the writer's own date, read through the one accessor that knows the field. */
 import { writerExpectedMs, resolveExpectedDate, type ExpectedSource } from "./expectedDate";
-import { replyStatedWindow, waitAnchor, waitAnchorMs, HOLDING_REPLY_TYPE, type StoredHoldingReply } from "./holdingReply";
+import { replyStatedWindow, waitAnchor, waitAnchorMs, isAgentReplyFeed, type StoredHoldingReply } from "./agentReply";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -579,7 +579,7 @@ export function agentRepliesForManuscript(
        * "decided", which is why this changes rather than being reported and left.
        */
       ((a.resultingStatus !== undefined && AGENT_RESPONSE_STATUSES.has(a.resultingStatus))
-        || a.activityType === HOLDING_REPLY_TYPE),
+        || isAgentReplyFeed(a)),
   ).length;
 }
 

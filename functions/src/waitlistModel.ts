@@ -102,6 +102,10 @@ export const ALLOWED_ORIGINS: readonly string[] = [
   "https://www.queryhawk.net",
   "https://scriptally-app.web.app",
   "https://scriptally-dev.web.app",
+  /* App site v1: the prod app site (its domain and its own web.app) and dev's landing mirror. */
+  "https://app.queryhawk.net",
+  "https://queryhawk-app.web.app",
+  "https://scriptally-dev-landing.web.app",
 ];
 
 /* ══════════════ Types ══════════════ */

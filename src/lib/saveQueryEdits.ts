@@ -14,6 +14,7 @@
  * Undo is delete-the-record (a `delete` op), never a compensating entry — so the corrected log derives
  * the corrected status. Exact QueryStatus enum strings throughout (in lockstep with emailImportCommit).
  */
+import { withReminderStamp } from "./reminderStamp";
 import { Firestore, collection, doc, writeBatch, updateDoc, deleteDoc, deleteField, Timestamp } from "firebase/firestore";
 import { QueryStatus, ActivityType, QueryMaterial } from "../types";
 import { recomputeQuery } from "./recomputeQuery";
@@ -198,7 +199,8 @@ export async function commitQueryEdits(
       if (f.rejectionType !== undefined) queryPatch.rejectionType = f.rejectionType;
       if (f.agentComments !== undefined) queryPatch.agentComments = f.agentComments;
     }
-    if (Object.keys(queryPatch).length > 0) batch.update(queryRef, queryPatch);
+    /* null prior: this patch never names the reminder (the fields above), so the stamp is never written from here */
+    if (Object.keys(queryPatch).length > 0) batch.update(queryRef, withReminderStamp(queryPatch as Record<string, unknown>, null));
 
     /**
      * ⚠️ THE STAMP RIDES THE SAME COMMIT AS THE LINK. This is the whole of D1: the two writes are

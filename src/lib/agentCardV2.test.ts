@@ -34,7 +34,10 @@ describe("the footer is the pack's table", () => {
   });
   it("a request to send: Mark partial / full sent (navy)", () => {
     const call = { kind: "you", bold: "", sub: "", button: "Send", door: { mode: "sent" }, queryId: "q1" } as never;
-    const full = acFoot(facts("you", row(QueryStatus.FULL_REQUESTED)), "Clara", call, NOW);
+    const full = acFoot(facts("you", row(QueryStatus.FULL_REQUESTED, { expectedMs: null })), "Clara", call, NOW);
+    /* Controls: entry v1 (Phase 4) — with a Send by, the footer says it as the query card does, with its weekday */
+    const dated = acFoot(facts("you", row(QueryStatus.FULL_REQUESTED, { expectedMs: new Date(2026, 11, 4, 12).getTime() })), "Clara", call, NOW);
+    expect(dated.sub).toBe("Send by Fri 4 Dec");
     expect([full.row, full.lead, full.sub, full.button?.label, full.button?.tone]).toEqual(["send", "Clara asked for your full", "Send it, then log it here", "Mark full sent", "navy"]);
     expect(full.button?.act).toEqual({ kind: "journey", mode: "sent", queryId: "q1" });
     expect(acFoot(facts("you", row(QueryStatus.PARTIAL_REQUESTED)), "Clara", call, NOW).button?.label).toBe("Mark partial sent");

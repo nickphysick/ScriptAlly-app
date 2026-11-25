@@ -20,6 +20,11 @@ export default defineConfig(() => {
       __QH_BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
       __QH_RELEASE__: JSON.stringify(release),
     },
+    /* App site v1: hidden source maps for Sentry, only when a build asks (build:prod-app). Hosting never uploads them
+       (firebase.app.json ignores every .map file); every other build is as it was. */
+    build: {
+      sourcemap: process.env.SA_SOURCEMAPS === 'hidden' ? ('hidden' as const) : false,
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

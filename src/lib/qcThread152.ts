@@ -23,6 +23,7 @@ import { STAGE_COLOURS, stageOf, statusBand } from "./stageColours";
 import { classifyMaterial } from "./agentMaterials";
 import type { QueryState } from "./queryState";
 import { waitWords } from "./qc1522";
+import { replyDateLine, replyHeardWords, replyTitle, type ChaseOf, type ReplyKind } from "./agentReply";
 
 const DAY = 86_400_000;
 /** whole CALENDAR days from b to a (local midnights): a wait between two dated steps is the days between the dates, never
@@ -45,7 +46,9 @@ export interface ThreadStepIn {
   activityId?: string;
   status: QueryStatus | null;
   /** a step that is not a status: your nudge, their holding reply, and (v152.1 §2.5) telling other agents about an offer */
-  kind: "nudge" | "holding" | "told" | null;
+  kind: "nudge" | "reply" | "told" | null;
+  /** Controls: entry v1 — a `reply` step: its kind, what a chaser chases, its new date and which way the query faced */
+  reply?: { kind: ReplyKind; chase: ChaseOf; dateMs: number | null; withYou: boolean; /** the status standing when it came */ stage?: QueryStatus | null } | null;
   ms: number | null;
   chips: ThreadChip[];
   /** Query sent's "by email"; a close's reason; told's "offer deadline 16 Oct" (v152.1 §2.5) */
@@ -64,7 +67,7 @@ export interface ThreadStepIn {
 
 const THEM = new Set<string>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED]);
 export function sideOf(s: Pick<ThreadStepIn, "status" | "kind">): Side {
-  if (s.kind === "holding") return "them";
+  if (s.kind === "reply") return "them";
   if (s.kind === "nudge" || s.kind === "told") return "me";
   return s.status && THEM.has(s.status) ? "them" : "me";
 }
@@ -74,11 +77,11 @@ const TITLE: Record<string, string> = {
   [QueryStatus.RESUBMITTED]: "Sent the revision", [QueryStatus.OFFER]: "Made an offer", [QueryStatus.REJECTED]: "Passed",
   [QueryStatus.NO_RESPONSE]: "You closed it: no response", [QueryStatus.WITHDRAWN]: "You withdrew it", [QueryStatus.SIGNED]: "Signed",
 };
-export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount?: number | null; askedFor?: string | null; event?: string | null }, first: string): string {
+export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind" | "reply"> & { toldCount?: number | null; askedFor?: string | null; event?: string | null }, first: string): string {
   if (s.kind === "nudge") return `You nudged ${first}`;
   /* v152.2 §6.1 — "You told 2 agents about the offer" */
   if (s.kind === "told") return s.toldCount ? `You told ${pl(s.toldCount, "agent")} about the offer` : "You told other agents about the offer";
-  if (s.kind === "holding") return "Sent a holding reply";
+  if (s.kind === "reply") return replyTitle(s.reply?.kind ?? "holding", first, s.reply?.chase ?? null);
   if (s.askedFor && s.status === QueryStatus.PARTIAL_REQUESTED) return `Asked for ${s.askedFor.charAt(0).toLowerCase()}${s.askedFor.slice(1)}`;
   if (s.status === QueryStatus.WITHDRAWN && s.event === "offer_declined") return "You declined the offer";
   if (s.status === QueryStatus.SIGNED) return `You accepted ${first}’s offer`;
@@ -97,11 +100,11 @@ export function stepTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount
  * `stepTitle` (the composer's and the step editor's headings) is unchanged.
  */
 const capFirst = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
-export function msgTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount?: number | null; askedFor?: string | null; event?: string | null }, first: string): string {
+export function msgTitle(s: Pick<ThreadStepIn, "status" | "kind" | "reply"> & { toldCount?: number | null; askedFor?: string | null; event?: string | null }, first: string): string {
   const F = capFirst(first);
   if (s.kind === "nudge") return `You nudged ${first}`;
   if (s.kind === "told") return s.toldCount ? `You told ${pl(s.toldCount, "agent")} about the offer` : "You told other agents about the offer";
-  if (s.kind === "holding") return `${F} sent a holding reply`;
+  if (s.kind === "reply") return replyTitle(s.reply?.kind ?? "holding", F, s.reply?.chase ?? null);
   switch (s.status) {
     case QueryStatus.QUERIED: return `You sent ${first} your query`;
     case QueryStatus.PARTIAL_REQUESTED: return s.askedFor ? `${F} asked for ${s.askedFor.charAt(0).toLowerCase()}${s.askedFor.slice(1)}` : `${F} asked for a partial`;
@@ -144,7 +147,7 @@ export const agentTint = (status: QueryStatus | string): { fill: string; edge: s
 export const HOLDING_TINT = { fill: "#ffffff", edge: "#e3dbd0" };
 export function tintOf(s: Pick<ThreadStepIn, "status" | "kind">): { fill: string; edge: string } | null {
   if (sideOf(s) === "me") return null;
-  return s.kind === "holding" ? HOLDING_TINT : agentTint(s.status ?? QueryStatus.REJECTED);
+  return s.kind === "reply" ? HOLDING_TINT : agentTint(s.status ?? QueryStatus.REJECTED);
 }
 /** a pass and your closes are drawn in grey ink (#8a8076); every other glyph in ink */
 export const greyGlyph = (s: Pick<ThreadStepIn, "status" | "kind">): boolean =>
@@ -160,7 +163,7 @@ export function discFill(s: Pick<ThreadStepIn, "status" | "kind">): string {
 export type ThreadItem =
   /** v152.2 §2.2 — "44 days later" / "1 day later" / "Same day", on the side of the next message */
   | { t: "wait"; key: string; label: string; tip: string | null; side: Side }
-  | { t: "msg"; key: string; activityId?: string; side: Side; status: QueryStatus | null; kind: "nudge" | "holding" | "told" | null; title: string;
+  | { t: "msg"; key: string; activityId?: string; side: Side; status: QueryStatus | null; kind: "nudge" | "reply" | "told" | null; title: string;
       /** "No date" when the step has none (§2.7) */
       date: string; dated: boolean; chips: ThreadChip[]; via: string | null;
       /** v53 (D9): the bubble's corner stamp ("2 Apr"), and its local midnight for the day pills; null when undated */
@@ -268,7 +271,9 @@ export function buildThread(steps: readonly ThreadStepIn[], c: ThreadCtx): Threa
     if (s.kind === "nudge") nudges += 1;
     out.push({
       t: "msg", key: s.key, activityId: s.activityId, side: sideOf(s), status: s.status, kind: s.kind,
-      title: msgTitle(s, c.first), sub: s.sub ?? null, date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "Not dated", dated: s.ms != null,
+      title: msgTitle(s, c.first),
+      /* Controls: entry v1 — the note's date line ("Send by Fri 4 Dec" / "Reply expected by 15 Jan"), when it gave one */
+      sub: s.kind === "reply" ? replyDateLine(s.reply?.dateMs ?? null, !!s.reply?.withYou) : s.sub ?? null, date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "Not dated", dated: s.ms != null,
       stamp: s.ms != null ? stampOf(s.ms, c.nowMs) : null, dayMs: s.ms != null ? midnight(s.ms) : null,
       chips: s.chips, via: s.via ?? null, tint: tintOf(s), grey: greyGlyph(s),
       quote: sideOf(s) === "them" && (s.quote ?? "").trim() ? s.quote!.trim() : null,
@@ -487,3 +492,17 @@ export function materialGroups(steps: readonly ThreadStepIn[], c: { nowMs: numbe
 }
 /** a request block's date words: "8 days late" / "by 15 Oct" */
 export const requestLate = (dueMs: number | null, nowMs: number) => leftWords(dueMs, nowMs);
+
+/**
+ * Controls: entry v1 (Nick's ruling 5) — Last heard's line on the Agent tab: what the latest reply from the agent WAS,
+ * of any kind ("chased the full", "a holding reply", "a note", "asked for the full", "passed"). Null on your side.
+ */
+const HEARD: Partial<Record<string, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "asked for a partial", [QueryStatus.FULL_REQUESTED]: "asked for the full",
+  [QueryStatus.REVISE_RESUBMIT]: "asked for a revision", [QueryStatus.OFFER]: "made an offer", [QueryStatus.REJECTED]: "passed",
+};
+export function heardWhat(s: Pick<ThreadStepIn, "status" | "kind" | "reply">): string | null {
+  if (sideOf(s) !== "them") return null;
+  if (s.kind === "reply") return replyHeardWords(s.reply?.kind ?? "holding", s.reply?.chase ?? null);
+  return (s.status && HEARD[s.status]) || null;
+}
