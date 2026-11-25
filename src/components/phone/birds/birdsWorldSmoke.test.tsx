@@ -157,3 +157,62 @@ describe("Phone Birds-eye world v1 renders", () => {
     expect(css).not.toMatch(/\.bw-w \{[^}]*transform/);
   });
 });
+
+describe("Phone Birds-eye world v1, phase 3 — movement, controls, the hawk", () => {
+  const src = () => readFileSync("src/components/phone/birds/worldMotion.ts", "utf8");
+  const view = () => readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8");
+  it("the shell carries the controls, the hint, the mini map and the hawk's shadow (and ?hawk=0 drops it)", () => {
+    const html = renderPageSeededWith(P(<BirdsWorld onBack={() => {}} onList={() => {}} />), "/queries/all?view=birds", QS(12));
+    for (const k of ["zin", "zout", "fit", "mini", "hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);
+    expect(html).toContain("Pinch to zoom · drag to explore");
+    expect(html).toContain(">See it all</button>");
+    expect(html).toContain('src="/images/hawk-shadow.png?v=1"');
+    expect(html).toContain('data-hawk="1"');
+    const off = renderPageSeededWith(P(<BirdsWorld onBack={() => {}} onList={() => {}} />), "/queries/all?view=birds&hawk=0", QS(12));
+    expect(off).not.toContain('data-bw="hawk"');
+    expect(off).toContain('data-hawk="0"');
+  });
+  it("the hawk: .10 over the overview, gone by z 1.6, grows and softens, slides at 0.35x the pan, mirrored and turned -8deg", async () => {
+    const { shadowStyle } = await import("./worldMotion");
+    const fit = { z: 1, ox: 10, oy: 200 };
+    expect(shadowStyle(1, 10, 200, fit)).toEqual({ opacity: "0.100", filter: "blur(1.5px)", transform: "translate(0.0px,0.0px) scale(1.000) rotate(-8deg) scaleX(-1)" });
+    expect(shadowStyle(1.6, 10, 200, fit).opacity).toBe("0.000");
+    expect(shadowStyle(1.3, 110, 100, fit).transform).toBe("translate(35.0px,-35.0px) scale(1.270) rotate(-8deg) scaleX(-1)");
+    const css = readFileSync("src/components/phone/birds/birdsWorld.css", "utf8");
+    expect(css).toMatch(/\.bw-hsw \{[^}]*z-index: 8;[^}]*width: 300px;[^}]*pointer-events: none;[^}]*animation: bw-hsdrift 14s ease-in-out infinite alternate/);
+    expect(css).toMatch(/\.bw-hs \{[^}]*mix-blend-mode: multiply/);
+    expect(css).toMatch(/prefers-reduced-motion: reduce\) \{\s*\.bw-hsw \{ animation: none; \}/);
+    /* the layers: hawk (8) over the header (7), the line (9), its pill (10) and the controls (11) over the hawk */
+    const z = (sel: string) => Number(new RegExp(`${sel.replace(/\./g, "\\.")} \\{[^}]*z-index: (\\d+)`).exec(css)?.[1]);
+    expect([z(".bw-gh0"), z(".bw-ruler"), z(".bw-hd"), z(".bw-hsw"), z(".bw-fline"), z(".bw .bw-flab"), z(".bw-zc")]).toEqual([4, 6, 7, 8, 9, 10, 11]);
+  });
+  it("movement is the ref's: pointer capture, pinch anchored on the row under the fingers, glide ×0.92, double tap ×2.2, Ctrl+wheel", () => {
+    const m = src();
+    expect(m).toContain("setPointerCapture");
+    expect(m).toContain("pinch.wx * W.SX(z)");
+    expect(m).toContain("W.yOff(pinch.wy, z)");
+    expect(m).toContain("v.x * 0.92");
+    expect(m).toContain("zoomAt(px, py, 2.2)");
+    expect(m).toContain("Math.exp(-e.deltaY * 0.012)");
+    expect(m).toMatch(/else if \(pan && pan\.moved && !c\.calm\(\)/);
+    expect(m).toMatch(/if \(c\.calm\(\)\) \{ assign\(t\); c\.draw\(\); return; \}/);
+  });
+  it("a tap opens the Queries list's own query sheet; replay never runs with reduced motion; the hint has its own key", () => {
+    const v = view();
+    expect(v).toContain("openRow: (id) => openV3Query(id)");
+    expect(v).toMatch(/if \(!w \|\| calm\(\)\) return;/);
+    expect(v).toContain('BW_HINT_KEY = "bw1.hint.seen"');
+    expect(v).not.toContain("firstTimeToday");
+    expect(v).toContain("w.vpW * 0.62 - w.LINE * w.SX(Sv.z)");
+  });
+  it("the replay clips each row's stages at its front, in date order, and draws nothing past it", async () => {
+    const { clipSegs } = await import("./drawWorld");
+    const { rowSegs } = await import("../../../lib/birdsWorld");
+    const segs = rowSegs(ROWS[0], "reply");
+    const mid = clipSegs(segs, -58);
+    expect(mid.every((s) => s.ca < -58 && s.cb <= -58)).toBe(true);
+    expect(mid.length).toBe(2);
+    expect(clipSegs(segs, -100)).toEqual([]);
+    expect(clipSegs(segs, null)).toBe(segs);
+  });
+});
