@@ -193,9 +193,33 @@
  },
  {
   "lock": "BW-25",
-  "where": "tapping the hawk drops the banner (\"4 things changed since 14 NovElinor Hale reached the reply d…\")",
+  "where": "tapping the hawk drops the banner (\"4 things changed since 14 NovElinor Hale (The Smoke Test) re…\")",
   "ok": true,
-  "detail": "4 things changed since 14 NovElinor Hale reached the reply date · Elinor Hale reached the reply date · Priya Nair reached the reply dateShow me"
+  "detail": "4 things changed since 14 NovElinor Hale (The Smoke Test) reached the reply date · Elinor Hale reached the reply date · Priya Nair reached the reply dateShow me"
+ },
+ {
+  "lock": "BW-29",
+  "where": "a same-agent line whose query has no manuscript stays bare (population 1)",
+  "ok": true,
+  "detail": "[\"Elinor Hale reached the reply date\"]"
+ },
+ {
+  "lock": "BW-29",
+  "where": "same-agent lines with a manuscript in the news (population 2 of 4)",
+  "ok": true,
+  "detail": "[\"Elinor Hale (The Smoke Test) reached the reply date\",\"Elinor Hale reached the reply date\",\"Priya Nair reached the reply date\",\"Elinor Hale (The Smoke Test) reached the reply date\"]"
+ },
+ {
+  "lock": "BW-29",
+  "where": "each same-agent line whose query has a manuscript carries its title",
+  "ok": true,
+  "detail": "[\"Elinor Hale (The Smoke Test) reached the reply date\",\"Elinor Hale (The Smoke Test) reached the reply date\"]"
+ },
+ {
+  "lock": "BW-29",
+  "where": "a single agent's line carries no title (population 1)",
+  "ok": true,
+  "detail": "[\"Priya Nair reached the reply date\"]"
  },
  {
   "lock": "BW-25",
@@ -207,7 +231,7 @@
   "lock": "BW-25",
   "where": "Done clears the count and records this visit",
   "ok": true,
-  "detail": "{\"count\":null,\"step\":false,\"stored\":1795730210349}"
+  "detail": "{\"count\":null,\"step\":false,\"stored\":1795735172713}"
  },
  {
   "lock": "BW-27",
@@ -243,7 +267,7 @@
   "lock": "BW-12",
   "where": "replay runs: the line moves forwards, its pill showing the date",
   "ok": true,
-  "detail": "[{\"lx\":23.29,\"label\":\"5 Dec\",\"replay\":\"running\"},{\"lx\":44.9,\"label\":\"31 Dec\",\"replay\":\"running\"},{\"lx\":77.57,\"label\":\"18 Feb\",\"replay\":\"running\"}]"
+  "detail": "[{\"lx\":22.99,\"label\":\"4 Dec\",\"replay\":\"running\"},{\"lx\":45.05,\"label\":\"31 Dec\",\"replay\":\"running\"},{\"lx\":81.07,\"label\":\"13 Feb\",\"replay\":\"running\"}]"
  },
  {
   "lock": "BW-12",
@@ -330,6 +354,48 @@
   "detail": "{\"h\":96,\"dock\":\"none\"}"
  },
  {
+  "lock": "BW-28",
+  "where": "a closed query's bar to hold (population: seed-query-1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-28",
+  "where": "a closed query's menu is just \"Open query\"",
+  "ok": true,
+  "detail": "{\"open\":true,\"id\":\"seed-query-1\",\"acts\":[\"Open query\"]}"
+ },
+ {
+  "lock": "BW-31",
+  "where": "an undated with-you query to hold (population: seed-pkgq-3)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-31",
+  "where": "no chip (and no no-date fade) on its bar",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "BW-31",
+  "where": "its menu: I’ve sent it · Add send-by date · Open query · Edit dates",
+  "ok": true,
+  "detail": "{\"open\":true,\"id\":\"seed-pkgq-3\",\"acts\":[\"I’ve sent it\",\"Add send-by date\",\"Open query\",\"Edit dates\"]}"
+ },
+ {
+  "lock": "BW-31",
+  "where": "\"Add send-by date\" opens \"When will you send it by?\", two weeks from today (\"Send by 10 Dec\")",
+  "ok": true,
+  "detail": "{\"open\":true,\"q\":\"When will you send it by?\",\"date\":\"Send by 10 Dec\",\"w\":\"2\"}"
+ },
+ {
+  "lock": "BW-31",
+  "where": "saving sets the send-by date, and the bar runs to it (due day 14, bar to 333.0 vs 333.0)",
+  "ok": true,
+  "detail": "{\"due\":\"14\",\"right\":333}"
+ },
+ {
   "lock": "BW-26",
   "where": "No reply date yet: under All and Waiting only",
   "ok": true,
@@ -348,6 +414,18 @@
   "detail": "{\"open\":true,\"slider\":true,\"date\":\"Reply by 1 Aug\"}"
  },
  {
+  "lock": "BW-30",
+  "where": "a passed date (population 1) shows \"That’s already passed, so it’ll go into Needs chasing.\"",
+  "ok": true,
+  "detail": "[{\"w\":\"1\",\"date\":\"27 Jun\",\"past\":true,\"line\":\"That’s already passed, so it’ll go into Needs chasing.\",\"font\":\"12px\"},{\"w\":\"26\",\"date\":\"19 Dec\",\"past\":false,\"line\":null,\"font\":\"\"}]"
+ },
+ {
+  "lock": "BW-30",
+  "where": "a date still to come (population 1) shows no such line",
+  "ok": true,
+  "detail": "[{\"w\":\"1\",\"date\":\"27 Jun\",\"past\":true,\"line\":\"That’s already passed, so it’ll go into Needs chasing.\",\"font\":\"12px\"},{\"w\":\"26\",\"date\":\"19 Dec\",\"past\":false,\"line\":null,\"font\":\"\"}]"
+ },
+ {
   "lock": "BW-26",
   "where": "nothing sits over the sheet's controls (the dock included)",
   "ok": true,
@@ -355,7 +433,7 @@
  },
  {
   "lock": "BW-26",
-  "where": "the save wrote the writer's reply date (2026-07-31T23:00:00.000Z)",
+  "where": "the save wrote the writer's reply date (2026-12-19T00:00:00.000Z)",
   "ok": true,
   "detail": ""
  },

@@ -431,12 +431,20 @@ const WHO: Partial<Record<string, string>> = {
 export interface BwChange { id: string; d: number; t: string }
 /** what changed since `seenDay` (days from today, ≤ 0): each stage moved, and each reply date reached, oldest first.
  *  A change ON the day last opened counts only if after it (ref `e.d > SEEN`) */
-export function changes(rows: readonly BwRow[], seenDay: number): BwChange[] {
-  const out: BwChange[] = [];
+/** v3.1 (Nick's ruling 2): when two lines would start with the same agent's name, each of them carries the
+ *  manuscript's title after the name — "Jo Smith (The Salt Road) asked for the full". Only then; never grouped. */
+export function changes(rows: readonly BwRow[], seenDay: number, titleOf: (id: string) => string | null | undefined = () => null): BwChange[] {
+  const raw: (BwChange & { name: string; rest: string })[] = [];
   for (const r of rows) {
-    for (const e of r.ev) if (e.d > seenDay && e.d <= 0 && WHO[e.status]) out.push({ id: r.id, d: e.d, t: `${r.name} ${WHO[e.status]}` });
-    if (!r.closed && !r.you && r.due != null && r.due <= 0 && r.due > seenDay) out.push({ id: r.id, d: r.due, t: `${r.name} reached the reply date` });
+    for (const e of r.ev) if (e.d > seenDay && e.d <= 0 && WHO[e.status]) raw.push({ id: r.id, d: e.d, t: "", name: r.name, rest: WHO[e.status] });
+    if (!r.closed && !r.you && r.due != null && r.due <= 0 && r.due > seenDay) raw.push({ id: r.id, d: r.due, t: "", name: r.name, rest: "reached the reply date" });
   }
+  const per = new Map<string, number>();
+  for (const x of raw) per.set(x.name, (per.get(x.name) ?? 0) + 1);
+  const out = raw.map(({ id, d, name, rest }) => {
+    const title = (per.get(name) ?? 0) > 1 ? titleOf(id)?.trim() : null;
+    return { id, d, t: `${name}${title ? ` (${title})` : ""} ${rest}` };
+  });
   return out.sort((a, b) => a.d - b.d || a.t.localeCompare(b.t));
 }
 /** "since Thursday" — the weekday within a week, the date beyond it */
@@ -470,16 +478,22 @@ export function searchRows(rows: readonly BwRow[], q: string, n = 6): BwRow[] {
 
 /** the no-date sheet's starting point: the agent's stated response time from their card, else 6 weeks */
 export const ND_DEFAULT_WEEKS = 6;
+/** the send-by sheet (v3.1) starts two weeks from today */
+export const SB_DEFAULT_WEEKS = 2;
 export function noDateDefault(statedWeeks: number | null | undefined): { weeks: number; stated: boolean } {
   return statedWeeks != null && statedWeeks > 0 ? { weeks: Math.round(statedWeeks), stated: true } : { weeks: ND_DEFAULT_WEEKS, stated: false };
 }
 
 /** the long-press menu (ref `menuHTML`): per state, each mapped to the app's journey by the view */
-export type BwAct = "replied" | "nudge" | "open" | "edit" | "sent" | "reopen";
-export const ACT_LABEL: Record<BwAct, string> = { replied: "They replied", nudge: "Send a nudge", open: "Open query", edit: "Edit dates", sent: "I’ve sent it", reopen: "Reopen" };
-export function menuActions(r: Pick<BwRow, "closed" | "you">): BwAct[] {
-  if (r.closed) return ["open", "reopen"];
-  if (r.you) return ["sent", "open", "edit"];
+/* v3.1 (Nick's rulings): no Reopen on the phone (no phone journey), so a closed query's menu is just Open query; an
+   undated with-you query gets "Add send-by date" after "I've sent it" */
+export type BwAct = "replied" | "nudge" | "open" | "edit" | "sent" | "sendby";
+export const ACT_LABEL: Record<BwAct, string> = { replied: "They replied", nudge: "Send a nudge", open: "Open query", edit: "Edit dates", sent: "I’ve sent it", sendby: "Add send-by date" };
+/** with you and no send-by date (v3.1): drawn to today, with "Add send-by date" in its menu and its timeline */
+export const needsSendBy = (r: Pick<BwRow, "closed" | "you" | "due">): boolean => !r.closed && r.you && r.due == null;
+export function menuActions(r: Pick<BwRow, "closed" | "you" | "due">): BwAct[] {
+  if (r.closed) return ["open"];
+  if (r.you) return needsSendBy(r) ? ["sent", "sendby", "open", "edit"] : ["sent", "open", "edit"];
   return ["replied", "nudge", "open", "edit"];
 }
 
@@ -508,11 +522,13 @@ export function recapStats(rows: readonly BwRow[]): BwRecap {
 }
 
 /** the timeline sheet (ref `openSheet`): one step per stage, the reply-due step, the line and the button */
-export interface BwStep { k: "done" | "next" | "late"; t: string; d: number; status: string | null; cur: boolean }
+/** "nosendby" (v3.1): an undated with-you query's send-by step, "No send-by date yet" with an Add link */
+export interface BwStep { k: "done" | "next" | "late" | "nosendby"; t: string; d: number; status: string | null; cur: boolean }
 export function sheetOf(r: BwRow, quietDays: number, nowMs: number): { steps: BwStep[]; line: string; cta: "replied" | "sent" | null } {
   const past = r.due != null && r.due < 0, quiet = past && -r.due! > quietDays;
   const steps: BwStep[] = r.ev.map((e, i) => ({ k: "done", t: (STAGE_NAME[e.status as QueryStatus] ?? e.status).replace(" requested", " asked for"), d: e.d, status: e.status, cur: i === r.ev.length - 1 }));
   if (r.due != null && !r.closed) steps.push({ k: past ? "late" : "next", t: r.you ? "Your send-by date" : "Reply due", d: r.due, status: null, cur: false });
+  else if (needsSendBy(r)) steps.push({ k: "nosendby", t: "No send-by date yet", d: 0, status: null, cur: false });
   const days = (n: number) => `${n} ${n === 1 ? "day" : "days"}`;
   const line = r.closed ? `Closed ${dm(r.ev[r.ev.length - 1]?.d ?? 0, nowMs)}.`
     : r.you ? (past ? `${days(-r.due!)} past the date you set to send it.` : r.due != null ? `Send it by ${dm(r.due, nowMs)}.` : "No send-by date set.")

@@ -15,8 +15,9 @@
  *     replay's recap.
  *   - EVERY ACTION OPENS THE APP'S OWN JOURNEY (`actOf`): They replied → Record a response (`runAct("reply")`); Send a
  *     nudge and I've sent it → the drawer's nudge and sent journeys (`runAct`); Edit dates → "Edit this query"
- *     (`pa3:edit-query`, as the query page's Edit does); Open query → the query card (`openV3Query`). Reopen has no
- *     phone journey (the card journey is hosted on the desktop Query Centre only), so it opens the query card.
+ *     (`pa3:edit-query`, as the query page's Edit does); Open query → the query card (`openV3Query`). No Reopen on the
+ *     phone (v3.1, Nick's ruling 1: its card journey is desktop-only). Add send-by date (v3.1) → the world's own
+ *     send-by sheet, which saves through the edit journey's `sendByFields` (expectedSendDate only).
  *   - PER DEVICE (localStorage): when this writer last opened Birds-eye (`BW_SEEN_KEY`, recorded once the news is seen
  *     or the tab is left), and which groups are folded (`BW_FOLD_KEY`).
  * ⚠️ COPY: never "overdue" or "late".
@@ -32,6 +33,7 @@ import { eyeRows, type EyeRow } from "../../../lib/qcBirdsEye";
 import type { QcRow } from "../../../lib/qcSummary";
 import { DEFAULT_QUIET_WEEKS } from "../../../lib/queryState";
 import { writerExpectedWrite } from "../../../lib/expectedDate";
+import { sendByFields } from "../../../lib/queryActions/sendBy";
 import { db } from "../../../lib/firebase";
 import {
   PILLS, PILL_LABEL, REPLAY_MS, RH, RULE, TOPFIT, TOPFOLD, WX, bandOf, bwCounts, bwGroups, bwRow, changes, chipForCourt, dateOf, dayFromMs, dm, isDrawn,
@@ -40,7 +42,7 @@ import {
 } from "../../../lib/birdsWorld";
 import { drawWorld } from "./drawWorld";
 import { buzz, shadowStyle, wireMotion, type Motion } from "./worldMotion";
-import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet, TimelineSheet } from "./BirdsSheets";
+import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet, SendBySheet, TimelineSheet } from "./BirdsSheets";
 import "./birdsWorld.css";
 
 const I = (d: string, w = 1.8) => (
@@ -100,15 +102,16 @@ export function cardFor(demo: boolean, f: BwFilter, groups: { t: string }[]): Bw
 }
 const PADY_CLOSED = 256;
 
-/** what each menu action opens: the app's own journeys (recon); Reopen falls back to the query card */
-export function actOf(a: BwAct, id: string): void {
+/** what each menu action opens: the app's own journeys (recon). "Add send-by date" (v3.1) opens the world's own
+ *  send-by sheet, so the caller says how (`sendBy`). Reopen is gone from the phone (v3.1, Nick's ruling 1). */
+export function actOf(a: BwAct, id: string, sendBy: (id: string) => void): void {
   switch (a) {
     case "replied": runAct("reply", id); return;
     case "nudge": runAct("nudge", id); return;
     case "sent": runAct("sent", id); return;
     case "edit": window.dispatchEvent(new CustomEvent("pa3:edit-query", { detail: id })); return;
     case "open": openV3Query(id); return;
-    case "reopen": openV3Query(id); return;
+    case "sendby": sendBy(id); return;
     default: { const unhandled: never = a; void unhandled; }
   }
 }
@@ -118,7 +121,7 @@ export interface BirdsWorldProps {
   onBack: () => void;
   onList: () => void;
 }
-type SheetState = null | { k: "row"; id: string } | { k: "key" } | { k: "search" } | { k: "nd"; id: string; queue: string[] };
+type SheetState = null | { k: "row"; id: string } | { k: "key" } | { k: "search" } | { k: "nd"; id: string; queue: string[] } | { k: "sb"; id: string };
 type TipState = null | { k: "news" } | { k: "line"; i: number };
 
 export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, onList }) => {
@@ -152,7 +155,12 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   /* ── the hawk's news: since this device last opened Birds-eye ── */
   const [seenMs] = useState<number | null>(() => { const v0 = Number(store.get(BW_SEEN_KEY)); return Number.isFinite(v0) && v0 > 0 ? v0 : null; });
   const seenDay = seenMs == null ? 0 : dayFromMs(seenMs, now);
-  const news: BwChange[] = useMemo(() => (demo || seenMs == null ? [] : changes(rows, seenDay)), [demo, seenMs, rows, seenDay]);
+  /* the manuscript's title, for news lines that would otherwise start with the same agent's name (v3.1, ruling 2) */
+  const titleOf = useCallback((id: string): string | null => {
+    const msId = (v.byId.get(id)?.row as QcRow | undefined)?.manuscriptId;
+    return msId ? v.core.db.manuscripts.find((m) => m.id === msId)?.title ?? null : null;
+  }, [v.byId, v.core.db.manuscripts]);
+  const news: BwChange[] = useMemo(() => (demo || seenMs == null ? [] : changes(rows, seenDay, titleOf)), [demo, seenMs, rows, seenDay, titleOf]);
   const [newsSeen, setNewsSeen] = useState(false);
   const recordVisit = useCallback(() => store.set(BW_SEEN_KEY, String(Date.now())), []);
   /* "last opened" is recorded once the news has been seen, or when the writer leaves the tab — never on a quick look */
@@ -448,6 +456,16 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     else { setSheet(null); if (saved) setToast("Every query has a reply date."); }
   };
   const dmOf = (d: number) => dm(d, now);
+  /* an undated with-you query's send-by date (v3.1, ruling 4): the edit journey's own write (expectedSendDate only) */
+  const openSendBy = (id: string) => setSheet({ k: "sb", id });
+  const sbRow = sheet?.k === "sb" ? byId.get(sheet.id) ?? null : null;
+  const saveSendBy = (id: string, weeks: number) => {
+    const at = dateOf(weeks * 7, now);
+    void v.core.db.updateQuery(id, sendByFields({ weeks: [], none: false, sendBy: at, reminder: null, noDateTask: at }, { due: false, reminder: false }, false) as never);
+    buzz(8);
+    setSheet(null);
+    setToast(`Saved. Send by ${dmOf(weeks * 7)}.`);
+  };
   const statedOf = (id: string): number | null => {
     const q = v.byId.get(id), agentId = (q?.row as { query?: { agentId?: string } } | undefined)?.query?.agentId;
     const a = agentId ? v.core.db.agents.find((x) => x.id === agentId) : undefined;
@@ -484,7 +502,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
           {levels.map((l, i) => ({ l, i })).reverse().map(({ l, i }) => <button key={l.t} type="button" data-a="lvl" data-i={i} data-bw="level" data-t={l.t} aria-pressed={i === 0}>{l.t}</button>)}
         </div>
         {step >= 0 && news[step] ? (
-          <div className="bw-sinces" data-bw="news-step" style={{ bottom: `var(--bw-cb, 96px)` }}>
+          <div className="bw-sinces" data-bw="news-step" data-id={news[step].id} style={{ bottom: `var(--bw-cb, 96px)` }}>
             <span><em>{step + 1} of {news.length}</em>{news[step].t}</span>
             <button type="button" data-bw="news-next" onClick={() => stepTo(step + 1)}>{step + 1 < news.length ? "Next" : "Done"}</button>
           </div>
@@ -528,8 +546,9 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
       ) : tip?.k === "line" && lines[tip.i] ? (
         <div className="bw-tipb" data-bw="tip" data-i={tip.i} style={{ top: tipTop }} onClick={onHawk}><i />{lines[tip.i]}<small>Tap for another</small></div>
       ) : null}
-      {menu && menuRow ? <QuickMenu r={menuRow} acts={menuActions(menuRow)} x={menu.x} y={menu.y} vpW={W.current?.vpW ?? 390} vpH={W.current?.vpH ?? 784} onClose={() => setMenu(null)} onAct={(a) => { setMenu(null); actOf(a, menuRow.id); }} /> : null}
-      {sheetRow ? <TimelineSheet r={sheetRow} quietDays={quietDays} nowMs={now} onClose={() => setSheet(null)} onAct={(a) => { setSheet(null); actOf(a, sheetRow.id); }} onOpen={() => { setSheet(null); openV3Query(sheetRow.id); }} /> : null}
+      {menu && menuRow ? <QuickMenu r={menuRow} acts={menuActions(menuRow)} x={menu.x} y={menu.y} vpW={W.current?.vpW ?? 390} vpH={W.current?.vpH ?? 784} onClose={() => setMenu(null)} onAct={(a) => { setMenu(null); actOf(a, menuRow.id, openSendBy); }} /> : null}
+      {sheetRow ? <TimelineSheet r={sheetRow} quietDays={quietDays} nowMs={now} onClose={() => setSheet(null)} onAct={(a) => { setSheet(null); actOf(a, sheetRow.id, openSendBy); }} onOpen={() => { setSheet(null); openV3Query(sheetRow.id); }} onSendBy={() => openSendBy(sheetRow.id)} /> : null}
+      {sbRow ? <SendBySheet r={sbRow} nowMs={now} hawk={BW_HAWK} onClose={() => setSheet(null)} onSave={(wk) => saveSendBy(sbRow.id, wk)} /> : null}
       {sheet?.k === "key" ? <KeySheet onClose={() => setSheet(null)} /> : null}
       {sheet?.k === "search" ? <SearchSheet rows={rows} onClose={() => setSheet(null)} onPick={flyTo} /> : null}
       {ndRow ? <NoDateSheet r={ndRow} left={ndQueue.filter((x) => byId.get(x) && isNoDate(byId.get(x)!)).length} statedWeeks={statedOf(ndRow.id)} nowMs={now} hawk={BW_HAWK}
