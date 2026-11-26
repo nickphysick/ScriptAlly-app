@@ -15,8 +15,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { V3Glyph } from "../v3/V3Parts";
 import { WeekSlider } from "../../forms/WeekSlider";
 import {
-  ACT_LABEL, agoOf, bandOf, dm, edgeOf, fadedBand, fadedEdge, hatchOf, noDateDefault, searchRows, sheetOf, type BwAct, type BwRecap, type BwRow,
+  ACT_LABEL, agoOf, bandOf, dm, edgeOf, fadedBand, fadedEdge, hatchOf, noDateDefault, SB_DEFAULT_WEEKS, searchRows, sheetOf, type BwAct, type BwRecap, type BwRow,
 } from "../../../lib/birdsWorld";
+import { STAGE_NAME } from "../../../lib/qcSummary";
 import { QueryStatus } from "../../../types";
 
 const X_IC = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>;
@@ -34,7 +35,7 @@ export const Sheet: React.FC<{ k: string; onClose: () => void; className?: strin
 const Close: React.FC<{ onClose: () => void }> = ({ onClose }) => <button type="button" className="bw-ib" aria-label="Close" data-bw="sheet-close" onClick={onClose}>{X_IC}</button>;
 
 /* ── tap a bar: the query's own timeline (ref `openSheet`) ── */
-export const TimelineSheet: React.FC<{ r: BwRow; quietDays: number; nowMs: number; onClose: () => void; onAct: (a: "replied" | "sent") => void; onOpen: () => void }> = ({ r, quietDays, nowMs, onClose, onAct, onOpen }) => {
+export const TimelineSheet: React.FC<{ r: BwRow; quietDays: number; nowMs: number; onClose: () => void; onAct: (a: "replied" | "sent") => void; onOpen: () => void; onSendBy: () => void }> = ({ r, quietDays, nowMs, onClose, onAct, onOpen, onSendBy }) => {
   const s = sheetOf(r, quietDays, nowMs);
   return (
     <Sheet k="timeline" onClose={onClose}>
@@ -48,7 +49,9 @@ export const TimelineSheet: React.FC<{ r: BwRow; quietDays: number; nowMs: numbe
           <li key={i} className={`${x.k}${x.cur ? " cur" : ""}`} data-bw="step" data-k={x.k}>
             <i style={x.status ? { background: bandOf(x.status), outline: `2px solid ${edgeOf(x.status)}` } : undefined}>{x.k === "late" ? "!" : ""}</i>
             <b>{x.t}</b>
-            <span>{dm(x.d, nowMs)} · {agoOf(x.d)}</span>
+            {x.k === "nosendby"
+              ? <button type="button" className="bw-link bw-sbadd" data-bw="sb-add" onClick={onSendBy}>Add</button>
+              : <span>{dm(x.d, nowMs)} · {agoOf(x.d)}</span>}
           </li>
         ))}
       </ol>
@@ -119,9 +122,33 @@ export const NoDateSheet: React.FC<{
       <p className="bw-ndq">When should you hear back by?</p>
       <WeekSlider value={weeks} onChange={setWeeks} min={1} max={26} label="When should you hear back by?" hideLabel readout={(n) => `${n} ${n === 1 ? "week" : "weeks"} · ${at(n)}`} />
       <p className="bw-ndr" data-bw="nd-date">{def.stated && weeks === def.weeks ? "Their stated time · " : ""}Reply by <b>{at(weeks)}</b></p>
+      {/* v3.1 (Nick's ruling 3): the honest date stays, even when it has passed, and says where the query will go */}
+      {sent + weeks * 7 < 0 ? <p className="bw-ndp" data-bw="nd-passed">That’s already passed, so it’ll go into Needs chasing.</p> : null}
       <div className="bw-ndf">
         <button type="button" className="bw-skip" data-bw="nd-skip" onClick={onSkip}>{left > 1 ? "Skip for now" : "Not now"}</button>
         <button type="button" className="bw-cta" data-bw="nd-save" onClick={() => onSave(weeks)}>Save</button>
+      </div>
+    </Sheet>
+  );
+};
+
+/* ── an undated with-you query's send-by date (v3.1, Nick's ruling 4): the no-date sheet's slider, weeks from today ── */
+export const SendBySheet: React.FC<{ r: BwRow; nowMs: number; hawk: string; onClose: () => void; onSave: (weeks: number) => void }> = ({ r, nowMs, hawk, onClose, onSave }) => {
+  const [weeks, setWeeks] = useState(SB_DEFAULT_WEEKS);
+  useEffect(() => { setWeeks(SB_DEFAULT_WEEKS); }, [r.id]);
+  const at = (w: number) => dm(w * 7, nowMs), cur = r.ev[r.ev.length - 1];
+  return (
+    <Sheet k="sendby" onClose={onClose} className="bw-nds">
+      <div className="bw-ndh">
+        <img src={hawk} alt="" />
+        <span><em>No send-by date yet</em><b>{r.name}</b><small>{r.agency ? `${r.agency} · ` : ""}{cur ? `${(STAGE_NAME[cur.status as QueryStatus] ?? cur.status).replace(" requested", " asked for")} ${dm(cur.d, nowMs)}` : ""}</small></span>
+      </div>
+      <p className="bw-ndq">When will you send it by?</p>
+      <WeekSlider value={weeks} onChange={setWeeks} min={1} max={26} label="When will you send it by?" hideLabel readout={(n) => `${n} ${n === 1 ? "week" : "weeks"} · ${at(n)}`} />
+      <p className="bw-ndr" data-bw="sb-date">Send by <b>{at(weeks)}</b></p>
+      <div className="bw-ndf">
+        <button type="button" className="bw-skip" data-bw="sb-skip" onClick={onClose}>Not now</button>
+        <button type="button" className="bw-cta" data-bw="sb-save" onClick={() => onSave(weeks)}>Save</button>
       </div>
     </Sheet>
   );

@@ -98,14 +98,16 @@ describe("Phone Birds-eye world v2 renders", () => {
     expect(W(null, "/queries/all?view=birds&hawk=0")).not.toContain('data-bw="hawk"');
     expect(shadowStyle(1, 10, 200, { z: 1, ox: 10, oy: 200 }).opacity).toBe("0.100");
   });
-  it("v3 source: the menu opens the app's journeys (Reopen falls back to the query card); per-device storage; haptics never throw", () => {
+  it("v3 source: the menu opens the app's journeys (no Reopen; Add send-by date opens the world's sheet); per-device storage; haptics never throw", () => {
     const v = readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8");
     expect(v).toContain('case "replied": runAct("reply", id); return;');
     expect(v).toContain('case "nudge": runAct("nudge", id); return;');
     expect(v).toContain('case "sent": runAct("sent", id); return;');
     expect(v).toContain('case "edit": window.dispatchEvent(new CustomEvent("pa3:edit-query", { detail: id })); return;');
     expect(v).toContain('case "open": openV3Query(id); return;');
-    expect(v).toContain('case "reopen": openV3Query(id); return;');
+    expect(v).not.toMatch(/case "reopen"|"Reopen"/);
+    expect(v).toContain('case "sendby": sendBy(id); return;');
+    expect(v).toContain("sendByFields({ weeks: [], none: false, sendBy: at, reminder: null, noDateTask: at }, { due: false, reminder: false }, false)");
     expect(v).toContain('BW_SEEN_KEY = "bw3.lastOpened"');
     expect(v).toContain('BW_FOLD_KEY = "bw3.folded"');
     expect(v).toContain("writerExpectedWrite(");

@@ -39,12 +39,14 @@ const HARNESS = JSON.parse(readFileSync("tests/emulator-seed/harness.json", "utf
 const UID = Object.keys(HARNESS.docs).find((k) => /^users\/[^/]+$/.test(k))!.split("/")[1];
 
 const MUTS = ["fitted", "dates", "names", "days", "cont", "quiet", "counts", "seventy", "copy", "layers", "offline", "calm", "land", "replay",
-  "pillfit", "heads", "calmzoom", "levels", "press", "search", "news", "nodate", "pull", "empty"] as const;
+  "pillfit", "heads", "calmzoom", "levels", "press", "search", "news", "nodate", "pull", "empty",
+  "reopen", "titles", "passed", "sendby"] as const;
 type Mut = (typeof MUTS)[number] | "";
 const MUT_LOCK: Record<Exclude<Mut, "">, string> = {
   fitted: "BW-1", dates: "BW-4", names: "BW-5", days: "BW-6", cont: "BW-7", quiet: "BW-8", counts: "BW-9", seventy: "BW-10", empty: "BW-11",
   replay: "BW-12", copy: "BW-13", layers: "BW-14", offline: "BW-15", calm: "BW-17", land: "BW-18",
   pillfit: "BW-19", heads: "BW-20", calmzoom: "BW-21", levels: "BW-22", press: "BW-23", search: "BW-24", news: "BW-25", nodate: "BW-26", pull: "BW-27",
+  reopen: "BW-28", titles: "BW-29", passed: "BW-30", sendby: "BW-31",
 };
 const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   dates: '.bw-bar[data-k="stage"] { margin-left: 6px !important; }',
@@ -70,6 +72,10 @@ const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   news: ".bw-bedot { display: none !important; }",
   /* BW-27: the pull's pill never shows */
   pull: ".bw-ptr { display: none !important; }",
+  /* BW-30: the "already passed" line hidden */
+  passed: ".bw-ndp { display: none !important; }",
+  /* BW-31: "Add send-by date" gone from the menu */
+  sendby: '[data-bw="menu-act"][data-act="sendby"] { display: none !important; }',
 };
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -375,7 +381,7 @@ for (const mut of runs) {
         await hold(page, pickT.x, pickT.y);
         await page.mouse.up(); await frame(page, 400);
         const menu = await page.evaluate(() => ({ open: !!document.querySelector('[data-bw="menu"]'), id: document.querySelector<HTMLElement>('[data-bw="menu"]')?.dataset.id ?? "", acts: [...document.querySelectorAll<HTMLElement>('[data-bw="menu-act"]')].map((b) => b.textContent ?? "") }));
-        const wantActs = pickT.closed ? ["Open query", "Reopen"] : pickT.you ? ["I’ve sent it", "Open query", "Edit dates"] : ["They replied", "Send a nudge", "Open query", "Edit dates"];
+        const wantActs = pickT.closed ? ["Open query"] : pickT.you ? ["I’ve sent it", "Open query", "Edit dates"] : ["They replied", "Send a nudge", "Open query", "Edit dates"];
         L.check("BW-23", "a hold on a zoomed-in bar opens the menu, with its state's actions", menu.open && menu.id === pickT.id && menu.acts.join("|") === wantActs.join("|"), JSON.stringify(menu));
         if (menu.open) { await page.locator('[data-bw="menu-veil"]').click({ position: { x: 10, y: 10 } }).catch(() => {}); await frame(page, 300); }
         if (pickT.white) {
@@ -427,13 +433,29 @@ for (const mut of runs) {
       L.check("BW-25", `tapping the hawk drops the banner ("${banner.slice(0, 60)}…")`, new RegExp(`^${n0} things changed since \\w+`).test(banner) && /Show me/.test(banner), banner);
       await page.locator('[data-bw="show-me"]').click({ timeout: 4000 }).catch(() => {}); await frame(page, 900);
       const seen: { step: string; glow: boolean; btn: string }[] = [];
+      const lines: { id: string; l: string }[] = [];
       for (let i = 0; i <= n0; i++) {
+        if (mut === "titles") await page.evaluate(() => { const sp = document.querySelector('[data-bw="news-step"] span'); const t = [...(sp?.childNodes ?? [])].find((n) => n.nodeType === 3); if (t) t.textContent = (t.textContent ?? "").replace(/ \([^)]*\)/, ""); });
+        lines.push(await page.evaluate(() => { const el = document.querySelector<HTMLElement>('[data-bw="news-step"]'), sp = el?.querySelector("span"); return { id: el?.dataset.id ?? "", l: [...(sp?.childNodes ?? [])].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim() }; }));
         const st = await page.evaluate(() => ({ step: document.querySelector('[data-bw="news-step"] em')?.textContent ?? "", glow: [...document.querySelectorAll<HTMLElement>('[data-bw="glow"]')].some((e) => getComputedStyle(e).display !== "none"), btn: document.querySelector('[data-bw="news-next"]')?.textContent ?? "" }));
         if (!st.step) break;
         seen.push(st);
         await page.locator('[data-bw="news-next"]').click(); await frame(page, 900);
       }
       const after = await page.evaluate(() => ({ count: document.querySelector('[data-bw="news-count"]')?.textContent ?? null, step: !!document.querySelector('[data-bw="news-step"]'), stored: Number(localStorage.getItem("bw3.lastOpened")) }));
+      /* ── BW-29 · two news lines that would start with the same agent's name both carry the manuscript title; single ones don't ── */
+      {
+        /* whether each line's query has a manuscript at all (a probe query in the harness is saved with none) */
+        const msOf = async (id: string) => { const j = await fetch(`${EMU}/users/${UID}/queries/${encodeURIComponent(id)}`, { headers: { Authorization: "Bearer owner" } }).then((x) => x.json()) as { fields?: { manuscriptId?: { stringValue?: string } } }; return !!j.fields?.manuscriptId?.stringValue; };
+        const parsed = await Promise.all(lines.filter((x) => x.l).map(async ({ id, l }) => { const m = /^(.*?)(?: \((.+)\))? (asked for a partial|asked for the full|made an offer|passed|reached the reply date)$/.exec(l); return { l, id, hasMs: await msOf(id), name: m?.[1] ?? l, title: m?.[2] ?? null }; }));
+        const per = new Map<string, number>(); for (const x of parsed) per.set(x.name, (per.get(x.name) ?? 0) + 1);
+        const all2 = parsed.filter((x) => per.get(x.name)! > 1), singles = parsed.filter((x) => per.get(x.name) === 1);
+        const twins = all2.filter((x) => x.hasMs), bare = all2.filter((x) => !x.hasMs);
+        L.check("BW-29", `a same-agent line whose query has no manuscript stays bare (population ${bare.length})`, bare.every((x) => !x.title), JSON.stringify(bare.map((x) => x.l)));
+        L.check("BW-29", `same-agent lines with a manuscript in the news (population ${twins.length} of ${parsed.length})`, twins.length >= 2, JSON.stringify(parsed.map((x) => x.l)));
+        L.check("BW-29", "each same-agent line whose query has a manuscript carries its title", twins.length > 0 && twins.every((x) => !!x.title), JSON.stringify(twins.map((x) => x.l)));
+        L.check("BW-29", `a single agent's line carries no title (population ${singles.length})`, singles.every((x) => !x.title), JSON.stringify(singles.map((x) => x.l)));
+      }
       const each = seen.length === n0 && seen.every((x, i) => x.step === `${i + 1} of ${n0}` && x.glow && x.btn === (i + 1 < n0 ? "Next" : "Done"));
       L.check("BW-25", `Show me visits each of the ${n0}, glowing, Next then Done`, each, JSON.stringify(seen));
       L.check("BW-25", "Done clears the count and records this visit", after.count == null && !after.step && Date.now() - after.stored < 60_000, JSON.stringify(after));
@@ -584,6 +606,68 @@ for (const mut of runs) {
       await page.setViewportSize(PHONE);
     }
 
+    /* ── BW-28 · a closed query's menu is just "Open query" (no Reopen on the phone, v3.1) ──
+       ── BW-31 · an undated with-you query: no chip on its bar; "Add send-by date" after "I've sent it" in its menu;
+          saving puts the date on the bar (v3.1) ── */
+    if (on("BW-28") || on("BW-31")) { stamp("BW-28/31");
+      await openWorld(page); await mutate(page, mut);
+      /* rows off screen aren't drawn: find one at the fitted view, then scroll to it at Weeks */
+      const findAtWeeks = async (sel: string) => {
+        await fitted(page);
+        const id = await page.evaluate((q) => document.querySelector<HTMLElement>(q)?.dataset.id ?? "", sel);
+        if (!id) return { id, bar: null as null | { x: number; y: number } };
+        const fy = await page.evaluate((i) => document.querySelector<HTMLElement>(`[data-bw="row"][data-id="${CSS.escape(i)}"]`)!.getBoundingClientRect().top, id);
+        await level(page, "Weeks");
+        const rowAt = () => page.evaluate((i) => { const r = document.querySelector<HTMLElement>(`[data-bw="row"][data-id="${CSS.escape(i)}"]`)?.getBoundingClientRect(); return r ? r.top + r.height / 2 : null; }, id);
+        let y = await rowAt();
+        for (let k = 0; k < 40 && y == null; k++) { await pan(page, 0, fy > 430 ? -300 : 300); y = await rowAt(); }
+        if (y != null) await pan(page, 0, 430 - y);
+        const barOf = () => page.evaluate((i) => { const bs = [...document.querySelectorAll<HTMLElement>(`[data-bw="bar"][data-row="${CSS.escape(i)}"]`)].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 2); if (!bs.length) return null; const l = Math.min(...bs.map((b) => b.left)), r = Math.max(...bs.map((b) => b.right)); return { l, r, y: bs[0].top + bs[0].height / 2 }; }, id);
+        let b = await barOf();
+        if (b && (b.r < 40 || b.l > innerW() - 40)) { await pan(page, 200 - (Math.max(b.l, Math.min(b.r, 200))), 0); b = await barOf(); }
+        if (b && b.r - Math.max(b.l, 20) < 30) { await pan(page, 200 - (b.r - 20), 0); b = await barOf(); }
+        return { id, bar: b ? { x: Math.max(b.l + 12, Math.min(b.r - 12, (Math.max(b.l, 24) + Math.min(b.r, 366)) / 2)), y: b.y } : null };
+      };
+      const innerW = () => PHONE.width;
+      const openMenu = async (pt: { x: number; y: number }) => {
+        await offPE(page); await hold(page, pt.x, pt.y); await page.mouse.up(); await frame(page, 400);
+        if (mut === "reopen") await page.evaluate(() => { const m = document.querySelector('[data-bw="menu"]'); if (m) { const b = document.createElement("button"); b.dataset.bw = "menu-act"; b.dataset.act = "reopen"; b.textContent = "Reopen"; m.appendChild(b); } });
+        return page.evaluate(() => ({ open: !!document.querySelector('[data-bw="menu"]'), id: document.querySelector<HTMLElement>('[data-bw="menu"]')?.dataset.id ?? "", acts: [...document.querySelectorAll<HTMLElement>('[data-bw="menu-act"]')].filter((b) => getComputedStyle(b).display !== "none").map((b) => b.textContent ?? "") }));
+      };
+      const closeMenu = () => page.locator('[data-bw="menu-veil"]').click({ position: { x: 10, y: 10 }, timeout: 2000 }).catch(() => {});
+
+      if (on("BW-28")) {
+        const c = await findAtWeeks('[data-bw="row"][data-closed="1"]');
+        L.check("BW-28", `a closed query's bar to hold (population: ${c.id || "none"})`, !!c.bar, "");
+        if (c.bar) {
+          const m = await openMenu(c.bar);
+          L.check("BW-28", "a closed query's menu is just \"Open query\"", m.open && m.id === c.id && m.acts.join("|") === "Open query", JSON.stringify(m));
+          await closeMenu();
+        }
+      }
+      if (on("BW-31")) {
+        const u = await findAtWeeks('[data-bw="row"][data-you="1"][data-dueday=""]');
+        L.check("BW-31", `an undated with-you query to hold (population: ${u.id || "none"})`, !!u.bar, "");
+        if (u.bar) {
+          const chips = await page.evaluate((i) => document.querySelectorAll(`[data-bw="ndset"][data-id="${CSS.escape(i)}"], [data-bw="ndt"][data-row="${CSS.escape(i)}"]`).length, u.id);
+          L.check("BW-31", "no chip (and no no-date fade) on its bar", chips === 0, String(chips));
+          const m = await openMenu(u.bar);
+          L.check("BW-31", "its menu: I’ve sent it · Add send-by date · Open query · Edit dates", m.open && m.id === u.id && m.acts.join("|") === "I’ve sent it|Add send-by date|Open query|Edit dates", JSON.stringify(m));
+          await page.locator('[data-bw="menu-act"][data-act="sendby"]').click({ timeout: 4000 }).catch(() => {}); await frame(page, 600);
+          const sh = await page.evaluate(() => ({ open: !!document.querySelector('[data-bw="sheet"][data-k="sendby"]'), q: document.querySelector('[data-bw="sheet"][data-k="sendby"] .bw-ndq')?.textContent ?? "", date: document.querySelector('[data-bw="sb-date"]')?.textContent ?? "", w: (document.querySelector('[data-bw="sheet"][data-k="sendby"] input[type="range"]') as HTMLInputElement | null)?.value ?? "" }));
+          const in14 = new Date(Date.now() + 14 * 86_400_000).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).replace("Sept", "Sep");
+          L.check("BW-31", `"Add send-by date" opens "When will you send it by?", two weeks from today ("${sh.date}")`, sh.open && sh.q === "When will you send it by?" && sh.w === "2" && sh.date === `Send by ${in14}`, JSON.stringify(sh));
+          if (sh.open) {
+            await page.locator('[data-bw="sb-save"]').click({ timeout: 4000 }).catch(() => {}); await frame(page, 2500);
+            const after = await page.evaluate((i) => { const h = document.querySelector<HTMLElement>(`[data-bw="row"][data-id="${CSS.escape(i)}"]`); const bars = [...document.querySelectorAll<HTMLElement>(`[data-bw="bar"][data-row="${CSS.escape(i)}"]`)].map((b) => b.getBoundingClientRect().right); return { due: h?.dataset.dueday ?? "gone", right: bars.length ? Math.max(...bars) : null }; }, u.id);
+            const r = await root(page);
+            L.check("BW-31", `saving sets the send-by date, and the bar runs to it (due day ${after.due}, bar to ${after.right?.toFixed(1)} vs ${dayX(r, 14).toFixed(1)})`, after.due === "14" && after.right != null && Math.abs(after.right - dayX(r, 14)) < 3, JSON.stringify(after));
+          }
+        }
+      }
+      await fitted(page);
+    }
+
     /* ── BW-26 · no reply date yet: in its group under All and Waiting only; saving a date moves the query out ── */
     if (on("BW-26")) { stamp("BW-26");
       await openWorld(page); await mutate(page, mut);
@@ -599,6 +683,23 @@ for (const mut of runs) {
         await page.mouse.click(r.x, r.y); await frame(page, 700);
         const sheet = await page.evaluate(() => ({ open: !!document.querySelector('[data-bw="sheet"][data-k="nodate"]'), slider: !!document.querySelector('[data-bw="sheet"][data-k="nodate"] input[type="range"]'), date: document.querySelector('[data-bw="nd-date"]')?.textContent ?? "" }));
         L.check("BW-26", `a tap on its bar opens the sheet with the app's slider ("${sheet.date}")`, sheet.open && sheet.slider && /Reply by \d+ \w+/.test(sheet.date), JSON.stringify(sheet));
+        /* ── BW-30 · a start date that has passed shows the one line; a future one doesn't ── */
+        {
+          const slider = page.locator('[data-bw="sheet"][data-k="nodate"] input[type="range"]');
+          const read = () => page.evaluate(() => {
+            const t = document.querySelector('[data-bw="nd-date"] b')?.textContent ?? "", now = new Date(), d = new Date(`${t} ${now.getFullYear()} 12:00`);
+            if (d.getTime() - now.getTime() > 182 * 86_400_000) d.setFullYear(d.getFullYear() - 1);
+            if (now.getTime() - d.getTime() > 182 * 86_400_000) d.setFullYear(d.getFullYear() + 1);
+            const p = document.querySelector<HTMLElement>('[data-bw="nd-passed"]');
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            return { date: t, past: new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() < today, line: p && getComputedStyle(p).display !== "none" ? p.textContent : null, font: p ? getComputedStyle(p).fontSize : "" };
+          });
+          const out: Record<string, unknown>[] = [];
+          for (const w of ["1", "26"]) { await slider.fill(w); await frame(page, 250); out.push({ w, ...(await read()) }); }
+          const pastOnes = out.filter((x) => x.past), future = out.filter((x) => !x.past);
+          L.check("BW-30", `a passed date (population ${pastOnes.length}) shows "That’s already passed, so it’ll go into Needs chasing."`, pastOnes.length > 0 && pastOnes.every((x) => x.line === "That’s already passed, so it’ll go into Needs chasing."), JSON.stringify(out));
+          L.check("BW-30", `a date still to come (population ${future.length}) shows no such line`, future.length > 0 && future.every((x) => x.line == null), JSON.stringify(out));
+        }
         if (mut === "nodate") await page.evaluate(() => { const b = document.querySelector('[data-bw="nd-save"]'); b?.replaceWith(b.cloneNode(true)); });
         /* every button in the sheet is the topmost thing where a finger lands (the dock once sat over Save) */
         const under = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-bw="sheet"] button, [data-bw="sheet"] input')].map((b) => { const r = b.getBoundingClientRect(); const t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return t && (t === b || b.contains(t)) ? "" : `${b.dataset.bw ?? b.tagName} under ${(t as HTMLElement | null)?.dataset?.pa5 ?? t?.tagName}`; }).filter(Boolean));
@@ -684,7 +785,8 @@ for (const mut of emptyRuns) {
     test.setTimeout(600_000);
     const L = new Ledger(mut, "empty");
     await signIn(page);
-    const card = async (k: string) => { const r = await root(page); const c = (await box(page, '[data-bw="card"]'))[0]; return { k: r.card, shown: !!c && c.d.k === k && c.w > 200, text: c?.text ?? "" }; };
+    /* waits for the card first: after the locks test, the emulator's writes can reach the page a few seconds late */
+    const card = async (k: string) => { await page.locator(`[data-bw="card"][data-k="${k}"]`).waitFor({ timeout: 15_000 }).catch(() => {}); const r = await root(page); const c = (await box(page, '[data-bw="card"]'))[0]; return { k: r.card, shown: !!c && c.d.k === k && c.w > 200, text: c?.text ?? "" }; };
     const ALL_Q = await listQueries();
     const owed = ALL_Q.filter((q) => ["Partial Requested", "Full Requested", "Revise & Resubmit", "Offer"].includes(q.status));
     for (const q of owed) await setStatus(q.id, "Queried");

@@ -229,6 +229,10 @@
   .bw-vt li.late i { outline: 2px solid var(--pa-navy); background: var(--pa-navy) !important; color: #fff; }
   .bw-vt li.next b, .bw-vt li.next span { color: var(--pa-muted); }
   .bw-vt li.next::before { background: repeating-linear-gradient(#dedbd5 0 3px, transparent 3px 6px); }
+  /* v3.1: an undated with-you query's send-by step — a dashed dot, and Add where the date would be */
+  .bw-vt li.nosendby i { outline: 2px dashed var(--pa-navy); background: #fff; }
+  .bw-vt li.nosendby b { color: var(--pa-muted); }
+  .bw .bw-vt li .bw-sbadd { grid-column: 2; display: inline; width: auto; min-height: 0; margin: 0; padding: 0; text-align: left; }
   .bw-say { font: 400 16px/1.45 var(--pa-sans); color: var(--pa-ink); margin: 0 0 16px; }
   .bw .bw-cta { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 48px; border-radius: 999px; background: var(--pa-navy); color: #fff !important; font: 600 16px/1.25 var(--pa-sans) !important; border: 0; cursor: pointer; }
   .bw .bw-link { display: block; width: 100%; min-height: 48px; margin-top: 4px; border: 0; background: none; color: var(--pa-navy) !important; font: 600 14px var(--pa-sans) !important; cursor: pointer; }
@@ -254,6 +258,8 @@
   .bw-ndq { margin: 18px 0 10px; font: 600 16px var(--pa-sans); color: var(--pa-ink); }
   .bw-ndr { margin: 4px 0 0; font: 400 14px var(--pa-sans); color: var(--pa-body); }
   .bw-ndr b { color: var(--pa-ink); }
+  /* v3.1: the slider's date has passed (Nick's ruling 3) — plain muted text under it */
+  .bw-ndp { margin: 4px 0 0; font: 400 12px/1.4 var(--pa-sans); color: var(--pa-muted); } /* the brief's 13px is off the phone scale (census); 12 is its step */
   .bw-ndf { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; }
   .bw .bw-ndf .bw-skip { height: 48px; padding: 0 4px; border: 0; background: none; font: 600 14px var(--pa-sans) !important; color: var(--pa-muted) !important; cursor: pointer; }
   .bw .bw-ndf .bw-cta { width: auto; flex: 1; }

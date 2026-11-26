@@ -12,7 +12,7 @@ import {
   BW_GROUPS, DAY, GAP, GPMAX, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP, ACT_LABEL, agoOf, changes, dayFromMs, menuActions, noDateDefault, noDateRows, outOn, recapStats, scrubLabel, searchRows, seenLabel, sheetOf, tips,
   aheadTx, allH, barBox, bwCounts, bwGroups, bwRow, chipForCourt, clipR, dm, fadedBand, hasFig, headingTop, inPill, isNoDate, kk,
   makeWorld, num, outcomeWord, replayAt, replayStart, rowSegs, rulerMarks, sampleRows, setAxis, shortName, spaced, stageTx,
-  zoomForRows, type BwRow,
+  needsSendBy, SB_DEFAULT_WEEKS, zoomForRows, type BwRow,
 } from "./birdsWorld";
 
 const NOW = new Date(2026, 10, 25, 12).getTime();
@@ -261,7 +261,27 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     const by = (id: string) => menuActions(rows().find((x) => x.id === id)!).map((a) => ACT_LABEL[a]);
     expect(by("chase")).toEqual(["They replied", "Send a nudge", "Open query", "Edit dates"]);
     expect(by("you")).toEqual(["I’ve sent it", "Open query", "Edit dates"]);
-    expect(by("passed")).toEqual(["Open query", "Reopen"]);
+    /* v3.1 (Nick's ruling 1): no Reopen on the phone */
+    expect(by("passed")).toEqual(["Open query"]);
+    /* v3.1 (ruling 4): an undated with-you query adds "Add send-by date" after "I've sent it" */
+    const undated = R(eye("youNoDate", [[Q.QUERIED, -40], [Q.FULL_REQUESTED, -9]], null));
+    expect(menuActions(undated).map((a) => ACT_LABEL[a])).toEqual(["I’ve sent it", "Add send-by date", "Open query", "Edit dates"]);
+    expect(needsSendBy(undated)).toBe(true);
+    expect(needsSendBy(rows().find((x) => x.id === "you")!)).toBe(false);
+    /* its timeline's reply step reads "No send-by date yet" (the sheet puts the Add link there) */
+    expect(sheetOf(undated, QUIET, NOW).steps.at(-1)).toMatchObject({ k: "nosendby", t: "No send-by date yet" });
+    expect(sheetOf(rows().find((x) => x.id === "you")!, QUIET, NOW).steps.some((s) => s.k === "nosendby")).toBe(false);
+    expect(SB_DEFAULT_WEEKS).toBe(2);
+  });
+  it("v3.1 the news: the manuscript's title only when two lines would start with the same agent's name", () => {
+    const twin = (id: string, d: number) => R(eye(id, [[Q.QUERIED, -60], [Q.FULL_REQUESTED, d]], 10));
+    const a = twin("a1", -2), b = twin("a2", -3), c = R(eye("solo", [[Q.QUERIED, -60], [Q.PARTIAL_REQUESTED, -1]], 10));
+    b.name = a.name; c.name = "Agent solo";
+    const titles: Record<string, string> = { a1: "The Salt Road", a2: "Low Tide", solo: "Unused" };
+    const t = changes([a, b, c], -7, (id) => titles[id]).map((x) => x.t);
+    expect(t).toEqual([`${a.name} (Low Tide) asked for the full`, `${a.name} (The Salt Road) asked for the full`, "Agent solo asked for a partial"]);
+    /* single lines never carry it */
+    expect(changes([a, c], -7, (id) => titles[id]).map((x) => x.t)).toEqual([`${a.name} asked for the full`, "Agent solo asked for a partial"]);
   });
   it("v3 the scrubber: what each row was doing that day; how many were out", () => {
     const r = (id: string) => rows().find((x) => x.id === id)!;
