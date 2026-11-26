@@ -31,7 +31,9 @@ import { appliedChoices } from "../../../lib/contactV27";
 import { AppliedRow } from "../../shell/AppliedRow";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { NQ_RING, SetGlyph } from "./ContactSheet24";
-import { GenrePills } from "../../shared/agentRowParts";
+import { GenrePills, Track } from "../../shared/agentRowParts";
+import { rowActionOf } from "../../../lib/contactListRows";
+import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { FIT_WORDS } from "../card/agentPills";
 import type { Group26Key } from "../../../lib/contactListMemory";
 import { drawnSections, sections, type Section } from "../../../lib/contactV26";
@@ -86,6 +88,10 @@ export interface ContactSheet26Props {
   homeCountry?: string;
   /** Contact list rows v1 — a "+ Add …" prompt: the agent's card, open at that section, ready to edit */
   onAddDetail?: (id: string, focus: "genres" | "reply") => void;
+  /** Contact list rows v1 · phase 2 — the day (the next action's dates are read against it) */
+  nowMs?: number;
+  /** Contact list rows v1 · phase 2 — the row's next action: its journey, never the row's card */
+  onAct?: (agentId: string, mode: DrawerMode, queryId: string | null) => void;
 }
 
 /** the stage words in Your query: the app's own names; not queried and closed-to-queries are their own */
@@ -383,6 +389,7 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props; narrow: boolean }
   const policy = policyWords(a.noResponseMeansNo);
   const genres = a.genres ?? [];
   const qw = queryWords(x);
+  const act = rowActionOf(x, p.nowMs ?? Date.now());
   const gaps = p.filters.missing ? p.gapsOf(a.id) : null;
   const open = () => p.onOpen(a.id);
   return (
@@ -435,8 +442,14 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props; narrow: boolean }
         {policy ? <small data-clr="policy-line">{policy}</small> : null}
       </span>
       <span role="cell" className={`cl26-q cl26-q--${qw.kind}`} data-cl26="query" data-clr="status" data-clr-c="" data-status={qw.status ?? qw.kind}>
-        <span className="clr-mark">{qw.kind === "stage" ? <StatusDot status={qw.status!} overrideSize={16} /> : qw.kind === "shut" ? <StatusDot status={QueryStatus.WITHDRAWN} overrideSize={16} /> : NQ_RING}</span>
+        {/* the track (its current step the stage's own StatusDot); not queried and closed to queries keep today's marks */}
+        <span className="clr-mark">{qw.kind === "stage" ? <Track status={qw.status!} /> : qw.kind === "shut" ? <StatusDot status={QueryStatus.WITHDRAWN} overrideSize={16} /> : NQ_RING}</span>
         <span className="clr-stage" data-clr="stage">{qw.words}</span>
+        {/* the next action: your move at rest in rust, any other on hover or focus (its space always held) */}
+        {act ? (
+          <button type="button" className="clr-act" data-clr="act" data-ym={act.ym ? "" : undefined} data-mode={act.mode}
+            onClick={(e) => { e.stopPropagation(); p.onAct?.(a.id, act.mode, x.q?.id ?? null); }}>{act.label}</button>
+        ) : null}
       </span>
       <span role="cell" className="cl26-chev" data-clr="chev" aria-hidden="true">›</span>
     </div>

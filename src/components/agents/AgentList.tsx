@@ -1159,6 +1159,14 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           onClearFilters={clearRailFilters}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
           homeCountry={getHomeCountry(currentUser)}
+          nowMs={nowMs}
+          /* Contact list rows v1 · phase 2 — the row's next action opens its journey, as the agent card's own buttons do */
+          onAct={(agentId, mode, queryId) => {
+            const agent = agents.find((x) => x.id === agentId);
+            if (mode === "log" || !queryId) { openQueryDrawer({ mode: "log", agentId, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }); return; }
+            if (mode === "resp" && responseHosted() && agent) { openResponse({ queryId, back: agentBack(agent) }); return; }
+            openQueryDrawer({ mode: mode as "resp", queryId });
+          }}
           /* Contact list rows v1 — "+ Add genres" / "+ Add reply time": the card, open at that section, ready to edit (the
              same request Missing details' "Fill in →" makes, at the field named rather than the first gap) */
           onAddDetail={(id, focus) => {
