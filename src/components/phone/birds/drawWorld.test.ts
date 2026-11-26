@@ -114,14 +114,13 @@ describe("Phone Birds-eye world v2 — the frame", () => {
     }
     expect(pairs).toBeGreaterThan(0);
   });
-  it("the ruler: every day once a day is 24px wide, the month in a pill at the left; the replay's pill shows its date", () => {
+  it("the ruler at the closest level (v3: Weeks, 42 days across — a date each Monday, 64px apart); the replay's pill shows its date", () => {
     const w = world(), z = w.maxZ, S = w.clamp({ z, ox: 390 * 0.6 - w.LINE * w.SX(z), oy: 200 });
     const f = drawWorld(w, S, O());
-    expect(f.html).toMatch(/data-tier="days"/);
-    expect(f.html).toMatch(/data-bw="mon"[^>]*>(Nov|Dec|Oct)</);
-    expect(tags(f.html, "grid").length).toBeGreaterThan(5);
-    const days = tags(f.html, "rm").filter((t) => t.includes('data-day="1"')).map((t) => num(t, "left")).sort((a, b) => a - b);
-    for (let i = 1; i < days.length; i++) expect(days[i] - days[i - 1]).toBeGreaterThanOrEqual(22);
+    expect(f.html).toMatch(/data-tier="1w"/);
+    expect(tags(f.html, "grid").length).toBeGreaterThan(3);
+    const marks = tags(f.html, "rm").map((t) => num(t, "left")).sort((a, b) => a - b);
+    for (let i = 1; i < marks.length; i++) expect(marks[i] - marks[i - 1]).toBeGreaterThanOrEqual(64);
     const r = drawWorld(w, w.fitView(), O({ rt: -40 }));
     expect(r.label).toBe("16 Oct");
     expect(r.html).toMatch(/data-bw="pill"[^>]*>16 Oct</);
