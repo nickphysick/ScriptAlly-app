@@ -109,9 +109,9 @@ export const WRITTEN_ARTICLES: readonly HelpArticle[] = [
   },
   {
     slug: "find-an-agent", area: "agents", title: "Find an agent", draft: true, updated: D,
-    lede: "Search by name or agency from the box at the left of the list's navy bar. Results narrow as you type.",
+    lede: "Search by name or agency from the box in the bar above the list. Results narrow as you type.",
     guide: { page: CL, key: "search" },
-    body: "Type into `Find an agent or agency`, the first thing in the list's navy bar, or press `/` to jump there. In full screen the box sits under the navy band. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
+    body: "Type into `Filter by name or agency`, in the bar above the list, or press `/` to jump there. In full screen the box sits under the navy band. It matches any part of an agent's name or their agency, whatever the capitals.\n\n"
       + "The list narrows as you type. Clear the box to see everyone again.",
     related: ["open-an-agent", "go-full-screen", "add-an-agent", "list-health"],
   },

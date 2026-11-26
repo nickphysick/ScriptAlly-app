@@ -78,7 +78,7 @@ export const GROUP26: readonly Group26[] = ["letter", "status", "none"];
 /** the four sorts the page offers (the chip's menu and the two headings) */
 export const SORTS26: readonly SortKey[] = ["surname", "added", "reply", "status"];
 
-export type SectionKind = "letter" | "reply" | "month" | "stage" | "set" | "all";
+export type SectionKind = "letter" | "reply" | "month" | "stage" | "fit" | "set" | "all";
 export interface Section {
   key: string;
   kind: SectionKind;
@@ -118,6 +118,9 @@ export function sectionKind(group: Group26, sort: SortKey): SectionKind {
   if (sort === "reply") return "reply";
   if (sort === "added") return "month";
   if (sort === "status") return "stage";
+  /* Contact list rows v1 — sorted by Fit, the sections are the ratings (5 to 1, then not rated), not letters: a letter
+     margin would break the order the heading asked for */
+  if (sort === "rating") return "fit";
   return "letter";
 }
 
@@ -153,9 +156,17 @@ export function sections(sorted: readonly AgentFacts[], group: Group26, sort: So
         const y = d.getFullYear();
         s = { key: `m:${y}-${d.getMonth()}`, kind, label: monthOf(t), big: monthOf(t), small: String(y), year: y };
       }
+    } else if (kind === "fit") {
+      const r = typeof x.agent.starRating === "number" && x.agent.starRating > 0 ? Math.round(x.agent.starRating) : null;
+      s = r == null
+        ? { key: "f:-", kind, label: "Not rated", big: "–", small: "not rated" }
+        : { key: `f:${r}`, kind, label: `${r} ${r === 1 ? "star" : "stars"}`, big: String(r), small: r === 1 ? "star" : "stars" };
     } else {
       const k = x.status14;
-      s = { key: `t:${k}`, kind, label: STATUS_LABEL[k], big: null, small: STATUS_LABEL[k], stage: k };
+      /* Contact list rows v1 — the Query status sort puts your move first, so a stage can run twice (a nudge-due Queried
+         ahead of the waiting Queried): your move keeps its own section, or the later run would be drawn inside it */
+      const you = x.stand === "you" ? "you:" : "";
+      s = { key: `t:${you}${k}`, kind, label: STATUS_LABEL[k], big: null, small: STATUS_LABEL[k], stage: k };
     }
     const hit = at.get(s.key);
     if (hit) { hit.ids.push(x.agent.id); continue; }

@@ -31,13 +31,18 @@ import { appliedChoices } from "../../../lib/contactV27";
 import { AppliedRow } from "../../shell/AppliedRow";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { NQ_RING, SetGlyph } from "./ContactSheet24";
-import { GenrePills } from "../../shared/agentRowParts";
+import { GenrePills, Track } from "../../shared/agentRowParts";
+import { rowActionOf } from "../../../lib/contactListRows";
+import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { FIT_WORDS } from "../card/agentPills";
 import type { Group26Key } from "../../../lib/contactListMemory";
 import { drawnSections, sections, type Section } from "../../../lib/contactV26";
 import type { StatusKey } from "../../../lib/contactList";
 import "./contactV26.css";
 import "./contactPrinciples.css";
+import "flag-icons/css/flag-icons.min.css";
+import "./contactListRows.css";
+import { countryName, flagFor, normaliseCountry } from "../../../lib/territory";
 
 /* QC layout v1 — GROUP26_LABEL moved with the Group chip to ContactBar */
 export { GROUP26_LABEL } from "./ContactBar";
@@ -78,6 +83,15 @@ export interface ContactSheet26Props {
   onRetry?: () => void;
   /** principles v1 — day one (three or fewer agents, none queried): the panel under the rows, its outline add */
   dayOne?: { onAdd: () => void } | null;
+  /** Contact list rows v1 — the writer's home country (lib/territory `getHomeCountry`, an ISO code): an agent outside it
+   *  carries a small flag after the agency */
+  homeCountry?: string;
+  /** Contact list rows v1 — a "+ Add …" prompt: the agent's card, open at that section, ready to edit */
+  onAddDetail?: (id: string, focus: "genres" | "reply") => void;
+  /** Contact list rows v1 · phase 2 — the day (the next action's dates are read against it) */
+  nowMs?: number;
+  /** Contact list rows v1 · phase 2 — the row's next action: its journey, never the row's card */
+  onAct?: (agentId: string, mode: DrawerMode, queryId: string | null) => void;
 }
 
 /** the stage words in Your query: the app's own names; not queried and closed-to-queries are their own */
@@ -93,6 +107,22 @@ const pinTopOf = (pin: HTMLElement): number => { const v = parseFloat(getCompute
 export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const cardRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
+  /* Contact list rows v1 — below a card of 960 (its content box, as the columns' container query reads it), Genres sought
+     shows one pill then "+n". The pill count is a number the CSS cannot change, so it is read here. */
+  const [narrow, setNarrow] = useState(false);
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!card || typeof ResizeObserver === "undefined") return undefined;
+    const put = () => {
+      const cs = getComputedStyle(card);
+      const w = card.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+      if (w > 0) setNarrow((v) => (v === w < 960 ? v : w < 960));
+    };
+    put();
+    const ro = new ResizeObserver(put);
+    ro.observe(card);
+    return () => ro.disconnect();
+  }, []);
   const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
   /* C/D — THE ONE PARTITION: the index names these and the list draws these, in this order */
   const secs = useMemo(() => sections(p.pool, p.group, p.sortKey, p.reversed), [p.pool, p.group, p.sortKey, p.reversed]);
@@ -177,6 +207,9 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   ];
   const none = noMatchCopy(named.map((n) => n.label));
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
+  /* Contact list rows v1 · phase 3 — the active heading's aria-sort; the Fit heading waits for a rating */
+  const sortOf = (k: SortKey): "ascending" | "descending" | "none" => (p.sortKey === k ? (p.reversed ? "descending" : "ascending") : "none");
+  const anyRated = p.all.some((x) => typeof x.agent.starRating === "number" && x.agent.starRating > 0);
   /* List filters v1 — the arrow on the sorted column only (↑ ascending, ↓ descending, as the bar's Sort chip draws it);
      the others show ↕ on hover and on keyboard focus */
   const headArrow = (k: SortKey) => (p.sortKey === k
@@ -201,17 +234,36 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
               ...(findText ? [{ key: "find", label: `\u201c${findText}\u201d`, onRemove: () => p.onSearch("") }] : []),
             ]} />
           ) : null}
+          {/* Contact list rows v1 — Agent · Fit · Genres sought · Response policy · Query status, on the rows' own template
+              (contactListRows.css). Below a card of 980 the two long headings shorten (both words are in the DOM; the
+              container query shows one). */}
           <div className="cl26-th" role="row" data-cl26="heads">
             <span className="cl26-thm" aria-hidden="true" />
-            <span role="columnheader" aria-sort={p.sortKey === "surname" ? (p.reversed ? "descending" : "ascending") : "none"}>
+            <span role="columnheader" data-clr-h="agent" aria-sort={sortOf("surname")}>
               <button type="button" className={p.sortKey === "surname" ? "on" : undefined} data-cl26="head" data-key="surname" onClick={() => sortBy("surname")}>
                 Agent{headArrow("surname")}
               </button>
             </span>
-            <span role="columnheader" className="cl26-thx" data-cl26="head-want">What they want</span>
-            <span role="columnheader" aria-sort={p.sortKey === "status" ? (p.reversed ? "descending" : "ascending") : "none"}>
+            {/* Contact list rows v1 · phase 3 — Fit sorts by the writer's own rating, best first, unrated last either way;
+                disabled while no agent is rated */}
+            <span role="columnheader" data-clr-h="fit" data-clr-c="" data-cl26="head-fit" aria-sort={sortOf("rating")}>
+              <button type="button" className={p.sortKey === "rating" ? "on" : undefined} data-cl26="head" data-key="rating" onClick={() => sortBy("rating")}
+                disabled={!anyRated} title={anyRated ? undefined : "Fit sorts once you\u2019ve rated your agents"}>
+                Fit{headArrow("rating")}
+              </button>
+            </span>
+            <span role="columnheader" data-clr-h="genres" data-clr-c="" className="cl26-thx" data-cl26="head-want">
+              <span data-clr-hl="l">Genres sought</span><span data-clr-hl="s">Genres</span>
+            </span>
+            {/* quickest first, unknown last either way (sortFacts "reply") */}
+            <span role="columnheader" data-clr-h="policy" data-cl26="head-policy" aria-sort={sortOf("reply")}>
+              <button type="button" className={p.sortKey === "reply" ? "on" : undefined} data-cl26="head" data-key="reply" onClick={() => sortBy("reply")}>
+                <span data-clr-hl="l">Response policy</span><span data-clr-hl="s">Response</span>{headArrow("reply")}
+              </button>
+            </span>
+            <span role="columnheader" data-clr-h="status" data-clr-c="" aria-sort={sortOf("status")}>
               <button type="button" className={p.sortKey === "status" ? "on" : undefined} data-cl26="head" data-key="status" onClick={() => sortBy("status")}>
-                Your query{headArrow("status")}
+                Query status{headArrow("status")}
               </button>
             </span>
             <span aria-hidden="true" />
@@ -263,7 +315,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
                   )}
                 </span>
                 <div className="cl26-rows">
-                  {sec.ids.map((id) => { const x = byId.get(id); return x ? <Row26 key={id} x={x} p={p} /> : null; })}
+                  {sec.ids.map((id) => { const x = byId.get(id); return x ? <Row26 key={id} x={x} p={p} narrow={narrow} /> : null; })}
                 </div>
               </div>
             ))}
@@ -317,12 +369,40 @@ export const FitStars: React.FC<{ n: 1 | 2 | 3 | 4 | 5 }> = ({ n }) => {
   );
 };
 
-const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) => {
+/** Contact list rows v1 — the agent's place, when it is outside the writer's home country: the flag's title
+ *  ("New York, United States", or just the country), its flag-icons class, or null at home or unknown */
+export function abroadOf(a: { country?: string; city?: string }, home: string | undefined): { title: string; flag: string } | null {
+  const code = normaliseCountry(a.country);
+  if (!code || !home || code === normaliseCountry(home)) return null;
+  const flag = flagFor(code);
+  const country = countryName(code) ?? code;
+  if (!flag) return null;
+  const city = (a.city ?? "").trim();
+  return { title: city ? `${city}, ${country}` : country, flag };
+}
+
+/** Contact list rows v1 — line 1 of Response policy: "Up to 1 week", "Up to 8 weeks"; null when not stated (the quick-add
+ *  stub 0 is "not stated" too, as the sort reads it) */
+export function replyWindowWords(weeks: number | null | undefined): string | null {
+  if (typeof weeks !== "number" || !Number.isFinite(weeks) || weeks <= 0) return null;
+  return `Up to ${weeks} ${weeks === 1 ? "week" : "weeks"}`;
+}
+/** line 2: the agent's silence policy, or nothing when it is not recorded */
+export function policyWords(nrmn: boolean | undefined): string | null {
+  return nrmn === true ? "No response means no" : nrmn === false ? "Always replies" : null;
+}
+
+const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props; narrow: boolean }> = ({ x, p, narrow }) => {
   const a = x.agent;
   const name = agentPrimary(a);
+  /* Contact list rows v1 — the agency ALONE (the location left the row); a flag after it when the agent is abroad */
   const agency = (a.name ?? "").trim() ? (a.agency ?? "").trim() : "";
-  const sub = [agency, x.loc].filter(Boolean).join(" · ");
+  const abroad = abroadOf(a, p.homeCountry);
+  const reply = replyWindowWords(a.responseTimeWeeks);
+  const policy = policyWords(a.noResponseMeansNo);
+  const genres = a.genres ?? [];
   const qw = queryWords(x);
+  const act = rowActionOf(x, p.nowMs ?? Date.now());
   const gaps = p.filters.missing ? p.gapsOf(a.id) : null;
   const open = () => p.onOpen(a.id);
   return (
@@ -342,9 +422,15 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
           rowIntoView(next);
         }
       }}>
-      <span role="cell" className="cl26-who" data-cl26="agent">
+      <span role="cell" className="cl26-who" data-cl26="agent" data-clr="agent">
         <Disc26 x={x} />
-        <span className="cl26-whot"><span className="clp2-nl"><b data-cl26="name" data-cl252="name">{name}</b>{a.starRating ? <FitStars n={a.starRating} /> : null}</span>{sub ? <small data-cl26="agency">{sub}</small> : null}
+        <span className="cl26-whot"><b data-cl26="name" data-cl252="name" title={name}>{name}</b>
+          {agency || abroad ? (
+            <small className="clr-ag">
+              {agency ? <span data-cl26="agency" title={agency}>{agency}</span> : null}
+              {abroad ? <span className={`clr-flag ${abroad.flag}`} data-clr="flag" role="img" title={abroad.title} aria-label={abroad.title} /> : null}
+            </small>
+          ) : null}
           {/* E — while Missing details is on: what this agent is missing, and the door to fill it in */}
           {gaps && gaps.length ? (
             <span className="cl26-miss" data-cl26="missing-line">
@@ -353,14 +439,32 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
           ) : null}
         </span>
       </span>
-      <span role="cell" className="cl26-want" data-cl26="want">
-        <GenrePills genres={a.genres ?? []} hit={p.genreHit} word={p.genreWord} max={Infinity} empty="No genres yet" fit />
+      {/* Fit: the writer's own rating (starRating), whatever the genres; unrated is a quiet dash */}
+      <span role="cell" className="clr-fit" data-clr="fit" data-clr-c="">
+        {a.starRating ? <FitStars n={a.starRating} /> : <span className="clr-dash" data-clr="unrated" role="img" title="Not rated yet" aria-label="Not rated yet">–</span>}
       </span>
-      <span role="cell" className={`cl26-q cl26-q--${qw.kind}`} data-cl26="query" data-status={qw.status ?? qw.kind}>
-        {qw.kind === "stage" ? <StatusDot status={qw.status!} overrideSize={16} /> : qw.kind === "shut" ? <StatusDot status={QueryStatus.WITHDRAWN} overrideSize={16} /> : NQ_RING}
-        <span>{qw.words}</span>
+      {/* Genres sought: up to two pills (one below a card of 960), then "+n"; none on file is a quiet prompt to add them */}
+      <span role="cell" className="cl26-want" data-cl26="want" data-clr="genres" data-clr-c="">
+        {genres.length
+          ? <GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} max={narrow ? 1 : 2} empty={null} fit />
+          : <button type="button" className="clr-add" data-clr="add" data-k="genres" onClick={() => p.onAddDetail?.(a.id, "genres")}>+ Add genres</button>}
       </span>
-      <span role="cell" className="cl26-chev" aria-hidden="true">›</span>
+      {/* Response policy: the reply window, and under it the agent's silence policy */}
+      <span role="cell" className="clr-pol" data-clr="policy">
+        <b>{reply ?? <button type="button" className="clr-add" data-clr="add" data-k="reply" onClick={() => p.onAddDetail?.(a.id, "reply")}>+ Add reply time</button>}</b>
+        {policy ? <small data-clr="policy-line">{policy}</small> : null}
+      </span>
+      <span role="cell" className={`cl26-q cl26-q--${qw.kind}`} data-cl26="query" data-clr="status" data-clr-c="" data-status={qw.status ?? qw.kind}>
+        {/* the track (its current step the stage's own StatusDot); not queried and closed to queries keep today's marks */}
+        <span className="clr-mark">{qw.kind === "stage" ? <Track status={qw.status!} /> : qw.kind === "shut" ? <StatusDot status={QueryStatus.WITHDRAWN} overrideSize={16} /> : NQ_RING}</span>
+        <span className="clr-stage" data-clr="stage">{qw.words}</span>
+        {/* the next action: your move at rest in rust, any other on hover or focus (its space always held) */}
+        {act ? (
+          <button type="button" className="clr-act" data-clr="act" data-ym={act.ym ? "" : undefined} data-mode={act.mode}
+            onClick={(e) => { e.stopPropagation(); p.onAct?.(a.id, act.mode, x.q?.id ?? null); }}>{act.label}</button>
+        ) : null}
+      </span>
+      <span role="cell" className="cl26-chev" data-clr="chev" aria-hidden="true">›</span>
     </div>
   );
 };

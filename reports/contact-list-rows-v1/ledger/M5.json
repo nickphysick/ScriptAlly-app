@@ -1,0 +1,372 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "your-move rows",
+  "ok": true,
+  "detail": "3 your-move actions: Ferris:Nudge, Okafor:Send your full, Tan:Send your partial"
+ },
+ {
+  "where": "quiet rows",
+  "ok": true,
+  "detail": "14 quiet actions"
+ },
+ {
+  "where": "Achebe · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Blackwood · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Carey · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Ellison · words",
+  "ok": true,
+  "detail": "action \"Log a query\" want Log a query"
+ },
+ {
+  "where": "Ellison · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand none)"
+ },
+ {
+  "where": "Ferris · words",
+  "ok": true,
+  "detail": "action \"Nudge\" want Nudge"
+ },
+ {
+  "where": "Ferris · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang true (stand you)"
+ },
+ {
+  "where": "Ferris · rust, at rest",
+  "ok": true,
+  "detail": "ym true opacity 1 colour rgb(122, 63, 49)"
+ },
+ {
+  "where": "Holt · words",
+  "ok": true,
+  "detail": "action \"Record a response\" want Record a response"
+ },
+ {
+  "where": "Holt · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Hussain · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Lang · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Morrow · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Okafor · words",
+  "ok": true,
+  "detail": "action \"Send your full\" want Send your full"
+ },
+ {
+  "where": "Okafor · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang true (stand you)"
+ },
+ {
+  "where": "Okafor · rust, at rest",
+  "ok": true,
+  "detail": "ym true opacity 1 colour rgb(122, 63, 49)"
+ },
+ {
+  "where": "Pemberton · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Pryce · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Quinn · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Reed · no action",
+  "ok": true,
+  "detail": "action undefined"
+ },
+ {
+  "where": "Reed · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand closed)"
+ },
+ {
+  "where": "Sandhu · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Stirling · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Tan · words",
+  "ok": true,
+  "detail": "action \"Send your partial\" want Send your partial"
+ },
+ {
+  "where": "Tan · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang true (stand you)"
+ },
+ {
+  "where": "Tan · rust, at rest",
+  "ok": true,
+  "detail": "ym true opacity 1 colour rgb(122, 63, 49)"
+ },
+ {
+  "where": "Vane-Coe · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand agent)"
+ },
+ {
+  "where": "Whitfield · no action",
+  "ok": true,
+  "detail": "action undefined"
+ },
+ {
+  "where": "Whitfield · \"!\" on the disc",
+  "ok": true,
+  "detail": "bang false (stand none)"
+ },
+ {
+  "where": "Achebe · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Achebe · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Achebe · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Blackwood · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Blackwood · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Blackwood · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Carey · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Carey · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Carey · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Ellison · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Ellison · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Ellison · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Holt · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Holt · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Holt · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Hussain · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Hussain · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Hussain · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 81.8 hover 81.8"
+ },
+ {
+  "where": "Lang · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Lang · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Lang · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Morrow · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Morrow · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Morrow · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Pemberton · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Pemberton · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Pemberton · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Pryce · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Pryce · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Pryce · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 81.8 hover 81.8"
+ },
+ {
+  "where": "Quinn · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Quinn · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Quinn · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Sandhu · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Sandhu · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Sandhu · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ },
+ {
+  "where": "Stirling · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Stirling · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Stirling · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 81.8 hover 81.8"
+ },
+ {
+  "where": "Vane-Coe · quiet at rest",
+  "ok": true,
+  "detail": "opacity 0"
+ },
+ {
+  "where": "Vane-Coe · shown on hover",
+  "ok": true,
+  "detail": "hover opacity 1"
+ },
+ {
+  "where": "Vane-Coe · height unchanged by hover",
+  "ok": true,
+  "detail": "rest 80.8 hover 80.8"
+ }
+]

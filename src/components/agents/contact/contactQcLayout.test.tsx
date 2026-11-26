@@ -162,7 +162,9 @@ describe("Phase 3 · the light bar above the list", () => {
     expect(bar(17)).toContain("<b>17</b> agents</span>");
     expect(bar(1)).toContain("<b>1</b> agent</span>");
     const h = bar(17);
-    expect(h).toContain('placeholder="Find an agent or agency"');
+    /* Contact list rows v1 — "Filter by name or agency"; the "/" key's hint stays in the shared bar's markup and this
+       page's stylesheet hides it (contactListRows.css) */
+    expect(h).toContain('placeholder="Filter by name or agency"');
     expect(h).toContain('<kbd aria-hidden="true">/</kbd>');
     expect(h).toMatch(/data-clq="sort"[\s\S]*?<b class="sc-f" data-sc="field">Surname<\/b>/);
     /* List filters v1 — labelled: "Group:", the value ("None" ungrouped), a caret; Sort: "Sort:", the field, ↑ */

@@ -8,7 +8,7 @@
  * rules name `.cl27` beside `.qc151.qc153`):
  *
  *   count   "{n} agents" / "1 agent" — what the list shows
- *   Find    "Find an agent or agency", "/" to focus it (the page's `contactsFind` key, unchanged)
+ *   Find    "Filter by name or agency", "/" to focus it (no hint drawn: contactListRows.css) (the page's `contactsFind` key, unchanged)
  *   Sort    the field's name (`SortChipButton` over `CL_SORT_FIELDS`, its menu `SortChipMenu`)
  *   Group   the grouping ("No grouping", …: `GroupMenu` over `GROUP26_OPTIONS`)
  *
@@ -42,7 +42,8 @@ export const GROUP26_LABEL: Record<Group26Key, string> = { letter: "Letter", sta
 /** List filters v1 — the Group button's value: "None" when ungrouped (the menu's row keeps "No grouping") */
 export const GROUP_VALUE: Record<Group26Key, string> = { ...GROUP26_LABEL, none: "None" };
 const CARET = <svg className="lf-cv" viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M2 4h8L6 9z" /></svg>;
-export const FIND_AGENT = "Find an agent or agency";
+/* Contact list rows v1 — it filters the list (by name or agency); the "/" key still focuses it, with no hint drawn */
+export const FIND_AGENT = "Filter by name or agency";
 
 /** is the strip stuck: the scroller has moved and the strip sits at its sticky top */
 export function stripStuck(tb: HTMLElement): boolean {

@@ -662,20 +662,24 @@ export type SortKey = "surname" | "agency" | "reply" | "activity" | "status" | "
 /** Contact list v25.1 E4 — the List's five headings, each a sort; the pill, the menu and the remembered sort offer these */
 /* Contact list v26 E — the four sorts the page offers (Surname, Date added, Reply time, Query status); the remembered sort
    is one of these, an older key reads as A to Z */
-export const HEADING_SORTS: readonly SortKey[] = ["surname", "added", "reply", "status"];
+/* Contact list rows v1 — the four headings that sort, in column order: Agent (surname), Fit (the writer's own rating,
+   `rating`), Response policy (`reply`), Query status. Genres sought does not sort. */
+export const HEADING_SORTS: readonly SortKey[] = ["surname", "rating", "reply", "status"];
+/** the sorts a device remembers: the headings' four, and the menu's Date added */
+export const REMEMBERED_SORTS: readonly SortKey[] = [...HEADING_SORTS, "added"];
 /** each with its italic line and the direction toggle's two words */
 export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [string, string] }[] = [
   { key: "surname", label: "Surname", line: "By family name", dir: ["A to Z", "Z to A"] },
   { key: "agency", label: "Agency", line: "Agencies by name, \u201cThe\u201d ignored", dir: ["A to Z", "Z to A"] },
   { key: "reply", label: "Response time", line: "Unknown last, either way", dir: ["Fastest first", "Slowest first"] },
   { key: "activity", label: "Recent activity", line: "The latest change to each agent's query", dir: ["Most recent first", "Oldest first"] },
-  { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
+  { key: "status", label: "Query status", line: "Your move first, closed last", dir: ["Your move first", "Closed first"] },
   /* v19 §C — the Date added heading: newest first, a record with no readable date last either way */
   { key: "added", label: "Date added", line: "Newest first", dir: ["Newest first", "Oldest first"] },
   /* v25.1 E4 — the Genres, Your query and Agent fit headings */
   { key: "fit", label: "Genre fit", line: "Most matches with the book first", dir: ["Best fit first", "Weakest fit first"] },
   { key: "urgency", label: "Urgency", line: "The soonest dated next step first", dir: ["Most urgent first", "Least urgent first"] },
-  { key: "rating", label: "Agent fit", line: "Unrated last, either way", dir: ["Highest first", "Lowest first"] },
+  { key: "rating", label: "Fit", line: "Your own rating; unrated last, either way", dir: ["Best first", "Lowest first"] },
 ];
 
 /** v19 §C/§J — when the agent was added, from the record's own `dateAdded` (ISO); null when it does not parse */
@@ -722,6 +726,8 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
   const weeks = (x: AgentFacts) => (typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0 ? x.agent.responseTimeWeeks : null);
   const active = (x: AgentFacts) => x.lastMs ?? null;
   const rank = (x: AgentFacts) => STATUS_GROUP_ORDER.indexOf(x.status14);
+  /* Contact list rows v1 — Query status: your move first, then the rest, closed last; within each, furthest along first */
+  const tier = (x: AgentFacts) => (x.stand === "you" ? 0 : x.stand === "closed" ? 2 : 1);
   const missing: Partial<Record<SortKey, (x: AgentFacts) => boolean>> = {
     reply: (x) => weeks(x) == null, activity: (x) => active(x) == null, added: (x) => addedMs(x.agent) == null,
   };
@@ -742,6 +748,10 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
     const now = ctx?.nowMs ?? Date.now();
     return by.sort((a, b) => { const [ta, va] = urgencyOf(a, now), [tb, vb] = urgencyOf(b, now); return turn * (ta - tb || va - vb) || sur(a, b); });
   }
+  if (key === "status") {
+    /* the whole key turns with the direction; ties stay A to Z by surname */
+    return by.sort((a, b) => turn * (tier(a) - tier(b) || rank(a) - rank(b)) || sur(a, b));
+  }
   if (key === "reply") {
     return by.sort((a, b) => { const x = weeks(a), y = weeks(b); if (x == null || y == null) return x == null && y == null ? sur(a, b) : x == null ? 1 : -1; return turn * (x - y) || sur(a, b); });
   }
@@ -749,7 +759,6 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
     case "surname": by.sort(sur); break;
     case "agency": by.sort((a, b) => deThe(a.agent.agency || "\uffff").toLowerCase().localeCompare(deThe(b.agent.agency || "\uffff").toLowerCase()) || sur(a, b)); break;
     case "activity": by.sort((a, b) => (active(b) ?? 0) - (active(a) ?? 0) || sur(a, b)); break;
-    case "status": by.sort((a, b) => rank(a) - rank(b) || sur(a, b)); break;
     case "added": by.sort((a, b) => (addedMs(b.agent) ?? -Infinity) - (addedMs(a.agent) ?? -Infinity) || sur(a, b)); break;
   }
   if (!reversed) return by;

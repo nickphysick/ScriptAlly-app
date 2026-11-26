@@ -50,8 +50,10 @@ describe("the heading sorts (v25.1 E4)", () => {
     /* RE-POINTED by Contact list v26 E: the fields are the page's four sorts, in words, with no chip of their own (the
        band's chip reads "Sorted by {field}") */
     /* and Add agent v1 Phase 6 adds Agent fit, through the same chip and menu (it has no heading of its own) */
-    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual([...HEADING_SORTS, "rating"]);
-    expect(CL_SORT_FIELDS.map((f) => f.label)).toEqual(["Surname", "Date added", "Reply time", "Query status", "Agent fit"]);
-    expect(CL_SORT_FIELDS.map((f) => f.order.map((o) => o.label))).toEqual([["A to Z", "Z to A"], ["Newest first", "Oldest first"], ["Fastest first", "Slowest first"], ["Furthest on", "Earliest first"], ["Best fit first", "Lowest first"]]);
+    /* RE-POINTED by Contact list rows v1: the four sorting headings first, in column order (Fit is the writer's own
+       rating), then the menu's Date added */
+    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual([...HEADING_SORTS, "added"]);
+    expect(CL_SORT_FIELDS.map((f) => f.label)).toEqual(["Surname", "Fit", "Response time", "Query status", "Date added"]);
+    expect(CL_SORT_FIELDS.map((f) => f.order.map((o) => o.label))).toEqual([["A to Z", "Z to A"], ["Best first", "Lowest first"], ["Quickest first", "Slowest first"], ["Your move first", "Closed first"], ["Newest first", "Oldest first"]]);
   });
 });
