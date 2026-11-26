@@ -147,8 +147,6 @@ export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all"): { t: BwGr
   const defs: [BwGroupName, BwRow[]][] = [["Needs chasing", ch], ["Nearly there", wt.filter((r) => kk(r) >= 0.75)], ["Plenty of time", wt.filter((r) => kk(r) < 0.75)], ["With you", you], ["No reply date yet", nd], ["Closed", closed]];
   return defs.filter(([, r]) => r.length).map(([t, r]) => ({ t, rows: r }));
 }
-/** v2's footer rows (open, no reply date, under All and Waiting): kept only until the v3 frame replaces the footer */
-export const noDateHere = (rows: readonly BwRow[], f: BwFilter): BwRow[] => (f === "all" || f === "wait" ? rows.filter((r) => isNoDate(r) && inPill(r, f)) : []);
 /** the open queries with no reply date, in the order the no-date sheet walks them */
 export const noDateRows = (rows: readonly BwRow[]): BwRow[] => rows.filter(isNoDate).sort(byKk);
 /** the "All" layout's height in world units (ref `allH`): every pill is drawn at its scale, folded or not */

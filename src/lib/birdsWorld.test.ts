@@ -11,7 +11,7 @@ import type { QcRow } from "./qcSummary";
 import {
   BW_GROUPS, DAY, GAP, GPMAX, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP, ACT_LABEL, agoOf, changes, dayFromMs, menuActions, noDateDefault, noDateRows, outOn, recapStats, scrubLabel, searchRows, seenLabel, sheetOf, tips,
   aheadTx, allH, barBox, bwCounts, bwGroups, bwRow, chipForCourt, clipR, dm, fadedBand, hasFig, headingTop, inPill, isNoDate, kk,
-  makeWorld, noDateHere, num, outcomeWord, replayAt, replayStart, rowSegs, rulerMarks, sampleRows, setAxis, shortName, spaced, stageTx,
+  makeWorld, num, outcomeWord, replayAt, replayStart, rowSegs, rulerMarks, sampleRows, setAxis, shortName, spaced, stageTx,
   zoomForRows, type BwRow,
 } from "./birdsWorld";
 
@@ -76,7 +76,6 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     expect(bwGroups(rows(), "chase").map((x) => x.t)).toEqual(["Needs chasing"]);
     expect(bwGroups(rows(), "you").some((x) => x.t === "Closed")).toBe(false);
     expect(isNoDate(rows().find((x) => x.id === "nodate")!)).toBe(true);
-    expect([noDateHere(rows(), "all").length, noDateHere(rows(), "wait").length, noDateHere(rows(), "chase").length, noDateHere(rows(), "you").length]).toEqual([1, 1, 0, 0]);
     /* the "All" layout's height sets the scale for every pill: six groups, nine rows (v2's footer is gone) */
     expect(allH(rows())).toBe(6 * GAP + 9 * RH + 8);
   });

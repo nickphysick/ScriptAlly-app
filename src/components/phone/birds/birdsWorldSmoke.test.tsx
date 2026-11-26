@@ -88,7 +88,9 @@ describe("Phone Birds-eye world v2 renders", () => {
   });
   it("the controls and the hawk's shadow (?hawk=0 drops it)", () => {
     const html = W();
-    for (const k of ["zin", "zout", "fit", "mini", "hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);
+    for (const k of ["zin", "zout", "hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);
+    /* v3 retires the mini map and "See it all" */
+    for (const k of ["fit", "mini"]) expect(html).not.toContain(`data-bw="${k}"`);
     expect(html).toContain('src="/images/hawk-shadow.png?v=1"');
     expect(W(null, "/queries/all?view=birds&hawk=0")).not.toContain('data-bw="hawk"');
     expect(shadowStyle(1, 10, 200, { z: 1, ox: 10, oy: 200 }).opacity).toBe("0.100");

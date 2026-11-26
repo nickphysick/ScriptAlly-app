@@ -32,7 +32,7 @@ import {
   PILLS, PILL_LABEL, REPLAY_MS, RULE, TOPFIT, TOPFOLD, bwCounts, bwGroups, bwRow, chipForCourt, isDrawn, makeWorld, replayAt, replayStart,
   sampleRows, type BwFilter, type BwRow, type BwView, type World,
 } from "../../../lib/birdsWorld";
-import { drawMini, drawWorld } from "./drawWorld";
+import { drawWorld } from "./drawWorld";
 import { shadowStyle, wireMotion, type Motion } from "./worldMotion";
 import "./birdsWorld.css";
 
@@ -127,8 +127,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const layer = useRef<HTMLDivElement>(null);
   const hd = useRef<HTMLDivElement>(null);
   const chips = useRef<HTMLDivElement>(null);
-  const mini = useRef<HTMLDivElement>(null);
-  const fit = useRef<HTMLButtonElement>(null);
   const zin = useRef<HTMLButtonElement>(null);
   const zout = useRef<HTMLButtonElement>(null);
   const hs = useRef<HTMLImageElement>(null);
@@ -149,11 +147,8 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     const fr = drawWorld(w, Sv, { nowMs: now, quietDays, rt: rp.current.rt, rows, pady });
     el.innerHTML = fr.html;
     hd.current?.classList.toggle("col", fr.zoomed || w.land);
-    fit.current?.classList.toggle("hide", !fr.zoomed);
     if (zin.current) zin.current.disabled = Sv.z >= w.maxZ - 1e-6;
     if (zout.current) zout.current.disabled = Sv.z <= 1 + 1e-6;
-    const m = mini.current;
-    if (m) { m.classList.toggle("hide", !fr.zoomed); if (fr.zoomed) m.innerHTML = drawMini(w, Sv, quietDays); }
     if (hs.current) Object.assign(hs.current.style, shadowStyle(Sv.z, Sv.ox, Sv.oy, w.fitView()));
     const r = root.current;
     if (r) {
@@ -248,7 +243,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     touched();
     if (a === "zin") m.zoomAt(w.vpW / 2, (w.vpH - 80) / 2, 1.8);
     else if (a === "zout") m.zoomAt(w.vpW / 2, (w.vpH - 80) / 2, 1 / 1.8);
-    else if (a === "fit") m.animateTo(w.fitView(), 420);
     else if (a === "toline") m.animateTo(w.clamp({ z: Sv.z, ox: w.vpW * 0.62 - w.LINE * w.SX(Sv.z), oy: Sv.oy }), 380);
   };
 
@@ -276,8 +270,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
           </div>
         ) : null}
         <div ref={hint} className={`bw-hint${showHint && explorable ? "" : " hide"}`} data-bw="hint">Pinch to zoom · drag to explore</div>
-        <div ref={mini} className="bw-mini hide" data-bw="mini" aria-hidden="true" />
-        <button ref={fit} type="button" className="bw-fit hide" data-bw="fit" data-a="fit">See it all</button>
         <div className="bw-zc" data-bw="zoom">
           <button ref={zin} type="button" data-a="zin" data-bw="zin" aria-label="Zoom in">{I(BW_IC.plus, 2.2)}</button>
           <button ref={zout} type="button" data-a="zout" data-bw="zout" aria-label="Zoom out" disabled>{I(BW_IC.minus, 2.2)}</button>
