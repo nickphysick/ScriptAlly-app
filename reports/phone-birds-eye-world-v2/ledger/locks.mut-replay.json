@@ -1,0 +1,296 @@
+[
+ {
+  "lock": "BW-1",
+  "where": "fitted (z 1, rows 4.5px): bars drawn (population 193)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-1",
+  "where": "fitted: no names, no figures, no gridlines",
+  "ok": true,
+  "detail": "{\"names\":0,\"figs\":0,\"grids\":0}"
+ },
+ {
+  "lock": "BW-1",
+  "where": "fitted: the pill reads Today, the header is unfolded (140px)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-9",
+  "where": "All 70 = With you 16 + Needs chasing 45 + Waiting 9 (the labels' own counts)",
+  "ok": true,
+  "detail": "{\"all\":70,\"you\":16,\"chase\":45,\"wait\":9}"
+ },
+ {
+  "lock": "BW-9",
+  "where": "the pills read All, With you, Needs chasing, Waiting, counts after the label",
+  "ok": true,
+  "detail": "All 70|With you 16|Needs chasing 45|Waiting 9"
+ },
+ {
+  "lock": "BW-10",
+  "where": "fitted with 70 open queries: time spans at least 90% of the width",
+  "ok": true,
+  "detail": "358.0px of 390"
+ },
+ {
+  "lock": "BW-10",
+  "where": "48px rows are reachable",
+  "ok": true,
+  "detail": "rows 48 at z 10.599 (ceiling 27.558)"
+ },
+ {
+  "lock": "BW-2",
+  "where": "you: All's horizontal scale (sx 0.59667 vs 0.59667)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "you: the line at All's x (321.3 vs 321.3)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "chase: All's horizontal scale (sx 0.59667 vs 0.59667)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "chase: the line at All's x (321.3 vs 321.3)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "wait: All's horizontal scale (sx 0.59667 vs 0.59667)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-2",
+  "where": "wait: the line at All's x (321.3 vs 321.3)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-3",
+  "where": "the shortest pill (wait, 9) opens closer in (FZ 10.6)",
+  "ok": true,
+  "detail": "z 10.6"
+ },
+ {
+  "lock": "BW-3",
+  "where": "wait: every drawn row (3) on screen, between the ruler and the dock",
+  "ok": true,
+  "detail": "3 of 3; last [408] vs dock 711"
+ },
+ {
+  "lock": "BW-3",
+  "where": "wait: the header is unfolded (140px)",
+  "ok": true,
+  "detail": "140"
+ },
+ {
+  "lock": "BW-4",
+  "where": "48px rows (48): multi-stage rows on screen (population 7 rows, 13 bars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-4",
+  "where": "each stage bar sits within 2px of its date's x",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-7",
+  "where": "the current stage and its tail share an edge (population 8)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-7",
+  "where": "earlier stages are the faded colour (population 12)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-7",
+  "where": "the current stage keeps its full colour",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-5",
+  "where": "screen 1: no name over a figure or an \"!\" (population 14 names, 17 figures and marks)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-5",
+  "where": "screen 2: no name over a figure or an \"!\" (population 15 names, 14 figures and marks)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-5",
+  "where": "screen 3: no name over a figure or an \"!\" (population 17 names, 18 figures and marks)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "390x784: the closest zoom on this campaign (tier days, 8 marks; recorded)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "390x784: marks overlap neither each other nor the Today or month pill",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "390x784: zoomed in, gridlines down from the marks (population 15)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "740x360: the closest zoom marks every day, with the month pill (tier days, 6 day numbers)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "740x360: marks overlap neither each other nor the Today or month pill",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "740x360: zoomed in, gridlines down from the marks (population 7)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-8",
+  "where": "quietWeeks 6: the fade starts 6 weeks after each reply date (population 32, 28 at the setting itself)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-8",
+  "where": "quietWeeks 3: the fade starts 3 weeks after each reply date (population 41, 37 at the setting itself)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-12",
+  "where": "replay runs: the line moves forwards, its pill showing the date, no figures",
+  "ok": false,
+  "detail": "[{\"lx\":16,\"label\":\"13 Aug\",\"replay\":\"running\",\"figs\":0},{\"lx\":16,\"label\":\"13 Aug\",\"replay\":\"running\",\"figs\":0},{\"lx\":16,\"label\":\"13 Aug\",\"replay\":\"running\",\"figs\":0}]"
+ },
+ {
+  "lock": "BW-12",
+  "where": "it starts near the first date (the line at the left of the bars)",
+  "ok": true,
+  "detail": "16 vs first bar Infinity, today 321.3"
+ },
+ {
+  "lock": "BW-12",
+  "where": "a touch stops it at today",
+  "ok": true,
+  "detail": "{\"replay\":\"done\",\"lx\":321.3,\"today\":321.3}"
+ },
+ {
+  "lock": "BW-14",
+  "where": "the hawk's shadow paints above a group heading",
+  "ok": true,
+  "detail": "[\"bw-hs\",\"bw-hsw\",\"bw-gh0 sm\",\"bw-gband\",\"bw-w\",\"bw-vp\"]"
+ },
+ {
+  "lock": "BW-14",
+  "where": "the line paints above the hawk",
+  "ok": true,
+  "detail": "[\"bw-fline\",\"bw-hit\",\"bw-gband\",\"bw-pz\",\"bw-w\",\"bw-vp\"]"
+ },
+ {
+  "lock": "BW-15",
+  "where": "\"← Today\": the line cannot leave by this side at this zoom (recorded)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-15",
+  "where": "panned past the line: \"Today →\" at the edge, outlined",
+  "ok": true,
+  "detail": "Today → {\"bg\":\"rgb(255, 255, 255)\",\"border\":\"1px solid rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "BW-15",
+  "where": "a tap on \"Today →\" brings the line back on screen",
+  "ok": true,
+  "detail": "241.8"
+ },
+ {
+  "lock": "BW-15",
+  "where": "the line was taken off screen (population 1 sides)",
+  "ok": true,
+  "detail": "at z 8.778, rows 39.75, sx 3.04899"
+ },
+ {
+  "lock": "BW-16",
+  "where": "Ctrl+wheel keeps the row under the pointer within 4px",
+  "ok": true,
+  "detail": "cor-move-b 0.359375"
+ },
+ {
+  "lock": "BW-16",
+  "where": "a pinch keeps the row under the fingers within 4px",
+  "ok": true,
+  "detail": "cor-move-b 0.015625"
+ },
+ {
+  "lock": "BW-13",
+  "where": "never \"overdue\" or \"late\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-17",
+  "where": "reduced motion: the hawk does not drift",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "BW-17",
+  "where": "reduced motion: a drag stops where it is let go",
+  "ok": true,
+  "detail": "{\"r0\":-879.99,\"r1\":-729.99,\"r2\":-729.99}"
+ },
+ {
+  "lock": "BW-12",
+  "where": "reduced motion: replay never runs",
+  "ok": true,
+  "detail": "idle"
+ },
+ {
+  "lock": "BW-18",
+  "where": "740x360: the header folded (96px), no dock",
+  "ok": true,
+  "detail": "{\"h\":96,\"dock\":\"none\"}"
+ },
+ {
+  "lock": "BW-13",
+  "where": "no error from the world in the console (population 0 console errors in all)",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -9,7 +9,7 @@ import { QueryStatus } from "../types";
 import type { EyeRow } from "./qcBirdsEye";
 import type { QcRow } from "./qcSummary";
 import {
-  BW_GROUPS, DAY, GAP, GPMAX, MAXZ_MIN, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP,
+  BW_GROUPS, DAY, GAP, GPMAX, GPMIN, MAXZ_MIN, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP,
   aheadTx, allH, barBox, bwCounts, bwGroups, bwRow, chipForCourt, clipR, dm, fadedBand, hasFig, headingTop, inPill, isNoDate, kk,
   makeWorld, noDateHere, num, outcomeWord, replayAt, replayStart, rowSegs, rulerMarks, sampleRows, setAxis, shortName, spaced, stageTx,
   zoomForRows, type BwRow,
@@ -118,14 +118,14 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     const n = "Partial asked", d = "16 Nov", both = n.length * 7.4 + d.length * 6.6 + 24;
     expect([stageTx(n, d, both), stageTx(n, d, both - 1), stageTx(n, d, n.length * 7.4 + 17), stageTx(n, d, 1)]).toEqual(["both", "name", "date", "none"]);
     expect([aheadTx("Reply by", "14 Jan", 200), aheadTx("Reply by", "14 Jan", 70), aheadTx("Reply by", "14 Jan", 20)]).toEqual(["Reply by 14 Jan", "14 Jan", ""]);
-    expect([dm(0, NOW), dm(-70, NOW)]).toEqual(["25 Nov", "16 Sept"]);
+    expect([dm(0, NOW), dm(-70, NOW)]).toEqual(["25 Nov", "16 Sep"]);
     expect(fadedBand(Q.QUERIED)).toBe("color-mix(in srgb,#efe6d6 45%,#fff)");
   });
   it("the ruler's tiers: months, then 4 / 2 / 1 weeks on Mondays, then every day — dates 64px apart, days 22px", () => {
     const ext = { D0: -164, D1: 71 };
     const tier = (ppd: number) => rulerMarks(ext, (d) => (d - ext.D0) * ppd, NOW);
     expect([1, 2.3, 4.6, 9.2, 24].map((p) => tier(p).tier)).toEqual(["months", "4w", "2w", "1w", "days"]);
-    expect(tier(1).marks.map((m) => m[1]).slice(0, 3)).toEqual(["Jul", "Aug", "Sept"]);
+    expect(tier(1).marks.map((m) => m[1]).slice(0, 3)).toEqual(["Jul", "Aug", "Sep"]);
     const wk = tier(9.2).marks;
     expect(wk.every(([x]) => { const d = Math.round(x / 9.2) + ext.D0; return new Date(T0 + d * DAY + DAY / 2).getDay() === 1; })).toBe(true);
     const days = tier(24);
@@ -141,7 +141,8 @@ describe("Phone Birds-eye world v2 — the engine", () => {
   it("scale: time fills the width; rows share the All layout's height; a pill never changes the scale", () => {
     const w = world();
     expect(w.fitS()).toBeCloseTo((390 - 32) / WX, 9);
-    expect(w.fitSY()).toBeCloseTo(Math.min(w.fitS() * 3, (784 - TOPFIT - RULE - 88) / (allH(rows()) + 8)), 9);
+    /* the footer (52px, one no-date query here) keeps its real height out of the rows' share */
+    expect(w.fitSY()).toBeCloseTo(Math.min(w.fitS() * 3, (784 - TOPFIT - RULE - 88 - 52) / (allH(rows()) - 52 + 8)), 9);
     for (const f of ["you", "chase", "wait"] as const) { const p = world(f); expect([p.fitS(), p.fitSY(), p.LINE, p.SX(1)]).toEqual([w.fitS(), w.fitSY(), w.LINE, w.SX(1)]); }
     expect(w.maxZ).toBeCloseTo(Math.max(MAXZ_MIN, (48 / (RH * w.fitSY())) * 2.6), 9);
     expect(w.zT()).toBeCloseTo(Math.max(1.05, 24 / (RH * w.fitSY())), 9);
@@ -153,9 +154,12 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     for (const w of [world(), world("all", seventy)]) {
       expect(w.rowPx(w.maxZ)).toBe(RPMAX);
       expect(w.gapPx(w.maxZ)).toBe(GPMAX);
+      expect(w.gapPx(1)).toBeGreaterThanOrEqual(GPMIN);
       for (const z of [1, 2, w.maxZ]) for (let wy = 0; wy <= w.H; wy += 7.3) expect(Math.abs(w.yOff(w.yWorld(w.yOff(wy, z), z), z) - w.yOff(wy, z))).toBeLessThan(0.5);
     }
     const s = world("all", seventy);
+    /* fitted, the rows, their floored gaps and the footer all end above the reserve */
+    expect(s.fitView().oy + s.yOff(s.H, 1)).toBeLessThanOrEqual(784 - 88 + 8);
     /* time spans at least 90% of the width when fitted */
     expect(WX * s.SX(1)).toBeGreaterThanOrEqual(0.9 * 390);
     expect(zoomForRows(s, 48) * RH * s.fitSY()).toBeCloseTo(48, 6);

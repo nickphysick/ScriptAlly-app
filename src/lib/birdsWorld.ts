@@ -25,6 +25,7 @@ import { STAGE_COLOURS, stageOf, statusBand } from "./stageColours";
 import { STAGE_NAME, tileCourt } from "./qcSummary";
 import type { EyeRow } from "./qcBirdsEye";
 import { beLine } from "./qc150";
+import { MONTHS_SHORT, dayMonth } from "./dates";
 
 export const DAY = 86_400_000;
 const startOfDay = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -32,6 +33,9 @@ const startOfDay = (ms: number): number => { const d = new Date(ms); d.setHours(
 /* ── the ref's constants ── */
 export const WX = 600, RH = 30, GAP = 40, XP = 0.25;
 export const RULE = 28, TOPFIT = 140, TOPFOLD = 96, RPMAX = 48, GPMAX = 44;
+/** ⚠️ v1's floor under a group's gap, kept: a small heading (22px) and its 6px, so headings never overlap on a long
+ *  campaign. The ref's fit took the harness's two- and one-row groups' gaps to 8px and their headings ran together. */
+export const GPMIN = 30;
 /** the lowest the zoom ceiling goes (ref `maxZ`) */
 export const MAXZ_MIN = 6.5;
 
@@ -139,7 +143,7 @@ export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all"): { t: BwGr
 }
 /** the footer's rows: open with no reply date, under All and Waiting only */
 export const noDateHere = (rows: readonly BwRow[], f: BwFilter): BwRow[] => (f === "all" || f === "wait" ? rows.filter((r) => isNoDate(r) && inPill(r, f)) : []);
-const FOOT_ND = 52;
+export const FOOT_ND = 52;
 /** the "All" layout's height in world units (ref `allH`): every pill is drawn at its scale */
 export function allH(rows: readonly BwRow[]): number {
   return bwGroups(rows, "all").reduce((a, x) => a + GAP + x.rows.length * RH, 0) + (noDateHere(rows, "all").length ? FOOT_ND : 0) + 8;
@@ -222,10 +226,10 @@ export function shortName(status: string): string {
     default: return outcomeWord(status);
   }
 }
-/** a day from today, and as the words say it: "16 Nov" (en-GB, so September is "Sept") */
+/** a day from today, and as the words say it: "16 Nov" — lib/dates' one formatter (so September is "Sep", not the ref's "Sept") */
 export const dateOf = (d: number, nowMs: number): Date => { const t = new Date(startOfDay(nowMs)); t.setDate(t.getDate() + d); return t; };
-export const dm = (d: number, nowMs: number): string => dateOf(d, nowMs).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-export const monthOf = (t: Date): string => t.toLocaleDateString("en-GB", { month: "short" });
+export const dm = (d: number, nowMs: number): string => dayMonth(dateOf(d, nowMs));
+export const monthOf = (t: Date): string => MONTHS_SHORT[t.getMonth()];
 const tw = (t: string, k: number) => t.length * k;
 export type StageWords = "both" | "name" | "date" | "none";
 /** what a stage says in `w` px (ref `stageTx`): name and date, then name only, then date only, then nothing */
@@ -256,7 +260,7 @@ export function rulerMarks(ext: BwExt, X: (d: number) => number, nowMs: number):
     let mon: Date | null = null;
     for (let d = ext.D0; d <= ext.D1; d++) {
       const t = dateOf(d, nowMs), x = X(d);
-      out.push([x, t.getDate() === 1 ? t.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : String(t.getDate()), true]);
+      out.push([x, t.getDate() === 1 ? dayMonth(t) : String(t.getDate()), true]);
       if (x <= 56) mon = t;
     }
     return { tier: "days", marks: out, mon: mon ?? dateOf(ext.D0, nowMs) };
@@ -306,14 +310,23 @@ export function makeWorld(o: WorldOpts): World {
   const ext = setAxis(o.rows);
   const PPD = WX / (ext.D1 - ext.D0);
   const wxd = (d: number) => (Math.max(ext.D0, Math.min(ext.D1, d)) - ext.D0) * PPD;
-  /* time always fills the width; rows share the height of the "All" layout, so a pill never changes the scale */
+  /* time always fills the width; rows share the height of the "All" layout, so a pill never changes the scale.
+     ⚠️ Two departures, both measured on the harness: the footer keeps its real 52px out of the rows' share (the ref
+     scaled it with the rows, so on a long campaign it sat under the dock — the ref's own shot 12 shows it), and the
+     gaps keep their 30px floor, the rows sharing what is left. */
   const fitS = () => (vpW - 32) / WX;
-  const fitSY = () => Math.min(fitS() * 3, (vpH - TOPFIT - RULE - bot) / (HALL + 8));
+  const allG = bwGroups(o.rows, "all"), allRows = allG.reduce((a, g) => a + g.rows.length, 0), allFoot = HALL - allG.reduce((a, g) => a + GAP + g.rows.length * RH, 0) - 8;
+  const avail = vpH - TOPFIT - RULE - bot - allFoot;
+  const fitSY = () => {
+    const free = avail / (HALL - allFoot + 8);
+    const s = GAP * free >= GPMIN || !allRows ? free : Math.max(0.01, (avail - allG.length * GPMIN - 8) / (allRows * RH));
+    return Math.min(fitS() * 3, s);
+  };
   const maxZ = Math.max(MAXZ_MIN, (RPMAX / (RH * fitSY())) * 2.6);
   const zT = () => Math.max(1.05, 24 / (RH * fitSY()));
   const SX = (z: number) => fitS() * Math.pow(z, XP) * (1 + (Math.max(0, z - zT()) / zT()) * 3);
   const SY = (z: number) => fitSY() * z;
-  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(GAP * SY(z), GPMAX);
+  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(Math.max(GAP * SY(z), GPMIN), GPMAX);
   const yOff = (wy: number, z: number): number => {
     const rp = rowPx(z) / RH, gp = gapPx(z) / GAP; let off = 0;
     for (const g of G) {
@@ -339,8 +352,8 @@ export function makeWorld(o: WorldOpts): World {
      while every row still fits, up to 48px rows */
   let FZ = 1;
   if (filter !== "all" && G.length) {
-    const avail = vpH - TOPFIT - RULE - bot - 8;
-    for (let t = 1; t <= maxZ; t += 0.02) { if (yOff(H, t) > avail) break; FZ = t; if (rowPx(t) >= RPMAX) break; }
+    const room = vpH - TOPFIT - RULE - bot - 8;
+    for (let t = 1; t <= maxZ; t += 0.02) { if (yOff(H, t) > room) break; FZ = t; if (rowPx(t) >= RPMAX) break; }
   }
   const topFor = (z: number) => (land || z > FZ + 0.05 ? TOPFOLD : TOPFIT);
   const top0 = land ? TOPFOLD : TOPFIT;

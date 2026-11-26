@@ -86,7 +86,9 @@ export const QueriesV4: React.FC = () => {
   const groups = useMemo(() => (chip === "all" ? V3_COURTS : [chip]).map((k) => ({ k, rows: courtRows(v.qs, k) })).filter((g) => g.rows.length), [chip, v.qs]);
   const corner = <IconBtn label="Search" n="search" pa4="search" onClick={() => openV3({ type: "search" })} />;
 
-  if (!v.qs.length) {
+  /* Phone Birds-eye world v2: with no queries at all the Birds-eye side is still the world — its own card over a blurred
+     sample — so only the list falls back to "Nothing sent yet" */
+  if (!v.qs.length && !bird) {
     return (
       <div className="pa4 pa4-queries" data-pa4="queries" data-view="empty">
         <Hero pa4="queries-hero" lap kick="Queries" head="Nothing sent yet." cast={{ src: CAST.courier, width: 124, style: { margin: "0 -22px -4px 0" } }} corner={corner} />

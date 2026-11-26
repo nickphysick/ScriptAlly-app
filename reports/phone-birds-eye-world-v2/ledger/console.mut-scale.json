@@ -1,0 +1,8 @@
+[
+ "console: Error: useV3Data: no V3Provider above this phone screen\n    at useV3Data (http://127.0.0.1:4321/assets/AppRoot-CZos5hQd.js:8958:997)\n    at TodayV5 (http://127.0.0.1:4321/assets/AppRoot-CZos5hQd.js:10",
+ "console: UI error boundary (dashboard) caught: useV3Data: no V3Provider above this phone screen",
+ "console: Error: useV3Data: no V3Provider above this phone screen\n    at useV3Data (http://127.0.0.1:4321/assets/AppRoot-CZos5hQd.js:8958:997)\n    at QueriesV4 (http://127.0.0.1:4321/assets/AppRoot-CZos5hQd.js:",
+ "console: UI error boundary (queries) caught: useV3Data: no V3Provider above this phone screen",
+ "console: Error: useV3Data: no V3Provider above this phone screen\n    at useV3Data (http://127.0.0.1:4321/assets/AppRoot-CZos5hQd.js:8958:997)\n    at TodoV5 (http://127.0.0.1:4321/assets/AppRoot-CZos5hQd.js:109",
+ "console: UI error boundary (todo) caught: useV3Data: no V3Provider above this phone screen"
+]

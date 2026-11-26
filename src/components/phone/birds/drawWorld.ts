@@ -65,7 +65,7 @@ function tailSeg(s: BwSeg, a: number, b: number, by: number, th: number, inner: 
 /** one row (ref `inRow`) */
 function inRow(W: World, r: BwRow, ry: number, rp: number, X: (x: number) => number, zoomed: boolean, o: FrameOpts, out: string[]) {
   const { th, by, named, one, two } = barBox(rp, ry, zoomed), vpW = W.vpW, rt = o.rt;
-  out.push(`<i class="bw-hit${o.sel === r.id ? " sel" : ""}" data-bw="row" data-id="${esc(r.id)}" data-from="${r.fromMs ?? ""}" data-to="${r.toMs ?? ""}" data-pasts="${r.pasts}" data-due="${r.dueMs ?? ""}" data-past="${r.due != null && r.due < 0 ? 1 : 0}" data-status="${esc(r.status)}" data-closed="${r.closed ? 1 : 0}" style="top:${px(ry)};height:${px(rp)}"></i>`);
+  out.push(`<i class="bw-hit${o.sel === r.id ? " sel" : ""}" data-bw="row" data-id="${esc(r.id)}" data-from="${r.fromMs ?? ""}" data-to="${r.toMs ?? ""}" data-pasts="${r.pasts}" data-due="${r.dueMs ?? ""}" data-past="${r.due != null && r.due < 0 ? 1 : 0}" data-status="${esc(r.status)}" data-closed="${r.closed ? 1 : 0}" data-start="${r.ev.length ? r.ev[r.ev.length - 1].d : ""}" data-dueday="${r.due ?? ""}" style="top:${px(ry)};height:${px(rp)}"></i>`);
   const segs = clipR(rowSegs(r, o.quietDays), rt);
   let x0: number | null = null, x1: number | null = null, ovX: number | null = null;
   for (const s of segs) {
@@ -91,9 +91,13 @@ function inRow(W: World, r: BwRow, ry: number, rp: number, X: (x: number) => num
   if (before < Math.min(nameW, 80) && ovX != null) nx = ovX + 12;
   const avail = (before >= Math.min(nameW, 80) && ovX != null && ovX > nx ? Math.min(figL, ovX - 12) : figL) - 8 - nx;
   const agW = r.agency.length * 6.4 + 8, withAg = two && !!r.agency && nameW + agW <= avail;
-  /* a bar too short for its name (a query sent days ago): the name sits just before the bar, on the white */
-  const barW = Math.min(x1, figL) - Math.max(x0, 0);
-  if (barW < Math.min(nameW, 90) + 24 && x0 - nameW - 14 > 8) out.push(`<span class="bw-inm out${two ? "" : " one"}" data-bw="name" style="right:${px(vpW - x0 + 10)};top:${px(by + (th - 18) / 2)}"><span class="in1">${esc(r.name)}</span></span>`);
+  /* a bar too short for its name (a query sent days ago): the name sits just before the bar, on the white.
+     ⚠️ A FIX ON THE REF: its rule never looked at the row's figure, and on a bar that starts near the right edge the
+     name ran under it (measured on the harness, BW-5). Here the name stops 8px short of the figure, with "…" if it must. */
+  const barW = Math.min(x1, figL) - Math.max(x0, 0), outR = Math.min(x0 - 10, figL - 8);
+  const outTop = by + (th - 18) / 2;
+  if (barW < Math.min(nameW, 90) + 24 && outR - nameW - 4 > 8) out.push(`<span class="bw-inm out${two ? "" : " one"}" data-bw="name" style="right:${px(vpW - outR)};top:${px(outTop)}"><span class="in1">${esc(r.name)}</span></span>`);
+  else if (barW < Math.min(nameW, 90) + 24 && outR - 64 > 8 && x0 - 10 > figL - 8) out.push(`<span class="bw-inm out${two ? "" : " one"}" data-bw="name" style="right:${px(vpW - outR)};top:${px(outTop)};max-width:${px(outR - 16)}"><span class="in1">${esc(r.name)}</span></span>`);
   else if (avail >= 48) out.push(`<span class="bw-inm${two ? "" : " one"}" data-bw="name" style="left:${px(nx)};top:${px(ny)};max-width:${px(avail)}"><span class="in1">${esc(r.name)}</span>${withAg ? `<small>${esc(r.agency)}</small>` : ""}</span>`);
   if (fig) out.push(`<span class="bw-fig sm" data-bw="fig" style="right:${px(fr)};top:${px(by + (th - 24) / 2)}">${n ? `<b>${n}</b> ` : ""}${u}</span>`);
 }
@@ -130,7 +134,10 @@ export function drawWorld(W: World, S: BwView, o: FrameOpts): Frame {
   /* the ruler: its marks, the month pill at the daily level, the line's own pill */
   const off: -1 | 0 | 1 = rt != null ? 0 : lx < 44 ? -1 : lx > vpW - 44 ? 1 : 0;
   const pill = (label.length * 7.2 + 16) / 2 + 6, pw = label.length * 7.2 + 30, ml = lx < 44 ? 12 + pw + 8 : 12;
-  const marks = spaced(ruler.marks.filter(([x, t, day]) => { const half = (day ? t.length * 7 : t.length * 6.6) / 2; return x - half > (ruler.mon ? ml + 44 : lx < 44 ? ml : 8) && x + half < vpW - 8 && Math.abs(x - lx) > half + pill; }));
+  /* ⚠️ A FIX ON THE REF: its marks kept clear of the line, not of the pill once it is pinned at the right edge ("Today →"),
+     and a date sat under it (measured, BW-6). The right-hand limit is the pinned pill's left edge when it is there. */
+  const rightLim = off > 0 ? vpW - 12 - (pw + 12) - 4 : vpW - 8;
+  const marks = spaced(ruler.marks.filter(([x, t, day]) => { const half = (day ? t.length * 7 : t.length * 6.6) / 2; return x - half > (ruler.mon ? ml + 44 : lx < 44 ? ml : 8) && x + half < rightLim && Math.abs(x - lx) > half + pill; }));
   const ppos = off < 0 ? "left:12px;transform:none" : off > 0 ? "right:12px;left:auto;transform:none" : `left:${px(rt != null ? Math.max(40, Math.min(vpW - 40, lx)) : lx)}`;
   out.push(`<div class="bw-ruler" data-bw="ruler" data-tier="${ruler.tier}" style="top:${px(TOP)};height:${px(RULE)}"><i class="bw-rzone" style="left:${px(Math.max(0, lx))}"></i>${marks.map(([x, t, day]) => `<em class="bw-rm" data-bw="rm" data-day="${day ? 1 : 0}" style="left:${px(x)}">${t}</em>`).join("")}${ruler.mon ? `<b class="bw-rmon" data-bw="mon" style="left:${px(lx < 44 ? 12 + label.length * 7.2 + 38 : 12)}">${monthOf(ruler.mon)}</b>` : ""}${off ? "" : `<i class="bw-rtick" style="left:${px(lx)}"></i>`}</div>`);
   out.push(`<button type="button" class="bw-flab${off ? " off" : ""}" data-bw="pill" data-a="toline" data-off="${off}" style="top:${px(TOP + 4)};${ppos}">${off < 0 ? "← " : ""}${label}${off > 0 ? " →" : ""}</button>`);

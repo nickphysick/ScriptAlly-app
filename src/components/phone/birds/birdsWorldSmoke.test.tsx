@@ -19,6 +19,7 @@ vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pa
 import { V3Provider } from "../v3/V3Provider";
 import { BirdsWorld, cardFor } from "./BirdsWorld";
 import { shadowStyle } from "./worldMotion";
+import { QueriesV4 } from "../v4/QueriesV4";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const DAY = 86_400_000;
@@ -67,6 +68,13 @@ describe("Phone Birds-eye world v2 renders", () => {
     expect(html).not.toContain('data-bw="chips"');
     expect(html).toMatch(/class="bw-hint hide"/);
     expect(html).toContain("pa-layer bw isdemo");
+  });
+  it("the Queries list's Birds-eye side mounts the world even with no queries (the list keeps Nothing sent yet)", () => {
+    const empty = { agents: [], queries: [] };
+    expect(renderPageSeededWith(P(<QueriesV4 />), "/queries/all?view=birds", empty)).toMatch(/data-bw="world"[^>]*data-demo="1"/);
+    const list = renderPageSeededWith(P(<QueriesV4 />), "/queries/all", empty);
+    expect(list).toContain("Nothing sent yet.");
+    expect(list).not.toContain('data-bw="world"');
   });
   it("only closed queries: the card at the top, Closed below it; a pill with nothing: its own card with See all queries", () => {
     const closed = W(null, "/queries/all?view=birds", ONLY_CLOSED);

@@ -27,6 +27,7 @@ import { useV3Data } from "../v3/V3Provider";
 import { openV3, openV3Query } from "../v3/v3Store";
 import { eyeRows, type EyeRow } from "../../../lib/qcBirdsEye";
 import type { QcRow } from "../../../lib/qcSummary";
+import { DEFAULT_QUIET_WEEKS } from "../../../lib/queryState";
 import {
   PILLS, PILL_LABEL, REPLAY_MS, RULE, TOPFIT, TOPFOLD, bwCounts, bwGroups, bwRow, chipForCourt, isDrawn, makeWorld, replayAt, replayStart,
   sampleRows, type BwFilter, type BwRow, type BwView, type World,
@@ -96,7 +97,8 @@ export interface BirdsWorldProps {
 export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, onList }) => {
   const v = useV3Data();
   const now = v.now;
-  const quietDays = (v.quietWeeks ?? 6) * 7;
+  /* the writer's own "A query goes quiet after" (Settings), read through useV3; the app's default is 4 weeks */
+  const quietDays = (v.quietWeeks ?? DEFAULT_QUIET_WEEKS) * 7;
   const loc = useLocation();
   const hawk = new URLSearchParams(loc.search).get("hawk") !== "0";
   const land = useLandscape();

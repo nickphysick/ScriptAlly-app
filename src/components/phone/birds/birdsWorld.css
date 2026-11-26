@@ -26,7 +26,8 @@
   .bw-hd.col .bw-behk { width: 28px; height: 28px; }
   .bw .bw-hd.col .bw-t2 .bw-h { font-size: 16px !important; }
   .bw-hd.col.filt .bw-t2 .bw-h { visibility: hidden; }
-  .bw-ib { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; border-radius: 999px; padding: 0; }
+  /* 36px, not the ref's 40: v1 added back and List to its header, and at 40 the title "Birds-eye view" was cut */
+  .bw-ib { flex: none; width: 36px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; border-radius: 999px; padding: 0; }
   .bw-ib svg { width: 24px; height: 24px; }
   .bw-ib.back { margin-left: -12px; }
   .bw-fon { flex: none; height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: #fff; color: var(--pa-navy) !important; font: 600 14px var(--pa-sans) !important; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; }
