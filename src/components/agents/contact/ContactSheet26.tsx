@@ -486,17 +486,28 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props; per: 1 | 2 | 3 }>
         <b>{reply ?? <button type="button" className="clr-add" data-clr="add" data-k="reply" onClick={() => p.onAddDetail?.(a.id, "reply")}>+ Add reply time</button>}</b>
         {policy ? <small data-clr="policy-line">{policy}</small> : null}
       </span>
-      <span role="cell" className={`cl26-q cl26-q--${qw.kind}`} data-cl26="query" data-clr="status" data-clr-c="" data-status={qw.status ?? qw.kind}>
-        {/* the track (its current step the stage's own StatusDot); not queried and closed to queries keep today's marks */}
-        <span className="clr-mark">{qw.kind === "stage" ? <Track status={qw.status!} /> : qw.kind === "shut" ? <StatusDot status={QueryStatus.WITHDRAWN} overrideSize={16} /> : NQ_RING}</span>
-        <span className="clr-stage" data-clr="stage">{qw.words}</span>
-        {/* the next action: your move at rest in rust, any other on hover or focus (its space always held) */}
+      {/* Contact list rows v1.2 · phase 3 — at rest, the track and stage word, centred both ways. With a mouse, on row hover or
+          focus, the status fades out (up 4px) and the action fades in at the same centre (from 4px below). With no hover
+          (touch), the action sits at the row's end in the ›'s place instead. Closed rows: no action, no swap. */}
+      <span role="cell" className={`cl26-q cl26-q--${qw.kind}`} data-cl26="query" data-clr="status" data-clr-c="" data-status={qw.status ?? qw.kind}
+        data-has={act ? "" : undefined}>
+        <span className="clr-rest" data-clr="rest">
+          {/* the track (its current step the stage's own StatusDot); not queried and closed to queries keep today's marks */}
+          <span className="clr-mark">{qw.kind === "stage" ? <Track status={qw.status!} /> : qw.kind === "shut" ? <StatusDot status={QueryStatus.WITHDRAWN} overrideSize={16} /> : NQ_RING}</span>
+          <span className="clr-stage" data-clr="stage">{qw.words}</span>
+        </span>
         {act ? (
-          <button type="button" className="clr-act" data-clr="act" data-ym={act.ym ? "" : undefined} data-mode={act.mode}
+          <button type="button" className="clr-act" data-clr="act" data-mode={act.mode}
             onClick={(e) => { e.stopPropagation(); p.onAct?.(a.id, act.mode, x.q?.id ?? null); }}>{act.label}</button>
         ) : null}
       </span>
-      <span role="cell" className="cl26-chev" data-clr="chev" aria-hidden="true">›</span>
+      <span role="cell" className="cl26-chev" data-clr="chev" data-has={act ? "" : undefined}>
+        {act ? (
+          <button type="button" className="clr-act clr-act-end" data-clr="act-end" data-mode={act.mode}
+            onClick={(e) => { e.stopPropagation(); p.onAct?.(a.id, act.mode, x.q?.id ?? null); }}>{act.label}</button>
+        ) : null}
+        <span className="clr-chev" data-clr="chev-mark" aria-hidden="true">›</span>
+      </span>
     </div>
   );
 };

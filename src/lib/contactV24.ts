@@ -141,9 +141,11 @@ export function bandRight(x: Pick<AgentFacts, "stand" | "q" | "agent">, nowMs: n
   return Number.isFinite(t) ? { kind: "added", text: `Added ${dm(t)}` } : null;
 }
 
-/** the call box's words for the next move the Query Centre would offer */
+/** the call box's words for the next move the Query Centre would offer. Contact list rows v1.2 (D7): ONE set of action
+ *  words app-wide, the query card Next box's own (lib/qc1512 rowAct): "Send your partial", "Send your full", "Send your
+ *  revision", "Nudge" */
 const CALL_BUTTON: Record<string, string> = {
-  "Mark partial sent": "Send the partial", "Mark full sent": "Send the full", "Mark revision sent": "Send the revision",
+  "Mark partial sent": "Send your partial", "Mark full sent": "Send your full", "Mark revision sent": "Send your revision",
   "Record your answer": "Record your answer", "Nudge": "Nudge", "Close query": "Close query",
 };
 

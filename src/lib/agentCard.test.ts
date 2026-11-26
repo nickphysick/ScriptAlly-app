@@ -66,18 +66,18 @@ describe("the primary button by stage (§3's table)", () => {
   it("offer → Answer the offer (offer)", () => {
     expect(card("fx-bare").primary).toEqual({ label: "Answer the offer", act: "offer" });
   });
-  it("partial requested → Send the partial; full requested → Send the full (sent)", () => {
-    expect(card("fx-none").primary).toEqual({ label: "Send the partial", act: "sent" });
-    expect(card("fx-shut-live").primary).toEqual({ label: "Send the full", act: "sent" });
+  it("partial requested → Send your partial; full requested → Send your full (sent) — RE-POINTED by Contact list rows v1.2 (D7: the query card's words)", () => {
+    expect(card("fx-none").primary).toEqual({ label: "Send your partial", act: "sent" });
+    expect(card("fx-shut-live").primary).toEqual({ label: "Send your full", act: "sent" });
   });
-  it("R&R → Send the new version (sent)", () => {
+  it("R&R → Send your revision (sent)", () => {
     const qs = Q.map((q) => (q.id === "fq-4" ? ({ ...q, status: QueryStatus.REVISE_RESUBMIT } as Query) : q));
-    expect(card("fx-none", buildQcRows(qs, A, [], NOW)).primary).toEqual({ label: "Send the new version", act: "sent" });
+    expect(card("fx-none", buildQcRows(qs, A, [], NOW)).primary).toEqual({ label: "Send your revision", act: "sent" });
   });
-  it("queried and past the expected date → Send a nudge, with Record a response beside it", () => {
+  it("queried and past the expected date → Nudge, with Record a response beside it", () => {
     const c = card("fx-long");
     expect(c.q?.pastExpected, "the precondition: 10 Aug + 6 weeks is gone by on 5 Oct").toBe(true);
-    expect(c.primary).toEqual({ label: "Send a nudge", act: "nudge", secondary: { label: "Record a response", act: "resp" } });
+    expect(c.primary).toEqual({ label: "Nudge", act: "nudge", secondary: { label: "Record a response", act: "resp" } });
   });
   it("a FULL gone quiet is the same moment — the nudge is offered at any stage on the agent's side", () => {
     const c = card("fx-two");

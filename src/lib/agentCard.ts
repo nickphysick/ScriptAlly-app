@@ -83,6 +83,7 @@ export interface CardPrimary extends CardButton {
   secondary?: CardButton;
 }
 
+/* Contact list rows v1.2 (D7) — the query card Next box's words (lib/qc1512 rowAct), one set app-wide */
 export function primaryFor(x: Pick<AgentFacts, "standing" | "door">, q: QcRow | null): CardPrimary {
   if (!q || x.standing.kind === "none") {
     return x.door === "closed"
@@ -92,9 +93,9 @@ export function primaryFor(x: Pick<AgentFacts, "standing" | "door">, q: QcRow | 
   if (q.court === "closed") return { label: "Open in Query Centre", act: "qc", ghost: true };
   if (q.court === "offer") return { label: "Answer the offer", act: "offer" };
   if (q.court === "you") {
-    if (q.status === QueryStatus.PARTIAL_REQUESTED) return { label: "Send the partial", act: "sent" };
-    if (q.status === QueryStatus.FULL_REQUESTED) return { label: "Send the full", act: "sent" };
-    if (q.status === QueryStatus.REVISE_RESUBMIT) return { label: "Send the new version", act: "sent" };
+    if (q.status === QueryStatus.PARTIAL_REQUESTED) return { label: "Send your partial", act: "sent" };
+    if (q.status === QueryStatus.FULL_REQUESTED) return { label: "Send your full", act: "sent" };
+    if (q.status === QueryStatus.REVISE_RESUBMIT) return { label: "Send your revision", act: "sent" };
     return { label: "Open in Query Centre", act: "qc", ghost: true };
   }
   /* ⚠️ PAST THE EXPECTED DATE ON THE AGENT'S SIDE, AT ANY STAGE — not only "Queried". The table
@@ -102,7 +103,7 @@ export function primaryFor(x: Pick<AgentFacts, "standing" | "door">, q: QcRow | 
      moment (the row calls it "Your move", and the Query Centre's own doors offer a nudge on every
      query with the agent). */
   if (q.pastExpected) {
-    return { label: "Send a nudge", act: "nudge", secondary: { label: "Record a response", act: "resp" } };
+    return { label: "Nudge", act: "nudge", secondary: { label: "Record a response", act: "resp" } };
   }
   return { label: "Record a response", act: "resp" };
 }

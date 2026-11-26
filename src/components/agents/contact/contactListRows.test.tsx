@@ -154,3 +154,25 @@ describe("Contact list rows v1.2 · Phase 2 — the cells", () => {
     expect(read("../AgentList.tsx")).toContain("onRate={(id, n) => { const ag = agents.find((x) => x.id === id); if (ag) void editKitFor(ag).save({ rating: n }); }}");
   });
 });
+
+describe("Contact list rows v1.2 · Phase 3 — the status and its action", () => {
+  it("the status cell: the resting stack, then the action in the same place; the end cell: the touch action, then the ›", () => {
+    const src = read("./ContactSheet26.tsx");
+    expect(src).toMatch(/<span className="clr-rest" data-clr="rest">[\s\S]*?<button type="button" className="clr-act" data-clr="act"/);
+    expect(src).toMatch(/<button type="button" className="clr-act clr-act-end" data-clr="act-end"[\s\S]*?<span className="clr-chev" data-clr="chev-mark" aria-hidden="true">›<\/span>/);
+    expect(src).not.toMatch(/data-ym=/);
+  });
+  it("the swap is the mouse's; with no hover the action is at the row's end; reduced motion is opacity only", () => {
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toContain(".cl26-card .cl26-row:hover .cl26-q[data-has] > .clr-rest, .cl26-card .cl26-row:focus-within .cl26-q[data-has] > .clr-rest { opacity: 0; transform: translateY(-4px); }");
+    expect(css).toMatch(/@media \(hover: none\) \{[\s\S]*?\.cl26-card \.cl26-chev\[data-has\] > \.clr-act-end \{ display: inline-flex; \}/);
+    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\) \{\s*\.cl26-card \.clr-rest, \.cl26-card \.cl26-q > \.clr-act \{ transition: opacity \.2s ease; transform: none !important; \}/);
+    expect(css).not.toMatch(/--sp-rust/);
+  });
+  it("one set of action words: the agent card's are the query card's", () => {
+    const v24 = readFileSync(new URL("../../../lib/contactV24.ts", import.meta.url), "utf8");
+    expect(v24).toContain('"Mark partial sent": "Send your partial", "Mark full sent": "Send your full", "Mark revision sent": "Send your revision"');
+    const card = readFileSync(new URL("../../../lib/agentCard.ts", import.meta.url), "utf8");
+    expect(card).not.toMatch(/"Send the partial"|"Send the full"|"Send a nudge"|"Send the new version"/);
+  });
+});

@@ -8,9 +8,9 @@
  *    `rowAct`: "Nudge", "Send your partial", "Send your full", "Answer the offer", "Close it", "Record a response"), and
  *    it opens the same journeys. The row says what the card says; it never keeps a second table of words. Where that
  *    source has nothing — an agent not yet queried — the design ref's "Log a query" is used.
- * ⚠️ YOUR MOVE IS `stand`, the disc's "!" (lib/contactList `agentFacts`, through queryCentreGroups `isYourMoveRow`): a
- *    request for the partial or full, an offer, or a reply date passed. A your-move action shows at rest, in rust; any
- *    other shows on row hover or focus. One fact draws both, so the "!" and the rust never disagree.
+ * Contact list rows v1.2 (D6/D7): every action is the small outline button, shown in the status's place on row hover or
+ *    focus (with a mouse) or at the row's end (with no hover); no rust, no "!". `ym` (your move, `stand === "you"`) is
+ *    kept for readers that sort or group by it.
  * Closed queries, and agents closed to queries that were never queried, have no action.
  */
 import type { DrawerMode } from "./queryActions/drawerStore";

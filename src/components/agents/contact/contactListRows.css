@@ -72,28 +72,19 @@
 
 /* ── Query status: the track, the stage word, the next action ── */
 .cl26-card .cl26-row .cl26-q { gap: 5px; }
-.cl26-card .cl26-row .cl26-q > .clr-stage { font: 400 16px/1.2 var(--sp-type) !important; white-space: nowrap; overflow: visible; }
-.cl26-card .cl26-row .cl26-q > .clr-mark { display: flex; align-items: center; justify-content: center; height: 16px; }
+.cl26-card .cl26-row .cl26-q .clr-rest > .clr-stage { font: 400 16px/1.2 var(--sp-type) !important; white-space: nowrap; overflow: visible; }
+.cl26-card .cl26-row .cl26-q .clr-rest > .clr-mark { display: flex; align-items: center; justify-content: center; height: 16px; }
 /* ⚠️ contactV26's `.cl26-q svg { width: 16px }` (sized for the old 16px StatusDot) would squash the track's 78px drawing to
    16px: the track and its current node keep their own sizes (shared/agentRowParts) */
 .cl26-card .cl26-row .cl26-q .cl252-track > svg { width: 78px; height: 12px; }
 .cl26-card .cl26-row .cl26-q .cl252-tnode svg { width: 12px; height: 12px; }
-.cl26-card .clr-act {
-  padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap;
-  font: 400 14px/1.2 var(--sp-serif) !important; color: var(--sp-quiet);
-  text-decoration: underline; text-decoration-color: rgba(91, 79, 71, .35); text-underline-offset: 3px;
-  opacity: 0; transition: opacity .15s;
-}
-.cl26-card .cl26-row:hover .clr-act, .cl26-card .cl26-row:focus-visible .clr-act, .cl26-card .clr-act:focus-visible { opacity: 1; }
-.cl26-card .clr-act:hover { color: #1c130f; text-decoration-color: currentColor; }
-.cl26-card .clr-act[data-ym] { opacity: 1; color: var(--sp-rust); font-weight: 600; text-decoration-color: rgba(122, 63, 49, .4); }
-.cl26-card .clr-act:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 2px; }
+/* the action: see v1.2 phase 3 below */
 
 /* ── closed rows sit back: the name, agency, stage word and action quiet; stars and pills keep their colour ── */
 .cl26-card .cl26-row[data-k="closed"] .cl26-whot > b,
 .cl26-card .cl26-row[data-k="closed"] .clr-ag,
 .cl26-card .cl26-row[data-k="closed"] .clr-stage,
-.cl26-card .cl26-row[data-k="closed"] .clr-act { color: var(--sp-quiet); -webkit-text-stroke: 0; }
+
 
 /* the bar's search: no "/" hint on this page (the key itself still works) */
 .cl27 [data-cl26="find"] kbd { display: none; }
@@ -101,7 +92,7 @@
 @container clr (width < 1150px) {
   .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 262px 72px minmax(0, 300px) 160px minmax(196px, 1fr) 30px; }
   .cl26-card .cl26-row .clp2-fit { font-size: 14px !important; letter-spacing: 0; }
-  .cl26-card .clr-pol > b, .cl26-card .cl26-row .cl26-q > .clr-stage { font-size: 15px !important; }
+  .cl26-card .clr-pol > b, .cl26-card .cl26-row .cl26-q .clr-rest > .clr-stage { font-size: 15px !important; }
   .cl26-card .clr-pol > small { font-size: 13.5px !important; }
 }
 @container clr (width < 980px) {
@@ -112,7 +103,7 @@
   .cl26-card .cl26-who { gap: 12px; }
   .cl26-card .cl26-whot > b { font-size: 17px !important; }
   .cl26-card .cl26-row .clp2-fit { font-size: 12px !important; }
-  .cl26-card .clr-pol > b, .cl26-card .cl26-row .cl26-q > .clr-stage { font-size: 14px !important; }
+  .cl26-card .clr-pol > b, .cl26-card .cl26-row .cl26-q .clr-rest > .clr-stage { font-size: 14px !important; }
   .cl26-card .clr-pol > small { font-size: 13px !important; white-space: normal; }
   .cl26-card .cl26-row .cl26-want .cl252-pill { font-size: 13px !important; padding: 0 7px; }
   /* a narrow Genres sought column (54px at a 1280 window) holds the prompt on two lines rather than spilling out */
@@ -191,3 +182,47 @@
 .cl26-card .cl26-row[data-k="closed"] .cl26-whot > b, .cl26-card .cl26-row[data-k="closed"] .clr-ag,
 .cl26-card .cl26-row[data-k="closed"] .clr-stage, .cl26-card .cl26-row[data-k="closed"] .clr-ag > span { color: #6b6058; }
 .cl26-card .clr-pol > small { color: #6b6058; }
+
+/* ══ Contact list rows v1.2 · phase 3 — the status at rest, the action on hover or at the row's end ══════════════════ */
+.cl26-card .cl26-row .cl26-q.cl26-q { display: grid; place-items: center; align-self: stretch; gap: 0; }
+.cl26-card .cl26-row .cl26-q > * { grid-area: 1 / 1; }
+.cl26-card .clr-rest { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: opacity .2s ease, transform .2s ease; }
+/* contactV26's `.cl26-q > span` (clip, ellipsis) was the old one-line status; the resting stack is never clipped */
+.cl26-card .cl26-row .cl26-q > .clr-rest { overflow: visible; white-space: normal; }
+/* the app's small outline button: 30 high, radius 8, white, a 1px navy edge, navy Source Serif 600 14px, padding 0 12; hover
+   tints navy 6%; the usual focus ring. No rust, no fill, no arrow. */
+.cl26-card .clr-act {
+  box-sizing: border-box; display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 8px;
+  border: 1px solid #2a3a52; background: #fff; color: #2a3a52; font: 600 14px/1 var(--sp-serif) !important; white-space: nowrap;
+  cursor: pointer; text-decoration: none;
+}
+.cl26-card .clr-act:hover { background: color-mix(in srgb, #2a3a52 6%, #fff); }
+.cl26-card .clr-act:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+/* MOUSE: the action waits at the same centre, 4px below, unseen; on row hover or focus-within the swap */
+.cl26-card .cl26-q > .clr-act { opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity .2s ease, transform .2s ease, background .15s; }
+.cl26-card .cl26-row:hover .cl26-q[data-has] > .clr-rest, .cl26-card .cl26-row:focus-within .cl26-q[data-has] > .clr-rest { opacity: 0; transform: translateY(-4px); }
+.cl26-card .cl26-row:hover .cl26-q > .clr-act, .cl26-card .cl26-row:focus-within .cl26-q > .clr-act { opacity: 1; transform: none; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .cl26-card .clr-rest, .cl26-card .cl26-q > .clr-act { transition: opacity .2s ease; transform: none !important; }
+}
+/* the end cell: the › (centred in its 30px); the touch action is hidden with a mouse */
+.cl26-card .cl26-row .cl26-chev { display: flex; align-items: center; justify-content: center; }
+.cl26-card .clr-act-end { display: none; }
+@container clr (width < 980px) { .cl26-card .clr-act { padding: 0 10px; } }
+/* NO HOVER (touch): the action at the row's end in the ›'s place, the status always at rest, never a third line; the
+   touch columns (the ref's body.touch rules) */
+@media (hover: none) {
+  .cl26-card .cl26-q > .clr-act { display: none; }
+  .cl26-card .cl26-row:hover .cl26-q[data-has] > .clr-rest, .cl26-card .cl26-row:focus-within .cl26-q[data-has] > .clr-rest { opacity: 1; transform: none; }
+  .cl26-card .cl26-chev[data-has] > .clr-act-end { display: inline-flex; }
+  .cl26-card .cl26-chev[data-has] > .clr-chev { display: none; }
+  .cl26-card .cl26-row .cl26-chev[data-has] { justify-content: flex-end; }
+  .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 290px 90px minmax(0, 360px) 180px 170px minmax(170px, 1fr); }
+  @container clr (width < 1150px) {
+    .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 230px 64px minmax(110px, 1fr) 150px 140px 160px; }
+  }
+  @container clr (width < 980px) {
+    .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 200px 52px minmax(96px, 1fr) 128px 124px 150px; column-gap: 12px; }
+  }
+  .cl26-card .clr-pick { opacity: 0; }
+}
