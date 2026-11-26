@@ -226,3 +226,17 @@
   }
   .cl26-card .clr-pick { opacity: 0; }
 }
+
+/* ══ Contact list rows v1.2 · phase 5 — the Letter grouping's margin, narrowed below a card of 980 ══════════════════ */
+/* At a 1280 window the card's content box is about 812px: below 980 every column but Genres sought is fixed, so the margin
+   (84px) left Genres 48px and no whole tag. Below 980 the margin is 28px (the letters 18px, the stage glyphs 18px, their
+   small words dropped), which leaves Genres room for a whole tag; the ungrouped and Status-grouped margin (22px) is
+   unchanged. The headings' padding reads the same `--cl26-m`, so they stay on the rows' template. */
+@container clr (width < 980px) {
+  .cl26-card:not([data-kind="all"]):not([data-kind="set"]) .cl26-frame { --cl26-m: 28px; }
+  .cl26-card .cl26-mgl { padding: 12px 0 0 6px; }
+  .cl26-card .cl26-mgl b { font-size: 18px !important; }
+  .cl26-card .cl26-mgl small { display: none; }
+  .cl26-card .cl26-mgl svg, .cl26-card .cl26-mgl .cl24-nq { width: 18px; height: 18px; }
+  .cl26-card .cl26-row .clr-gline .clr-tag { padding: 0 10px; }
+}

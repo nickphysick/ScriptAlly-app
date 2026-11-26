@@ -163,10 +163,9 @@ export function sections(sorted: readonly AgentFacts[], group: Group26, sort: So
         : { key: `f:${r}`, kind, label: `${r} ${r === 1 ? "star" : "stars"}`, big: String(r), small: r === 1 ? "star" : "stars" };
     } else {
       const k = x.status14;
-      /* Contact list rows v1 — the Query status sort puts your move first, so a stage can run twice (a nudge-due Queried
-         ahead of the waiting Queried): your move keeps its own section, or the later run would be drawn inside it */
-      const you = x.stand === "you" ? "you:" : "";
-      s = { key: `t:${you}${k}`, kind, label: STATUS_LABEL[k], big: null, small: STATUS_LABEL[k], stage: k };
+      /* Contact list rows v1.2 (5.2) — ONE section a stage, never two: a nudge-due Queried joins the waiting Queried, first
+         within it (the status sort put it first, and a section keeps the sort's order). v1's your-move split is retired. */
+      s = { key: `t:${k}`, kind, label: STATUS_LABEL[k], big: null, small: STATUS_LABEL[k], stage: k };
     }
     const hit = at.get(s.key);
     if (hit) { hit.ids.push(x.agent.id); continue; }

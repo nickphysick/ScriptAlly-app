@@ -104,8 +104,9 @@ describe("Contact list rows v1 · Phase 3 — sorting and search", () => {
     expect(sectionKind("letter", "rating")).toBe("fit");
     const r = [fx("a", { starRating: 5 }), fx("b", { starRating: 5 }), fx("c", { starRating: 2 }), fx("d")];
     expect(sections(r, "letter", "rating").map((s) => `${s.label}:${s.ids.join("")}`)).toEqual(["5 stars:ab", "2 stars:c", "Not rated:d"]);
+    /* RE-POINTED by v1.2 (5.2): one Queried section, never two, the nudge due first within it */
     const q = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs")], "status");
-    expect(sections(q, "letter", "status").map((s) => s.ids.join(""))).toEqual(["n", "f", "w"]);
+    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:queried:nw", "t:fs:f"]);
   });
   it("the search reads Filter by name or agency, and this page hides the \"/\" hint", () => {
     expect(FIND_AGENT).toBe("Filter by name or agency");
