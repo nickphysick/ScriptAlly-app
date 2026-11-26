@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "BW-11",
+  "where": "nothing with you: \"Nothing’s with you\" (population 16 set back)",
+  "ok": true,
+  "detail": "Nothing’s with youWhen an agent asks for pages or makes an offer, it’ll show up here.See all queries"
+ },
+ {
+  "lock": "BW-11",
+  "where": "only closed: the card at the top, the Closed section below it",
+  "ok": true,
+  "detail": "No open queriesYour closed queries are below.Log a query · gap 22.703125"
+ },
+ {
+  "lock": "BW-11",
+  "where": "the harness's queries deleted, emulator only (population 88; 0 left)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-11",
+  "where": "no queries: \"No queries out yet\" over the sample, blurred 3px at 55%",
+  "ok": true,
+  "detail": "{\"text\":\"No queries out yetLog your first query and it lands here, with every stage on its own dates.Log a query\",\"filter\":\"blur(3px)\",\"opacity\":\"0.55\",\"chips\":0,\"levels\":\"none\",\"bars\":63}"
+ },
+ {
+  "lock": "BW-11",
+  "where": "no queries: no pills and no level control",
+  "ok": true,
+  "detail": "{\"filter\":\"blur(3px)\",\"opacity\":\"0.55\",\"chips\":0,\"levels\":\"none\",\"bars\":63}"
+ }
+]

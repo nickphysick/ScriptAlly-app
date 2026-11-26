@@ -153,7 +153,7 @@ export function drawWorld(W: World, S: BwView, o: FrameOpts): Frame {
   const gridAt = out.length; out.push("");
   const heads: string[] = [];
   for (const g of W.G) {
-    const gp = W.gapPx(z), small = gp < 34, hh0 = small ? 22 : 28;
+    const gp = W.gapPx(z), small = gp < 34, hh0 = small ? 26 : 30; /* the v3 headings' own heights (.bw-gh0.u / .u.sm) */
     /* headings never touch: when groups above are folded, the next heading keeps its distance (ref `PUSH`/`LASTH`) */
     { const nat = Y(g.y) + Math.max(0, gp - hh0 - 6); if (nat < LASTH) PUSH += LASTH - nat; }
     const gy = Y(g.y), gEnd = Y(g.y + GAP + g.h);

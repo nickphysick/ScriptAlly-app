@@ -279,7 +279,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     if (!w || !rows.some((r) => isDrawn(r) || isNoDate(r))) return;
     motion.current?.stop();
     setRecap(false); setTip(null);
-    const t0 = replayStart(rows);
+    const t0 = replayStart(rows, w.ext.D0);
     S.current = w.fitView();
     rp.current.rt = t0;
     if (root.current) root.current.dataset.replay = "running";
@@ -462,7 +462,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const menuRow = menu ? byId.get(menu.id) ?? null : null;
 
   const body = (
-    <div ref={root} className={`pa-layer bw${land ? " land" : ""}${demo ? " isdemo" : ""}`} data-bw="world" data-pa5="birds-view" data-filter={f}
+    <div ref={root} className={`pa-layer bw${land ? " land" : ""}${demo ? " isdemo" : ""}${sheet || menu || recap ? " lift" : ""}`} data-bw="world" data-pa5="birds-view" data-filter={f}
       data-n={groups.reduce((a, g) => a + g.rows.length, 0)} data-court={court ?? ""} data-replay="idle" data-hawk={hawk ? "1" : "0"} data-demo={demo ? "1" : "0"}
       data-card={card?.k ?? ""} data-news={news.length} data-step={step} data-recap={recap ? "1" : "0"} onClick={onClick}>
       <div ref={vp} className="bw-vp" data-bw="vp">

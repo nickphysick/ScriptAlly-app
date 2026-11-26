@@ -76,6 +76,11 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     expect(bwGroups(rows(), "chase").map((x) => x.t)).toEqual(["Needs chasing"]);
     expect(bwGroups(rows(), "you").some((x) => x.t === "Closed")).toBe(false);
     expect(isNoDate(rows().find((x) => x.id === "nodate")!)).toBe(true);
+    /* with you and no send-by date: drawn in With you (to today), never in "No reply date yet" (a reply date is not the writer's to set there) */
+    const youNoDate = R(eye("youNoDate", [[Q.QUERIED, -40], [Q.FULL_REQUESTED, -9]], null));
+    expect(isNoDate(youNoDate)).toBe(false);
+    expect(bwGroups([...rows(), youNoDate], "you").find((x) => x.t === "With you")!.rows.map((r) => r.id)).toContain("youNoDate");
+    expect(noDateRows([...rows(), youNoDate]).map((r) => r.id)).toEqual(["nodate"]);
     /* the "All" layout's height sets the scale for every pill: six groups, nine rows (v2's footer is gone) */
     expect(allH(rows())).toBe(6 * GAP + 9 * RH + 8);
   });
@@ -106,6 +111,8 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     expect(clipR(s, 0).some((x) => x.k === "ahead")).toBe(false);
     expect(clipR(s, null)).toEqual(s);
     expect(replayStart(rows())).toBe(-153);
+    /* never before the axis's start */
+    expect(replayStart(rows(), -120)).toBe(-120);
     expect([replayAt(-100, 0), replayAt(-100, 0.5), replayAt(-100, 1)]).toEqual([-100, -50, 0]);
   });
   it("figures only past its date, for an offer, or a closed outcome — never time still to run", () => {

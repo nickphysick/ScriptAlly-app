@@ -1,0 +1,7 @@
+{
+ "mut": "copy",
+ "lock": "BW-13",
+ "own": 1,
+ "other": 2,
+ "readings": 58
+}

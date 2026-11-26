@@ -105,9 +105,10 @@ export const kk = (r: BwRow): number => (r.due == null ? -start(r) / 60 : -start
 export const isYou = (r: BwRow): boolean => !r.closed && r.you;
 export const isChase = (r: BwRow): boolean => !r.closed && !r.you && r.due != null && r.due < 0;
 export const isWait = (r: BwRow): boolean => !r.closed && !r.you && !(r.due != null && r.due < 0);
-/** on its real dates: open with a reply date, or an offer (its date sits on the line) */
-export const isDrawn = (r: BwRow): boolean => !r.closed && (r.due != null || isOffer(r.status)) && r.ev.length > 0;
-/** open with no reply date: its own group, "No reply date yet" (v3), a bar to today fading out after it */
+/** on its real dates: open with a reply date, an offer (its date sits on the line), or with you (a reply date is not
+ *  the writer's to wait on there: with no send-by date its stage runs to today, in With you, where its pill counts it) */
+export const isDrawn = (r: BwRow): boolean => !r.closed && (r.due != null || isOffer(r.status) || r.you) && r.ev.length > 0;
+/** waiting with no reply date: its own group, "No reply date yet" (v3), a bar to today fading out after it */
 export const isNoDate = (r: BwRow): boolean => !r.closed && !isDrawn(r) && r.ev.length > 0;
 export const PILLS: readonly BwFilter[] = ["all", "you", "chase", "wait"];
 export const PILL_LABEL: Record<BwFilter, string> = { all: "All", you: "With you", chase: "Needs chasing", wait: "Waiting" };
@@ -200,7 +201,8 @@ export function clipR(segs: readonly BwSeg[], rt: number | null): BwSeg[] {
   return out;
 }
 /** the replay's start: three days before the earliest stage of anything drawn */
-export const replayStart = (rows: readonly BwRow[]): number => Math.min(0, ...rows.filter(isDrawn).map((r) => r.ev[0].d)) - 3;
+/** never before the axis's own start (a query older than a year would pin the line to the left edge) */
+export const replayStart = (rows: readonly BwRow[], d0 = -Infinity): number => Math.max(d0, Math.min(0, ...rows.filter(isDrawn).map((r) => r.ev[0].d)) - 3);
 /** the replay's clock: ease in-out over its duration (ref `replay`) */
 export const replayAt = (t0: number, k: number): number => t0 + (0 - t0) * (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
 export const REPLAY_MS = 6000;

@@ -1,0 +1,338 @@
+[
+ {
+  "lock": "BW-1",
+  "where": "fitted (z 1, rows 5.5px): bars drawn (population 230)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-1",
+  "where": "fitted: no names, no figures, no gridlines",
+  "ok": true,
+  "detail": "{\"names\":0,\"figs\":0,\"grids\":0}"
+ },
+ {
+  "lock": "BW-1",
+  "where": "fitted: the pill reads Today, the header is unfolded (140px)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-9",
+  "where": "All 70 = With you 16 + Needs chasing 51 + Waiting 3",
+  "ok": true,
+  "detail": "{\"all\":70,\"you\":16,\"chase\":51,\"wait\":3}"
+ },
+ {
+  "lock": "BW-10",
+  "where": "fitted with 70 open queries: time spans at least 90% of the width",
+  "ok": true,
+  "detail": "358.0px"
+ },
+ {
+  "lock": "BW-10",
+  "where": "48px rows are reachable (the Weeks level)",
+  "ok": true,
+  "detail": "rows 48 at z 10.98"
+ },
+ {
+  "lock": "BW-19",
+  "where": "you: the view stays fitted (z 1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-19",
+  "where": "chase: the view stays fitted (z 1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-19",
+  "where": "wait: the view stays fitted (z 1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-20",
+  "where": "all 5 groups folded (population 5)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-20",
+  "where": "no two headings overlap, and each gap is at least 12px",
+  "ok": false,
+  "detail": "Needs chasing→Nearly there -18.0px, Plenty of time→With you -18.0px"
+ },
+ {
+  "lock": "BW-22",
+  "where": "the level control reads Weeks / Months / All (Weeks on top)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-22",
+  "where": "Months: 120.0 days across (120)",
+  "ok": true,
+  "detail": "z 6.162 vs 6.162"
+ },
+ {
+  "lock": "BW-22",
+  "where": "Weeks: the closer of 42 days across and 48px rows ×1.02 (42.0 days, rows 48px)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-22",
+  "where": "All: fitted (z = 1)",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "BW-21",
+  "where": "zoomed in: no edge chips and no figure pills (Months and Weeks)",
+  "ok": true,
+  "detail": "{\"mo\":{\"figs\":0,\"grids\":0,\"fades\":2},\"wk\":{\"figs\":0,\"grids\":3,\"fades\":2}}"
+ },
+ {
+  "lock": "BW-21",
+  "where": "gridlines show at Weeks and not at Months",
+  "ok": true,
+  "detail": "{\"mo\":{\"figs\":0,\"grids\":0,\"fades\":2},\"wk\":{\"figs\":0,\"grids\":3,\"fades\":2}}"
+ },
+ {
+  "lock": "BW-21",
+  "where": "a soft white fade at each side when zoomed in",
+  "ok": true,
+  "detail": "{\"mo\":{\"figs\":0,\"grids\":0,\"fades\":2},\"wk\":{\"figs\":0,\"grids\":3,\"fades\":2}}"
+ },
+ {
+  "lock": "BW-4",
+  "where": "Weeks (48px rows): multi-stage rows on screen (population 7 bars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-4",
+  "where": "each stage bar sits within 2px of its date's x",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-7",
+  "where": "earlier stages are the faded colour (population 12)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-7",
+  "where": "the current stage and its tail share an edge (population 2)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-5",
+  "where": "screen 1: no name over an \"!\" (population 17 names, 0 marks)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "BW-5",
+  "where": "screen 2: no name over an \"!\" (population 15 names, 0 marks)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-6",
+  "where": "Weeks: the ruler's marks (population 2) clear of each other and of the pills",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-23",
+  "where": "a zoomed-in bar to hold (population 0)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "BW-23",
+  "where": "on the fitted view a hold scrubs (\"21 Aug · 55 out\")",
+  "ok": true,
+  "detail": "{\"line\":true,\"pill\":\"21 Aug · 55 out\",\"menu\":false}"
+ },
+ {
+  "lock": "BW-24",
+  "where": "search lists matches (6 before typing, 6 for \"a\")",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-24",
+  "where": "picking one flies to it: Weeks, the row on screen and glowing",
+  "ok": true,
+  "detail": "{\"on\":true,\"glow\":true,\"level\":\"Weeks\"}"
+ },
+ {
+  "lock": "BW-25",
+  "where": "with \"last opened\" 12 days ago (the first day with two or more changes) the badge shows 4",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "BW-25",
+  "where": "tapping the hawk drops the banner (\"4 things changed since 14 NovElinor Hale reached the reply d…\")",
+  "ok": true,
+  "detail": "4 things changed since 14 NovElinor Hale reached the reply date · Elinor Hale reached the reply date · Priya Nair reached the reply dateShow me"
+ },
+ {
+  "lock": "BW-25",
+  "where": "Show me visits each of the 4, glowing, Next then Done",
+  "ok": true,
+  "detail": "[{\"step\":\"1 of 4\",\"glow\":true,\"btn\":\"Next\"},{\"step\":\"2 of 4\",\"glow\":true,\"btn\":\"Next\"},{\"step\":\"3 of 4\",\"glow\":true,\"btn\":\"Next\"},{\"step\":\"4 of 4\",\"glow\":true,\"btn\":\"Done\"}]"
+ },
+ {
+  "lock": "BW-25",
+  "where": "Done clears the count and records this visit",
+  "ok": true,
+  "detail": "{\"count\":null,\"step\":false,\"stored\":1795732483976}"
+ },
+ {
+  "lock": "BW-27",
+  "where": "fitted: the pull shows the hawk (\"Let go to refresh\"), then \"Checking for news…\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-27",
+  "where": "letting go triggers exactly one refetch, then \"You’re up to date.\"",
+  "ok": true,
+  "detail": "0 → 1 · You’re up to date."
+ },
+ {
+  "lock": "BW-27",
+  "where": "zoomed in: no pull and no refetch",
+  "ok": true,
+  "detail": "{\"zoomedPull\":false,\"before\":1,\"after\":1}"
+ },
+ {
+  "lock": "BW-8",
+  "where": "quietWeeks 6: the fade starts 6 weeks after each reply date (population 34)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-8",
+  "where": "quietWeeks 3: the fade starts 3 weeks after each reply date (population 45)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-12",
+  "where": "replay runs: the line moves forwards, its pill showing the date",
+  "ok": true,
+  "detail": "[{\"lx\":23.31,\"label\":\"5 Dec\",\"replay\":\"running\"},{\"lx\":44.96,\"label\":\"31 Dec\",\"replay\":\"running\"},{\"lx\":82.05,\"label\":\"13 Feb\",\"replay\":\"running\"}]"
+ },
+ {
+  "lock": "BW-12",
+  "where": "a touch stops it at today (no recap)",
+  "ok": true,
+  "detail": "\"done\""
+ },
+ {
+  "lock": "BW-12",
+  "where": "played through, it ends on the recap (952 days)",
+  "ok": true,
+  "detail": "{\"card\":true,\"days\":\"952\",\"btns\":[\"Share\",\"Done\"]}"
+ },
+ {
+  "lock": "BW-14",
+  "where": "the hawk's shadow paints above a group heading",
+  "ok": true,
+  "detail": "[\"bw-hs\",\"bw-hsw\",\"bw-gh0 u sm\",\"bw-hit\",\"bw-gband\",\"bw-w\"]"
+ },
+ {
+  "lock": "BW-14",
+  "where": "the line paints above the hawk",
+  "ok": true,
+  "detail": "[\"bw-fline\",\"bw-hs\",\"bw-hit\",\"bw-gband\",\"bw-pz\",\"bw-w\"]"
+ },
+ {
+  "lock": "BW-15",
+  "where": "panned past the line: \"← Today\" at the edge, outlined",
+  "ok": true,
+  "detail": "← Today {\"bg\":\"rgb(255, 255, 255)\",\"border\":\"1px solid rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "BW-15",
+  "where": "a tap on \"← Today\" brings the line back on screen",
+  "ok": true,
+  "detail": "241.8"
+ },
+ {
+  "lock": "BW-15",
+  "where": "panned past the line: \"Today →\" at the edge, outlined",
+  "ok": true,
+  "detail": "Today → {\"bg\":\"rgb(255, 255, 255)\",\"border\":\"1px solid rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "BW-15",
+  "where": "a tap on \"Today →\" brings the line back on screen",
+  "ok": true,
+  "detail": "241.8"
+ },
+ {
+  "lock": "BW-15",
+  "where": "the line was taken off screen (population 2 sides)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-13",
+  "where": "never \"overdue\" or \"late\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-17",
+  "where": "reduced motion: the hawk does not drift",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "BW-17",
+  "where": "reduced motion: a drag stops where it is let go",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-12",
+  "where": "reduced motion: replay never runs",
+  "ok": true,
+  "detail": "idle"
+ },
+ {
+  "lock": "BW-18",
+  "where": "740x360: the header folded (96px), no dock",
+  "ok": true,
+  "detail": "{\"h\":96,\"dock\":\"none\"}"
+ },
+ {
+  "lock": "BW-26",
+  "where": "No reply date yet: under All and Waiting only",
+  "ok": false,
+  "detail": "{\"all\":false,\"you\":false,\"chase\":false,\"wait\":false}"
+ },
+ {
+  "lock": "BW-26",
+  "where": "a no-date query to date (population: none)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "BW-13",
+  "where": "no error from the world in the console (population 0 console errors in all)",
+  "ok": true,
+  "detail": ""
+ }
+]

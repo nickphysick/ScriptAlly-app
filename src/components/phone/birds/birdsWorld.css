@@ -12,6 +12,8 @@
     position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #fff; color: var(--pa-ink); font: 400 16px/1.5 var(--pa-sans);
     -webkit-font-smoothing: antialiased;
   }
+  /* a sheet, the quick menu or the recap lifts the world over the dock (z 50) so nothing in them sits under it; the app's own sheets (z 1000) still open over it */
+  .bw.lift { z-index: 60; }
   .bw button { font: inherit; color: inherit; }
   .bw button:focus-visible { outline: 2px solid var(--pa-navy); outline-offset: 2px; }
 
