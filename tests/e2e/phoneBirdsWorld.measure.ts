@@ -20,7 +20,7 @@ import { expect, test, type Page, type CDPSession } from "@playwright/test";
 import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 import { statusBand } from "../../src/lib/stageColours";
-import { stageTx, shortName } from "../../src/lib/birdsWorldV1";
+import { stageTx, shortName } from "../../src/lib/birdsWorld";
 
 const DIR = "reports/phone-birds-eye-world-v1";
 const PHONE = { width: 390, height: 784 } as const;

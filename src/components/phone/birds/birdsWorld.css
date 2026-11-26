@@ -20,16 +20,23 @@
   /* folded: one line, 96px (the engine's TOPFOLD) */
   .bw-hd.col { height: 96px; }
   .bw-t2 { display: flex; align-items: center; gap: 4px; }
-  .bw .bw-t2 .bw-h { flex: 1; min-width: 0; margin: 0; font: 400 20px/1.2 var(--pa-type) !important; color: #fff; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bw .bw-t2 .bw-h { flex: 1; min-width: 0; margin: 0; font: 400 20px/1.2 var(--pa-type) !important; color: #fff; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: font-size 0.25s; }
+  /* v2: the Birds-eye hawk in a round badge (36px, 28px folded); folded, the title is 16px, and hidden with a filter on */
+  .bw-behk { flex: none; width: 36px; height: 36px; margin-right: 8px; border-radius: 50%; object-fit: cover; object-position: 50% 30%; background: #fff; outline: 2px solid rgba(255, 255, 255, 0.9); transition: width 0.25s, height 0.25s; }
+  .bw-hd.col .bw-behk { width: 28px; height: 28px; }
+  .bw .bw-hd.col .bw-t2 .bw-h { font-size: 16px !important; }
+  .bw-hd.col.filt .bw-t2 .bw-h { visibility: hidden; }
   .bw-ib { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; border-radius: 999px; padding: 0; }
   .bw-ib svg { width: 24px; height: 24px; }
   .bw-ib.back { margin-left: -12px; }
   .bw-fon { flex: none; height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: #fff; color: var(--pa-navy) !important; font: 600 14px var(--pa-sans) !important; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; }
   .bw-hd.col .bw-fon { opacity: 1; pointer-events: auto; }
-  .bw-chips { display: flex; gap: 6px; margin: 8px -8px 0 0; padding-right: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; max-height: 40px; transition: max-height 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s, margin 0.25s; }
+  .bw-hd:not(.col) .bw-fon { display: none; }
+  .bw-chips { display: flex; gap: 5px; margin: 8px -8px 0 0; padding-right: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; max-height: 40px; transition: max-height 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s, margin 0.25s; }
   .bw-chips::-webkit-scrollbar { display: none; }
   .bw-hd.col .bw-chips { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
-  .bw-c2 { flex: none; height: 32px; padding: 0 10px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.1); color: var(--pa-onnavy) !important; font: 400 14px var(--pa-sans) !important; white-space: nowrap; cursor: pointer; }
+  .bw-chips.more { -webkit-mask-image: linear-gradient(90deg, black calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, black calc(100% - 36px), transparent); }
+  .bw-c2 { flex: none; height: 32px; padding: 0 9px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.1); color: var(--pa-onnavy) !important; font: 400 14px var(--pa-sans) !important; white-space: nowrap; cursor: pointer; }
   .bw-c2 b { font-weight: 600; color: #fff; }
   .bw-c2.on { background: #fff; color: var(--pa-navy) !important; }
   .bw-c2.on b { color: var(--pa-navy); }
@@ -109,8 +116,18 @@
   .bw-mini.hide { opacity: 0; }
   .bw-mini i { position: absolute; height: 2px; }
   .bw-mini b { position: absolute; border: 1.5px solid var(--pa-navy); background: rgba(42, 58, 82, 0.06); box-sizing: border-box; }
-  .bw-hint { position: absolute; left: 50%; top: 180px; transform: translateX(-50%); z-index: 11; padding: 8px 14px; border-radius: 999px; background: var(--pa-navy); color: #fff; font: 600 14px var(--pa-sans); white-space: nowrap; box-shadow: var(--ps-sh-raised); transition: opacity 0.4s; pointer-events: none; }
+  .bw-hint { position: absolute; left: 50%; top: 46%; transform: translateX(-50%); z-index: 11; padding: 8px 14px; border-radius: 999px; background: var(--pa-navy); color: #fff; font: 600 14px var(--pa-sans); white-space: nowrap; box-shadow: var(--ps-sh-raised); transition: opacity 0.4s; pointer-events: none; }
   .bw-hint.hide { opacity: 0; }
+  /* v2: the empty-state card (ref `.bwc`); its radius and shadow are set on the element (the prompt's values) */
+  .bw-card { position: absolute; z-index: 12; left: 50%; width: 300px; margin-left: -150px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 24px 22px 22px; background: #fff; text-align: center; font: 400 14px/1.45 var(--pa-sans); color: var(--pa-body); box-sizing: border-box; }
+  .bw-card.mid { transform: translateY(-50%); }
+  .bw-card img { width: 56px; height: 56px; margin-bottom: 4px; border-radius: 50%; object-fit: cover; object-position: 50% 30%; border: 3px solid #fff; outline: 1px solid #efebe4; box-sizing: content-box; }
+  .bw .bw-card b { font: 400 20px/1.25 var(--pa-type); color: var(--pa-ink); }
+  .bw .bw-go2, .bw .bw-go3 { margin-top: 10px; height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--pa-navy); color: #fff !important; font: 600 14px var(--pa-sans) !important; cursor: pointer; }
+  .bw .bw-go3 { background: none; color: var(--pa-navy) !important; border: 1.5px solid var(--pa-navy); }
+  /* no queries at all: the invented sample behind the card, blurred; nothing to touch */
+  .bw-w.demo { filter: blur(3px); opacity: 0.55; pointer-events: none; }
+  .bw.isdemo .bw-zc, .bw.isdemo .bw-mini, .bw.isdemo .bw-fit, .bw.isdemo .bw-hint, .bw.isdemo .bw-hsw { display: none; }
   .bw-empty { position: absolute; left: 24px; right: 24px; top: 200px; z-index: 5; margin: 0; font: 400 16px/1.5 var(--pa-sans); color: var(--pa-body); text-align: center; }
 
   /* the hawk's shadow (ref `.hsw`/`.hs`): over the world and the header, under the line; never takes a tap */

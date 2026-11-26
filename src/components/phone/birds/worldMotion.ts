@@ -11,7 +11,7 @@
  *   - Reduced motion: no glide, no tweens (every move lands at once).
  *   - A pointer that starts on the controls, the ruler, the line's pill or the header is theirs, never the world's.
  */
-import type { BwView, World } from "../../../lib/birdsWorldV1";
+import type { BwView, World } from "../../../lib/birdsWorld";
 
 export interface MotionCtx {
   vp: HTMLElement;
@@ -53,7 +53,7 @@ export function wireMotion(c: MotionCtx): Motion {
   let pan: { x: number; y: number; sx: number; sy: number; moved: boolean } | null = null;
   let pinch: { d: number; z: number; wx: number; wy: number } | null = null;
   let vel = { x: 0, y: 0 }, lastT = 0, lastTap = 0, tapT: ReturnType<typeof setTimeout> | undefined;
-  const ours = (t: EventTarget | null) => !(t instanceof Element && t.closest(".bw-zc, .bw-fit, .bw-ruler, .bw-flab, .bw-hd"));
+  const ours = (t: EventTarget | null) => !(t instanceof Element && t.closest(".bw-zc, .bw-fit, .bw-ruler, .bw-flab, .bw-hd, .bw-card, .bw-ndl"));
 
   const down = (e: PointerEvent) => {
     if (!ours(e.target)) return;
