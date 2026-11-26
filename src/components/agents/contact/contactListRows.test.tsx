@@ -68,9 +68,10 @@ describe("Contact list rows v1 · Phase 1 — the columns and cells", () => {
   it("the columns are the card's container query, fixed widths, spare width last — never fr shares between columns", () => {
     const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(css).toContain(".cl26-card { container: clr / inline-size; }");
-    expect(css).toContain("grid-template-columns: 290px 90px minmax(0, 360px) 180px 220px minmax(24px, 1fr);");
-    expect(css).toMatch(/@container clr \(width < 1150px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 262px 72px minmax\(0, 300px\) 160px 196px minmax\(20px, 1fr\); \}/);
-    expect(css).toMatch(/@container clr \(width < 980px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 228px 64px minmax\(0, 1fr\) 138px 156px 16px; column-gap: 14px; \}/);
+    /* RE-POINTED by v1.2: Query status takes the spare width; the › is a fixed 30 (22 below 980) */
+    expect(css).toContain("grid-template-columns: 290px 90px minmax(0, 360px) 180px minmax(220px, 1fr) 30px;");
+    expect(css).toMatch(/@container clr \(width < 1150px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 262px 72px minmax\(0, 300px\) 160px minmax\(196px, 1fr\) 30px; \}/);
+    expect(css).toMatch(/@container clr \(width < 980px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 228px 64px minmax\(0, 1fr\) 138px 156px 22px; column-gap: 14px; \}/);
   });
 });
 
@@ -108,5 +109,17 @@ describe("Contact list rows v1 · Phase 3 — sorting and search", () => {
   it("the search reads Filter by name or agency, and this page hides the \"/\" hint", () => {
     expect(FIND_AGENT).toBe("Filter by name or agency");
     expect(read("./contactListRows.css")).toContain('.cl27 [data-cl26="find"] kbd { display: none; }');
+  });
+});
+
+describe("Contact list rows v1.2 · Phase 1 — the pin", () => {
+  it("the heading row is the pin, inside the frame; the cap is retired; its top is read off the filter panel", () => {
+    const src = read("./ContactSheet26.tsx");
+    expect(src).toContain('<div className="cl26-th cl26-pin" role="row" data-cl26="heads"');
+    expect(src).not.toMatch(/className="cl26-pin clq-cap"|data-clq="cap"/);
+    expect(src).toContain('const t = getComputedStyle(rail).top;');
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toContain("position: sticky; top: var(--clr-th-top, 12px);");
+    expect(css).toContain("--clr-head-bg: #d3deea; --clr-head-ink: #1f2c40; --clr-head-edge: #b9c9da;");
   });
 });

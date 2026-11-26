@@ -133,22 +133,5 @@
   .cl27 .qc156-slim .clq-snq:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 }
 
-/* ── v1.1 Phase 3 · THE CAP: the card's top as one sticky block (ref `.card2`, `.cap`, `.capin`, `.captop`, `.rowsf`) ──
-   The card keeps its white body, ring and shadow (contactV26.css) with its top 10px moved into the cap. The cap
-   (`.cl26-pin`, sticky under the strip: contactPrinciples.css) paints the page's ground across its whole box, 14px past
-   the card on each side; on it, the white rounded top (22px corners) with its 1px ring, top and sides only, and inside
-   that the frame's rounded top (13px) with its #e3d5c9 line. The rows' frame continues the sides and closes the foot.
-   Whatever scrolls behind the cap (the card's own white body, the rows) never shows through its corners. */
-@media (min-width: 768px) {
-  .cl27 .cl26-card { padding: 0 10px 10px; }
-  .cl27 .cl26-card > .clq-cap { margin: 0 -24px; padding: 0 14px; }
-  .cl27 .clq-cap > .clq-capin { padding: 10px 10px 0; border-radius: 22px 22px 0 0; background: #fff; clip-path: inset(-2px -2px 0 -2px); }
-  /* PINNED ONLY (`data-clq-stuck`, ContactBar's reader): at rest the card draws its own ring and shadow exactly as today,
-     so the cap paints nothing of its own there. Pinned, the cap paints the page's ground (its box, and the 1px above it
-     where the card's top ring sits) and the white top draws the ring the card's own scrolled-away top no longer can. */
-  .cl27 .cl26-card > .clq-cap[data-clq-stuck] { background: var(--ws-page); }
-  .cl27 .cl26-card > .clq-cap[data-clq-stuck]::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: -1px; height: 1px; background: var(--ws-page); }
-  .cl27 .clq-cap[data-clq-stuck] > .clq-capin { box-shadow: 0 0 0 1px #1c130f14; }
-  .cl27 .clq-capin > .clq-captop { border: 1px solid #e3d5c9; border-bottom: 0; border-radius: 13px 13px 0 0; overflow: hidden; }
-  .cl27 .cl26-card > .clq-cap + .cl26-frame.cl26-frame { border-top: 0; border-radius: 0 0 13px 13px; }
-}
+/* v1.1 Phase 3's cap (the card's top as one sticky block) is retired by Contact list rows v1.2: the heading row alone pins,
+   inside the frame, level with the filter panel (contactListRows.css). */

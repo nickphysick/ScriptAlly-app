@@ -9,9 +9,10 @@
  * ⚠️ FIXED-WIDTH COLUMNS, NOT fr SHARES. Spare width collects in the last track before the ›, never between columns.
  * ⚠️ THE WIDTHS COME FROM THE LIST CARD'S OWN WIDTH (a container query on `.cl26-card`, its content box), never the
  *    window: the filter panel and the sidebar take what they take, and the card is what the columns live in.
- *      card ≥ 1150   290 · 90 · minmax(0,360) · 180 · 220 · minmax(24px,1fr)   gap 24
- *      980–1149      262 · 72 · minmax(0,300) · 160 · 196 · minmax(20px,1fr)   gap 24
- *      < 980         228 · 64 · minmax(0,1fr) · 138 · 156 · 16px               gap 14
+ *      card ≥ 1150   290 · 90 · minmax(0,360) · 180 · minmax(220px,1fr) · 30   gap 24
+ *      980–1149      262 · 72 · minmax(0,300) · 160 · minmax(196px,1fr) · 30   gap 24
+ *      < 980         228 · 64 · minmax(0,1fr) · 138 · 156 · 22                 gap 14
+ *    v1.2: Query status takes the spare width (its content centred between Response policy and the ›).
  * ⚠️ HEADINGS AND ROWS SHARE THE ONE TEMPLATE. The headings' margin column (the letter/stage margin the rows sit beside)
  *    is padding, not a track, so the gap is never laid between it and Agent.
  * Fit, Genres sought and Query status are centred (`[data-clr-c]`); Agent and Response policy are left-aligned.
@@ -21,7 +22,7 @@
 
 .cl26-card .cl26-row,
 .cl26-card .cl26-th {
-  grid-template-columns: 290px 90px minmax(0, 360px) 180px 220px minmax(24px, 1fr);
+  grid-template-columns: 290px 90px minmax(0, 360px) 180px minmax(220px, 1fr) 30px;
   column-gap: 24px;
 }
 .cl26-card .cl26-th { padding-left: var(--cl26-m, 84px); box-sizing: border-box; }
@@ -98,13 +99,13 @@
 .cl27 [data-cl26="find"] kbd { display: none; }
 
 @container clr (width < 1150px) {
-  .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 262px 72px minmax(0, 300px) 160px 196px minmax(20px, 1fr); }
+  .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 262px 72px minmax(0, 300px) 160px minmax(196px, 1fr) 30px; }
   .cl26-card .cl26-row .clp2-fit { font-size: 14px !important; letter-spacing: 0; }
   .cl26-card .clr-pol > b, .cl26-card .cl26-row .cl26-q > .clr-stage { font-size: 15px !important; }
   .cl26-card .clr-pol > small { font-size: 13.5px !important; }
 }
 @container clr (width < 980px) {
-  .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 228px 64px minmax(0, 1fr) 138px 156px 16px; column-gap: 14px; }
+  .cl26-card .cl26-row, .cl26-card .cl26-th { grid-template-columns: 228px 64px minmax(0, 1fr) 138px 156px 22px; column-gap: 14px; }
   .cl26-card .cl26-th [data-clr-hl="l"] { display: none; }
   .cl26-card .cl26-th [data-clr-hl="s"] { display: inline; }
   .cl26-card .cl26-dsc { --d: 38px; }
@@ -116,5 +117,37 @@
   .cl26-card .cl26-row .cl26-want .cl252-pill { font-size: 13px !important; padding: 0 7px; }
   /* a narrow Genres sought column (54px at a 1280 window) holds the prompt on two lines rather than spilling out */
   .cl26-card .clr-add { font-size: 14px !important; white-space: normal; max-width: 100%; text-align: center; }
-  .cl26-card .cl26-th > span { font-size: 13.5px !important; }
+}
+
+/* ══ Contact list rows v1.2 · phase 1 — larger typewriter headings on pale slate, pinned level with the filter panel ══ */
+/* the Contact list's heading tokens (pale slate; the consistency rulings' #d3deea / #1f2c40 / #b9c9da) */
+.cl26-card { --clr-head-bg: #d3deea; --clr-head-ink: #1f2c40; --clr-head-edge: #b9c9da; --clr-head-arrow: #2a3a52; }
+.cl27 .cl26-card { padding-top: 10px; }
+.cl26-card .cl26-th {
+  height: auto; min-height: 54px; background: var(--clr-head-bg); border-bottom: 1px solid var(--clr-head-edge);
+}
+.cl26-card .cl26-th > span, .cl27 .cl26-card .cl26-th > span { font: 400 18px/1.2 var(--sp-type) !important; color: var(--clr-head-ink); }
+.cl26-card .cl26-th button.on { color: var(--clr-head-ink); }
+.cl26-card .cl26-th button.on i { color: var(--clr-head-arrow); }
+.cl26-card .cl26-th button:not(.on) i { color: var(--clr-head-ink); }
+.cl26-card .cl26-chev { text-align: center; }
+/* PINNED: the heading row alone, at the filter panel's own sticky top (`--clr-th-top`, read off the panel by
+   ContactSheet26), its top corners rounded; stuck, the page's ground above it (so no row shows over it) and a soft shadow */
+.cl26-card .cl26-th.cl26-pin, .cl27 .cl26-card .cl26-th.cl26-pin { position: sticky; top: var(--clr-th-top, 12px); z-index: 6; }
+.cl26-card .cl26-th[data-stuck] { border-radius: 13px 13px 0 0; box-shadow: 0 0 0 1px var(--clr-head-edge), 0 8px 14px -10px rgba(28, 19, 15, .35); }
+.cl26-card .cl26-th::before {
+  content: ""; position: absolute; left: -14px; right: -14px; top: -14px; height: 14px; background: var(--ws-page, #f2eee8);
+  opacity: 0; pointer-events: none;
+}
+.cl26-card .cl26-th[data-stuck]::before { opacity: 1; }
+/* the margin labels stick under the pinned headings */
+.cl27 .cl26-card .cl26-mgl { top: calc(var(--clr-th-top, 12px) + var(--cl26-pin-h, 54px) + 8px); }
+/* the light bar above the list no longer sticks on this page: pinned, the headings are the list's top (the ref) */
+@media (min-width: 768px) {
+  .cl27 .qc153-main > .qc154-tbw.qc154-tbw { position: relative; top: auto; }
+  /* the panel scrolls inside itself when the window is shorter than it (its max-height is set by ContactSheet26) */
+  .cl27 .qc153-rail.fp.fp { overflow-y: auto; overscroll-behavior: contain; }
+}
+@container clr (width < 1150px) {
+  .cl26-card .cl26-th > span, .cl27 .cl26-card .cl26-th > span { font-size: 16px !important; }
 }

@@ -185,9 +185,10 @@ describe("Phase 4 · the card's line never breaks", () => {
   it("the frame's line is #e3d5c9", () => {
     expect(read("./contactQcLayout.css")).toMatch(/\.cl27 \.cl26-card \.cl26-frame \{ border-color: #e3d5c9; \}/);
   });
-  it("no mask paints over the card's edge: the stuck mask and the pin's `stuck` are deleted", () => {
+  it("no mask paints over the card's edge (v26's stuck mask stays deleted)", () => {
+    /* RE-POINTED by Contact list rows v1.2: the pinned heading row is stuck-aware again, for its shadow and the page's
+       ground above it (contactListRows.css), inside the frame; v26's 14px mask over the card's sides stays gone */
     expect(read("./contactV26.css")).not.toMatch(/\.cl26-pin\[data-stuck\]/);
-    expect(read("./ContactSheet26.tsx")).not.toMatch(/data-stuck=|setStuck/);
   });
   it("the pin sits under the bar's strip (its height published by the bar)", () => {
     expect(read("./contactPrinciples.css")).toContain(".cl27 .cl26-pin { top: calc(var(--pin-cover, 12px) - 12px + var(--clq-strip, 34px) - 22px); }");
@@ -253,15 +254,10 @@ describe("v1.1 Phase 3 · the cap", () => {
   const sheet = renderToStaticMarkup(<ContactSheet26 pool={[]} all={[]} group="none" sortKey="surname" reversed={false} onSort={noop}
     filters={emptyContactFilters()} onFilters={noop} onClearAll={noop} search="" onSearch={noop} genreWord={(r) => r} genreHit={() => false}
     openId={null} onOpen={noop} wouldShow={() => 0} gapsOf={() => null} onFill={noop} setChip={null} onClearFilters={noop} onExport={noop} />);
-  it("the card's top is one sticky block: the cap › the white top › the frame's top › the rows it pins; then the rows' frame", () => {
-    expect(sheet).toMatch(/<section class="cl26-card"[^>]*><div class="cl26-pin clq-cap" data-cl26="pin" data-clq="cap"><div class="clq-capin"><div class="clq-captop">[\s\S]*?data-cl26="heads"[\s\S]*?<\/div><\/div><\/div><div class="cl26-frame" data-cl26="frame">/);
-  });
-  it("the cap paints the ground and its ring only while pinned (at rest the card is today's card)", () => {
-    const css = read("./contactQcLayout.css");
-    expect(css).toContain(".cl27 .cl26-card > .clq-cap { margin: 0 -24px; padding: 0 14px; }");
-    expect(css).toContain(".cl27 .cl26-card > .clq-cap[data-clq-stuck] { background: var(--ws-page); }");
-    expect(css).toContain(".cl27 .clq-cap[data-clq-stuck] > .clq-capin { box-shadow: 0 0 0 1px #1c130f14; }");
-    expect(css).toContain(".cl27 .clq-capin > .clq-captop { border: 1px solid #e3d5c9; border-bottom: 0; border-radius: 13px 13px 0 0; overflow: hidden; }");
-    expect(read("./ContactBar.tsx")).toContain('cap.toggleAttribute("data-clq-stuck", c)');
+  it("RE-POINTED by Contact list rows v1.2 — the cap is retired: the heading row is the pin, inside the frame", () => {
+    expect(sheet).toMatch(/<section class="cl26-card"[^>]*><div class="cl26-frame" data-cl26="frame">[\s\S]*?<div class="cl26-th cl26-pin" role="row" data-cl26="heads"/);
+    expect(sheet).not.toContain("clq-cap");
+    expect(read("./contactQcLayout.css")).not.toMatch(/\.clq-cap\b|\.clq-capin|\.clq-captop/);
+    expect(read("./ContactBar.tsx")).not.toContain("data-clq-stuck");
   });
 });

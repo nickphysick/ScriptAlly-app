@@ -17,10 +17,9 @@
  * on scroll, on mount, on resize, when the page is shown again (every workspace page stays mounted, so a page that was
  * hidden while the scroller moved comes back with whatever it last read), when the document becomes visible, and when
  * `--pin-cover` changes (the slim row writes it on `.clv-main`'s style) — never only on scroll: a stale reading is what
- * broke the card's line in Nick's screenshot. QC layout v1.1: the same reader, on the same events, flags the card's cap
- * (`data-clq-stuck`) when it pins, which is when it paints its own ground and ring (contactQcLayout.css).
- * The strip's height is published as `--clq-strip` on `.clv-main`, so the card's cap (the index, applied and heading
- * rows) sits directly under the strip and nothing covers the card's edge.
+ * broke the card's line in Nick's screenshot. The strip's height is published as `--clq-strip` on `.clv-main`.
+ * Contact list rows v1.2: on this page the strip no longer sticks, and the card's cap (which this reader used to flag) is
+ * retired — the heading row alone pins, level with the filter panel (ContactSheet26, contactListRows.css).
  */
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import type { SortKey } from "../../../lib/contactList";
@@ -92,9 +91,6 @@ export const ContactBar: React.FC<{
       raf = 0;
       const s = stripStuck(tb);
       if (tb.hasAttribute("data-qc156-stuck") !== s) tb.toggleAttribute("data-qc156-stuck", s);
-      /* v1.1 — the card's cap (the sticky top of the card under this strip): pinned, it paints its own ground and ring */
-      const cap = tb.parentElement?.querySelector<HTMLElement>(":scope > [data-cl26='card'] > [data-clq='cap']");
-      if (cap) { const c = stripStuck(cap); if (cap.hasAttribute("data-clq-stuck") !== c) cap.toggleAttribute("data-clq-stuck", c); }
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(read); };
     document.addEventListener("scroll", on, true);

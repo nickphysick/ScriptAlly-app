@@ -131,6 +131,35 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const [current, setCurrent] = useState<string | null>(null);
   const jumping = useRef<{ key: string; until: number } | null>(null);
 
+  /* Contact list rows v1.2 — the heading row's sticky top IS the filter panel's (`.qc153-rail`'s own computed top), read
+     from the panel, never restated; re-read when --pin-cover moves (the slim row) and on resize. And whether it is stuck,
+     for its shadow and the ground painted above it. */
+  const [stuck, setStuck] = useState(false);
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    const rail = card?.closest(".qc153-cl")?.querySelector<HTMLElement>(".qc153-rail");
+    if (!card || !rail) return undefined;
+    const port = card.closest<HTMLElement>(".wpg-scroll");
+    const put = () => {
+      /* the panel pins and scrolls inside itself (List filters v1.1's rule): never taller than the room under its sticky
+         top, so the tall-panel rule (shell/useTallRail) never unpins it */
+      const root = card.closest<HTMLElement>(".clv-main");
+      const cover = parseFloat(root ? getComputedStyle(root).getPropertyValue("--pin-cover") : "") || 12;
+      const room = (port?.clientHeight ?? window.innerHeight) - 14 - cover - 12;
+      if (room > 200) rail.style.maxHeight = `${Math.floor(room)}px`;
+      const t = getComputedStyle(rail).top;
+      if (t && t !== "auto") card.style.setProperty("--clr-th-top", t);
+    };
+    put();
+    const cover = card.closest<HTMLElement>(".clv-main");
+    const mo = cover && typeof MutationObserver !== "undefined" ? new MutationObserver(put) : null;
+    if (cover) mo?.observe(cover, { attributes: true, attributeFilter: ["style"] });
+    window.addEventListener("resize", put);
+    const ro = typeof ResizeObserver === "undefined" || !port ? null : new ResizeObserver(put);
+    if (port) ro?.observe(port);
+    return () => { mo?.disconnect(); ro?.disconnect(); window.removeEventListener("resize", put); };
+  }, []);
+
   /* the pin's height, published for the margin labels' sticky top */
   useLayoutEffect(() => {
     const pin = pinRef.current, card = cardRef.current;
@@ -160,6 +189,10 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
       if (!el) continue;
       if (cur === null || el.getBoundingClientRect().top <= line) cur = sec.key; else break;
     }
+    /* stuck: the heading row at its sticky top while the frame's top has gone above it */
+    const fr = pin.parentElement?.getBoundingClientRect();
+    const st = !!fr && pin.getBoundingClientRect().top <= top + at + 1 && fr.top < top + at - 1;
+    setStuck((v) => (v === st ? v : st));
     const j = jumping.current;
     if (j && performance.now() < j.until) cur = j.key; else jumping.current = null;
     setCurrent((v) => (v === cur ? v : cur));
@@ -218,13 +251,11 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
 
   return (
     <section className="cl26-card" data-cl26="card" ref={cardRef} data-kind={drawn[0]?.kind ?? "all"}>
-      {/* QC layout v1.1 — THE CAP: the card's top as one sticky block (ref `.cap`/`.capin`/`.captop`). It paints the page's
-          ground 14px past the card on each side; on it sit the card's white rounded top with its ring (`.clq-capin`) and
-          the frame's rounded top with its line (`.clq-captop`), holding the index, applied and heading rows. Pinned, it
-          sits directly under the bar's strip, so the card looks as it does at rest: it begins at the headings, and the
-          rows scrolling behind never show through the corners. The rows' frame below continues its sides. */}
-      <div className="cl26-pin clq-cap" data-cl26="pin" data-clq="cap" ref={pinRef}>
-        <div className="clq-capin"><div className="clq-captop">
+      {/* Contact list rows v1.2 — THE PIN IS THE HEADING ROW ALONE, inside the frame (D2). Its sticky top is the filter
+          panel's own (read off the panel: `--clr-th-top`), so pinned it sits level with the panel, its rounded top kept and
+          the page's ground painted above it (contactListRows.css). The index and applied rows sit above it at the frame's
+          top and scroll away; the margin labels still stick under it. The cap (v1.1's `.clq-cap`) is retired. */}
+      <div className="cl26-frame" data-cl26="frame">
           {p.group !== "none" && drawn.length > 0 ? <Index26 secs={secs} current={current ?? drawn[0]?.key ?? null} onJump={jump} /> : null}
           {/* List filters v1 — the applied row (shell/AppliedRow): a set, the filters, the search in quotes; Clear all */}
           {applied.length > 0 || p.setChip || findText ? (
@@ -237,7 +268,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
           {/* Contact list rows v1 — Agent · Fit · Genres sought · Response policy · Query status, on the rows' own template
               (contactListRows.css). Below a card of 980 the two long headings shorten (both words are in the DOM; the
               container query shows one). */}
-          <div className="cl26-th" role="row" data-cl26="heads">
+          <div className="cl26-th cl26-pin" role="row" data-cl26="heads" data-stuck={stuck ? "" : undefined} ref={pinRef}>
             <span className="cl26-thm" aria-hidden="true" />
             <span role="columnheader" data-clr-h="agent" aria-sort={sortOf("surname")}>
               <button type="button" className={p.sortKey === "surname" ? "on" : undefined} data-cl26="head" data-key="surname" onClick={() => sortBy("surname")}>
@@ -268,9 +299,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             </span>
             <span aria-hidden="true" />
           </div>
-        </div></div>
-      </div>
-      <div className="cl26-frame" data-cl26="frame">
+
 
         {state === "loading" ? (
           /* principles v1 — skeleton rows (a disc, two lines, two cells), shimmering; no spinner */
