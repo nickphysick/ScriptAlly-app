@@ -1279,7 +1279,8 @@
     "design-refs/agent-card-v2-2/agent-card-v2-2.html": "b6edfa7d503004f52c64ecb0966981d38f1597922988d58d979486becdabbeeb",
     "design-refs/phone-birds-eye-world-v1/phone-birds-eye-world-v1.html": "374e0d2d234180c7d8c14a0716d5ef9c80906fc84f9ba527fa44ae28d43acb1c",
     "design-refs/phone-birds-eye-world-v2/phone-birds-eye-world-v2.html": "c782f21abb181c3555f079aff98d37047dffe8e3ef01a914cb0b7f4cb0e37ea6",
-    "design-refs/contact-list-rows-v1/contact-list-rows-v1.html": "2f84f6ccb6ddc8c86451b5c259cba8fbdfd92ec7c5b1ac912ee5f6d2ec7b4a57"
+    "design-refs/contact-list-rows-v1/contact-list-rows-v1.html": "2f84f6ccb6ddc8c86451b5c259cba8fbdfd92ec7c5b1ac912ee5f6d2ec7b4a57",
+    "design-refs/contact-list-rows-v1-2/contact-list-rows-v1-2.html": "57c09ee65de2539af059efd6e814e6ea8f75c0581534ff9fc2ac1a7e478f3666"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
