@@ -2,15 +2,15 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phone Birds-eye world v2, phase 2 — the frame (drawWorld), drawn in node from the engine. The rendered checks are
- * phase 4's measurement (tests/e2e/phoneBirdsWorld.measure.ts).
+ * Phone Birds-eye world v2 and v3, phase 2 — the frame (drawWorld), drawn in node from the engine. The rendered checks
+ * are phase 4's measurement (tests/e2e/phoneBirdsWorld.measure.ts).
  */
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../../../types";
 import type { EyeRow } from "../../../lib/qcBirdsEye";
 import type { QcRow } from "../../../lib/qcSummary";
-import { DAY, RH, bwRow, fadedBand, makeWorld, rowSegs, sampleRows, zoomForRows, type BwFilter, type BwRow, type BwView } from "../../../lib/birdsWorld";
-import { drawMini, drawWorld, esc, segBg } from "./drawWorld";
+import { DAY, bwRow, fadedBand, makeWorld, rowSegs, sampleRows, zoomForRows, type BwFilter, type BwRow, type BwView } from "../../../lib/birdsWorld";
+import { drawWorld, esc, segBg } from "./drawWorld";
 
 const NOW = new Date(2026, 10, 25, 12).getTime();
 const T0 = new Date(2026, 10, 25).getTime();
@@ -34,22 +34,22 @@ const ROWS: BwRow[] = [
   ...Array.from({ length: 30 }, (_, i) => bwRow(eye(`f${i}`, [[Q.QUERIED, -10 - i * 4]], -10 - i * 4 + 42), NOW)),
 ];
 const O = (o: Partial<Parameters<typeof drawWorld>[2]> = {}) => ({ nowMs: NOW, quietDays: 42, rt: null, rows: ROWS, ...o });
-const world = (f: BwFilter = "all", rows = ROWS) => makeWorld({ rows, filter: f, vpW: 390, vpH: 784, bot: 88 });
+const world = (f: BwFilter = "all", rows = ROWS, folded?: Set<string>) => makeWorld({ rows, filter: f, vpW: 390, vpH: 784, bot: 88, folded });
 /** zoomed to `rp` px rows, the line at 74% across, with row `id` at y 300 */
-function at(rp: number, id = "three", f: BwFilter = "all") {
+function at(rp: number, id = "three", f: BwFilter = "all", o: Partial<Parameters<typeof drawWorld>[2]> = {}) {
   const w = world(f), z = zoomForRows(w, rp), y = w.G.flatMap((g) => g.rows).find((p) => p.r.id === id)!.y;
   const S: BwView = w.clamp({ z, ox: 390 * 0.74 - w.LINE * w.SX(z), oy: 300 - w.yOff(y, z) });
-  return { w, S, f: drawWorld(w, S, O()) };
+  return { w, S, f: drawWorld(w, S, O(o)) };
 }
 const tags = (html: string, bw: string) => [...html.matchAll(new RegExp(`<[^>]*data-bw="${bw}"[^>]*>`, "g"))].map((m) => m[0]);
 const num = (tag: string, prop: string) => Number(new RegExp(`${prop}:(-?[\\d.]+)px`).exec(tag)?.[1] ?? NaN);
 
-describe("Phone Birds-eye world v2 — the frame", () => {
-  it("fitted is bars only: no names, figures, gridlines or ticks; the pill reads Today", () => {
+describe("Phone Birds-eye world — the frame", () => {
+  it("fitted is bars only: no names, figures, gridlines, ticks or edge fades; the pill reads Today", () => {
     const w = world(), f = drawWorld(w, w.fitView(), O());
     expect(f.zoomed).toBe(false);
     expect(tags(f.html, "bar").length).toBeGreaterThan(0);
-    for (const k of ["name", "fig", "grid", "tick"]) expect(tags(f.html, k)).toEqual([]);
+    for (const k of ["name", "fig", "grid", "tick", "fade", "ndset"]) expect(tags(f.html, k)).toEqual([]);
     expect(f.html).toMatch(/data-bw="pill"[^>]*>Today</);
     expect(f.html).toMatch(/data-bw="ruler" data-tier="months"/);
   });
@@ -62,84 +62,91 @@ describe("Phone Birds-eye world v2 — the frame", () => {
     expect(two).toMatch(/<small>Hale &amp; Finch<\/small>/);
     expect(two).not.toContain("Eleanor <Voss>");
   });
-  it("earlier stages are faded; the current stage runs straight on into its tail with no gap", () => {
+  it("earlier stages are faded; the current stage runs straight on into its tail with no gap; a tick on the reply date", () => {
     const { f } = at(48);
     const bars = tags(f.html, "bar").filter((t) => t.includes('data-row="three"'));
-    const early = bars.find((t) => t.includes('data-cur="0"'))!;
-    expect(early).toContain(`background:${fadedBand(Q.QUERIED)}`);
+    expect(bars.find((t) => t.includes('data-cur="0"'))!).toContain(`background:${fadedBand(Q.QUERIED)}`);
     const cur = bars.find((t) => t.includes('data-k="stage"') && t.includes('data-cur="1"'))!, tail = bars.find((t) => t.includes('data-k="ahead"'))!;
     expect(Math.abs(num(cur, "left") + num(cur, "width") - num(tail, "left"))).toBeLessThan(0.02);
-    expect(cur).toContain('data-cont="1"');
     expect(segBg(rowSegs(ROWS[0], 42)[3])).not.toContain("inset 0 0 0 1px");
-    /* not yet due: a navy tick on the reply date, "Reply by …" at the bar's end */
     expect(tags(f.html, "tick").length).toBeGreaterThan(0);
   });
-  it("past its date: hatched from an \"!\" marker at the reply date; gone quiet fades out to today", () => {
+  it("past its date: hatched from an \"!\" at the reply date; gone quiet fades out; a plain dot on thin rows", () => {
     const { f } = at(48, "quiet");
     const q = tags(f.html, "bar").filter((t) => t.includes('data-row="quiet"'));
     expect(q.map((t) => /data-k="(\w+)"/.exec(t)![1])).toEqual(["stage", "past", "quiet"]);
     expect(q[1]).toContain("repeating-linear-gradient(135deg");
     expect(q[2]).toContain("linear-gradient(90deg");
-    /* the marker is drawn straight after its hatching */
     const mark = (/<i class="bw-ovd[^"]*" data-bw="mark"[^>]*>/.exec(f.html.slice(f.html.indexOf(q[1]) + q[1].length)) ?? [""])[0];
-    expect(mark).toBeTruthy();
     expect(Math.abs(num(mark, "left") - num(q[1], "left"))).toBeLessThan(0.02);
-    expect(f.html).toMatch(/data-bw="mark"[^>]*>!<\/i>/);
-    /* fitted, a plain dot with no glyph */
     const w = world();
     expect(drawWorld(w, w.fitView(), O()).html).toMatch(/class="bw-ovd dot" data-bw="mark"[^>]*><\/i>/);
   });
-  it("figures only where they belong: past its date and the closed outcome — never time still to run", () => {
-    const { f } = at(48, "past");
-    const figs = tags(f.html, "fig").map((t) => t);
-    expect(f.html).toMatch(/data-bw="fig"[^>]*><b>\d+<\/b> (days|wks) past<\/span>/);
-    expect(f.html).not.toMatch(/to go/);
-    const c = at(48, "closed").f.html;
-    expect(c).toMatch(/data-bw="fig"[^>]*>Passed<\/span>/);
-    expect(figs.length).toBeGreaterThan(0);
+  it("v3 calmer: no figure pills at any zoom; edge fades when zoomed in; gridlines only at rows of 44px or more", () => {
+    for (const rp of [27, 40, 48]) for (const id of ["past", "closed", "three"]) expect(tags(at(rp, id).f.html, "fig")).toEqual([]);
+    const months = at(40).f, weeks = at(48).f;
+    expect(tags(months.html, "fade").length).toBe(2);
+    expect(tags(months.html, "grid")).toEqual([]);
+    expect(tags(weeks.html, "grid").length).toBeGreaterThan(0);
+    expect(drawWorld(world(), world().fitView(), O({ rt: -40 })).html).not.toContain('data-bw="fade"');
   });
-  it("the name never runs under a figure (its box ends before the figure's)", () => {
-    const { f } = at(48, "past");
-    let pairs = 0;
-    for (const g of tags(f.html, "fig")) {
-      /* the same row's name: the one whose top is within the bar's height of the figure's */
-      const n = tags(f.html, "name").find((t) => /left:/.test(t) && Math.abs(num(t, "top") - num(g, "top")) < 20);
-      if (!n) continue;
-      pairs++;
-      /* the figure's own text gives its width (number 9px a character, unit 6.4, padding 22: the ref's estimate) */
-      const inner = f.html.slice(f.html.indexOf(g) + g.length, f.html.indexOf("</span>", f.html.indexOf(g) + g.length));
-      const nm = /<b>(\d+)<\/b>/.exec(inner)?.[1] ?? "", unit = inner.replace(/<b>\d+<\/b>\s*/, "");
-      const figLeft = 390 - num(g, "right") - (nm.length * 9 + unit.length * 6.4 + 22);
-      expect(num(n, "left") + num(n, "max-width")).toBeLessThanOrEqual(figLeft - 8 + 0.01);
+  it("v3 headings: chevron, bold title and count, each a fold target; folded, the count stays and the rows go", () => {
+    const w = world(), html = drawWorld(w, w.fitView(), O()).html;
+    expect(html).toMatch(/<span class="bw-gh0 u[^"]*" data-bw="group" data-t="Needs chasing" data-n="\d+" data-folded="0"[^>]*><span class="ghu tapf" data-a="fold" data-g="Needs chasing" data-bw="fold" role="button" aria-expanded="true"><svg class="chev"/);
+    const f = world("all", ROWS, new Set(["Needs chasing"])), fh = drawWorld(f, f.fitView(), O()).html;
+    expect(fh).toMatch(/data-t="Needs chasing" data-n="(\d+)" data-folded="1"[\s\S]*?<svg class="chev shut"/);
+    expect(fh).not.toContain('data-id="past"');
+    expect(Number(/data-t="Needs chasing" data-n="(\d+)"/.exec(fh)![1])).toBe(Number(/data-t="Needs chasing" data-n="(\d+)"/.exec(html)![1]));
+  });
+  it("v3 headings never touch: with every group folded, each heading sits its height + 12px below the one above", () => {
+    const all = new Set(["Needs chasing", "Nearly there", "Plenty of time", "With you", "No reply date yet", "Closed"]);
+    for (const rows of [ROWS, sampleRows()]) {
+      const w = world("all", rows, all), html = drawWorld(w, w.fitView(), O({ rows })).html;
+      const tops = tags(html, "group").map((t) => ({ top: num(t, "top"), small: /bw-gh0 u sm/.test(t) }));
+      expect(tops.length).toBeGreaterThan(3);
+      for (let i = 1; i < tops.length; i++) expect(tops[i].top - tops[i - 1].top).toBeGreaterThanOrEqual((tops[i - 1].small ? 22 : 28) + 12 - 0.01);
     }
-    expect(pairs).toBeGreaterThan(0);
   });
-  it("the ruler: every day once a day is 24px wide, the month in a pill at the left; the replay's pill shows its date", () => {
+  it("v3 no reply date yet: its own group; the bar to today, then the dashed fade; zoomed in, the name and the chip", () => {
+    const w = world(), html = drawWorld(w, w.fitView(), O()).html;
+    expect(html).toMatch(/data-t="No reply date yet" data-n="1"/);
+    expect(html).toMatch(/data-bw="bar" data-k="nodate"[^>]*data-row="nodate"/);
+    expect(html).toMatch(/data-bw="ndt" data-row="nodate"/);
+    expect(world("chase").G.some((g) => g.t === "No reply date yet")).toBe(false);
+    const z = at(48, "nodate").f.html;
+    expect(z).toMatch(/data-bw="ndset" data-a="ndset" data-id="nodate"[^>]*>\+ Add reply date</);
+    const chip = tags(z, "ndset")[0];
+    expect(num(chip, "left")).toBeLessThanOrEqual(390 - 150 + 0.01);
+  });
+  it("v3 the scrubber: its line, its day on the ruler, and what each named row was doing then", () => {
+    const { w, S } = at(48, "three");
+    const x = S.ox + (-58 - w.ext.D0) * w.PPD * w.SX(S.z);
+    const f = drawWorld(w, S, O({ scrub: x }));
+    expect(f.scrubDay).toBe(-58);
+    expect(f.html).toContain('data-bw="scrub"');
+    expect(f.html).toMatch(/data-bw="scrub-pill"[^>]*><b>28 Sep<\/b><\/div>/);
+    expect(f.html).toMatch(/data-bw="scrub-label"[^>]*>Partial asked<\/span>/);
+    const fit = drawWorld(w, w.fitView(), O({ scrub: 200 }));
+    expect(fit.html).toMatch(/data-bw="scrub-pill"[^>]*><b>[^<]+<\/b> · \d+ out<\/div>/);
+  });
+  it("v3 the glow and the change's day", () => {
+    const f = at(48, "three", "all", { glow: { id: "three", d: -30 } }).f.html;
+    expect(f).toContain('data-bw="glow"');
+    expect(f).toContain('data-bw="change"');
+  });
+  it("the ruler at the closest level (v3: Weeks, 42 days across — a date each Monday, 64px apart); the replay's pill shows its date", () => {
     const w = world(), z = w.maxZ, S = w.clamp({ z, ox: 390 * 0.6 - w.LINE * w.SX(z), oy: 200 });
     const f = drawWorld(w, S, O());
-    expect(f.html).toMatch(/data-tier="days"/);
-    expect(f.html).toMatch(/data-bw="mon"[^>]*>(Nov|Dec|Oct)</);
-    expect(tags(f.html, "grid").length).toBeGreaterThan(5);
-    const days = tags(f.html, "rm").filter((t) => t.includes('data-day="1"')).map((t) => num(t, "left")).sort((a, b) => a - b);
-    for (let i = 1; i < days.length; i++) expect(days[i] - days[i - 1]).toBeGreaterThanOrEqual(22);
+    expect(f.html).toMatch(/data-tier="1w"/);
+    const marks = tags(f.html, "rm").map((t) => num(t, "left")).sort((a, b) => a - b);
+    for (let i = 1; i < marks.length; i++) expect(marks[i] - marks[i - 1]).toBeGreaterThanOrEqual(64);
     const r = drawWorld(w, w.fitView(), O({ rt: -40 }));
     expect(r.label).toBe("16 Oct");
     expect(r.html).toMatch(/data-bw="pill"[^>]*>16 Oct</);
-    expect(tags(r.html, "fig")).toEqual([]);
   });
-  it("no-date queries are footed, not drawn; Closed is drawn last under All", () => {
-    const f = at(48, "three").f.html;
-    expect(f).toContain('data-id="three"');
-    expect(drawWorld(world(), world().fitView(), O()).html).toMatch(/data-bw="nodate"[^>]*>1 query has no reply date<b>Add dates<\/b>/);
-    expect(world().G.map((g) => g.t).pop()).toBe("Closed");
-    expect(drawWorld(world("chase"), world("chase").fitView(), O()).html).not.toContain('data-bw="nodate"');
-  });
-  it("the mini map and the sample campaign draw; esc escapes", () => {
-    const { w, S } = at(48);
-    expect(drawMini(w, S, 42)).toMatch(/<b style=/);
+  it("the sample campaign draws; esc escapes", () => {
     const s = sampleRows(), sw = makeWorld({ rows: s, filter: "all", vpW: 390, vpH: 784, bot: 88 });
     expect(drawWorld(sw, sw.fitView(), { nowMs: NOW, quietDays: 42, rt: null, rows: s }).html).toContain('data-bw="bar"');
     expect(esc(`<a href="x">'&'</a>`)).toBe("&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;");
-    expect(RH).toBe(30);
   });
 });

@@ -2,7 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phone Birds-eye world v2 (design-refs/phone-birds-eye-world-v2/phone-birds-eye-world-v2.html) — THE ENGINE, pure.
+ * Phone Birds-eye world v3 (design-refs/phone-birds-eye-world-v3/phone-birds-eye-world-v3.html; v2's ref for what v3
+ * leaves alone) — THE ENGINE, pure.
+ *   - v3: folding groups and the "No reply date yet" group in the chart (v2's footer retired); the snap levels All /
+ *     Months / Weeks (`levels`, `nearestLv`; the ceiling is Weeks); `FZ` retired (a pill stays fitted, z = 1); the hawk's
+ *     news (`changes` against this device's "last opened"), its one-liners (`tips`), the search match, the no-date
+ *     default (the agent's stated time, else 6 weeks), the long-press menu's actions, the scrubber's words, the recap's
+ *     figures and the timeline sheet's steps. v2's 30px gap floor and footer reserve are retired: v3's heading spacing
+ *     (`PUSH`, drawWorld) keeps headings apart, and the footer is gone.
  * One canvas you zoom and pan: every open query on real dates, today as the line. The view (components/phone/birds/)
  * draws from this; the unit suite calls it.
  *   - THE DATA IS THE DESKTOP'S (lib/qc150 `beLine`): each row's dated stages and its current one, in whole days from
@@ -33,9 +40,6 @@ const startOfDay = (ms: number): number => { const d = new Date(ms); d.setHours(
 /* ── the ref's constants ── */
 export const WX = 600, RH = 30, GAP = 40, XP = 0.25;
 export const RULE = 28, TOPFIT = 140, TOPFOLD = 96, RPMAX = 48, GPMAX = 44;
-/** ⚠️ v1's floor under a group's gap, kept: a small heading (22px) and its 6px, so headings never overlap on a long
- *  campaign. The ref's fit took the harness's two- and one-row groups' gaps to 8px and their headings ran together. */
-export const GPMIN = 30;
 /** the lowest the zoom ceiling goes (ref `maxZ`) */
 export const MAXZ_MIN = 6.5;
 
@@ -101,10 +105,11 @@ export const kk = (r: BwRow): number => (r.due == null ? -start(r) / 60 : -start
 export const isYou = (r: BwRow): boolean => !r.closed && r.you;
 export const isChase = (r: BwRow): boolean => !r.closed && !r.you && r.due != null && r.due < 0;
 export const isWait = (r: BwRow): boolean => !r.closed && !r.you && !(r.due != null && r.due < 0);
-/** drawn on the world: open with a reply date, or an offer (its date sits on the line) */
-export const isDrawn = (r: BwRow): boolean => !r.closed && (r.due != null || isOffer(r.status)) && r.ev.length > 0;
-/** open, with no reply date, so not drawn: the footer's "N queries have no reply date" */
-export const isNoDate = (r: BwRow): boolean => !r.closed && !isDrawn(r);
+/** on its real dates: open with a reply date, an offer (its date sits on the line), or with you (a reply date is not
+ *  the writer's to wait on there: with no send-by date its stage runs to today, in With you, where its pill counts it) */
+export const isDrawn = (r: BwRow): boolean => !r.closed && (r.due != null || isOffer(r.status) || r.you) && r.ev.length > 0;
+/** waiting with no reply date: its own group, "No reply date yet" (v3), a bar to today fading out after it */
+export const isNoDate = (r: BwRow): boolean => !r.closed && !isDrawn(r) && r.ev.length > 0;
 export const PILLS: readonly BwFilter[] = ["all", "you", "chase", "wait"];
 export const PILL_LABEL: Record<BwFilter, string> = { all: "All", you: "With you", chase: "Needs chasing", wait: "Waiting" };
 export interface BwCounts { all: number; you: number; chase: number; wait: number }
@@ -129,30 +134,31 @@ export function chipForCourt(court: string | null | undefined): BwFilter {
 }
 
 /* ── the groups ── */
-export const BW_GROUPS = ["Needs chasing", "Nearly there", "Plenty of time", "With you", "Closed"] as const;
+export const BW_GROUPS = ["Needs chasing", "Nearly there", "Plenty of time", "With you", "No reply date yet", "Closed"] as const;
 export type BwGroupName = (typeof BW_GROUPS)[number];
 const byKk = (a: BwRow, b: BwRow) => kk(b) - kk(a) || a.name.localeCompare(b.name);
-/** the groups under a pill, in order, each most elapsed first (Closed: the latest closed first; under All only) */
+/** the groups under a pill, in order, each most elapsed first (No reply date yet: under All and Waiting; Closed: the
+ *  latest closed first, under All only) */
 export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all"): { t: BwGroupName; rows: BwRow[] }[] {
   const drawn = rows.filter((r) => isDrawn(r) && inPill(r, f));
   const them = drawn.filter((r) => !r.you).sort(byKk), you = drawn.filter((r) => r.you).sort(byKk);
   const ch = them.filter(isChase), wt = them.filter((r) => !isChase(r));
   const closed = f === "all" ? rows.filter((r) => r.closed && r.ev.length).sort((a, b) => start(b) - start(a) || a.name.localeCompare(b.name)) : [];
-  const defs: [BwGroupName, BwRow[]][] = [["Needs chasing", ch], ["Nearly there", wt.filter((r) => kk(r) >= 0.75)], ["Plenty of time", wt.filter((r) => kk(r) < 0.75)], ["With you", you], ["Closed", closed]];
+  const nd = f === "all" || f === "wait" ? rows.filter((r) => isNoDate(r) && inPill(r, f)).sort(byKk) : [];
+  const defs: [BwGroupName, BwRow[]][] = [["Needs chasing", ch], ["Nearly there", wt.filter((r) => kk(r) >= 0.75)], ["Plenty of time", wt.filter((r) => kk(r) < 0.75)], ["With you", you], ["No reply date yet", nd], ["Closed", closed]];
   return defs.filter(([, r]) => r.length).map(([t, r]) => ({ t, rows: r }));
 }
-/** the footer's rows: open with no reply date, under All and Waiting only */
-export const noDateHere = (rows: readonly BwRow[], f: BwFilter): BwRow[] => (f === "all" || f === "wait" ? rows.filter((r) => isNoDate(r) && inPill(r, f)) : []);
-export const FOOT_ND = 52;
-/** the "All" layout's height in world units (ref `allH`): every pill is drawn at its scale */
+/** the open queries with no reply date, in the order the no-date sheet walks them */
+export const noDateRows = (rows: readonly BwRow[]): BwRow[] => rows.filter(isNoDate).sort(byKk);
+/** the "All" layout's height in world units (ref `allH`): every pill is drawn at its scale, folded or not */
 export function allH(rows: readonly BwRow[]): number {
-  return bwGroups(rows, "all").reduce((a, x) => a + GAP + x.rows.length * RH, 0) + (noDateHere(rows, "all").length ? FOOT_ND : 0) + 8;
+  return bwGroups(rows, "all").reduce((a, x) => a + GAP + x.rows.length * RH, 0) + 8;
 }
 
 /* ── the span (ref `setAxis`): a fortnight before the campaign's first date to three weeks after its last ── */
 export interface BwExt { D0: number; D1: number }
 export function setAxis(rows: readonly BwRow[]): BwExt {
-  const qs = rows.filter((r) => !r.closed);
+  const qs = rows.filter((r) => !r.closed && r.ev.length);
   const first = Math.min(0, ...qs.flatMap((r) => r.ev.map((e) => e.d)));
   const last = Math.max(0, ...qs.map((r) => r.due ?? 0));
   return { D0: Math.max(-365, Math.min(-60, first - 14)), D1: Math.min(365, Math.max(42, last + 21)) };
@@ -195,7 +201,8 @@ export function clipR(segs: readonly BwSeg[], rt: number | null): BwSeg[] {
   return out;
 }
 /** the replay's start: three days before the earliest stage of anything drawn */
-export const replayStart = (rows: readonly BwRow[]): number => Math.min(0, ...rows.filter(isDrawn).map((r) => r.ev[0].d)) - 3;
+/** never before the axis's own start (a query older than a year would pin the line to the left edge) */
+export const replayStart = (rows: readonly BwRow[], d0 = -Infinity): number => Math.max(d0, Math.min(0, ...rows.filter(isDrawn).map((r) => r.ev[0].d)) - 3);
 /** the replay's clock: ease in-out over its duration (ref `replay`) */
 export const replayAt = (t0: number, k: number): number => t0 + (0 - t0) * (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
 export const REPLAY_MS = 6000;
@@ -276,14 +283,21 @@ export const spaced = (m: readonly [number, string, boolean][]): [number, string
 
 /* ── the world: layout and the mapping between world and screen ── */
 export interface BwPlaced { r: BwRow; y: number }
-export interface BwG { t: BwGroupName; y: number; rows: BwPlaced[] }
+/** a group as laid out: `n` its count (folded or not), `h` the world height its rows take (a folded group keeps 1.3 rows) */
+export interface BwG { t: BwGroupName; y: number; h: number; n: number; folded: boolean; rows: BwPlaced[] }
+export interface BwLevelStop { t: "All" | "Months" | "Weeks"; z: number }
 export interface BwView { z: number; ox: number; oy: number }
 export interface World {
   G: BwG[]; H: number; FOOT: number; HALL: number; ext: BwExt; PPD: number; LINE: number;
   vpW: number; vpH: number; bot: number; land: boolean; filter: BwFilter;
-  /** the pill's opening zoom (1 under All; closer in for a short pill) */
+  /** v2's opening zoom for a short pill, retired in v3: always 1 (a pill stays fitted) */
   FZ: number;
   maxZ: number;
+  /** the snap levels (ref `levels()`): All, then Months and Weeks where each is 15% closer than the one below */
+  levels: BwLevelStop[];
+  nearestLv: (z: number) => number;
+  /** the zoom that shows `days` across the screen (ref `zForDays`) */
+  zForDays: (days: number) => number;
   wxd: (d: number) => number;
   topFor: (z: number) => number;
   fitS: () => number; fitSY: () => number; zT: () => number;
@@ -300,33 +314,29 @@ export interface WorldOpts {
   bot: number;
   /** landscape: the header always folded */
   land?: boolean;
+  /** the groups folded on this device */
+  folded?: ReadonlySet<string>;
 }
 export function makeWorld(o: WorldOpts): World {
   const { vpW, vpH, bot, filter } = o, land = !!o.land;
   let y = 0;
-  const G: BwG[] = bwGroups(o.rows, filter).map(({ t, rows }) => { const g = { t, y, rows: rows.map((r, i) => ({ r, y: y + GAP + i * RH })) }; y += GAP + rows.length * RH; return g; });
-  const FOOT = (noDateHere(o.rows, filter).length ? FOOT_ND : 0) + 8;
+  const G: BwG[] = bwGroups(o.rows, filter).map(({ t, rows: rows0 }) => {
+    const folded = !!o.folded?.has(t), rows = folded ? [] : rows0, h = folded ? RH * 1.3 : rows.length * RH;
+    const g: BwG = { t, y, h, n: rows0.length, folded, rows: rows.map((r, i) => ({ r, y: y + GAP + i * RH })) };
+    y += GAP + h; return g;
+  });
+  const FOOT = 8;
   const H = y + FOOT, HALL = allH(o.rows);
   const ext = setAxis(o.rows);
   const PPD = WX / (ext.D1 - ext.D0);
   const wxd = (d: number) => (Math.max(ext.D0, Math.min(ext.D1, d)) - ext.D0) * PPD;
-  /* time always fills the width; rows share the height of the "All" layout, so a pill never changes the scale.
-     ⚠️ Two departures, both measured on the harness: the footer keeps its real 52px out of the rows' share (the ref
-     scaled it with the rows, so on a long campaign it sat under the dock — the ref's own shot 12 shows it), and the
-     gaps keep their 30px floor, the rows sharing what is left. */
+  /* time always fills the width; rows share the height of the "All" layout, so a pill never changes the scale */
   const fitS = () => (vpW - 32) / WX;
-  const allG = bwGroups(o.rows, "all"), allRows = allG.reduce((a, g) => a + g.rows.length, 0), allFoot = HALL - allG.reduce((a, g) => a + GAP + g.rows.length * RH, 0) - 8;
-  const avail = vpH - TOPFIT - RULE - bot - allFoot;
-  const fitSY = () => {
-    const free = avail / (HALL - allFoot + 8);
-    const s = GAP * free >= GPMIN || !allRows ? free : Math.max(0.01, (avail - allG.length * GPMIN - 8) / (allRows * RH));
-    return Math.min(fitS() * 3, s);
-  };
-  const maxZ = Math.max(MAXZ_MIN, (RPMAX / (RH * fitSY())) * 2.6);
+  const fitSY = () => Math.min(fitS() * 3, (vpH - TOPFIT - RULE - bot) / (HALL + 8));
   const zT = () => Math.max(1.05, 24 / (RH * fitSY()));
   const SX = (z: number) => fitS() * Math.pow(z, XP) * (1 + (Math.max(0, z - zT()) / zT()) * 3);
   const SY = (z: number) => fitSY() * z;
-  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(Math.max(GAP * SY(z), GPMIN), GPMAX);
+  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(GAP * SY(z), GPMAX);
   const yOff = (wy: number, z: number): number => {
     const rp = rowPx(z) / RH, gp = gapPx(z) / GAP; let off = 0;
     for (const g of G) {
@@ -348,14 +358,19 @@ export function makeWorld(o: WorldOpts): World {
     const last = G[G.length - 1];
     return last ? last.y + GAP + last.rows.length * RH + (o2 - off) : o2;
   };
-  /* "See it all" (ref `fitView`/`FZ`): under All, everything at the fitted size; a short pill opens as close in as it can
-     while every row still fits, up to 48px rows */
-  let FZ = 1;
-  if (filter !== "all" && G.length) {
-    const room = vpH - TOPFIT - RULE - bot - 8;
-    for (let t = 1; t <= maxZ; t += 0.02) { if (yOff(H, t) > room) break; FZ = t; if (rowPx(t) >= RPMAX) break; }
-  }
-  const topFor = (z: number) => (land || z > FZ + 0.05 ? TOPFOLD : TOPFIT);
+  /* the snap levels (ref `levels()`, `zForDays`): All is fitted; Months shows 120 days across; Weeks is the closer of
+     42 days across and the zoom where rows reach 48px (× 1.02); each only where it is 15% closer than the one below */
+  const zForDays = (days: number): number => { let lo = 1, hi = 200; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (days * PPD * SX(m) > vpW - 32) hi = m; else lo = m; } return lo; };
+  const levels: BwLevelStop[] = [{ t: "All", z: 1 }];
+  { const m = zForDays(120), wk = Math.max(zForDays(42), (RPMAX / (RH * fitSY())) * 1.02);
+    if (m > 1.15) levels.push({ t: "Months", z: m });
+    if (wk > levels[levels.length - 1].z * 1.15) levels.push({ t: "Weeks", z: wk }); }
+  /* pinch stops at the closest level (ref `maxZ` with snapping on) */
+  const maxZ = Math.max(1, levels[levels.length - 1].z * 1.001);
+  const nearestLv = (z: number): number => { let b = 0; levels.forEach((l, i) => { if (Math.abs(Math.log(l.z / z)) < Math.abs(Math.log(levels[b].z / z))) b = i; }); return b; };
+  /* v3: a pill stays fitted (v2's closer opening, FZ, is retired) */
+  const FZ = 1;
+  const topFor = (z: number) => (land || z > 1.05 ? TOPFOLD : TOPFIT);
   const top0 = land ? TOPFOLD : TOPFIT;
   const clamp = (v: BwView): BwView => {
     const z = Math.min(maxZ, Math.max(1, v.z)); const ww = WX * SX(z), hh = yOff(H, z), pad = 16;
@@ -364,8 +379,8 @@ export function makeWorld(o: WorldOpts): World {
     return { z, ox, oy };
   };
   const LINE = wxd(0);
-  const fitView = (): BwView => (FZ <= 1.0001 ? { z: 1, ox: (vpW - WX * SX(1)) / 2, oy: top0 + RULE + 8 } : clamp({ z: FZ, ox: vpW * 0.74 - LINE * SX(FZ), oy: top0 + RULE + 8 }));
-  return { G, H, FOOT, HALL, ext, PPD, LINE, vpW, vpH, bot, land, filter, FZ, maxZ, wxd, topFor, fitS, fitSY, zT, SX, SY, rowPx, gapPx, yOff, yWorld, clamp, fitView };
+  const fitView = (): BwView => ({ z: 1, ox: (vpW - WX * SX(1)) / 2, oy: top0 + RULE + 8 });
+  return { G, H, FOOT, HALL, ext, PPD, LINE, vpW, vpH, bot, land, filter, FZ, maxZ, levels, nearestLv, zForDays, wxd, topFor, fitS, fitSY, zT, SX, SY, rowPx, gapPx, yOff, yWorld, clamp, fitView };
 }
 /** the zoom that gives rows `rp` px */
 export const zoomForRows = (w: World, rp: number): number => Math.min(w.maxZ, Math.max(1, rp / RH / w.fitSY()));
@@ -403,3 +418,108 @@ export function sampleRows(): BwRow[] {
     };
   });
 }
+
+/* ══ v3 · the hawk's news, its one-liners, search, the no-date default, the long-press menu, the scrubber, the recap and
+   the timeline sheet (ref `changes`, `tips`, `openSearch`, `openNd`, `menuHTML`, the scrubber, `recapCard`,
+   `openSheet`). Pure. ══ */
+
+/** what each stage it moved to is called in the news (ref `WHO`) */
+const WHO: Partial<Record<string, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "asked for a partial", [QueryStatus.FULL_REQUESTED]: "asked for the full",
+  [QueryStatus.OFFER]: "made an offer", [QueryStatus.REJECTED]: "passed",
+};
+export interface BwChange { id: string; d: number; t: string }
+/** what changed since `seenDay` (days from today, ≤ 0): each stage moved, and each reply date reached, oldest first.
+ *  A change ON the day last opened counts only if after it (ref `e.d > SEEN`) */
+export function changes(rows: readonly BwRow[], seenDay: number): BwChange[] {
+  const out: BwChange[] = [];
+  for (const r of rows) {
+    for (const e of r.ev) if (e.d > seenDay && e.d <= 0 && WHO[e.status]) out.push({ id: r.id, d: e.d, t: `${r.name} ${WHO[e.status]}` });
+    if (!r.closed && !r.you && r.due != null && r.due <= 0 && r.due > seenDay) out.push({ id: r.id, d: r.due, t: `${r.name} reached the reply date` });
+  }
+  return out.sort((a, b) => a.d - b.d || a.t.localeCompare(b.t));
+}
+/** "since Thursday" — the weekday within a week, the date beyond it */
+export function seenLabel(seenDay: number, nowMs: number): string {
+  const t = dateOf(seenDay, nowMs);
+  return seenDay >= -6 ? t.toLocaleDateString("en-GB", { weekday: "long" }) : dm(seenDay, nowMs);
+}
+/** a stored instant → its day from today (ref `SEEN`) */
+export const dayFromMs = (ms: number, nowMs: number): number => dayOf(ms, startOfDay(nowMs));
+
+/** the hawk's one-liners, in order, each only when it applies (ref `tips`) */
+export function tips(rows: readonly BwRow[], quietDays: number): string[] {
+  const open = rows.filter((r) => !r.closed), out: string[] = [];
+  const you = open.filter((r) => r.you).length;
+  const wk = open.filter((r) => !r.you && r.due != null && r.due >= 0 && r.due <= 7).length;
+  const quiet = open.filter((r) => !r.you && r.due != null && -r.due > quietDays).sort((a, b) => a.due! - b.due!)[0];
+  const firsts = rows.filter((r) => r.ev.length).map((r) => r.ev[0].d);
+  if (you) out.push(`${you} ${you === 1 ? "thing is" : "things are"} waiting on you. The ball’s in your court.`);
+  out.push(wk ? `${wk} ${wk === 1 ? "reply is" : "replies are"} due this week. Fingers crossed.` : "No replies due this week. A good week to send a few more.");
+  if (quiet) out.push(`${quiet.name} has gone quiet. A nudge, or time to let it go?`);
+  if (firsts.length) { const n = -Math.min(...firsts); out.push(`${n} ${n === 1 ? "day" : "days"} on the hunt. Most searches take months, not weeks. Keep going.`); }
+  return out;
+}
+
+/** search (ref `openSearch`): by name or agency, open first then closed, at most six */
+export function searchRows(rows: readonly BwRow[], q: string, n = 6): BwRow[] {
+  const v = q.trim().toLowerCase();
+  const all = [...rows.filter((r) => !r.closed), ...rows.filter((r) => r.closed)];
+  return (v ? all.filter((r) => `${r.name} ${r.agency}`.toLowerCase().includes(v)) : all).slice(0, n);
+}
+
+/** the no-date sheet's starting point: the agent's stated response time from their card, else 6 weeks */
+export const ND_DEFAULT_WEEKS = 6;
+export function noDateDefault(statedWeeks: number | null | undefined): { weeks: number; stated: boolean } {
+  return statedWeeks != null && statedWeeks > 0 ? { weeks: Math.round(statedWeeks), stated: true } : { weeks: ND_DEFAULT_WEEKS, stated: false };
+}
+
+/** the long-press menu (ref `menuHTML`): per state, each mapped to the app's journey by the view */
+export type BwAct = "replied" | "nudge" | "open" | "edit" | "sent" | "reopen";
+export const ACT_LABEL: Record<BwAct, string> = { replied: "They replied", nudge: "Send a nudge", open: "Open query", edit: "Edit dates", sent: "I’ve sent it", reopen: "Reopen" };
+export function menuActions(r: Pick<BwRow, "closed" | "you">): BwAct[] {
+  if (r.closed) return ["open", "reopen"];
+  if (r.you) return ["sent", "open", "edit"];
+  return ["replied", "nudge", "open", "edit"];
+}
+
+/** what a row was doing on `day` (the scrubber's label) */
+export function scrubLabel(r: BwRow, day: number, quietDays: number): string | null {
+  if (isNoDate(r)) return r.ev[0] && day >= r.ev[0].d && day <= 0 ? "Waiting" : null;
+  const g = rowSegs(r, quietDays).find((s) => day >= s.a && day <= s.b + 0.5);
+  if (!g) return null;
+  return g.k === "past" ? "Past its date" : g.k === "quiet" ? "Gone quiet" : g.k === "ahead" ? (r.you ? "To send" : "Waiting") : shortName(g.st);
+}
+/** how many were out on `day` (the scrubber's pill on the fitted view) */
+export const outOn = (rows: readonly BwRow[], day: number): number => rows.filter((r) => r.ev.length && r.ev[0].d <= day && !(r.closed && r.ev[r.ev.length - 1].d < day)).length;
+
+/** the recap's figures (ref `recapCard`) */
+export interface BwRecap { days: number; sent: number; replies: number; requests: number; offers: number }
+export function recapStats(rows: readonly BwRow[]): BwRecap {
+  const dated = rows.filter((r) => r.ev.length);
+  const evs = dated.flatMap((r) => r.ev.map((e) => e.status));
+  const reqs = new Set<string>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED]);
+  const reps = new Set<string>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.OFFER, QueryStatus.REJECTED]);
+  return {
+    days: dated.length ? -Math.min(...dated.map((r) => r.ev[0].d)) : 0, sent: dated.length,
+    replies: evs.filter((s) => reps.has(s)).length, requests: evs.filter((s) => reqs.has(s)).length,
+    offers: dated.filter((r) => r.ev.some((e) => e.status === QueryStatus.OFFER)).length,
+  };
+}
+
+/** the timeline sheet (ref `openSheet`): one step per stage, the reply-due step, the line and the button */
+export interface BwStep { k: "done" | "next" | "late"; t: string; d: number; status: string | null; cur: boolean }
+export function sheetOf(r: BwRow, quietDays: number, nowMs: number): { steps: BwStep[]; line: string; cta: "replied" | "sent" | null } {
+  const past = r.due != null && r.due < 0, quiet = past && -r.due! > quietDays;
+  const steps: BwStep[] = r.ev.map((e, i) => ({ k: "done", t: (STAGE_NAME[e.status as QueryStatus] ?? e.status).replace(" requested", " asked for"), d: e.d, status: e.status, cur: i === r.ev.length - 1 }));
+  if (r.due != null && !r.closed) steps.push({ k: past ? "late" : "next", t: r.you ? "Your send-by date" : "Reply due", d: r.due, status: null, cur: false });
+  const days = (n: number) => `${n} ${n === 1 ? "day" : "days"}`;
+  const line = r.closed ? `Closed ${dm(r.ev[r.ev.length - 1]?.d ?? 0, nowMs)}.`
+    : r.you ? (past ? `${days(-r.due!)} past the date you set to send it.` : r.due != null ? `Send it by ${dm(r.due, nowMs)}.` : "No send-by date set.")
+    : quiet ? "It’s gone quiet. A last nudge, or time to let it go?"
+    : past ? `${days(-r.due!)} past the reply date. A polite nudge often gets things moving.`
+    : r.due == null ? "No reply date set." : `Reply expected in ${days(r.due)}.`;
+  return { steps, line, cta: r.closed ? null : r.you ? "sent" : "replied" };
+}
+/** "x days ago" (ref `ago`) */
+export const agoOf = (d: number): string => (d === 0 ? "today" : d < 0 ? `${-d} ${d === -1 ? "day" : "days"} ago` : `in ${d} ${d === 1 ? "day" : "days"}`);

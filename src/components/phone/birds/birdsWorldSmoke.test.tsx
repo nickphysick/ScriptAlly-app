@@ -86,27 +86,35 @@ describe("Phone Birds-eye world v2 renders", () => {
     expect(cardFor(false, "all", [{ t: "Closed" }])?.k).toBe("closed");
     expect(cardFor(false, "all", [{ t: "With you" }])).toBeNull();
   });
-  it("the controls and the hawk's shadow (?hawk=0 drops it)", () => {
+  it("v3: the level control, the hawk's button, the colour key and the hawk's shadow (?hawk=0 drops it); no + / −, See it all or mini map", () => {
     const html = W();
-    for (const k of ["zin", "zout", "fit", "mini", "hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);
+    expect(html).toMatch(/data-bw="levels"[\s\S]*data-bw="level" data-t="All" aria-pressed="true"/);
+    expect(html).toContain('data-bw="hawk-btn"');
+    expect(html).toContain('aria-label="What the colours mean"');
+    for (const k of ["hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);
+    for (const k of ["zin", "zout", "fit", "mini"]) expect(html).not.toContain(`data-bw="${k}"`);
+    expect(html).toContain("Pinch to zoom · hold to scrub");
     expect(html).toContain('src="/images/hawk-shadow.png?v=1"');
     expect(W(null, "/queries/all?view=birds&hawk=0")).not.toContain('data-bw="hawk"');
     expect(shadowStyle(1, 10, 200, { z: 1, ox: 10, oy: 200 }).opacity).toBe("0.100");
   });
-  it("source: one layer per frame; replay is 6s from the first date, stops on a touch, never with reduced motion; Add dates opens the list", () => {
+  it("v3 source: the menu opens the app's journeys (Reopen falls back to the query card); per-device storage; haptics never throw", () => {
     const v = readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8");
-    expect(v).toContain("el.innerHTML = fr.html");
-    expect(v).toMatch(/if \(rp\.current\.rt != null \|\| calm\(\)\) \{ stopReplay\(\); return; \}/);
-    expect(v).toContain("const t0 = replayStart(rows);");
-    expect(v).toMatch(/const touched = useCallback\(\(\) => \{\s*stopReplay\(\);/);
-    expect(v).toContain('if (a === "nodate") { onList(); return; }');
-    expect(v).toContain("if (!el || demo) return undefined;");
-    expect(readFileSync("src/lib/birdsWorld.ts", "utf8")).toContain("export const REPLAY_MS = 6000;");
+    expect(v).toContain('case "replied": runAct("reply", id); return;');
+    expect(v).toContain('case "nudge": runAct("nudge", id); return;');
+    expect(v).toContain('case "sent": runAct("sent", id); return;');
+    expect(v).toContain('case "edit": window.dispatchEvent(new CustomEvent("pa3:edit-query", { detail: id })); return;');
+    expect(v).toContain('case "open": openV3Query(id); return;');
+    expect(v).toContain('case "reopen": openV3Query(id); return;');
+    expect(v).toContain('BW_SEEN_KEY = "bw3.lastOpened"');
+    expect(v).toContain('BW_FOLD_KEY = "bw3.folded"');
+    expect(v).toContain("writerExpectedWrite(");
+    expect(v).toContain("if (rp.current.rt != null || calm()) { stopReplay(); return; }");
+    const m = readFileSync("src/components/phone/birds/worldMotion.ts", "utf8");
+    expect(m).toContain("export const HOLD_MS = 380;");
+    expect(m).toMatch(/export function buzz\(ms = 8\): void \{ try \{/);
     const css = readFileSync("src/components/phone/birds/birdsWorld.css", "utf8");
     expect(css).toMatch(/\.bw-vp \{[^}]*touch-action: none/);
-    expect(css).toMatch(/\.bw-w\.demo \{ filter: blur\(3px\); opacity: 0\.55;/);
     expect(css).toMatch(/\.bw-hint \{[^}]*top: 46%/);
-    const z = (sel: string) => Number(new RegExp(`${sel.replace(/\./g, "\\.")} \\{[^}]*z-index: (\\d+)`).exec(css)?.[1]);
-    expect([z(".bw-gh0"), z(".bw-ruler"), z(".bw-hd"), z(".bw-hsw"), z(".bw-fline"), z(".bw .bw-flab"), z(".bw-zc")]).toEqual([4, 6, 7, 8, 9, 10, 11]);
   });
 });
