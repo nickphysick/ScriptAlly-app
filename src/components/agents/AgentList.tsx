@@ -1160,6 +1160,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
           homeCountry={getHomeCountry(currentUser)}
           nowMs={nowMs}
+          /* Contact list rows v1.2 — Fit from the row: the agent card's own setter (`edit.save({ rating })`, editKitFor below)
+             and its own toast ("Agent fit: great fit") */
+          onRate={(id, n) => { const ag = agents.find((x) => x.id === id); if (ag) void editKitFor(ag).save({ rating: n }); }}
           /* Contact list rows v1 · phase 2 — the row's next action opens its journey, as the agent card's own buttons do */
           onAct={(agentId, mode, queryId) => {
             const agent = agents.find((x) => x.id === agentId);

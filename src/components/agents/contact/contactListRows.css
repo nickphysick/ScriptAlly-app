@@ -51,7 +51,7 @@
 
 /* ── Fit: the writer's own stars, or a quiet dash ── */
 .cl26-card .cl26-row .clp2-fit { position: static; top: 0; margin: 0; font-size: 16px !important; letter-spacing: 1px; }
-.cl26-card .clr-dash { font: 400 16px/1 var(--sp-serif) !important; color: #c4bab0; cursor: help; }
+.cl26-card .clr-dash { font: 400 16px/1 var(--sp-serif) !important; color: #6b6058; cursor: help; }
 
 /* ── Genres sought: up to two pills (one below a card of 960), then "+n"; never wrapping ── */
 .cl26-card .cl26-row .cl26-want { padding-right: 0; }
@@ -60,9 +60,9 @@
 /* ── the quiet "+ Add …" prompts: italic, darkening on row hover ── */
 .cl26-card .clr-add {
   padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap;
-  font: italic 400 15px/1.3 var(--sp-serif) !important; color: #a89e94; transition: color .15s;
+  font: italic 400 16px/1.3 var(--sp-serif) !important; color: #6b6058; transition: color .15s;
 }
-.cl26-card .cl26-row:hover .clr-add, .cl26-card .cl26-row:focus-visible .clr-add { color: var(--sp-quiet); }
+.cl26-card .cl26-row:hover .clr-add, .cl26-card .cl26-row:focus-visible .clr-add { color: #5b4f47; }
 .cl26-card .clr-add:hover, .cl26-card .clr-add:focus-visible { color: #1c130f; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── Response policy: "Up to {n} weeks", and under it the policy, small and quiet ── */
@@ -151,3 +151,43 @@
 @container clr (width < 1150px) {
   .cl26-card .cl26-th > span, .cl27 .cl26-card .cl26-th > span { font-size: 16px !important; }
 }
+
+/* ══ Contact list rows v1.2 · phase 2 — genres in lines, rate Fit from the row, plain initials, row consistency ══════ */
+/* Genres sought: lines of 2 (3 at 1250+, 1 below 980), at most two, each centred; the cell padded 6 so a tag never
+   touches a neighbouring column; a tag too long for its line ends in "…" */
+.cl26-card .cl26-row .cl26-want { padding: 0 6px; box-sizing: border-box; }
+.cl26-card .clr-glines { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; min-width: 0; }
+.cl26-card .clr-gline { display: flex; justify-content: center; align-items: center; gap: 6px; flex-wrap: nowrap; max-width: 100%; min-width: 0; }
+/* the standard text tag: 28 high, Source Serif 600 14px, padding 0 12, fully rounded; the pills' own colours */
+.cl26-card .cl26-row .clr-gline .clr-tag {
+  display: inline-block; flex: 0 1 auto; min-width: 0; box-sizing: border-box; height: 28px; padding: 0 12px; border-radius: 999px;
+  font: 600 14px/28px var(--sp-serif) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cl26-card .clr-gline .clr-more { flex: none; font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: var(--sp-quiet); }
+
+/* Fit from the row: the dash, and over it five faint stars on row hover or focus */
+.cl26-card .clr-rate { position: relative; display: inline-grid; place-items: center; }
+.cl26-card .clr-rate > * { grid-area: 1 / 1; }
+.cl26-card .clr-rate .clr-dash { transition: opacity .15s; }
+.cl26-card .clr-pick { display: flex; gap: 1px; opacity: 0; transition: opacity .15s; }
+.cl26-card .clr-pick button {
+  padding: 2px 1px; border: 0; background: none; cursor: pointer; font: 400 16px/1 var(--sp-serif) !important; color: #d9cfc3;
+}
+.cl26-card .clr-pick:hover button { color: #2a3a52; }
+.cl26-card .clr-pick button:hover ~ button { color: #d9cfc3; }
+.cl26-card .clr-pick button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; border-radius: 2px; }
+.cl26-card .cl26-row:hover .clr-pick, .cl26-card .cl26-row:focus-within .clr-pick, .cl26-card .cl26-row:focus-visible .clr-pick { opacity: 1; }
+.cl26-card .cl26-row:hover .clr-rate .clr-dash, .cl26-card .cl26-row:focus-within .clr-rate .clr-dash, .cl26-card .cl26-row:focus-visible .clr-rate .clr-dash { opacity: 0; }
+@container clr (width < 1150px) { .cl26-card .clr-pick button { font-size: 14px !important; } }
+@container clr (width < 980px) { .cl26-card .clr-pick button { font-size: 12px !important; padding: 2px 0; } }
+
+/* the consistency rulings on the row: hover #f8f4ed, a 2px navy focus ring, the agency line 16px, the prompts italic 16px
+   #6b6058 darkening to #5b4f47, the unrated dash #6b6058, closed rows' text #6b6058; the paler greys leave the rows */
+.cl27 .cl26-card .cl26-row:hover, .cl27 .cl26-card .cl26-row:focus-visible { background: #f8f4ed; }
+.cl27 .cl26-card .cl26-row:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+.cl27 .cl26-card .cl26-whot .clr-ag, .cl27 .cl26-card .cl26-whot small.clr-ag {
+  font: 400 16px/1.3 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #5b4f47;
+}
+.cl26-card .cl26-row[data-k="closed"] .cl26-whot > b, .cl26-card .cl26-row[data-k="closed"] .clr-ag,
+.cl26-card .cl26-row[data-k="closed"] .clr-stage, .cl26-card .cl26-row[data-k="closed"] .clr-ag > span { color: #6b6058; }
+.cl26-card .clr-pol > small { color: #6b6058; }

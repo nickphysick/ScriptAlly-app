@@ -54,7 +54,8 @@ describe("Contact list rows v1 · Phase 1 — the columns and cells", () => {
   });
   it("Genres sought: at most two pills then +n; none on file is \"+ Add genres\", never \"No genres yet\"", () => {
     const h = sheet([fx("three", { genres: ["Crime", "Noir", "Gothic"] }), fx("none")]);
-    expect(row(h, "three")).toMatch(/data-total="3" data-shown="2"/);
+    /* RE-POINTED by v1.2: tags in lines (two a line at the default width, at most two lines, then "+n") */
+    expect(row(h, "three")).toMatch(/data-clr="glines" data-per="2" data-total="3" data-shown="3"/);
     expect(row(h, "none")).toContain('<button type="button" class="clr-add" data-clr="add" data-k="genres">+ Add genres</button>');
     expect(h).not.toContain("No genres yet");
   });
@@ -121,5 +122,35 @@ describe("Contact list rows v1.2 · Phase 1 — the pin", () => {
     const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(css).toContain("position: sticky; top: var(--clr-th-top, 12px);");
     expect(css).toContain("--clr-head-bg: #d3deea; --clr-head-ink: #1f2c40; --clr-head-edge: #b9c9da;");
+  });
+});
+
+import { GenreLines, FitRater } from "./ContactRowParts";
+describe("Contact list rows v1.2 · Phase 2 — the cells", () => {
+  const lines = (n: number, per: 1 | 2 | 3) => renderToStaticMarkup(
+    <GenreLines genres={Array.from({ length: n }, (_, i) => `G${i}`)} hit={(g) => g === "G3"} word={(g) => g} per={per} />);
+  const count = (h: string) => [...h.matchAll(/data-clr="gline">([\s\S]*?)<\/span><\/span>|data-clr="gline">/g)].length;
+  it("lines of per, at most two, the book's genre first, +n on the last line only", () => {
+    const h = lines(5, 2);
+    expect(count(h)).toBe(2);
+    expect(h).toMatch(/data-shown="4"/);
+    expect(h.indexOf("G3")).toBeLessThan(h.indexOf("G0"));
+    expect(h.match(/data-clr="more" data-n="1">\+1</g)).toHaveLength(1);
+    expect(h.lastIndexOf('data-clr="gline"')).toBeLessThan(h.indexOf('data-clr="more"'));
+    expect(lines(5, 3)).toMatch(/data-shown="5"/);
+    expect(lines(5, 3)).not.toContain('data-clr="more"');
+    expect(lines(5, 1)).toMatch(/data-shown="2"[\s\S]*data-clr="more" data-n="3"/);
+  });
+  it("no \"!\" on the initials; the disc keeps navy / dotted / stone", () => {
+    const src = read("./ContactSheet26.tsx");
+    expect(src).not.toContain("cl26-bang");
+    expect(read("./contactV26.css")).toMatch(/\.cl26-dsc--none \{ background: #fff; color: #2a3a52; border: 1\.5px dotted #2a3a52; \}/);
+  });
+  it("the rater: the dash, five radio stars, the page's setter", () => {
+    const h = renderToStaticMarkup(<FitRater name="Ann" onRate={noop} />);
+    expect(h).toContain('data-clr="unrated"');
+    expect(h.match(/data-clr="rate-star"/g)).toHaveLength(5);
+    expect(h).toMatch(/role="radiogroup" aria-label="Rate Ann’s fit"/);
+    expect(read("../AgentList.tsx")).toContain("onRate={(id, n) => { const ag = agents.find((x) => x.id === id); if (ag) void editKitFor(ag).save({ rating: n }); }}");
   });
 });

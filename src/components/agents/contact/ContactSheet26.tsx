@@ -31,7 +31,8 @@ import { appliedChoices } from "../../../lib/contactV27";
 import { AppliedRow } from "../../shell/AppliedRow";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { NQ_RING, SetGlyph } from "./ContactSheet24";
-import { GenrePills, Track } from "../../shared/agentRowParts";
+import { Track } from "../../shared/agentRowParts";
+import { FitRater, GenreLines } from "./ContactRowParts";
 import { rowActionOf } from "../../../lib/contactListRows";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { FIT_WORDS } from "../card/agentPills";
@@ -92,6 +93,8 @@ export interface ContactSheet26Props {
   nowMs?: number;
   /** Contact list rows v1 · phase 2 — the row's next action: its journey, never the row's card */
   onAct?: (agentId: string, mode: DrawerMode, queryId: string | null) => void;
+  /** Contact list rows v1.2 · phase 2 — rate an unrated agent's Fit from the row: the agent card's own setter and toast */
+  onRate?: (agentId: string, n: 1 | 2 | 3 | 4 | 5) => void;
 }
 
 /** the stage words in Your query: the app's own names; not queried and closed-to-queries are their own */
@@ -107,16 +110,16 @@ const pinTopOf = (pin: HTMLElement): number => { const v = parseFloat(getCompute
 export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const cardRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
-  /* Contact list rows v1 — below a card of 960 (its content box, as the columns' container query reads it), Genres sought
-     shows one pill then "+n". The pill count is a number the CSS cannot change, so it is read here. */
-  const [narrow, setNarrow] = useState(false);
+  /* Contact list rows v1.2 — Genres sought's tags a line, by the card's width (its content box, as the columns' container
+     query reads it): three at 1250 and wider, one below 980, else two. A count the CSS cannot change, so it is read here. */
+  const [per, setPer] = useState<1 | 2 | 3>(2);
   useLayoutEffect(() => {
     const card = cardRef.current;
     if (!card || typeof ResizeObserver === "undefined") return undefined;
     const put = () => {
       const cs = getComputedStyle(card);
       const w = card.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
-      if (w > 0) setNarrow((v) => (v === w < 960 ? v : w < 960));
+      if (w > 0) { const n: 1 | 2 | 3 = w >= 1250 ? 3 : w < 980 ? 1 : 2; setPer((v) => (v === n ? v : n)); }
     };
     put();
     const ro = new ResizeObserver(put);
@@ -344,7 +347,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
                   )}
                 </span>
                 <div className="cl26-rows">
-                  {sec.ids.map((id) => { const x = byId.get(id); return x ? <Row26 key={id} x={x} p={p} narrow={narrow} /> : null; })}
+                  {sec.ids.map((id) => { const x = byId.get(id); return x ? <Row26 key={id} x={x} p={p} per={per} /> : null; })}
                 </div>
               </div>
             ))}
@@ -378,13 +381,12 @@ export const SectionGlyph: React.FC<{ s: Section; size?: number }> = ({ s, size 
   return null;
 };
 
-/** the agent's disc, coloured by who the query is with: navy (with the agent), navy with the rust "!" (your move), a
- *  dotted ring (not queried), stone (closed) */
+/** the agent's disc: navy once queried, white with a fine dotted navy ring when not, stone when closed. Contact list rows
+ *  v1.2 (D5) — this page is an address book: no rust "!" on the initials (the disc's only caller is this list) */
 export const Disc26: React.FC<{ x: AgentFacts; size?: number }> = ({ x, size }) => (
   <span className={`cl26-dsc cl26-dsc--${x.stand}`} data-cl26="disc" data-k={x.stand} aria-hidden="true"
     style={size ? ({ "--d": `${size}px` } as React.CSSProperties) : undefined}>
     {agentInitials(x.agent).slice(0, 2)}
-    {x.stand === "you" ? <i className="cl26-bang">!</i> : null}
   </span>
 );
 
@@ -421,7 +423,7 @@ export function policyWords(nrmn: boolean | undefined): string | null {
   return nrmn === true ? "No response means no" : nrmn === false ? "Always replies" : null;
 }
 
-const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props; narrow: boolean }> = ({ x, p, narrow }) => {
+const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props; per: 1 | 2 | 3 }> = ({ x, p, per }) => {
   const a = x.agent;
   const name = agentPrimary(a);
   /* Contact list rows v1 — the agency ALONE (the location left the row); a flag after it when the agent is abroad */
@@ -470,12 +472,13 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props; narrow: boolean }
       </span>
       {/* Fit: the writer's own rating (starRating), whatever the genres; unrated is a quiet dash */}
       <span role="cell" className="clr-fit" data-clr="fit" data-clr-c="">
-        {a.starRating ? <FitStars n={a.starRating} /> : <span className="clr-dash" data-clr="unrated" role="img" title="Not rated yet" aria-label="Not rated yet">–</span>}
+        {/* v1.2 — an unrated agent can be rated from the row: the dash becomes five faint stars on hover or focus */}
+        {a.starRating ? <FitStars n={a.starRating} /> : <FitRater name={name} onRate={(n) => p.onRate?.(a.id, n)} />}
       </span>
       {/* Genres sought: up to two pills (one below a card of 960), then "+n"; none on file is a quiet prompt to add them */}
       <span role="cell" className="cl26-want" data-cl26="want" data-clr="genres" data-clr-c="">
         {genres.length
-          ? <GenrePills genres={genres} hit={p.genreHit} word={p.genreWord} max={narrow ? 1 : 2} empty={null} fit />
+          ? <GenreLines genres={genres} hit={p.genreHit} word={p.genreWord} per={per} />
           : <button type="button" className="clr-add" data-clr="add" data-k="genres" onClick={() => p.onAddDetail?.(a.id, "genres")}>+ Add genres</button>}
       </span>
       {/* Response policy: the reply window, and under it the agent's silence policy */}
