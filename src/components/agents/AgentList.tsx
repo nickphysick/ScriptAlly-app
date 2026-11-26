@@ -76,7 +76,9 @@ import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wid
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { getHomeCountry } from "../../lib/territory";
+import { getHomeCountry, normaliseCountry } from "../../lib/territory";
+/** Contact list rows v1.2 — the agent's country is set and is not the writer's home country */
+const isAbroad = (country: string | undefined, home: string): boolean => { const c = normaliseCountry(country); return !!c && c !== normaliseCountry(home); };
 import { agentBack, openResponse, responseHosted } from "../../lib/queryPanelStore";
 import { type ContactPop } from "./contact/ContactListControls";
 import { ESC_LEVEL, escapeDepth } from "../../lib/escapeStack";
@@ -336,9 +338,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     : hkAll), [hkAllFilledAid, hkAll, agents, hkCtxOf, hkPrefs]);
   /* v13 §3 — THE NUMBERS STRIP: over the agents the list shows BEFORE filtering, never the filtered set.
      v14 §1.3: its figures are facts, not controls — the carousel they filled is retired. */
+  /* Contact list rows v1.2 — the writer's home country (an ISO code), read before the facts that use it */
+  const homeCode = getHomeCountry(currentUser);
   const factsAll = useMemo(
-    () => agents.map((a) => ({ ...agentFacts(a, qcRows, scoped?.id ?? null), gaps: agentGapAction(hk, a.id)?.n ?? 0 })),
-    [agents, qcRows, scoped, hk],
+    /* Contact list rows v1.2 — `abroad` (the panel's "Outside the UK"): the agent's country set and not the writer's home */
+    () => agents.map((a) => ({ ...agentFacts(a, qcRows, scoped?.id ?? null), gaps: agentGapAction(hk, a.id)?.n ?? 0, abroad: isAbroad(a.country, homeCode) })),
+    [agents, qcRows, scoped, hk, homeCode],
   );
   /* ruling Q5: "takes the book" — any of the agent's genres matching the main genre or any subGenre */
   /* the pool: Find and the "At a glance" group — so every chip's count is faceted under them */
@@ -563,6 +568,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
          does the saved record still match the pool and the panel, and where does it land */
       const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
       savedFacts.gaps = agentGapAction(hk, saved.id)?.n ?? 0;
+      savedFacts.abroad = isAbroad(saved.country, homeCode);
       const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
         .map((a) => (a.id === saved.id ? savedFacts : (factsAll.find((x) => x.agent.id === a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
@@ -1158,7 +1164,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           setChip={sets ? { label: setsLabel(sets), onDrop: () => setSets(null) } : null}
           onClearFilters={clearRailFilters}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
-          homeCountry={getHomeCountry(currentUser)}
+          homeCountry={homeCode}
           nowMs={nowMs}
           /* Contact list rows v1.2 — Fit from the row: the agent card's own setter (`edit.save({ rating })`, editKitFor below)
              and its own toast ("Agent fit: great fit") */

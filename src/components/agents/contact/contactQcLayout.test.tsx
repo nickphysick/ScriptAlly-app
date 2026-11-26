@@ -8,7 +8,8 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ContactHeaderQc, CLQ_ARCH, CLQ_RING, QC_ART_W } from "./ContactHeaderQc";
-import { ContactViews, agentsFoot, GENRES_SHOWN } from "./ContactViews";
+import { ContactViews, GENRES_SHOWN } from "./ContactViews";
+import { panelFoot } from "../../../lib/contactPanel";
 import { ContactBar } from "./ContactBar";
 import { emptyContactFilters, type AgentFacts, type ContactFilters } from "../../../lib/contactList";
 import { appliedChoices, railOn, toggleReady } from "../../../lib/contactV27";
@@ -88,63 +89,56 @@ describe("List filters v1 Phase 3 · the Agents panel", () => {
     expect(read("../../queries/centre/QcViews156.tsx")).toContain('from "../../shell/FilterPanel"');
     expect(() => read("../../shell/ViewsPanel.tsx")).toThrow();
   });
-  it("Who to query next: Ready to query wide, then Always reply and Missing details; no Your move, no Waiting to hear back", () => {
+  /* RE-POINTED by Contact list rows v1.2 · Phase 4 — the revamped panel: Your list, Open to queries?, Fit, Replies, Genres
+     sought, then Outside the UK and Missing details; faceted counts; zero disabled unless chosen */
+  const opt = (h: string, k: string) => h.match(new RegExp(`<button[^>]*data-clq-opt="${k}"[^>]*>`))?.[0] ?? "";
+  const n = (h: string, k: string) => Number(opt(h, k).match(/data-n="(\d+)"/)?.[1] ?? NaN);
+  it("its sections, in order; the old Who to query next, Have you queried them? and Are they open? are gone", () => {
     const h = views();
-    const t = btn(h, "tile");
-    expect(t.map((x) => x.match(/data-k="(\w+)" data-n="(\d+)"/)?.slice(1).join(":"))).toEqual(["ready:2", "always:1", "missing:1"]);
-    expect(t[0]).toMatch(/class="fp-tile fp-tile--wide"[\s\S]*Ready to query<small>Open, and not yet queried<\/small>/);
-    expect(t[1]).toMatch(/title="Even when it’s a no"/);
-    expect(t[2]).toMatch(/title="Gaps in their profile"/);
-    for (const gone of ["Your move", "Waiting to hear back", "All agents", "Views", "Refine", "More filters", "Where they stand", "Export"]) expect(h).not.toContain(gone);
+    expect([...h.matchAll(/data-clq-sec="(\w+)"/g)].map((m) => m[1])).toEqual(["list", "door", "fit", "reply", "genres", "abroad", "missing"]);
+    expect(h).not.toMatch(/Who to query next|Have you queried them|Are they open|Ready to query|What they want/);
   });
-  it("Ready to query sets both fields and clears both; both split sides read on with it, and it is one applied chip", () => {
-    const on = toggleReady(E());
-    expect([on.queried, on.open]).toEqual(["no", "open"]);
-    expect(toggleReady(on)).toEqual(E());
-    const h = views(on);
-    expect(btn(h, "tile")[0]).toMatch(/aria-checked="true"/);
-    expect(btn(h, "side").filter((x) => x.includes('aria-checked="true"')).map((x) => x.match(/data-k="(\w+)"/)?.[1])).toEqual(["no", "open"]);
-    expect(appliedChoices(on, (k) => k).map((c) => c.label)).toEqual(["Ready to query"]);
-    expect(appliedChoices(on, (k) => k)[0].drop(on)).toEqual(E());
-    expect(railOn(on, null)).toBe(1);
-    /* one of the two alone is not Ready to query: its own chip, as before */
-    expect(appliedChoices({ ...E(), queried: "no" }, (k) => k).map((c) => c.label)).toEqual(["Not queried yet"]);
-  });
-  it("Always reply and Missing details are independent, and either can be on with Ready to query", () => {
-    const h = views({ ...toggleReady(E()), always: true, missing: true });
-    expect(btn(h, "tile").every((x) => x.includes('aria-checked="true"'))).toBe(true);
-    expect(btn(h, "tile").every((x) => x.includes('role="checkbox"'))).toBe(true);
-  });
-  it("the splits: counts, words, and the \"not known\" link while any door is not known", () => {
+  it("Your list and Open to queries? are boxed segments with their counts; Either covers a door not known", () => {
     const h = views();
-    expect(btn(h, "side").map((x) => `${x.match(/data-k="(\w+)" data-n="(\d+)"/)?.slice(1).join(":")}:${x.match(/<span>([^<]+)</)?.[1]}`))
-      .toEqual(["no:3:not yet queried", "yes:2:queried", "open:3:open to queries", "closed:1:closed for now"]);
-    expect(h).toMatch(/<button type="button" class="fp-lnk" data-clq="not-known" aria-pressed="false">1 not known<\/button>/);
-    expect(views(E(), FX.slice(0, 4))).not.toContain("not known");
+    expect([n(h, "list:all"), n(h, "list:queried"), n(h, "list:none")]).toEqual([5, 2, 3]);
+    expect([n(h, "door:any"), n(h, "door:open"), n(h, "door:closed")]).toEqual([5, 3, 1]);
+    expect(opt(h, "list:all")).toContain('aria-checked="true"');
+    expect(opt(h, "door:any")).toContain('aria-checked="true"');
   });
-  it("What they want: the book's genre first with a tick, the key under the pills; no powder \"your book\" tag", () => {
-    const h = views();
-    const g = btn(h, "genre");
-    expect(g[0]).toMatch(/data-k="thriller"[^>]*><svg class="fp-tk"/);
-    expect(g.slice(1).some((x) => x.includes("fp-tk"))).toBe(false);
-    expect(h).toMatch(/data-clq="book-key"><svg class="fp-tk"[\s\S]*?<\/svg>Genres your book carries<\/p>/);
-    expect(h).not.toMatch(/your book<|clq-yb|#e3e8ef/);
+  it("faceted: each count is under every OTHER section's choice; a zero is disabled unless it is the choice", () => {
+    const h = views({ ...E(), queried: "no" });
+    expect([n(h, "list:all"), n(h, "list:queried"), n(h, "list:none")]).toEqual([5, 2, 3]);
+    expect([n(h, "door:any"), n(h, "door:open"), n(h, "door:closed")]).toEqual([3, 2, 0]);
+    expect(opt(h, "door:closed")).toContain("disabled");
+    expect(n(h, "genre:crime")).toBe(0);
+    expect(opt(h, "genre:crime")).toContain("disabled");
   });
-  it("six genres, then \"+{n} more\"; none on file says so", () => {
+  it("Fit and Replies are single-choice toggles; Outside the UK and Missing details are rows at the foot", () => {
+    const all = [fx("r5", {}, { starRating: 5, noResponseMeansNo: true, responseTimeWeeks: 6 }), fx("r4", { abroad: true } as Partial<AgentFacts>, { starRating: 4 }), fx("u", { gaps: 1 })];
+    const h = views({ ...E(), fit: 4 }, all);
+    expect([n(h, "fit:5"), n(h, "fit:4"), n(h, "fit:0")]).toEqual([1, 2, 1]);
+    expect(opt(h, "fit:4")).toContain('aria-pressed="true"');
+    expect([n(h, "reply:always"), n(h, "reply:nrmn"), n(h, "reply:known")]).toEqual([0, 1, 1]);
+    expect(opt(h, "abroad")).toMatch(/class="clr-frow"/);
+    expect([n(h, "abroad"), n(h, "missing")]).toEqual([1, 0]);
+  });
+  it("Genres: the book's first with a tick, six then +n more; the quiet line counts the agents with none", () => {
     const many = Array.from({ length: 9 }, (_, i) => fx(`g${i}`, { genres: [`Genre ${String.fromCharCode(65 + i)}`] }));
-    const h = views(E(), many);
-    expect(btn(h, "genre")).toHaveLength(GENRES_SHOWN);
-    expect(h).toMatch(/data-clq="genre-more">\+3 more<\/button>/);
-    expect(views(E(), [fx("z")])).toContain('<span class="fp-none" data-clq="genres-none">No genres on file yet</span>');
+    const h = views(E(), [...many, fx("t", { genres: ["Thriller"] }), fx("z")]);
+    expect(h.match(/data-clq-opt="genre:[^"]+"/g)).toHaveLength(GENRES_SHOWN);
+    expect(h.indexOf('data-clq-opt="genre:thriller"')).toBeLessThan(h.indexOf('data-clq-opt="genre:genre a"'));
+    expect(opt(h, "genre:thriller")).toBeTruthy();
+    expect(h).toMatch(/data-clq="genres-more" aria-expanded="false">\+4 more<\/button>/);
+    expect(h).toContain('<p class="clr-fnote" data-clq="no-genres">1 agent has no genres yet.</p>');
   });
   it("no stage colour anywhere in the panel", () => {
-    const h = views(toggleReady(E())).toLowerCase();
+    const h = views({ ...E(), queried: "no" }).toLowerCase();
     for (const c of Object.values(STAGE_COLOURS)) for (const hex of Object.values(c)) expect(h).not.toContain(hex);
   });
   it("the foot", () => {
-    expect(agentsFoot(false, 5, 5, 3)).toBe("All 5 agents. 3 not yet queried.");
-    expect(agentsFoot(false, 5, 5, 0)).toBe("All 5 agents.");
-    expect(agentsFoot(true, 2, 5, 3)).toBe("Showing 2 of 5 agents.");
+    expect(panelFoot(false, 5, 5)).toBe("All 5 agents.");
+    expect(panelFoot(true, 2, 5)).toBe("Showing 2 of 5 agents.");
+    expect(views()).toContain("All 5 agents.");
   });
 });
 

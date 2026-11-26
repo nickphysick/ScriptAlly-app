@@ -244,6 +244,9 @@ export interface AgentFacts {
   pastExpected: boolean;
   /** the location as displayed: city, else the country's name, else null */
   loc: string | null;
+  /** Contact list rows v1.2 — the agent's country is set and is not the writer's home country (set by the page that knows
+   *  the writer: getHomeCountry); absent reads as not abroad */
+  abroad?: boolean;
   /** their door: open, closed, or not known (an Unknown or absent status; counted with neither) */
   door: DoorState;
   /** v13: the same fact under the filter's keys — Open, Closed, or not stated */
@@ -350,9 +353,20 @@ export interface ContactFilters {
   genreMode: GenreMode;
   /** v25.4 D — "Missing details": agents with any Housekeeping gap (`AgentFacts.gaps > 0`) */
   missing?: boolean;
+  /** Contact list rows v1.2 — Fit (the writer's own rating): exactly five stars, four and up, or not rated; null is any */
+  fit?: FitChoice;
+  /** Contact list rows v1.2 — Replies: always replies, no response means no, or a reply time known; "any" is either */
+  reply?: ReplyChoice;
+  /** Contact list rows v1.2 — Outside the UK: the agent's country is set and is not the writer's home country
+   *  (`AgentFacts.abroad`, set by the page from getHomeCountry) */
+  abroad?: boolean;
 }
+export type FitChoice = null | 5 | 4 | 0;
+export type ReplyChoice = "any" | "always" | "nrmn" | "known";
+export const FIT_CHOICES: readonly Exclude<FitChoice, null>[] = [5, 4, 0];
+export const REPLY_CHOICES: readonly ReplyChoice[] = ["any", "always", "nrmn", "known"];
 export const emptyContactFilters = (): ContactFilters =>
-  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any", missing: false });
+  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any", missing: false, fit: null, reply: "any", abroad: false });
 export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "open", label: "Open now" }, { key: "closed", label: "Closed for now" },
   { key: "unknown", label: DOOR_NOT_KNOWN },
@@ -360,8 +374,8 @@ export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
 export const QUERIED_CHOICES: { key: QueriedChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "yes", label: "Queried" }, { key: "no", label: "Not queried yet" },
 ];
-export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres" | "missing";
-export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres", "missing"];
+export type FilterSection = "status" | "action" | "open" | "queried" | "mats" | "always" | "genres" | "missing" | "fit" | "reply" | "abroad";
+export const FILTER_SECTIONS: FilterSection[] = ["status", "action", "open", "queried", "mats", "always", "genres", "missing", "fit", "reply", "abroad"];
 /** how many filters are on — one per applied-filters chip (search is not a filter here and is never counted) */
 export const contactFilterCount = (f: ContactFilters): number => appliedFilters(f, (k) => k).length;
 
@@ -438,6 +452,11 @@ export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => str
   if (f.mats) out.push({ key: "mats", label: "Missing materials", drop: (g) => ({ ...g, mats: false }) });
   if (f.always) out.push({ key: "always", label: "Always replies", drop: (g) => ({ ...g, always: false }) });
   if (f.missing) out.push({ key: "missing", label: "Missing details", drop: (g) => ({ ...g, missing: false }) });
+  if (f.fit != null) out.push({ key: "fit", label: f.fit === 5 ? "Fit: ★★★★★" : f.fit === 4 ? "Fit: ★★★★ and up" : "Fit: not rated", drop: (g) => ({ ...g, fit: null }) });
+  if (f.reply && f.reply !== "any") {
+    out.push({ key: "reply", label: f.reply === "always" ? "Always replies" : f.reply === "nrmn" ? "No response means no" : "Reply time known", drop: (g) => ({ ...g, reply: "any" }) });
+  }
+  if (f.abroad) out.push({ key: "abroad", label: "Outside the UK", drop: (g) => ({ ...g, abroad: false }) });
   if (f.genres.length) {
     out.push({
       key: "genres", label: `Genre: ${genreLabel(f.genres[0])}${f.genres.length > 1 ? ` +${f.genres.length - 1}` : ""}`,
@@ -487,12 +506,28 @@ const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => 
   mats: (x, f) => !f.mats || isMissingMaterials(x),
   always: (x, f) => !f.always || isAlwaysResponds(x),
   missing: (x, f) => !f.missing || hasMissingDetails(x),
+  /* Contact list rows v1.2 — the revamped panel's three new sections */
+  fit: (x, f) => f.fit == null || fitMatches(x, f.fit),
+  reply: (x, f) => !f.reply || f.reply === "any" || replyMatches(x, f.reply),
+  abroad: (x, f) => !f.abroad || x.abroad === true,
   genres: (x, f) => {
     if (f.genres.length === 0) return true;
     const mine = new Set(x.genres.map(genreKey));
     return f.genreMode === "all" ? f.genres.every((g) => mine.has(g)) : f.genres.some((g) => mine.has(g));
   },
 };
+/** the writer's own rating, as the Fit section reads it: 5 is exactly five stars, 4 is four and up, 0 is not rated */
+export const ratingOf = (x: Pick<AgentFacts, "agent">): number | null =>
+  (typeof x.agent.starRating === "number" && x.agent.starRating > 0 ? x.agent.starRating : null);
+export function fitMatches(x: Pick<AgentFacts, "agent">, c: Exclude<FitChoice, null>): boolean {
+  const r = ratingOf(x);
+  return c === 0 ? r == null : c === 5 ? r === 5 : r != null && r >= 4;
+}
+export function replyMatches(x: Pick<AgentFacts, "agent">, c: Exclude<ReplyChoice, "any">): boolean {
+  if (c === "always") return x.agent.noResponseMeansNo === false;
+  if (c === "nrmn") return x.agent.noResponseMeansNo === true;
+  return typeof x.agent.responseTimeWeeks === "number" && x.agent.responseTimeWeeks > 0;
+}
 export const matchesContactFilters = (x: AgentFacts, f: ContactFilters, except?: FilterSection): boolean =>
   FILTER_SECTIONS.every((k) => k === except || sectionMatch[k](x, f));
 

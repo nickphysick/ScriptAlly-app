@@ -23,7 +23,7 @@
  */
 import {
   type ContactFilters, emptyContactFilters, GROUP_OPTIONS, type GroupKey, OPEN_CHOICES, type OpenChoice,
-  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, REMEMBERED_SORTS, type SortKey, STATUS_CHOICES, type StatusKey,
+  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, REMEMBERED_SORTS, REPLY_CHOICES, type ReplyChoice, type SortKey, STATUS_CHOICES, type StatusKey,
 } from "./contactList";
 import { GLANCE_KEYS, type GlanceKey } from "./contactGlance";
 
@@ -146,6 +146,10 @@ export function sanitiseListVisit(raw: unknown): ListVisit | null {
     genres: Array.isArray(sf.genres) ? [...new Set(sf.genres.filter((x): x is string => typeof x === "string" && x.trim().length > 0 && x.length <= 80))].slice(0, 20) : [],
     genreMode: sf.genreMode === "all" ? "all" : "any",
     missing: sf.missing === true,
+    /* Contact list rows v1.2 — the new keys read safely: anything unknown is ignored and reads as off */
+    fit: sf.fit === 5 || sf.fit === 4 || sf.fit === 0 ? sf.fit : null,
+    reply: oneOf<ReplyChoice>(sf.reply, REPLY_CHOICES, "any"),
+    abroad: sf.abroad === true,
   };
   const scroll = typeof r.scroll === "number" && Number.isFinite(r.scroll) && r.scroll > 0 ? Math.min(Math.round(r.scroll), 1_000_000) : d.scroll;
   return {

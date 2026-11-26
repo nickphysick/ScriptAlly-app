@@ -2,55 +2,47 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * List filters v1 Phase 3 (design-refs/list-filters-v1/) — THE AGENTS LIST'S FILTER PANEL, in the filter column. The card
- * is the shared shell/FilterPanel; this file says what the Agents list's sections, counts and writes are. Agent filters
- * only:
+ * Contact list rows v1.2 · Phase 4 — THE AGENTS LIST'S FILTER PANEL, REVAMPED (design-refs/contact-list-rows-v1-2, the
+ * "Revamped" panel). The card is still the shared shell/FilterPanel (its navy head, the card, the foot); this file says
+ * what the Agents list's sections, counts and writes are:
  *
- *   Who to query next       a wide tile, Ready to query (`queried: "no"` + `open: "open"`, lib/contactV27 toggleReady),
- *                           then Always reply (`always`) and Missing details (`missing`), each its own on/off
- *   Have you queried them?  a split: not yet queried | queried (`queried`)
- *   Are they open?          a split: open to queries | closed for now (`open`); under it, "{n} not known" while any
- *                           agent's door is not known (`open: "unknown"`)
- *   What they want          genres as pills: the book's first (a tick), then by count, then A to Z; six, plus any on,
- *                           then "+{n} more", which shows every genre with a "Find a genre" field and "Show fewer"
- *   foot                    "All {N} agents. {x} not yet queried." / "Showing {n} of {N} agents."
+ *   Your list            a boxed segment: All · Queried · Not yet, each with its count above its word   (`queried`)
+ *   Open to queries?     a boxed segment: Either · Open · Closed                                         (`open`)
+ *   Fit  your rating     pills ★★★★★ · ★★★★ and up · Not rated; single choice, the chosen one clears    (`fit`)
+ *   Replies              pills Always replies · No response means no · Reply time known; single choice (`reply`)
+ *   Genres sought        pills, several allowed (any match); the book's first with a small navy tick; six, then
+ *                        "+n more" / "Show fewer"; under them "{n} agents have no genres yet"            (`genres`)
+ *   Outside the UK       a full-width toggle row at the foot, with its count                            (`abroad`)
+ *   Missing details      a full-width toggle row at the foot, with its count                            (`missing`)
+ *   foot                 "All {n} agents." / "Showing {x} of {n} agents."
  *
- * ⚠️ A PRESENTATION OF THE PAGE'S ONE FILTER STATE: every control writes `ContactFilters` through `onFilters` with
- *    lib/contactV27's writers, and every count is lib/contactV27 `railCounts` (the list's own predicate, faceted).
- * ⚠️ READY TO QUERY IS THE SAME STATE AS THE TWO SPLITS' LEFT SIDES: when it is on, "not yet queried" and "open to
- *    queries" read on too. One filter state, shown twice on purpose.
- * ⚠️ NOT DRAWN, STILL HONOURED: `status`, `action`, `mats` and the set ("Where they stand"). Set from the dashboard or a
- *    link they filter, show as applied chips, and Clear all clears them. Your move and Waiting to hear back are about
- *    chasing queries: they belong to the Queries page and are not here.
- * ⚠️ NO STAGE COLOUR anywhere in this panel: none of its filters is a stage.
- * ⚠️ ITS HOOKS ARE `data-clq`, NEVER `data-qc156`: every workspace page stays mounted.
+ * ⚠️ ONE FILTER STATE: every control writes `ContactFilters` through `onFilters`; every count is lib/contactPanel
+ *    `panelCounts` — FACETED (each option: what it would show given every other section's choice). An option at 0 is
+ *    disabled unless it is the current choice. Replaced: "Who to query next" (Ready to query, Always reply), "Have you
+ *    queried them?", "Are they open?" and "What they want".
+ * ⚠️ NOT DRAWN, STILL HONOURED: `status`, `action`, `mats`, `always` and the set. Set from a link they filter, show as
+ *    applied chips, and Clear all clears them.
+ * ⚠️ ITS HOOKS ARE `data-clq`, NEVER `data-qc156`: every workspace page stays mounted. Sections `data-clq-sec`, options
+ *    `data-clq-opt` with their count in `data-n`.
  */
 import React, { useState } from "react";
-import type { AgentFacts, ContactFilters } from "../../../lib/contactList";
-import { emptyContactFilters, matchesContactFilters } from "../../../lib/contactList";
-import { railCounts, railOn, readyOn, toggleGenre, toggleReady, READY_LABEL, type RailGenre, type Sets } from "../../../lib/contactV27";
-import { FILTER_TICK, FilterPanel, FilterPills, FilterSection, FilterSplit, FilterTile, FilterTiles } from "../../shell/FilterPanel";
+import type { AgentFacts, ContactFilters, FitChoice, ReplyChoice } from "../../../lib/contactList";
+import { panelCounts, panelFoot } from "../../../lib/contactPanel";
+import { railOn, toggleGenre, type Sets } from "../../../lib/contactV27";
+import { FILTER_TICK, FilterPanel } from "../../shell/FilterPanel";
 import "../../queries/centre/qcv153.css";
 import "../../queries/centre/qcv1531.css";
 import "../../queries/centre/qcv154.css";
 import "../../queries/centre/qcv156.css";
 import "./contactQcLayout.css";
+import "./contactPanel.css";
 
 /** genres shown before "+{n} more" */
 export const GENRES_SHOWN = 6;
-const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
-/** the foot's sentence */
-export function agentsFoot(on: boolean, showing: number, total: number, notQueried: number): string {
-  if (on || showing !== total) return `Showing ${showing} of ${total} ${plural(total, "agent", "agents")}.`;
-  const all = `All ${total} ${plural(total, "agent", "agents")}.`;
-  return notQueried > 0 ? `${all} ${notQueried} not yet queried.` : all;
-}
-/** the genres' order: the book's first, then railCounts' own order (how many agents carry it, highest first, then A to
- *  Z). A stable sort on the book alone, so the order never jumps as other filters change the faceted counts. */
-export const orderGenres = (g: readonly RailGenre[], hit: (k: string) => boolean): RailGenre[] =>
+/** the genres' order: the book's first, then by how many agents carry it, then A to Z (a stable order: it never jumps as
+ *  the faceted counts change) */
+export const orderGenres = <G extends { key: string }>(g: readonly G[], hit: (k: string) => boolean): G[] =>
   [...g].sort((a, b) => Number(hit(b.key)) - Number(hit(a.key)));
-
-const FIND_I = <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>;
 
 export interface ContactViewsProps {
   all: readonly AgentFacts[];
@@ -68,71 +60,109 @@ export interface ContactViewsProps {
   loading?: boolean;
 }
 
+interface Opt { k: string; label: React.ReactNode; n: number; on: boolean; press: () => void; aria?: string }
+const disabledAt0 = (o: Opt, loading: boolean) => loading || (o.n === 0 && !o.on);
+
+/** a boxed segment: the selected one navy with cream text; each its count above its word */
+const Segment: React.FC<{ label: string; opts: Opt[]; loading: boolean }> = ({ label, opts, loading }) => (
+  <div className="clr-seg" role="radiogroup" aria-label={label}>
+    {opts.map((o) => (
+      <button key={o.k} type="button" role="radio" aria-checked={o.on} className={o.on ? "on" : undefined} data-clq-opt={o.k} data-n={o.n}
+        disabled={disabledAt0(o, loading)} onClick={o.press}>
+        <b>{o.n}</b><span>{o.label}</span>
+      </button>
+    ))}
+  </div>
+);
+/** filter pills: 32 high, navy when chosen; the count after the words */
+const Pills: React.FC<{ label: string; opts: Opt[]; loading: boolean }> = ({ label, opts, loading }) => (
+  <div className="clr-chips" role="group" aria-label={label}>
+    {opts.map((o) => (
+      <button key={o.k} type="button" aria-pressed={o.on} className={`clr-chip${o.on ? " on" : ""}`} data-clq-opt={o.k} data-n={o.n}
+        aria-label={o.aria} disabled={disabledAt0(o, loading)} onClick={o.press}>
+        {o.label}<em>{o.n}</em>
+      </button>
+    ))}
+  </div>
+);
+const Section: React.FC<{ k: string; title: string; aside?: React.ReactNode; children: React.ReactNode }> = ({ k, title, aside, children }) => (
+  <section className="fp-sec clr-fs" data-clq-sec={k} aria-label={title}>
+    <h4 className="clr-fh"><span>{title}</span>{aside ? <small>{aside}</small> : null}</h4>
+    {children}
+  </section>
+);
+
 export const ContactViews: React.FC<ContactViewsProps> = (p) => {
   const f = p.filters;
+  const loading = !!p.loading;
   const [allGenres, setAllGenres] = useState(false);
-  const [gfind, setGfind] = useState("");
   const on = railOn(f, p.sets);
-  const c = railCounts(p.all, f, p.sets, p.pool, p.genreLabel);
+  const c = panelCounts(p.all, f, p.sets, p.pool, p.genreLabel);
   const hit = (k: string) => !!p.genreHit?.(k);
-  const ready = readyOn(f);
-  const notQueried = p.all.reduce((n, x) => n + (matchesContactFilters(x, { ...emptyContactFilters(), queried: "no" }) ? 1 : 0), 0);
+  const set = (patch: Partial<ContactFilters>) => p.onFilters({ ...f, ...patch });
+  const fitNow: FitChoice = f.fit ?? null;
+  const replyNow: ReplyChoice = f.reply ?? "any";
 
   const ordered = orderGenres(c.genres, hit);
-  const q = gfind.trim().toLowerCase();
-  const shownGenres = allGenres
-    ? ordered.filter((g) => !q || g.label.toLowerCase().includes(q))
-    : ordered.filter((g, i) => i < GENRES_SHOWN || g.on);
-  const carries = c.genres.some((g) => hit(g.key));
-  const side = (k: "queried" | "open", v: string) => () => p.onFilters({ ...f, [k]: f[k] === v ? "either" : v } as ContactFilters);
+  const shownGenres = allGenres ? ordered : ordered.filter((g, i) => i < GENRES_SHOWN || g.on);
+  const stars = (n: number) => <span className="clr-st" aria-hidden="true">{"★".repeat(n)}</span>;
 
   return (
-    <FilterPanel hook="data-clq" label="Filter your agents" on={on} onClear={p.onReset} loading={!!p.loading}
-      foot={agentsFoot(on > 0, p.showing, p.all.length, notQueried)}>
-      <FilterSection probe="next" title="Who to query next">
-        <FilterTiles label="Who to query next" role="group">
-          <FilterTile k="ready" n={c.ready} label={READY_LABEL} line="Open, and not yet queried" icon="plane" wide role="checkbox"
-            on={ready} onPress={() => p.onFilters(toggleReady(f))} />
-          <FilterTile k="always" n={c.always} label="Always reply" title={"Even when it’s a no"} icon="reply" role="checkbox"
-            on={f.always} onPress={() => p.onFilters({ ...f, always: !f.always })} />
-          <FilterTile k="missing" n={c.missing} label="Missing details" title="Gaps in their profile" icon="doc" role="checkbox"
-            on={!!f.missing} onPress={() => p.onFilters({ ...f, missing: !f.missing })} />
-        </FilterTiles>
-      </FilterSection>
-
-      <FilterSection probe="splits" title="Have you queried them?">
-        <FilterSplit probe="queried" label="Have you queried them?" sides={[
-          { k: "no", n: c.queried.no, words: "not yet queried", on: f.queried === "no", onPress: side("queried", "no") },
-          { k: "yes", n: c.queried.yes, words: "queried", on: f.queried === "yes", onPress: side("queried", "yes") },
+    <FilterPanel hook="data-clq" label="Filter your agents" on={on} onClear={p.onReset} loading={loading}
+      foot={panelFoot(on > 0, c.showing, c.total)}>
+      <Section k="list" title="Your list">
+        <Segment label="Your list" loading={loading} opts={[
+          { k: "list:all", label: "All", n: c.list.all, on: f.queried === "either", press: () => set({ queried: "either" }) },
+          { k: "list:queried", label: "Queried", n: c.list.queried, on: f.queried === "yes", press: () => set({ queried: "yes" }) },
+          { k: "list:none", label: "Not yet", n: c.list.none, on: f.queried === "no", press: () => set({ queried: "no" }) },
         ]} />
-        <div className="fp-st"><b>Are they open?</b></div>
-        <FilterSplit probe="open" label="Are they open?" sides={[
-          { k: "open", n: c.door.open, words: "open to queries", on: f.open === "open", onPress: side("open", "open") },
-          { k: "closed", n: c.door.closed, words: "closed for now", on: f.open === "closed", onPress: side("open", "closed") },
-        ]} />
-        {c.door.unknown > 0 || f.open === "unknown" ? (
-          <div className="fp-note">
-            <button type="button" className="fp-lnk" data-clq="not-known" aria-pressed={f.open === "unknown"} disabled={!!p.loading}
-              onClick={side("open", "unknown")}>{c.door.unknown} not known</button>
-          </div>
-        ) : null}
-      </FilterSection>
+      </Section>
 
-      <FilterSection probe="genres" title="What they want"
-        aside={allGenres ? <button type="button" className="fp-lnk" data-clq="genres-fewer" onClick={() => { setAllGenres(false); setGfind(""); }}>Show fewer</button> : null}>
-        {allGenres ? (
-          <label className="fp-find" data-clq="genre-find">
-            {FIND_I}
-            <input value={gfind} onChange={(e) => setGfind(e.target.value)} placeholder="Find a genre" aria-label="Find a genre" autoComplete="off" />
-          </label>
-        ) : null}
-        {c.genres.length === 0 ? <span className="fp-none" data-clq="genres-none">No genres on file yet</span> : (
-          <FilterPills probe="genre" label="What they want"
-            items={shownGenres.map((g) => ({ k: g.key, label: g.label, n: g.n, on: g.on, tick: hit(g.key), onToggle: () => p.onFilters(toggleGenre(f, g.key)) }))}
-            more={allGenres ? null : { n: ordered.length - shownGenres.length, onPress: () => setAllGenres(true) }} />
+      <Section k="door" title="Open to queries?">
+        <Segment label="Open to queries?" loading={loading} opts={[
+          { k: "door:any", label: "Either", n: c.door.any, on: f.open === "either" || f.open === "unknown", press: () => set({ open: "either" }) },
+          { k: "door:open", label: "Open", n: c.door.open, on: f.open === "open", press: () => set({ open: "open" }) },
+          { k: "door:closed", label: "Closed", n: c.door.closed, on: f.open === "closed", press: () => set({ open: "closed" }) },
+        ]} />
+      </Section>
+
+      <Section k="fit" title="Fit" aside="your rating">
+        <Pills label="Fit, your rating" loading={loading} opts={([5, 4, 0] as const).map((v) => ({
+          k: `fit:${v}`, n: c.fit[v], on: fitNow === v, press: () => set({ fit: fitNow === v ? null : v }),
+          label: v === 5 ? stars(5) : v === 4 ? <>{stars(4)}<span>and up</span></> : "Not rated",
+          aria: v === 5 ? "Five stars" : v === 4 ? "Four stars and up" : "Not rated",
+        }))} />
+      </Section>
+
+      <Section k="reply" title="Replies">
+        <Pills label="Replies" loading={loading} opts={([["always", "Always replies"], ["nrmn", "No response means no"], ["known", "Reply time known"]] as const).map(([v, w]) => ({
+          k: `reply:${v}`, label: w, n: c.reply[v], on: replyNow === v, press: () => set({ reply: replyNow === v ? "any" : v }),
+        }))} />
+      </Section>
+
+      <Section k="genres" title="Genres sought">
+        {c.genres.length === 0 ? <p className="clr-fnote" data-clq="genres-none">No genres on file yet.</p> : (
+          <Pills label="Genres sought" loading={loading} opts={shownGenres.map((g) => ({
+            k: `genre:${g.key}`, n: g.n, on: g.on, press: () => p.onFilters(toggleGenre(f, g.key)),
+            label: <>{hit(g.key) ? <span className="clr-tick" title="Your book">{FILTER_TICK}</span> : null}{g.label}</>,
+          }))} />
         )}
-        {carries ? <p className="fp-note" data-clq="book-key">{FILTER_TICK}Genres your book carries</p> : null}
-      </FilterSection>
+        {ordered.length > GENRES_SHOWN ? (
+          <button type="button" className="clr-fmore" data-clq="genres-more" aria-expanded={allGenres} onClick={() => setAllGenres((v) => !v)}>
+            {allGenres ? "Show fewer" : `+${ordered.length - shownGenres.length} more`}
+          </button>
+        ) : null}
+        {c.noGenres > 0 ? <p className="clr-fnote" data-clq="no-genres">{c.noGenres} {c.noGenres === 1 ? "agent has" : "agents have"} no genres yet.</p> : null}
+      </Section>
+
+      {/* the foot's two toggles, full width, each with its count */}
+      {([["abroad", "Outside the UK", c.abroad, !!f.abroad, () => set({ abroad: !f.abroad })],
+        ["missing", "Missing details", c.missing, !!f.missing, () => set({ missing: !f.missing })]] as const).map(([k, w, n, isOn, press]) => (
+        <button key={k} type="button" className={`clr-frow${isOn ? " on" : ""}`} data-clq-sec={k} data-clq-opt={k} data-n={n} aria-pressed={isOn}
+          disabled={loading || (n === 0 && !isOn)} onClick={press}>
+          <b>{n}</b><span>{w}</span><i aria-hidden="true">{isOn ? "✕" : "›"}</i>
+        </button>
+      ))}
     </FilterPanel>
   );
 };
