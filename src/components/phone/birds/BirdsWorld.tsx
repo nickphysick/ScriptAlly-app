@@ -31,7 +31,7 @@ import type { QcRow } from "../../../lib/qcSummary";
 import {
   BW_CHIPS, CHIP_WORDS, RULE, axisExt, bwCounts, bwGroups, bwRow, chipForCourt, level, makeWorld, type BwAxis, type BwFilter, type BwView, type World,
 } from "../../../lib/birdsWorldV1";
-import { drawMini, drawWorld } from "./drawWorld";
+import { drawMini, drawWorld } from "./drawWorldV1";
 import { shadowStyle, wireMotion, type Motion } from "./worldMotion";
 import "./birdsWorld.css";
 

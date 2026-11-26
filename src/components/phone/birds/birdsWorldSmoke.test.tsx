@@ -19,7 +19,7 @@ vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pa
 
 import { V3Provider } from "../v3/V3Provider";
 import { BirdsWorld } from "./BirdsWorld";
-import { drawWorld, drawMini, esc } from "./drawWorld";
+import { drawWorld, drawMini, esc } from "./drawWorldV1";
 import { axisExt, bwGroups, bwRow, makeWorld, zoomForRows, type BwRow } from "../../../lib/birdsWorldV1";
 import type { EyeRow } from "../../../lib/qcBirdsEye";
 import type { QcRow } from "../../../lib/qcSummary";
@@ -146,7 +146,7 @@ describe("Phone Birds-eye world v1 renders", () => {
     expect(esc(`<a href="x">'&'</a>`)).toBe("&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;");
   });
   it("source: the view redraws one layer per frame, never a CSS scale on the content", () => {
-    const src = readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8") + readFileSync("src/components/phone/birds/drawWorld.ts", "utf8");
+    const src = readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8") + readFileSync("src/components/phone/birds/drawWorldV1.ts", "utf8");
     expect(src).toContain("requestAnimationFrame");
     expect(src).toContain("el.innerHTML = f.html");
     expect(src).not.toMatch(/scale\(\$\{[^}]*\}\)[^;]*bw-w|\.bw-w[^}]*transform/);
@@ -204,7 +204,7 @@ describe("Phone Birds-eye world v1, phase 3 — movement, controls, the hawk", (
     expect(v).toContain("w.vpW * 0.62 - w.LINE * w.SX(Sv.z)");
   });
   it("the replay clips each row's stages at its front, in date order, and draws nothing past it", async () => {
-    const { clipSegs } = await import("./drawWorld");
+    const { clipSegs } = await import("./drawWorldV1");
     const { rowSegs } = await import("../../../lib/birdsWorldV1");
     const segs = rowSegs(ROWS[0], "reply");
     const mid = clipSegs(segs, -58);

@@ -2,56 +2,41 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phone Birds-eye world v1 — THE FRAME: the ref's `draw()` (design-refs/phone-birds-eye-world-v1, world.js), ported.
- * One string of absolutely positioned marks for one layer, rebuilt per frame in screen space, so text stays crisp at
- * every zoom (never a CSS scale on the content). Pure: the view calls it from requestAnimationFrame; the smoke calls it
- * in node. The classes are the ref's, prefixed `bw-`.
+ * Phone Birds-eye world v2 — THE FRAME: the v2 ref's `draw()`, `inRow()`, `tailSeg()`, `segBg()`, `inBar()` and the ruler
+ * (design-refs/phone-birds-eye-world-v2, the page script), ported. One string of absolutely positioned marks for one
+ * layer, rebuilt per frame in screen space, so text stays crisp at every zoom. Pure: the view calls it from
+ * requestAnimationFrame; the tests call it in node. The classes are the ref's, prefixed `bw-`.
+ *   - DETAILS INSIDE THE BAR (the only layout): zoomed in, the bar fills its row (row − 8, at most 40); from 18px it
+ *     carries the agent's name, from 34px the agency beside it and each stage's short name and date along the bottom.
+ *     The name never runs under a figure or the "!": the agency drops first, then the name ends with "…"; with no room
+ *     before the "!", the name sits just after it; a bar too short for its name puts the name just before the bar.
+ *   - Earlier stages are faded; the current stage runs straight on (`cont`, no gap, no inner edge): solid to the reply
+ *     date (a navy tick, "Reply by 14 Jan"), or hatched past it from an "!" marker, fading to today once gone quiet.
+ *   - Fitted (zoomed out) is bars only: no names, figures or gridlines.
  * ⚠️ USER TEXT IS ESCAPED (`esc`): this string goes into innerHTML.
- * ⚠️ NO STAGE CHIP OR PILL AT ANY LEVEL; the only words in a bar are the Timeline level's.
  */
-import { QueryStatus } from "../../../types";
-import { STAGE_INK, stageOf } from "../../../lib/stageColours";
 import {
-  GAP, RH, RULE, WX, aheadTx, barBox, bandOf, dm, edgeOf, hatchOf, headingTop, num, rowOffset, rowSegs, rulerMarks, shortName, spaced,
-  stageTx, type BwAxis, type BwRow, type BwSeg, type BwView, type World,
-} from "../../../lib/birdsWorldV1";
+  GAP, RH, RULE, WX, aheadTx, bandOf, barBox, clipR, dm, edgeOf, fadedBand, fadedEdge, hasFig, hatchOf, headingTop, monthOf, noDateHere, num,
+  rowSegs, rulerMarks, shortName, spaced, stageTx, type BwRow, type BwSeg, type BwView, type World,
+} from "../../../lib/birdsWorld";
 
 export const esc = (s: string): string => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const px = (n: number) => `${Math.round(n * 100) / 100}px`;
 
-/* ── the glyph track (ref `gtrack`): queried, partial, full, offer; the stage it stands at full strength ── */
-const SEAL = "M12 3.2A2.55 2.55 0 0 1 16.4 4.38A2.55 2.55 0 0 1 19.62 7.6A2.55 2.55 0 0 1 20.8 12A2.55 2.55 0 0 1 19.62 16.4A2.55 2.55 0 0 1 16.4 19.62A2.55 2.55 0 0 1 12 20.8A2.55 2.55 0 0 1 7.6 19.62A2.55 2.55 0 0 1 4.38 16.4A2.55 2.55 0 0 1 3.2 12A2.55 2.55 0 0 1 4.38 7.6A2.55 2.55 0 0 1 7.6 4.38A2.55 2.55 0 0 1 12 3.2Z";
-const STAR = "M12 7.8L13.12 10.66L16.18 10.84L13.81 12.79L14.59 15.76L12 14.1L9.41 15.76L10.19 12.79L7.82 10.84L10.88 10.66Z";
-const INK = STAGE_INK;
-const TGL = [
-  `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="${INK}" stroke-width="2.4"/></svg>`,
-  `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="${INK}" stroke-width="2.4"/><path d="M12 5.5A6.5 6.5 0 0 0 12 18.5Z" fill="${INK}"/></svg>`,
-  `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="${INK}" stroke-width="2.4"/><circle cx="12" cy="12" r="6" fill="${INK}"/></svg>`,
-  `<svg viewBox="0 0 24 24"><path d="${SEAL}${STAR}" fill="${INK}" fill-rule="evenodd"/></svg>`,
-];
-const STAGE_AT: Record<string, number> = { queried: 0, partial: 1, full: 2, offer: 3, closed: 0 };
-const REQUESTED = new Set<string>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]);
-export function gtrack(status: string, size: number): string {
-  const cur = STAGE_AT[stageOf(status)] ?? 0, req = REQUESTED.has(status), band = bandOf(status), edge = edgeOf(status);
-  return `<span class="bw-gt" style="--g:${size}px">${TGL.map((g, i) => `${i ? `<u class="${i <= cur ? "on" : ""}"></u>` : ""}<i class="${i < cur ? "done" : i === cur ? "now" : ""}" style="${i === cur ? `background:${band};box-shadow:0 0 0 ${size > 14 ? 3 : 2}px ${band}${req ? `,0 0 0 ${size > 14 ? 4 : 3}px ${edge}` : ""}` : ""}">${g}</i>`).join("")}</span>`;
-}
-
-/** past its date, hatched in the stage's colour — the offer stays flat duck egg (Plumage: no gradient on an offer) */
-const pastBg = (st: string) => (stageOf(st) === "offer" ? bandOf(st) : hatchOf(st));
-
 export interface FrameOpts {
-  axis: BwAxis;
   nowMs: number;
-  /** the replay's front, in calendar days (null: everything) */
-  clip: number | null;
-  /** the row whose sheet is open */
-  sel: string | null;
+  /** the writer's "goes quiet after", in days */
+  quietDays: number;
+  /** the replay's "now", in days from today (null: not replaying) */
+  rt: number | null;
+  /** every row of the campaign (for the footer's no-date count) */
+  rows: readonly BwRow[];
+  /** extra space above the rows (the "only closed" card sits there) */
+  pady?: number;
+  sel?: string | null;
 }
-/** a row's segments, cut at the replay's front */
-export function clipSegs(segs: BwSeg[], clip: number | null): BwSeg[] {
-  if (clip == null) return segs;
-  return segs.filter((s) => s.ca < clip).map((s) => (s.cb <= clip ? s : { ...s, b: s.a + (clip - s.ca), cb: clip, last: false }));
-}
+export interface Frame { html: string; lx: number; off: -1 | 0 | 1; zoomed: boolean; top: number; label: string }
+
 const vis = (a: number, b: number, vpW: number) => { const l = Math.max(a, 0), r = Math.min(b, vpW - 8); return { w: r - l, pad: l - a }; };
 function inBar(s: BwSeg, v: { w: number; pad: number }, r: BwRow, nowMs: number): string {
   const date = dm(s.d, nowMs);
@@ -61,13 +46,69 @@ function inBar(s: BwSeg, v: { w: number; pad: number }, r: BwRow, nowMs: number)
   const body = w === "both" ? `<b>${name}</b><small>${date}</small>` : w === "name" ? `<b>${name}</b>` : w === "date" ? `<small>${date}</small>` : "";
   return body ? pl + body : "";
 }
+/** a stage's fill and edge (ref `segBg`): the current one in full colour (no inner edge where it runs on), earlier ones faded */
+export function segBg(s: BwSeg): string {
+  const e = edgeOf(s.st);
+  if (s.last) return `background:${bandOf(s.st)};box-shadow:${s.cont ? `inset 0 1px 0 ${e},inset 0 -1px 0 ${e},inset 1px 0 0 ${e}` : `inset 0 0 0 1px ${e}`}`;
+  return `background:${fadedBand(s.st)};box-shadow:inset 0 0 0 1px ${fadedEdge(s.st)}`;
+}
+/** the time after the current stage, joined on with no gap (ref `tailSeg`) */
+function tailSeg(s: BwSeg, a: number, b: number, by: number, th: number, inner: string, cl: string, badge: boolean, data: string): string {
+  const w = Math.max(2, b - a), r = th / 2, e = edgeOf(s.st), bd = bandOf(s.st);
+  if (s.k === "ahead") return `<i class="bw-bar${cl}" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${bd};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e},inset -1px 0 0 ${e};border-radius:0 ${px(r)} ${px(r)} 0">${inner}</i>`;
+  if (s.k === "quiet") return `<i class="bw-bar" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:linear-gradient(90deg,color-mix(in srgb,${bd} 80%,#fff),rgba(255,255,255,0));border-radius:0 ${px(r)} ${px(r)} 0"></i>`;
+  const sz = badge ? Math.max(12, Math.min(16, th + 4)) : Math.max(5, Math.min(14, th + 3)), cy = by + th / 2;
+  return `<i class="bw-bar" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${hatchOf(s.st)};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e}${s.cont ? "" : `,inset -1px 0 0 ${e}`};border-radius:${s.cont ? "0" : `0 ${px(r)} ${px(r)} 0`}"></i>`
+    + `<i class="bw-ovd${sz < 11 ? " dot" : ""}" data-bw="mark" title="Past its reply date" style="left:${px(a)};top:${px(cy)};--s:${px(sz)}">${sz < 11 ? "" : "!"}</i>`;
+}
 
-/** the frame's string, and what the controls need to know */
-export function drawWorld(W: World, S: BwView, o: FrameOpts): { html: string; lx: number; off: -1 | 0 | 1; zoomed: boolean; top: number } {
-  const TOP = W.topFor(S.z), { z, ox, oy } = S, sx = W.SX(z), X = (x: number) => ox + x * sx, Y = (y: number) => oy + W.yOff(y, z);
-  const rp = W.rowPx(z), out: string[] = [], { vpW, vpH } = W;
-  const top = Y(0), bot = Y(W.H), lx = X(W.LINE), endX = X(WX);
-  out.push(`<i class="bw-pz" style="left:${px(lx)};width:${px(Math.max(0, endX - lx))};top:${px(top)};height:${px(bot - top)}"></i>`);
+/** one row (ref `inRow`) */
+function inRow(W: World, r: BwRow, ry: number, rp: number, X: (x: number) => number, zoomed: boolean, o: FrameOpts, out: string[]) {
+  const { th, by, named, one, two } = barBox(rp, ry, zoomed), vpW = W.vpW, rt = o.rt;
+  out.push(`<i class="bw-hit${o.sel === r.id ? " sel" : ""}" data-bw="row" data-id="${esc(r.id)}" data-from="${r.fromMs ?? ""}" data-to="${r.toMs ?? ""}" data-pasts="${r.pasts}" data-due="${r.dueMs ?? ""}" data-past="${r.due != null && r.due < 0 ? 1 : 0}" data-status="${esc(r.status)}" data-closed="${r.closed ? 1 : 0}" style="top:${px(ry)};height:${px(rp)}"></i>`);
+  const segs = clipR(rowSegs(r, o.quietDays), rt);
+  let x0: number | null = null, x1: number | null = null, ovX: number | null = null;
+  for (const s of segs) {
+    const a = X(W.wxd(s.a)), b = X(W.wxd(s.b));
+    if (b - a < 1) continue;
+    if (x0 == null) x0 = a;
+    x1 = b;
+    const cl = two ? " tx tx2" : "";
+    const data = `data-bw="bar" data-k="${s.k}" data-st="${esc(s.st)}" data-day="${s.a}" data-row="${esc(r.id)}" data-cur="${s.last ? 1 : 0}" data-cont="${s.cont ? 1 : 0}"`;
+    if (s.k !== "stage") { if (s.k === "past") ovX = a; out.push(tailSeg(s, a, b, by, th, two && s.k === "ahead" ? inBar(s, vis(a, b, vpW), r, o.nowMs) : "", cl, named, data)); continue; }
+    const gap = s.last ? 0 : 2, rr = s.last && !s.cont;
+    const rad = `border-radius:${s.first ? `${px(th / 2)} 0 0 ${px(th / 2)}` : "0"}${rr ? `;border-top-right-radius:${px(th / 2)};border-bottom-right-radius:${px(th / 2)}` : ""}`;
+    out.push(`<i class="bw-bar${s.first ? "" : " mid"}${rr ? "" : " open"}${cl}" ${data} style="left:${px(a)};width:${px(Math.max(3, b - a - gap))};top:${px(by)};height:${px(th)};${segBg(s)};${rad}">${two ? inBar(s, vis(a, b - gap, vpW), r, o.nowMs) : ""}</i>`);
+  }
+  if (named && rt == null && r.due != null && r.due >= 0) out.push(`<i class="bw-tick" data-bw="tick" style="left:${px(X(W.wxd(r.due)))};top:${px(by - 3)};height:${px(th + 6)}"></i>`);
+  if (!one || x0 == null || x1 == null) return;
+  const fig = hasFig(r, rt != null);
+  let nx = Math.max(x0, 0) + 12;
+  const ny = two ? by + 4 : by + (th - 18) / 2, [n, u] = num(r), fr = Math.max(12, vpW - X(WX) + 4);
+  /* the name never runs under the figure or the "!": the agency drops first, then the name ends with "…" */
+  const figL = fig ? vpW - fr - (n.length * 9 + u.length * 6.4 + 22) : vpW - 12, nameW = r.name.length * 8.1;
+  const before = ovX != null && ovX > nx - 12 ? ovX - 12 - nx : 1e9;
+  if (before < Math.min(nameW, 80) && ovX != null) nx = ovX + 12;
+  const avail = (before >= Math.min(nameW, 80) && ovX != null && ovX > nx ? Math.min(figL, ovX - 12) : figL) - 8 - nx;
+  const agW = r.agency.length * 6.4 + 8, withAg = two && !!r.agency && nameW + agW <= avail;
+  /* a bar too short for its name (a query sent days ago): the name sits just before the bar, on the white */
+  const barW = Math.min(x1, figL) - Math.max(x0, 0);
+  if (barW < Math.min(nameW, 90) + 24 && x0 - nameW - 14 > 8) out.push(`<span class="bw-inm out${two ? "" : " one"}" data-bw="name" style="right:${px(vpW - x0 + 10)};top:${px(by + (th - 18) / 2)}"><span class="in1">${esc(r.name)}</span></span>`);
+  else if (avail >= 48) out.push(`<span class="bw-inm${two ? "" : " one"}" data-bw="name" style="left:${px(nx)};top:${px(ny)};max-width:${px(avail)}"><span class="in1">${esc(r.name)}</span>${withAg ? `<small>${esc(r.agency)}</small>` : ""}</span>`);
+  if (fig) out.push(`<span class="bw-fig sm" data-bw="fig" style="right:${px(fr)};top:${px(by + (th - 24) / 2)}">${n ? `<b>${n}</b> ` : ""}${u}</span>`);
+}
+
+/** the frame's string, and what the controls need */
+export function drawWorld(W: World, S: BwView, o: FrameOpts): Frame {
+  const zoomed = S.z > W.FZ + 0.05, TOP = W.topFor(S.z), { z, ox, oy } = S, sx = W.SX(z), pady = o.pady ?? 0;
+  const X = (x: number) => ox + x * sx, Y = (y: number) => oy + pady + W.yOff(y, z);
+  const rp = W.rowPx(z), out: string[] = [], { vpW, vpH } = W, rt = o.rt;
+  const top = Y(0), bot = Y(W.H - W.FOOT), lx = X(rt != null ? W.wxd(rt) : W.LINE), endX = X(WX);
+  const label = rt != null ? dm(Math.round(rt), o.nowMs) : "Today";
+  out.push(`<i class="bw-pz" style="left:${px(lx)};width:${px(Math.max(0, endX - lx))};top:${px(top)};height:${px(Math.max(0, bot - top))}"></i>`);
+  const ruler = rulerMarks(W.ext, (d) => X(W.wxd(d)), o.nowMs);
+  /* zoomed in only: very fine gridlines down from each ruler mark, behind the bars */
+  if (zoomed) { const gt = Math.max(top, TOP + RULE); for (const [x] of ruler.marks) if (x > 0 && x < vpW) out.push(`<i class="bw-grid" data-bw="grid" style="left:${px(x)};top:${px(gt)};height:${px(Math.max(0, bot - gt))}"></i>`); }
   const heads: string[] = [];
   for (const g of W.G) {
     const gy = Y(g.y), gp = W.gapPx(z), gEnd = Y(g.y + GAP + g.rows.length * RH), small = gp < 34;
@@ -77,47 +118,30 @@ export function drawWorld(W: World, S: BwView, o: FrameOpts): { html: string; lx
     for (const { r, y } of g.rows) {
       const ry = Y(y);
       if (ry > vpH + 10 || ry + rp < -10) continue;
-      const { th, by, tall } = barBox(rp, ry);
-      const x0 = X(0), lab = Math.max(12, x0), mx = Math.min(lab, X(WX) - 160), off = rowOffset(r, o.axis);
-      out.push(`<i class="bw-hit${o.sel === r.id ? " sel" : ""}" data-bw="row" data-id="${esc(r.id)}" data-from="${r.fromMs ?? ""}" data-to="${r.toMs ?? ""}" data-pasts="${r.pasts}" data-due="${r.dueMs ?? ""}" data-past="${r.due != null && r.due < 0 ? 1 : 0}" data-status="${esc(r.status)}" data-off="${off}" style="top:${px(ry)};height:${px(rp)}"></i>`);
-      for (const s of clipSegs(rowSegs(r, o.axis), o.clip)) {
-        const a = X(W.wxd(s.a)), b = X(W.wxd(s.b));
-        if (b - a < 1) continue;
-        const data = `data-bw="bar" data-k="${s.k}" data-st="${esc(s.st)}" data-day="${s.ca}" data-row="${esc(r.id)}"`;
-        if (s.k === "ahead") out.push(`<i class="bw-bar ahead${tall ? " tx" : ""}" ${data} style="left:${px(a + 2)};width:${px(Math.max(2, b - a - 2))};top:${px(by)};height:${px(th)};border-color:${edgeOf(s.st)}">${tall ? inBar(s, vis(a + 2, b, vpW), r, o.nowMs) : ""}</i>`);
-        else if (s.k === "past") out.push(`<i class="bw-bar past" ${data} style="left:${px(a + 2)};width:${px(Math.max(3, b - a - 2))};top:${px(by)};height:${px(th)};background:${pastBg(s.st)};box-shadow:inset 0 0 0 1px ${edgeOf(s.st)}"></i>`);
-        else out.push(`<i class="bw-bar${s.first ? "" : " mid"}${s.last ? "" : " open"}${tall ? " tx" : ""}" ${data} style="left:${px(a)};width:${px(Math.max(3, b - a - (s.last ? 0 : 2)))};top:${px(by)};height:${px(th)};background:${bandOf(s.st)};box-shadow:inset 0 0 0 1px ${edgeOf(s.st)}">${tall ? inBar(s, vis(a, b - (s.last ? 0 : 2), vpW), r, o.nowMs) : ""}</i>`);
-      }
-      if (rp >= 22 && r.due != null && o.clip == null) { const dueX = X(W.wxd(o.axis === "calendar" ? r.due : 0)); out.push(`<i class="bw-tick" style="left:${px(dueX)};top:${px(by - 4)};height:${px(th + 8)}"></i>`); }
-      const ny = rp >= 72 ? ry + 10 : rp >= 44 ? ry + 8 : ry + 2;
-      if (rp >= 22) {
-        const gs = rp >= 72 ? 16 : rp >= 44 ? 14 : 12, gw = gs * 4 + 18 + 8;
-        out.push(`<span class="bw-nmrow" data-bw="name" style="left:${px(mx)};top:${px(ny)}">${gtrack(r.status, gs)}<span class="bw-nm${rp < 44 ? " sm" : ""}">${esc(r.name)}</span></span>`);
-        if (rp >= 72) {
-          const lead = `${r.sendBy ? "Send by" : "Reply by"}`, ag = esc(r.agency);
-          const sub = r.due == null ? ag : tall && r.due >= 0 ? ag : `${lead} ${dm(r.due, o.nowMs)}${ag ? ` · ${ag}` : ""}`;
-          if (sub) out.push(`<span class="bw-sub" data-bw="sub" style="left:${px(mx + gw)};top:${px(ry + 34)}">${sub}</span>`);
-        }
-      }
-      if (rp >= 44) { const [n, u] = num(r); out.push(`<span class="bw-fig" data-bw="fig" style="right:${px(Math.max(12, vpW - X(WX) + 4))};top:${px(rp >= 72 ? ry + 8 : ry + 5)}">${n ? `<b>${n}</b> ` : ""}${u}</span>`); }
+      inRow(W, r, ry, rp, X, S.z > 1.05, o, out);
     }
   }
   const lt = TOP + 4 + 20;
-  if (lx >= 44 && lx <= vpW - 44) out.push(`<i class="bw-fline" data-bw="line" style="left:${px(lx)};top:${px(lt)};height:${px(Math.max(0, bot - lt))}"></i>`);
+  if (rt != null ? lx >= 0 && lx <= vpW : lx >= 44 && lx <= vpW - 44) out.push(`<i class="bw-fline" data-bw="line" style="left:${px(lx)};top:${px(lt)};height:${px(Math.max(0, bot - lt))}"></i>`);
+  /* the footer: queries with no reply date (under All and Waiting only) */
+  const nd = noDateHere(o.rows, W.filter).length;
+  if (nd) out.push(`<button type="button" class="bw-ndl" data-bw="nodate" data-a="nodate" style="top:${px(Y(W.H - W.FOOT) + 14)}">${nd} ${nd === 1 ? "query has" : "queries have"} no reply date<b>Add dates</b></button>`);
   out.push(heads.join(""));
-  const off: -1 | 0 | 1 = lx < 44 ? -1 : lx > vpW - 44 ? 1 : 0;
-  const marks = spaced(rulerMarks(o.axis, W.ext, (d) => X(W.wxd(d)), o.nowMs).filter(([x]) => x > 20 && x < vpW - 20 && Math.abs(x - lx) > 56));
-  out.push(`<div class="bw-ruler" data-bw="ruler" style="top:${px(TOP)};height:${px(RULE)}"><i class="bw-rzone" style="left:${px(Math.max(0, lx))}"></i>${marks.map(([x, t]) => `<em class="bw-rm" style="left:${px(x)}">${t}</em>`).join("")}${off ? "" : `<i class="bw-rtick" style="left:${px(lx)}"></i>`}</div>`);
-  const pos = off < 0 ? "left:12px;transform:none" : off > 0 ? "right:12px;left:auto;transform:none" : `left:${px(lx)}`;
-  out.push(`<button type="button" class="bw-flab${off ? " off" : ""}" data-bw="pill" data-a="toline" data-off="${off}" style="top:${px(TOP + 4)};${pos}">${off < 0 ? "← " : ""}${W.ext.lab}${off > 0 ? " →" : ""}</button>`);
-  return { html: out.join(""), lx, off, zoomed: S.z > 1.05, top: TOP };
+  /* the ruler: its marks, the month pill at the daily level, the line's own pill */
+  const off: -1 | 0 | 1 = rt != null ? 0 : lx < 44 ? -1 : lx > vpW - 44 ? 1 : 0;
+  const pill = (label.length * 7.2 + 16) / 2 + 6, pw = label.length * 7.2 + 30, ml = lx < 44 ? 12 + pw + 8 : 12;
+  const marks = spaced(ruler.marks.filter(([x, t, day]) => { const half = (day ? t.length * 7 : t.length * 6.6) / 2; return x - half > (ruler.mon ? ml + 44 : lx < 44 ? ml : 8) && x + half < vpW - 8 && Math.abs(x - lx) > half + pill; }));
+  const ppos = off < 0 ? "left:12px;transform:none" : off > 0 ? "right:12px;left:auto;transform:none" : `left:${px(rt != null ? Math.max(40, Math.min(vpW - 40, lx)) : lx)}`;
+  out.push(`<div class="bw-ruler" data-bw="ruler" data-tier="${ruler.tier}" style="top:${px(TOP)};height:${px(RULE)}"><i class="bw-rzone" style="left:${px(Math.max(0, lx))}"></i>${marks.map(([x, t, day]) => `<em class="bw-rm" data-bw="rm" data-day="${day ? 1 : 0}" style="left:${px(x)}">${t}</em>`).join("")}${ruler.mon ? `<b class="bw-rmon" data-bw="mon" style="left:${px(lx < 44 ? 12 + label.length * 7.2 + 38 : 12)}">${monthOf(ruler.mon)}</b>` : ""}${off ? "" : `<i class="bw-rtick" style="left:${px(lx)}"></i>`}</div>`);
+  out.push(`<button type="button" class="bw-flab${off ? " off" : ""}" data-bw="pill" data-a="toline" data-off="${off}" style="top:${px(TOP + 4)};${ppos}">${off < 0 ? "← " : ""}${label}${off > 0 ? " →" : ""}</button>`);
+  return { html: out.join(""), lx, off, zoomed, top: TOP, label };
 }
 
 /** the mini map (ref): bar segments, and a frame on what is on screen */
-export function drawMini(W: World, S: BwView, axis: BwAxis): string {
+export function drawMini(W: World, S: BwView, quietDays: number): string {
   const ms = Math.min(84 / WX, 56 / Math.max(1, W.H)), mox = (92 - WX * ms) / 2, moy = (64 - W.H * ms) / 2;
-  const rows = W.G.flatMap((g) => g.rows.flatMap(({ r, y }) => rowSegs(r, axis).filter((x) => x.k !== "ahead").map((x) =>
-    `<i style="left:${px(mox + W.wxd(x.a) * ms)};width:${px(Math.max(1, (W.wxd(x.b) - W.wxd(x.a)) * ms))};top:${px(moy + y * ms)};background:${x.k === "past" ? edgeOf(x.st) : bandOf(x.st)}"></i>`))).join("");
+  const rows = W.G.flatMap((g) => g.rows.flatMap(({ r, y }) => rowSegs(r, quietDays).filter((x) => x.k !== "ahead").map((x) =>
+    `<i style="left:${px(mox + W.wxd(x.a) * ms)};width:${px(Math.max(1, (W.wxd(x.b) - W.wxd(x.a)) * ms))};top:${px(moy + y * ms)};background:${x.k === "past" || x.k === "quiet" ? edgeOf(x.st) : bandOf(x.st)}"></i>`))).join("");
   const TOP = W.topFor(S.z), sx = W.SX(S.z);
   const vx = -S.ox / sx, vy = W.yWorld(TOP + RULE - S.oy, S.z), vw = W.vpW / sx, vh = W.yWorld(W.vpH - 80 - S.oy, S.z) - vy;
   return rows + `<b style="left:${px(mox + Math.max(0, vx) * ms)};top:${px(moy + Math.max(0, vy) * ms)};width:${px(Math.min(WX, vw) * ms)};height:${px(Math.min(W.H, vh) * ms)}"></b>`;

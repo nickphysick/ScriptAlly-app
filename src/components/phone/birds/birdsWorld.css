@@ -72,6 +72,22 @@
   .bw-gt i.now svg { width: 78%; height: 78%; }
   .bw-gt u { width: 6px; height: 1.5px; background: #dedbd5; flex: none; }
   .bw-gt u.on { background: var(--pa-ink); opacity: 0.6; }
+  /* ── v2: details inside the bar (ref `.tx2`, `.inm`, `.fig.sm`), the "!" marker (`.ovd`), the gridlines (`.grid`), the
+     month pill (`.rmon`) and the no-date footer (`.ndl`). The ref's 2px white ring on the marker is an outline here, and
+     the footer's radius 16 (the phone sheet's ratchet). ── */
+  .bw-bar.tx2 { align-items: flex-end; padding-bottom: 5px; }
+  .bw-inm { position: absolute; z-index: 1; display: flex; overflow: hidden; align-items: baseline; gap: 8px; white-space: nowrap; font: 600 14px/18px var(--pa-sans); color: var(--pa-ink); pointer-events: none; text-shadow: 0 0 3px rgba(255, 255, 255, 0.9); }
+  .bw-inm .in1 { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .bw-inm small { font: 400 12px/18px var(--pa-sans); color: var(--pa-body); }
+  .bw-fig.sm { height: 24px; padding: 0 8px; font-size: 12px; line-height: 24px; }
+  .bw-fig.sm b { font-size: 16px; line-height: 24px; }
+  .bw-ovd { position: absolute; z-index: 2; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); border-radius: 50%; background: var(--pa-navy); color: #fff; font: 700 12px/var(--s) var(--pa-sans); font-size: calc(var(--s) * 0.72); text-align: center; font-style: normal; outline: 2px solid #fff; pointer-events: none; }
+  .bw-ovd.dot { outline-width: 1.5px; }
+  .bw-grid { position: absolute; width: 1px; margin-left: -0.5px; background: rgba(31, 38, 51, 0.07); pointer-events: none; }
+  .bw-rmon { position: absolute; top: 4px; height: 20px; padding: 0 8px; border-radius: 999px; background: #efebe4; font: 600 12px/20px var(--pa-sans); color: var(--pa-ink); }
+  .bw .bw-ndl { position: absolute; left: 16px; right: 76px; display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 16px; border: 0; border-radius: 16px; background: #f2eee8; font: 400 14px var(--pa-sans) !important; color: var(--pa-body) !important; cursor: pointer; }
+  .bw .bw-ndl b { font-weight: 600; color: var(--pa-navy); }
+
   /* the line, its pill and the ruler (ref `.fline`, `.flab.top`, `.ruler`) */
   .bw-fline { position: absolute; z-index: 9; width: 2px; margin-left: -1px; background: var(--pa-navy); opacity: 0.85; pointer-events: none; }
   .bw-ruler { position: absolute; left: 0; right: 0; z-index: 6; background: #fff; border-bottom: 1px solid var(--bw-rule); box-sizing: border-box; }
