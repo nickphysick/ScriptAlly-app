@@ -1,0 +1,225 @@
+
+> react-example@0.0.0 e2e:emu
+> node scripts/emu.mjs e2e tests/e2e/contactListRows.measure.ts --project=measure
+
+[heavy-slot] killing firestore emulator pid 96993, age 28:05, 205 MB (on acquire)
+vite v6.4.6 building for emulator...
+transforming...
+✓ 4144 modules transformed.
+../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js (14422:32): Use of eval in "../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/auth/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/lib/accountEmail.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/firebase.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/firestore/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/yourNotesStore.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/letters/LetterDesk.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/letters/QueryLettersPage.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/manuscripts/ComparableTitlesPage.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/manuscripts/v12/Msv21Dialogs.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/manuscripts/v28/MsEditDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/packages/v26/usePk26Model.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/packages/v4/usePackagesModel.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/packages/v62/usePk62Actions.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/todo/ws/WsBatch54.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/todo/ws/wsFlows.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/activityWrite.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/firebase.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/importEvent.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/manuscriptV29.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/manuscriptWrite.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/nudgeUndo.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/nudgeWrite.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/practiceQuery.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/qc1522Write.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/closeSave.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/sendBy.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/sentCorrect.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/saveAgentEdits.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/saveQueryEdits.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr1-red/src/lib/firebase.ts is dynamically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/marketing/ContactPage.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/marketing/appCheck.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/AgentList.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/card/AgentCardHost.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/card/HostAgentCard.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/contact/AgentCard262.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/agents/contact/useHkFixes.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/storage/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/firebase.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/lib/db.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr1-red/src/components/shell/AppShell.tsx is dynamically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/components/onboarding/HandoffNav.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/App.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/components/help/HelpArticlePage.tsx, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/inviteCode.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/sendFeedback.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/marketing/ContactPage.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/lib/aiCallable.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/xlsx/xlsx.mjs is dynamically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/lib/importReadRoute.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/templateFile.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/templateImport.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1-red/src/lib/sheetText.ts, /Users/nickphysick/ScriptAlly-clr1-red/src/lib/smartImport.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist-emu/index.html                                    6.23 kB │ gzip:     2.21 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 17.34s
+[emu-guard] 24.9 GB free. Debug logs: /dev/null.
+i  emulators: Starting emulators: auth, firestore, storage
+i  emulators: Detected demo project ID "demo-scriptally", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Importing data from /Users/nickphysick/ScriptAlly-clr1-red/tests/emulator-data/firestore_export/firestore_export.overall_export_metadata
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+⚠  Unexpected rules runtime error: Picked up JAVA_TOOL_OPTIONS: -Xmx1536m -XX:ActiveProcessorCount=2
+
+Could not find metadata directory at "/Users/nickphysick/ScriptAlly-clr1-red/tests/emulator-data/storage_export/metadata" and/or blobs directory at "/Users/nickphysick/ScriptAlly-clr1-red/tests/emulator-data/storage_export/blobs".
+i  Running script: node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure'
+auth emulator: harness@scriptally.test (uid LS4ymFFCEvhN82advZQJ5zkr7sv2) ready
+  ➜  Local:   http://127.0.0.1:4321/
+[load-guard] 1-minute load 4.52 at the start of the run
+
+Running 5 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (2.6s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M1 · 1280 · clr-achebe · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-blackwood · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-carey · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-ellison · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-ferris · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-holt · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-hussain · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-lang · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-morrow · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-okafor · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-pemberton · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-pryce · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-quinn · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-reed · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-sandhu · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-stirling · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-tan · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-vane-coe · cells — cells [null,null,null,null]
+  ✗ M1 · 1280 · clr-whitfield · cells — cells [null,null,null,null]
+  ✗ M1 · 1440 · clr-achebe · cells — cells [null,null,null,null]
+  ✗ M1 · 1440 · clr-blackwood · cells — cells [null,null,null,null]
+  ✗ M1 · 1440 · clr-carey · cells — cells [null,null,null,null]
+  ✗ M1 · 1440 · clr-ellison · cells — cells [null,null,null,null]
+  ✗ M1 · 1440 · clr-ferris · cells — cells [null,null,null,null]
+  ✗ M1 · 1440 · clr-holt · cells — cells [null,null,null,null]
+[M1] 12/88 green
+  ✘  2 [measure] › tests/e2e/contactListRows.measure.ts:181:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 (16.2s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M5 · your-move rows — 0 your-move actions: 
+  ✗ M5 · quiet rows — 0 quiet actions
+  ✗ M5 · Ellison · words — action undefined want Log a query
+  ✗ M5 · Ferris · words — action undefined want Nudge
+  ✗ M5 · Ferris · rust, at rest — ym undefined opacity undefined colour undefined
+  ✗ M5 · Holt · words — action undefined want Record a response
+  ✗ M5 · Okafor · words — action undefined want Send your full
+  ✗ M5 · Okafor · rust, at rest — ym undefined opacity undefined colour undefined
+  ✗ M5 · Tan · words — action undefined want Send your partial
+  ✗ M5 · Tan · rust, at rest — ym undefined opacity undefined colour undefined
+[M5] 22/32 green
+  ✘  3 [measure] › tests/e2e/contactListRows.measure.ts:248:1 › M5 · actions: your move at rest, the rest on hover; hover moves nothing (4.6s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✘  4 [measure] › tests/e2e/contactListRows.measure.ts:301:1 › M6 · heading sorts, both ways; the chip agrees (3.0m)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M7 · agent heading active — aria-sort undefined
+  ✗ M7 · placeholder — placeholder "Find an agent or agency"
+  ✗ M7 · no / hint — kbd shown true
+[M7] 3/6 green
+  ✘  5 [measure] › tests/e2e/contactListRows.measure.ts:350:1 › M7 · opens A to Z; the search's words (4.6s)
+
+
+  1) [measure] › tests/e2e/contactListRows.measure.ts:181:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+
+    Error: M1: fewer readings than it claims
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 456
+    Received:    88
+
+      79 |     for (const r of this.rows.filter((x) => !x.ok).slice(0, 25)) console.log(`  ✗ ${this.name} · ${r.where} — ${r.detail}`);
+      80 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    > 81 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+         |                                                                             ^
+      82 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+      83 |   }
+      84 | }
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:81:77)
+        at /Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:245:6
+
+    Error Context: test-results/contactListRows.measure.ts-cd926-ag-—-at-1280-1440-1600-1920-measure/error-context.md
+
+  2) [measure] › tests/e2e/contactListRows.measure.ts:248:1 › M5 · actions: your move at rest, the rest on hover; hover moves nothing 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 12
+
+    - Array []
+    + Array [
+    +   "your-move rows — 0 your-move actions: ",
+    +   "quiet rows — 0 quiet actions",
+    +   "Ellison · words — action undefined want Log a query",
+    +   "Ferris · words — action undefined want Nudge",
+    +   "Ferris · rust, at rest — ym undefined opacity undefined colour undefined",
+    +   "Holt · words — action undefined want Record a response",
+    +   "Okafor · words — action undefined want Send your full",
+    +   "Okafor · rust, at rest — ym undefined opacity undefined colour undefined",
+    +   "Tan · words — action undefined want Send your partial",
+    +   "Tan · rust, at rest — ym undefined opacity undefined colour undefined",
+    + ]
+
+      80 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      81 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 82 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      83 |   }
+      84 | }
+      85 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:82:83)
+        at /Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:284:6
+
+    Error Context: test-results/contactListRows.measure.ts-53c79-n-hover-hover-moves-nothing-measure/error-context.md
+
+  3) [measure] › tests/e2e/contactListRows.measure.ts:301:1 › M6 · heading sorts, both ways; the chip agrees 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: locator.click: Test timeout of 180000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl26="card"] [data-clr-h="fit"] button').visible().first()
+
+
+      287 | /** the drawn order after a heading press */
+      288 | async function pressHead(page: Page, k: string) {
+    > 289 |   await page.locator(`[data-cl26="card"] [data-clr-h="${k}"] button`).filter({ visible: true }).first().click();
+          |                                                                                                         ^
+      290 |   await page.waitForTimeout(400);
+      291 |   return (await readList(page)) as List;
+      292 | }
+        at pressHead (/Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:289:105)
+        at /Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:322:17
+
+    Error Context: test-results/contactListRows.measure.ts-9b3b4-s-both-ways-the-chip-agrees-measure/error-context.md
+
+  4) [measure] › tests/e2e/contactListRows.measure.ts:350:1 › M7 · opens A to Z; the search's words 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "agent heading active — aria-sort undefined",
+    +   "placeholder — placeholder \"Find an agent or agency\"",
+    +   "no / hint — kbd shown true",
+    + ]
+
+      80 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      81 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 82 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      83 |   }
+      84 | }
+      85 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:82:83)
+        at /Users/nickphysick/ScriptAlly-clr1-red/tests/e2e/contactListRows.measure.ts:361:6
+
+    Error Context: test-results/contactListRows.measure.ts-8e422-s-A-to-Z-the-search-s-words-measure/error-context.md
+
+  4 failed
+    [measure] › tests/e2e/contactListRows.measure.ts:181:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+    [measure] › tests/e2e/contactListRows.measure.ts:248:1 › M5 · actions: your move at rest, the rest on hover; hover moves nothing 
+    [measure] › tests/e2e/contactListRows.measure.ts:301:1 › M6 · heading sorts, both ways; the chip agrees 
+    [measure] › tests/e2e/contactListRows.measure.ts:350:1 › M7 · opens A to Z; the search's words ─
+  1 passed (3.6m)
+[load-guard] 1-minute load 1.79 at the end of the run
+⚠  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  auth: Stopping Authentication Emulator
+i  storage: Stopping Storage Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure'" exited with code 1

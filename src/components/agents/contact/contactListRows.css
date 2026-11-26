@@ -73,6 +73,10 @@
 .cl26-card .cl26-row .cl26-q { gap: 5px; }
 .cl26-card .cl26-row .cl26-q > .clr-stage { font: 400 16px/1.2 var(--sp-type) !important; white-space: nowrap; overflow: visible; }
 .cl26-card .cl26-row .cl26-q > .clr-mark { display: flex; align-items: center; justify-content: center; height: 16px; }
+/* ⚠️ contactV26's `.cl26-q svg { width: 16px }` (sized for the old 16px StatusDot) would squash the track's 78px drawing to
+   16px: the track and its current node keep their own sizes (shared/agentRowParts) */
+.cl26-card .cl26-row .cl26-q .cl252-track > svg { width: 78px; height: 12px; }
+.cl26-card .cl26-row .cl26-q .cl252-tnode svg { width: 12px; height: 12px; }
 .cl26-card .clr-act {
   padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap;
   font: 400 14px/1.2 var(--sp-serif) !important; color: var(--sp-quiet);
@@ -110,6 +114,7 @@
   .cl26-card .clr-pol > b, .cl26-card .cl26-row .cl26-q > .clr-stage { font-size: 14px !important; }
   .cl26-card .clr-pol > small { font-size: 13px !important; white-space: normal; }
   .cl26-card .cl26-row .cl26-want .cl252-pill { font-size: 13px !important; padding: 0 7px; }
-  .cl26-card .clr-add { font-size: 14px !important; }
+  /* a narrow Genres sought column (54px at a 1280 window) holds the prompt on two lines rather than spilling out */
+  .cl26-card .clr-add { font-size: 14px !important; white-space: normal; max-width: 100%; text-align: center; }
   .cl26-card .cl26-th > span { font-size: 13.5px !important; }
 }

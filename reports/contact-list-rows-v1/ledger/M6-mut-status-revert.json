@@ -1,0 +1,182 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "fit first press · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "fit first press · order",
+  "ok": true,
+  "detail": "Ellison Vane-Coe Okafor Blackwood Ferris Morrow Reed Pemberton Tan Holt Hussain Stirling Quinn Achebe Pryce Lang Carey Whitfield Sandhu"
+ },
+ {
+  "where": "fit first press · aria-sort",
+  "ok": true,
+  "detail": "aria-sort ascending"
+ },
+ {
+  "where": "fit first press · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Fit\",\"dir\":\"↑\"}"
+ },
+ {
+  "where": "fit reversed · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "fit reversed · order",
+  "ok": true,
+  "detail": "Lang Quinn Achebe Pryce Hussain Stirling Ferris Morrow Reed Pemberton Tan Holt Ellison Vane-Coe Okafor Blackwood Carey Whitfield Sandhu"
+ },
+ {
+  "where": "fit reversed · aria-sort",
+  "ok": true,
+  "detail": "aria-sort descending"
+ },
+ {
+  "where": "fit reversed · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Fit\",\"dir\":\"↓\"}"
+ },
+ {
+  "where": "fit · missing last when reversed",
+  "ok": true,
+  "detail": "tail Carey Whitfield Sandhu"
+ },
+ {
+  "where": "policy first press · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "policy first press · order",
+  "ok": true,
+  "detail": "Ellison Vane-Coe Ferris Morrow Okafor Reed Carey Lang Pemberton Quinn Tan Whitfield Holt Sandhu Blackwood Hussain Stirling Achebe Pryce"
+ },
+ {
+  "where": "policy first press · aria-sort",
+  "ok": true,
+  "detail": "aria-sort ascending"
+ },
+ {
+  "where": "policy first press · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Response time\",\"dir\":\"↑\"}"
+ },
+ {
+  "where": "policy reversed · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "policy reversed · order",
+  "ok": true,
+  "detail": "Blackwood Hussain Stirling Holt Sandhu Carey Lang Pemberton Quinn Tan Whitfield Ferris Morrow Okafor Reed Vane-Coe Ellison Achebe Pryce"
+ },
+ {
+  "where": "policy reversed · aria-sort",
+  "ok": true,
+  "detail": "aria-sort descending"
+ },
+ {
+  "where": "policy reversed · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Response time\",\"dir\":\"↓\"}"
+ },
+ {
+  "where": "policy · missing last when reversed",
+  "ok": true,
+  "detail": "tail Achebe Pryce"
+ },
+ {
+  "where": "status first press · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "status first press · order",
+  "ok": false,
+  "detail": "Holt before Okafor · Holt Okafor Tan Achebe Blackwood Carey Hussain Lang Morrow Pemberton Pryce Quinn Sandhu Stirling Vane-Coe Ferris Ellison Whitfield Reed"
+ },
+ {
+  "where": "status first press · aria-sort",
+  "ok": true,
+  "detail": "aria-sort ascending"
+ },
+ {
+  "where": "status first press · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Query status\",\"dir\":\"↑\"}"
+ },
+ {
+  "where": "status reversed · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "status reversed · order",
+  "ok": false,
+  "detail": "Okafor before Holt · Reed Ellison Whitfield Achebe Blackwood Carey Hussain Lang Morrow Pemberton Pryce Quinn Sandhu Stirling Vane-Coe Ferris Tan Okafor Holt"
+ },
+ {
+  "where": "status reversed · aria-sort",
+  "ok": true,
+  "detail": "aria-sort descending"
+ },
+ {
+  "where": "status reversed · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Query status\",\"dir\":\"↓\"}"
+ },
+ {
+  "where": "agent first press · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "agent first press · order",
+  "ok": true,
+  "detail": "Achebe Blackwood Carey Ellison Ferris Holt Hussain Lang Morrow Okafor Pemberton Pryce Quinn Reed Sandhu Stirling Tan Vane-Coe Whitfield"
+ },
+ {
+  "where": "agent first press · aria-sort",
+  "ok": true,
+  "detail": "aria-sort ascending"
+ },
+ {
+  "where": "agent first press · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Surname\",\"dir\":\"↑\"}"
+ },
+ {
+  "where": "agent reversed · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "agent reversed · order",
+  "ok": true,
+  "detail": "Whitfield Vane-Coe Tan Stirling Sandhu Reed Quinn Pryce Pemberton Okafor Morrow Lang Hussain Holt Ferris Ellison Carey Blackwood Achebe"
+ },
+ {
+  "where": "agent reversed · aria-sort",
+  "ok": true,
+  "detail": "aria-sort descending"
+ },
+ {
+  "where": "agent reversed · chip",
+  "ok": true,
+  "detail": "chip {\"field\":\"Surname\",\"dir\":\"↓\"}"
+ },
+ {
+  "where": "genres · no sort",
+  "ok": true,
+  "detail": "genres heading buttons 0"
+ }
+]

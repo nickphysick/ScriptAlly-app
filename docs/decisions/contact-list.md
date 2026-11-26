@@ -2,12 +2,21 @@
 
 ## Current state
 
-- Newest recorded build: Contact list v18 → v18.3 (15–17 Oct; refs design-refs/contact-list-v18*/, reports reports/contact-list-v18*/). v18's branch tip is in main.
+- Newest recorded build: Contact list rows v1 (26 Nov, branch-only, section below). Before it: Contact list v18 → v18.3 (15–17 Oct; refs design-refs/contact-list-v18*/, reports reports/contact-list-v18*/). v18's branch tip is in main.
 - The agent card v1 (5 Oct) is the only agent editor; v16's agent panel and full screen stand where v17/v18 do not replace them.
 - The Agent list spec (July) and v11–v15 are older builds kept for their data laws (the three axes, materials storage, the two-systems exception).
 - Agent location/territory: ISO alpha-2 `country` + `homeCountry`; see the section of that name.
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
+
+## Branch-only (not on main): `contact-list-rows-v1` — the list's columns, cells, sorting and search (26 Nov; ref = design-refs/contact-list-rows-v1/contact-list-rows-v1.html + screens; report reports/contact-list-rows-v1/REPORT.md)
+- **The columns are Agent · Fit · Genres sought · Response policy · Query status · ›, on FIXED widths read from the list card's own width** (a container query `clr` on `.cl26-card`, its content box): 290·90·≤360·180·220·rest at 1150 and up, 262·72·≤300·160·196·rest from 980, 228·64·rest·138·156·16 below (gap 24, then 14). Spare width collects in the last track before the ›, never between columns. `contactListRows.css`.
+- **⚠️ The headings' margin column is PADDING (`padding-left: var(--cl26-m)`), not a track:** as a track the gap would sit between it and Agent and every heading would drift 24px right of its column.
+- **Location left the row.** The agency line is the agency alone; a flag-icons flag follows only when the agent's `country` is set and differs from `getHomeCountry(user)` (`abroadOf`).
+- **Fit is the writer's own `starRating`**, a quiet "–" when unrated; it never depends on genres (the ref's "Fit needs genres" rule is wrong).
+- **The row's next action takes the query card's own words** (`lib/qc1512` `rowAct`, through `lib/contactListRows` `rowActionOf`, which keeps no word table); "Log a query" for an agent not yet queried. Your move is `stand === "you"`, the disc's "!": shown at rest in rust; anything else on hover or focus, its space always held.
+- **Sorting: the four headings and the bar's Sort chip read one sort state.** `HEADING_SORTS` = surname · rating · reply · status (the brief's "fit" is the star-rating key `rating`). Status sorts your move first, then the rest, closed last, by furthest along within each. Grouped by letter, a Fit sort draws rating sections and a status sort keeps your move's run of a stage apart — otherwise the drawn order breaks the sort.
+- **Locks:** `tests/e2e/contactListRows.measure.ts` (M1–M7, `CLR_MUTATE=m1,m3,m5`; its own 19-agent emulator account, `tests/e2e/clrFixture.mjs`); unit `contactListRows.test.tsx`, `lib/contactListRows.test.ts`.
 
 ## Branch-only (not on main): `contact-list-v18`
 

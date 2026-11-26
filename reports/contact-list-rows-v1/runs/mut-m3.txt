@@ -1,0 +1,237 @@
+
+> react-example@0.0.0 e2e:emu
+> node scripts/emu.mjs e2e tests/e2e/contactListRows.measure.ts --project=measure -g M1
+
+[heavy-slot] Waiting for the test slot — held by phone-birds-eye-world-v2 (/Users/nickphysick/ScriptAlly-bew2) since 15:30
+[heavy-slot] got the test slot after 140 s.
+[heavy-slot] sweep (on acquire): nothing left over.
+vite v6.4.6 building for emulator...
+transforming...
+✓ 4146 modules transformed.
+../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js (14422:32): Use of eval in "../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/auth/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/accountEmail.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/firestore/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/letters/LetterDesk.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/letters/QueryLettersPage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/manuscripts/ComparableTitlesPage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/manuscripts/v12/Msv21Dialogs.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/manuscripts/v28/MsEditDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/packages/v26/usePk26Model.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/packages/v4/usePackagesModel.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/packages/v62/usePk62Actions.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/WsBatch54.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/wsFlows.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/activityWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/importEvent.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/manuscriptV29.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/manuscriptWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/nudgeUndo.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/nudgeWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/practiceQuery.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc1522Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/closeSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/sendBy.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/sentCorrect.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/saveAgentEdits.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/saveQueryEdits.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/marketing/ContactPage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/marketing/appCheck.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/AgentList.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/AgentCardHost.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/HostAgentCard.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/contact/AgentCard262.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/contact/useHkFixes.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/storage/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr1/src/components/shell/AppShell.tsx is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/onboarding/HandoffNav.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/App.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/help/HelpArticlePage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/inviteCode.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/sendFeedback.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/marketing/ContactPage.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/aiCallable.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/xlsx/xlsx.mjs is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/importReadRoute.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/templateFile.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/templateImport.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/sheetText.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/smartImport.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist-emu/index.html                                    6.23 kB │ gzip:     2.21 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 52.57s
+[emu-guard] 23.8 GB free. Debug logs: /dev/null.
+i  emulators: Starting emulators: auth, firestore, storage
+i  emulators: Detected demo project ID "demo-scriptally", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Importing data from /Users/nickphysick/ScriptAlly-clr1/tests/emulator-data/firestore_export/firestore_export.overall_export_metadata
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+⚠  Unexpected rules runtime error: Picked up JAVA_TOOL_OPTIONS: -Xmx1536m -XX:ActiveProcessorCount=2
+
+Could not find metadata directory at "/Users/nickphysick/ScriptAlly-clr1/tests/emulator-data/storage_export/metadata" and/or blobs directory at "/Users/nickphysick/ScriptAlly-clr1/tests/emulator-data/storage_export/blobs".
+i  Running script: node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure' '-g' 'M1'
+auth emulator: harness@scriptally.test (uid LS4ymFFCEvhN82advZQJ5zkr7sv2) ready
+  ➜  Local:   http://127.0.0.1:4321/
+[load-guard] 1-minute load 29.32 at the start of the run
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.8s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+[M1] 640/640 green
+[M2] 864/864 green
+  ✗ M3 · 1280 · clr-achebe · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-blackwood · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-carey · fit centred — content centre off by -27.9 · cell 745–809 · "–" 745–753
+  ✗ M3 · 1280 · clr-carey · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-ellison · status centred — content centre off by -35.6 · cell 1043–1199 · svg.cl24-nq 1043–1059 | "Not queried" 1043–1128 | "Log a query" 1043–1121
+  ✗ M3 · 1280 · clr-ferris · status centred — content centre off by -39.0 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Nudge" 1043–1086
+  ✗ M3 · 1280 · clr-holt · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Full sent" 1043–1111 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-hussain · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-lang · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-morrow · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-okafor · status centred — content centre off by -24.3 · cell 1043–1199 · span.cl252-track 1043–1121 | "Full request" 1043–1150 | "Send your fu" 1043–1137
+  ✗ M3 · 1280 · clr-pemberton · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-pryce · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-quinn · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-reed · status centred — content centre off by -39.0 · cell 1043–1199 · span.cl252-track 1043–1121 | "Passed" 1043–1089
+  ✗ M3 · 1280 · clr-sandhu · fit centred — content centre off by -27.9 · cell 745–809 · "–" 745–753
+  ✗ M3 · 1280 · clr-sandhu · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-stirling · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-tan · status centred — content centre off by -13.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Partial requ" 1043–1172 | "Send your pa" 1043–1158
+  ✗ M3 · 1280 · clr-vane-coe · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | "Queried" 1043–1100 | "Record a res" 1043–1164
+  ✗ M3 · 1280 · clr-whitfield · fit centred — content centre off by -27.9 · cell 745–809 · "–" 745–753
+  ✗ M3 · 1280 · clr-whitfield · status centred — content centre off by -14.9 · cell 1043–1199 · svg. 1043–1059 | "Closed to qu" 1043–1169
+  ✗ M3 · 1440 · clr-achebe · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | "Queried" 1203–1260 | "Record a res" 1203–1324
+  ✗ M3 · 1440 · clr-blackwood · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | "Queried" 1203–1260 | "Record a res" 1203–1324
+  ✗ M3 · 1440 · clr-carey · fit centred — content centre off by -27.9 · cell 745–809 · "–" 745–753
+[M3] 118/228 green
+  ✘  2 [measure] › tests/e2e/contactListRows.measure.ts:197:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 (18.0s)
+
+
+  1) [measure] › tests/e2e/contactListRows.measure.ts:197:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 112
+
+    - Array []
+    + Array [
+    +   "1280 · clr-achebe · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-blackwood · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-carey · fit centred — content centre off by -27.9 · cell 745–809 · \"–\" 745–753",
+    +   "1280 · clr-carey · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-ellison · status centred — content centre off by -35.6 · cell 1043–1199 · svg.cl24-nq 1043–1059 | \"Not queried\" 1043–1128 | \"Log a query\" 1043–1121",
+    +   "1280 · clr-ferris · status centred — content centre off by -39.0 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Nudge\" 1043–1086",
+    +   "1280 · clr-holt · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Full sent\" 1043–1111 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-hussain · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-lang · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-morrow · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-okafor · status centred — content centre off by -24.3 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Full request\" 1043–1150 | \"Send your fu\" 1043–1137",
+    +   "1280 · clr-pemberton · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-pryce · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-quinn · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-reed · status centred — content centre off by -39.0 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Passed\" 1043–1089",
+    +   "1280 · clr-sandhu · fit centred — content centre off by -27.9 · cell 745–809 · \"–\" 745–753",
+    +   "1280 · clr-sandhu · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-stirling · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-tan · status centred — content centre off by -13.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Partial requ\" 1043–1172 | \"Send your pa\" 1043–1158",
+    +   "1280 · clr-vane-coe · status centred — content centre off by -17.4 · cell 1043–1199 · span.cl252-track 1043–1121 | \"Queried\" 1043–1100 | \"Record a res\" 1043–1164",
+    +   "1280 · clr-whitfield · fit centred — content centre off by -27.9 · cell 745–809 · \"–\" 745–753",
+    +   "1280 · clr-whitfield · status centred — content centre off by -14.9 · cell 1043–1199 · svg. 1043–1059 | \"Closed to qu\" 1043–1169",
+    +   "1440 · clr-achebe · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-blackwood · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-carey · fit centred — content centre off by -27.9 · cell 745–809 · \"–\" 745–753",
+    +   "1440 · clr-carey · genres centred — content centre off by -68.3 · cell 823–1037 · \"+ Add genres\" 823–900",
+    +   "1440 · clr-carey · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-ellison · status centred — content centre off by -35.6 · cell 1203–1359 · svg.cl24-nq 1203–1219 | \"Not queried\" 1203–1288 | \"Log a query\" 1203–1281",
+    +   "1440 · clr-ferris · status centred — content centre off by -39.0 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Nudge\" 1203–1246",
+    +   "1440 · clr-holt · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Full sent\" 1203–1271 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-hussain · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-lang · genres centred — content centre off by -68.3 · cell 823–1037 · \"+ Add genres\" 823–900",
+    +   "1440 · clr-lang · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-morrow · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-okafor · status centred — content centre off by -24.3 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Full request\" 1203–1310 | \"Send your fu\" 1203–1297",
+    +   "1440 · clr-pemberton · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-pryce · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-quinn · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-reed · status centred — content centre off by -39.0 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Passed\" 1203–1249",
+    +   "1440 · clr-sandhu · fit centred — content centre off by -27.9 · cell 745–809 · \"–\" 745–753",
+    +   "1440 · clr-sandhu · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-stirling · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-tan · status centred — content centre off by -13.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Partial requ\" 1203–1332 | \"Send your pa\" 1203–1318",
+    +   "1440 · clr-vane-coe · status centred — content centre off by -17.4 · cell 1203–1359 · span.cl252-track 1203–1281 | \"Queried\" 1203–1260 | \"Record a res\" 1203–1324",
+    +   "1440 · clr-whitfield · fit centred — content centre off by -27.9 · cell 745–809 · \"–\" 745–753",
+    +   "1440 · clr-whitfield · status centred — content centre off by -14.9 · cell 1203–1359 · svg. 1203–1219 | \"Closed to qu\" 1203–1329",
+    +   "1600 · clr-achebe · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-blackwood · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-carey · fit centred — content centre off by -31.9 · cell 789–861 · \"–\" 789–797",
+    +   "1600 · clr-carey · genres centred — content centre off by -66.8 · cell 885–1101 · \"+ Add genres\" 885–967",
+    +   "1600 · clr-carey · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-ellison · status centred — content centre off by -52.5 · cell 1309–1505 · svg.cl24-nq 1309–1325 | \"Not queried\" 1309–1400 | \"Log a query\" 1309–1387",
+    +   "1600 · clr-ferris · status centred — content centre off by -59.0 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Nudge\" 1309–1352",
+    +   "1600 · clr-holt · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Full sent\" 1309–1381 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-hussain · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-lang · genres centred — content centre off by -66.8 · cell 885–1101 · \"+ Add genres\" 885–967",
+    +   "1600 · clr-lang · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-morrow · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-okafor · status centred — content centre off by -40.5 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Full request\" 1309–1424 | \"Send your fu\" 1309–1403",
+    +   "1600 · clr-pemberton · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-pryce · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-quinn · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-reed · status centred — content centre off by -59.0 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Passed\" 1309–1359",
+    +   "1600 · clr-sandhu · fit centred — content centre off by -31.9 · cell 789–861 · \"–\" 789–797",
+    +   "1600 · clr-sandhu · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-stirling · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-tan · status centred — content centre off by -28.8 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Partial requ\" 1309–1447 | \"Send your pa\" 1309–1424",
+    +   "1600 · clr-vane-coe · status centred — content centre off by -37.4 · cell 1309–1505 · span.cl252-track 1309–1387 | \"Queried\" 1309–1370 | \"Record a res\" 1309–1430",
+    +   "1600 · clr-whitfield · fit centred — content centre off by -31.9 · cell 789–861 · \"–\" 789–797",
+    +   "1600 · clr-whitfield · status centred — content centre off by -30.4 · cell 1309–1505 · svg. 1309–1325 | \"Closed to qu\" 1309–1444",
+    +   "1920 · clr-achebe · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i. 937–954 | i. 954–971 | i. 971–988",
+    +   "1920 · clr-achebe · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-blackwood · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i.on 971–988",
+    +   "1920 · clr-blackwood · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-carey · fit centred — content centre off by -40.9 · cell 903–993 · \"–\" 903–911",
+    +   "1920 · clr-carey · genres centred — content centre off by -93.8 · cell 1017–1287 · \"+ Add genres\" 1017–1099",
+    +   "1920 · clr-carey · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-ellison · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i.on 971–988",
+    +   "1920 · clr-ellison · status centred — content centre off by -61.5 · cell 1515–1735 · svg.cl24-nq 1515–1531 | \"Not queried\" 1515–1612 | \"Log a query\" 1515–1593",
+    +   "1920 · clr-ferris · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i. 971–988",
+    +   "1920 · clr-ferris · status centred — content centre off by -71.0 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Nudge\" 1515–1558",
+    +   "1920 · clr-holt · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i. 971–988",
+    +   "1920 · clr-holt · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Full sent\" 1515–1592 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-hussain · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i. 954–971 | i. 971–988",
+    +   "1920 · clr-hussain · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-lang · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i. 920–937 | i. 937–954 | i. 954–971 | i. 971–988",
+    +   "1920 · clr-lang · genres centred — content centre off by -93.8 · cell 1017–1287 · \"+ Add genres\" 1017–1099",
+    +   "1920 · clr-lang · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-morrow · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i. 971–988",
+    +   "1920 · clr-morrow · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-okafor · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i.on 971–988",
+    +   "1920 · clr-okafor · status centred — content centre off by -48.6 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Full request\" 1515–1638 | \"Send your fu\" 1515–1609",
+    +   "1920 · clr-pemberton · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i. 971–988",
+    +   "1920 · clr-pemberton · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-pryce · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i. 937–954 | i. 954–971 | i. 971–988",
+    +   "1920 · clr-pryce · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-quinn · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i. 937–954 | i. 954–971 | i. 971–988",
+    +   "1920 · clr-quinn · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-reed · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i. 971–988",
+    +   "1920 · clr-reed · status centred — content centre off by -71.0 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Passed\" 1515–1568",
+    +   "1920 · clr-sandhu · fit centred — content centre off by -40.9 · cell 903–993 · \"–\" 903–911",
+    +   "1920 · clr-sandhu · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-stirling · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i. 954–971 | i. 971–988",
+    +   "1920 · clr-stirling · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-tan · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i. 971–988",
+    +   "1920 · clr-tan · status centred — content centre off by -36.2 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Partial requ\" 1515–1663 | \"Send your pa\" 1515–1630",
+    +   "1920 · clr-vane-coe · fit centred — content centre off by -2.5 · cell 903–993 · i.on 903–920 | i.on 920–937 | i.on 937–954 | i.on 954–971 | i.on 971–988",
+    +   "1920 · clr-vane-coe · status centred — content centre off by -49.4 · cell 1515–1735 · span.cl252-track 1515–1593 | \"Queried\" 1515–1580 | \"Record a res\" 1515–1636",
+    +   "1920 · clr-whitfield · fit centred — content centre off by -40.9 · cell 903–993 · \"–\" 903–911",
+    +   "1920 · clr-whitfield · status centred — content centre off by -37.9 · cell 1515–1735 · svg. 1515–1531 | \"Closed to qu\" 1515–1659",
+    + ]
+
+      80 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      81 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 82 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      83 |   }
+      84 | }
+      85 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr1/tests/e2e/contactListRows.measure.ts:82:83)
+        at /Users/nickphysick/ScriptAlly-clr1/tests/e2e/contactListRows.measure.ts:261:48
+
+    Error Context: test-results/contactListRows.measure.ts-cd926-ag-—-at-1280-1440-1600-1920-measure/error-context.md
+
+  1 failed
+    [measure] › tests/e2e/contactListRows.measure.ts:197:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+  1 passed (41.7s)
+[load-guard] 1-minute load 16.01 at the end of the run
+⚠  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  auth: Stopping Authentication Emulator
+i  storage: Stopping Storage Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure' '-g' 'M1'" exited with code 1

@@ -1,0 +1,70 @@
+
+> react-example@0.0.0 e2e:emu
+> node scripts/emu.mjs e2e tests/e2e/contactListRows.measure.ts --project=measure -g M6
+
+[heavy-slot] sweep (on acquire): nothing left over.
+vite v6.4.6 building for emulator...
+transforming...
+✓ 4146 modules transformed.
+../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js (14422:32): Use of eval in "../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/auth/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/accountEmail.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/firestore/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/letters/LetterDesk.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/letters/QueryLettersPage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/manuscripts/ComparableTitlesPage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/manuscripts/v12/Msv21Dialogs.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/manuscripts/v28/MsEditDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/packages/v26/usePk26Model.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/packages/v4/usePackagesModel.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/packages/v62/usePk62Actions.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/WsBatch54.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/wsFlows.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/activityWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/importEvent.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/manuscriptV29.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/manuscriptWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/nudgeUndo.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/nudgeWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/practiceQuery.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc1522Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/closeSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/sendBy.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/sentCorrect.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/saveAgentEdits.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/saveQueryEdits.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/marketing/ContactPage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/marketing/appCheck.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/AgentList.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/AgentCardHost.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/HostAgentCard.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/contact/AgentCard262.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/agents/contact/useHkFixes.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr1/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/storage/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/firebase.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/db.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr1/src/components/shell/AppShell.tsx is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/onboarding/HandoffNav.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/App.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/components/help/HelpArticlePage.tsx, /Users/nickphysick/ScriptAlly-clr1/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/inviteCode.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/sendFeedback.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr1/src/marketing/ContactPage.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/aiCallable.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/xlsx/xlsx.mjs is dynamically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/importReadRoute.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/templateFile.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/templateImport.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr1/src/lib/sheetText.ts, /Users/nickphysick/ScriptAlly-clr1/src/lib/smartImport.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist-emu/index.html                                    6.23 kB │ gzip:     2.21 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 16.00s
+[emu-guard] 21.5 GB free. Debug logs: /dev/null.
+i  emulators: Starting emulators: auth, firestore, storage
+i  emulators: Detected demo project ID "demo-scriptally", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Importing data from /Users/nickphysick/ScriptAlly-clr1/tests/emulator-data/firestore_export/firestore_export.overall_export_metadata
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+⚠  Unexpected rules runtime error: Picked up JAVA_TOOL_OPTIONS: -Xmx1536m -XX:ActiveProcessorCount=2
+
+Could not find metadata directory at "/Users/nickphysick/ScriptAlly-clr1/tests/emulator-data/storage_export/metadata" and/or blobs directory at "/Users/nickphysick/ScriptAlly-clr1/tests/emulator-data/storage_export/blobs".
+i  Running script: node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure' '-g' 'M6'
+auth emulator: harness@scriptally.test (uid LS4ymFFCEvhN82advZQJ5zkr7sv2) ready
+  ➜  Local:   http://127.0.0.1:4321/
+[load-guard] 1-minute load 6.08 at the start of the run
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.8s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+[M6] 36/36 green
+  ✓  2 [measure] › tests/e2e/contactListRows.measure.ts:317:1 › M6 · heading sorts, both ways; the chip agrees (8.9s)
+
+  2 passed (27.9s)
+[load-guard] 1-minute load 4.25 at the end of the run
+✔  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  auth: Stopping Authentication Emulator
+i  storage: Stopping Storage Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
