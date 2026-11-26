@@ -38,9 +38,9 @@ describe("the footer is the pack's table", () => {
     /* Controls: entry v1 (Phase 4) — with a Send by, the footer says it as the query card does, with its weekday */
     const dated = acFoot(facts("you", row(QueryStatus.FULL_REQUESTED, { expectedMs: new Date(2026, 11, 4, 12).getTime() })), "Clara", call, NOW);
     expect(dated.sub).toBe("Send by Fri 4 Dec");
-    expect([full.row, full.lead, full.sub, full.button?.label, full.button?.tone]).toEqual(["send", "Clara asked for your full", "Send it, then log it here", "Mark full sent", "navy"]);
+    expect([full.row, full.lead, full.sub, full.button?.label, full.button?.tone]).toEqual(["send", "Clara asked for your full", "Send it, then log it here", "Send your full", "navy"]); /* RE-POINTED by Contact list rows v1.2 (D7) */
     expect(full.button?.act).toEqual({ kind: "journey", mode: "sent", queryId: "q1" });
-    expect(acFoot(facts("you", row(QueryStatus.PARTIAL_REQUESTED)), "Clara", call, NOW).button?.label).toBe("Mark partial sent");
+    expect(acFoot(facts("you", row(QueryStatus.PARTIAL_REQUESTED)), "Clara", call, NOW).button?.label).toBe("Send your partial");
   });
   it("an offer: Record your answer, and Make it a task as the second row's link", () => {
     const call = { kind: "you", bold: "", sub: "", button: "Answer", door: { mode: "offer" }, queryId: "q1" } as never;

@@ -1,0 +1,402 @@
+[
+ {
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1280 · clr-achebe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-carey · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-ellison · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-ferris · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-holt · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-hussain · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-lang · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-morrow · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-okafor · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-pryce · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-quinn · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-reed · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-stirling · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-tan · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1115.0 want 1115.0"
+ },
+ {
+  "where": "1440 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1440 · clr-achebe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-carey · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-ellison · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-ferris · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-holt · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-hussain · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-lang · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-morrow · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-okafor · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-pryce · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-quinn · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-reed · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-stirling · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-tan · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1275.0 want 1275.0"
+ },
+ {
+  "where": "1600 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1600 · clr-achebe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-carey · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-ellison · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-ferris · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-holt · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-hussain · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-lang · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-morrow · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-okafor · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-pryce · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-quinn · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-reed · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-stirling · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-tan · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1397.0 want 1397.0"
+ },
+ {
+  "where": "1920 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1920 · clr-achebe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-carey · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-ellison · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-ferris · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-holt · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-hussain · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-lang · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-morrow · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-okafor · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-pryce · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-quinn · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-reed · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-stirling · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-tan · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · status centred between policy and ›",
+  "ok": true,
+  "detail": "centre 1619.0 want 1619.0"
+ }
+]

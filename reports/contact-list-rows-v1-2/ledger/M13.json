@@ -1,0 +1,197 @@
+[
+ {
+  "where": "no \"!\" on this page",
+  "ok": true,
+  "detail": "0 bangs"
+ },
+ {
+  "where": "Achebe · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Achebe · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Blackwood · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Blackwood · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Carey · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Carey · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Ellison · disc (none)",
+  "ok": true,
+  "detail": "bg rgb(255, 255, 255) border dotted rgb(42, 58, 82)"
+ },
+ {
+  "where": "Ellison · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Ferris · disc (you)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Ferris · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Holt · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Holt · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Hussain · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Hussain · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Lang · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Lang · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Morrow · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Morrow · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Okafor · disc (you)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Okafor · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Pemberton · disc (none)",
+  "ok": true,
+  "detail": "bg rgb(255, 255, 255) border dotted rgb(42, 58, 82)"
+ },
+ {
+  "where": "Pemberton · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Pryce · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Pryce · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Quinn · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Quinn · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Reed · disc (closed)",
+  "ok": true,
+  "detail": "bg rgb(228, 225, 219) border solid rgb(107, 96, 88)"
+ },
+ {
+  "where": "Reed · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Sandhu · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Sandhu · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Stirling · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Stirling · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Tan · disc (you)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Tan · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Vane-Coe · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Vane-Coe · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ },
+ {
+  "where": "Whitfield · disc (none)",
+  "ok": true,
+  "detail": "bg rgb(255, 255, 255) border dotted rgb(42, 58, 82)"
+ },
+ {
+  "where": "Whitfield · name and stage word drawn",
+  "ok": true,
+  "detail": "name true stage true"
+ }
+]

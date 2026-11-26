@@ -1,0 +1,102 @@
+[
+ {
+  "where": "no \"!\" on this page",
+  "ok": true,
+  "detail": "0 bangs"
+ },
+ {
+  "where": "Achebe · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Blackwood · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Carey · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Ellison · disc (none)",
+  "ok": true,
+  "detail": "bg rgb(255, 255, 255) border dotted rgb(42, 58, 82)"
+ },
+ {
+  "where": "Ferris · disc (you)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Holt · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Hussain · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Lang · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Morrow · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Okafor · disc (you)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Pemberton · disc (none)",
+  "ok": true,
+  "detail": "bg rgb(255, 255, 255) border dotted rgb(42, 58, 82)"
+ },
+ {
+  "where": "Pryce · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Quinn · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Reed · disc (closed)",
+  "ok": true,
+  "detail": "bg rgb(228, 225, 219) border solid rgb(107, 96, 88)"
+ },
+ {
+  "where": "Sandhu · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Stirling · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Tan · disc (you)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Vane-Coe · disc (agent)",
+  "ok": true,
+  "detail": "bg rgb(42, 58, 82) border solid rgb(244, 238, 229)"
+ },
+ {
+  "where": "Whitfield · disc (none)",
+  "ok": true,
+  "detail": "bg rgb(255, 255, 255) border dotted rgb(42, 58, 82)"
+ }
+]

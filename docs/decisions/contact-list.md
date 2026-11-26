@@ -2,12 +2,22 @@
 
 ## Current state
 
-- Newest recorded build: Contact list rows v1 (26 Nov, branch-only, section below). Before it: Contact list v18 → v18.3 (15–17 Oct; refs design-refs/contact-list-v18*/, reports reports/contact-list-v18*/). v18's branch tip is in main.
+- Newest recorded build: Contact list rows v1.2 (26 Nov, branch-only, section below); before it rows v1. Before it: Contact list v18 → v18.3 (15–17 Oct; refs design-refs/contact-list-v18*/, reports reports/contact-list-v18*/). v18's branch tip is in main.
 - The agent card v1 (5 Oct) is the only agent editor; v16's agent panel and full screen stand where v17/v18 do not replace them.
 - The Agent list spec (July) and v11–v15 are older builds kept for their data laws (the three axes, materials storage, the two-systems exception).
 - Agent location/territory: ISO alpha-2 `country` + `homeCountry`; see the section of that name.
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
+
+## Branch-only (not on main): `contact-list-rows-v1-2` — every ruling since v1, and the revamped filter panel (26 Nov; ref = design-refs/contact-list-rows-v1-2/contact-list-rows-v1-2.html + screens; report reports/contact-list-rows-v1-2/REPORT.md)
+- **Query status takes the spare width** (290·90·≤360·180·(≥220,1fr)·30 / 262·72·≤300·160·(≥196,1fr)·30 / 228·64·1fr·138·156·22) and its content is centred between Response policy and the › (the › sits at its 30px column's left).
+- **⚠️ ONLY THE HEADING ROW PINS, inside the frame, at the filter panel's own sticky top** (read off `.qc153-rail`'s computed `top`, never restated). The v1.1 cap is retired; the light bar and the A–Z index scroll away. The panel is capped to the room under its top and scrolls inside itself, or the tall-panel rule unpins it.
+- **Headings: typewriter 18/16px on the Contact list's heading tokens** (`--clr-head-bg` #d3deea, `--clr-head-ink` #1f2c40, `--clr-head-edge` #b9c9da). ⚠️ The long/short word spans inside a heading must inherit its face (the brand sheet names bare spans).
+- **The row:** genres as tags in lines (`ContactRowParts` `GenreLines`: 2 a line, 3 at a card of 1250+, 1 below 980; ≤2 lines; "+n"); Fit rated from the row through the card's own setter (`editKitFor(agent).save({ rating })`); no "!" on the initials; the action is the small outline button, swapping with the status on hover, at the row's end with `(hover: none)`.
+- **One set of action words** (the query card's): `lib/contactV24` CALL_BUTTON, `lib/agentCardV2` acFoot and `lib/agentCard` primaryFor all say "Send your partial / full / revision", "Nudge".
+- **The panel (ContactViews on the shared shell):** Your list · Open to queries? · Fit · Replies · Genres sought · Outside the UK · Missing details. `ContactFilters` gains `fit`, `reply`, `abroad` (`AgentFacts.abroad` set by the page from getHomeCountry). Counts are FACETED (`lib/contactPanel` `panelCounts`).
+- **Letter margin 18px below a card of 980** (so a whole tag shows at 1280); one section a stage under the status sort.
+- **Locks:** `tests/e2e/contactListRows.measure.ts` M1–M20 (`CLR_MUTATE=m8,m10,m11,m14,m15`; M20 is a `toHaveScreenshot` of the Query Centre's panel, baseline in `contactListRows.measure.ts-snapshots/`); unit `contactListRows.test.tsx`, `contactQcLayout.test.tsx`, `lib/contactPanel.test.ts`.
 
 ## Branch-only (not on main): `contact-list-rows-v1` — the list's columns, cells, sorting and search (26 Nov; ref = design-refs/contact-list-rows-v1/contact-list-rows-v1.html + screens; report reports/contact-list-rows-v1/REPORT.md)
 - **The columns are Agent · Fit · Genres sought · Response policy · Query status · ›, on FIXED widths read from the list card's own width** (a container query `clr` on `.cl26-card`, its content box): 290·90·≤360·180·220·rest at 1150 and up, 262·72·≤300·160·196·rest from 980, 228·64·rest·138·156·16 below (gap 24, then 14). Spare width collects in the last track before the ›, never between columns. `contactListRows.css`.

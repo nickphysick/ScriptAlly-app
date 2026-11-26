@@ -1,0 +1,732 @@
+
+> react-example@0.0.0 e2e:emu
+> node scripts/emu.mjs e2e tests/e2e/contactListRows.measure.ts --project=measure --update-snapshots
+
+[heavy-slot] sweep (on acquire): nothing left over.
+vite v6.4.6 building for emulator...
+transforming...
+✓ 4146 modules transformed.
+../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js (14422:32): Use of eval in "../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/auth/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr12/src/lib/accountEmail.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr12/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/firebase.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/firestore/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr12/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/yourNotesStore.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr12/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/letters/LetterDesk.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/letters/QueryLettersPage.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/manuscripts/ComparableTitlesPage.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/manuscripts/v12/Msv21Dialogs.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/manuscripts/v28/MsEditDrawer.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/packages/v26/usePk26Model.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/packages/v4/usePackagesModel.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/packages/v62/usePk62Actions.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/todo/ws/WsBatch54.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/todo/ws/wsFlows.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/activityWrite.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/firebase.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/importEvent.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/manuscriptV29.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/manuscriptWrite.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/nudgeUndo.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/nudgeWrite.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/practiceQuery.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/qc1522Write.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/closeSave.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/sendBy.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/sentCorrect.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/saveAgentEdits.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/saveQueryEdits.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr12/src/lib/firebase.ts is dynamically imported by /Users/nickphysick/ScriptAlly-clr12/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr12/src/marketing/ContactPage.tsx, /Users/nickphysick/ScriptAlly-clr12/src/marketing/appCheck.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr12/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/AgentList.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/card/AgentCardHost.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/card/HostAgentCard.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/contact/AgentCard262.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/agents/contact/useHkFixes.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr12/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr12/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/storage/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr12/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/firebase.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr12/src/lib/db.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr12/src/components/shell/AppShell.tsx is dynamically imported by /Users/nickphysick/ScriptAlly-clr12/src/components/onboarding/HandoffNav.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr12/src/App.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr12/src/components/help/HelpArticlePage.tsx, /Users/nickphysick/ScriptAlly-clr12/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/inviteCode.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/sendFeedback.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr12/src/marketing/ContactPage.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr12/src/lib/aiCallable.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/xlsx/xlsx.mjs is dynamically imported by /Users/nickphysick/ScriptAlly-clr12/src/lib/importReadRoute.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/templateFile.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/templateImport.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr12/src/lib/sheetText.ts, /Users/nickphysick/ScriptAlly-clr12/src/lib/smartImport.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist-emu/index.html                                    6.23 kB │ gzip:     2.21 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6m 51s
+[emu-guard] 24.7 GB free. Debug logs: /dev/null.
+i  emulators: Starting emulators: auth, firestore, storage
+i  emulators: Detected demo project ID "demo-scriptally", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Importing data from /Users/nickphysick/ScriptAlly-clr12/tests/emulator-data/firestore_export/firestore_export.overall_export_metadata
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+⚠  Unexpected rules runtime error: Picked up JAVA_TOOL_OPTIONS: -Xmx1536m -XX:ActiveProcessorCount=2
+
+Could not find metadata directory at "/Users/nickphysick/ScriptAlly-clr12/tests/emulator-data/storage_export/metadata" and/or blobs directory at "/Users/nickphysick/ScriptAlly-clr12/tests/emulator-data/storage_export/blobs".
+i  Running script: node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure' '--update-snapshots'
+auth emulator: harness@scriptally.test (uid LS4ymFFCEvhN82advZQJ5zkr7sv2) ready
+  ➜  Local:   http://127.0.0.1:4321/
+[load-guard] 1-minute load 39.29 at the start of the run
+
+Running 14 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (3.4s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M1 · 1280 · clr-achebe · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-achebe · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-achebe · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-blackwood · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-blackwood · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-blackwood · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-carey · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-carey · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-carey · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-ellison · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-ellison · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-ellison · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-ferris · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-ferris · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-ferris · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-holt · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-holt · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-holt · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-hussain · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-hussain · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-hussain · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-lang · policy left — left 388.0 want 382.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-lang · status left — left 540.0 want 534.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-lang · chev left — left 710.0 want 704.0 (card 812, row 726)
+  ✗ M1 · 1280 · clr-morrow · policy left — left 388.0 want 382.0 (card 812, row 726)
+[M1] 412/640 green
+  ✘   2 [measure] › tests/e2e/contactListRows.measure.ts:200:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 (16.0s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+[M5] 9/9 green
+  ✓   3 [measure] › tests/e2e/contactListRows.measure.ts:267:1 › M5 · the action's words (re-pointed by v1.2: the query card's words everywhere; no action on a closed query) (4.5s)
+[M6] 36/36 green
+  ✓   4 [measure] › tests/e2e/contactListRows.measure.ts:297:1 › M6 · heading sorts, both ways; the chip agrees (9.0s)
+[M7] 6/6 green
+  ✓   5 [measure] › tests/e2e/contactListRows.measure.ts:346:1 › M7 · opens A to Z; the search's words (4.4s)
+  ✗ M8 · 1280 · clr-achebe · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-blackwood · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-carey · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-ellison · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-ferris · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-holt · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-hussain · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-lang · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-morrow · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-okafor · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-pemberton · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-pryce · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-quinn · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-reed · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-sandhu · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-stirling · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-tan · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-vane-coe · parts — pol true chev true rest false
+  ✗ M8 · 1280 · clr-whitfield · parts — pol true chev true rest false
+  ✗ M8 · 1440 · clr-achebe · parts — pol true chev true rest false
+  ✗ M8 · 1440 · clr-blackwood · parts — pol true chev true rest false
+  ✗ M8 · 1440 · clr-carey · parts — pol true chev true rest false
+  ✗ M8 · 1440 · clr-ellison · parts — pol true chev true rest false
+  ✗ M8 · 1440 · clr-ferris · parts — pol true chev true rest false
+  ✗ M8 · 1440 · clr-holt · parts — pol true chev true rest false
+[M8] 4/80 green
+  ✘   6 [measure] › tests/e2e/contactListRows.measure.ts:368:1 › M8, M9, M11 · status centred in its space; typewriter headings; genre tags in lines (15.9s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M10 · 1440 · heading top = panel top — headings 306.0 panel -498.8
+  ✗ M10 · 1440 · rounded top corners — radius 0/0
+  ✗ M10 · 1440 · a soft shadow once stuck — shadow none
+  ✗ M10 · 1920 · heading top = panel top — headings 306.0 panel -498.8
+  ✗ M10 · 1920 · rounded top corners — radius 0/0
+  ✗ M10 · 1920 · a soft shadow once stuck — shadow none
+[M10] 4/10 green
+  ✘   7 [measure] › tests/e2e/contactListRows.measure.ts:429:1 › M10 · pinned: the heading row level with the filter panel, rounded, nothing showing above (9.6s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M13 · no "!" on this page — 3 bangs
+[M13] 19/20 green
+  ✘   8 [measure] › tests/e2e/contactListRows.measure.ts:464:1 › M13, M14, M16 · plain discs; the status/action swap; the small outline button and its words (13.7s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M15 · Achebe · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Blackwood · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Carey · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Ellison · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Ferris · button in the last column — end false inside false centre-action shown true
+  ✗ M15 · Holt · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Hussain · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Lang · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Morrow · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Okafor · button in the last column — end false inside false centre-action shown true
+  ✗ M15 · Pemberton · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Pryce · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Quinn · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Reed · keeps its ›, no button — chev false end false
+  ✗ M15 · Sandhu · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Stirling · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Tan · button in the last column — end false inside false centre-action shown true
+  ✗ M15 · Vane-Coe · button in the last column — end false inside false centre-action shown false
+  ✗ M15 · Whitfield · keeps its ›, no button — chev false end false
+[M15] 19/38 green
+  ✘   9 [measure] › tests/e2e/contactListRows.measure.ts:534:1 › M15 · no hover: the action at the row's end, the row still two lines (10.0s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✘  10 [measure] › tests/e2e/contactListRows.measure.ts:602:1 › M17, M18 · the panel's sections and faceted counts; Clear all (4.0m)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M19 · Achebe · a full tag at 1280 — 0 full tags
+  ✗ M19 · Blackwood · a full tag at 1280 — 0 full tags
+  ✗ M19 · Ellison · a full tag at 1280 — 0 full tags
+  ✗ M19 · Ferris · a full tag at 1280 — 0 full tags
+  ✗ M19 · Holt · a full tag at 1280 — 0 full tags
+  ✗ M19 · Hussain · a full tag at 1280 — 0 full tags
+  ✗ M19 · Morrow · a full tag at 1280 — 0 full tags
+  ✗ M19 · Okafor · a full tag at 1280 — 0 full tags
+  ✗ M19 · Pemberton · a full tag at 1280 — 0 full tags
+  ✗ M19 · Pryce · a full tag at 1280 — 0 full tags
+  ✗ M19 · Quinn · a full tag at 1280 — 0 full tags
+  ✗ M19 · Reed · a full tag at 1280 — 0 full tags
+  ✗ M19 · Sandhu · a full tag at 1280 — 0 full tags
+  ✗ M19 · Stirling · a full tag at 1280 — 0 full tags
+  ✗ M19 · Tan · a full tag at 1280 — 0 full tags
+  ✗ M19 · Vane-Coe · a full tag at 1280 — 0 full tags
+  ✗ M19 · Whitfield · a full tag at 1280 — 0 full tags
+  ✗ M19 · one Queried section — sections t:you:fr t:you:pr t:you:queried t:fs t:queried t:none t:closed
+[M19] 4/22 green
+  ✘  11 [measure] › tests/e2e/contactListRows.measure.ts:647:1 › M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge due first (5.2s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+
+  ✘  12 [measure] › tests/e2e/contactListRows.measure.ts:681:1 › M12 · rate Fit from the row: hover, click, keyboard; saved, toasted, drawn (3.0m)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+A snapshot doesn't exist at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts-snapshots/m20-qc-filter-panel-1440-measure-darwin.png, writing actual.
+  ✓  13 [measure] › tests/e2e/contactListRows.measure.ts:717:1 › M20 · the Query Centre's filter panel is unchanged (4.9s)
+  ✓  14 [measure] › tests/e2e/contactListRows.measure.ts:727:1 › screens · the ref's rest views at the four widths (15.5s)
+
+
+  1) [measure] › tests/e2e/contactListRows.measure.ts:200:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 230
+
+    - Array []
+    + Array [
+    +   "1280 · clr-achebe · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-achebe · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-achebe · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-blackwood · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-blackwood · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-blackwood · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-carey · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-carey · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-carey · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-ellison · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-ellison · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-ellison · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-ferris · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-ferris · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-ferris · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-holt · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-holt · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-holt · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-hussain · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-hussain · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-hussain · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-lang · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-lang · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-lang · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-morrow · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-morrow · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-morrow · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-okafor · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-okafor · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-okafor · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-pemberton · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-pemberton · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-pemberton · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-pryce · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-pryce · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-pryce · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-quinn · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-quinn · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-quinn · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-reed · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-reed · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-reed · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-sandhu · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-sandhu · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-sandhu · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-stirling · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-stirling · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-stirling · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-tan · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-tan · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-tan · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-vane-coe · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-vane-coe · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-vane-coe · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1280 · clr-whitfield · policy left — left 388.0 want 382.0 (card 812, row 726)",
+    +   "1280 · clr-whitfield · status left — left 540.0 want 534.0 (card 812, row 726)",
+    +   "1280 · clr-whitfield · chev left — left 710.0 want 704.0 (card 812, row 726)",
+    +   "1440 · clr-achebe · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-achebe · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-achebe · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-blackwood · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-blackwood · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-blackwood · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-carey · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-carey · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-carey · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-ellison · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-ellison · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-ellison · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-ferris · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-ferris · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-ferris · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-holt · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-holt · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-holt · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-hussain · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-hussain · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-hussain · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-lang · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-lang · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-lang · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-morrow · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-morrow · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-morrow · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-okafor · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-okafor · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-okafor · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-pemberton · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-pemberton · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-pemberton · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-pryce · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-pryce · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-pryce · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-quinn · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-quinn · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-quinn · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-reed · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-reed · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-reed · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-sandhu · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-sandhu · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-sandhu · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-stirling · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-stirling · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-stirling · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-tan · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-tan · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-tan · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-vane-coe · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-vane-coe · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-vane-coe · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1440 · clr-whitfield · policy left — left 548.0 want 542.0 (card 972, row 886)",
+    +   "1440 · clr-whitfield · status left — left 700.0 want 694.0 (card 972, row 886)",
+    +   "1440 · clr-whitfield · chev left — left 870.0 want 864.0 (card 972, row 886)",
+    +   "1600 · clr-achebe · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-achebe · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-achebe · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-blackwood · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-blackwood · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-blackwood · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-carey · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-carey · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-carey · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-ellison · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-ellison · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-ellison · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-ferris · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-ferris · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-ferris · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-holt · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-holt · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-holt · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-hussain · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-hussain · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-hussain · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-lang · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-lang · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-lang · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-morrow · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-morrow · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-morrow · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-okafor · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-okafor · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-okafor · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-pemberton · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-pemberton · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-pemberton · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-pryce · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-pryce · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-pryce · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-quinn · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-quinn · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-quinn · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-reed · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-reed · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-reed · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-sandhu · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-sandhu · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-sandhu · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-stirling · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-stirling · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-stirling · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-tan · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-tan · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-tan · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-vane-coe · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-vane-coe · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-vane-coe · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1600 · clr-whitfield · policy left — left 622.0 want 612.0 (card 1132, row 1046)",
+    +   "1600 · clr-whitfield · status left — left 806.0 want 796.0 (card 1132, row 1046)",
+    +   "1600 · clr-whitfield · chev left — left 1026.0 want 1016.0 (card 1132, row 1046)",
+    +   "1920 · clr-achebe · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-achebe · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-achebe · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-blackwood · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-blackwood · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-blackwood · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-carey · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-carey · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-carey · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-ellison · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-ellison · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-ellison · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-ferris · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-ferris · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-ferris · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-holt · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-holt · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-holt · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-hussain · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-hussain · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-hussain · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-lang · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-lang · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-lang · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-morrow · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-morrow · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-morrow · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-okafor · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-okafor · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-okafor · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-pemberton · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-pemberton · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-pemberton · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-pryce · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-pryce · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-pryce · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-quinn · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-quinn · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-quinn · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-reed · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-reed · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-reed · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-sandhu · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-sandhu · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-sandhu · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-stirling · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-stirling · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-stirling · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-tan · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-tan · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-tan · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-vane-coe · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-vane-coe · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-vane-coe · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    +   "1920 · clr-whitfield · policy left — left 722.0 want 716.0 (card 1280, row 1194)",
+    +   "1920 · clr-whitfield · status left — left 926.0 want 920.0 (card 1280, row 1194)",
+    +   "1920 · clr-whitfield · chev left — left 1170.0 want 1164.0 (card 1280, row 1194)",
+    + ]
+
+      83 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      84 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 85 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      86 |   }
+      87 | }
+      88 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:85:83)
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:264:6
+
+    Error Context: test-results/contactListRows.measure.ts-cd926-ag-—-at-1280-1440-1600-1920-measure/error-context.md
+
+  2) [measure] › tests/e2e/contactListRows.measure.ts:368:1 › M8, M9, M11 · status centred in its space; typewriter headings; genre tags in lines 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 78
+
+    - Array []
+    + Array [
+    +   "1280 · clr-achebe · parts — pol true chev true rest false",
+    +   "1280 · clr-blackwood · parts — pol true chev true rest false",
+    +   "1280 · clr-carey · parts — pol true chev true rest false",
+    +   "1280 · clr-ellison · parts — pol true chev true rest false",
+    +   "1280 · clr-ferris · parts — pol true chev true rest false",
+    +   "1280 · clr-holt · parts — pol true chev true rest false",
+    +   "1280 · clr-hussain · parts — pol true chev true rest false",
+    +   "1280 · clr-lang · parts — pol true chev true rest false",
+    +   "1280 · clr-morrow · parts — pol true chev true rest false",
+    +   "1280 · clr-okafor · parts — pol true chev true rest false",
+    +   "1280 · clr-pemberton · parts — pol true chev true rest false",
+    +   "1280 · clr-pryce · parts — pol true chev true rest false",
+    +   "1280 · clr-quinn · parts — pol true chev true rest false",
+    +   "1280 · clr-reed · parts — pol true chev true rest false",
+    +   "1280 · clr-sandhu · parts — pol true chev true rest false",
+    +   "1280 · clr-stirling · parts — pol true chev true rest false",
+    +   "1280 · clr-tan · parts — pol true chev true rest false",
+    +   "1280 · clr-vane-coe · parts — pol true chev true rest false",
+    +   "1280 · clr-whitfield · parts — pol true chev true rest false",
+    +   "1440 · clr-achebe · parts — pol true chev true rest false",
+    +   "1440 · clr-blackwood · parts — pol true chev true rest false",
+    +   "1440 · clr-carey · parts — pol true chev true rest false",
+    +   "1440 · clr-ellison · parts — pol true chev true rest false",
+    +   "1440 · clr-ferris · parts — pol true chev true rest false",
+    +   "1440 · clr-holt · parts — pol true chev true rest false",
+    +   "1440 · clr-hussain · parts — pol true chev true rest false",
+    +   "1440 · clr-lang · parts — pol true chev true rest false",
+    +   "1440 · clr-morrow · parts — pol true chev true rest false",
+    +   "1440 · clr-okafor · parts — pol true chev true rest false",
+    +   "1440 · clr-pemberton · parts — pol true chev true rest false",
+    +   "1440 · clr-pryce · parts — pol true chev true rest false",
+    +   "1440 · clr-quinn · parts — pol true chev true rest false",
+    +   "1440 · clr-reed · parts — pol true chev true rest false",
+    +   "1440 · clr-sandhu · parts — pol true chev true rest false",
+    +   "1440 · clr-stirling · parts — pol true chev true rest false",
+    +   "1440 · clr-tan · parts — pol true chev true rest false",
+    +   "1440 · clr-vane-coe · parts — pol true chev true rest false",
+    +   "1440 · clr-whitfield · parts — pol true chev true rest false",
+    +   "1600 · clr-achebe · parts — pol true chev true rest false",
+    +   "1600 · clr-blackwood · parts — pol true chev true rest false",
+    +   "1600 · clr-carey · parts — pol true chev true rest false",
+    +   "1600 · clr-ellison · parts — pol true chev true rest false",
+    +   "1600 · clr-ferris · parts — pol true chev true rest false",
+    +   "1600 · clr-holt · parts — pol true chev true rest false",
+    +   "1600 · clr-hussain · parts — pol true chev true rest false",
+    +   "1600 · clr-lang · parts — pol true chev true rest false",
+    +   "1600 · clr-morrow · parts — pol true chev true rest false",
+    +   "1600 · clr-okafor · parts — pol true chev true rest false",
+    +   "1600 · clr-pemberton · parts — pol true chev true rest false",
+    +   "1600 · clr-pryce · parts — pol true chev true rest false",
+    +   "1600 · clr-quinn · parts — pol true chev true rest false",
+    +   "1600 · clr-reed · parts — pol true chev true rest false",
+    +   "1600 · clr-sandhu · parts — pol true chev true rest false",
+    +   "1600 · clr-stirling · parts — pol true chev true rest false",
+    +   "1600 · clr-tan · parts — pol true chev true rest false",
+    +   "1600 · clr-vane-coe · parts — pol true chev true rest false",
+    +   "1600 · clr-whitfield · parts — pol true chev true rest false",
+    +   "1920 · clr-achebe · parts — pol true chev true rest false",
+    +   "1920 · clr-blackwood · parts — pol true chev true rest false",
+    +   "1920 · clr-carey · parts — pol true chev true rest false",
+    +   "1920 · clr-ellison · parts — pol true chev true rest false",
+    +   "1920 · clr-ferris · parts — pol true chev true rest false",
+    +   "1920 · clr-holt · parts — pol true chev true rest false",
+    +   "1920 · clr-hussain · parts — pol true chev true rest false",
+    +   "1920 · clr-lang · parts — pol true chev true rest false",
+    +   "1920 · clr-morrow · parts — pol true chev true rest false",
+    +   "1920 · clr-okafor · parts — pol true chev true rest false",
+    +   "1920 · clr-pemberton · parts — pol true chev true rest false",
+    +   "1920 · clr-pryce · parts — pol true chev true rest false",
+    +   "1920 · clr-quinn · parts — pol true chev true rest false",
+    +   "1920 · clr-reed · parts — pol true chev true rest false",
+    +   "1920 · clr-sandhu · parts — pol true chev true rest false",
+    +   "1920 · clr-stirling · parts — pol true chev true rest false",
+    +   "1920 · clr-tan · parts — pol true chev true rest false",
+    +   "1920 · clr-vane-coe · parts — pol true chev true rest false",
+    +   "1920 · clr-whitfield · parts — pol true chev true rest false",
+    + ]
+
+      83 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      84 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 85 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      86 |   }
+      87 | }
+      88 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:85:83)
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:426:6
+
+    Error Context: test-results/contactListRows.measure.ts-d0714-eadings-genre-tags-in-lines-measure/error-context.md
+
+  3) [measure] › tests/e2e/contactListRows.measure.ts:429:1 › M10 · pinned: the heading row level with the filter panel, rounded, nothing showing above 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "1440 · heading top = panel top — headings 306.0 panel -498.8",
+    +   "1440 · rounded top corners — radius 0/0",
+    +   "1440 · a soft shadow once stuck — shadow none",
+    +   "1920 · heading top = panel top — headings 306.0 panel -498.8",
+    +   "1920 · rounded top corners — radius 0/0",
+    +   "1920 · a soft shadow once stuck — shadow none",
+    + ]
+
+      83 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      84 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 85 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      86 |   }
+      87 | }
+      88 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:85:83)
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:461:7
+
+    Error Context: test-results/contactListRows.measure.ts-d59fb-unded-nothing-showing-above-measure/error-context.md
+
+  4) [measure] › tests/e2e/contactListRows.measure.ts:464:1 › M13, M14, M16 · plain discs; the status/action swap; the small outline button and its words 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "no \"!\" on this page — 3 bangs",
+    + ]
+
+      83 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      84 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 85 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      86 |   }
+      87 | }
+      88 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:85:83)
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:531:7
+
+    Error Context: test-results/contactListRows.measure.ts-0f573-utline-button-and-its-words-measure/error-context.md
+
+  5) [measure] › tests/e2e/contactListRows.measure.ts:534:1 › M15 · no hover: the action at the row's end, the row still two lines 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 21
+
+    - Array []
+    + Array [
+    +   "Achebe · button in the last column — end false inside false centre-action shown false",
+    +   "Blackwood · button in the last column — end false inside false centre-action shown false",
+    +   "Carey · button in the last column — end false inside false centre-action shown false",
+    +   "Ellison · button in the last column — end false inside false centre-action shown false",
+    +   "Ferris · button in the last column — end false inside false centre-action shown true",
+    +   "Holt · button in the last column — end false inside false centre-action shown false",
+    +   "Hussain · button in the last column — end false inside false centre-action shown false",
+    +   "Lang · button in the last column — end false inside false centre-action shown false",
+    +   "Morrow · button in the last column — end false inside false centre-action shown false",
+    +   "Okafor · button in the last column — end false inside false centre-action shown true",
+    +   "Pemberton · button in the last column — end false inside false centre-action shown false",
+    +   "Pryce · button in the last column — end false inside false centre-action shown false",
+    +   "Quinn · button in the last column — end false inside false centre-action shown false",
+    +   "Reed · keeps its ›, no button — chev false end false",
+    +   "Sandhu · button in the last column — end false inside false centre-action shown false",
+    +   "Stirling · button in the last column — end false inside false centre-action shown false",
+    +   "Tan · button in the last column — end false inside false centre-action shown true",
+    +   "Vane-Coe · button in the last column — end false inside false centre-action shown false",
+    +   "Whitfield · keeps its ›, no button — chev false end false",
+    + ]
+
+      83 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      84 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 85 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      86 |   }
+      87 | }
+      88 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:85:83)
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:566:7
+
+    Error Context: test-results/contactListRows.measure.ts-6e6e5-end-the-row-still-two-lines-measure/error-context.md
+
+  6) [measure] › tests/e2e/contactListRows.measure.ts:602:1 › M17, M18 · the panel's sections and faceted counts; Clear all 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('.qc153-rail.fp').visible().locator('[data-clq-opt="genre:crime"]')
+
+
+      622 |   m18.check("Clear all hidden at rest", !P.clear, `shown ${P.clear}`);
+      623 |   /* Genres "Crime" plus Open */
+    > 624 |   await fp.locator('[data-clq-opt="genre:crime"]').click();
+          |                                                    ^
+      625 |   await fp.locator('[data-clq-opt="door:open"]').click();
+      626 |   await page.waitForTimeout(400);
+      627 |   P = await readPanel(page);
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:624:52
+
+    Error Context: test-results/contactListRows.measure.ts-d1246-nd-faceted-counts-Clear-all-measure/error-context.md
+
+  7) [measure] › tests/e2e/contactListRows.measure.ts:647:1 › M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge due first 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 20
+
+    - Array []
+    + Array [
+    +   "Achebe · a full tag at 1280 — 0 full tags",
+    +   "Blackwood · a full tag at 1280 — 0 full tags",
+    +   "Ellison · a full tag at 1280 — 0 full tags",
+    +   "Ferris · a full tag at 1280 — 0 full tags",
+    +   "Holt · a full tag at 1280 — 0 full tags",
+    +   "Hussain · a full tag at 1280 — 0 full tags",
+    +   "Morrow · a full tag at 1280 — 0 full tags",
+    +   "Okafor · a full tag at 1280 — 0 full tags",
+    +   "Pemberton · a full tag at 1280 — 0 full tags",
+    +   "Pryce · a full tag at 1280 — 0 full tags",
+    +   "Quinn · a full tag at 1280 — 0 full tags",
+    +   "Reed · a full tag at 1280 — 0 full tags",
+    +   "Sandhu · a full tag at 1280 — 0 full tags",
+    +   "Stirling · a full tag at 1280 — 0 full tags",
+    +   "Tan · a full tag at 1280 — 0 full tags",
+    +   "Vane-Coe · a full tag at 1280 — 0 full tags",
+    +   "Whitfield · a full tag at 1280 — 0 full tags",
+    +   "one Queried section — sections t:you:fr t:you:pr t:you:queried t:fs t:queried t:none t:closed",
+    + ]
+
+      83 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      84 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 85 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      86 |   }
+      87 | }
+      88 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:85:83)
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:678:7
+
+    Error Context: test-results/contactListRows.measure.ts-a1656-ied-section-nudge-due-first-measure/error-context.md
+
+  8) [measure] › tests/e2e/contactListRows.measure.ts:681:1 › M12 · rate Fit from the row: hover, click, keyboard; saved, toasted, drawn 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: locator.click: Test timeout of 180000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl26="row"][data-id="clr-carey"]').visible().locator('[data-clr="rate-star"]').nth(3)
+
+
+      694 |     m12.check("five buttons on hover", vis.length === 5 && vis.every((o) => o === 1), `opacities ${vis.join(",")}`);
+      695 |     if (!MUTATE.size) await page.screenshot({ path: `${DIR}/shots/hover-rate-fit-1440.png` });
+    > 696 |     await stars.nth(3).click();
+          |                        ^
+      697 |     await page.waitForTimeout(1200);
+      698 |     m12.check("saved 4 (read back from the store)", store("Carey").starRating === 4, JSON.stringify(store("Carey")));
+      699 |     const toast = await page.getByText("Agent fit: great fit").first().isVisible().catch(() => false);
+        at /Users/nickphysick/ScriptAlly-clr12/tests/e2e/contactListRows.measure.ts:696:24
+
+    Error Context: test-results/contactListRows.measure.ts-84e54-eyboard-saved-toasted-drawn-measure/error-context.md
+
+  8 failed
+    [measure] › tests/e2e/contactListRows.measure.ts:200:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+    [measure] › tests/e2e/contactListRows.measure.ts:368:1 › M8, M9, M11 · status centred in its space; typewriter headings; genre tags in lines 
+    [measure] › tests/e2e/contactListRows.measure.ts:429:1 › M10 · pinned: the heading row level with the filter panel, rounded, nothing showing above 
+    [measure] › tests/e2e/contactListRows.measure.ts:464:1 › M13, M14, M16 · plain discs; the status/action swap; the small outline button and its words 
+    [measure] › tests/e2e/contactListRows.measure.ts:534:1 › M15 · no hover: the action at the row's end, the row still two lines 
+    [measure] › tests/e2e/contactListRows.measure.ts:602:1 › M17, M18 · the panel's sections and faceted counts; Clear all 
+    [measure] › tests/e2e/contactListRows.measure.ts:647:1 › M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge due first 
+    [measure] › tests/e2e/contactListRows.measure.ts:681:1 › M12 · rate Fit from the row: hover, click, keyboard; saved, toasted, drawn 
+  6 passed (9.2m)
+[load-guard] 1-minute load 2.66 at the end of the run
+⚠  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  auth: Stopping Authentication Emulator
+i  storage: Stopping Storage Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure' '--update-snapshots'" exited with code 1

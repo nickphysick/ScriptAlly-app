@@ -1,0 +1,357 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "Achebe · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Achebe · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Achebe · one centre",
+  "ok": true,
+  "detail": "action 1275.0,625.2 status 1275.0,625.1"
+ },
+ {
+  "where": "Achebe · height unchanged",
+  "ok": true,
+  "detail": "72 → 72"
+ },
+ {
+  "where": "Blackwood · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Blackwood · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Blackwood · one centre",
+  "ok": true,
+  "detail": "action 1275.0,703.2 status 1275.0,703.1"
+ },
+ {
+  "where": "Blackwood · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Carey · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Carey · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Carey · one centre",
+  "ok": true,
+  "detail": "action 1275.0,781.2 status 1275.0,781.1"
+ },
+ {
+  "where": "Carey · height unchanged",
+  "ok": true,
+  "detail": "72 → 72"
+ },
+ {
+  "where": "Ellison · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Ellison · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Ellison · one centre",
+  "ok": true,
+  "detail": "action 1275.0,851.2 status 1275.0,851.1"
+ },
+ {
+  "where": "Ellison · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Ferris · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Ferris · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Ferris · one centre",
+  "ok": true,
+  "detail": "action 1275.0,505.2 status 1275.0,505.1"
+ },
+ {
+  "where": "Ferris · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Holt · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Holt · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Holt · one centre",
+  "ok": true,
+  "detail": "action 1275.0,588.2 status 1275.0,588.1"
+ },
+ {
+  "where": "Holt · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Hussain · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Hussain · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Hussain · one centre",
+  "ok": true,
+  "detail": "action 1275.0,671.2 status 1275.0,671.1"
+ },
+ {
+  "where": "Hussain · height unchanged",
+  "ok": true,
+  "detail": "83 → 83"
+ },
+ {
+  "where": "Lang · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Lang · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Lang · one centre",
+  "ok": true,
+  "detail": "action 1275.0,749.2 status 1275.0,749.1"
+ },
+ {
+  "where": "Lang · height unchanged",
+  "ok": true,
+  "detail": "72 → 72"
+ },
+ {
+  "where": "Morrow · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Morrow · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Morrow · one centre",
+  "ok": true,
+  "detail": "action 1275.0,827.2 status 1275.0,827.1"
+ },
+ {
+  "where": "Morrow · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Okafor · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Okafor · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Okafor · one centre",
+  "ok": true,
+  "detail": "action 1275.0,851.2 status 1275.0,851.1"
+ },
+ {
+  "where": "Okafor · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Pemberton · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Pemberton · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Pemberton · one centre",
+  "ok": true,
+  "detail": "action 1275.0,505.2 status 1275.0,505.1"
+ },
+ {
+  "where": "Pemberton · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Pryce · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Pryce · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Pryce · one centre",
+  "ok": true,
+  "detail": "action 1275.0,588.2 status 1275.0,588.1"
+ },
+ {
+  "where": "Pryce · height unchanged",
+  "ok": true,
+  "detail": "83 → 83"
+ },
+ {
+  "where": "Quinn · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Quinn · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Quinn · one centre",
+  "ok": true,
+  "detail": "action 1275.0,666.2 status 1275.0,666.1"
+ },
+ {
+  "where": "Quinn · height unchanged",
+  "ok": true,
+  "detail": "72 → 72"
+ },
+ {
+  "where": "Reed · no action, no swap",
+  "ok": true,
+  "detail": "act -1 rest 1"
+ },
+ {
+  "where": "Sandhu · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Sandhu · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Sandhu · one centre",
+  "ok": true,
+  "detail": "action 1275.0,823.1 status 1275.0,823.1"
+ },
+ {
+  "where": "Sandhu · height unchanged",
+  "ok": true,
+  "detail": "73.96875 → 73.96875"
+ },
+ {
+  "where": "Stirling · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Stirling · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Stirling · one centre",
+  "ok": true,
+  "detail": "action 1275.0,851.1 status 1275.0,851.1"
+ },
+ {
+  "where": "Stirling · height unchanged",
+  "ok": true,
+  "detail": "83 → 83"
+ },
+ {
+  "where": "Tan · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Tan · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Tan · one centre",
+  "ok": true,
+  "detail": "action 1275.0,536.1 status 1275.0,536.1"
+ },
+ {
+  "where": "Tan · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Vane-Coe · at rest",
+  "ok": true,
+  "detail": "rest 1 act 0"
+ },
+ {
+  "where": "Vane-Coe · hovered",
+  "ok": true,
+  "detail": "rest 0 act 1"
+ },
+ {
+  "where": "Vane-Coe · one centre",
+  "ok": true,
+  "detail": "action 1275.0,619.1 status 1275.0,619.1"
+ },
+ {
+  "where": "Vane-Coe · height unchanged",
+  "ok": true,
+  "detail": "82 → 82"
+ },
+ {
+  "where": "Whitfield · no action, no swap",
+  "ok": true,
+  "detail": "act -1 rest 1"
+ }
+]

@@ -12,6 +12,9 @@
  * Every write is delete-before-write, so a re-run restores it. Dates are relative to the run, so the nudge-due query is
  * nudge due on whatever day this runs.
  *
+ * v1.2 (26 Nov): Pemberton not queried (three not queried), Lang and Pryce unrated (five unrated), Quinn in Dublin (two
+ * abroad), Hussain with five genres, Whitfield (closed to queries) carries Crime so the panel's door counts are faceted
+ * observably; the manuscript's genre is Crime. Still 19 agents.
  * The cases (Phase 4's list): unrated ×3 (Carey, Sandhu, Whitfield) · no genres ×2 (Carey, Lang) · three genres
  * (Hussain, Okafor) · no reply time ×2 (Achebe, Pryce) · each policy (always: most; no response means no: Blackwood,
  * Hussain, Sandhu; unstated: Ellison, Whitfield) · abroad: Holt (New York) · nudge due: Ferris · partial requested: Tan ·
@@ -44,20 +47,20 @@ export const CLR_AGENTS = [
   ["Samuel", "Ferris", "Kestrel House", "Oxford", "GB", 4, ["Crime", "Gothic"], 6, false, "Open", [[W(7), "Queried"]]],
   ["Clara", "Holt", "Larkfield Agency", "New York", "US", 4, ["Thriller", "Speculative"], 10, false, "Open",
     [[W(10), "Queried"], [W(6), "Partial Requested"], [W(5), "Partial Sent"], [W(3), "Full Requested"], [W(1), "Full Sent"]]],
-  ["Nadia", "Hussain", "Linden Literary", "London", "GB", 3, ["Literary", "Upmarket", "Book club"], 12, true, "Open", [[W(2), "Queried"]]],
-  ["Beatrice", "Lang", "Corrin & Wade", "London", "GB", 1, [], 8, false, "Open", [[W(1), "Queried"]]],
+  ["Nadia", "Hussain", "Linden Literary", "London", "GB", 3, ["Literary", "Upmarket", "Book club", "Historical", "Saga"], 12, true, "Open", [[W(2), "Queried"]]],
+  ["Beatrice", "Lang", "Corrin & Wade", "London", "GB", null, [], 8, false, "Open", [[W(1), "Queried"]]],
   ["Alistair", "Morrow", "Fernhill Literary", "London", "GB", 4, ["Historical", "Thriller"], 6, false, "Open", [[W(2), "Queried"]]],
   ["Daniel", "Okafor", "Northgate Books", "Leeds", "GB", 5, ["Thriller", "Crime", "Horror"], 6, false, "Open",
     [[W(5), "Queried"], [W(1), "Full Requested"]]],
-  ["Hugo", "Pemberton", "Calloway Literary", "London", "GB", 4, ["Crime", "Psychological"], 8, false, "Open", [[W(3), "Queried"]]],
-  ["Owen", "Pryce", "Tidewell Literary", "Cardiff", "GB", 2, ["Historical", "Saga"], null, false, "Open", [[W(2), "Queried"]]],
-  ["Martha", "Quinn", "Thistle & Bell", "Belfast", "GB", 2, ["Book club"], 8, false, "Open", [[W(1), "Queried"]]],
+  ["Hugo", "Pemberton", "Calloway Literary", "London", "GB", 4, ["Crime", "Psychological"], 8, false, "Open", null],
+  ["Owen", "Pryce", "Tidewell Literary", "Cardiff", "GB", null, ["Historical", "Saga"], null, false, "Open", [[W(2), "Queried"]]],
+  ["Martha", "Quinn", "Thistle & Bell", "Dublin", "IE", 2, ["Book club"], 8, false, "Open", [[W(1), "Queried"]]],
   ["Marcus", "Reed", "Hartley & Co", "London", "GB", 4, ["Crime", "Thriller"], 6, false, "Open", [[W(6), "Queried"], [W(2), "Rejected"]]],
   ["Priya", "Sandhu", "Westbrook Agency", "Birmingham", "GB", null, ["Young adult"], 10, true, "Open", [[W(1), "Queried"]]],
   ["Fenella", "Stirling", "Ashcombe Agency", "Bristol", "GB", 3, ["Upmarket", "Book club"], 12, false, "Open", [[W(2), "Queried"]]],
   ["William", "Tan", "Foxglove Literary", "London", "GB", 4, ["Crime", "Historical"], 8, false, "Open", [[W(4), "Queried"], [5, "Partial Requested"]]],
   ["Harriet", "Vane-Coe", "Stillwater Reps", "Edinburgh", "GB", 5, ["Thriller", "Psychological"], 5, false, "Open", [[W(1), "Queried"]]],
-  ["Eleanor", "Whitfield", "Greenfield Literary", "London", "GB", null, ["Literary", "Book club"], 8, null, "Closed", null],
+  ["Eleanor", "Whitfield", "Greenfield Literary", "London", "GB", null, ["Crime", "Book club"], 8, null, "Closed", null],
 ];
 export const clrId = (surname) => `clr-${surname.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
@@ -89,7 +92,7 @@ export async function seedClr() {
 
   const now = Date.now();
   await base.collection("manuscripts").doc(CLR_MS).set({
-    id: CLR_MS, userId: CLR_UID, title: "The Salt Line", status: "Querying", genre: "Thriller", ageCategory: "Adult",
+    id: CLR_MS, userId: CLR_UID, title: "The Salt Line", status: "Querying", genre: "Crime", ageCategory: "Adult",
     wordCount: 82000, logline: "", statusChangedDate: ymd(now - W(12) * DAY), comps: [],
   });
 

@@ -175,5 +175,8 @@ describe("Contact list rows v1.2 · Phase 3 — the status and its action", () =
     expect(v24).toContain('"Mark partial sent": "Send your partial", "Mark full sent": "Send your full", "Mark revision sent": "Send your revision"');
     const card = readFileSync(new URL("../../../lib/agentCard.ts", import.meta.url), "utf8");
     expect(card).not.toMatch(/"Send the partial"|"Send the full"|"Send a nudge"|"Send the new version"/);
+    /* the mounted card's foot button (lib/agentCardV2 acFoot) */
+    const v2 = readFileSync(new URL("../../../lib/agentCardV2.ts", import.meta.url), "utf8");
+    expect(v2).toContain('label: full ? "Send your full" : "Send your partial"');
   });
 });

@@ -1,0 +1,2332 @@
+[
+ {
+  "where": "1280 · Achebe · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1280 · Achebe · 1 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Achebe · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1280 · Achebe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.3–851.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Achebe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Blackwood · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Blackwood · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Blackwood · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 789.0–839.0 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Ellison · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Ellison · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Ellison · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 777.4–850.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Ferris · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Ferris · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Ferris · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 781.6–846.4 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Holt · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Holt · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Holt · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 777.4–850.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 765.1–862.9 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Hussain · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Hussain · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 5 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Hussain · +n on the last line",
+  "ok": true,
+  "detail": "more false,true"
+ },
+ {
+  "where": "1280 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.3–851.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 763.0–845.3 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Morrow · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Morrow · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Morrow · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 770.4–857.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 777.4–850.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Okafor · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Okafor · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 3 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Okafor · +n on the last line",
+  "ok": true,
+  "detail": "more false,true"
+ },
+ {
+  "where": "1280 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 767.7–840.9 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Pemberton · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Pemberton · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Pemberton · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 763.0–865.0 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Pryce · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Pryce · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Pryce · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 770.4–857.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 788.5–839.5 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Quinn · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1280 · Quinn · 1 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Quinn · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1280 · Quinn · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 770.3–857.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Quinn · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Reed · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Reed · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Reed · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 777.4–850.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Sandhu · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1280 · Sandhu · 1 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Sandhu · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1280 · Sandhu · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 763.5–864.5 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Sandhu · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Stirling · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Stirling · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Stirling · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 770.3–857.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 770.3–857.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Tan · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Tan · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Tan · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 770.4–857.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Vane-Coe · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Vane-Coe · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Vane-Coe · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 777.4–850.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 763.0–865.0 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Whitfield · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1280 · Whitfield · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 812)"
+ },
+ {
+  "where": "1280 · Whitfield · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1280 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1280 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 770.3–857.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Achebe · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1440 · Achebe · 1 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Achebe · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1440 · Achebe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.3–931.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Achebe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Blackwood · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Blackwood · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Blackwood · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 869.0–919.0 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Ellison · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Ellison · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Ellison · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 857.4–930.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Ferris · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Ferris · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Ferris · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 861.6–926.4 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Holt · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Holt · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Holt · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 857.4–930.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 845.1–942.9 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Hussain · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Hussain · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 5 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Hussain · +n on the last line",
+  "ok": true,
+  "detail": "more false,true"
+ },
+ {
+  "where": "1440 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.3–931.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 840.4–927.9 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Morrow · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Morrow · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Morrow · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 850.4–937.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 857.4–930.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Okafor · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Okafor · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 3 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Okafor · +n on the last line",
+  "ok": true,
+  "detail": "more false,true"
+ },
+ {
+  "where": "1440 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 847.7–920.9 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Pemberton · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Pemberton · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Pemberton · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 837.3–950.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Pryce · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Pryce · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Pryce · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 850.4–937.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 868.5–919.5 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Quinn · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1440 · Quinn · 1 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Quinn · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1440 · Quinn · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 850.3–937.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Quinn · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Reed · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Reed · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Reed · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 857.4–930.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Sandhu · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1440 · Sandhu · 1 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Sandhu · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1440 · Sandhu · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 843.5–944.5 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Sandhu · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Stirling · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Stirling · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Stirling · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 850.3–937.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 850.3–937.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Tan · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Tan · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Tan · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 850.4–937.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Vane-Coe · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Vane-Coe · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Vane-Coe · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 857.4–930.6 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 837.3–950.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Whitfield · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1440 · Whitfield · 1 a line",
+  "ok": true,
+  "detail": "lines 1+1 of 2 (per 1, card 972)"
+ },
+ {
+  "where": "1440 · Whitfield · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1440 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 856.2–931.8 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1440 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 850.3–937.7 cell 757.0–1031.0"
+ },
+ {
+  "where": "1440 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Achebe · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Achebe · 2 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Achebe · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Achebe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 948.3–1027.7 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Achebe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Blackwood · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Blackwood · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Blackwood · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 918.3–997.8 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1003.8–1057.7 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Ellison · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Ellison · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Ellison · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 906.6–986.2 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 992.2–1069.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Ferris · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Ferris · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Ferris · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 910.9–990.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 996.4–1065.1 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Holt · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Holt · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Holt · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 895.5–972.7 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 978.7–1080.5 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Hussain · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1600 · Hussain · 2 a line",
+  "ok": true,
+  "detail": "lines 2+2 of 5 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Hussain · +n on the last line",
+  "ok": true,
+  "detail": "more false,true"
+ },
+ {
+  "where": "1600 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 899.6–978.9 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 984.9–1076.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 891.0–975.3 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 981.3–1065.6 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Morrow · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Morrow · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Morrow · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 900.8–992.0 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 998.0–1075.2 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Okafor · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1600 · Okafor · 2 a line",
+  "ok": true,
+  "detail": "lines 2+1 of 3 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Okafor · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1600 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 906.6–986.2 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 992.2–1069.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 952.3–1023.6 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Pemberton · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Pemberton · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Pemberton · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 891.0–967.2 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 973.2–1085.0 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Pryce · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Pryce · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Pryce · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 911.9–1003.1 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1009.1–1064.1 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Quinn · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Quinn · 2 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Quinn · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Quinn · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 942.3–1033.7 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Quinn · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Reed · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Reed · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Reed · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 906.6–986.2 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 992.2–1069.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Sandhu · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Sandhu · 2 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Sandhu · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Sandhu · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 935.5–1040.5 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Sandhu · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Stirling · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Stirling · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Stirling · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 893.6–985.1 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 991.1–1082.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Tan · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Tan · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Tan · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 899.6–979.1 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 985.1–1076.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Vane-Coe · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Vane-Coe · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Vane-Coe · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 891.0–965.8 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 971.8–1085.0 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Whitfield · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1600 · Whitfield · 2 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 2, card 1132)"
+ },
+ {
+  "where": "1600 · Whitfield · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1600 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 899.6–979.1 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1600 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 985.1–1076.4 cell 885.0–1091.0"
+ },
+ {
+  "where": "1600 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Achebe · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Achebe · 3 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Achebe · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Achebe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1109.3–1188.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Achebe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Blackwood · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Blackwood · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Blackwood · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1079.3–1158.8 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Blackwood · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1164.8–1218.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Blackwood · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Ellison · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Ellison · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Ellison · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1067.6–1147.2 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Ellison · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1153.2–1230.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Ellison · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Ferris · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Ferris · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Ferris · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1071.9–1151.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Ferris · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1157.4–1226.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Ferris · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Holt · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Holt · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Holt · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1056.5–1133.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Holt · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1139.7–1241.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Holt · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Hussain · lines ≤ 2",
+  "ok": true,
+  "detail": "2 lines"
+ },
+ {
+  "where": "1920 · Hussain · 3 a line",
+  "ok": true,
+  "detail": "lines 3+2 of 5 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Hussain · +n on the last line",
+  "ok": true,
+  "detail": "more false,false"
+ },
+ {
+  "where": "1920 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1023.0–1095.9 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1101.9–1185.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1191.5–1275.0 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1072.9–1164.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Hussain · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1170.1–1225.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Hussain · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Morrow · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Morrow · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Morrow · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1061.8–1153.0 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Morrow · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1159.0–1236.2 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Morrow · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Okafor · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Okafor · 3 a line",
+  "ok": true,
+  "detail": "lines 3 of 3 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Okafor · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1029.0–1108.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1114.5–1191.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Okafor · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1197.7–1269.0 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Okafor · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Pemberton · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Pemberton · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Pemberton · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1047.5–1127.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Pemberton · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1133.1–1250.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Pemberton · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Pryce · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Pryce · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Pryce · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1072.9–1164.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Pryce · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1170.1–1225.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Pryce · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Quinn · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Quinn · 3 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Quinn · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Quinn · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1103.3–1194.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Quinn · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Reed · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Reed · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Reed · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1067.6–1147.2 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Reed · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1153.2–1230.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Reed · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Sandhu · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Sandhu · 3 a line",
+  "ok": true,
+  "detail": "lines 1 of 1 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Sandhu · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Sandhu · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1096.5–1201.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Sandhu · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Stirling · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Stirling · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Stirling · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1054.6–1146.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Stirling · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1152.1–1243.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Stirling · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Tan · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Tan · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Tan · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1060.6–1140.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Tan · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1146.1–1237.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Tan · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Vane-Coe · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Vane-Coe · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Vane-Coe · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1048.7–1125.9 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Vane-Coe · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1131.9–1249.3 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Vane-Coe · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Whitfield · lines ≤ 2",
+  "ok": true,
+  "detail": "1 lines"
+ },
+ {
+  "where": "1920 · Whitfield · 3 a line",
+  "ok": true,
+  "detail": "lines 2 of 2 (per 3, card 1280)"
+ },
+ {
+  "where": "1920 · Whitfield · +n on the last line",
+  "ok": true,
+  "detail": "more false"
+ },
+ {
+  "where": "1920 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1060.6–1140.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ },
+ {
+  "where": "1920 · Whitfield · tag clear of the cell",
+  "ok": true,
+  "detail": "tag 1146.1–1237.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · Whitfield · tag face",
+  "ok": true,
+  "detail": "h 28 \"Source Serif 4\" 600 14"
+ }
+]

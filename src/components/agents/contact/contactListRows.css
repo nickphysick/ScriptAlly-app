@@ -83,8 +83,7 @@
 /* ── closed rows sit back: the name, agency, stage word and action quiet; stars and pills keep their colour ── */
 .cl26-card .cl26-row[data-k="closed"] .cl26-whot > b,
 .cl26-card .cl26-row[data-k="closed"] .clr-ag,
-.cl26-card .cl26-row[data-k="closed"] .clr-stage,
-
+.cl26-card .cl26-row[data-k="closed"] .clr-stage { color: #6b6058; -webkit-text-stroke: 0; }
 
 /* the bar's search: no "/" hint on this page (the key itself still works) */
 .cl27 [data-cl26="find"] kbd { display: none; }
@@ -118,6 +117,8 @@
   height: auto; min-height: 54px; background: var(--clr-head-bg); border-bottom: 1px solid var(--clr-head-edge);
 }
 .cl26-card .cl26-th > span, .cl27 .cl26-card .cl26-th > span { font: 400 18px/1.2 var(--sp-type) !important; color: var(--clr-head-ink); }
+/* the long/short word spans inside a heading inherit its face: the brand sheet names bare spans on every route */
+.cl27 .cl26-card .cl26-th [data-clr-hl], .cl27 .cl26-card .cl26-th button { font: inherit !important; }
 .cl26-card .cl26-th button.on { color: var(--clr-head-ink); }
 .cl26-card .cl26-th button.on i { color: var(--clr-head-arrow); }
 .cl26-card .cl26-th button:not(.on) i { color: var(--clr-head-ink); }
@@ -130,7 +131,8 @@
   content: ""; position: absolute; left: -14px; right: -14px; top: -14px; height: 14px; background: var(--ws-page, #f2eee8);
   opacity: 0; pointer-events: none;
 }
-.cl26-card .cl26-th[data-stuck]::before { opacity: 1; }
+/* stuck, the ground is solid to the pointer too: the rows it hides cannot be clicked through it */
+.cl26-card .cl26-th[data-stuck]::before { opacity: 1; pointer-events: auto; }
 /* the margin labels stick under the pinned headings */
 .cl27 .cl26-card .cl26-mgl { top: calc(var(--clr-th-top, 12px) + var(--cl26-pin-h, 54px) + 8px); }
 /* the light bar above the list no longer sticks on this page: pinned, the headings are the list's top (the ref) */
@@ -179,8 +181,7 @@
 .cl27 .cl26-card .cl26-whot .clr-ag, .cl27 .cl26-card .cl26-whot small.clr-ag {
   font: 400 16px/1.3 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #5b4f47;
 }
-.cl26-card .cl26-row[data-k="closed"] .cl26-whot > b, .cl26-card .cl26-row[data-k="closed"] .clr-ag,
-.cl26-card .cl26-row[data-k="closed"] .clr-stage, .cl26-card .cl26-row[data-k="closed"] .clr-ag > span { color: #6b6058; }
+.cl26-card .cl26-row[data-k="closed"] .clr-ag > span { color: #6b6058; }
 .cl26-card .clr-pol > small { color: #6b6058; }
 
 /* ══ Contact list rows v1.2 · phase 3 — the status at rest, the action on hover or at the row's end ══════════════════ */
@@ -205,10 +206,10 @@
 @media (prefers-reduced-motion: reduce) {
   .cl26-card .clr-rest, .cl26-card .cl26-q > .clr-act { transition: opacity .2s ease; transform: none !important; }
 }
-/* the end cell: the › (centred in its 30px); the touch action is hidden with a mouse */
-.cl26-card .cl26-row .cl26-chev { display: flex; align-items: center; justify-content: center; }
+/* the end cell: the › at its left edge, so the status's centre is the middle of the room between Response policy and the
+   › (D1); the touch action is hidden with a mouse */
+.cl26-card .cl26-row .cl26-chev { display: flex; align-items: center; justify-content: flex-start; }
 .cl26-card .clr-act-end { display: none; }
-@container clr (width < 980px) { .cl26-card .clr-act { padding: 0 10px; } }
 /* NO HOVER (touch): the action at the row's end in the ›'s place, the status always at rest, never a third line; the
    touch columns (the ref's body.touch rules) */
 @media (hover: none) {
@@ -229,14 +230,15 @@
 
 /* ══ Contact list rows v1.2 · phase 5 — the Letter grouping's margin, narrowed below a card of 980 ══════════════════ */
 /* At a 1280 window the card's content box is about 812px: below 980 every column but Genres sought is fixed, so the margin
-   (84px) left Genres 48px and no whole tag. Below 980 the margin is 28px (the letters 18px, the stage glyphs 18px, their
-   small words dropped), which leaves Genres room for a whole tag; the ungrouped and Status-grouped margin (22px) is
+   (84px) left Genres 48px and no whole tag. Below 980 the margin is 18px (the letters 16px, the stage glyphs 14px, their
+   small words dropped), which leaves Genres 114px: room for the fixture's longest single tag, "Young adult" (101px, and
+   the cell's 6px either side); the ungrouped and Status-grouped margin (22px) is
    unchanged. The headings' padding reads the same `--cl26-m`, so they stay on the rows' template. */
 @container clr (width < 980px) {
-  .cl26-card:not([data-kind="all"]):not([data-kind="set"]) .cl26-frame { --cl26-m: 28px; }
-  .cl26-card .cl26-mgl { padding: 12px 0 0 6px; }
-  .cl26-card .cl26-mgl b { font-size: 18px !important; }
+  .cl26-card:not([data-kind="all"]):not([data-kind="set"]) .cl26-frame { --cl26-m: 18px; }
+  .cl26-card .cl26-mgl { padding: 12px 0 0 3px; }
+  .cl26-card .cl26-mgl b { font-size: 16px !important; }
   .cl26-card .cl26-mgl small { display: none; }
-  .cl26-card .cl26-mgl svg, .cl26-card .cl26-mgl .cl24-nq { width: 18px; height: 18px; }
+  .cl26-card .cl26-mgl svg, .cl26-card .cl26-mgl .cl24-nq { width: 14px; height: 14px; }
   .cl26-card .cl26-row .clr-gline .clr-tag { padding: 0 10px; }
 }

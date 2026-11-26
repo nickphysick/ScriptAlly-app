@@ -1,0 +1,102 @@
+[
+ {
+  "where": "1280 · heading agent",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 228 cw 228"
+ },
+ {
+  "where": "1280 · heading fit",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 64 cw 64"
+ },
+ {
+  "where": "1280 · heading genres",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 114 cw 114"
+ },
+ {
+  "where": "1280 · heading policy",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 138 cw 138"
+ },
+ {
+  "where": "1280 · heading status",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 156 cw 156"
+ },
+ {
+  "where": "1440 · heading agent",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 228 cw 228"
+ },
+ {
+  "where": "1440 · heading fit",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 64 cw 64"
+ },
+ {
+  "where": "1440 · heading genres",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 274 cw 274"
+ },
+ {
+  "where": "1440 · heading policy",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 138 cw 138"
+ },
+ {
+  "where": "1440 · heading status",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 156 cw 156"
+ },
+ {
+  "where": "1600 · heading agent",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 262 cw 262"
+ },
+ {
+  "where": "1600 · heading fit",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 72 cw 72"
+ },
+ {
+  "where": "1600 · heading genres",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 206 cw 206"
+ },
+ {
+  "where": "1600 · heading policy",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 160 cw 160"
+ },
+ {
+  "where": "1600 · heading status",
+  "ok": true,
+  "detail": "\"Special Elite\" 16px (want 16) sw 196 cw 196"
+ },
+ {
+  "where": "1920 · heading agent",
+  "ok": true,
+  "detail": "\"Special Elite\" 18px (want 18) sw 290 cw 290"
+ },
+ {
+  "where": "1920 · heading fit",
+  "ok": true,
+  "detail": "\"Special Elite\" 18px (want 18) sw 90 cw 90"
+ },
+ {
+  "where": "1920 · heading genres",
+  "ok": true,
+  "detail": "\"Special Elite\" 18px (want 18) sw 264 cw 264"
+ },
+ {
+  "where": "1920 · heading policy",
+  "ok": true,
+  "detail": "\"Special Elite\" 18px (want 18) sw 180 cw 180"
+ },
+ {
+  "where": "1920 · heading status",
+  "ok": true,
+  "detail": "\"Special Elite\" 18px (want 18) sw 220 cw 220"
+ }
+]

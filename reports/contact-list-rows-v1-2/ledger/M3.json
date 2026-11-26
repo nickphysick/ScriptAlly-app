@@ -1,0 +1,1142 @@
+[
+ {
+  "where": "1280 · clr-achebe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i. 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-achebe · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 776–852"
+ },
+ {
+  "where": "1280 · clr-achebe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-blackwood · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1280 · clr-blackwood · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 789–839"
+ },
+ {
+  "where": "1280 · clr-blackwood · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-carey · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1280 · clr-carey · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · \"+ Add genres\" 775–853"
+ },
+ {
+  "where": "1280 · clr-carey · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-ellison · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1280 · clr-ellison · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 777–851"
+ },
+ {
+  "where": "1280 · clr-ellison · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1037–1193 · svg.cl24-nq 1107–1123 | \"Not queried\" 1073–1157"
+ },
+ {
+  "where": "1280 · clr-ferris · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-ferris · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 782–846"
+ },
+ {
+  "where": "1280 · clr-ferris · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-holt · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-holt · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 777–851 | span.cl252-pill 765–863"
+ },
+ {
+  "where": "1280 · clr-holt · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Full sent\" 1081–1149"
+ },
+ {
+  "where": "1280 · clr-hussain · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-hussain · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 763–845 | \"+\" 851–858 | \"3\" 858–865"
+ },
+ {
+  "where": "1280 · clr-hussain · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-lang · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1280 · clr-lang · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · \"+ Add genres\" 775–853"
+ },
+ {
+  "where": "1280 · clr-lang · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-morrow · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-morrow · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 770–858 | span.cl252-pill 777–851"
+ },
+ {
+  "where": "1280 · clr-morrow · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-okafor · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1280 · clr-okafor · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 768–841 | \"+\" 847–853 | \"1\" 853–860"
+ },
+ {
+  "where": "1280 · clr-okafor · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Full request\" 1061–1169"
+ },
+ {
+  "where": "1280 · clr-pemberton · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-pemberton · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 763–865"
+ },
+ {
+  "where": "1280 · clr-pemberton · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1037–1193 · svg.cl24-nq 1107–1123 | \"Not queried\" 1073–1157"
+ },
+ {
+  "where": "1280 · clr-pryce · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1280 · clr-pryce · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 770–858 | span.cl252-pill 788–840"
+ },
+ {
+  "where": "1280 · clr-pryce · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-quinn · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i. 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-quinn · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 770–858"
+ },
+ {
+  "where": "1280 · clr-quinn · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-reed · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-reed · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 777–851"
+ },
+ {
+  "where": "1280 · clr-reed · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Passed\" 1092–1138"
+ },
+ {
+  "where": "1280 · clr-sandhu · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1280 · clr-sandhu · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–871 · span.cl252-pill 764–864"
+ },
+ {
+  "where": "1280 · clr-sandhu · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-stirling · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-stirling · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–871 · span.cl252-pill 770–858 | span.cl252-pill 770–858"
+ },
+ {
+  "where": "1280 · clr-stirling · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-tan · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1280 · clr-tan · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 770–858"
+ },
+ {
+  "where": "1280 · clr-tan · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Partial requ\" 1050–1180"
+ },
+ {
+  "where": "1280 · clr-vane-coe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1280 · clr-vane-coe · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 777–851 | span.cl252-pill 763–865"
+ },
+ {
+  "where": "1280 · clr-vane-coe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · span.cl252-track 1076–1154 | \"Queried\" 1086–1144"
+ },
+ {
+  "where": "1280 · clr-whitfield · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1280 · clr-whitfield · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–871 · span.cl252-pill 776–852 | span.cl252-pill 770–858"
+ },
+ {
+  "where": "1280 · clr-whitfield · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1037–1193 · svg. 1107–1123 | \"Closed to qu\" 1052–1178"
+ },
+ {
+  "where": "1440 · clr-achebe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i. 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-achebe · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 856–932"
+ },
+ {
+  "where": "1440 · clr-achebe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-blackwood · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1440 · clr-blackwood · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 869–919"
+ },
+ {
+  "where": "1440 · clr-blackwood · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-carey · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1440 · clr-carey · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · \"+ Add genres\" 855–933"
+ },
+ {
+  "where": "1440 · clr-carey · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-ellison · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1440 · clr-ellison · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 857–931"
+ },
+ {
+  "where": "1440 · clr-ellison · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1197–1353 · svg.cl24-nq 1267–1283 | \"Not queried\" 1233–1317"
+ },
+ {
+  "where": "1440 · clr-ferris · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-ferris · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 862–926"
+ },
+ {
+  "where": "1440 · clr-ferris · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-holt · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-holt · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 857–931 | span.cl252-pill 845–943"
+ },
+ {
+  "where": "1440 · clr-holt · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Full sent\" 1241–1309"
+ },
+ {
+  "where": "1440 · clr-hussain · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-hussain · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 840–928 | \"+\" 934–940 | \"3\" 940–948"
+ },
+ {
+  "where": "1440 · clr-hussain · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-lang · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1440 · clr-lang · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · \"+ Add genres\" 855–933"
+ },
+ {
+  "where": "1440 · clr-lang · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-morrow · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-morrow · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 850–938 | span.cl252-pill 857–931"
+ },
+ {
+  "where": "1440 · clr-morrow · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-okafor · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1440 · clr-okafor · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 848–921 | \"+\" 927–933 | \"1\" 933–940"
+ },
+ {
+  "where": "1440 · clr-okafor · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Full request\" 1221–1329"
+ },
+ {
+  "where": "1440 · clr-pemberton · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-pemberton · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 837–951"
+ },
+ {
+  "where": "1440 · clr-pemberton · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1197–1353 · svg.cl24-nq 1267–1283 | \"Not queried\" 1233–1317"
+ },
+ {
+  "where": "1440 · clr-pryce · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1440 · clr-pryce · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 850–938 | span.cl252-pill 868–920"
+ },
+ {
+  "where": "1440 · clr-pryce · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-quinn · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i. 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-quinn · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 850–938"
+ },
+ {
+  "where": "1440 · clr-quinn · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-reed · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-reed · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 857–931"
+ },
+ {
+  "where": "1440 · clr-reed · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Passed\" 1252–1298"
+ },
+ {
+  "where": "1440 · clr-sandhu · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1440 · clr-sandhu · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 844–944"
+ },
+ {
+  "where": "1440 · clr-sandhu · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-stirling · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i. 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-stirling · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 850–938 | span.cl252-pill 850–938"
+ },
+ {
+  "where": "1440 · clr-stirling · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-tan · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i. 729–741"
+ },
+ {
+  "where": "1440 · clr-tan · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 850–938"
+ },
+ {
+  "where": "1440 · clr-tan · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Partial requ\" 1210–1340"
+ },
+ {
+  "where": "1440 · clr-vane-coe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · i.on 681–693 | i.on 693–705 | i.on 705–717 | i.on 717–729 | i.on 729–741"
+ },
+ {
+  "where": "1440 · clr-vane-coe · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 757–1031 · span.cl252-pill 857–931 | span.cl252-pill 837–951"
+ },
+ {
+  "where": "1440 · clr-vane-coe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · span.cl252-track 1236–1314 | \"Queried\" 1246–1304"
+ },
+ {
+  "where": "1440 · clr-whitfield · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 679–743 · \"–\" 707–715"
+ },
+ {
+  "where": "1440 · clr-whitfield · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 757–1031 · span.cl252-pill 856–932 | span.cl252-pill 850–938"
+ },
+ {
+  "where": "1440 · clr-whitfield · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1197–1353 · svg. 1267–1283 | \"Closed to qu\" 1212–1338"
+ },
+ {
+  "where": "1600 · clr-achebe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i. 818–832 | i. 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-achebe · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 948–1028"
+ },
+ {
+  "where": "1600 · clr-achebe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-blackwood · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i.on 846–860"
+ },
+ {
+  "where": "1600 · clr-blackwood · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 918–998 | span.cl252-pill 1004–1058"
+ },
+ {
+  "where": "1600 · clr-blackwood · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-carey · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · \"–\" 821–829"
+ },
+ {
+  "where": "1600 · clr-carey · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · \"+ Add genres\" 944–1032"
+ },
+ {
+  "where": "1600 · clr-carey · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-ellison · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i.on 846–860"
+ },
+ {
+  "where": "1600 · clr-ellison · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 907–986 | span.cl252-pill 992–1069"
+ },
+ {
+  "where": "1600 · clr-ellison · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1299–1495 · svg.cl24-nq 1389–1405 | \"Not queried\" 1352–1442"
+ },
+ {
+  "where": "1600 · clr-ferris · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-ferris · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 911–990 | span.cl252-pill 996–1065"
+ },
+ {
+  "where": "1600 · clr-ferris · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-holt · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-holt · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 896–973 | span.cl252-pill 979–1081"
+ },
+ {
+  "where": "1600 · clr-holt · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Full sent\" 1361–1433"
+ },
+ {
+  "where": "1600 · clr-hussain · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i. 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-hussain · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 900–979 | span.cl252-pill 985–1076 | span.cl252-pill 891–975 | span.cl252-pill 981–1066 | \"+\" 1072–1078 | \"1\" 1078–1085"
+ },
+ {
+  "where": "1600 · clr-hussain · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-lang · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · \"–\" 821–829"
+ },
+ {
+  "where": "1600 · clr-lang · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · \"+ Add genres\" 944–1032"
+ },
+ {
+  "where": "1600 · clr-lang · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-morrow · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-morrow · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 901–992 | span.cl252-pill 998–1075"
+ },
+ {
+  "where": "1600 · clr-morrow · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-okafor · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i.on 846–860"
+ },
+ {
+  "where": "1600 · clr-okafor · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 907–986 | span.cl252-pill 992–1069 | span.cl252-pill 952–1024"
+ },
+ {
+  "where": "1600 · clr-okafor · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Full request\" 1339–1455"
+ },
+ {
+  "where": "1600 · clr-pemberton · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-pemberton · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 891–967 | span.cl252-pill 973–1085"
+ },
+ {
+  "where": "1600 · clr-pemberton · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1299–1495 · svg.cl24-nq 1389–1405 | \"Not queried\" 1352–1442"
+ },
+ {
+  "where": "1600 · clr-pryce · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · \"–\" 821–829"
+ },
+ {
+  "where": "1600 · clr-pryce · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 912–1003 | span.cl252-pill 1009–1064"
+ },
+ {
+  "where": "1600 · clr-pryce · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-quinn · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i. 818–832 | i. 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-quinn · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 942–1034"
+ },
+ {
+  "where": "1600 · clr-quinn · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-reed · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-reed · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 907–986 | span.cl252-pill 992–1069"
+ },
+ {
+  "where": "1600 · clr-reed · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Passed\" 1372–1422"
+ },
+ {
+  "where": "1600 · clr-sandhu · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · \"–\" 821–829"
+ },
+ {
+  "where": "1600 · clr-sandhu · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 936–1040"
+ },
+ {
+  "where": "1600 · clr-sandhu · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-stirling · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i. 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-stirling · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 894–985 | span.cl252-pill 991–1082"
+ },
+ {
+  "where": "1600 · clr-stirling · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-tan · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i. 846–860"
+ },
+ {
+  "where": "1600 · clr-tan · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 900–979 | span.cl252-pill 985–1076"
+ },
+ {
+  "where": "1600 · clr-tan · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Partial requ\" 1328–1466"
+ },
+ {
+  "where": "1600 · clr-vane-coe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · i.on 790–804 | i.on 804–818 | i.on 818–832 | i.on 832–846 | i.on 846–860"
+ },
+ {
+  "where": "1600 · clr-vane-coe · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 885–1091 · span.cl252-pill 891–966 | span.cl252-pill 972–1085"
+ },
+ {
+  "where": "1600 · clr-vane-coe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1299–1495 · span.cl252-track 1358–1436 | \"Queried\" 1366–1428"
+ },
+ {
+  "where": "1600 · clr-whitfield · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 789–861 · \"–\" 821–829"
+ },
+ {
+  "where": "1600 · clr-whitfield · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 885–1091 · span.cl252-pill 900–979 | span.cl252-pill 985–1076"
+ },
+ {
+  "where": "1600 · clr-whitfield · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1299–1495 · svg. 1389–1405 | \"Closed to qu\" 1329–1465"
+ },
+ {
+  "where": "1920 · clr-achebe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i. 940–957 | i. 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-achebe · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1109–1189"
+ },
+ {
+  "where": "1920 · clr-achebe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-blackwood · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i.on 974–991"
+ },
+ {
+  "where": "1920 · clr-blackwood · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1079–1159 | span.cl252-pill 1165–1219"
+ },
+ {
+  "where": "1920 · clr-blackwood · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-carey · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · \"–\" 944–952"
+ },
+ {
+  "where": "1920 · clr-carey · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · \"+ Add genres\" 1105–1193"
+ },
+ {
+  "where": "1920 · clr-carey · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-ellison · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i.on 974–991"
+ },
+ {
+  "where": "1920 · clr-ellison · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1068–1147 | span.cl252-pill 1153–1230"
+ },
+ {
+  "where": "1920 · clr-ellison · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1509–1729 · svg.cl24-nq 1611–1627 | \"Not queried\" 1571–1667"
+ },
+ {
+  "where": "1920 · clr-ferris · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-ferris · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1072–1151 | span.cl252-pill 1157–1226"
+ },
+ {
+  "where": "1920 · clr-ferris · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-holt · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-holt · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1057–1134 | span.cl252-pill 1140–1242"
+ },
+ {
+  "where": "1920 · clr-holt · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Full sent\" 1580–1658"
+ },
+ {
+  "where": "1920 · clr-hussain · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i. 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-hussain · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1023–1096 | span.cl252-pill 1102–1186 | span.cl252-pill 1192–1275 | span.cl252-pill 1073–1164 | span.cl252-pill 1170–1225"
+ },
+ {
+  "where": "1920 · clr-hussain · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-lang · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · \"–\" 944–952"
+ },
+ {
+  "where": "1920 · clr-lang · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · \"+ Add genres\" 1105–1193"
+ },
+ {
+  "where": "1920 · clr-lang · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-morrow · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-morrow · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1062–1153 | span.cl252-pill 1159–1236"
+ },
+ {
+  "where": "1920 · clr-morrow · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-okafor · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i.on 974–991"
+ },
+ {
+  "where": "1920 · clr-okafor · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1029–1109 | span.cl252-pill 1115–1192 | span.cl252-pill 1198–1269"
+ },
+ {
+  "where": "1920 · clr-okafor · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Full request\" 1558–1680"
+ },
+ {
+  "where": "1920 · clr-pemberton · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-pemberton · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1048–1127 | span.cl252-pill 1133–1250"
+ },
+ {
+  "where": "1920 · clr-pemberton · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1509–1729 · svg.cl24-nq 1611–1627 | \"Not queried\" 1571–1667"
+ },
+ {
+  "where": "1920 · clr-pryce · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · \"–\" 944–952"
+ },
+ {
+  "where": "1920 · clr-pryce · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1073–1164 | span.cl252-pill 1170–1225"
+ },
+ {
+  "where": "1920 · clr-pryce · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-quinn · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i. 940–957 | i. 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-quinn · genres centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1017–1281 · span.cl252-pill 1103–1195"
+ },
+ {
+  "where": "1920 · clr-quinn · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-reed · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-reed · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1068–1147 | span.cl252-pill 1153–1230"
+ },
+ {
+  "where": "1920 · clr-reed · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Passed\" 1593–1645"
+ },
+ {
+  "where": "1920 · clr-sandhu · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · \"–\" 944–952"
+ },
+ {
+  "where": "1920 · clr-sandhu · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1097–1201"
+ },
+ {
+  "where": "1920 · clr-sandhu · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-stirling · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i. 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-stirling · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1055–1146 | span.cl252-pill 1152–1243"
+ },
+ {
+  "where": "1920 · clr-stirling · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-tan · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i. 974–991"
+ },
+ {
+  "where": "1920 · clr-tan · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1061–1140 | span.cl252-pill 1146–1237"
+ },
+ {
+  "where": "1920 · clr-tan · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Partial requ\" 1545–1693"
+ },
+ {
+  "where": "1920 · clr-vane-coe · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · i.on 906–923 | i.on 923–940 | i.on 940–957 | i.on 957–974 | i.on 974–991"
+ },
+ {
+  "where": "1920 · clr-vane-coe · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1049–1126 | span.cl252-pill 1132–1249"
+ },
+ {
+  "where": "1920 · clr-vane-coe · status centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 1509–1729 · span.cl252-track 1580–1658 | \"Queried\" 1586–1652"
+ },
+ {
+  "where": "1920 · clr-whitfield · fit centred",
+  "ok": true,
+  "detail": "content centre off by 0.0 · cell 903–993 · \"–\" 944–952"
+ },
+ {
+  "where": "1920 · clr-whitfield · genres centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1017–1281 · span.cl252-pill 1061–1140 | span.cl252-pill 1146–1237"
+ },
+ {
+  "where": "1920 · clr-whitfield · status centred",
+  "ok": true,
+  "detail": "content centre off by -0.0 · cell 1509–1729 · svg. 1611–1627 | \"Closed to qu\" 1547–1691"
+ }
+]

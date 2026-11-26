@@ -1,0 +1,192 @@
+[
+ {
+  "where": "precondition: (hover: none) matches",
+  "ok": true,
+  "detail": "hover:none true"
+ },
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "Achebe · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Achebe · still two lines",
+  "ok": true,
+  "detail": "touch 72.0 mouse 72"
+ },
+ {
+  "where": "Blackwood · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Blackwood · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Carey · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Carey · still two lines",
+  "ok": true,
+  "detail": "touch 72.0 mouse 72"
+ },
+ {
+  "where": "Ellison · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Ellison · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Ferris · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Ferris · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Holt · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Holt · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Hussain · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Hussain · still two lines",
+  "ok": true,
+  "detail": "touch 83.0 mouse 83"
+ },
+ {
+  "where": "Lang · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Lang · still two lines",
+  "ok": true,
+  "detail": "touch 72.0 mouse 72"
+ },
+ {
+  "where": "Morrow · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Morrow · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Okafor · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Okafor · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Pemberton · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Pemberton · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Pryce · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Pryce · still two lines",
+  "ok": true,
+  "detail": "touch 83.0 mouse 83"
+ },
+ {
+  "where": "Quinn · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Quinn · still two lines",
+  "ok": true,
+  "detail": "touch 72.0 mouse 72"
+ },
+ {
+  "where": "Reed · keeps its ›, no button",
+  "ok": true,
+  "detail": "chev true end false"
+ },
+ {
+  "where": "Sandhu · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Sandhu · still two lines",
+  "ok": true,
+  "detail": "touch 74.0 mouse 73.96875"
+ },
+ {
+  "where": "Stirling · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Stirling · still two lines",
+  "ok": true,
+  "detail": "touch 83.0 mouse 83"
+ },
+ {
+  "where": "Tan · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Tan · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Vane-Coe · button in the last column",
+  "ok": false,
+  "detail": "end false inside false centre-action shown true"
+ },
+ {
+  "where": "Vane-Coe · still two lines",
+  "ok": true,
+  "detail": "touch 82.0 mouse 82"
+ },
+ {
+  "where": "Whitfield · keeps its ›, no button",
+  "ok": true,
+  "detail": "chev true end false"
+ }
+]

@@ -1,0 +1,12 @@
+[
+ {
+  "where": "button: 30 high, radius 8, white, 1px navy edge, navy text, Source Serif 600 14px, padding 0 12",
+  "ok": true,
+  "detail": "{\"h\":30,\"r\":\"8px\",\"bg\":\"rgb(255, 255, 255)\",\"b\":\"1px solid rgb(42, 58, 82)\",\"c\":\"rgb(42, 58, 82)\",\"f\":\"\\\"Source Serif 4\\\", Georgia, serif\",\"w\":\"600\",\"z\":\"14px\",\"p\":\"12px 12px\"}"
+ },
+ {
+  "where": "the agent card's words match the row's",
+  "ok": true,
+  "detail": "card \"Send your partial\""
+ }
+]
