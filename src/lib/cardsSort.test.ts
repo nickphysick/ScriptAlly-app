@@ -24,7 +24,7 @@ describe("the Contact list's fields", () => {
   it("are its five sortable headings, in their order", () => {
     /* RE-POINTED by Contact list v26 E: the page offers four sorts (v25.1's five headings retired with their columns) */
     /* and Add agent v1 Phase 6 adds Agent fit through the same chip and menu */
-    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual(["surname", "added", "reply", "status", "rating"]);
+    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual(["surname", "rating", "reply", "status", "added"]);
   });
 });
 

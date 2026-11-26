@@ -207,6 +207,9 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   ];
   const none = noMatchCopy(named.map((n) => n.label));
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
+  /* Contact list rows v1 · phase 3 — the active heading's aria-sort; the Fit heading waits for a rating */
+  const sortOf = (k: SortKey): "ascending" | "descending" | "none" => (p.sortKey === k ? (p.reversed ? "descending" : "ascending") : "none");
+  const anyRated = p.all.some((x) => typeof x.agent.starRating === "number" && x.agent.starRating > 0);
   /* List filters v1 — the arrow on the sorted column only (↑ ascending, ↓ descending, as the bar's Sort chip draws it);
      the others show ↕ on hover and on keyboard focus */
   const headArrow = (k: SortKey) => (p.sortKey === k
@@ -236,19 +239,29 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
               container query shows one). */}
           <div className="cl26-th" role="row" data-cl26="heads">
             <span className="cl26-thm" aria-hidden="true" />
-            <span role="columnheader" data-clr-h="agent" aria-sort={p.sortKey === "surname" ? (p.reversed ? "descending" : "ascending") : "none"}>
+            <span role="columnheader" data-clr-h="agent" aria-sort={sortOf("surname")}>
               <button type="button" className={p.sortKey === "surname" ? "on" : undefined} data-cl26="head" data-key="surname" onClick={() => sortBy("surname")}>
                 Agent{headArrow("surname")}
               </button>
             </span>
-            <span role="columnheader" data-clr-h="fit" data-clr-c="" data-cl26="head-fit">Fit</span>
+            {/* Contact list rows v1 · phase 3 — Fit sorts by the writer's own rating, best first, unrated last either way;
+                disabled while no agent is rated */}
+            <span role="columnheader" data-clr-h="fit" data-clr-c="" data-cl26="head-fit" aria-sort={sortOf("rating")}>
+              <button type="button" className={p.sortKey === "rating" ? "on" : undefined} data-cl26="head" data-key="rating" onClick={() => sortBy("rating")}
+                disabled={!anyRated} title={anyRated ? undefined : "Fit sorts once you\u2019ve rated your agents"}>
+                Fit{headArrow("rating")}
+              </button>
+            </span>
             <span role="columnheader" data-clr-h="genres" data-clr-c="" className="cl26-thx" data-cl26="head-want">
               <span data-clr-hl="l">Genres sought</span><span data-clr-hl="s">Genres</span>
             </span>
-            <span role="columnheader" data-clr-h="policy" data-cl26="head-policy">
-              <span data-clr-hl="l">Response policy</span><span data-clr-hl="s">Response</span>
+            {/* quickest first, unknown last either way (sortFacts "reply") */}
+            <span role="columnheader" data-clr-h="policy" data-cl26="head-policy" aria-sort={sortOf("reply")}>
+              <button type="button" className={p.sortKey === "reply" ? "on" : undefined} data-cl26="head" data-key="reply" onClick={() => sortBy("reply")}>
+                <span data-clr-hl="l">Response policy</span><span data-clr-hl="s">Response</span>{headArrow("reply")}
+              </button>
             </span>
-            <span role="columnheader" data-clr-h="status" data-clr-c="" aria-sort={p.sortKey === "status" ? (p.reversed ? "descending" : "ascending") : "none"}>
+            <span role="columnheader" data-clr-h="status" data-clr-c="" aria-sort={sortOf("status")}>
               <button type="button" className={p.sortKey === "status" ? "on" : undefined} data-cl26="head" data-key="status" onClick={() => sortBy("status")}>
                 Query status{headArrow("status")}
               </button>

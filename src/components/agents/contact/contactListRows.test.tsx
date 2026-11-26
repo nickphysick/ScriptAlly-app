@@ -73,3 +73,40 @@ describe("Contact list rows v1 · Phase 1 — the columns and cells", () => {
     expect(css).toMatch(/@container clr \(width < 980px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 228px 64px minmax\(0, 1fr\) 138px 156px 16px; column-gap: 14px; \}/);
   });
 });
+
+import { sortFacts, HEADING_SORTS } from "../../../lib/contactList";
+import { sections, sectionKind } from "../../../lib/contactV26";
+import { FIND_AGENT } from "./ContactBar";
+
+describe("Contact list rows v1 · Phase 3 — sorting and search", () => {
+  const st = (id: string, stand: AgentFacts["stand"], status14: string, agent: Record<string, unknown> = {}) =>
+    fx(id, { name: `Ann ${id}`, ...agent }, { stand, status14 } as Partial<AgentFacts>);
+  it("the headings that sort: Agent, Fit, Response policy, Query status — and not Genres sought", () => {
+    expect(HEADING_SORTS).toEqual(["surname", "rating", "reply", "status"]);
+    const h = sheet([fx("a", { starRating: 3 })]);
+    expect([...h.matchAll(/data-clr-h="(\w+)"[^>]*>\s*<button[^>]*data-key="(\w+)"/g)].map((m) => `${m[1]}:${m[2]}`)).toEqual(["agent:surname", "fit:rating", "policy:reply", "status:status"]);
+    expect(h).toMatch(/data-clr-h="agent"[^>]*aria-sort="ascending"/);
+    expect(h).toMatch(/data-clr-h="genres"[^>]*><span data-clr-hl/);
+  });
+  it("Fit is disabled, and says why, while no agent is rated", () => {
+    expect(sheet([fx("a")])).toMatch(/data-key="rating" disabled="" title="Fit sorts once you’ve rated your agents"/);
+    expect(sheet([fx("a", { starRating: 2 })])).not.toMatch(/data-key="rating" disabled/);
+  });
+  it("Query status: your move first (furthest along first), then the rest by furthest along, closed last; reversed turns the whole key", () => {
+    const xs = [st("pass", "closed", "closed"), st("nq", "none", "none"), st("wait", "agent", "queried"), st("fsent", "agent", "fs"),
+      st("nudge", "you", "queried"), st("part", "you", "pr"), st("full", "you", "fr")];
+    expect(sortFacts(xs, "status").map((x) => x.agent.id)).toEqual(["full", "part", "nudge", "fsent", "wait", "nq", "pass"]);
+    expect(sortFacts(xs, "status", true).map((x) => x.agent.id)).toEqual(["pass", "nq", "wait", "fsent", "nudge", "part", "full"]);
+  });
+  it("grouped by letter, a Fit sort draws rating sections and a status sort keeps your move's run apart", () => {
+    expect(sectionKind("letter", "rating")).toBe("fit");
+    const r = [fx("a", { starRating: 5 }), fx("b", { starRating: 5 }), fx("c", { starRating: 2 }), fx("d")];
+    expect(sections(r, "letter", "rating").map((s) => `${s.label}:${s.ids.join("")}`)).toEqual(["5 stars:ab", "2 stars:c", "Not rated:d"]);
+    const q = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs")], "status");
+    expect(sections(q, "letter", "status").map((s) => s.ids.join(""))).toEqual(["n", "f", "w"]);
+  });
+  it("the search reads Filter by name or agency, and this page hides the \"/\" hint", () => {
+    expect(FIND_AGENT).toBe("Filter by name or agency");
+    expect(read("./contactListRows.css")).toContain('.cl27 [data-cl26="find"] kbd { display: none; }');
+  });
+});

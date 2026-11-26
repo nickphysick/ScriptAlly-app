@@ -53,9 +53,13 @@ describe("the view — per device (qh.cl.view)", () => {
     expect(readListView().view).toBe("cards");
     g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "reply", reversed: false, pinned: true }));
     expect(readListView()).toEqual({ group: "status", sort: "reply", reversed: false, pinned: true, view: "list", byStatus: true, group26: "letter" });
-    /* v25.1 E4, RE-POINTED by Contact list v26 E — only the page's four sorts are remembered (Surname, Date added, Reply
-       time, Query status; the fixtures above moved from "rating" to "reply"); an older key ("rating") reads as A to Z */
-    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "rating", reversed: false, pinned: true }));
+    /* RE-POINTED by Contact list rows v1 — the four sorting headings (Surname, Fit as "rating", Response time, Query
+       status) and the menu's Date added are remembered; any other key ("urgency") reads as A to Z */
+    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "rating", reversed: true, pinned: true }));
+    expect([readListView().sort, readListView().reversed]).toEqual(["rating", true]);
+    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "added", reversed: false, pinned: true }));
+    expect(readListView().sort).toBe("added");
+    g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "status", sort: "urgency", reversed: false, pinned: true }));
     expect(readListView().sort).toBe("surname");
     g.window!.localStorage.setItem(LIST_VIEW_KEY, JSON.stringify({ v: 1, group: "none", sort: "surname", reversed: false, pinned: false, view: "grid" }));
     expect(readListView().view).toBe("list");

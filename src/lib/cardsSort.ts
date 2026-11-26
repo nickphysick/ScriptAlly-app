@@ -50,16 +50,17 @@ export const sort151Of = (v: { key: SortKey151; reversed: boolean }): Sort151 =>
 /** Contact list v25.1 E4/E5 — its five headings, in their order, each a sort; the pill says the choice in words (no
  *  arrow): "Name A–Z", "Best genre fit", "Quickest reply", "Most urgent", "Highest rated", and their reverses */
 export const CL_SORT_FIELDS: readonly SortField<SortKey>[] = [
-  /* Contact list v26 E — the four sorts the page offers (the menu, the chip and the two sorting headings): Surname,
-     Date added, Reply time, Query status. v25.1's Genre fit, Urgency and Agent fit left with their columns. */
+  /* Contact list rows v1 — the four sorting headings first, in column order, each named as the chip names it (the chip
+     and the headings read the one sort state: one source of truth), then the menu's Date added */
   { key: "surname", label: "Surname", order: AZ },
+  /* the writer's own rating (sortFacts "rating"): unrated last either way */
+  { key: "rating", label: "Fit", order: [{ label: "Best first", reversed: false }, { label: "Lowest first", reversed: true }] },
+  /* unknown last either way */
+  { key: "reply", label: "Response time", order: [{ label: "Quickest first", reversed: false }, { label: "Slowest first", reversed: true }] },
+  /* your move first (furthest along first), then the rest by furthest along, closed last */
+  { key: "status", label: "Query status", order: [{ label: "Your move first", reversed: false }, { label: "Closed first", reversed: true }] },
   { key: "added", label: "Date added", order: [{ label: "Newest first", reversed: false }, { label: "Oldest first", reversed: true }] },
-  { key: "reply", label: "Reply time", order: [{ label: "Fastest first", reversed: false }, { label: "Slowest first", reversed: true }] },
-  { key: "status", label: "Query status", order: [{ label: "Furthest on", reversed: false }, { label: "Earliest first", reversed: true }] },
-  /* Add agent v1 Phase 6 — Agent fit, through the same chip and menu (lib/contactList sortFacts' "rating": unrated last
-     either way, ties by the shorter response time, then surname) */
-  { key: "rating", label: "Agent fit", order: [{ label: "Best fit first", reversed: false }, { label: "Lowest first", reversed: true }] },
-]
+];
 
 /**
  * cards-sort-search v1 §B — THE MONTH JUMPS for a list sorted by a date: one per month the rows fall in, in the order the
