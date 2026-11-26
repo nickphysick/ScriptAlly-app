@@ -138,5 +138,5 @@ fixture's longest single tag ("Young adult", 101px) plus the cell's 6px each sid
 
 ## Process
 
-- Dev: see the deploy section of the wrap-up (merged onto whatever dev serves at deploy time).
+- **Dev: https://scriptally-dev.web.app serves `index-8JglYLZj.js`**, built from a clean checkout of `contact-list-rows-v1-2` @ 236d78822. Dev served `index-_ZibFKqo.js` (`dev/bew2-clr1`) just before, which this branch contains, so no merge was needed; the served hash was checked inside the deploy command.
 - Red-before ran in this worktree before any source edit; the slot was shared with other sessions' runs.
