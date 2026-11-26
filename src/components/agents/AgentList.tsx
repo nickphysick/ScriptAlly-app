@@ -76,6 +76,7 @@ import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wid
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { getHomeCountry } from "../../lib/territory";
 import { agentBack, openResponse, responseHosted } from "../../lib/queryPanelStore";
 import { type ContactPop } from "./contact/ContactListControls";
 import { ESC_LEVEL, escapeDepth } from "../../lib/escapeStack";
@@ -1156,7 +1157,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           }}
           setChip={sets ? { label: setsLabel(sets), onDrop: () => setSets(null) } : null}
           onClearFilters={clearRailFilters}
-          onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
+          onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))}
+          homeCountry={getHomeCountry(currentUser)}
+          /* Contact list rows v1 — "+ Add genres" / "+ Add reply time": the card, open at that section, ready to edit (the
+             same request Missing details' "Fill in →" makes, at the field named rather than the first gap) */
+          onAddDetail={(id, focus) => {
+            if (!agents.some((x) => x.id === id)) return;
+            setHkOpenRef.current(false);
+            setCardId(id);
+            setEditReq({ id, seq: Date.now(), edit: { focus } });
+          }} />
         </div>
         </div>
         {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}

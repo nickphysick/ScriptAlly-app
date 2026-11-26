@@ -1277,7 +1277,8 @@
     "design-refs/plumage-colours-v3/screens/04-search-agent-tile@2x.png": "d1ed1e660d414157b1b56528e3a6064cedf186ae515898bfc019c50a266f6e95",
     "design-refs/query-card-v168/query-card-v168.html": "ffb6ebdb5a1a39df9cf4963d986d202bc5cb990e7f8f26a627eb69c562ad8f5a",
     "design-refs/agent-card-v2-2/agent-card-v2-2.html": "b6edfa7d503004f52c64ecb0966981d38f1597922988d58d979486becdabbeeb",
-    "design-refs/phone-birds-eye-world-v1/phone-birds-eye-world-v1.html": "374e0d2d234180c7d8c14a0716d5ef9c80906fc84f9ba527fa44ae28d43acb1c"
+    "design-refs/phone-birds-eye-world-v1/phone-birds-eye-world-v1.html": "374e0d2d234180c7d8c14a0716d5ef9c80906fc84f9ba527fa44ae28d43acb1c",
+    "design-refs/contact-list-rows-v1/contact-list-rows-v1.html": "2f84f6ccb6ddc8c86451b5c259cba8fbdfd92ec7c5b1ac912ee5f6d2ec7b4a57"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
