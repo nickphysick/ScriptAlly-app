@@ -14,7 +14,7 @@ import { STAGE_INK, stageOf } from "../../../lib/stageColours";
 import {
   GAP, RH, RULE, WX, aheadTx, barBox, bandOf, dm, edgeOf, hatchOf, headingTop, num, rowOffset, rowSegs, rulerMarks, shortName, spaced,
   stageTx, type BwAxis, type BwRow, type BwSeg, type BwView, type World,
-} from "../../../lib/birdsWorld";
+} from "../../../lib/birdsWorldV1";
 
 export const esc = (s: string): string => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const px = (n: number) => `${Math.round(n * 100) / 100}px`;

@@ -11,7 +11,7 @@
  *   - Reduced motion: no glide, no tweens (every move lands at once).
  *   - A pointer that starts on the controls, the ruler, the line's pill or the header is theirs, never the world's.
  */
-import type { BwView, World } from "../../../lib/birdsWorld";
+import type { BwView, World } from "../../../lib/birdsWorldV1";
 
 export interface MotionCtx {
   vp: HTMLElement;

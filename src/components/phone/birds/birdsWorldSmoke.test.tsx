@@ -20,7 +20,7 @@ vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pa
 import { V3Provider } from "../v3/V3Provider";
 import { BirdsWorld } from "./BirdsWorld";
 import { drawWorld, drawMini, esc } from "./drawWorld";
-import { axisExt, bwGroups, bwRow, makeWorld, zoomForRows, type BwRow } from "../../../lib/birdsWorld";
+import { axisExt, bwGroups, bwRow, makeWorld, zoomForRows, type BwRow } from "../../../lib/birdsWorldV1";
 import type { EyeRow } from "../../../lib/qcBirdsEye";
 import type { QcRow } from "../../../lib/qcSummary";
 
@@ -205,7 +205,7 @@ describe("Phone Birds-eye world v1, phase 3 — movement, controls, the hawk", (
   });
   it("the replay clips each row's stages at its front, in date order, and draws nothing past it", async () => {
     const { clipSegs } = await import("./drawWorld");
-    const { rowSegs } = await import("../../../lib/birdsWorld");
+    const { rowSegs } = await import("../../../lib/birdsWorldV1");
     const segs = rowSegs(ROWS[0], "reply");
     const mid = clipSegs(segs, -58);
     expect(mid.every((s) => s.ca < -58 && s.cb <= -58)).toBe(true);

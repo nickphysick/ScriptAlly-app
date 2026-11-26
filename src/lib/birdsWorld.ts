@@ -2,166 +2,213 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phone Birds-eye world v1 (design-refs/phone-birds-eye-world-v1/phone-birds-eye-world-v1.html) — THE ENGINE, pure.
- * One canvas you zoom and pan: every live query against one finish line. The view (components/phone/birds/BirdsWorld)
+ * Phone Birds-eye world v2 (design-refs/phone-birds-eye-world-v2/phone-birds-eye-world-v2.html) — THE ENGINE, pure.
+ * One canvas you zoom and pan: every open query on real dates, today as the line. The view (components/phone/birds/)
  * draws from this; the unit suite calls it.
- *   - THE DATA IS THE DESKTOP'S (lib/qc150 `beLine` over `eyeRows`): each row's dated stages (`past`) and its current
- *     stage (`cur`), read here in whole days from today. Nothing here restates a stage rule.
- *   - THE MATHS IS THE REF'S `world.js`, ported name for name: `layout()`, `yOff`/`yWorld`, `rowPx`/`gapPx`, `SX`/`SY`,
- *     `fitS`/`fitSY`, `zT`, `clamp()`, `fitView()`, `topFor`, `rowSegs()`, `num()`, `SHORT`, `stageTx()`,
- *     `rulerMarks()`/`spaced()`. Its constants are the ref's. Two things are the build's own, each named where it is
- *     made: the axis extent grows to hold real data (the ref's fixed −140…+70 / −180…+60 days are its minimum), and the
- *     bottom reserve is the app's dock height plus 16 (the ref's 104 was its own dock plus 42).
- *   - THE GROUPS (Nick's): Past its date · Nearly there · Plenty of time (with the agent, by how much of the reply
- *     window has gone, the ref's `kk`) · Waiting on you (the writer's move, `tileCourt` "you") · No date.
+ *   - THE DATA IS THE DESKTOP'S (lib/qc150 `beLine`): each row's dated stages and its current one, in whole days from
+ *     today. A closed query's last stage is its closing (the outcome's own status, on the day it reached it —
+ *     `stageStartMs`, as lib/qcSummary rules, never `lastMs`).
+ *   - THE MATHS IS THE REF'S page script, ported name for name: `setAxis()` (the span), `fitS`/`fitSY`/`maxZ`/`zT`,
+ *     `SX`/`SY`, `fitView()` and `FZ`, `rowPx`/`gapPx`, `yOff`/`yWorld`, `clamp()`, `topFor`, `allH()`/`layout()`,
+ *     `rowSegs()` (with `cont`, the gone-quiet fade, the offer's run and the closed cap), `clipR()`, `num()`/`hasFig()`,
+ *     `SHORT`/`stageTx()`, `rulerMarks()`/`spaced()`. v1's reply-date axis, its blend and its beside-the-bar levels are
+ *     retired. The one departure kept from v1: the bottom reserve is the app's dock + 16 (the ref's 104 was its own dock).
+ *   - THE PILLS (Nick's): All = With you + Needs chasing + Waiting, exactly — With you is the writer's move
+ *     (`tileCourt` "you": a partial, full or revision asked for, or an offer); Needs chasing is with the agent and past
+ *     its reply date; Waiting is with the agent and not past it, no-date queries included.
+ *   - GONE QUIET starts at the writer's own setting (`quietWeeks`, Settings › "A query goes quiet after"; the phone reads
+ *     it through useV3), counted from the reply date.
  * ⚠️ COPY: never "overdue" or "late" — "past its date", "wks past".
  */
 import { QueryStatus } from "../types";
 import { STAGE_COLOURS, stageOf, statusBand } from "./stageColours";
-import { tileCourt } from "./qcSummary";
+import { STAGE_NAME, tileCourt } from "./qcSummary";
 import type { EyeRow } from "./qcBirdsEye";
 import { beLine } from "./qc150";
-import { dayMonth, MONTHS_SHORT } from "./dates";
 
 export const DAY = 86_400_000;
 const startOfDay = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 
 /* ── the ref's constants ── */
-export const WX = 600, RH = 30, GAP = 40, MAXZ = 6.5, XP = 0.25;
-export const RULE = 28, TOPFIT = 140, TOPFOLD = 96, RPMAX = 100, GPMAX = 44;
-/** ⚠️ the build's floor under a group's gap: a small heading (22px) and its 6px, so headings never overlap however many
- *  rows the fit has to hold (the ref's 22 rows never took a gap under 26px; the harness's 70 took it to 6) */
-export const GPMIN = 30;
-/** the levels, by row height on screen (ref `LV`) */
-export const LV: readonly (readonly [number, BwLevel])[] = [[0, "Overview"], [22, "Names"], [44, "Figures"], [72, "Dates"], [86, "Timeline"]];
-export type BwLevel = "Overview" | "Names" | "Figures" | "Dates" | "Timeline";
-export const level = (rp: number): BwLevel => LV.filter((l) => rp >= l[0]).pop()![1];
+export const WX = 600, RH = 30, GAP = 40, XP = 0.25;
+export const RULE = 28, TOPFIT = 140, TOPFOLD = 96, RPMAX = 48, GPMAX = 44;
+/** the lowest the zoom ceiling goes (ref `maxZ`) */
+export const MAXZ_MIN = 6.5;
 
-/* ── colours: the Plumage table, read (BAND fill, EDGE inset) ── */
+/* ── colours: the Plumage table, read ── */
 export const bandOf = (status: string): string => statusBand(status);
 export const edgeOf = (status: string): string => STAGE_COLOURS[stageOf(status)].edge;
 export const hatchOf = (status: string): string => `repeating-linear-gradient(135deg,${bandOf(status)} 0 4px,#fff 4px 7px)`;
+/** an earlier stage, faded so the current one reads as the live one (ref `segBg`) */
+export const fadedBand = (status: string): string => `color-mix(in srgb,${bandOf(status)} 45%,#fff)`;
+export const fadedEdge = (status: string): string => `color-mix(in srgb,${edgeOf(status)} 50%,#fff)`;
 
 /* ── the rows ── */
-export type BwAxis = "reply" | "calendar";
-export type BwFilter = "all" | "past" | "week" | "you";
+export type BwFilter = "all" | "you" | "chase" | "wait";
 export interface BwStage { d: number; status: string }
 export interface BwRow {
   id: string;
   name: string;
   agency: string;
   status: string;
-  /** the writer's move (`tileCourt` "you": a partial, full or revision asked for, an offer) */
+  /** the writer's move (`tileCourt` "you") */
   you: boolean;
   /** "Send by" where the date is the writer's to keep */
   sendBy: boolean;
-  /** every dated stage, end to end, in calendar days from today (≤ 0) */
+  closed: boolean;
+  /** the closed outcome's word ("Passed", "No reply", "Withdrawn"…); "" while open */
+  outcome: string;
+  /** every dated stage, end to end, in calendar days from today (≤ 0); a closed query's last is its closing */
   ev: BwStage[];
-  /** the current stage's start, in days (null when nothing dates it) */
-  start: number | null;
-  /** the reply date, in days from today (negative: past its date); null when there is none */
+  /** the reply date, in days from today (negative: past its date); null when there is none (and always when closed) */
   due: number | null;
-  /** how much of the reply window has gone (ref `kk`); null with no date */
-  kk: number | null;
-  /* the engine's own dates, carried for the measurements (the v5 view's attributes) */
+  /* the engine's own dates, carried for the measurements */
   fromMs: number | null;
   toMs: number | null;
   pasts: string;
   dueMs: number | null;
 }
 const dayOf = (ms: number, today: number): number => Math.round((startOfDay(ms) - today) / DAY);
+const isOffer = (s: string) => s === QueryStatus.OFFER || s === QueryStatus.SIGNED;
+/** a closed query's outcome, said short (STAGE_NAME, with "Closed with no reply" as "No reply") */
+export const outcomeWord = (status: string): string => (status === QueryStatus.NO_RESPONSE ? "No reply" : STAGE_NAME[status as QueryStatus] ?? "Closed");
 
-/** one row from the desktop's line (`beLine`): its stages in days, its date and its window */
-export function bwRow(e: EyeRow, nowMs: number): BwRow {
+/** one row from the desktop's line (`beLine`); `closed` from the phone's own court (V3Query.court) */
+export function bwRow(e: EyeRow, nowMs: number, closed = false): BwRow {
   const today = startOfDay(nowMs);
   const line = beLine(e, nowMs);
   const row = e.row;
   const statusAt = new Map(row.history.spans.map((s) => [s.startMs, String(s.status)]));
   const ev: BwStage[] = line.past.map((b) => ({ d: dayOf(b.fromMs, today), status: statusAt.get(b.fromMs) ?? String(row.status) }));
   if (line.cur) ev.push({ d: dayOf(line.cur.fromMs, today), status: String(row.status) });
-  const start = line.cur ? dayOf(line.cur.fromMs, today) : ev.length ? ev[ev.length - 1].d : null;
-  const due = line.dueMs == null ? null : dayOf(line.dueMs, today);
-  const s0 = start ?? 0;
-  const kk = due == null ? null : -s0 / Math.max(7, due - s0);
+  const you = !closed && tileCourt(row.status as QueryStatus) === "you";
   return {
     id: row.id, name: row.agentName, agency: row.agency && row.agency !== "No agency" ? row.agency : "", status: String(row.status),
-    you: tileCourt(row.status as QueryStatus) === "you", sendBy: row.expectedKind === "sendBy" || tileCourt(row.status as QueryStatus) === "you",
-    ev, start, due, kk,
-    fromMs: line.cur?.fromMs ?? null, toMs: line.cur?.toMs ?? null, pasts: line.past.map((b) => `${b.fromMs}-${b.toMs}`).join(","), dueMs: line.dueMs,
+    you, sendBy: you || row.expectedKind === "sendBy", closed, outcome: closed ? outcomeWord(String(row.status)) : "",
+    ev, due: closed || line.dueMs == null ? null : dayOf(line.dueMs, today),
+    fromMs: line.cur?.fromMs ?? null, toMs: line.cur?.toMs ?? null, pasts: line.past.map((b) => `${b.fromMs}-${b.toMs}`).join(","), dueMs: closed ? null : line.dueMs,
   };
 }
+const start = (r: BwRow): number => (r.ev.length ? r.ev[r.ev.length - 1].d : 0);
+/** how much of the reply window has gone (ref `kk`); with no date, against 60 days */
+export const kk = (r: BwRow): number => (r.due == null ? -start(r) / 60 : -start(r) / Math.max(7, r.due - start(r)));
 
-/* ── the groups (Nick's), and the chips that filter them ── */
-export const BW_GROUPS = ["Past its date", "Nearly there", "Plenty of time", "Waiting on you", "No date"] as const;
-export type BwGroupName = (typeof BW_GROUPS)[number];
-export function groupOf(r: BwRow): BwGroupName {
-  if (r.due == null || r.kk == null) return "No date";
-  if (r.you) return "Waiting on you";
-  return r.kk >= 1 ? "Past its date" : r.kk >= 0.75 ? "Nearly there" : "Plenty of time";
-}
-export function bwFilter(rows: readonly BwRow[], f: BwFilter): BwRow[] {
+/* ── the pills: the open queries split exactly three ways ── */
+export const isYou = (r: BwRow): boolean => !r.closed && r.you;
+export const isChase = (r: BwRow): boolean => !r.closed && !r.you && r.due != null && r.due < 0;
+export const isWait = (r: BwRow): boolean => !r.closed && !r.you && !(r.due != null && r.due < 0);
+/** drawn on the world: open with a reply date, or an offer (its date sits on the line) */
+export const isDrawn = (r: BwRow): boolean => !r.closed && (r.due != null || isOffer(r.status)) && r.ev.length > 0;
+/** open, with no reply date, so not drawn: the footer's "N queries have no reply date" */
+export const isNoDate = (r: BwRow): boolean => !r.closed && !isDrawn(r);
+export const PILLS: readonly BwFilter[] = ["all", "you", "chase", "wait"];
+export const PILL_LABEL: Record<BwFilter, string> = { all: "All", you: "With you", chase: "Needs chasing", wait: "Waiting" };
+export interface BwCounts { all: number; you: number; chase: number; wait: number }
+export const bwCounts = (rows: readonly BwRow[]): BwCounts => {
+  const open = rows.filter((r) => !r.closed);
+  return { all: open.length, you: open.filter(isYou).length, chase: open.filter(isChase).length, wait: open.filter(isWait).length };
+};
+export function inPill(r: BwRow, f: BwFilter): boolean {
   switch (f) {
-    case "all": return [...rows];
-    case "past": return rows.filter((r) => r.due != null && r.due < 0);
-    case "week": return rows.filter((r) => r.due != null && r.due >= 0 && r.due <= 7);
-    case "you": return rows.filter((r) => r.you);
+    case "all": return !r.closed;
+    case "you": return isYou(r);
+    case "chase": return isChase(r);
+    case "wait": return isWait(r);
     default: { const unhandled: never = f; return unhandled; }
   }
 }
-export interface BwCounts { all: number; past: number; week: number; you: number }
-/** the four chips' counts — over every live row, so they never change with the filter */
-export const bwCounts = (rows: readonly BwRow[]): BwCounts => ({
-  all: rows.length, past: bwFilter(rows, "past").length, week: bwFilter(rows, "week").length, you: bwFilter(rows, "you").length,
-});
-export const CHIP_WORDS: Record<BwFilter, string> = { all: "out", past: "past its date", week: "this week", you: "with you" };
-export const BW_CHIPS: readonly BwFilter[] = ["all", "past", "week", "you"];
+/** where `&court=` lands (v1's map): with you → With you; gone quiet → Needs chasing; with agents → All */
+export function chipForCourt(court: string | null | undefined): BwFilter {
+  if (court === "you") return "you";
+  if (court === "quiet") return "chase";
+  return "all";
+}
 
-/** the groups in order, each most-elapsed first (No date: the longest in its stage first) */
+/* ── the groups ── */
+export const BW_GROUPS = ["Needs chasing", "Nearly there", "Plenty of time", "With you", "Closed"] as const;
+export type BwGroupName = (typeof BW_GROUPS)[number];
+const byKk = (a: BwRow, b: BwRow) => kk(b) - kk(a) || a.name.localeCompare(b.name);
+/** the groups under a pill, in order, each most elapsed first (Closed: the latest closed first; under All only) */
 export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all"): { t: BwGroupName; rows: BwRow[] }[] {
-  const mine = bwFilter(rows, f);
-  return BW_GROUPS.map((t) => ({
-    t,
-    rows: mine.filter((r) => groupOf(r) === t).sort((a, b) =>
-      t === "No date" ? (a.start ?? 0) - (b.start ?? 0) || a.name.localeCompare(b.name) : (b.kk ?? 0) - (a.kk ?? 0) || a.name.localeCompare(b.name)),
-  })).filter((g) => g.rows.length);
+  const drawn = rows.filter((r) => isDrawn(r) && inPill(r, f));
+  const them = drawn.filter((r) => !r.you).sort(byKk), you = drawn.filter((r) => r.you).sort(byKk);
+  const ch = them.filter(isChase), wt = them.filter((r) => !isChase(r));
+  const closed = f === "all" ? rows.filter((r) => r.closed && r.ev.length).sort((a, b) => start(b) - start(a) || a.name.localeCompare(b.name)) : [];
+  const defs: [BwGroupName, BwRow[]][] = [["Needs chasing", ch], ["Nearly there", wt.filter((r) => kk(r) >= 0.75)], ["Plenty of time", wt.filter((r) => kk(r) < 0.75)], ["With you", you], ["Closed", closed]];
+  return defs.filter(([, r]) => r.length).map(([t, r]) => ({ t, rows: r }));
+}
+/** the footer's rows: open with no reply date, under All and Waiting only */
+export const noDateHere = (rows: readonly BwRow[], f: BwFilter): BwRow[] => (f === "all" || f === "wait" ? rows.filter((r) => isNoDate(r) && inPill(r, f)) : []);
+const FOOT_ND = 52;
+/** the "All" layout's height in world units (ref `allH`): every pill is drawn at its scale */
+export function allH(rows: readonly BwRow[]): number {
+  return bwGroups(rows, "all").reduce((a, x) => a + GAP + x.rows.length * RH, 0) + (noDateHere(rows, "all").length ? FOOT_ND : 0) + 8;
 }
 
-/* ── a row's segments (ref `rowSegs`): its stages end to end, then past its date (hatched) or still to come (dashed) ── */
-export type SegKind = "stage" | "past" | "ahead";
-export interface BwSeg {
-  /** on the axis, in days */
-  a: number; b: number;
-  /** on the calendar, in days (the replay clips on these) */
-  ca: number; cb: number;
-  /** the date its words name, in calendar days */
-  d: number;
-  st: string; k: SegKind; first: boolean; last: boolean;
+/* ── the span (ref `setAxis`): a fortnight before the campaign's first date to three weeks after its last ── */
+export interface BwExt { D0: number; D1: number }
+export function setAxis(rows: readonly BwRow[]): BwExt {
+  const qs = rows.filter((r) => !r.closed);
+  const first = Math.min(0, ...qs.flatMap((r) => r.ev.map((e) => e.d)));
+  const last = Math.max(0, ...qs.map((r) => r.due ?? 0));
+  return { D0: Math.max(-365, Math.min(-60, first - 14)), D1: Math.min(365, Math.max(42, last + 21)) };
 }
-/** where a row's axis 0 sits: its own reply date (reply axis; an undated row lines today up on the line), or today */
-export const rowOffset = (r: BwRow, axis: BwAxis): number => (axis === "reply" ? r.due ?? 0 : 0);
-export function rowSegs(r: BwRow, axis: BwAxis): BwSeg[] {
-  const off = rowOffset(r, axis), P = (d: number) => d - off, out: BwSeg[] = [], ev = r.ev;
+
+/* ── a row's segments (ref `rowSegs`, on real dates) ── */
+export type SegKind = "stage" | "past" | "quiet" | "ahead";
+export interface BwSeg { a: number; b: number; d: number; st: string; k: SegKind; first: boolean; last: boolean; cont: boolean }
+export function rowSegs(r: BwRow, quietDays: number): BwSeg[] {
+  const out: BwSeg[] = [], ev = r.ev;
+  const seg = (a: number, b: number, d: number, st: string, k: SegKind, first: boolean, last: boolean, cont = false): BwSeg => ({ a, b, d, st, k, first, last, cont });
   ev.forEach((e, i) => {
-    const nx = ev[i + 1];
-    const seg = (ca: number, cb: number, k: SegKind, last: boolean, d = e.d, first = i === 0): BwSeg => ({ a: P(ca), b: P(cb), ca, cb, d, st: e.status, k, first, last });
-    if (nx) { out.push(seg(e.d, nx.d, "stage", false)); return; }
-    if (r.due == null) { out.push(seg(e.d, 0, "stage", true)); return; }
-    if (r.due < 0) { out.push(seg(e.d, r.due, "stage", true)); out.push(seg(r.due, 0, "past", true, r.due, false)); }
-    else { out.push(seg(e.d, 0, "stage", true)); out.push(seg(0, r.due, "ahead", true, r.due, false)); }
+    const nx = ev[i + 1], first = i === 0;
+    if (nx) { out.push(seg(e.d, nx.d, e.d, e.status, "stage", first, false)); return; }
+    /* closed: a short grey cap on the day it closed. An offer (or no date): its stage runs on to today, 3 days at least */
+    if (r.closed) { out.push(seg(e.d, e.d + 4, e.d, e.status, "stage", first, true)); return; }
+    if (r.due == null) { out.push(seg(e.d, Math.max(0, e.d + 3), e.d, e.status, "stage", first, true)); return; }
+    if (r.due < 0) {
+      /* a stage reached after its reply date had gone (a nudge, a late request) starts its hatching at its own start */
+      const end = Math.max(e.d, r.due);
+      out.push(seg(e.d, end, e.d, e.status, "stage", first, true, true));
+      /* past its date: hatched; once it has gone quiet (the writer's setting, from the reply date) it fades to today */
+      const qp = r.due + quietDays;
+      if (0 > qp && qp > end) { out.push(seg(end, qp, r.due, e.status, "past", false, true, true)); out.push(seg(qp, 0, r.due, e.status, "quiet", false, true)); }
+      else if (0 > qp) out.push(seg(end, 0, r.due, e.status, "quiet", false, true));
+      else out.push(seg(end, 0, r.due, e.status, "past", false, true));
+    } else {
+      out.push(seg(e.d, 0, e.d, e.status, "stage", first, true, true));
+      out.push(seg(0, r.due, r.due, e.status, "ahead", false, true));
+    }
   });
   return out;
 }
+/** the replay's cut (ref `clipR`): nothing after its "now", nothing still to come, the last piece squared off */
+export function clipR(segs: readonly BwSeg[], rt: number | null): BwSeg[] {
+  if (rt == null) return [...segs];
+  const out: BwSeg[] = [];
+  for (const g of segs) { if (g.k === "ahead" || g.a > rt) continue; const c = { ...g }; if (c.b > rt) c.b = rt; out.push(c); }
+  if (out.length) { const l = out[out.length - 1]; if (l.k === "stage") { l.last = true; l.cont = false; } }
+  return out;
+}
+/** the replay's start: three days before the earliest stage of anything drawn */
+export const replayStart = (rows: readonly BwRow[]): number => Math.min(0, ...rows.filter(isDrawn).map((r) => r.ev[0].d)) - 3;
+/** the replay's clock: ease in-out over its duration (ref `replay`) */
+export const replayAt = (t0: number, k: number): number => t0 + (0 - t0) * (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+export const REPLAY_MS = 6000;
 
-/* ── words ── */
-/** the figure: [number, unit] — "8 wks past", "12 days to go"; an undated row says "No date" */
-export function num(r: Pick<BwRow, "due">): [string, string] {
+/* ── figures: only past its date, an offer, or a closed outcome (ref `hasFig`, `num`) ── */
+export const hasFig = (r: BwRow, replaying = false): boolean => !replaying && (r.closed || isOffer(r.status) || (r.due != null && r.due < 0));
+export function num(r: Pick<BwRow, "due" | "closed" | "outcome" | "status">): [string, string] {
+  if (r.closed) return ["", r.outcome];
+  if (isOffer(r.status)) return ["", "Offer"];
   const d = r.due;
-  if (d == null) return ["", "No date"];
+  if (d == null) return ["", ""];
   if (d < 0) { const w = Math.round(-d / 7); return w >= 2 ? [String(w), "wks past"] : [String(-d), -d === 1 ? "day past" : "days past"]; }
   const w = Math.round(d / 7);
   return d >= 14 ? [String(w), "wks to go"] : [String(d), d === 1 ? "day to go" : "days to go"];
 }
-/** each stage's short name in its bar (ref `SHORT`) */
+
+/* ── words ── */
 export function shortName(status: string): string {
   switch (status) {
     case QueryStatus.QUERIED: return "Queried";
@@ -172,57 +219,66 @@ export function shortName(status: string): string {
     case QueryStatus.REVISE_RESUBMIT: return "R&R asked";
     case QueryStatus.RESUBMITTED: return "Resubmitted";
     case QueryStatus.OFFER: case QueryStatus.SIGNED: return "Offer";
-    default: return "Passed";
+    default: return outcomeWord(status);
   }
 }
-/** a day from today as the words say it: "16 Nov" */
-export const dm = (d: number, nowMs: number): string => dayMonth(startOfDay(nowMs) + d * DAY + DAY / 2);
+/** a day from today, and as the words say it: "16 Nov" (en-GB, so September is "Sept") */
+export const dateOf = (d: number, nowMs: number): Date => { const t = new Date(startOfDay(nowMs)); t.setDate(t.getDate() + d); return t; };
+export const dm = (d: number, nowMs: number): string => dateOf(d, nowMs).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+export const monthOf = (t: Date): string => t.toLocaleDateString("en-GB", { month: "short" });
 const tw = (t: string, k: number) => t.length * k;
-/** what a stage's bar says in `w` px (ref `stageTx`): name and date, then name only, then date only, then nothing */
 export type StageWords = "both" | "name" | "date" | "none";
+/** what a stage says in `w` px (ref `stageTx`): name and date, then name only, then date only, then nothing */
 export function stageTx(name: string, date: string, w: number): StageWords {
   return w >= tw(name, 7.4) + tw(date, 6.6) + 24 ? "both" : w >= tw(name, 7.4) + 18 ? "name" : w >= tw(date, 6.6) + 18 ? "date" : "none";
 }
-/** the dashed part's words (ref `inBar` "ahead"): "Reply by 14 Jan", then the date, then nothing */
+/** the still-to-come part's words (ref `inBar` "ahead"): "Reply by 14 Jan", then the date, then nothing */
 export function aheadTx(lead: string, date: string, w: number): string {
   const t = `${lead} ${date}`;
   return w >= tw(t, 6.6) + 20 ? t : w >= tw(date, 6.6) + 20 ? date : "";
 }
 
-/* ── the axis ── */
-export interface BwAxisExt { D0: number; D1: number; lab: string }
-/** the ref's extents, as they are: −140…+70 days on the reply date, −180…+60 on the calendar. A stage or a date beyond
- *  them is held at the edge (`wxd` clamps, as the ref's does) — widening to the data let one two-year-old query squeeze
- *  every bar into a sliver (measured on the harness, 25 Nov). `rows` is kept for the signature. */
-export function axisExt(_rows: readonly BwRow[], axis: BwAxis): BwAxisExt {
-  return axis === "reply" ? { D0: -140, D1: 70, lab: "Reply due" } : { D0: -180, D1: 60, lab: "Today" };
-}
-/** the ruler's marks: weeks either side of the reply date (every four), or the months on the calendar */
-export function rulerMarks(axis: BwAxis, ext: BwAxisExt, X: (d: number) => number, nowMs: number): [number, string][] {
-  const out: [number, string][] = [];
-  if (axis === "reply") {
-    for (let w = Math.ceil(ext.D0 / 28) * 4; w * 7 <= ext.D1; w += 4) { if (!w) continue; out.push([X(w * 7), `${w < 0 ? "−" : "+"}${Math.abs(w)} wks`]); }
-  } else {
-    const today = startOfDay(nowMs), n = new Date(today);
-    for (let m = -48; m <= 24; m++) {
-      const dt = new Date(n.getFullYear(), n.getMonth() + m, 1), d = Math.round((dt.getTime() - today) / DAY);
+/* ── the ruler (ref `rulerMarks`): months, then a date every 4 / 2 / 1 weeks on Mondays, then every day ── */
+export type BwTier = "months" | "4w" | "2w" | "1w" | "days";
+export interface BwRuler { tier: BwTier; marks: [number, string, boolean][]; mon: Date | null }
+export function rulerMarks(ext: BwExt, X: (d: number) => number, nowMs: number): BwRuler {
+  const ppd = Math.abs(X(7) - X(0)) / 7, out: [number, string, boolean][] = [];
+  const now = dateOf(0, nowMs);
+  if (ppd * 28 < 64) {
+    for (let m = -13; m <= 13; m++) {
+      const dt = new Date(now.getFullYear(), now.getMonth() + m, 1), d = Math.round((dt.getTime() - now.getTime()) / DAY);
       if (d < ext.D0 || d > ext.D1) continue;
-      out.push([X(d), MONTHS_SHORT[dt.getMonth()]]);
+      out.push([X(d), monthOf(dt), false]);
     }
+    return { tier: "months", marks: out, mon: null };
   }
-  return out;
+  if (ppd >= 24) {
+    let mon: Date | null = null;
+    for (let d = ext.D0; d <= ext.D1; d++) {
+      const t = dateOf(d, nowMs), x = X(d);
+      out.push([x, t.getDate() === 1 ? t.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : String(t.getDate()), true]);
+      if (x <= 56) mon = t;
+    }
+    return { tier: "days", marks: out, mon: mon ?? dateOf(ext.D0, nowMs) };
+  }
+  const step = ppd * 7 >= 64 ? 7 : ppd * 14 >= 64 ? 14 : 28;
+  let first = ext.D0;
+  while (dateOf(first, nowMs).getDay() !== 1) first++;
+  for (let d = first; d <= ext.D1; d += 7) { if (Math.round((d - first) / 7) % (step / 7)) continue; out.push([X(d), dm(d, nowMs), false]); }
+  return { tier: step === 7 ? "1w" : step === 14 ? "2w" : "4w", marks: out, mon: null };
 }
-/** at least 52px between marks (ref `spaced`) */
-export const spaced = (m: readonly [number, string][]): [number, string][] => { let last = -99; return m.filter(([x]) => { if (x - last < 52) return false; last = x; return true; }); };
+/** dates at least 64px apart, day numbers 22px (ref `spaced`) */
+export const spaced = (m: readonly [number, string, boolean][]): [number, string, boolean][] => { let last = -99; return m.filter(([x, , day]) => { if (x - last < (day ? 22 : 64)) return false; last = x; return true; }); };
 
-/* ── the world: layout and the mapping between world and screen (ref `layout`, `fitS` … `clamp`) ── */
+/* ── the world: layout and the mapping between world and screen ── */
 export interface BwPlaced { r: BwRow; y: number }
 export interface BwG { t: BwGroupName; y: number; rows: BwPlaced[] }
 export interface BwView { z: number; ox: number; oy: number }
 export interface World {
-  G: BwG[]; H: number; ext: BwAxisExt; PPD: number; LINE: number;
-  vpW: number; vpH: number; bot: number; land: boolean;
-  /** the zoom ceiling: the ref's 6.5, raised so rows can always reach 100px */
+  G: BwG[]; H: number; FOOT: number; HALL: number; ext: BwExt; PPD: number; LINE: number;
+  vpW: number; vpH: number; bot: number; land: boolean; filter: BwFilter;
+  /** the pill's opening zoom (1 under All; closer in for a short pill) */
+  FZ: number;
   maxZ: number;
   wxd: (d: number) => number;
   topFor: (z: number) => number;
@@ -233,8 +289,8 @@ export interface World {
   clamp: (v: BwView) => BwView; fitView: () => BwView;
 }
 export interface WorldOpts {
-  groups: { t: BwGroupName; rows: BwRow[] }[];
-  ext: BwAxisExt;
+  rows: readonly BwRow[];
+  filter: BwFilter;
   vpW: number; vpH: number;
   /** the space kept under the rows: the dock's height + 16 (16 with no dock) */
   bot: number;
@@ -242,30 +298,22 @@ export interface WorldOpts {
   land?: boolean;
 }
 export function makeWorld(o: WorldOpts): World {
+  const { vpW, vpH, bot, filter } = o, land = !!o.land;
   let y = 0;
-  const G: BwG[] = o.groups.map(({ t, rows }) => { const g = { t, y, rows: rows.map((r, i) => ({ r, y: y + GAP + i * RH })) }; y += GAP + rows.length * RH; return g; });
-  const H = y + 12;
-  const { vpW, vpH, bot, ext } = o, land = !!o.land;
+  const G: BwG[] = bwGroups(o.rows, filter).map(({ t, rows }) => { const g = { t, y, rows: rows.map((r, i) => ({ r, y: y + GAP + i * RH })) }; y += GAP + rows.length * RH; return g; });
+  const FOOT = (noDateHere(o.rows, filter).length ? FOOT_ND : 0) + 8;
+  const H = y + FOOT, HALL = allH(o.rows);
+  const ext = setAxis(o.rows);
   const PPD = WX / (ext.D1 - ext.D0);
   const wxd = (d: number) => (Math.max(ext.D0, Math.min(ext.D1, d)) - ext.D0) * PPD;
-  const top0 = land ? TOPFOLD : TOPFIT;
-  const topFor = (z: number) => (land || z > 1.05 ? TOPFOLD : TOPFIT);
-  /* ⚠️ A DEPARTURE FOR REAL DATA. The ref's `fitS` is min(width fit, height fit) and its `fitSY` never goes under it:
-     right for its 22 rows (the width binds), but a campaign of 35 squeezes time into a third of the screen, and the
-     fitted rows overflow. Here time keeps the width fit (the ref's own comment: "time keeps the width fit") and rows
-     take the height, whichever way — so every live query is on screen fitted. With the ref's 22 rows both are its. */
+  /* time always fills the width; rows share the height of the "All" layout, so a pill never changes the scale */
   const fitS = () => (vpW - 32) / WX;
-  const nRows = G.reduce((a, g) => a + g.rows.length, 0), avail = vpH - top0 - RULE - bot;
-  const fitSY = () => {
-    const free = avail / (H + 8);
-    /* the ref's fit, unless its gaps would fall under the floor: then the gaps sit at the floor and the rows share the rest */
-    const s = GAP * free >= GPMIN || !nRows ? free : Math.max(0.01, (avail - G.length * GPMIN - 8) / (nRows * RH));
-    return Math.min(fitS() * 3, s);
-  };
-  const zT = () => 86 / (RH * fitSY());
+  const fitSY = () => Math.min(fitS() * 3, (vpH - TOPFIT - RULE - bot) / (HALL + 8));
+  const maxZ = Math.max(MAXZ_MIN, (RPMAX / (RH * fitSY())) * 2.6);
+  const zT = () => Math.max(1.05, 24 / (RH * fitSY()));
   const SX = (z: number) => fitS() * Math.pow(z, XP) * (1 + (Math.max(0, z - zT()) / zT()) * 3);
   const SY = (z: number) => fitSY() * z;
-  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(Math.max(GAP * SY(z), GPMIN), GPMAX);
+  const rowPx = (z: number) => Math.min(RH * SY(z), RPMAX), gapPx = (z: number) => Math.min(GAP * SY(z), GPMAX);
   const yOff = (wy: number, z: number): number => {
     const rp = rowPx(z) / RH, gp = gapPx(z) / GAP; let off = 0;
     for (const g of G) {
@@ -274,7 +322,7 @@ export function makeWorld(o: WorldOpts): World {
       if (wy <= c) return off + (wy - b) * rp; off += (c - b) * rp;
     }
     const last = G.length ? G[G.length - 1] : null, end = last ? last.y + GAP + last.rows.length * RH : 0;
-    return off + Math.min(12, Math.max(0, wy - end));
+    return off + Math.min(FOOT, Math.max(0, wy - end));
   };
   const yWorld = (o2: number, z: number): number => {
     const rp = rowPx(z) / RH, gp = gapPx(z) / GAP; let off = 0;
@@ -287,35 +335,58 @@ export function makeWorld(o: WorldOpts): World {
     const last = G[G.length - 1];
     return last ? last.y + GAP + last.rows.length * RH + (o2 - off) : o2;
   };
-  /* ⚠️ MAXZ IS THE REF'S 6.5 WHEN ITS ROWS CAN REACH 100px WITHIN IT (the ref's own data: 6.5 × 30 × 0.667 = 130px, so
-     1.3× the cap). A longer campaign starts with shorter rows, so the ceiling rises to keep that same 1.3× headroom —
-     otherwise the Dates and Timeline levels could never be reached. */
-  const maxZ = Math.max(MAXZ, (1.3 * RPMAX) / (RH * fitSY()));
+  /* "See it all" (ref `fitView`/`FZ`): under All, everything at the fitted size; a short pill opens as close in as it can
+     while every row still fits, up to 48px rows */
+  let FZ = 1;
+  if (filter !== "all" && G.length) {
+    const avail = vpH - TOPFIT - RULE - bot - 8;
+    for (let t = 1; t <= maxZ; t += 0.02) { if (yOff(H, t) > avail) break; FZ = t; if (rowPx(t) >= RPMAX) break; }
+  }
+  const topFor = (z: number) => (land || z > FZ + 0.05 ? TOPFOLD : TOPFIT);
+  const top0 = land ? TOPFOLD : TOPFIT;
   const clamp = (v: BwView): BwView => {
     const z = Math.min(maxZ, Math.max(1, v.z)); const ww = WX * SX(z), hh = yOff(H, z), pad = 16;
     const ox = ww + 2 * pad <= vpW ? (vpW - ww) / 2 : Math.min(pad, Math.max(vpW - ww - pad, v.ox));
     const T = topFor(z), oy = hh + T + RULE + bot <= vpH ? T + RULE + 8 : Math.min(T + RULE + 8, Math.max(vpH - hh - bot, v.oy));
     return { z, ox, oy };
   };
-  const fitView = (): BwView => ({ z: 1, ox: (vpW - WX * SX(1)) / 2, oy: top0 + RULE + 8 });
-  return { G, H, ext, PPD, LINE: wxd(0), vpW, vpH, bot, land, maxZ, wxd, topFor, fitS, fitSY, zT, SX, SY, rowPx, gapPx, yOff, yWorld, clamp, fitView };
+  const LINE = wxd(0);
+  const fitView = (): BwView => (FZ <= 1.0001 ? { z: 1, ox: (vpW - WX * SX(1)) / 2, oy: top0 + RULE + 8 } : clamp({ z: FZ, ox: vpW * 0.74 - LINE * SX(FZ), oy: top0 + RULE + 8 }));
+  return { G, H, FOOT, HALL, ext, PPD, LINE, vpW, vpH, bot, land, filter, FZ, maxZ, wxd, topFor, fitS, fitSY, zT, SX, SY, rowPx, gapPx, yOff, yWorld, clamp, fitView };
 }
-/** the zoom that gives rows `rp` px (ref `zoomToRows`'s z) */
-export const zoomForRows = (w: World, rp: number): number => Math.max(1, rp / RH / w.fitSY());
+/** the zoom that gives rows `rp` px */
+export const zoomForRows = (w: World, rp: number): number => Math.min(w.maxZ, Math.max(1, rp / RH / w.fitSY()));
 
 /** the heading's place (ref): just above its rows, pinned under the ruler, pushed up by the next */
 export function headingTop(gy: number, gp: number, gEnd: number, top: number, small: boolean): { hy: number; hh: number; pinned: boolean } {
   const hh = small ? 22 : 28, natural = gy + Math.max(0, gp - hh - 6), hy = Math.min(Math.max(natural, top + RULE), gEnd - hh - 2);
   return { hy, hh, pinned: hy > natural + 1 };
 }
-/** a bar's thickness and top at row height `rp` (ref `draw()`'s `th`/`by`) */
-export function barBox(rp: number, ry: number): { th: number; by: number; tall: boolean } {
-  const th = rp < 22 ? Math.max(3, Math.min(10, rp * 0.5)) : rp < 44 ? 5 : rp < 80 ? 8 : Math.min(26, 8 + (rp - 80) * 1.2);
-  return { th, by: rp < 22 ? ry + (rp - th) / 2 : ry + rp - (rp < 44 ? 6 : 12) - th, tall: th >= 16 };
+/** a row's bar (ref `inRow`): fitted, a thin bar; zoomed in, it fills the row (row − 8, at most 40) and carries its
+ *  name from 18px, the agency and each stage's words from 34px */
+export function barBox(rp: number, ry: number, zoomed: boolean): { th: number; by: number; named: boolean; one: boolean; two: boolean } {
+  const named = zoomed && rp >= 24, th = !named ? Math.max(3, Math.min(12, rp * 0.45)) : Math.min(40, rp - 8);
+  return { th, by: ry + (rp - th) / 2, named, one: named && th >= 18, two: named && th >= 34 };
 }
-/** where `&court=` lands: the nearest chip (with you → with you; gone quiet → past its date; with agents has none) */
-export function chipForCourt(court: string | null | undefined): BwFilter {
-  if (court === "you") return "you";
-  if (court === "quiet") return "past";
-  return "all";
+
+/* ── the sample campaign (ref `BEP`), invented, for the no-queries screen behind its card. Never real data. ── */
+const SN = [["Harriet", "Vance"], ["Callum", "Reid"], ["Rosalind", "Ashby"], ["Samuel", "Osei"], ["Eleanor", "Voss"], ["Daniel", "O'Rourke"], ["Imogen", "Hartley"], ["Sam", "Okonjo"], ["Priya", "Kapoor"], ["Theo", "Abara"], ["Ottoline", "Frayn"], ["Noah", "Bright"], ["Jonathan", "Marsh"], ["Ana", "Kovic"], ["David", "Reyes"], ["Tom", "Ellery"], ["Edda", "Voss"], ["Mira", "Stone"], ["Lucy", "Penrose"], ["Kit", "Marlowe"], ["Ines", "Duarte"], ["Felix", "Grant"]];
+const SA = ["Vance & Wren", "Northlight", "Ashby & Lowe", "Blackfriars", "Voss & Hart", "Hale & Finch", "Hartley Literary", "Pembroke Street", "Kapoor Agency", "Abara Lit", "Frayn & Co", "Ellery Bright", "Marsh Literary", "Kovic Agency", "Reyes Literary", "Ellery Bright", "Voss & Grey", "Stone House", "Penrose Lit", "Marlowe Mills", "Duarte Agency", "Grant & Co"];
+type K = "q" | "preq" | "psent" | "freq" | "fsent" | "offer" | "pass";
+const SK: Record<K, QueryStatus> = { q: QueryStatus.QUERIED, preq: QueryStatus.PARTIAL_REQUESTED, psent: QueryStatus.PARTIAL_SENT, freq: QueryStatus.FULL_REQUESTED, fsent: QueryStatus.FULL_SENT, offer: QueryStatus.OFFER, pass: QueryStatus.REJECTED };
+const SP: [[number, K][], number][] = [[[[150, "q"], [96, "preq"], [90, "psent"], [44, "freq"], [40, "fsent"]], 10], [[[60, "q"]], 8], [[[51, "q"]], 6], [[[70, "q"], [30, "preq"], [24, "psent"]], 8], [[[90, "q"], [60, "freq"], [52, "fsent"]], 10], [[[40, "q"], [11, "preq"]], 2], [[[30, "q"]], 8], [[[100, "q"]], 6], [[[24, "q"]], 8], [[[80, "q"], [50, "preq"], [48, "psent"]], 6], [[[130, "q"]], 12], [[[95, "q"], [60, "freq"], [55, "fsent"], [3, "offer"]], 0], [[[56, "q"], [20, "freq"]], 2], [[[70, "q"], [30, "freq"]], 2], [[[63, "q"], [35, "preq"]], 2], [[[18, "q"]], 8], [[[77, "q"], [40, "preq"], [36, "psent"]], 8], [[[6, "q"]], 8], [[[120, "q"], [70, "pass"]], 0], [[[45, "q"]], 6], [[[12, "q"]], 10], [[[160, "q"], [110, "preq"], [104, "psent"], [60, "pass"]], 0]];
+/** the ref's invented campaign, relative to today: 22 queries (2 closed, 3 with no reply date). Never real data. */
+export function sampleRows(): BwRow[] {
+  let nd = 0;
+  return SP.map(([ev, wk], i) => {
+    const st = ev[ev.length - 1][1], closed = st === "pass", last = -ev[ev.length - 1][0];
+    let due: number | null = closed || st === "offer" ? null : last + (wk ? wk * 7 : 0);
+    if (nd < 3 && !closed && st === "q" && due != null && due > 10) { due = null; nd++; }
+    const status = SK[st], you = st === "preq" || st === "freq" || st === "offer";
+    return {
+      id: `sample${i}`, name: SN[i].join(" "), agency: SA[i], status, you, sendBy: you,
+      closed, outcome: closed ? outcomeWord(status) : "", ev: ev.map(([d, s]) => ({ d: -d, status: SK[s] })), due,
+      fromMs: null, toMs: null, pasts: "", dueMs: null,
+    };
+  });
 }
