@@ -23,7 +23,7 @@
  */
 import {
   type ContactFilters, emptyContactFilters, GROUP_OPTIONS, type GroupKey, OPEN_CHOICES, type OpenChoice,
-  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, REMEMBERED_SORTS, REPLY_CHOICES, type ReplyChoice, type SortKey, STATUS_CHOICES, type StatusKey,
+  QUERIED_CHOICES, type QueriedChoice, SORT_OPTIONS, REMEMBERED_SORTS, RT_MIN, RT_MAX, type SortKey, STATUS_CHOICES, type StatusKey,
 } from "./contactList";
 import { GLANCE_KEYS, type GlanceKey } from "./contactGlance";
 
@@ -146,12 +146,16 @@ export function sanitiseListVisit(raw: unknown): ListVisit | null {
     genres: Array.isArray(sf.genres) ? [...new Set(sf.genres.filter((x): x is string => typeof x === "string" && x.trim().length > 0 && x.length <= 80))].slice(0, 20) : [],
     genreMode: sf.genreMode === "all" ? "all" : "any",
     missing: sf.missing === true,
-    /* Contact list rows v1.2 — the new keys read safely: anything unknown is ignored and reads as off */
-    fit: sf.fit === 5 || sf.fit === 4 || sf.fit === 0 ? sf.fit : null,
-    reply: oneOf<ReplyChoice>(sf.reply, REPLY_CHOICES, "any"),
-    abroad: sf.abroad === true,
-    /* v1.2.1 — "No genres yet"; never with genre picks */
-    noGenres: sf.noGenres === true && !(Array.isArray(sf.genres) && sf.genres.length > 0),
+    /* Contact list rows v1.3 — the smart panel's keys, read safely: anything unknown is ignored and reads as off (v1.2's
+       fit / reply / abroad / noGenres are no longer read) */
+    fitMin: typeof sf.fitMin === "number" && Number.isInteger(sf.fitMin) && sf.fitMin >= 1 && sf.fitMin <= 5 ? sf.fitMin : null,
+    fitUnrated: sf.fitUnrated === true && typeof sf.fitMin === "number",
+    rt: Array.isArray(sf.rt) && sf.rt.length === 2 && sf.rt.every((n) => typeof n === "number" && Number.isInteger(n) && n >= RT_MIN && n <= RT_MAX) && (sf.rt[0] as number) <= (sf.rt[1] as number)
+      && !((sf.rt[0] as number) === RT_MIN && (sf.rt[1] as number) === RT_MAX) ? [sf.rt[0] as number, sf.rt[1] as number] : null,
+    rtUnknown: sf.rtUnknown !== false,
+    countries: Array.isArray(sf.countries) ? [...new Set(sf.countries.filter((c): c is string => typeof c === "string" && /^[A-Z]{2}$/.test(c)))].slice(0, 50) : [],
+    alwaysReply: sf.alwaysReply === "yes" || sf.alwaysReply === "no" ? sf.alwaysReply : "any",
+    profile: sf.profile === "full" || sf.profile === "gaps" ? sf.profile : "any",
   };
   const scroll = typeof r.scroll === "number" && Number.isFinite(r.scroll) && r.scroll > 0 ? Math.min(Math.round(r.scroll), 1_000_000) : d.scroll;
   return {

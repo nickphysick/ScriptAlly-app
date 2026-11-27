@@ -210,9 +210,12 @@ describe("Contact list rows v1.2.1 · Phase 2 — the row's action gets its own 
 });
 
 describe("Contact list rows v1.2.1 · Phase 4 — v1.2's answers", () => {
-  it("Outside {the home country's short name}", async () => {
-    const { countryShortName } = await import("../../../lib/territory");
-    expect([countryShortName("GB"), countryShortName("US"), countryShortName("IE"), countryShortName("")]).toEqual(["the UK", "the US", "Ireland", "your country"]);
+  /* RE-POINTED by Contact list rows v1.3 · Phase 2 — the Outside {home} pill is gone (Location replaces it), and with it
+     territory's countryShortName */
+  it("the Outside pill is gone with its short-name helper", async () => {
+    const t = await import("../../../lib/territory");
+    expect("countryShortName" in t).toBe(false);
+    expect(read("./ContactViews.tsx").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "")).not.toMatch(/Outside|abroad/);
   });
   it("one set of action words on the dashboard feed, the to-do, the calendar pill and the history story", () => {
     for (const f of ["dashFeed.ts", "calendarPill.ts", "contactStory255.ts", "timelineCopy.ts", "todoBoard.ts"]) {

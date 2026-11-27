@@ -21,6 +21,8 @@ const app = admin.initializeApp({ projectId: EMULATOR_PROJECT }, "clr-read");
 const ref = getFirestore(app).doc(`users/${CLR_UID}/agents/${clrId(process.argv[2])}`);
 if (process.argv[3] === "--clear") await ref.update({ starRating: FieldValue.delete() });
 /* v1.2.1 — the writer's home country, for M26 (`--home US`, restored with `--home GB`) */
+/* v1.3 — an agent's country, for M34's many-countries case (`--country FR`, restored with the fixture's own) */
+if (process.argv[3] === "--country") await ref.update({ country: process.argv[4] });
 if (process.argv[3] === "--home") await getFirestore(app).doc(`users/${CLR_UID}`).update({ homeCountry: process.argv[4] });
 const d = (await ref.get()).data() ?? {};
 console.log(JSON.stringify({ starRating: typeof d.starRating === "number" ? d.starRating : null }));

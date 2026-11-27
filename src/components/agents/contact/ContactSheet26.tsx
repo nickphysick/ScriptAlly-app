@@ -43,7 +43,7 @@ import "./contactV26.css";
 import "./contactPrinciples.css";
 import "flag-icons/css/flag-icons.min.css";
 import "./contactListRows.css";
-import { countryName, countryShortName, flagFor, normaliseCountry } from "../../../lib/territory";
+import { countryName, flagFor, normaliseCountry } from "../../../lib/territory";
 
 /* QC layout v1 — GROUP26_LABEL moved with the Group chip to ContactBar */
 export { GROUP26_LABEL } from "./ContactBar";
@@ -231,7 +231,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   }, [read]);
 
   /* List filters v1 — one chip per choice the writer made: Ready to query (its two fields) is ONE chip */
-  const applied = useMemo(() => appliedChoices(p.filters, (k) => p.genreWord(k) || k, countryShortName(p.homeCountry ?? "GB")), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
+  const applied = useMemo(() => appliedChoices(p.filters, (k) => p.genreWord(k) || k), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
   const state = p.state ?? "list";
   /* principles v1 — what is applied, in the order the band and applied row draw it (Find, a set, the filters), each with
      the way to take just that one off: the no-matches state names them and offers to remove the last */

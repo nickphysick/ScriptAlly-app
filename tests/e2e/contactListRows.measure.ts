@@ -28,7 +28,7 @@ import { CLR_AGENTS, CLR_EMAIL, clrId } from "./clrFixture.mjs";
 test.use({ storageState: { cookies: [], origins: [] } });
 /* not serial: each lock reads on its own, so one red does not hide the next */
 
-const DIR = process.env.CLR_DIR ?? "reports/contact-list-rows-v1-2-1";
+const DIR = process.env.CLR_DIR ?? "reports/contact-list-rows-v1-3";
 const WIDTHS = [1280, 1440, 1600, 1920];
 const H = 900;
 const MUTATE = new Set((process.env.CLR_MUTATE ?? "").split(",").map((s) => s.trim()).filter(Boolean));
@@ -587,111 +587,117 @@ test("M15 · no hover: the action at the row's end, the row still two lines", as
 });
 
 /* ── the panel: a hand count over the fixture, per option, faceted ── */
-type PanelState = { list: "all" | "queried" | "none"; door: "any" | "open" | "closed"; fit: null | 5 | 4 | 0; reply: null | "always" | "nrmn" | "known"; genres: string[]; abroad: boolean; nogenres?: boolean };
-const PS0: PanelState = { list: "all", door: "any", fit: null, reply: null, genres: [], abroad: false };
-const passes = (x: Fx, s: PanelState, skip: keyof PanelState | null) =>
-  (skip === "list" || s.list === "all" || (s.list === "queried" ? x.stand !== "none" : x.stand === "none"))
-  && (skip === "door" || s.door === "any" || (s.door === "open" ? x.door === "Open" : x.door === "Closed"))
-  && (skip === "fit" || s.fit === null || (s.fit === 0 ? x.rating == null : s.fit === 5 ? x.rating === 5 : (x.rating ?? 0) >= 4))
-  && (skip === "reply" || s.reply === null || (s.reply === "always" ? x.nrmn === false : s.reply === "nrmn" ? x.nrmn === true : (x.weeks ?? 0) > 0))
-  && (skip === "genres" || (s.nogenres ? x.genres.length === 0 : s.genres.length === 0 || x.genres.some((g) => s.genres.includes(g))))
-  && (skip === "abroad" || !s.abroad || x.country !== "GB");
+/* ── v1.3 · the smart panel: a hand count over the fixture, per option, faceted ── */
+const COUNTRY_OF: Record<string, string> = Object.fromEntries(FX.map((x) => [x.id, x.country]));
+const gapsOf = (x: Fx) => x.genres.length === 0 || x.weeks == null || x.surname === "Achebe" || x.door === "Closed";
+type PanelState = { queried: null | "yes" | "no"; door: null | "open" | "closed"; fitMin: number | null; unrated: boolean;
+  genres: string[]; rt: [number, number] | null; rtUnknown: boolean; loc: string[]; always: null | "yes" | "no"; prof: null | "full" | "gaps" };
+const PS0: PanelState = { queried: null, door: null, fitMin: null, unrated: false, genres: [], rt: null, rtUnknown: true, loc: [], always: null, prof: null };
+type Sec = "queried" | "door" | "fit" | "genres" | "rt" | "loc" | "always" | "prof";
+const passes = (x: Fx, s: PanelState, skip: Sec | null) =>
+  (skip === "queried" || !s.queried || (s.queried === "yes" ? x.stand !== "none" : x.stand === "none"))
+  && (skip === "door" || !s.door || (s.door === "open" ? x.door === "Open" : x.door === "Closed"))
+  && (skip === "fit" || s.fitMin == null || (x.rating == null ? s.unrated : x.rating >= s.fitMin))
+  && (skip === "genres" || s.genres.length === 0 || x.genres.some((g) => s.genres.includes(g)))
+  && (skip === "rt" || !s.rt || (x.weeks == null ? s.rtUnknown : x.weeks >= s.rt[0] && (s.rt[1] >= 16 || x.weeks <= s.rt[1])))
+  && (skip === "loc" || s.loc.length === 0 || s.loc.includes(COUNTRY_OF[x.id]))
+  && (skip === "always" || !s.always || (s.always === "yes" ? x.nrmn === false : x.nrmn !== false))
+  && (skip === "prof" || !s.prof || (s.prof === "gaps" ? gapsOf(x) : !gapsOf(x)));
 function handCounts(s: PanelState): Record<string, number> {
-  const c = (skip: keyof PanelState, fn: (x: Fx) => boolean) => FX.filter((x) => passes(x, s, skip) && fn(x)).length;
+  const c = (skip: Sec, fn: (x: Fx) => boolean) => FX.filter((x) => passes(x, s, skip) && fn(x)).length;
   const out: Record<string, number> = {
-    "list:all": c("list", () => true), "list:queried": c("list", (x) => x.stand !== "none"), "list:none": c("list", (x) => x.stand === "none"),
-    "door:any": c("door", () => true), "door:open": c("door", (x) => x.door === "Open"), "door:closed": c("door", (x) => x.door === "Closed"),
-    "fit:5": c("fit", (x) => x.rating === 5), "fit:4": c("fit", (x) => (x.rating ?? 0) >= 4), "fit:0": c("fit", (x) => x.rating == null),
-    "reply:always": c("reply", (x) => x.nrmn === false), "reply:nrmn": c("reply", (x) => x.nrmn === true), "reply:known": c("reply", (x) => (x.weeks ?? 0) > 0),
-    "abroad": c("abroad", (x) => x.country !== "GB"),
-    /* v1.2.1 — the "No genres yet" pill, in the Genres section */
-    "nogenres": c("genres", (x) => x.genres.length === 0),
+    "queried:yes": c("queried", (x) => x.stand !== "none"), "queried:no": c("queried", (x) => x.stand === "none"),
+    "door:open": c("door", (x) => x.door === "Open"), "door:closed": c("door", (x) => x.door === "Closed"),
+    "fit:unrated": c("fit", (x) => x.rating == null),
+    "rt:unknown": c("rt", (x) => x.weeks == null),
+    "always:yes": c("always", (x) => x.nrmn === false), "always:no": c("always", (x) => x.nrmn !== false),
+    "prof:full": c("prof", (x) => !gapsOf(x)), "prof:gaps": c("prof", (x) => gapsOf(x)),
   };
-  const gs = new Set(FX.flatMap((x) => x.genres));
-  for (const g of gs) out[`genre:${g.toLowerCase()}`] = c("genres", (x) => x.genres.includes(g));
+  for (const k of [1, 2, 3, 4, 5]) out[`fit:${k}`] = c("fit", (x) => x.rating != null && x.rating >= k);
+  for (const g of new Set(FX.flatMap((x) => x.genres))) out[`genre:${g.toLowerCase()}`] = c("genres", (x) => x.genres.includes(g));
+  for (const k of new Set(FX.map((x) => x.country))) out[`loc:${k}`] = c("loc", (x) => x.country === k);
   return out;
 }
 const readPanel = (page: Page) => page.evaluate(() => {
   const shown = (e: Element | null): e is HTMLElement => !!e && e.getBoundingClientRect().width > 0.5;
   const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find(shown)!;
   /* a genre option is keyed by its words ("genre:crime"), not the app's genre key */
-  const keyOf = (o: HTMLElement) => { const k = o.dataset.clqOpt ?? ""; if (!k.startsWith("genre:")) return k; const em = o.querySelector("em")?.textContent ?? ""; return `genre:${(o.textContent ?? "").replace(/✓/g, "").slice(0, (o.textContent ?? "").length - em.length).replace(/✓/g, "").trim().toLowerCase()}`; };
+  const keyOf = (o: HTMLElement) => { const k = o.dataset.clqOpt ?? ""; return k.startsWith("genre:") ? `genre:${(o.dataset.label ?? "").toLowerCase()}` : k; };
   const opts = Object.fromEntries([...fp.querySelectorAll<HTMLElement>("[data-clq-opt]")].filter(shown).map((o) => [keyOf(o),
     { n: Number(o.dataset.n), on: o.getAttribute("aria-pressed") === "true" || o.getAttribute("aria-checked") === "true", disabled: (o as HTMLButtonElement).disabled }]));
-  const clear = fp.querySelector('[data-clq="clear"]');
-  const summary = fp.querySelector<HTMLElement>('[data-clq="summary"]');
-  return { opts, clear: shown(clear), summary: summary && shown(summary) ? summary.textContent?.trim() ?? null : null,
-    foot: (() => { const f = fp.querySelector<HTMLElement>('[data-clq="foot"]'); return f && shown(f) && (f.textContent ?? "").trim() ? f.textContent!.trim() : null; })(),
-    sections: [...fp.querySelectorAll<HTMLElement>("[data-clq-sec]")].filter(shown).map((s) => s.dataset.clqSec) };
+  const t = (sel: string) => { const e = fp.querySelector<HTMLElement>(sel); return e && shown(e) ? (e.textContent ?? "").trim() : null; };
+  return { opts, clear: !!fp.querySelector('[data-clq="clear"]') && shown(fp.querySelector('[data-clq="clear"]')), summary: t('[data-clq="summary"]'),
+    fitSum: t('[data-clq="fit-sum"]'), rtLabel: t('[data-clq="rt-label"]'), loc: t('[data-clq="loc"]'),
+    sections: [...fp.querySelectorAll<HTMLElement>("[data-clq-sec]")].filter(shown).map((s) => s.dataset.clqSec),
+    heads: [...fp.querySelectorAll<HTMLElement>("[data-clq-sec] > .clr-fh > b, [data-clq-sec] .clr-fh b")].filter(shown).map((h) => (h.textContent ?? "").trim()),
+    box: (() => { const b = fp.getBoundingClientRect(); return { t: b.top, b: b.bottom, l: b.left, r: b.right }; })(), sh: fp.scrollHeight, ch: fp.clientHeight };
 });
+type Panel = Awaited<ReturnType<typeof readPanel>>;
+const cmpCounts = (L: Ledger, tag: string, P: Panel, s: PanelState) => {
+  const want = handCounts(s);
+  for (const [k, n] of Object.entries(want)) {
+    const got = P.opts[k];
+    if (!got && n === 0) continue; /* an absent zero (a genre or country not shown) is not a disagreement */
+    /* a genre past the four quick pills, or a country while Location's list is closed, is not drawn: its count is read
+       where it IS drawn (the search list, M32; the open list, M34) */
+    if (!got && (k.startsWith("genre:") || k.startsWith("loc:"))) continue;
+    L.check(`${tag} · ${k}`, !!got && got.n === n, `got ${got ? got.n : "missing"} want ${n}`);
+  }
+};
+const fpOf = (page: Page) => page.locator(".qc153-rail.fp").filter({ visible: true });
 
-test("M17, M18, M25 · the compact panel: its sections, faceted counts; Clear all; No genres yet", async ({ page }) => {
+test("M17, M18, M25, M30 · the smart panel: sections, words, faceted counts; Clear all", async ({ page }) => {
   test.setTimeout(240_000);
-  const m17 = new Ledger("M17"), m18 = new Ledger("M18"), m25 = new Ledger("M25");
+  const m17 = new Ledger("M17"), m18 = new Ledger("M18"), m25 = new Ledger("M25"), m30 = new Ledger("M30");
   await open(page, 1440);
-  const fp = page.locator(".qc153-rail.fp").filter({ visible: true });
+  const fp = fpOf(page);
   let P = await readPanel(page);
-  /* M25 — the compact panel as the ref draws it */
-  m25.check("sections", JSON.stringify(P.sections) === JSON.stringify(["list", "fit", "reply", "genres", "abroad"]), JSON.stringify(P.sections));
-  m25.check("Your list holds both segments", ["list:all", "list:queried", "list:none", "door:any", "door:open", "door:closed"].every((k) => k in P.opts), Object.keys(P.opts).join(","));
-  const fitWords = await fp.locator('[data-clq-opt^="fit:"]').evaluateAll((es) => es.map((e) => (e.firstChild?.textContent ?? e.textContent ?? "").replace(/\d+$/, "").trim()));
-  m25.check("Fit pills: 5★, 4★+, Not rated", JSON.stringify(fitWords) === JSON.stringify(["5★", "4★+", "Not rated"]), JSON.stringify(fitWords));
-  const gShown = await fp.locator('[data-clq-opt^="genre:"]').filter({ visible: true }).count();
-  m25.check("four genres, then +n more and No genres yet", gShown === 4 && (await fp.locator('[data-clq="genres-more"]').filter({ visible: true }).count()) === 1 && "nogenres" in P.opts, `${gShown} genres · nogenres ${"nogenres" in P.opts}`);
-  m25.check("Missing details has left the panel", !("missing" in P.opts) && !(await fp.getByText("Missing details").count()), Object.keys(P.opts).join(","));
-  m25.check("List health still offers Fill the gaps", (await page.getByRole("button", { name: /Fill the gaps/ }).filter({ visible: true }).count()) >= 1, "");
-  m25.check("no foot line", P.foot === null, `foot ${JSON.stringify(P.foot)}`);
-  const more = fp.locator('[data-clq="genres-more"]');
-  if (await more.count()) await more.click();
+  m30.check("sections in the ref's order", JSON.stringify(P.sections) === JSON.stringify(["pairs", "fit", "genres", "reply", "loc", "pairs2"]), JSON.stringify(P.sections));
+  m30.check("headings", JSON.stringify(P.heads) === JSON.stringify(["Minimum fit", "Genres sought", "Reply time", "Location"]), JSON.stringify(P.heads));
+  m30.check("summaries at rest", P.fitSum === "Any" && P.rtLabel === "Any" && /Anywhere/.test(P.loc ?? ""), `fit ${P.fitSum} rt ${P.rtLabel} loc ${P.loc}`);
+  m25.check("no Outside or No genres yet pill; no Missing details", !["abroad", "nogenres", "missing"].some((k) => k in P.opts), Object.keys(P.opts).join(","));
+  m25.check("pairs neither chosen at rest", ["queried:yes", "queried:no", "door:open", "door:closed", "always:yes", "always:no", "prof:full", "prof:gaps"].every((k) => P.opts[k] && !P.opts[k].on), "");
+  m18.check("Clear all and the summary hidden at rest", !P.clear && P.summary === null, `clear ${P.clear} summary ${P.summary}`);
+  cmpCounts(m17, "rest", P, PS0);
+  /* three combinations, each faceted. ⚠️ A pair option with no agents under the others is DISABLED (the panel's rule): a
+     combination picks the side the fixture can show, read off the panel, so a click never waits on a disabled button. */
+  page.setDefaultTimeout(8000);
+  const side = async (a: string, b: string) => { const Q = await readPanel(page); return (Q.opts[a]?.n ?? 0) > 0 ? a : b; };
+  let st2: PanelState = { ...PS0 }, st3: PanelState = { ...PS0 };
+  let lastAlways = "always:yes";
+  const states: { tag: string; s: () => PanelState; press: () => Promise<void> }[] = [
+    { tag: "Open + 4★", s: () => ({ ...PS0, door: "open", fitMin: 4 }), press: async () => { await fp.locator('[data-clq-opt="door:open"]').click(); await fp.locator('[data-clq-opt="fit:4"]').click(); } },
+    { tag: "+ Crime + a profile side", s: () => st2, press: async () => {
+      await fp.locator('[data-clq-opt^="genre:"][data-label="Crime"]').click(); await page.waitForTimeout(250);
+      const k = await side("prof:gaps", "prof:full");
+      st2 = { ...PS0, door: "open", fitMin: 4, genres: ["Crime"], prof: k === "prof:gaps" ? "gaps" : "full" };
+      await fp.locator(`[data-clq-opt="${k}"]`).click(); } },
+    { tag: "+ Not rated, a reply side", s: () => st3, press: async () => {
+      await fp.locator('[data-clq-opt="fit:unrated"]').click(); await page.waitForTimeout(250);
+      lastAlways = await side("always:yes", "always:no");
+      st3 = { ...st2, unrated: true, always: lastAlways === "always:yes" ? "yes" : "no" };
+      await fp.locator(`[data-clq-opt="${lastAlways}"]`).click(); } },
+  ];
+  for (const st of states) {
+    await st.press(); await page.waitForTimeout(350);
+    P = await readPanel(page);
+    cmpCounts(m30, st.tag, P, st.s());
+    const want = FX.filter((x) => passes(x, st.s(), null)).map((x) => x.id).sort();
+    const got = (await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")))).sort();
+    m30.check(`${st.tag} · the list is exactly the matching agents`, JSON.stringify(got) === JSON.stringify(want), `got ${got.join(",")} want ${want.join(",")}`);
+    m18.check(`${st.tag} · the summary`, P.summary === `${want.length} of 19` && P.clear, `summary ${P.summary} clear ${P.clear}`);
+  }
+  /* a chosen option clicked again clears it */
+  await fp.locator(`[data-clq-opt="${lastAlways}"]`).click(); await page.waitForTimeout(250);
   P = await readPanel(page);
-  const cmp = (tag: string, s: PanelState) => {
-    const want = handCounts(s);
-    if (tag === "rest") m17.check(`${tag} · population`, want["list:all"] > 0 && want["abroad"] > 0 && want["fit:0"] > 0 && want["list:none"] > 0 && want["nogenres"] > 0, JSON.stringify(want));
-    else m17.check(`${tag} · population`, want["list:all"] > 0, JSON.stringify(want));
-    for (const [k, n] of Object.entries(want)) {
-      const got = P.opts[k];
-      m17.check(`${tag} · ${k}`, !!got && got.n === n, `got ${got ? got.n : "missing"} want ${n}`);
-      if (got && n === 0) m17.check(`${tag} · ${k} disabled at 0`, got.disabled || got.on, `disabled ${got.disabled} on ${got.on}`);
-    }
-  };
-  cmp("rest", PS0);
-  m17.check("rest · no summary", P.summary === null, `summary ${JSON.stringify(P.summary)}`);
-  m18.check("Clear all hidden at rest", !P.clear, `shown ${P.clear}`);
-  /* Genres "Crime" plus Open */
-  await fp.locator('[data-clq-opt^="genre:"]').filter({ hasText: /^\W*Crime\d+$/ }).first().click();
-  await fp.locator('[data-clq-opt="door:open"]').click();
-  await page.waitForTimeout(400);
+  m30.check("clicking a chosen option again clears it", P.opts[lastAlways]?.on === false, `${lastAlways} ${P.opts[lastAlways]?.on}`);
+  await fp.locator('[data-clq="clear"]').click(); await page.waitForTimeout(300);
   P = await readPanel(page);
-  const s1: PanelState = { ...PS0, genres: ["Crime"], door: "open" };
-  cmp("Crime + Open", s1);
-  const want = FX.filter((x) => passes(x, s1, null)).map((x) => x.id).sort();
-  const got = (await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")))).sort();
-  m17.check("Crime + Open · the list is exactly the matching agents", JSON.stringify(got) === JSON.stringify(want), `got ${got.join(",")} want ${want.join(",")}`);
-  m17.check("Crime + Open · the summary beside the title", P.summary === `${want.length} of 19`, `summary ${JSON.stringify(P.summary)}`);
-  m18.check("Clear all shown with a filter on", P.clear, `shown ${P.clear}`);
-  if (!MUTATE.size) await page.screenshot({ path: `${DIR}/shots/filters-crime-open-1440.png` });
-  /* No genres yet and a genre pick clear each other */
-  await fp.locator('[data-clq-opt="nogenres"]').click();
-  await page.waitForTimeout(300);
-  P = await readPanel(page);
-  const genreOn = Object.entries(P.opts).filter(([k, o]) => k.startsWith("genre:") && o.on).map(([k]) => k);
-  m25.check("No genres yet clears the genre picks", P.opts["nogenres"]?.on === true && genreOn.length === 0, `nogenres ${P.opts["nogenres"]?.on} genres on ${genreOn.join(",")}`);
-  const noneIds = FX.filter((x) => passes(x, { ...PS0, door: "open", nogenres: true }, null)).map((x) => x.id).sort();
-  const gotNone = (await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")))).sort();
-  m25.check("No genres yet filters to agents with none", JSON.stringify(gotNone) === JSON.stringify(noneIds) && noneIds.length > 0, `got ${gotNone.join(",")} want ${noneIds.join(",")}`);
-  await fp.locator('[data-clq-opt^="genre:"]').filter({ hasText: /^\W*Thriller\d+$/ }).first().click().catch(() => {});
-  await page.waitForTimeout(300);
-  P = await readPanel(page);
-  m25.check("a genre pick clears No genres yet", P.opts["nogenres"]?.on === false && P.opts["genre:thriller"]?.on === true, `nogenres ${P.opts["nogenres"]?.on} thriller ${P.opts["genre:thriller"]?.on}`);
-  /* Clear all resets every section */
-  await fp.locator('[data-clq="clear"]').click();
-  await page.waitForTimeout(300);
-  P = await readPanel(page);
-  const onNow = Object.entries(P.opts).filter(([, o]) => o.on).map(([k]) => k).sort();
-  m18.check("Clear all resets every section", JSON.stringify(onNow) === JSON.stringify(["door:any", "list:all"]), `on ${onNow.join(",")}`);
-  m18.check("Clear all hides itself", !P.clear, `shown ${P.clear}`);
-  m18.check("the whole list is back", (await visibleRows(page).count()) === 19, "rows");
-  m17.done(40); m18.done(5); m25.done(10);
+  m18.check("Clear all resets every section", Object.values(P.opts).every((o) => !o.on) && P.fitSum === "Any", Object.entries(P.opts).filter(([, o]) => o.on).map(([k]) => k).join(","));
+  m18.check("Clear all hides itself and the summary", !P.clear && P.summary === null, `clear ${P.clear} summary ${P.summary}`);
+  m18.check("the whole list is back", (await visibleRows(page).count()) === 19, "");
+  if (!MUTATE.size) await fp.screenshot({ path: `${DIR}/shots/panel-rest.png` });
+  m17.done(15); m18.done(7); m25.done(2); m30.done(30);
 });
 
 test("M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge due first", async ({ page }) => {
@@ -953,29 +959,12 @@ test("M24 · the panel fits a 1440×900 window: height + sticky top + 16 ≤ the
     `${R.h.toFixed(0)} + ${R.scTop.toFixed(0)} + ${R.top} + 16 = ${(R.h + R.scTop + R.top + 16).toFixed(0)} vs ${R.inner} (with the beta strip showing: +${strip})`);
   m24.check("no scrolling inside the panel", R.sh <= R.ch + 1, `scrollHeight ${R.sh} clientHeight ${R.ch}`);
   m24.check("pinned, the whole panel is inside the window", R.bottom <= R.inner, `bottom ${R.bottom.toFixed(0)} inner ${R.inner}`);
+  /* M36 (v1.3): every list closed, the beta strip dismissed: no inner scroll (the ref measures 632) */
+  const m36 = new Ledger("M36");
+  m36.check("no inner scroll at 1440×900, lists closed, strip dismissed", R.sh <= R.ch + 1, `content ${R.sh} room ${R.ch}`);
+  m36.done(1);
   if (!MUTATE.size) await page.locator(".qc153-rail.fp").filter({ visible: true }).screenshot({ path: `${DIR}/shots/panel-compact-1440.png` });
   m24.done(4);
-});
-
-test("M26 · the Outside label follows the writer's home country (GB, then US)", async ({ page }) => {
-  test.setTimeout(180_000);
-  const m26 = new Ledger("M26");
-  const home = (c: string) => execFileSync("node", ["tests/e2e/clrRead.mjs", "Achebe", "--home", c], { encoding: "utf8", timeout: 60_000 });
-  const read = () => page.evaluate(() => {
-    const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find((e) => e.getBoundingClientRect().width > 0)!;
-    const o = fp.querySelector<HTMLElement>('[data-clq-opt="abroad"]');
-    return o ? { words: (o.firstChild?.textContent ?? "").trim(), n: Number(o.dataset.n) } : null;
-  });
-  try {
-    await open(page, 1440);
-    const gb = await read();
-    m26.check("GB home: Outside the UK, two agents", gb?.words === "Outside the UK" && gb.n === FX.filter((x) => x.country !== "GB").length, JSON.stringify(gb));
-    home("US");
-    await open(page, 1440);
-    const us = await read();
-    m26.check("US home: Outside the US, counted against the US", us?.words === "Outside the US" && us.n === FX.filter((x) => x.country !== "US").length, JSON.stringify(us));
-  } finally { home("GB"); }
-  m26.done(2);
 });
 
 test("M27 · the list card's width gives narrow / middle / wide / wide at 1280, 1440, 1600, 1920", async ({ page }) => {
@@ -992,4 +981,262 @@ test("M27 · the list card's width gives narrow / middle / wide / wide at 1280, 
       `card ${L.card.w.toFixed(1)} tier ${tierOf(L.card.w)} drawn ${drawn} (Agent ${agentW.toFixed(0)}) short headings ${short}`);
   }
   m27.done(4);
+});
+
+/* ══ Contact list rows v1.3 — M28 to M36 ═════════════════════════════════════════════════════════════════════════════ */
+const sheetBand = (page: Page) => page.evaluate(() => {
+  const shown = (e: Element | null): e is HTMLElement => !!e && e.getBoundingClientRect().width > 0.5 && getComputedStyle(e).visibility !== "hidden";
+  const card = [...document.querySelectorAll<HTMLElement>('[data-cl26="card"]')].find(shown)!;
+  const sc = card.closest<HTMLElement>(".wpg-scroll")!;
+  const slim = [...document.querySelectorAll<HTMLElement>(".qc156-slim")].find((e) => shown(e) && parseFloat(getComputedStyle(e).opacity) > 0.5) ?? null;
+  const th = card.querySelector<HTMLElement>('[data-cl26="heads"]')!;
+  const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find(shown)!;
+  let pe: HTMLElement | null = sc, page = "rgba(0, 0, 0, 0)";
+  while (pe) { const bg = getComputedStyle(pe).backgroundColor; if (bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg)) { page = bg; break; } pe = pe.parentElement; }
+  const s = sc.getBoundingClientRect(), t = th.getBoundingClientRect();
+  const slimBg = slim ? getComputedStyle(slim, "::before").backgroundColor : null;
+  return { sheet: { l: s.left, r: s.right - (sc.offsetWidth - sc.clientWidth), t: s.top }, slim: slim ? (() => { const r = slim.getBoundingClientRect(); return { t: r.top, b: r.bottom, l: r.left, r: r.right }; })() : null,
+    slimBg, page, th: t.top, fpTop: fp.getBoundingClientRect().top, stuck: th.hasAttribute("data-stuck") };
+});
+const rgb = (s: string | null) => (s?.match(/\d+/g) ?? ["0", "0", "0"]).slice(0, 3).map(Number) as [number, number, number];
+const near = (a: [number, number, number], b: [number, number, number], d = 3) => Math.abs(a[0] - b[0]) <= d && Math.abs(a[1] - b[1]) <= d && Math.abs(a[2] - b[2]) <= d;
+
+test("M28 · pinned at 1440×900: from the sheet's top to the slim bar's foot, slim-bar ground; then page colour to the headings", async ({ page }) => {
+  test.setTimeout(240_000);
+  const m28 = new Ledger("M28");
+  await openWin(page);
+  /* three depths inside the list (deeper, the filter column ends and the panel's sticky end moves it up: not this lock) */
+  for (const depth of [600, 800, 1000]) {
+    await scrollTo(page, depth); await page.waitForTimeout(500);
+    const G = await sheetBand(page);
+    m28.check(`${depth} · precondition: the slim bar shown, the headings pinned`, !!G.slim && G.stuck, `slim ${!!G.slim} stuck ${G.stuck}`);
+    if (!G.slim) continue;
+    const png = readPng(await page.screenshot());
+    const slimC = rgb(G.slimBg), pageC = rgb(G.page);
+    let badA = 0, badB = 0, nA = 0, nB = 0; const wA: string[] = [], wB: string[] = [];
+    /* every column across the sheet, inside its rounded top corners (radius 18: the shell's navy shows past them) */
+    for (let x = Math.ceil(G.sheet.l) + 20; x < Math.floor(G.sheet.r) - 20; x += 1) {
+      /* the band above the slim bar's content and its own ground: from the sheet's top to the slim bar's top */
+      for (let y = Math.ceil(G.sheet.t) + 1; y < Math.floor(G.slim.t); y++) { nA++; const c = png.at(x, y); if (!near(c, slimC) && !near(c, pageC)) { badA++; if (wA.length < 4) wA.push(`${x},${y}=${c}`); } }
+      /* below the slim bar (past its 1px rule) to the headings: page colour only */
+      for (let y = Math.ceil(G.slim.b) + 1; y < Math.floor(G.th) - 1; y++) { nB++; const c = png.at(x, y); if (!near(c, pageC)) { badB++; if (wB.length < 4) wB.push(`${x},${y}=${c}`); } }
+    }
+    m28.check(`${depth} · above the slim bar: its ground only (${nA} px)`, badA === 0, `${badA} other · ${wA.join(" ")}`);
+    m28.check(`${depth} · below it to the headings: page colour only (${nB} px)`, nB > 0 && badB === 0, `${badB} other · ${wB.join(" ")}`);
+    m28.check(`${depth} · the headings level with the panel`, Math.abs(G.th - G.fpTop) <= 1, `headings ${G.th.toFixed(1)} panel ${G.fpTop.toFixed(1)}`);
+    if (depth === 800 && !MUTATE.size) await page.screenshot({ path: `${DIR}/shots/pinned-1440x900.png` });
+  }
+  m28.done(12);
+});
+
+test("M29 · at the end of the list the card ends cleanly: corners, rim and shadow drawn, page colour below", async ({ page }) => {
+  test.setTimeout(120_000);
+  const m29 = new Ledger("M29");
+  await openWin(page);
+  await scrollTo(page, 100000); await page.waitForTimeout(600);
+  const R = await page.evaluate(() => {
+    const shown = (e: Element | null): e is HTMLElement => !!e && e.getBoundingClientRect().width > 0.5;
+    const card = [...document.querySelectorAll<HTMLElement>('[data-cl26="card"]')].find(shown)!;
+    const b = card.getBoundingClientRect(); const cs = getComputedStyle(card);
+    let pe: HTMLElement | null = card.parentElement, page = "";
+    while (pe) { const bg = getComputedStyle(pe).backgroundColor; if (bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg)) { page = bg; break; } pe = pe.parentElement; }
+    return { l: b.left, r: b.right, b: b.bottom, radius: parseFloat(cs.borderBottomLeftRadius), page, inner: window.innerHeight };
+  });
+  m29.check("precondition: the card's foot is on screen", R.b < R.inner - 12, `card bottom ${R.b.toFixed(0)} window ${R.inner}`);
+  const png = readPng(await page.screenshot());
+  const pageC = rgb(R.page);
+  /* inside each bottom corner, 8px in from the curve: the card's white; just outside the corner's arc: page colour or the
+     shadow (warmer, darker), never cut white; 14px below the card's foot: page colour */
+  const corner = (x: number) => png.at(Math.round(x), Math.round(R.b - 10));
+  const inL = corner(R.l + 12), inR = corner(R.r - 12);
+  m29.check("bottom corners: the card's white inside", near(inL, [255, 255, 255], 4) && near(inR, [255, 255, 255], 4), `left ${inL} right ${inR}`);
+  const outL = png.at(Math.round(R.l + 2), Math.round(R.b - 2)), outR = png.at(Math.round(R.r - 2), Math.round(R.b - 2));
+  m29.check("bottom corners rounded (the arc's outside is not white)", !near(outL, [255, 255, 255], 6) && !near(outR, [255, 255, 255], 6) && R.radius >= 12, `outside ${outL} / ${outR} radius ${R.radius}`);
+  let bad = 0, n = 0;
+  for (let x = Math.ceil(R.l) + 24; x < Math.floor(R.r) - 24; x += 4) { const y = Math.round(R.b + 30); if (y >= R.inner) break; n++; if (!near(png.at(x, y), pageC, 8)) bad++; }
+  m29.check("page colour below (past the shadow)", n > 0 && bad === 0, `${bad} of ${n} not page colour`);
+  /* the rim: the card's ring on its foot (a darker line than the page, 1px under the white) */
+  const rim = png.at(Math.round((R.l + R.r) / 2), Math.round(R.b));
+  m29.check("the rim and shadow drawn on the foot", !near(rim, [255, 255, 255], 6) && !near(rim, pageC, 1), `foot ${rim} page ${pageC}`);
+  if (!MUTATE.size) await page.screenshot({ path: `${DIR}/shots/end-of-list-1440x900.png` });
+  m29.done(5);
+});
+
+test("M31 · Minimum fit: a star sets ≥ k; Not rated waits for a minimum, then adds the unrated", async ({ page }) => {
+  test.setTimeout(120_000);
+  const m31 = new Ledger("M31");
+  await open(page, 1440);
+  const fp = fpOf(page);
+  let P = await readPanel(page);
+  m31.check("Not rated disabled until a minimum is set", P.opts["fit:unrated"]?.disabled === true, JSON.stringify(P.opts["fit:unrated"]));
+  await fp.locator('[data-clq-opt="fit:4"]').click(); await page.waitForTimeout(300);
+  P = await readPanel(page);
+  const want4 = FX.filter((x) => (x.rating ?? 0) >= 4).map((x) => x.id).sort();
+  const got4 = (await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")))).sort();
+  m31.check("4★ shows fit ≥ 4 only", JSON.stringify(got4) === JSON.stringify(want4), `got ${got4.length} want ${want4.length}`);
+  m31.check("the summary", P.fitSum === `4★ and up · ${want4.length}`, `summary ${P.fitSum}`);
+  m31.check("Not rated now enabled, with what it would add", P.opts["fit:unrated"]?.disabled === false && P.opts["fit:unrated"].n === FX.filter((x) => x.rating == null).length, JSON.stringify(P.opts["fit:unrated"]));
+  await fp.locator('[data-clq-opt="fit:unrated"]').click(); await page.waitForTimeout(300);
+  const gotU = await visibleRows(page).count();
+  m31.check("on, it adds the unrated", gotU === want4.length + FX.filter((x) => x.rating == null).length, `${gotU} rows`);
+  await fp.locator('[data-clq-opt="fit:4"]').click(); await page.waitForTimeout(300);
+  P = await readPanel(page);
+  m31.check("the chosen star again clears it", P.fitSum === "Any" && (await visibleRows(page).count()) === 19, `summary ${P.fitSum}`);
+  m31.done(6);
+});
+
+test("M32 · Genres: the quick pills keep their order; the search list is inline, scrolls past 168, and is keyboard-only", async ({ page }) => {
+  test.setTimeout(180_000);
+  const m32 = new Ledger("M32");
+  await open(page, 1440);
+  const fp = fpOf(page);
+  const order = () => fp.locator('[data-clq-opt^="genre:"]').evaluateAll((es) => es.map((e) => (e as HTMLElement).dataset.label));
+  const o0 = await order();
+  m32.check("four quick pills, the book's genre first", o0.length === 4 && o0[0] === "Crime", JSON.stringify(o0));
+  page.setDefaultTimeout(8000);
+  /* ⚠️ a zero pair is disabled; Not always is the side this fixture keeps above zero under Open + 5★ */
+  for (const press of ['[data-clq-opt="door:open"]', '[data-clq-opt="fit:5"]', '[data-clq-opt="always:no"]']) {
+    await fp.locator(press).click(); await page.waitForTimeout(300);
+    const o = await order();
+    m32.check(`order unchanged after ${press}`, JSON.stringify(o.slice(0, 4)) === JSON.stringify(o0), JSON.stringify(o));
+  }
+  await fp.locator('[data-clq="clear"]').click(); await page.waitForTimeout(300);
+  /* keyboard only: type, arrows, Enter, Esc, Backspace */
+  const input = fp.locator('[data-clq="genre-find"] input');
+  await input.focus(); await page.keyboard.type("i");
+  await page.waitForTimeout(250);
+  const G = await page.evaluate(() => {
+    const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find((e) => e.getBoundingClientRect().width > 0)!;
+    const l = fp.querySelector<HTMLElement>('[data-clq="genre-sugs"]'); if (!l) return null;
+    const a = l.getBoundingClientRect(), f = fp.getBoundingClientRect();
+    return { inside: a.left >= f.left && a.right <= f.right && l.closest(".qc153-rail") === fp, h: a.height, sh: l.scrollHeight, ch: l.clientHeight,
+      items: l.querySelectorAll('[data-clq="genre-sug"]').length, mark: !!l.querySelector("mark"), oy: getComputedStyle(l).overflowY, pos: getComputedStyle(l).position };
+  });
+  m32.check("the list opens inline, inside the panel's box (never a popover)", !!G && G.inside && G.pos !== "absolute" && G.pos !== "fixed", JSON.stringify(G));
+  m32.check("at most 168 high, then it scrolls inside itself", !!G && G.h <= 168.5 && (G.sh <= G.ch + 1 || G.oy === "auto"), JSON.stringify(G));
+  m32.check("matches highlighted", !!G?.mark, "");
+  if (!MUTATE.size) await fpOf(page).screenshot({ path: `${DIR}/shots/panel-genre-search.png` });
+  await page.keyboard.press("ArrowDown"); await page.keyboard.press("Enter"); await page.waitForTimeout(300);
+  let P = await readPanel(page);
+  const picked = Object.entries(P.opts).filter(([k, o]) => k.startsWith("genre:") && o.on).map(([k]) => k);
+  m32.check("ArrowDown + Enter picks the first match", picked.length === 1, picked.join(","));
+  await input.focus(); await page.keyboard.type("x"); await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+  m32.check("Esc closes the list", (await fp.locator('[data-clq="genre-sugs"]').filter({ visible: true }).count()) === 0, "");
+  await input.fill(""); await input.focus(); await page.keyboard.press("Backspace"); await page.waitForTimeout(300);
+  P = await readPanel(page);
+  m32.check("Backspace on an empty field removes the last pick", Object.entries(P.opts).every(([k, o]) => !k.startsWith("genre:") || !o.on), "");
+  m32.done(9);
+});
+
+test("M33 · Reply time: both handles by mouse and keyboard, never crossing; rows mid-drag; focus kept; Not known on", async ({ page }) => {
+  test.setTimeout(180_000);
+  const m33 = new Ledger("M33");
+  await open(page, 1440);
+  const fp = fpOf(page);
+  const lo = fp.locator('[data-clq="rt-lo"]'), hi = fp.locator('[data-clq="rt-hi"]');
+  let P = await readPanel(page);
+  m33.check("Not known disabled until a range is set", P.opts["rt:unknown"]?.disabled === true, JSON.stringify(P.opts["rt:unknown"]));
+  /* keyboard */
+  await lo.focus(); await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight");
+  await page.waitForTimeout(300);
+  const focusLo = await lo.evaluate((e) => document.activeElement === e);
+  P = await readPanel(page);
+  m33.check("keyboard moves the low handle; focus stays on it", P.rtLabel === "6–16+ wks" && focusLo, `label ${P.rtLabel} focus ${focusLo}`);
+  m33.check("a range set: Not known starts on", P.opts["rt:unknown"]?.on === true && P.opts["rt:unknown"].disabled === false, JSON.stringify(P.opts["rt:unknown"]));
+  const s1: PanelState = { ...PS0, rt: [6, 16], rtUnknown: true };
+  m33.check("the rows follow (with the unknown kept in)", (await visibleRows(page).count()) === FX.filter((x) => passes(x, s1, null)).length, "");
+  await hi.focus(); for (let i = 0; i < 14; i++) await page.keyboard.press("ArrowLeft");
+  await page.waitForTimeout(300);
+  P = await readPanel(page);
+  m33.check("the handles can't cross", P.rtLabel === "6 wks", `label ${P.rtLabel}`);
+  /* mouse: drag the high handle back to the end, reading the rows mid-drag and the focus throughout */
+  await hi.focus(); for (let i = 0; i < 10; i++) await page.keyboard.press("ArrowRight");
+  const box = (await hi.boundingBox())!;
+  const val = async () => Number(await hi.inputValue());
+  const v0 = await val();
+  /* the thumb (20 wide) travels the input's width less its own: start ON it, never at the input's edge */
+  const x0 = box.x + 10 + ((v0 - 1) / 15) * (box.width - 20), y = box.y + box.height / 2;
+  await page.mouse.move(x0, y); await page.mouse.down();
+  await page.mouse.move(x0 - box.width * 0.2, y, { steps: 4 });
+  const mid = await page.evaluate(() => { const r = [...document.querySelectorAll('[data-cl26="card"] [data-cl26="row"]')].filter((e) => e.getBoundingClientRect().width > 0).length; return { rows: r, focus: (document.activeElement as HTMLElement | null)?.dataset?.clq ?? null }; });
+  await page.mouse.up(); await page.waitForTimeout(200);
+  const v1 = await val();
+  m33.check("the mouse moves the handle", v1 < v0, `${v0} → ${v1}`);
+  m33.check("rows update mid-drag; focus stays on the handle", mid.focus === "rt-hi", JSON.stringify(mid));
+  await fp.locator('[data-clq-opt="rt:unknown"]').click(); await page.waitForTimeout(300);
+  P = await readPanel(page);
+  m33.check("Not known turns off", P.opts["rt:unknown"]?.on === false, "");
+  m33.done(8);
+});
+
+test("M26, M34 · Location: exactly the countries present; grows to five then scrolls; never pushes anything out of reach", async ({ page }) => {
+  test.setTimeout(240_000);
+  const m26 = new Ledger("M26"), m34 = new Ledger("M34");
+  const setCountry = (who: string, c: string) => execFileSync("node", ["tests/e2e/clrRead.mjs", who, "--country", c], { encoding: "utf8", timeout: 60_000 });
+  const readLoc = () => page.evaluate(() => {
+    const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find((e) => e.getBoundingClientRect().width > 0)!;
+    const l = fp.querySelector<HTMLElement>('[data-clq="loc-list"]');
+    const rows = l ? [...l.querySelectorAll<HTMLElement>("[data-clq-opt^='loc:']")] : [];
+    return { open: !!l && l.getBoundingClientRect().height > 0, inside: !!l && l.closest(".qc153-rail") === fp,
+      rows: rows.map((r) => ({ k: r.dataset.clqOpt, n: Number(r.dataset.n), flag: !!r.querySelector(".fi, [data-clq='flag']"), words: (r.textContent ?? "").replace(/\d+$/, "").trim(), h: r.getBoundingClientRect().height })),
+      sh: l?.scrollHeight ?? 0, ch: l?.clientHeight ?? 0 };
+  });
+  try {
+    await open(page, 1440);
+    const fp = fpOf(page);
+    await fp.locator('[data-clq="loc"]').click(); await page.waitForTimeout(300);
+    let L = await readLoc();
+    const want = [...new Set(FX.map((x) => x.country))].sort((a, b) => FX.filter((x) => x.country === b).length - FX.filter((x) => x.country === a).length || a.localeCompare(b));
+    m34.check("opens inline, inside the panel", L.open && L.inside, JSON.stringify({ open: L.open, inside: L.inside }));
+    m34.check("exactly the countries present, by count", JSON.stringify(L.rows.map((r) => r.k)) === JSON.stringify(want.map((c) => `loc:${c}`)), JSON.stringify(L.rows.map((r) => r.k)));
+    m34.check("each with its flag, full name and count", L.rows.every((r) => r.flag && r.n === FX.filter((x) => `loc:${x.country}` === r.k).length) && L.rows.some((r) => r.words.includes("United Kingdom")), JSON.stringify(L.rows));
+    m34.check("rows 28 high", L.rows.every((r) => Math.abs(r.h - 28) <= 1), L.rows.map((r) => r.h).join(","));
+    m34.check(`${L.rows.length} countries: no scroll`, L.sh <= L.ch + 1, `${L.sh}/${L.ch}`);
+    if (!MUTATE.size) await fp.screenshot({ path: `${DIR}/shots/panel-location-open.png` });
+    /* M26 (re-pointed): the label follows the picks */
+    await fp.locator('[data-clq-opt="loc:US"]').click(); await page.waitForTimeout(300);
+    const P = await readPanel(page);
+    m26.check("the picked country names the button", /United States/.test(P.loc ?? ""), `loc ${P.loc}`);
+    m26.check("and the list follows", (await visibleRows(page).count()) === FX.filter((x) => x.country === "US").length, "");
+    await fp.locator('[data-clq="loc"]').click(); await page.waitForTimeout(200);
+    m34.check("a second click closes it", !(await readLoc()).open, "");
+    /* six-plus countries: it scrolls inside itself; at 1280×640 the panel still reaches Has gaps */
+    for (const [who, c] of [["Achebe", "FR"], ["Blackwood", "DE"], ["Carey", "AU"], ["Lang", "CA"]] as const) setCountry(who, c);
+    await page.setViewportSize({ width: 1280, height: 640 });
+    await open(page, 1280);
+    await page.setViewportSize({ width: 1280, height: 640 });
+    await page.waitForTimeout(500);
+    await fpOf(page).locator('[data-clq="loc"]').click(); await page.waitForTimeout(300);
+    L = await readLoc();
+    m34.check(`${L.rows.length} countries: it scrolls inside itself`, L.rows.length >= 6 && L.sh > L.ch + 1 && L.ch <= 5 * 28 + 8, `${L.rows.length} rows ${L.sh}/${L.ch}`);
+    const reach = await page.evaluate(() => {
+      const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find((e) => e.getBoundingClientRect().width > 0)!;
+      fp.scrollTop = fp.scrollHeight;
+      const g = fp.querySelector<HTMLElement>('[data-clq-opt="prof:gaps"]')!.getBoundingClientRect(), f = fp.getBoundingClientRect();
+      return { inView: g.bottom <= f.bottom + 0.5 && g.top >= f.top - 0.5, overscroll: getComputedStyle(fp).overscrollBehaviorY, scrolls: fp.scrollHeight > fp.clientHeight };
+    });
+    m34.check("at 1280×640 with it open, scrolling the panel reaches Has gaps", reach.inView && reach.scrolls, JSON.stringify(reach));
+    m34.check("overscroll contained", reach.overscroll === "contain", reach.overscroll);
+    if (!MUTATE.size) await fpOf(page).screenshot({ path: `${DIR}/shots/panel-1280x640-scrolled.png` });
+  } finally {
+    for (const [who, c] of [["Achebe", "GB"], ["Blackwood", "GB"], ["Carey", "GB"], ["Lang", "GB"]] as const) setCountry(who, c);
+  }
+  m26.done(2); m34.done(9);
+});
+
+test("M35 · an agent with no genres has gaps (List health's own rule), never a full profile", async ({ page }) => {
+  test.setTimeout(120_000);
+  const m35 = new Ledger("M35");
+  await open(page, 1440);
+  const fp = fpOf(page);
+  const P = await readPanel(page);
+  const wantGaps = FX.filter(gapsOf).length;
+  m35.check("Has gaps counts List health's rule", P.opts["prof:gaps"]?.n === wantGaps && P.opts["prof:full"]?.n === 19 - wantGaps, `gaps ${P.opts["prof:gaps"]?.n} full ${P.opts["prof:full"]?.n} want ${wantGaps}/${19 - wantGaps}`);
+  await fp.locator('[data-clq-opt="prof:gaps"]').click(); await page.waitForTimeout(300);
+  const gapIds = await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")));
+  m35.check("Carey and Lang (no genres) are under Has gaps", gapIds.includes("clr-carey") && gapIds.includes("clr-lang"), gapIds.join(","));
+  await fp.locator('[data-clq-opt="prof:full"]').click(); await page.waitForTimeout(300);
+  const fullIds = await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")));
+  m35.check("and never under Full profile", !fullIds.includes("clr-carey") && !fullIds.includes("clr-lang") && fullIds.length === 19 - wantGaps, fullIds.join(","));
+  m35.done(3);
 });
