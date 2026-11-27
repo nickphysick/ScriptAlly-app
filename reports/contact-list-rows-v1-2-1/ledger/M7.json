@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "opens A to Z",
+  "ok": true,
+  "detail": "Achebe Blackwood Carey Ellison Ferris Holt Hussain Lang Morrow Okafor Pemberton Pryce Quinn Reed Sandhu Stirling Tan Vane-Coe Whitfield"
+ },
+ {
+  "where": "chip says Surname ↑",
+  "ok": true,
+  "detail": "chip {\"field\":\"Surname\",\"dir\":\"↑\"}"
+ },
+ {
+  "where": "agent heading active",
+  "ok": true,
+  "detail": "aria-sort ascending"
+ },
+ {
+  "where": "placeholder",
+  "ok": true,
+  "detail": "placeholder \"Filter by name or agency\""
+ },
+ {
+  "where": "no / hint",
+  "ok": true,
+  "detail": "kbd shown false"
+ }
+]

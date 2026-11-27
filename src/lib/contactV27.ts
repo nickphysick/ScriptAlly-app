@@ -36,8 +36,8 @@ export const READY_LABEL = "Ready to query";
  * The applied chips, one per choice the writer made: lib/contactList `appliedFilters`, except that Ready to query (both
  * of its fields) is ONE chip, and removing it clears both.
  */
-export function appliedChoices(f: ContactFilters, genreLabel: (k: string) => string): AppliedFilter[] {
-  const all = appliedFilters(f, genreLabel);
+export function appliedChoices(f: ContactFilters, genreLabel: (k: string) => string, homeShort?: string): AppliedFilter[] {
+  const all = appliedFilters(f, genreLabel, homeShort);
   if (!readyOn(f)) return all;
   const out: AppliedFilter[] = [];
   for (const a of all) {

@@ -209,9 +209,9 @@ export interface RowNote {
 
 /** What to do, in the writer's own imperative. */
 const DEED: Partial<Record<QueryStatus, string>> = {
-  [QueryStatus.PARTIAL_REQUESTED]: "Send the partial",
-  [QueryStatus.FULL_REQUESTED]: "Send the full",
-  [QueryStatus.REVISE_RESUBMIT]: "Send the revision",
+  [QueryStatus.PARTIAL_REQUESTED]: "Send your partial",
+  [QueryStatus.FULL_REQUESTED]: "Send your full",
+  [QueryStatus.REVISE_RESUBMIT]: "Send your revision",
   [QueryStatus.OFFER]: "Answer them",
 };
 

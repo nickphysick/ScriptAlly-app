@@ -1,0 +1,604 @@
+
+> react-example@0.0.0 e2e:emu
+> node scripts/emu.mjs e2e tests/e2e/contactListRows.measure.ts --project=measure
+
+[heavy-slot] Waiting for the test slot — held by phone-birds-eye-world-v3-1 (/Users/nickphysick/ScriptAlly-bew31) since 23:23
+[heavy-slot] got the test slot after 400 s.
+[heavy-slot] sweep (on acquire): nothing left over.
+vite v6.4.6 building for emulator...
+transforming...
+✓ 4150 modules transformed.
+../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js (14422:32): Use of eval in "../ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/auth/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr121/src/lib/accountEmail.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr121/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/firebase.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/firestore/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr121/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/yourNotesStore.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr121/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/letters/LetterDesk.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/letters/QueryLettersPage.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/manuscripts/ComparableTitlesPage.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/manuscripts/v12/Msv21Dialogs.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/manuscripts/v28/MsEditDrawer.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/packages/v26/usePk26Model.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/packages/v4/usePackagesModel.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/packages/v62/usePk62Actions.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/phone/birds/BirdsWorld.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/todo/ws/WsBatch54.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/todo/ws/wsFlows.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/activityWrite.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/firebase.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/importEvent.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/manuscriptV29.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/manuscriptWrite.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/nudgeUndo.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/nudgeWrite.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/practiceQuery.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/qc1522Write.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/closeSave.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/sendBy.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/sentCorrect.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/saveAgentEdits.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/saveQueryEdits.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr121/src/lib/firebase.ts is dynamically imported by /Users/nickphysick/ScriptAlly-clr121/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/events.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/foundingNotes.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/foundingStats.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr121/src/marketing/ContactPage.tsx, /Users/nickphysick/ScriptAlly-clr121/src/marketing/appCheck.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr121/src/components/AccountSettings.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/ImportCsv.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/AgentList.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/card/AgentCardHost.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/card/HostAgentCard.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/card/useAgentNotes.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/card/useAgentThreads.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/contact/AgentCard262.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/agents/contact/useHkFixes.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/emailImport/PasteEmailFlow.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/phone/birds/BirdsWorld.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queries/centre/LogStagesHost.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queries/phone/EditQueryPhone.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queryActions/journeys/LogJourney.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/queryActions/journeys/OfferJourney.tsx, /Users/nickphysick/ScriptAlly-clr121/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-clr121/src/components/todo/ws/WsPreview.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/accountAuthFacts.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/agentCardSave.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/agentCardSnapshot.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/entryDeleteWrite.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/importDraft.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/qc152Write.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/respondSave.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/snapshot.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/queryActions/stepSaves.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/scoutStore.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/storage/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr121/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/firebase.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr121/src/lib/db.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-clr121/src/components/shell/AppShell.tsx is dynamically imported by /Users/nickphysick/ScriptAlly-clr121/src/components/onboarding/HandoffNav.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr121/src/App.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-clr121/src/components/help/HelpArticlePage.tsx, /Users/nickphysick/ScriptAlly-clr121/src/lib/accountEmail.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/inviteCode.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/sendFeedback.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/yourNotesStore.ts, /Users/nickphysick/ScriptAlly-clr121/src/marketing/ContactPage.tsx but also statically imported by /Users/nickphysick/ScriptAlly-clr121/src/lib/aiCallable.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/xlsx/xlsx.mjs is dynamically imported by /Users/nickphysick/ScriptAlly-clr121/src/lib/importReadRoute.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/templateFile.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/templateImport.ts but also statically imported by /Users/nickphysick/ScriptAlly-clr121/src/lib/sheetText.ts, /Users/nickphysick/ScriptAlly-clr121/src/lib/smartImport.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist-emu/index.html                                    6.23 kB │ gzip:     2.21 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 34.85s
+[emu-guard] 23.1 GB free. Debug logs: /dev/null.
+i  emulators: Starting emulators: auth, firestore, storage
+i  emulators: Detected demo project ID "demo-scriptally", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Importing data from /Users/nickphysick/ScriptAlly-clr121/tests/emulator-data/firestore_export/firestore_export.overall_export_metadata
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+⚠  Unexpected rules runtime error: Picked up JAVA_TOOL_OPTIONS: -Xmx1536m -XX:ActiveProcessorCount=2
+
+Could not find metadata directory at "/Users/nickphysick/ScriptAlly-clr121/tests/emulator-data/storage_export/metadata" and/or blobs directory at "/Users/nickphysick/ScriptAlly-clr121/tests/emulator-data/storage_export/blobs".
+i  Running script: node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure'
+auth emulator: harness@scriptally.test (uid LS4ymFFCEvhN82advZQJ5zkr7sv2) ready
+  ➜  Local:   http://127.0.0.1:4321/
+[load-guard] 1-minute load 6.06 at the start of the run
+
+Running 18 tests using 1 worker
+
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (4.2s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M1 · 1440 · clr-achebe · fit left — left 242.0 want 248.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-achebe · genres left — left 320.0 want 336.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-achebe · policy left — left 608.0 want 554.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-achebe · status left — left 760.0 want 730.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-achebe · chev left — left 930.0 want 922.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-achebe · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16
+  ✗ M1 · 1440 · clr-blackwood · fit left — left 242.0 want 248.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-blackwood · genres left — left 320.0 want 336.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-blackwood · policy left — left 608.0 want 554.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-blackwood · status left — left 760.0 want 730.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-blackwood · chev left — left 930.0 want 922.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-blackwood · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16
+  ✗ M1 · 1440 · clr-carey · fit left — left 242.0 want 248.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-carey · genres left — left 320.0 want 336.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-carey · policy left — left 608.0 want 554.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-carey · status left — left 760.0 want 730.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-carey · chev left — left 930.0 want 922.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-carey · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16
+  ✗ M1 · 1440 · clr-ellison · fit left — left 242.0 want 248.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-ellison · genres left — left 320.0 want 336.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-ellison · policy left — left 608.0 want 554.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-ellison · status left — left 760.0 want 730.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-ellison · chev left — left 930.0 want 922.0 (card 972, row 952)
+  ✗ M1 · 1440 · clr-ellison · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16
+  ✗ M1 · 1440 · clr-ferris · fit left — left 242.0 want 248.0 (card 972, row 952)
+[M1] 450/640 green
+  ✘   2 [measure] › tests/e2e/contactListRows.measure.ts:212:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 (16.9s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+[M5] 9/9 green
+  ✓   3 [measure] › tests/e2e/contactListRows.measure.ts:279:1 › M5 · the action's words (re-pointed by v1.2: the query card's words everywhere; no action on a closed query) (5.0s)
+[M6] 36/36 green
+  ✓   4 [measure] › tests/e2e/contactListRows.measure.ts:309:1 › M6 · heading sorts, both ways; the chip agrees (8.9s)
+[M7] 6/6 green
+  ✓   5 [measure] › tests/e2e/contactListRows.measure.ts:359:1 › M7 · opens A to Z; the search's words (4.4s)
+[M8] 80/80 green
+  ✗ M9 · 1600 · heading agent — "Special Elite" 16px (want 18) sw 262 cw 262
+  ✗ M9 · 1600 · heading fit — "Special Elite" 16px (want 18) sw 72 cw 72
+  ✗ M9 · 1600 · heading genres — "Special Elite" 16px (want 18) sw 206 cw 206
+  ✗ M9 · 1600 · heading policy — "Special Elite" 16px (want 18) sw 160 cw 160
+  ✗ M9 · 1600 · heading status — "Special Elite" 16px (want 18) sw 196 cw 196
+[M9] 15/20 green
+  ✘   6 [measure] › tests/e2e/contactListRows.measure.ts:381:1 › M8, M9, M11 · status centred in its space; typewriter headings; genre tags in lines (17.7s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+[M10] 10/10 green
+  ✓   7 [measure] › tests/e2e/contactListRows.measure.ts:446:1 › M10 · pinned: the heading row level with the filter panel, rounded, nothing showing above (10.5s)
+[M13] 39/39 green
+[M14] 71/71 green
+[M16] 2/2 green
+  ✓   8 [measure] › tests/e2e/contactListRows.measure.ts:481:1 › M13, M14, M16 · plain discs; the status/action swap; the small outline button and its words (14.7s)
+[M15] 38/38 green
+  ✓   9 [measure] › tests/e2e/contactListRows.measure.ts:554:1 › M15 · no hover: the action at the row's end, the row still two lines (10.8s)
+  ✘  10 [measure] › tests/e2e/contactListRows.measure.ts:628:1 › M17, M18, M25 · the compact panel: its sections, faceted counts; Clear all; No genres yet (4.0m)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+[M19] 22/22 green
+  ✓  11 [measure] › tests/e2e/contactListRows.measure.ts:697:1 › M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge due first (5.0s)
+[M12] 6/6 green
+  ✓  12 [measure] › tests/e2e/contactListRows.measure.ts:732:1 › M12 · rate Fit from the row: hover, click, keyboard; saved, toasted, drawn (8.4s)
+  ✓  13 [measure] › tests/e2e/contactListRows.measure.ts:768:1 › M20 · the Query Centre's filter panel is unchanged (4.5s)
+  ✗ M21 · 700 · only page colour (and the slim bar) above the headings — 35017 of 35017 not page colour (rgba(0, 0, 0, 0)) · 406,107=242,238,232 406,108=242,238,232 406,109=242,238,232 406,110=242,238,232 406,111=242,238,232 406,112=242,238,232
+  ✗ M21 · 1100 · only page colour (and the slim bar) above the headings — 35017 of 35017 not page colour (rgba(0, 0, 0, 0)) · 406,107=242,238,232 406,108=242,238,232 406,109=242,238,232 406,110=242,238,232 406,111=242,238,232 406,112=242,238,232
+  ✗ M21 · 1600 · only page colour (and the slim bar) above the headings — 35017 of 35017 not page colour (rgba(0, 0, 0, 0)) · 406,107=242,238,232 406,108=242,238,232 406,109=242,238,232 406,110=242,238,232 406,111=242,238,232 406,112=242,238,232
+[M21] 6/9 green
+  ✘  14 [measure] › tests/e2e/contactListRows.measure.ts:795:1 › M21, M22 · pinned at 1440×900: only the slim bar and page colour above the headings; no row above them (6.1s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✘  15 [measure] › tests/e2e/contactListRows.measure.ts:840:1 › M23 · each row action opens its own journey, never the card; the keyboard too; elsewhere opens the card (5.0m)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M24 · no scrolling inside the panel — scrollHeight 1032 clientHeight 638
+[M24] 2/3 green
+  ✘  16 [measure] › tests/e2e/contactListRows.measure.ts:897:1 › M24 · the panel fits a 1440×900 window: height + sticky top + 16 ≤ the inner height; no inner scroll (4.6s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M26 · GB home: Outside the UK, two agents — {"words":"2","n":2}
+  ✗ M26 · US home: Outside the US, counted against the US — {"words":"18","n":18}
+[M26] 0/2 green
+  ✘  17 [measure] › tests/e2e/contactListRows.measure.ts:913:1 › M26 · the Outside label follows the writer's home country (GB, then US) (8.2s)
+clr fixture: 19 agents on clr@scriptally.test (uid clr-rows-v1)
+  ✗ M27 · 1440 · card 972 → middle — card 972.0 tier middle drawn narrow (Agent 228) short headings true
+  ✗ M27 · 1600 · card 1132 → wide — card 1132.0 tier wide drawn middle (Agent 262) short headings false
+[M27] 2/4 green
+  ✘  18 [measure] › tests/e2e/contactListRows.measure.ts:934:1 › M27 · the list card's width gives narrow / middle / wide / wide at 1280, 1440, 1600, 1920 (15.7s)
+
+
+  1) [measure] › tests/e2e/contactListRows.measure.ts:212:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -   1
+    + Received  + 192
+
+    - Array []
+    + Array [
+    +   "1440 · clr-achebe · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-achebe · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-achebe · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-achebe · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-achebe · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-achebe · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-blackwood · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-blackwood · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-blackwood · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-blackwood · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-blackwood · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-blackwood · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-carey · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-carey · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-carey · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-carey · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-carey · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-carey · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-ellison · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-ellison · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-ellison · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-ellison · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-ellison · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-ellison · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-ferris · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-ferris · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-ferris · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-ferris · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-ferris · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-ferris · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-holt · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-holt · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-holt · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-holt · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-holt · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-holt · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-hussain · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-hussain · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-hussain · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-hussain · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-hussain · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-hussain · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-lang · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-lang · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-lang · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-lang · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-lang · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-lang · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-morrow · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-morrow · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-morrow · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-morrow · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-morrow · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-morrow · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-okafor · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-okafor · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-okafor · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-okafor · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-okafor · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-okafor · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-pemberton · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-pemberton · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-pemberton · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-pemberton · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-pemberton · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-pemberton · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-pryce · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-pryce · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-pryce · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-pryce · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-pryce · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-pryce · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-quinn · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-quinn · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-quinn · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-quinn · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-quinn · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-quinn · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-reed · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-reed · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-reed · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-reed · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-reed · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-reed · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-sandhu · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-sandhu · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-sandhu · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-sandhu · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-sandhu · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-sandhu · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-stirling · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-stirling · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-stirling · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-stirling · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-stirling · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-stirling · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-tan · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-tan · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-tan · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-tan · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-tan · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-tan · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-vane-coe · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-vane-coe · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-vane-coe · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-vane-coe · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-vane-coe · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-vane-coe · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1440 · clr-whitfield · fit left — left 242.0 want 248.0 (card 972, row 952)",
+    +   "1440 · clr-whitfield · genres left — left 320.0 want 336.0 (card 972, row 952)",
+    +   "1440 · clr-whitfield · policy left — left 608.0 want 554.0 (card 972, row 952)",
+    +   "1440 · clr-whitfield · status left — left 760.0 want 730.0 (card 972, row 952)",
+    +   "1440 · clr-whitfield · chev left — left 930.0 want 922.0 (card 972, row 952)",
+    +   "1440 · clr-whitfield · fit = agent right + gap — fit 679.0 agent.r 665.0 gap 16",
+    +   "1600 · clr-achebe · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-achebe · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-achebe · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-achebe · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-blackwood · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-blackwood · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-blackwood · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-blackwood · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-carey · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-carey · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-carey · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-carey · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-ellison · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-ellison · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-ellison · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-ellison · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-ferris · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-ferris · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-ferris · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-ferris · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-holt · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-holt · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-holt · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-holt · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-hussain · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-hussain · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-hussain · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-hussain · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-lang · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-lang · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-lang · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-lang · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-morrow · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-morrow · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-morrow · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-morrow · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-okafor · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-okafor · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-okafor · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-okafor · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-pemberton · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-pemberton · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-pemberton · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-pemberton · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-pryce · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-pryce · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-pryce · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-pryce · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-quinn · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-quinn · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-quinn · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-quinn · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-reed · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-reed · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-reed · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-reed · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-sandhu · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-sandhu · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-sandhu · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-sandhu · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-stirling · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-stirling · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-stirling · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-stirling · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-tan · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-tan · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-tan · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-tan · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-vane-coe · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-vane-coe · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-vane-coe · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-vane-coe · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    +   "1600 · clr-whitfield · fit left — left 286.0 want 314.0 (card 1132, row 1046)",
+    +   "1600 · clr-whitfield · genres left — left 382.0 want 428.0 (card 1132, row 1046)",
+    +   "1600 · clr-whitfield · policy left — left 612.0 want 568.0 (card 1132, row 1046)",
+    +   "1600 · clr-whitfield · status left — left 796.0 want 772.0 (card 1132, row 1046)",
+    + ]
+
+      86 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      87 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 88 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      89 |   }
+      90 | }
+      91 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:88:83)
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:276:6
+
+    Error Context: test-results/contactListRows.measure.ts-cd926-ag-—-at-1280-1440-1600-1920-measure/error-context.md
+
+  2) [measure] › tests/e2e/contactListRows.measure.ts:381:1 › M8, M9, M11 · status centred in its space; typewriter headings; genre tags in lines 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   "1600 · heading agent — \"Special Elite\" 16px (want 18) sw 262 cw 262",
+    +   "1600 · heading fit — \"Special Elite\" 16px (want 18) sw 72 cw 72",
+    +   "1600 · heading genres — \"Special Elite\" 16px (want 18) sw 206 cw 206",
+    +   "1600 · heading policy — \"Special Elite\" 16px (want 18) sw 160 cw 160",
+    +   "1600 · heading status — \"Special Elite\" 16px (want 18) sw 196 cw 196",
+    + ]
+
+      86 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      87 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 88 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      89 |   }
+      90 | }
+      91 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:88:83)
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:443:23
+
+    Error Context: test-results/contactListRows.measure.ts-d0714-eadings-genre-tags-in-lines-measure/error-context.md
+
+  3) [measure] › tests/e2e/contactListRows.measure.ts:628:1 › M17, M18, M25 · the compact panel: its sections, faceted counts; Clear all; No genres yet 
+
+    Test timeout of 240000ms exceeded.
+
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    Call log:
+      - waiting for locator('.qc153-rail.fp').visible().locator('[data-clq-opt="nogenres"]')
+
+
+      672 |   if (!MUTATE.size) await page.screenshot({ path: `${DIR}/shots/filters-crime-open-1440.png` });
+      673 |   /* No genres yet and a genre pick clear each other */
+    > 674 |   await fp.locator('[data-clq-opt="nogenres"]').click();
+          |                                                 ^
+      675 |   await page.waitForTimeout(300);
+      676 |   P = await readPanel(page);
+      677 |   const genreOn = Object.entries(P.opts).filter(([k, o]) => k.startsWith("genre:") && o.on).map(([k]) => k);
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:674:49
+
+    Error Context: test-results/contactListRows.measure.ts-b64bd-nts-Clear-all-No-genres-yet-measure/error-context.md
+
+  4) [measure] › tests/e2e/contactListRows.measure.ts:795:1 › M21, M22 · pinned at 1440×900: only the slim bar and page colour above the headings; no row above them 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "700 · only page colour (and the slim bar) above the headings — 35017 of 35017 not page colour (rgba(0, 0, 0, 0)) · 406,107=242,238,232 406,108=242,238,232 406,109=242,238,232 406,110=242,238,232 406,111=242,238,232 406,112=242,238,232",
+    +   "1100 · only page colour (and the slim bar) above the headings — 35017 of 35017 not page colour (rgba(0, 0, 0, 0)) · 406,107=242,238,232 406,108=242,238,232 406,109=242,238,232 406,110=242,238,232 406,111=242,238,232 406,112=242,238,232",
+    +   "1600 · only page colour (and the slim bar) above the headings — 35017 of 35017 not page colour (rgba(0, 0, 0, 0)) · 406,107=242,238,232 406,108=242,238,232 406,109=242,238,232 406,110=242,238,232 406,111=242,238,232 406,112=242,238,232",
+    + ]
+
+      86 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      87 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 88 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      89 |   }
+      90 | }
+      91 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:88:83)
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:837:7
+
+    Error Context: test-results/contactListRows.measure.ts-1e955--headings-no-row-above-them-measure/error-context.md
+
+  5) [measure] › tests/e2e/contactListRows.measure.ts:840:1 › M23 · each row action opens its own journey, never the card; the keyboard too; elsewhere opens the card 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.click: Test timeout of 300000ms exceeded.
+    Call log:
+      - waiting for locator('[data-cl26="row"][data-id="clr-ferris"]').visible().locator('[data-clr="act"]')
+        - locator resolved to <button type="button" data-clr="act" class="clr-act" data-mode="nudge">Nudge</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <span data-clr="stage" class="clr-stage">Queried</span> from <span data-clr="rest" class="clr-rest">…</span> subtree intercepts pointer events
+        - retrying click action
+        - waiting 20ms
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+        - <span data-clr="stage" class="clr-stage">Queried</span> from <span data-clr="rest" class="clr-rest">…</span> subtree intercepts pointer events
+      2 × retrying click action
+          - waiting 100ms
+          - waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <button type="button" class="qc156-sb" data-clh2="slim-add">+ Add an agent</button> from <div data-shown="" data-clh2="slim" class="qc156-slim">…</div> subtree intercepts pointer events
+      142 × retrying click action
+            - waiting 500ms
+            - waiting for element to be visible, enabled and stable
+            - element is visible, enabled and stable
+            - scrolling into view if needed
+            - done scrolling
+            - <span data-clr="stage" class="clr-stage">Queried</span> from <span data-clr="rest" class="clr-rest">…</span> subtree intercepts pointer events
+          - retrying click action
+            - waiting 500ms
+            - waiting for element to be visible, enabled and stable
+            - element is visible, enabled and stable
+            - scrolling into view if needed
+            - done scrolling
+            - <span data-clr="stage" class="clr-stage">Queried</span> from <span data-clr="rest" class="clr-rest">…</span> subtree intercepts pointer events
+          - retrying click action
+            - waiting 500ms
+            - waiting for element to be visible, enabled and stable
+            - element is visible, enabled and stable
+            - scrolling into view if needed
+            - done scrolling
+            - <button type="button" class="qc156-sb" data-clh2="slim-add">+ Add an agent</button> from <div data-shown="" data-clh2="slim" class="qc156-slim">…</div> subtree intercepts pointer events
+          - retrying click action
+            - waiting 500ms
+            - waiting for element to be visible, enabled and stable
+            - element is visible, enabled and stable
+            - scrolling into view if needed
+            - done scrolling
+            - <button type="button" class="qc156-sb" data-clh2="slim-add">+ Add an agent</button> from <div data-shown="" data-clh2="slim" class="qc156-slim">…</div> subtree intercepts pointer events
+      - retrying click action
+        - waiting 500ms
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+        - <span data-clr="stage" class="clr-stage">Queried</span> from <span data-clr="rest" class="clr-rest">…</span> subtree intercepts pointer events
+      - retrying click action
+        - waiting 500ms
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - done scrolling
+
+
+      872 |       const btn = row.locator('[data-clr="act"]');
+      873 |       if (kb) { await btn.focus(); await page.keyboard.press(c.surname === "Holt" ? " " : "Enter"); }
+    > 874 |       else { const bx = (await row.boundingBox())!; await page.mouse.move(bx.x + 40, bx.y + bx.height / 2); await page.waitForTimeout(250); await btn.click(); }
+          |                                                                                                                                                       ^
+      875 |       await page.waitForTimeout(900);
+      876 |       const s = await state();
+      877 |       const want = c.key === "queryId" ? `clr-q-${c.surname.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` : id;
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:874:151
+
+    Error Context: test-results/contactListRows.measure.ts-8cb73-oo-elsewhere-opens-the-card-measure/error-context.md
+
+  6) [measure] › tests/e2e/contactListRows.measure.ts:897:1 › M24 · the panel fits a 1440×900 window: height + sticky top + 16 ≤ the inner height; no inner scroll 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "no scrolling inside the panel — scrollHeight 1032 clientHeight 638",
+    + ]
+
+      86 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      87 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 88 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      89 |   }
+      90 | }
+      91 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:88:83)
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:910:7
+
+    Error Context: test-results/contactListRows.measure.ts-f804e-nner-height-no-inner-scroll-measure/error-context.md
+
+  7) [measure] › tests/e2e/contactListRows.measure.ts:913:1 › M26 · the Outside label follows the writer's home country (GB, then US) 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "GB home: Outside the UK, two agents — {\"words\":\"2\",\"n\":2}",
+    +   "US home: Outside the US, counted against the US — {\"words\":\"18\",\"n\":18}",
+    + ]
+
+      86 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      87 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 88 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      89 |   }
+      90 | }
+      91 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:88:83)
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:931:7
+
+    Error Context: test-results/contactListRows.measure.ts-29ff7--s-home-country-GB-then-US--measure/error-context.md
+
+  8) [measure] › tests/e2e/contactListRows.measure.ts:934:1 › M27 · the list card's width gives narrow / middle / wide / wide at 1280, 1440, 1600, 1920 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "1440 · card 972 → middle — card 972.0 tier middle drawn narrow (Agent 228) short headings true",
+    +   "1600 · card 1132 → wide — card 1132.0 tier wide drawn middle (Agent 262) short headings false",
+    + ]
+
+      86 |     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+      87 |     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    > 88 |     expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+         |                                                                                   ^
+      89 |   }
+      90 | }
+      91 |
+        at Ledger.done (/Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:88:83)
+        at /Users/nickphysick/ScriptAlly-clr121/tests/e2e/contactListRows.measure.ts:947:7
+
+    Error Context: test-results/contactListRows.measure.ts-9fdaa-wide-at-1280-1440-1600-1920-measure/error-context.md
+
+  8 failed
+    [measure] › tests/e2e/contactListRows.measure.ts:212:1 › M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 1920 
+    [measure] › tests/e2e/contactListRows.measure.ts:381:1 › M8, M9, M11 · status centred in its space; typewriter headings; genre tags in lines 
+    [measure] › tests/e2e/contactListRows.measure.ts:628:1 › M17, M18, M25 · the compact panel: its sections, faceted counts; Clear all; No genres yet 
+    [measure] › tests/e2e/contactListRows.measure.ts:795:1 › M21, M22 · pinned at 1440×900: only the slim bar and page colour above the headings; no row above them 
+    [measure] › tests/e2e/contactListRows.measure.ts:840:1 › M23 · each row action opens its own journey, never the card; the keyboard too; elsewhere opens the card 
+    [measure] › tests/e2e/contactListRows.measure.ts:897:1 › M24 · the panel fits a 1440×900 window: height + sticky top + 16 ≤ the inner height; no inner scroll 
+    [measure] › tests/e2e/contactListRows.measure.ts:913:1 › M26 · the Outside label follows the writer's home country (GB, then US) 
+    [measure] › tests/e2e/contactListRows.measure.ts:934:1 › M27 · the list card's width gives narrow / middle / wide / wide at 1280, 1440, 1600, 1920 
+  10 passed (11.8m)
+[load-guard] 1-minute load 1.74 at the end of the run
+⚠  Script exited unsuccessfully (code 1)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  auth: Stopping Authentication Emulator
+i  storage: Stopping Storage Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/contactListRows.measure.ts' '--project=measure'" exited with code 1

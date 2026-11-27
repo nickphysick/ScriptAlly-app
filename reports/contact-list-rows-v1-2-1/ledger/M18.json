@@ -1,0 +1,27 @@
+[
+ {
+  "where": "Clear all hidden at rest",
+  "ok": true,
+  "detail": "shown false"
+ },
+ {
+  "where": "Clear all shown with a filter on",
+  "ok": true,
+  "detail": "shown true"
+ },
+ {
+  "where": "Clear all resets every section",
+  "ok": true,
+  "detail": "on door:any,list:all"
+ },
+ {
+  "where": "Clear all hides itself",
+  "ok": true,
+  "detail": "shown false"
+ },
+ {
+  "where": "the whole list is back",
+  "ok": true,
+  "detail": "rows"
+ }
+]

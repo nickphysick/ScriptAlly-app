@@ -71,8 +71,9 @@ describe("Contact list rows v1 · Phase 1 — the columns and cells", () => {
     expect(css).toContain(".cl26-card { container: clr / inline-size; }");
     /* RE-POINTED by v1.2: Query status takes the spare width; the › is a fixed 30 (22 below 980) */
     expect(css).toContain("grid-template-columns: 290px 90px minmax(0, 360px) 180px minmax(220px, 1fr) 30px;");
-    expect(css).toMatch(/@container clr \(width < 1150px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 262px 72px minmax\(0, 300px\) 160px minmax\(196px, 1fr\) 30px; \}/);
-    expect(css).toMatch(/@container clr \(width < 980px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 228px 64px minmax\(0, 1fr\) 138px 156px 22px; column-gap: 14px; \}/);
+    /* RE-POINTED by v1.2.1 (4.4): the tiers at 1100 and 900, the middle tier's own columns */
+    expect(css).toMatch(/@container clr \(width < 1100px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 232px 72px minmax\(170px, 260px\) 160px minmax\(176px, 1fr\) 30px; column-gap: 16px; \}/);
+    expect(css).toMatch(/@container clr \(width < 900px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 228px 64px minmax\(0, 1fr\) 138px 156px 22px; column-gap: 14px; \}/);
   });
 });
 
@@ -106,7 +107,8 @@ describe("Contact list rows v1 · Phase 3 — sorting and search", () => {
     expect(sections(r, "letter", "rating").map((s) => `${s.label}:${s.ids.join("")}`)).toEqual(["5 stars:ab", "2 stars:c", "Not rated:d"]);
     /* RE-POINTED by v1.2 (5.2): one Queried section, never two, the nudge due first within it */
     const q = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs")], "status");
-    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:queried:nw", "t:fs:f"]);
+    /* RE-POINTED by v1.2.1 (4.3): the stage sections follow the sort's order — Full sent above a waiting Queried */
+    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:fs:f", "t:queried:nw"]);
   });
   it("the search reads Filter by name or agency, and this page hides the \"/\" hint", () => {
     expect(FIND_AGENT).toBe("Filter by name or agency");
@@ -178,5 +180,43 @@ describe("Contact list rows v1.2 · Phase 3 — the status and its action", () =
     /* the mounted card's foot button (lib/agentCardV2 acFoot) */
     const v2 = readFileSync(new URL("../../../lib/agentCardV2.ts", import.meta.url), "utf8");
     expect(v2).toContain('label: full ? "Send your full" : "Send your partial"');
+  });
+});
+
+describe("Contact list rows v1.2.1 · Phase 1 — nothing scrolls above the pinned headings", () => {
+  it("one opaque cap owned by the pin: from the scroller's top to the heading's top, across the card and its rim", () => {
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toContain("top: calc(-1 * var(--clr-th-top, 12px)); height: var(--clr-th-top, 12px);");
+    expect(css).toMatch(/\.cl26-card \.cl26-th::before \{\s*content: ""; position: absolute; left: -14px; right: -14px;/);
+    expect(css).toContain(".cl26-card .cl26-frame.cl26-frame { overflow: visible; }");
+    /* the light bar stacks with the page, under the cap */
+    expect(css).toContain(".cl27 .qc153-main > .qc154-tbw.qc154-tbw { position: relative; top: auto; z-index: auto; }");
+    /* never a second sticky element racing the first */
+    expect((css.match(/position: sticky/g) ?? []).length).toBe(1);
+  });
+});
+
+describe("Contact list rows v1.2.1 · Phase 2 — the row's action gets its own click", () => {
+  it("the resting stack never takes the pointer, and the action sits above it", () => {
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toContain(".cl26-card .cl26-row .cl26-q > .clr-rest { pointer-events: none; }");
+    expect(css).toContain(".cl26-card .cl26-row .cl26-q > .clr-act { position: relative; z-index: 1; }");
+  });
+  it("both placements stop the click reaching the row and open the action's journey", () => {
+    const src = read("./ContactSheet26.tsx");
+    expect(src.match(/onClick=\{\(e\) => \{ e\.stopPropagation\(\); p\.onAct\?\.\(a\.id, act\.mode, x\.q\?\.id \?\? null\); \}\}/g)).toHaveLength(2);
+  });
+});
+
+describe("Contact list rows v1.2.1 · Phase 4 — v1.2's answers", () => {
+  it("Outside {the home country's short name}", async () => {
+    const { countryShortName } = await import("../../../lib/territory");
+    expect([countryShortName("GB"), countryShortName("US"), countryShortName("IE"), countryShortName("")]).toEqual(["the UK", "the US", "Ireland", "your country"]);
+  });
+  it("one set of action words on the dashboard feed, the to-do, the calendar pill and the history story", () => {
+    for (const f of ["dashFeed.ts", "calendarPill.ts", "contactStory255.ts", "timelineCopy.ts", "todoBoard.ts"]) {
+      const src = readFileSync(new URL(`../../../lib/${f}`, import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      expect(src, f).not.toMatch(/"Send the (partial|full|revision)"|`Send the full to/);
+    }
   });
 });

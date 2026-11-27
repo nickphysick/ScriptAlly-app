@@ -43,7 +43,7 @@ import "./contactV26.css";
 import "./contactPrinciples.css";
 import "flag-icons/css/flag-icons.min.css";
 import "./contactListRows.css";
-import { countryName, flagFor, normaliseCountry } from "../../../lib/territory";
+import { countryName, countryShortName, flagFor, normaliseCountry } from "../../../lib/territory";
 
 /* QC layout v1 — GROUP26_LABEL moved with the Group chip to ContactBar */
 export { GROUP26_LABEL } from "./ContactBar";
@@ -111,7 +111,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const cardRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
   /* Contact list rows v1.2 — Genres sought's tags a line, by the card's width (its content box, as the columns' container
-     query reads it): three at 1250 and wider, one below 980, else two. A count the CSS cannot change, so it is read here. */
+     query reads it): three at 1250 and wider, one below 900, else two. A count the CSS cannot change, so it is read here. */
   const [per, setPer] = useState<1 | 2 | 3>(2);
   useLayoutEffect(() => {
     const card = cardRef.current;
@@ -119,7 +119,8 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     const put = () => {
       const cs = getComputedStyle(card);
       const w = card.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
-      if (w > 0) { const n: 1 | 2 | 3 = w >= 1250 ? 3 : w < 980 ? 1 : 2; setPer((v) => (v === n ? v : n)); }
+      /* v1.2.1 (4.4) — the tiers: narrow below 900 (one a line), middle and the lower wide two, three from 1250 */
+      if (w > 0) { const n: 1 | 2 | 3 = w >= 1250 ? 3 : w < 900 ? 1 : 2; setPer((v) => (v === n ? v : n)); }
     };
     put();
     const ro = new ResizeObserver(put);
@@ -230,7 +231,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   }, [read]);
 
   /* List filters v1 — one chip per choice the writer made: Ready to query (its two fields) is ONE chip */
-  const applied = useMemo(() => appliedChoices(p.filters, (k) => p.genreWord(k) || k), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
+  const applied = useMemo(() => appliedChoices(p.filters, (k) => p.genreWord(k) || k, countryShortName(p.homeCountry ?? "GB")), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
   const state = p.state ?? "list";
   /* principles v1 — what is applied, in the order the band and applied row draw it (Find, a set, the filters), each with
      the way to take just that one off: the no-matches state names them and offers to remove the last */
@@ -269,7 +270,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             ]} />
           ) : null}
           {/* Contact list rows v1 — Agent · Fit · Genres sought · Response policy · Query status, on the rows' own template
-              (contactListRows.css). Below a card of 980 the two long headings shorten (both words are in the DOM; the
+              (contactListRows.css). Below a card of 900 the two long headings shorten (both words are in the DOM; the
               container query shows one). */}
           <div className="cl26-th cl26-pin" role="row" data-cl26="heads" data-stuck={stuck ? "" : undefined} ref={pinRef}>
             <span className="cl26-thm" aria-hidden="true" />

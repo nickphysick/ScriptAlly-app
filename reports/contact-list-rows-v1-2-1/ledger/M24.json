@@ -1,0 +1,22 @@
+[
+ {
+  "where": "precondition: a 1440×900 window's inner height",
+  "ok": true,
+  "detail": "inner 790"
+ },
+ {
+  "where": "full height + the shell above the scroller + sticky top + 16 ≤ inner height",
+  "ok": true,
+  "detail": "608 + 64 + 98 + 16 = 786 vs 790 (with the beta strip showing: +42)"
+ },
+ {
+  "where": "no scrolling inside the panel",
+  "ok": true,
+  "detail": "scrollHeight 608 clientHeight 608"
+ },
+ {
+  "where": "pinned, the whole panel is inside the window",
+  "ok": true,
+  "detail": "bottom 770 inner 790"
+ }
+]

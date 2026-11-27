@@ -41,7 +41,7 @@ describe("the feed: who wrote it", () => {
   it("an open request needs the writer; a met one says the day the pages went; a closed one says neither", () => {
     const asked = act({ id: "ask", date: at(10), resultingStatus: QueryStatus.PARTIAL_REQUESTED });
     const open = feed([asked], query({ status: QueryStatus.PARTIAL_REQUESTED }))[0];
-    expect([open.need?.label, open.met]).toEqual(["Send the partial", null]);
+    expect([open.need?.label, open.met]).toEqual(["Send your partial", null]); /* RE-POINTED by Contact list rows v1.2.1 (4.5) */
 
     const sent = act({ id: "went", date: at(6), activityType: ActivityType.MATERIALS_SENT, resultingStatus: QueryStatus.PARTIAL_SENT });
     const met = feed([asked, sent], query({ status: QueryStatus.PARTIAL_SENT })).find((x) => x.id === "ask")!;

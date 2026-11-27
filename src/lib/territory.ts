@@ -253,3 +253,12 @@ export function homeCountrySeed(): { homeCountry: string } | Record<string, neve
   const detected = detectHomeRegion();
   return detected ? { homeCountry: detected } : {};
 }
+
+/** Contact list rows v1.2.1 — a country's short name as a sentence uses it after "Outside": "the UK", "the US", "the
+ *  Netherlands"; otherwise its name ("Ireland"), or the code itself when it is not one this list knows */
+const THE: Record<string, string> = { GB: "the UK", US: "the US", NL: "the Netherlands", PH: "the Philippines", AE: "the UAE", BS: "the Bahamas", CZ: "Czechia", DO: "the Dominican Republic" };
+export function countryShortName(value: string | null | undefined): string {
+  const code = toCode(value);
+  if (!code) return "your country";
+  return THE[code] ?? countryName(code) ?? code;
+}

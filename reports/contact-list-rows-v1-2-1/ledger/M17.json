@@ -1,0 +1,307 @@
+[
+ {
+  "where": "rest · population",
+  "ok": true,
+  "detail": "{\"list:all\":19,\"list:queried\":16,\"list:none\":3,\"door:any\":19,\"door:open\":18,\"door:closed\":1,\"fit:5\":4,\"fit:4\":10,\"fit:0\":5,\"reply:always\":14,\"reply:nrmn\":3,\"reply:known\":17,\"abroad\":2,\"nogenres\":2,\"genre:literary\":2,\"genre:crime\":8,\"genre:noir\":1,\"genre:thriller\":6,\"genre:gothic\":1,\"genre:speculative\":1,\"genre:upmarket\":2,\"genre:book club\":4,\"genre:historical\":4,\"genre:saga\":2,\"genre:horror\":1,\"genre:psychological\":2,\"genre:young adult\":1}"
+ },
+ {
+  "where": "rest · list:all",
+  "ok": true,
+  "detail": "got 19 want 19"
+ },
+ {
+  "where": "rest · list:queried",
+  "ok": true,
+  "detail": "got 16 want 16"
+ },
+ {
+  "where": "rest · list:none",
+  "ok": true,
+  "detail": "got 3 want 3"
+ },
+ {
+  "where": "rest · door:any",
+  "ok": true,
+  "detail": "got 19 want 19"
+ },
+ {
+  "where": "rest · door:open",
+  "ok": true,
+  "detail": "got 18 want 18"
+ },
+ {
+  "where": "rest · door:closed",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "rest · fit:5",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "rest · fit:4",
+  "ok": true,
+  "detail": "got 10 want 10"
+ },
+ {
+  "where": "rest · fit:0",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "rest · reply:always",
+  "ok": true,
+  "detail": "got 14 want 14"
+ },
+ {
+  "where": "rest · reply:nrmn",
+  "ok": true,
+  "detail": "got 3 want 3"
+ },
+ {
+  "where": "rest · reply:known",
+  "ok": true,
+  "detail": "got 17 want 17"
+ },
+ {
+  "where": "rest · abroad",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "rest · nogenres",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "rest · genre:literary",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "rest · genre:crime",
+  "ok": true,
+  "detail": "got 8 want 8"
+ },
+ {
+  "where": "rest · genre:noir",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "rest · genre:thriller",
+  "ok": true,
+  "detail": "got 6 want 6"
+ },
+ {
+  "where": "rest · genre:gothic",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "rest · genre:speculative",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "rest · genre:upmarket",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "rest · genre:book club",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "rest · genre:historical",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "rest · genre:saga",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "rest · genre:horror",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "rest · genre:psychological",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "rest · genre:young adult",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "rest · no summary",
+  "ok": true,
+  "detail": "summary null"
+ },
+ {
+  "where": "Crime + Open · population",
+  "ok": true,
+  "detail": "{\"list:all\":7,\"list:queried\":5,\"list:none\":2,\"door:any\":8,\"door:open\":7,\"door:closed\":1,\"fit:5\":3,\"fit:4\":7,\"fit:0\":0,\"reply:always\":5,\"reply:nrmn\":1,\"reply:known\":7,\"abroad\":0,\"nogenres\":2,\"genre:literary\":2,\"genre:crime\":7,\"genre:noir\":1,\"genre:thriller\":6,\"genre:gothic\":1,\"genre:speculative\":1,\"genre:upmarket\":2,\"genre:book club\":3,\"genre:historical\":4,\"genre:saga\":2,\"genre:horror\":1,\"genre:psychological\":2,\"genre:young adult\":1}"
+ },
+ {
+  "where": "Crime + Open · list:all",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "Crime + Open · list:queried",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "Crime + Open · list:none",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Crime + Open · door:any",
+  "ok": true,
+  "detail": "got 8 want 8"
+ },
+ {
+  "where": "Crime + Open · door:open",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "Crime + Open · door:closed",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "Crime + Open · fit:5",
+  "ok": true,
+  "detail": "got 3 want 3"
+ },
+ {
+  "where": "Crime + Open · fit:4",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "Crime + Open · fit:0",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "Crime + Open · fit:0 disabled at 0",
+  "ok": true,
+  "detail": "disabled true on false"
+ },
+ {
+  "where": "Crime + Open · reply:always",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "Crime + Open · reply:nrmn",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "Crime + Open · reply:known",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "Crime + Open · abroad",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "Crime + Open · abroad disabled at 0",
+  "ok": true,
+  "detail": "disabled true on false"
+ },
+ {
+  "where": "Crime + Open · nogenres",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Crime + Open · genre:literary",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Crime + Open · genre:crime",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "Crime + Open · genre:noir",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "Crime + Open · genre:thriller",
+  "ok": true,
+  "detail": "got 6 want 6"
+ },
+ {
+  "where": "Crime + Open · genre:gothic",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "Crime + Open · genre:speculative",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "Crime + Open · genre:upmarket",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Crime + Open · genre:book club",
+  "ok": true,
+  "detail": "got 3 want 3"
+ },
+ {
+  "where": "Crime + Open · genre:historical",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "Crime + Open · genre:saga",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Crime + Open · genre:horror",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "Crime + Open · genre:psychological",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Crime + Open · genre:young adult",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "Crime + Open · the list is exactly the matching agents",
+  "ok": true,
+  "detail": "got clr-blackwood,clr-ellison,clr-ferris,clr-okafor,clr-pemberton,clr-reed,clr-tan want clr-blackwood,clr-ellison,clr-ferris,clr-okafor,clr-pemberton,clr-reed,clr-tan"
+ },
+ {
+  "where": "Crime + Open · the summary beside the title",
+  "ok": true,
+  "detail": "summary \"7 of 19\""
+ }
+]

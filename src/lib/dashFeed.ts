@@ -438,8 +438,8 @@ export const dayLabelFor = (at: number, now: Date): string => {
 
 /** What an open request asks of the writer — the drawer's ink action on a reply card. */
 const NEED_LABEL: Partial<Record<QueryStatus, string>> = {
-  [QueryStatus.PARTIAL_REQUESTED]: "Send the partial",
-  [QueryStatus.FULL_REQUESTED]: "Send the full",
+  [QueryStatus.PARTIAL_REQUESTED]: "Send your partial",
+  [QueryStatus.FULL_REQUESTED]: "Send your full",
   [QueryStatus.REVISE_RESUBMIT]: "Send your revision",
   [QueryStatus.OFFER]: "Offer: next steps",
 };

@@ -165,7 +165,7 @@ describe("an asking row names what is owed, or it says nothing at all", () => {
 
   it("the four named deeds still answer, and a nudge that has fallen due still does", () => {
     expect(rowNote(copy({ status: QueryStatus.FULL_REQUESTED }), "now", "2026-08-27")!.deed)
-      .toBe("Send the full");
+      .toBe("Send your full"); /* RE-POINTED by Contact list rows v1.2.1 (4.5): the query card's words app-wide */
     expect(rowNote(copy({ status: QueryStatus.OFFER }), "offers", "2026-08-27")!.deed)
       .toBe("Answer them");
     expect(rowNote(copy({ nudgeYmd: "2026-08-20" }), "now", "2026-08-27")!.deed)

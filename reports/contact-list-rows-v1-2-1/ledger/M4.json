@@ -1,0 +1,1202 @@
+[
+ {
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1280 · Achebe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Achebe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1280 · Achebe · no city",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1280 · Blackwood · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Blackwood · agency alone",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1280 · Blackwood · no city",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1280 · Carey · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Carey · agency alone",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1280 · Carey · no city",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1280 · Ellison · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Ellison · agency alone",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1280 · Ellison · no city",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1280 · Ferris · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Ferris · agency alone",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1280 · Ferris · no city",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1280 · Holt · flag",
+  "ok": true,
+  "detail": "flag \"New York, United States\" (abroad: true)"
+ },
+ {
+  "where": "1280 · Holt · flag title",
+  "ok": true,
+  "detail": "title \"New York, United States\""
+ },
+ {
+  "where": "1280 · Holt · agency alone",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1280 · Holt · no city",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1280 · Hussain · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Hussain · agency alone",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1280 · Hussain · no city",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1280 · Lang · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Lang · agency alone",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1280 · Lang · no city",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1280 · Morrow · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Morrow · agency alone",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1280 · Morrow · no city",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1280 · Okafor · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Okafor · agency alone",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1280 · Okafor · no city",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1280 · Pemberton · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Pemberton · agency alone",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1280 · Pemberton · no city",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1280 · Pryce · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Pryce · agency alone",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1280 · Pryce · no city",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1280 · Quinn · flag",
+  "ok": true,
+  "detail": "flag \"Dublin, Ireland\" (abroad: true)"
+ },
+ {
+  "where": "1280 · Quinn · flag title",
+  "ok": true,
+  "detail": "title \"Dublin, Ireland\""
+ },
+ {
+  "where": "1280 · Quinn · agency alone",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1280 · Quinn · no city",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1280 · Reed · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Reed · agency alone",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1280 · Reed · no city",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1280 · Sandhu · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Sandhu · agency alone",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1280 · Sandhu · no city",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1280 · Stirling · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Stirling · agency alone",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1280 · Stirling · no city",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1280 · Tan · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Tan · agency alone",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1280 · Tan · no city",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1280 · Vane-Coe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Vane-Coe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1280 · Vane-Coe · no city",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1280 · Whitfield · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1280 · Whitfield · agency alone",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ },
+ {
+  "where": "1280 · Whitfield · no city",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ },
+ {
+  "where": "1440 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1440 · Achebe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Achebe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1440 · Achebe · no city",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1440 · Blackwood · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Blackwood · agency alone",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1440 · Blackwood · no city",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1440 · Carey · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Carey · agency alone",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1440 · Carey · no city",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1440 · Ellison · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Ellison · agency alone",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1440 · Ellison · no city",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1440 · Ferris · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Ferris · agency alone",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1440 · Ferris · no city",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1440 · Holt · flag",
+  "ok": true,
+  "detail": "flag \"New York, United States\" (abroad: true)"
+ },
+ {
+  "where": "1440 · Holt · flag title",
+  "ok": true,
+  "detail": "title \"New York, United States\""
+ },
+ {
+  "where": "1440 · Holt · agency alone",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1440 · Holt · no city",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1440 · Hussain · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Hussain · agency alone",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1440 · Hussain · no city",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1440 · Lang · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Lang · agency alone",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1440 · Lang · no city",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1440 · Morrow · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Morrow · agency alone",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1440 · Morrow · no city",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1440 · Okafor · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Okafor · agency alone",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1440 · Okafor · no city",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1440 · Pemberton · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Pemberton · agency alone",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1440 · Pemberton · no city",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1440 · Pryce · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Pryce · agency alone",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1440 · Pryce · no city",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1440 · Quinn · flag",
+  "ok": true,
+  "detail": "flag \"Dublin, Ireland\" (abroad: true)"
+ },
+ {
+  "where": "1440 · Quinn · flag title",
+  "ok": true,
+  "detail": "title \"Dublin, Ireland\""
+ },
+ {
+  "where": "1440 · Quinn · agency alone",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1440 · Quinn · no city",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1440 · Reed · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Reed · agency alone",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1440 · Reed · no city",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1440 · Sandhu · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Sandhu · agency alone",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1440 · Sandhu · no city",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1440 · Stirling · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Stirling · agency alone",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1440 · Stirling · no city",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1440 · Tan · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Tan · agency alone",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1440 · Tan · no city",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1440 · Vane-Coe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Vane-Coe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1440 · Vane-Coe · no city",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1440 · Whitfield · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1440 · Whitfield · agency alone",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ },
+ {
+  "where": "1440 · Whitfield · no city",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ },
+ {
+  "where": "1600 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1600 · Achebe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Achebe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1600 · Achebe · no city",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1600 · Blackwood · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Blackwood · agency alone",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1600 · Blackwood · no city",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1600 · Carey · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Carey · agency alone",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1600 · Carey · no city",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1600 · Ellison · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Ellison · agency alone",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1600 · Ellison · no city",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1600 · Ferris · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Ferris · agency alone",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1600 · Ferris · no city",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1600 · Holt · flag",
+  "ok": true,
+  "detail": "flag \"New York, United States\" (abroad: true)"
+ },
+ {
+  "where": "1600 · Holt · flag title",
+  "ok": true,
+  "detail": "title \"New York, United States\""
+ },
+ {
+  "where": "1600 · Holt · agency alone",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1600 · Holt · no city",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1600 · Hussain · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Hussain · agency alone",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1600 · Hussain · no city",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1600 · Lang · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Lang · agency alone",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1600 · Lang · no city",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1600 · Morrow · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Morrow · agency alone",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1600 · Morrow · no city",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1600 · Okafor · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Okafor · agency alone",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1600 · Okafor · no city",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1600 · Pemberton · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Pemberton · agency alone",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1600 · Pemberton · no city",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1600 · Pryce · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Pryce · agency alone",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1600 · Pryce · no city",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1600 · Quinn · flag",
+  "ok": true,
+  "detail": "flag \"Dublin, Ireland\" (abroad: true)"
+ },
+ {
+  "where": "1600 · Quinn · flag title",
+  "ok": true,
+  "detail": "title \"Dublin, Ireland\""
+ },
+ {
+  "where": "1600 · Quinn · agency alone",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1600 · Quinn · no city",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1600 · Reed · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Reed · agency alone",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1600 · Reed · no city",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1600 · Sandhu · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Sandhu · agency alone",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1600 · Sandhu · no city",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1600 · Stirling · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Stirling · agency alone",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1600 · Stirling · no city",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1600 · Tan · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Tan · agency alone",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1600 · Tan · no city",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1600 · Vane-Coe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Vane-Coe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1600 · Vane-Coe · no city",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1600 · Whitfield · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1600 · Whitfield · agency alone",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ },
+ {
+  "where": "1600 · Whitfield · no city",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ },
+ {
+  "where": "1920 · population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "1920 · Achebe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Achebe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1920 · Achebe · no city",
+  "ok": true,
+  "detail": "agency line \"Brightwater Literary\""
+ },
+ {
+  "where": "1920 · Blackwood · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Blackwood · agency alone",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1920 · Blackwood · no city",
+  "ok": true,
+  "detail": "agency line \"Marlow & Finch\""
+ },
+ {
+  "where": "1920 · Carey · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Carey · agency alone",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1920 · Carey · no city",
+  "ok": true,
+  "detail": "agency line \"Pilgrim Literary\""
+ },
+ {
+  "where": "1920 · Ellison · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Ellison · agency alone",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1920 · Ellison · no city",
+  "ok": true,
+  "detail": "agency line \"Quayside Agency\""
+ },
+ {
+  "where": "1920 · Ferris · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Ferris · agency alone",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1920 · Ferris · no city",
+  "ok": true,
+  "detail": "agency line \"Kestrel House\""
+ },
+ {
+  "where": "1920 · Holt · flag",
+  "ok": true,
+  "detail": "flag \"New York, United States\" (abroad: true)"
+ },
+ {
+  "where": "1920 · Holt · flag title",
+  "ok": true,
+  "detail": "title \"New York, United States\""
+ },
+ {
+  "where": "1920 · Holt · agency alone",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1920 · Holt · no city",
+  "ok": true,
+  "detail": "agency line \"Larkfield Agency\""
+ },
+ {
+  "where": "1920 · Hussain · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Hussain · agency alone",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1920 · Hussain · no city",
+  "ok": true,
+  "detail": "agency line \"Linden Literary\""
+ },
+ {
+  "where": "1920 · Lang · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Lang · agency alone",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1920 · Lang · no city",
+  "ok": true,
+  "detail": "agency line \"Corrin & Wade\""
+ },
+ {
+  "where": "1920 · Morrow · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Morrow · agency alone",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1920 · Morrow · no city",
+  "ok": true,
+  "detail": "agency line \"Fernhill Literary\""
+ },
+ {
+  "where": "1920 · Okafor · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Okafor · agency alone",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1920 · Okafor · no city",
+  "ok": true,
+  "detail": "agency line \"Northgate Books\""
+ },
+ {
+  "where": "1920 · Pemberton · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Pemberton · agency alone",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1920 · Pemberton · no city",
+  "ok": true,
+  "detail": "agency line \"Calloway Literary\""
+ },
+ {
+  "where": "1920 · Pryce · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Pryce · agency alone",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1920 · Pryce · no city",
+  "ok": true,
+  "detail": "agency line \"Tidewell Literary\""
+ },
+ {
+  "where": "1920 · Quinn · flag",
+  "ok": true,
+  "detail": "flag \"Dublin, Ireland\" (abroad: true)"
+ },
+ {
+  "where": "1920 · Quinn · flag title",
+  "ok": true,
+  "detail": "title \"Dublin, Ireland\""
+ },
+ {
+  "where": "1920 · Quinn · agency alone",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1920 · Quinn · no city",
+  "ok": true,
+  "detail": "agency line \"Thistle & Bell\""
+ },
+ {
+  "where": "1920 · Reed · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Reed · agency alone",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1920 · Reed · no city",
+  "ok": true,
+  "detail": "agency line \"Hartley & Co\""
+ },
+ {
+  "where": "1920 · Sandhu · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Sandhu · agency alone",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1920 · Sandhu · no city",
+  "ok": true,
+  "detail": "agency line \"Westbrook Agency\""
+ },
+ {
+  "where": "1920 · Stirling · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Stirling · agency alone",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1920 · Stirling · no city",
+  "ok": true,
+  "detail": "agency line \"Ashcombe Agency\""
+ },
+ {
+  "where": "1920 · Tan · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Tan · agency alone",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1920 · Tan · no city",
+  "ok": true,
+  "detail": "agency line \"Foxglove Literary\""
+ },
+ {
+  "where": "1920 · Vane-Coe · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Vane-Coe · agency alone",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1920 · Vane-Coe · no city",
+  "ok": true,
+  "detail": "agency line \"Stillwater Reps\""
+ },
+ {
+  "where": "1920 · Whitfield · flag",
+  "ok": true,
+  "detail": "flag null (abroad: false)"
+ },
+ {
+  "where": "1920 · Whitfield · agency alone",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ },
+ {
+  "where": "1920 · Whitfield · no city",
+  "ok": true,
+  "detail": "agency line \"Greenfield Literary\""
+ }
+]

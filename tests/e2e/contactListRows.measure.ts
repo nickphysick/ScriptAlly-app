@@ -21,13 +21,14 @@
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
+import { readPng } from "./pngPixels";
 import { execFileSync } from "node:child_process";
 import { CLR_AGENTS, CLR_EMAIL, clrId } from "./clrFixture.mjs";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 /* not serial: each lock reads on its own, so one red does not hide the next */
 
-const DIR = process.env.CLR_DIR ?? "reports/contact-list-rows-v1-2";
+const DIR = process.env.CLR_DIR ?? "reports/contact-list-rows-v1-2-1";
 const WIDTHS = [1280, 1440, 1600, 1920];
 const H = 900;
 const MUTATE = new Set((process.env.CLR_MUTATE ?? "").split(",").map((s) => s.trim()).filter(Boolean));
@@ -50,22 +51,24 @@ const byId = new Map(FX.map((x) => [x.id, x]));
 const COUNTRY: Record<string, string> = { US: "United States", IE: "Ireland", GB: "United Kingdom" };
 const AZ = [...FX].sort((a, b) => a.surname.localeCompare(b.surname) || a.name.localeCompare(b.name)).map((x) => x.id);
 
-/* the template, for a card width — v1.2's 1.1: Query status takes the spare width, the › a fixed 30 (22 below 980) */
+/* the template, for a card width — v1.2.1's retuned tiers (4.4): narrow below 900, middle 900–1099, wide from 1100 */
 type Tr = number | "genres" | "status";
-function template(card: number): { tracks: Tr[]; gap: number; genresMax: number | null; statusMin: number | null } {
-  if (card >= 1150) return { tracks: [290, 90, "genres", 180, "status", 30], gap: 24, genresMax: 360, statusMin: 220 };
-  if (card >= 980) return { tracks: [262, 72, "genres", 160, "status", 30], gap: 24, genresMax: 300, statusMin: 196 };
-  return { tracks: [228, 64, "genres", 138, 156, 22], gap: 14, genresMax: null, statusMin: null };
+function template(card: number): { tracks: Tr[]; gap: number; genresMin: number; genresMax: number | null; statusMin: number | null } {
+  if (card >= 1100) return { tracks: [290, 90, "genres", 180, "status", 30], gap: 24, genresMin: 0, genresMax: 360, statusMin: 220 };
+  if (card >= 900) return { tracks: [232, 72, "genres", 160, "status", 30], gap: 16, genresMin: 170, genresMax: 260, statusMin: 176 };
+  return { tracks: [228, 64, "genres", 138, 156, 22], gap: 14, genresMin: 0, genresMax: null, statusMin: null };
 }
+const tierOf = (card: number): "narrow" | "middle" | "wide" => (card >= 1100 ? "wide" : card >= 900 ? "middle" : "narrow");
 /** expected left edges (relative to the row's own left) for a row this wide, by the grid algorithm: fixed tracks; Genres
- *  grows to its maximum before the flexible track (Query status) takes what is left; below 980 Genres is the 1fr */
+ *  grows from its minimum to its maximum before the flexible track (Query status) takes what is left; narrow: Genres is
+ *  the 1fr */
 function expectedLefts(card: number, row: number): number[] {
   const t = template(card);
   const fixed = t.tracks.filter((x): x is number => typeof x === "number").reduce((s, x) => s + x, 0);
   const free = row - fixed - t.gap * (t.tracks.length - 1);
   let genres: number, status = 0;
   if (t.statusMin == null) genres = Math.max(0, free);
-  else { genres = Math.max(0, Math.min(t.genresMax!, free - t.statusMin)); status = Math.max(t.statusMin, free - genres); }
+  else { genres = Math.max(t.genresMin, Math.min(t.genresMax!, free - t.statusMin)); status = Math.max(t.statusMin, free - genres); }
   const w = t.tracks.map((x) => (x === "genres" ? genres : x === "status" ? status : x));
   const out: number[] = []; let at = 0;
   for (const x of w) { out.push(at); at += x + t.gap; }
@@ -265,7 +268,7 @@ test("M1–M4 · columns, cells, centring, the flag — at 1280, 1440, 1600, 192
       const i = COLS.indexOf(h.k ?? "");
       if (row0 && i >= 0 && row0.cells[i]) m1.check(`${w} · heading ${h.k} on its column`, Math.abs(h.l - row0.cells[i].l) <= 1, `heading l ${h.l.toFixed(1)} cell l ${row0.cells[i].l.toFixed(1)}`);
     }
-    const short = L.card.w < 980;
+    const short = L.card.w < 900;
     const want = short ? ["Agent", "Fit", "Genres", "Response", "Query status"] : ["Agent", "Fit", "Genres sought", "Response policy", "Query status"];
     m2.check(`${w} · heading words`, JSON.stringify(L.heads.map((h) => h.text)) === JSON.stringify(want), `${JSON.stringify(L.heads.map((h) => h.text))} (card ${L.card.w.toFixed(0)})`);
     if (!MUTATE.size) await page.screenshot({ path: `${DIR}/shots/rest-${w}.png` });
@@ -419,7 +422,7 @@ test("M8, M9, M11 · status centred in its space; typewriter headings; genre tag
       m8.check(`${w} · ${r.id} · status centred between policy and ›`, Math.abs(c - mid) <= 2, `centre ${c.toFixed(1)} want ${mid.toFixed(1)}`);
       const fx = byId.get(r.id!)!;
       if (fx.genres.length) {
-        const per = R.inner >= 1250 ? 3 : R.inner < 980 ? 1 : 2;
+        const per = R.inner >= 1250 ? 3 : R.inner < 900 ? 1 : 2;
         const shownPills = r.lines.reduce((n, ln) => n + ln.pills.length, 0);
         m11.check(`${w} · ${fx.surname} · lines ≤ 2`, r.lines.length >= 1 && r.lines.length <= 2, `${r.lines.length} lines`);
         m11.check(`${w} · ${fx.surname} · ${per} a line`, r.lines.every((ln) => ln.pills.length <= per) && shownPills === Math.min(fx.genres.length, per * 2),
@@ -433,7 +436,7 @@ test("M8, M9, M11 · status centred in its space; typewriter headings; genre tag
       }
     }
     for (const h of R.heads) {
-      const want = R.inner >= 1150 ? 18 : 16;
+      const want = R.inner >= 1100 ? 18 : 16; /* v1.2.1: 18px on the wide tier */
       m9.check(`${w} · heading ${h.k}`, /Special Elite/.test(h.family) && h.size === want && h.sw <= h.cw + 0.5, `${h.family.split(",")[0]} ${h.size}px (want ${want}) sw ${h.sw} cw ${h.cw}`);
     }
   }
@@ -584,14 +587,14 @@ test("M15 · no hover: the action at the row's end, the row still two lines", as
 });
 
 /* ── the panel: a hand count over the fixture, per option, faceted ── */
-type PanelState = { list: "all" | "queried" | "none"; door: "any" | "open" | "closed"; fit: null | 5 | 4 | 0; reply: null | "always" | "nrmn" | "known"; genres: string[]; abroad: boolean };
+type PanelState = { list: "all" | "queried" | "none"; door: "any" | "open" | "closed"; fit: null | 5 | 4 | 0; reply: null | "always" | "nrmn" | "known"; genres: string[]; abroad: boolean; nogenres?: boolean };
 const PS0: PanelState = { list: "all", door: "any", fit: null, reply: null, genres: [], abroad: false };
 const passes = (x: Fx, s: PanelState, skip: keyof PanelState | null) =>
   (skip === "list" || s.list === "all" || (s.list === "queried" ? x.stand !== "none" : x.stand === "none"))
   && (skip === "door" || s.door === "any" || (s.door === "open" ? x.door === "Open" : x.door === "Closed"))
   && (skip === "fit" || s.fit === null || (s.fit === 0 ? x.rating == null : s.fit === 5 ? x.rating === 5 : (x.rating ?? 0) >= 4))
   && (skip === "reply" || s.reply === null || (s.reply === "always" ? x.nrmn === false : s.reply === "nrmn" ? x.nrmn === true : (x.weeks ?? 0) > 0))
-  && (skip === "genres" || s.genres.length === 0 || x.genres.some((g) => s.genres.includes(g)))
+  && (skip === "genres" || (s.nogenres ? x.genres.length === 0 : s.genres.length === 0 || x.genres.some((g) => s.genres.includes(g))))
   && (skip === "abroad" || !s.abroad || x.country !== "GB");
 function handCounts(s: PanelState): Record<string, number> {
   const c = (skip: keyof PanelState, fn: (x: Fx) => boolean) => FX.filter((x) => passes(x, s, skip) && fn(x)).length;
@@ -601,6 +604,8 @@ function handCounts(s: PanelState): Record<string, number> {
     "fit:5": c("fit", (x) => x.rating === 5), "fit:4": c("fit", (x) => (x.rating ?? 0) >= 4), "fit:0": c("fit", (x) => x.rating == null),
     "reply:always": c("reply", (x) => x.nrmn === false), "reply:nrmn": c("reply", (x) => x.nrmn === true), "reply:known": c("reply", (x) => (x.weeks ?? 0) > 0),
     "abroad": c("abroad", (x) => x.country !== "GB"),
+    /* v1.2.1 — the "No genres yet" pill, in the Genres section */
+    "nogenres": c("genres", (x) => x.genres.length === 0),
   };
   const gs = new Set(FX.flatMap((x) => x.genres));
   for (const g of gs) out[`genre:${g.toLowerCase()}`] = c("genres", (x) => x.genres.includes(g));
@@ -614,22 +619,34 @@ const readPanel = (page: Page) => page.evaluate(() => {
   const opts = Object.fromEntries([...fp.querySelectorAll<HTMLElement>("[data-clq-opt]")].filter(shown).map((o) => [keyOf(o),
     { n: Number(o.dataset.n), on: o.getAttribute("aria-pressed") === "true" || o.getAttribute("aria-checked") === "true", disabled: (o as HTMLButtonElement).disabled }]));
   const clear = fp.querySelector('[data-clq="clear"]');
-  return { opts, clear: shown(clear), foot: fp.querySelector('[data-clq="foot"]')?.textContent?.trim() ?? null,
+  const summary = fp.querySelector<HTMLElement>('[data-clq="summary"]');
+  return { opts, clear: shown(clear), summary: summary && shown(summary) ? summary.textContent?.trim() ?? null : null,
+    foot: (() => { const f = fp.querySelector<HTMLElement>('[data-clq="foot"]'); return f && shown(f) && (f.textContent ?? "").trim() ? f.textContent!.trim() : null; })(),
     sections: [...fp.querySelectorAll<HTMLElement>("[data-clq-sec]")].filter(shown).map((s) => s.dataset.clqSec) };
 });
 
-test("M17, M18 · the panel's sections and faceted counts; Clear all", async ({ page }) => {
+test("M17, M18, M25 · the compact panel: its sections, faceted counts; Clear all; No genres yet", async ({ page }) => {
   test.setTimeout(240_000);
-  const m17 = new Ledger("M17"), m18 = new Ledger("M18");
+  const m17 = new Ledger("M17"), m18 = new Ledger("M18"), m25 = new Ledger("M25");
   await open(page, 1440);
   const fp = page.locator(".qc153-rail.fp").filter({ visible: true });
+  let P = await readPanel(page);
+  /* M25 — the compact panel as the ref draws it */
+  m25.check("sections", JSON.stringify(P.sections) === JSON.stringify(["list", "fit", "reply", "genres", "abroad"]), JSON.stringify(P.sections));
+  m25.check("Your list holds both segments", ["list:all", "list:queried", "list:none", "door:any", "door:open", "door:closed"].every((k) => k in P.opts), Object.keys(P.opts).join(","));
+  const fitWords = await fp.locator('[data-clq-opt^="fit:"]').evaluateAll((es) => es.map((e) => (e.firstChild?.textContent ?? e.textContent ?? "").replace(/\d+$/, "").trim()));
+  m25.check("Fit pills: 5★, 4★+, Not rated", JSON.stringify(fitWords) === JSON.stringify(["5★", "4★+", "Not rated"]), JSON.stringify(fitWords));
+  const gShown = await fp.locator('[data-clq-opt^="genre:"]').filter({ visible: true }).count();
+  m25.check("four genres, then +n more and No genres yet", gShown === 4 && (await fp.locator('[data-clq="genres-more"]').filter({ visible: true }).count()) === 1 && "nogenres" in P.opts, `${gShown} genres · nogenres ${"nogenres" in P.opts}`);
+  m25.check("Missing details has left the panel", !("missing" in P.opts) && !(await fp.getByText("Missing details").count()), Object.keys(P.opts).join(","));
+  m25.check("List health still offers Fill the gaps", (await page.getByRole("button", { name: /Fill the gaps/ }).filter({ visible: true }).count()) >= 1, "");
+  m25.check("no foot line", P.foot === null, `foot ${JSON.stringify(P.foot)}`);
   const more = fp.locator('[data-clq="genres-more"]');
   if (await more.count()) await more.click();
-  let P = await readPanel(page);
-  m17.check("sections", JSON.stringify(P.sections) === JSON.stringify(["list", "door", "fit", "reply", "genres", "abroad", "missing"]), JSON.stringify(P.sections));
+  P = await readPanel(page);
   const cmp = (tag: string, s: PanelState) => {
     const want = handCounts(s);
-    if (tag === "rest") m17.check(`${tag} · population`, want["list:all"] > 0 && want["abroad"] > 0 && want["fit:0"] > 0 && want["list:none"] > 0, JSON.stringify(want));
+    if (tag === "rest") m17.check(`${tag} · population`, want["list:all"] > 0 && want["abroad"] > 0 && want["fit:0"] > 0 && want["list:none"] > 0 && want["nogenres"] > 0, JSON.stringify(want));
     else m17.check(`${tag} · population`, want["list:all"] > 0, JSON.stringify(want));
     for (const [k, n] of Object.entries(want)) {
       const got = P.opts[k];
@@ -638,7 +655,7 @@ test("M17, M18 · the panel's sections and faceted counts; Clear all", async ({ 
     }
   };
   cmp("rest", PS0);
-  m17.check("rest · foot", P.foot === "All 19 agents.", `foot ${JSON.stringify(P.foot)}`);
+  m17.check("rest · no summary", P.summary === null, `summary ${JSON.stringify(P.summary)}`);
   m18.check("Clear all hidden at rest", !P.clear, `shown ${P.clear}`);
   /* Genres "Crime" plus Open */
   await fp.locator('[data-clq-opt^="genre:"]').filter({ hasText: /^\W*Crime\d+$/ }).first().click();
@@ -650,9 +667,22 @@ test("M17, M18 · the panel's sections and faceted counts; Clear all", async ({ 
   const want = FX.filter((x) => passes(x, s1, null)).map((x) => x.id).sort();
   const got = (await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")))).sort();
   m17.check("Crime + Open · the list is exactly the matching agents", JSON.stringify(got) === JSON.stringify(want), `got ${got.join(",")} want ${want.join(",")}`);
-  m17.check("Crime + Open · foot", P.foot === `Showing ${want.length} of 19 agents.`, `foot ${JSON.stringify(P.foot)}`);
+  m17.check("Crime + Open · the summary beside the title", P.summary === `${want.length} of 19`, `summary ${JSON.stringify(P.summary)}`);
   m18.check("Clear all shown with a filter on", P.clear, `shown ${P.clear}`);
   if (!MUTATE.size) await page.screenshot({ path: `${DIR}/shots/filters-crime-open-1440.png` });
+  /* No genres yet and a genre pick clear each other */
+  await fp.locator('[data-clq-opt="nogenres"]').click();
+  await page.waitForTimeout(300);
+  P = await readPanel(page);
+  const genreOn = Object.entries(P.opts).filter(([k, o]) => k.startsWith("genre:") && o.on).map(([k]) => k);
+  m25.check("No genres yet clears the genre picks", P.opts["nogenres"]?.on === true && genreOn.length === 0, `nogenres ${P.opts["nogenres"]?.on} genres on ${genreOn.join(",")}`);
+  const noneIds = FX.filter((x) => passes(x, { ...PS0, door: "open", nogenres: true }, null)).map((x) => x.id).sort();
+  const gotNone = (await visibleRows(page).evaluateAll((rs) => rs.map((r) => r.getAttribute("data-id")))).sort();
+  m25.check("No genres yet filters to agents with none", JSON.stringify(gotNone) === JSON.stringify(noneIds) && noneIds.length > 0, `got ${gotNone.join(",")} want ${noneIds.join(",")}`);
+  await fp.locator('[data-clq-opt^="genre:"]').filter({ hasText: /^\W*Thriller\d+$/ }).first().click().catch(() => {});
+  await page.waitForTimeout(300);
+  P = await readPanel(page);
+  m25.check("a genre pick clears No genres yet", P.opts["nogenres"]?.on === false && P.opts["genre:thriller"]?.on === true, `nogenres ${P.opts["nogenres"]?.on} thriller ${P.opts["genre:thriller"]?.on}`);
   /* Clear all resets every section */
   await fp.locator('[data-clq="clear"]').click();
   await page.waitForTimeout(300);
@@ -661,7 +691,7 @@ test("M17, M18 · the panel's sections and faceted counts; Clear all", async ({ 
   m18.check("Clear all resets every section", JSON.stringify(onNow) === JSON.stringify(["door:any", "list:all"]), `on ${onNow.join(",")}`);
   m18.check("Clear all hides itself", !P.clear, `shown ${P.clear}`);
   m18.check("the whole list is back", (await visibleRows(page).count()) === 19, "rows");
-  m17.done(40); m18.done(5);
+  m17.done(40); m18.done(5); m25.done(10);
 });
 
 test("M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge due first", async ({ page }) => {
@@ -743,4 +773,223 @@ test("M20 · the Query Centre's filter panel is unchanged", async ({ page }) => 
   const panel = page.locator(".qc151.qc153 .qc153-rail.fp").filter({ visible: true }).first();
   await expect(panel).toBeVisible();
   await expect(panel).toHaveScreenshot("m20-qc-filter-panel-1440.png", { maxDiffPixels: 0 });
+});
+
+/* ══ Contact list rows v1.2.1 — M21 to M27 ═══════════════════════════════════════════════════════════════════════════
+ * A 1440×900 laptop window's INNER height is about 790px (the browser's own bars take the rest): the window locks use
+ * 1440×790, never the 900 of the screen. */
+const WIN = { width: 1440, height: 790 };
+async function openWin(page: Page) {
+  await page.setViewportSize(WIN);
+  await openRoute(page, "/agents", WIN);
+  for (const m of MUTATE) if (MUTATIONS[m]) await page.addStyleTag({ content: MUTATIONS[m] });
+  await expect(page.locator('[data-cl26="row"]').filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
+  await page.evaluate(async () => { await document.fonts.ready; });
+  await page.waitForTimeout(500);
+}
+const scrollTo = (page: Page, y: number) => page.evaluate((y) => {
+  const sc = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().width > 0);
+  if (sc) sc.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+}, y);
+
+test("M21, M22 · pinned at 1440×900: only the slim bar and page colour above the headings; no row above them", async ({ page }) => {
+  test.setTimeout(240_000);
+  const m21 = new Ledger("M21"), m22 = new Ledger("M22");
+  await openWin(page);
+  for (const depth of [700, 1100, 1600]) {
+    await scrollTo(page, depth);
+    await page.waitForTimeout(500);
+    const G = await page.evaluate(() => {
+      const shown = (e: Element | null): e is HTMLElement => !!e && e.getBoundingClientRect().width > 0.5 && getComputedStyle(e).visibility !== "hidden";
+      const card = [...document.querySelectorAll<HTMLElement>('[data-cl26="card"]')].find(shown)!;
+      const th = card.querySelector<HTMLElement>('[data-cl26="heads"]')!;
+      const sc = card.closest<HTMLElement>(".wpg-scroll")!;
+      const slim = [...document.querySelectorAll<HTMLElement>(".qc156-slim")].find((e) => shown(e) && parseFloat(getComputedStyle(e).opacity) > 0.5) ?? null;
+      /* the page colour: the first ancestor of the scroller that paints a background (the scroller itself is transparent) */
+      let pe: HTMLElement | null = sc, page = "rgba(0, 0, 0, 0)";
+      while (pe) { const bg = getComputedStyle(pe).backgroundColor; if (bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg)) { page = bg; break; } pe = pe.parentElement; }
+      const c = card.getBoundingClientRect(), t = th.getBoundingClientRect(), s = sc.getBoundingClientRect();
+      /* rows whose box reaches above the headings' top, and what the pointer finds there */
+      const hits: string[] = [];
+      for (let x = c.left - 2; x <= c.right + 2; x += 24) for (let y = s.top + 2; y < t.top - 1; y += 6) {
+        const el = document.elementFromPoint(x, y);
+        /* the cap belongs to the heading row: a hit on the heading is the cap; a row, or the card's frame elsewhere, is not */
+        if (el && !el.closest('[data-cl26="heads"]') && el.closest('[data-cl26="row"], .cl26-frame, [data-cl26="card"], .qc154-tbw')) hits.push(`${Math.round(x)},${Math.round(y)}`);
+      }
+      return { l: c.left, r: c.right, top: s.top, th: t.top, slim: slim ? (() => { const r = slim.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom }; })() : null,
+        page, stuck: th.hasAttribute("data-stuck"), rowsUnder: [...card.querySelectorAll<HTMLElement>('[data-cl26="row"]')].some((r) => r.getBoundingClientRect().top < t.top), hits };
+    });
+    m21.check(`${depth} · precondition: pinned, with rows passed under`, G.stuck && G.rowsUnder, `stuck ${G.stuck} rows under ${G.rowsUnder}`);
+    /* the pixels: every column across the card and its rim, from the shell's top bar to the headings */
+    const png = readPng(await page.screenshot());
+    const [pr, pg, pb] = (G.page.match(/\d+/g) ?? ["0", "0", "0"]).map(Number);
+    let bad = 0, total = 0; const where: string[] = [];
+    for (let x = Math.floor(G.l) - 2; x <= Math.ceil(G.r) + 2; x++) {
+      for (let y = Math.ceil(G.top) + 1; y < Math.floor(G.th) - 1; y++) {
+        /* the slim bar's own band: its ::before paints its ground and its bottom rule (#e0d9ce) past its box to the page's
+           edges (qcv156.css), so the whole row of its height is the slim bar */
+        if (G.slim && y >= G.slim.t && y <= G.slim.b) continue;
+        total += 1;
+        const [r, g, b] = png.at(x, y);
+        if (Math.abs(r - pr) > 3 || Math.abs(g - pg) > 3 || Math.abs(b - pb) > 3) { bad += 1; if (where.length < 6) where.push(`${x},${y}=${r},${g},${b}`); }
+      }
+    }
+    m21.check(`${depth} · population: pixels sampled`, total > 1000, `${total} pixels`);
+    m21.check(`${depth} · only page colour (and the slim bar) above the headings`, bad === 0, `${bad} of ${total} not page colour (${G.page}) · ${where.join(" ")}`);
+    m22.check(`${depth} · no row or card under the pointer above the headings`, G.hits.length === 0, `at ${G.hits.slice(0, 6).join(" ")}`);
+    if (depth === 1100 && !MUTATE.size) await page.screenshot({ path: `${DIR}/shots/pinned-1440x900.png` });
+  }
+  m21.done(6); m22.done(3);
+});
+
+test("M23 · each row action opens its own journey, never the card; the keyboard too; elsewhere opens the card", async ({ page }) => {
+  test.setTimeout(300_000);
+  const m23 = new Ledger("M23");
+  await openWin(page);
+  /* bounded: a case that hangs is a red reading that names itself, never a silent test timeout */
+  page.setDefaultTimeout(8000);
+  const CASES: { surname: string; words: string; mode: string; via?: string; key: "queryId" | "agentId" }[] = [
+    { surname: "Ferris", words: "Nudge", mode: "nudge", key: "queryId" },
+    /* the send journey: the drawer's "sent", routed to the card journey "send" where the side panel hosts it */
+    { surname: "Tan", words: "Send your partial", mode: "send", key: "queryId" },
+    { surname: "Okafor", words: "Send your full", mode: "send", key: "queryId" },
+    { surname: "Holt", words: "Record a response", mode: "resp", key: "queryId" },
+    { surname: "Ellison", words: "Log a query", mode: "log", key: "agentId" },
+  ];
+  const state = () => page.evaluate(() => {
+    const shown = (e: Element | null) => !!e && e.getBoundingClientRect().width > 1 && getComputedStyle(e).visibility !== "hidden";
+    const j = (window as unknown as { __saJourneys?: Record<string, unknown>[] }).__saJourneys ?? [];
+    /* the app's journey hosts: the query drawer; the side panel that holds the response journey and the card journeys
+       (send, close, offer: Card journeys v1 — `openQueryDrawer` routes "sent" there as kind "send"); and Log a query's
+       staged panel (QcLogStages, its band `data-qc149f`) */
+    return { last: j[j.length - 1] ?? null, n: j.length,
+      drawer: [...document.querySelectorAll(".qad-drawer")].some(shown),
+      response: [...document.querySelectorAll('[data-side-panel][data-rar="panel"], [data-qc149f="band"]')].some(shown),
+      card: [...document.querySelectorAll("[data-cl262='panel'], [data-cl24='card-panel']")].some(shown) };
+  });
+  const close = async () => {
+    for (let i = 0; i < 4; i++) {
+      const s = await state();
+      if (!s.drawer && !s.response && !s.card) return;
+      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      for (const sel of ['[data-rar="leave-discard"]', '[data-cj="leave-discard"]', '[data-qad="leave-discard"]', 'button:has-text("Discard")',
+        '[data-side-panel] [data-rar="close"]', '[data-side-panel] [data-cj="close"]', '[data-qc149f="close"]', '[data-side-panel] button[aria-label^="Close"]']) {
+        const d = page.locator(sel).filter({ visible: true }); if (await d.count()) { await d.first().click({ timeout: 3000 }).catch(() => {}); await page.waitForTimeout(300); }
+      }
+    }
+  };
+  for (const kb of [false, true]) {
+    for (const c of CASES) {
+     try {
+      const id = clrId(c.surname);
+      const row = page.locator(`[data-cl26="row"][data-id="${id}"]`).filter({ visible: true });
+      /* mid-screen, clear of the slim bar and the pinned headings */
+      await row.evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior }));
+      await page.waitForTimeout(250);
+      const before = (await state()).n;
+      const btn = row.locator('[data-clr="act"]');
+      if (kb) { await btn.focus(); await page.keyboard.press(c.surname === "Holt" ? " " : "Enter"); }
+      else {
+        /* a PERSON's click: hover the row, then press the pointer at the button's centre — whatever is on top there gets
+           it (Playwright's own click would wait for the button to be uncovered, and hide the fault this lock is about) */
+        const bx = (await row.boundingBox())!; await page.mouse.move(bx.x + 40, bx.y + bx.height / 2); await page.waitForTimeout(250);
+        const b = (await btn.boundingBox())!; await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+      }
+      await page.waitForTimeout(900);
+      const s = await state();
+      const want = c.key === "queryId" ? `clr-q-${c.surname.toLowerCase().replace(/[^a-z0-9]+/g, "-")}` : id;
+      const tag = `${kb ? "keyboard" : "mouse"} · ${c.words}`;
+      m23.check(`${tag} · the words`, (await btn.textContent())?.trim() === c.words, `button ${JSON.stringify(await btn.textContent())}`);
+      m23.check(`${tag} · a journey started`, s.n > before, `journeys ${before} → ${s.n}`);
+      /* the journey's own record: its mode and this agent's query (or the agent, for Log a query), and never via the card */
+      m23.check(`${tag} · its journey and this agent's query`, !!s.last && (s.last.mode === c.mode || (c.mode === "send" && s.last.mode === "sent")) && s.last[c.key] === want,
+        `last ${JSON.stringify(s.last)} want mode ${c.mode} ${c.key} ${want}`);
+      m23.check(`${tag} · its host is on screen`, s.drawer || s.response, `drawer ${s.drawer} side panel ${s.response}`);
+      m23.check(`${tag} · the agent card did not open`, !s.card, `card ${s.card}`);
+      if (!kb && c.surname === "Tan" && !MUTATE.size) await page.screenshot({ path: `${DIR}/shots/row-action-journey-1440x900.png` });
+      await close();
+     } catch (e) {
+      m23.check(`${kb ? "keyboard" : "mouse"} · ${c.words} · ran`, false, String(e).split("\n")[0].slice(0, 180));
+      await close().catch(() => {});
+     }
+    }
+  }
+  /* a click elsewhere on the row still opens the card */
+  try {
+    await close();
+    const inert = await page.evaluate(() => !!document.querySelector('[data-cl26="card"]')?.closest("[inert]"));
+    m23.check("the page is live again after the journeys (nothing left open)", !inert, `inert ${inert}`);
+    const r = page.locator('[data-cl26="row"][data-id="clr-tan"]').filter({ visible: true });
+    await r.evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior }));
+    const b = (await r.boundingBox())!; await page.mouse.click(b.x + 30, b.y + 20);
+    await page.waitForTimeout(900);
+    m23.check("elsewhere on the row opens the card", (await state()).card, "");
+    await close();
+  } catch (e) { m23.check("elsewhere on the row opens the card · ran", false, String(e).split("\n")[0].slice(0, 180)); }
+  m23.done(52);
+});
+
+test("M24 · the panel fits a 1440×900 window: height + sticky top + 16 ≤ the inner height; no inner scroll", async ({ page }) => {
+  test.setTimeout(120_000);
+  const m24 = new Ledger("M24");
+  await openWin(page);
+  if (!MUTATE.size) await page.screenshot({ path: `${DIR}/shots/rest-1440x900.png` });
+  /* pinned: the panel at its sticky top (the formula's case). ⚠️ The sticky top is measured from the page's scroller, which
+     starts under the shell's top bar (and, until it is dismissed, the beta strip): the room the panel has is the window
+     less all of that. The beta strip is dismissed as Nick has it on dev; its cost is read and reported. */
+  const strip = await page.evaluate(() => { const b = document.querySelector<HTMLElement>(".sa-beta, [class*='sa-beta']"); return b && b.getBoundingClientRect().height > 0 ? Math.round(b.getBoundingClientRect().height) : 0; });
+  const x = page.locator('button.sa-betax[aria-label="Dismiss"]').filter({ visible: true });
+  if (await x.count()) { await x.click(); await page.waitForTimeout(400); }
+  await scrollTo(page, 900);
+  await page.waitForTimeout(500);
+  const R = await page.evaluate(() => {
+    const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find((e) => e.getBoundingClientRect().width > 0)!;
+    const sc = fp.closest<HTMLElement>(".wpg-scroll")!;
+    const b = fp.getBoundingClientRect();
+    return { h: fp.scrollHeight, box: b.height, bottom: b.bottom, scTop: sc.getBoundingClientRect().top, top: parseFloat(getComputedStyle(fp).top) || 0, inner: window.innerHeight, sh: fp.scrollHeight, ch: fp.clientHeight };
+  });
+  m24.check("precondition: a 1440×900 window's inner height", R.inner === WIN.height, `inner ${R.inner}`);
+  m24.check("full height + the shell above the scroller + sticky top + 16 ≤ inner height", R.h + R.scTop + R.top + 16 <= R.inner,
+    `${R.h.toFixed(0)} + ${R.scTop.toFixed(0)} + ${R.top} + 16 = ${(R.h + R.scTop + R.top + 16).toFixed(0)} vs ${R.inner} (with the beta strip showing: +${strip})`);
+  m24.check("no scrolling inside the panel", R.sh <= R.ch + 1, `scrollHeight ${R.sh} clientHeight ${R.ch}`);
+  m24.check("pinned, the whole panel is inside the window", R.bottom <= R.inner, `bottom ${R.bottom.toFixed(0)} inner ${R.inner}`);
+  if (!MUTATE.size) await page.locator(".qc153-rail.fp").filter({ visible: true }).screenshot({ path: `${DIR}/shots/panel-compact-1440.png` });
+  m24.done(4);
+});
+
+test("M26 · the Outside label follows the writer's home country (GB, then US)", async ({ page }) => {
+  test.setTimeout(180_000);
+  const m26 = new Ledger("M26");
+  const home = (c: string) => execFileSync("node", ["tests/e2e/clrRead.mjs", "Achebe", "--home", c], { encoding: "utf8", timeout: 60_000 });
+  const read = () => page.evaluate(() => {
+    const fp = [...document.querySelectorAll<HTMLElement>(".qc153-rail.fp")].find((e) => e.getBoundingClientRect().width > 0)!;
+    const o = fp.querySelector<HTMLElement>('[data-clq-opt="abroad"]');
+    return o ? { words: (o.firstChild?.textContent ?? "").trim(), n: Number(o.dataset.n) } : null;
+  });
+  try {
+    await open(page, 1440);
+    const gb = await read();
+    m26.check("GB home: Outside the UK, two agents", gb?.words === "Outside the UK" && gb.n === FX.filter((x) => x.country !== "GB").length, JSON.stringify(gb));
+    home("US");
+    await open(page, 1440);
+    const us = await read();
+    m26.check("US home: Outside the US, counted against the US", us?.words === "Outside the US" && us.n === FX.filter((x) => x.country !== "US").length, JSON.stringify(us));
+  } finally { home("GB"); }
+  m26.done(2);
+});
+
+test("M27 · the list card's width gives narrow / middle / wide / wide at 1280, 1440, 1600, 1920", async ({ page }) => {
+  test.setTimeout(180_000);
+  const m27 = new Ledger("M27");
+  const want: Record<number, string> = { 1280: "narrow", 1440: "middle", 1600: "wide", 1920: "wide" };
+  for (const w of WIDTHS) {
+    await open(page, w);
+    const L = (await readList(page)) as List;
+    const agentW = L.rows[0]?.cells[0]?.w ?? 0;
+    const drawn = agentW >= 289 ? "wide" : agentW >= 231 ? "middle" : "narrow";
+    const short = L.heads.some((h) => h.text === "Genres");
+    m27.check(`${w} · card ${L.card.w.toFixed(0)} → ${want[w]}`, tierOf(L.card.w) === want[w] && drawn === want[w] && short === (want[w] === "narrow"),
+      `card ${L.card.w.toFixed(1)} tier ${tierOf(L.card.w)} drawn ${drawn} (Agent ${agentW.toFixed(0)}) short headings ${short}`);
+  }
+  m27.done(4);
 });

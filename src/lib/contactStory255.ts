@@ -77,7 +77,7 @@ const dm = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MO
 
 /** the writer's next step, in the timeline's words — only where the move is the writer's */
 const NEXT_STEP: Record<string, string> = {
-  "Mark partial sent": "Send the partial", "Mark full sent": "Send the full", "Mark revision sent": "Send the revision",
+  "Mark partial sent": "Send your partial", "Mark full sent": "Send your full", "Mark revision sent": "Send your revision",
   "Record your answer": "Decide on offer", Nudge: "Nudge", "Close query": "Consider closing",
 };
 

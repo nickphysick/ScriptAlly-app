@@ -1136,7 +1136,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the Views panel (sticky; QC layout v1), then the list */}
         <div className="qc153-cl" data-cl27="columns">
         <div className="qc153-railcol" data-cl27="rail-column">
-          <ContactViews all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} pool={inPool}
+          <ContactViews homeCountry={homeCode} all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} pool={inPool}
             genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={frameState ? 0 : listPool.length}
             onReset={clearRailFilters} />
         </div>

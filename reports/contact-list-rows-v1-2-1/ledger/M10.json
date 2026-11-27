@@ -1,0 +1,52 @@
+[
+ {
+  "where": "1440 · precondition: rows have scrolled under the headings",
+  "ok": true,
+  "detail": "scrolled true"
+ },
+ {
+  "where": "1440 · heading top = panel top",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ },
+ {
+  "where": "1440 · rounded top corners",
+  "ok": true,
+  "detail": "radius 13/13"
+ },
+ {
+  "where": "1440 · no row above the headings",
+  "ok": true,
+  "detail": "row pixels at "
+ },
+ {
+  "where": "1440 · a soft shadow once stuck",
+  "ok": true,
+  "detail": "shadow rgb(185, 201, 218) 0px 0px 0px 1px, rgba(28, 19, 15, 0.35) 0px 8px 14px -10px"
+ },
+ {
+  "where": "1920 · precondition: rows have scrolled under the headings",
+  "ok": true,
+  "detail": "scrolled true"
+ },
+ {
+  "where": "1920 · heading top = panel top",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ },
+ {
+  "where": "1920 · rounded top corners",
+  "ok": true,
+  "detail": "radius 13/13"
+ },
+ {
+  "where": "1920 · no row above the headings",
+  "ok": true,
+  "detail": "row pixels at "
+ },
+ {
+  "where": "1920 · a soft shadow once stuck",
+  "ok": true,
+  "detail": "shadow rgb(185, 201, 218) 0px 0px 0px 1px, rgba(28, 19, 15, 0.35) 0px 8px 14px -10px"
+ }
+]

@@ -173,6 +173,16 @@ export function sections(sorted: readonly AgentFacts[], group: Group26, sort: So
     at.set(s.key, sec);
     runs.push(sec);
   }
+  /* v1.2.1 (4.3) — the status sort's STAGE SECTIONS follow its own order (3.1): the your-move stages first (furthest along
+     first: an offer, a revision, the full, the partial asked for), then the rest furthest along first (Full sent above a
+     waiting Queried), not queried, closed last. A section keeps the sort's order inside it, so a nudge-due Queried agent
+     leads its section. Reversed, the whole order turns. */
+  if (kind === "stage") {
+    const YOU: readonly StatusKey[] = ["offer", "rr", "fr", "pr"];
+    const key = (s: Section) => { const k = s.stage!; return [k === "closed" ? 2 : YOU.includes(k) ? 0 : 1, STATUS_GROUP_ORDER.indexOf(k)]; };
+    const turn = reversed ? -1 : 1;
+    return [...runs].sort((a, b) => { const [ta, ra] = key(a), [tb, rb] = key(b); return turn * (ta - tb || ra - rb); });
+  }
   if (kind !== "letter") return runs;
   /* the full A–Z, equal widths, in the sort's direction; an empty letter is kept for the index and drawn by nobody */
   const AZ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");

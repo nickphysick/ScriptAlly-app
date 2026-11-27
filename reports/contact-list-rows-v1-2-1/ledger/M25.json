@@ -1,0 +1,52 @@
+[
+ {
+  "where": "sections",
+  "ok": true,
+  "detail": "[\"list\",\"fit\",\"reply\",\"genres\",\"abroad\"]"
+ },
+ {
+  "where": "Your list holds both segments",
+  "ok": true,
+  "detail": "list:all,list:queried,list:none,door:any,door:open,door:closed,fit:5,fit:4,fit:0,reply:always,reply:nrmn,reply:known,genre:crime,genre:thriller,genre:book club,genre:historical,nogenres,abroad"
+ },
+ {
+  "where": "Fit pills: 5★, 4★+, Not rated",
+  "ok": true,
+  "detail": "[\"5★\",\"4★+\",\"Not rated\"]"
+ },
+ {
+  "where": "four genres, then +n more and No genres yet",
+  "ok": true,
+  "detail": "4 genres · nogenres true"
+ },
+ {
+  "where": "Missing details has left the panel",
+  "ok": true,
+  "detail": "list:all,list:queried,list:none,door:any,door:open,door:closed,fit:5,fit:4,fit:0,reply:always,reply:nrmn,reply:known,genre:crime,genre:thriller,genre:book club,genre:historical,nogenres,abroad"
+ },
+ {
+  "where": "List health still offers Fill the gaps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no foot line",
+  "ok": true,
+  "detail": "foot null"
+ },
+ {
+  "where": "No genres yet clears the genre picks",
+  "ok": true,
+  "detail": "nogenres true genres on "
+ },
+ {
+  "where": "No genres yet filters to agents with none",
+  "ok": true,
+  "detail": "got clr-carey,clr-lang want clr-carey,clr-lang"
+ },
+ {
+  "where": "a genre pick clears No genres yet",
+  "ok": true,
+  "detail": "nogenres false thriller true"
+ }
+]
