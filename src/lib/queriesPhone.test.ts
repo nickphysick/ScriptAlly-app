@@ -129,7 +129,7 @@ describe("the celebration", () => {
     expect(w.headline).toBe("Marcus wants the full!");
     expect(w.line).toContain("Murphy’s Day Out");
     expect(w.stats).toHaveLength(3);
-    expect(w.button).toBe("Send the full now");
+    expect(w.button).toBe("Send your full");
   });
 });
 

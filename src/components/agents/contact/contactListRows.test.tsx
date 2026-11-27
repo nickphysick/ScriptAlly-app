@@ -108,7 +108,13 @@ describe("Contact list rows v1 · Phase 3 — sorting and search", () => {
     /* RE-POINTED by v1.2 (5.2): one Queried section, never two, the nudge due first within it */
     const q = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs")], "status");
     /* RE-POINTED by v1.2.1 (4.3): the stage sections follow the sort's order — Full sent above a waiting Queried */
-    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:fs:f", "t:queried:nw"]);
+    /* RE-POINTED by v1.3 (3.3): a nudge due gets its own section, after your move's stages and above Full sent */
+    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:nudge:n", "t:fs:f", "t:queried:w"]);
+    const all = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs"), st("p", "you", "pr"), st("o", "you", "offer"), st("x", "closed", "closed")], "status");
+    const S = sections(all, "letter", "status");
+    expect(S.map((s) => s.key)).toEqual(["t:offer", "t:pr", "t:nudge", "t:fs", "t:queried", "t:closed"]);
+    expect(S.find((s) => s.nudge)!.label).toBe("Nudge due");
+    expect(sections(all, "letter", "status", true).map((s) => s.key)).toEqual(["t:closed", "t:queried", "t:fs", "t:nudge", "t:pr", "t:offer"]);
   });
   it("the search reads Filter by name or agency, and this page hides the \"/\" hint", () => {
     expect(FIND_AGENT).toBe("Filter by name or agency");

@@ -174,12 +174,12 @@ describe("§8.7 · the bars and their words", () => {
     expect(tlRow(one({ dateSent: ago(5) }), NOW).nudge, "nothing is overdue").toBeNull();
   });
   it("⚠️ the action ghost follows a WITH-YOU bar and nothing follows an agent-side one", () => {
-    expect(ghostFor(QueryStatus.PARTIAL_REQUESTED)).toEqual({ status: QueryStatus.PARTIAL_SENT, label: "Send the partial" });
-    expect(ghostFor(QueryStatus.FULL_REQUESTED)).toEqual({ status: QueryStatus.FULL_SENT, label: "Send the full" });
+    expect(ghostFor(QueryStatus.PARTIAL_REQUESTED)).toEqual({ status: QueryStatus.PARTIAL_SENT, label: "Send your partial" });
+    expect(ghostFor(QueryStatus.FULL_REQUESTED)).toEqual({ status: QueryStatus.FULL_SENT, label: "Send your full" });
     expect(ghostFor(QueryStatus.OFFER)?.label).toBe("Your decision");
     for (const s of [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]) expect(ghostFor(s), s).toBeNull();
     expect(tlRow(one({ dateSent: ago(10) }), NOW).ghost).toBeNull();
-    expect(tlRow(one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) }), NOW).ghost?.label).toBe("Send the full");
+    expect(tlRow(one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2) }), NOW).ghost?.label).toBe("Send your full");
   });
 });
 

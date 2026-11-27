@@ -93,6 +93,8 @@ export interface Section {
   /** a stage section's status key, a set section's set */
   stage?: StatusKey;
   set?: SetKey;
+  /** the status sort's Nudge due section (v1.3): your move on a waiting query */
+  nudge?: true;
   /** an empty letter (the A–Z index keeps all 26; the list draws none) */
   empty?: boolean;
   ids: string[];
@@ -130,6 +132,9 @@ export function sectionKind(group: Group26, sort: SortKey): SectionKind {
  * Surname the result holds all 26 letters, the empty ones marked, in the sort's direction; a surname starting with
  * anything else takes "#" (drawn, and indexed after Z). Grouped by Status it is the four sets in their fixed order.
  */
+/** the waiting stages a nudge is due on (`actionOf` → "nudge": your move, and none of the your-move stages) */
+const NUDGE_STAGES: readonly StatusKey[] = ["queried", "ps", "fs", "resub"];
+
 export function sections(sorted: readonly AgentFacts[], group: Group26, sort: SortKey, reversed = false): Section[] {
   const kind = sectionKind(group, sort);
   if (kind === "all") return [{ key: "all", kind, label: "", big: null, small: null, ids: sorted.map((x) => x.agent.id) }];
@@ -163,9 +168,12 @@ export function sections(sorted: readonly AgentFacts[], group: Group26, sort: So
         : { key: `f:${r}`, kind, label: `${r} ${r === 1 ? "star" : "stars"}`, big: String(r), small: r === 1 ? "star" : "stars" };
     } else {
       const k = x.status14;
-      /* Contact list rows v1.2 (5.2) — ONE section a stage, never two: a nudge-due Queried joins the waiting Queried, first
-         within it (the status sort put it first, and a section keeps the sort's order). v1's your-move split is retired. */
-      s = { key: `t:${k}`, kind, label: STATUS_LABEL[k], big: null, small: STATUS_LABEL[k], stage: k };
+      /* Contact list rows v1.3 (3.3) — a nudge due gets its OWN section: your move on a query that is otherwise waiting (the
+         sort's tier 0 — `stand === "you"` — on a waiting stage). It sits after the your-move stages and above Full sent,
+         the place the status sort already gives those rows. Its margin draws the stage it waits on. */
+      s = x.stand === "you" && NUDGE_STAGES.includes(k)
+        ? { key: "t:nudge", kind, label: "Nudge due", big: null, small: "Nudge due", stage: k, nudge: true }
+        : { key: `t:${k}`, kind, label: STATUS_LABEL[k], big: null, small: STATUS_LABEL[k], stage: k };
     }
     const hit = at.get(s.key);
     if (hit) { hit.ids.push(x.agent.id); continue; }
@@ -179,7 +187,7 @@ export function sections(sorted: readonly AgentFacts[], group: Group26, sort: So
      leads its section. Reversed, the whole order turns. */
   if (kind === "stage") {
     const YOU: readonly StatusKey[] = ["offer", "rr", "fr", "pr"];
-    const key = (s: Section) => { const k = s.stage!; return [k === "closed" ? 2 : YOU.includes(k) ? 0 : 1, STATUS_GROUP_ORDER.indexOf(k)]; };
+    const key = (s: Section) => { const k = s.stage!; return s.nudge ? [0, STATUS_GROUP_ORDER.length] : [k === "closed" ? 2 : YOU.includes(k) ? 0 : 1, STATUS_GROUP_ORDER.indexOf(k)]; };
     const turn = reversed ? -1 : 1;
     return [...runs].sort((a, b) => { const [ta, ra] = key(a), [tb, rb] = key(b); return turn * (ta - tb || ra - rb); });
   }

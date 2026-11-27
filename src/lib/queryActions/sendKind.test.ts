@@ -42,9 +42,9 @@ describe("NU11-c · the door, from the Dashboard and the To-do", () => {
   });
   it("the parked chip names the full", () => {
     const t = toldWantsFull(QueryStatus.PARTIAL_SENT);
-    expect(journeyTitle("sent", t)).toBe("Send the full");
+    expect(journeyTitle("sent", t)).toBe("Send your full");
     expect(journeyDoing("sent", t)).toBe("sending the full");
-    expect(journeyTitle("sent", QueryStatus.PARTIAL_REQUESTED)).toBe("Send the partial");
+    expect(journeyTitle("sent", QueryStatus.PARTIAL_REQUESTED)).toBe("Send your partial");
   });
   it("the To-do desk's strip says Full for it, and Partial for an ordinary partial", () => {
     const task = (query: Query) => ({ kind: "send", first: "Tom", title: "", query, item: { card: {} } } as unknown as WsTask);

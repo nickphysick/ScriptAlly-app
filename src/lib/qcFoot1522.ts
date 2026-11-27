@@ -103,7 +103,7 @@ export function footer1522(c: FootCtx): Foot1522 {
           button: { label: "Mark resubmitted", tone: "navy", act: "sent" } };
       }
       const what = c.askedFor ? c.askedFor.charAt(0).toLowerCase() + c.askedFor.slice(1) : null;
-      const lead = what ? `Send ${what}` : full ? "Send the full" : "Send the partial";
+      const lead = what ? `Send ${what}` : full ? "Send your full" : "Send your partial";
       const label = what ? "Mark sent" : full ? "Mark full sent" : "Mark partial sent";
       let sub = "No date set", late = false;
       if (c.dueMs != null) {

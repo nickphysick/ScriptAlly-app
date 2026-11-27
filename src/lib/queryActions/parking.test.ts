@@ -22,8 +22,8 @@ describe("the chip's words", () => {
       expect(journeyTitle(m), m).toMatch(/^[A-Z]/);
       expect(journeyDoing(m), m).toMatch(/^[a-z]+ing /);
     }
-    expect(journeyTitle("sent", QueryStatus.FULL_REQUESTED)).toBe("Send the full");
-    expect(journeyTitle("sent", QueryStatus.PARTIAL_REQUESTED)).toBe("Send the partial");
+    expect(journeyTitle("sent", QueryStatus.FULL_REQUESTED)).toBe("Send your full");
+    expect(journeyTitle("sent", QueryStatus.PARTIAL_REQUESTED)).toBe("Send your partial");
     expect(journeyTitle("sent", QueryStatus.REVISE_RESUBMIT)).toBe("Send the new version");
     expect(journeyDoing("sent", QueryStatus.FULL_REQUESTED)).toBe("sending the full");
     expect(journeyDoing("resp")).toBe("recording a response");

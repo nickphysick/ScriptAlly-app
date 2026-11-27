@@ -700,7 +700,7 @@ test("M17, M18, M25, M30 · the smart panel: sections, words, faceted counts; Cl
   m17.done(15); m18.done(7); m25.done(2); m30.done(30);
 });
 
-test("M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge due first", async ({ page }) => {
+test("M19 · 1280 Letter grouping shows a full tag; one Queried section; Nudge due its own section above Full sent", async ({ page }) => {
   test.setTimeout(180_000);
   const m19 = new Ledger("M19");
   await open(page, 1280);
@@ -731,8 +731,14 @@ test("M19 · 1280 Letter grouping shows a full tag; one Queried section, nudge d
   });
   const queried = S.filter((s) => /queried$/.test(s.k ?? "") && !/none|nq/.test(s.k ?? ""));
   m19.check("one Queried section", queried.length === 1, `sections ${S.map((s) => s.k).join(" ")}`);
-  m19.check("nudge due first in it", queried[0]?.ids[0] === "clr-ferris", `first ${queried[0]?.ids[0]}`);
-  m19.done(6);
+  /* RE-POINTED by v1.3 (3.3): the nudge due has its own section, after your move's stages and directly above Full sent */
+  const ks = S.map((s) => s.k ?? "");
+  const nudge = S.find((s) => s.k === "t:nudge");
+  m19.check("a Nudge due section holding the nudge due (Ferris), not inside Queried", !!nudge && nudge.ids.includes("clr-ferris") && !queried[0]?.ids.includes("clr-ferris"), `sections ${ks.join(" ")}`);
+  const fsAt = ks.indexOf("t:fs"), nAt = ks.indexOf("t:nudge");
+  m19.check("Nudge due sits above Full sent and below every your-move stage", nAt >= 0 && (fsAt < 0 || nAt === fsAt - 1)
+    && ks.slice(0, nAt).every((k) => ["t:offer", "t:rr", "t:fr", "t:pr"].includes(k)), `sections ${ks.join(" ")}`);
+  m19.done(7);
 });
 
 test("M12 · rate Fit from the row: hover, click, keyboard; saved, toasted, drawn", async ({ page }) => {
