@@ -293,8 +293,12 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     expect(rowSegs(late, 42).filter((s) => s.k !== "stage").map((s) => [s.k, s.a, s.b, !!s.mark])).toEqual([["quiet", -20, 0, true]]);
     expect(isGoneQuiet(rows().find((x) => x.id === "quiet")!, 42)).toBe(true);
     expect(isGoneQuiet(rows().find((x) => x.id === "chase")!, 42)).toBe(false);
-    /* with you and 50 days past a send-by date: its tail fades too, so it counts as gone quiet */
-    expect(isGoneQuiet(R(eye("youOld", [[Q.QUERIED, -90], [Q.FULL_REQUESTED, -70]], -50)), 42)).toBe(true);
+    /* phone query sheet v1 §A (Nick's ruling): only a query waiting on the agent goes quiet. With you and 50 days past a
+       send-by date: not gone quiet, hatched to today with its "!", no fade, and sorted among the rest by share of window */
+    const youOld = R(eye("youOld", [[Q.QUERIED, -90], [Q.FULL_REQUESTED, -70]], -50));
+    expect(isGoneQuiet(youOld, 42)).toBe(false);
+    expect(rowSegs(youOld, 42).filter((s) => s.k !== "stage").map((s) => [s.k, s.a, s.b, !!s.mark])).toEqual([["past", -50, 0, true]]);
+    expect(bwGroups([...rows(), youOld], "all", 42)[0].rows.map((r) => r.id)).toEqual(["youOld", "chase", "you", "offer", "quiet"]);
     /* gone quiet last: quiet (100/42, the most of its window used) drops below chase, you and offer; same under Needs chasing */
     expect(bwGroups(rows(), "all", 42)[0].rows.map((r) => r.id)).toEqual(["chase", "you", "offer", "quiet"]);
     expect(bwGroups(rows(), "chase", 42)[0].rows.map((r) => r.id)).toEqual(["chase", "quiet"]);
