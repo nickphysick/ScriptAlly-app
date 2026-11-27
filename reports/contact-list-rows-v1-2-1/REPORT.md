@@ -122,4 +122,4 @@ your partial → the send journey, the card closed); and the earlier views re-ta
 
 ## Dev
 
-Deployed — see the deploy line added below.
+**https://scriptally-dev.web.app serves `index-CSL1bsjK.js`**, built from a clean checkout of `dev/bew31-clr121` @ 2b2ec27db = this branch (cc4b351a2) merged onto `dev/bew31-clr12` @ 6b9ade4a3 (Birds-eye world v3.1 over Contact list rows v1.2), which dev served as `index-BKLzeKlK.js` when the deploy ran — dev had moved since this branch was cut, so it stacked on the new line rather than over it. The merge was clean; the served hash was checked inside the deploy command.
