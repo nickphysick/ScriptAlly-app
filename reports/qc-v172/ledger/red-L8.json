@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "L8",
+  "where": "population",
+  "ok": true,
+  "detail": "{\"two\":\"seed-query-12\",\"skip\":\"cv25-q-08\",\"far\":\"seed-query-12\"}"
+ },
+ {
+  "lock": "L8",
+  "where": "two · the edge sweeps",
+  "ok": true,
+  "detail": "qr172-edge"
+ },
+ {
+  "lock": "L8",
+  "where": "two · every step reached pops",
+  "ok": false,
+  "detail": "qr172-nope,qr172-nope,qr172-nope,qr172-nope"
+ },
+ {
+  "lock": "L8",
+  "where": "two · in turn",
+  "ok": true,
+  "detail": "0.15 < 0.35 < 0.55 < 0.75"
+ },
+ {
+  "lock": "L8",
+  "where": "two · within 0.6s (+ the last pop)",
+  "ok": true,
+  "detail": "last starts at 0.600s, ends 0.820s"
+ },
+ {
+  "lock": "L8",
+  "where": "two · the current step rings",
+  "ok": true,
+  "detail": "none,none,none,qr172-ring"
+ },
+ {
+  "lock": "L8",
+  "where": "two · skipped and future steps keep still",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "L8",
+  "where": "skip · the edge sweeps",
+  "ok": true,
+  "detail": "qr172-edge"
+ },
+ {
+  "lock": "L8",
+  "where": "skip · every step reached pops",
+  "ok": false,
+  "detail": "qr172-nope,qr172-nope"
+ },
+ {
+  "lock": "L8",
+  "where": "skip · in turn",
+  "ok": true,
+  "detail": "0.15 < 0.75"
+ },
+ {
+  "lock": "L8",
+  "where": "skip · within 0.6s (+ the last pop)",
+  "ok": true,
+  "detail": "last starts at 0.600s, ends 1.260s"
+ },
+ {
+  "lock": "L8",
+  "where": "skip · the current step rings",
+  "ok": true,
+  "detail": "none,none,none,qr172-ring"
+ },
+ {
+  "lock": "L8",
+  "where": "skip · skipped and future steps keep still",
+  "ok": true,
+  "detail": "is-skip:none/none is-skip:none/none"
+ },
+ {
+  "lock": "L8",
+  "where": "far · the edge sweeps",
+  "ok": true,
+  "detail": "qr172-edge"
+ },
+ {
+  "lock": "L8",
+  "where": "far · every step reached pops",
+  "ok": false,
+  "detail": "qr172-nope,qr172-nope,qr172-nope,qr172-nope"
+ },
+ {
+  "lock": "L8",
+  "where": "far · in turn",
+  "ok": true,
+  "detail": "0.15 < 0.35 < 0.55 < 0.75"
+ },
+ {
+  "lock": "L8",
+  "where": "far · within 0.6s (+ the last pop)",
+  "ok": true,
+  "detail": "last starts at 0.600s, ends 0.820s"
+ },
+ {
+  "lock": "L8",
+  "where": "far · the current step rings",
+  "ok": true,
+  "detail": "none,none,none,qr172-ring"
+ },
+ {
+  "lock": "L8",
+  "where": "far · skipped and future steps keep still",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "L8",
+  "where": "reduced motion · nothing moves",
+  "ok": true,
+  "detail": "none · none,none,none,none"
+ }
+]

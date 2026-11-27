@@ -59,10 +59,15 @@ export const QcRow170: React.FC<{ row: QcRow; nowMs: number; selected: boolean; 
   const word = NAME[r.status] ?? r.status;
   const quiet = isQuietCard(r, nowMs);
   const seal = <span className="qr170-seal" aria-hidden="true">{r.initials}</span>;
+  /* v172.1 — on hover the track replays (qcv169.css): the steps reached pop in turn, in at most 0.6s however many
+     there are (`--qr-d` a step, `--k` this step's turn); a skipped step is not part of the replay */
+  const all = steps(r, nowMs);
+  const turns = all.filter((x) => x.n === "reached" || x.n === "cur").length;
+  let turn = 0;
   const stepsCol = (
     <span className="qr170-steps" aria-label={`Where it stands: ${word}`}>
-      {steps(r, nowMs).map((x, i) => (
-        <span key={i} className={`qr170-sp is-${x.n}`} style={x.n === "cur" ? { "--c": statusBand(r.status), "--e": STAGE_COLOURS[stage].edge } as React.CSSProperties : undefined}>
+      {all.map((x, i) => (
+        <span key={i} className={`qr170-sp is-${x.n}`} style={{ ...(x.n === "cur" ? { "--c": statusBand(r.status), "--e": STAGE_COLOURS[stage].edge } : {}), ...(x.n === "reached" || x.n === "cur" ? { "--k": turn++ } : {}) } as React.CSSProperties}>
           <span className="qr170-sn"><StatusDot status={x.status} overrideSize={x.n === "cur" ? 18 : 15} tone="inherit" reached={i === 3 ? x.n === "cur" : true} decorative />
             {x.n === "cur" ? <b className={`qr170-arw d-${quiet ? "quiet" : t.dir}`} aria-hidden="true">{quiet ? ZZZ : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}</span>
           <b>{x.n === "cur" ? <><span className="w-l">{word}</span><span className="w-s">{x.name}</span></> : x.name}</b>
@@ -73,6 +78,7 @@ export const QcRow170: React.FC<{ row: QcRow; nowMs: number; selected: boolean; 
   );
   return (
     <div ref={ref} className={`qr170${selected ? " is-sel" : ""}${closed ? " is-closed" : ""}`} id={`query-row-${r.id}`} role="button" tabIndex={0} data-qcv="row" data-qc172="row" data-id={r.id} data-status={r.status} data-furthest={r.furthest}
+      style={{ "--qr-d": `${(0.6 / Math.max(1, turns - 1)).toFixed(3)}s` } as React.CSSProperties}
       onClick={() => onOpen(r.id)} onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); onOpen(r.id); } }}
       aria-label={`${r.agentName}, ${r.agency}`}>
       {seal}

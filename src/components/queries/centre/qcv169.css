@@ -254,3 +254,29 @@
 .qc172-hint { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin: 6px 0 4px; font: 400 16px/1.4 var(--sp-serif); color: #5b4f47; }
 .qc172-hint button { all: unset; cursor: pointer; display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--sp-anthracite, #2a3a52); color: var(--sp-anthracite, #2a3a52); font: 600 14px/1 var(--sp-serif) !important; }
 .qc172-hint button:hover { background: rgba(42,58,82,.06); }
+
+/* ── v172.1 · a row on hover: it lifts at once (the tint, a navy edge sweeping down, the button's arrow nudging), and
+   after 150ms of pointing its track replays — each step reached pops in turn, the line into it drawing, then the
+   current step rings once in its stage's edge colour. At most 0.6s whatever the stage (`--qr-d` a step, set by
+   QcRow170 with each step's turn `--k`); a skipped step keeps its dashes and does not pop. Reduced motion: the
+   edge simply shows and nothing moves. ── */
+@media (min-width: 768px) {
+  .qc169 .qr170 { position: relative; }
+  .qr170::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #2a3a52; transform: scaleY(0); transform-origin: top; pointer-events: none; }
+  .qr170:hover::after { animation: qr172-edge 0.25s ease-out both; }
+  .qr170-act > span { display: inline-block; transition: transform 0.25s; }
+  .qr170:hover .qr170-act > span { transform: translateX(4px); }
+  .qr170:hover .qr170-sp:is(.is-reached, .is-cur) .qr170-sn { animation: qr172-pop calc(var(--qr-d, 0.2s) * 1.1) ease-out both; animation-delay: calc(0.15s + var(--k, 0) * var(--qr-d, 0.2s)); }
+  .qr170:hover .qr170-sp + .qr170-sp:is(.is-reached, .is-cur)::before { transform-origin: left; animation: qr172-draw calc(var(--qr-d, 0.2s) * 0.9) ease-out both; animation-delay: calc(0.15s + var(--k, 0) * var(--qr-d, 0.2s)); }
+  .qr170-sp.is-cur .qr170-sn::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; pointer-events: none; opacity: 0; }
+  .qr170:hover .qr170-sp.is-cur .qr170-sn::after { animation: qr172-ring 0.8s ease-out 1 both; animation-delay: calc(0.3s + (var(--k, 0) + 1) * var(--qr-d, 0.2s)); }
+}
+@keyframes qr172-edge { to { transform: scaleY(1); } }
+@keyframes qr172-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes qr172-pop { 0% { transform: scale(0.5); opacity: 0.2; } 70% { transform: scale(1.12); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes qr172-ring { 0% { opacity: 0.9; box-shadow: 0 0 0 0 var(--e, #2a3a52); } 100% { opacity: 0; box-shadow: 0 0 0 10px var(--e, #2a3a52); } }
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .qr170:hover::after { animation: none; transform: none; }
+  .qr170:hover .qr170-sp .qr170-sn, .qr170:hover .qr170-sp::before, .qr170:hover .qr170-sp .qr170-sn::after { animation: none !important; }
+  .qr170-act > span { transition: none; }
+}
