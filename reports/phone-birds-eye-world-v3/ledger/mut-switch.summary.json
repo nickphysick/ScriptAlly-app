@@ -1,0 +1,7 @@
+{
+ "mut": "switch",
+ "lock": "BW-35",
+ "own": 4,
+ "other": 17,
+ "readings": 87
+}

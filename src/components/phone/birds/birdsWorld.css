@@ -9,6 +9,10 @@
   .bw {
     /* the ref's rule is the sheet's; its edge (#e2dbd0) is the stage table's closed edge, the nearest the sheet allows */
     --bw-rule: #efebe4; --bw-edge: #dedbd5;
+    /* v3.2: the bottom controls are pinned to the dock in CSS — the dock (1px rule + 8px + a 48px tab + 16px, then the
+       safe area: .pa4-tb) + 12px — never from a JS-measured viewport height, which cut the level switch off on first
+       load. The "1 of 3" bar and the toast read the same line. */
+    --bw-cb: calc(73px + 12px + env(safe-area-inset-bottom, 0px));
     position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #fff; color: var(--pa-ink); font: 400 16px/1.5 var(--pa-sans);
     -webkit-font-smoothing: antialiased;
   }
@@ -284,5 +288,15 @@
   .bw-tst { position: absolute; left: 16px; right: 16px; z-index: 30; padding: 12px 16px; border-radius: 999px; background: var(--pa-navy); color: #fff; font: 400 14px var(--pa-sans); text-align: center; pointer-events: none; }
 }
 @media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
-  .bw-glw, .bw-bedot, .bw-ptr.go img, .bw-qmenu, .bw-veil, .bw-sheet { animation: none; }
+  .bw-glw, .bw-bedot, .bw-ptr.go img, .bw-qmenu, .bw-veil, .bw-sheet, .bw-zc.lvl.open { animation: none; }
+}
+@media (max-width: 767.98px) {
+  /* landscape has no dock */
+  .bw.land { --bw-cb: calc(24px + env(safe-area-inset-bottom, 0px)); }
+  /* v3.2 the level switch: at rest one navy chip (the current level and an upward chevron), 40px tall; open, the three
+     levels in the white card, Weeks on top, scaling in from the bottom right */
+  .bw-zc.lvl .bw-lvchip { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px 0 14px; background: var(--pa-navy); color: #fff; font: 600 14px var(--pa-sans) !important; }
+  .bw-zc.lvl .bw-lvchip svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .bw-zc.lvl.open { transform-origin: 100% 100%; animation: bw-lvin 0.16s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes bw-lvin { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
 }

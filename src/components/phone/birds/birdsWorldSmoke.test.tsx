@@ -88,7 +88,9 @@ describe("Phone Birds-eye world v2 renders", () => {
   });
   it("v3: the level control, the hawk's button, the colour key and the hawk's shadow (?hawk=0 drops it); no + / −, See it all or mini map", () => {
     const html = W();
-    expect(html).toMatch(/data-bw="levels"[\s\S]*data-bw="level" data-t="All" aria-pressed="true"/);
+    /* v3.2: at rest the switch is one chip naming the level, a button with aria-expanded; the three levels only when open */
+    expect(html).toMatch(/data-bw="levels" data-open="0"[^>]*><button type="button" class="bw-lvchip" data-a="lvchip" data-bw="level-chip" data-t="All" aria-expanded="false" aria-label="Zoom level: All"><span>All<\/span>/);
+    expect(html).not.toContain('data-bw="level" ');
     expect(html).toContain('data-bw="hawk-btn"');
     expect(html).toContain('aria-label="What the colours mean"');
     for (const k of ["hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);

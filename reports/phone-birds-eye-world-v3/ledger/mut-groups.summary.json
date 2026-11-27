@@ -1,0 +1,7 @@
+{
+ "mut": "groups",
+ "lock": "BW-32",
+ "own": 2,
+ "other": 1,
+ "readings": 90
+}

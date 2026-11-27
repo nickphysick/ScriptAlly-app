@@ -160,7 +160,7 @@ export function drawWorld(W: World, S: BwView, o: FrameOpts): Frame {
     LASTH = gy + Math.max(0, gp - hh0 - 6) + hh0 + 12;
     out.push(`<i class="bw-gband" style="top:${px(gy)};height:${px(gEnd - gy)}"></i>`);
     const natural = gy + Math.max(0, gp - hh0 - 6), hy = Math.min(Math.max(natural, TOP + RULE), gEnd - hh0 - 2), pinned = hy > natural + 1;
-    if (hy < vpH && hy + hh0 > 0) heads.push(`<span class="bw-gh0 u${small ? " sm" : ""}${pinned ? " pinned" : ""}" data-bw="group" data-t="${g.t}" data-n="${g.n}" data-folded="${g.folded ? 1 : 0}" style="top:${px(hy)};padding-left:${px(Math.max(16, X(0)))}"><span class="ghu tapf" data-a="fold" data-g="${g.t}" data-bw="fold" role="button" aria-expanded="${!g.folded}">${CHEV.replace('class="chev"', `class="chev${g.folded ? " shut" : ""}"`)}${g.t}<em>${g.n}</em></span></span>`);
+    if (hy < vpH && hy + hh0 > 0) heads.push(`<span class="bw-gh0 u${small ? " sm" : ""}${pinned ? " pinned" : ""}" data-bw="group" data-t="${g.label}" data-g="${g.t}" data-n="${g.n}" data-folded="${g.folded ? 1 : 0}" style="top:${px(hy)};padding-left:${px(Math.max(16, X(0)))}"><span class="ghu tapf" data-a="fold" data-g="${g.t}" data-bw="fold" role="button" aria-expanded="${!g.folded}">${CHEV.replace('class="chev"', `class="chev${g.folded ? " shut" : ""}"`)}${g.label}<em>${g.n}</em></span></span>`);
     for (const { r, y } of g.rows) {
       const ry = Y(y);
       if (ry > vpH + 10 || ry + rp < -10) continue;

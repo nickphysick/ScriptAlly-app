@@ -1,7 +1,7 @@
 [
  {
   "lock": "BW-1",
-  "where": "fitted (z 1, rows 5.5px): bars drawn (population 222)",
+  "where": "fitted (z 1, rows 5.6px): bars drawn (population 222)",
   "ok": true,
   "detail": ""
  },
@@ -16,6 +16,72 @@
   "where": "fitted: the pill reads Today, the header is unfolded (140px)",
   "ok": true,
   "detail": ""
+ },
+ {
+  "lock": "BW-32",
+  "where": "under All the headings read Needs action · Within their window · No reply date yet · Closed",
+  "ok": true,
+  "detail": "[\"Needs action\",\"Within their window\",\"No reply date yet\",\"Closed\"]"
+ },
+ {
+  "lock": "BW-32",
+  "where": "no heading reads Nearly there or Plenty of time",
+  "ok": true,
+  "detail": "[\"Needs action\",\"Within their window\",\"No reply date yet\",\"Closed\"]"
+ },
+ {
+  "lock": "BW-33",
+  "where": "under With you the one group is headed \"With you\"",
+  "ok": true,
+  "detail": "[\"With you\"]"
+ },
+ {
+  "lock": "BW-33",
+  "where": "under Needs chasing the one group is headed \"Needs chasing\"",
+  "ok": true,
+  "detail": "[\"Needs chasing\"]"
+ },
+ {
+  "lock": "BW-33",
+  "where": "the pills: All 70 = With you 16 + Needs chasing 45 + Waiting 9",
+  "ok": true,
+  "detail": "{\"all\":70,\"you\":16,\"chase\":45,\"wait\":9}"
+ },
+ {
+  "lock": "BW-34",
+  "where": "Needs action holds every with-you (16) and chasing (45) query: 61 rows",
+  "ok": true,
+  "detail": "{\"n\":61,\"rows\":61}"
+ },
+ {
+  "lock": "BW-34",
+  "where": "ordered by share of window used, most first (with-you and chasing mixed in one order)",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-35",
+  "where": "at rest one button, \"Zoom level: All\", aria-expanded false, 40px, navy",
+  "ok": true,
+  "detail": "{\"n\":1,\"texts\":[\"All\"],\"chip\":\"Zoom level: All\",\"expanded\":\"false\",\"pressed\":[null],\"h\":40,\"bg\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "BW-35",
+  "where": "tapped, three: Weeks, Months, All, the current pressed",
+  "ok": true,
+  "detail": "{\"n\":3,\"texts\":[\"Weeks\",\"Months\",\"All\"],\"chip\":null,\"expanded\":null,\"pressed\":[\"false\",\"false\",\"true\"],\"h\":40,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+ },
+ {
+  "lock": "BW-35",
+  "where": "picking Months snaps there and folds to one chip reading Months",
+  "ok": true,
+  "detail": "{\"level\":\"Months\",\"n\":1,\"texts\":[\"Months\"],\"chip\":\"Zoom level: Months\",\"expanded\":\"false\",\"pressed\":[null],\"h\":40,\"bg\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "BW-35",
+  "where": "a tap on the world folds it, with no level change (and opens nothing)",
+  "ok": true,
+  "detail": "{\"n\":1,\"texts\":[\"Months\"],\"chip\":\"Zoom level: Months\",\"expanded\":\"false\",\"pressed\":[null],\"h\":40,\"bg\":\"rgb(42, 58, 82)\",\"z0\":6.079,\"z1\":6.079,\"sheet\":0}"
  },
  {
   "lock": "BW-9",
@@ -33,7 +99,7 @@
   "lock": "BW-10",
   "where": "48px rows are reachable (the Weeks level)",
   "ok": true,
-  "detail": "rows 48 at z 11.11"
+  "detail": "rows 48 at z 10.835"
  },
  {
   "lock": "BW-19",
@@ -55,7 +121,7 @@
  },
  {
   "lock": "BW-20",
-  "where": "all 6 groups folded (population 6)",
+  "where": "all 4 groups folded (population 4)",
   "ok": true,
   "detail": ""
  },
@@ -67,7 +133,7 @@
  },
  {
   "lock": "BW-22",
-  "where": "the level control reads Weeks / Months / All (Weeks on top)",
+  "where": "the level control, open, reads Weeks / Months / All (Weeks on top)",
   "ok": true,
   "detail": ""
  },
@@ -75,7 +141,7 @@
   "lock": "BW-22",
   "where": "Months: 120.0 days across (120)",
   "ok": true,
-  "detail": "z 6.238 vs 6.238"
+  "detail": "z 6.079 vs 6.079"
  },
  {
   "lock": "BW-22",
@@ -109,7 +175,7 @@
  },
  {
   "lock": "BW-4",
-  "where": "Weeks (48px rows): multi-stage rows on screen (population 7 bars)",
+  "where": "Weeks (48px rows): multi-stage rows on screen (population 12 bars)",
   "ok": true,
   "detail": ""
  },
@@ -127,19 +193,19 @@
  },
  {
   "lock": "BW-7",
-  "where": "the current stage and its tail share an edge (population 3)",
+  "where": "the current stage and its tail share an edge (population 1)",
   "ok": true,
   "detail": "[]"
  },
  {
   "lock": "BW-5",
-  "where": "screen 1: no name over an \"!\" (population 18 names, 18 marks)",
+  "where": "screen 1: no name over an \"!\" (population 18 names, 14 marks)",
   "ok": true,
   "detail": ""
  },
  {
   "lock": "BW-5",
-  "where": "screen 2: no name over an \"!\" (population 17 names, 17 marks)",
+  "where": "screen 2: no name over an \"!\" (population 18 names, 14 marks)",
   "ok": true,
   "detail": ""
  },
@@ -151,7 +217,7 @@
  },
  {
   "lock": "BW-23",
-  "where": "a zoomed-in bar to hold (population 7)",
+  "where": "a zoomed-in bar to hold (population 4)",
   "ok": true,
   "detail": ""
  },
@@ -159,13 +225,13 @@
   "lock": "BW-23",
   "where": "a hold on a zoomed-in bar opens the menu, with its state's actions",
   "ok": true,
-  "detail": "{\"open\":true,\"id\":\"seed-cal-near-q\",\"acts\":[\"They replied\",\"Send a nudge\",\"Open query\",\"Edit dates\"]}"
+  "detail": "{\"open\":true,\"id\":\"seed-query-3\",\"acts\":[\"They replied\",\"Send a nudge\",\"Open query\",\"Edit dates\"]}"
  },
  {
   "lock": "BW-23",
   "where": "a hold on the white beside a bar scrubs (no menu)",
   "ok": true,
-  "detail": "{\"line\":true,\"pill\":\"4 Dec\",\"menu\":false}"
+  "detail": "{\"line\":true,\"pill\":\"5 Dec\",\"menu\":false}"
  },
  {
   "lock": "BW-23",
@@ -187,7 +253,7 @@
  },
  {
   "lock": "BW-25",
-  "where": "with \"last opened\" 12 days ago (the first day with two or more changes) the badge shows 4",
+  "where": "with \"last opened\" 13 days ago (the first day with two or more changes) the badge shows 4",
   "ok": true,
   "detail": "4"
  },
@@ -231,7 +297,7 @@
   "lock": "BW-25",
   "where": "Done clears the count and records this visit",
   "ok": true,
-  "detail": "{\"count\":null,\"step\":false,\"stored\":1795735172713}"
+  "detail": "{\"count\":null,\"step\":false,\"stored\":1795776379335}"
  },
  {
   "lock": "BW-27",
@@ -253,7 +319,7 @@
  },
  {
   "lock": "BW-8",
-  "where": "quietWeeks 6: the fade starts 6 weeks after each reply date (population 32)",
+  "where": "quietWeeks 6: the fade starts 6 weeks after each reply date (population 33)",
   "ok": true,
   "detail": "[]"
  },
@@ -267,7 +333,7 @@
   "lock": "BW-12",
   "where": "replay runs: the line moves forwards, its pill showing the date",
   "ok": true,
-  "detail": "[{\"lx\":22.99,\"label\":\"4 Dec\",\"replay\":\"running\"},{\"lx\":45.05,\"label\":\"31 Dec\",\"replay\":\"running\"},{\"lx\":81.07,\"label\":\"13 Feb\",\"replay\":\"running\"}]"
+  "detail": "[{\"lx\":23.32,\"label\":\"6 Dec\",\"replay\":\"running\"},{\"lx\":45.01,\"label\":\"1 Jan\",\"replay\":\"running\"},{\"lx\":81.06,\"label\":\"13 Feb\",\"replay\":\"running\"}]"
  },
  {
   "lock": "BW-12",
@@ -277,21 +343,21 @@
  },
  {
   "lock": "BW-12",
-  "where": "played through, it ends on the recap (952 days)",
+  "where": "played through, it ends on the recap (953 days)",
   "ok": true,
-  "detail": "{\"card\":true,\"days\":\"952\",\"btns\":[\"Share\",\"Done\"]}"
+  "detail": "{\"card\":true,\"days\":\"953\",\"btns\":[\"Share\",\"Done\"]}"
  },
  {
   "lock": "BW-14",
   "where": "the hawk's shadow paints above a group heading",
   "ok": true,
-  "detail": "[\"bw-hs\",\"bw-hsw\",\"bw-gh0 u sm\",\"bw-gband\",\"bw-w\",\"bw-vp\"]"
+  "detail": "[\"bw-hs\",\"bw-hsw\",\"bw-gh0 u\",\"bw-gband\",\"bw-w\",\"bw-vp\"]"
  },
  {
   "lock": "BW-14",
   "where": "the line paints above the hawk",
   "ok": true,
-  "detail": "[\"bw-fline\",\"bw-hs\",\"bw-hit\",\"bw-gband\",\"bw-pz\",\"bw-w\"]"
+  "detail": "[\"bw-fline\",\"bw-hs\",\"bw-hsw\",\"bw-hit\",\"bw-gband\",\"bw-pz\"]"
  },
  {
   "lock": "BW-15",
@@ -385,15 +451,15 @@
  },
  {
   "lock": "BW-31",
-  "where": "\"Add send-by date\" opens \"When will you send it by?\", two weeks from today (\"Send by 10 Dec\")",
+  "where": "\"Add send-by date\" opens \"When will you send it by?\", two weeks from today (\"Send by 11 Dec\")",
   "ok": true,
-  "detail": "{\"open\":true,\"q\":\"When will you send it by?\",\"date\":\"Send by 10 Dec\",\"w\":\"2\"}"
+  "detail": "{\"open\":true,\"q\":\"When will you send it by?\",\"date\":\"Send by 11 Dec\",\"w\":\"2\"}"
  },
  {
   "lock": "BW-31",
-  "where": "saving sets the send-by date, and the bar runs to it (due day 14, bar to 333.0 vs 333.0)",
+  "where": "saving sets the send-by date, and the bar runs to it (due day 14, bar to 333.8 vs 333.8)",
   "ok": true,
-  "detail": "{\"due\":\"14\",\"right\":333}"
+  "detail": "{\"due\":\"14\",\"right\":333.75}"
  },
  {
   "lock": "BW-26",
@@ -442,6 +508,30 @@
   "where": "saving a date moves the query out of the group",
   "ok": true,
   "detail": "0"
+ },
+ {
+  "lock": "BW-36",
+  "where": "on load (784 tall): inside the viewport and above the dock {\"top\":659,\"bottom\":699,\"vh\":784,\"vv\":784,\"dockTop\":711}",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-36",
+  "where": "after the shrink to 700: inside the viewport and above the dock {\"top\":575,\"bottom\":615,\"vh\":700,\"vv\":700,\"dockTop\":627}",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-36",
+  "where": "pinned 12px above the dock both times",
+  "ok": true,
+  "detail": "{\"onLoad\":{\"top\":659,\"bottom\":699,\"vh\":784,\"vv\":784,\"dockTop\":711},\"after\":{\"top\":575,\"bottom\":615,\"vh\":700,\"vv\":700,\"dockTop\":627}}"
+ },
+ {
+  "lock": "BW-36",
+  "where": "the dock still sliding in on load: once it settles, the switch is above it {\"top\":659,\"bottom\":699,\"vh\":784,\"vv\":784,\"dockTop\":711}",
+  "ok": true,
+  "detail": ""
  },
  {
   "lock": "BW-13",
