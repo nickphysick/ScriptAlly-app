@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { group172 } from "../lib/smart172";
 import { SendExtras } from "./queryActions/SendExtras";
 import { requeryLine } from "../lib/requery";
 import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
@@ -146,7 +147,7 @@ import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
 import { qcStateAid } from "../lib/qcReviewAid155";
 import { goalAidSends, qcGoalAid } from "../lib/qcReviewAid156";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
-import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
+import { CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
 import { qcPlanAid } from "../lib/qcReviewAid1522";
 import { dayLabel as dayLabel152, orderSteps as orderSteps152, sideOf as side152, stepTitle as stepTitle152, type ThreadStepIn } from "../lib/qcThread152";
 import { getActivityTime } from "../lib/queryDerivation";
@@ -166,7 +167,7 @@ import type { Snapshot } from "../lib/queryActions/snapshot";
 import { inUseId as inUseBookVersion } from "../lib/versionsV2";
 import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { buildCardView, capWord } from "./queries/centre/qcCardView";
-import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
+import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups } from "../lib/qc1511";
 import { rowAct, statusKind } from "../lib/qc1512";
 import { pressView, twinTags } from "../lib/qc149";
@@ -8282,7 +8283,9 @@ export const Queries: React.FC<{
                 const shut = sorted151.filter((r) => CLOSED_SET.includes(r.status));
                 return shut.length ? [...live, { key: "closed", label: "Closed", rows: shut }] : live;
               };
-              const sections151: Section<QcRow>[] = group1522 === "attention" ? whoSections(sorted151, now151).map((x) => ({ ...x, label: ACTION_LABEL[x.key as keyof typeof ACTION_LABEL] ?? x.label }))
+              /* v172 — Group = Action is Birds-eye's "Where it stands" (group172): Needs action (the most urgent first,
+                 tier172), Within their window, Waiting with no reply date, Closed last */
+              const sections151: Section<QcRow>[] = group1522 === "attention" ? group172(sorted151, now151)
                 : group1522 === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
                 : group1522 === "status" ? statusGroups()
                 : qcListGroups(sorted151, "package", now151, qcPackageName).map((g) => ({
