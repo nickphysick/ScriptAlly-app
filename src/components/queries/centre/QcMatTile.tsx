@@ -89,9 +89,11 @@ export const MatTile: React.FC<{
   id: string; g: MatGroups; onOpen: (open: boolean) => void;
   /** Log a query v2's preview: the hover is drawn inside the card, and Escape sits above the drawer's */
   inCard?: boolean; escLevel?: number;
+  /** MOCK v169 — the list row's pill: the materials' own icons, then the count */
+  pill?: boolean;
   /** the card, for the in-card hover's position */
   cardRef: React.RefObject<HTMLElement | null>;
-}> = ({ id, g, onOpen, inCard = false, escLevel = ESC_LEVEL.page, cardRef }) => {
+}> = ({ id, g, onOpen, inCard = false, escLevel = ESC_LEVEL.page, cardRef, pill = false }) => {
   const [st, setSt] = useState<TileState>(TILE_CLOSED);
   const open = st.open;
   const [place, setPlace] = useState<Place | null>(null);
@@ -154,12 +156,18 @@ export const MatTile: React.FC<{
   return (
     <span className="pc3-tw" data-pc3="tile-wrap" onPointerEnter={() => go("enter")} onPointerLeave={() => go("leave")}
       onClick={(e) => e.stopPropagation()}>
-      <button ref={btn} type="button" className={`pc3-tile${open ? " is-open" : ""}`} data-qc1533="tab" data-pc3="tile" aria-label={name}
+      <button ref={btn} type="button" className={`pc3-tile${open ? " is-open" : ""}${pill ? " pc3-pill" : ""}`} data-qc1533="tab" data-pc3="tile" aria-label={name}
         aria-expanded={open} aria-controls={open ? popId : undefined}
         onFocus={() => go("focus")} onBlur={() => go("blur")}
         onClick={(e) => { e.stopPropagation(); go("click"); }}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); go("press"); } }}>
-        {CLIP}<i>{g.count}</i>
+        {pill ? (() => {
+          /* every item, side by side, in the agreed material icons; one asked for and not yet sent is drawn dashed and faint */
+          const items = g.groups.flatMap((x) => x.chips);
+          return <>{items.map((c, n) => <span key={n} className={`pc3-pi${c.asked ? " is-ask" : ""}`} title={`${c.name}${c.asked ? " · asked" : ""}`}>{c.mark === "full"
+            ? <StatusDot status={c.asked ? QueryStatus.FULL_REQUESTED : QueryStatus.FULL_SENT} overrideSize={15} tone="inherit" decorative />
+            : c.mark ? <MaterialIcon kind={c.mark as never} size={16} /> : CLIP}</span>)}</>;
+        })() : <>{CLIP}<i>{g.count}</i></>}
       </button>
       {hover ? createPortal(hover, inCard && cardRef.current ? cardRef.current : document.body) : null}
     </span>
