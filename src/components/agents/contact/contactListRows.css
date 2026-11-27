@@ -138,7 +138,7 @@
    ring). Rows, the card's white top and the light bar pass behind it; only the slim bar (z-index 40) sits over it.
    v1.2's 14px strip was too short to reach the slim bar, and the frame's clip cut anything past 14px outside it. */
 .cl26-card .cl26-th::before {
-  content: ""; position: absolute; left: -14px; right: -14px; top: calc(-1 * var(--clr-th-top, 12px)); height: var(--clr-th-top, 12px);
+  content: ""; position: absolute; left: -28px; right: -28px; top: calc(-1 * var(--clr-th-top, 12px)); height: var(--clr-th-top, 12px);
   background: var(--ws-page, #f2eee8); opacity: 0; pointer-events: none;
 }
 /* stuck, the cap is solid to the pointer too: the rows it hides cannot be clicked through it */
@@ -272,4 +272,18 @@
   .cl26-card .cl26-mgl small { display: none; }
   .cl26-card .cl26-mgl svg, .cl26-card .cl26-mgl .cl24-nq { width: 14px; height: 14px; }
   .cl26-card .cl26-row .clr-gline .clr-tag { padding: 0 10px; }
+}
+
+/* ══ Contact list rows v1.3 · phase 1 — nothing scrolls above the slim bar ══════════════════════════════════════════════
+   The slim bar (the pinned page header) sticks 12px below the sheet's top edge (its own `top: var(--pin-cover, 12px)`), and
+   its ground (its ::before) covers only its own box: the light bar, rows and the card showed through that band, cut hard at
+   the sheet's edge (Nick's screenshot). Its ground now reaches up to the sheet's top edge, across the sheet's full width,
+   so from the folder tabs to the slim bar's foot there is only the slim bar. Below it, the pinned heading row's cap (above)
+   paints the page's ground down to the headings — now 28px past the frame each side (v1.2.1's 14 let the card's soft side
+   shadow show in the gutter). One surface each; neither sticks on its own. */
+@media (min-width: 768px) {
+  .clv-group.cl27 > .qc156-slim[data-shown]::after {
+    content: ""; position: absolute; z-index: -1; top: calc(-1 * var(--pin-cover, 12px)); height: var(--pin-cover, 12px);
+    left: calc(-1 * var(--qc156-bl, 0px)); right: calc(-1 * var(--qc156-br, 0px)); background: var(--ws-page);
+  }
 }
