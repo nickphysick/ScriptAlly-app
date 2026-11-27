@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "L9",
+  "where": "d-in · population",
+  "ok": true,
+  "detail": "16 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-in · at rest",
+  "ok": false,
+  "detail": "seed-query-12: stroke rgb(28, 19, 15) on rgb(42, 58, 82); cv25-q-08: stroke rgb(28, 19, 15) on rgb(42, 58, 82); seed-query-7: stroke rgb(28, 19, 15) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-in · hovered",
+  "ok": false,
+  "detail": "stroke rgb(28, 19, 15) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-out · population",
+  "ok": true,
+  "detail": "11 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-out · at rest",
+  "ok": false,
+  "detail": "cor-pair: stroke rgb(28, 19, 15) on rgb(42, 58, 82); seed-query-23: stroke rgb(28, 19, 15) on rgb(42, 58, 82); seed-query-8: stroke rgb(28, 19, 15) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-out · hovered",
+  "ok": false,
+  "detail": "stroke rgb(28, 19, 15) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-end · population",
+  "ok": true,
+  "detail": "18 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-end · at rest",
+  "ok": false,
+  "detail": "seed-pkgq-8: stroke rgb(28, 19, 15) on rgb(42, 58, 82); msv12-q-8: stroke rgb(28, 19, 15) on rgb(42, 58, 82); cv25-q-01: stroke rgb(28, 19, 15) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-end · hovered",
+  "ok": false,
+  "detail": "stroke rgb(28, 19, 15) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-quiet · population",
+  "ok": true,
+  "detail": "43 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-quiet · navy z z z on white",
+  "ok": true,
+  "detail": "43 navy on white"
+ }
+]

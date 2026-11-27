@@ -358,3 +358,37 @@ test("L8 · a row on hover: lifts, then its track replays in turn within 0.6s; s
   L.check("reduced motion · nothing moves", rm.edge === "none" && rm.steps.every((s) => s.anim === "none" && s.ring === "none" && s.line === "none"), `${rm.edge} · ${rm.steps.map((s) => s.anim).join(",")}`);
   L.done(8);
 });
+
+/* ── v172.2 ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+test("L9 · the current step's badge: a white arrow on navy (in, out, end) at rest and hovered; the quiet badge navy on white", async ({ page }) => {
+  const L = new Ledger("L9");
+  const V = await openList(page, WIDE);
+  await liftMotionSuppression(page);
+  /* the closed group folds on Action: open it, so the ended (d-end) badges are drawn */
+  const fold = page.locator(`${V}[data-qc153='fold'][data-k='closed'] [data-qc153='show-all']`);
+  if (await fold.count()) { await fold.click(); await page.waitForTimeout(600); }
+  const read = (dir: string) => page.evaluate(({ V, dir }) => [...document.querySelectorAll<HTMLElement>(`${V}[data-qc172='row'] .qr170-arw.d-${dir}`)].map((b) => {
+    const path = b.querySelector("svg path, svg *:not(svg)") as SVGElement | null;
+    const z = b.querySelector<HTMLElement>(".qr170-zz");
+    return { id: b.closest<HTMLElement>("[data-qc172='row']")!.dataset.id!, bg: getComputedStyle(b).backgroundColor, stroke: path ? getComputedStyle(path).stroke : null, zz: z ? getComputedStyle(z).color : null };
+  }), { V, dir });
+  const WHITE = "rgb(255, 255, 255)", NAVY = "rgb(42, 58, 82)";
+  for (const dir of ["in", "out", "end"]) {
+    const all = await read(dir);
+    L.check(`d-${dir} · population`, all.length > 0, `${all.length} badges`);
+    const bad = all.filter((b) => b.stroke !== WHITE || b.bg !== NAVY);
+    L.check(`d-${dir} · at rest`, all.length > 0 && bad.length === 0, bad.length ? bad.slice(0, 3).map((b) => `${b.id}: stroke ${b.stroke} on ${b.bg}`).join("; ") : `${all.length} white on navy`);
+    if (!all.length) continue;
+    await page.locator(`${V}[data-qc172='row'][data-id="${all[0].id}"]`).hover();
+    await page.waitForTimeout(1200);
+    const h = (await read(dir)).find((b) => b.id === all[0].id)!;
+    L.check(`d-${dir} · hovered`, h.stroke === WHITE && h.bg === NAVY, `stroke ${h.stroke} on ${h.bg}`);
+    await page.mouse.move(2, 2);
+  }
+  const q = await read("quiet");
+  L.check("d-quiet · population", q.length > 0, `${q.length} badges`);
+  const qb = q.filter((b) => b.zz !== NAVY || b.bg !== WHITE);
+  L.check("d-quiet · navy z z z on white", q.length > 0 && qb.length === 0, qb.length ? qb.slice(0, 3).map((b) => `${b.id}: ${b.zz} on ${b.bg}`).join("; ") : `${q.length} navy on white`);
+  L.done(9);
+});
