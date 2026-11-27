@@ -41,7 +41,8 @@ const UID = Object.keys(HARNESS.docs).find((k) => /^users\/[^/]+$/.test(k))!.spl
 const MUTS = ["fitted", "dates", "names", "days", "cont", "quiet", "counts", "seventy", "copy", "layers", "offline", "calm", "land", "replay",
   "pillfit", "heads", "calmzoom", "levels", "press", "search", "news", "nodate", "pull", "empty",
   "reopen", "titles", "passed", "sendby",
-  "groups", "pillhead", "order", "switch", "cutoff"] as const;
+  "groups", "pillhead", "order", "switch", "cutoff",
+  "solidquiet", "quietfirst", "chipgone"] as const;
 type Mut = (typeof MUTS)[number] | "";
 const MUT_LOCK: Record<Exclude<Mut, "">, string> = {
   fitted: "BW-1", dates: "BW-4", names: "BW-5", days: "BW-6", cont: "BW-7", quiet: "BW-8", counts: "BW-9", seventy: "BW-10", empty: "BW-11",
@@ -49,6 +50,7 @@ const MUT_LOCK: Record<Exclude<Mut, "">, string> = {
   pillfit: "BW-19", heads: "BW-20", calmzoom: "BW-21", levels: "BW-22", press: "BW-23", search: "BW-24", news: "BW-25", nodate: "BW-26", pull: "BW-27",
   reopen: "BW-28", titles: "BW-29", passed: "BW-30", sendby: "BW-31",
   groups: "BW-32", pillhead: "BW-33", order: "BW-34", switch: "BW-35", cutoff: "BW-36",
+  solidquiet: "BW-37", quietfirst: "BW-38", chipgone: "BW-39",
 };
 const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   dates: '.bw-bar[data-k="stage"] { margin-left: 6px !important; }',
@@ -80,6 +82,10 @@ const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   sendby: '[data-bw="menu-act"][data-act="sendby"] { display: none !important; }',
   /* BW-35: the chip gone, so the switch at rest shows no button */
   switch: ".bw-zc.lvl .bw-lvchip { display: none !important; }",
+  /* BW-37: gone quiet back to a solid fill */
+  solidquiet: '.bw-bar[data-k="quiet"] { background: #ead9bd !important; -webkit-mask-image: none !important; mask-image: none !important; }',
+  /* BW-39: the chip hidden while the switch is open */
+  chipgone: ".bw-zc.lvl.open .bw-lvchip { display: none !important; }",
   /* BW-36: the switch placed the old way's worst case, under the dock */
   cutoff: ".bw .bw-zc { bottom: 8px !important; }",
 };
@@ -121,7 +127,7 @@ const offPE = (page: Page) => page.addStyleTag({ content: ".bw-hsw, .bw-hs, .bw-
 async function level(page: Page, t: "All" | "Months" | "Weeks") {
   /* v3.2: the switch rests as one chip; open it first */
   const chip = page.locator('[data-bw="level-chip"]');
-  if (await chip.count()) { await chip.click({ timeout: 3000 }).catch(() => {}); await frame(page, 250); }
+  if ((await chip.count()) && (await chip.getAttribute("aria-expanded")) !== "true") { await chip.click({ timeout: 3000 }).catch(() => {}); await frame(page, 250); }
   const b = page.locator(`[data-bw="level"][data-t="${t}"]`);
   if (!(await b.count())) return false;
   await b.click({ timeout: 3000 }).catch(() => {}); await frame(page, 700);
@@ -259,22 +265,34 @@ for (const mut of runs) {
     }
 
     /* ── BW-34 · Needs action holds every chasing and every with-you query, ordered by share of window used, most first ── */
-    if (on("BW-34")) { stamp("BW-34");
+    if (on("BW-34") || on("BW-38")) { stamp("BW-34/38");
       await fitted(page);
       if (mut === "order") await page.evaluate(() => { const g = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top); const [a, b] = [g[0], g[3]]; if (a && b) { const t = a.style.top; a.style.top = b.style.top; b.style.top = t; } });
       const r = await page.evaluate(() => {
         const heads = [...document.querySelectorAll<HTMLElement>('[data-bw="group"]')].map((g) => ({ g: g.dataset.g!, n: Number(g.dataset.n), top: g.getBoundingClientRect().top })).sort((a, b) => a.top - b.top);
         const i = heads.findIndex((h) => h.g === "Needs action"), lo = heads[i]?.top ?? 0, hi = heads[i + 1]?.top ?? Infinity;
-        const rows = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((h) => ({ id: h.dataset.id!, top: h.getBoundingClientRect().top, you: h.dataset.you === "1", past: h.dataset.past === "1", closed: h.dataset.closed === "1", start: Number(h.dataset.start), due: h.dataset.dueday === "" ? null : Number(h.dataset.dueday) }))
+        /* gone quiet: more than the setting's days past its date (the world publishes the setting); a tail that went quiet a
+           day ago is too thin to draw at the fitted view, so it is read from the dates, not the bars */
+        const qd = Number(document.querySelector<HTMLElement>('[data-bw="world"]')!.dataset.quietdays);
+        const rows = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((h) => ({ id: h.dataset.id!, top: h.getBoundingClientRect().top, quiet: h.dataset.dueday !== "" && Number(h.dataset.dueday) < 0 && -Number(h.dataset.dueday) > qd, you: h.dataset.you === "1", past: h.dataset.past === "1", closed: h.dataset.closed === "1", start: Number(h.dataset.start), due: h.dataset.dueday === "" ? null : Number(h.dataset.dueday) }))
           .filter((x) => x.top > lo && x.top < hi).sort((a, b) => a.top - b.top);
         return { n: heads[i]?.n ?? 0, rows };
       });
       const chips = Object.fromEntries((await box(page, '[data-bw="chip"]')).map((c) => [c.d.k, Number(c.d.n)]));
       const share = (x: { start: number; due: number | null }) => (x.due == null ? -x.start / 60 : -x.start / Math.max(7, x.due - x.start));
-      const bad = r.rows.slice(1).map((x, i) => ({ a: r.rows[i], b: x })).filter(({ a, b }) => share(b) > share(a) + 1e-9);
+      /* v3.3: gone-quiet rows last; within each part, most of the window used first */
+      const bad = r.rows.slice(1).map((x, i) => ({ a: r.rows[i], b: x })).filter(({ a, b }) => a.quiet === b.quiet && share(b) > share(a) + 1e-9);
       const mixed = r.rows.some((x, i) => i > 0 && x.you !== r.rows[i - 1].you);
       L.check("BW-34", `Needs action holds every with-you (${chips.you}) and chasing (${chips.chase}) query: ${r.rows.length} rows`, r.rows.length === chips.you + chips.chase && r.n === r.rows.length && r.rows.every((x) => x.you || x.past), JSON.stringify({ n: r.n, rows: r.rows.length }));
-      L.check("BW-34", "ordered by share of window used, most first (with-you and chasing mixed in one order)", bad.length === 0 && mixed, JSON.stringify(bad.slice(0, 3).map(({ a, b }) => [a.id, share(a).toFixed(3), b.id, share(b).toFixed(3)])));
+      L.check("BW-34", "ordered by share of window used, most first, within the not-quiet and the gone-quiet parts (with-you and chasing mixed)", bad.length === 0 && mixed, JSON.stringify(bad.slice(0, 3).map(({ a, b }) => [a.id, share(a).toFixed(3), b.id, share(b).toFixed(3)])));
+      /* ── BW-38 · in Needs action, every gone-quiet row sits below every other row ── */
+      if (on("BW-38")) {
+        const rows = r.rows.slice();
+        if (mut === "quietfirst") { const qi = rows.findIndex((x) => x.quiet); if (qi > 0) { const [q] = rows.splice(qi, 1); rows.unshift(q); } }
+        const quiet = rows.filter((x) => x.quiet), other = rows.filter((x) => !x.quiet);
+        const firstQuiet = rows.findIndex((x) => x.quiet), lastOther = rows.map((x) => x.quiet).lastIndexOf(false);
+        L.check("BW-38", `gone-quiet rows (population ${quiet.length}) all below the others (${other.length})`, quiet.length > 0 && other.length > 0 && firstQuiet > lastOther, JSON.stringify({ firstQuiet, lastOther }));
+      }
     }
 
     /* ── BW-35 · the switch: one button at rest; tap it, three; pick one, it snaps and folds; a tap on the world folds it
@@ -286,7 +304,7 @@ for (const mut of runs) {
       L.check("BW-35", `at rest one button, "${rest.chip}", aria-expanded false, 40px, navy`, rest.n === 1 && rest.chip === "Zoom level: All" && rest.expanded === "false" && Math.abs(rest.h - 40) < 0.5 && rest.bg === "rgb(42, 58, 82)", JSON.stringify(rest));
       await page.locator('[data-bw="level-chip"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 300);
       const open = await sw();
-      L.check("BW-35", "tapped, three: Weeks, Months, All, the current pressed", open.n === 3 && open.texts.join("|") === "Weeks|Months|All" && open.pressed.join("|") === "false|false|true", JSON.stringify(open));
+      L.check("BW-35", "tapped, three levels (Weeks, Months, All, the current pressed) above the chip (v3.3)", open.n === 4 && open.texts.join("|") === "Weeks|Months|All|All" && open.pressed.join("|") === "false|false|true|", JSON.stringify(open));
       await page.locator('[data-bw="level"][data-t="Months"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 700);
       const picked = await sw(), rp = await root(page);
       L.check("BW-35", "picking Months snaps there and folds to one chip reading Months", rp.level === "Months" && picked.n === 1 && picked.chip === "Zoom level: Months", JSON.stringify({ level: rp.level, ...picked }));
@@ -298,6 +316,77 @@ for (const mut of runs) {
       /* when the switch was not open (a broken run), that tap opened a row's sheet: close it so later sections can run */
       if (sheet) { await page.locator('[data-bw="veil"]').click({ position: { x: 10, y: 10 }, timeout: 2000 }).catch(() => {}); await frame(page, 300); }
       await fitted(page);
+    }
+
+    /* ── BW-39 · open, the chip stays: in the DOM, visible, aria-expanded true, directly below the three levels; closing
+          sets it false ── */
+    if (on("BW-39")) { stamp("BW-39");
+      await fitted(page);
+      const read = () => page.evaluate(() => {
+        const c = document.querySelector<HTMLElement>('[data-bw="level-chip"]'), cr = c?.getBoundingClientRect();
+        const lv = [...document.querySelectorAll<HTMLElement>('[data-bw="level"]')].map((b) => b.getBoundingClientRect());
+        const vis = !!c && !!cr && cr.height > 0 && getComputedStyle(c).display !== "none" && getComputedStyle(c).visibility !== "hidden";
+        const at = cr ? document.elementFromPoint(cr.left + cr.width / 2, cr.top + cr.height / 2) : null;
+        return { inDom: !!c, vis, top: !!c && !!at && (at === c || c.contains(at)), expanded: c?.getAttribute("aria-expanded") ?? null, label: c?.getAttribute("aria-label") ?? null, levels: lv.length, gap: cr && lv.length ? cr.top - Math.max(...lv.map((r) => r.bottom)) : null, under: cr && lv.length ? lv.every((r) => r.bottom <= cr.top + 0.5) : false, rot: c ? getComputedStyle(c.querySelector("svg")!).transform : "" };
+      });
+      await page.locator('[data-bw="level-chip"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 400);
+      if (mut === "chipgone") await mutate(page, "chipgone");
+      const open = await read();
+      L.check("BW-39", `open: the chip is in the DOM, visible and uncovered, aria-expanded true, ${open.label}`, open.inDom && open.vis && open.top && open.expanded === "true" && open.label === "Zoom level: All", JSON.stringify(open));
+      L.check("BW-39", `open: directly below the three levels (gap ${open.gap?.toFixed(1)}px), its chevron turned down`, open.levels === 3 && open.under && open.gap != null && open.gap >= 0 && open.gap <= 1.5 && open.rot !== "none", JSON.stringify(open));
+      await page.locator('[data-bw="level-chip"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 300);
+      const shut = await read();
+      L.check("BW-39", "tapping the chip again closes it: aria-expanded false, no levels", shut.expanded === "false" && shut.levels === 0 && shut.vis, JSON.stringify(shut));
+    }
+
+    /* ── BW-37 · a gone-quiet bar has no solid stretch between its "!" and today: every pixel column there is hatched or
+          faded, and the fade is 10% or less at today (read from a screenshot at Months: at Weeks no bar has its "!" and a
+          long quiet stretch on screen at once) ── */
+    if (on("BW-37")) { stamp("BW-37");
+      await level(page, "Months"); await lineTo(page, 0.9);
+      /* gridlines, names, the hawk and the edge fades are not what is measured: held out of the picture */
+      await page.addStyleTag({ content: '[data-bw="grid"], .bw-inm, .bw-hsw, .bw-efd, .bw-glw { visibility: hidden !important; }' });
+      const find = () => page.evaluate(() => {
+        const lxs = document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.lx, lx = lxs ? Number(lxs) : null;
+        for (const q of document.querySelectorAll<HTMLElement>('[data-bw="bar"][data-k="quiet"]')) {
+          const qr = q.getBoundingClientRect(), id = q.dataset.row!;
+          const marks = [...document.querySelectorAll<HTMLElement>('[data-bw="mark"]')].map((m) => m.getBoundingClientRect()).filter((m) => m.top < qr.bottom && m.bottom > qr.top);
+          const bars = [...document.querySelectorAll<HTMLElement>(`[data-bw="bar"][data-row="${CSS.escape(id)}"]`)].filter((b) => b.dataset.k === "past" || b.dataset.k === "quiet").map((b) => b.getBoundingClientRect());
+          const m = marks[0];
+          if (!m || lx == null || qr.top < 150 || qr.bottom > innerHeight - 140) continue;
+          if (m.left < 4 || qr.right < lx - 3 || qr.right - Math.max(qr.left, 0) < 120) continue;
+          return { id, lx, x0: Math.ceil(m.right + 2), x1: Math.floor(lx - 5), y0: Math.ceil(qr.top + 3), y1: Math.floor(qr.bottom - 3), qx: qr.left, bars: bars.map((b) => [b.left, b.right]) };
+        }
+        return null;
+      });
+      let t = await find();
+      for (let i = 0; i < 25 && !t; i++) { await pan(page, 0, -300); await page.addStyleTag({ content: '[data-bw="grid"], .bw-inm, .bw-hsw, .bw-efd, .bw-glw { visibility: hidden !important; }' }); t = await find(); }
+      L.check("BW-37", `a gone-quiet bar with its "!" and today on screen (population: ${t ? t.id : "none"})`, !!t, "");
+      if (t) {
+        if (mut === "solidquiet") await mutate(page, "solidquiet");
+        await frame(page, 200);
+        const png = await page.screenshot({ clip: { x: t.x0, y: t.y0, width: t.x1 - t.x0, height: t.y1 - t.y0 } });
+        const cols = await page.evaluate(async (b64) => {
+          const img = new Image(); img.src = `data:image/png;base64,${b64}`; await img.decode();
+          const c = document.createElement("canvas"); c.width = img.width; c.height = img.height; const g = c.getContext("2d")!; g.drawImage(img, 0, 0);
+          const d = g.getImageData(0, 0, c.width, c.height).data, out: { range: number; dev: number }[] = [];
+          for (let x = 0; x < c.width; x++) { let mn = 255, mx = 0, sum = 0; for (let y = 0; y < c.height; y++) { const i = (y * c.width + x) * 4, l = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; mn = Math.min(mn, l); mx = Math.max(mx, l); sum += 255 - l; } out.push({ range: mx - mn, dev: sum / c.height }); }
+          return out;
+        }, png.toString("base64"));
+        /* solid: a column with no stripe in it (range under 6) that is still coloured (more than 12 off white) */
+        const solid = cols.map((c, i) => ({ i, ...c })).filter((c) => c.range < 6 && c.dev > 12);
+        /* the fade: the mask is linear, so fit a line to the quiet stretch's second half (averaging over the stripes) and read
+           it at today's x; compare with the hatching in full where the quiet stretch starts (its first two stripe periods) */
+        const sc = cols.length / (t.x1 - t.x0), qs = Math.max(0, Math.round((Math.max(t.qx, t.x0) - t.x0) * sc));
+        const ref = cols.slice(qs, qs + Math.round(20 * sc)), full = ref.reduce((a, c) => a + c.dev, 0) / Math.max(1, ref.length);
+        const fit = cols.map((c, i) => [i, c.dev] as const).slice(Math.round(qs + (cols.length - qs) / 2));
+        const n = fit.length, mx = fit.reduce((a, [x]) => a + x, 0) / n, my = fit.reduce((a, [, y]) => a + y, 0) / n;
+        const slope = fit.reduce((a, [x, y]) => a + (x - mx) * (y - my), 0) / Math.max(1e-9, fit.reduce((a, [x]) => a + (x - mx) ** 2, 0));
+        const end = my + slope * ((t.lx - t.x0) * sc - mx);
+        L.check("BW-37", `every pixel column from the "!" to today is hatched or faded: ${cols.length} columns, ${solid.length} solid`, cols.length > 100 && solid.length === 0, JSON.stringify(solid.slice(0, 5)));
+        L.check("BW-37", `the fade, read at today's x, is 10% or less of the full hatching (${(100 * end / full).toFixed(1)}%)`, full > 8 && end / full <= 0.1, JSON.stringify({ full: full.toFixed(1), end: end.toFixed(1), slope: slope.toFixed(4) }));
+      }
+      await openWorld(page); await mutate(page, mut === "solidquiet" ? "" : mut);
     }
 
     /* ── BW-9 · the pills add up ── */
@@ -445,7 +534,7 @@ for (const mut of runs) {
     /* ── BW-23 · long press: the menu on a zoomed-in bar, with its state's actions; scrubbing anywhere else ── */
     if (on("BW-23")) { stamp("BW-23");
       await level(page, "Weeks"); await lineTo(page, 0.62);
-      const target = await page.evaluate(() => {
+      const targets = () => page.evaluate(() => {
         const out: { id: string; you: boolean; closed: boolean; x: number; y: number; white: { x: number; y: number } | null }[] = [];
         for (const h of document.querySelectorAll<HTMLElement>('[data-bw="row"]')) {
           const hr = h.getBoundingClientRect(); if (hr.top < 200 || hr.bottom > innerHeight - 140) continue;
@@ -458,6 +547,9 @@ for (const mut of runs) {
         }
         return out;
       });
+      /* v3.3: the order puts long bars off the first screen, so scroll on (up to eight screens) until one fits */
+      let target = await targets();
+      for (let i = 0; i < 8 && !target.some((t) => !t.you && !t.closed && t.white); i++) { await pan(page, 0, -300); target = await targets(); }
       const pickT = target.find((t) => !t.you && !t.closed && t.white) ?? target[0];
       L.check("BW-23", `a zoomed-in bar to hold (population ${target.length})`, !!pickT, "");
       if (pickT) {
@@ -974,4 +1066,27 @@ test("Phone Birds-eye world v3.2 — before and after shots", async ({ page }, i
   const chip = page.locator('[data-bw="level-chip"]');
   if (await chip.count()) { await chip.click(); await frame(page, 400); }
   await shot("4-switch-open");
+});
+
+/* ══ v3.3: before-and-after shots at 390 × 784 (BW_SHOTS33=before|after): Months with a gone-quiet row; the switch open ══ */
+test("Phone Birds-eye world v3.3 — before and after shots", async ({ page }, info) => {
+  const tag = process.env.BW_SHOTS33;
+  test.skip(info.project.name !== "pixel" || !tag, "BW_SHOTS33=before|after, Chromium phone");
+  test.setTimeout(300_000);
+  page.setDefaultTimeout(15_000);
+  const out = "reports/phone-birds-eye-world-v3-3/shots"; mkdirSync(out, { recursive: true });
+  const shot = (n: string) => page.screenshot({ path: `${out}/${n}-${tag}.png` });
+  await signIn(page);
+  await page.evaluate(() => { try { localStorage.setItem("bw1.hint.seen", "1"); } catch { /* */ } });
+  await openWorld(page);
+  await level(page, "Months"); await lineTo(page, 0.8);
+  /* the first gone-quiet bar on screen (scroll down to one if needed), held about a third of the way down */
+  const qy = () => page.evaluate(() => { const b = document.querySelector<HTMLElement>('[data-bw="bar"][data-k="quiet"]'); return b ? b.getBoundingClientRect().top : null; });
+  let y = await qy();
+  for (let i = 0; i < 20 && (y == null || y < 260 || y > 700); i++) { await pan(page, 0, y == null ? -300 : 320 - y); y = await qy(); }
+  await shot("1-months-gone-quiet");
+  await level(page, "Weeks");
+  const chip = page.locator('[data-bw="level-chip"]');
+  if (await chip.count()) { await chip.click(); await frame(page, 400); }
+  await shot("2-switch-open");
 });

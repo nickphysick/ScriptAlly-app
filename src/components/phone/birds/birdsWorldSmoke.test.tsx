@@ -91,6 +91,10 @@ describe("Phone Birds-eye world v2 renders", () => {
     /* v3.2: at rest the switch is one chip naming the level, a button with aria-expanded; the three levels only when open */
     expect(html).toMatch(/data-bw="levels" data-open="0"[^>]*><button type="button" class="bw-lvchip" data-a="lvchip" data-bw="level-chip" data-t="All" aria-expanded="false" aria-label="Zoom level: All"><span>All<\/span>/);
     expect(html).not.toContain('data-bw="level" ');
+    /* v3.3: open, the chip stays (the source renders it outside the open branch, aria-expanded following the state) */
+    const src = readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8");
+    expect(src).toContain('data-bw="level-chip" data-t={t} aria-expanded={lvOpen}');
+    expect(src).toContain('if (a === "lvchip") { buzz(8); setLvOpen((o) => !o); return; }');
     expect(html).toContain('data-bw="hawk-btn"');
     expect(html).toContain('aria-label="What the colours mean"');
     for (const k of ["hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);

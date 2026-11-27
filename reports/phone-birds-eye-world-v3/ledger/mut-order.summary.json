@@ -2,6 +2,6 @@
  "mut": "order",
  "lock": "BW-34",
  "own": 1,
- "other": 0,
- "readings": 90
+ "other": 1,
+ "readings": 97
 }
