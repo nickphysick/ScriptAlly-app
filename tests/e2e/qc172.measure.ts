@@ -1,0 +1,290 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v172 — the locks L1–L6 (design-refs/query-centre-v172/cc-prompt-query-centre-v172.md, Phase 5), read off
+ * the rendered page over the emulator seed (`npm run e2e:emu -- tests/e2e/qc172.measure.ts`).
+ *
+ *   L1 the heading row: deeper blush (#e8bdb4), Special Elite 18px at 1512 / 16px at 1280; "Sent by" starts where its
+ *      column starts (±2px).
+ *   L2 Birds-eye opens on All: every bar inside the card; no names column; a row's name label shows on hover.
+ *   L3 the overdue chip at 3M: on every overdue row, centred on its bar (±2px), its centre ≥ 40px left of today.
+ *   L4 one grouping: the list's group keys (Group = Action) and Birds-eye's are the same, in the same order, Closed
+ *      last; the first Needs-action row is an offer when one exists.
+ *   L5 the panel: Stage Queried leaves only queries whose furthest stage is Queried; the reply date's "Not dated" count
+ *      is Birds-eye's "Waiting, no reply date" count; reply + send-by together never shows fewer than either alone.
+ *   L6 the panel's type sizes: every text node is 12, 14, 16, 18 or 20px — the ranges' scale numbers and the icon
+ *      glyphs (★ ▾ ▴ ✓) excepted; a pill's words are the shell's filter-pill token (--sp-fpill-size, 14.5px).
+ *
+ * ⚠️ EVERY POPULATION IS PROVED NON-ZERO BEFORE IT IS ASSERTED OVER: an empty list passes every "for each".
+ * ⚠️ EVERY READ STARTS FROM THE VISIBLE PAGE (`visiblePage`): every workspace page stays mounted.
+ * Each lock writes reports/qc-v172/ledger/<tag>-<lock>.json; QC172_TAG names the run (green, or red-before).
+ */
+import { test, expect, type Page } from "@playwright/test";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { openQc } from "./nb1Lib";
+import { visiblePage } from "./measure";
+
+test.setTimeout(300_000);
+const DIR = "reports/qc-v172";
+const TAG = process.env.QC172_TAG ?? "green";
+const WIDE = { width: 1512, height: 982 };
+const NARROW = { width: 1280, height: 900 };
+
+type Row = { lock: string; where: string; ok: boolean; detail: string };
+class Ledger {
+  rows: Row[] = [];
+  constructor(public name: string) {}
+  check(where: string, ok: unknown, detail: string) { this.rows.push({ lock: this.name, where, ok: !!ok, detail }); }
+  done(floor: number) {
+    mkdirSync(`${DIR}/ledger`, { recursive: true });
+    writeFileSync(`${DIR}/ledger/${TAG}-${this.name}.json`, JSON.stringify(this.rows, null, 1));
+    for (const r of this.rows.filter((x) => !x.ok).slice(0, 30)) console.log(`  ✗ ${r.lock} · ${r.where} — ${r.detail}`);
+    console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
+    expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
+    expect(this.rows.filter((r) => !r.ok).map((r) => `${r.where} — ${r.detail}`)).toEqual([]);
+  }
+}
+
+/** the list on Group = Action (the list's "attention"), the panel untouched */
+async function openList(page: Page, vp: { width: number; height: number }) {
+  await openQc(page, vp, { group: "attention" });
+  return visiblePage(page);
+}
+async function toView(page: Page, v: "list" | "birds") {
+  const V = await visiblePage(page);
+  await page.locator(`${V}[data-qc151='switch'] [data-v='${v}']`).click();
+  await page.waitForTimeout(1200);
+}
+const n = (s: string | null | undefined) => Number(String(s ?? "").replace(/[^\d]/g, "") || NaN);
+
+test("L1 · the heading row: deeper blush, Special Elite 18 / 16, Sent by over its column", async ({ page }) => {
+  const L = new Ledger("L1");
+  for (const vp of [WIDE, NARROW]) {
+    const V = await openList(page, vp);
+    const r = await page.evaluate((V) => {
+      const th = document.querySelector<HTMLElement>(`${V}.qc169-th`);
+      const rows = document.querySelectorAll(`${V}[data-qc172='row']`).length;
+      if (!th) return { rows, th: false } as const;
+      const cs = getComputedStyle(th);
+      const heads = [...th.querySelectorAll<HTMLElement>(".qc169-thc")].map((h) => {
+        const el = h.querySelector("button") ?? h; const c = getComputedStyle(el);
+        return { col: h.dataset.col, family: c.fontFamily, size: parseFloat(c.fontSize), shown: h.getBoundingClientRect().width > 0 && parseFloat(c.fontSize) > 0 };
+      });
+      const sm = th.querySelector<HTMLElement>(".c-sm")!.getBoundingClientRect().left;
+      const cells = [...document.querySelectorAll<HTMLElement>(`${V}[data-qc172='row'] .qr170-sm`)].map((e) => e.getBoundingClientRect().left);
+      return { rows, th: true, bg: cs.backgroundColor, h: th.getBoundingClientRect().height, heads, sm, cells } as const;
+    }, V);
+    L.check(`${vp.width} · population`, r.rows > 0, `${r.rows} list rows`);
+    if (!r.th) { L.check(`${vp.width} · heading row`, false, "no .qc169-th"); continue; }
+    L.check(`${vp.width} · background`, r.bg === "rgb(232, 189, 180)", r.bg);
+    L.check(`${vp.width} · height`, r.h >= 53.5, `${r.h}px`);
+    const want = vp.width >= 1400 ? 18 : 16;
+    for (const h of r.heads.filter((x) => x.shown)) {
+      L.check(`${vp.width} · ${h.col} face`, /Special Elite/i.test(h.family), h.family);
+      L.check(`${vp.width} · ${h.col} size`, h.size === want, `${h.size}px, want ${want}`);
+    }
+    if (vp.width >= 1400) {
+      L.check(`${vp.width} · Sent by shown`, r.heads.some((x) => x.col === "c-sm" && x.shown), "the heading is drawn");
+      const bad = r.cells.filter((x) => Math.abs(x - r.sm) > 2);
+      L.check(`${vp.width} · Sent by left edge`, r.cells.length > 0 && bad.length === 0, `heading ${r.sm.toFixed(1)}; ${r.cells.length} cells, ${bad.length} off (${bad.slice(0, 3).map((x) => x.toFixed(1)).join(", ")})`);
+    }
+  }
+  L.done(12);
+});
+
+test("L2 · Birds-eye opens on All: every bar inside the card, no names column, the name on hover", async ({ page }) => {
+  const L = new Ledger("L2");
+  await openList(page, WIDE);
+  await toView(page, "birds");
+  const V = await visiblePage(page);
+  const r = await page.evaluate((V) => {
+    const be = document.querySelector<HTMLElement>(`${V}[data-qc150='birds']`);
+    if (!be) return null;
+    const box = be.getBoundingClientRect();
+    const bars = [...be.querySelectorAll<HTMLElement>(".qc150-bar")].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0);
+    const out = bars.filter((b) => b.left < box.left - 0.5 || b.right > box.right + 0.5).length;
+    const ags = [...be.querySelectorAll<HTMLElement>(".qc150-ag")];
+    const agShown = ags.filter((a) => a.getBoundingClientRect().width > 0).length;
+    return { zoom: be.dataset.zoom, bars: bars.length, out, rows: be.querySelectorAll("[data-qc150='be-track']").length, ags: ags.length, agShown };
+  }, V);
+  L.check("birds-eye drawn", !!r, "[data-qc150='birds'] in the visible page");
+  if (r) {
+    L.check("population", r.bars > 0 && r.rows > 0, `${r.rows} rows, ${r.bars} bars`);
+    L.check("opens on All", r.zoom === "all", `data-zoom=${r.zoom}`);
+    L.check("every bar inside the card", r.out === 0, `${r.out} of ${r.bars} outside`);
+    L.check("no names column", r.ags > 0 && r.agShown === 0, `${r.agShown} of ${r.ags} name cells drawn`);
+  }
+  const row = page.locator(`${V}[data-qc150='be-track']`).nth(2);
+  await row.hover();
+  await page.waitForTimeout(300);
+  const lab = await page.evaluate((V) => {
+    const shown = [...document.querySelectorAll<HTMLElement>(`${V}.qc169-nm`)].filter((e) => getComputedStyle(e).display !== "none" && e.getBoundingClientRect().width > 0);
+    return shown.map((e) => e.textContent?.trim() ?? "");
+  }, V);
+  L.check("hover shows one name label", lab.length === 1 && lab[0].length > 2, JSON.stringify(lab));
+  L.done(6);
+});
+
+test("L3 · the overdue chip at 3M: on every overdue row, centred, ≥ 40px left of today", async ({ page }) => {
+  const L = new Ledger("L3");
+  await openList(page, WIDE);
+  await toView(page, "birds");
+  const V = await visiblePage(page);
+  await page.locator(`${V}[data-qc150='zoom'] [data-z='3m']`).click();
+  await page.waitForTimeout(1200);
+  /* ⚠️ 3M from All centres on the middle of the campaign, where today is off screen and its line is display:none
+     (a rect at x 0). Back to today first, and a hidden line is a failed reading, never x 0. */
+  await page.locator(`${V}[data-qc150='today']`).click();
+  await page.waitForTimeout(1200);
+  const r = await page.evaluate((V) => {
+    const be = document.querySelector<HTMLElement>(`${V}[data-qc150='birds']`)!;
+    const tl = be.querySelector<HTMLElement>("[data-qc150='today-line']")!;
+    const t = tl.getBoundingClientRect();
+    const shown = getComputedStyle(tl).display !== "none" && t.height > 0;
+    const today = t.left + t.width / 2;
+    const rows = [...be.querySelectorAll<HTMLElement>("[data-qc150='be-track']")].map((tr) => {
+      const bar = tr.querySelector<HTMLElement>("[data-qc150='be-bar'].qc150-bar--o");
+      const chip = tr.querySelector<HTMLElement>("[data-qc150='be-due']");
+      if (!bar) return null;
+      const b = bar.getBoundingClientRect();
+      const c = chip?.getBoundingClientRect();
+      return { chip: !!chip, title: chip?.title ?? "", dy: c ? Math.abs((c.top + c.height / 2) - (b.top + b.height / 2)) : NaN, gap: c ? today - (c.left + c.width / 2) : NaN };
+    }).filter((x): x is NonNullable<typeof x> => !!x);
+    return { zoom: be.dataset.zoom, rows, shown, today };
+  }, V);
+  L.check("at 3M", r.zoom === "3m", `data-zoom=${r.zoom}`);
+  L.check("the today line is drawn", r.shown, `display/height of today-line; x ${r.today.toFixed(1)}`);
+  L.check("population", r.rows.length > 0, `${r.rows.length} overdue rows`);
+  r.rows.forEach((x, i) => {
+    L.check(`row ${i} chip`, x.chip && /^Reply was due \d{1,2} [A-Z][a-z]+$/.test(x.title), x.title || "no chip");
+    L.check(`row ${i} centred`, x.dy <= 2, `${x.dy.toFixed(2)}px off the bar's centre`);
+    L.check(`row ${i} clear of today`, x.gap >= 39.5, `${x.gap.toFixed(1)}px left of today`);
+  });
+  L.done(5);
+});
+
+test("L4 · one grouping: list and Birds-eye share keys and order, Closed last, an offer first", async ({ page }) => {
+  const L = new Ledger("L4");
+  const V = await openList(page, WIDE);
+  const list = await page.evaluate((V) => {
+    const keys = [...document.querySelectorAll<HTMLElement>(`${V}.qc169 [data-qc1511='group'], ${V}.qc169 [data-qc153='fold']`)].map((e) => e.dataset.k ?? "");
+    const all = [...document.querySelectorAll<HTMLElement>(`${V}[data-qc172='row']`)];
+    const first = document.querySelector<HTMLElement>(`${V}[data-qc1511='group'][data-k='action'] [data-qc172='row']`);
+    return { keys, offers: all.filter((e) => e.dataset.status === "Offer").length, first: first?.dataset.status ?? null };
+  }, V);
+  await toView(page, "birds");
+  const be = await page.evaluate((V) => [...document.querySelectorAll<HTMLElement>(`${V}[data-qc150='be-group']`)].map((e) => e.dataset.group ?? ""), V);
+  L.check("population", list.keys.length >= 2 && be.length >= 2, `list ${JSON.stringify(list.keys)} · birds-eye ${JSON.stringify(be)}`);
+  L.check("same keys, same order", JSON.stringify(list.keys) === JSON.stringify(be), `list ${JSON.stringify(list.keys)} · birds-eye ${JSON.stringify(be)}`);
+  L.check("the four groups only", list.keys.every((k) => ["action", "window", "nodate", "closed"].includes(k)), JSON.stringify(list.keys));
+  L.check("Closed last (list)", !list.keys.includes("closed") || list.keys[list.keys.length - 1] === "closed", JSON.stringify(list.keys));
+  L.check("Closed last (birds-eye)", !be.includes("closed") || be[be.length - 1] === "closed", JSON.stringify(be));
+  L.check("an offer leads Needs action", list.offers === 0 || list.first === "Offer", `${list.offers} offers; first is ${list.first}`);
+  L.done(6);
+});
+
+/** set a range input the way a drag does: the native setter, then an input event React hears */
+async function setRange(page: Page, V: string, label: string, value: number) {
+  await page.evaluate(({ V, label, value }) => {
+    const el = document.querySelector<HTMLInputElement>(`${V}.qs172 input[aria-label="${label}"]`);
+    if (!el) throw new Error(`no range ${label}`);
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(el, String(value));
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }, { V, label, value });
+  await page.waitForTimeout(500);
+}
+const showing = async (page: Page, V: string) => {
+  const t = await page.locator(`${V}.qs172-h small`).textContent();
+  const m = /(\d+) of (\d+)|All (\d+)/.exec(t ?? "");
+  return m ? Number(m[1] ?? m[3]) : NaN;
+};
+async function clearPanel(page: Page, V: string) {
+  const b = page.locator(`${V}.qs172-h button`);
+  if (await b.count()) { await b.click(); await page.waitForTimeout(500); }
+}
+
+test("L5 · the panel: Stage Queried, Not dated = Birds-eye's no-reply-date, reply + send-by never fewer", async ({ page }) => {
+  const L = new Ledger("L5");
+  const V = await openList(page, WIDE);
+  /* a — Stage Queried: every row left reached Queried and no further (R&R counts as Full) */
+  await page.locator(`${V}.qs172-stg button[title='Queried']`).click();
+  await page.waitForTimeout(800);
+  const st = await page.evaluate((V) => {
+    const later = new Set(["Partial Requested", "Partial Sent", "Full Requested", "Full Sent", "Revise & Resubmit", "Resubmitted", "Offer"]);
+    const rows = [...document.querySelectorAll<HTMLElement>(`${V}[data-qc172='row']`)];
+    const bad = rows.filter((e) => later.has(e.dataset.status ?? "") || e.dataset.furthest === "partial" || e.dataset.furthest === "full");
+    return { n: rows.length, bad: bad.map((e) => `${e.dataset.status}/${e.dataset.furthest}`) };
+  }, V);
+  L.check("Stage Queried · population", st.n > 0, `${st.n} rows`);
+  L.check("Stage Queried · only Queried", st.bad.length === 0, `${st.bad.length} later: ${st.bad.slice(0, 4).join(", ")}`);
+  await clearPanel(page, V);
+
+  /* b — the reply date's Not dated count against Birds-eye's group */
+  const nd = await page.evaluate((V) => {
+    const sec = [...document.querySelectorAll<HTMLElement>(`${V}.qs172-s`)].find((s) => s.querySelector(".qs172-sh b")?.textContent?.includes("reply date"));
+    return sec?.querySelector(".qs172-ck em")?.textContent ?? null;
+  }, V);
+  await toView(page, "birds");
+  const beN = await page.evaluate((V) => document.querySelectorAll(`${V}[data-qc150='be-group'][data-group='nodate'] [data-qc150='be-track']`).length, V);
+  L.check("Not dated · population", n(nd) > 0, `panel ${nd}`);
+  L.check("Not dated = Waiting, no reply date", n(nd) === beN, `panel ${nd} · birds-eye ${beN}`);
+  await toView(page, "list");
+
+  /* c — reply date and send-by date: each alone, then both (a query passes on either) */
+  const all = await showing(page, V);
+  const cases: [string, [string, number][]][] = [
+    ["reply overdue", [["Agent’s reply date to", 0]]],
+    ["send-by overdue", [["Your send-by date to", 0]]],
+    ["reply next 4w", [["Agent’s reply date from", 0], ["Agent’s reply date to", 28]]],
+    ["send-by next 4w", [["Your send-by date from", 0], ["Your send-by date to", 28]]],
+  ];
+  const got: Record<string, number> = {};
+  for (const [name, sets] of cases) {
+    for (const [lab, v] of sets) await setRange(page, V, lab, v);
+    got[name] = await showing(page, V);
+    await clearPanel(page, V);
+  }
+  for (const [a, b] of [["reply overdue", "send-by overdue"], ["reply next 4w", "send-by next 4w"]] as const) {
+    const sets = [...cases.find((c) => c[0] === a)![1], ...cases.find((c) => c[0] === b)![1]];
+    for (const [lab, v] of sets) await setRange(page, V, lab, v);
+    const both = await showing(page, V);
+    await clearPanel(page, V);
+    L.check(`${a} + ${b} · population`, got[a] + got[b] > 0 && got[a] < all, `all ${all}; ${a} ${got[a]}; ${b} ${got[b]}`);
+    L.check(`${a} + ${b} · never fewer`, both >= Math.max(got[a], got[b]), `both ${both}; ${a} ${got[a]}; ${b} ${got[b]}`);
+  }
+  L.done(8);
+});
+
+test("L6 · the panel's type sizes: 12, 14, 16, 18 or 20px only", async ({ page }) => {
+  const L = new Ledger("L6");
+  const V = await openList(page, WIDE);
+  const read = async (where: string) => {
+    const r = await page.evaluate((V) => {
+      const root = document.querySelector<HTMLElement>(`${V}.qs172`)!;
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const out: { t: string; px: number; pill: number | null }[] = [];
+      for (let x = w.nextNode(); x; x = w.nextNode()) {
+        const t = (x.textContent ?? "").trim(); const el = x.parentElement!;
+        if (!t || el.getBoundingClientRect().width === 0) continue;
+        if (el.closest(".qs172-scale")) continue;          // the ranges' numbers
+        if (/^[★▾▴✓\s]+$/.test(t)) continue;               // icon glyphs
+        /* a pill is the shell's standard filter pill: its words are the shell token --sp-fpill-size (primitives.css) */
+        const pill = el.closest(".qs172-chip, .qs172-inc") && !el.closest("em") ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sp-fpill-size")) : null;
+        out.push({ t: t.slice(0, 24), px: parseFloat(getComputedStyle(el).fontSize), pill });
+      }
+      return out;
+    }, V);
+    L.check(`${where} · population`, r.length > 20, `${r.length} text nodes`);
+    const bad = r.filter((x) => (x.pill != null ? x.px !== x.pill : ![12, 14, 16, 18, 20].includes(x.px)));
+    L.check(`${where} · pills read the shell token`, r.some((x) => x.pill != null && x.pill > 0), `${r.filter((x) => x.pill != null).length} pill words`);
+    L.check(`${where} · sizes`, bad.length === 0, bad.slice(0, 6).map((x) => `"${x.t}" ${x.px}px`).join("; ") || `${r.length} nodes, all in the set`);
+  };
+  await read("folded");
+  await page.locator(`${V}.qs172-more`).click();
+  await page.waitForTimeout(400);
+  await page.locator(`${V}.qs172-dd`).click();
+  await page.waitForTimeout(400);
+  await read("More filters open");
+  L.done(6);
+});

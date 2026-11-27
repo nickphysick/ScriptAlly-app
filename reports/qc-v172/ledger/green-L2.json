@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L2",
+  "where": "birds-eye drawn",
+  "ok": true,
+  "detail": "[data-qc150='birds'] in the visible page"
+ },
+ {
+  "lock": "L2",
+  "where": "population",
+  "ok": true,
+  "detail": "88 rows, 121 bars"
+ },
+ {
+  "lock": "L2",
+  "where": "opens on All",
+  "ok": true,
+  "detail": "data-zoom=all"
+ },
+ {
+  "lock": "L2",
+  "where": "every bar inside the card",
+  "ok": true,
+  "detail": "0 of 121 outside"
+ },
+ {
+  "lock": "L2",
+  "where": "no names column",
+  "ok": true,
+  "detail": "0 of 88 name cells drawn"
+ },
+ {
+  "lock": "L2",
+  "where": "hover shows one name label",
+  "ok": true,
+  "detail": "[\"Mira Kovic Old Harbour Literary\"]"
+ }
+]

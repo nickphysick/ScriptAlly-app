@@ -47,7 +47,8 @@ export async function openQc(page: Page, vp: VP, o: QOpt = {}) {
   }, o);
   await openRoute(page, "/queries", vp);
   /* v151 — the desktop page is QcPage151 (its table or its Birds-eye card); the v138 sheet before it; v154 its grid card (Log a query v2.1 Phase 7) */
-  await page.locator(".qc138-sheet [data-qcv='row'], .qc138-sheet [data-qc142='card'], [data-qc151='row'], [data-qc151='birds-card'], [data-qc154='card']").first().waitFor({ timeout: 30_000 });
+  /* v172 — the list's rows are QcRow170 (`data-qc172="row"`) */
+  await page.locator(".qc138-sheet [data-qcv='row'], .qc138-sheet [data-qc142='card'], [data-qc151='row'], [data-qc151='birds-card'], [data-qc154='card'], [data-qc172='row']").first().waitFor({ timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1500);
   await page.mouse.move(5, 5);

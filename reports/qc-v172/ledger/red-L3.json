@@ -1,0 +1,866 @@
+[
+ {
+  "lock": "L3",
+  "where": "at 3M",
+  "ok": true,
+  "detail": "data-zoom=3m"
+ },
+ {
+  "lock": "L3",
+  "where": "the today line is drawn",
+  "ok": true,
+  "detail": "display/height of today-line; x 1171.7"
+ },
+ {
+  "lock": "L3",
+  "where": "population",
+  "ok": true,
+  "detail": "47 overdue rows"
+ },
+ {
+  "lock": "L3",
+  "where": "row 0 chip",
+  "ok": true,
+  "detail": "Reply was due 27 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 0 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 0 clear of today",
+  "ok": true,
+  "detail": "3235.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 1 chip",
+  "ok": true,
+  "detail": "Reply was due 1 January"
+ },
+ {
+  "lock": "L3",
+  "where": "row 1 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 1 clear of today",
+  "ok": true,
+  "detail": "2510.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 2 chip",
+  "ok": true,
+  "detail": "Reply was due 1 January"
+ },
+ {
+  "lock": "L3",
+  "where": "row 2 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 2 clear of today",
+  "ok": true,
+  "detail": "2510.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 3 chip",
+  "ok": true,
+  "detail": "Reply was due 1 January"
+ },
+ {
+  "lock": "L3",
+  "where": "row 3 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 3 clear of today",
+  "ok": true,
+  "detail": "2510.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 4 chip",
+  "ok": true,
+  "detail": "Reply was due 1 January"
+ },
+ {
+  "lock": "L3",
+  "where": "row 4 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 4 clear of today",
+  "ok": true,
+  "detail": "2510.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 5 chip",
+  "ok": true,
+  "detail": "Reply was due 2 March"
+ },
+ {
+  "lock": "L3",
+  "where": "row 5 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 5 clear of today",
+  "ok": true,
+  "detail": "2053.9px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 6 chip",
+  "ok": true,
+  "detail": "Reply was due 10 April"
+ },
+ {
+  "lock": "L3",
+  "where": "row 6 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 6 clear of today",
+  "ok": true,
+  "detail": "1752.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 7 chip",
+  "ok": true,
+  "detail": "Reply was due 15 April"
+ },
+ {
+  "lock": "L3",
+  "where": "row 7 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 7 clear of today",
+  "ok": true,
+  "detail": "1714.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 8 chip",
+  "ok": true,
+  "detail": "Reply was due 16 May"
+ },
+ {
+  "lock": "L3",
+  "where": "row 8 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 8 clear of today",
+  "ok": true,
+  "detail": "1478.3px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 9 chip",
+  "ok": true,
+  "detail": "Reply was due 17 May"
+ },
+ {
+  "lock": "L3",
+  "where": "row 9 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 9 clear of today",
+  "ok": true,
+  "detail": "1470.7px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 10 chip",
+  "ok": true,
+  "detail": "Reply was due 21 May"
+ },
+ {
+  "lock": "L3",
+  "where": "row 10 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 10 clear of today",
+  "ok": true,
+  "detail": "1440.3px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 11 chip",
+  "ok": true,
+  "detail": "Reply was due 9 June"
+ },
+ {
+  "lock": "L3",
+  "where": "row 11 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 11 clear of today",
+  "ok": true,
+  "detail": "1295.8px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 12 chip",
+  "ok": true,
+  "detail": "Reply was due 28 June"
+ },
+ {
+  "lock": "L3",
+  "where": "row 12 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 12 clear of today",
+  "ok": true,
+  "detail": "1156.6px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 13 chip",
+  "ok": true,
+  "detail": "Reply was due 27 July"
+ },
+ {
+  "lock": "L3",
+  "where": "row 13 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 13 clear of today",
+  "ok": true,
+  "detail": "936.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 14 chip",
+  "ok": true,
+  "detail": "Reply was due 10 August"
+ },
+ {
+  "lock": "L3",
+  "where": "row 14 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 14 clear of today",
+  "ok": true,
+  "detail": "825.5px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 15 chip",
+  "ok": true,
+  "detail": "Reply was due 19 August"
+ },
+ {
+  "lock": "L3",
+  "where": "row 15 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 15 clear of today",
+  "ok": true,
+  "detail": "755.9px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 16 chip",
+  "ok": true,
+  "detail": "Reply was due 24 August"
+ },
+ {
+  "lock": "L3",
+  "where": "row 16 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 16 clear of today",
+  "ok": true,
+  "detail": "723.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 17 chip",
+  "ok": true,
+  "detail": "Reply was due 26 August"
+ },
+ {
+  "lock": "L3",
+  "where": "row 17 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 17 clear of today",
+  "ok": true,
+  "detail": "704.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 18 chip",
+  "ok": true,
+  "detail": "Reply was due 26 August"
+ },
+ {
+  "lock": "L3",
+  "where": "row 18 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 18 clear of today",
+  "ok": true,
+  "detail": "704.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 19 chip",
+  "ok": true,
+  "detail": "Reply was due 8 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 19 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 19 clear of today",
+  "ok": true,
+  "detail": "609.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 20 chip",
+  "ok": true,
+  "detail": "Reply was due 12 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 20 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 20 clear of today",
+  "ok": true,
+  "detail": "578.6px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 21 chip",
+  "ok": true,
+  "detail": "Reply was due 19 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 21 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 21 clear of today",
+  "ok": true,
+  "detail": "525.4px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 22 chip",
+  "ok": true,
+  "detail": "Reply was due 21 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 22 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 22 clear of today",
+  "ok": true,
+  "detail": "510.2px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 23 chip",
+  "ok": true,
+  "detail": "Reply was due 23 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 23 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 23 clear of today",
+  "ok": true,
+  "detail": "495.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 24 chip",
+  "ok": true,
+  "detail": "Reply was due 26 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 24 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 24 clear of today",
+  "ok": true,
+  "detail": "472.2px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 25 chip",
+  "ok": true,
+  "detail": "Reply was due 28 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 25 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 25 clear of today",
+  "ok": true,
+  "detail": "457.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 26 chip",
+  "ok": true,
+  "detail": "Reply was due 29 September"
+ },
+ {
+  "lock": "L3",
+  "where": "row 26 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 26 clear of today",
+  "ok": true,
+  "detail": "449.4px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 27 chip",
+  "ok": true,
+  "detail": "Reply was due 4 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 27 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 27 clear of today",
+  "ok": true,
+  "detail": "411.3px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 28 chip",
+  "ok": true,
+  "detail": "Reply was due 4 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 28 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 28 clear of today",
+  "ok": true,
+  "detail": "411.3px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 29 chip",
+  "ok": true,
+  "detail": "Reply was due 4 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 29 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 29 clear of today",
+  "ok": true,
+  "detail": "411.3px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 30 chip",
+  "ok": true,
+  "detail": "Reply was due 4 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 30 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 30 clear of today",
+  "ok": true,
+  "detail": "407.5px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 31 chip",
+  "ok": true,
+  "detail": "Reply was due 11 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 31 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 31 clear of today",
+  "ok": true,
+  "detail": "358.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 32 chip",
+  "ok": true,
+  "detail": "Reply was due 14 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 32 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 32 clear of today",
+  "ok": true,
+  "detail": "335.3px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 33 chip",
+  "ok": true,
+  "detail": "Reply was due 16 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 33 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 33 clear of today",
+  "ok": true,
+  "detail": "320.1px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 34 chip",
+  "ok": true,
+  "detail": "Reply was due 16 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 34 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 34 clear of today",
+  "ok": true,
+  "detail": "317.2px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 35 chip",
+  "ok": true,
+  "detail": "Reply was due 16 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 35 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 35 clear of today",
+  "ok": true,
+  "detail": "314.9px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 36 chip",
+  "ok": true,
+  "detail": "Reply was due 19 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 36 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 36 clear of today",
+  "ok": true,
+  "detail": "297.3px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 37 chip",
+  "ok": true,
+  "detail": "Reply was due 20 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 37 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 37 clear of today",
+  "ok": true,
+  "detail": "286.8px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 38 chip",
+  "ok": true,
+  "detail": "Reply was due 27 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 38 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 38 clear of today",
+  "ok": true,
+  "detail": "236.4px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 39 chip",
+  "ok": true,
+  "detail": "Reply was due 29 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 39 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 39 clear of today",
+  "ok": true,
+  "detail": "216.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 40 chip",
+  "ok": true,
+  "detail": "Reply was due 31 October"
+ },
+ {
+  "lock": "L3",
+  "where": "row 40 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 40 clear of today",
+  "ok": true,
+  "detail": "206.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 41 chip",
+  "ok": true,
+  "detail": "Reply was due 11 November"
+ },
+ {
+  "lock": "L3",
+  "where": "row 41 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 41 clear of today",
+  "ok": true,
+  "detail": "122.4px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 42 chip",
+  "ok": true,
+  "detail": "Reply was due 14 November"
+ },
+ {
+  "lock": "L3",
+  "where": "row 42 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 42 clear of today",
+  "ok": true,
+  "detail": "99.5px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 43 chip",
+  "ok": true,
+  "detail": "Reply was due 15 November"
+ },
+ {
+  "lock": "L3",
+  "where": "row 43 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 43 clear of today",
+  "ok": true,
+  "detail": "86.2px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 44 chip",
+  "ok": true,
+  "detail": "Reply was due 15 November"
+ },
+ {
+  "lock": "L3",
+  "where": "row 44 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 44 clear of today",
+  "ok": true,
+  "detail": "86.0px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 45 chip",
+  "ok": true,
+  "detail": "Reply was due 15 November"
+ },
+ {
+  "lock": "L3",
+  "where": "row 45 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 45 clear of today",
+  "ok": true,
+  "detail": "85.8px left of today"
+ },
+ {
+  "lock": "L3",
+  "where": "row 46 chip",
+  "ok": true,
+  "detail": "Reply was due 18 November"
+ },
+ {
+  "lock": "L3",
+  "where": "row 46 centred",
+  "ok": false,
+  "detail": "10.41px off the bar's centre"
+ },
+ {
+  "lock": "L3",
+  "where": "row 46 clear of today",
+  "ok": true,
+  "detail": "69.1px left of today"
+ }
+]

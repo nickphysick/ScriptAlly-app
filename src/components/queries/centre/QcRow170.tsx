@@ -72,7 +72,7 @@ export const QcRow170: React.FC<{ row: QcRow; nowMs: number; selected: boolean; 
     </span>
   );
   return (
-    <div ref={ref} className={`qr170${selected ? " is-sel" : ""}${closed ? " is-closed" : ""}`} id={`query-row-${r.id}`} role="button" tabIndex={0} data-qcv="row" data-id={r.id}
+    <div ref={ref} className={`qr170${selected ? " is-sel" : ""}${closed ? " is-closed" : ""}`} id={`query-row-${r.id}`} role="button" tabIndex={0} data-qcv="row" data-qc172="row" data-id={r.id} data-status={r.status} data-furthest={r.furthest}
       onClick={() => onOpen(r.id)} onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); onOpen(r.id); } }}
       aria-label={`${r.agentName}, ${r.agency}`}>
       {seal}

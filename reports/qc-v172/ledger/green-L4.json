@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L4",
+  "where": "population",
+  "ok": true,
+  "detail": "list [\"action\",\"window\",\"nodate\",\"closed\"] · birds-eye [\"action\",\"window\",\"nodate\",\"closed\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "same keys, same order",
+  "ok": true,
+  "detail": "list [\"action\",\"window\",\"nodate\",\"closed\"] · birds-eye [\"action\",\"window\",\"nodate\",\"closed\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "the four groups only",
+  "ok": true,
+  "detail": "[\"action\",\"window\",\"nodate\",\"closed\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "Closed last (list)",
+  "ok": true,
+  "detail": "[\"action\",\"window\",\"nodate\",\"closed\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "Closed last (birds-eye)",
+  "ok": true,
+  "detail": "[\"action\",\"window\",\"nodate\",\"closed\"]"
+ },
+ {
+  "lock": "L4",
+  "where": "an offer leads Needs action",
+  "ok": true,
+  "detail": "2 offers; first is Offer"
+ }
+]
