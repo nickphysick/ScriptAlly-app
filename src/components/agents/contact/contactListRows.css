@@ -127,17 +127,30 @@
    ContactSheet26), its top corners rounded; stuck, the page's ground above it (so no row shows over it) and a soft shadow */
 .cl26-card .cl26-th.cl26-pin, .cl27 .cl26-card .cl26-th.cl26-pin { position: sticky; top: var(--clr-th-top, 12px); z-index: 6; }
 .cl26-card .cl26-th[data-stuck] { border-radius: 13px 13px 0 0; box-shadow: 0 0 0 1px var(--clr-head-edge), 0 8px 14px -10px rgba(28, 19, 15, .35); }
+/* Contact list rows v1.2.1 · phase 1 — THE CAP: one opaque surface owned by the pin (the heading row's ::before, never a
+   second sticky element). Stuck, it paints the page's ground from the scroller's top (the shell's top bar) down to the
+   heading row's top edge — its height IS the heading's sticky top, `--clr-th-top`, read off the filter panel — and across
+   the card's full width and its rim (14px past the frame on each side: the frame's line, the card's 10px white and its
+   ring). Rows, the card's white top and the light bar pass behind it; only the slim bar (z-index 40) sits over it.
+   v1.2's 14px strip was too short to reach the slim bar, and the frame's clip cut anything past 14px outside it. */
 .cl26-card .cl26-th::before {
-  content: ""; position: absolute; left: -14px; right: -14px; top: -14px; height: 14px; background: var(--ws-page, #f2eee8);
-  opacity: 0; pointer-events: none;
+  content: ""; position: absolute; left: -14px; right: -14px; top: calc(-1 * var(--clr-th-top, 12px)); height: var(--clr-th-top, 12px);
+  background: var(--ws-page, #f2eee8); opacity: 0; pointer-events: none;
 }
-/* stuck, the ground is solid to the pointer too: the rows it hides cannot be clicked through it */
+/* stuck, the cap is solid to the pointer too: the rows it hides cannot be clicked through it */
 .cl26-card .cl26-th[data-stuck]::before { opacity: 1; pointer-events: auto; }
+/* the frame no longer clips (the cap reaches past it); its rounded corners are drawn by its first and last rows instead */
+.cl26-card .cl26-frame.cl26-frame { overflow: visible; }
+.cl26-card .cl26-frame > :first-child { border-radius: 12px 12px 0 0; }
+.cl26-card .cl26-frame .cl26-sec:last-child .cl26-row:last-child { border-radius: 0 0 12px 0; }
+.cl26-card[data-kind="all"] .cl26-frame .cl26-sec:last-child .cl26-row:last-child, .cl26-card[data-kind="set"] .cl26-frame .cl26-sec:last-child .cl26-row:last-child { border-radius: 0 0 12px 12px; }
 /* the margin labels stick under the pinned headings */
 .cl27 .cl26-card .cl26-mgl { top: calc(var(--clr-th-top, 12px) + var(--cl26-pin-h, 54px) + 8px); }
 /* the light bar above the list no longer sticks on this page: pinned, the headings are the list's top (the ref) */
 @media (min-width: 768px) {
-  .cl27 .qc153-main > .qc154-tbw.qc154-tbw { position: relative; top: auto; }
+  /* v1.2.1 — and it stacks with the page (the Query Centre's rule gives the strip z-index 30, which put it OVER the pinned
+     headings' cap: the light bar peeking under the shell's top bar was this) */
+  .cl27 .qc153-main > .qc154-tbw.qc154-tbw { position: relative; top: auto; z-index: auto; }
   /* the panel scrolls inside itself when the window is shorter than it (its max-height is set by ContactSheet26) */
   .cl27 .qc153-rail.fp.fp { overflow-y: auto; overscroll-behavior: contain; }
 }

@@ -180,3 +180,16 @@ describe("Contact list rows v1.2 · Phase 3 — the status and its action", () =
     expect(v2).toContain('label: full ? "Send your full" : "Send your partial"');
   });
 });
+
+describe("Contact list rows v1.2.1 · Phase 1 — nothing scrolls above the pinned headings", () => {
+  it("one opaque cap owned by the pin: from the scroller's top to the heading's top, across the card and its rim", () => {
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toContain("top: calc(-1 * var(--clr-th-top, 12px)); height: var(--clr-th-top, 12px);");
+    expect(css).toMatch(/\.cl26-card \.cl26-th::before \{\s*content: ""; position: absolute; left: -14px; right: -14px;/);
+    expect(css).toContain(".cl26-card .cl26-frame.cl26-frame { overflow: visible; }");
+    /* the light bar stacks with the page, under the cap */
+    expect(css).toContain(".cl27 .qc153-main > .qc154-tbw.qc154-tbw { position: relative; top: auto; z-index: auto; }");
+    /* never a second sticky element racing the first */
+    expect((css.match(/position: sticky/g) ?? []).length).toBe(1);
+  });
+});
