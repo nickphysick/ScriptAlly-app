@@ -1,0 +1,117 @@
+[
+ {
+  "where": "precondition: grouped by Letter",
+  "ok": true,
+  "detail": "index true"
+ },
+ {
+  "where": "the letter margin's width (reported)",
+  "ok": true,
+  "detail": "margin 18px"
+ },
+ {
+  "where": "population: rows with genres",
+  "ok": true,
+  "detail": "17"
+ },
+ {
+  "where": "Achebe · a full tag at 1280",
+  "ok": true,
+  "detail": "1 full tags · cell 114.0 · tags need 75"
+ },
+ {
+  "where": "Blackwood · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 76/50"
+ },
+ {
+  "where": "Ellison · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 76/73"
+ },
+ {
+  "where": "Ferris · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 76/65"
+ },
+ {
+  "where": "Holt · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 73/98"
+ },
+ {
+  "where": "Hussain · a full tag at 1280",
+  "ok": true,
+  "detail": "1 full tags · cell 114.0 · tags need 75/87"
+ },
+ {
+  "where": "Morrow · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 87/73"
+ },
+ {
+  "where": "Okafor · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 76/73"
+ },
+ {
+  "where": "Pemberton · a full tag at 1280",
+  "ok": true,
+  "detail": "1 full tags · cell 114.0 · tags need 76/113"
+ },
+ {
+  "where": "Pryce · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 87/51"
+ },
+ {
+  "where": "Quinn · a full tag at 1280",
+  "ok": true,
+  "detail": "1 full tags · cell 114.0 · tags need 87"
+ },
+ {
+  "where": "Reed · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 76/73"
+ },
+ {
+  "where": "Sandhu · a full tag at 1280",
+  "ok": true,
+  "detail": "1 full tags · cell 114.0 · tags need 101"
+ },
+ {
+  "where": "Stirling · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 87/87"
+ },
+ {
+  "where": "Tan · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 76/87"
+ },
+ {
+  "where": "Vane-Coe · a full tag at 1280",
+  "ok": true,
+  "detail": "1 full tags · cell 114.0 · tags need 73/113"
+ },
+ {
+  "where": "Whitfield · a full tag at 1280",
+  "ok": true,
+  "detail": "2 full tags · cell 114.0 · tags need 76/87"
+ },
+ {
+  "where": "one Queried section",
+  "ok": true,
+  "detail": "sections t:fr t:pr t:nudge t:fs t:queried t:none t:closed"
+ },
+ {
+  "where": "a Nudge due section holding the nudge due (Ferris), not inside Queried",
+  "ok": true,
+  "detail": "sections t:fr t:pr t:nudge t:fs t:queried t:none t:closed"
+ },
+ {
+  "where": "Nudge due sits above Full sent and below every your-move stage",
+  "ok": true,
+  "detail": "sections t:fr t:pr t:nudge t:fs t:queried t:none t:closed"
+ }
+]

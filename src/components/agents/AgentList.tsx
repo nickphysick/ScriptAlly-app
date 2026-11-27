@@ -76,9 +76,7 @@ import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wid
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { getHomeCountry, normaliseCountry } from "../../lib/territory";
-/** Contact list rows v1.2 — the agent's country is set and is not the writer's home country */
-const isAbroad = (country: string | undefined, home: string): boolean => { const c = normaliseCountry(country); return !!c && c !== normaliseCountry(home); };
+import { getHomeCountry } from "../../lib/territory";
 import { agentBack, openResponse, responseHosted } from "../../lib/queryPanelStore";
 import { type ContactPop } from "./contact/ContactListControls";
 import { ESC_LEVEL, escapeDepth } from "../../lib/escapeStack";
@@ -341,9 +339,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* Contact list rows v1.2 — the writer's home country (an ISO code), read before the facts that use it */
   const homeCode = getHomeCountry(currentUser);
   const factsAll = useMemo(
-    /* Contact list rows v1.2 — `abroad` (the panel's "Outside the UK"): the agent's country set and not the writer's home */
-    () => agents.map((a) => ({ ...agentFacts(a, qcRows, scoped?.id ?? null), gaps: agentGapAction(hk, a.id)?.n ?? 0, abroad: isAbroad(a.country, homeCode) })),
-    [agents, qcRows, scoped, hk, homeCode],
+    /* Contact list rows v1.3 — `lhGaps`: List health's own gap count (Housekeeping's `gapsById`, the one gap rule), for the
+       panel's Full profile / Has gaps */
+    () => agents.map((a) => ({ ...agentFacts(a, qcRows, scoped?.id ?? null), gaps: agentGapAction(hk, a.id)?.n ?? 0, lhGaps: hk.gapsById.get(a.id)?.length ?? 0 })),
+    [agents, qcRows, scoped, hk],
   );
   /* ruling Q5: "takes the book" — any of the agent's genres matching the main genre or any subGenre */
   /* the pool: Find and the "At a glance" group — so every chip's count is faceted under them */
@@ -568,7 +567,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
          does the saved record still match the pool and the panel, and where does it land */
       const savedFacts = agentFacts(saved, qcRows, scoped?.id ?? null);
       savedFacts.gaps = agentGapAction(hk, saved.id)?.n ?? 0;
-      savedFacts.abroad = isAbroad(saved.country, homeCode);
+      savedFacts.lhGaps = hk.gapsById.get(saved.id)?.length ?? 0;
       const survives = inPool(savedFacts) && matchesContactFilters(savedFacts, filters);
       const afterAll = [...agents.filter((a) => a.id !== saved.id), saved]
         .map((a) => (a.id === saved.id ? savedFacts : (factsAll.find((x) => x.agent.id === a.id) ?? agentFacts(a, qcRows, scoped?.id ?? null))));
@@ -1136,7 +1135,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the Views panel (sticky; QC layout v1), then the list */}
         <div className="qc153-cl" data-cl27="columns">
         <div className="qc153-railcol" data-cl27="rail-column">
-          <ContactViews homeCountry={homeCode} all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} pool={inPool}
+          <ContactViews all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} pool={inPool}
             genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={frameState ? 0 : listPool.length}
             onReset={clearRailFilters} />
         </div>

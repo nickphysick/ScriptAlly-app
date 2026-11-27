@@ -1,0 +1,262 @@
+[
+ {
+  "where": "mouse · Nudge · the words",
+  "ok": true,
+  "detail": "button \"Nudge\""
+ },
+ {
+  "where": "mouse · Nudge · a journey started",
+  "ok": true,
+  "detail": "journeys 0 → 1"
+ },
+ {
+  "where": "mouse · Nudge · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"drawer\",\"mode\":\"nudge\",\"queryId\":\"clr-q-ferris\",\"agentId\":null} want mode nudge queryId clr-q-ferris"
+ },
+ {
+  "where": "mouse · Nudge · its host is on screen",
+  "ok": true,
+  "detail": "drawer true side panel false"
+ },
+ {
+  "where": "mouse · Nudge · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "mouse · Send your partial · the words",
+  "ok": true,
+  "detail": "button \"Send your partial\""
+ },
+ {
+  "where": "mouse · Send your partial · a journey started",
+  "ok": true,
+  "detail": "journeys 1 → 2"
+ },
+ {
+  "where": "mouse · Send your partial · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"card-journey\",\"mode\":\"send\",\"queryId\":\"clr-q-tan\"} want mode send queryId clr-q-tan"
+ },
+ {
+  "where": "mouse · Send your partial · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "mouse · Send your partial · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "mouse · Send your full · the words",
+  "ok": true,
+  "detail": "button \"Send your full\""
+ },
+ {
+  "where": "mouse · Send your full · a journey started",
+  "ok": true,
+  "detail": "journeys 2 → 3"
+ },
+ {
+  "where": "mouse · Send your full · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"card-journey\",\"mode\":\"send\",\"queryId\":\"clr-q-okafor\"} want mode send queryId clr-q-okafor"
+ },
+ {
+  "where": "mouse · Send your full · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "mouse · Send your full · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "mouse · Record a response · the words",
+  "ok": true,
+  "detail": "button \"Record a response\""
+ },
+ {
+  "where": "mouse · Record a response · a journey started",
+  "ok": true,
+  "detail": "journeys 3 → 4"
+ },
+ {
+  "where": "mouse · Record a response · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"response\",\"mode\":\"resp\",\"queryId\":\"clr-q-holt\"} want mode resp queryId clr-q-holt"
+ },
+ {
+  "where": "mouse · Record a response · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "mouse · Record a response · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "mouse · Log a query · the words",
+  "ok": true,
+  "detail": "button \"Log a query\""
+ },
+ {
+  "where": "mouse · Log a query · a journey started",
+  "ok": true,
+  "detail": "journeys 4 → 5"
+ },
+ {
+  "where": "mouse · Log a query · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"drawer\",\"mode\":\"log\",\"queryId\":null,\"agentId\":\"clr-ellison\"} want mode log agentId clr-ellison"
+ },
+ {
+  "where": "mouse · Log a query · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "mouse · Log a query · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "keyboard · Nudge · the words",
+  "ok": true,
+  "detail": "button \"Nudge\""
+ },
+ {
+  "where": "keyboard · Nudge · a journey started",
+  "ok": true,
+  "detail": "journeys 5 → 6"
+ },
+ {
+  "where": "keyboard · Nudge · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"drawer\",\"mode\":\"nudge\",\"queryId\":\"clr-q-ferris\",\"agentId\":null} want mode nudge queryId clr-q-ferris"
+ },
+ {
+  "where": "keyboard · Nudge · its host is on screen",
+  "ok": true,
+  "detail": "drawer true side panel false"
+ },
+ {
+  "where": "keyboard · Nudge · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "keyboard · Send your partial · the words",
+  "ok": true,
+  "detail": "button \"Send your partial\""
+ },
+ {
+  "where": "keyboard · Send your partial · a journey started",
+  "ok": true,
+  "detail": "journeys 6 → 7"
+ },
+ {
+  "where": "keyboard · Send your partial · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"card-journey\",\"mode\":\"send\",\"queryId\":\"clr-q-tan\"} want mode send queryId clr-q-tan"
+ },
+ {
+  "where": "keyboard · Send your partial · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "keyboard · Send your partial · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "keyboard · Send your full · the words",
+  "ok": true,
+  "detail": "button \"Send your full\""
+ },
+ {
+  "where": "keyboard · Send your full · a journey started",
+  "ok": true,
+  "detail": "journeys 7 → 8"
+ },
+ {
+  "where": "keyboard · Send your full · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"card-journey\",\"mode\":\"send\",\"queryId\":\"clr-q-okafor\"} want mode send queryId clr-q-okafor"
+ },
+ {
+  "where": "keyboard · Send your full · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "keyboard · Send your full · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "keyboard · Record a response · the words",
+  "ok": true,
+  "detail": "button \"Record a response\""
+ },
+ {
+  "where": "keyboard · Record a response · a journey started",
+  "ok": true,
+  "detail": "journeys 8 → 9"
+ },
+ {
+  "where": "keyboard · Record a response · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"response\",\"mode\":\"resp\",\"queryId\":\"clr-q-holt\"} want mode resp queryId clr-q-holt"
+ },
+ {
+  "where": "keyboard · Record a response · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "keyboard · Record a response · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "keyboard · Log a query · the words",
+  "ok": true,
+  "detail": "button \"Log a query\""
+ },
+ {
+  "where": "keyboard · Log a query · a journey started",
+  "ok": true,
+  "detail": "journeys 9 → 10"
+ },
+ {
+  "where": "keyboard · Log a query · its journey and this agent's query",
+  "ok": true,
+  "detail": "last {\"via\":\"drawer\",\"mode\":\"log\",\"queryId\":null,\"agentId\":\"clr-ellison\"} want mode log agentId clr-ellison"
+ },
+ {
+  "where": "keyboard · Log a query · its host is on screen",
+  "ok": true,
+  "detail": "drawer false side panel true"
+ },
+ {
+  "where": "keyboard · Log a query · the agent card did not open",
+  "ok": true,
+  "detail": "card false"
+ },
+ {
+  "where": "the page is live again after the journeys (nothing left open)",
+  "ok": true,
+  "detail": "inert false"
+ },
+ {
+  "where": "elsewhere on the row opens the card",
+  "ok": true,
+  "detail": ""
+ }
+]

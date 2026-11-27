@@ -2,12 +2,23 @@
 
 ## Current state
 
-- Newest recorded build: Contact list rows v1.2 (26 Nov, branch-only, section below); before it rows v1. Before it: Contact list v18 → v18.3 (15–17 Oct; refs design-refs/contact-list-v18*/, reports reports/contact-list-v18*/). v18's branch tip is in main.
+- Newest recorded build: Contact list rows v1.3 (27 Nov, branch-only, section below); before it rows v1.2.1, v1.2, v1. Before it: Contact list v18 → v18.3 (15–17 Oct; refs design-refs/contact-list-v18*/, reports reports/contact-list-v18*/). v18's branch tip is in main.
 - The agent card v1 (5 Oct) is the only agent editor; v16's agent panel and full screen stand where v17/v18 do not replace them.
 - The Agent list spec (July) and v11–v15 are older builds kept for their data laws (the three axes, materials storage, the two-systems exception).
 - Agent location/territory: ISO alpha-2 `country` + `homeCountry`; see the section of that name.
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
+
+## Branch-only (not on main): `contact-list-rows-v1-3` — the scroll fixed properly, the smart filter panel, v1.2.1's answers (27 Nov; ref = design-refs/contact-list-rows-v1-3/contact-list-rows-v1-3.html; report reports/contact-list-rows-v1-3/REPORT.md)
+- **⚠️ NOTHING SCROLLS ABOVE THE SLIM BAR:** the slim bar's ground (its `::before`) is joined by an `::after` from the sheet's top (`-var(--pin-cover)`) down to the bar, across the sheet's full width (`--qc156-bl/-br`). The pin's cap spans the card and its rim (`left/right: -28px`). One opaque surface owns everything above the heading row; the light bar still scrolls away.
+- **The smart panel (the ref's v4.18, ContactViews on the shared shell):** quick pairs Queried / Not queried, Open / Closed · Minimum fit (five stars, star k = fit ≥ k; "Not rated" include pill, disabled until a minimum) · Genres sought (four quick pills, order fixed once open; "Find another genre" with an INLINE list, 168 max) · Reply time (two handles 1–16+ wks; "Not known" starts on once a range is set) · Location (a dropdown with an inline multi-select list of the countries on file, rows 28, five then scrolling) · Always reply / Not always, Full profile / Has gaps.
+- **`ContactFilters`:** `fitMin`, `fitUnrated`, `rt`, `rtUnknown`, `countries`, `alwaysReply`, `profile` replace v1.2's `fit`, `reply`, `abroad`, `noGenres` (and `fitMatches`, `replyMatches`, territory's `countryShortName`). A remembered set drops the retired keys. Counts are faceted (`lib/contactPanel` `panelCounts`).
+- **"Has gaps" is List health's rule:** `AgentFacts.lhGaps` = `hk.gapsById` (every gap, including those deferred with "Later"; missing genres count). The Housekeeping list reads `byAgent`, which hides deferred gaps: one rule, two views.
+- **⚠️ The panel is ~36px tighter than the ref's vertical rhythm** (sections 8px, heads 6px below, pairs 30 high): the ref measures 632 and this shell leaves 608 under the panel's sticky top at 1440×900.
+- **Rules are `.cl27 .fp.fp`** (the shell's `:is(.qc151.qc153, .cl27)` outranks `.cl27 .fp`).
+- **Words:** "Send your partial / Send your full" on the Query Centre footer (`qcFoot1522`), timeline ghost (`qcTimeline`), phone button (`queriesPhone`) and parked chip (`queryActions/parking`); saved to-do titles untouched.
+- **Status sort, grouped by Letter:** a nudge due (your move on queried / partial sent / full sent / resubmitted) gets its own "Nudge due" section after the your-move stages and directly above Full sent.
+- **Locks:** M1–M36 in `tests/e2e/contactListRows.measure.ts` (`CLR_MUTATE=m28` deletes the above-slim fix); unit `contactListRows.test.tsx`, `contactQcLayout.test.tsx`, `lib/contactPanel.test.ts`.
 
 ## Branch-only (not on main): `contact-list-rows-v1-2-1` — three fixes from dev, the compact panel, v1.2's answers (27 Nov; ref = design-refs/contact-list-rows-v1-2-1/; report reports/contact-list-rows-v1-2-1/REPORT.md)
 - **⚠️ ONE OPAQUE CAP OWNED BY THE PIN:** stuck, the heading row's `::before` paints the page's ground from the scroller's top down to the heading (its height IS `--clr-th-top`) across the card and rim. The frame no longer clips (its first and last rows draw its corners); the light bar stacks with the page (`z-index: auto` — the Query Centre's 30 put it over the cap). Never a second sticky element.

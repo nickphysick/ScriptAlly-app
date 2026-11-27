@@ -480,7 +480,7 @@ for (const vp of SIZES) {
 const D = String.raw`\d{1,2} [A-Z][a-z]{2}( \d{4})?`;
 /** one fixture per row of §3: [fixture, icon, line 1, line 2, button, tone, second action] */
 const FOOT: [string, string, RegExp, RegExp, string, string, string | null][] = [
-  ["fullreq", "stage", /^Send the full$/, new RegExp(String.raw`^\d+ days? left · by ${D}$`), "Mark full sent", "navy", null],
+  ["fullreq", "stage", /^Send your full$/, new RegExp(String.raw`^\d+ days? left · by ${D}$`), "Mark full sent", "navy", null],
   ["rr", "stage", /^Revise and resubmit$/, new RegExp(`^Rhea asked on ${D}$`), "Mark revision sent", "navy", null],
   ["offer", "stage", /^Olive made an offer$/, new RegExp(String.raw`^\d+ days? left · answer by ${D}$`), "Answer the offer", "navy", "Tell other agents"],
   ["offertold", "stage", /^Tom made an offer$/, new RegExp(`^You told 6 others · deadline ${D}$`), "Answer the offer", "navy", null],

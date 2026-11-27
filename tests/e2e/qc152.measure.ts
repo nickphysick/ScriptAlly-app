@@ -317,7 +317,7 @@ for (const vp of SIZES) {
       await open(page, vp);
       const WANT: Record<string, { lead: RegExp; sub: RegExp; btn: string; tone: string }> = {
         offer: { lead: /^Olive made an offer$/, sub: /^\d+ days? left · answer by \d{1,2} \w{3}$/, btn: "Answer the offer", tone: "navy" },
-        materials: { lead: /^Send the partial$/, sub: /^\d+ days? left · by \d{1,2} \w{3}$/, btn: "Mark partial sent", tone: "navy" },
+        materials: { lead: /^Send your partial$/, sub: /^\d+ days? left · by \d{1,2} \w{3}$/, btn: "Mark partial sent", tone: "navy" },
         nudge: { lead: /^No reply from Priya yet$/, sub: /^Reply was due \d{1,2} \w{3} · \d+ days? ago$/, btn: "Nudge", tone: "outline" },
         agent: { lead: /^Waiting on Rufus$/, sub: /^Reply expected by \d{1,2} \w{3}$/, btn: "Record a response", tone: "outline" },
         quiet: { lead: /^No reply from Quinn$/, sub: /^Quiet since \d{1,2} \w{3} · close it, or keep waiting$/, btn: "Close it", tone: "outline" },

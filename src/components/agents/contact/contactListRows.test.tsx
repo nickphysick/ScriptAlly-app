@@ -108,7 +108,13 @@ describe("Contact list rows v1 · Phase 3 — sorting and search", () => {
     /* RE-POINTED by v1.2 (5.2): one Queried section, never two, the nudge due first within it */
     const q = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs")], "status");
     /* RE-POINTED by v1.2.1 (4.3): the stage sections follow the sort's order — Full sent above a waiting Queried */
-    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:fs:f", "t:queried:nw"]);
+    /* RE-POINTED by v1.3 (3.3): a nudge due gets its own section, after your move's stages and above Full sent */
+    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:nudge:n", "t:fs:f", "t:queried:w"]);
+    const all = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs"), st("p", "you", "pr"), st("o", "you", "offer"), st("x", "closed", "closed")], "status");
+    const S = sections(all, "letter", "status");
+    expect(S.map((s) => s.key)).toEqual(["t:offer", "t:pr", "t:nudge", "t:fs", "t:queried", "t:closed"]);
+    expect(S.find((s) => s.nudge)!.label).toBe("Nudge due");
+    expect(sections(all, "letter", "status", true).map((s) => s.key)).toEqual(["t:closed", "t:queried", "t:fs", "t:nudge", "t:pr", "t:offer"]);
   });
   it("the search reads Filter by name or agency, and this page hides the \"/\" hint", () => {
     expect(FIND_AGENT).toBe("Filter by name or agency");
@@ -187,7 +193,8 @@ describe("Contact list rows v1.2.1 · Phase 1 — nothing scrolls above the pinn
   it("one opaque cap owned by the pin: from the scroller's top to the heading's top, across the card and its rim", () => {
     const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(css).toContain("top: calc(-1 * var(--clr-th-top, 12px)); height: var(--clr-th-top, 12px);");
-    expect(css).toMatch(/\.cl26-card \.cl26-th::before \{\s*content: ""; position: absolute; left: -14px; right: -14px;/);
+    /* RE-POINTED by v1.3 · Phase 1: 28px past the frame each side (the card's side shadow sat in the gutter) */
+    expect(css).toMatch(/\.cl26-card \.cl26-th::before \{\s*content: ""; position: absolute; left: -28px; right: -28px;/);
     expect(css).toContain(".cl26-card .cl26-frame.cl26-frame { overflow: visible; }");
     /* the light bar stacks with the page, under the cap */
     expect(css).toContain(".cl27 .qc153-main > .qc154-tbw.qc154-tbw { position: relative; top: auto; z-index: auto; }");
@@ -209,14 +216,25 @@ describe("Contact list rows v1.2.1 · Phase 2 — the row's action gets its own 
 });
 
 describe("Contact list rows v1.2.1 · Phase 4 — v1.2's answers", () => {
-  it("Outside {the home country's short name}", async () => {
-    const { countryShortName } = await import("../../../lib/territory");
-    expect([countryShortName("GB"), countryShortName("US"), countryShortName("IE"), countryShortName("")]).toEqual(["the UK", "the US", "Ireland", "your country"]);
+  /* RE-POINTED by Contact list rows v1.3 · Phase 2 — the Outside {home} pill is gone (Location replaces it), and with it
+     territory's countryShortName */
+  it("the Outside pill is gone with its short-name helper", async () => {
+    const t = await import("../../../lib/territory");
+    expect("countryShortName" in t).toBe(false);
+    expect(read("./ContactViews.tsx").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "")).not.toMatch(/Outside|abroad/);
   });
   it("one set of action words on the dashboard feed, the to-do, the calendar pill and the history story", () => {
     for (const f of ["dashFeed.ts", "calendarPill.ts", "contactStory255.ts", "timelineCopy.ts", "todoBoard.ts"]) {
       const src = readFileSync(new URL(`../../../lib/${f}`, import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       expect(src, f).not.toMatch(/"Send the (partial|full|revision)"|`Send the full to/);
     }
+  });
+});
+
+describe("Contact list rows v1.3 · Phase 1 — nothing scrolls above the slim bar", () => {
+  it("the slim bar's ground reaches up to the sheet's top edge, across its full width", () => {
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.clv-group\.cl27 > \.qc156-slim\[data-shown\]::after \{\s*content: ""; position: absolute; z-index: -1; top: calc\(-1 \* var\(--pin-cover, 12px\)\); height: var\(--pin-cover, 12px\);/);
+    expect((css.match(/position: sticky/g) ?? []).length).toBe(1);
   });
 });

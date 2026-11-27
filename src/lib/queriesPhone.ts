@@ -300,7 +300,7 @@ export function cheerWords(kind: Cheer, r: QcRow, rows: readonly QcRow[], msTitl
     headline: `${first} wants the ${kind === "full" ? "full" : "partial"}!`,
     line: `That’s your ${ordinal(Math.max(1, n))} ${what}${book}.${by ? ` Send it by ${by}.` : ""}`,
     stats,
-    button: kind === "full" ? "Send the full now" : "Send the partial now",
+    button: kind === "full" ? "Send your full" : "Send your partial",
   };
 }
 

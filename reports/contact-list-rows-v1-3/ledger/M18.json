@@ -1,0 +1,37 @@
+[
+ {
+  "where": "Clear all and the summary hidden at rest",
+  "ok": true,
+  "detail": "clear false summary null"
+ },
+ {
+  "where": "Open + 4★ · the summary",
+  "ok": true,
+  "detail": "summary 10 of 19 clear true"
+ },
+ {
+  "where": "+ Crime + a profile side · the summary",
+  "ok": true,
+  "detail": "summary 7 of 19 clear true"
+ },
+ {
+  "where": "+ Not rated, a reply side · the summary",
+  "ok": true,
+  "detail": "summary 5 of 19 clear true"
+ },
+ {
+  "where": "Clear all resets every section",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Clear all hides itself and the summary",
+  "ok": true,
+  "detail": "clear false summary null"
+ },
+ {
+  "where": "the whole list is back",
+  "ok": true,
+  "detail": ""
+ }
+]

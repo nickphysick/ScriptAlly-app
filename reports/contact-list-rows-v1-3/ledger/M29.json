@@ -1,0 +1,27 @@
+[
+ {
+  "where": "precondition: the card's foot is on screen",
+  "ok": true,
+  "detail": "card bottom 644 window 790"
+ },
+ {
+  "where": "bottom corners: the card's white inside",
+  "ok": true,
+  "detail": "left 255,255,255 right 255,255,255"
+ },
+ {
+  "where": "bottom corners rounded (the arc's outside is not white)",
+  "ok": true,
+  "detail": "outside 235,231,226 / 236,232,227 radius 22"
+ },
+ {
+  "where": "page colour below (past the shadow)",
+  "ok": true,
+  "detail": "0 of 236 not page colour"
+ },
+ {
+  "where": "the rim and shadow drawn on the foot",
+  "ok": true,
+  "detail": "foot 189,183,178 page 242,238,232"
+ }
+]

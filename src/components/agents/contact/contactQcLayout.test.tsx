@@ -93,49 +93,67 @@ describe("List filters v1 Phase 3 · the Agents panel", () => {
      sought, then Outside the UK and Missing details; faceted counts; zero disabled unless chosen */
   const opt = (h: string, k: string) => h.match(new RegExp(`<button[^>]*data-clq-opt="${k}"[^>]*>`))?.[0] ?? "";
   const n = (h: string, k: string) => Number(opt(h, k).match(/data-n="(\d+)"/)?.[1] ?? NaN);
-  /* RE-POINTED by Contact list rows v1.2.1 · Phase 3 — the compact panel: one Your list section holding both segments;
-     Outside the UK a pill in the last section; Missing details out of the panel; no foot line */
-  it("its sections, in order; the old Who to query next, Have you queried them? and Are they open? are gone", () => {
+  /* RE-POINTED by Contact list rows v1.3 · Phase 2 — the smart panel (the ref's v4.18): quick pairs, Minimum fit, Genres
+     sought, Reply time, Location, then the bottom pairs; faceted counts; include pills disabled until their range is set */
+  it("its sections, in order; Missing details, Outside and No genres yet are gone", () => {
     const h = views();
-    expect([...h.matchAll(/data-clq-sec="(\w+)"/g)].map((m) => m[1])).toEqual(["list", "fit", "reply", "genres", "abroad"]);
-    expect(h).not.toContain("Missing details");
+    expect([...h.matchAll(/data-clq-sec="(\w+)"/g)].map((m) => m[1])).toEqual(["pairs", "fit", "genres", "reply", "loc", "pairs2"]);
+    expect([...h.matchAll(/class="clr-fh[^"]*"><b>([^<]+)<\/b>/g)].map((m) => m[1])).toEqual(["Minimum fit", "Genres sought", "Reply time", "Location"]);
+    expect(h).not.toMatch(/Missing details|Outside|No genres yet|data-clq-opt="nogenres"|data-clq-opt="abroad"/);
     expect(h).not.toMatch(/Who to query next|Have you queried them|Are they open|Ready to query|What they want/);
   });
-  it("Your list and Open to queries? are boxed segments with their counts; Either covers a door not known", () => {
+  it("the quick pairs: count before word, neither chosen at rest; a closed door is closed, an unknown door is neither", () => {
     const h = views();
-    expect([n(h, "list:all"), n(h, "list:queried"), n(h, "list:none")]).toEqual([5, 2, 3]);
-    expect([n(h, "door:any"), n(h, "door:open"), n(h, "door:closed")]).toEqual([5, 3, 1]);
-    expect(opt(h, "list:all")).toContain('aria-checked="true"');
-    expect(opt(h, "door:any")).toContain('aria-checked="true"');
+    expect([n(h, "queried:yes"), n(h, "queried:no"), n(h, "door:open"), n(h, "door:closed")]).toEqual([2, 3, 3, 1]);
+    expect(h).toMatch(/data-clq-opt="queried:no"[^>]*><b>3<\/b>Not queried<\/button>/);
+    for (const k of ["queried:yes", "queried:no", "door:open", "door:closed", "always:yes", "always:no", "prof:full", "prof:gaps"]) expect(opt(h, k)).toContain('aria-pressed="false"');
   });
   it("faceted: each count is under every OTHER section's choice; a zero is disabled unless it is the choice", () => {
     const h = views({ ...E(), queried: "no" });
-    expect([n(h, "list:all"), n(h, "list:queried"), n(h, "list:none")]).toEqual([5, 2, 3]);
-    expect([n(h, "door:any"), n(h, "door:open"), n(h, "door:closed")]).toEqual([3, 2, 0]);
+    expect([n(h, "queried:yes"), n(h, "queried:no")]).toEqual([2, 3]);
+    expect([n(h, "door:open"), n(h, "door:closed")]).toEqual([2, 0]);
     expect(opt(h, "door:closed")).toContain("disabled");
     expect(n(h, "genre:crime")).toBe(0);
     expect(opt(h, "genre:crime")).toContain("disabled");
   });
-  it("Fit (5★, 4★+, Not rated) and Replies are single-choice toggles; Outside the UK is a pill", () => {
-    const all = [fx("r5", {}, { starRating: 5, noResponseMeansNo: true, responseTimeWeeks: 6 }), fx("r4", { abroad: true } as Partial<AgentFacts>, { starRating: 4 }), fx("u", { gaps: 1 })];
-    const h = views({ ...E(), fit: 4 }, all);
-    expect([n(h, "fit:5"), n(h, "fit:4"), n(h, "fit:0")]).toEqual([1, 2, 1]);
-    expect(opt(h, "fit:4")).toContain('aria-pressed="true"');
-    expect([n(h, "reply:always"), n(h, "reply:nrmn"), n(h, "reply:known")]).toEqual([0, 1, 1]);
-    expect(opt(h, "abroad")).toMatch(/class="clr-chip"/);
-    expect(n(h, "abroad")).toBe(1);
-    expect(h).toMatch(/data-clq-opt="fit:5"[^>]*>5★<em>/);
-    expect(h).toMatch(/data-clq-opt="fit:4"[^>]*>4★\+<em>/);
+  it("Minimum fit: star k counts fit ≥ k; Not rated is disabled until a minimum is set, then counts the unrated it adds", () => {
+    const all = [fx("r5", {}, { starRating: 5 }), fx("r4", {}, { starRating: 4 }), fx("r2", {}, { starRating: 2 }), fx("u")];
+    const rest = views(E(), all);
+    expect([1, 2, 3, 4, 5].map((k) => n(rest, `fit:${k}`))).toEqual([3, 3, 2, 2, 1]);
+    expect(opt(rest, "fit:unrated")).toContain("disabled");
+    expect(rest).toMatch(/data-clq="fit-sum">Any</);
+    const set = views({ ...E(), fitMin: 4 }, all);
+    expect(opt(set, "fit:unrated")).not.toContain("disabled");
+    expect(n(set, "fit:unrated")).toBe(1);
+    expect(opt(set, "fit:4")).toContain('aria-checked="true"');
   });
-  it("Genres: the book's first with a tick, four then the +n more pill, then No genres yet with its faceted count", () => {
+  it("Reply time: Any at rest with Not known disabled; once set, Not known starts on", () => {
+    const all = [fx("w2", {}, { responseTimeWeeks: 2 }), fx("w9", {}, { responseTimeWeeks: 9 }), fx("u", {}, { responseTimeWeeks: 0 })];
+    const rest = views(E(), all);
+    expect(rest).toMatch(/data-clq="rt-label">Any</);
+    expect(opt(rest, "rt:unknown")).toContain("disabled");
+    const set = views({ ...E(), rt: [2, 8] }, all);
+    expect(set).toMatch(/data-clq="rt-label">2–8 wks</);
+    expect(opt(set, "rt:unknown")).toMatch(/class="clr-inc on"/);
+    expect(n(set, "rt:unknown")).toBe(1);
+  });
+  it("Genres: four quick pills, the book's first; then Find another genre; no +n more pill", () => {
     const many = Array.from({ length: 9 }, (_, i) => fx(`g${i}`, { genres: [`Genre ${String.fromCharCode(65 + i)}`] }));
     const h = views(E(), [...many, fx("t", { genres: ["Thriller"] }), fx("z")]);
     expect(h.match(/data-clq-opt="genre:[^"]+"/g)).toHaveLength(GENRES_SHOWN);
     expect(h.indexOf('data-clq-opt="genre:thriller"')).toBeLessThan(h.indexOf('data-clq-opt="genre:genre a"'));
-    expect(opt(h, "genre:thriller")).toBeTruthy();
-    expect(h).toMatch(/class="clr-chip clr-chip--more" data-clq="genres-more" aria-expanded="false">\+6 more<\/button>/);
-    expect(opt(h, "nogenres")).toMatch(/data-n="1"/);
-    expect(h.indexOf('data-clq="genres-more"')).toBeLessThan(h.indexOf('data-clq-opt="nogenres"'));
+    expect(h).toMatch(/placeholder="Find another genre"/);
+    expect(h).not.toContain("genres-more");
+  });
+  it("Location: Anywhere at rest; the picked countries' flags and names, then +n", () => {
+    const all = [fx("a", {}, { country: "GB" }), fx("b", {}, { country: "US" }), fx("c", {}, { country: "IE" }), fx("d", {}, { country: "GB" })];
+    expect(views(E(), all)).toMatch(/data-clq="loc"[^>]*>[\s\S]*?Anywhere/);
+    const h = views({ ...E(), countries: ["GB", "US", "IE"] }, all);
+    expect(h).toMatch(/United Kingdom, [\s\S]*United States \+1/);
+  });
+  it("the bottom pairs read List health's gaps (lhGaps)", () => {
+    const h = views(E(), [fx("a", { lhGaps: 2 } as Partial<AgentFacts>), fx("b", { lhGaps: 0 } as Partial<AgentFacts>, { noResponseMeansNo: false })]);
+    expect([n(h, "prof:full"), n(h, "prof:gaps"), n(h, "always:yes"), n(h, "always:no")]).toEqual([1, 1, 1, 1]);
   });
   it("no stage colour anywhere in the panel", () => {
     const h = views({ ...E(), queried: "no" }).toLowerCase();

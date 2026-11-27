@@ -1,0 +1,17 @@
+[
+ {
+  "where": "Has gaps counts List health's rule",
+  "ok": true,
+  "detail": "gaps 5 full 14 want 5/14"
+ },
+ {
+  "where": "Carey and Lang (no genres) are under Has gaps",
+  "ok": true,
+  "detail": "clr-achebe,clr-carey,clr-lang,clr-pryce,clr-whitfield"
+ },
+ {
+  "where": "and never under Full profile",
+  "ok": true,
+  "detail": "clr-blackwood,clr-ellison,clr-ferris,clr-holt,clr-hussain,clr-morrow,clr-okafor,clr-pemberton,clr-quinn,clr-reed,clr-sandhu,clr-stirling,clr-tan,clr-vane-coe"
+ }
+]

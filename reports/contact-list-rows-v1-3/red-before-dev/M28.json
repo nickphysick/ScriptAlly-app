@@ -1,0 +1,62 @@
+[
+ {
+  "where": "600 · precondition: the slim bar shown, the headings pinned",
+  "ok": true,
+  "detail": "slim true stuck true"
+ },
+ {
+  "where": "600 · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "600 · below it to the headings: page colour only (31488 px)",
+  "ok": false,
+  "detail": "336 other · 398,179=238,234,228 398,180=238,234,228 398,181=238,234,228 398,182=238,234,228"
+ },
+ {
+  "where": "600 · the headings level with the panel",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ },
+ {
+  "where": "800 · precondition: the slim bar shown, the headings pinned",
+  "ok": true,
+  "detail": "slim true stuck true"
+ },
+ {
+  "where": "800 · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "800 · below it to the headings: page colour only (31488 px)",
+  "ok": false,
+  "detail": "336 other · 398,179=238,234,228 398,180=238,234,228 398,181=238,234,228 398,182=238,234,228"
+ },
+ {
+  "where": "800 · the headings level with the panel",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ },
+ {
+  "where": "1000 · precondition: the slim bar shown, the headings pinned",
+  "ok": true,
+  "detail": "slim true stuck true"
+ },
+ {
+  "where": "1000 · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "1000 · below it to the headings: page colour only (31488 px)",
+  "ok": false,
+  "detail": "336 other · 398,179=238,234,228 398,180=238,234,228 398,181=238,234,228 398,182=238,234,228"
+ },
+ {
+  "where": "1000 · the headings level with the panel",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ }
+]

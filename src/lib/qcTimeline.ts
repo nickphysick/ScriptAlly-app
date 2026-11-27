@@ -256,8 +256,8 @@ export function currentWords(row: QcRow, nowMs: number): string {
 /** What a with-you stage owes next (§8.7's action ghosts). Nothing follows an agent-side bar. */
 export function ghostFor(status: QueryStatus): TlGhost | null {
   switch (status) {
-    case QueryStatus.PARTIAL_REQUESTED: return { status: QueryStatus.PARTIAL_SENT, label: "Send the partial" };
-    case QueryStatus.FULL_REQUESTED: return { status: QueryStatus.FULL_SENT, label: "Send the full" };
+    case QueryStatus.PARTIAL_REQUESTED: return { status: QueryStatus.PARTIAL_SENT, label: "Send your partial" };
+    case QueryStatus.FULL_REQUESTED: return { status: QueryStatus.FULL_SENT, label: "Send your full" };
     case QueryStatus.OFFER: return { status: QueryStatus.OFFER, label: "Your decision" };
     default: return null;
   }

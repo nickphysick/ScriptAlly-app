@@ -101,7 +101,10 @@ export async function seedClr() {
     const id = clrId(surname);
     const agent = {
       id, userId: CLR_UID, name: `${first} ${surname}`, agency, city, country, genres,
-      email: `${first.toLowerCase()}@example.com`, website: "", mswlNotes: "", agentNotes: "", notes: "",
+      /* v1.3 — a wishlist on file for all but Achebe, so "Full profile" / "Has gaps" (List health's own gap rule) split the
+         list: the gaps come from no genres (Carey, Lang), no reply time (Achebe, Pryce), no wishlist (Achebe) and a closed
+         door with no reopen task (Whitfield) */
+      email: `${first.toLowerCase()}@example.com`, website: "", mswlNotes: surname === "Achebe" ? "" : "Voice-led fiction with a hook.", agentNotes: "", notes: "",
       submissionStatus: door, submissionMethod: "Email", materialsWanted: ["Query letter"], socials: [],
       dateAdded: ymd(now - (60 + n) * DAY), lastCheckedDate: ymd(now - 10 * DAY), setAside: false, importedNeedsReview: false,
       ...(rating ? { starRating: rating } : {}),

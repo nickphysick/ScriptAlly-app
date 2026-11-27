@@ -1,0 +1,12 @@
+[
+ {
+  "where": "no Outside or No genres yet pill; no Missing details",
+  "ok": true,
+  "detail": "queried:yes,queried:no,door:open,door:closed,fit:1,fit:2,fit:3,fit:4,fit:5,fit:unrated,genre:crime,genre:thriller,genre:book club,genre:historical,rt:unknown,always:yes,always:no,prof:full,prof:gaps"
+ },
+ {
+  "where": "pairs neither chosen at rest",
+  "ok": true,
+  "detail": ""
+ }
+]

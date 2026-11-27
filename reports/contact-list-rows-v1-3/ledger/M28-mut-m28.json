@@ -1,0 +1,87 @@
+[
+ {
+  "where": "600 · precondition: the slim bar shown, the headings pinned",
+  "ok": true,
+  "detail": "slim true stuck true"
+ },
+ {
+  "where": "600 · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "600 · below it to the headings: page colour only (31488 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "600 · the headings level with the panel",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ },
+ {
+  "where": "800 · precondition: the slim bar shown, the headings pinned",
+  "ok": true,
+  "detail": "slim true stuck true"
+ },
+ {
+  "where": "800 · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "800 · below it to the headings: page colour only (31488 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "800 · the headings level with the panel",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ },
+ {
+  "where": "1000 · precondition: the slim bar shown, the headings pinned",
+  "ok": true,
+  "detail": "slim true stuck true"
+ },
+ {
+  "where": "1000 · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "1000 · below it to the headings: page colour only (31488 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "1000 · the headings level with the panel",
+  "ok": true,
+  "detail": "headings 204.0 panel 204.0"
+ },
+ {
+  "where": "200 (slim shown, headings not yet pinned) · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "240 (slim shown, headings not yet pinned) · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "280 (slim shown, headings not yet pinned) · above the slim bar: its ground only (14432 px)",
+  "ok": true,
+  "detail": "0 other · "
+ },
+ {
+  "where": "320 (slim shown, headings not yet pinned) · above the slim bar: its ground only (14432 px)",
+  "ok": false,
+  "detail": "9882 other · 412,111=208,204,198 412,112=151,144,139 413,111=110,102,98 413,112=28,19,15"
+ },
+ {
+  "where": "the early window was read at least once",
+  "ok": true,
+  "detail": "4 depths"
+ }
+]

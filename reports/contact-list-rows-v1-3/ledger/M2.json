@@ -1,0 +1,4322 @@
+[
+ {
+  "where": "1280 · clr-achebe · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-achebe · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-achebe · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-achebe · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-achebe · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-achebe · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–628.3 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-achebe · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-achebe · genres content inside",
+  "ok": true,
+  "detail": "content 776.3–851.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-achebe · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–985.5 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-achebe · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-achebe · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–622.3 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · genres content inside",
+  "ok": true,
+  "detail": "content 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–1005.7 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-blackwood · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-carey · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-carey · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-carey · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-carey · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-carey · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-carey · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–600.1 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-carey · fit content inside",
+  "ok": true,
+  "detail": "content 706.9–715.1 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-carey · genres content inside",
+  "ok": true,
+  "detail": "content 775.3–852.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-carey · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.6 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-carey · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-carey · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-ellison · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-ellison · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-ellison · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-ellison · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-ellison · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-ellison · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–619.0 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-ellison · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-ellison · genres content inside",
+  "ok": true,
+  "detail": "content 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-ellison · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.8 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-ellison · status content inside",
+  "ok": true,
+  "detail": "content 1072.6–1157.4 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-ellison · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-ferris · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-ferris · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-ferris · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-ferris · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-ferris · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-ferris · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–609.3 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-ferris · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-ferris · genres content inside",
+  "ok": true,
+  "detail": "content 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-ferris · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.5 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-ferris · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-ferris · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-holt · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-holt · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-holt · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-holt · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-holt · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-holt · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–597.1 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-holt · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-holt · genres content inside",
+  "ok": true,
+  "detail": "content 765.1–862.9 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-holt · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–986.8 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-holt · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-holt · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-hussain · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-hussain · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-hussain · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-hussain · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-hussain · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-hussain · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–611.4 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-hussain · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-hussain · genres content inside",
+  "ok": true,
+  "detail": "content 763.0–865.0 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-hussain · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–1005.7 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-hussain · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-hussain · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-lang · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-lang · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-lang · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-lang · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-lang · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-lang · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–608.4 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-lang · fit content inside",
+  "ok": true,
+  "detail": "content 706.9–715.1 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-lang · genres content inside",
+  "ok": true,
+  "detail": "content 775.3–852.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-lang · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.6 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-lang · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-lang · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-morrow · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-morrow · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-morrow · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-morrow · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-morrow · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-morrow · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–629.7 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-morrow · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-morrow · genres content inside",
+  "ok": true,
+  "detail": "content 770.4–857.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-morrow · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.5 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-morrow · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-morrow · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-okafor · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-okafor · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-okafor · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-okafor · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-okafor · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-okafor · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–609.5 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-okafor · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-okafor · genres content inside",
+  "ok": true,
+  "detail": "content 767.7–860.3 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-okafor · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.5 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-okafor · status content inside",
+  "ok": true,
+  "detail": "content 1061.3–1168.7 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-okafor · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–621.8 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · genres content inside",
+  "ok": true,
+  "detail": "content 763.0–865.0 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.6 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · status content inside",
+  "ok": true,
+  "detail": "content 1072.6–1157.4 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-pemberton · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-pryce · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-pryce · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-pryce · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-pryce · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-pryce · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-pryce · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–598.7 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-pryce · fit content inside",
+  "ok": true,
+  "detail": "content 706.9–715.1 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-pryce · genres content inside",
+  "ok": true,
+  "detail": "content 770.4–857.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-pryce · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–985.5 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-pryce · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-pryce · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-quinn · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-quinn · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-quinn · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-quinn · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-quinn · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-quinn · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–604.3 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-quinn · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-quinn · genres content inside",
+  "ok": true,
+  "detail": "content 770.3–857.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-quinn · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.6 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-quinn · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-quinn · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-reed · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-reed · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-reed · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-reed · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-reed · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-reed · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–591.9 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-reed · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-reed · genres content inside",
+  "ok": true,
+  "detail": "content 776.2–851.8 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-reed · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.5 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-reed · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-reed · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–610.1 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · fit content inside",
+  "ok": true,
+  "detail": "content 706.9–715.1 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · genres content inside",
+  "ok": true,
+  "detail": "content 763.5–864.5 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–1005.7 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-sandhu · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-stirling · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-stirling · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-stirling · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-stirling · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-stirling · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-stirling · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–635.7 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-stirling · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-stirling · genres content inside",
+  "ok": true,
+  "detail": "content 770.3–857.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-stirling · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–986.3 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-stirling · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-stirling · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-tan · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-tan · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-tan · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-tan · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-tan · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-tan · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–601.1 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-tan · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-tan · genres content inside",
+  "ok": true,
+  "detail": "content 770.4–857.6 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-tan · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.6 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-tan · status content inside",
+  "ok": true,
+  "detail": "content 1050.4–1179.6 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-tan · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–638.9 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · fit content inside",
+  "ok": true,
+  "detail": "content 681.0–741.0 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · genres content inside",
+  "ok": true,
+  "detail": "content 763.0–865.0 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–977.8 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · status content inside",
+  "ok": true,
+  "detail": "content 1076.0–1154.0 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-vane-coe · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · agent|fit",
+  "ok": true,
+  "detail": "r 665.0 next l 679.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · fit|genres",
+  "ok": true,
+  "detail": "r 743.0 next l 757.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · genres|policy",
+  "ok": true,
+  "detail": "r 871.0 next l 885.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · policy|status",
+  "ok": true,
+  "detail": "r 1023.0 next l 1037.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · status|chev",
+  "ok": true,
+  "detail": "r 1193.0 next l 1207.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · agent content inside",
+  "ok": true,
+  "detail": "content 447.7–647.1 cell 437.0–665.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · fit content inside",
+  "ok": true,
+  "detail": "content 706.9–715.1 cell 679.0–743.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · genres content inside",
+  "ok": true,
+  "detail": "content 770.3–857.7 cell 757.0–871.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · policy content inside",
+  "ok": true,
+  "detail": "content 885.0–978.6 cell 885.0–1023.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · status content inside",
+  "ok": true,
+  "detail": "content 1051.9–1178.1 cell 1037.0–1193.0"
+ },
+ {
+  "where": "1280 · clr-whitfield · chev content inside",
+  "ok": true,
+  "detail": "content 1207.0–1212.4 cell 1207.0–1229.0"
+ },
+ {
+  "where": "1280 · headings",
+  "ok": true,
+  "detail": "5 headings"
+ },
+ {
+  "where": "1280 · heading agent fits",
+  "ok": true,
+  "detail": "\"Agent\" sw 228 cw 228 lines 1"
+ },
+ {
+  "where": "1280 · heading fit fits",
+  "ok": true,
+  "detail": "\"Fit\" sw 64 cw 64 lines 1"
+ },
+ {
+  "where": "1280 · heading genres fits",
+  "ok": true,
+  "detail": "\"Genres\" sw 114 cw 114 lines 1"
+ },
+ {
+  "where": "1280 · heading policy fits",
+  "ok": true,
+  "detail": "\"Response\" sw 138 cw 138 lines 1"
+ },
+ {
+  "where": "1280 · heading status fits",
+  "ok": true,
+  "detail": "\"Query status\" sw 156 cw 156 lines 1"
+ },
+ {
+  "where": "1280 · heading words",
+  "ok": true,
+  "detail": "[\"Agent\",\"Fit\",\"Genres\",\"Response\",\"Query status\"] (card 812)"
+ },
+ {
+  "where": "1440 · clr-achebe · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-achebe · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-achebe · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-achebe · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-achebe · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-achebe · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–644.6 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-achebe · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-achebe · genres content inside",
+  "ok": true,
+  "detail": "content 836.3–911.7 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-achebe · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1104.1 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-achebe · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-achebe · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–638.3 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · genres content inside",
+  "ok": true,
+  "detail": "content 808.3–939.7 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1135.5 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-blackwood · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-carey · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-carey · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-carey · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-carey · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-carey · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-carey · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–614.8 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-carey · fit content inside",
+  "ok": true,
+  "detail": "content 716.9–725.1 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-carey · genres content inside",
+  "ok": true,
+  "detail": "content 830.4–917.6 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-carey · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.3 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-carey · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-carey · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-ellison · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-ellison · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-ellison · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-ellison · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-ellison · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-ellison · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–634.8 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-ellison · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-ellison · genres content inside",
+  "ok": true,
+  "detail": "content 796.6–951.4 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-ellison · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.5 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-ellison · status content inside",
+  "ok": true,
+  "detail": "content 1209.5–1300.4 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-ellison · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-ferris · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-ferris · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-ferris · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-ferris · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-ferris · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-ferris · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–624.5 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-ferris · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-ferris · genres content inside",
+  "ok": true,
+  "detail": "content 800.9–947.1 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-ferris · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.2 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-ferris · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-ferris · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-holt · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-holt · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-holt · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-holt · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-holt · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-holt · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–605.1 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-holt · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-holt · genres content inside",
+  "ok": true,
+  "detail": "content 785.5–962.5 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-holt · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1100.0 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-holt · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-holt · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-hussain · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-hussain · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-hussain · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-hussain · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-hussain · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-hussain · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–626.8 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-hussain · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-hussain · genres content inside",
+  "ok": true,
+  "detail": "content 779.0–969.0 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-hussain · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1135.5 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-hussain · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-hussain · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-lang · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-lang · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-lang · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-lang · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-lang · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-lang · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–623.5 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-lang · fit content inside",
+  "ok": true,
+  "detail": "content 716.9–725.1 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-lang · genres content inside",
+  "ok": true,
+  "detail": "content 830.4–917.6 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-lang · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.3 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-lang · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-lang · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-morrow · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-morrow · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-morrow · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-morrow · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-morrow · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-morrow · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–646.1 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-morrow · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-morrow · genres content inside",
+  "ok": true,
+  "detail": "content 790.8–957.2 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-morrow · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.2 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-morrow · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-morrow · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-okafor · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-okafor · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-okafor · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-okafor · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-okafor · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-okafor · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–624.7 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-okafor · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-okafor · genres content inside",
+  "ok": true,
+  "detail": "content 796.6–951.4 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-okafor · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.2 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-okafor · status content inside",
+  "ok": true,
+  "detail": "content 1197.5–1312.5 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-okafor · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–637.7 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · genres content inside",
+  "ok": true,
+  "detail": "content 779.0–969.0 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.3 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · status content inside",
+  "ok": true,
+  "detail": "content 1209.5–1300.4 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-pemberton · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-pryce · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-pryce · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-pryce · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-pryce · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-pryce · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-pryce · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–606.7 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-pryce · fit content inside",
+  "ok": true,
+  "detail": "content 716.9–725.1 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-pryce · genres content inside",
+  "ok": true,
+  "detail": "content 801.9–946.1 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-pryce · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1104.1 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-pryce · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-pryce · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-quinn · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-quinn · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-quinn · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-quinn · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-quinn · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-quinn · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–619.2 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-quinn · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-quinn · genres content inside",
+  "ok": true,
+  "detail": "content 830.3–917.7 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-quinn · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.3 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-quinn · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-quinn · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-reed · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-reed · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-reed · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-reed · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-reed · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-reed · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–606.0 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-reed · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-reed · genres content inside",
+  "ok": true,
+  "detail": "content 796.6–951.4 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-reed · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.2 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-reed · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-reed · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–618.1 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · fit content inside",
+  "ok": true,
+  "detail": "content 716.9–725.1 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · genres content inside",
+  "ok": true,
+  "detail": "content 823.5–924.5 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1135.5 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-sandhu · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-stirling · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-stirling · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-stirling · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-stirling · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-stirling · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-stirling · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–652.5 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-stirling · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-stirling · genres content inside",
+  "ok": true,
+  "detail": "content 783.6–964.4 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-stirling · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1099.5 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-stirling · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-stirling · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-tan · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-tan · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-tan · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-tan · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-tan · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-tan · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–609.1 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-tan · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-tan · genres content inside",
+  "ok": true,
+  "detail": "content 789.6–958.4 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-tan · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.3 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-tan · status content inside",
+  "ok": true,
+  "detail": "content 1185.8–1324.2 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-tan · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–655.9 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · fit content inside",
+  "ok": true,
+  "detail": "content 686.0–756.0 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · genres content inside",
+  "ok": true,
+  "detail": "content 779.0–969.0 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1090.4 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · status content inside",
+  "ok": true,
+  "detail": "content 1216.0–1294.0 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-vane-coe · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · agent|fit",
+  "ok": true,
+  "detail": "r 669.0 next l 685.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · fit|genres",
+  "ok": true,
+  "detail": "r 757.0 next l 773.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · genres|policy",
+  "ok": true,
+  "detail": "r 975.0 next l 991.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · policy|status",
+  "ok": true,
+  "detail": "r 1151.0 next l 1167.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · status|chev",
+  "ok": true,
+  "detail": "r 1343.0 next l 1359.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · agent content inside",
+  "ok": true,
+  "detail": "content 449.7–664.5 cell 437.0–669.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · fit content inside",
+  "ok": true,
+  "detail": "content 716.9–725.1 cell 685.0–757.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · genres content inside",
+  "ok": true,
+  "detail": "content 789.6–958.4 cell 773.0–975.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · policy content inside",
+  "ok": true,
+  "detail": "content 991.0–1091.3 cell 991.0–1151.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · status content inside",
+  "ok": true,
+  "detail": "content 1187.4–1322.6 cell 1167.0–1343.0"
+ },
+ {
+  "where": "1440 · clr-whitfield · chev content inside",
+  "ok": true,
+  "detail": "content 1359.0–1364.4 cell 1359.0–1389.0"
+ },
+ {
+  "where": "1440 · headings",
+  "ok": true,
+  "detail": "5 headings"
+ },
+ {
+  "where": "1440 · heading agent fits",
+  "ok": true,
+  "detail": "\"Agent\" sw 232 cw 232 lines 1"
+ },
+ {
+  "where": "1440 · heading fit fits",
+  "ok": true,
+  "detail": "\"Fit\" sw 72 cw 72 lines 1"
+ },
+ {
+  "where": "1440 · heading genres fits",
+  "ok": true,
+  "detail": "\"Genres sought\" sw 202 cw 202 lines 1"
+ },
+ {
+  "where": "1440 · heading policy fits",
+  "ok": true,
+  "detail": "\"Response policy\" sw 160 cw 160 lines 1"
+ },
+ {
+  "where": "1440 · heading status fits",
+  "ok": true,
+  "detail": "\"Query status\" sw 176 cw 176 lines 1"
+ },
+ {
+  "where": "1440 · heading words",
+  "ok": true,
+  "detail": "[\"Agent\",\"Fit\",\"Genres sought\",\"Response policy\",\"Query status\"] (card 972)"
+ },
+ {
+  "where": "1600 · clr-achebe · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-achebe · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-achebe · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-achebe · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-achebe · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-achebe · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–654.6 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-achebe · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-achebe · genres content inside",
+  "ok": true,
+  "detail": "content 921.3–1000.7 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-achebe · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1184.1 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-achebe · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-achebe · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–648.3 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · genres content inside",
+  "ok": true,
+  "detail": "content 891.3–1030.7 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1220.2 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-blackwood · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-carey · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-carey · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-carey · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-carey · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-carey · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-carey · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–624.8 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-carey · fit content inside",
+  "ok": true,
+  "detail": "content 801.9–810.1 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-carey · genres content inside",
+  "ok": true,
+  "detail": "content 917.4–1004.6 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-carey · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1178.0 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-carey · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-carey · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-ellison · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-ellison · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-ellison · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-ellison · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-ellison · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-ellison · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–644.8 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-ellison · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-ellison · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-ellison · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1178.2 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-ellison · status content inside",
+  "ok": true,
+  "detail": "content 1336.5–1433.5 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-ellison · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-ferris · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-ferris · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-ferris · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-ferris · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-ferris · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-ferris · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–634.5 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-ferris · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-ferris · genres content inside",
+  "ok": true,
+  "detail": "content 883.9–1038.1 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-ferris · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1177.8 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-ferris · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-ferris · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-holt · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-holt · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-holt · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-holt · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-holt · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-holt · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–615.1 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-holt · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-holt · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-holt · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1187.3 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-holt · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-holt · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-hussain · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-hussain · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-hussain · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-hussain · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-hussain · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-hussain · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–636.8 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-hussain · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-hussain · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-hussain · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1220.2 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-hussain · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-hussain · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-lang · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-lang · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-lang · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-lang · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-lang · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-lang · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–633.5 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-lang · fit content inside",
+  "ok": true,
+  "detail": "content 801.9–810.1 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-lang · genres content inside",
+  "ok": true,
+  "detail": "content 917.4–1004.6 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-lang · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1178.0 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-lang · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-lang · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-morrow · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-morrow · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-morrow · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-morrow · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-morrow · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-morrow · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–656.1 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-morrow · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-morrow · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-morrow · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1177.8 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-morrow · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-morrow · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-okafor · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-okafor · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-okafor · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-okafor · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-okafor · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-okafor · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–634.7 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-okafor · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-okafor · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-okafor · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1177.8 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-okafor · status content inside",
+  "ok": true,
+  "detail": "content 1323.6–1446.3 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-okafor · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–647.7 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1178.0 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · status content inside",
+  "ok": true,
+  "detail": "content 1336.5–1433.5 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-pemberton · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-pryce · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-pryce · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-pryce · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-pryce · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-pryce · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-pryce · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–616.7 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-pryce · fit content inside",
+  "ok": true,
+  "detail": "content 801.9–810.1 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-pryce · genres content inside",
+  "ok": true,
+  "detail": "content 884.9–1037.1 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-pryce · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1184.1 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-pryce · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-pryce · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-quinn · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-quinn · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-quinn · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-quinn · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-quinn · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-quinn · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–629.2 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-quinn · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-quinn · genres content inside",
+  "ok": true,
+  "detail": "content 915.3–1006.7 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-quinn · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1178.0 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-quinn · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-quinn · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-reed · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-reed · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-reed · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-reed · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-reed · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-reed · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–616.0 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-reed · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-reed · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-reed · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1177.8 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-reed · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-reed · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–628.1 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · fit content inside",
+  "ok": true,
+  "detail": "content 801.9–810.1 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · genres content inside",
+  "ok": true,
+  "detail": "content 908.5–1013.5 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1220.2 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-sandhu · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-stirling · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-stirling · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-stirling · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-stirling · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-stirling · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-stirling · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–662.5 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-stirling · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-stirling · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-stirling · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1186.7 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-stirling · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-stirling · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-tan · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-tan · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-tan · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-tan · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-tan · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-tan · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–619.1 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-tan · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-tan · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-tan · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1178.0 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-tan · status content inside",
+  "ok": true,
+  "detail": "content 1311.2–1458.8 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-tan · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–665.9 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · fit content inside",
+  "ok": true,
+  "detail": "content 763.5–848.5 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1177.0 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · status content inside",
+  "ok": true,
+  "detail": "content 1346.0–1424.0 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-vane-coe · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · agent|fit",
+  "ok": true,
+  "detail": "r 737.0 next l 761.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · fit|genres",
+  "ok": true,
+  "detail": "r 851.0 next l 875.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · genres|policy",
+  "ok": true,
+  "detail": "r 1047.0 next l 1071.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · policy|status",
+  "ok": true,
+  "detail": "r 1251.0 next l 1275.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · status|chev",
+  "ok": true,
+  "detail": "r 1495.0 next l 1519.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · agent content inside",
+  "ok": true,
+  "detail": "content 459.7–674.5 cell 447.0–737.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · fit content inside",
+  "ok": true,
+  "detail": "content 801.9–810.1 cell 761.0–851.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · genres content inside",
+  "ok": true,
+  "detail": "content 881.0–1041.0 cell 875.0–1047.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · policy content inside",
+  "ok": true,
+  "detail": "content 1071.0–1178.0 cell 1071.0–1251.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · status content inside",
+  "ok": true,
+  "detail": "content 1312.9–1457.1 cell 1275.0–1495.0"
+ },
+ {
+  "where": "1600 · clr-whitfield · chev content inside",
+  "ok": true,
+  "detail": "content 1519.0–1524.4 cell 1519.0–1549.0"
+ },
+ {
+  "where": "1600 · headings",
+  "ok": true,
+  "detail": "5 headings"
+ },
+ {
+  "where": "1600 · heading agent fits",
+  "ok": true,
+  "detail": "\"Agent\" sw 290 cw 290 lines 1"
+ },
+ {
+  "where": "1600 · heading fit fits",
+  "ok": true,
+  "detail": "\"Fit\" sw 90 cw 90 lines 1"
+ },
+ {
+  "where": "1600 · heading genres fits",
+  "ok": true,
+  "detail": "\"Genres sought\" sw 172 cw 172 lines 1"
+ },
+ {
+  "where": "1600 · heading policy fits",
+  "ok": true,
+  "detail": "\"Response policy\" sw 180 cw 180 lines 1"
+ },
+ {
+  "where": "1600 · heading status fits",
+  "ok": true,
+  "detail": "\"Query status\" sw 220 cw 220 lines 1"
+ },
+ {
+  "where": "1600 · heading words",
+  "ok": true,
+  "detail": "[\"Agent\",\"Fit\",\"Genres sought\",\"Response policy\",\"Query status\"] (card 1132)"
+ },
+ {
+  "where": "1920 · clr-achebe · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-achebe · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-achebe · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-achebe · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-achebe · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-achebe · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–796.6 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-achebe · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-achebe · genres content inside",
+  "ok": true,
+  "detail": "content 1109.3–1188.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-achebe · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1418.1 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-achebe · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-achebe · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–790.3 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · genres content inside",
+  "ok": true,
+  "detail": "content 1079.3–1218.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1454.2 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-blackwood · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-carey · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-carey · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-carey · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-carey · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-carey · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-carey · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–766.8 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-carey · fit content inside",
+  "ok": true,
+  "detail": "content 943.9–952.1 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-carey · genres content inside",
+  "ok": true,
+  "detail": "content 1105.4–1192.6 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-carey · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1412.0 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-carey · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-carey · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-ellison · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-ellison · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-ellison · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-ellison · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-ellison · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-ellison · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–786.8 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-ellison · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-ellison · genres content inside",
+  "ok": true,
+  "detail": "content 1067.6–1230.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-ellison · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1412.2 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-ellison · status content inside",
+  "ok": true,
+  "detail": "content 1570.5–1667.5 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-ellison · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-ferris · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-ferris · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-ferris · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-ferris · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-ferris · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-ferris · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–776.5 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-ferris · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-ferris · genres content inside",
+  "ok": true,
+  "detail": "content 1071.9–1226.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-ferris · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1411.8 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-ferris · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-ferris · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-holt · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-holt · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-holt · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-holt · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-holt · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-holt · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–757.1 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-holt · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-holt · genres content inside",
+  "ok": true,
+  "detail": "content 1056.5–1241.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-holt · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1421.3 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-holt · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-holt · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-hussain · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-hussain · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-hussain · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-hussain · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-hussain · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-hussain · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–778.8 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-hussain · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-hussain · genres content inside",
+  "ok": true,
+  "detail": "content 1023.0–1275.0 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-hussain · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1454.2 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-hussain · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-hussain · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-lang · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-lang · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-lang · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-lang · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-lang · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-lang · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–775.5 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-lang · fit content inside",
+  "ok": true,
+  "detail": "content 943.9–952.1 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-lang · genres content inside",
+  "ok": true,
+  "detail": "content 1105.4–1192.6 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-lang · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1412.0 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-lang · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-lang · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-morrow · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-morrow · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-morrow · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-morrow · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-morrow · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-morrow · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–798.1 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-morrow · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-morrow · genres content inside",
+  "ok": true,
+  "detail": "content 1061.8–1236.2 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-morrow · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1411.8 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-morrow · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-morrow · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-okafor · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-okafor · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-okafor · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-okafor · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-okafor · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-okafor · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–776.7 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-okafor · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-okafor · genres content inside",
+  "ok": true,
+  "detail": "content 1029.0–1269.0 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-okafor · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1411.8 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-okafor · status content inside",
+  "ok": true,
+  "detail": "content 1557.6–1680.3 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-okafor · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–789.7 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · genres content inside",
+  "ok": true,
+  "detail": "content 1047.5–1250.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1412.0 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · status content inside",
+  "ok": true,
+  "detail": "content 1570.5–1667.5 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-pemberton · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-pryce · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-pryce · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-pryce · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-pryce · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-pryce · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-pryce · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–758.7 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-pryce · fit content inside",
+  "ok": true,
+  "detail": "content 943.9–952.1 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-pryce · genres content inside",
+  "ok": true,
+  "detail": "content 1072.9–1225.1 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-pryce · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1418.1 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-pryce · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-pryce · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-quinn · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-quinn · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-quinn · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-quinn · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-quinn · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-quinn · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–771.2 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-quinn · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-quinn · genres content inside",
+  "ok": true,
+  "detail": "content 1103.3–1194.7 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-quinn · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1412.0 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-quinn · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-quinn · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-reed · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-reed · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-reed · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-reed · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-reed · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-reed · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–758.0 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-reed · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-reed · genres content inside",
+  "ok": true,
+  "detail": "content 1067.6–1230.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-reed · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1411.8 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-reed · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-reed · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–770.1 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · fit content inside",
+  "ok": true,
+  "detail": "content 943.9–952.1 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · genres content inside",
+  "ok": true,
+  "detail": "content 1096.5–1201.5 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1454.2 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-sandhu · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-stirling · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-stirling · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-stirling · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-stirling · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-stirling · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-stirling · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–804.5 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-stirling · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-stirling · genres content inside",
+  "ok": true,
+  "detail": "content 1054.6–1243.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-stirling · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1420.7 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-stirling · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-stirling · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-tan · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-tan · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-tan · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-tan · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-tan · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-tan · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–761.1 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-tan · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-tan · genres content inside",
+  "ok": true,
+  "detail": "content 1060.6–1237.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-tan · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1412.0 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-tan · status content inside",
+  "ok": true,
+  "detail": "content 1545.2–1692.8 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-tan · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–807.9 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · fit content inside",
+  "ok": true,
+  "detail": "content 905.5–990.5 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · genres content inside",
+  "ok": true,
+  "detail": "content 1048.7–1249.3 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1411.0 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · status content inside",
+  "ok": true,
+  "detail": "content 1580.0–1658.0 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-vane-coe · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · agent|fit",
+  "ok": true,
+  "detail": "r 879.0 next l 903.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · fit|genres",
+  "ok": true,
+  "detail": "r 993.0 next l 1017.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · genres|policy",
+  "ok": true,
+  "detail": "r 1281.0 next l 1305.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · policy|status",
+  "ok": true,
+  "detail": "r 1485.0 next l 1509.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · status|chev",
+  "ok": true,
+  "detail": "r 1729.0 next l 1753.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · agent content inside",
+  "ok": true,
+  "detail": "content 601.7–816.5 cell 589.0–879.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · fit content inside",
+  "ok": true,
+  "detail": "content 943.9–952.1 cell 903.0–993.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · genres content inside",
+  "ok": true,
+  "detail": "content 1060.6–1237.4 cell 1017.0–1281.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · policy content inside",
+  "ok": true,
+  "detail": "content 1305.0–1412.0 cell 1305.0–1485.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · status content inside",
+  "ok": true,
+  "detail": "content 1546.9–1691.1 cell 1509.0–1729.0"
+ },
+ {
+  "where": "1920 · clr-whitfield · chev content inside",
+  "ok": true,
+  "detail": "content 1753.0–1758.4 cell 1753.0–1783.0"
+ },
+ {
+  "where": "1920 · headings",
+  "ok": true,
+  "detail": "5 headings"
+ },
+ {
+  "where": "1920 · heading agent fits",
+  "ok": true,
+  "detail": "\"Agent\" sw 290 cw 290 lines 1"
+ },
+ {
+  "where": "1920 · heading fit fits",
+  "ok": true,
+  "detail": "\"Fit\" sw 90 cw 90 lines 1"
+ },
+ {
+  "where": "1920 · heading genres fits",
+  "ok": true,
+  "detail": "\"Genres sought\" sw 264 cw 264 lines 1"
+ },
+ {
+  "where": "1920 · heading policy fits",
+  "ok": true,
+  "detail": "\"Response policy\" sw 180 cw 180 lines 1"
+ },
+ {
+  "where": "1920 · heading status fits",
+  "ok": true,
+  "detail": "\"Query status\" sw 220 cw 220 lines 1"
+ },
+ {
+  "where": "1920 · heading words",
+  "ok": true,
+  "detail": "[\"Agent\",\"Fit\",\"Genres sought\",\"Response policy\",\"Query status\"] (card 1280)"
+ }
+]

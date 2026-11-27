@@ -1,0 +1,32 @@
+[
+ {
+  "where": "Not rated disabled until a minimum is set",
+  "ok": true,
+  "detail": "{\"n\":5,\"on\":false,\"disabled\":true}"
+ },
+ {
+  "where": "4★ shows fit ≥ 4 only",
+  "ok": true,
+  "detail": "got 10 want 10"
+ },
+ {
+  "where": "the summary",
+  "ok": true,
+  "detail": "summary 4★ and up · 10"
+ },
+ {
+  "where": "Not rated now enabled, with what it would add",
+  "ok": true,
+  "detail": "{\"n\":5,\"on\":false,\"disabled\":false}"
+ },
+ {
+  "where": "on, it adds the unrated",
+  "ok": true,
+  "detail": "15 rows"
+ },
+ {
+  "where": "the chosen star again clears it",
+  "ok": true,
+  "detail": "summary Any"
+ }
+]

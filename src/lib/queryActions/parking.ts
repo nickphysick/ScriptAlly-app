@@ -29,7 +29,7 @@ export interface ParkedJourney {
   of: number;
   /** the journey's own `snapshot()` — plain data, so a reload can seed it */
   answers: unknown;
-  /** the chip's title ("Send the full"), what starting it is called ("sending the full"), and the agent */
+  /** the chip's title ("Send your full"), what starting it is called ("sending the full"), and the agent */
   title: string;
   doing: string;
   name: string;
@@ -48,7 +48,7 @@ export function journeyTitle(mode: DrawerMode, status?: SendOf): string {
   switch (mode) {
     case "sent": {
       const k = sendKind(status);
-      return k === "full" ? "Send the full" : k === "rr" ? "Send the new version" : "Send the partial";
+      return k === "full" ? "Send your full" : k === "rr" ? "Send the new version" : "Send your partial";
     }
     case "log": return "Log a query";
     case "resp": return "Record a response";
