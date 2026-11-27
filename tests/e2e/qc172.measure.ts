@@ -23,7 +23,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openQc } from "./nb1Lib";
-import { visiblePage } from "./measure";
+import { liftMotionSuppression, visiblePage } from "./measure";
 
 test.setTimeout(300_000);
 const DIR = "reports/qc-v172";
@@ -287,4 +287,74 @@ test("L6 · the panel's type sizes: 12, 14, 16, 18 or 20px only", async ({ page 
   await page.waitForTimeout(400);
   await read("More filters open");
   L.done(6);
+});
+
+/* ── v172.1 ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+test("L7 · the panel's header stays pinned while the panel scrolls", async ({ page }) => {
+  const L = new Ledger("L7");
+  const V = await openList(page, WIDE);
+  await page.locator(`${V}.qs172-more`).click();
+  await page.waitForTimeout(400);
+  const read = () => page.evaluate((V) => {
+    const col = document.querySelector<HTMLElement>(`${V}.qc153-railcol`)!;
+    const h = document.querySelector<HTMLElement>(`${V}.qs172-h`)!;
+    return { colTop: col.getBoundingClientRect().top, hTop: h.getBoundingClientRect().top, hH: h.getBoundingClientRect().height, scroll: col.scrollTop, room: col.scrollHeight - col.clientHeight, pos: getComputedStyle(h).position };
+  }, V);
+  const a = await read();
+  L.check("population · the panel scrolls", a.room > 100, `${a.room}px to scroll with More filters open`);
+  await page.evaluate((V) => { const c = document.querySelector<HTMLElement>(`${V}.qc153-railcol`)!; c.scrollTop = Math.min(300, c.scrollHeight - c.clientHeight); }, V);
+  await page.waitForTimeout(400);
+  const b = await read();
+  L.check("scrolled", b.scroll >= 100, `scrollTop ${b.scroll}`);
+  L.check("sticky", b.pos === "sticky", b.pos);
+  L.check("the header stays at the panel's top", Math.abs(b.hTop - b.colTop) <= 1, `header top ${b.hTop.toFixed(1)} · panel top ${b.colTop.toFixed(1)}`);
+  L.check("the header keeps its height", Math.abs(b.hH - a.hH) <= 0.5 && b.hH > 30, `${a.hH} → ${b.hH}`);
+  L.done(5);
+});
+
+test("L8 · a row on hover: lifts, then its track replays in turn within 0.6s; still under reduced motion", async ({ page }) => {
+  const L = new Ledger("L8");
+  const V = await openList(page, WIDE);
+  /* ⚠️ the harness kills every animation for steady readings (measure.ts KILL_MOTION); this lock is about animation */
+  await liftMotionSuppression(page);
+  /* a row with at least two steps reached, one with a skipped step if the seed has one */
+  const ids = await page.evaluate((V) => {
+    const rows = [...document.querySelectorAll<HTMLElement>(`${V}[data-qc172='row']`)];
+    const two = rows.find((r) => r.querySelectorAll(".qr170-sp.is-reached").length >= 1 && r.querySelector(".qr170-sp.is-cur") && !r.querySelector(".qr170-sp.is-skip"));
+    const skip = rows.find((r) => r.querySelector(".qr170-sp.is-skip") && r.querySelector(".qr170-sp.is-cur"));
+    const far = rows.find((r) => r.querySelector(".qr170-sp:nth-child(4).is-cur"));
+    return { two: two?.dataset.id ?? null, skip: skip?.dataset.id ?? null, far: far?.dataset.id ?? null };
+  }, V);
+  L.check("population", !!ids.two, JSON.stringify(ids));
+  const probe = (id: string) => page.evaluate(({ V, id }) => {
+    const row = document.querySelector<HTMLElement>(`${V}[data-qc172='row'][data-id="${CSS.escape(id)}"]`)!;
+    const steps = [...row.querySelectorAll<HTMLElement>(".qr170-sp")].map((sp) => {
+      const sn = sp.querySelector<HTMLElement>(".qr170-sn")!; const cs = getComputedStyle(sn);
+      return { state: [...sp.classList].find((c) => c.startsWith("is-")) ?? "", anim: cs.animationName, delay: parseFloat(cs.animationDelay), dur: parseFloat(cs.animationDuration), ring: getComputedStyle(sn, "::after").animationName, line: getComputedStyle(sp, "::before").animationName };
+    });
+    return { edge: getComputedStyle(row, "::after").animationName, steps };
+  }, { V, id });
+  for (const [name, id] of Object.entries(ids)) {
+    if (!id) continue;
+    await page.locator(`${V}[data-qc172='row'][data-id="${id}"]`).hover();
+    await page.waitForTimeout(100);
+    const r = await probe(id);
+    const on = r.steps.filter((s) => s.state === "is-reached" || s.state === "is-cur");
+    L.check(`${name} · the edge sweeps`, r.edge.includes("qr172-edge"), r.edge);
+    L.check(`${name} · every step reached pops`, on.length > 0 && on.every((s) => s.anim.includes("qr172-pop")), on.map((s) => s.anim).join(","));
+    L.check(`${name} · in turn`, on.every((s, i) => i === 0 || s.delay > on[i - 1].delay), on.map((s) => s.delay).join(" < "));
+    const end = Math.max(...on.map((s) => s.delay + s.dur)) - 0.15;
+    L.check(`${name} · within 0.6s (+ the last pop)`, on[on.length - 1].delay - 0.15 <= 0.6 + 0.001, `last starts at ${(on[on.length - 1].delay - 0.15).toFixed(3)}s, ends ${end.toFixed(3)}s`);
+    L.check(`${name} · the current step rings`, r.steps.some((s) => s.state === "is-cur" && s.ring.includes("qr172-ring")), r.steps.map((s) => s.ring).join(","));
+    const still = r.steps.filter((s) => s.state === "is-skip" || s.state === "is-fut");
+    L.check(`${name} · skipped and future steps keep still`, still.every((s) => !s.anim.includes("qr172-pop") && !s.line.includes("qr172-draw")), still.map((s) => `${s.state}:${s.anim}/${s.line}`).join(" ") || "none");
+    await page.mouse.move(2, 2);
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.locator(`${V}[data-qc172='row'][data-id="${ids.two}"]`).hover();
+  await page.waitForTimeout(100);
+  const rm = await probe(ids.two!);
+  L.check("reduced motion · nothing moves", rm.edge === "none" && rm.steps.every((s) => s.anim === "none" && s.ring === "none" && s.line === "none"), `${rm.edge} · ${rm.steps.map((s) => s.anim).join(",")}`);
+  L.done(8);
 });
