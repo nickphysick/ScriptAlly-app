@@ -191,3 +191,6 @@
 .qs172-mpills .qs172-chip svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--navy); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
 .qs172-mpills .qs172-chip.on svg { stroke: #fff; }
 .qs172-mpills .qs172-chip:disabled { opacity: .45; cursor: default; }
+
+/* v172.3 — more than 18 bars (a long campaign in months or quarters): a 1px gap */
+.qs172-hist.is-dense { gap: 1px; }

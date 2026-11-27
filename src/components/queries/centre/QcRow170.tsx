@@ -71,13 +71,13 @@ export const QcRow170: React.FC<{ row: QcRow; nowMs: number; selected: boolean; 
           <span className="qr170-sn"><StatusDot status={x.status} overrideSize={x.n === "cur" ? 18 : 15} tone="inherit" reached={i === 3 ? x.n === "cur" : true} decorative />
             {x.n === "cur" ? <b className={`qr170-arw d-${quiet ? "quiet" : t.dir}`} aria-hidden="true">{quiet ? ZZZ : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}</span>
           <b>{x.n === "cur" ? <><span className="w-l">{word}</span><span className="w-s">{x.name}</span></> : x.name}</b>
-          <em>{x.date ?? (x.n === "skip" ? "–" : "")}</em>
+          <em>{x.date ?? (x.n === "fut" ? "" : "–")}</em>
         </span>
       ))}
     </span>
   );
   return (
-    <div ref={ref} className={`qr170${selected ? " is-sel" : ""}${closed ? " is-closed" : ""}`} id={`query-row-${r.id}`} role="button" tabIndex={0} data-qcv="row" data-qc172="row" data-id={r.id} data-status={r.status} data-furthest={r.furthest}
+    <div ref={ref} className={`qr170${selected ? " is-sel" : ""}${closed ? " is-closed" : ""}`} id={`query-row-${r.id}`} role="button" tabIndex={0} data-qcv="row" data-qc172="row" data-id={r.id} data-status={r.status} data-furthest={r.furthest} data-court={r.court} data-ss={r.stageStartMs == null ? "none" : undefined}
       style={{ "--qr-d": `${(0.6 / Math.max(1, turns - 1)).toFixed(3)}s` } as React.CSSProperties}
       onClick={() => onOpen(r.id)} onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); onOpen(r.id); } }}
       aria-label={`${r.agentName}, ${r.agency}`}>

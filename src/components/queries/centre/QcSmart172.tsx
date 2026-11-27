@@ -43,30 +43,64 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
   const on = smartOn172(s);
   const n = (skip: keyof Smart172, extra: (r: QcRow) => boolean) => rows.filter((r) => pass172(r, s, ctx, skip) && extra(r)).length;
 
-  /* the sent range: whole weeks from the first send to this week */
-  const weeks = useMemo(() => {
+  /* v172.3 — the sent range in buckets sized to the campaign: weeks while it fits in 26 weeks, else months while it
+     fits in 26 months, else quarters; never more than 26 bars (a weekly bar per week of a two-year campaign drew
+     every bar 0px wide) */
+  const nowMs = ctx.nowMs, set = setSmart172, sent = s.sent;
+  const buckets = useMemo(() => {
     const ms = rows.map((r) => r.sentMs).filter((x): x is number => x != null);
-    if (!ms.length) return [] as number[];
-    const end = ctx.nowMs, start = Math.min(...ms);
+    if (!ms.length) return { unit: "week" as const, starts: [] as number[] };
+    const end = nowMs, first = Math.min(...ms);
+    const nWeeks = Math.ceil((end - first) / WEEK);
+    if (nWeeks <= 26) { const out: number[] = []; for (let t = end - nWeeks * WEEK; t <= end; t += WEEK) out.push(t); return { unit: "week" as const, starts: out }; }
+    const f = new Date(first), e = new Date(end);
+    const months = (e.getFullYear() - f.getFullYear()) * 12 + e.getMonth() - f.getMonth() + 1;
+    const step = months <= 26 ? 1 : 3;
+    const s0 = new Date(f.getFullYear(), step === 3 ? Math.floor(f.getMonth() / 3) * 3 : f.getMonth(), 1);
     const out: number[] = [];
-    for (let t = end - Math.ceil((end - start) / WEEK) * WEEK; t <= end; t += WEEK) out.push(t);
-    return out;
-  }, [rows, ctx.nowMs]);
-  const W = weeks.length - 1;
-  const lo = s.sent ? Math.max(0, weeks.findIndex((t) => t >= s.sent![0])) : 0;
-  const hi = s.sent ? Math.max(lo, weeks.findIndex((t) => t + WEEK > s.sent![1])) : W;
+    for (let d = s0; d.getTime() <= end; d = new Date(d.getFullYear(), d.getMonth() + step, 1)) out.push(d.getTime());
+    return { unit: step === 1 ? ("month" as const) : ("quarter" as const), starts: out };
+  }, [rows, nowMs]);
+  const starts = buckets.starts;
+  const bEnd = (i: number) => (i + 1 < starts.length ? starts[i + 1] : nowMs + 1);
+  const W = starts.length - 1;
+  const lo = sent ? Math.max(0, starts.findIndex((t, i) => bEnd(i) > sent[0])) : 0;
+  const hi = sent ? Math.max(lo, starts.findIndex((t, i) => bEnd(i) > sent[1])) : W;
   const sentBase = rows.filter((r) => pass172(r, s, ctx, "sent"));
-  const hist = weeks.map((t) => sentBase.filter((r) => r.sentMs != null && r.sentMs >= t && r.sentMs < t + WEEK).length);
+  const hist = starts.map((t, i) => sentBase.filter((r) => r.sentMs != null && r.sentMs >= t && r.sentMs < bEnd(i)).length);
   const hmax = Math.max(1, ...hist);
-  const setSent = (a: number, b: number) => setSmart172({ sent: a <= 0 && b >= W ? null : [weeks[a], weeks[b] + WEEK - 1] });
-  const wkLabel = (i: number) => dayMonth(weeks[i]);
-  const months = (() => {
-    const all = weeks.map((t, i) => ({ i, d: new Date(t) })).filter((x, i, a) => i > 0 && x.d.getMonth() !== a[i - 1].d.getMonth());
-    const out: typeof all = []; const gap = Math.max(1, W * 0.13);
-    for (const m of all) if (!out.length || m.i - out[out.length - 1].i >= gap) out.push(m);
+  const setSent = (a: number, b: number) => set({ sent: a <= 0 && b >= W ? null : [starts[a], bEnd(b) - 1] });
+  const yy = (d: Date) => `’${String(d.getFullYear()).slice(2)}`;
+  /* "3 Mar" (a week) · "Mar ’25" (a month) · "Q1 ’25" (a quarter); the range's end names the bucket's last month */
+  const fromLabel = (i: number) => {
+    const d = new Date(starts[i]);
+    return buckets.unit === "week" ? dayMonth(starts[i]) : buckets.unit === "month" ? `${MONTHS_SHORT[d.getMonth()]} ${yy(d)}` : `Q${Math.floor(d.getMonth() / 3) + 1} ${yy(d)}`;
+  };
+  const toLabel = (i: number) => {
+    if (buckets.unit === "week") return fromLabel(i);
+    const d = new Date(bEnd(i) - 1);
+    return `${MONTHS_SHORT[d.getMonth()]} ${yy(d)}`;
+  };
+  /* the scale: weeks — the month names where the month changes (centred, the first left-aligned); months and
+     quarters — the first bucket and each new year, "Jan ’25", left-aligned at their bucket; a label within 16% of
+     the range of the one before is skipped */
+  const scale = (() => {
+    const out: { i: number; text: string; left: boolean }[] = [];
+    if (buckets.unit === "week") {
+      const all = starts.map((t, i) => ({ i, d: new Date(t) })).filter((x, i, a) => i > 0 && x.d.getMonth() !== a[i - 1].d.getMonth());
+      const gap = Math.max(1, W * 0.13);
+      for (const m of all) if (!out.length || m.i - out[out.length - 1].i >= gap) out.push({ i: m.i, text: MONTHS_SHORT[m.d.getMonth()], left: !out.length });
+      return out;
+    }
+    const gap = W * 0.16;
+    starts.forEach((t, i) => {
+      const d = new Date(t);
+      if (i > 0 && d.getFullYear() === new Date(starts[i - 1]).getFullYear()) return;
+      if (out.length && i - out[out.length - 1].i < gap) return;
+      out.push({ i, text: `${MONTHS_SHORT[d.getMonth()]} ${yy(d)}`, left: true });
+    });
     return out;
   })();
-
 
   /* what you sent: packages by count */
   const pkgs = useMemo(() => {
@@ -120,9 +154,9 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
 
       {W > 0 ? (
         <section className="qs172-s">
-          <Head172 title="Sent" on={!!s.sent} text={`${wkLabel(lo)} – ${hi >= W ? "now" : wkLabel(hi)}`} idle="any time" part="sent" onReset={setSmart172} />
-          {/* the weekly bars show the spread; they are not buttons (the handles pick the range) */}
-          <div className="qs172-hist" aria-hidden="true">
+          <Head172 title="Sent" on={!!s.sent} text={`${fromLabel(lo)} – ${hi >= W ? "now" : toLabel(hi)}`} idle="any time" part="sent" onReset={setSmart172} />
+          {/* the bars show the spread; they are not buttons (the handles pick the range, one bucket a step) */}
+          <div className={`qs172-hist${starts.length > 18 ? " is-dense" : ""}`} aria-hidden="true">
             {hist.map((h, i) => <i key={i} className={i >= lo && i <= hi ? "in" : ""} style={{ height: `${h ? 4 + (h / hmax) * 26 : 0}px` }} />)}
           </div>
           <div className="qs172-dual" style={{ ["--lo" as string]: `${(lo / W) * 100}%`, ["--hi" as string]: `${(hi / W) * 100}%` }}>
@@ -130,7 +164,7 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
             <input type="range" min={0} max={W} value={lo} aria-label="Sent from" onChange={(e) => setSent(Math.min(+e.target.value, hi), hi)} />
             <input type="range" min={0} max={W} value={hi} aria-label="Sent to" onChange={(e) => setSent(lo, Math.max(+e.target.value, lo))} />
           </div>
-          <div className="qs172-scale">{months.map((m) => <span key={m.i} style={{ left: `${(m.i / W) * 100}%` }}>{MONTHS_SHORT[m.d.getMonth()]}</span>)}</div>
+          <div className="qs172-scale">{scale.map((m) => <span key={m.i} style={{ left: `${(m.i / W) * 100}%`, ...(m.left ? { transform: "none" } : {}) }}>{m.text}</span>)}</div>
         </section>
       ) : null}
 
@@ -265,9 +299,9 @@ const DueRange172: React.FC<{ k: "date" | "sendby"; title: string; side: "agent"
         <input type="range" min={b.min} max={b.max} step={7} value={d.hi} aria-label={`${title} to`} onChange={(e) => set({ hi: Math.max(+e.target.value, d.lo) })} />
       </div>
       <div className="qs172-scale">
-        <span style={{ left: "0%", transform: "none" }}>{Math.abs(b.min / 7)}w ago</span>
+        <span style={{ left: "0%", transform: "none" }}>{Math.abs(b.min / 7)}w+ ago</span>
         <span style={{ left: `${today}%` }}>Today</span>
-        <span style={{ left: "100%", transform: "translateX(-100%)" }}>{b.max / 7}w ahead</span>
+        <span style={{ left: "100%", transform: "translateX(-100%)" }}>{b.max / 7}w+ ahead</span>
       </div>
       <label className="qs172-ck"><input type="checkbox" checked={d.nd} onChange={(e) => set({ nd: e.target.checked })} />Not dated <em>{undated}</em></label>
     </section>

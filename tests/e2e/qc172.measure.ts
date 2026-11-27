@@ -392,3 +392,88 @@ test("L9 · the current step's badge: a white arrow on navy (in, out, end) at re
   L.check("d-quiet · navy z z z on white", q.length > 0 && qb.length === 0, qb.length ? qb.slice(0, 3).map((b) => `${b.id}: ${b.zz} on ${b.bg}`).join("; ") : `${q.length} navy on white`);
   L.done(9);
 });
+
+/* ── v172.3 · long campaigns ───────────────────────────────────────────────────────────────────────────────────── */
+
+async function readSent(page: Page, V: string) {
+  return page.evaluate((V) => {
+    const sec = [...document.querySelectorAll<HTMLElement>(`${V}.qs172-s`)].find((s) => s.querySelector(".qs172-sh b")?.textContent?.trim() === "Sent");
+    if (!sec) return null;
+    const bars = [...sec.querySelectorAll<HTMLElement>(".qs172-hist > i")].map((b) => ({ w: b.getBoundingClientRect().width, h: b.getBoundingClientRect().height }));
+    const scale = [...sec.querySelectorAll<HTMLElement>(".qs172-scale span")].map((x) => x.textContent ?? "");
+    const now = sec.querySelector(".qs172-now2")?.textContent ?? "";
+    const idle = sec.querySelector(".qs172-sh > span")?.textContent ?? "";
+    const max = Number(sec.querySelector<HTMLInputElement>('input[aria-label="Sent to"]')?.max ?? NaN);
+    return { bars, scale, now, idle, max };
+  }, V);
+}
+
+test("L10 · the Sent chart on a long campaign: ≤ 26 bars, each counted bar ≥ 3px, a year on the scale, the handle steps", async ({ page }) => {
+  const L = new Ledger("L10");
+  const V = await openList(page, WIDE);
+  const a = await readSent(page, V);
+  L.check("the Sent section is drawn", !!a, "Sent section");
+  if (a) {
+    const counted = a.bars.filter((b) => b.h > 0);
+    L.check("population · a counted bar", counted.length > 0, `${a.bars.length} bars, ${counted.length} counted`);
+    L.check("≤ 26 bars", a.bars.length > 0 && a.bars.length <= 26, `${a.bars.length} bars`);
+    const thin = counted.filter((b) => b.w < 3);
+    L.check("every counted bar ≥ 3px wide", counted.length > 0 && thin.length === 0, `${thin.length} under 3px (${counted.slice(0, 4).map((b) => b.w.toFixed(1)).join(", ")}…)`);
+    L.check("a year on the scale", a.scale.some((t) => /’\d\d/.test(t)), JSON.stringify(a.scale));
+    await page.evaluate(({ V, v }) => {
+      const sec = [...document.querySelectorAll<HTMLElement>(`${V}.qs172-s`)].find((s) => s.querySelector(".qs172-sh b")?.textContent?.trim() === "Sent")!;
+      const el = sec.querySelector<HTMLInputElement>('input[aria-label="Sent to"]')!;
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(el, String(v));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }, { V, v: a.max - 1 });
+    await page.waitForTimeout(500);
+    const b = await readSent(page, V);
+    L.check("one step of the right handle changes the summary", !!b && b.now !== "" && !/now$/.test(b.now), `before "${a.idle}" · after "${b?.now}"`);
+    await clearPanel(page, V);
+  }
+  L.done(6);
+});
+
+test("L11 · the date sliders' open ends say so", async ({ page }) => {
+  const L = new Ledger("L11");
+  const V = await openList(page, WIDE);
+  const ends = await page.evaluate((V) => [...document.querySelectorAll<HTMLElement>(`${V}.qs172-s`)]
+    .filter((s) => s.querySelector(".qs172-ck"))
+    .map((s) => { const sp = [...s.querySelectorAll<HTMLElement>(".qs172-scale span")]; return { t: s.querySelector(".qs172-sh b")?.textContent?.trim(), a: sp[0]?.textContent, b: sp[sp.length - 1]?.textContent }; }), V);
+  L.check("both date fields", ends.length === 2, JSON.stringify(ends));
+  const want: Record<string, [string, string]> = { "Agent’s reply date": ["8w+ ago", "12w+ ahead"], "Your send-by date": ["4w+ ago", "8w+ ahead"] };
+  for (const e of ends) {
+    const w = want[e.t ?? ""];
+    L.check(`${e.t} · left end`, !!w && e.a === w[0], `"${e.a}"`);
+    L.check(`${e.t} · right end`, !!w && e.b === w[1], `"${e.b}"`);
+  }
+  L.done(5);
+});
+
+test("L12 · every your-move and offer row with a dated track has a reason line", async ({ page }) => {
+  const L = new Ledger("L12");
+  const V = await openList(page, WIDE);
+  const r = await page.evaluate((V) => [...document.querySelectorAll<HTMLElement>(`${V}[data-qc172='row']`)]
+    .filter((row) => (row.dataset.court === "you" || row.dataset.court === "offer") && (row.querySelector(".qr170-sp.is-cur em")?.textContent ?? "").trim() !== "" && (row.querySelector(".qr170-sp.is-cur em")?.textContent ?? "").trim() !== "–")
+    .map((row) => ({ name: row.querySelector(".qr170-who b")?.textContent ?? "", ss: row.dataset.ss ?? "", act: row.querySelector(".qr170-act")?.textContent?.replace("→", "").trim() ?? row.querySelector(".qr170-wait")?.textContent ?? "", line: (row.querySelector(".qr170-n em")?.textContent ?? "").trim() })), V);
+  L.check("population", r.length > 0, `${r.length} rows`);
+  L.check("population · a row with no stage start recorded", r.some((x) => x.ss === "none"), r.filter((x) => x.ss === "none").map((x) => x.name).join(", ") || "none");
+  const empty = r.filter((x) => !x.line);
+  L.check("every one has a reason line", r.length > 0 && empty.length === 0, empty.map((x) => `${x.name} (${x.act})`).join("; ") || `${r.length} with lines`);
+  L.done(3);
+});
+
+test("L13 · every reached step has a date line (a dash when none); future steps none", async ({ page }) => {
+  const L = new Ledger("L13");
+  const V = await openList(page, WIDE);
+  const r = await page.evaluate((V) => [...document.querySelectorAll<HTMLElement>(`${V}[data-qc172='row'] .qr170-sp`)].map((sp) => ({
+    state: [...sp.classList].find((c) => c.startsWith("is-")) ?? "", em: (sp.querySelector("em")?.textContent ?? "").trim(),
+    name: sp.closest<HTMLElement>("[data-qc172='row']")!.querySelector(".qr170-who b")?.textContent ?? "" })), V);
+  const reached = r.filter((x) => x.state !== "is-fut"), fut = r.filter((x) => x.state === "is-fut");
+  L.check("population", reached.length > 0 && fut.length > 0, `${reached.length} reached, ${fut.length} future`);
+  const blank = reached.filter((x) => !x.em);
+  L.check("every reached step has a date line", blank.length === 0, blank.slice(0, 5).map((x) => `${x.name} ${x.state}`).join("; ") || "all dated or dashed");
+  const filled = fut.filter((x) => x.em);
+  L.check("future steps have none", filled.length === 0, filled.slice(0, 5).map((x) => `${x.name}: "${x.em}"`).join("; ") || "none");
+  L.done(3);
+});
