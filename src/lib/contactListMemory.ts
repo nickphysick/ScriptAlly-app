@@ -150,6 +150,8 @@ export function sanitiseListVisit(raw: unknown): ListVisit | null {
     fit: sf.fit === 5 || sf.fit === 4 || sf.fit === 0 ? sf.fit : null,
     reply: oneOf<ReplyChoice>(sf.reply, REPLY_CHOICES, "any"),
     abroad: sf.abroad === true,
+    /* v1.2.1 — "No genres yet"; never with genre picks */
+    noGenres: sf.noGenres === true && !(Array.isArray(sf.genres) && sf.genres.length > 0),
   };
   const scroll = typeof r.scroll === "number" && Number.isFinite(r.scroll) && r.scroll > 0 ? Math.min(Math.round(r.scroll), 1_000_000) : d.scroll;
   return {

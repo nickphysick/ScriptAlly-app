@@ -44,3 +44,14 @@ describe("a remembered filter set", () => {
     expect(read({ fit: 0, reply: "nrmn", abroad: true })).toMatchObject({ fit: 0, reply: "nrmn", abroad: true });
   });
 });
+
+describe("v1.2.1 — No genres yet", () => {
+  const read = (filters: Record<string, unknown>) => sanitiseListVisit({ v: LIST_VISIT_VERSION, filters, search: "", scroll: 0 })!.filters;
+  it("matches agents with no genres; a remembered one never comes back with genre picks", () => {
+    expect(matchesContactFilters(fx({}), { ...emptyContactFilters(), noGenres: true })).toBe(true);
+    expect(matchesContactFilters(fx({}, { genres: ["Crime"] } as Partial<AgentFacts>), { ...emptyContactFilters(), noGenres: true })).toBe(false);
+    expect(read({ noGenres: true }).noGenres).toBe(true);
+    expect(read({ noGenres: true, genres: ["crime"] }).noGenres).toBe(false);
+    expect(read({}).noGenres).toBe(false);
+  });
+});

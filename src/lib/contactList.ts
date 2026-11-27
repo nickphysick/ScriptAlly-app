@@ -360,13 +360,16 @@ export interface ContactFilters {
   /** Contact list rows v1.2 — Outside the UK: the agent's country is set and is not the writer's home country
    *  (`AgentFacts.abroad`, set by the page from getHomeCountry) */
   abroad?: boolean;
+  /** Contact list rows v1.2.1 — "No genres yet": agents with no genres on file. It shares the Genres section: choosing it
+   *  clears the genre picks, and a genre pick clears it */
+  noGenres?: boolean;
 }
 export type FitChoice = null | 5 | 4 | 0;
 export type ReplyChoice = "any" | "always" | "nrmn" | "known";
 export const FIT_CHOICES: readonly Exclude<FitChoice, null>[] = [5, 4, 0];
 export const REPLY_CHOICES: readonly ReplyChoice[] = ["any", "always", "nrmn", "known"];
 export const emptyContactFilters = (): ContactFilters =>
-  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any", missing: false, fit: null, reply: "any", abroad: false });
+  ({ status: [], action: false, open: "either", queried: "either", mats: false, always: false, genres: [], genreMode: "any", missing: false, fit: null, reply: "any", abroad: false, noGenres: false });
 export const OPEN_CHOICES: { key: OpenChoice; label: string }[] = [
   { key: "either", label: "Either" }, { key: "open", label: "Open now" }, { key: "closed", label: "Closed for now" },
   { key: "unknown", label: DOOR_NOT_KNOWN },
@@ -457,6 +460,7 @@ export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => str
     out.push({ key: "reply", label: f.reply === "always" ? "Always replies" : f.reply === "nrmn" ? "No response means no" : "Reply time known", drop: (g) => ({ ...g, reply: "any" }) });
   }
   if (f.abroad) out.push({ key: "abroad", label: "Outside the UK", drop: (g) => ({ ...g, abroad: false }) });
+  if (f.noGenres) out.push({ key: "noGenres", label: "No genres yet", drop: (g) => ({ ...g, noGenres: false }) });
   if (f.genres.length) {
     out.push({
       key: "genres", label: `Genre: ${genreLabel(f.genres[0])}${f.genres.length > 1 ? ` +${f.genres.length - 1}` : ""}`,
@@ -511,6 +515,7 @@ const sectionMatch: Record<FilterSection, (x: AgentFacts, f: ContactFilters) => 
   reply: (x, f) => !f.reply || f.reply === "any" || replyMatches(x, f.reply),
   abroad: (x, f) => !f.abroad || x.abroad === true,
   genres: (x, f) => {
+    if (f.noGenres) return x.genres.length === 0;
     if (f.genres.length === 0) return true;
     const mine = new Set(x.genres.map(genreKey));
     return f.genreMode === "all" ? f.genres.every((g) => mine.has(g)) : f.genres.some((g) => mine.has(g));

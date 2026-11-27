@@ -2,20 +2,23 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list rows v1.2 · Phase 4 — THE AGENTS LIST'S FILTER PANEL, REVAMPED (design-refs/contact-list-rows-v1-2, the
- * "Revamped" panel). The card is still the shared shell/FilterPanel (its navy head, the card, the foot); this file says
- * what the Agents list's sections, counts and writes are:
+ * Contact list rows v1.2 · Phase 4, COMPACTED by v1.2.1 · Phase 3 — THE AGENTS LIST'S FILTER PANEL (design-refs/
+ * contact-list-rows-v1-2-1, "panel-compact"). It fits a 1440×900 laptop window without scrolling inside itself. The card
+ * is still the shared shell/FilterPanel (its navy head and Clear all); this file says what the Agents list's sections,
+ * counts and writes are:
  *
- *   Your list            a boxed segment: All · Queried · Not yet, each with its count above its word   (`queried`)
- *   Open to queries?     a boxed segment: Either · Open · Closed                                         (`open`)
- *   Fit  your rating     pills ★★★★★ · ★★★★ and up · Not rated; single choice, the chosen one clears    (`fit`)
+ *   head                 "Filter"; while a filter is on, a quiet "{x} of {n}" beside it, and Clear all. No foot line.
+ *   Your list            one section, two boxed segments (each count beside its word): All · Queried · Not yet
+ *                        (`queried`), then Either · Open · Closed (`open`)
+ *   Fit  your rating     pills 5★ · 4★+ · Not rated; single choice, the chosen one clears                (`fit`)
  *   Replies              pills Always replies · No response means no · Reply time known; single choice (`reply`)
- *   Genres sought        pills, several allowed (any match); the book's first with a small navy tick; six, then
- *                        "+n more" / "Show fewer"; under them "{n} agents have no genres yet"            (`genres`)
- *   Outside the UK       a full-width toggle row at the foot, with its count                            (`abroad`)
- *   Missing details      a full-width toggle row at the foot, with its count                            (`missing`)
- *   foot                 "All {n} agents." / "Showing {x} of {n} agents."
+ *   Genres sought        four pills (the book's first, with a small navy tick), several allowed (any match), then
+ *                        "+n more" (an outline pill), then "No genres yet" (`noGenres`) — which clears the genre picks,
+ *                        and a genre pick clears it
+ *   (last)               "Outside the UK", a pill                                                         (`abroad`)
  *
+ * "Missing details" left the panel (List health's Fill the gaps does that job); the `missing` filter is still honoured
+ * from a link and cleared by Clear all.
  * ⚠️ ONE FILTER STATE: every control writes `ContactFilters` through `onFilters`; every count is lib/contactPanel
  *    `panelCounts` — FACETED (each option: what it would show given every other section's choice). An option at 0 is
  *    disabled unless it is the current choice. Replaced: "Who to query next" (Ready to query, Always reply), "Have you
@@ -25,9 +28,10 @@
  * ⚠️ ITS HOOKS ARE `data-clq`, NEVER `data-qc156`: every workspace page stays mounted. Sections `data-clq-sec`, options
  *    `data-clq-opt` with their count in `data-n`.
  */
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { AgentFacts, ContactFilters, FitChoice, ReplyChoice } from "../../../lib/contactList";
-import { panelCounts, panelFoot } from "../../../lib/contactPanel";
+import { panelCounts, panelSummary } from "../../../lib/contactPanel";
 import { railOn, toggleGenre, type Sets } from "../../../lib/contactV27";
 import { FILTER_TICK, FilterPanel } from "../../shell/FilterPanel";
 import "../../queries/centre/qcv153.css";
@@ -38,7 +42,7 @@ import "./contactQcLayout.css";
 import "./contactPanel.css";
 
 /** genres shown before "+{n} more" */
-export const GENRES_SHOWN = 6;
+export const GENRES_SHOWN = 4;
 /** the genres' order: the book's first, then by how many agents carry it, then A to Z (a stable order: it never jumps as
  *  the faceted counts change) */
 export const orderGenres = <G extends { key: string }>(g: readonly G[], hit: (k: string) => boolean): G[] =>
@@ -86,11 +90,25 @@ const Pills: React.FC<{ label: string; opts: Opt[]; loading: boolean }> = ({ lab
   </div>
 );
 const Section: React.FC<{ k: string; title: string; aside?: React.ReactNode; children: React.ReactNode }> = ({ k, title, aside, children }) => (
-  <section className="fp-sec clr-fs" data-clq-sec={k} aria-label={title}>
-    <h4 className="clr-fh"><span>{title}</span>{aside ? <small>{aside}</small> : null}</h4>
+  <section className="fp-sec clr-fs" data-clq-sec={k} aria-label={title || undefined}>
+    {title ? <h4 className="clr-fh"><span>{title}</span>{aside ? <small>{aside}</small> : null}</h4> : null}
     {children}
   </section>
 );
+
+/** v1.2.1 — the head's summary ("{x} of {n}"), placed beside "Filter" in the shared shell's head through a portal (the shell is
+ *  reused as it is: it draws "Filter" and Clear all; this page adds its summary there) */
+const HeadSummary: React.FC<{ text: string | null }> = ({ text }) => {
+  const probe = useRef<HTMLSpanElement>(null);
+  const [head, setHead] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => { setHead(probe.current?.closest(".fp")?.querySelector<HTMLElement>(":scope > .fp-hd") ?? null); }, []);
+  return (
+    <>
+      <span ref={probe} hidden />
+      {head && text ? createPortal(<small className="clr-sum" data-clq="summary" aria-live="polite">{text}</small>, head) : null}
+    </>
+  );
+};
 
 export const ContactViews: React.FC<ContactViewsProps> = (p) => {
   const f = p.filters;
@@ -105,20 +123,18 @@ export const ContactViews: React.FC<ContactViewsProps> = (p) => {
 
   const ordered = orderGenres(c.genres, hit);
   const shownGenres = allGenres ? ordered : ordered.filter((g, i) => i < GENRES_SHOWN || g.on);
-  const stars = (n: number) => <span className="clr-st" aria-hidden="true">{"★".repeat(n)}</span>;
 
   return (
-    <FilterPanel hook="data-clq" label="Filter your agents" on={on} onClear={p.onReset} loading={loading}
-      foot={panelFoot(on > 0, c.showing, c.total)}>
+    /* v1.2.1 — no foot line: the summary sits beside the title while a filter is on */
+    <FilterPanel hook="data-clq" label="Filter your agents" on={on} onClear={p.onReset} loading={loading} foot={null}>
+      <HeadSummary text={loading ? null : panelSummary(on > 0, c.showing, c.total)} />
+      {/* YOUR LIST: one section holding both segments — who you've queried, and who is open */}
       <Section k="list" title="Your list">
         <Segment label="Your list" loading={loading} opts={[
           { k: "list:all", label: "All", n: c.list.all, on: f.queried === "either", press: () => set({ queried: "either" }) },
           { k: "list:queried", label: "Queried", n: c.list.queried, on: f.queried === "yes", press: () => set({ queried: "yes" }) },
           { k: "list:none", label: "Not yet", n: c.list.none, on: f.queried === "no", press: () => set({ queried: "no" }) },
         ]} />
-      </Section>
-
-      <Section k="door" title="Open to queries?">
         <Segment label="Open to queries?" loading={loading} opts={[
           { k: "door:any", label: "Either", n: c.door.any, on: f.open === "either" || f.open === "unknown", press: () => set({ open: "either" }) },
           { k: "door:open", label: "Open", n: c.door.open, on: f.open === "open", press: () => set({ open: "open" }) },
@@ -129,7 +145,7 @@ export const ContactViews: React.FC<ContactViewsProps> = (p) => {
       <Section k="fit" title="Fit" aside="your rating">
         <Pills label="Fit, your rating" loading={loading} opts={([5, 4, 0] as const).map((v) => ({
           k: `fit:${v}`, n: c.fit[v], on: fitNow === v, press: () => set({ fit: fitNow === v ? null : v }),
-          label: v === 5 ? stars(5) : v === 4 ? <>{stars(4)}<span>and up</span></> : "Not rated",
+          label: v === 5 ? "5★" : v === 4 ? "4★+" : "Not rated",
           aria: v === 5 ? "Five stars" : v === 4 ? "Four stars and up" : "Not rated",
         }))} />
       </Section>
@@ -140,29 +156,36 @@ export const ContactViews: React.FC<ContactViewsProps> = (p) => {
         }))} />
       </Section>
 
+      {/* GENRES SOUGHT: four, then "+n more" (an outline pill), then "No genres yet" — which clears the genre picks, and a
+          genre pick clears it */}
       <Section k="genres" title="Genres sought">
-        {c.genres.length === 0 ? <p className="clr-fnote" data-clq="genres-none">No genres on file yet.</p> : (
-          <Pills label="Genres sought" loading={loading} opts={shownGenres.map((g) => ({
-            k: `genre:${g.key}`, n: g.n, on: g.on, press: () => p.onFilters(toggleGenre(f, g.key)),
-            label: <>{hit(g.key) ? <span className="clr-tick" title="Your book">{FILTER_TICK}</span> : null}{g.label}</>,
-          }))} />
-        )}
-        {ordered.length > GENRES_SHOWN ? (
-          <button type="button" className="clr-fmore" data-clq="genres-more" aria-expanded={allGenres} onClick={() => setAllGenres((v) => !v)}>
-            {allGenres ? "Show fewer" : `+${ordered.length - shownGenres.length} more`}
-          </button>
-        ) : null}
-        {c.noGenres > 0 ? <p className="clr-fnote" data-clq="no-genres">{c.noGenres} {c.noGenres === 1 ? "agent has" : "agents have"} no genres yet.</p> : null}
+        <div className="clr-chips" role="group" aria-label="Genres sought">
+          {shownGenres.map((g) => (
+            <button key={g.key} type="button" aria-pressed={g.on} className={`clr-chip${g.on ? " on" : ""}`} data-clq-opt={`genre:${g.key}`} data-n={g.n}
+              disabled={loading || (g.n === 0 && !g.on)} onClick={() => p.onFilters({ ...toggleGenre(f, g.key), noGenres: false })}>
+              {hit(g.key) ? <span className="clr-tick" title="Your book">{FILTER_TICK}</span> : null}{g.label}<em>{g.n}</em>
+            </button>
+          ))}
+          {ordered.length > GENRES_SHOWN ? (
+            <button type="button" className="clr-chip clr-chip--more" data-clq="genres-more" aria-expanded={allGenres} onClick={() => setAllGenres((v) => !v)}>
+              {allGenres ? "Fewer" : `+${ordered.length - shownGenres.length} more`}
+            </button>
+          ) : null}
+          {c.noGenres > 0 || f.noGenres ? (
+            <button type="button" aria-pressed={!!f.noGenres} className={`clr-chip${f.noGenres ? " on" : ""}`} data-clq-opt="nogenres" data-n={c.noGenres}
+              disabled={loading || (c.noGenres === 0 && !f.noGenres)} onClick={() => set({ noGenres: !f.noGenres, genres: [] })}>
+              No genres yet<em>{c.noGenres}</em>
+            </button>
+          ) : null}
+        </div>
       </Section>
 
-      {/* the foot's two toggles, full width, each with its count */}
-      {([["abroad", "Outside the UK", c.abroad, !!f.abroad, () => set({ abroad: !f.abroad })],
-        ["missing", "Missing details", c.missing, !!f.missing, () => set({ missing: !f.missing })]] as const).map(([k, w, n, isOn, press]) => (
-        <button key={k} type="button" className={`clr-frow${isOn ? " on" : ""}`} data-clq-sec={k} data-clq-opt={k} data-n={n} aria-pressed={isOn}
-          disabled={loading || (n === 0 && !isOn)} onClick={press}>
-          <b>{n}</b><span>{w}</span><i aria-hidden="true">{isOn ? "✕" : "›"}</i>
-        </button>
-      ))}
+      {/* the last section: Outside the UK, a pill ("Missing details" left the panel: List health's Fill the gaps does that job) */}
+      <Section k="abroad" title="">
+        <Pills label="Where they are" loading={loading} opts={[
+          { k: "abroad", label: "Outside the UK", n: c.abroad, on: !!f.abroad, press: () => set({ abroad: !f.abroad }) },
+        ]} />
+      </Section>
     </FilterPanel>
   );
 };

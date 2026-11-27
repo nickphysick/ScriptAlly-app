@@ -29,7 +29,7 @@ export interface PanelCounts {
   reply: { always: number; nrmn: number; known: number };
   /** every genre on file, most carried first, then A to Z */
   genres: PanelGenre[];
-  /** agents with no genres on file (the panel's quiet line) */
+  /** agents with no genres on file — the "No genres yet" pill's count, faceted like the genres (v1.2.1) */
   noGenres: number;
   abroad: number;
   missing: number;
@@ -66,7 +66,7 @@ export function panelCounts(
     fit: { 5: c("fit", (x) => fitMatches(x, 5)), 4: c("fit", (x) => fitMatches(x, 4)), 0: c("fit", (x) => fitMatches(x, 0)) },
     reply: { always: c("reply", (x) => replyMatches(x, "always")), nrmn: c("reply", (x) => replyMatches(x, "nrmn")), known: c("reply", (x) => replyMatches(x, "known")) },
     genres: [...totals.values()].sort((a, b) => b.total - a.total || a.label.localeCompare(b.label)),
-    noGenres: all.filter((x) => x.genres.length === 0).length,
+    noGenres: c("genres", (x) => x.genres.length === 0),
     abroad: c("abroad", (x) => x.abroad === true),
     missing: c("missing", hasMissingDetails),
     showing: c(null, () => true),
@@ -74,8 +74,6 @@ export function panelCounts(
   };
 }
 
-/** the foot's sentence: "All {n} agents." with no filter on, "Showing {x} of {n} agents." with one on */
-export function panelFoot(on: boolean, showing: number, total: number): string {
-  const word = total === 1 ? "agent" : "agents";
-  return on || showing !== total ? `Showing ${showing} of ${total} ${word}.` : `All ${total} ${word}.`;
-}
+/** v1.2.1 — the head's quiet summary beside "Filter": "{x} of {n}" while a filter is on; nothing at rest (the foot line
+ *  is gone) */
+export const panelSummary = (on: boolean, showing: number, total: number): string | null => (on ? `${showing} of ${total}` : null);

@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ContactHeaderQc, CLQ_ARCH, CLQ_RING, QC_ART_W } from "./ContactHeaderQc";
 import { ContactViews, GENRES_SHOWN } from "./ContactViews";
-import { panelFoot } from "../../../lib/contactPanel";
+import { panelSummary } from "../../../lib/contactPanel";
 import { ContactBar } from "./ContactBar";
 import { emptyContactFilters, type AgentFacts, type ContactFilters } from "../../../lib/contactList";
 import { appliedChoices, railOn, toggleReady } from "../../../lib/contactV27";
@@ -93,9 +93,12 @@ describe("List filters v1 Phase 3 · the Agents panel", () => {
      sought, then Outside the UK and Missing details; faceted counts; zero disabled unless chosen */
   const opt = (h: string, k: string) => h.match(new RegExp(`<button[^>]*data-clq-opt="${k}"[^>]*>`))?.[0] ?? "";
   const n = (h: string, k: string) => Number(opt(h, k).match(/data-n="(\d+)"/)?.[1] ?? NaN);
+  /* RE-POINTED by Contact list rows v1.2.1 · Phase 3 — the compact panel: one Your list section holding both segments;
+     Outside the UK a pill in the last section; Missing details out of the panel; no foot line */
   it("its sections, in order; the old Who to query next, Have you queried them? and Are they open? are gone", () => {
     const h = views();
-    expect([...h.matchAll(/data-clq-sec="(\w+)"/g)].map((m) => m[1])).toEqual(["list", "door", "fit", "reply", "genres", "abroad", "missing"]);
+    expect([...h.matchAll(/data-clq-sec="(\w+)"/g)].map((m) => m[1])).toEqual(["list", "fit", "reply", "genres", "abroad"]);
+    expect(h).not.toContain("Missing details");
     expect(h).not.toMatch(/Who to query next|Have you queried them|Are they open|Ready to query|What they want/);
   });
   it("Your list and Open to queries? are boxed segments with their counts; Either covers a door not known", () => {
@@ -113,32 +116,35 @@ describe("List filters v1 Phase 3 · the Agents panel", () => {
     expect(n(h, "genre:crime")).toBe(0);
     expect(opt(h, "genre:crime")).toContain("disabled");
   });
-  it("Fit and Replies are single-choice toggles; Outside the UK and Missing details are rows at the foot", () => {
+  it("Fit (5★, 4★+, Not rated) and Replies are single-choice toggles; Outside the UK is a pill", () => {
     const all = [fx("r5", {}, { starRating: 5, noResponseMeansNo: true, responseTimeWeeks: 6 }), fx("r4", { abroad: true } as Partial<AgentFacts>, { starRating: 4 }), fx("u", { gaps: 1 })];
     const h = views({ ...E(), fit: 4 }, all);
     expect([n(h, "fit:5"), n(h, "fit:4"), n(h, "fit:0")]).toEqual([1, 2, 1]);
     expect(opt(h, "fit:4")).toContain('aria-pressed="true"');
     expect([n(h, "reply:always"), n(h, "reply:nrmn"), n(h, "reply:known")]).toEqual([0, 1, 1]);
-    expect(opt(h, "abroad")).toMatch(/class="clr-frow"/);
-    expect([n(h, "abroad"), n(h, "missing")]).toEqual([1, 0]);
+    expect(opt(h, "abroad")).toMatch(/class="clr-chip"/);
+    expect(n(h, "abroad")).toBe(1);
+    expect(h).toMatch(/data-clq-opt="fit:5"[^>]*>5★<em>/);
+    expect(h).toMatch(/data-clq-opt="fit:4"[^>]*>4★\+<em>/);
   });
-  it("Genres: the book's first with a tick, six then +n more; the quiet line counts the agents with none", () => {
+  it("Genres: the book's first with a tick, four then the +n more pill, then No genres yet with its faceted count", () => {
     const many = Array.from({ length: 9 }, (_, i) => fx(`g${i}`, { genres: [`Genre ${String.fromCharCode(65 + i)}`] }));
     const h = views(E(), [...many, fx("t", { genres: ["Thriller"] }), fx("z")]);
     expect(h.match(/data-clq-opt="genre:[^"]+"/g)).toHaveLength(GENRES_SHOWN);
     expect(h.indexOf('data-clq-opt="genre:thriller"')).toBeLessThan(h.indexOf('data-clq-opt="genre:genre a"'));
     expect(opt(h, "genre:thriller")).toBeTruthy();
-    expect(h).toMatch(/data-clq="genres-more" aria-expanded="false">\+4 more<\/button>/);
-    expect(h).toContain('<p class="clr-fnote" data-clq="no-genres">1 agent has no genres yet.</p>');
+    expect(h).toMatch(/class="clr-chip clr-chip--more" data-clq="genres-more" aria-expanded="false">\+6 more<\/button>/);
+    expect(opt(h, "nogenres")).toMatch(/data-n="1"/);
+    expect(h.indexOf('data-clq="genres-more"')).toBeLessThan(h.indexOf('data-clq-opt="nogenres"'));
   });
   it("no stage colour anywhere in the panel", () => {
     const h = views({ ...E(), queried: "no" }).toLowerCase();
     for (const c of Object.values(STAGE_COLOURS)) for (const hex of Object.values(c)) expect(h).not.toContain(hex);
   });
-  it("the foot", () => {
-    expect(panelFoot(false, 5, 5)).toBe("All 5 agents.");
-    expect(panelFoot(true, 2, 5)).toBe("Showing 2 of 5 agents.");
-    expect(views()).toContain("All 5 agents.");
+  it("no foot line; the head's summary reads {x} of {n} while a filter is on", () => {
+    expect(panelSummary(false, 5, 5)).toBeNull();
+    expect(panelSummary(true, 2, 5)).toBe("2 of 5");
+    expect(views()).not.toMatch(/All 5 agents|Showing \d+ of/);
   });
 });
 
