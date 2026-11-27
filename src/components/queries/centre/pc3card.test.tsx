@@ -106,7 +106,8 @@ describe("Log a query v2.3 · Phase 2 (D2) · the compact tile on a narrow card"
   it("the same button: the markup is unchanged (no second element, the hooks and the name stay)", () => {
     const t = readFileSync(new URL("./QcMatTile.tsx", import.meta.url), "utf8");
     expect(t.match(/<button /g)?.length).toBe(1);
-    expect(t).toMatch(/className=\{`pc3-tile\$\{open \? " is-open" : ""\}`\} data-qc1533="tab" data-pc3="tile" aria-label=\{name\}/);
+    /* v172 — the list row's icon pill is the same button with one more class (`pill`), not a second element */
+    expect(t).toMatch(/className=\{`pc3-tile\$\{open \? " is-open" : ""\}\$\{pill \? " pc3-pill" : ""\}`\} data-qc1533="tab" data-pc3="tile" aria-label=\{name\}/);
   });
   it("a 24px pill on the label's line at its right-hand end, glyph and count side by side, nothing under 12px", () => {
     expect(body).toMatch(/\.qc154-card \.pc3-tw \{ position: relative; z-index: 1; top: auto; right: auto; transform: none; order: -1; align-self: flex-end; margin: -4px -2px -22px 0; \}/);

@@ -1,0 +1,503 @@
+diff --git a/src/components/Queries.tsx b/src/components/Queries.tsx
+index b2e55bfd..56962b12 100644
+--- a/src/components/Queries.tsx
++++ b/src/components/Queries.tsx
+@@ -3,6 +3,9 @@
+  * SPDX-License-Identifier: Apache-2.0
+  */
+ 
++import { useSmart172, pass172, chips172, resetSmart172, group172, type Ctx172 } from "../smart172";
++import { useMock169 } from "../mock169";
++import { QcSmart172 } from "./queries/centre/QcSmart172";
+ import { SendExtras } from "./queryActions/SendExtras";
+ import { requeryLine } from "../lib/requery";
+ import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
+@@ -4032,7 +4035,16 @@ export const Queries: React.FC<{
+      phone `qcCzCourt` still chooses for the v126 carousel and filters nothing. */
+   const qcCourtOn = qcDesk ? qcCzCourt : null;
+   const qcNow138 = Date.now();
+-  const qcFiltered = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)));
++  /* MOCK v172 — the smart filter panel's own narrowing, on top of the page's */
++  const sm172 = useSmart172();
++  const m172 = useMock169();
++  const ctx172: Ctx172 = {
++    nowMs: qcNow138,
++    pkg: (r) => { const k = pkgKeyOf(r); return k ? (qcPackageName(k) ?? "Unnamed package") : "Nothing recorded"; },
++    stars: (r) => Number((qcLivingAgents.get(r.query.agentId) as { starRating?: number } | undefined)?.starRating ?? 0),
++    country: (r) => String((qcLivingAgents.get(r.query.agentId) as { country?: string } | undefined)?.country ?? ""),
++  };
++  const qcFiltered = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)) && (!qcDesk || m172.fp !== "smart" || pass172(r, sm172, ctx172)));
+   /* v138 §C — on the desk the headings sort; the phone keeps the v126 sort */
+   const qcVisible = qcDesk
+     ? sort138(qcFiltered, qcSort138, {
+@@ -4111,7 +4123,7 @@ export const Queries: React.FC<{
+   /* v150 D — on the desktop the old drawer is retired: a remembered `?view=calendar` opens the view, never the drawer */
+   useEffect(() => { if (qcDesk && beOpen) setBeOpen(false); }, [qcDesk, beOpen]);
+   /* v150 D8 — Birds-eye's own grouping and sort: separate from the list's, and never written to the list's memory */
+-  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("urgency");
++  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("state");
+   const [qcBeSort, setQcBeSort] = useState<BeSort>("due");
+   /* v150 D9 — over the rows the list shows (search, Filters, the stat card), closed dropped */
+   const qcBeGroups = useMemo(() => beGroups(qcVisible, qcBeGroup, qcBeSort, qcNow138),
+@@ -8282,7 +8294,7 @@ export const Queries: React.FC<{
+                 const shut = sorted151.filter((r) => CLOSED_SET.includes(r.status));
+                 return shut.length ? [...live, { key: "closed", label: "Closed", rows: shut }] : live;
+               };
+-              const sections151: Section<QcRow>[] = group1522 === "attention" ? whoSections(sorted151, now151).map((x) => ({ ...x, label: ACTION_LABEL[x.key as keyof typeof ACTION_LABEL] ?? x.label }))
++              const sections151: Section<QcRow>[] = m172.fp === "smart" && m172.g1 === "on" && group1522 === "attention" ? (group172(sorted151, now151) as unknown as Section<QcRow>[]) : group1522 === "attention" ? whoSections(sorted151, now151).map((x) => ({ ...x, label: ACTION_LABEL[x.key as keyof typeof ACTION_LABEL] ?? x.label }))
+                 : group1522 === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
+                 : group1522 === "status" ? statusGroups()
+                 : qcListGroups(sorted151, "package", now151, qcPackageName).map((g) => ({
+@@ -8332,8 +8344,18 @@ export const Queries: React.FC<{
+                   pills={pillGroups(strip151)}
+                   /* List filters v1 — the applied row: every chip (the search in quotes, a whole stage on its band), and
+                      Clear all = the filters and the search; the sort and grouping stay (the bar's buttons show them) */
+-                  applied={qc140Chips.map((c) => ({ key: c.key, label: c.label, stage: c.stage, mark: c.stage ? c.status : undefined, onRemove: c.off }))}
+-                  onClearApplied={() => { clear151(); setQcFind(""); }}
++                  applied={[...qc140Chips.map((c) => ({ key: c.key, label: c.label, stage: c.stage, mark: c.stage ? c.status : undefined, onRemove: c.off })), ...(m172.fp === "smart" ? chips172(sm172).map(({ part: _p, ...c }) => c) : [])]}
++                  hint172={m172.fp === "smart" && m172.hint === "on" && qcVisible.length === 0 ? (() => {
++                    /* 4 · nothing matches: the one filter whose removal brings back the most */
++                    const base = railBase.filter((r) => matches138(r, qcF138, now151));
++                    let best: { label: string; n: number; onRemove: () => void } | null = null;
++                    for (const c of chips172(sm172)) {
++                      const n = base.filter((r) => pass172(r, { ...sm172, ...c.part }, ctx172)).length;
++                      if (n > 0 && (!best || n > best.n)) best = { label: c.label, n, onRemove: c.onRemove };
++                    }
++                    return best;
++                  })() : null}
++                  onClearApplied={() => { clear151(); setQcFind(""); resetSmart172(); }}
+                   group={group1522} onGroup={setQcGroup1522} packageOk={pkgOk1522}
+                   sort={qcSort151} onSort={setQcSort151}
+                   sections={showGridSkeleton ? [] : sections151}
+@@ -8359,11 +8381,13 @@ export const Queries: React.FC<{
+                   onImport={() => onNavigate?.("import")}
+                   packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
+                   agentOf={(r) => qcLivingAgents.get(r.query.agentId) ?? null}
+-                  rail={<QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
++                  rail={m172.fp === "smart"
++                    ? <QcSmart172 rows={railBase.filter((r) => matches138(r, qcF138, now151))} ctx={ctx172} showing={qcVisible.length} total={qcScoped.length} onReset={clear151} />
++                    : <QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
+                     showing={qcVisible.length} total={qcScoped.length} needYou={needYou} loading={showGridSkeleton} />}
+                   birds={qcView150 === "birds" && !showGridSkeleton ? (
+                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
+-                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
++                      selectedId={selectedQueryId} closedN={qcBeGroup === "state" ? 0 : beClosedCount(qcVisible, qcNow138)}
+                       lead={(r) => <Track151 row={r.row} />}
+                       act={(id) => { const r = qcById.get(id); return r ? rowAct(r, now151) : null; }}
+                       barKind={(r) => stageOf(r.row.status)}
+@@ -8669,7 +8693,7 @@ export const Queries: React.FC<{
+                   /* v150 D — Birds-eye in the list card, under the navy bar; its Group and Sort replace the list's */
+                   birds={qcView150 === "birds" && !showGridSkeleton ? (
+                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
+-                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
++                      selectedId={selectedQueryId} closedN={qcBeGroup === "state" ? 0 : beClosedCount(qcVisible, qcNow138)}
+                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
+                       /* the list tray's own action: the row's next move, through its panel */
+                       onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />
+diff --git a/src/components/queries/centre/QcBar153.tsx b/src/components/queries/centre/QcBar153.tsx
+index 9b23d3ef..d0bed100 100644
+--- a/src/components/queries/centre/QcBar153.tsx
++++ b/src/components/queries/centre/QcBar153.tsx
+@@ -26,7 +26,7 @@ import "./qcv153.css";
+ export type View153 = "list" | "birds";
+ const LIST_I = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" /></svg>;
+ const BE_I = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 4h7M5 8h9M3 12h6" /></svg>;
+-const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Past expected, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
++const BE_GROUP_LINE: Record<BeGroup, string> = { state: "Needs action, within their window, waiting with no reply date, closed", urgency: "Past expected, upcoming, watch and wait", status: "By stage", none: "One timeline" };
+ const BE_SORT_LINE: Record<BeSort, string> = { due: "Soonest first", wait: "Oldest query first", agent: "By name" };
+ /** List filters v1 — the labelled chips' parts: the icon (navy), the muted word, the value, the caret */
+ const CARET = <svg className="lf-cv" viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M2 4h8L6 9z" /></svg>;
+diff --git a/src/components/queries/centre/QcBirds150.tsx b/src/components/queries/centre/QcBirds150.tsx
+index 0ffcef7b..a3d02538 100644
+--- a/src/components/queries/centre/QcBirds150.tsx
++++ b/src/components/queries/centre/QcBirds150.tsx
+@@ -19,10 +19,11 @@
+ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+ import { createPortal } from "react-dom";
+ import { usePopover } from "../../shell/ListPills";
++import { tileCourt as tileCourt169 } from "../../../lib/qcSummary";
+ import type { EyeRow } from "../../../lib/qcBirdsEye";
+ import {
+   BE_GROUPS, BE_SORTS, BE_SPANS, BE_TODAY_AT, beLine, beMonths, beScale, beTicks, beX,
+-  type BeGroup, type BeGroupOut, type BeLine, type BeSort, type BeZoom,
++  type BeGroup, type BeGroupOut, type BeLine, type BeSort, type BeZoom, type BeScale,
+ } from "../../../lib/qc150";
+ import "./qcv150.css";
+ 
+@@ -84,14 +85,18 @@ export const QcBirds150: React.FC<{
+   const hoverRef = useRef<HTMLElement>(null);
+   const tagRef = useRef<HTMLSpanElement>(null);
+   const [viewW, setViewW] = useState(0);
+-  const [zoom, setZoom] = useState<BeZoom>("3m");
++  const [zoom, setZoom] = useState<Z169>("all");
+   const [fontsTick, setFontsTick] = useState(0);
+-  const span = BE_SPANS[zoom];
++  const span = zoom === "all" ? 0 : BE_SPANS[zoom];
+   const today = startOfDay(nowMs);
+ 
+   const rows: EyeRow[] = useMemo(() => groups.flatMap((g) => g.rows), [groups]);
+-  const lines = useMemo(() => new Map(rows.map((r) => [r.id, beLine(r, nowMs)])), [rows, nowMs]);
+-  const scale = useMemo(() => (viewW > 0 ? beScale([...lines.values()], span, viewW, nowMs) : null), [lines, span, viewW, nowMs]);
++  const lines = useMemo(() => new Map(rows.map((r) => {
++    const l = beLine(r, nowMs);
++    /* v172 mock — a closed query keeps its history and ends where it closed: no current bar, no date */
++    return [r.id, tileCourt169(r.row.status) === "closed" ? { ...l, cur: null, dueMs: null, daysOver: 0, inDays: 0 } : l];
++  })), [rows, nowMs]);
++  const scale = useMemo(() => (viewW > 0 ? (zoom === "all" ? fitScale169([...lines.values()], viewW, nowMs) : beScale([...lines.values()], span, viewW, nowMs)) : null), [lines, span, viewW, nowMs, zoom]);
+   const months = useMemo(() => (scale ? beMonths(scale, nowMs) : []), [scale, nowMs]);
+   const ticks = useMemo(() => (scale ? beTicks(scale, nowMs) : []), [scale, nowMs]);
+   const tx = scale ? beX(scale, today) : 0;
+@@ -193,13 +198,34 @@ export const QcBirds150: React.FC<{
+     };
+     anim.current = requestAnimationFrame(step);
+   }, [clamp, apply]);
+-  const pickZoom = (z: BeZoom) => {
++  const pickZoom = (z: Z169, at?: number) => {
+     if (!scale || z === zoom) return;
+     cancelAnimationFrame(anim.current);
+-    pendingCentre.current = scale.r0 + ((off.current + viewW / 2) / scale.ppd) * DAY;
++    pendingCentre.current = at ?? scale.r0 + ((off.current + viewW / 2) / scale.ppd) * DAY;
+     setZoom(z);
+   };
+ 
++  /* v15 trial — pinch (or ctrl + wheel) over the timeline steps through All · 6M · 3M · 6W, keeping the date under the pointer */
++  const pz = useRef(pickZoom); pz.current = pickZoom;
++  const wheelAt = useRef(0);
++  useEffect(() => {
++    const root = rootRef.current;
++    if (!root) return undefined;
++    const wh = (e: WheelEvent) => {
++      if (!e.ctrlKey || !scale || !(e.target as HTMLElement).closest("[data-qc150='axis'], [data-qc150='be-track']")) return;
++      e.preventDefault();
++      const now = performance.now();
++      if (now - wheelAt.current < 350 || Math.abs(e.deltaY) < 2) return;
++      wheelAt.current = now;
++      const i = ZSTEPS169.indexOf(zoom), j = Math.max(0, Math.min(ZSTEPS169.length - 1, i + (e.deltaY < 0 ? 1 : -1)));
++      if (j === i) return;
++      const ax = axRef.current!.getBoundingClientRect();
++      pz.current(ZSTEPS169[j], scale.r0 + ((off.current + e.clientX - ax.left) / scale.ppd) * DAY);
++    };
++    root.addEventListener("wheel", wh, { passive: false });
++    return () => root.removeEventListener("wheel", wh);
++  }, [scale, zoom]);
++
+   /* ── drag anywhere on the axis or the timeline cells, with momentum; a drag never counts as a click ── */
+   const drag = useRef<{ x: number; o0: number; lx: number; lt: number; v: number; moved: boolean } | null>(null);
+   const swallow = useRef(false);
+@@ -308,8 +334,8 @@ export const QcBirds150: React.FC<{
+       <div className="qc150-bvh" data-qc150="daterow">
+         <div className="qc150-zc">
+           <div className="qc150-zp" role="group" aria-label="Time" data-qc150="zoom">
+-            {(Object.keys(BE_SPANS) as BeZoom[]).map((z) => (
+-              <button key={z} type="button" data-z={z} aria-pressed={zoom === z} onClick={() => pickZoom(z)}>{z.toUpperCase()}</button>
++            {(["all", ...Object.keys(BE_SPANS)] as Z169[]).map((z) => (
++              <button key={z} type="button" data-z={z} aria-pressed={zoom === z} onClick={() => pickZoom(z)}>{z === "all" ? "All" : z.toUpperCase()}</button>
+             ))}
+             <i className="qc150-sep" aria-hidden="true" />
+             <button type="button" className="qc150-ar" data-qc150="earlier" aria-label="Earlier" onClick={() => goTo(off.current - viewW / 3)}>‹</button>
+@@ -318,6 +344,7 @@ export const QcBirds150: React.FC<{
+             </button>
+             <button type="button" className="qc150-ar" data-qc150="later" aria-label="Later" onClick={() => goTo(off.current + viewW / 3)}>›</button>
+           </div>
++          {zoom === "all" ? <span className="qc169-hint">Your whole campaign. Point at a bar to see who it is; click to zoom in there.</span> : null}
+         </div>
+         <div className="qc150-ax" ref={axRef} data-qc150="axis" data-qc150-tl="">
+           {scale ? (
+@@ -347,7 +374,7 @@ export const QcBirds150: React.FC<{
+         <i className="qc150-vl qc150-vl--t" ref={todayRef} data-qc150="today-line" aria-hidden="true" />
+         <i className="qc150-vl qc150-vl--h" ref={hoverRef} data-qc150="hover-line" aria-hidden="true" />
+         {groups.map((g) => (
+-          <section key={g.key} className="qc150-bg" data-qc150="be-group" data-group={g.key}>
++          <section key={g.key} className={`qc150-bg${g.key === "closed" ? " qc172-closed" : ""}`} data-qc150="be-group" data-group={g.key}>
+             {banded ? <div className="qc150-gb" data-qc150="be-band"><b>{g.label}</b><small>{g.rows.length}</small></div> : null}
+             {g.rows.map((r, j) => {
+               const L = laid.get(r.id);
+@@ -362,7 +389,13 @@ export const QcBirds150: React.FC<{
+                     {lead ? lead(r) : <span className="qc150-d" aria-hidden="true">{r.row.initials}</span>}
+                     <span className="qc150-who"><b data-qc150="be-name">{r.row.agentName}</b><small>{r.row.agency}</small></span>
+                   </div>
+-                  <div className="qc150-tl" data-qc150="be-track" data-qc150-tl="">
++                  <div className="qc150-tl" data-qc150="be-track" data-qc150-tl=""
++                    onClickCapture={zoom === "all" ? (e) => {
++                      if (!scale || swallow.current) return;
++                      e.stopPropagation();
++                      const ax = axRef.current!.getBoundingClientRect();
++                      pickZoom("3m", scale.r0 + ((off.current + e.clientX - ax.left) / scale.ppd) * DAY);
++                    } : undefined}>
+                     {scale && l ? (
+                       <div className="qc150-trk" style={{ width: W }}>
+                         {l.past.map((b) => {
+@@ -378,10 +411,30 @@ export const QcBirds150: React.FC<{
+                         {l.cur && L ? (
+                           <div className={`qc150-bar qc150-bar--cur qc150-t-${l.cur.tint}${l.cur.overdue ? " qc150-bar--o" : ""}`} data-qc150="be-bar" data-sk={barKind?.(r)} data-from={l.cur.fromMs}
+                             title={l.cur.title} style={{ left: L.s, width: Math.max(L.e - L.s, 4), ...(barFill ? { background: barFill(r) } : {}) }}>
+-                            {L.inside ? <span className="qc150-lb" data-qc150="be-label" data-lb="cur" data-l={L.s} data-r={L.e - (l.cur.overdue ? 22 : 0)} data-lw={measure(L.inside, 14) + 28}>{L.inside}</span> : null}
++                            {(() => {
++                              /* v14 — past its date: the navy date chip carries the date, so the bar keeps just its stage, left of the chip */
++                              const dx = l.cur.overdue && l.dueMs != null ? Math.min(beX(scale, l.dueMs), tx - 40) : null;
++                              const txt = dx != null && L.inside ? L.inside.split(" · ")[0] : L.inside;
++                              if (!txt) return null;
++                              const lw = measure(txt, 14) + 28, r = dx != null ? dx - 40 : L.e - (l.cur.overdue ? 22 : 0);
++                              if (dx != null && r - L.s < lw) return null;
++                              return <span className="qc150-lb" data-qc150="be-label" data-lb="cur" data-l={L.s} data-r={r} data-lw={lw}>{txt}</span>;
++                            })()}
+                           </div>
+                         ) : null}
++                        {l.cur && L && l.cur.overdue && l.dueMs != null ? (
++                          <span className="qc169-due" data-qc150="be-due" style={{ left: Math.min(beX(scale, l.dueMs), tx - (zoom === "all" ? 6 : 40)) }} title={`Reply was due ${new Date(l.dueMs).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`}>
++                            <b aria-hidden="true">!</b>{new Date(l.dueMs).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
++                          </span>
++                        ) : null}
+                         {l.cur && L ? <Tail L={L} tx={tx} /> : null}
++                        {zoom === "all" && L ? (() => {
++                          /* v16 — All: no names column; the name shows beside the bar when the row is pointed at */
++                          const s0 = Math.min(L.s, ...l.past.map((b) => beX(scale, b.fromMs)));
++                          const e0 = l.cur?.overdue ? tx : L.e;
++                          const left = s0 > 200;
++                          return <span className={`qc169-nm${left ? "" : " is-r"}`} style={{ left: left ? s0 - 8 : e0 + 10 }}><b>{r.row.agentName}</b> {r.row.agency}</span>;
++                        })() : null}
+                       </div>
+                     ) : null}
+                   </div>
+@@ -477,3 +530,16 @@ export const QcBePills150: React.FC<{ group: BeGroup; onGroup: (g: BeGroup) => v
+     </span>
+   );
+ };
++
++/* v15 trial — "All": the whole campaign on one page, then zoom in (the buttons, a click on the overview, or pinch) */
++type Z169 = BeZoom | "all";
++const ZSTEPS169: Z169[] = ["all", "6m", "3m", "6w"];
++function fitScale169(lines: readonly BeLine[], viewW: number, nowMs: number): BeScale {
++  const today = startOfDay(nowMs);
++  const starts = lines.flatMap((l) => [...l.past.map((b) => b.fromMs), ...(l.cur ? [l.cur.fromMs] : [])]).concat([today - 42 * DAY]);
++  const ends = lines.flatMap((l) => [l.dueMs ?? today, l.cur?.toMs ?? today]).concat([today + 14 * DAY]);
++  const r0 = startOfDay(Math.min(...starts) - 7 * DAY);
++  const r1 = Math.max(...ends) + 10 * DAY;
++  const ppd = viewW / ((r1 - r0) / DAY);
++  return { r0, r1, ppd, width: viewW };
++}
+diff --git a/src/components/queries/centre/QcMatTile.tsx b/src/components/queries/centre/QcMatTile.tsx
+index 9523fefa..54420d16 100644
+--- a/src/components/queries/centre/QcMatTile.tsx
++++ b/src/components/queries/centre/QcMatTile.tsx
+@@ -89,9 +89,11 @@ export const MatTile: React.FC<{
+   id: string; g: MatGroups; onOpen: (open: boolean) => void;
+   /** Log a query v2's preview: the hover is drawn inside the card, and Escape sits above the drawer's */
+   inCard?: boolean; escLevel?: number;
++  /** MOCK v169 — the list row's pill: the materials' own icons, then the count */
++  pill?: boolean;
+   /** the card, for the in-card hover's position */
+   cardRef: React.RefObject<HTMLElement | null>;
+-}> = ({ id, g, onOpen, inCard = false, escLevel = ESC_LEVEL.page, cardRef }) => {
++}> = ({ id, g, onOpen, inCard = false, escLevel = ESC_LEVEL.page, cardRef, pill = false }) => {
+   const [st, setSt] = useState<TileState>(TILE_CLOSED);
+   const open = st.open;
+   const [place, setPlace] = useState<Place | null>(null);
+@@ -154,12 +156,18 @@ export const MatTile: React.FC<{
+   return (
+     <span className="pc3-tw" data-pc3="tile-wrap" onPointerEnter={() => go("enter")} onPointerLeave={() => go("leave")}
+       onClick={(e) => e.stopPropagation()}>
+-      <button ref={btn} type="button" className={`pc3-tile${open ? " is-open" : ""}`} data-qc1533="tab" data-pc3="tile" aria-label={name}
++      <button ref={btn} type="button" className={`pc3-tile${open ? " is-open" : ""}${pill ? " pc3-pill" : ""}`} data-qc1533="tab" data-pc3="tile" aria-label={name}
+         aria-expanded={open} aria-controls={open ? popId : undefined}
+         onFocus={() => go("focus")} onBlur={() => go("blur")}
+         onClick={(e) => { e.stopPropagation(); go("click"); }}
+         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); go("press"); } }}>
+-        {CLIP}<i>{g.count}</i>
++        {pill ? (() => {
++          /* every item, side by side, in the agreed material icons; one asked for and not yet sent is drawn dashed and faint */
++          const items = g.groups.flatMap((x) => x.chips);
++          return <>{items.map((c, n) => <span key={n} className={`pc3-pi${c.asked ? " is-ask" : ""}`} title={`${c.name}${c.asked ? " · asked" : ""}`}>{c.mark === "full"
++            ? <StatusDot status={c.asked ? QueryStatus.FULL_REQUESTED : QueryStatus.FULL_SENT} overrideSize={15} tone="inherit" decorative />
++            : c.mark ? <MaterialIcon kind={c.mark as never} size={16} /> : CLIP}</span>)}</>;
++        })() : <>{CLIP}<i>{g.count}</i></>}
+       </button>
+       {hover ? createPortal(hover, inCard && cardRef.current ? cardRef.current : document.body) : null}
+     </span>
+diff --git a/src/components/queries/centre/QcPage151.tsx b/src/components/queries/centre/QcPage151.tsx
+index 68290443..65b8887e 100644
+--- a/src/components/queries/centre/QcPage151.tsx
++++ b/src/components/queries/centre/QcPage151.tsx
+@@ -38,6 +38,10 @@ import { sectionSwatch, standWords } from "../../../lib/qc153";
+ import { STAGE_COLOURS } from "../../../lib/stageColours";
+ import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
+ import { LoadFailed } from "../../notes/LoadFailed";
++import { useMock169 } from "../../../mock169";
++import { ListCap169, Mock169Panel } from "./QcRows169";
++import { QcRow170 } from "./QcRow170";
++import "./qcv169.css";
+ import { QcSlim156 } from "./QcSlim156";
+ import { useTallRail } from "../../shell/useTallRail";
+ import type { WeekGoal154 } from "../../../lib/qc154goal";
+@@ -77,7 +81,7 @@ export const QcSwitch151: React.FC<{ view: View151; onView: (v: View151) => void
+ export interface CountLine1512 { ms: string | null; sent: number; active: number; heardPct: number }
+ 
+ /* ── §9 Birds-eye's Group and Sort menus' lines ── */
+-const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
++const BE_GROUP_LINE: Record<BeGroup, string> = { state: "Needs action, within their window, waiting with no reply date, closed", urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
+ const BE_SORT_LINE: Record<BeSort, string> = { due: "Soonest first", wait: "Oldest query first", agent: "By name" };
+ 
+ 
+@@ -115,6 +119,8 @@ export interface QcPage151Props {
+   /** List filters v1 — the applied row: one chip per choice (Queries.tsx's qc140Chips), and its Clear all (the
+    *  filters and the search; never the sort or the grouping, which the bar's buttons show) */
+   applied: AppliedChip[];
++  /** MOCK v172 — the filter whose removal brings the most back, when nothing matches */
++  hint172?: { label: string; n: number; onRemove: () => void } | null;
+   onClearApplied: () => void;
+   /* the table */
+   group: GroupBy;
+@@ -368,11 +374,28 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
+   /* v154 — each group's queries are a 3-across grid of small cards (the slip's successor: same row, facts and act) */
+   /* v161 — stable callbacks, so a card whose query did not change is not re-rendered for a new closure (QcCard154) */
+   const onOpen154 = useStableFn(p.onOpen), onAct154 = useStableFn(p.onAct);
+-  const card = (r: QcRow) => (
++  const m169 = useMock169();
++  const card = (r: QcRow) => m169.list === "ledger" && p.view !== "birds" ? (
++    <QcRow170 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)} onOpen={onOpen154} onAct={onAct154} />
++  ) : (
+     <QcCard154 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
+       act={rowAct(r, p.nowMs)} onOpen={onOpen154} onAct={onAct154} />
+   );
+   const only = p.sections.length === 1;
++  /* MOCK v169 — the list as rows in one card (the Contact list's card: a pinned cap with a navy index bar and the column
++     heads), or the cards as now */
++  const rows169 = m169.list !== "cards" && !birds;
++  useEffect(() => {
++    const tb = tbRef.current, root = rootRef.current; if (!tb || !root) return undefined;
++    const set = () => root.style.setProperty("--qc169-strip", `${tb.offsetHeight}px`);
++    set(); const ro = new ResizeObserver(set); ro.observe(tb); return () => ro.disconnect();
++  }, []);
++  const wrap169 = (kids: React.ReactNode) => !rows169 ? kids : (
++    <section className="qc169-card" data-qc169="card">
++      <ListCap169 sections={p.sections.filter((x) => x.label).map((x) => ({ key: x.key, label: x.label, n: x.rows.length }))} sort={p.sort} onSort={p.onSort} cur={tbOn ? tbGrp?.label ?? null : null} variant={m169.list} />
++      <div className="qc169-body">{kids}</div>
++    </section>
++  );
+   /* v153 — the slim bar at the top of the list column: the switch, the count, search, Sort and Group */
+   const controlLine = (
+     <QcBar153 view={p.view} onView={p.onView} loading={p.loading} showing={p.showing} total={p.total}
+@@ -388,6 +411,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
+   return (
+     <div className="qc151 qc153" data-qc151="page" data-view={p.view} ref={rootRef}>
+       {/* v156 §3 — the collapsed header: sticky for the whole page, taking no space, shown once the panel has gone */}
++      <Mock169Panel view={p.view} />
+       {slim156}
+       {/* v153.1 — the header on the page's own ground: the hawk, the title block and the stage ring card */}
+       <QcHeader1531 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} ring={p.ring} />
+@@ -413,7 +437,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
+               ) : p.birds}
+             </div></div>
+           ) : (
+-            <div className="qc153-list" data-qc151="table" data-qcv="list" aria-busy={loading155 || undefined}>
++            <div className={`qc153-list${rows169 ? " qc169" : ""}`} data-qc151="table" data-qcv="list" data-tint={m169.tint} data-ws={m169.ws} data-wsl={m169.wsl} data-list={m169.list} data-tl={m169.tl} data-head={m169.head} aria-busy={loading155 || undefined}>
+               {/* v155 §1 — nothing needs you: the panel above the first group, the list carrying on beneath it */}
+               {p.state155?.kind === "quiet" && !empty ? <QuietPanel155 body={p.state155.body} /> : null}
+               {error155 ? <LoadFailed words={error155.words} onRetry={error155.retry} busy={error155.busy} probe="queries" />
+@@ -421,9 +445,13 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
+                 <div className="qc151-emp" data-qc151="no-matches">
+                   <b>No queries match</b>
+                   <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
++                  {p.hint172 ? (
++                    <span className="qc172-hint">Remove <span className="qc172-hl">“{p.hint172.label}”</span> to see {p.hint172.n} {p.hint172.n === 1 ? "query" : "queries"}.
++                      <button type="button" className="qc151-btn" data-qc172="hint" onClick={p.hint172.onRemove}>Remove it</button></span>
++                  ) : null}
+                   <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearApplied}>Clear all</button>
+                 </div>
+-              ) : p.sections.map((s) => {
++              ) : wrap169(p.sections.map((s) => {
+                 const folds = isFoldKey(p.group, s.key) && !only;
+                 const fk = s.key === "quiet" ? "quiet" : "closed";
+                 if (folds && !opened.has(s.key)) {
+@@ -454,7 +482,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
+                     <div className="qc154-grid" data-qc154="grid">{s.rows.map(card)}</div>
+                   </section>
+                 );
+-              })}
++              }))}
+             </div>
+           )}
+ 
+diff --git a/src/components/queries/centre/QcSlip153.tsx b/src/components/queries/centre/QcSlip153.tsx
+index 7dc9c98b..ad286d21 100644
+--- a/src/components/queries/centre/QcSlip153.tsx
++++ b/src/components/queries/centre/QcSlip153.tsx
+@@ -37,11 +37,11 @@ import "../../containers/framedSlip.css";
+ import "./qcv153.css";
+ import "./qcv1531.css";
+ 
+-const A_IN = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 3.5 4 12M4 5.5V12h6.5" /></svg>;
+-const A_OUT = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 12.5 12 4M5.5 4H12v6.5" /></svg>;
++export const A_IN = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 3.5 4 12M4 5.5V12h6.5" /></svg>;
++export const A_OUT = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 12.5 12 4M5.5 4H12v6.5" /></svg>;
+ /* v157 — a quiet card's badge: three white dots in place of the arrow */
+-const A_QUIET = <svg viewBox="0 0 12 12" fill="currentColor"><circle cx="2.6" cy="6" r="1.25" /><circle cx="6" cy="6" r="1.25" /><circle cx="9.4" cy="6" r="1.25" /></svg>;
+-const A_END = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 8h8" /></svg>;
++export const A_QUIET = <svg viewBox="0 0 12 12" fill="currentColor"><circle cx="2.6" cy="6" r="1.25" /><circle cx="6" cy="6" r="1.25" /><circle cx="9.4" cy="6" r="1.25" /></svg>;
++export const A_END = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 8h8" /></svg>;
+ 
+ export const FACT_ICON = {
+   queried: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"><path d="M14 2 1.8 7.2l5 2 2 5z" /><path d="M14 2 6.8 9.2" /></svg>,
+@@ -82,7 +82,7 @@ export const Track153: React.FC<{ t: SlipTrack; status?: string; quiet?: boolean
+           {i ? <i className={`qc153-ln qc153-ln--${t.links[i - 1]}`} data-qc153="link" data-state={t.links[i - 1]} aria-hidden="true" /> : null}
+           <span className={`qc153-nd qc153-nd--${n}`} data-qc153="node" data-state={n} title={NODE_TITLE[i]}>
+             <StatusDot status={st} overrideSize={rr ? RR_CUR_WRAP : STEP_WRAP} tone="inherit" reached={reached} decorative />
+-            {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}${quiet ? " qc153-arw--quiet" : ""}`} data-qc153="arrow" data-dir={t.dir} data-quiet={quiet ? "" : undefined} aria-hidden="true">{quiet ? A_QUIET : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
++            {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}${quiet ? " qc153-arw--quiet" : ""}`} data-qc153="arrow" data-dir={t.dir} data-quiet={quiet ? "" : undefined} aria-hidden="true">{quiet ? <span className="qr170-zz"><i>z</i><i>z</i><i>z</i></span> : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
+           </span>
+         </React.Fragment>
+       );
+diff --git a/src/lib/qc150.ts b/src/lib/qc150.ts
+index 1567f261..8b0888a3 100644
+--- a/src/lib/qc150.ts
++++ b/src/lib/qc150.ts
+@@ -110,10 +110,10 @@ export function writeView150(v: QcView150): void {
+ 
+ /* ══ Part D · Birds-eye ═════════════════════════════════════════════════════════════════════════════════════════════ */
+ 
+-export type BeGroup = "urgency" | "status" | "none";
++export type BeGroup = "state" | "urgency" | "status" | "none";
+ export type BeSort = "due" | "wait" | "agent";
+ export const BE_GROUPS: readonly { key: BeGroup; label: string }[] = [
+-  { key: "urgency", label: "Urgency" }, { key: "status", label: "Status" }, { key: "none", label: "None" },
++  { key: "state", label: "Where it stands" }, { key: "urgency", label: "Urgency" }, { key: "status", label: "Status" }, { key: "none", label: "None" },
+ ];
+ export const BE_SORTS: readonly { key: BeSort; label: string }[] = [
+   { key: "due", label: "Due date" }, { key: "wait", label: "Waiting longest" }, { key: "agent", label: "Agent A–Z" },
+@@ -136,6 +136,20 @@ export const BE_CMP: Record<BeSort, (a: EyeRow, b: EyeRow) => number> = {
+ /** Birds-eye's groups over the rows the list already shows (search, Filters, the stat card): closed dropped */
+ export function beGroups(rows: readonly QcRow[], group: BeGroup, sort: BeSort, nowMs: number): BeGroupOut[] {
+   const live = eyeRows(rows, nowMs);
++  if (group === "state") {
++    /* v172 mock — the phone's groups: Needs action (with you, or needs chasing) · Within their window · No reply date yet ·
++       Closed, always last. Closed rows keep their history bars and end where they closed. */
++    const all = eyeRows(rows, nowMs, true);
++    const mk = (key: string, label: string, mine: EyeRow[], cmp: (a: EyeRow, b: EyeRow) => number) => ({ key, label, rows: mine.slice().sort(cmp) });
++    const ws = (r: EyeRow) => whereItStands(r.row, nowMs);
++    const out2: BeGroupOut[] = [
++      mk("action", "Needs action", all.filter((r) => ws(r) === "you" || ws(r) === "quiet"), BE_CMP[sort]),
++      mk("window", "Within their window", all.filter((r) => ws(r) === "agent" && r.row.expectedMs != null), BE_CMP[sort]),
++      mk("nodate", "Waiting, no reply date", all.filter((r) => ws(r) === "agent" && r.row.expectedMs == null), BE_CMP[sort]),
++      mk("closed", "Closed", all.filter((r) => ws(r) === "closed"), (a, b) => (b.row.stageStartMs ?? b.row.lastMs) - (a.row.stageStartMs ?? a.row.lastMs)),
++    ];
++    return out2.filter((g) => g.rows.length > 0);
++  }
+   const make = (key: string, label: string, mine: EyeRow[]): BeGroupOut => ({ key, label, rows: mine.slice().sort(BE_CMP[sort]) });
+   let out: BeGroupOut[];
+   if (group === "none") out = [make("all", "All live queries", live)];
+diff --git a/src/lib/qcBirdsEye.ts b/src/lib/qcBirdsEye.ts
+index fe4f75c4..bce93401 100644
+--- a/src/lib/qcBirdsEye.ts
++++ b/src/lib/qcBirdsEye.ts
+@@ -236,9 +236,9 @@ export interface EyeGroup { key: Attention; label: string; count: number; rows:
+  * date is where "no date" quietly becomes "the year 1970": the rows with nothing promised belong at
+  * the end of the group they are in, not at the head of it.
+  */
+-export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
++export function eyeRows(rows: readonly QcRow[], nowMs: number, withClosed = false): EyeRow[] {
+   return rows
+-    .filter((r) => tileCourt(r.status) !== "closed" && tileCourt(r.status) !== null)
++    .filter((r) => withClosed || (tileCourt(r.status) !== "closed" && tileCourt(r.status) !== null))
+     .map((r): EyeRow => {
+       const day = dayCount(r, nowMs);
+       const stage = STAGE_NAME[r.status];

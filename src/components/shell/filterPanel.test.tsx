@@ -1,7 +1,7 @@
 /**
- * List filters v1 Phase 1 — the shared Filter panel and its parts (shell/FilterPanel). Markup and roles only: the two
- * pages' contents are queries/centre/qcViews156.test.tsx and agents/contact/contactViews.test.tsx; the rendered look and
- * clicks are tests/e2e/lf1.measure.ts.
+ * List filters v1 Phase 1 — the shared Filter panel and its parts (shell/FilterPanel). Markup and roles only: the
+ * Agents page's contents are agents/contact/contactViews.test.tsx (since v172 the Queries list's panel is its own,
+ * queries/centre/QcSmart172); the rendered look and clicks are tests/e2e/lf1.measure.ts.
  */
 import { describe, expect, it } from "vitest";
 import React from "react";

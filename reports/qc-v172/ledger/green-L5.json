@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L5",
+  "where": "Stage Queried · population",
+  "ok": true,
+  "detail": "38 rows"
+ },
+ {
+  "lock": "L5",
+  "where": "Stage Queried · only Queried",
+  "ok": true,
+  "detail": "0 later: "
+ },
+ {
+  "lock": "L5",
+  "where": "Not dated · population",
+  "ok": true,
+  "detail": "panel 4"
+ },
+ {
+  "lock": "L5",
+  "where": "Not dated = Waiting, no reply date",
+  "ok": true,
+  "detail": "panel 4 · birds-eye 4"
+ },
+ {
+  "lock": "L5",
+  "where": "reply overdue + send-by overdue · population",
+  "ok": true,
+  "detail": "all 88; reply overdue 49; send-by overdue 16"
+ },
+ {
+  "lock": "L5",
+  "where": "reply overdue + send-by overdue · never fewer",
+  "ok": true,
+  "detail": "both 65; reply overdue 49; send-by overdue 16"
+ },
+ {
+  "lock": "L5",
+  "where": "reply next 4w + send-by next 4w · population",
+  "ok": true,
+  "detail": "all 88; reply next 4w 6; send-by next 4w 14"
+ },
+ {
+  "lock": "L5",
+  "where": "reply next 4w + send-by next 4w · never fewer",
+  "ok": true,
+  "detail": "both 20; reply next 4w 6; send-by next 4w 14"
+ }
+]

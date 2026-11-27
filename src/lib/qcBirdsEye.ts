@@ -236,9 +236,9 @@ export interface EyeGroup { key: Attention; label: string; count: number; rows: 
  * date is where "no date" quietly becomes "the year 1970": the rows with nothing promised belong at
  * the end of the group they are in, not at the head of it.
  */
-export function eyeRows(rows: readonly QcRow[], nowMs: number): EyeRow[] {
+export function eyeRows(rows: readonly QcRow[], nowMs: number, withClosed = false): EyeRow[] {
   return rows
-    .filter((r) => tileCourt(r.status) !== "closed" && tileCourt(r.status) !== null)
+    .filter((r) => withClosed || (tileCourt(r.status) !== "closed" && tileCourt(r.status) !== null))
     .map((r): EyeRow => {
       const day = dayCount(r, nowMs);
       const stage = STAGE_NAME[r.status];

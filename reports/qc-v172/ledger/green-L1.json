@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "L1",
+  "where": "1512 · population",
+  "ok": true,
+  "detail": "70 list rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · background",
+  "ok": true,
+  "detail": "rgb(232, 189, 180)"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · height",
+  "ok": true,
+  "detail": "54px"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-ag face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-ag size",
+  "ok": true,
+  "detail": "18px, want 18"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-j face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-j size",
+  "ok": true,
+  "detail": "18px, want 18"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-sm face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-sm size",
+  "ok": true,
+  "detail": "18px, want 18"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-mat face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-mat size",
+  "ok": true,
+  "detail": "18px, want 18"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-nx face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · c-nx size",
+  "ok": true,
+  "detail": "18px, want 18"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · Sent by shown",
+  "ok": true,
+  "detail": "the heading is drawn"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 · Sent by left edge",
+  "ok": true,
+  "detail": "heading 1019.0; 70 cells, 0 off ()"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "70 list rows"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · background",
+  "ok": true,
+  "detail": "rgb(232, 189, 180)"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · height",
+  "ok": true,
+  "detail": "54px"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-ag face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-ag size",
+  "ok": true,
+  "detail": "16px, want 16"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-j face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-j size",
+  "ok": true,
+  "detail": "16px, want 16"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-mat face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-mat size",
+  "ok": true,
+  "detail": "16px, want 16"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-nx face",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 · c-nx size",
+  "ok": true,
+  "detail": "16px, want 16"
+ }
+]

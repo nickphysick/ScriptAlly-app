@@ -37,11 +37,12 @@ import "../../containers/framedSlip.css";
 import "./qcv153.css";
 import "./qcv1531.css";
 
-const A_IN = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 3.5 4 12M4 5.5V12h6.5" /></svg>;
-const A_OUT = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 12.5 12 4M5.5 4H12v6.5" /></svg>;
-/* v157 — a quiet card's badge: three white dots in place of the arrow */
-const A_QUIET = <svg viewBox="0 0 12 12" fill="currentColor"><circle cx="2.6" cy="6" r="1.25" /><circle cx="6" cy="6" r="1.25" /><circle cx="9.4" cy="6" r="1.25" /></svg>;
-const A_END = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 8h8" /></svg>;
+export const A_IN = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 3.5 4 12M4 5.5V12h6.5" /></svg>;
+export const A_OUT = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 12.5 12 4M5.5 4H12v6.5" /></svg>;
+/* v172 — a quiet card's badge: a sleeping z z z, each z a little larger and higher (qcv169.css `.qr170-zz`); it
+   replaces v157's three dots */
+export const ZZZ153 = <span className="qr170-zz"><i>z</i><i>z</i><i>z</i></span>;
+export const A_END = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 8h8" /></svg>;
 
 export const FACT_ICON = {
   queried: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"><path d="M14 2 1.8 7.2l5 2 2 5z" /><path d="M14 2 6.8 9.2" /></svg>,
@@ -82,7 +83,7 @@ export const Track153: React.FC<{ t: SlipTrack; status?: string; quiet?: boolean
           {i ? <i className={`qc153-ln qc153-ln--${t.links[i - 1]}`} data-qc153="link" data-state={t.links[i - 1]} aria-hidden="true" /> : null}
           <span className={`qc153-nd qc153-nd--${n}`} data-qc153="node" data-state={n} title={NODE_TITLE[i]}>
             <StatusDot status={st} overrideSize={rr ? RR_CUR_WRAP : STEP_WRAP} tone="inherit" reached={reached} decorative />
-            {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}${quiet ? " qc153-arw--quiet" : ""}`} data-qc153="arrow" data-dir={t.dir} data-quiet={quiet ? "" : undefined} aria-hidden="true">{quiet ? A_QUIET : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
+            {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}${quiet ? " qc153-arw--quiet" : ""}`} data-qc153="arrow" data-dir={t.dir} data-quiet={quiet ? "" : undefined} aria-hidden="true">{quiet ? ZZZ153 : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
           </span>
         </React.Fragment>
       );

@@ -30,7 +30,6 @@ import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { RadioMenu151 } from "./QcToolbar140";
 import { head1522 } from "../../../lib/qc1522";
 import { QcHeader1531 } from "./QcHeader1531";
-import { QcCard154 } from "./QcCard154";
 import { QcBar153 } from "./QcBar153";
 import { AppliedRow, type AppliedChip } from "../../shell/AppliedRow";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
@@ -38,6 +37,9 @@ import { sectionSwatch, standWords } from "../../../lib/qc153";
 import { STAGE_COLOURS } from "../../../lib/stageColours";
 import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
 import { LoadFailed } from "../../notes/LoadFailed";
+import { ListCap169 } from "./QcRows169";
+import { QcRow170 } from "./QcRow170";
+import "./qcv169.css";
 import { QcSlim156 } from "./QcSlim156";
 import { useTallRail } from "../../shell/useTallRail";
 import type { WeekGoal154 } from "../../../lib/qc154goal";
@@ -77,7 +79,7 @@ export const QcSwitch151: React.FC<{ view: View151; onView: (v: View151) => void
 export interface CountLine1512 { ms: string | null; sent: number; active: number; heardPct: number }
 
 /* ── §9 Birds-eye's Group and Sort menus' lines ── */
-const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
+const BE_GROUP_LINE: Record<BeGroup, string> = { state: "Needs action, within their window, waiting with no reply date, closed", urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
 const BE_SORT_LINE: Record<BeSort, string> = { due: "Soonest first", wait: "Oldest query first", agent: "By name" };
 
 
@@ -115,6 +117,8 @@ export interface QcPage151Props {
   /** List filters v1 — the applied row: one chip per choice (Queries.tsx's qc140Chips), and its Clear all (the
    *  filters and the search; never the sort or the grouping, which the bar's buttons show) */
   applied: AppliedChip[];
+  /** v172 — when nothing matches: the panel filter whose removal brings the most back, and how many */
+  hint172?: { label: string; n: number; onRemove: () => void } | null;
   onClearApplied: () => void;
   /* the table */
   group: GroupBy;
@@ -366,13 +370,25 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     return n;
   });
   /* v154 — each group's queries are a 3-across grid of small cards (the slip's successor: same row, facts and act) */
-  /* v161 — stable callbacks, so a card whose query did not change is not re-rendered for a new closure (QcCard154) */
+  /* v161 — stable callbacks, so a row whose query did not change is not re-rendered for a new closure */
   const onOpen154 = useStableFn(p.onOpen), onAct154 = useStableFn(p.onAct);
+  /* v172 — each query is a row of the one list card (QcRow170); the v154 grid of small cards is retired here */
   const card = (r: QcRow) => (
-    <QcCard154 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
-      act={rowAct(r, p.nowMs)} onOpen={onOpen154} onAct={onAct154} />
+    <QcRow170 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)} onOpen={onOpen154} onAct={onAct154} />
   );
   const only = p.sections.length === 1;
+  useEffect(() => {
+    const tb = tbRef.current, root = rootRef.current; if (!tb || !root) return undefined;
+    const set = () => root.style.setProperty("--qc169-strip", `${tb.offsetHeight}px`);
+    set(); const ro = new ResizeObserver(set); ro.observe(tb); return () => ro.disconnect();
+  }, []);
+  /* v172 — the list as rows in one card (the Contact list's card: a cap pinned under the strip, with the column heads) */
+  const wrap169 = (kids: React.ReactNode) => (
+    <section className="qc169-card" data-qc169="card">
+      <ListCap169 sort={p.sort} onSort={p.onSort} />
+      <div className="qc169-body">{kids}</div>
+    </section>
+  );
   /* v153 — the slim bar at the top of the list column: the switch, the count, search, Sort and Group */
   const controlLine = (
     <QcBar153 view={p.view} onView={p.onView} loading={p.loading} showing={p.showing} total={p.total}
@@ -413,7 +429,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
               ) : p.birds}
             </div></div>
           ) : (
-            <div className="qc153-list" data-qc151="table" data-qcv="list" aria-busy={loading155 || undefined}>
+            <div className="qc153-list qc169" data-qc151="table" data-qcv="list" aria-busy={loading155 || undefined}>
               {/* v155 §1 — nothing needs you: the panel above the first group, the list carrying on beneath it */}
               {p.state155?.kind === "quiet" && !empty ? <QuietPanel155 body={p.state155.body} /> : null}
               {error155 ? <LoadFailed words={error155.words} onRetry={error155.retry} busy={error155.busy} probe="queries" />
@@ -421,9 +437,13 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 <div className="qc151-emp" data-qc151="no-matches">
                   <b>No queries match</b>
                   <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
+                  {p.hint172 ? (
+                    <span className="qc172-hint" data-qc172="hint">Remove <span className="qc172-hl">“{p.hint172.label}”</span> to see {p.hint172.n} {p.hint172.n === 1 ? "query" : "queries"}.
+                      <button type="button" className="qc151-btn" data-qc172="hint-remove" onClick={p.hint172.onRemove}>Remove it</button></span>
+                  ) : null}
                   <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearApplied}>Clear all</button>
                 </div>
-              ) : p.sections.map((s) => {
+              ) : wrap169(p.sections.map((s) => {
                 const folds = isFoldKey(p.group, s.key) && !only;
                 const fk = s.key === "quiet" ? "quiet" : "closed";
                 if (folds && !opened.has(s.key)) {
@@ -454,7 +474,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                     <div className="qc154-grid" data-qc154="grid">{s.rows.map(card)}</div>
                   </section>
                 );
-              })}
+              }))}
             </div>
           )}
 

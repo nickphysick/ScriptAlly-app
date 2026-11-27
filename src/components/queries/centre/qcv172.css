@@ -1,0 +1,191 @@
+/* Query Centre v172 — the smart filter panel (QcSmart172), Contact list v4.18's look, to the consistency rulings v2–v4 */
+
+.qs172 button { font: inherit; color: inherit; }
+.qs172-h { display: flex; align-items: baseline; gap: 10px; padding: 12px 16px 11px; background: var(--navy); color: var(--cream); }
+
+.qs172-h button:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+
+.qs172-q { display: grid; gap: 8px; padding: 12px 14px; }
+.qs172-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 3px; border-radius: 10px; background: #f4f0eb; }
+.qs172-seg button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 2px; border-radius: 8px; text-align: center; }
+
+.qs172-seg button:hover:not(:disabled) { background: #fff; }
+.qs172-seg button.on, .qs172-seg button.on:hover { background: var(--navy); }
+.qs172-seg button.on b, .qs172-seg button.on span { color: var(--cream); }
+.qs172-seg button:disabled { opacity: .45; cursor: default; }
+.qs172-incs { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.qs172-inc i { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #f4f0eb; font-style: normal; font-size: 11px; color: var(--navy); }
+.qs172-inc em, .qs172 em { font: 400 13px/1 var(--sp-type); font-style: normal; color: var(--q); }
+.qs172-inc.on { background: #e3e8ef; box-shadow: inset 0 0 0 1px #b9c9da; color: #1f2c40; }
+.qs172-inc.on i { background: var(--navy); color: #fff; }
+
+.qs172-s { padding: 10px 14px 12px; border-top: 1px solid #f1ebe2; }
+
+.qs172-sh b { font: 400 18px/1.2 var(--sp-type) !important; }
+
+/* Stage: the glyph track as a picker */
+
+.qs172-stg button svg { width: 32px; height: 32px; padding: 4px; border-radius: 50%; }
+
+.qs172-stg button em { font-size: 12px; }
+.qs172-stg button:hover svg { color: var(--navy); background: #f4f0eb; }
+.qs172-stg button.on { color: var(--navy); }
+
+.qs172-stg .qs172-ln { flex: 1; height: 2px; margin-top: 15px; background: #e6ded3; }
+
+/* ranges */
+.qs172-hist { display: flex; align-items: flex-end; gap: 2px; height: 30px; margin: 0 8px; }
+.qs172-hist i { flex: 1; border-radius: 2px 2px 0 0; background: #e6ded3; }
+.qs172-hist i.in { background: #9fb0c6; }
+.qs172-dual { position: relative; height: 26px; margin: 0 8px; }
+.qs172-dual .tr { position: absolute; left: 0; right: 0; top: 11px; height: 4px; border-radius: 2px; background: #e6ded3; }
+.qs172-dual .fl { position: absolute; top: 11px; height: 4px; border-radius: 2px; background: var(--navy); left: var(--lo); right: calc(100% - var(--hi)); }
+.qs172-dual input { position: absolute; left: -9px; width: calc(100% + 18px); top: 0; height: 26px; margin: 0; background: none; -webkit-appearance: none; appearance: none; pointer-events: none; }
+.qs172-dual input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--navy), 0 2px 4px rgba(28,19,15,.25); cursor: grab; }
+.qs172-dual input::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--navy); cursor: grab; }
+.qs172-dual input::-webkit-slider-runnable-track { background: none; }
+.qs172-scale { position: relative; height: 14px; margin: 2px 8px 0; }
+.qs172-scale span { position: absolute; white-space: nowrap; transform: translateX(-50%); font: 400 12px/1 var(--sp-type); color: var(--q); }
+
+/* pills + search */
+.qs172-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+.qs172-chip.on, .qs172-chip.on:hover { background: var(--navy); color: var(--cream); box-shadow: none; }
+.qs172-chip.on em { color: rgba(244,238,229,.8); }
+.qs172-find { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d6cabb; color: var(--mut); }
+.qs172-find:focus-within { box-shadow: inset 0 0 0 1.5px var(--navy); }
+.qs172-find svg { width: 16px; height: 16px; flex: none; }
+.qs172-find input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: 400 15px/1 var(--sp-serif); color: #1c130f; }
+.qs172-find input::placeholder { color: var(--q); }
+.qs172-sugs { margin-top: 6px; max-height: 168px; overflow-y: auto; border-radius: 10px; box-shadow: inset 0 0 0 1px #ece4d9; padding: 4px; }
+.qs172-sug { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 6px 10px; border-radius: 8px; font: 400 14.5px/1.2 var(--sp-serif); }
+.qs172-sug:hover { background: #f8f4ed; }
+.qs172-sug i { font-style: normal; color: var(--navy); font-size: 12px; }
+.qs172-sug em { margin-left: auto; }
+
+/* fit + location */
+.qs172-fit { display: flex; align-items: center; justify-content: space-between; }
+.qs172-stars { display: inline-flex; }
+.qs172-stars button { all: unset; cursor: pointer; padding: 0 1px; font: 400 23px/1 var(--sp-serif); color: #d9cfc3; }
+.qs172-stars:hover button { color: var(--navy); }
+.qs172-stars button:hover ~ button { color: #d9cfc3; }
+.qs172-stars button.on { color: var(--navy); }
+.qs172-dd { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; width: 100%; min-height: 36px; padding: 6px 30px 6px 10px; position: relative;
+  border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d6cabb; font: 400 15px/1.2 var(--sp-serif); }
+.qs172-dd .any { color: var(--q); }
+.qs172-dd i { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 11px; color: var(--mut); }
+.qs172-dd.open { box-shadow: inset 0 0 0 1.5px var(--navy); }
+.qs172-loc { margin-top: 6px; max-height: 220px; overflow-y: auto; border-radius: 10px; box-shadow: inset 0 0 0 1px #ece4d9; padding: 4px; }
+.qs172-loc button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 5px 10px; border-radius: 8px; font: 400 14.5px/1.2 var(--sp-serif); }
+.qs172-loc button:hover { background: #f8f4ed; }
+.qs172-loc button i { width: 12px; font-style: normal; font-size: 12px; color: var(--navy); }
+.qs172-loc .fl { font-size: 16px; }
+.qs172-loc em { margin-left: auto; }
+
+/* any / yes / no rows */
+.qs172-l { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid #f1ebe2; }
+.qs172-l b { font: 400 18px/1.2 var(--sp-type) !important; white-space: nowrap; }
+.qs172-tri { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; padding: 3px; border-radius: 10px; background: #f4f0eb; }
+
+.qs172-tri button em { font-size: 12px; }
+.qs172-tri button:hover { background: #fff; }
+.qs172-tri button.on, .qs172-tri button.on:hover { background: var(--navy); color: var(--cream); }
+.qs172-tri button.on em { color: rgba(244,238,229,.8); }
+
+.qs172 button:focus-visible, .qs172-dd:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+/* due ranges: the past side of today is warmer; a tick on today; the not-dated box */
+.qs172-hist--due { position: relative; height: 26px; }
+.qs172-hist--due i.past.in { background: #d9a99c; }
+.qs172-dual .qs172-now { position: absolute; top: 6px; width: 2px; height: 14px; margin-left: -1px; background: #1c130f; border-radius: 1px; }
+
+.qs172-ck input { width: 16px; height: 16px; margin: 0; accent-color: var(--navy); }
+
+/* v17.5 — the rulebook (consistency rulings v2–v4): body 16 / secondary 14 (#5b4f47) / captions 12 (#6b6058); headings:
+   card 20 Special Elite, small 16 Source Serif 600; filter pills 32 high 14px; text fields 44 high, radius 10, 1px ink edge,
+   16px, navy edge on focus only; one focus ring; hovers — filled darkens, outline tints 6%, rows #f8f4ed */
+.qs172 { --navy: #2a3a52; --cream: #f4eee5; border-radius: 16px; background: #fff; overflow: hidden; box-shadow: 0 0 0 1px #e3d5c9, 0 1px 2px rgba(28,19,15,.06), 0 18px 36px -24px rgba(28,19,15,.3); color: #1c130f; --mut: #5b4f47; --q: #6b6058; }
+.qs172-h b { font: 400 20px/1 var(--sp-type) !important; }
+.qs172-h small { font: italic 400 14px/1 var(--sp-serif) !important; color: rgba(244,238,229,.8); }
+.qs172-h button { all: unset; cursor: pointer; margin-left: auto; font: 400 14px/1 var(--sp-serif) !important; color: #f4eee5; text-decoration: underline; text-underline-offset: 3px; }
+.qs172 :focus-visible { outline: 2px solid var(--navy) !important; outline-offset: 2px; }
+.qs172-h button:focus-visible { outline-color: #f4eee5 !important; }
+
+.qs172-sh { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 8px; align-items: baseline; }
+.qs172-sh b, .qs172-l b { font: 600 16px/1.25 var(--sp-serif) !important; color: #1c130f; white-space: normal; }
+.qs172-sh span { text-align: right; font: italic 400 14px/1.25 var(--sp-serif); color: var(--mut); }
+.qs172 em, .qs172-inc em { font: 400 12px/1 var(--sp-type) !important; color: var(--q); }
+
+.qs172-seg span { color: var(--mut); font: 400 14px/1.15 var(--sp-serif); }
+.qs172-seg b { font: 400 20px/1 var(--sp-type) !important; }
+.qs172-seg button.on:hover { background: #22304a; }
+.qs172-seg button:hover:not(:disabled):not(.on) { background: #f8f4ed; }
+
+.qs172-inc { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d6cabb; background: #fff; color: var(--mut); white-space: nowrap; height: 32px; padding: 0 12px 0 9px; font: 400 14px/1 var(--sp-serif); }
+.qs172-inc:hover { background: rgba(42,58,82,.06); }
+
+.qs172-stg button span { font: 400 14px/1.1 var(--sp-serif); color: var(--mut); }
+
+.qs172-chip { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; max-width: 100%; border-radius: 999px; background: #f4f0eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 32px; padding: 0 12px; font: 400 14px/1 var(--sp-serif); }
+.qs172-chip:hover { background: rgba(42,58,82,.06); box-shadow: inset 0 0 0 1px #d6cabb; }
+.qs172-chip.on:hover { background: #22304a; }
+
+.qs172-find, .qs172-dd { height: auto; min-height: 44px; border-radius: 10px; box-shadow: inset 0 0 0 1px #1c130f; }
+.qs172-find:focus-within, .qs172-dd.open, .qs172-dd:focus-visible { box-shadow: inset 0 0 0 1px var(--navy), 0 0 0 1px var(--navy); outline: 0 !important; }
+.qs172-find input, .qs172-dd { font: 400 16px/1.2 var(--sp-serif); }
+.qs172-find input::placeholder, .qs172-dd .any { color: var(--q); }
+.qs172-sugs p { margin: 6px 8px; font: italic 400 14px/1.3 var(--sp-serif); color: var(--mut); }
+.qs172-sug, .qs172-loc button { font: 400 16px/1.2 var(--sp-serif); min-height: 36px; }
+.qs172-sug:hover, .qs172-loc button:hover { background: #f8f4ed; }
+
+.qs172-tri button { all: unset; box-sizing: border-box; cursor: pointer; min-height: 28px; padding: 0 6px; border-radius: 7px; color: var(--mut); white-space: nowrap; text-align: center; font: 400 14px/30px var(--sp-serif); }
+.qs172-tri button:hover:not(.on) { background: #f8f4ed; }
+.qs172-tri button.on:hover { background: #22304a; }
+
+.qs172-ck { display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; cursor: pointer; font: 400 14px/1.2 var(--sp-serif); color: var(--mut); }
+.qs172-f { padding: 10px 16px 12px; border-top: 1px solid #f1ebe2; background: #fbf9f5; font: 400 14px/1.3 var(--sp-serif); color: var(--mut); }
+
+/* v17.6 — a set section: the navy dot by its title */
+.qs172-sh .qs172-dot { display: inline-block; width: 7px; height: 7px; margin: 0 7px 2px 0; border-radius: 50%; background: var(--navy); vertical-align: middle; }
+.qs172-l .qs172-sh { margin: 0; }
+
+/* v17.7 — a set section: what's picked on its own line under the title, a Reset link on the right */
+.qs172-sh.is-on { flex-wrap: wrap; row-gap: 2px; }
+.qs172-sh .qs172-rs { all: unset; cursor: pointer; font: 400 14px/1.25 var(--sp-serif); color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.qs172-sh .qs172-rs:hover { color: #1c130f; }
+.qs172-sh .qs172-now2 { flex-basis: 100%; font: 400 14px/1.3 var(--sp-serif); color: var(--navy); }
+
+/* v17.8 — Stage: four stops; the glyphs pick (multi-select) */
+.qs172-stg { display: flex; align-items: flex-start; justify-content: space-between; margin: 0; }
+.qs172-stg button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; color: #8f8478; width: 52px; }
+.qs172-stg button.pick svg { background: var(--navy); color: #fff; }
+
+/* v17.10 — one pill: the app's standard filter pill (shell tokens --sp-fpill-h / --sp-fpill-size, as the Corkboard's):
+   white with a hairline edge, Source Serif, count in the typewriter; selected = navy, white, 600, no edge */
+.qs172 .qs172-inc, .qs172 .qs172-chip {
+  all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
+  height: var(--sp-fpill-h, 32px); padding: 0 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #e3ddd3;
+  font: 400 var(--sp-fpill-size, 14.5px)/1 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: box-shadow .15s, background .15s;
+}
+.qs172 .qs172-inc em, .qs172 .qs172-chip em { font: 400 12px/1 var(--sp-type) !important; color: var(--q); }
+.qs172 .qs172-inc:hover, .qs172 .qs172-chip:hover { background: rgba(42,58,82,.06); box-shadow: inset 0 0 0 1px #cfc5b6; }
+.qs172 .qs172-inc.on, .qs172 .qs172-chip.on { background: var(--navy); color: #fff; font-weight: 600 !important; box-shadow: none; }
+.qs172 .qs172-inc.on:hover, .qs172 .qs172-chip.on:hover { background: #22304a; }
+.qs172 .qs172-inc.on em, .qs172 .qs172-chip.on em { color: #f4eee5; }
+.qs172 .qs172-inc i { display: none; }
+
+/* v18 · 2 More filters */
+.qs172-more { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; width: 100%; padding: 12px 14px; border-top: 1px solid #f1ebe2; }
+.qs172-more b { font: 600 16px/1.25 var(--sp-serif) !important; color: #1c130f; }
+.qs172-more span { grid-column: 1; font: italic 400 14px/1.3 var(--sp-serif); color: var(--mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qs172-more i { grid-column: 2; grid-row: 1; font-style: normal; font-size: 12px; color: var(--mut); }
+.qs172-more:hover { background: #f8f4ed; }
+.qs172-more:disabled { cursor: default; }
+.qs172-more:disabled:hover { background: none; }
+
+/* v18 · 6 Sent by as pills, the method's icon inside */
+.qs172-mpills .qs172-chip svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--navy); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.qs172-mpills .qs172-chip.on svg { stroke: #fff; }
+.qs172-mpills .qs172-chip:disabled { opacity: .45; cursor: default; }

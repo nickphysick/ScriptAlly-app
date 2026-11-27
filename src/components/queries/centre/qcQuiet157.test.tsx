@@ -91,11 +91,12 @@ describe("v157 · the quiet marks", () => {
       expect(h).not.toContain("qc157-zz");
     }
   });
-  it("the badge holds three dots (viewBox 0 0 12 12, cx 2.6 / 6 / 9.4, cy 6, r 1.25) and no arrow", () => {
-    const b = card154(quiet()).match(/<b class="qc153-arw[^"]*"[\s\S]*?<\/b>/)?.[0] ?? "";
+  /* v172 — the badge's three dots became a sleeping z z z (QcSlip153 `ZZZ153`, the list row's own) */
+  it("the badge holds the sleeping z z z and no arrow", () => {
+    const b = card154(quiet()).match(/<b class="qc153-arw[^"]*"[\s\S]*?<\/span><\/b>/)?.[0] ?? "";
     expect(b).toContain("qc153-arw--quiet");
-    expect(b).toContain('viewBox="0 0 12 12"');
-    expect([...b.matchAll(/<circle cx="([\d.]+)" cy="6" r="1.25"/g)].map((m) => m[1])).toEqual(["2.6", "6", "9.4"]);
+    expect(b).toContain('<span class="qr170-zz"><i>z</i><i>z</i><i>z</i></span>');
+    expect(b).not.toContain("<circle");
     expect(b).not.toContain("<path");
     expect(card154(row154(QueryStatus.QUERIED, "agent", { qs: "agent" }))).toMatch(/<b class="qc153-arw qc153-arw--out"[^>]*><svg[^>]*><path/);
   });

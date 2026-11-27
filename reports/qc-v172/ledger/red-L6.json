@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L6",
+  "where": "folded · population",
+  "ok": true,
+  "detail": "33 text nodes"
+ },
+ {
+  "lock": "L6",
+  "where": "folded · pills read the shell token",
+  "ok": true,
+  "detail": "1 pill words"
+ },
+ {
+  "lock": "L6",
+  "where": "folded · sizes",
+  "ok": false,
+  "detail": "\"Stage\" 15px; \"Sent\" 15px; \"Agent’s reply date\" 15px; \"Your send-by date\" 15px"
+ },
+ {
+  "lock": "L6",
+  "where": "More filters open · population",
+  "ok": true,
+  "detail": "67 text nodes"
+ },
+ {
+  "lock": "L6",
+  "where": "More filters open · pills read the shell token",
+  "ok": true,
+  "detail": "8 pill words"
+ },
+ {
+  "lock": "L6",
+  "where": "More filters open · sizes",
+  "ok": false,
+  "detail": "\"Stage\" 15px; \"Sent\" 15px; \"Agent’s reply date\" 15px; \"Your send-by date\" 15px; \"What you sent\" 15px; \"Sent by\" 15px"
+ }
+]

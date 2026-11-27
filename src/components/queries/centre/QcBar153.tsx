@@ -26,7 +26,7 @@ import "./qcv153.css";
 export type View153 = "list" | "birds";
 const LIST_I = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" /></svg>;
 const BE_I = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 4h7M5 8h9M3 12h6" /></svg>;
-const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Past expected, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
+const BE_GROUP_LINE: Record<BeGroup, string> = { state: "Needs action, within their window, waiting with no reply date, closed", urgency: "Past expected, upcoming, watch and wait", status: "By stage", none: "One timeline" };
 const BE_SORT_LINE: Record<BeSort, string> = { due: "Soonest first", wait: "Oldest query first", agent: "By name" };
 /** List filters v1 — the labelled chips' parts: the icon (navy), the muted word, the value, the caret */
 const CARET = <svg className="lf-cv" viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M2 4h8L6 9z" /></svg>;

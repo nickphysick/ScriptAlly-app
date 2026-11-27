@@ -106,8 +106,10 @@ describe("one derived list, one control that narrows it", () => {
     expect(at).toBeGreaterThan(-1);
     /* RE-POINTED (overnight fixes v1, Part 2): "FORM MODE" is in a comment, which decls() strips, so the window is the
        fixed fallback; it was 6000 with the second onOpenQuery 20 characters inside the edge, and Part 2's two
-       `|| qcLoadFail` (26 characters) pushed it out. 6100 restores the margin; the claim is unchanged. */
-    const mount = page.slice(at, page.indexOf("FORM MODE", at) > 0 ? page.indexOf("FORM MODE", at) : at + 6100);
+       `|| qcLoadFail` (26 characters) pushed it out. 6100 restores the margin; the claim is unchanged.
+       RE-POINTED again (Query Centre v172): the smart panel's applied chips and nothing-matches hint add ~580
+       characters inside the mount; 6800 keeps the same margin, and the claim is unchanged. */
+    const mount = page.slice(at, page.indexOf("FORM MODE", at) > 0 ? page.indexOf("FORM MODE", at) : at + 6800);
     expect(mount.split("onOpenQuery?.(").length - 1, "a view selects through something other than the page's onOpenQuery").toBeGreaterThanOrEqual(2);
     expect(mount).not.toMatch(/setSelectedQueryId\(/);
   });

@@ -95,3 +95,17 @@ describe("the visit — for the session (qh.qc.filters)", () => {
     expect(r).toEqual({ ...DEFAULT_QC_VISIT(), filters: { ...emptyQc138Filters(), stages: [QueryStatus.QUERIED], sent: ["p"] } });
   });
 });
+
+/* v172 — the smart filter panel's choices ride with the visit's filters: absent stays absent, a stored one comes back
+   made safe (lib/smart172 sanitiseSmart172) */
+describe("v172 · the visit remembers the smart panel", () => {
+  it("absent stays absent; a stored panel comes back, a bad field falls back", async () => {
+    const { sanitiseQcVisit } = await import("./qcViewMemory");
+    const { EMPTY172 } = await import("./smart172");
+    const base = { v: 1, filters: {}, search: "", scroll: 0 };
+    expect(sanitiseQcVisit(base)?.smart).toBeUndefined();
+    const smart = { ...EMPTY172, who: "wait", stage: [1], countries: ["GB"] };
+    expect(sanitiseQcVisit({ ...base, smart })?.smart).toEqual(smart);
+    expect(sanitiseQcVisit({ ...base, smart: { ...smart, mats: "maybe" } })?.smart).toEqual({ ...smart, mats: "any" });
+  });
+});

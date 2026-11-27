@@ -110,10 +110,10 @@ export function writeView150(v: QcView150): void {
 
 /* ══ Part D · Birds-eye ═════════════════════════════════════════════════════════════════════════════════════════════ */
 
-export type BeGroup = "urgency" | "status" | "none";
+export type BeGroup = "state" | "urgency" | "status" | "none";
 export type BeSort = "due" | "wait" | "agent";
 export const BE_GROUPS: readonly { key: BeGroup; label: string }[] = [
-  { key: "urgency", label: "Urgency" }, { key: "status", label: "Status" }, { key: "none", label: "None" },
+  { key: "state", label: "Where it stands" }, { key: "urgency", label: "Urgency" }, { key: "status", label: "Status" }, { key: "none", label: "None" },
 ];
 export const BE_SORTS: readonly { key: BeSort; label: string }[] = [
   { key: "due", label: "Due date" }, { key: "wait", label: "Waiting longest" }, { key: "agent", label: "Agent A–Z" },
@@ -136,6 +136,20 @@ export const BE_CMP: Record<BeSort, (a: EyeRow, b: EyeRow) => number> = {
 /** Birds-eye's groups over the rows the list already shows (search, Filters, the stat card): closed dropped */
 export function beGroups(rows: readonly QcRow[], group: BeGroup, sort: BeSort, nowMs: number): BeGroupOut[] {
   const live = eyeRows(rows, nowMs);
+  if (group === "state") {
+    /* v172 — "Where it stands", the phone's groups: Needs action (with you, or needs chasing) · Within their window · No reply date yet ·
+       Closed, always last. Closed rows keep their history bars and end where they closed. */
+    const all = eyeRows(rows, nowMs, true);
+    const mk = (key: string, label: string, mine: EyeRow[], cmp: (a: EyeRow, b: EyeRow) => number) => ({ key, label, rows: mine.slice().sort(cmp) });
+    const ws = (r: EyeRow) => whereItStands(r.row, nowMs);
+    const out2: BeGroupOut[] = [
+      mk("action", "Needs action", all.filter((r) => ws(r) === "you" || ws(r) === "quiet"), BE_CMP[sort]),
+      mk("window", "Within their window", all.filter((r) => ws(r) === "agent" && r.row.expectedMs != null), BE_CMP[sort]),
+      mk("nodate", "Waiting, no reply date", all.filter((r) => ws(r) === "agent" && r.row.expectedMs == null), BE_CMP[sort]),
+      mk("closed", "Closed", all.filter((r) => ws(r) === "closed"), (a, b) => (b.row.stageStartMs ?? b.row.lastMs) - (a.row.stageStartMs ?? a.row.lastMs)),
+    ];
+    return out2.filter((g) => g.rows.length > 0);
+  }
   const make = (key: string, label: string, mine: EyeRow[]): BeGroupOut => ({ key, label, rows: mine.slice().sort(BE_CMP[sort]) });
   let out: BeGroupOut[];
   if (group === "none") out = [make("all", "All live queries", live)];

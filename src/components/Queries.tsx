@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EMPTY172, chips172, group172, pass172, type Ctx172, type Smart172 } from "../lib/smart172";
+import { QcSmart172 } from "./queries/centre/QcSmart172";
 import { SendExtras } from "./queryActions/SendExtras";
 import { requeryLine } from "../lib/requery";
 import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
@@ -136,17 +138,15 @@ import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151, type State155 } from "./queries/centre/QcPage151";
 import { useLoadFailure } from "./notes/useLoadFailure";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
-import { QcViews156 } from "./queries/centre/QcViews156";
 import { QcLine156 } from "./queries/centre/QcLine156";
 import { weekGoal154, type WeekGoal154 } from "../lib/qc154goal";
-import { railCounts } from "../lib/qc153Rail";
 import { stageOf, statusBand } from "../lib/stageColours";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
 import { qcStateAid } from "../lib/qcReviewAid155";
 import { goalAidSends, qcGoalAid } from "../lib/qcReviewAid156";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
-import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
+import { CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
 import { qcPlanAid } from "../lib/qcReviewAid1522";
 import { dayLabel as dayLabel152, orderSteps as orderSteps152, sideOf as side152, stepTitle as stepTitle152, type ThreadStepIn } from "../lib/qcThread152";
 import { getActivityTime } from "../lib/queryDerivation";
@@ -166,7 +166,7 @@ import type { Snapshot } from "../lib/queryActions/snapshot";
 import { inUseId as inUseBookVersion } from "../lib/versionsV2";
 import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { buildCardView, capWord } from "./queries/centre/qcCardView";
-import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, whoSections, type Section, type Sort151 } from "../lib/qc151";
+import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups } from "../lib/qc1511";
 import { rowAct, statusKind } from "../lib/qc1512";
 import { pressView, twinTags } from "../lib/qc149";
@@ -2595,6 +2595,9 @@ export const Queries: React.FC<{
   /** v138 §A — the stage filter: a set of statuses, shared by the glyph row and the Stage pill. Empty = every stage. */
   const [qcF138, setQcF138] = useState<Qc138Filters>(() => qcRemVisit?.filters ?? emptyQc138Filters());
   const qcStages = qcF138.stages;
+  /* v172 — the smart filter panel's choices (QcSmart172): page state on top of qcF138, remembered for the visit with it */
+  const [qcSmart, setQcSmart] = useState<Smart172>(() => qcRemVisit?.smart ?? EMPTY172);
+  const patchSmart = useCallback((p: Partial<Smart172>) => setQcSmart((s) => ({ ...s, ...p })), []);
   const pickGlyph = (k: GlyphKey) => setQcF138((f) => ({ ...f, stages: pressGlyph(f.stages, k) }));
   const qc138Pop = usePopover<Qc138Pop>();
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
@@ -2605,7 +2608,7 @@ export const Queries: React.FC<{
   const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
   /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
   useEffect(() => { writeQcView({ sort: qcSort138 }); }, [qcSort138]);
-  useEffect(() => { writeQcVisit({ filters: qcF138, search: qcFind }); }, [qcF138, qcFind]);
+  useEffect(() => { writeQcVisit({ filters: qcF138, search: qcFind, smart: qcSmart }); }, [qcF138, qcFind, qcSmart]);
   /* v138 §G — the rows ticked for a bulk action, and the journeys still to run, in order */
   const [qcPicked, setQcPicked] = useState<ReadonlySet<string>>(() => new Set());
   const [qcBulk, setQcBulk] = useState<{ mode: "nudge" | "resp" | "close"; ids: string[] } | null>(null);
@@ -4032,7 +4035,15 @@ export const Queries: React.FC<{
      phone `qcCzCourt` still chooses for the v126 carousel and filters nothing. */
   const qcCourtOn = qcDesk ? qcCzCourt : null;
   const qcNow138 = Date.now();
-  const qcFiltered = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)));
+  /* v172 — the smart filter panel's narrowing (desktop only), on top of the page's own: the package name, the agent's
+     fit and country are what the panel's sections read */
+  const ctx172: Ctx172 = {
+    nowMs: qcNow138,
+    pkg: (r) => { const k = pkgKeyOf(r); return k ? (qcPackageName(k) ?? "Unnamed package") : "Nothing recorded"; },
+    stars: (r) => Number(qcLivingAgents.get(r.query.agentId)?.starRating ?? 0),
+    country: (r) => String(qcLivingAgents.get(r.query.agentId)?.country ?? ""),
+  };
+  const qcFiltered = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn) && (!qcDesk || matches138(r, qcF138, qcNow138)) && (!qcDesk || pass172(r, qcSmart, ctx172)));
   /* v138 §C — on the desk the headings sort; the phone keeps the v126 sort */
   const qcVisible = qcDesk
     ? sort138(qcFiltered, qcSort138, {
@@ -4111,7 +4122,7 @@ export const Queries: React.FC<{
   /* v150 D — on the desktop the old drawer is retired: a remembered `?view=calendar` opens the view, never the drawer */
   useEffect(() => { if (qcDesk && beOpen) setBeOpen(false); }, [qcDesk, beOpen]);
   /* v150 D8 — Birds-eye's own grouping and sort: separate from the list's, and never written to the list's memory */
-  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("urgency");
+  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("state");
   const [qcBeSort, setQcBeSort] = useState<BeSort>("due");
   /* v150 D9 — over the rows the list shows (search, Filters, the stat card), closed dropped */
   const qcBeGroups = useMemo(() => beGroups(qcVisible, qcBeGroup, qcBeSort, qcNow138),
@@ -4131,7 +4142,7 @@ export const Queries: React.FC<{
   const qc150BeLive = qcBeOrder.length;
   /* v138 §C — "Showing {n} of {N}" whenever anything narrows the list; "Clear all" clears every narrowing at once */
   const qc138Filtered = qc138FilterCount(qcF138) > 0 || qcFilter !== "all" || qcFind.trim() !== "" || !!qcCourtOn || !!qcIds;
-  const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); setQcIds(null); };
+  const qc138ClearAll = () => { setQcF138(emptyQc138Filters()); setQcFilter("all"); setQcFind(""); setQcCzCourt(null); setQcIds(null); setQcSmart(EMPTY172); };
   /* v138 §C — a band's tint from its group (Part D settles the groups themselves) */
   /* v139 §C — under Status and Next action the band follows whose court it is; packages are powder */
   const qc138Tone = (g: { key: string }): BandTone => bandToneOf(qcGroup, g.key);
@@ -8282,7 +8293,9 @@ export const Queries: React.FC<{
                 const shut = sorted151.filter((r) => CLOSED_SET.includes(r.status));
                 return shut.length ? [...live, { key: "closed", label: "Closed", rows: shut }] : live;
               };
-              const sections151: Section<QcRow>[] = group1522 === "attention" ? whoSections(sorted151, now151).map((x) => ({ ...x, label: ACTION_LABEL[x.key as keyof typeof ACTION_LABEL] ?? x.label }))
+              /* v172 — Group = Action is Birds-eye's "Where it stands" (group172): Needs action (the most urgent first,
+                 tier172), Within their window, Waiting with no reply date, Closed last */
+              const sections151: Section<QcRow>[] = group1522 === "attention" ? group172(sorted151, now151)
                 : group1522 === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
                 : group1522 === "status" ? statusGroups()
                 : qcListGroups(sorted151, "package", now151, qcPackageName).map((g) => ({
@@ -8297,9 +8310,6 @@ export const Queries: React.FC<{
               const order151 = sections151.flatMap((x) => x.rows.map((r) => r.id));
               /* v153 — the rail's faceted counts, over what the rail does not own (scope, search, the older narrowings) */
               const railBase = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn));
-              /* List filters v1 — the foot's "{y} need you": Your move with nothing filtered, over the list in scope */
-              const needYou = qcScoped.filter((r) => matches138(r, { ...emptyQc138Filters(), you: true }, now151)).length;
-              const railN = railCounts(railBase, qcF138, qc138Counts.sent.map((o) => o.key), (r, g) => matches138(r, g, now151));
               /* v156 §2 — the header's line and the collapsed bar's "n of goal" (goal156Of) */
               const goal156 = showGridSkeleton || qcLoadFail ? null : goal156Of(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151);
               const beEmpty = !showGridSkeleton && qcBeOrder.length === 0
@@ -8332,8 +8342,19 @@ export const Queries: React.FC<{
                   pills={pillGroups(strip151)}
                   /* List filters v1 — the applied row: every chip (the search in quotes, a whole stage on its band), and
                      Clear all = the filters and the search; the sort and grouping stay (the bar's buttons show them) */
-                  applied={qc140Chips.map((c) => ({ key: c.key, label: c.label, stage: c.stage, mark: c.stage ? c.status : undefined, onRemove: c.off }))}
-                  onClearApplied={() => { clear151(); setQcFind(""); }}
+                  applied={[...qc140Chips.map((c) => ({ key: c.key, label: c.label, stage: c.stage, mark: c.stage ? c.status : undefined, onRemove: c.off })),
+                    ...chips172(qcSmart, patchSmart).map(({ part: _p, ...c }) => c)]}
+                  /* v172 — nothing matches: the one panel filter whose removal brings back the most */
+                  hint172={qcVisible.length === 0 ? (() => {
+                    const base = railBase.filter((r) => matches138(r, qcF138, now151));
+                    let best: { label: string; n: number; onRemove: () => void } | null = null;
+                    for (const c of chips172(qcSmart, patchSmart)) {
+                      const n = base.filter((r) => pass172(r, { ...qcSmart, ...c.part }, ctx172)).length;
+                      if (n > 0 && (!best || n > best.n)) best = { label: c.label, n, onRemove: c.onRemove };
+                    }
+                    return best;
+                  })() : null}
+                  onClearApplied={() => { clear151(); setQcFind(""); setQcSmart(EMPTY172); }}
                   group={group1522} onGroup={setQcGroup1522} packageOk={pkgOk1522}
                   sort={qcSort151} onSort={setQcSort151}
                   sections={showGridSkeleton ? [] : sections151}
@@ -8359,11 +8380,11 @@ export const Queries: React.FC<{
                   onImport={() => onNavigate?.("import")}
                   packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
                   agentOf={(r) => qcLivingAgents.get(r.query.agentId) ?? null}
-                  rail={<QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
-                    showing={qcVisible.length} total={qcScoped.length} needYou={needYou} loading={showGridSkeleton} />}
+                  rail={<QcSmart172 rows={railBase.filter((r) => matches138(r, qcF138, now151))} ctx={ctx172} showing={qcVisible.length} total={qcScoped.length}
+                    s={qcSmart} onChange={patchSmart} onClear={() => { clear151(); setQcFind(""); setQcSmart(EMPTY172); }} />}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
-                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      selectedId={selectedQueryId} closedN={qcBeGroup === "state" ? 0 : beClosedCount(qcVisible, qcNow138)}
                       lead={(r) => <Track151 row={r.row} />}
                       act={(id) => { const r = qcById.get(id); return r ? rowAct(r, now151) : null; }}
                       barKind={(r) => stageOf(r.row.status)}
@@ -8669,7 +8690,7 @@ export const Queries: React.FC<{
                   /* v150 D — Birds-eye in the list card, under the navy bar; its Group and Sort replace the list's */
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
-                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      selectedId={selectedQueryId} closedN={qcBeGroup === "state" ? 0 : beClosedCount(qcVisible, qcNow138)}
                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
                       /* the list tray's own action: the row's next move, through its panel */
                       onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />

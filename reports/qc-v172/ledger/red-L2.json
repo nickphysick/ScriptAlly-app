@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L2",
+  "where": "birds-eye drawn",
+  "ok": true,
+  "detail": "[data-qc150='birds'] in the visible page"
+ },
+ {
+  "lock": "L2",
+  "where": "population",
+  "ok": true,
+  "detail": "88 rows, 126 bars"
+ },
+ {
+  "lock": "L2",
+  "where": "opens on All",
+  "ok": false,
+  "detail": "data-zoom=3m"
+ },
+ {
+  "lock": "L2",
+  "where": "every bar inside the card",
+  "ok": false,
+  "detail": "91 of 126 outside"
+ },
+ {
+  "lock": "L2",
+  "where": "no names column",
+  "ok": false,
+  "detail": "88 of 88 name cells drawn"
+ },
+ {
+  "lock": "L2",
+  "where": "hover shows one name label",
+  "ok": false,
+  "detail": "[]"
+ }
+]
