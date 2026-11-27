@@ -19,10 +19,11 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePopover } from "../../shell/ListPills";
+import { tileCourt } from "../../../lib/qcSummary";
 import type { EyeRow } from "../../../lib/qcBirdsEye";
 import {
   BE_GROUPS, BE_SORTS, BE_SPANS, BE_TODAY_AT, beLine, beMonths, beScale, beTicks, beX,
-  type BeGroup, type BeGroupOut, type BeLine, type BeSort, type BeZoom,
+  type BeGroup, type BeGroupOut, type BeLine, type BeSort, type BeZoom, type BeScale,
 } from "../../../lib/qc150";
 import "./qcv150.css";
 
@@ -84,14 +85,18 @@ export const QcBirds150: React.FC<{
   const hoverRef = useRef<HTMLElement>(null);
   const tagRef = useRef<HTMLSpanElement>(null);
   const [viewW, setViewW] = useState(0);
-  const [zoom, setZoom] = useState<BeZoom>("3m");
+  const [zoom, setZoom] = useState<Z169>("all");
   const [fontsTick, setFontsTick] = useState(0);
-  const span = BE_SPANS[zoom];
+  const span = zoom === "all" ? 0 : BE_SPANS[zoom];
   const today = startOfDay(nowMs);
 
   const rows: EyeRow[] = useMemo(() => groups.flatMap((g) => g.rows), [groups]);
-  const lines = useMemo(() => new Map(rows.map((r) => [r.id, beLine(r, nowMs)])), [rows, nowMs]);
-  const scale = useMemo(() => (viewW > 0 ? beScale([...lines.values()], span, viewW, nowMs) : null), [lines, span, viewW, nowMs]);
+  const lines = useMemo(() => new Map(rows.map((r) => {
+    const l = beLine(r, nowMs);
+    /* v172 — a closed query keeps its history and ends where it closed: no current bar, no date */
+    return [r.id, tileCourt(r.row.status) === "closed" ? { ...l, cur: null, dueMs: null, daysOver: 0, inDays: 0 } : l];
+  })), [rows, nowMs]);
+  const scale = useMemo(() => (viewW > 0 ? (zoom === "all" ? fitScale169([...lines.values()], viewW, nowMs) : beScale([...lines.values()], span, viewW, nowMs)) : null), [lines, span, viewW, nowMs, zoom]);
   const months = useMemo(() => (scale ? beMonths(scale, nowMs) : []), [scale, nowMs]);
   const ticks = useMemo(() => (scale ? beTicks(scale, nowMs) : []), [scale, nowMs]);
   const tx = scale ? beX(scale, today) : 0;
@@ -193,12 +198,33 @@ export const QcBirds150: React.FC<{
     };
     anim.current = requestAnimationFrame(step);
   }, [clamp, apply]);
-  const pickZoom = (z: BeZoom) => {
+  const pickZoom = (z: Z169, at?: number) => {
     if (!scale || z === zoom) return;
     cancelAnimationFrame(anim.current);
-    pendingCentre.current = scale.r0 + ((off.current + viewW / 2) / scale.ppd) * DAY;
+    pendingCentre.current = at ?? scale.r0 + ((off.current + viewW / 2) / scale.ppd) * DAY;
     setZoom(z);
   };
+
+  /* v172 — pinch (or ctrl + wheel) over the timeline steps through All · 6M · 3M · 6W, keeping the date under the pointer */
+  const pz = useRef(pickZoom); pz.current = pickZoom;
+  const wheelAt = useRef(0);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    const wh = (e: WheelEvent) => {
+      if (!e.ctrlKey || !scale || !(e.target as HTMLElement).closest("[data-qc150='axis'], [data-qc150='be-track']")) return;
+      e.preventDefault();
+      const now = performance.now();
+      if (now - wheelAt.current < 350 || Math.abs(e.deltaY) < 2) return;
+      wheelAt.current = now;
+      const i = ZSTEPS169.indexOf(zoom), j = Math.max(0, Math.min(ZSTEPS169.length - 1, i + (e.deltaY < 0 ? 1 : -1)));
+      if (j === i) return;
+      const ax = axRef.current!.getBoundingClientRect();
+      pz.current(ZSTEPS169[j], scale.r0 + ((off.current + e.clientX - ax.left) / scale.ppd) * DAY);
+    };
+    root.addEventListener("wheel", wh, { passive: false });
+    return () => root.removeEventListener("wheel", wh);
+  }, [scale, zoom]);
 
   /* ── drag anywhere on the axis or the timeline cells, with momentum; a drag never counts as a click ── */
   const drag = useRef<{ x: number; o0: number; lx: number; lt: number; v: number; moved: boolean } | null>(null);
@@ -308,8 +334,8 @@ export const QcBirds150: React.FC<{
       <div className="qc150-bvh" data-qc150="daterow">
         <div className="qc150-zc">
           <div className="qc150-zp" role="group" aria-label="Time" data-qc150="zoom">
-            {(Object.keys(BE_SPANS) as BeZoom[]).map((z) => (
-              <button key={z} type="button" data-z={z} aria-pressed={zoom === z} onClick={() => pickZoom(z)}>{z.toUpperCase()}</button>
+            {(["all", ...Object.keys(BE_SPANS)] as Z169[]).map((z) => (
+              <button key={z} type="button" data-z={z} aria-pressed={zoom === z} onClick={() => pickZoom(z)}>{z === "all" ? "All" : z.toUpperCase()}</button>
             ))}
             <i className="qc150-sep" aria-hidden="true" />
             <button type="button" className="qc150-ar" data-qc150="earlier" aria-label="Earlier" onClick={() => goTo(off.current - viewW / 3)}>‹</button>
@@ -318,6 +344,7 @@ export const QcBirds150: React.FC<{
             </button>
             <button type="button" className="qc150-ar" data-qc150="later" aria-label="Later" onClick={() => goTo(off.current + viewW / 3)}>›</button>
           </div>
+          {zoom === "all" ? <span className="qc169-hint">Your whole campaign. Point at a bar to see who it is; click to zoom in there.</span> : null}
         </div>
         <div className="qc150-ax" ref={axRef} data-qc150="axis" data-qc150-tl="">
           {scale ? (
@@ -347,7 +374,7 @@ export const QcBirds150: React.FC<{
         <i className="qc150-vl qc150-vl--t" ref={todayRef} data-qc150="today-line" aria-hidden="true" />
         <i className="qc150-vl qc150-vl--h" ref={hoverRef} data-qc150="hover-line" aria-hidden="true" />
         {groups.map((g) => (
-          <section key={g.key} className="qc150-bg" data-qc150="be-group" data-group={g.key}>
+          <section key={g.key} className={`qc150-bg${g.key === "closed" ? " qc172-closed" : ""}`} data-qc150="be-group" data-group={g.key}>
             {banded ? <div className="qc150-gb" data-qc150="be-band"><b>{g.label}</b><small>{g.rows.length}</small></div> : null}
             {g.rows.map((r, j) => {
               const L = laid.get(r.id);
@@ -362,7 +389,13 @@ export const QcBirds150: React.FC<{
                     {lead ? lead(r) : <span className="qc150-d" aria-hidden="true">{r.row.initials}</span>}
                     <span className="qc150-who"><b data-qc150="be-name">{r.row.agentName}</b><small>{r.row.agency}</small></span>
                   </div>
-                  <div className="qc150-tl" data-qc150="be-track" data-qc150-tl="">
+                  <div className="qc150-tl" data-qc150="be-track" data-qc150-tl=""
+                    onClickCapture={zoom === "all" ? (e) => {
+                      if (!scale || swallow.current) return;
+                      e.stopPropagation();
+                      const ax = axRef.current!.getBoundingClientRect();
+                      pickZoom("3m", scale.r0 + ((off.current + e.clientX - ax.left) / scale.ppd) * DAY);
+                    } : undefined}>
                     {scale && l ? (
                       <div className="qc150-trk" style={{ width: W }}>
                         {l.past.map((b) => {
@@ -378,10 +411,30 @@ export const QcBirds150: React.FC<{
                         {l.cur && L ? (
                           <div className={`qc150-bar qc150-bar--cur qc150-t-${l.cur.tint}${l.cur.overdue ? " qc150-bar--o" : ""}`} data-qc150="be-bar" data-sk={barKind?.(r)} data-from={l.cur.fromMs}
                             title={l.cur.title} style={{ left: L.s, width: Math.max(L.e - L.s, 4), ...(barFill ? { background: barFill(r) } : {}) }}>
-                            {L.inside ? <span className="qc150-lb" data-qc150="be-label" data-lb="cur" data-l={L.s} data-r={L.e - (l.cur.overdue ? 22 : 0)} data-lw={measure(L.inside, 14) + 28}>{L.inside}</span> : null}
+                            {(() => {
+                              /* v172 — past its date: the navy date chip carries the date, so the bar keeps just its stage, left of the chip */
+                              const dx = l.cur.overdue && l.dueMs != null ? Math.min(beX(scale, l.dueMs), tx - 40) : null;
+                              const txt = dx != null && L.inside ? L.inside.split(" · ")[0] : L.inside;
+                              if (!txt) return null;
+                              const lw = measure(txt, 14) + 28, r = dx != null ? dx - 40 : L.e - (l.cur.overdue ? 22 : 0);
+                              if (dx != null && r - L.s < lw) return null;
+                              return <span className="qc150-lb" data-qc150="be-label" data-lb="cur" data-l={L.s} data-r={r} data-lw={lw}>{txt}</span>;
+                            })()}
                           </div>
                         ) : null}
+                        {l.cur && L && l.cur.overdue && l.dueMs != null ? (
+                          <span className="qc169-due" data-qc150="be-due" style={{ left: Math.min(beX(scale, l.dueMs), tx - (zoom === "all" ? 6 : 40)) }} title={`Reply was due ${new Date(l.dueMs).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`}>
+                            <b aria-hidden="true">!</b>{new Date(l.dueMs).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                          </span>
+                        ) : null}
                         {l.cur && L ? <Tail L={L} tx={tx} /> : null}
+                        {zoom === "all" && L ? (() => {
+                          /* v172 — All: no names column; the name shows beside the bar when the row is pointed at */
+                          const s0 = Math.min(L.s, ...l.past.map((b) => beX(scale, b.fromMs)));
+                          const e0 = l.cur?.overdue ? tx : L.e;
+                          const left = s0 > 200;
+                          return <span className={`qc169-nm${left ? "" : " is-r"}`} style={{ left: left ? s0 - 8 : e0 + 10 }}><b>{r.row.agentName}</b> {r.row.agency}</span>;
+                        })() : null}
                       </div>
                     ) : null}
                   </div>
@@ -477,3 +530,16 @@ export const QcBePills150: React.FC<{ group: BeGroup; onGroup: (g: BeGroup) => v
     </span>
   );
 };
+
+/* v172 — "All": the whole campaign on one page (the default on open), then zoom in (the buttons, a click on the overview, or pinch) */
+type Z169 = BeZoom | "all";
+const ZSTEPS169: Z169[] = ["all", "6m", "3m", "6w"];
+function fitScale169(lines: readonly BeLine[], viewW: number, nowMs: number): BeScale {
+  const today = startOfDay(nowMs);
+  const starts = lines.flatMap((l) => [...l.past.map((b) => b.fromMs), ...(l.cur ? [l.cur.fromMs] : [])]).concat([today - 42 * DAY]);
+  const ends = lines.flatMap((l) => [l.dueMs ?? today, l.cur?.toMs ?? today]).concat([today + 14 * DAY]);
+  const r0 = startOfDay(Math.min(...starts) - 7 * DAY);
+  const r1 = Math.max(...ends) + 10 * DAY;
+  const ppd = viewW / ((r1 - r0) / DAY);
+  return { r0, r1, ppd, width: viewW };
+}

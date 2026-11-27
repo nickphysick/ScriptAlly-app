@@ -79,7 +79,7 @@ export const QcSwitch151: React.FC<{ view: View151; onView: (v: View151) => void
 export interface CountLine1512 { ms: string | null; sent: number; active: number; heardPct: number }
 
 /* ── §9 Birds-eye's Group and Sort menus' lines ── */
-const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
+const BE_GROUP_LINE: Record<BeGroup, string> = { state: "Needs action, within their window, waiting with no reply date, closed", urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
 const BE_SORT_LINE: Record<BeSort, string> = { due: "Soonest first", wait: "Oldest query first", agent: "By name" };
 
 

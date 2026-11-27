@@ -4111,7 +4111,7 @@ export const Queries: React.FC<{
   /* v150 D — on the desktop the old drawer is retired: a remembered `?view=calendar` opens the view, never the drawer */
   useEffect(() => { if (qcDesk && beOpen) setBeOpen(false); }, [qcDesk, beOpen]);
   /* v150 D8 — Birds-eye's own grouping and sort: separate from the list's, and never written to the list's memory */
-  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("urgency");
+  const [qcBeGroup, setQcBeGroup] = useState<BeGroup>("state");
   const [qcBeSort, setQcBeSort] = useState<BeSort>("due");
   /* v150 D9 — over the rows the list shows (search, Filters, the stat card), closed dropped */
   const qcBeGroups = useMemo(() => beGroups(qcVisible, qcBeGroup, qcBeSort, qcNow138),
@@ -8363,7 +8363,7 @@ export const Queries: React.FC<{
                     showing={qcVisible.length} total={qcScoped.length} needYou={needYou} loading={showGridSkeleton} />}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
-                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      selectedId={selectedQueryId} closedN={qcBeGroup === "state" ? 0 : beClosedCount(qcVisible, qcNow138)}
                       lead={(r) => <Track151 row={r.row} />}
                       act={(id) => { const r = qcById.get(id); return r ? rowAct(r, now151) : null; }}
                       barKind={(r) => stageOf(r.row.status)}
@@ -8669,7 +8669,7 @@ export const Queries: React.FC<{
                   /* v150 D — Birds-eye in the list card, under the navy bar; its Group and Sort replace the list's */
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
-                      selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
+                      selectedId={selectedQueryId} closedN={qcBeGroup === "state" ? 0 : beClosedCount(qcVisible, qcNow138)}
                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
                       /* the list tray's own action: the row's next move, through its panel */
                       onAct={(id) => { const r = qcById.get(id); const req = r ? trayOpen(null, r) : null; if (req) stepRow(req); else onOpenQuery?.(id); }} />

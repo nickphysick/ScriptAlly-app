@@ -2,7 +2,7 @@
    §1 the toolbar's strip ends in a hard edge, the Contact list's way (no 22px fade);
    §2 the card: a cap pinned under the strip carrying the column heads (the deeper blush heading row), then the groups;
    §3 the row (QcRow170): seal, agent, the four steps with dates, how it was sent, the materials pill, the next move;
-   §4 (Phase 2) Birds-eye. */
+   §4 Birds-eye: the overdue date chip, the All overview, the names on hover, the closed group. */
 
 @media (min-width: 768px) {
   /* ── §1 · the strip: the page's ground, solid, to the bar's foot. Its last 22px paint nothing, so the list card's cap
@@ -190,6 +190,49 @@
   .qc151.qc153 .qc153-cl > .qc153-railcol { position: sticky; top: calc(var(--pin-cover, 12px) + 2px); align-self: start; z-index: 5;
     max-height: calc(100vh - var(--pin-cover, 12px) - 96px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; border-radius: 22px; }
 }
+
+@media (min-width: 768px) {
+  /* the date row pins under the strip, as the list's cap does */
+  .qc151 .qc150-be .qc150-bvh.qc150-bvh { top: calc(var(--pin-cover, 12px) - 12px + var(--qc169-strip, 92px) - 22px); }
+}
+
+/* ── §4 · Birds-eye ── */
+/* the date a query went past its reply date, on its bar */
+.qc150-be .qc169-due { position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 3; display: inline-flex; align-items: center; gap: 4px;
+  height: 20px; padding: 0 7px 0 3px; border-radius: 999px; background: var(--sp-anthracite, #2a3a52); color: #fff; font: 600 11px/1 var(--font-mono, "Courier Prime", monospace);
+  white-space: nowrap; pointer-events: auto; box-shadow: 0 0 0 2px var(--paper, #fbf7f0); }
+.qc150-be .qc169-due b { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; background: #fff; color: var(--sp-anthracite, #2a3a52); font: 700 10px/1 system-ui, sans-serif; }
+
+/* "All": every query on one page; no words on the bars, slim rows, zoom in for the detail */
+.qc150-be[data-zoom="all"] .qc150-br { min-height: 15px; border-bottom-color: rgba(28,19,15,0.04); }
+.qc150-be[data-zoom="all"] .qc150-tl { height: 15px; -webkit-mask-image: none; mask-image: none; cursor: zoom-in; }
+.qc150-be[data-zoom="all"] .qc150-bar { height: 9px; margin-top: -4.5px; border-radius: 3px; }
+.qc150-be[data-zoom="all"] .qc150-bar .qc150-lb, .qc150-be[data-zoom="all"] .qc150-tail, .qc150-be[data-zoom="all"] .qc150-xa > *,
+.qc150-be[data-zoom="all"] .qc150-who small, .qc150-be[data-zoom="all"] .qc150-ag > :not(.qc150-who) { display: none !important; }
+.qc150-be[data-zoom="all"] .qc150-who b { font-size: 12px !important; line-height: 1 !important; font-weight: 500 !important; }
+.qc150-be[data-zoom="all"] .qc169-due { width: 8px; height: 8px; padding: 0; gap: 0; font-size: 0; box-shadow: 0 0 0 1.5px var(--paper, #fbf7f0); }
+.qc150-be[data-zoom="all"] .qc169-due b { display: none; }
+.qc150-be[data-zoom="all"] .qc151-gb, .qc150-be[data-zoom="all"] .qc150-gb { padding-top: 12px; padding-bottom: 6px; }
+.qc150-be[data-zoom="all"] .qc150-br--last { margin-bottom: 6px; }
+
+/* All gives the whole width to the picture: the zoom pill sits on its own row, no names column, names on hover */
+.qc151 .qc150-be[data-zoom="all"] .qc150-bvh { grid-template-columns: 16px minmax(0, 1fr) 16px; grid-template-rows: auto auto; }
+.qc151 .qc150-be[data-zoom="all"] .qc150-zc { grid-column: 1 / -1; padding: 10px 24px 8px; gap: 18px; }
+.qc151 .qc150-be[data-zoom="all"] .qc150-ax { grid-column: 2; grid-row: 2; height: 64px; -webkit-mask-image: none; mask-image: none; box-shadow: none; }
+.qc150-be .qc169-hint { font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(255, 255, 255, 0.78); }
+.qc151 .qc150-be[data-zoom="all"] .qc150-br { grid-template-columns: minmax(0, 1fr); }
+.qc151 .qc150-be[data-zoom="all"] .qc150-ag, .qc151 .qc150-be[data-zoom="all"] .qc150-xa { display: none !important; }
+.qc150-be .qc169-nm { position: absolute; top: 50%; z-index: 4; transform: translate(-100%, -50%); display: none; padding: 3px 9px; border-radius: 6px;
+  background: var(--sp-anthracite, #2a3a52); color: #fff; white-space: nowrap; pointer-events: none; font: 400 12.5px/1.2 var(--sp-serif) !important; box-shadow: 0 2px 8px rgba(28, 19, 15, 0.18); }
+.qc150-be .qc169-nm b { font-weight: 600; }
+.qc150-be .qc169-nm.is-r { transform: translate(0, -50%); }
+.qc150-be[data-zoom="all"] .qc150-br:hover .qc169-nm { display: block; }
+.qc150-be[data-zoom="all"] .qc150-br:hover { background: rgba(42, 58, 82, 0.05); }
+.qc150-be[data-zoom="all"] .qc150-trk { overflow: visible; }
+
+/* "Where it stands": the closed group sits last, quieter */
+.qc150-be .qc172-closed .qc150-br { opacity: .8; }
+.qc150-be .qc172-closed .qc150-br:hover { opacity: 1; }
 
 /* v17.11 — column headings as the Agents list's (Contact list rows v1.2): typewriter 18px (16px on narrower lists),
    ink, every heading the same face; a 54px heading row */
