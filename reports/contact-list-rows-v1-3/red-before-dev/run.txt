@@ -1,0 +1,14 @@
+  ✗ M28 · 600 · below it to the headings: page colour only (31488 px) — 336 other · 398,179=238,234,228 398,180=238,234,228 398,181=238,234,228 398,182=238,234,228
+  ✗ M28 · 800 · below it to the headings: page colour only (31488 px) — 336 other · 398,179=238,234,228 398,180=238,234,228 398,181=238,234,228 398,182=238,234,228
+  ✗ M28 · 1000 · below it to the headings: page colour only (31488 px) — 336 other · 398,179=238,234,228 398,180=238,234,228 398,181=238,234,228 398,182=238,234,228
+  ✘  2 [measure] › tests/e2e/contactListRows.measure.ts:1010:1 › M28 · pinned at 1440×900: from the sheet's top to the slim bar's foot, slim-bar ground; then page colour to the headings (6.3s)
+  ✘  3 [measure] › tests/e2e/contactListRows.measure.ts:1178:1 › M26, M34 · Location: exactly the countries present; grows to five then scrolls; never pushes anything out of reach (4.0m)
+  ✘  4 [measure] › tests/e2e/contactListRows.measure.ts:1233:1 › M35 · an agent with no genres has gaps (List health's own rule), never a full profile (2.0m)
+    Test timeout of 240000ms exceeded.
+    Error: locator.click: Test timeout of 240000ms exceeded.
+    > 1193 |     await fp.locator('[data-clq="loc"]').click(); await page.waitForTimeout(300);
+    Test timeout of 120000ms exceeded.
+    Error: locator.click: Test timeout of 120000ms exceeded.
+    > 1241 |   await fp.locator('[data-clq-opt="prof:gaps"]').click(); await page.waitForTimeout(300);
+      1244 |   await fp.locator('[data-clq-opt="prof:full"]').click(); await page.waitForTimeout(300);
+dev/bew31-clr121 @ 2b2ec27db (served as index-CSL1bsjK.js) + this branch's harness/fixture only

@@ -1,0 +1,52 @@
+[
+ {
+  "where": "four quick pills, the book's genre first",
+  "ok": true,
+  "detail": "[\"Crime\",\"Thriller\",\"Book club\",\"Historical\"]"
+ },
+ {
+  "where": "order unchanged after [data-clq-opt=\"door:open\"]",
+  "ok": true,
+  "detail": "[\"Crime\",\"Thriller\",\"Book club\",\"Historical\"]"
+ },
+ {
+  "where": "order unchanged after [data-clq-opt=\"fit:5\"]",
+  "ok": true,
+  "detail": "[\"Crime\",\"Thriller\",\"Book club\",\"Historical\"]"
+ },
+ {
+  "where": "order unchanged after [data-clq-opt=\"always:no\"]",
+  "ok": true,
+  "detail": "[\"Crime\",\"Thriller\",\"Book club\",\"Historical\"]"
+ },
+ {
+  "where": "the list opens inline, inside the panel's box (never a popover)",
+  "ok": true,
+  "detail": "{\"inside\":true,\"h\":168,\"sh\":280,\"ch\":168,\"items\":8,\"mark\":true,\"oy\":\"auto\",\"pos\":\"static\"}"
+ },
+ {
+  "where": "at most 168 high, then it scrolls inside itself",
+  "ok": true,
+  "detail": "{\"inside\":true,\"h\":168,\"sh\":280,\"ch\":168,\"items\":8,\"mark\":true,\"oy\":\"auto\",\"pos\":\"static\"}"
+ },
+ {
+  "where": "matches highlighted",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "ArrowDown + Enter picks the first match",
+  "ok": true,
+  "detail": "genre:crime"
+ },
+ {
+  "where": "Esc closes the list",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Backspace on an empty field removes the last pick",
+  "ok": true,
+  "detail": ""
+ }
+]

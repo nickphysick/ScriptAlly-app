@@ -1,0 +1,97 @@
+[
+ {
+  "where": "rest · queried:yes",
+  "ok": true,
+  "detail": "got 16 want 16"
+ },
+ {
+  "where": "rest · queried:no",
+  "ok": true,
+  "detail": "got 3 want 3"
+ },
+ {
+  "where": "rest · door:open",
+  "ok": true,
+  "detail": "got 18 want 18"
+ },
+ {
+  "where": "rest · door:closed",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "rest · fit:unrated",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "rest · rt:unknown",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "rest · always:yes",
+  "ok": true,
+  "detail": "got 14 want 14"
+ },
+ {
+  "where": "rest · always:no",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "rest · prof:full",
+  "ok": true,
+  "detail": "got 14 want 14"
+ },
+ {
+  "where": "rest · prof:gaps",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "rest · fit:1",
+  "ok": true,
+  "detail": "got 14 want 14"
+ },
+ {
+  "where": "rest · fit:2",
+  "ok": true,
+  "detail": "got 14 want 14"
+ },
+ {
+  "where": "rest · fit:3",
+  "ok": true,
+  "detail": "got 12 want 12"
+ },
+ {
+  "where": "rest · fit:4",
+  "ok": true,
+  "detail": "got 10 want 10"
+ },
+ {
+  "where": "rest · fit:5",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "rest · genre:crime",
+  "ok": true,
+  "detail": "got 8 want 8"
+ },
+ {
+  "where": "rest · genre:thriller",
+  "ok": true,
+  "detail": "got 6 want 6"
+ },
+ {
+  "where": "rest · genre:book club",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "rest · genre:historical",
+  "ok": true,
+  "detail": "got 4 want 4"
+ }
+]

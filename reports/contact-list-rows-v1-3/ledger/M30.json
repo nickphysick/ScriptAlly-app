@@ -1,0 +1,322 @@
+[
+ {
+  "where": "sections in the ref's order",
+  "ok": true,
+  "detail": "[\"pairs\",\"fit\",\"genres\",\"reply\",\"loc\",\"pairs2\"]"
+ },
+ {
+  "where": "headings",
+  "ok": true,
+  "detail": "[\"Minimum fit\",\"Genres sought\",\"Reply time\",\"Location\"]"
+ },
+ {
+  "where": "summaries at rest",
+  "ok": true,
+  "detail": "fit Any rt Any loc Anywhere▾"
+ },
+ {
+  "where": "Open + 4★ · queried:yes",
+  "ok": true,
+  "detail": "got 8 want 8"
+ },
+ {
+  "where": "Open + 4★ · queried:no",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Open + 4★ · door:open",
+  "ok": true,
+  "detail": "got 10 want 10"
+ },
+ {
+  "where": "Open + 4★ · door:closed",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "Open + 4★ · fit:unrated",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "Open + 4★ · rt:unknown",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "Open + 4★ · always:yes",
+  "ok": true,
+  "detail": "got 8 want 8"
+ },
+ {
+  "where": "Open + 4★ · always:no",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Open + 4★ · prof:full",
+  "ok": true,
+  "detail": "got 10 want 10"
+ },
+ {
+  "where": "Open + 4★ · prof:gaps",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "Open + 4★ · fit:1",
+  "ok": true,
+  "detail": "got 14 want 14"
+ },
+ {
+  "where": "Open + 4★ · fit:2",
+  "ok": true,
+  "detail": "got 14 want 14"
+ },
+ {
+  "where": "Open + 4★ · fit:3",
+  "ok": true,
+  "detail": "got 12 want 12"
+ },
+ {
+  "where": "Open + 4★ · fit:4",
+  "ok": true,
+  "detail": "got 10 want 10"
+ },
+ {
+  "where": "Open + 4★ · fit:5",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "Open + 4★ · genre:crime",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "Open + 4★ · genre:thriller",
+  "ok": true,
+  "detail": "got 6 want 6"
+ },
+ {
+  "where": "Open + 4★ · genre:book club",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "Open + 4★ · genre:historical",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "Open + 4★ · the list is exactly the matching agents",
+  "ok": true,
+  "detail": "got clr-blackwood,clr-ellison,clr-ferris,clr-holt,clr-morrow,clr-okafor,clr-pemberton,clr-reed,clr-tan,clr-vane-coe want clr-blackwood,clr-ellison,clr-ferris,clr-holt,clr-morrow,clr-okafor,clr-pemberton,clr-reed,clr-tan,clr-vane-coe"
+ },
+ {
+  "where": "+ Crime + a profile side · queried:yes",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Crime + a profile side · queried:no",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "+ Crime + a profile side · door:open",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "+ Crime + a profile side · door:closed",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Crime + a profile side · fit:unrated",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Crime + a profile side · rt:unknown",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Crime + a profile side · always:yes",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Crime + a profile side · always:no",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "+ Crime + a profile side · prof:full",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "+ Crime + a profile side · prof:gaps",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Crime + a profile side · fit:1",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "+ Crime + a profile side · fit:2",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "+ Crime + a profile side · fit:3",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "+ Crime + a profile side · fit:4",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "+ Crime + a profile side · fit:5",
+  "ok": true,
+  "detail": "got 3 want 3"
+ },
+ {
+  "where": "+ Crime + a profile side · genre:crime",
+  "ok": true,
+  "detail": "got 7 want 7"
+ },
+ {
+  "where": "+ Crime + a profile side · genre:thriller",
+  "ok": true,
+  "detail": "got 6 want 6"
+ },
+ {
+  "where": "+ Crime + a profile side · genre:book club",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Crime + a profile side · genre:historical",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "+ Crime + a profile side · the list is exactly the matching agents",
+  "ok": true,
+  "detail": "got clr-blackwood,clr-ellison,clr-ferris,clr-okafor,clr-pemberton,clr-reed,clr-tan want clr-blackwood,clr-ellison,clr-ferris,clr-okafor,clr-pemberton,clr-reed,clr-tan"
+ },
+ {
+  "where": "+ Not rated, a reply side · queried:yes",
+  "ok": true,
+  "detail": "got 4 want 4"
+ },
+ {
+  "where": "+ Not rated, a reply side · queried:no",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "+ Not rated, a reply side · door:open",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · door:closed",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Not rated, a reply side · fit:unrated",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Not rated, a reply side · rt:unknown",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Not rated, a reply side · always:yes",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · always:no",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "+ Not rated, a reply side · prof:full",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · prof:gaps",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Not rated, a reply side · fit:1",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · fit:2",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · fit:3",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · fit:4",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · fit:5",
+  "ok": true,
+  "detail": "got 1 want 1"
+ },
+ {
+  "where": "+ Not rated, a reply side · genre:crime",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · genre:thriller",
+  "ok": true,
+  "detail": "got 5 want 5"
+ },
+ {
+  "where": "+ Not rated, a reply side · genre:book club",
+  "ok": true,
+  "detail": "got 0 want 0"
+ },
+ {
+  "where": "+ Not rated, a reply side · genre:historical",
+  "ok": true,
+  "detail": "got 2 want 2"
+ },
+ {
+  "where": "+ Not rated, a reply side · the list is exactly the matching agents",
+  "ok": true,
+  "detail": "got clr-ferris,clr-okafor,clr-pemberton,clr-reed,clr-tan want clr-ferris,clr-okafor,clr-pemberton,clr-reed,clr-tan"
+ },
+ {
+  "where": "clicking a chosen option again clears it",
+  "ok": true,
+  "detail": "always:yes false"
+ }
+]

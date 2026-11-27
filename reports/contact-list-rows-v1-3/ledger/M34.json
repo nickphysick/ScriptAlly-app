@@ -1,0 +1,47 @@
+[
+ {
+  "where": "opens inline, inside the panel",
+  "ok": true,
+  "detail": "{\"open\":true,\"inside\":true}"
+ },
+ {
+  "where": "exactly the countries present, by count",
+  "ok": true,
+  "detail": "[\"loc:GB\",\"loc:IE\",\"loc:US\"]"
+ },
+ {
+  "where": "each with its flag, full name and count",
+  "ok": true,
+  "detail": "[{\"k\":\"loc:GB\",\"n\":17,\"flag\":true,\"words\":\"United Kingdom\",\"h\":28},{\"k\":\"loc:IE\",\"n\":1,\"flag\":true,\"words\":\"Ireland\",\"h\":28},{\"k\":\"loc:US\",\"n\":1,\"flag\":true,\"words\":\"United States\",\"h\":28}]"
+ },
+ {
+  "where": "rows 28 high",
+  "ok": true,
+  "detail": "28,28,28"
+ },
+ {
+  "where": "3 countries: no scroll",
+  "ok": true,
+  "detail": "88/88"
+ },
+ {
+  "where": "a second click closes it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "7 countries: it scrolls inside itself",
+  "ok": true,
+  "detail": "7 rows 200/144"
+ },
+ {
+  "where": "at 1280×640 with it open, scrolling the panel reaches Has gaps",
+  "ok": true,
+  "detail": "{\"inView\":true,\"overscroll\":\"contain\",\"scrolls\":true}"
+ },
+ {
+  "where": "overscroll contained",
+  "ok": true,
+  "detail": "contain"
+ }
+]

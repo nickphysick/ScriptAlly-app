@@ -1,0 +1,42 @@
+[
+ {
+  "where": "Not known disabled until a range is set",
+  "ok": true,
+  "detail": "{\"n\":2,\"on\":false,\"disabled\":true}"
+ },
+ {
+  "where": "keyboard moves the low handle; focus stays on it",
+  "ok": true,
+  "detail": "label 6–16+ wks focus true"
+ },
+ {
+  "where": "a range set: Not known starts on",
+  "ok": true,
+  "detail": "{\"n\":2,\"on\":true,\"disabled\":false}"
+ },
+ {
+  "where": "the rows follow (with the unknown kept in)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the handles can't cross",
+  "ok": true,
+  "detail": "label 6 wks"
+ },
+ {
+  "where": "the mouse moves the handle",
+  "ok": true,
+  "detail": "16 → 12"
+ },
+ {
+  "where": "rows update mid-drag; focus stays on the handle",
+  "ok": true,
+  "detail": "{\"rows\":17,\"focus\":\"rt-hi\"}"
+ },
+ {
+  "where": "Not known turns off",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -102,6 +102,8 @@ const MUTATIONS: Record<string, string> = {
   m10: `.cl26-card .cl26-th.cl26-pin { top: 0px !important; border-radius: 0 !important; }`,
   m11: `.cl26-card .cl26-row .clr-gline .clr-tag { height: 26px !important; padding: 0 9px !important; border-radius: 7px !important; font: 400 14px/26px var(--sp-type) !important; } .cl26-card .cl26-row .cl26-want { padding: 0 !important; }`,
   m14: `.cl26-card .cl26-q > .clr-act { opacity: 1 !important; transform: none !important; } .cl26-card .cl26-row .cl26-q > .clr-rest { opacity: 1 !important; transform: none !important; }`,
+  /* v1.3 — M28's above-the-slim-bar fix deleted: the slim bar's ground no longer reaches up to the sheet's top */
+  m28: `.clv-group.cl27 > .qc156-slim[data-shown]::after { content: none !important; }`,
   m15: `@media (hover: none) { .cl26-card .cl26-q > .clr-act { display: inline-flex !important; opacity: 1 !important; } .cl26-card .cl26-chev[data-has] > .clr-act-end { display: none !important; } }`,
 };
 async function open(page: Page, width: number, view?: { group26: "none" | "letter" }) {
@@ -1032,7 +1034,23 @@ test("M28 · pinned at 1440×900: from the sheet's top to the slim bar's foot, s
     m28.check(`${depth} · the headings level with the panel`, Math.abs(G.th - G.fpTop) <= 1, `headings ${G.th.toFixed(1)} panel ${G.fpTop.toFixed(1)}`);
     if (depth === 800 && !MUTATE.size) await page.screenshot({ path: `${DIR}/shots/pinned-1440x900.png` });
   }
-  m28.done(12);
+  /* ⚠️ the window BEFORE the headings pin: the slim bar shown, the heading row still in the flow — the pin's cap is off, so
+     only the slim bar's own ground keeps the rows out of the band above it (the case the v1.3 fix exists for) */
+  let early = 0;
+  for (let depth = 40; depth < 600; depth += 40) {
+    await scrollTo(page, depth); await page.waitForTimeout(300);
+    const G = await sheetBand(page);
+    if (!G.slim || G.stuck) continue;
+    early++;
+    const png = readPng(await page.screenshot());
+    const slimC = rgb(G.slimBg), pageC = rgb(G.page);
+    let bad = 0, n = 0; const w: string[] = [];
+    for (let x = Math.ceil(G.sheet.l) + 20; x < Math.floor(G.sheet.r) - 20; x += 1)
+      for (let y = Math.ceil(G.sheet.t) + 1; y < Math.floor(G.slim.t); y++) { n++; const c = png.at(x, y); if (!near(c, slimC) && !near(c, pageC)) { bad++; if (w.length < 4) w.push(`${x},${y}=${c}`); } }
+    m28.check(`${depth} (slim shown, headings not yet pinned) · above the slim bar: its ground only (${n} px)`, n > 0 && bad === 0, `${bad} other · ${w.join(" ")}`);
+  }
+  m28.check("the early window was read at least once", early > 0, `${early} depths`);
+  m28.done(14);
 });
 
 test("M29 · at the end of the list the card ends cleanly: corners, rim and shadow drawn, page colour below", async ({ page }) => {

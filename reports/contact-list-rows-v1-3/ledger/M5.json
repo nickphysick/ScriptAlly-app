@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "19 rows"
+ },
+ {
+  "where": "Ellison · words",
+  "ok": true,
+  "detail": "action \"Log a query\" want Log a query"
+ },
+ {
+  "where": "Ferris · words",
+  "ok": true,
+  "detail": "action \"Nudge\" want Nudge"
+ },
+ {
+  "where": "Holt · words",
+  "ok": true,
+  "detail": "action \"Record a response\" want Record a response"
+ },
+ {
+  "where": "Okafor · words",
+  "ok": true,
+  "detail": "action \"Send your full\" want Send your full"
+ },
+ {
+  "where": "Pemberton · words",
+  "ok": true,
+  "detail": "action \"Log a query\" want Log a query"
+ },
+ {
+  "where": "Reed · no action",
+  "ok": true,
+  "detail": "action undefined"
+ },
+ {
+  "where": "Tan · words",
+  "ok": true,
+  "detail": "action \"Send your partial\" want Send your partial"
+ },
+ {
+  "where": "Whitfield · no action",
+  "ok": true,
+  "detail": "action undefined"
+ }
+]
