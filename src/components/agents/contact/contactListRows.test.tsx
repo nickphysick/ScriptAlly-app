@@ -187,7 +187,8 @@ describe("Contact list rows v1.2.1 · Phase 1 — nothing scrolls above the pinn
   it("one opaque cap owned by the pin: from the scroller's top to the heading's top, across the card and its rim", () => {
     const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(css).toContain("top: calc(-1 * var(--clr-th-top, 12px)); height: var(--clr-th-top, 12px);");
-    expect(css).toMatch(/\.cl26-card \.cl26-th::before \{\s*content: ""; position: absolute; left: -14px; right: -14px;/);
+    /* RE-POINTED by v1.3 · Phase 1: 28px past the frame each side (the card's side shadow sat in the gutter) */
+    expect(css).toMatch(/\.cl26-card \.cl26-th::before \{\s*content: ""; position: absolute; left: -28px; right: -28px;/);
     expect(css).toContain(".cl26-card .cl26-frame.cl26-frame { overflow: visible; }");
     /* the light bar stacks with the page, under the cap */
     expect(css).toContain(".cl27 .qc153-main > .qc154-tbw.qc154-tbw { position: relative; top: auto; z-index: auto; }");
@@ -218,5 +219,13 @@ describe("Contact list rows v1.2.1 · Phase 4 — v1.2's answers", () => {
       const src = readFileSync(new URL(`../../../lib/${f}`, import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
       expect(src, f).not.toMatch(/"Send the (partial|full|revision)"|`Send the full to/);
     }
+  });
+});
+
+describe("Contact list rows v1.3 · Phase 1 — nothing scrolls above the slim bar", () => {
+  it("the slim bar's ground reaches up to the sheet's top edge, across its full width", () => {
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.clv-group\.cl27 > \.qc156-slim\[data-shown\]::after \{\s*content: ""; position: absolute; z-index: -1; top: calc\(-1 \* var\(--pin-cover, 12px\)\); height: var\(--pin-cover, 12px\);/);
+    expect((css.match(/position: sticky/g) ?? []).length).toBe(1);
   });
 });
