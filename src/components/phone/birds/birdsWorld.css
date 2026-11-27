@@ -298,5 +298,9 @@
   .bw-zc.lvl .bw-lvchip { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px 0 14px; background: var(--pa-navy); color: #fff; font: 600 14px var(--pa-sans) !important; }
   .bw-zc.lvl .bw-lvchip svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .bw-zc.lvl.open { transform-origin: 100% 100%; animation: bw-lvin 0.16s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  /* v3.3: open, the chip stays at the bottom of the card (chevron down), the three levels above it */
+  .bw-zc.lvl .bw-lvlist { display: flex; flex-direction: column; }
+  .bw-zc.lvl .bw-lvlist + .bw-lvchip { border-top: 1px solid var(--bw-rule); }
+  .bw-zc.lvl.open .bw-lvchip svg { transform: rotate(180deg); }
   @keyframes bw-lvin { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
 }

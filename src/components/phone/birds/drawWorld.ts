@@ -63,14 +63,26 @@ export function segBg(s: BwSeg): string {
   if (s.last) return `background:${bandOf(s.st)};box-shadow:${s.cont ? `inset 0 1px 0 ${e},inset 0 -1px 0 ${e},inset 1px 0 0 ${e}` : `inset 0 0 0 1px ${e}`}`;
   return `background:${fadedBand(s.st)};box-shadow:inset 0 0 0 1px ${fadedEdge(s.st)}`;
 }
+/** the hatching with its stripes' phase anchored to the screen's x (v3.3), so a row's hatched stretch and its quiet
+ *  stretch, two elements, continue one pattern with no seam. At 135deg a stripe's phase at (x, y) in an element is
+ *  (x + y) / √2 from its top-left corner; shifting the stops by its left (a) / √2, mod the 7px period, aligns them. */
+export function hatchAt(status: string, a: number): string {
+  const d = (((a / Math.SQRT2) % 7) + 7) % 7, f = (n: number) => `${+n.toFixed(3)}px`;
+  return `repeating-linear-gradient(135deg,${bandOf(status)} ${f(-d)} ${f(4 - d)},#fff ${f(4 - d)} ${f(7 - d)})`;
+}
+/** gone quiet's fade (v3.3): the hatching seen in full where it goes quiet, 8% at today */
+export const QUIET_FADE = "linear-gradient(90deg,#000,rgba(0,0,0,0.08))";
 /** the time after the current stage, joined on with no gap (ref `tailSeg`) */
 function tailSeg(s: BwSeg, a: number, b: number, by: number, th: number, inner: string, cl: string, badge: boolean, data: string): string {
   const w = Math.max(2, b - a), r = th / 2, e = edgeOf(s.st), bd = bandOf(s.st);
   if (s.k === "ahead") return `<i class="bw-bar${cl}" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${bd};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e},inset -1px 0 0 ${e};border-radius:0 ${px(r)} ${px(r)} 0">${inner}</i>`;
-  if (s.k === "quiet") return `<i class="bw-bar" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:linear-gradient(90deg,color-mix(in srgb,${bd} 80%,#fff),rgba(255,255,255,0));border-radius:0 ${px(r)} ${px(r)} 0"></i>`;
   const sz = badge ? Math.max(12, Math.min(16, th + 4)) : Math.max(5, Math.min(14, th + 3)), cy = by + th / 2;
-  return `<i class="bw-bar" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${hatchOf(s.st)};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e}${s.cont ? "" : `,inset -1px 0 0 ${e}`};border-radius:${s.cont ? "0" : `0 ${px(r)} ${px(r)} 0`}"></i>`
-    + `<i class="bw-ovd${sz < 11 ? " dot" : ""}" data-bw="mark" title="Past its reply date" style="left:${px(a)};top:${px(cy)};--s:${px(sz)}">${sz < 11 ? "" : "!"}</i>`;
+  const mark = s.mark ? `<i class="bw-ovd${sz < 11 ? " dot" : ""}" data-bw="mark" title="Past its reply date" style="left:${px(a)};top:${px(cy)};--s:${px(sz)}">${sz < 11 ? "" : "!"}</i>` : "";
+  /* v3.3 (Nick): gone quiet stays hatched. The same hatching and its top and bottom edge lines run on to today, fading
+     out under a mask from full to 8% there (QUIET_FADE); no solid colour after the "!" */
+  if (s.k === "quiet") return `<i class="bw-bar" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${hatchAt(s.st, a)};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e};-webkit-mask-image:${QUIET_FADE};mask-image:${QUIET_FADE};border-radius:0 ${px(r)} ${px(r)} 0"></i>` + mark;
+  return `<i class="bw-bar" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${hatchAt(s.st, a)};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e}${s.cont ? "" : `,inset -1px 0 0 ${e}`};border-radius:${s.cont ? "0" : `0 ${px(r)} ${px(r)} 0`}"></i>`
+    + mark;
 }
 const hitTag = (r: BwRow, ry: number, rp: number, sel: string | null | undefined) =>
   `<i class="bw-hit${sel === r.id ? " sel" : ""}" data-bw="row" data-id="${esc(r.id)}" data-from="${r.fromMs ?? ""}" data-to="${r.toMs ?? ""}" data-pasts="${r.pasts}" data-due="${r.dueMs ?? ""}" data-past="${r.due != null && r.due < 0 ? 1 : 0}" data-status="${esc(r.status)}" data-closed="${r.closed ? 1 : 0}" data-nodate="${isNoDate(r) ? 1 : 0}" data-you="${r.you ? 1 : 0}" data-start="${r.ev.length ? r.ev[r.ev.length - 1].d : ""}" data-dueday="${r.due ?? ""}" style="top:${px(ry)};height:${px(rp)}"></i>`;

@@ -12,7 +12,7 @@ import {
   BW_GROUPS, DAY, GAP, GPMAX, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP, ACT_LABEL, agoOf, changes, dayFromMs, menuActions, noDateDefault, noDateRows, outOn, recapStats, scrubLabel, searchRows, seenLabel, sheetOf, tips,
   aheadTx, allH, barBox, bwCounts, bwGroups, bwRow, chipForCourt, clipR, dm, fadedBand, hasFig, headingTop, inPill, isNoDate, kk,
   makeWorld, num, outcomeWord, replayAt, replayStart, rowSegs, rulerMarks, sampleRows, setAxis, shortName, spaced, stageTx,
-  keepFolds, needsSendBy, SB_DEFAULT_WEEKS, zoomForRows, type BwRow,
+  isGoneQuiet, keepFolds, needsSendBy, SB_DEFAULT_WEEKS, zoomForRows, type BwRow,
 } from "./birdsWorld";
 
 const NOW = new Date(2026, 10, 25, 12).getTime();
@@ -283,6 +283,27 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     expect(sheetOf(undated, QUIET, NOW).steps.at(-1)).toMatchObject({ k: "nosendby", t: "No send-by date yet" });
     expect(sheetOf(rows().find((x) => x.id === "you")!, QUIET, NOW).steps.some((s) => s.k === "nosendby")).toBe(false);
     expect(SB_DEFAULT_WEEKS).toBe(2);
+  });
+  it("v3.3 gone quiet: stays hatched (its tail carries the \"!\" when nothing hatched comes before it); sorts last in Needs action", () => {
+    /* quiet (−100, due −58): past then quiet at 42 days, the "!" on the past stretch only */
+    const marks = (q: number) => rowSegs(rows().find((x) => x.id === "quiet")!, q).filter((s) => s.k === "past" || s.k === "quiet").map((s) => [s.k, !!s.mark]);
+    expect(marks(42)).toEqual([["past", true], ["quiet", false]]);
+    /* a stage reached after it had already gone quiet (sent −20, due −70, quiet from −28): quiet from its own start, "!" there */
+    const late = R(eye("late", [[Q.QUERIED, -120], [Q.PARTIAL_SENT, -20]], -70));
+    expect(rowSegs(late, 42).filter((s) => s.k !== "stage").map((s) => [s.k, s.a, s.b, !!s.mark])).toEqual([["quiet", -20, 0, true]]);
+    expect(isGoneQuiet(rows().find((x) => x.id === "quiet")!, 42)).toBe(true);
+    expect(isGoneQuiet(rows().find((x) => x.id === "chase")!, 42)).toBe(false);
+    /* with you and 50 days past a send-by date: its tail fades too, so it counts as gone quiet */
+    expect(isGoneQuiet(R(eye("youOld", [[Q.QUERIED, -90], [Q.FULL_REQUESTED, -70]], -50)), 42)).toBe(true);
+    /* gone quiet last: quiet (100/42, the most of its window used) drops below chase, you and offer; same under Needs chasing */
+    expect(bwGroups(rows(), "all", 42)[0].rows.map((r) => r.id)).toEqual(["chase", "you", "offer", "quiet"]);
+    expect(bwGroups(rows(), "chase", 42)[0].rows.map((r) => r.id)).toEqual(["chase", "quiet"]);
+    /* within the gone-quiet ones, the same order (most of the window used first) */
+    const q2 = R(eye("quiet2", [[Q.QUERIED, -200]], -150));
+    expect(bwGroups([...rows(), q2], "all", 42)[0].rows.map((r) => r.id)).toEqual(["chase", "you", "offer", "quiet2", "quiet"]);
+    /* no setting given: v3.2's order */
+    expect(bwGroups(rows())[0].rows.map((r) => r.id)).toEqual(["quiet", "chase", "you", "offer"]);
+    expect(makeWorld({ rows: rows(), filter: "all", vpW: 390, vpH: 784, bot: 88, quietDays: 42 }).G[0].rows.map((x) => x.r.id)).toEqual(["chase", "you", "offer", "quiet"]);
   });
   it("v3.1 the news: the manuscript's title only when two lines would start with the same agent's name", () => {
     const twin = (id: string, d: number) => R(eye(id, [[Q.QUERIED, -60], [Q.FULL_REQUESTED, d]], 10));

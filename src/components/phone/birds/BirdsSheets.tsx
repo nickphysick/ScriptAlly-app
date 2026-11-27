@@ -18,6 +18,7 @@ import {
   ACT_LABEL, agoOf, bandOf, dm, edgeOf, fadedBand, fadedEdge, hatchOf, noDateDefault, SB_DEFAULT_WEEKS, searchRows, sheetOf, type BwAct, type BwRecap, type BwRow,
 } from "../../../lib/birdsWorld";
 import { STAGE_NAME } from "../../../lib/qcSummary";
+import { QUIET_FADE } from "./drawWorld";
 import { QueryStatus } from "../../../types";
 
 const X_IC = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>;
@@ -76,7 +77,8 @@ export const KeySheet: React.FC<{ onClose: () => void }> = ({ onClose }) => (
       <h5>Along each bar</h5>
       <div className="bw-kr"><i style={{ background: fadedBand(QueryStatus.PARTIAL_SENT), boxShadow: `inset 0 0 0 1px ${fadedEdge(QueryStatus.PARTIAL_SENT)}` }} />Faded: a stage it has moved past</div>
       <div className="bw-kr"><i style={{ background: hatchOf(QueryStatus.QUERIED), boxShadow: `inset 0 0 0 1px ${edgeOf(QueryStatus.QUERIED)}` }} />Hatched: past its reply date</div>
-      <div className="bw-kr"><i style={{ background: `linear-gradient(90deg,${bandOf(QueryStatus.QUERIED)},#fff)` }} />Fading out: gone quiet</div>
+      {/* v3.3: gone quiet is the same hatching, fading out (drawWorld's QUIET_FADE) */}
+      <div className="bw-kr"><i data-bw="key-quiet" style={{ background: hatchOf(QueryStatus.QUERIED), boxShadow: `inset 0 1px 0 ${edgeOf(QueryStatus.QUERIED)},inset 0 -1px 0 ${edgeOf(QueryStatus.QUERIED)}`, WebkitMaskImage: QUIET_FADE, maskImage: QUIET_FADE }} />Fading out: gone quiet</div>
       <div className="bw-kr"><i className="kov">!</i>The day the reply was due</div>
       <div className="bw-kr"><i className="kline" />Today</div>
     </div>

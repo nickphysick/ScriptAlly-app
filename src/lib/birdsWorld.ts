@@ -104,6 +104,9 @@ export const kk = (r: BwRow): number => (r.due == null ? -start(r) / 60 : -start
 /* ── the pills: the open queries split exactly three ways ── */
 export const isYou = (r: BwRow): boolean => !r.closed && r.you;
 export const isChase = (r: BwRow): boolean => !r.closed && !r.you && r.due != null && r.due < 0;
+/** gone quiet: open and more than the setting's days past its date — exactly where rowSegs starts the faded "quiet" tail,
+ *  so what reads as gone quiet is what sorts last (a with-you query that far past its send-by date fades the same way) */
+export const isGoneQuiet = (r: BwRow, quietDays: number): boolean => !r.closed && r.due != null && r.due < 0 && -r.due > quietDays;
 export const isWait = (r: BwRow): boolean => !r.closed && !r.you && !(r.due != null && r.due < 0);
 /** on its real dates: open with a reply date, an offer (its date sits on the line), or with you (a reply date is not
  *  the writer's to wait on there: with no send-by date its stage runs to today, in With you, where its pill counts it) */
@@ -150,9 +153,11 @@ const byKk = (a: BwRow, b: BwRow) => kk(b) - kk(a) || a.name.localeCompare(b.nam
  *  query with you (undated ones too), mixed in one order, the largest share of its window used first (`kk`, the measure
  *  v3 split Nearly there from Plenty of time by). Within their window: with the agent and not yet past the date, the same
  *  sort. No reply date yet: under All and Waiting. Closed: the latest closed first, under All only. */
-export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all"): { t: BwGroupName; label: string; rows: BwRow[] }[] {
+export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all", quietDays = Infinity): { t: BwGroupName; label: string; rows: BwRow[] }[] {
   const drawn = rows.filter((r) => isDrawn(r) && inPill(r, f));
-  const action = drawn.filter((r) => r.you || isChase(r)).sort(byKk), within = drawn.filter((r) => !r.you && !isChase(r)).sort(byKk);
+  /* v3.3 (Nick's ruling): in Needs action, the gone-quiet queries go last, each part most of its window used first */
+  const quiet = (r: BwRow) => isGoneQuiet(r, quietDays) ? 1 : 0;
+  const action = drawn.filter((r) => r.you || isChase(r)).sort((a, b) => quiet(a) - quiet(b) || byKk(a, b)), within = drawn.filter((r) => !r.you && !isChase(r)).sort(byKk);
   const closed = f === "all" ? rows.filter((r) => r.closed && r.ev.length).sort((a, b) => start(b) - start(a) || a.name.localeCompare(b.name)) : [];
   const nd = f === "all" || f === "wait" ? rows.filter((r) => isNoDate(r) && inPill(r, f)).sort(byKk) : [];
   const defs: [BwGroupName, BwRow[]][] = [["Needs action", action], ["Within their window", within], ["No reply date yet", nd], ["Closed", closed]];
@@ -176,7 +181,9 @@ export function setAxis(rows: readonly BwRow[]): BwExt {
 
 /* ── a row's segments (ref `rowSegs`, on real dates) ── */
 export type SegKind = "stage" | "past" | "quiet" | "ahead";
-export interface BwSeg { a: number; b: number; d: number; st: string; k: SegKind; first: boolean; last: boolean; cont: boolean }
+/** `mark`: the tail that starts past the reply date carries the "!" (v3.3: a query that went quiet with no hatched
+ *  stretch before it carries it on its quiet tail) */
+export interface BwSeg { a: number; b: number; d: number; st: string; k: SegKind; first: boolean; last: boolean; cont: boolean; mark?: boolean }
 export function rowSegs(r: BwRow, quietDays: number): BwSeg[] {
   const out: BwSeg[] = [], ev = r.ev;
   const seg = (a: number, b: number, d: number, st: string, k: SegKind, first: boolean, last: boolean, cont = false): BwSeg => ({ a, b, d, st, k, first, last, cont });
@@ -192,9 +199,10 @@ export function rowSegs(r: BwRow, quietDays: number): BwSeg[] {
       out.push(seg(e.d, end, e.d, e.status, "stage", first, true, true));
       /* past its date: hatched; once it has gone quiet (the writer's setting, from the reply date) it fades to today */
       const qp = r.due + quietDays;
-      if (0 > qp && qp > end) { out.push(seg(end, qp, r.due, e.status, "past", false, true, true)); out.push(seg(qp, 0, r.due, e.status, "quiet", false, true)); }
-      else if (0 > qp) out.push(seg(end, 0, r.due, e.status, "quiet", false, true));
-      else out.push(seg(end, 0, r.due, e.status, "past", false, true));
+      /* v3.3 (Nick): gone quiet stays hatched — the quiet tail is the same hatching, fading out to today (drawWorld) */
+      if (0 > qp && qp > end) { out.push({ ...seg(end, qp, r.due, e.status, "past", false, true, true), mark: true }); out.push(seg(qp, 0, r.due, e.status, "quiet", false, true)); }
+      else if (0 > qp) out.push({ ...seg(end, 0, r.due, e.status, "quiet", false, true), mark: true });
+      else out.push({ ...seg(end, 0, r.due, e.status, "past", false, true), mark: true });
     } else {
       out.push(seg(e.d, 0, e.d, e.status, "stage", first, true, true));
       out.push(seg(0, r.due, r.due, e.status, "ahead", false, true));
@@ -326,11 +334,13 @@ export interface WorldOpts {
   land?: boolean;
   /** the groups folded on this device */
   folded?: ReadonlySet<string>;
+  /** the writer's "goes quiet after", in days (v3.3: gone-quiet queries sort last in Needs action) */
+  quietDays?: number;
 }
 export function makeWorld(o: WorldOpts): World {
   const { vpW, vpH, bot, filter } = o, land = !!o.land;
   let y = 0;
-  const G: BwG[] = bwGroups(o.rows, filter).map(({ t, label, rows: rows0 }) => {
+  const G: BwG[] = bwGroups(o.rows, filter, o.quietDays).map(({ t, label, rows: rows0 }) => {
     const folded = !!o.folded?.has(t), rows = folded ? [] : rows0, h = folded ? RH * 1.3 : rows.length * RH;
     const g: BwG = { t, label, y, h, n: rows0.length, folded, rows: rows.map((r, i) => ({ r, y: y + GAP + i * RH })) };
     y += GAP + h; return g;

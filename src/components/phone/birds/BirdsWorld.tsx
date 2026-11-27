@@ -151,7 +151,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   useEffect(() => { setFilter(chipForCourt(court)); }, [court]);
   const f: BwFilter = demo ? "all" : filter;
   const [folded, setFolded] = useState<Set<string>>(readFolded);
-  const groups = useMemo(() => bwGroups(rows, f), [rows, f]);
+  const groups = useMemo(() => bwGroups(rows, f, quietDays), [rows, f, quietDays]);
   const card = cardFor(demo, f, groups);
   const pady = card?.k === "closed" ? PADY_CLOSED : 0;
   const explorable = !demo && groups.some((g) => g.rows.length);
@@ -233,7 +233,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     if (r) {
       Object.assign(r.dataset, {
         z: Sv.z.toFixed(3), rp: w.rowPx(Sv.z).toFixed(2), off: String(fr.off), ox: Sv.ox.toFixed(2), oy: Sv.oy.toFixed(2), sx: w.SX(Sv.z).toFixed(5),
-        d0: String(w.ext.D0), d1: String(w.ext.D1), ppd: w.PPD.toFixed(6), gap: w.gapPx(Sv.z).toFixed(2), top: String(fr.top + RULE), lx: fr.lx.toFixed(2),
+        d0: String(w.ext.D0), d1: String(w.ext.D1), quietdays: String(quietDays), ppd: w.PPD.toFixed(6), gap: w.gapPx(Sv.z).toFixed(2), top: String(fr.top + RULE), lx: fr.lx.toFixed(2),
         maxz: w.maxZ.toFixed(3), zoomed: fr.zoomed ? "1" : "0", level: w.levels[n].t, levels: w.levels.map((l) => `${l.t}:${l.z.toFixed(3)}`).join(","),
         scrub: fr.scrubDay == null ? "" : String(fr.scrubDay), pull: String(Math.round(L.pull)), refreshes: String(L.refreshes),
       });
@@ -246,12 +246,12 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     const el = vp.current;
     if (!el) return;
     const bot = land ? 16 : dockHeight() + 16;
-    W.current = makeWorld({ rows, filter: f, vpW: el.clientWidth || 390, vpH: el.clientHeight || 784, bot, land, folded });
+    W.current = makeWorld({ rows, filter: f, vpW: el.clientWidth || 390, vpH: el.clientHeight || 784, bot, land, folded, quietDays });
     S.current = keep ? W.current.clamp(S.current) : W.current.fitView();
     paint();
-  }, [rows, f, land, folded, paint]);
+  }, [rows, f, land, folded, paint, quietDays]);
   /* a pill or new data opens fitted (a pill stays at z = 1); a fold keeps where you are */
-  useLayoutEffect(() => { build(false); }, [rows, f, land]); // eslint-disable-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => { build(false); }, [rows, f, land, quietDays]); // eslint-disable-line react-hooks/exhaustive-deps
   useLayoutEffect(() => { build(true); }, [folded]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const el = vp.current;
@@ -421,7 +421,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     }
     if (a === "ndset") { const id = b.dataset.id!; setSheet({ k: "nd", id, queue: noDateRows(rows).map((x) => x.id) }); return; }
     if (!m) return;
-    if (a === "lvchip") { buzz(8); setLvOpen(true); return; }
+    if (a === "lvchip") { buzz(8); setLvOpen((o) => !o); return; }
     if (a === "lvl") {
       const i = Number(b.dataset.i);
       setLvOpen(false);
@@ -522,10 +522,15 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
           </div>
         ) : null}
         <div ref={hint} className={`bw-hint${showHint && explorable ? "" : " hide"}`} data-bw="hint">Pinch to zoom · hold to scrub</div>
-        <div ref={lvl} className={`bw-zc lvl${lvOpen ? " open" : ""}`} data-bw="levels" data-open={lvOpen ? 1 : 0} {...(lvOpen ? { role: "group", "aria-label": "Zoom level" } : {})}>
-          {lvOpen
-            ? levels.map((l, i) => ({ l, i })).reverse().map(({ l, i }) => { const on = i === (W.current?.nearestLv(S.current.z) ?? 0); return <button key={l.t} type="button" data-a="lvl" data-i={i} data-bw="level" data-t={l.t} aria-pressed={on}>{l.t}</button>; })
-            : (() => { const t = levels[W.current?.nearestLv(S.current.z) ?? 0]?.t ?? "All"; return <button type="button" className="bw-lvchip" data-a="lvchip" data-bw="level-chip" data-t={t} aria-expanded={false} aria-label={`Zoom level: ${t}`}><span>{t}</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 7.5 6 4.5 9 7.5" /></svg></button>; })()}
+        {/* v3.3 (Nick's ruling): opening keeps the chip, at the bottom of the card, still naming the level, its chevron
+            turned down; the three levels open above it */}
+        <div ref={lvl} className={`bw-zc lvl${lvOpen ? " open" : ""}`} data-bw="levels" data-open={lvOpen ? 1 : 0}>
+          {lvOpen ? (
+            <div className="bw-lvlist" role="group" aria-label="Zoom level" data-bw="level-list">
+              {levels.map((l, i) => ({ l, i })).reverse().map(({ l, i }) => { const on = i === (W.current?.nearestLv(S.current.z) ?? 0); return <button key={l.t} type="button" data-a="lvl" data-i={i} data-bw="level" data-t={l.t} aria-pressed={on}>{l.t}</button>; })}
+            </div>
+          ) : null}
+          {(() => { const t = levels[W.current?.nearestLv(S.current.z) ?? 0]?.t ?? "All"; return <button type="button" className="bw-lvchip" data-a="lvchip" data-bw="level-chip" data-t={t} aria-expanded={lvOpen} aria-label={`Zoom level: ${t}`}><span>{t}</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 7.5 6 4.5 9 7.5" /></svg></button>; })()}
         </div>
         {step >= 0 && news[step] ? (
           <div className="bw-sinces" data-bw="news-step" data-id={news[step].id} style={{ bottom: `var(--bw-cb, 96px)` }}>

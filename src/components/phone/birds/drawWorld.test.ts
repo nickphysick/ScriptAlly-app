@@ -10,7 +10,7 @@ import { QueryStatus } from "../../../types";
 import type { EyeRow } from "../../../lib/qcBirdsEye";
 import type { QcRow } from "../../../lib/qcSummary";
 import { DAY, bwRow, fadedBand, makeWorld, rowSegs, sampleRows, zoomForRows, type BwFilter, type BwRow, type BwView } from "../../../lib/birdsWorld";
-import { drawWorld, esc, segBg } from "./drawWorld";
+import { QUIET_FADE, drawWorld, hatchAt, esc, segBg } from "./drawWorld";
 
 const NOW = new Date(2026, 10, 25, 12).getTime();
 const T0 = new Date(2026, 10, 25).getTime();
@@ -76,7 +76,18 @@ describe("Phone Birds-eye world — the frame", () => {
     const q = tags(f.html, "bar").filter((t) => t.includes('data-row="quiet"'));
     expect(q.map((t) => /data-k="(\w+)"/.exec(t)![1])).toEqual(["stage", "past", "quiet"]);
     expect(q[1]).toContain("repeating-linear-gradient(135deg");
-    expect(q[2]).toContain("linear-gradient(90deg");
+    /* v3.3 (Nick): gone quiet stays hatched — the same hatching and edge lines, under a mask from full to 8% at today;
+       no solid fill after the "!", and only one "!" (on the past stretch) */
+    expect(q[2]).toContain("repeating-linear-gradient(135deg");
+    expect(q[2]).toContain("mask-image:linear-gradient(90deg,#000,rgba(0,0,0,0.08))");
+    expect(q[2]).toMatch(/box-shadow:inset 0 1px 0 [^,]+,inset 0 -1px 0 /);
+    expect(q[2]).not.toMatch(/background:(linear-gradient\(90deg|color-mix|#)/);
+    expect(QUIET_FADE).toBe("linear-gradient(90deg,#000,rgba(0,0,0,0.08))");
+    /* the stripes continue across the hatched and quiet stretches: each is phased by its own left / √2 (mod 7px) */
+    const stop0 = (h: string) => Number(/135deg,[^ ]+ (-?[\d.]+)px/.exec(h)![1]);
+    expect(stop0(hatchAt("Queried", 0))).toBe(0);
+    for (const a of [10, 37.5, 200]) expect(stop0(hatchAt("Queried", a))).toBeCloseTo(-(((a / Math.SQRT2) % 7) + 7) % 7, 3);
+    expect(q[1]).toContain(hatchAt(String(/data-st="([^"]+)"/.exec(q[1])?.[1] ?? "Queried"), num(q[1], "left")).split(" ")[0]);
     const mark = (/<i class="bw-ovd[^"]*" data-bw="mark"[^>]*>/.exec(f.html.slice(f.html.indexOf(q[1]) + q[1].length)) ?? [""])[0];
     expect(Math.abs(num(mark, "left") - num(q[1], "left"))).toBeLessThan(0.02);
     const w = world();

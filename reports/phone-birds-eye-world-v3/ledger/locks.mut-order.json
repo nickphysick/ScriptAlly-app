@@ -1,7 +1,7 @@
 [
  {
   "lock": "BW-1",
-  "where": "fitted (z 1, rows 5.6px): bars drawn (population 226)",
+  "where": "fitted (z 1, rows 5.6px): bars drawn (population 228)",
   "ok": true,
   "detail": ""
  },
@@ -55,9 +55,15 @@
  },
  {
   "lock": "BW-34",
-  "where": "ordered by share of window used, most first (with-you and chasing mixed in one order)",
+  "where": "ordered by share of window used, most first, within the not-quiet and the gone-quiet parts (with-you and chasing mixed)",
   "ok": false,
-  "detail": "[[\"msv12-q-1\",\"11.857\",\"seed-query-4\",\"16.143\"],[\"seed-query-22\",\"14.286\",\"msv12-q-7\",\"37.429\"]]"
+  "detail": "[[\"cv25-q-06\",\"1.433\",\"cv25-q-08\",\"1.617\"],[\"cor-pair\",\"1.458\",\"seed-query-12\",\"1.667\"]]"
+ },
+ {
+  "lock": "BW-38",
+  "where": "gone-quiet rows (population 40) all below the others (21)",
+  "ok": true,
+  "detail": "{\"firstQuiet\":21,\"lastOther\":20}"
  },
  {
   "lock": "BW-35",
@@ -67,9 +73,9 @@
  },
  {
   "lock": "BW-35",
-  "where": "tapped, three: Weeks, Months, All, the current pressed",
+  "where": "tapped, three levels (Weeks, Months, All, the current pressed) above the chip (v3.3)",
   "ok": true,
-  "detail": "{\"n\":3,\"texts\":[\"Weeks\",\"Months\",\"All\"],\"chip\":null,\"expanded\":null,\"pressed\":[\"false\",\"false\",\"true\"],\"h\":40,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+  "detail": "{\"n\":4,\"texts\":[\"Weeks\",\"Months\",\"All\",\"All\"],\"chip\":\"Zoom level: All\",\"expanded\":\"true\",\"pressed\":[\"false\",\"false\",\"true\",null],\"h\":40,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "lock": "BW-35",
@@ -81,7 +87,43 @@
   "lock": "BW-35",
   "where": "a tap on the world folds it, with no level change (and opens nothing)",
   "ok": true,
-  "detail": "{\"n\":1,\"texts\":[\"Months\"],\"chip\":\"Zoom level: Months\",\"expanded\":\"false\",\"pressed\":[null],\"h\":40,\"bg\":\"rgb(42, 58, 82)\",\"z0\":6.079,\"z1\":6.079,\"sheet\":0}"
+  "detail": "{\"n\":1,\"texts\":[\"Months\"],\"chip\":\"Zoom level: Months\",\"expanded\":\"false\",\"pressed\":[null],\"h\":40,\"bg\":\"rgb(42, 58, 82)\",\"z0\":6.56,\"z1\":6.56,\"sheet\":0}"
+ },
+ {
+  "lock": "BW-39",
+  "where": "open: the chip is in the DOM, visible and uncovered, aria-expanded true, Zoom level: All",
+  "ok": true,
+  "detail": "{\"inDom\":true,\"vis\":true,\"top\":true,\"expanded\":\"true\",\"label\":\"Zoom level: All\",\"levels\":3,\"gap\":0,\"under\":true,\"rot\":\"matrix(-1, 0, 0, -1, 0, 0)\"}"
+ },
+ {
+  "lock": "BW-39",
+  "where": "open: directly below the three levels (gap 0.0px), its chevron turned down",
+  "ok": true,
+  "detail": "{\"inDom\":true,\"vis\":true,\"top\":true,\"expanded\":\"true\",\"label\":\"Zoom level: All\",\"levels\":3,\"gap\":0,\"under\":true,\"rot\":\"matrix(-1, 0, 0, -1, 0, 0)\"}"
+ },
+ {
+  "lock": "BW-39",
+  "where": "tapping the chip again closes it: aria-expanded false, no levels",
+  "ok": true,
+  "detail": "{\"inDom\":true,\"vis\":true,\"top\":true,\"expanded\":\"false\",\"label\":\"Zoom level: All\",\"levels\":0,\"gap\":null,\"under\":false,\"rot\":\"none\"}"
+ },
+ {
+  "lock": "BW-37",
+  "where": "a gone-quiet bar with its \"!\" and today on screen (population: thin-q-chase)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-37",
+  "where": "every pixel column from the \"!\" to today is hatched or faded: 564 columns, 0 solid",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-37",
+  "where": "the fade, read at today's x, is 10% or less of the full hatching (7.6%)",
+  "ok": true,
+  "detail": "{\"full\":\"13.7\",\"end\":\"1.0\",\"slope\":\"-0.0306\"}"
  },
  {
   "lock": "BW-9",
@@ -99,7 +141,7 @@
   "lock": "BW-10",
   "where": "48px rows are reachable (the Weeks level)",
   "ok": true,
-  "detail": "rows 48 at z 10.835"
+  "detail": "rows 48 at z 11.97"
  },
  {
   "lock": "BW-19",
@@ -141,7 +183,7 @@
   "lock": "BW-22",
   "where": "Months: 120.0 days across (120)",
   "ok": true,
-  "detail": "z 6.079 vs 6.079"
+  "detail": "z 6.56 vs 6.56"
  },
  {
   "lock": "BW-22",
@@ -175,7 +217,7 @@
  },
  {
   "lock": "BW-4",
-  "where": "Weeks (48px rows): multi-stage rows on screen (population 10 bars)",
+  "where": "Weeks (48px rows): multi-stage rows on screen (population 6 bars)",
   "ok": true,
   "detail": ""
  },
@@ -193,19 +235,19 @@
  },
  {
   "lock": "BW-7",
-  "where": "the current stage and its tail share an edge (population 1)",
+  "where": "the current stage and its tail share an edge (population 5)",
   "ok": true,
   "detail": "[]"
  },
  {
   "lock": "BW-5",
-  "where": "screen 1: no name over an \"!\" (population 18 names, 15 marks)",
+  "where": "screen 1: no name over an \"!\" (population 18 names, 17 marks)",
   "ok": true,
   "detail": ""
  },
  {
   "lock": "BW-5",
-  "where": "screen 2: no name over an \"!\" (population 18 names, 14 marks)",
+  "where": "screen 2: no name over an \"!\" (population 18 names, 18 marks)",
   "ok": true,
   "detail": ""
  },
@@ -235,9 +277,9 @@
  },
  {
   "lock": "BW-23",
-  "where": "on the fitted view a hold scrubs (\"21 Aug · 55 out\")",
+  "where": "on the fitted view a hold scrubs (\"6 Oct · 71 out\")",
   "ok": true,
-  "detail": "{\"line\":true,\"pill\":\"21 Aug · 55 out\",\"menu\":false}"
+  "detail": "{\"line\":true,\"pill\":\"6 Oct · 71 out\",\"menu\":false}"
  },
  {
   "lock": "BW-24",
@@ -297,7 +339,7 @@
   "lock": "BW-25",
   "where": "Done clears the count and records this visit",
   "ok": true,
-  "detail": "{\"count\":null,\"step\":false,\"stored\":1795774840825}"
+  "detail": "{\"count\":null,\"step\":false,\"stored\":1795782506651}"
  },
  {
   "lock": "BW-27",
@@ -333,7 +375,7 @@
   "lock": "BW-12",
   "where": "replay runs: the line moves forwards, its pill showing the date",
   "ok": true,
-  "detail": "[{\"lx\":23.37,\"label\":\"6 Dec\",\"replay\":\"running\"},{\"lx\":45.1,\"label\":\"2 Jan\",\"replay\":\"running\"},{\"lx\":82.31,\"label\":\"14 Feb\",\"replay\":\"running\"}]"
+  "detail": "[{\"lx\":22.18,\"label\":\"6 Dec\",\"replay\":\"running\"},{\"lx\":41.26,\"label\":\"1 Jan\",\"replay\":\"running\"},{\"lx\":72.29,\"label\":\"14 Feb\",\"replay\":\"running\"}]"
  },
  {
   "lock": "BW-12",
@@ -433,7 +475,7 @@
  },
  {
   "lock": "BW-31",
-  "where": "an undated with-you query to hold (population: seed-query-20)",
+  "where": "an undated with-you query to hold (population: seed-query-12)",
   "ok": true,
   "detail": ""
  },
@@ -447,7 +489,7 @@
   "lock": "BW-31",
   "where": "its menu: I’ve sent it · Add send-by date · Open query · Edit dates",
   "ok": true,
-  "detail": "{\"open\":true,\"id\":\"seed-query-20\",\"acts\":[\"I’ve sent it\",\"Add send-by date\",\"Open query\",\"Edit dates\"]}"
+  "detail": "{\"open\":true,\"id\":\"seed-query-12\",\"acts\":[\"I’ve sent it\",\"Add send-by date\",\"Open query\",\"Edit dates\"]}"
  },
  {
   "lock": "BW-31",
@@ -457,9 +499,9 @@
  },
  {
   "lock": "BW-31",
-  "where": "saving sets the send-by date, and the bar runs to it (due day 14, bar to 333.8 vs 333.8)",
-  "ok": true,
-  "detail": "{\"due\":\"14\",\"right\":333.75}"
+  "where": "saving sets the send-by date, and the bar runs to it (due day , bar to 277.3 vs 287.4)",
+  "ok": false,
+  "detail": "{\"due\":\"\",\"right\":277.328125}"
  },
  {
   "lock": "BW-26",
@@ -469,7 +511,7 @@
  },
  {
   "lock": "BW-26",
-  "where": "a no-date query to date (population: probe-un-both)",
+  "where": "a no-date query to date (population: probe-un-noagent)",
   "ok": true,
   "detail": ""
  },

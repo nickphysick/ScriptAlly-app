@@ -55,9 +55,15 @@
  },
  {
   "lock": "BW-34",
-  "where": "ordered by share of window used, most first (with-you and chasing mixed in one order)",
+  "where": "ordered by share of window used, most first, within the not-quiet and the gone-quiet parts (with-you and chasing mixed)",
   "ok": true,
   "detail": "[]"
+ },
+ {
+  "lock": "BW-38",
+  "where": "gone-quiet rows (population 40) all below the others (21)",
+  "ok": true,
+  "detail": "{\"firstQuiet\":21,\"lastOther\":20}"
  },
  {
   "lock": "BW-35",
@@ -67,9 +73,9 @@
  },
  {
   "lock": "BW-35",
-  "where": "tapped, three: Weeks, Months, All, the current pressed",
+  "where": "tapped, three levels (Weeks, Months, All, the current pressed) above the chip (v3.3)",
   "ok": true,
-  "detail": "{\"n\":3,\"texts\":[\"Weeks\",\"Months\",\"All\"],\"chip\":null,\"expanded\":null,\"pressed\":[\"false\",\"false\",\"true\"],\"h\":40,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+  "detail": "{\"n\":4,\"texts\":[\"Weeks\",\"Months\",\"All\",\"All\"],\"chip\":\"Zoom level: All\",\"expanded\":\"true\",\"pressed\":[\"false\",\"false\",\"true\",null],\"h\":40,\"bg\":\"rgba(0, 0, 0, 0)\"}"
  },
  {
   "lock": "BW-35",
@@ -82,6 +88,42 @@
   "where": "a tap on the world folds it, with no level change (and opens nothing)",
   "ok": true,
   "detail": "{\"n\":1,\"texts\":[\"Months\"],\"chip\":\"Zoom level: Months\",\"expanded\":\"false\",\"pressed\":[null],\"h\":40,\"bg\":\"rgb(42, 58, 82)\",\"z0\":6.079,\"z1\":6.079,\"sheet\":0}"
+ },
+ {
+  "lock": "BW-39",
+  "where": "open: the chip is in the DOM, visible and uncovered, aria-expanded true, Zoom level: All",
+  "ok": true,
+  "detail": "{\"inDom\":true,\"vis\":true,\"top\":true,\"expanded\":\"true\",\"label\":\"Zoom level: All\",\"levels\":3,\"gap\":0,\"under\":true,\"rot\":\"matrix(-1, 0, 0, -1, 0, 0)\"}"
+ },
+ {
+  "lock": "BW-39",
+  "where": "open: directly below the three levels (gap 0.0px), its chevron turned down",
+  "ok": true,
+  "detail": "{\"inDom\":true,\"vis\":true,\"top\":true,\"expanded\":\"true\",\"label\":\"Zoom level: All\",\"levels\":3,\"gap\":0,\"under\":true,\"rot\":\"matrix(-1, 0, 0, -1, 0, 0)\"}"
+ },
+ {
+  "lock": "BW-39",
+  "where": "tapping the chip again closes it: aria-expanded false, no levels",
+  "ok": true,
+  "detail": "{\"inDom\":true,\"vis\":true,\"top\":true,\"expanded\":\"false\",\"label\":\"Zoom level: All\",\"levels\":0,\"gap\":null,\"under\":false,\"rot\":\"none\"}"
+ },
+ {
+  "lock": "BW-37",
+  "where": "a gone-quiet bar with its \"!\" and today on screen (population: msv12-q-1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BW-37",
+  "where": "every pixel column from the \"!\" to today is hatched or faded: 462 columns, 0 solid",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "BW-37",
+  "where": "the fade, read at today's x, is 10% or less of the full hatching (8.5%)",
+  "ok": true,
+  "detail": "{\"full\":\"12.5\",\"end\":\"1.1\",\"slope\":\"-0.0258\"}"
  },
  {
   "lock": "BW-9",
@@ -175,7 +217,7 @@
  },
  {
   "lock": "BW-4",
-  "where": "Weeks (48px rows): multi-stage rows on screen (population 12 bars)",
+  "where": "Weeks (48px rows): multi-stage rows on screen (population 7 bars)",
   "ok": true,
   "detail": ""
  },
@@ -193,19 +235,19 @@
  },
  {
   "lock": "BW-7",
-  "where": "the current stage and its tail share an edge (population 1)",
+  "where": "the current stage and its tail share an edge (population 2)",
   "ok": true,
   "detail": "[]"
  },
  {
   "lock": "BW-5",
-  "where": "screen 1: no name over an \"!\" (population 18 names, 14 marks)",
+  "where": "screen 1: no name over an \"!\" (population 18 names, 17 marks)",
   "ok": true,
   "detail": ""
  },
  {
   "lock": "BW-5",
-  "where": "screen 2: no name over an \"!\" (population 18 names, 14 marks)",
+  "where": "screen 2: no name over an \"!\" (population 18 names, 18 marks)",
   "ok": true,
   "detail": ""
  },
@@ -217,7 +259,7 @@
  },
  {
   "lock": "BW-23",
-  "where": "a zoomed-in bar to hold (population 4)",
+  "where": "a zoomed-in bar to hold (population 5)",
   "ok": true,
   "detail": ""
  },
@@ -297,7 +339,7 @@
   "lock": "BW-25",
   "where": "Done clears the count and records this visit",
   "ok": true,
-  "detail": "{\"count\":null,\"step\":false,\"stored\":1795776379335}"
+  "detail": "{\"count\":null,\"step\":false,\"stored\":1795781558871}"
  },
  {
   "lock": "BW-27",
@@ -333,7 +375,7 @@
   "lock": "BW-12",
   "where": "replay runs: the line moves forwards, its pill showing the date",
   "ok": true,
-  "detail": "[{\"lx\":23.32,\"label\":\"6 Dec\",\"replay\":\"running\"},{\"lx\":45.01,\"label\":\"1 Jan\",\"replay\":\"running\"},{\"lx\":81.06,\"label\":\"13 Feb\",\"replay\":\"running\"}]"
+  "detail": "[{\"lx\":23.3,\"label\":\"6 Dec\",\"replay\":\"running\"},{\"lx\":45.7,\"label\":\"1 Jan\",\"replay\":\"running\"},{\"lx\":82.09,\"label\":\"14 Feb\",\"replay\":\"running\"}]"
  },
  {
   "lock": "BW-12",
