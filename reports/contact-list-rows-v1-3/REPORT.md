@@ -103,4 +103,12 @@ location, gaps), `lib/contactPanel.test.ts` (each new key's matching; a remember
 
 ## Dev
 
-(filled in at deploy)
+- Before the deploy dev served `index-Sf7ata54.js` = `dev/bew32-clr121` @ 450ac35c1: Birds-eye world v3.2 (the other
+  session's, 11:03Z) on top of this list's v1.2.1. This build was merged onto it, never over it.
+- `dev/bew32-clr13` @ 86c7ee1c3 = `dev/bew32-clr121` + `contact-list-rows-v1-3` @ 39091b094. The merge was clean.
+  Gates on the merged tree: tsc 0, Vitest 13,852 passed / 4 skipped / 0 failed (two files read fixtures under
+  `reports/`, which the sparse deploy checkout first left out; their two folders were added and they pass, 44/44),
+  and `build:dev` 0 with no error lines.
+- Deployed to https://scriptally-dev.web.app (hosting only). The served bundle was checked inside the deploy command
+  before (`index-Sf7ata54.js`) and after (`index-JQHHkqsZ.js`, matching the build).
+- Nothing is merged to main. Prod is untouched.
