@@ -214,6 +214,12 @@
 .cl26-card .clr-act:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 /* MOUSE: the action waits at the same centre, 4px below, unseen; on row hover or focus-within the swap */
 .cl26-card .cl26-q > .clr-act { opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity .2s ease, transform .2s ease, background .15s; }
+/* v1.2.1 · phase 2 — THE ACTION GETS ITS OWN CLICK. The two share one grid cell; the resting stack's transform (the fade
+   up) made it paint OVER the action, so a click on "Nudge" landed on the invisible "Queried" and bubbled to the row, which
+   opened the agent card. The resting stack never takes the pointer (it has nothing to press: a click there is the row's),
+   and the action sits above it. */
+.cl26-card .cl26-row .cl26-q > .clr-rest { pointer-events: none; }
+.cl26-card .cl26-row .cl26-q > .clr-act { position: relative; z-index: 1; }
 .cl26-card .cl26-row:hover .cl26-q[data-has] > .clr-rest, .cl26-card .cl26-row:focus-within .cl26-q[data-has] > .clr-rest { opacity: 0; transform: translateY(-4px); }
 .cl26-card .cl26-row:hover .cl26-q > .clr-act, .cl26-card .cl26-row:focus-within .cl26-q > .clr-act { opacity: 1; transform: none; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) {

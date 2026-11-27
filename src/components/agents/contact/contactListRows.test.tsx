@@ -193,3 +193,15 @@ describe("Contact list rows v1.2.1 · Phase 1 — nothing scrolls above the pinn
     expect((css.match(/position: sticky/g) ?? []).length).toBe(1);
   });
 });
+
+describe("Contact list rows v1.2.1 · Phase 2 — the row's action gets its own click", () => {
+  it("the resting stack never takes the pointer, and the action sits above it", () => {
+    const css = read("./contactListRows.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toContain(".cl26-card .cl26-row .cl26-q > .clr-rest { pointer-events: none; }");
+    expect(css).toContain(".cl26-card .cl26-row .cl26-q > .clr-act { position: relative; z-index: 1; }");
+  });
+  it("both placements stop the click reaching the row and open the action's journey", () => {
+    const src = read("./ContactSheet26.tsx");
+    expect(src.match(/onClick=\{\(e\) => \{ e\.stopPropagation\(\); p\.onAct\?\.\(a\.id, act\.mode, x\.q\?\.id \?\? null\); \}\}/g)).toHaveLength(2);
+  });
+});
