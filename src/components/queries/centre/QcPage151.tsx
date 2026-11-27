@@ -117,6 +117,8 @@ export interface QcPage151Props {
   /** List filters v1 — the applied row: one chip per choice (Queries.tsx's qc140Chips), and its Clear all (the
    *  filters and the search; never the sort or the grouping, which the bar's buttons show) */
   applied: AppliedChip[];
+  /** v172 — when nothing matches: the panel filter whose removal brings the most back, and how many */
+  hint172?: { label: string; n: number; onRemove: () => void } | null;
   onClearApplied: () => void;
   /* the table */
   group: GroupBy;
@@ -435,6 +437,10 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 <div className="qc151-emp" data-qc151="no-matches">
                   <b>No queries match</b>
                   <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
+                  {p.hint172 ? (
+                    <span className="qc172-hint" data-qc172="hint">Remove <span className="qc172-hl">“{p.hint172.label}”</span> to see {p.hint172.n} {p.hint172.n === 1 ? "query" : "queries"}.
+                      <button type="button" className="qc151-btn" data-qc172="hint-remove" onClick={p.hint172.onRemove}>Remove it</button></span>
+                  ) : null}
                   <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearApplied}>Clear all</button>
                 </div>
               ) : wrap169(p.sections.map((s) => {

@@ -25,6 +25,7 @@ import { QueryStatus } from "../types";
 import type { GroupBy } from "./qcCalView";
 import { DEFAULT_SORT_138, emptyQc138Filters, type Qc138Filters, type Qc138Sort, type Qc138SortKey } from "./qc138";
 import { parseQcListMemory, QC_LIST_MEMORY_KEY, type QcDensity } from "./qcListMemory";
+import { sanitiseSmart172, type Smart172 } from "./smart172";
 
 const GROUPS: readonly GroupBy[] = ["attention", "status", "action", "package", "none"];
 const SORT_KEYS: readonly Qc138SortKey[] = ["agent", "first", "stage", "sent", "next", "due", "changed"];
@@ -95,6 +96,8 @@ export interface QcVisit {
   search: string;
   /** the list's unpinned scroll position, in px from the scroll area's top */
   scroll: number;
+  /** v172 — the smart filter panel's choices (lib/smart172); absent = untouched */
+  smart?: Smart172;
 }
 export const DEFAULT_QC_VISIT = (): QcVisit => ({ filters: emptyQc138Filters(), search: "", scroll: 0 });
 
@@ -122,7 +125,7 @@ export function sanitiseQcVisit(raw: unknown): QcVisit | null {
     where: f.where === "you" || f.where === "agent" || f.where === "quiet" || f.where === "closed" ? f.where : null,
   };
   const scroll = typeof r.scroll === "number" && Number.isFinite(r.scroll) && r.scroll > 0 ? Math.min(Math.round(r.scroll), 1_000_000) : d.scroll;
-  return { filters, search: typeof r.search === "string" ? r.search.slice(0, 200) : d.search, scroll };
+  return { filters, search: typeof r.search === "string" ? r.search.slice(0, 200) : d.search, scroll, ...(r.smart !== undefined ? { smart: sanitiseSmart172(r.smart) } : {}) };
 }
 
 export function readQcVisit(): QcVisit | null {
@@ -137,6 +140,6 @@ export function readQcVisit(): QcVisit | null {
 export function writeQcVisit(patch: Partial<QcVisit>): void {
   try {
     const m = { ...(readQcVisit() ?? DEFAULT_QC_VISIT()), ...patch };
-    window.sessionStorage.setItem(QC_VISIT_KEY, JSON.stringify({ v: QC_VISIT_VERSION, filters: m.filters, search: m.search, scroll: m.scroll }));
+    window.sessionStorage.setItem(QC_VISIT_KEY, JSON.stringify({ v: QC_VISIT_VERSION, filters: m.filters, search: m.search, scroll: m.scroll, smart: m.smart }));
   } catch { /* storage refused: the page still works */ }
 }

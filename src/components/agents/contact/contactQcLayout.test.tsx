@@ -85,7 +85,6 @@ describe("List filters v1 Phase 3 · the Agents panel", () => {
     expect(h).toMatch(/^<aside class="qc153-rail fp" aria-label="Filter your agents" data-clq="panel">/);
     expect(h).not.toContain("data-qc156");
     expect(read("./ContactViews.tsx")).toContain('from "../../shell/FilterPanel"');
-    expect(read("../../queries/centre/QcViews156.tsx")).toContain('from "../../shell/FilterPanel"');
     expect(() => read("../../shell/ViewsPanel.tsx")).toThrow();
   });
   it("Who to query next: Ready to query wide, then Always reply and Missing details; no Your move, no Waiting to hear back", () => {

@@ -35,7 +35,7 @@ describe("the applied row", () => {
 
 describe("one word for clearing", () => {
   const files = ["../queries/centre/QcPage151.tsx", "../agents/contact/ContactSheet26.tsx", "./FilterPanel.tsx", "./AppliedRow.tsx",
-    "../queries/centre/QcViews156.tsx", "../agents/contact/ContactViews.tsx"];
+    "../agents/contact/ContactViews.tsx"]; /* v172 — the Queries list's panel is QcSmart172 now (a per-section "Reset" by ruling) */
   it("the two lists' panel, applied row and no-matches state say \"Clear all\", never Reset, Reset filters or Clear filters", () => {
     for (const f of files) {
       const code = read(f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
