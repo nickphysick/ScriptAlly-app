@@ -23,7 +23,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { doc, getDocFromServer } from "firebase/firestore";
 import { useV3Data } from "../v3/V3Provider";
 import { openV3, openV3Query } from "../v3/v3Store";
@@ -40,6 +40,8 @@ import {
 } from "../../../lib/birdsWorld";
 import { drawWorld } from "./drawWorld";
 import { buzz, shadowStyle, wireMotion, type Motion } from "./worldMotion";
+import { BW_LOOK_KEY, fadeWorld, growIn, type LookHandle } from "./firstLook";
+import { firstTimeToday } from "../../../lib/phoneV41";
 import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet } from "./BirdsSheets";
 import "./birdsWorld.css";
 
@@ -207,10 +209,14 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   /* ⚠️ declared above paint, which reads it (CLAUDE.md: order, not hoisting) */
   const refreshingRef = useRef(false);
   const live = useRef<{ scrub: number | null; scrubDay: number | null; pull: number; glow: { id: string; d: number | null } | null; refreshes: number }>({ scrub: null, scrubDay: null, pull: 0, glow: null, refreshes: 0 });
+  /* first look v1 §A: while the bars grow in, the frame they grow on is not repainted (a resize or new data waits for
+     the end, or for the touch that finishes it); declared above paint, which reads it */
+  const look = useRef<LookHandle | null>(null);
+  const [looking, setLooking] = useState(false);
 
   const paint = useCallback(() => {
     const w = W.current, el = layer.current;
-    if (!w || !el) return;
+    if (!w || !el || look.current) return;
     const Sv = S.current, L = live.current;
     const fr = drawWorld(w, Sv, { nowMs: now, quietDays, rt: rp.current.rt, rows, pady, scrub: L.scrub, glow: L.glow });
     el.innerHTML = fr.html;
@@ -408,6 +414,39 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     return () => { m.dispose(); motion.current = null; };
   }, [draw, touched, demo, byId, rows, refresh, snapTo]);
 
+  /* ── the first look (Phone Birds-eye first look v1 §A) ──
+     The day's first open with something to show plays the bars growing in, from the fitted view the page opens at;
+     every other open, and every open with reduced motion, fades the world in. A row asked for by the address
+     (`?fly=<id>`, Today's preview) is flown to once the world is in. The latest paint and flight are read through refs:
+     the end comes two seconds after this effect's render. */
+  const navigate = useNavigate();
+  const paintRef = useRef(paint); paintRef.current = paint;
+  const flyRef = useRef(flyTo); flyRef.current = flyTo;
+  const flyAsk = useRef<string | null>(new URLSearchParams(loc.search).get("fly"));
+  const lookDecided = useRef(false);
+  useLayoutEffect(() => {
+    if (lookDecided.current || demo) return;
+    const el = layer.current, box = vp.current, r = root.current;
+    if (!el || !box || !r || !W.current) return;
+    lookDecided.current = true;
+    const fly = () => {
+      const id = flyAsk.current;
+      if (!id) return;
+      flyAsk.current = null;
+      const p = new URLSearchParams(loc.search); p.delete("fly");
+      navigate({ pathname: loc.pathname, search: p.toString() ? `?${p}` : "" }, { replace: true });
+      let n = 0;
+      const go = () => { if (motion.current) flyRef.current(id); else if (n++ < 60) requestAnimationFrame(go); };
+      requestAnimationFrame(go);
+    };
+    if (calm() || !firstTimeToday(BW_LOOK_KEY, Date.now())) { el.dataset.look = "fade"; fadeWorld(box); fly(); return; }
+    setLooking(true);
+    look.current = growIn(el, Number(r.dataset.top) || 0, () => { look.current = null; setLooking(false); paintRef.current(); fly(); });
+  }, [demo]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { flyAsk.current = null; look.current?.finish(); }, []);
+  /* a touch anywhere finishes it at once, and the gestures have it from there */
+  const finishLook = () => { look.current?.finish(); };
+
   const onClick = (e: React.MouseEvent) => {
     const b = (e.target as Element).closest<HTMLElement>("[data-a]"), w = W.current, m = motion.current;
     if (!b || !w) return;
@@ -493,7 +532,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const body = (
     <div ref={root} className={`pa-layer bw${land ? " land" : ""}${demo ? " isdemo" : ""}${sheet || menu || recap ? " lift" : ""}`} data-bw="world" data-pa5="birds-view" data-filter={f}
       data-n={groups.reduce((a, g) => a + g.rows.length, 0)} data-court={court ?? ""} data-replay="idle" data-hawk={hawk ? "1" : "0"} data-demo={demo ? "1" : "0"}
-      data-card={card?.k ?? ""} data-news={news.length} data-step={step} data-recap={recap ? "1" : "0"} onClick={onClick}>
+      data-card={card?.k ?? ""} data-news={news.length} data-step={step} data-recap={recap ? "1" : "0"} data-looking={looking ? "1" : "0"} onClick={onClick} onPointerDownCapture={finishLook}>
       <div ref={vp} className="bw-vp" data-bw="vp">
         <div ref={layer} className={`bw-w${demo ? " demo" : ""}`} data-bw="layer" />
         <div ref={over} className="bw-over" data-bw="over" />
@@ -508,7 +547,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
               : <button type="button" className="bw-go2" data-bw="log" onClick={() => openV3({ type: "plus" })}>Log a query</button>}
           </div>
         ) : null}
-        <div ref={hint} className={`bw-hint${showHint && explorable ? "" : " hide"}`} data-bw="hint">Pinch to zoom · hold to scrub</div>
+        <div ref={hint} className={`bw-hint${showHint && explorable && !looking ? "" : " hide"}`} data-bw="hint">Pinch to zoom · hold to scrub</div>
         {/* v3.3 (Nick's ruling): opening keeps the chip, at the bottom of the card, still naming the level, its chevron
             turned down; the three levels open above it */}
         <div ref={lvl} className={`bw-zc lvl${lvOpen ? " open" : ""}`} data-bw="levels" data-open={lvOpen ? 1 : 0}>
@@ -534,7 +573,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
           <button type="button" className="bw-ib back" aria-label="Back" data-bw="back" onClick={onBack}>{I(BW_IC.back, 2)}</button>
           <button type="button" className="bw-bewrap" data-bw="hawk-btn" aria-label={news.length && !newsSeen ? `${news.length} things changed` : "The hawk"} onClick={onHawk}>
             <img className="bw-behk" data-bw="badge" src={BW_HAWK} alt="" />
-            {news.length && !newsSeen ? <em className="bw-bedot" data-bw="news-count">{news.length}</em> : null}
+            {news.length && !newsSeen && !looking ? <em className="bw-bedot" data-bw="news-count">{news.length}</em> : null}
           </button>
           <h1 className="bw-h">Birds-eye view</h1>
           {f !== "all" ? <button type="button" className="bw-fon" data-bw="fon" data-k={f} onClick={() => pick("all")}>{PILL_LABEL[f]} ✕</button> : null}

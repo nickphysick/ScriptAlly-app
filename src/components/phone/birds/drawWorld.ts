@@ -77,7 +77,9 @@ function tailSeg(s: BwSeg, a: number, b: number, by: number, th: number, inner: 
   const w = Math.max(2, b - a), r = th / 2, e = edgeOf(s.st), bd = bandOf(s.st);
   if (s.k === "ahead") return `<i class="bw-bar${cl}" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${bd};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e},inset -1px 0 0 ${e};border-radius:0 ${px(r)} ${px(r)} 0">${inner}</i>`;
   const sz = badge ? Math.max(12, Math.min(16, th + 4)) : Math.max(5, Math.min(14, th + 3)), cy = by + th / 2;
-  const mark = s.mark ? `<i class="bw-ovd${sz < 11 ? " dot" : ""}" data-bw="mark" title="Past its reply date" style="left:${px(a)};top:${px(cy)};--s:${px(sz)}">${sz < 11 ? "" : "!"}</i>` : "";
+  /* first look v1: the mark names its row, so the grow-in pops it as that row's wipe reaches it */
+  const rowAttr = /data-row="[^"]*"/.exec(data)?.[0] ?? "";
+  const mark = s.mark ? `<i class="bw-ovd${sz < 11 ? " dot" : ""}" data-bw="mark" ${rowAttr} title="Past its reply date" style="left:${px(a)};top:${px(cy)};--s:${px(sz)}">${sz < 11 ? "" : "!"}</i>` : "";
   /* v3.3 (Nick): gone quiet stays hatched. The same hatching and its top and bottom edge lines run on to today, fading
      out under a mask from full to 8% there (QUIET_FADE); no solid colour after the "!" */
   if (s.k === "quiet") return `<i class="bw-bar" ${data} style="left:${px(a)};width:${px(w)};top:${px(by)};height:${px(th)};background:${hatchAt(s.st, a)};box-shadow:inset 0 1px 0 ${e},inset 0 -1px 0 ${e};-webkit-mask-image:${QUIET_FADE};mask-image:${QUIET_FADE};border-radius:0 ${px(r)} ${px(r)} 0"></i>` + mark;
