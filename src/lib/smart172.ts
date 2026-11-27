@@ -8,6 +8,7 @@
  */
 import { QueryStatus } from "../types";
 import { whereItStands, type QcRow } from "./qcSummary";
+import { dayMonth } from "./dates";
 
 export type Who172 = "you" | "chase" | "wait";
 /** a due-date range in days from today (the ends are open: "or earlier" / "or later"), and whether undated ones count */
@@ -89,8 +90,7 @@ const COUNTRY172: Record<string, string> = { GB: "UK", US: "US", IE: "Ireland", 
 const METHOD172: Record<string, string> = { email: "Email", "query manager": "QueryManager", "online form": "Online form", post: "Post" };
 const STAGE172 = ["Queried", "Partial", "Full", "Offer"];
 const wk172 = (x: number) => (x === 0 ? "today" : `${Math.abs(x / 7)}w ${x < 0 ? "ago" : "ahead"}`);
-const MON172 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const day172 = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MON172[d.getMonth()]}`; };
+const day172 = (ms: number) => dayMonth(ms);
 /** a due range in words, with real dates: "Overdue", "Due by 29 Jan", "Due 12 Dec – 29 Jan", "Due after 12 Dec",
  *  "Not yet due", "Dated only"; "+ undated" when undated ones still count */
 export function dueText172(d: Due172, b: { min: number; max: number }): string {

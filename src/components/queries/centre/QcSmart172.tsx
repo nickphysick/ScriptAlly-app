@@ -9,13 +9,13 @@
  */
 import React, { useMemo, useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
+import { MONTHS_SHORT, dayMonth } from "../../../lib/dates";
 import { stageOn172, stageText172, resetPart172, dueText172, REPLY172, SENDBY172, dueDays172, dueOn172, sideOf172, undated172, method172, pass172, smartOn172, stageIdx172, whoOf172, type Ctx172, type Smart172 } from "../../../lib/smart172";
 import { METHOD_ICON } from "./QcRow170";
 import "./qcv172.css";
 
 const DAY = 86400000;
 const WEEK = 7 * DAY;
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const flag = (cc: string) => (cc && cc.length === 2 ? String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0))) : "🏳");
 const COUNTRY: Record<string, string> = { GB: "United Kingdom", US: "United States", IE: "Ireland", AU: "Australia", CA: "Canada", DE: "Germany", NZ: "New Zealand" };
 const METHODS: { k: string; label: string }[] = [
@@ -59,7 +59,7 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
   const hist = weeks.map((t) => sentBase.filter((r) => r.sentMs != null && r.sentMs >= t && r.sentMs < t + WEEK).length);
   const hmax = Math.max(1, ...hist);
   const setSent = (a: number, b: number) => setSmart172({ sent: a <= 0 && b >= W ? null : [weeks[a], weeks[b] + WEEK - 1] });
-  const wkLabel = (i: number) => { const d = new Date(weeks[i]); return `${d.getDate()} ${MON[d.getMonth()]}`; };
+  const wkLabel = (i: number) => dayMonth(weeks[i]);
   const months = (() => {
     const all = weeks.map((t, i) => ({ i, d: new Date(t) })).filter((x, i, a) => i > 0 && x.d.getMonth() !== a[i - 1].d.getMonth());
     const out: typeof all = []; const gap = Math.max(1, W * 0.13);
@@ -130,7 +130,7 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
             <input type="range" min={0} max={W} value={lo} aria-label="Sent from" onChange={(e) => setSent(Math.min(+e.target.value, hi), hi)} />
             <input type="range" min={0} max={W} value={hi} aria-label="Sent to" onChange={(e) => setSent(lo, Math.max(+e.target.value, lo))} />
           </div>
-          <div className="qs172-scale">{months.map((m) => <span key={m.i} style={{ left: `${(m.i / W) * 100}%` }}>{MON[m.d.getMonth()]}</span>)}</div>
+          <div className="qs172-scale">{months.map((m) => <span key={m.i} style={{ left: `${(m.i / W) * 100}%` }}>{MONTHS_SHORT[m.d.getMonth()]}</span>)}</div>
         </section>
       ) : null}
 

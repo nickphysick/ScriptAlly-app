@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { createPortal } from "react-dom";
 import { usePopover } from "../../shell/ListPills";
 import { tileCourt } from "../../../lib/qcSummary";
+import { dayMonth } from "../../../lib/dates";
 import type { EyeRow } from "../../../lib/qcBirdsEye";
 import {
   BE_GROUPS, BE_SORTS, BE_SPANS, BE_TODAY_AT, beLine, beMonths, beScale, beTicks, beX,
@@ -424,7 +425,7 @@ export const QcBirds150: React.FC<{
                         ) : null}
                         {l.cur && L && l.cur.overdue && l.dueMs != null ? (
                           <span className="qc169-due" data-qc150="be-due" style={{ left: Math.min(beX(scale, l.dueMs), tx - (zoom === "all" ? 6 : 40)) }} title={`Reply was due ${new Date(l.dueMs).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`}>
-                            <b aria-hidden="true">!</b>{new Date(l.dueMs).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                            <b aria-hidden="true">!</b>{dayMonth(l.dueMs)}
                           </span>
                         ) : null}
                         {l.cur && L ? <Tail L={L} tx={tx} /> : null}
