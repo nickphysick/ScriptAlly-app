@@ -2,7 +2,9 @@
 
 Branch `phone-query-sheet-v1`, cut from `origin/phone-birds-eye-world-v3-3` (112a35b6a). Main had not moved past it (`origin/main` 7f70f99f7 is contained). Pushed, not merged. Below 768px only.
 
-The phase 4 commit hash, the dev build it was merged on top of, and the served bundle are in the session's final message.
+- **Dev:** `dev/bew33-clr13-qc1722-pqs1` (fdb4531db) is this branch merged onto `dev/bew33-clr13-qc1722`, which is what dev was serving (`index-CzdCn2Qj.js`: Query Centre v172.2 over Birds-eye v3.3 and rows v1.3). It now serves **`index-Dbp7ZcQZ.js`**, whose AppRoot chunk carries the sheet.
+- **The one merge conflict** was `design-refs/.refhashes.json`; both sides' entries are kept.
+- **On the merged tree:** tsc exits 0, and Vitest's only reds were from the scratch checkout's missing `functions/node_modules`. With it linked, the 37 failing files pass.
 
 ## False premises
 
@@ -21,10 +23,12 @@ All of them are in by content: Card journeys v1, Record a response v2.1 and v2.1
 
 | Gate | Baseline (before any edit) | Final |
 |---|---|---|
-| tsc (8 GB heap) | exit 0 | FINAL_TSC |
-| `npm run build` | exit 0 (built in 1.78s) | FINAL_BUILD |
-| `npm run build:dev` | exit 0 | FINAL_BD |
-| Vitest | Test Files 973 passed, 1 skipped (974) · Tests 13817 passed, 4 skipped (13821) | FINAL_VITEST |
+| tsc (8 GB heap) | exit 0 | exit 0 |
+| `npm run build` | exit 0 (built in 1.78s) | exit 0 |
+| `npm run build:dev` | exit 0 | exit 0 |
+| Vitest | Test Files 973 passed, 1 skipped (974) · Tests 13817 passed, 4 skipped (13821) | Test Files 973 passed, 1 skipped (974) · Tests 13817 passed, 4 skipped (13821) |
+
+- **The first final run caught one red:** `dates.test.ts`, "there is one month table". It was red from phase 3, because `PhoneDaySlider` and `PhonePreviewCard` each carried their own copy of the month table. Both now read the one in `lib/dates`, with identical output. That fix is in phase 4, and the second run is the one shown.
 
 ## Commits
 
@@ -33,7 +37,7 @@ All of them are in by content: Card journeys v1, Record a response v2.1 and v2.1
 | a1d1461d6 | Phase 1: refs (25 files checked against SHA256SUMS and the brief's table, enrolled), gone quiet for agents only |
 | 5b36c4ef0 | Phase 2: the sheet |
 | c36b88cf6 | Phase 3: the journeys |
-| PHASE4 | Phase 4: locks, screenshots |
+| cc0a53ac3 | Phase 4: locks, screenshots |
 
 ## A. Gone quiet (Nick's ruling)
 
