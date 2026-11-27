@@ -12,7 +12,8 @@ import type { ComposeKey } from "../../../lib/foundingCard";
 
 export type V3Overlay =
   | { type: "query"; id: string }
-  | { type: "agent"; id: string }
+  /* Phone query sheet v1: the agent card opened from a query sheet carries the sheet as `back`, and closing it returns there */
+  | { type: "agent"; id: string; back?: V3Overlay }
   | { type: "plus" }
   | { type: "log"; agentId?: string }
   | { type: "reply"; queryId?: string }
@@ -43,7 +44,8 @@ export const v3Snack = (): V3Snack | null => snack;
 export function subscribeV3(l: Listener): () => void { listeners.add(l); return () => { listeners.delete(l); }; }
 
 export function openV3(o: V3Overlay): void { overlay = o; seq += 1; snack = null; emit(); }
-export function closeV3(): void { overlay = null; emit(); }
+/** closes the overlay; one opened over another (`back`) returns to it (Phone query sheet v1: the agent card over a query) */
+export function closeV3(): void { overlay = overlay && "back" in overlay && overlay.back ? overlay.back : null; emit(); }
 export const openV3Query = (id: string): void => openV3({ type: "query", id });
 export const openV3Agent = (id: string): void => openV3({ type: "agent", id });
 

@@ -494,7 +494,7 @@ const REACH: Reach[] = [
   { page: "A task's journey", dock: "todo", taps: ['[data-pa5="todo-verb"]'], arrive: 'vis:[data-tdp="task"]' },
   { page: "Queries list (/queries)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="all-queries"]'], arrive: "path:/queries/all" },
   { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="be-foot"]'], arrive: 'vis:[data-pa5="birds-view"]' },
-  { page: "A query's page", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="be-row"]', '[data-pa5="be-open"]'], arrive: 'vis:[data-pa4="qpage"]' },
+  { page: "A query's page", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="be-row"]', '[data-pa5="be-open"]'], arrive: 'vis:[data-pqs="sheet"]' }, /* Phone query sheet v1: the query opens as the one sheet */
   { page: "Agents (/agents)", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]'], arrive: 'vis:[data-pa5="agents-tab"]' },
   { page: "Everyone on your list", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]', '[data-pa5="see-all-agents"]'], arrive: 'vis:[data-pa4="agents-all"]' },
   { page: "An agent's card", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]', '[data-pa4="fit-card"]'], arrive: 'vis:[data-pa4="asheet"]' },

@@ -42,7 +42,7 @@ import {
 } from "../../../lib/birdsWorld";
 import { drawWorld } from "./drawWorld";
 import { buzz, shadowStyle, wireMotion, type Motion } from "./worldMotion";
-import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet, SendBySheet, TimelineSheet } from "./BirdsSheets";
+import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet, SendBySheet } from "./BirdsSheets";
 import "./birdsWorld.css";
 
 const I = (d: string, w = 1.8) => (
@@ -125,7 +125,7 @@ export interface BirdsWorldProps {
   onBack: () => void;
   onList: () => void;
 }
-type SheetState = null | { k: "row"; id: string } | { k: "key" } | { k: "search" } | { k: "nd"; id: string; queue: string[] } | { k: "sb"; id: string };
+type SheetState = null | { k: "key" } | { k: "search" } | { k: "nd"; id: string; queue: string[] } | { k: "sb"; id: string };
 type TipState = null | { k: "news" } | { k: "line"; i: number };
 
 export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, onList }) => {
@@ -386,7 +386,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     if (!el || demo) return undefined;
     const m = wireMotion({
       vp: el, world: () => W.current, S, draw, calm, touched,
-      openRow: (id) => { if (lvSpent.current) { lvSpent.current = false; return; } const r = byId.get(id); if (!r) return; if (isNoDate(r)) setSheet({ k: "nd", id, queue: noDateRows(rows).map((x) => x.id) }); else setSheet({ k: "row", id }); },
+      openRow: (id) => { if (lvSpent.current) { lvSpent.current = false; return; } const r = byId.get(id); if (!r) return; if (isNoDate(r)) setSheet({ k: "nd", id, queue: noDateRows(rows).map((x) => x.id) }); else openV3Query(id); },
       longPress: (x, y, cx, cy) => {
         const w = W.current;
         if (w && S.current.z > 1.05) {
@@ -500,7 +500,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const cardTop: number | string = card ? (card.k === "closed" ? top + RULE + 16 : `calc((${top + RULE}px + 100% - 96px) / 2)`) : 0;
   const levels = W.current?.levels ?? [{ t: "All" as const, z: 1 }];
   const tipTop = top + 4;
-  const sheetRow = sheet?.k === "row" ? byId.get(sheet.id) ?? null : null;
   const menuRow = menu ? byId.get(menu.id) ?? null : null;
 
   const body = (
@@ -578,7 +577,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
         <div className="bw-tipb" data-bw="tip" data-i={tip.i} style={{ top: tipTop }} onClick={onHawk}><i />{lines[tip.i]}<small>Tap for another</small></div>
       ) : null}
       {menu && menuRow ? <QuickMenu r={menuRow} acts={menuActions(menuRow)} x={menu.x} y={menu.y} vpW={W.current?.vpW ?? 390} vpH={W.current?.vpH ?? 784} onClose={() => setMenu(null)} onAct={(a) => { setMenu(null); actOf(a, menuRow.id, openSendBy); }} /> : null}
-      {sheetRow ? <TimelineSheet r={sheetRow} quietDays={quietDays} nowMs={now} onClose={() => setSheet(null)} onAct={(a) => { setSheet(null); actOf(a, sheetRow.id, openSendBy); }} onOpen={() => { setSheet(null); openV3Query(sheetRow.id); }} onSendBy={() => openSendBy(sheetRow.id)} /> : null}
       {sbRow ? <SendBySheet r={sbRow} nowMs={now} hawk={BW_HAWK} onClose={() => setSheet(null)} onSave={(wk) => saveSendBy(sbRow.id, wk)} /> : null}
       {sheet?.k === "key" ? <KeySheet onClose={() => setSheet(null)} /> : null}
       {sheet?.k === "search" ? <SearchSheet rows={rows} onClose={() => setSheet(null)} onPick={flyTo} /> : null}

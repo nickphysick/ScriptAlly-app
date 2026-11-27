@@ -15,7 +15,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { V3Glyph } from "../v3/V3Parts";
 import { WeekSlider } from "../../forms/WeekSlider";
 import {
-  ACT_LABEL, agoOf, bandOf, dm, edgeOf, fadedBand, fadedEdge, hatchOf, noDateDefault, SB_DEFAULT_WEEKS, searchRows, sheetOf, type BwAct, type BwRecap, type BwRow,
+  ACT_LABEL, bandOf, dm, edgeOf, fadedBand, fadedEdge, hatchOf, noDateDefault, SB_DEFAULT_WEEKS, searchRows, type BwAct, type BwRecap, type BwRow,
 } from "../../../lib/birdsWorld";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { QUIET_FADE } from "./drawWorld";
@@ -35,33 +35,7 @@ export const Sheet: React.FC<{ k: string; onClose: () => void; className?: strin
 );
 const Close: React.FC<{ onClose: () => void }> = ({ onClose }) => <button type="button" className="bw-ib" aria-label="Close" data-bw="sheet-close" onClick={onClose}>{X_IC}</button>;
 
-/* ── tap a bar: the query's own timeline (ref `openSheet`) ── */
-export const TimelineSheet: React.FC<{ r: BwRow; quietDays: number; nowMs: number; onClose: () => void; onAct: (a: "replied" | "sent") => void; onOpen: () => void; onSendBy: () => void }> = ({ r, quietDays, nowMs, onClose, onAct, onOpen, onSendBy }) => {
-  const s = sheetOf(r, quietDays, nowMs);
-  return (
-    <Sheet k="timeline" onClose={onClose}>
-      <div className="bw-sh1">
-        <span className="bw-disc"><V3Glyph status={r.status} size={44} label={false} bg={bandOf(r.status)} /></span>
-        <span style={{ flex: 1, minWidth: 0 }}><span className="bw-nm2">{r.name}</span>{r.agency ? <span className="bw-sec">{r.agency}</span> : null}</span>
-        <Close onClose={onClose} />
-      </div>
-      <ol className="bw-vt" data-bw="steps">
-        {s.steps.map((x, i) => (
-          <li key={i} className={`${x.k}${x.cur ? " cur" : ""}`} data-bw="step" data-k={x.k}>
-            <i style={x.status ? { background: bandOf(x.status), outline: `2px solid ${edgeOf(x.status)}` } : undefined}>{x.k === "late" ? "!" : ""}</i>
-            <b>{x.t}</b>
-            {x.k === "nosendby"
-              ? <button type="button" className="bw-link bw-sbadd" data-bw="sb-add" onClick={onSendBy}>Add</button>
-              : <span>{dm(x.d, nowMs)} · {agoOf(x.d)}</span>}
-          </li>
-        ))}
-      </ol>
-      <p className="bw-say" data-bw="say">{s.line}</p>
-      {s.cta ? <button type="button" className="bw-cta" data-bw="cta" onClick={() => onAct(s.cta!)}>{s.cta === "sent" ? "I’ve sent it" : "They replied"}</button> : null}
-      <button type="button" className="bw-link" data-bw="open-full" onClick={onOpen}>Open the full query</button>
-    </Sheet>
-  );
-};
+/* Phone query sheet v1 — a tap on a bar opens the one query sheet (QuerySheet); v3's timeline sheet is retired. */
 
 /* ── the colour key (ref `openKey`) ── */
 const KEY_STAGES: [string, string][] = [

@@ -1,0 +1,134 @@
+/* ── PHONE QUERY SHEET v1 (design-refs/phone-query-sheet-v1, its `.dr` drawer and tabs) ──
+   Below 768px only. The ref's layout, read off its CSS; the phone style sheet's census holds the values: sizes on its
+   scale (12 / 14 / 16 / 20), radii 16 / 24 / round, its palette or the tokens, and the two shadow tokens. Where the ref
+   drew a hairline with an inset shadow this draws a border, and its off-palette greys are the tokens mixed. */
+@media (max-width: 767.98px) {
+  .pqs { position: fixed; inset: 0; z-index: 2; font: 400 14px/1.45 var(--pa-sans); color: var(--pa-ink); }
+  .pqs-dim { position: absolute; inset: 0; background: color-mix(in srgb, var(--pa-ink) 34%, transparent); opacity: 0; transition: opacity 0.28s; }
+  .pqs-dim.on { opacity: 1; }
+
+  /* the drawer: half (430 of 784), full (52px from the top); the drag only follows the finger */
+  .pqs-sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; background: #fff; border-radius: 24px 24px 0 0;
+    box-shadow: var(--ps-sh-raised); overflow: hidden; will-change: transform;
+    transition: height 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s;
+    animation: pqs-up 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pqs-sheet.half { height: calc(100dvh * 430 / 784); }
+  .pqs-sheet.full { height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
+  .pqs-sheet.drag { transition: none; }
+  .pqs-sheet.shut { transform: translateY(100%); }
+  /* a journey open over it: the sheet stands back, scaled from its top, dimmed (ref `.dr.back`) */
+  .pqs-sheet.back { transform: scale(0.94); transform-origin: 50% 0; filter: brightness(0.72); border-radius: 24px; }
+  @keyframes pqs-up { from { transform: translateY(100%); } }
+
+  .pqs-grab { position: absolute; top: 0; left: 0; right: 0; height: 22px; z-index: 3; display: grid; place-items: center; cursor: grab; touch-action: none; }
+  .pqs-grab i { width: 40px; height: 5px; border-radius: 999px; background: color-mix(in srgb, var(--pa-ink) 28%, transparent); }
+
+  /* the strip, in the stage's colour: the track, the stage's name, ⋯ and × */
+  .pqs-strip { flex: none; display: flex; align-items: center; gap: 10px; height: 56px; padding: 12px 10px 0 16px; }
+  .pqs-trk { display: flex; align-items: center; }
+  .pqs-trk .nd { display: grid; place-items: center; width: 20px; height: 20px; }
+  .pqs-trk .nd.cur { width: 30px; height: 30px; border-radius: 50%; background: #fff; box-shadow: var(--ps-sh-card); }
+  .pqs-trk .nd.fut { opacity: 0.45; }
+  .pqs-trk .ln { width: 10px; height: 2px; background: var(--pa-ink); }
+  .pqs-trk .ln.fut { opacity: 0.35; }
+  .pqs-strip .stl { flex: 1; min-width: 0; font: 600 16px var(--pa-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pqs-strip .cb { flex: none; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: color-mix(in srgb, #fff 55%, transparent); color: var(--pa-ink); cursor: pointer; }
+  .pqs-strip .cb svg { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+  /* ⋯ — from the strip (ref `.mn`) */
+  .pqs-mn { position: absolute; z-index: 9; top: 56px; right: 12px; width: 230px; max-height: 60%; overflow-y: auto; border-radius: 16px; background: #fff; box-shadow: var(--ps-sh-raised); transform-origin: top right; animation: pqs-mn 0.16s ease-out; }
+  @keyframes pqs-mn { from { transform: scale(0.92); opacity: 0; } }
+  .pqs-mn button { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 0 16px; border: 0; border-top: 1px solid var(--pa-rule); background: none; font: 400 16px var(--pa-sans); color: var(--pa-ink); text-align: left; cursor: pointer; }
+  .pqs-mn button:first-child, .pqs-mn .ph + button { border-top: 0; }
+  .pqs-mn button.red { color: var(--pa-rust); }
+  .pqs-mn button[aria-checked="true"] { font-weight: 600; }
+  .pqs-mn .ph { padding: 12px 16px 6px; font: 600 14px var(--pa-sans); color: var(--pa-muted); }
+
+  .pqs-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .pqs-body::-webkit-scrollbar { display: none; }
+  /* the head: the navy seal, the name in Special Elite with the agency in italics, Day N */
+  .pqs-hd { display: flex; align-items: center; gap: 12px; padding: 14px 16px 0; }
+  .pqs-hd .seal { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--pa-navy); color: #fff; font: 400 14px var(--pa-type); outline: 1px solid var(--pa-rule); outline-offset: 2px; }
+  .pqs-hd .nm { flex: 1; min-width: 0; }
+  .pqs-hd .nm b { display: block; font: 400 20px/1.2 var(--pa-type); color: var(--pa-ink); overflow-wrap: anywhere; }
+  .pqs-hd .nm i { font: italic 400 14px var(--pa-sans); color: var(--pa-muted); }
+  .pqs-hd .dayn { flex: none; font: 400 14px var(--pa-sans); color: var(--pa-muted); }
+  /* the book, on one line (ref `.bk.one`) */
+  .pqs-bk { display: flex; align-items: center; gap: 6px; margin: 10px 16px 0; font: 400 14px var(--pa-sans); color: var(--pa-muted); white-space: nowrap; overflow: hidden; }
+  .pqs-bk .bi { flex: none; display: grid; place-items: center; width: 20px; height: 20px; }
+  .pqs-bk .bi svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+  .pqs-bk b { font: 400 14px var(--pa-type); color: var(--pa-body); overflow: hidden; text-overflow: ellipsis; }
+  /* the tabs, underlined, sticking under the strip */
+  .pqs-tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 22px; margin: 12px 0 0; padding: 0 16px; background: #fff; border-bottom: 1px solid var(--pa-rule); }
+  .pqs-tabs button { height: 44px; padding: 0; border: 0; border-bottom: 2px solid transparent; background: none; font: 400 16px var(--pa-sans); color: var(--pa-muted); cursor: pointer; }
+  .pqs-tabs button[aria-selected="true"] { color: var(--pa-ink); font-weight: 600; border-bottom-color: var(--pa-ink); }
+  .pqs-pane { padding: 14px 16px 24px; }
+
+  /* Tracking: the desktop thread, yours white on the right, the agent's in their stage colour with their initials */
+  .pqs-th { display: flex; flex-direction: column; gap: 6px; }
+  .pqs-bub { position: relative; display: flex; gap: 10px; max-width: 88%; padding: 10px 12px 22px; border-radius: 16px; font-size: 14px; }
+  .pqs-bub .gd { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #fff; }
+  .pqs-bub .tx { min-width: 0; }
+  .pqs-bub b { display: block; font: 600 14px/1.35 var(--pa-sans); color: var(--pa-ink); }
+  .pqs-bub .mt { display: block; font-size: 12px; color: var(--pa-body); }
+  .pqs-bub .mt svg { width: 12px; height: 12px; margin-right: 4px; vertical-align: -1px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .pqs-bub q { display: block; margin: 4px 0 0; font: italic 400 14px/1.4 var(--pa-sans); color: var(--pa-body); }
+  .pqs-bub .ts { position: absolute; right: 12px; bottom: 5px; font-size: 12px; color: var(--pa-muted); }
+  .pqs-bub.me { align-self: flex-end; background: #fff; border: 1px solid var(--pa-rule); }
+  .pqs-bub.me .gd { background: var(--pa-fill); }
+  .pqs-bub.them { align-self: flex-start; margin-left: 28px; }
+  .pqs-bub.them .who { position: absolute; left: -28px; top: 6px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--pa-navy); color: #fff; font: 400 12px var(--pa-type); }
+  .pqs-gap { padding: 4px 2px; font: italic 400 12px var(--pa-sans); color: var(--pa-muted); }
+  .pqs-gap.r { text-align: right; }
+  .pqs-bub.new { animation: pqs-bin 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; }
+  @keyframes pqs-bin { from { transform: translateY(10px) scale(0.96); opacity: 0; } }
+
+  /* the pencils: always shown (no hover on a phone), one on each editable thing */
+  .pqs-pen { position: absolute; right: 8px; top: 8px; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--pa-muted); cursor: pointer; }
+  .pqs-pen svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+  .pqs-bub .pqs-pen { top: 4px; right: 4px; }
+  .pqs-bub { padding-right: 34px; }
+  /* Agent: two by two, then what they ask for, then their card (ref `.tiles`, `.lst`, `.lnk`) */
+  .pqs-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pqs-tile { position: relative; padding: 10px 36px 10px 12px; border-radius: 16px; background: var(--pa-page); }
+  .pqs-tile small { display: block; font-size: 12px; color: var(--pa-muted); }
+  .pqs-tile b { font: 600 14px var(--pa-sans); }
+  .pqs-pane .pqs-sec { margin: 18px 0 8px; font: 600 14px var(--pa-sans); }
+  .pqs-pane > div > section:first-child .pqs-sec { margin-top: 0; }
+  .pqs-lst { border-radius: 16px; background: #fff; border: 1px solid var(--pa-rule); }
+  .pqs-lst .li { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 0 44px 0 12px; border: 0; border-top: 1px solid var(--pa-rule); background: none; font: 400 14px var(--pa-sans); color: var(--pa-ink); text-align: left; }
+  .pqs-lst .li:first-child { border-top: 0; }
+  .pqs-lst .li .pqs-pen { top: 10px; }
+  .pqs-lst .li .mi { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 16px; background: var(--pa-page); }
+  .pqs-lst .li .mi svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; }
+  .pqs-lst .li.ghost { cursor: pointer; }
+  .pqs-lst .li .gb { display: inline-block; width: 70px; height: 10px; border-radius: 999px; background: var(--pa-fill); }
+  .pqs-lst .li .gb.s { width: 40px; }
+  .pqs-lnk { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 0; border: 0; background: none; font: 600 14px var(--pa-sans); color: var(--pa-navy); cursor: pointer; }
+  .pqs-lnk svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  /* the desktop's own Notes tab, at the phone's width */
+  .pqs-desk { font-size: 14px; }
+  /* the desktop's tabs set their own serif; on the phone everything read or tapped is the system face (phone style P8) */
+  .pqs .pqs-desk.qc152, .pqs .pqs-desk.qc152 :is(p, span, b, button, textarea, input, label, li, em, i, small, div) { font-family: var(--pa-sans) !important; }
+  .pqs .pqs-desk.qc152 :is(h3, h4) { font-family: var(--pa-type) !important; }
+  /* a step edited: the desktop's editor, on a sheet over this one */
+  .pqs-ed { position: absolute; inset: 0; z-index: 10; }
+  .pqs-ed .pqs-edsheet { height: auto; max-height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)); }
+  .pqs-edbody { flex: 1; min-height: 0; overflow-y: auto; padding: 26px 12px calc(16px + env(safe-area-inset-bottom, 0px)); }
+
+  /* the footer: the status line over a full-width button (ref `.ft.stack`) */
+  .pqs-ft { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); background: #fff; border-top: 1px solid var(--pa-rule); }
+  .pqs-ft .stb { display: flex; align-items: center; gap: 10px; padding: 6px 4px; }
+  .pqs-ft .stb .gd { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; }
+  .pqs-ft .stb b { display: block; font: 600 14px/1.3 var(--pa-sans); }
+  .pqs-ft .stb i { font: italic 400 12px var(--pa-sans); color: var(--pa-muted); }
+  .pqs-ft .pri { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 48px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--pa-navy); color: #fff; font: 600 16px var(--pa-sans); cursor: pointer; outline: 1.5px solid var(--pa-navy); outline-offset: 2px; }
+  .pqs-ft .pri svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pqs-ft .pri.out { background: #fff; color: var(--pa-navy); outline: 0; border: 1.5px solid var(--pa-navy); }
+}
+@media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
+  .pqs-sheet, .pqs-bub.new, .pqs-mn { animation: none; }
+  .pqs-sheet.back { transform: none; }
+}
