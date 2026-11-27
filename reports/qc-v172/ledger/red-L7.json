@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L7",
+  "where": "population · the panel scrolls",
+  "ok": true,
+  "detail": "662px to scroll with More filters open"
+ },
+ {
+  "lock": "L7",
+  "where": "scrolled",
+  "ok": true,
+  "detail": "scrollTop 300"
+ },
+ {
+  "lock": "L7",
+  "where": "sticky",
+  "ok": false,
+  "detail": "static"
+ },
+ {
+  "lock": "L7",
+  "where": "the header stays at the panel's top",
+  "ok": false,
+  "detail": "header top -108.0 · panel top 192.0"
+ },
+ {
+  "lock": "L7",
+  "where": "the header keeps its height",
+  "ok": true,
+  "detail": "43 → 43"
+ }
+]
