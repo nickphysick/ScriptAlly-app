@@ -128,7 +128,15 @@
   .pqs-ft .pri svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .pqs-ft .pri.out { background: #fff; color: var(--pa-navy); outline: 0; border: 1.5px solid var(--pa-navy); }
 }
+@media (max-width: 767.98px) {
+  /* the save's toast: navy, the Archivist's head, Undo, above the footer for about 4s (ref `.toast`) */
+  .pqs-toast { position: absolute; left: 12px; right: 12px; bottom: calc(136px + env(safe-area-inset-bottom, 0px)); z-index: 12; display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 12px; border-radius: 999px; background: var(--pa-navy); color: #fff; font: 400 14px var(--pa-sans); box-shadow: var(--ps-sh-raised); animation: pqs-tin 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+  .pqs-toast img { flex: none; width: 32px; height: 32px; border-radius: 50%; }
+  .pqs-toast span { flex: 1; min-width: 0; }
+  .pqs-toast button { flex: none; height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: color-mix(in srgb, #fff 14%, transparent); color: #fff; font: 600 14px var(--pa-sans); cursor: pointer; }
+  @keyframes pqs-tin { from { transform: translateY(20px); opacity: 0; } }
+}
 @media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
-  .pqs-sheet, .pqs-bub.new, .pqs-mn { animation: none; }
+  .pqs-sheet, .pqs-bub.new, .pqs-mn, .pqs-toast { animation: none; }
   .pqs-sheet.back { transform: none; }
 }

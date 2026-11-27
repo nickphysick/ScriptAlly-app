@@ -11,7 +11,8 @@ import type { GroupKey } from "../../../lib/contactHousekeeping";
 import type { ComposeKey } from "../../../lib/foundingCard";
 
 export type V3Overlay =
-  | { type: "query"; id: string }
+  /* Phone query sheet v1: the one query sheet; a door may open it at a journey (`j`) or at its dates edit (`edit`) */
+  | { type: "query"; id: string; j?: "send" | "close" | "offer" | "reopen" | "resp"; edit?: "dates" | "sendby" }
   /* Phone query sheet v1: the agent card opened from a query sheet carries the sheet as `back`, and closing it returns there */
   | { type: "agent"; id: string; back?: V3Overlay }
   | { type: "plus" }

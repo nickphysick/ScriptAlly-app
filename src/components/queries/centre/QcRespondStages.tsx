@@ -42,6 +42,8 @@ import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import "./qcLogStages.css";
 import "./qcRespondStages.css";
+import { PhoneDaySlider } from "./PhoneDaySlider";
+import { PhonePreviewCard } from "./PhonePreviewCard";
 
 /** the Archivist's head (design-refs/dashboard-v93/assets/tier-head-archivist.png) */
 export const ARCHIVIST = "/images/archivist-head.png";
@@ -83,6 +85,11 @@ export interface QcRespondStagesProps {
   behind?: boolean;
   onClose: () => void;
   leaveRef?: React.MutableRefObject<(() => void) | null>;
+  /** Phone query sheet v1 — the same journey on the phone (default off: the desktop is unchanged): "An earlier date" is
+   *  the app's slider (PhoneDaySlider), the track is a thin bar with "Step n of m · name", the review records once
+   *  ("Log it"), and a save hands back to the sheet (`onPhoneSaved`) instead of the recorded screen */
+  phone?: boolean;
+  onPhoneSaved?: (saved: RespSaved) => void;
 }
 
 interface RState {
@@ -285,9 +292,9 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
         <div className="laq-big" data-rar="when">
           {big("today", "Today", wdm(today), s.when === today, () => answer({ when: today, earlier: false }))}
           {yday >= minDay ? big("yesterday", "Yesterday", wdm(yday), s.when === yday, () => answer({ when: yday, earlier: false })) : null}
-          {big("earlier", "An earlier date", early ? `Chosen: ${dm(s.when!)}` : "Pick it from the calendar", s.earlier, () => setS((o) => ({ ...o, earlier: !o.earlier, dir: "" })), false)}
+          {big("earlier", "An earlier date", early ? `Chosen: ${dm(s.when!)}` : p.phone ? "Pick it on the slider" : "Pick it from the calendar", s.earlier, () => setS((o) => ({ ...o, earlier: !o.earlier, dir: "" })), false)}
         </div>
-        {s.earlier ? (
+        {s.earlier && p.phone ? <PhoneDaySlider minMs={minDay} nowMs={nowMs} cur={s.when} data="when" onPick={(ms) => setS((o) => ({ ...o, when: ms }))} /> : s.earlier ? (
           <div className="laq-cal" data-rar="calendar" ref={calRef}>
             <div className="laq-calh">
               <button type="button" aria-label="Previous month" data-rar="cal-prev" disabled={s.calAt <= minAt} onClick={() => setS((o) => ({ ...o, calAt: o.calAt - 1, dir: "" }))}>{ICON.l}</button>
@@ -508,7 +515,7 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
   const a = answers();
   const pv = useMemo(() => (a && s.qid && (s.step === "check" || phase === "done") ? p.previewOf(s.qid, a) : null), [s, phase]); // eslint-disable-line react-hooks/exhaustive-deps
   const [stamp, setStamp] = useState(false);
-  const card = (row: QcRow, pkg: string | null, stampOn: boolean, stampMs: number) => (
+  const card = (row: QcRow, pkg: string | null, stampOn: boolean, stampMs: number) => p.phone ? <PhonePreviewCard row={row} data="preview" /> : (
     <div className={`laq-pv laq-pvw qc151 qc153 is-wide${phase === "done" ? " is-logged" : ""}${stampOn ? " has-stamp" : ""}`} data-rar="preview">
       <div className="laq-pvc"><QcCard154 row={row} nowMs={nowMs} selected={false} packageName={pkg} act={null} onOpen={noop} onAct={noop} preview /></div>
       {stampOn ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-rar="stamp" aria-hidden="true"><span>Recorded</span><small>{dm(stampMs).toUpperCase()}</small></span> : null}
@@ -605,6 +612,8 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
     const done = await p.onSave(s.qid, ans, notes);
     setBusy(false);
     if (!done) return;
+    /* the phone: the journey drops and the sheet comes forward with the toast (Phone query sheet v1 §C) */
+    if (p.phone && p.onPhoneSaved) { p.onPhoneSaved(done); return; }
     const before = s, f = first, qid = s.qid;
     if (more) {
       stampThen(() => {
@@ -709,6 +718,16 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
       })}
     </div>
   );
+  /* the phone's progress: one segment per step (done white, current blush), "Step n of m · name" beneath */
+  const prog = () => {
+    const sg = stagesOf(s.kind), at = Math.max(0, sg.indexOf(s.step));
+    return (
+      <div className="pqj-prog" data-rar="progress" data-at={at + 1} data-of={sg.length}>
+        <div className="pqj-bar" aria-hidden="true">{sg.map((k, i) => <i key={k} className={i < at ? "done" : i === at ? "cur" : ""} />)}</div>
+        <div className="pqj-pgl"><span>Step {at + 1} of {sg.length} · <b>{STAGE_LABEL[s.step]}</b></span><span>{first}</span></div>
+      </div>
+    );
+  };
   const counts = saved?.counts ?? pv?.counts ?? null;
   const [h1, h2] = headline({
     kind: phase === "done" ? saved?.a.kind ?? null : s.kind, first: phase === "done" ? saved?.first ?? first : first, recorded: phase === "done", sitting, picked: !!s.qid,
@@ -721,7 +740,7 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
       <FlowHead title={<>{h1}<span className="is-c br" data-rar="head-2">{h2}</span></>} titleKey={`${h1}|${h2}`}
         mark={<img className="flh-m rar-art" data-rar="art" src={ARCHIVIST} alt="" width={48} height={48} />}
         onClose={() => leave()} data={{ "data-rar": "head" }} closeData={{ "data-rar": "close" }} />
-      {track(allDone)}
+      {p.phone ? prog() : track(allDone)}
     </div>
   );
 
@@ -784,8 +803,8 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
     if (s.step === "check") return <>
       <button type="button" className="laq-lnk" data-rar="cancel" onClick={() => leave()} disabled={busy || stamp}>Cancel</button>
       <span className="laq-sp" />
-      <button type="button" className="laq-lnk" data-rar="record-more" disabled={busy || stamp} onClick={() => void record(true)}>Record and start another</button>
-      <button type="button" className="laq-btn" data-rar="record" disabled={busy || stamp} aria-busy={busy || undefined} onClick={() => void record(false)}>{busy ? "Recording…" : <>Record reply {ICON.arrow}</>}</button>
+      {p.phone ? null : <button type="button" className="laq-lnk" data-rar="record-more" disabled={busy || stamp} onClick={() => void record(true)}>Record and start another</button>}
+      <button type="button" className="laq-btn" data-rar="record" disabled={busy || stamp} aria-busy={busy || undefined} onClick={() => void record(false)}>{busy ? "Recording…" : <>{p.phone ? "Log it" : "Record reply"} {ICON.arrow}</>}</button>
     </>;
     return <>{backBtn}<span className="laq-sp" />{hint("Pick one to carry on")}</>;
   })();

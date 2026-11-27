@@ -38,9 +38,11 @@ import { useToast } from "../../toast/ToastProvider";
 import { NotesTab158, quotesOf } from "../../queries/centre/QcNotes158";
 import { V3Glyph } from "../v3/V3Parts";
 import { StepEditSheet } from "./StepEditSheet";
+import { QueryJourney, type PqjKind } from "./QueryJourney";
 import { closeV3, openV3, showV3Snack, type V3Overlay } from "../v3/v3Store";
 import { useV3Data } from "../v3/V3Provider";
 import { runAct } from "../v4/acts";
+import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { trackStage } from "./track";
 import "../../queries/centre/qcv158.css";
 import "../../queries/centre/qcv152card.css";
@@ -54,23 +56,12 @@ export const PQS_HALF = 430 / 784;
 /** full height leaves this much above the sheet */
 export const PQS_TOP = 52;
 
-/** what a footer act opens on the phone (Phase 3 hands these to the desktop journeys) */
-export type PqsAct = FootAct;
-export interface PqsHooks {
-  /** a footer or menu act; the sheet's own default is the existing phone flows */
-  onAct?: (act: PqsAct, id: string) => void;
-}
-let hooks: PqsHooks = {};
-/** the journeys (Phase 3) take the sheet's acts here */
-export function setQuerySheetHooks(h: PqsHooks): void { hooks = h; }
-
-const FOOT_TO_RUN: Record<FootAct, "sent" | "nudge" | "close" | "offer" | "reply"> = {
-  sent: "sent", nudge: "nudge", close: "close", offer: "offer", tell: "offer", resp: "reply", reopen: "reply",
+/** what a footer or menu act opens on the phone (§C): the desktop's journeys over the sheet; a nudge is the existing
+ *  nudge flow, and "tell the others" the existing offer flow that holds the tell list (as on the desktop) */
+export const ACT_JOURNEY: Record<FootAct, PqjKind | "nudge" | "tell"> = {
+  sent: "send", close: "close", offer: "offer", resp: "resp", reopen: "reopen", nudge: "nudge", tell: "tell",
 };
-function act(a: PqsAct, id: string): void {
-  if (hooks.onAct) { hooks.onAct(a, id); return; }
-  runAct(FOOT_TO_RUN[a], id);
-}
+const ARCHIVIST = "/images/archivist-head.png";
 
 const CLOSED = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN, QueryStatus.SIGNED]);
 const initials = (name: string): string => name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "?";
@@ -109,15 +100,16 @@ const Pen: React.FC<{ label: string; onClick: () => void; k: string }> = ({ labe
 
 export interface QuerySheetProps {
   id: string;
-  /** a journey is open over it: it stands back (scaled, dimmed), its strip above the journey */
-  back?: boolean;
-  /** the tab to open on (a save returns to Tracking) */
+  /** a door that opens straight into a journey (Birds-eye's long press) */
+  j?: PqjKind | null;
+  /** a door that opens straight into a dates edit (Birds-eye's Edit dates: the latest step's editor; Add send-by date:
+   *  the desktop's Edit journey, whose save is sendByFields) */
+  edit?: "dates" | "sendby" | null;
+  /** the tab to open on */
   tab?: PqsTab;
-  /** the bubble that has just been logged (it animates in) */
-  newKey?: string | null;
 }
 
-export const QuerySheet: React.FC<QuerySheetProps> = ({ id, back = false, tab: tab0 = "tracking", newKey = null }) => {
+export const QuerySheet: React.FC<QuerySheetProps> = ({ id, j: j0 = null, edit: edit0 = null, tab: tab0 = "tracking" }) => {
   const v = useV3Data();
   const db = useScriptAllyDb();
   const { showConfirm } = useToast();
@@ -136,13 +128,32 @@ export const QuerySheet: React.FC<QuerySheetProps> = ({ id, back = false, tab: t
   const foot: Foot1522 | null = useMemo(() => (d && vq ? footer1522({ ...(d.foot as NonNullable<typeof d.foot>), state: d.state, status: String(vq.row.status), first, nowMs }) : null), [d, vq, first, nowMs]);
 
   /* ── heights: half, full, or shut (drag, tap, dim) ── */
-  const [h, setH] = useState<"half" | "full">("half");
+  const [h, setH] = useState<"half" | "full">(j0 ? "full" : "half");
   const [shut, setShut] = useState(false);
   const [drag, setDrag] = useState<number | null>(null);
   const sheet = useRef<HTMLDivElement>(null);
   const close = useCallback(() => { setShut(true); setTimeout(() => closeV3(), 280); }, []);
-  /* a journey steps it back at full height (ref `startJ`: the drawer rises first) */
-  useEffect(() => { if (back) setH("full"); }, [back]);
+  /* ── a journey over the sheet (§C): the sheet rises to full, then steps back; Cancel brings it forward at the height
+     it was; a save drops the journey, the sheet comes forward updated, the new bubble animates in, the toast shows ── */
+  const [jr, setJr] = useState<PqjKind | null>(j0);
+  const before = useRef<"half" | "full">("half");
+  const back = jr != null;
+  const [newKey, setNewKey] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; undo: () => Promise<void>; n: number } | null>(null);
+  const openJ = (k: PqjKind) => { before.current = h; setMenu(null); setH("full"); setJr(k); };
+  const closeJ = () => { setJr(null); setH(before.current); };
+  useEffect(() => { if (j0) { before.current = "half"; setH("full"); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!toast) return undefined;
+    const t = window.setTimeout(() => setToast((x) => (x && x.n === toast.n ? null : x)), 4000);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+  const act = (a: FootAct) => {
+    const k = ACT_JOURNEY[a];
+    if (k === "nudge") { runAct("nudge", id); return; }
+    if (k === "tell") { runAct("offer", id); return; }
+    openJ(k);
+  };
   const grab = (e: React.PointerEvent) => {
     const el = sheet.current;
     if (!el) return;
@@ -167,9 +178,19 @@ export const QuerySheet: React.FC<QuerySheetProps> = ({ id, back = false, tab: t
   const body = useRef<HTMLDivElement>(null);
   /* a new bubble: Tracking scrolls to it */
   useEffect(() => { if (newKey && body.current) body.current.scrollTop = body.current.scrollHeight; }, [newKey, thread.length]);
+  useEffect(() => { if (!newKey) return undefined; const t = window.setTimeout(() => setNewKey(false), 1200); return () => window.clearTimeout(t); }, [newKey]);
 
   /* ── a step edited (the desktop's step editor, as a sheet over this one) ── */
   const [edit, setEdit] = useState<string | null>(null);
+  /* a door into the dates edit: the latest dated step's editor (the dates a query carries live on its steps) */
+  const datesFor = useRef(edit0);
+  useEffect(() => { if (edit0 === "sendby") { datesFor.current = null; openQueryDrawer({ mode: "edit", queryId: id }); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (datesFor.current !== "dates" || !d) return;
+    const latest = [...d.steps].filter((x) => x.activityId && !x.kind && x.ms != null).sort((a, b) => (a.ms ?? 0) - (b.ms ?? 0)).pop();
+    datesFor.current = null;
+    if (latest?.activityId) setEdit(latest.activityId);
+  }, [d]);
 
   /* ── ⋯ ── */
   const [menu, setMenu] = useState<null | "menu" | "move">(null);
@@ -260,7 +281,7 @@ export const QuerySheet: React.FC<QuerySheetProps> = ({ id, back = false, tab: t
               <div key={c.label} className="li"><span className="mi">{Ic.doc}</span><span className="lt">{c.label}</span>
                 {g.activityId && !g.pending ? <Pen k="mat" label={`Edit what went with ${g.heading.toLowerCase()}`} onClick={() => setEdit(g.activityId!)} /> : null}</div>
             )) : (
-              <button type="button" className="li ghost" data-pqs="mat-ghost" aria-label={g.pending ? "Log what went" : "Nothing yet"} onClick={() => { if (g.pending) act("sent", id); }}>
+              <button type="button" className="li ghost" data-pqs="mat-ghost" aria-label={g.pending ? "Log what went" : "Nothing yet"} onClick={() => { if (g.pending) act("sent"); }}>
                 <span className="mi" /><span className="gb" /><span className="gb s" />
               </button>
             )}
@@ -304,8 +325,8 @@ export const QuerySheet: React.FC<QuerySheetProps> = ({ id, back = false, tab: t
         </div>
         {menu === "menu" ? (
           <div className="pqs-mn" role="menu" data-pqs="menu">
-            {!closed ? <button type="button" role="menuitem" data-act="nudge" onClick={() => { setMenu(null); act("nudge", id); }}>Log a nudge</button> : null}
-            {!closed ? <button type="button" role="menuitem" data-act="close" onClick={() => { setMenu(null); act("close", id); }}>Close this query</button> : null}
+            {!closed ? <button type="button" role="menuitem" data-act="nudge" onClick={() => { setMenu(null); act("nudge"); }}>Log a nudge</button> : null}
+            {!closed ? <button type="button" role="menuitem" data-act="close" onClick={() => { setMenu(null); act("close"); }}>Close this query</button> : null}
             <button type="button" role="menuitem" data-act="move" onClick={() => setMenu("move")}>Move to another agent</button>
             <button type="button" role="menuitem" data-act="delete" className="red" onClick={askDelete}>Delete this query</button>
           </div>
@@ -339,11 +360,20 @@ export const QuerySheet: React.FC<QuerySheetProps> = ({ id, back = false, tab: t
             </div>
             {foot.button ? (
               <button type="button" className={`pri${solid ? "" : " out"}`} data-pqs="primary" data-act={foot.button.act} data-tone={foot.button.tone}
-                onClick={() => act(foot.button!.act, id)}>{foot.button.label}{solid ? Ic.arrow : null}</button>
+                onClick={() => act(foot.button!.act)}>{foot.button.label}{solid ? Ic.arrow : null}</button>
             ) : null}
           </div>
         ) : null}
       </div>
+      {jr ? <QueryJourney id={id} kind={jr} onClose={closeJ}
+        onSaved={(msg, undo) => { setJr(null); setH(before.current); setTab("tracking"); setNewKey(true); setToast((o) => ({ msg, undo, n: (o?.n ?? 0) + 1 })); }} /> : null}
+      {toast ? (
+        <div className="pqs-toast" role="status" data-pqs="toast" key={toast.n}>
+          <img src={ARCHIVIST} alt="" width={32} height={32} />
+          <span>{toast.msg}</span>
+          <button type="button" data-pqs="undo" onClick={() => { const u = toast.undo; setToast(null); void u(); }}>Undo</button>
+        </div>
+      ) : null}
       {edit ? <StepEditSheet q={q} ag={ag} ms={ms} steps={d.steps} evStore={view.evStore as unknown as Map<string, Record<string, unknown>>} activityId={edit}
         first={first} nowMs={nowMs} quietWeeks={v.quietWeeks} onClose={() => setEdit(null)} /> : null}
     </div>

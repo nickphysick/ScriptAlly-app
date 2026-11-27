@@ -34,7 +34,7 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
   let full = false;
   /* Phone query sheet v1 — every query door opens the one sheet, over the screen it came from (it draws its own dim) */
   if (o?.type === "query") {
-    body = v.byId.get(o.id) ? <QuerySheet key={o.id} id={o.id} /> : null;
+    body = v.byId.get(o.id) ? <QuerySheet key={o.id} id={o.id} j={o.j ?? null} edit={o.edit ?? null} /> : null;
     full = true;
   } else if (o?.type === "agent" && o.back?.type === "query") {
     /* the agent card over the query sheet: the sheet stays behind it */

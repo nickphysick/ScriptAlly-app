@@ -15,9 +15,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { V3Glyph } from "../v3/V3Parts";
 import { WeekSlider } from "../../forms/WeekSlider";
 import {
-  ACT_LABEL, bandOf, dm, edgeOf, fadedBand, fadedEdge, hatchOf, noDateDefault, SB_DEFAULT_WEEKS, searchRows, type BwAct, type BwRecap, type BwRow,
+  ACT_LABEL, bandOf, dm, edgeOf, fadedBand, fadedEdge, hatchOf, noDateDefault, searchRows, type BwAct, type BwRecap, type BwRow,
 } from "../../../lib/birdsWorld";
-import { STAGE_NAME } from "../../../lib/qcSummary";
 import { QUIET_FADE } from "./drawWorld";
 import { QueryStatus } from "../../../types";
 
@@ -108,27 +107,7 @@ export const NoDateSheet: React.FC<{
   );
 };
 
-/* ── an undated with-you query's send-by date (v3.1, Nick's ruling 4): the no-date sheet's slider, weeks from today ── */
-export const SendBySheet: React.FC<{ r: BwRow; nowMs: number; hawk: string; onClose: () => void; onSave: (weeks: number) => void }> = ({ r, nowMs, hawk, onClose, onSave }) => {
-  const [weeks, setWeeks] = useState(SB_DEFAULT_WEEKS);
-  useEffect(() => { setWeeks(SB_DEFAULT_WEEKS); }, [r.id]);
-  const at = (w: number) => dm(w * 7, nowMs), cur = r.ev[r.ev.length - 1];
-  return (
-    <Sheet k="sendby" onClose={onClose} className="bw-nds">
-      <div className="bw-ndh">
-        <img src={hawk} alt="" />
-        <span><em>No send-by date yet</em><b>{r.name}</b><small>{r.agency ? `${r.agency} · ` : ""}{cur ? `${(STAGE_NAME[cur.status as QueryStatus] ?? cur.status).replace(" requested", " asked for")} ${dm(cur.d, nowMs)}` : ""}</small></span>
-      </div>
-      <p className="bw-ndq">When will you send it by?</p>
-      <WeekSlider value={weeks} onChange={setWeeks} min={1} max={26} label="When will you send it by?" hideLabel readout={(n) => `${n} ${n === 1 ? "week" : "weeks"} · ${at(n)}`} />
-      <p className="bw-ndr" data-bw="sb-date">Send by <b>{at(weeks)}</b></p>
-      <div className="bw-ndf">
-        <button type="button" className="bw-skip" data-bw="sb-skip" onClick={onClose}>Not now</button>
-        <button type="button" className="bw-cta" data-bw="sb-save" onClick={() => onSave(weeks)}>Save</button>
-      </div>
-    </Sheet>
-  );
-};
+/* Phone query sheet v1 §D — v3.1's send-by sheet is retired: Add send-by date opens the query sheet's dates edit. */
 
 /* ── the long-press menu (ref `menuHTML`) ── */
 export const QuickMenu: React.FC<{ r: BwRow; acts: BwAct[]; x: number; y: number; vpW: number; vpH: number; onClose: () => void; onAct: (a: BwAct) => void }> = ({ r, acts, x, y, vpW, vpH, onClose, onAct }) => {

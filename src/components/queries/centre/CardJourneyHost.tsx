@@ -38,7 +38,11 @@ export const CardJourneyHost: React.FC<{
   onClose: () => void;
   onHandOver: (reply: "passed" | null) => void;
   leaveRef?: React.MutableRefObject<(() => void) | null>;
-}> = ({ queryId, kind, fromCard, onClose, onHandOver, leaveRef }) => {
+  /** Phone query sheet v1 — the phone's presentation of the same journey and save (QcCardJourney `phone`) */
+  phone?: boolean;
+  verb?: string;
+  onPhoneSaved?: (saved: CJSaved, head: [string, string]) => void;
+}> = ({ queryId, kind, fromCard, onClose, onHandOver, leaveRef, phone, verb, onPhoneSaved }) => {
   const scriptDb = useScriptAllyDb();
   const { currentUser, queries, agents, manuscripts, activities, versions, addJournalEntry, deleteJournalEntry } = scriptDb;
   const { showToast } = useToast();
@@ -147,5 +151,5 @@ export const CardJourneyHost: React.FC<{
     return { undo, counts: pv?.counts ?? [] };
   };
 
-  return <QcCardJourney spec={spec} ctx={ctx} previewOf={previewOf} onSave={onSave} rowOf={rowOf} onClose={onClose} onHandOver={onHandOver} fromCard={fromCard} leaveRef={leaveRef} />;
+  return <QcCardJourney spec={spec} ctx={ctx} previewOf={previewOf} onSave={onSave} rowOf={rowOf} onClose={onClose} onHandOver={onHandOver} fromCard={fromCard} leaveRef={leaveRef} phone={phone} verb={verb} onPhoneSaved={onPhoneSaved} />;
 };

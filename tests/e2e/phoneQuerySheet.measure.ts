@@ -60,3 +60,32 @@ test("Phone query sheet v1 — first look", async ({ page }, info) => {
   await page.screenshot({ path: `${out}/step-edit.png` });
   expect(await page.locator('[data-pqs="sheet"]').count()).toBe(1);
 });
+
+test("Phone query sheet v1 — journey look", async ({ page }, info) => {
+  test.skip(info.project.name !== "pixel" || !process.env.PQS_LOOK, "PQS_LOOK=1");
+  test.setTimeout(300_000);
+  page.setDefaultTimeout(15_000);
+  const out = `${DIR}/look`; mkdirSync(out, { recursive: true });
+  await signIn(page);
+  await queries(page);
+  /* a with-you row whose button is a solid "Mark … sent" */
+  for (let i = 0; i < 12; i++) {
+    const rows = page.locator('[data-pa4="qrow"][data-court="you"]:visible');
+    if (i >= await rows.count()) break;
+    await rows.nth(i).click(); await page.locator('[data-pqs="sheet"]').waitFor(); await frame(page, 500);
+    if ((await page.locator('[data-pqs="primary"]').getAttribute("data-act").catch(() => null)) === "sent") break;
+    await page.locator('[data-pqs="close"]').click(); await frame(page, 400);
+  }
+  await page.locator('[data-pqs="primary"]').click(); await frame(page, 900);
+  await page.screenshot({ path: `${out}/j1.png` });
+  for (let n = 2; n <= 6; n++) {
+    const big = page.locator('[data-pqj="journey"] .laq-big > button').first();
+    const go = page.locator('[data-pqj="journey"] [data-cj="go"], [data-pqj="journey"] [data-rar="go"]');
+    if (await go.count()) await go.first().click(); else if (await big.count()) await big.click(); else break;
+    await frame(page, 700);
+    await page.screenshot({ path: `${out}/j${n}.png` });
+    if (await page.locator('[data-pqj="journey"] [data-cj="save"]').count()) break;
+  }
+  await page.locator('[data-pqj="journey"] [data-cj="save"]').click(); await frame(page, 1400);
+  await page.screenshot({ path: `${out}/saved.png` });
+});
