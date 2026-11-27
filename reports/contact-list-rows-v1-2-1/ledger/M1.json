@@ -1,0 +1,3202 @@
+[
+ {
+  "where": "1280 · the card",
+  "ok": true,
+  "detail": "the list card is on screen"
+ },
+ {
+  "where": "1280 · population",
+  "ok": true,
+  "detail": "19 rows (want the fixture's 19)"
+ },
+ {
+  "where": "1280 · clr-achebe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-achebe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-achebe · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-achebe · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-achebe · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-achebe · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-achebe · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-achebe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-blackwood · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-blackwood · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-blackwood · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-blackwood · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-blackwood · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-blackwood · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-blackwood · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-blackwood · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-carey · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-carey · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-carey · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-carey · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-carey · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-carey · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-carey · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-carey · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-ellison · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-ellison · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ellison · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ellison · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ellison · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ellison · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ellison · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ellison · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-ferris · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-ferris · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ferris · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ferris · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ferris · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ferris · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ferris · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-ferris · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-holt · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-holt · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-holt · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-holt · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-holt · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-holt · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-holt · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-holt · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-hussain · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-hussain · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-hussain · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-hussain · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-hussain · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-hussain · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-hussain · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-hussain · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-lang · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-lang · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-lang · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-lang · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-lang · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-lang · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-lang · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-lang · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-morrow · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-morrow · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-morrow · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-morrow · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-morrow · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-morrow · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-morrow · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-morrow · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-okafor · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-okafor · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-okafor · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-okafor · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-okafor · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-okafor · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-okafor · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-okafor · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-pemberton · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-pemberton · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pemberton · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pemberton · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pemberton · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pemberton · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pemberton · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pemberton · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-pryce · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-pryce · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pryce · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pryce · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pryce · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pryce · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pryce · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-pryce · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-quinn · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-quinn · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-quinn · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-quinn · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-quinn · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-quinn · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-quinn · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-quinn · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-reed · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-reed · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-reed · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-reed · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-reed · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-reed · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-reed · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-reed · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-sandhu · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-sandhu · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-sandhu · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-sandhu · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-sandhu · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-sandhu · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-sandhu · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-sandhu · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-stirling · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-stirling · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-stirling · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-stirling · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-stirling · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-stirling · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-stirling · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-stirling · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-tan · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-tan · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-tan · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-tan · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-tan · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-tan · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-tan · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-tan · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-vane-coe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-vane-coe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-vane-coe · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-vane-coe · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-vane-coe · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-vane-coe · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-vane-coe · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-vane-coe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · clr-whitfield · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1280 · clr-whitfield · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-whitfield · fit left",
+  "ok": true,
+  "detail": "left 242.0 want 242.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-whitfield · genres left",
+  "ok": true,
+  "detail": "left 320.0 want 320.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-whitfield · policy left",
+  "ok": true,
+  "detail": "left 448.0 want 448.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-whitfield · status left",
+  "ok": true,
+  "detail": "left 600.0 want 600.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-whitfield · chev left",
+  "ok": true,
+  "detail": "left 770.0 want 770.0 (card 812, row 792)"
+ },
+ {
+  "where": "1280 · clr-whitfield · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 679.0 agent.r 665.0 gap 14"
+ },
+ {
+  "where": "1280 · expected template",
+  "ok": true,
+  "detail": "lefts 0,242,320,448,600,770"
+ },
+ {
+  "where": "1280 · heading agent on its column",
+  "ok": true,
+  "detail": "heading l 437.0 cell l 437.0"
+ },
+ {
+  "where": "1280 · heading fit on its column",
+  "ok": true,
+  "detail": "heading l 679.0 cell l 679.0"
+ },
+ {
+  "where": "1280 · heading genres on its column",
+  "ok": true,
+  "detail": "heading l 757.0 cell l 757.0"
+ },
+ {
+  "where": "1280 · heading policy on its column",
+  "ok": true,
+  "detail": "heading l 885.0 cell l 885.0"
+ },
+ {
+  "where": "1280 · heading status on its column",
+  "ok": true,
+  "detail": "heading l 1037.0 cell l 1037.0"
+ },
+ {
+  "where": "1440 · the card",
+  "ok": true,
+  "detail": "the list card is on screen"
+ },
+ {
+  "where": "1440 · population",
+  "ok": true,
+  "detail": "19 rows (want the fixture's 19)"
+ },
+ {
+  "where": "1440 · clr-achebe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-achebe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-achebe · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-achebe · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-achebe · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-achebe · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-achebe · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-achebe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-blackwood · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-blackwood · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-blackwood · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-blackwood · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-blackwood · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-blackwood · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-blackwood · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-blackwood · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-carey · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-carey · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-carey · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-carey · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-carey · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-carey · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-carey · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-carey · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-ellison · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-ellison · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ellison · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ellison · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ellison · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ellison · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ellison · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ellison · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-ferris · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-ferris · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ferris · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ferris · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ferris · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ferris · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ferris · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-ferris · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-holt · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-holt · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-holt · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-holt · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-holt · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-holt · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-holt · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-holt · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-hussain · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-hussain · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-hussain · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-hussain · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-hussain · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-hussain · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-hussain · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-hussain · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-lang · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-lang · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-lang · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-lang · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-lang · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-lang · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-lang · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-lang · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-morrow · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-morrow · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-morrow · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-morrow · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-morrow · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-morrow · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-morrow · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-morrow · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-okafor · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-okafor · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-okafor · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-okafor · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-okafor · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-okafor · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-okafor · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-okafor · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-pemberton · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-pemberton · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pemberton · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pemberton · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pemberton · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pemberton · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pemberton · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pemberton · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-pryce · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-pryce · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pryce · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pryce · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pryce · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pryce · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pryce · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-pryce · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-quinn · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-quinn · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-quinn · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-quinn · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-quinn · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-quinn · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-quinn · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-quinn · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-reed · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-reed · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-reed · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-reed · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-reed · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-reed · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-reed · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-reed · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-sandhu · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-sandhu · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-sandhu · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-sandhu · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-sandhu · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-sandhu · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-sandhu · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-sandhu · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-stirling · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-stirling · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-stirling · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-stirling · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-stirling · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-stirling · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-stirling · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-stirling · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-tan · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-tan · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-tan · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-tan · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-tan · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-tan · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-tan · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-tan · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-vane-coe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-vane-coe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-vane-coe · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-vane-coe · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-vane-coe · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-vane-coe · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-vane-coe · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-vane-coe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · clr-whitfield · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1440 · clr-whitfield · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-whitfield · fit left",
+  "ok": true,
+  "detail": "left 248.0 want 248.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-whitfield · genres left",
+  "ok": true,
+  "detail": "left 336.0 want 336.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-whitfield · policy left",
+  "ok": true,
+  "detail": "left 554.0 want 554.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-whitfield · status left",
+  "ok": true,
+  "detail": "left 730.0 want 730.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-whitfield · chev left",
+  "ok": true,
+  "detail": "left 922.0 want 922.0 (card 972, row 952)"
+ },
+ {
+  "where": "1440 · clr-whitfield · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 685.0 agent.r 669.0 gap 16"
+ },
+ {
+  "where": "1440 · expected template",
+  "ok": true,
+  "detail": "lefts 0,248,336,554,730,922"
+ },
+ {
+  "where": "1440 · heading agent on its column",
+  "ok": true,
+  "detail": "heading l 437.0 cell l 437.0"
+ },
+ {
+  "where": "1440 · heading fit on its column",
+  "ok": true,
+  "detail": "heading l 685.0 cell l 685.0"
+ },
+ {
+  "where": "1440 · heading genres on its column",
+  "ok": true,
+  "detail": "heading l 773.0 cell l 773.0"
+ },
+ {
+  "where": "1440 · heading policy on its column",
+  "ok": true,
+  "detail": "heading l 991.0 cell l 991.0"
+ },
+ {
+  "where": "1440 · heading status on its column",
+  "ok": true,
+  "detail": "heading l 1167.0 cell l 1167.0"
+ },
+ {
+  "where": "1600 · the card",
+  "ok": true,
+  "detail": "the list card is on screen"
+ },
+ {
+  "where": "1600 · population",
+  "ok": true,
+  "detail": "19 rows (want the fixture's 19)"
+ },
+ {
+  "where": "1600 · clr-achebe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-achebe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-achebe · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-achebe · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-achebe · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-achebe · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-achebe · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-achebe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-blackwood · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-blackwood · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-blackwood · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-blackwood · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-blackwood · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-blackwood · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-blackwood · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-blackwood · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-carey · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-carey · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-carey · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-carey · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-carey · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-carey · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-carey · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-carey · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-ellison · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-ellison · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ellison · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ellison · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ellison · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ellison · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ellison · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ellison · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-ferris · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-ferris · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ferris · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ferris · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ferris · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ferris · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ferris · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-ferris · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-holt · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-holt · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-holt · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-holt · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-holt · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-holt · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-holt · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-holt · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-hussain · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-hussain · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-hussain · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-hussain · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-hussain · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-hussain · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-hussain · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-hussain · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-lang · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-lang · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-lang · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-lang · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-lang · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-lang · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-lang · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-lang · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-morrow · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-morrow · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-morrow · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-morrow · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-morrow · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-morrow · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-morrow · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-morrow · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-okafor · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-okafor · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-okafor · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-okafor · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-okafor · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-okafor · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-okafor · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-okafor · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-pemberton · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-pemberton · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pemberton · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pemberton · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pemberton · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pemberton · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pemberton · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pemberton · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-pryce · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-pryce · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pryce · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pryce · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pryce · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pryce · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pryce · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-pryce · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-quinn · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-quinn · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-quinn · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-quinn · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-quinn · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-quinn · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-quinn · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-quinn · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-reed · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-reed · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-reed · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-reed · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-reed · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-reed · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-reed · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-reed · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-sandhu · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-sandhu · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-sandhu · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-sandhu · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-sandhu · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-sandhu · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-sandhu · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-sandhu · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-stirling · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-stirling · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-stirling · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-stirling · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-stirling · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-stirling · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-stirling · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-stirling · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-tan · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-tan · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-tan · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-tan · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-tan · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-tan · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-tan · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-tan · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-vane-coe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-vane-coe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-vane-coe · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-vane-coe · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-vane-coe · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-vane-coe · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-vane-coe · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-vane-coe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · clr-whitfield · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1600 · clr-whitfield · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-whitfield · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-whitfield · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-whitfield · policy left",
+  "ok": true,
+  "detail": "left 624.0 want 624.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-whitfield · status left",
+  "ok": true,
+  "detail": "left 828.0 want 828.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-whitfield · chev left",
+  "ok": true,
+  "detail": "left 1072.0 want 1072.0 (card 1132, row 1102)"
+ },
+ {
+  "where": "1600 · clr-whitfield · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 761.0 agent.r 737.0 gap 24"
+ },
+ {
+  "where": "1600 · expected template",
+  "ok": true,
+  "detail": "lefts 0,314,428,624,828,1072"
+ },
+ {
+  "where": "1600 · heading agent on its column",
+  "ok": true,
+  "detail": "heading l 447.0 cell l 447.0"
+ },
+ {
+  "where": "1600 · heading fit on its column",
+  "ok": true,
+  "detail": "heading l 761.0 cell l 761.0"
+ },
+ {
+  "where": "1600 · heading genres on its column",
+  "ok": true,
+  "detail": "heading l 875.0 cell l 875.0"
+ },
+ {
+  "where": "1600 · heading policy on its column",
+  "ok": true,
+  "detail": "heading l 1071.0 cell l 1071.0"
+ },
+ {
+  "where": "1600 · heading status on its column",
+  "ok": true,
+  "detail": "heading l 1275.0 cell l 1275.0"
+ },
+ {
+  "where": "1920 · the card",
+  "ok": true,
+  "detail": "the list card is on screen"
+ },
+ {
+  "where": "1920 · population",
+  "ok": true,
+  "detail": "19 rows (want the fixture's 19)"
+ },
+ {
+  "where": "1920 · clr-achebe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-achebe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-achebe · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-achebe · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-achebe · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-achebe · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-achebe · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-achebe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-blackwood · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-blackwood · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-blackwood · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-blackwood · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-blackwood · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-blackwood · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-blackwood · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-blackwood · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-carey · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-carey · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-carey · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-carey · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-carey · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-carey · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-carey · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-carey · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-ellison · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-ellison · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ellison · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ellison · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ellison · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ellison · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ellison · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ellison · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-ferris · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-ferris · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ferris · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ferris · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ferris · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ferris · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ferris · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-ferris · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-holt · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-holt · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-holt · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-holt · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-holt · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-holt · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-holt · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-holt · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-hussain · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-hussain · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-hussain · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-hussain · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-hussain · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-hussain · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-hussain · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-hussain · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-lang · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-lang · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-lang · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-lang · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-lang · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-lang · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-lang · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-lang · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-morrow · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-morrow · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-morrow · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-morrow · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-morrow · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-morrow · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-morrow · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-morrow · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-okafor · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-okafor · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-okafor · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-okafor · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-okafor · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-okafor · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-okafor · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-okafor · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-pemberton · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-pemberton · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pemberton · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pemberton · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pemberton · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pemberton · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pemberton · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pemberton · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-pryce · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-pryce · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pryce · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pryce · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pryce · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pryce · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pryce · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-pryce · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-quinn · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-quinn · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-quinn · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-quinn · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-quinn · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-quinn · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-quinn · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-quinn · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-reed · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-reed · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-reed · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-reed · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-reed · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-reed · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-reed · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-reed · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-sandhu · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-sandhu · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-sandhu · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-sandhu · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-sandhu · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-sandhu · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-sandhu · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-sandhu · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-stirling · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-stirling · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-stirling · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-stirling · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-stirling · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-stirling · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-stirling · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-stirling · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-tan · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-tan · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-tan · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-tan · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-tan · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-tan · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-tan · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-tan · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-vane-coe · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-vane-coe · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-vane-coe · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-vane-coe · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-vane-coe · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-vane-coe · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-vane-coe · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-vane-coe · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · clr-whitfield · cells",
+  "ok": true,
+  "detail": "cells [\"agent\",\"fit\",\"genres\",\"policy\",\"status\",\"chev\"]"
+ },
+ {
+  "where": "1920 · clr-whitfield · agent left",
+  "ok": true,
+  "detail": "left 0.0 want 0.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-whitfield · fit left",
+  "ok": true,
+  "detail": "left 314.0 want 314.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-whitfield · genres left",
+  "ok": true,
+  "detail": "left 428.0 want 428.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-whitfield · policy left",
+  "ok": true,
+  "detail": "left 716.0 want 716.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-whitfield · status left",
+  "ok": true,
+  "detail": "left 920.0 want 920.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-whitfield · chev left",
+  "ok": true,
+  "detail": "left 1164.0 want 1164.0 (card 1280, row 1194)"
+ },
+ {
+  "where": "1920 · clr-whitfield · fit = agent right + gap",
+  "ok": true,
+  "detail": "fit 903.0 agent.r 879.0 gap 24"
+ },
+ {
+  "where": "1920 · expected template",
+  "ok": true,
+  "detail": "lefts 0,314,428,716,920,1164"
+ },
+ {
+  "where": "1920 · heading agent on its column",
+  "ok": true,
+  "detail": "heading l 589.0 cell l 589.0"
+ },
+ {
+  "where": "1920 · heading fit on its column",
+  "ok": true,
+  "detail": "heading l 903.0 cell l 903.0"
+ },
+ {
+  "where": "1920 · heading genres on its column",
+  "ok": true,
+  "detail": "heading l 1017.0 cell l 1017.0"
+ },
+ {
+  "where": "1920 · heading policy on its column",
+  "ok": true,
+  "detail": "heading l 1305.0 cell l 1305.0"
+ },
+ {
+  "where": "1920 · heading status on its column",
+  "ok": true,
+  "detail": "heading l 1509.0 cell l 1509.0"
+ }
+]

@@ -1,0 +1,47 @@
+[
+ {
+  "where": "700 · precondition: pinned, with rows passed under",
+  "ok": true,
+  "detail": "stuck true rows under true"
+ },
+ {
+  "where": "700 · population: pixels sampled",
+  "ok": true,
+  "detail": "34895 pixels"
+ },
+ {
+  "where": "700 · only page colour (and the slim bar) above the headings",
+  "ok": true,
+  "detail": "0 of 34895 not page colour (rgb(242, 238, 232)) · "
+ },
+ {
+  "where": "1100 · precondition: pinned, with rows passed under",
+  "ok": true,
+  "detail": "stuck true rows under true"
+ },
+ {
+  "where": "1100 · population: pixels sampled",
+  "ok": true,
+  "detail": "34895 pixels"
+ },
+ {
+  "where": "1100 · only page colour (and the slim bar) above the headings",
+  "ok": true,
+  "detail": "0 of 34895 not page colour (rgb(242, 238, 232)) · "
+ },
+ {
+  "where": "1600 · precondition: pinned, with rows passed under",
+  "ok": true,
+  "detail": "stuck true rows under true"
+ },
+ {
+  "where": "1600 · population: pixels sampled",
+  "ok": true,
+  "detail": "34895 pixels"
+ },
+ {
+  "where": "1600 · only page colour (and the slim bar) above the headings",
+  "ok": true,
+  "detail": "0 of 34895 not page colour (rgb(242, 238, 232)) · "
+ }
+]

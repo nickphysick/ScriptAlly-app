@@ -1,0 +1,32 @@
+[
+ {
+  "where": "precondition: Carey unrated in the store",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "five buttons on hover",
+  "ok": true,
+  "detail": "opacities 1,1,1,1,1"
+ },
+ {
+  "where": "saved 4 (read back from the store)",
+  "ok": true,
+  "detail": "{\"starRating\":4}"
+ },
+ {
+  "where": "the card's own toast",
+  "ok": true,
+  "detail": "toast true"
+ },
+ {
+  "where": "the dash became four stars",
+  "ok": true,
+  "detail": "data-n 4"
+ },
+ {
+  "where": "keyboard: → → Enter saves 3",
+  "ok": true,
+  "detail": "{\"starRating\":3}"
+ }
+]

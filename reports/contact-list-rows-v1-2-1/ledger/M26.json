@@ -1,0 +1,12 @@
+[
+ {
+  "where": "GB home: Outside the UK, two agents",
+  "ok": true,
+  "detail": "{\"words\":\"Outside the UK\",\"n\":2}"
+ },
+ {
+  "where": "US home: Outside the US, counted against the US",
+  "ok": true,
+  "detail": "{\"words\":\"Outside the US\",\"n\":18}"
+ }
+]
