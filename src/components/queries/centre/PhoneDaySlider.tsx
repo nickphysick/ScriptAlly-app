@@ -9,12 +9,12 @@
  */
 import React from "react";
 import { WeekSlider } from "../../forms/WeekSlider";
+import { MONTHS_SHORT } from "../../../lib/dates";
 
 const DAY = 86_400_000;
 const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-export const wdmDay = (ms: number): string => { const d = new Date(ms); return `${WD[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`; };
+export const wdmDay = (ms: number): string => { const d = new Date(ms); return `${WD[d.getDay()]} ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
 
 /** the slider's days: from `minMs`'s day to two days before `nowMs` (null when there is no such day) */
 export function earlierSpan(minMs: number, nowMs: number): { from: number; to: number; n: number } | null {

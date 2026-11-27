@@ -12,11 +12,10 @@ import type { QcRow } from "../../../lib/qcSummary";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { bandInk, statusBand } from "../../../lib/stageColours";
 import { QueryStatus } from "../../../types";
+import { dayMonth } from "../../../lib/dates";
 import { V3Glyph } from "../../phone/v3/V3Parts";
 import { trackStage } from "../../phone/qsheet/track";
 
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const dm = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}`; };
 const TRACK: QueryStatus[] = [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.OFFER];
 const NEXT: Record<string, string> = { reply: "Reply expected by", sendBy: "Send by", offer: "Answer by" };
 
@@ -34,10 +33,10 @@ export const PhonePreviewCard: React.FC<{ row: QcRow; data: string; logged?: boo
         </span>
       </div>
       <div className="pf">
-        <div data-k="stage"><small>{STAGE_NAME[st as QueryStatus] ?? st}</small><b>{since != null ? dm(since) : "No date"}</b></div>
+        <div data-k="stage"><small>{STAGE_NAME[st as QueryStatus] ?? st}</small><b>{since != null ? dayMonth(since) : "No date"}</b></div>
         {row.expectedKind && row.court !== "closed" ? (
-          <div className="nx" data-k="next"><small>{NEXT[row.expectedKind] ?? "Next"}</small><b>{row.expectedMs != null ? dm(row.expectedMs) : "No date"}</b></div>
-        ) : <div data-k="next"><small>{row.court === "closed" ? "Closed" : "Next"}</small><b>{row.court === "closed" ? (row.lastMs != null ? dm(row.lastMs) : "—") : "—"}</b></div>}
+          <div className="nx" data-k="next"><small>{NEXT[row.expectedKind] ?? "Next"}</small><b>{row.expectedMs != null ? dayMonth(row.expectedMs) : "No date"}</b></div>
+        ) : <div data-k="next"><small>{row.court === "closed" ? "Closed" : "Next"}</small><b>{row.court === "closed" ? (row.lastMs != null ? dayMonth(row.lastMs) : "—") : "—"}</b></div>}
       </div>
     </div>
   );

@@ -362,6 +362,13 @@ export const QuerySheet: React.FC<QuerySheetProps> = ({ id, j: j0 = null, edit: 
               <button type="button" className={`pri${solid ? "" : " out"}`} data-pqs="primary" data-act={foot.button.act} data-tone={foot.button.tone}
                 onClick={() => act(foot.button!.act)}>{foot.button.label}{solid ? Ic.arrow : null}</button>
             ) : null}
+            {/* the desktop footer's other actions (QcCard152: `link`, then "{First} replied"), quieter, under the button */}
+            {foot.link || foot.replied ? (
+              <div className="pqs-ftl" data-pqs="foot-others">
+                {foot.link ? <button type="button" data-pqs="foot-link" data-act={foot.link.act} onClick={() => act(foot.link!.act)}>{foot.link.label}</button> : null}
+                {foot.replied ? <button type="button" data-pqs="foot-replied" data-act="resp" onClick={() => act("resp")}>{foot.replied.label}</button> : null}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

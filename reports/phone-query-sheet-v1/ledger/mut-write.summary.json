@@ -1,0 +1,7 @@
+{
+ "mut": "write",
+ "lock": "PQS-5",
+ "own": 2,
+ "other": 0,
+ "readings": 40
+}

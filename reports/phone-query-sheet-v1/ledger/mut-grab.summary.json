@@ -1,0 +1,7 @@
+{
+ "mut": "grab",
+ "lock": "PQS-3",
+ "own": 2,
+ "other": 3,
+ "readings": 40
+}

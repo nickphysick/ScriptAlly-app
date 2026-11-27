@@ -1,0 +1,7 @@
+{
+ "mut": "half",
+ "lock": "PQS-2",
+ "own": 5,
+ "other": 0,
+ "readings": 40
+}

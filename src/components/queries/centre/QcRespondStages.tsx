@@ -821,7 +821,7 @@ export const QcRespondStages: React.FC<QcRespondStagesProps> = (p) => {
     : s.step === "sent" ? (s.sub === "went" ? wentBody() : sentBody()) : s.step === "words" ? wordsBody() : s.step === "next" ? nextBody()
     : s.step === "by" ? byBody() : s.step === "others" ? othersBody() : checkBody();
   return (
-    <div ref={rootRef} className="laq rar" data-rar="root" data-step={s.step} data-sub={s.step === "sent" ? s.sub : undefined} style={toneStyle}>
+    <div ref={rootRef} className="laq rar" data-rar="root" data-step={s.step} data-kind={s.kind ?? ""} data-sub={s.step === "sent" ? s.sub : undefined} style={toneStyle}>
       <div className={`laq-in${bump ? " is-bump" : ""}`}>
         {top(false)}
         <div ref={sbRef} key={s.step === "sent" ? `sent:${s.sub}` : s.step} className={`laq-sb${s.dir && !reduce ? ` is-${s.dir}` : ""}${s.step === "check" ? " is-chk" : ""}`} data-rar="body">{body}</div>

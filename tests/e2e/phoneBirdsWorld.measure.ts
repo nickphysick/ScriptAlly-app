@@ -274,7 +274,7 @@ for (const mut of runs) {
         /* gone quiet: more than the setting's days past its date (the world publishes the setting); a tail that went quiet a
            day ago is too thin to draw at the fitted view, so it is read from the dates, not the bars */
         const qd = Number(document.querySelector<HTMLElement>('[data-bw="world"]')!.dataset.quietdays);
-        const rows = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((h) => ({ id: h.dataset.id!, top: h.getBoundingClientRect().top, quiet: h.dataset.dueday !== "" && Number(h.dataset.dueday) < 0 && -Number(h.dataset.dueday) > qd, you: h.dataset.you === "1", past: h.dataset.past === "1", closed: h.dataset.closed === "1", start: Number(h.dataset.start), due: h.dataset.dueday === "" ? null : Number(h.dataset.dueday) }))
+        const rows = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((h) => ({ id: h.dataset.id!, top: h.getBoundingClientRect().top, quiet: h.dataset.you !== "1" && h.dataset.dueday !== "" && Number(h.dataset.dueday) < 0 && -Number(h.dataset.dueday) > qd, /* Phone query sheet v1 §A: agents only */ you: h.dataset.you === "1", past: h.dataset.past === "1", closed: h.dataset.closed === "1", start: Number(h.dataset.start), due: h.dataset.dueday === "" ? null : Number(h.dataset.dueday) }))
           .filter((x) => x.top > lo && x.top < hi).sort((a, b) => a.top - b.top);
         return { n: heads[i]?.n ?? 0, rows };
       });
@@ -842,16 +842,14 @@ for (const mut of runs) {
           L.check("BW-31", "no chip (and no no-date fade) on its bar", chips === 0, String(chips));
           const m = await openMenu(u.bar);
           L.check("BW-31", "its menu: I’ve sent it · Add send-by date · Open query · Edit dates", m.open && m.id === u.id && m.acts.join("|") === "I’ve sent it|Add send-by date|Open query|Edit dates", JSON.stringify(m));
-          await page.locator('[data-bw="menu-act"][data-act="sendby"]').click({ timeout: 4000 }).catch(() => {}); await frame(page, 600);
-          const sh = await page.evaluate(() => ({ open: !!document.querySelector('[data-bw="sheet"][data-k="sendby"]'), q: document.querySelector('[data-bw="sheet"][data-k="sendby"] .bw-ndq')?.textContent ?? "", date: document.querySelector('[data-bw="sb-date"]')?.textContent ?? "", w: (document.querySelector('[data-bw="sheet"][data-k="sendby"] input[type="range"]') as HTMLInputElement | null)?.value ?? "" }));
-          const in14 = new Date(Date.now() + 14 * 86_400_000).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).replace("Sept", "Sep");
-          L.check("BW-31", `"Add send-by date" opens "When will you send it by?", two weeks from today ("${sh.date}")`, sh.open && sh.q === "When will you send it by?" && sh.w === "2" && sh.date === `Send by ${in14}`, JSON.stringify(sh));
-          if (sh.open) {
-            await page.locator('[data-bw="sb-save"]').click({ timeout: 4000 }).catch(() => {}); await frame(page, 2500);
-            const after = await page.evaluate((i) => { const h = document.querySelector<HTMLElement>(`[data-bw="row"][data-id="${CSS.escape(i)}"]`); const bars = [...document.querySelectorAll<HTMLElement>(`[data-bw="bar"][data-row="${CSS.escape(i)}"]`)].map((b) => b.getBoundingClientRect().right); return { due: h?.dataset.dueday ?? "gone", right: bars.length ? Math.max(...bars) : null }; }, u.id);
-            const r = await root(page);
-            L.check("BW-31", `saving sets the send-by date, and the bar runs to it (due day ${after.due}, bar to ${after.right?.toFixed(1)} vs ${dayX(r, 14).toFixed(1)})`, after.due === "14" && after.right != null && Math.abs(after.right - dayX(r, 14)) < 3, JSON.stringify(after));
-          }
+          /* Phone query sheet v1 §D: Add send-by date opens the one query sheet, then the desktop's Edit journey over it
+             (its save is sendByFields, measured with the desktop's journeys); v3.1's own send-by sheet is retired */
+          await page.locator('[data-bw="menu-act"][data-act="sendby"]').click({ timeout: 4000 }).catch(() => {}); await frame(page, 1200);
+          const sh = await page.evaluate((qid) => ({ sheet: document.querySelector<HTMLElement>('[data-pqs="root"]')?.dataset.id ?? "", edit: document.querySelector<HTMLElement>('[data-pf="edit"]') ? "edit" : "", old: !!document.querySelector('[data-bw="sheet"][data-k="sendby"]'), qid }), u.id);
+          L.check("BW-31", `"Add send-by date" opens the query sheet (${sh.sheet}) with the desktop's Edit journey over it (${sh.edit || "none"})`, sh.sheet === u.id && sh.edit === "edit" && !sh.old, JSON.stringify(sh));
+          await page.locator('[data-pf="edit"] [aria-label="Close"], [data-pf="edit"] button[data-qad="close"]').first().click({ timeout: 2000 }).catch(() => {}); await frame(page, 400);
+          await page.keyboard.press("Escape").catch(() => {}); await frame(page, 300);
+          await page.locator('[data-pqs="close"]').click({ timeout: 2000 }).catch(() => {}); await frame(page, 500);
         }
       }
       await fitted(page);

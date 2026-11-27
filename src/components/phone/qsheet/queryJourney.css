@@ -28,6 +28,8 @@
   .pqj .laq :is(p, span, b, button, label, li, em, i, small, strong, input, textarea) { font-family: var(--pa-sans) !important; }
   .pqj .laq :is(.flh-t, .flh-t *, .laq-qh, .laq-qh *) { font-family: var(--pa-type) !important; }
   .pqj .laq .laq-qh { font-size: 20px; line-height: 1.3; }
+  /* the app's slider labels its ends and its Unknown at 9px (forms.css); on the phone no text is under 12px (PQS-10) */
+  .pqj .laq .laq-wkb .sa-wk-ends, .pqj .laq .laq-wkb .sa-wk-ends span, .pqj .laq .laq-wkb .sa-wk-unkbtn { font-size: 12px !important; }
 
   /* the review's card (ref `.pv`) */
   .pqj-pv { margin: 0 0 14px; border-radius: 16px; overflow: hidden; box-shadow: var(--ps-sh-card); border: 1px solid var(--pa-rule); }
