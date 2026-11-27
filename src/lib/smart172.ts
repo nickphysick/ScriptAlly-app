@@ -75,9 +75,14 @@ export const dueDays172 = (r: QcRow, now: number): number | null => (r.expectedM
 export function dueIn172(r: QcRow, now: number, side: "agent" | "you", d: Due172, b: { min: number; max: number }): boolean {
   if (sideOf172(r, now) !== side) return false;
   const n = dueDays172(r, now);
-  if (n == null) return d.nd;
+  if (n == null) return d.nd && undated172(r, now, side);
   return (d.lo <= b.min || n >= d.lo) && (d.hi >= b.max || n <= d.hi);
 }
+
+/** an undated query the field's "Not dated" counts: on your side every one; on the agent's side only those simply
+ *  waiting — exactly Birds-eye's "Waiting, no reply date" (an undated query that needs chasing is not "waiting") */
+export const undated172 = (r: QcRow, now: number, side: "agent" | "you"): boolean =>
+  dueDays172(r, now) == null && (side === "you" || whoOf172(r, now) === "wait");
 
 /* the applied row's chips for the smart panel: one per set section, each removable on its own */
 const COUNTRY172: Record<string, string> = { GB: "UK", US: "US", IE: "Ireland", AU: "Australia", CA: "Canada", DE: "Germany", NZ: "New Zealand" };

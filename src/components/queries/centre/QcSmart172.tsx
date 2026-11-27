@@ -9,7 +9,7 @@
  */
 import React, { useMemo, useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
-import { stageOn172, stageText172, resetPart172, dueText172, REPLY172, SENDBY172, dueDays172, dueOn172, sideOf172, method172, pass172, smartOn172, stageIdx172, whoOf172, type Ctx172, type Smart172 } from "../../../lib/smart172";
+import { stageOn172, stageText172, resetPart172, dueText172, REPLY172, SENDBY172, dueDays172, dueOn172, sideOf172, undated172, method172, pass172, smartOn172, stageIdx172, whoOf172, type Ctx172, type Smart172 } from "../../../lib/smart172";
 import { METHOD_ICON } from "./QcRow170";
 import "./qcv172.css";
 
@@ -245,7 +245,7 @@ const DueRange172: React.FC<{ k: "date" | "sendby"; title: string; side: "agent"
   const d = s[k];
   const mine = rows.filter((r) => sideOf172(r, ctx.nowMs) === side && pass172(r, s, ctx, k));
   const days = mine.map((r) => dueDays172(r, ctx.nowMs));
-  const undated = days.filter((x) => x == null).length;
+  const undated = mine.filter((r) => undated172(r, ctx.nowMs, side)).length;
   const span = b.max - b.min, cols = span / 7;
   const hist = Array.from({ length: cols }, (_, i) => days.filter((x) => x != null && Math.min(b.max - 1, Math.max(b.min, x)) >= b.min + i * 7 && Math.min(b.max - 1, Math.max(b.min, x)) < b.min + (i + 1) * 7).length);
   const hmax = Math.max(1, ...hist);

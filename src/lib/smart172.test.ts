@@ -9,7 +9,7 @@
 import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
 import { row154 } from "../components/queries/centre/qc154.fixture";
-import { EMPTY172, REPLY172, SENDBY172, group172, pass172, sanitiseSmart172, tier172, type Ctx172 } from "./smart172";
+import { EMPTY172, REPLY172, SENDBY172, group172, pass172, sanitiseSmart172, tier172, undated172, type Ctx172 } from "./smart172";
 import type { QcRow } from "./qcSummary";
 
 const DAY = 86_400_000;
@@ -58,6 +58,22 @@ describe("v172 · the two date fields", () => {
     expect(pass172(youLate, both, ctx)).toBe(true);
     expect(pass172(agentLate, both, ctx)).toBe(true);
     expect(pass172(agentLate, { ...EMPTY172, sendby: both.sendby }, ctx)).toBe(false);
+  });
+});
+
+describe("v172 · the reply date's Not dated is Birds-eye's Waiting, no reply date", () => {
+  const waiting = at("w", QueryStatus.QUERIED, "agent", { expectedMs: null, stageStartMs: NOW - 5 * DAY });
+  const chase = at("c", QueryStatus.QUERIED, "agent", { expectedMs: null, stageStartMs: NOW - 120 * DAY });
+  it("an undated query simply waiting counts; one gone quiet (Needs chasing) does not", () => {
+    expect(group172([waiting], NOW)[0].key).toBe("nodate");
+    expect(undated172(waiting, NOW, "agent")).toBe(true);
+    expect(group172([chase], NOW)[0].key).toBe("action");
+    expect(undated172(chase, NOW, "agent")).toBe(false);
+  });
+  it("with the reply date set and Not dated ticked, the waiting one passes and the chase does not", () => {
+    const s = { ...EMPTY172, date: { lo: REPLY172.min, hi: 0, nd: true } };
+    expect(pass172(waiting, s, ctx)).toBe(true);
+    expect(pass172(chase, s, ctx)).toBe(false);
   });
 });
 
