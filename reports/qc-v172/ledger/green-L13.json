@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L13",
+  "where": "population",
+  "ok": true,
+  "detail": "122 reached, 158 future"
+ },
+ {
+  "lock": "L13",
+  "where": "every reached step has a date line",
+  "ok": true,
+  "detail": "all dated or dashed"
+ },
+ {
+  "lock": "L13",
+  "where": "future steps have none",
+  "ok": true,
+  "detail": "none"
+ }
+]

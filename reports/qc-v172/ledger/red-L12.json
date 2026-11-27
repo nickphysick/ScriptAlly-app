@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "L12",
+  "where": "population",
+  "ok": true,
+  "detail": "16 rows"
+ },
+ {
+  "lock": "L12",
+  "where": "population · a row with no stage start recorded",
+  "ok": true,
+  "detail": "Ottoline Frayn"
+ },
+ {
+  "lock": "L12",
+  "where": "every one has a reason line",
+  "ok": false,
+  "detail": "Ottoline Frayn (Send your full)"
+ }
+]

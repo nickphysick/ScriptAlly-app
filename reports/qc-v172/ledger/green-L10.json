@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L10",
+  "where": "the Sent section is drawn",
+  "ok": true,
+  "detail": "Sent section"
+ },
+ {
+  "lock": "L10",
+  "where": "population · a counted bar",
+  "ok": true,
+  "detail": "11 bars, 5 counted"
+ },
+ {
+  "lock": "L10",
+  "where": "≤ 26 bars",
+  "ok": true,
+  "detail": "11 bars"
+ },
+ {
+  "lock": "L10",
+  "where": "every counted bar ≥ 3px wide",
+  "ok": true,
+  "detail": "0 under 3px (18.5, 18.5, 18.5, 18.5…)"
+ },
+ {
+  "lock": "L10",
+  "where": "a year on the scale",
+  "ok": true,
+  "detail": "[\"Apr ’24\",\"Jan ’25\",\"Jan ’26\"]"
+ },
+ {
+  "lock": "L10",
+  "where": "one step of the right handle changes the summary",
+  "ok": true,
+  "detail": "before \"any time\" · after \"Q2 ’24 – Sep ’26\""
+ }
+]

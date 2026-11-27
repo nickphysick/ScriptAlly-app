@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "L11",
+  "where": "both date fields",
+  "ok": true,
+  "detail": "[{\"t\":\"Agent’s reply date\",\"a\":\"8w ago\",\"b\":\"12w ahead\"},{\"t\":\"Your send-by date\",\"a\":\"4w ago\",\"b\":\"8w ahead\"}]"
+ },
+ {
+  "lock": "L11",
+  "where": "Agent’s reply date · left end",
+  "ok": false,
+  "detail": "\"8w ago\""
+ },
+ {
+  "lock": "L11",
+  "where": "Agent’s reply date · right end",
+  "ok": false,
+  "detail": "\"12w ahead\""
+ },
+ {
+  "lock": "L11",
+  "where": "Your send-by date · left end",
+  "ok": false,
+  "detail": "\"4w ago\""
+ },
+ {
+  "lock": "L11",
+  "where": "Your send-by date · right end",
+  "ok": false,
+  "detail": "\"8w ahead\""
+ }
+]

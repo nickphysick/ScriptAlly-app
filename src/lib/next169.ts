@@ -38,7 +38,9 @@ export function next169(r: QcRow, nowMs: number): Next169 {
   if (isClosedRow(r) || r.court === "closed") return { value: "Closed", line: null, hot: false, bar: null };
   const act = rowAct(r, nowMs);
   const st = stateOf(r);
-  const asked = ago(r.stageStartMs, nowMs);
+  /* when the stage has no start recorded, the date it reached that stage in its history (the track's own date) */
+  const curStart = r.stageStartMs ?? (r.history?.spans ?? []).filter((x) => Number.isFinite(x.startMs)).map((x) => x.startMs).sort((a, b) => b - a)[0] ?? null;
+  const asked = ago(curStart, nowMs);
   if (r.court === "offer" || r.status === QueryStatus.OFFER) return { value: "Answer the offer", line: asked ? `offered ${asked}` : null, hot: true, bar: null };
   if (r.court === "you" || r.withYou) {
     const by = r.expectedMs;
