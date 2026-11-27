@@ -134,19 +134,29 @@ export function chipForCourt(court: string | null | undefined): BwFilter {
 }
 
 /* ── the groups ── */
-export const BW_GROUPS = ["Needs chasing", "Nearly there", "Plenty of time", "With you", "No reply date yet", "Closed"] as const;
+/* v3.2 (Nick's ruling: too many groups): "Nearly there" and "Plenty of time" are retired, and "Needs chasing" and "With
+   you" fold into one group, Needs action. These are the groups' ids (and their fold keys); a heading follows the pill. */
+export const BW_GROUPS = ["Needs action", "Within their window", "No reply date yet", "Closed"] as const;
 export type BwGroupName = (typeof BW_GROUPS)[number];
+/** a group's heading under a pill: Needs action reads "With you" under With you and "Needs chasing" under Needs chasing */
+export function groupLabel(t: BwGroupName, f: BwFilter): string {
+  if (t !== "Needs action") return t;
+  return f === "you" ? PILL_LABEL.you : f === "chase" ? PILL_LABEL.chase : t;
+}
+/** saved folds: only today's group ids carry; a retired name (or v3's "Needs chasing" / "With you") is dropped */
+export const keepFolds = (names: readonly string[]): string[] => names.filter((n) => (BW_GROUPS as readonly string[]).includes(n));
 const byKk = (a: BwRow, b: BwRow) => kk(b) - kk(a) || a.name.localeCompare(b.name);
-/** the groups under a pill, in order, each most elapsed first (No reply date yet: under All and Waiting; Closed: the
- *  latest closed first, under All only) */
-export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all"): { t: BwGroupName; rows: BwRow[] }[] {
+/** the groups under a pill, in order (v3.2). Needs action: every query past its reply date with the agent, and every
+ *  query with you (undated ones too), mixed in one order, the largest share of its window used first (`kk`, the measure
+ *  v3 split Nearly there from Plenty of time by). Within their window: with the agent and not yet past the date, the same
+ *  sort. No reply date yet: under All and Waiting. Closed: the latest closed first, under All only. */
+export function bwGroups(rows: readonly BwRow[], f: BwFilter = "all"): { t: BwGroupName; label: string; rows: BwRow[] }[] {
   const drawn = rows.filter((r) => isDrawn(r) && inPill(r, f));
-  const them = drawn.filter((r) => !r.you).sort(byKk), you = drawn.filter((r) => r.you).sort(byKk);
-  const ch = them.filter(isChase), wt = them.filter((r) => !isChase(r));
+  const action = drawn.filter((r) => r.you || isChase(r)).sort(byKk), within = drawn.filter((r) => !r.you && !isChase(r)).sort(byKk);
   const closed = f === "all" ? rows.filter((r) => r.closed && r.ev.length).sort((a, b) => start(b) - start(a) || a.name.localeCompare(b.name)) : [];
   const nd = f === "all" || f === "wait" ? rows.filter((r) => isNoDate(r) && inPill(r, f)).sort(byKk) : [];
-  const defs: [BwGroupName, BwRow[]][] = [["Needs chasing", ch], ["Nearly there", wt.filter((r) => kk(r) >= 0.75)], ["Plenty of time", wt.filter((r) => kk(r) < 0.75)], ["With you", you], ["No reply date yet", nd], ["Closed", closed]];
-  return defs.filter(([, r]) => r.length).map(([t, r]) => ({ t, rows: r }));
+  const defs: [BwGroupName, BwRow[]][] = [["Needs action", action], ["Within their window", within], ["No reply date yet", nd], ["Closed", closed]];
+  return defs.filter(([, r]) => r.length).map(([t, r]) => ({ t, label: groupLabel(t, f), rows: r }));
 }
 /** the open queries with no reply date, in the order the no-date sheet walks them */
 export const noDateRows = (rows: readonly BwRow[]): BwRow[] => rows.filter(isNoDate).sort(byKk);
@@ -284,7 +294,7 @@ export const spaced = (m: readonly [number, string, boolean][]): [number, string
 /* ── the world: layout and the mapping between world and screen ── */
 export interface BwPlaced { r: BwRow; y: number }
 /** a group as laid out: `n` its count (folded or not), `h` the world height its rows take (a folded group keeps 1.3 rows) */
-export interface BwG { t: BwGroupName; y: number; h: number; n: number; folded: boolean; rows: BwPlaced[] }
+export interface BwG { t: BwGroupName; label: string; y: number; h: number; n: number; folded: boolean; rows: BwPlaced[] }
 export interface BwLevelStop { t: "All" | "Months" | "Weeks"; z: number }
 export interface BwView { z: number; ox: number; oy: number }
 export interface World {
@@ -320,9 +330,9 @@ export interface WorldOpts {
 export function makeWorld(o: WorldOpts): World {
   const { vpW, vpH, bot, filter } = o, land = !!o.land;
   let y = 0;
-  const G: BwG[] = bwGroups(o.rows, filter).map(({ t, rows: rows0 }) => {
+  const G: BwG[] = bwGroups(o.rows, filter).map(({ t, label, rows: rows0 }) => {
     const folded = !!o.folded?.has(t), rows = folded ? [] : rows0, h = folded ? RH * 1.3 : rows.length * RH;
-    const g: BwG = { t, y, h, n: rows0.length, folded, rows: rows.map((r, i) => ({ r, y: y + GAP + i * RH })) };
+    const g: BwG = { t, label, y, h, n: rows0.length, folded, rows: rows.map((r, i) => ({ r, y: y + GAP + i * RH })) };
     y += GAP + h; return g;
   });
   const FOOT = 8;

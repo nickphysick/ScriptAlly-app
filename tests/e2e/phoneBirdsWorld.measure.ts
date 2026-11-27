@@ -40,13 +40,15 @@ const UID = Object.keys(HARNESS.docs).find((k) => /^users\/[^/]+$/.test(k))!.spl
 
 const MUTS = ["fitted", "dates", "names", "days", "cont", "quiet", "counts", "seventy", "copy", "layers", "offline", "calm", "land", "replay",
   "pillfit", "heads", "calmzoom", "levels", "press", "search", "news", "nodate", "pull", "empty",
-  "reopen", "titles", "passed", "sendby"] as const;
+  "reopen", "titles", "passed", "sendby",
+  "groups", "pillhead", "order", "switch", "cutoff"] as const;
 type Mut = (typeof MUTS)[number] | "";
 const MUT_LOCK: Record<Exclude<Mut, "">, string> = {
   fitted: "BW-1", dates: "BW-4", names: "BW-5", days: "BW-6", cont: "BW-7", quiet: "BW-8", counts: "BW-9", seventy: "BW-10", empty: "BW-11",
   replay: "BW-12", copy: "BW-13", layers: "BW-14", offline: "BW-15", calm: "BW-17", land: "BW-18",
   pillfit: "BW-19", heads: "BW-20", calmzoom: "BW-21", levels: "BW-22", press: "BW-23", search: "BW-24", news: "BW-25", nodate: "BW-26", pull: "BW-27",
   reopen: "BW-28", titles: "BW-29", passed: "BW-30", sendby: "BW-31",
+  groups: "BW-32", pillhead: "BW-33", order: "BW-34", switch: "BW-35", cutoff: "BW-36",
 };
 const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   dates: '.bw-bar[data-k="stage"] { margin-left: 6px !important; }',
@@ -76,6 +78,10 @@ const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   passed: ".bw-ndp { display: none !important; }",
   /* BW-31: "Add send-by date" gone from the menu */
   sendby: '[data-bw="menu-act"][data-act="sendby"] { display: none !important; }',
+  /* BW-35: the chip gone, so the switch at rest shows no button */
+  switch: ".bw-zc.lvl .bw-lvchip { display: none !important; }",
+  /* BW-36: the switch placed the old way's worst case, under the dock */
+  cutoff: ".bw .bw-zc { bottom: 8px !important; }",
 };
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -113,6 +119,9 @@ const frame = (page: Page, ms = 450) => page.waitForTimeout(ms);
 const offPE = (page: Page) => page.addStyleTag({ content: ".bw-hsw, .bw-hs, .bw-gh0, .bw-fline, .bw-ruler, .bw-inm, .bw-ovd { pointer-events: none !important; }" });
 /** a level by its button (v3 snaps every zoom to a level) */
 async function level(page: Page, t: "All" | "Months" | "Weeks") {
+  /* v3.2: the switch rests as one chip; open it first */
+  const chip = page.locator('[data-bw="level-chip"]');
+  if (await chip.count()) { await chip.click({ timeout: 3000 }).catch(() => {}); await frame(page, 250); }
   const b = page.locator(`[data-bw="level"][data-t="${t}"]`);
   if (!(await b.count())) return false;
   await b.click({ timeout: 3000 }).catch(() => {}); await frame(page, 700);
@@ -221,6 +230,76 @@ for (const mut of runs) {
       L.check("BW-1", "fitted: the pill reads Today, the header is unfolded (140px)", (await box(page, '[data-bw="pill"]'))[0]?.text.trim() === "Today" && (await box(page, '[data-bw="head"]'))[0]?.h === 140, "");
     }
 
+    /* ── BW-32 · under All the headings are exactly Needs action, Within their window, No reply date yet, Closed (those
+          present), never "Nearly there" or "Plenty of time" ── */
+    const headText = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-bw="group"] .ghu')].map((g) => [...g.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim()));
+    if (on("BW-32")) { stamp("BW-32");
+      await fitted(page);
+      if (mut === "groups") await page.evaluate(() => { const g = document.querySelectorAll<HTMLElement>('[data-bw="group"] .ghu')[1]; const t = g && [...g.childNodes].find((n) => n.nodeType === 3); if (t) t.textContent = "Nearly there"; });
+      const heads = await headText();
+      const want = ["Needs action", "Within their window", "No reply date yet", "Closed"];
+      L.check("BW-32", `under All the headings read ${heads.join(" · ")}`, heads.length >= 3 && heads.join("|") === want.filter((t) => heads.includes(t)).join("|") && heads.every((h) => want.includes(h)), JSON.stringify(heads));
+      L.check("BW-32", "no heading reads Nearly there or Plenty of time", !heads.some((h) => /Nearly there|Plenty of time/.test(h)), JSON.stringify(heads));
+    }
+
+    /* ── BW-33 · the heading follows the pill: With you → "With you", Needs chasing → "Needs chasing"; the pills add up ── */
+    if (on("BW-33")) { stamp("BW-33");
+      const got: Record<string, string[]> = {};
+      for (const k of ["you", "chase"]) {
+        await pill(page, k);
+        if (mut === "pillhead") await page.evaluate(() => { const g = document.querySelector<HTMLElement>('[data-bw="group"] .ghu'); const t = g && [...g.childNodes].find((n) => n.nodeType === 3); if (t) t.textContent = "Needs action"; });
+        got[k] = await headText();
+        await pill(page, k);
+      }
+      L.check("BW-33", "under With you the one group is headed \"With you\"", got.you.join("|") === "With you", JSON.stringify(got.you));
+      L.check("BW-33", "under Needs chasing the one group is headed \"Needs chasing\"", got.chase.join("|") === "Needs chasing", JSON.stringify(got.chase));
+      const chips = await box(page, '[data-bw="chip"]');
+      const n = Object.fromEntries(chips.map((c) => [c.d.k, Number(c.d.n)]));
+      L.check("BW-33", `the pills: All ${n.all} = With you ${n.you} + Needs chasing ${n.chase} + Waiting ${n.wait}`, n.all > 0 && n.all === n.you + n.chase + n.wait && chips.map((c) => c.text.replace(/\s*\d+\s*$/, "").trim()).join("|") === "All|With you|Needs chasing|Waiting", JSON.stringify(n));
+    }
+
+    /* ── BW-34 · Needs action holds every chasing and every with-you query, ordered by share of window used, most first ── */
+    if (on("BW-34")) { stamp("BW-34");
+      await fitted(page);
+      if (mut === "order") await page.evaluate(() => { const g = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top); const [a, b] = [g[0], g[3]]; if (a && b) { const t = a.style.top; a.style.top = b.style.top; b.style.top = t; } });
+      const r = await page.evaluate(() => {
+        const heads = [...document.querySelectorAll<HTMLElement>('[data-bw="group"]')].map((g) => ({ g: g.dataset.g!, n: Number(g.dataset.n), top: g.getBoundingClientRect().top })).sort((a, b) => a.top - b.top);
+        const i = heads.findIndex((h) => h.g === "Needs action"), lo = heads[i]?.top ?? 0, hi = heads[i + 1]?.top ?? Infinity;
+        const rows = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((h) => ({ id: h.dataset.id!, top: h.getBoundingClientRect().top, you: h.dataset.you === "1", past: h.dataset.past === "1", closed: h.dataset.closed === "1", start: Number(h.dataset.start), due: h.dataset.dueday === "" ? null : Number(h.dataset.dueday) }))
+          .filter((x) => x.top > lo && x.top < hi).sort((a, b) => a.top - b.top);
+        return { n: heads[i]?.n ?? 0, rows };
+      });
+      const chips = Object.fromEntries((await box(page, '[data-bw="chip"]')).map((c) => [c.d.k, Number(c.d.n)]));
+      const share = (x: { start: number; due: number | null }) => (x.due == null ? -x.start / 60 : -x.start / Math.max(7, x.due - x.start));
+      const bad = r.rows.slice(1).map((x, i) => ({ a: r.rows[i], b: x })).filter(({ a, b }) => share(b) > share(a) + 1e-9);
+      const mixed = r.rows.some((x, i) => i > 0 && x.you !== r.rows[i - 1].you);
+      L.check("BW-34", `Needs action holds every with-you (${chips.you}) and chasing (${chips.chase}) query: ${r.rows.length} rows`, r.rows.length === chips.you + chips.chase && r.n === r.rows.length && r.rows.every((x) => x.you || x.past), JSON.stringify({ n: r.n, rows: r.rows.length }));
+      L.check("BW-34", "ordered by share of window used, most first (with-you and chasing mixed in one order)", bad.length === 0 && mixed, JSON.stringify(bad.slice(0, 3).map(({ a, b }) => [a.id, share(a).toFixed(3), b.id, share(b).toFixed(3)])));
+    }
+
+    /* ── BW-35 · the switch: one button at rest; tap it, three; pick one, it snaps and folds; a tap on the world folds it
+          with no level change ── */
+    if (on("BW-35")) { stamp("BW-35");
+      await fitted(page);
+      const sw = () => page.evaluate(() => { const c = document.querySelector<HTMLElement>('[data-bw="levels"]')!; const bs = [...c.querySelectorAll<HTMLElement>("button")].filter((b) => b.getClientRects().length && getComputedStyle(b).display !== "none"); return { n: bs.length, texts: bs.map((b) => b.textContent?.trim()), chip: c.querySelector<HTMLElement>('[data-bw="level-chip"]')?.getAttribute("aria-label") ?? null, expanded: c.querySelector<HTMLElement>('[data-bw="level-chip"]')?.getAttribute("aria-expanded") ?? null, pressed: bs.map((b) => b.getAttribute("aria-pressed")), h: bs[0]?.getBoundingClientRect().height ?? 0, bg: bs[0] ? getComputedStyle(bs[0]).backgroundColor : "" }; });
+      const rest = await sw();
+      L.check("BW-35", `at rest one button, "${rest.chip}", aria-expanded false, 40px, navy`, rest.n === 1 && rest.chip === "Zoom level: All" && rest.expanded === "false" && Math.abs(rest.h - 40) < 0.5 && rest.bg === "rgb(42, 58, 82)", JSON.stringify(rest));
+      await page.locator('[data-bw="level-chip"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 300);
+      const open = await sw();
+      L.check("BW-35", "tapped, three: Weeks, Months, All, the current pressed", open.n === 3 && open.texts.join("|") === "Weeks|Months|All" && open.pressed.join("|") === "false|false|true", JSON.stringify(open));
+      await page.locator('[data-bw="level"][data-t="Months"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 700);
+      const picked = await sw(), rp = await root(page);
+      L.check("BW-35", "picking Months snaps there and folds to one chip reading Months", rp.level === "Months" && picked.n === 1 && picked.chip === "Zoom level: Months", JSON.stringify({ level: rp.level, ...picked }));
+      await page.locator('[data-bw="level-chip"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 300);
+      const z0 = (await root(page)).z;
+      await offPE(page); await page.mouse.click(120, 420); await frame(page, 500);
+      const tapped = await sw(), z1 = (await root(page)).z, sheet = await page.locator('[data-bw="sheet"]').count();
+      L.check("BW-35", "a tap on the world folds it, with no level change (and opens nothing)", tapped.n === 1 && Math.abs(z1 - z0) < 1e-6 && sheet === 0, JSON.stringify({ ...tapped, z0, z1, sheet }));
+      /* when the switch was not open (a broken run), that tap opened a row's sheet: close it so later sections can run */
+      if (sheet) { await page.locator('[data-bw="veil"]').click({ position: { x: 10, y: 10 }, timeout: 2000 }).catch(() => {}); await frame(page, 300); }
+      await fitted(page);
+    }
+
     /* ── BW-9 · the pills add up ── */
     if (on("BW-9")) { stamp("BW-9");
       if (mut === "counts") await page.evaluate(() => { const c = document.querySelector<HTMLElement>('[data-bw="chip"][data-k="wait"]')!; c.dataset.n = String(+c.dataset.n! + 1); c.querySelector("b")!.textContent = c.dataset.n!; });
@@ -245,7 +324,7 @@ for (const mut of runs) {
     if (on("BW-19")) { stamp("BW-19");
       for (const k of ["you", "chase", "wait"]) {
         await pill(page, k);
-        if (mut === "pillfit") { await page.locator('[data-bw="level"][data-t="Months"]').click({ timeout: 1500 }).catch(() => {}); await frame(page, 600); }
+        if (mut === "pillfit") await level(page, "Months");
         const r = await root(page);
         L.check("BW-19", `${k}: the view stays fitted (z ${r.z})`, Math.abs(r.z - 1) < 1e-3 && !r.zoomed, "");
         await fitted(page);
@@ -255,7 +334,7 @@ for (const mut of runs) {
 
     /* ── BW-20 · with every group folded on the fitted view, no two headings overlap; each gap at least 12px ── */
     if (on("BW-20")) { stamp("BW-20");
-      const titles = (await box(page, '[data-bw="group"]')).map((g) => g.d.t);
+      const titles = (await box(page, '[data-bw="group"]')).map((g) => g.d.g);
       for (const t of titles) { await page.locator(`[data-bw="fold"][data-g="${t}"]`).click({ timeout: 3000 }).catch(() => {}); await frame(page, 300); }
       const heads = (await box(page, '[data-bw="group"]')).sort((a, b) => a.t - b.t);
       const folded = heads.filter((h) => h.d.folded === "1").length;
@@ -270,8 +349,10 @@ for (const mut of runs) {
     /* ── BW-22 · the level control lands on 120 days across (Months) and on the Weeks rule ── */
     if (on("BW-22")) { stamp("BW-22");
       const r0 = await root(page);
+      await page.locator('[data-bw="level-chip"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 300);
       const tags = (await box(page, '[data-bw="level"]')).map((b) => b.d.t);
-      L.check("BW-22", `the level control reads ${tags.join(" / ")} (Weeks on top)`, tags.join("|") === "Weeks|Months|All", "");
+      L.check("BW-22", `the level control, open, reads ${tags.join(" / ")} (Weeks on top)`, tags.join("|") === "Weeks|Months|All", "");
+      await page.locator('[data-bw="level"][data-t="All"]').click({ timeout: 3000 }).catch(() => {}); await frame(page, 300);
       await level(page, "Months");
       if (mut === "levels") { await page.mouse.move(200, 430); await page.mouse.wheel(-300, 0); await frame(page, 300); await page.evaluate(() => { const r = document.querySelector<HTMLElement>('[data-bw="world"]')!; r.dataset.z = String(+r.dataset.z! * 1.2); r.dataset.sx = String(+r.dataset.sx! * 1.15); }); }
       const m = await root(page);
@@ -329,10 +410,13 @@ for (const mut of runs) {
       const wantBg = await page.evaluate((list) => list.map(([st, band]) => { const d = document.createElement("i"); d.style.background = `color-mix(in srgb,${band} 45%,#fff)`; document.body.appendChild(d); const c = getComputedStyle(d).backgroundColor; d.remove(); return [st, c]; }), early.map((b) => [b.st, statusBand(b.st)] as [string, string]));
       L.check("BW-7", `earlier stages are the faded colour (population ${early.length})`, early.length > 0 && early.every((b, i) => b.bg === wantBg[i][1]), "");
       await lineTo(page, 0.6);
-      const joins = await page.evaluate(() => {
+      const readJoins = () => page.evaluate(() => {
         const tails = [...document.querySelectorAll<HTMLElement>('[data-bw="bar"][data-k="ahead"], [data-bw="bar"][data-k="past"]')].map((b) => ({ row: b.dataset.row!, l: b.getBoundingClientRect().left }));
         return [...document.querySelectorAll<HTMLElement>('[data-bw="bar"][data-k="stage"][data-cur="1"][data-cont="1"]')].map((b) => ({ row: b.dataset.row!, r: b.getBoundingClientRect().right, t: tails.find((x) => x.row === b.dataset.row)?.l })).filter((x) => x.t != null && x.r > 0 && x.r < innerWidth);
       });
+      /* v3.2: the regroup moves rows, so scroll on (up to eight screens) until some current stages meet their tails */
+      let joins = await readJoins();
+      for (let i = 0; i < 8 && joins.length === 0; i++) { await pan(page, 0, -300); joins = await readJoins(); }
       const gaps = joins.filter((x) => Math.abs(x.r - x.t!) > 0.6);
       L.check("BW-7", `the current stage and its tail share an edge (population ${joins.length})`, joins.length > 0 && gaps.length === 0, JSON.stringify(gaps.slice(0, 3)));
       /* BW-5 reads the top of Needs chasing at Weeks, where the "!" marks are */
@@ -533,14 +617,26 @@ for (const mut of runs) {
     if (on("BW-14")) { stamp("BW-14");
       await fitted(page);
       await page.addStyleTag({ content: ".bw-hsw, .bw-hs, .bw-gh0, .bw-fline, .bw-ruler { pointer-events: auto !important; }" });
+      /* v3.2: four groups leave no heading under the hawk's middle on the fitted view, so at Months a heading is panned
+         under it. The point is read inside the middle half of the hawk's own box (its edges are soft and may not hit). */
+      /* the hawk drifts (14s); held still for this reading, which is about stacking, not motion */
+      await page.addStyleTag({ content: ".bw-hsw { animation: none !important; }" });
+      const band = () => page.evaluate(() => { const w = document.querySelector<HTMLElement>(".bw-hsw")!.getBoundingClientRect(); const t = w.top + w.height * 0.25, b = w.bottom - w.height * 0.25; const hs = [...document.querySelectorAll<HTMLElement>(".bw-gh0")].map((h) => h.getBoundingClientRect()); return { mid: (t + b) / 2, hit: hs.some((h) => h.top + 2 < b && h.bottom - 2 > t), next: [...document.querySelectorAll<HTMLElement>(".bw-gh0:not(.pinned)")].map((h) => h.getBoundingClientRect().top).filter((y) => y > 200).sort((p, q) => Math.abs(p + 13 - (t + b) / 2) - Math.abs(q + 13 - (t + b) / 2))[0] ?? null }; });
+      let bd = await band();
+      if (!bd.hit) {
+        await level(page, "Months"); bd = await band();
+        for (let i = 0; i < 30 && !bd.hit && bd.next == null; i++) { await pan(page, 0, -300); bd = await band(); }
+        for (let i = 0; i < 4 && !bd.hit && bd.next != null; i++) { await pan(page, 0, bd.mid - (bd.next + 13)); bd = await band(); }
+      }
+      await page.addStyleTag({ content: ".bw-hsw, .bw-hs, .bw-gh0, .bw-fline, .bw-ruler { pointer-events: auto !important; }" });
       const layers = await page.evaluate(() => {
-        const hs = document.querySelector<HTMLElement>(".bw-hs")?.getBoundingClientRect();
+        const hs = document.querySelector<HTMLElement>(".bw-hsw")?.getBoundingClientRect();
         const heads = [...document.querySelectorAll<HTMLElement>(".bw-gh0")].map((h) => h.getBoundingClientRect());
         const line = document.querySelector<HTMLElement>(".bw-fline")?.getBoundingClientRect();
         const at = (x: number, y: number) => document.elementsFromPoint(x, y).map((e) => (e as HTMLElement).className?.toString?.() ?? e.tagName);
         const rank = (list: string[], cls: string) => list.findIndex((c) => c.split(" ").includes(cls));
         let headPt: [number, number] | null = null;
-        if (hs) for (const h of heads) { const l = Math.max(h.left + 4, hs.left + hs.width * 0.25), r = Math.min(h.right, hs.right - hs.width * 0.25), t = Math.max(h.top + 2, hs.top), b = Math.min(h.bottom - 2, hs.bottom); if (r > l && b > t) { headPt = [(l + r) / 2, (t + b) / 2]; break; } }
+        if (hs) for (const h of heads) { const l = Math.max(h.left + 4, hs.left + hs.width * 0.25), r = Math.min(h.right, hs.right - hs.width * 0.25), t = Math.max(h.top + 2, hs.top + hs.height * 0.25), b = Math.min(h.bottom - 2, hs.bottom - hs.height * 0.25); if (r > l && b > t) { headPt = [(l + r) / 2, (t + b) / 2]; break; } }
         const A = headPt ? at(...headPt) : [];
         const B = hs && line ? at(line.left + line.width / 2, Math.max(hs.top + 10, line.top + 10)) : [];
         return { hawkOverHead: headPt ? rank(A, "bw-hs") >= 0 && rank(A, "bw-hs") < rank(A, "bw-gh0") : null, A: A.slice(0, 6), lineOverHawk: rank(B, "bw-fline") >= 0 && (rank(B, "bw-hs") < 0 || rank(B, "bw-fline") < rank(B, "bw-hs")), B: B.slice(0, 6) };
@@ -548,6 +644,7 @@ for (const mut of runs) {
       L.check("BW-14", "the hawk's shadow paints above a group heading", layers.hawkOverHead === true, JSON.stringify(layers.A));
       L.check("BW-14", "the line paints above the hawk", layers.lineOverHawk === true, JSON.stringify(layers.B));
       await page.addStyleTag({ content: ".bw-hsw, .bw-hs, .bw-gh0, .bw-fline, .bw-ruler { pointer-events: none !important; }" });
+      await fitted(page);
     }
 
     /* ── BW-15 · the line off screen (at Weeks) ── */
@@ -707,11 +804,52 @@ for (const mut of runs) {
         await page.locator('[data-bw="nd-save"]').click({ timeout: 5000 }).catch(() => {}); await frame(page, 2500);
         await page.locator('[data-bw="sheet-close"]').click({ timeout: 1500 }).catch(() => {}); await frame(page, 400);
         const moved = await page.evaluate((id) => { const h = document.querySelector<HTMLElement>(`[data-bw="row"][data-id="${CSS.escape(id)}"]`); return h ? h.dataset.nodate : "gone"; }, nd);
-        const doc = await fetch(`${EMU}/users/${UID}/queries/${encodeURIComponent(nd)}`, { headers: { Authorization: "Bearer owner" } }).then((x) => x.json()) as { fields?: Record<string, { stringValue?: string }> };
-        const wrote = doc.fields?.writerExpectedDate?.stringValue ?? "";
+        /* the page moves the row from its local cache at once; the emulator's copy can lag under load, so poll it (10s) */
+        let wrote = "";
+        for (let t = 0; t < 20 && !wrote; t++) {
+          const doc = await fetch(`${EMU}/users/${UID}/queries/${encodeURIComponent(nd)}`, { headers: { Authorization: "Bearer owner" } }).then((x) => x.json()) as { fields?: Record<string, { stringValue?: string }> };
+          wrote = doc.fields?.writerExpectedDate?.stringValue ?? "";
+          if (!wrote) await page.waitForTimeout(500);
+        }
         L.check("BW-26", `the save wrote the writer's reply date (${wrote})`, !!wrote, "");
         L.check("BW-26", "saving a date moves the query out of the group", moved === "0", String(moved));
       }
+    }
+
+    /* ── BW-36 · the first-load cut-off: load at 784px tall, shrink to 700 within 300ms (an address bar settling); the
+          switch stays inside the viewport and above the dock, on load and after, with no refresh ── */
+    if (on("BW-36")) { stamp("BW-36");
+      await page.setViewportSize(PHONE);
+      const read = () => page.evaluate(() => {
+        const z = document.querySelector<HTMLElement>('[data-bw="levels"]')?.getBoundingClientRect(), d = document.querySelector<HTMLElement>('[data-pa5="dock"]');
+        const dr = d && getComputedStyle(d).display !== "none" ? d.getBoundingClientRect() : null;
+        return z ? { top: z.top, bottom: z.bottom, vh: innerHeight, vv: window.visualViewport?.height ?? innerHeight, dockTop: dr ? dr.top : null } : null;
+      });
+      await page.goto(WORLD);
+      if (mut === "cutoff") await mutate(page, "cutoff");
+      await page.locator('[data-bw="levels"]').first().waitFor({ timeout: 30_000 });
+      const onLoad = await read();
+      await page.setViewportSize({ width: PHONE.width, height: 700 });
+      await frame(page, 700);
+      if (mut === "cutoff") await mutate(page, "cutoff");
+      const after = await read();
+      const ok = (x: typeof onLoad) => !!x && x.top >= 0 && x.bottom <= Math.min(x.vh, x.vv) && (x.dockTop == null || x.bottom <= x.dockTop - 11.5);
+      L.check("BW-36", `on load (784 tall): inside the viewport and above the dock ${JSON.stringify(onLoad)}`, ok(onLoad), "");
+      L.check("BW-36", `after the shrink to 700: inside the viewport and above the dock ${JSON.stringify(after)}`, ok(after), "");
+      L.check("BW-36", "pinned 12px above the dock both times", !!onLoad && !!after && onLoad.dockTop != null && after.dockTop != null && Math.abs(onLoad.dockTop - onLoad.bottom - 12) < 1 && Math.abs(after.dockTop - after.bottom - 12) < 1, JSON.stringify({ onLoad, after }));
+      /* the cause, reproduced: the dock still sliding in (tucked by its transform) until 300ms after the world first lays out, as it
+         is when the app opens straight onto Birds-eye. v3 read the dock as innerHeight − its top at that moment (0px)
+         and put the switch 24px from the bottom, under the dock, until a refresh. */
+      await page.addInitScript(() => { try { if (sessionStorage.getItem("bwT.tuck") !== "1") return; sessionStorage.removeItem("bwT.tuck"); const st = document.createElement("style"); st.textContent = '[data-pa5="dock"] { transform: translateY(100%) !important; transition: none !important; }'; document.documentElement.appendChild(st); const mo = new MutationObserver(() => { if (document.querySelector('[data-bw="world"]')) { mo.disconnect(); setTimeout(() => st.remove(), 300); } }); mo.observe(document.documentElement, { childList: true, subtree: true }); } catch { /* */ } });
+      await page.setViewportSize(PHONE);
+      await page.evaluate(() => { try { sessionStorage.setItem("bwT.tuck", "1"); } catch { /* */ } });
+      await page.goto(WORLD);
+      await page.locator('[data-bw="levels"]').first().waitFor({ timeout: 30_000 });
+      await frame(page, 900);
+      if (mut === "cutoff") await mutate(page, "cutoff");
+      const settled = await read();
+      L.check("BW-36", `the dock still sliding in on load: once it settles, the switch is above it ${JSON.stringify(settled)}`, ok(settled) && settled!.dockTop != null && Math.abs(settled!.dockTop - settled!.bottom - 12) < 1, "");
+      await page.setViewportSize(PHONE);
     }
 
     const ours = errs.filter((e) => /BirdsWorld|BirdsSheets|drawWorld|wireMotion|makeWorld|bwRow|rowSegs/.test(e));
@@ -732,7 +870,7 @@ test("Phone Birds-eye world v3 — the shots beside the ref's", async ({ page },
   await page.evaluate(() => { try { localStorage.setItem("bw1.hint.seen", "1"); } catch { /* */ } });
   await openWorld(page);
   await shot("01-overview");
-  const titles = (await box(page, '[data-bw="group"]')).map((g) => g.d.t);
+  const titles = (await box(page, '[data-bw="group"]')).map((g) => g.d.g);
   for (const t of titles.slice(0, -1)) { await page.locator(`[data-bw="fold"][data-g="${t}"]`).click().catch(() => {}); await frame(page, 250); }
   await shot("02-folded-groups");
   for (const t of titles.slice(0, -1)) { await page.locator(`[data-bw="fold"][data-g="${t}"]`).click().catch(() => {}); await frame(page, 200); }
@@ -817,3 +955,23 @@ for (const mut of emptyRuns) {
     L.done(5);
   });
 }
+
+/* ══ v3.2: before-and-after shots at 390 × 784 (BW_SHOTS32=before|after): All fitted, the With you pill, Weeks with the
+      switch at rest, and the switch open (before v3.2 the switch is always open, so its "open" shot is the same) ══ */
+test("Phone Birds-eye world v3.2 — before and after shots", async ({ page }, info) => {
+  const tag = process.env.BW_SHOTS32;
+  test.skip(info.project.name !== "pixel" || !tag, "BW_SHOTS32=before|after, Chromium phone");
+  test.setTimeout(300_000);
+  page.setDefaultTimeout(15_000);
+  const out = "reports/phone-birds-eye-world-v3-2/shots"; mkdirSync(out, { recursive: true });
+  const shot = (n: string) => page.screenshot({ path: `${out}/${n}-${tag}.png` });
+  await signIn(page);
+  await page.evaluate(() => { try { localStorage.setItem("bw1.hint.seen", "1"); } catch { /* */ } });
+  await openWorld(page);
+  await shot("1-all-fitted");
+  await pill(page, "you"); await shot("2-with-you"); await pill(page, "you");
+  await level(page, "Weeks"); await lineTo(page, 0.7); await shot("3-weeks-switch-at-rest");
+  const chip = page.locator('[data-bw="level-chip"]');
+  if (await chip.count()) { await chip.click(); await frame(page, 400); }
+  await shot("4-switch-open");
+});

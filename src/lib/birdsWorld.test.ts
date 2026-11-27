@@ -12,7 +12,7 @@ import {
   BW_GROUPS, DAY, GAP, GPMAX, RH, RPMAX, RULE, TOPFIT, TOPFOLD, WX, XP, ACT_LABEL, agoOf, changes, dayFromMs, menuActions, noDateDefault, noDateRows, outOn, recapStats, scrubLabel, searchRows, seenLabel, sheetOf, tips,
   aheadTx, allH, barBox, bwCounts, bwGroups, bwRow, chipForCourt, clipR, dm, fadedBand, hasFig, headingTop, inPill, isNoDate, kk,
   makeWorld, num, outcomeWord, replayAt, replayStart, rowSegs, rulerMarks, sampleRows, setAxis, shortName, spaced, stageTx,
-  needsSendBy, SB_DEFAULT_WEEKS, zoomForRows, type BwRow,
+  keepFolds, needsSendBy, SB_DEFAULT_WEEKS, zoomForRows, type BwRow,
 } from "./birdsWorld";
 
 const NOW = new Date(2026, 10, 25, 12).getTime();
@@ -63,26 +63,37 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     }
     expect([chipForCourt("you"), chipForCourt("quiet"), chipForCourt("agent"), chipForCourt(null)]).toEqual(["you", "chase", "all", "all"]);
   });
-  it("the groups, in order; No reply date yet under All and Waiting only; Closed last and under All only", () => {
+  it("v3.2 the groups, in order: Needs action, Within their window, No reply date yet (All and Waiting), Closed (All, last)", () => {
     const g = bwGroups(rows());
-    expect(g.map((x) => x.t)).toEqual(["Needs chasing", "Nearly there", "Plenty of time", "With you", "No reply date yet", "Closed"]);
-    expect(g.map((x) => x.t)).toEqual(BW_GROUPS.filter((t) => g.some((x) => x.t === t)));
+    expect(g.map((x) => x.t)).toEqual(["Needs action", "Within their window", "No reply date yet", "Closed"]);
+    expect(BW_GROUPS).toEqual(["Needs action", "Within their window", "No reply date yet", "Closed"]);
+    /* Needs action: chasing and with-you mixed in one order, the largest share of the window used first (kk) — quiet
+       100/42, chase 60/56, you 11/14, offer 3/60; Within their window: near 45/56, five 40/70, plenty 6/56 */
     expect(Object.fromEntries(g.map((x) => [x.t, x.rows.map((r) => r.id)]))).toEqual({
-      "Needs chasing": ["quiet", "chase"], "Nearly there": ["near"], "Plenty of time": ["five", "plenty"], "With you": ["you", "offer"], "No reply date yet": ["nodate"], Closed: ["passed"],
+      "Needs action": ["quiet", "chase", "you", "offer"], "Within their window": ["near", "five", "plenty"], "No reply date yet": ["nodate"], Closed: ["passed"],
     });
-    expect(bwGroups(rows(), "wait").map((x) => x.t)).toEqual(["Nearly there", "Plenty of time", "No reply date yet"]);
+    /* mixed, not split: a with-you query 40 days into a 20-day send-by window sits between quiet and chase */
+    const youLate = R(eye("youLate", [[Q.QUERIED, -60], [Q.FULL_REQUESTED, -40]], -20));
+    expect(bwGroups([...rows(), youLate])[0].rows.map((r) => r.id)).toEqual(["quiet", "youLate", "chase", "you", "offer"]);
+    expect(g.every((x) => x.label === x.t)).toBe(true);
+    expect(bwGroups(rows(), "wait").map((x) => x.t)).toEqual(["Within their window", "No reply date yet"]);
     for (const f of ["chase", "you"] as const) expect(bwGroups(rows(), f).some((x) => x.t === "No reply date yet")).toBe(false);
     expect(noDateRows(rows()).map((r) => r.id)).toEqual(["nodate"]);
-    expect(bwGroups(rows(), "chase").map((x) => x.t)).toEqual(["Needs chasing"]);
+    /* the heading follows the pill */
+    expect(bwGroups(rows(), "chase").map((x) => [x.t, x.label, x.rows.map((r) => r.id)])).toEqual([["Needs action", "Needs chasing", ["quiet", "chase"]]]);
+    expect(bwGroups(rows(), "you").map((x) => [x.t, x.label, x.rows.map((r) => r.id)])).toEqual([["Needs action", "With you", ["you", "offer"]]]);
+    /* folds: only today's ids carry */
+    expect(keepFolds(["Nearly there", "Plenty of time", "Needs chasing", "With you", "Needs action", "Closed"])).toEqual(["Needs action", "Closed"]);
     expect(bwGroups(rows(), "you").some((x) => x.t === "Closed")).toBe(false);
     expect(isNoDate(rows().find((x) => x.id === "nodate")!)).toBe(true);
     /* with you and no send-by date: drawn in With you (to today), never in "No reply date yet" (a reply date is not the writer's to set there) */
     const youNoDate = R(eye("youNoDate", [[Q.QUERIED, -40], [Q.FULL_REQUESTED, -9]], null));
     expect(isNoDate(youNoDate)).toBe(false);
-    expect(bwGroups([...rows(), youNoDate], "you").find((x) => x.t === "With you")!.rows.map((r) => r.id)).toContain("youNoDate");
+    expect(bwGroups([...rows(), youNoDate], "you").find((x) => x.label === "With you")!.rows.map((r) => r.id)).toContain("youNoDate");
+    expect(bwGroups([...rows(), youNoDate]).find((x) => x.t === "Needs action")!.rows.map((r) => r.id)).toContain("youNoDate");
     expect(noDateRows([...rows(), youNoDate]).map((r) => r.id)).toEqual(["nodate"]);
-    /* the "All" layout's height sets the scale for every pill: six groups, nine rows (v2's footer is gone) */
-    expect(allH(rows())).toBe(6 * GAP + 9 * RH + 8);
+    /* the "All" layout's height sets the scale for every pill: v3.2's four groups, nine rows */
+    expect(allH(rows())).toBe(4 * GAP + 9 * RH + 8);
   });
   it("the span: a fortnight before the first date to three weeks after the last, clamped −365…−60 and 42…365; closed queries don't count", () => {
     expect(setAxis(rows())).toEqual({ D0: -164, D1: 71 });
@@ -202,10 +213,10 @@ describe("Phone Birds-eye world v2 — the engine", () => {
   });
 
   it("v3 folding: a folded group keeps its heading and count, its rows go, it holds 1.3 rows of world height", () => {
-    const f = makeWorld({ rows: rows(), filter: "all", vpW: 390, vpH: 784, bot: 88, folded: new Set(["Needs chasing", "Closed"]) });
-    const ch = f.G.find((g) => g.t === "Needs chasing")!;
-    expect([ch.folded, ch.n, ch.rows.length, ch.h]).toEqual([true, 2, 0, RH * 1.3]);
-    expect(f.G.find((g) => g.t === "Nearly there")!.y).toBe(GAP + RH * 1.3);
+    const f = makeWorld({ rows: rows(), filter: "all", vpW: 390, vpH: 784, bot: 88, folded: new Set(["Needs action", "Closed"]) });
+    const ch = f.G.find((g) => g.t === "Needs action")!;
+    expect([ch.folded, ch.n, ch.rows.length, ch.h]).toEqual([true, 4, 0, RH * 1.3]);
+    expect(f.G.find((g) => g.t === "Within their window")!.y).toBe(GAP + RH * 1.3);
     /* the scale is All's, folded or not */
     expect(f.fitSY()).toBe(world().fitSY());
   });

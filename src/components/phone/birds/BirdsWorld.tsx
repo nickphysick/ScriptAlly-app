@@ -37,7 +37,7 @@ import { sendByFields } from "../../../lib/queryActions/sendBy";
 import { db } from "../../../lib/firebase";
 import {
   PILLS, PILL_LABEL, REPLAY_MS, RH, RULE, TOPFIT, TOPFOLD, WX, bandOf, bwCounts, bwGroups, bwRow, changes, chipForCourt, dateOf, dayFromMs, dm, isDrawn,
-  isNoDate, makeWorld, menuActions, noDateRows, recapStats, replayAt, replayStart, rowSegs, sampleRows, seenLabel, tips,
+  isNoDate, keepFolds, makeWorld, menuActions, noDateRows, recapStats, replayAt, replayStart, rowSegs, sampleRows, seenLabel, tips,
   type BwAct, type BwChange, type BwFilter, type BwRow, type BwView, type World,
 } from "../../../lib/birdsWorld";
 import { drawWorld } from "./drawWorld";
@@ -73,18 +73,22 @@ export const useLandscape = (): boolean => {
   useEffect(() => { const f = () => setL(read()); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   return l;
 };
+/** the dock's own height, for the world's layout (the room left under the last row). v3.2: read from its layout box
+ *  (`offsetHeight`), never `innerHeight − top`: that read caught the dock mid-slide (it tucks with a transform and
+ *  animates 0.25s) and the address bar unsettled, and v3 placed the level switch from it — cut off on first load.
+ *  The controls themselves are now pinned to the dock in CSS (`--bw-cb`), not from any JS measurement. */
 const dockHeight = (): number => {
-  if (typeof document === "undefined") return 72;
+  if (typeof document === "undefined") return 73;
   const d = document.querySelector<HTMLElement>('[data-pa5="dock"]');
-  const r = d?.getBoundingClientRect();
-  return r && r.height > 0 && getComputedStyle(d!).display !== "none" ? Math.round(window.innerHeight - r.top) : 72;
+  return d && d.offsetHeight > 0 && getComputedStyle(d).display !== "none" ? d.offsetHeight : 73;
 };
 const calm = (): boolean => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
 const store = {
   get: (k: string): string | null => { try { return window.localStorage.getItem(k); } catch { return null; } },
   set: (k: string, v: string): void => { try { window.localStorage.setItem(k, v); } catch { /* storage refused: the view still works */ } },
 };
-const readFolded = (): Set<string> => { try { const v = JSON.parse(store.get(BW_FOLD_KEY) ?? "[]"); return new Set(Array.isArray(v) ? v.map(String) : []); } catch { return new Set(); } };
+/* v3.2: folds of retired group names (and v3's "Needs chasing" / "With you") are dropped on read, and the store rewritten */
+const readFolded = (): Set<string> => { try { const v = JSON.parse(store.get(BW_FOLD_KEY) ?? "[]"); const all = Array.isArray(v) ? v.map(String) : [], kept = keepFolds(all); if (kept.length !== all.length) store.set(BW_FOLD_KEY, JSON.stringify(kept)); return new Set(kept); } catch { return new Set(); } };
 
 /** the empty-state card's words (ref `draw()`'s card); null when the world has something to show */
 export type BwCard = { k: "none" | "you" | "chase" | "wait" | "closed" | "open"; title: string; line: string; cta: "log" | "all" };
@@ -174,6 +178,10 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   /* ── React state the sheets and cards read ── */
   const [sheet, setSheet] = useState<SheetState>(null);
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  /* v3.2: the level switch rests as one chip; open, the three levels */
+  const [lvOpen, setLvOpen] = useState(false);
+  const lvOpenRef = useRef(false); lvOpenRef.current = lvOpen;
+  const lvSpent = useRef(false);
   const [tip, setTip] = useState<TipState>(null);
   const [step, setStep] = useState(-1);
   const [recap, setRecap] = useState(false);
@@ -216,7 +224,10 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
       over.current.innerHTML = L.pull > 0 || refreshingRef.current ? `<div class="bw-ptr${refreshingRef.current ? " go" : ""}" data-bw="pull" style="top:${fr.top + RULE + 6 + Math.min(L.pull, 90) * 0.5}px;opacity:${refreshingRef.current ? 1 : k}"><img src="${BW_HAWK}" alt="" style="transform:rotate(${refreshingRef.current ? 0 : k * -30}deg) scale(${0.6 + k * 0.4})"><span>${refreshingRef.current ? "Checking for news…" : k >= 1 ? "Let go to refresh" : "Pull to refresh"}</span></div>` : "";
     }
     const n = w.nearestLv(Sv.z);
-    lvl.current?.querySelectorAll<HTMLButtonElement>("button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.i) === n)));
+    lvl.current?.querySelectorAll<HTMLButtonElement>('[data-bw="level"]').forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.i) === n)));
+    /* the chip names the level it is at (a double tap or a pinch moves it without React) */
+    const chip = lvl.current?.querySelector<HTMLButtonElement>('[data-bw="level-chip"]'), lt = w.levels[n]?.t ?? "All";
+    if (chip && chip.dataset.t !== lt) { chip.dataset.t = lt; chip.setAttribute("aria-label", `Zoom level: ${lt}`); const sp = chip.querySelector("span"); if (sp) sp.textContent = lt; }
     if (hs.current) Object.assign(hs.current.style, shadowStyle(Sv.z, Sv.ox, Sv.oy, w.fitView()));
     const r = root.current;
     if (r) {
@@ -236,7 +247,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     if (!el) return;
     const bot = land ? 16 : dockHeight() + 16;
     W.current = makeWorld({ rows, filter: f, vpW: el.clientWidth || 390, vpH: el.clientHeight || 784, bot, land, folded });
-    root.current?.style.setProperty("--bw-cb", `${bot + 8}px`);
     S.current = keep ? W.current.clamp(S.current) : W.current.fitView();
     paint();
   }, [rows, f, land, folded, paint]);
@@ -248,7 +258,11 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     if (!el || typeof ResizeObserver === "undefined") return undefined;
     const ro = new ResizeObserver(() => build(true));
     ro.observe(el);
-    return () => ro.disconnect();
+    /* v3.2: the address bar and the dock settle after first paint; the visual viewport says so even when the world's
+       box does not change */
+    const again = () => build(true), vv = typeof window !== "undefined" ? window.visualViewport : null;
+    window.addEventListener("resize", again); vv?.addEventListener("resize", again);
+    return () => { ro.disconnect(); window.removeEventListener("resize", again); vv?.removeEventListener("resize", again); };
   }, [build]);
   useEffect(() => () => { cancelAnimationFrame(frame.current); cancelAnimationFrame(rp.current.raf); }, []);
   useEffect(() => { document.body.classList.toggle("pa41-land", land); return () => document.body.classList.remove("pa41-land"); }, [land]);
@@ -349,6 +363,9 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
 
   /* ── movement ── */
   const touched = useCallback((): boolean => {
+    /* a touch on the world folds the open level switch, with no level change; a tap that folds it opens nothing */
+    lvSpent.current = lvOpenRef.current;
+    if (lvOpenRef.current) setLvOpen(false);
     if (recap) { setRecap(false); return false; }
     if (rp.current.rt != null) { stopReplay(); return false; }
     const h = hint.current;
@@ -369,7 +386,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     if (!el || demo) return undefined;
     const m = wireMotion({
       vp: el, world: () => W.current, S, draw, calm, touched,
-      openRow: (id) => { const r = byId.get(id); if (!r) return; if (isNoDate(r)) setSheet({ k: "nd", id, queue: noDateRows(rows).map((x) => x.id) }); else setSheet({ k: "row", id }); },
+      openRow: (id) => { if (lvSpent.current) { lvSpent.current = false; return; } const r = byId.get(id); if (!r) return; if (isNoDate(r)) setSheet({ k: "nd", id, queue: noDateRows(rows).map((x) => x.id) }); else setSheet({ k: "row", id }); },
       longPress: (x, y, cx, cy) => {
         const w = W.current;
         if (w && S.current.z > 1.05) {
@@ -404,7 +421,13 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     }
     if (a === "ndset") { const id = b.dataset.id!; setSheet({ k: "nd", id, queue: noDateRows(rows).map((x) => x.id) }); return; }
     if (!m) return;
-    if (a === "lvl") { touched(); snapTo(Number(b.dataset.i), w.vpW / 2, (w.vpH - 80) / 2, true); }
+    if (a === "lvchip") { buzz(8); setLvOpen(true); return; }
+    if (a === "lvl") {
+      const i = Number(b.dataset.i);
+      setLvOpen(false);
+      if (i === w.nearestLv(Sv.z)) return;
+      touched(); snapTo(i, w.vpW / 2, (w.vpH - 80) / 2, true);
+    }
     else if (a === "toline") m.animateTo(w.clamp({ z: Sv.z, ox: w.vpW * 0.62 - w.LINE * w.SX(Sv.z), oy: Sv.oy }), 380);
   };
 
@@ -472,8 +495,9 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     return a?.responseTimeWeeks ?? null;
   };
 
-  const vpH = vp.current?.clientHeight ?? 784;
-  const cardTop = card ? (card.k === "closed" ? top + RULE + 16 : (top + RULE + vpH - 96) / 2) : 0;
+  /* v3.2: the empty card's middle is CSS's (half way between the ruler and the bottom less 96px), not a height read in JS
+     (which is 784 by fallback on the first render) */
+  const cardTop: number | string = card ? (card.k === "closed" ? top + RULE + 16 : `calc((${top + RULE}px + 100% - 96px) / 2)`) : 0;
   const levels = W.current?.levels ?? [{ t: "All" as const, z: 1 }];
   const tipTop = top + 4;
   const sheetRow = sheet?.k === "row" ? byId.get(sheet.id) ?? null : null;
@@ -498,8 +522,10 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
           </div>
         ) : null}
         <div ref={hint} className={`bw-hint${showHint && explorable ? "" : " hide"}`} data-bw="hint">Pinch to zoom · hold to scrub</div>
-        <div ref={lvl} className="bw-zc lvl" data-bw="levels">
-          {levels.map((l, i) => ({ l, i })).reverse().map(({ l, i }) => <button key={l.t} type="button" data-a="lvl" data-i={i} data-bw="level" data-t={l.t} aria-pressed={i === 0}>{l.t}</button>)}
+        <div ref={lvl} className={`bw-zc lvl${lvOpen ? " open" : ""}`} data-bw="levels" data-open={lvOpen ? 1 : 0} {...(lvOpen ? { role: "group", "aria-label": "Zoom level" } : {})}>
+          {lvOpen
+            ? levels.map((l, i) => ({ l, i })).reverse().map(({ l, i }) => { const on = i === (W.current?.nearestLv(S.current.z) ?? 0); return <button key={l.t} type="button" data-a="lvl" data-i={i} data-bw="level" data-t={l.t} aria-pressed={on}>{l.t}</button>; })
+            : (() => { const t = levels[W.current?.nearestLv(S.current.z) ?? 0]?.t ?? "All"; return <button type="button" className="bw-lvchip" data-a="lvchip" data-bw="level-chip" data-t={t} aria-expanded={false} aria-label={`Zoom level: ${t}`}><span>{t}</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 7.5 6 4.5 9 7.5" /></svg></button>; })()}
         </div>
         {step >= 0 && news[step] ? (
           <div className="bw-sinces" data-bw="news-step" data-id={news[step].id} style={{ bottom: `var(--bw-cb, 96px)` }}>

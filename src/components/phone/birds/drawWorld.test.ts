@@ -92,24 +92,24 @@ describe("Phone Birds-eye world — the frame", () => {
   });
   it("v3 headings: chevron, bold title and count, each a fold target; folded, the count stays and the rows go", () => {
     const w = world(), html = drawWorld(w, w.fitView(), O()).html;
-    expect(html).toMatch(/<span class="bw-gh0 u[^"]*" data-bw="group" data-t="Needs chasing" data-n="\d+" data-folded="0"[^>]*><span class="ghu tapf" data-a="fold" data-g="Needs chasing" data-bw="fold" role="button" aria-expanded="true"><svg class="chev"/);
-    const f = world("all", ROWS, new Set(["Needs chasing"])), fh = drawWorld(f, f.fitView(), O()).html;
-    expect(fh).toMatch(/data-t="Needs chasing" data-n="(\d+)" data-folded="1"[\s\S]*?<svg class="chev shut"/);
+    expect(html).toMatch(/<span class="bw-gh0 u[^"]*" data-bw="group" data-t="Needs action" data-g="Needs action" data-n="\d+" data-folded="0"[^>]*><span class="ghu tapf" data-a="fold" data-g="Needs action" data-bw="fold" role="button" aria-expanded="true"><svg class="chev"/);
+    const f = world("all", ROWS, new Set(["Needs action"])), fh = drawWorld(f, f.fitView(), O()).html;
+    expect(fh).toMatch(/data-t="Needs action" data-g="Needs action" data-n="(\d+)" data-folded="1"[\s\S]*?<svg class="chev shut"/);
     expect(fh).not.toContain('data-id="past"');
-    expect(Number(/data-t="Needs chasing" data-n="(\d+)"/.exec(fh)![1])).toBe(Number(/data-t="Needs chasing" data-n="(\d+)"/.exec(html)![1]));
+    expect(Number(/data-t="Needs action" data-g="Needs action" data-n="(\d+)"/.exec(fh)![1])).toBe(Number(/data-t="Needs action" data-g="Needs action" data-n="(\d+)"/.exec(html)![1]));
   });
   it("v3 headings never touch: with every group folded, each heading sits its height + 12px below the one above", () => {
-    const all = new Set(["Needs chasing", "Nearly there", "Plenty of time", "With you", "No reply date yet", "Closed"]);
+    const all = new Set(["Needs action", "Within their window", "No reply date yet", "Closed"]);
     for (const rows of [ROWS, sampleRows()]) {
       const w = world("all", rows, all), html = drawWorld(w, w.fitView(), O({ rows })).html;
       const tops = tags(html, "group").map((t) => ({ top: num(t, "top"), small: /bw-gh0 u sm/.test(t) }));
-      expect(tops.length).toBeGreaterThan(3);
+      expect(tops.length).toBeGreaterThanOrEqual(3);
       for (let i = 1; i < tops.length; i++) expect(tops[i].top - tops[i - 1].top).toBeGreaterThanOrEqual((tops[i - 1].small ? 22 : 28) + 12 - 0.01);
     }
   });
   it("v3 no reply date yet: its own group; the bar to today, then the dashed fade; zoomed in, the name and the chip", () => {
     const w = world(), html = drawWorld(w, w.fitView(), O()).html;
-    expect(html).toMatch(/data-t="No reply date yet" data-n="1"/);
+    expect(html).toMatch(/data-t="No reply date yet" data-g="No reply date yet" data-n="1"/);
     expect(html).toMatch(/data-bw="bar" data-k="nodate"[^>]*data-row="nodate"/);
     expect(html).toMatch(/data-bw="ndt" data-row="nodate"/);
     expect(world("chase").G.some((g) => g.t === "No reply date yet")).toBe(false);
