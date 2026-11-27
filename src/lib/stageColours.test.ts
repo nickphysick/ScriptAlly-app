@@ -250,10 +250,11 @@ describe("Plumage colours v1 · the phone", () => {
     }
     expect(statusFill(null)).toBe("#efe6d6");
   });
-  it("the phone query page's strip and the agent's bubbles are the flat status band", () => {
-    const q = readFileSync("src/components/phone/v4/QueryPageV4.tsx", "utf8");
-    expect(q).toContain("background: statusBand(String(v.row.status)), color: bandInk(String(v.row.status))");
-    expect(q).toContain("background: t.status ? statusBand(t.status) : statusFill(t.status)");
+  it("the phone query sheet's strip and the agent's bubbles are the flat status band", () => {
+    /* Phone query sheet v1 retires v4's query page; the sheet draws the strip and the bubbles */
+    const q = readFileSync("src/components/phone/qsheet/QuerySheet.tsx", "utf8");
+    expect(q).toContain("style={{ background: statusBand(status), color: bandInk(status) }}");
+    expect(q).toContain("background: t.status ? statusBand(t.status) : undefined, color: bandInk(t.status)");
     const f = "src/components/phone/v5/BirdsBlockV5.tsx";
     expect([f, /background: statusBand\(String\(cur\.status\)\)/.test(readFileSync(f, "utf8"))]).toEqual([f, true]);
     /* Phone Birds-eye world v1 (BirdsViewV5's successor): each stage's bar is its status band, read through the engine */

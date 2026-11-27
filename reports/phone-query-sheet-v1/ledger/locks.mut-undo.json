@@ -1,0 +1,242 @@
+[
+ {
+  "lock": "PQS-1",
+  "where": "with-you queries past their send-by by more than 28 days (population 2): no fade",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PQS-1",
+  "where": "waiting queries that far past (population 36): faded",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PQS-1",
+  "where": "Needs action: every gone-quiet (waiting) row below every other, with-you ones among the rest",
+  "ok": true,
+  "detail": "{\"firstQuiet\":23,\"lastOther\":22}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a Queries row: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"cv25-q-08\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a Today card: the one sheet (1), at half height (430px of 430), over /dashboard",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"seed-query-12\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/dashboard\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a search result: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"cor-closed\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a Birds-eye bar: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"seed-pkgq-3\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all?view=birds\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "Birds-eye's long-press Open query: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"seed-query-3\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all?view=birds\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-3",
+  "where": "dragged up: full (732px, top 52)",
+  "ok": true,
+  "detail": "{\"open\":true,\"id\":\"cor-move-a\",\"h\":\"full\",\"height\":732,\"top\":52,\"path\":\"/queries/all\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-3",
+  "where": "dragged down: back to half (430px)",
+  "ok": true,
+  "detail": "{\"open\":true,\"id\":\"cor-move-a\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-3",
+  "where": "dragged far down: closed",
+  "ok": true,
+  "detail": "{\"open\":false,\"id\":\"\",\"h\":\"\",\"height\":0,\"top\":0,\"path\":\"/queries/all\",\"comp\":0}"
+ },
+ {
+  "lock": "PQS-3",
+  "where": "a tap on the dim closes it",
+  "ok": true,
+  "detail": "{\"open\":false,\"id\":\"\",\"h\":\"\",\"height\":0,\"top\":0,\"path\":\"/queries/all\",\"comp\":0}"
+ },
+ {
+  "lock": "PQS-4",
+  "where": "partial requested: \"Mark partial sent\" (navy) on the phone, \"Mark partial sent\" (navy) on the desktop",
+  "ok": true,
+  "detail": "{\"ph\":{\"label\":\"Mark partial sent\",\"tone\":\"navy\"},\"dk\":{\"label\":\"Mark partial sent\",\"tone\":\"navy\"}}"
+ },
+ {
+  "lock": "PQS-4",
+  "where": "waiting: \"Close it\" (navy) on the phone, \"Close it\" (navy) on the desktop",
+  "ok": true,
+  "detail": "{\"ph\":{\"label\":\"Close it\",\"tone\":\"navy\"},\"dk\":{\"label\":\"Close it\",\"tone\":\"navy\"}}"
+ },
+ {
+  "lock": "PQS-4",
+  "where": "offer: \"Answer the offer\" (navy) on the phone, \"Answer the offer\" (navy) on the desktop",
+  "ok": true,
+  "detail": "{\"ph\":{\"label\":\"Answer the offer\",\"tone\":\"navy\"},\"dk\":{\"label\":\"Answer the offer\",\"tone\":\"navy\"}}"
+ },
+ {
+  "lock": "PQS-4",
+  "where": "closed: \"Reopen\" (outline) on the phone, \"Reopen\" (outline) on the desktop",
+  "ok": true,
+  "detail": "{\"ph\":{\"label\":\"Reopen\",\"tone\":\"outline\"},\"dk\":{\"label\":\"Reopen\",\"tone\":\"outline\"}}"
+ },
+ {
+  "lock": "PQS-4",
+  "where": "signed (\"You have an agent\"): no button on the phone (desktop footer1522: none on Offer accepted)",
+  "ok": true,
+  "detail": "{\"tone\":\"none\",\"lead\":\"You have an agent\"}"
+ },
+ {
+  "lock": "PQS-5",
+  "where": "send (send) on cor-move-a: the phone's save writes what the desktop's writes (query, log, feed)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-5",
+  "where": "send: both saves undone (the record back as it was)",
+  "ok": true,
+  "detail": "{\"back0\":true,\"back1\":true}"
+ },
+ {
+  "lock": "PQS-5",
+  "where": "close (close) on cor-move-b: the phone's save writes what the desktop's writes (query, log, feed)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-5",
+  "where": "close: both saves undone (the record back as it was)",
+  "ok": true,
+  "detail": "{\"back0\":true,\"back1\":true}"
+ },
+ {
+  "lock": "PQS-5",
+  "where": "reopen (reopen) on cor-closed: the phone's save writes what the desktop's writes (query, log, feed)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-5",
+  "where": "reopen: both saves undone (the record back as it was)",
+  "ok": true,
+  "detail": "{\"back0\":true,\"back1\":true}"
+ },
+ {
+  "lock": "PQS-5",
+  "where": "offer (offer) on cv25-q-08: the phone's save writes what the desktop's writes (query, log, feed)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-5",
+  "where": "offer: both saves undone (the record back as it was)",
+  "ok": true,
+  "detail": "{\"back0\":true,\"back1\":true}"
+ },
+ {
+  "lock": "PQS-5",
+  "where": "resp (resp) on cv25-q-03: the phone's save writes what the desktop's writes (query, log, feed)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-5",
+  "where": "resp: both saves undone (the record back as it was)",
+  "ok": true,
+  "detail": "{\"back0\":true,\"back1\":true}"
+ },
+ {
+  "lock": "PQS-6",
+  "where": "Close → passed: Record a response at \"when\", Passed chosen, no Carry on on the hand-over (0)",
+  "ok": true,
+  "detail": "{\"kind\":\"resp\",\"step\":\"when\",\"go\":0,\"passed\":true}"
+ },
+ {
+  "lock": "PQS-6",
+  "where": "Reopen → replied: Record a response at \"reply\" (\"What did … say?\"), no Carry on (0)",
+  "ok": true,
+  "detail": "{\"kind\":\"resp\",\"step\":\"reply\",\"go\":0}"
+ },
+ {
+  "lock": "PQS-7",
+  "where": "\"An earlier date\" is a slider (Wed Sep 02 2026 to Wed Nov 25 2026)",
+  "ok": true,
+  "detail": "{\"min\":1788303600000,\"max\":1795564800000}"
+ },
+ {
+  "lock": "PQS-7",
+  "where": "it cannot go before the last event (Wed Sep 02 2026)",
+  "ok": true,
+  "detail": "{\"slider\":{\"min\":1788303600000,\"max\":1795564800000},\"last\":1788303600000}"
+ },
+ {
+  "lock": "PQS-7",
+  "where": "no calendar and no date pills anywhere in the journey",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PQS-8",
+  "where": "behind the journey: scaled 0.94, brightness(0.72), its strip at 52 above the journey at 62",
+  "ok": true,
+  "detail": "{\"back\":true,\"scale\":0.94,\"filter\":\"brightness(0.72)\",\"stripTop\":52,\"journeyTop\":62}"
+ },
+ {
+  "lock": "PQS-8",
+  "where": "Cancel brings it forward (no scale, no dim, no journey), at the height it was",
+  "ok": true,
+  "detail": "{\"back\":false,\"filter\":\"none\",\"journey\":false,\"h\":\"half\"}"
+ },
+ {
+  "lock": "PQS-9",
+  "where": "the new bubble (\"You sent Clara your partial\") is the last in Tracking (1 → 2)",
+  "ok": true,
+  "detail": "{\"n\":2,\"last\":\"You sent Clara your partial\",\"strip\":\"Partial sent\",\"status\":\"Partial Sent\"}"
+ },
+ {
+  "lock": "PQS-9",
+  "where": "the strip shows the new stage (Partial sent)",
+  "ok": true,
+  "detail": "{\"n\":2,\"last\":\"You sent Clara your partial\",\"strip\":\"Partial sent\",\"status\":\"Partial Sent\"}"
+ },
+ {
+  "lock": "PQS-9",
+  "where": "Undo restores the query exactly (its doc, log and feed)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-10",
+  "where": "no text under 12px (the sheet's four tabs, the journey's steps)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-10",
+  "where": "never \"overdue\" or \"late\"",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PQS-10",
+  "where": "no error from the sheet or the journeys (population 0 page errors in all)",
+  "ok": true,
+  "detail": ""
+ }
+]

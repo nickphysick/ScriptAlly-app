@@ -104,9 +104,10 @@ export const kk = (r: BwRow): number => (r.due == null ? -start(r) / 60 : -start
 /* ── the pills: the open queries split exactly three ways ── */
 export const isYou = (r: BwRow): boolean => !r.closed && r.you;
 export const isChase = (r: BwRow): boolean => !r.closed && !r.you && r.due != null && r.due < 0;
-/** gone quiet: open and more than the setting's days past its date — exactly where rowSegs starts the faded "quiet" tail,
- *  so what reads as gone quiet is what sorts last (a with-you query that far past its send-by date fades the same way) */
-export const isGoneQuiet = (r: BwRow, quietDays: number): boolean => !r.closed && r.due != null && r.due < 0 && -r.due > quietDays;
+/** gone quiet (Nick's ruling, phone query sheet v1 §A): WAITING ON THE AGENT and more than the setting's days past the
+ *  reply date. A with-you query past its send-by date never goes quiet: it stays hatched to today with its "!" and sorts
+ *  among the rest of Needs action. The ONE test — rowSegs draws the faded tail by it and bwGroups sorts by it. */
+export const isGoneQuiet = (r: BwRow, quietDays: number): boolean => isChase(r) && -r.due! > quietDays;
 export const isWait = (r: BwRow): boolean => !r.closed && !r.you && !(r.due != null && r.due < 0);
 /** on its real dates: open with a reply date, an offer (its date sits on the line), or with you (a reply date is not
  *  the writer's to wait on there: with no send-by date its stage runs to today, in With you, where its pill counts it) */
@@ -199,10 +200,11 @@ export function rowSegs(r: BwRow, quietDays: number): BwSeg[] {
       out.push(seg(e.d, end, e.d, e.status, "stage", first, true, true));
       /* past its date: hatched; once it has gone quiet (the writer's setting, from the reply date) it fades to today */
       const qp = r.due + quietDays;
-      /* v3.3 (Nick): gone quiet stays hatched — the quiet tail is the same hatching, fading out to today (drawWorld) */
-      if (0 > qp && qp > end) { out.push({ ...seg(end, qp, r.due, e.status, "past", false, true, true), mark: true }); out.push(seg(qp, 0, r.due, e.status, "quiet", false, true)); }
-      else if (0 > qp) out.push({ ...seg(end, 0, r.due, e.status, "quiet", false, true), mark: true });
-      else out.push({ ...seg(end, 0, r.due, e.status, "past", false, true), mark: true });
+      /* v3.3 (Nick): gone quiet stays hatched — the quiet tail is the same hatching, fading out to today (drawWorld).
+         Phone query sheet v1 §A: only a query waiting on the agent goes quiet (isGoneQuiet, the sort's own test) */
+      if (!isGoneQuiet(r, quietDays)) out.push({ ...seg(end, 0, r.due, e.status, "past", false, true), mark: true });
+      else if (qp > end) { out.push({ ...seg(end, qp, r.due, e.status, "past", false, true, true), mark: true }); out.push(seg(qp, 0, r.due, e.status, "quiet", false, true)); }
+      else out.push({ ...seg(end, 0, r.due, e.status, "quiet", false, true), mark: true });
     } else {
       out.push(seg(e.d, 0, e.d, e.status, "stage", first, true, true));
       out.push(seg(0, r.due, r.due, e.status, "ahead", false, true));

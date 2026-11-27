@@ -124,7 +124,7 @@ export function surname(name: string): string {
   return w.length ? w[w.length - 1] : "";
 }
 
-/** the mini track's stage, 0–3: queried · partial · full · offer (QueryPageV4 `trackStage`'s nodes; closed reads 0) */
+/** the mini track's stage, 0–3: queried · partial · full · offer (the query sheet's `trackStage` nodes, qsheet/track.ts; closed reads 0) */
 export function miniStage(status: string): 0 | 1 | 2 | 3 {
   if (status === QueryStatus.OFFER || status === QueryStatus.SIGNED) return 3;
   if (status === QueryStatus.FULL_REQUESTED || status === QueryStatus.FULL_SENT || status === QueryStatus.REVISE_RESUBMIT || status === QueryStatus.RESUBMITTED) return 2;

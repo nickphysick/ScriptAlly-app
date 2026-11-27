@@ -10,7 +10,7 @@ import React, { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { closeV3, clearV3Snack, subscribeV3, v3Overlay, v3Seq, v3Snack, type V3Overlay } from "./v3Store";
 import { useV3Data } from "./V3Provider";
-import { QueryPageV4 } from "../v4/QueryPageV4";
+import { QuerySheet } from "../qsheet/QuerySheet";
 import { SearchV4 } from "../v4/SearchV4";
 
 export interface V3Panels {
@@ -32,10 +32,13 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
   }, [o]);
   let body: React.ReactNode = null;
   let full = false;
+  /* Phone query sheet v1 — every query door opens the one sheet, over the screen it came from (it draws its own dim) */
   if (o?.type === "query") {
-    const q = v.byId.get(o.id);
-    body = q ? <QueryPageV4 v={q} nowMs={v.now} quietWeeks={v.quietWeeks} /> : null;
+    body = v.byId.get(o.id) ? <QuerySheet key={o.id} id={o.id} j={o.j ?? null} edit={o.edit ?? null} /> : null;
     full = true;
+  } else if (o?.type === "agent" && o.back?.type === "query") {
+    /* the agent card over the query sheet: the sheet stays behind it */
+    body = <>{v.byId.get(o.back.id) ? <QuerySheet key={o.back.id} id={o.back.id} /> : null}{render?.(o) ?? null}</>;
   } else if (o?.type === "search") {
     body = <SearchV4 />;
     full = true;

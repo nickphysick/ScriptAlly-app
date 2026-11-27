@@ -1,0 +1,7 @@
+{
+ "mut": "tiny",
+ "lock": "PQS-10",
+ "own": 1,
+ "other": 3,
+ "readings": 40
+}

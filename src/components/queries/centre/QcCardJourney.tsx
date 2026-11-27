@@ -44,6 +44,8 @@ import "./qcv149card.css";
 import "./qcLogStages.css";
 import "./qcRespondStages.css";
 import "./qcCardJourney.css";
+import { PhoneDaySlider } from "./PhoneDaySlider";
+import { PhonePreviewCard } from "./PhonePreviewCard";
 
 /** what every journey knows about the query it is for */
 export interface CJCtx {
@@ -134,6 +136,12 @@ export interface QcCardJourneyProps<S> {
   /** opened from the card: the finish button is "Back to {First}'s card" */
   fromCard: boolean;
   leaveRef?: React.MutableRefObject<(() => void) | null>;
+  /** Phone query sheet v1 — the same journey on the phone (default off: the desktop is unchanged): "An earlier date" is
+   *  the app's slider (PhoneDaySlider), the track is a thin bar with "Step n of m · name", the review's button is the
+   *  phone's verb (`verb`), and a save hands back to the sheet (`onPhoneSaved`) instead of the finish screen */
+  phone?: boolean;
+  verb?: string;
+  onPhoneSaved?: (saved: CJSaved, head: [string, string]) => void;
 }
 
 const noop = () => {};
@@ -192,9 +200,9 @@ export function QcCardJourney<S>(p: QcCardJourneyProps<S>): React.ReactElement {
           <div className="laq-big" data-cj={`${o.data}-rows`}>
             {today >= minDay ? row("today", "Today", wdm(today), o.cur === today, () => o.onPick(today)) : null}
             {yday >= minDay ? row("yesterday", "Yesterday", wdm(yday), o.cur === yday, () => o.onPick(yday)) : null}
-            {row("earlier", "An earlier date", early ? `Chosen: ${dm(o.cur!)}` : "Pick it from the calendar", cal.open, () => setCal((x) => ({ ...x, open: !x.open })), false)}
+            {row("earlier", "An earlier date", early ? `Chosen: ${dm(o.cur!)}` : p.phone ? "Pick it on the slider" : "Pick it from the calendar", cal.open, () => setCal((x) => ({ ...x, open: !x.open })), false)}
           </div>
-          {cal.open ? (
+          {cal.open && p.phone ? <PhoneDaySlider minMs={o.minMs} nowMs={nowMs} cur={o.cur} onPick={o.onPick} data={o.data} /> : cal.open ? (
             <div className="laq-cal" data-cj="calendar" ref={calRef}>
               <div className="laq-calh">
                 <button type="button" aria-label="Previous month" data-cj="cal-prev" disabled={cal.at <= minAt} onClick={() => setCal((x) => ({ ...x, at: x.at - 1 }))}>{ICON.l}</button>
@@ -262,7 +270,7 @@ export function QcCardJourney<S>(p: QcCardJourneyProps<S>): React.ReactElement {
   const pv = useMemo(() => (step === "log" || phase === "done" ? p.previewOf(s) : null), [s, step, phase]); // eslint-disable-line react-hooks/exhaustive-deps
   const [stamp, setStamp] = useState(false);
   const [notes, setNotes] = useState<{ notes: JourneyNote[]; open: boolean; draft: string; edit: { id: string; text: string } | null }>({ notes: [], open: false, draft: "", edit: null });
-  const card = (row: QcRow, pkg: string | null, stampOn: boolean, word: string, stampMs: number) => (
+  const card = (row: QcRow, pkg: string | null, stampOn: boolean, word: string, stampMs: number) => p.phone ? <PhonePreviewCard row={row} data="preview" /> : (
     <div className={`laq-pv laq-pvw qc151 qc153 is-wide${phase === "done" ? " is-logged" : ""}${stampOn ? " has-stamp" : ""}`} data-cj="preview">
       <div className="laq-pvc"><QcCard154 row={row} nowMs={nowMs} selected={false} packageName={pkg} act={null} onOpen={noop} onAct={noop} preview /></div>
       {stampOn ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-cj="stamp" aria-hidden="true"><span>{word}</span><small>{dm(stampMs).toUpperCase()}</small></span> : null}
@@ -324,6 +332,8 @@ export function QcCardJourney<S>(p: QcCardJourneyProps<S>): React.ReactElement {
     const done = await p.onSave(s, notesToSave({ notes: notes.notes, edit: notes.edit, draft: notes.draft }));
     setBusy(false);
     if (!done) return;
+    /* the phone: the journey drops and the sheet comes forward with the toast (Phone query sheet v1 §C) */
+    if (p.phone && p.onPhoneSaved) { p.onPhoneSaved(done, spec.finish(s, c, done.counts).head); return; }
     const before = s;
     const then = () => { setSaved({ ...done, before }); setPhase("done"); };
     if (reduce) { then(); return; }
@@ -392,12 +402,22 @@ export function QcCardJourney<S>(p: QcCardJourneyProps<S>): React.ReactElement {
       })}
     </div>
   );
+  /* the phone's progress: one segment per step (done white, current blush), "Step n of m · name" beneath */
+  const prog = () => {
+    const at = Math.max(0, sg.indexOf(step));
+    return (
+      <div className="pqj-prog" data-cj="progress" data-at={at + 1} data-of={sg.length}>
+        <div className="pqj-bar" aria-hidden="true">{sg.map((k, i) => <i key={k} className={i < at ? "done" : i === at ? "cur" : ""} />)}</div>
+        <div className="pqj-pgl"><span>Step {at + 1} of {sg.length} · <b>{CJ_LABEL[step]}</b></span><span>{first}</span></div>
+      </div>
+    );
+  };
   const top = (h: [string, string], allDone: boolean) => (
     <div className="laq-top rar-top" data-laq="top">
       <FlowHead title={<>{h[0]}<span className="is-c br" data-cj="head-2">{h[1]}</span></>} titleKey={`${h[0]}|${h[1]}`}
         mark={<img className="flh-m rar-art" data-cj="art" src={ARCHIVIST} alt="" width={48} height={48} />}
         onClose={() => leave()} data={{ "data-cj": "head" }} closeData={{ "data-cj": "close" }} />
-      {track(allDone)}
+      {p.phone ? prog() : track(allDone)}
     </div>
   );
 
@@ -443,7 +463,7 @@ export function QcCardJourney<S>(p: QcCardJourneyProps<S>): React.ReactElement {
     if (step === "log") return <>
       <button type="button" className="laq-lnk" data-cj="cancel" onClick={() => leave()} disabled={busy || stamp}>Cancel</button>
       <span className="laq-sp" />
-      <button type="button" className="laq-btn" data-cj="save" disabled={busy || stamp || !pv} aria-busy={busy || undefined} onClick={() => void save()}>{busy ? "Saving…" : <>{spec.check.button} {ICON.arrow}</>}</button>
+      <button type="button" className="laq-btn" data-cj="save" disabled={busy || stamp || !pv} aria-busy={busy || undefined} onClick={() => void save()}>{busy ? "Saving…" : <>{p.phone && p.verb ? p.verb : spec.check.button} {ICON.arrow}</>}</button>
     </>;
     const cr = spec.carry?.(step, api) ?? null;
     if (!cr) return <>{backBtn}<span className="laq-sp" />{hint("Pick one to carry on")}</>;

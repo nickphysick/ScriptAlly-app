@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "PQS-6",
+  "where": "Close → passed: Record a response at \"when\", Passed chosen, no Carry on on the hand-over (0)",
+  "ok": true,
+  "detail": "{\"kind\":\"resp\",\"step\":\"when\",\"go\":0,\"passed\":true}"
+ },
+ {
+  "lock": "PQS-6",
+  "where": "Reopen → replied: Record a response at \"reply\" (\"What did … say?\"), no Carry on (0)",
+  "ok": true,
+  "detail": "{\"kind\":\"resp\",\"step\":\"reply\",\"go\":0}"
+ },
+ {
+  "lock": "PQS-10",
+  "where": "no error from the sheet or the journeys (population 0 page errors in all)",
+  "ok": true,
+  "detail": ""
+ }
+]

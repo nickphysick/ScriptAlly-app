@@ -39,7 +39,10 @@ export const RespondStagesHost: React.FC<{
   leaveRef?: React.MutableRefObject<(() => void) | null>;
   /** v2.1 — the query's card is open over the journey: it takes no keys */
   behind?: boolean;
-}> = ({ seedQueryId, seedKind, onClose, onOpenCard, leaveRef, behind = false }) => {
+  /** Phone query sheet v1 — the phone's presentation of the same journey and save (QcRespondStages `phone`) */
+  phone?: boolean;
+  onPhoneSaved?: (saved: RespSaved) => void;
+}> = ({ seedQueryId, seedKind, onClose, onOpenCard, leaveRef, behind = false, phone, onPhoneSaved }) => {
   const scriptDb = useScriptAllyDb();
   const { currentUser, queries, agents, manuscripts, activities, versions, addJournalEntry, deleteJournalEntry } = scriptDb;
   const { showToast } = useToast();
@@ -149,7 +152,7 @@ export const RespondStagesHost: React.FC<{
 
   return (
     <QcRespondStages nowMs={nowMs} queries={list} seedQueryId={seedQueryId && list.some((x) => x.id === seedQueryId) ? seedQueryId : null} seedKind={seedKind ?? null}
-      ctxOf={ctxOf} previewOf={previewOf} rowOf={rowOf} onSave={onSave} onClose={onClose} leaveRef={leaveRef} behind={behind} />
+      ctxOf={ctxOf} previewOf={previewOf} rowOf={rowOf} onSave={onSave} onClose={onClose} leaveRef={leaveRef} behind={behind} phone={phone} onPhoneSaved={onPhoneSaved} />
   );
 };
 
