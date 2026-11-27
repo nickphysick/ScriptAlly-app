@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "L9",
+  "where": "d-in · population",
+  "ok": true,
+  "detail": "16 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-in · at rest",
+  "ok": true,
+  "detail": "16 white on navy"
+ },
+ {
+  "lock": "L9",
+  "where": "d-in · hovered",
+  "ok": true,
+  "detail": "stroke rgb(255, 255, 255) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-out · population",
+  "ok": true,
+  "detail": "11 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-out · at rest",
+  "ok": true,
+  "detail": "11 white on navy"
+ },
+ {
+  "lock": "L9",
+  "where": "d-out · hovered",
+  "ok": true,
+  "detail": "stroke rgb(255, 255, 255) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-end · population",
+  "ok": true,
+  "detail": "18 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-end · at rest",
+  "ok": true,
+  "detail": "18 white on navy"
+ },
+ {
+  "lock": "L9",
+  "where": "d-end · hovered",
+  "ok": true,
+  "detail": "stroke rgb(255, 255, 255) on rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L9",
+  "where": "d-quiet · population",
+  "ok": true,
+  "detail": "43 badges"
+ },
+ {
+  "lock": "L9",
+  "where": "d-quiet · navy z z z on white",
+  "ok": true,
+  "detail": "43 navy on white"
+ }
+]

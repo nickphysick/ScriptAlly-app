@@ -183,6 +183,8 @@
   .qc151 .qr170-n em { padding-left: 0; }
   .qc169.qc169 .qc169-th > .c-ag { justify-self: start; padding-left: 0 !important; margin-left: 0; }
   .qr170-arw.qr170-arw:not(.d-quiet) { background: #2a3a52; color: #fff; }
+  /* the step labels' "b" rule (.qc151 .qr170-sp b) also caught the badge, itself a <b>: the arrow went ink on navy */
+  .qc151 .qr170-sp .qr170-arw:not(.d-quiet) { color: #fff; }
   /* the filter panel: pinned under the page's header while the list scrolls; if it is taller than the window, it
      scrolls inside itself */
   .qc151.qc153 .qc153-cl > .qc153-railcol { position: sticky; top: calc(var(--pin-cover, 12px) + 2px); align-self: start; z-index: 5;
