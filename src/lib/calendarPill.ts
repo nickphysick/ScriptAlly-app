@@ -44,9 +44,9 @@ export interface Pill {
  * note had it first.
  */
 export const DEEDS = {
-  partial: "Send the partial",
-  full: "Send the full",
-  revision: "Send the revision",
+  partial: "Send your partial",
+  full: "Send your full",
+  revision: "Send your revision",
   offer: "Answer them",
   nudge: "Nudge due",
   /**

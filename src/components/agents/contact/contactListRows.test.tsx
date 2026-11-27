@@ -71,8 +71,9 @@ describe("Contact list rows v1 · Phase 1 — the columns and cells", () => {
     expect(css).toContain(".cl26-card { container: clr / inline-size; }");
     /* RE-POINTED by v1.2: Query status takes the spare width; the › is a fixed 30 (22 below 980) */
     expect(css).toContain("grid-template-columns: 290px 90px minmax(0, 360px) 180px minmax(220px, 1fr) 30px;");
-    expect(css).toMatch(/@container clr \(width < 1150px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 262px 72px minmax\(0, 300px\) 160px minmax\(196px, 1fr\) 30px; \}/);
-    expect(css).toMatch(/@container clr \(width < 980px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 228px 64px minmax\(0, 1fr\) 138px 156px 22px; column-gap: 14px; \}/);
+    /* RE-POINTED by v1.2.1 (4.4): the tiers at 1100 and 900, the middle tier's own columns */
+    expect(css).toMatch(/@container clr \(width < 1100px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 232px 72px minmax\(170px, 260px\) 160px minmax\(176px, 1fr\) 30px; column-gap: 16px; \}/);
+    expect(css).toMatch(/@container clr \(width < 900px\) \{\s*\.cl26-card \.cl26-row, \.cl26-card \.cl26-th \{ grid-template-columns: 228px 64px minmax\(0, 1fr\) 138px 156px 22px; column-gap: 14px; \}/);
   });
 });
 
@@ -106,7 +107,8 @@ describe("Contact list rows v1 · Phase 3 — sorting and search", () => {
     expect(sections(r, "letter", "rating").map((s) => `${s.label}:${s.ids.join("")}`)).toEqual(["5 stars:ab", "2 stars:c", "Not rated:d"]);
     /* RE-POINTED by v1.2 (5.2): one Queried section, never two, the nudge due first within it */
     const q = sortFacts([st("w", "agent", "queried"), st("n", "you", "queried"), st("f", "agent", "fs")], "status");
-    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:queried:nw", "t:fs:f"]);
+    /* RE-POINTED by v1.2.1 (4.3): the stage sections follow the sort's order — Full sent above a waiting Queried */
+    expect(sections(q, "letter", "status").map((s) => `${s.key}:${s.ids.join("")}`)).toEqual(["t:fs:f", "t:queried:nw"]);
   });
   it("the search reads Filter by name or agency, and this page hides the \"/\" hint", () => {
     expect(FIND_AGENT).toBe("Filter by name or agency");
@@ -203,5 +205,18 @@ describe("Contact list rows v1.2.1 · Phase 2 — the row's action gets its own 
   it("both placements stop the click reaching the row and open the action's journey", () => {
     const src = read("./ContactSheet26.tsx");
     expect(src.match(/onClick=\{\(e\) => \{ e\.stopPropagation\(\); p\.onAct\?\.\(a\.id, act\.mode, x\.q\?\.id \?\? null\); \}\}/g)).toHaveLength(2);
+  });
+});
+
+describe("Contact list rows v1.2.1 · Phase 4 — v1.2's answers", () => {
+  it("Outside {the home country's short name}", async () => {
+    const { countryShortName } = await import("../../../lib/territory");
+    expect([countryShortName("GB"), countryShortName("US"), countryShortName("IE"), countryShortName("")]).toEqual(["the UK", "the US", "Ireland", "your country"]);
+  });
+  it("one set of action words on the dashboard feed, the to-do, the calendar pill and the history story", () => {
+    for (const f of ["dashFeed.ts", "calendarPill.ts", "contactStory255.ts", "timelineCopy.ts", "todoBoard.ts"]) {
+      const src = readFileSync(new URL(`../../../lib/${f}`, import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+      expect(src, f).not.toMatch(/"Send the (partial|full|revision)"|`Send the full to/);
+    }
   });
 });

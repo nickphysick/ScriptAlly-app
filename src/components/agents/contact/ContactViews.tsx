@@ -15,7 +15,7 @@
  *   Genres sought        four pills (the book's first, with a small navy tick), several allowed (any match), then
  *                        "+n more" (an outline pill), then "No genres yet" (`noGenres`) — which clears the genre picks,
  *                        and a genre pick clears it
- *   (last)               "Outside the UK", a pill                                                         (`abroad`)
+ *   (last)               "Outside {home}", a pill — the writer's home country's short name ("the UK", "the US")  (`abroad`)
  *
  * "Missing details" left the panel (List health's Fill the gaps does that job); the `missing` filter is still honoured
  * from a link and cleared by Clear all.
@@ -34,6 +34,7 @@ import type { AgentFacts, ContactFilters, FitChoice, ReplyChoice } from "../../.
 import { panelCounts, panelSummary } from "../../../lib/contactPanel";
 import { railOn, toggleGenre, type Sets } from "../../../lib/contactV27";
 import { FILTER_TICK, FilterPanel } from "../../shell/FilterPanel";
+import { countryShortName } from "../../../lib/territory";
 import "../../queries/centre/qcv153.css";
 import "../../queries/centre/qcv1531.css";
 import "../../queries/centre/qcv154.css";
@@ -62,6 +63,8 @@ export interface ContactViewsProps {
   /** Clear all: every filter, drawn here or not, and the set */
   onReset: () => void;
   loading?: boolean;
+  /** v1.2.1 (4.2) — the writer's home country (getHomeCountry): "Outside the UK", "Outside the US" */
+  homeCountry?: string;
 }
 
 interface Opt { k: string; label: React.ReactNode; n: number; on: boolean; press: () => void; aria?: string }
@@ -183,7 +186,7 @@ export const ContactViews: React.FC<ContactViewsProps> = (p) => {
       {/* the last section: Outside the UK, a pill ("Missing details" left the panel: List health's Fill the gaps does that job) */}
       <Section k="abroad" title="">
         <Pills label="Where they are" loading={loading} opts={[
-          { k: "abroad", label: "Outside the UK", n: c.abroad, on: !!f.abroad, press: () => set({ abroad: !f.abroad }) },
+          { k: "abroad", label: `Outside ${countryShortName(p.homeCountry ?? "GB")}`, n: c.abroad, on: !!f.abroad, press: () => set({ abroad: !f.abroad }) },
         ]} />
       </Section>
     </FilterPanel>

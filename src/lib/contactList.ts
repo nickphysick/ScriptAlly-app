@@ -440,7 +440,7 @@ export function standsRows(present: (k: StatusKey) => boolean, f: ContactFilters
 /** one applied filter: its words on the row, and the filters without it */
 export interface AppliedFilter { key: string; label: string; drop: (f: ContactFilters) => ContactFilters }
 /** every filter that is on, one chip each, in the menu's order (search and the band's group are the page's to add) */
-export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => string): AppliedFilter[] {
+export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => string, homeShort = "the UK"): AppliedFilter[] {
   const out: AppliedFilter[] = [];
   if (f.status.length) {
     const first = STATUS_LABEL[f.status[0]];
@@ -459,7 +459,8 @@ export function appliedFilters(f: ContactFilters, genreLabel: (k: string) => str
   if (f.reply && f.reply !== "any") {
     out.push({ key: "reply", label: f.reply === "always" ? "Always replies" : f.reply === "nrmn" ? "No response means no" : "Reply time known", drop: (g) => ({ ...g, reply: "any" }) });
   }
-  if (f.abroad) out.push({ key: "abroad", label: "Outside the UK", drop: (g) => ({ ...g, abroad: false }) });
+  /* v1.2.1 (4.2) — "Outside {the writer's home country's short name}" */
+  if (f.abroad) out.push({ key: "abroad", label: `Outside ${homeShort}`, drop: (g) => ({ ...g, abroad: false }) });
   if (f.noGenres) out.push({ key: "noGenres", label: "No genres yet", drop: (g) => ({ ...g, noGenres: false }) });
   if (f.genres.length) {
     out.push({

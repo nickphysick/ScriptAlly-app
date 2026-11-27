@@ -298,7 +298,7 @@ export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefi
     case "offer_tell_all":
       return { kind: "OFFER", title: task.title, who: name, subtitle: msTitle, due: q?.status === QueryStatus.OFFER ? offerDue(q?.offerResponseDeadline ? Date.parse(String(q.offerResponseDeadline)) : null, now) : "", warn: true, status: q?.status, hk: false };
     case "offer_send_full":
-      return { kind: "AGENT WAITING", title: `Send the full to ${name}`, who: name, subtitle: msTitle, due: "", warn: true, status: q?.status, hk: false };
+      return { kind: "AGENT WAITING", title: `Send your full to ${name}`, who: name, subtitle: msTitle, due: "", warn: true, status: q?.status, hk: false };
     case "withdraw_tell":
       return { kind: "COURTESY", title: `Tell ${name} you've withdrawn`, who: name, subtitle: msTitle, due: "", warn: false, status: undefined as QueryStatus | undefined, hk: true };
     case "signed_tell":
