@@ -198,18 +198,22 @@ export const BRACKET_SPAN_DAYS = 20;
 /**
  * Which discs carry a label, given each disc's x (px): the agents-waiting discs for pages share one bracket when they sit
  * within 20 days of each other (and carry no label of their own); every other disc is labelled when it has at least 64px
- * clear of the next labelled disc. Read right to left, so the oldest keeps its label.
+ * clear of the next labelled disc — and, given the labels' widths, room for both sets of words. Read right to left, so
+ * the oldest keeps its label.
  */
-export function lineLabels(points: readonly (LinePoint & { x: number })[]): { labelled: Set<string>; bracket: { from: number; to: number } | null } {
+export function lineLabels(points: readonly (LinePoint & { x: number })[], width?: (p: LinePoint) => number): { labelled: Set<string>; bracket: { from: number; to: number } | null } {
   const pages = points.filter((p) => p.group === "wait" && forPages(p.task));
   const span = pages.length ? Math.max(...pages.map((p) => p.days)) - Math.min(...pages.map((p) => p.days)) : Infinity;
   const bracket = pages.length > 1 && span <= BRACKET_SPAN_DAYS ? { from: Math.min(...pages.map((p) => p.x)), to: Math.max(...pages.map((p) => p.x)) } : null;
   const inBracket = new Set(bracket ? pages.map((p) => p.task.key) : []);
   const labelled = new Set<string>();
-  let lastX = Infinity;
+  /* 64px between discs at least; and, where the labels' own widths are known, room for both words beside each other */
+  let last: { x: number; w: number } | null = null;
   for (const p of [...points].sort((a, b) => b.x - a.x)) {
     if (inBracket.has(p.task.key)) continue;
-    if (lastX - p.x >= LABEL_CLEAR_PX) { labelled.add(p.task.key); lastX = p.x; }
+    const w = width ? width(p) : 0;
+    const need = last ? Math.max(LABEL_CLEAR_PX, (last.w + w) / 2 + 8) : 0;
+    if (!last || last.x - p.x >= need) { labelled.add(p.task.key); last = { x: p.x, w }; }
   }
   /* a label never sits under the bracket's own line (it spans its discs, 16px beyond each end) */
   if (bracket) for (const p of points) if (labelled.has(p.task.key) && p.x > bracket.from - 16 - LABEL_CLEAR_PX / 2 && p.x < bracket.to + 16 + LABEL_CLEAR_PX / 2) labelled.delete(p.task.key);

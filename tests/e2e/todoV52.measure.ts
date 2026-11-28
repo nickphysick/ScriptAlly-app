@@ -13,7 +13,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { openRoute } from "./measure";
+import { openRoute, startFirstTodoTask } from "./measure";
 
 const DIR = "reports/todo-list-v52";
 const READ = `${DIR}/readings`;
@@ -35,6 +35,8 @@ async function open(page: Page, vp: { width: number; height: number }) {
     try { if (!sessionStorage.getItem("td52-init")) { localStorage.removeItem("sa.todoTraySlim"); sessionStorage.setItem("td52-init", "1"); } } catch { /* */ }
   });
   await openRoute(page, "/todo", vp);
+  /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+  await startFirstTodoTask(page);
   await expect(page.locator(PG)).toHaveCount(1, { timeout: 30_000 });
   await expect(page.locator(`${PG} [data-tws-row]`).first()).toBeVisible({ timeout: 30_000 });
   await page.waitForTimeout(500);

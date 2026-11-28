@@ -23,8 +23,14 @@
   .tws .twa-top .twa-mnote { flex: 1; min-width: 0; margin: 0; }
   .tws .twa-top .twa-mnote img { mix-blend-mode: multiply; }
   .tws .twa-top .twa-mnote p { max-width: 640px; }
+  .tws .twa-go { flex: none; display: flex; align-items: center; gap: 24px; }
   .tws .twa-or { flex: none; font: italic 14px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
   .tws .twa-top .tws-go { flex: none; }
+  /* measured at 1280: beside the button, the words squeezed the hawk's bubble to four lines; on a narrower desk they sit
+     under the button, so the bubble keeps two */
+  @container twarun (max-width: 900px) {
+    .tws .twa-go { flex-direction: column-reverse; align-items: flex-end; gap: 6px; }
+  }
 
   /* the piles: one row, one white card per group, its fill and edge the group's own */
   .tws .twa-piles { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 16px; }
@@ -32,6 +38,7 @@
     all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto 1fr; column-gap: 14px; padding: 14px 16px; border-radius: 14px; background: #fff;
     box-shadow: inset 0 0 0 1px var(--twa-pe); min-height: 142px; transition: transform 0.15s, box-shadow 0.15s;
+    container: twapile / inline-size;
   }
   .tws .twa-pile:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px var(--twa-pe), 0 6px 16px rgba(42, 58, 82, 0.1); }
   .tws .twa-pile:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
@@ -40,7 +47,14 @@
   .tws .twa-pt { align-self: end; font: 600 17px/1.25 var(--tw-serif); color: var(--tw-ink); }
   .tws .twa-sub { font: italic 14.5px/1.35 var(--tw-serif); color: var(--sp-quiet); }
   .tws .twa-pile[data-quiet] :is(.twa-big, .twa-pt) { color: var(--sp-quiet); }
-  .tws .twa-discs { grid-column: 1 / -1; align-self: end; display: flex; align-items: center; margin-top: 12px; }
+  .tws .twa-discs { grid-column: 1 / -1; align-self: end; display: flex; flex-wrap: wrap; align-items: center; row-gap: 6px; margin-top: 12px; }
+  /* measured at 1280 with four piles: a narrow pile keeps its title beside the count and gives the sub-line the card's
+     whole width (it wrapped to six lines under the title) */
+  @container twapile (max-width: 240px) {
+    .tws .twa-big { grid-row: 1; }
+    .tws .twa-pt { align-self: center; }
+    .tws .twa-sub { grid-column: 1 / -1; margin-top: 6px; }
+  }
   .tws .twa-more { margin-left: 16px; font: 14.5px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
 
   /* a disc: the tray row's glyph, round, in its stage colour, ringed in the ground it sits on */
@@ -64,6 +78,7 @@
   .tws .twa-lh span { margin-left: 8px; font: italic 400 14px var(--tw-serif); color: var(--sp-quiet); }
   .tws .twa-track { position: relative; height: 106px; }
   .tws .twa-axis { position: absolute; left: 14px; right: 14px; top: 62px; height: 2px; background: #e6dfd4; }
+  .tws .twa-tmark { position: absolute; top: 58px; width: 2px; height: 10px; border-radius: 1px; background: #e6dfd4; transform: translateX(-50%); }
   .tws .twa-tick { position: absolute; top: 86px; transform: translateX(-50%); font: 13px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
   .tws .twa-dot { all: unset; position: absolute; top: 49px; width: 28px; height: 28px; border-radius: 50%; transform: translateX(-50%); cursor: pointer; box-shadow: 0 0 0 2px var(--tw-deskbg); }
   .tws .twa-dot .tws-av.twa-av { width: 28px; height: 28px; margin: 0; }
@@ -94,7 +109,8 @@
    The hawk's row holds two lines of bubble in both states, so the piles' top is the same loading and loaded. */
 @media (min-width: 768px) {
   .tws .twa-top { min-height: 64px; }
-  .tws .twl-run .twa-h { display: flex; align-items: center; min-height: 29px; }
+  /* the heading's own line box (--sp-h-section's 1.2), so its top is the loaded heading's to the pixel (measured 0.09px off at 29px) */
+  .tws .twl-run .twa-h { display: flex; align-items: center; min-height: 1.2em; }
   .tws .twl-run [data-twl="rhead"] { width: 190px; height: 20px; }
   .tws .twl-run [data-twl="rdate"] { width: 150px; height: 12px; }
   .tws .twl-run .twl-mnote { align-items: center; }

@@ -14,7 +14,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { openRoute } from "./measure";
+import { openRoute, startFirstTodoTask } from "./measure";
 
 /* ⚠️ NOT serial: a red case must not skip the ones after it (each is a lock of its own, and the `all` break makes every
    one red at once). One worker still runs them in order. */
@@ -61,6 +61,8 @@ async function openCl(page: Page, vp: { width: number; height: number }) {
 }
 async function openTodo(page: Page, vp: { width: number; height: number }) {
   await openRoute(page, "/todo", vp);
+  /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+  await startFirstTodoTask(page);
   await expect(page.locator(`${TD}:visible [data-tws-row]`).first()).toBeVisible({ timeout: 60_000 });
   /* the board settles over a few seconds as the account's collections arrive: wait until the title holds still */
   let last = "";

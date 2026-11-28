@@ -8,7 +8,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
-import { openRoute } from "./measure";
+import { openRoute, startFirstTodoTask } from "./measure";
 
 const OUT = "reports/todo-list-v53/shots";
 mkdirSync(OUT, { recursive: true });
@@ -19,6 +19,8 @@ const desk = (page: Page) => page.locator(`${PG} [data-tws="desk"]`);
 async function open(page: Page) {
   await page.addInitScript(() => { try { localStorage.removeItem("sa.todoTraySlim"); } catch { /* */ } });
   await openRoute(page, "/todo", VP);
+  /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+  await startFirstTodoTask(page);
   await expect(page.locator(`${PG} [data-tws-row]`).first()).toBeVisible({ timeout: 30_000 });
   await page.waitForTimeout(800);
 }

@@ -22,6 +22,10 @@ const MENTOR = "/images/todo/mentor.webp";
 const ARROW = <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>;
 /** the discs a pile shows before "and {n} more" */
 export const PILE_DISCS = 5;
+/** a tick's words need this much room */
+const TICK_GAP_PX = 60;
+/** a label's width, estimated from its words at 13.5px (the name semibold, "{n}d" italic) */
+const labelWidth = (who: string | null, days: number) => Math.round((who ? who.length * 7.6 + 4 : 0) + String(days).length * 6.8 + 8);
 
 /** what is lit: a pile (its group's rows), or one task (its row and its disc) */
 export type RunLight = { src: "pile"; id: string; keys: ReadonlySet<string> } | { src: "task"; key: string; group: string; keys: ReadonlySet<string> } | null;
@@ -65,7 +69,10 @@ export const WsRunThrough: React.FC<RunThroughProps> = ({ now, userFirst, all, s
   const PAD = 14;
   const xOf = (d: number) => PAD + (w > 2 * PAD ? (d / axis.max) * (w - 2 * PAD) : 0);
   const placed = points.map((p) => ({ ...p, x: xOf(p.days) }));
-  const { labelled, bracket } = lineLabels(placed);
+  const { labelled, bracket } = lineLabels(placed, (p) => labelWidth(agentFirst(p.task), p.days));
+  /* a tick every 30 days; its words only where they have room (every k-th tick, k the smallest that leaves 60px) */
+  const tickPx = axis.ticks.length > 1 ? xOf(30) - xOf(0) : Infinity;
+  const tickEvery = Math.max(1, Math.ceil(TICK_GAP_PX / Math.max(1, tickPx)));
   const isLit = (key: string) => !!lit && lit.src === "task" && lit.key === key;
   const lightTask = (t: WsTask) => onLight({ src: "task", key: t.key, group: t.group, keys: new Set([t.key]) });
   const off = () => onLight(null);
@@ -75,10 +82,12 @@ export const WsRunThrough: React.FC<RunThroughProps> = ({ now, userFirst, all, s
       <div className="twa-head" data-twa="head"><h2 className="twa-h">Where to start</h2><em data-twa="date">{longDay(now)}</em></div>
       <div className="twa-top">
         <div className="tws-mnote twa-mnote" data-tws="hawk" data-twa="hawk" data-tws58-stage={leadStage ?? undefined} style={stageVars(leadStage, lead?.query?.status) as React.CSSProperties | undefined}>
-          <img src={MENTOR} alt="" /><p data-twa="line">{hawkLine(piles, userFirst, now)}</p>
+          <img src={MENTOR} alt="" /><p data-twa="say">{hawkLine(piles, userFirst, now)}</p>
         </div>
-        <small className="twa-or">or choose any task from the list</small>
-        {first ? <button type="button" className="tws-go" data-twa="start" onClick={() => onOpen(first.key)}>{startLabel(first)} {ARROW}</button> : null}
+        <div className="twa-go">
+          <small className="twa-or">or choose any task from the list</small>
+          {first ? <button type="button" className="tws-go" data-twa="start" onClick={() => onOpen(first.key)}>{startLabel(first)} {ARROW}</button> : null}
+        </div>
       </div>
 
       <div className="twa-piles" data-twa="piles" data-n={piles.length}>
@@ -107,7 +116,12 @@ export const WsRunThrough: React.FC<RunThroughProps> = ({ now, userFirst, all, s
           <h3 className="twa-lh">How long each has been on your list<span>Agents waiting and nudges. Further right is older.</span></h3>
           <div className="twa-track" ref={lineRef}>
             <span className="twa-axis" aria-hidden="true" />
-            {axis.ticks.map((d) => <span key={d} className="twa-tick" style={{ left: xOf(d) }} aria-hidden="true">{d === 0 ? "Today" : `${d} days`}</span>)}
+            {axis.ticks.map((d, i) => (
+              <React.Fragment key={d}>
+                <span className="twa-tmark" style={{ left: xOf(d) }} aria-hidden="true" />
+                {i % tickEvery === 0 ? <span className="twa-tick" style={{ left: xOf(d) }} aria-hidden="true">{d === 0 ? "Today" : `${d} days`}</span> : null}
+              </React.Fragment>
+            ))}
             {bracket ? (
               <span className="twa-brk" data-twa="bracket" style={{ left: bracket.from - 16, width: bracket.to - bracket.from + 32 }} aria-hidden="true"><span>Waiting on you for pages</span></span>
             ) : null}

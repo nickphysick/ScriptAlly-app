@@ -8,7 +8,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { openRoute } from "./measure";
+import { openRoute, startFirstTodoTask } from "./measure";
 
 test.describe.configure({ mode: "serial" });
 test.setTimeout(600_000);
@@ -61,6 +61,8 @@ for (const vp of SIZES) {
   });
   test(`recon · To-do list (${vp.width})`, async ({ page }) => {
     await openRoute(page, "/todo", vp);
+    /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+    await startFirstTodoTask(page);
     await expect(page.locator('[data-tws="page"]:visible [data-tws-row]').first()).toBeVisible({ timeout: 60_000 });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(3000);

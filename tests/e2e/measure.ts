@@ -173,6 +173,17 @@ function passwordFromEnvLocal(): string | null {
 }
 
 /** Open a route on the deployed dev site and wait for the workspace to be real, not a skeleton. */
+/**
+ * To-do arrival v1 (28 Nov) — the To-do page opens on "Where to start" with no task open. The To-do measures written
+ * before it read the desk of the task arrival used to open by itself: the first task in the tray's order. Start opens
+ * exactly that task, so those measures press it once the page is in and read the same desk as before.
+ */
+export async function startFirstTodoTask(page: Page) {
+  const start = page.locator('[data-tws="page"]:visible [data-twa="start"]');
+  await start.first().waitFor({ state: "visible", timeout: 60_000 }).catch(() => {});
+  if (await start.count()) await start.first().click();
+}
+
 export async function openRoute(page: Page, route: string, viewport?: { width: number; height: number }) {
   if (viewport) await page.setViewportSize(viewport);
   await page.goto(route);
