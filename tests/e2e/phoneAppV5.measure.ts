@@ -144,9 +144,9 @@ async function press(page: Page, sel: string, timeout = 15_000) {
 }
 const stageTo = (page: Page, y: number) => page.evaluate((yy) => { document.getElementById("app-stage-scroll")?.scrollTo({ top: yy, behavior: "instant" as ScrollBehavior }); }, y);
 const stageTop = (page: Page) => page.evaluate(() => document.getElementById("app-stage-scroll")?.scrollTop ?? -1);
-const REPLAY_KEYS = ["pa41.birds-view.replayed", "pa41.birds-card.replayed", "bw1.firstLook.day"]; /* + Birds-eye first look v1 */
-const clearReplays = (page: Page) => page.evaluate((ks) => { try { for (const k of ks) localStorage.removeItem(k); } catch { /* none */ } }, REPLAY_KEYS);
-const markReplayed = (page: Page) => page.evaluate((ks) => { try { const d = new Date(); const t = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; for (const k of ks) localStorage.setItem(k, t); } catch { /* none */ } }, REPLAY_KEYS);
+const REPLAY_KEYS = ["pa41.birds-view.replayed", "pa41.birds-card.replayed"];
+const clearReplays = (page: Page) => page.evaluate((ks) => { try { for (const k of ks) localStorage.removeItem(k); localStorage.removeItem("sa.e2e.bw-nolook"); } catch { /* none */ } }, REPLAY_KEYS);
+const markReplayed = (page: Page) => page.evaluate((ks) => { try { const d = new Date(); const t = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; for (const k of ks) localStorage.setItem(k, t); localStorage.setItem("sa.e2e.bw-nolook", "1"); /* polish v1.1: Birds-eye arrivals fade */ } catch { /* none */ } }, REPLAY_KEYS);
 const blockIntoView = async (page: Page) => {
   await page.evaluate(() => document.querySelector('[data-bwq="card"]')?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior })); /* polish v1: My queries */
   await page.waitForTimeout(500);
@@ -294,7 +294,7 @@ const REACH: Reach[] = [
   { page: "To do's tasks (v4's tasks page)", dock: "todo", taps: [], arrive: 'vis:[data-pa5="todo"]' },
   { page: "A task's journey", dock: "todo", taps: ['[data-pa5="todo-verb"]'], arrive: 'vis:[data-tdp="task"]' },
   { page: "Queries list (/queries)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="all-queries"]'], arrive: "path:/queries/all" },
-  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-bwq="card"]'], arrive: 'vis:[data-pa5="birds-view"]' }, /* polish v1: Today's My queries */
+  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-bwq="link"]'], arrive: 'vis:[data-pa5="birds-view"]' }, /* polish v1: Today's My queries */
   { page: "A query's page", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-ps="move-row"]'], arrive: 'vis:[data-pqs="sheet"]' }, /* Phone query sheet v1: the one sheet; first look v1: from a Your move row (the preview's rows open Birds-eye) */
   { page: "Agents (/agents)", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]'], arrive: 'vis:[data-pa5="agents-tab"]' },
   { page: "Everyone on your list", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]', '[data-pa5="see-all-agents"]'], arrive: 'vis:[data-pa4="agents-all"]' },
@@ -379,7 +379,7 @@ group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async 
      Retired with BirdsViewV5 (the world's own locks are tests/e2e/phoneBirdsWorld.measure.ts): PA41-8 (groups fold at
      five), PA5-8's 28px rows, 18 in sight and the fixed name column on a drag, PA5-6's notch and deeper segment in the
      view, and the 184px landscape name column. */
-  await press(page, '[data-bwq="card"]');
+  await press(page, '[data-bwq="link"]');
   await page.locator('[data-bw="world"]').first().waitFor();
   await page.waitForTimeout(800);
   await mutate(page);

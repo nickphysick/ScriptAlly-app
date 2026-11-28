@@ -37,16 +37,20 @@ const QS = (n: number) => ({
 const ONLY_CLOSED = { agents: [agent(0), agent(1)], queries: [query(0, QueryStatus.REJECTED, { lastStatusChange: iso(-3) }), query(1, QueryStatus.NO_RESPONSE, { lastStatusChange: iso(-5) })] };
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
 const W = (court: string | null = null, route = "/queries/all?view=birds", data: Record<string, unknown> = QS(12)) =>
-  renderPageSeededWith(P(<BirdsWorld court={court} onBack={() => {}} onList={() => {}} />), route, data);
+  renderPageSeededWith(P(<BirdsWorld court={court} onList={() => {}} />), route, data);
 
 describe("Phone Birds-eye world v2 renders", () => {
-  it("polish v1: the slim header — one row: back, the hawk, Birds-eye view, List, filter, replay, the key, search; no pill row", () => {
+  it("polish v1.1: the slim header — one row: the hawk, Birds-eye view, filter, search, List, ⋯; no pill row, no Back", () => {
     const html = W();
     expect(html).toContain('data-bw="world"');
     expect(html).toMatch(/class="bw-hd col slim" data-bw="head" data-slim="1"/);
     expect(html).toMatch(/data-bw="badge" src="\/images\/qc\/be-hawk-head\.png"/);
     expect(html).toContain(">Birds-eye view</h1>");
-    const order = ["Back", "List", "Filter", "Replay your campaign", "What the colours mean", "Search"].map((l) => html.indexOf(`aria-label="${l}"`));
+    /* polish v1.1: hawk · title · filter · search · List · ⋯; no Back; Replay and the key are in the ⋯ menu */
+    expect(html).not.toContain('aria-label="Back"');
+    expect(html).not.toContain('data-bw="replay"');
+    expect(html).toMatch(/aria-label="More" aria-haspopup="menu" aria-expanded="false" data-bw="more"/);
+    const order = ["Filter", "Search", "List", "More"].map((l) => html.indexOf(`aria-label="${l}"`));
     expect(order.every((i) => i > 0)).toBe(true);
     expect(order).toEqual([...order].sort((a, b) => a - b));
     expect(html).toMatch(/aria-haspopup="menu" aria-expanded="false" data-bw="filter" data-f="all"/);
@@ -107,7 +111,9 @@ describe("Phone Birds-eye world v2 renders", () => {
     expect(src).toContain('data-bw="level-chip" data-t={t} aria-expanded={lvOpen}');
     expect(src).toContain('if (a === "lvchip") { buzz(8); setLvOpen((o) => !o); return; }');
     expect(html).toContain('data-bw="hawk-btn"');
-    expect(html).toContain('aria-label="What the colours mean"');
+    /* polish v1.1: the colour key is in the ⋯ menu (rendered when it opens) */
+    expect(html).toContain('data-bw="more"');
+    expect(readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8")).toMatch(/data-bw="key-btn"[^\n]*setSheet\(\{ k: "key" \}\)[^\n]*What the colours mean/);
     for (const k of ["hint", "hawk"]) expect(html).toContain(`data-bw="${k}"`);
     for (const k of ["zin", "zout", "fit", "mini"]) expect(html).not.toContain(`data-bw="${k}"`);
     expect(html).toContain("Pinch to zoom · hold to scrub");

@@ -35,15 +35,17 @@
   /* 36px, not the ref's 40: v1 added back and List to its header, and at 40 the title "Birds-eye view" was cut */
   .bw-ib { flex: none; width: 36px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; border-radius: 999px; padding: 0; }
   .bw-ib svg { width: 24px; height: 24px; }
-  .bw-ib.back { margin-left: -12px; }
   /* Birds-eye polish v1 §B — the slim header (ref `.hd2.slim`, `.fbtn`, `.fdot`, `.fmenu`): one row at every level, 96
      high; the pill row is retired. Back and List stay, as the app's way out of Birds-eye and into the list (the ref's
      stand-in dock carries those), so the icon buttons keep v1's 36 (the ref's are 40) and the title gives way. */
   .bw-hd.slim { height: 96px; padding: 44px 6px 8px 14px; }
-  /* the chip that stands in for the title while a filter is on: its words give way (an ellipsis), never its ✕ — with
-     back and List in the row there is less room than the ref's (polish v1) */
-  .bw-hd.slim .bw-fon { display: inline-flex; align-items: center; gap: 4px; flex: 0 1 auto; min-width: 0; }
-  .bw-hd.slim .bw-fonl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* the chip that stands in for the title while a filter is on: its whole label and ✕ (polish v1.1) */
+  .bw-hd.slim .bw-fon { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+  .bw-hd.slim .bw-fonl { white-space: nowrap; }
+  /* polish v1.1: Back gone and Replay and the key in the ⋯ menu, the row has room again: four 40px buttons, the full title
+     and a whole filter chip fit at 390 */
+  .bw .bw-hd.slim .bw-t2 .bw-ib { width: 40px; }
+  .bw-mbtn.on { background: rgba(255, 255, 255, 0.16); border-radius: 50%; }
   .bw-fbtn { position: relative; }
   .bw-fbtn.on { background: rgba(255, 255, 255, 0.16); border-radius: 50%; }
   .bw-fdot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; outline: 2px solid var(--pa-navy); pointer-events: none; } /* its pink, #e8b9a6, is the brief's and inline */

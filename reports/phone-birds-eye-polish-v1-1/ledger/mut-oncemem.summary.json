@@ -1,0 +1,7 @@
+{
+ "mut": "oncemem",
+ "lock": "BP-9",
+ "own": 3,
+ "other": 1,
+ "readings": 55
+}

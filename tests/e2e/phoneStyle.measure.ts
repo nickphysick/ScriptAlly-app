@@ -56,10 +56,10 @@ async function signIn(page: Page) {
   page.setDefaultTimeout(20_000);
 }
 /* Phone Birds-eye first look v1: the day's first open of Birds-eye plays a two-second grow-in that holds the world's
-   frame; these readings are of the world at rest, so today's first look is marked as already seen (the app's own
-   day stamp, lib/phoneV41 `dayStamp`). The grow-in's own locks are phoneBirdsFirstLook.measure.ts. */
+   frame; these readings are of the world at rest, so the app's DEV-ONLY switch makes each arrival fade (polish v1.1:
+   the grow-in plays on every arrival). The grow-in's own locks are phoneBirdsFirstLook.measure.ts. */
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => { try { const d = new Date(); localStorage.setItem("bw1.firstLook.day", `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`); } catch { /* */ } });
+  await page.addInitScript(() => { try { localStorage.setItem("sa.e2e.bw-nolook", "1"); } catch { /* */ } });
   await page.addInitScript(() => {
     const w = window as unknown as { __v: (s: string, r?: ParentNode) => HTMLElement[] };
     w.__v = (s, r = document) => [...r.querySelectorAll<HTMLElement>(s)].filter((e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== "hidden");
@@ -213,7 +213,7 @@ async function probe(page: Page, roots: string[], extra: { cardSel?: string } = 
     const texts = all.filter((e) => [...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim()));
     const taps = all.filter((e) => e.matches("button, a[href], [role='button'], [role='tab'], input:not([type='hidden']), select, textarea") && !e.closest("[data-ps-skip]"));
     const isRow = (e: HTMLElement) => e.matches(".ps-row, .pa4-tap, .pa4-ib2, [data-pa4='qrow'], [data-pa4='feed-row'], .pa3-row, .pa-agrow")
-      || (taps.includes(e) && e.getBoundingClientRect().width >= vw * 0.8 && !!e.querySelector("svg, img, .pa-disc, .pa4-seal") && !e.matches(".ps-link, .pa4-link, .pa5-be-f, .ps-cta, .pa4-cta, .ps-tlink, .ps-tile, .bwq"));
+      || (taps.includes(e) && e.getBoundingClientRect().width >= vw * 0.8 && !!e.querySelector("svg, img, .pa-disc, .pa4-seal") && !e.matches(".ps-link, .pa4-link, .pa5-be-f, .ps-cta, .pa4-cta, .ps-tlink, .ps-tile, .bwq, .bwq-body, .bwq-link"));
     const rows = all.filter(isRow);
     /* PS1-1 sizes */
     for (const e of texts) { const fs = getComputedStyle(e).fontSize; if (!SIZES.has(fs)) add("PS1-1", e, fs); else if (fs === "12px" && !e.closest("[data-ps-cap]")) add("PS1-1", e, "12px unmarked"); }
@@ -221,8 +221,9 @@ async function probe(page: Page, roots: string[], extra: { cardSel?: string } = 
     for (const e of texts) {
       const cs = getComputedStyle(e); const w = cs.fontWeight === "normal" ? "400" : cs.fontWeight === "bold" ? "700" : cs.fontWeight;
       if (w !== "400" && w !== "600") add("PS1-2", e, `weight ${w}`);
-      /* Birds-eye polish v1's brief sets My queries' counts in Special Elite at 16px (the ref's `.mr b`): named, not a breach */
-      if (/Special Elite/.test(cs.fontFamily) && (parseFloat(cs.fontSize) < 20 || w !== "400") && !(e.matches(".bwq-n") && cs.fontSize === "16px" && w === "400")) add("PS1-2", e, `typewriter ${cs.fontSize} ${w}`);
+      /* Birds-eye polish v1's brief sets My queries' counts, and v1.1's its band's "N queries sent", in Special Elite at 16px
+         (the ref's `.mr b`, `.mtt`): named, not a breach */
+      if (/Special Elite/.test(cs.fontFamily) && (parseFloat(cs.fontSize) < 20 || w !== "400") && !(e.matches(".bwq-n, .bwq-tt") && cs.fontSize === "16px" && w === "400")) add("PS1-2", e, `typewriter ${cs.fontSize} ${w}`);
     }
     /* PS1-3 page and cards */
     const ground = document.querySelector<HTMLElement>(".ws-main") ?? document.body;

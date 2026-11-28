@@ -1,0 +1,7 @@
+{
+ "mut": "thin",
+ "lock": "BP-4",
+ "own": 2,
+ "other": 3,
+ "readings": 55
+}

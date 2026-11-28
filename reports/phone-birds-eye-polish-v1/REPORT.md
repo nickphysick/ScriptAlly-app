@@ -2,6 +2,11 @@
 
 Branch `phone-birds-eye-polish-v1`, cut from `origin/phone-birds-eye-nav-fix-v1` (at 839fe3a61; `phone-query-sheet-v1-1` does not exist). Main had not moved. Pushed, not merged. Below 768px only.
 
+- **Dev:** `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1-pol1` (886b8ae2f) is this branch merged onto `…-qc1724-ta1`, which is what dev served (`index-Dyb-9aiS.js`: To-do arrival v1 over Query Centre v172.4 over this nav fix). It now serves **`index-CdU0zGaB.js`**, whose AppRoot chunk carries the menu, the marks and My queries.
+- **The served bundle checked out.** A rebuild of `…-ta1` differs from it only in Sentry's `release`, the commit built: the branch tip against its parent, which differ only in that session's report. So the served bundle is that branch.
+- **The merge:** its one conflict was `design-refs/.refhashes.json`; both sides' entries are kept.
+- **On the merged tree:** tsc exits 0; Vitest has 983 files passed, 1 skipped (984), and 13910 tests passed, 4 skipped (13914).
+
 ## The nav fix, landed first
 
 - **What it is:** `phone-birds-eye-nav-fix-v1` was cut from `origin/phone-birds-eye-first-look-v1`, because that is what dev served. It is one commit, e87a1cc85, with a report commit, 839fe3a61.
@@ -59,7 +64,7 @@ Branch `phone-birds-eye-polish-v1`, cut from `origin/phone-birds-eye-nav-fix-v1`
 | 1fedc34c3 | Phase 2: marks on the bars |
 | 528169c5e | Phase 3: the grow-in checked against the polish ref; the marks pop in with it |
 | 8bbdf3563 | Phase 4: My queries on Today |
-| PHASE5 | Phase 5: locks, screenshots |
+| 0ca8e718f | Phase 5: locks, screenshots |
 
 ## What was built
 

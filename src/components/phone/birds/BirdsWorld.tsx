@@ -39,8 +39,7 @@ import {
 } from "../../../lib/birdsWorld";
 import { drawWorld } from "./drawWorld";
 import { buzz, shadowStyle, wireMotion, type Motion } from "./worldMotion";
-import { BW_LOOK_KEY, fadeWorld, growIn, type LookHandle } from "./firstLook";
-import { firstTimeToday } from "../../../lib/phoneV41";
+import { BW_E2E_NOLOOK_KEY, BW_LOOK_RETIRED_KEY, fadeWorld, growIn, type LookHandle } from "./firstLook";
 import { bwRowsOf } from "./bwRows";
 import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet } from "./BirdsSheets";
 import "./birdsWorld.css";
@@ -122,13 +121,12 @@ export function actOf(a: BwAct, id: string): void {
 
 export interface BirdsWorldProps {
   court?: string | null;
-  onBack: () => void;
   onList: () => void;
 }
 type SheetState = null | { k: "key" } | { k: "search" } | { k: "nd"; id: string; queue: string[] };
 type TipState = null | { k: "news" } | { k: "line"; i: number };
 
-export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, onList }) => {
+export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onList }) => {
   const v = useV3Data();
   const now = v.now;
   const quietDays = (v.quietWeeks ?? DEFAULT_QUIET_WEEKS) * 7;
@@ -186,6 +184,8 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const [showHint] = useState(() => store.get(BW_HINT_KEY) !== "1");
   /* Birds-eye polish v1 §B: the filter menu (it replaces the pill row) */
   const [fmenu, setFmenu] = useState(false);
+  /* polish v1.1: the ⋯ menu (Replay your campaign, What the colours mean) */
+  const [more, setMore] = useState(false);
 
   /* ── the view state, off React's render ── */
   const root = useRef<HTMLDivElement>(null);
@@ -402,9 +402,11 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     return () => { m.dispose(); motion.current = null; };
   }, [draw, touched, demo, byId, rows, refresh, snapTo]);
 
-  /* ── the first look (Phone Birds-eye first look v1 §A) ──
-     The day's first open with something to show plays the bars growing in, from the fitted view the page opens at;
-     every other open, and every open with reduced motion, fades the world in. The latest paint is read through a ref: the
+  /* ── the first look (Phone Birds-eye first look v1 §A; polish v1.1: on every arrival) ──
+     Every arrival at Birds-eye with something to show plays the bars growing in, from the fitted view the page opens at
+     — from another tab, Today's link, the List/Birds-eye switch, or the app opening straight into it (each is a new mount:
+     the nav fix mounts Birds-eye only while its page is on screen). A filter, a level, a fold, a sheet or menu closing,
+     pull to refresh or a re-render is not an arrival: it is decided once per mount. Reduced motion fades it in. The latest paint is read through a ref: the
      end comes two seconds after this effect's render. (First look's `?fly=<id>` went with its three-week preview, its
      only door: Birds-eye polish v1.) */
   const paintRef = useRef(paint); paintRef.current = paint;
@@ -414,7 +416,11 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     const el = layer.current, box = vp.current, r = root.current;
     if (!el || !box || !r || !W.current) return;
     lookDecided.current = true;
-    if (calm() || !firstTimeToday(BW_LOOK_KEY, Date.now())) { el.dataset.look = "fade"; fadeWorld(box); return; }
+    /* the once-a-day memory is retired (polish v1.1): its key goes */
+    try { window.localStorage.removeItem(BW_LOOK_RETIRED_KEY); } catch { /* storage refused */ }
+    /* DEV-ONLY (the MODE test folds it away): the measurements that read the world at rest set it */
+    const e2eNoLook = import.meta.env.MODE !== "production" && store.get(BW_E2E_NOLOOK_KEY) === "1";
+    if (calm() || e2eNoLook) { el.dataset.look = "fade"; fadeWorld(box); return; }
     setLooking(true);
     look.current = growIn(el, Number(r.dataset.top) || 0, () => { look.current = null; setLooking(false); paintRef.current(); });
   }, [demo]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -547,26 +553,34 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
           filters in the menu under the filter button */}
       <div ref={hd} className={`bw-hd col slim${f !== "all" ? " filt" : ""}`} data-bw="head" data-slim="1">
         <div className="bw-t2">
-          <button type="button" className="bw-ib back" aria-label="Back" data-bw="back" onClick={onBack}>{I(BW_IC.back, 2)}</button>
           <button type="button" className="bw-bewrap" data-bw="hawk-btn" aria-label={news.length && !newsSeen ? `${news.length} things changed` : "The hawk"} onClick={onHawk}>
             <img className="bw-behk" data-bw="badge" src={BW_HAWK} alt="" />
             {news.length && !newsSeen && !looking ? <em className="bw-bedot" data-bw="news-count">{news.length}</em> : null}
           </button>
           <h1 className="bw-h">Birds-eye view</h1>
           {f !== "all" ? <button type="button" className="bw-fon" data-bw="fon" data-k={f} aria-label={`${PILL_LABEL[f]}: clear the filter`} onClick={() => pick("all")}><span className="bw-fonl">{PILL_LABEL[f]}</span><span aria-hidden="true">✕</span></button> : null}
-          <button type="button" className="bw-ib" aria-label="List" data-bw="list" onClick={onList}>{I(BW_IC.list, 2)}</button>
           {demo ? null : (
             <button type="button" className={`bw-ib bw-fbtn${fmenu ? " on" : ""}`} aria-label="Filter" aria-haspopup="menu" aria-expanded={fmenu} data-bw="filter" data-f={f}
-              onClick={() => { buzz(8); setFmenu((o) => !o); }}>
+              onClick={() => { buzz(8); setMore(false); setFmenu((o) => !o); }}>
               {I('<path d="M4 6h16M7 12h10M10 18h4"/>')}
               {f !== "all" ? <i className="bw-fdot" data-bw="fdot" aria-hidden="true" style={{ background: "#e8b9a6" }} /> : null}
             </button>
           )}
-          <button type="button" className="bw-ib" aria-label="Replay your campaign" data-bw="replay" onClick={() => { if (!demo) replay(); }}>{I(BW_IC.play)}</button>
-          <button type="button" className="bw-ib" aria-label="What the colours mean" data-bw="key-btn" onClick={() => setSheet({ k: "key" })}>{I(BW_IC.key)}</button>
+          {/* polish v1.1: hawk · title · filter · search · List · ⋯ (Back dropped: the dock leaves Birds-eye); Replay and the
+              colour key moved into the ⋯ menu */}
           <button type="button" className="bw-ib" aria-label="Search" data-bw="search" onClick={() => { if (!demo) setSheet({ k: "search" }); }}>{I(BW_IC.search)}</button>
+          <button type="button" className="bw-ib" aria-label="List" data-bw="list" onClick={onList}>{I(BW_IC.list, 2)}</button>
+          <button type="button" className={`bw-ib bw-mbtn${more ? " on" : ""}`} aria-label="More" aria-haspopup="menu" aria-expanded={more} data-bw="more"
+            onClick={() => { buzz(8); setFmenu(false); setMore((o) => !o); }}>{I('<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>')}</button>
         </div>
       </div>
+      {more ? (<>
+        <div className="bw-mveil bw-fveil" data-bw="more-veil" onClick={() => setMore(false)} />
+        <div className="bw-fmenu" data-bw="more-menu" role="menu" aria-label="More">
+          <button type="button" role="menuitem" data-bw="replay" onClick={() => { setMore(false); buzz(8); if (!demo) replay(); }}><span>Replay your campaign</span></button>
+          <button type="button" role="menuitem" data-bw="key-btn" onClick={() => { setMore(false); buzz(8); setSheet({ k: "key" }); }}><span>What the colours mean</span></button>
+        </div>
+      </>) : null}
       {fmenu ? (<>
         <div className="bw-mveil bw-fveil" data-bw="fmenu-veil" onClick={() => setFmenu(false)} />
         <div className="bw-fmenu" data-bw="fmenu" role="menu" aria-label="Filter">

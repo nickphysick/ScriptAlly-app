@@ -25,7 +25,6 @@ import { openRoute } from "./measure";
 const DIR = process.env.NAV_OUT ?? "reports/phone-birds-eye-nav-fix-v1";
 const PHONE = { width: 390, height: 784 } as const;
 const BIRDS = "/queries/all?view=birds";
-const KEY = "bw1.firstLook.day";
 const frame = (page: Page, ms = 450) => page.waitForTimeout(ms);
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -38,7 +37,9 @@ async function signIn(page: Page) {
   await page.setViewportSize(PHONE);
 }
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
-const setDay = (page: Page, v: string | null) => page.evaluate(([k, x]) => { try { if (x == null) localStorage.removeItem(k!); else localStorage.setItem(k!, x); } catch { /* */ } }, [KEY, v] as const);
+/* polish v1.1: the grow-in plays on every arrival; `null` lets it play, anything else sets the app's DEV-ONLY switch
+   (sa.e2e.bw-nolook) so the arrival only fades */
+const setDay = (page: Page, v: string | null) => page.evaluate((x) => { try { if (x == null) localStorage.removeItem("sa.e2e.bw-nolook"); else localStorage.setItem("sa.e2e.bw-nolook", "1"); } catch { /* */ } }, v);
 /** Birds-eye, opened by its address; `first`: as the day's first open (the grow-in plays) */
 async function openBirds(page: Page, first = false) {
   await setDay(page, first ? null : today());
@@ -54,9 +55,14 @@ async function tapAt(page: Page, sel: string): Promise<boolean> {
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
   return true;
 }
+/* the level by its chip, retried until the world says it is there (a tap during the arrival's fade can miss) */
 const levelTo = async (page: Page, t: "All" | "Months" | "Weeks") => {
-  await tapAt(page, '[data-bw="level-chip"]'); await frame(page, 300);
-  await tapAt(page, `[data-bw="level"][data-t="${t}"]`); await frame(page, 700);
+  for (let i = 0; i < 4; i++) {
+    if ((await page.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.level)) === t) return;
+    await frame(page, 300);
+    await tapAt(page, '[data-bw="level-chip"]'); await frame(page, 300);
+    await tapAt(page, `[data-bw="level"][data-t="${t}"]`); await frame(page, 700);
+  }
 };
 /** the middle of a drawn bar, for a tap or a hold */
 const barAt = (page: Page) => page.evaluate(() => {
@@ -64,7 +70,7 @@ const barAt = (page: Page) => page.evaluate(() => {
   /* any drawn bar crossing the screen; the point mid-way along its visible part, clear of marks and "!"s (Birds-eye
      world's own long-press lock finds its bars the same way) */
   const avoid = [...document.querySelectorAll<HTMLElement>(".bw-evmk, .bw-ovd")].map((m) => m.getBoundingClientRect());
-  const bars = [...document.querySelectorAll<HTMLElement>('[data-bw="bar"][data-k="stage"]')].map((b) => b.getBoundingClientRect())
+  const bars = [...document.querySelectorAll<HTMLElement>('[data-bw="bar"]')].map((b) => b.getBoundingClientRect())
     .filter((r) => r.height >= 10 && r.top > top + 30 && r.bottom < 640 && Math.min(r.right, 366) - Math.max(r.left, 24) > 30);
   for (const r of [...bars.slice(Math.floor(bars.length / 2)), ...bars]) {
     const l = Math.max(r.left, 24), rr = Math.min(r.right, 366);
@@ -147,7 +153,7 @@ const STATES: State[] = [
     return `search ${open ? "opened" : "NOT opened"}, now ${(await p.locator('[data-bw="sheet"]').count()) ? "still open" : "closed"}`;
   } },
   { k: "after the colour key opened and closed", run: async (p) => {
-    await openBirds(p); await tapAt(p, '[data-bw="key-btn"]');
+    await openBirds(p); await tapAt(p, '[data-bw="more"]'); await frame(p, 250); await tapAt(p, '[data-bw="key-btn"]');
     const open = await p.locator('[data-bw="sheet"]').first().waitFor({ timeout: 3000 }).then(() => true).catch(() => false);
     await p.mouse.click(195, 30); await frame(p, 500);
     if (await p.locator('[data-bw="sheet"]').count()) { await p.keyboard.press("Escape"); await frame(p, 400); }
@@ -174,7 +180,7 @@ const STATES: State[] = [
   { k: "opened from Today's My queries", run: async (p) => {
     await setDay(p, today()); await p.goto("/dashboard?tab=queries");
     await p.locator('[data-bwq="card"]').filter({ visible: true }).first().waitFor({ timeout: 20_000 });
-    await frame(p, 600); await tapAt(p, '[data-bwq="card"]');
+    await frame(p, 600); await tapAt(p, '[data-bwq="link"]'); /* polish v1.1: only the link opens Birds-eye */
     await p.locator('[data-bw="world"]').first().waitFor({ timeout: 20_000 }); await frame(p, 900);
     return "opened from My queries";
   } },
@@ -209,11 +215,7 @@ const DOCK: Target[] = [
   } },
 ];
 const WORLD_ONLY: Target[] = [
-  { k: "back", sel: '[data-bw="back"]', arrive: async (p) => {
-    const gone = (await p.locator('[data-bw="world"]').count()) === 0;
-    const hit = await p.evaluate(() => { const h = document.elementFromPoint(195, 520) as HTMLElement | null; return { inWorld: !!h?.closest('[data-bw="world"]'), where: `${location.pathname}${location.search}` }; });
-    return { ok: gone && !hit.inWorld, why: `${hit.where} · world ${gone ? "gone" : "still mounted"}` };
-  } },
+  /* polish v1.1: Back is gone from Birds-eye's header (the dock leaves it) */
   { k: "List", sel: '[data-bw="list"]', arrive: (p) => onTop(p, '[data-pa4="queries"][data-view="list"]') },
 ];
 
@@ -270,6 +272,6 @@ test("Birds-eye nav fix v1 — BW-NAV-1", async ({ page }, info) => {
   const red = rows.filter((r) => !r.ok);
   for (const r of red.slice(0, 60)) console.log(`  ✗ ${r.where} — ${r.detail.slice(0, 220)}`);
   console.log(`  BW-NAV-1: ${rows.length} readings, ${red.length} red`);
-  if (!ONLY.length) expect(rows.length).toBeGreaterThanOrEqual(STATES.length * 7 + 15 + 1);
+  if (!ONLY.length) expect(rows.length).toBeGreaterThanOrEqual(STATES.length * 6 + 15 + 1); /* six targets a state: polish v1.1 drops Back */
   expect(red.map((r) => `${r.where} — ${r.detail.slice(0, 200)}`)).toEqual([]);
 });

@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "PQS-1",
+  "where": "with-you queries past their send-by by more than 28 days (population 2): no fade",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PQS-1",
+  "where": "waiting queries that far past (population 37): faded",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PQS-1",
+  "where": "Needs action: every gone-quiet (waiting) row below every other, with-you ones among the rest",
+  "ok": true,
+  "detail": "{\"firstQuiet\":23,\"lastOther\":22}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a Queries row: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"cv25-q-08\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a Today card: the one sheet (1), at half height (430px of 430), over /dashboard",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"seed-query-12\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/dashboard\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a search result: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"cor-closed\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "a Birds-eye bar: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"seed-pkgq-3\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all?view=birds\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-2",
+  "where": "Birds-eye's long-press Open query: the one sheet (1), at half height (430px of 430), over /queries/all",
+  "ok": true,
+  "detail": "{\"ok\":true,\"open\":true,\"id\":\"seed-query-3\",\"h\":\"half\",\"height\":430,\"top\":354,\"path\":\"/queries/all?view=birds\",\"comp\":1}"
+ },
+ {
+  "lock": "PQS-10",
+  "where": "no error from the sheet or the journeys (population 0 page errors in all)",
+  "ok": true,
+  "detail": ""
+ }
+]
