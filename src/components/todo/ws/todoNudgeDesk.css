@@ -41,3 +41,15 @@
   .tws .twn-quiet { margin: 18px 0 0; font: italic 14.5px/1.45 var(--tw-serif); color: var(--sp-quiet); }
   @media (prefers-reduced-motion: reduce) { .tws .twn-ch { transition: none; } }
 }
+
+/* ── Phase 3 · the hawk folds away: picture and bubble together, 0.34s, cubic-bezier(.4,0,.2,1) — it fades and lifts 6px
+   over the first 45%, then its height (its own, measured: --twn-h) and bottom margin close to 0 ── */
+@media (min-width: 768px) {
+  .tws .twn-hawk.twn-bye { overflow: hidden; animation: twn-bye 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  @keyframes twn-bye {
+    0% { max-height: var(--twn-h, 90px); opacity: 1; transform: none; }
+    45% { max-height: var(--twn-h, 90px); opacity: 0; transform: translateY(-6px); }
+    100% { max-height: 0; opacity: 0; margin-bottom: 0; transform: translateY(-6px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .tws .twn-hawk.twn-bye { animation: none; display: none; } }
+}

@@ -8,7 +8,7 @@
  * says what happens. Nothing is saved here: the footer's Log it runs the flow's own commit (`saveNudgeSent`).
  * The words and shapes are lib/todoNudgeDesk's (pure, locked).
  */
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { addDays } from "../../../lib/queryActions/dates";
 import { nudgeAnswers, nudgeDayWord, nudgeHawkLine } from "../../../lib/todoNudgeDesk";
 import { stageVars, type WsTask } from "../../../lib/todoWs";
@@ -17,15 +17,33 @@ import { DatePick, DeskTiles } from "./WsControls";
 import type { NudgeDesk } from "./wsFlows";
 
 const MENTOR = "/images/todo/mentor.webp";
+const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
 
 export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stage: Stage | null }> = ({ t, nd, today, stage }) => {
   const first = nd.facts.first;
   const answers = nudgeAnswers(today, nd.when === "other" ? nd.picked : null);
+  /* Phase 3 — THE HAWK FOLDS AWAY on the first pick (0.34s: it fades and lifts over the first 45%, then its height closes,
+     so the sentence glides up into its place) and stays gone while the task is open. This desk is keyed by the task, so
+     the hawk is back when the task is opened again. Reduced motion: it is simply not drawn once a day is picked. */
+  const [hawk, setHawk] = useState<"shown" | "folding" | "gone">("shown");
+  const hawkRef = useRef<HTMLDivElement>(null);
+  const [hawkH, setHawkH] = useState(0);
+  useLayoutEffect(() => {
+    if (!nd.when || hawk !== "shown") return;
+    if (reducedMotion()) { setHawk("gone"); return; }
+    setHawkH(hawkRef.current?.offsetHeight ?? 0);
+    setHawk("folding");
+  }, [nd.when, hawk]);
+  const stageStyle = stageVars(stage, t.query?.status) as Record<string, string> | undefined;
   return (
     <div className="twn-desk" data-twn="desk">
-      <div className="tws-mnote twn-hawk" data-tws="hawk" data-twn="hawk" data-tws58-stage={stage ?? undefined} style={stageVars(stage, t.query?.status) as React.CSSProperties | undefined}>
-        <img src={MENTOR} alt="" /><p>{nudgeHawkLine(nd.facts)}</p>
-      </div>
+      {hawk === "gone" ? null : (
+        <div ref={hawkRef} className={hawk === "folding" ? "tws-mnote twn-hawk twn-bye" : "tws-mnote twn-hawk"} data-tws="hawk" data-twn="hawk" data-twn-hawk={hawk}
+          data-tws58-stage={stage ?? undefined} style={{ ...(stageStyle ?? {}), ...(hawk === "folding" ? { "--twn-h": `${hawkH}px` } : {}) } as React.CSSProperties}
+          onAnimationEnd={(e) => { if (e.target === e.currentTarget) setHawk("gone"); }}>
+          <img src={MENTOR} alt="" /><p>{nudgeHawkLine(nd.facts)}</p>
+        </div>
+      )}
       <p className="twn-sent" data-twn="sentence">I nudged {first}{" "}
         {nd.picked ? <><u data-twn="day">{nudgeDayWord(nd.picked, today)}</u>.</> : <span className="twn-blank" aria-label="a day, not picked yet" />}
       </p>

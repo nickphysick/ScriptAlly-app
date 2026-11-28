@@ -140,3 +140,22 @@ describe("the words (pure)", () => {
     expect([14, 35, 7, 49, 62, 122].map(agoWords)).toEqual(["two weeks", "five weeks", "a week", "seven weeks", "two months", "four months"]);
   });
 });
+
+describe("Phase 3 — the hawk folds away", () => {
+  const css = readFileSync(join(__dirname, "todoNudgeDesk.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const nd = readFileSync(join(__dirname, "WsNudgeDesk.tsx"), "utf8");
+  const ws = readFileSync(join(__dirname, "TodoWorkspace.tsx"), "utf8");
+  it("0.34s, cubic-bezier(.4,0,.2,1): fades and lifts 6px over the first 45%, then its height and bottom margin close", () => {
+    expect(css).toContain(".tws .twn-hawk.twn-bye { overflow: hidden; animation: twn-bye 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards; }");
+    expect(css).toMatch(/45% \{ max-height: var\(--twn-h, 90px\); opacity: 0; transform: translateY\(-6px\); \}/);
+    expect(css).toMatch(/100% \{ max-height: 0; opacity: 0; margin-bottom: 0; transform: translateY\(-6px\); \}/);
+  });
+  it("reduced motion: not drawn once a day is picked", () => {
+    expect(nd).toContain('if (reducedMotion()) { setHawk("gone"); return; }');
+    expect(css).toContain(".tws .twn-hawk.twn-bye { animation: none; display: none; }");
+  });
+  it("gone while the task is open; back when it is opened again (the desk is keyed by the task, the hawk is its state)", () => {
+    expect(nd).toContain('{hawk === "gone" ? null : (');
+    expect(ws).toMatch(/<div key=\{t\.key\} className="tws-wsx tws-in" data-tws="desk"/);
+  });
+});
