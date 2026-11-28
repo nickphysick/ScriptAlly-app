@@ -128,7 +128,7 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
 
   return (
     <aside className="qs172" data-qc172="panel" aria-label="Filter your queries">
-      <header className="qs172-h"><b>Filter</b><small>{on ? `${showing} of ${total}` : `All ${total}`}</small>{on ? <button type="button" onClick={reset}>Clear all</button> : null}</header>
+      <header className="qs172-h"><b>Filter</b><small>{`${showing} showing`}</small>{on ? <button type="button" onClick={reset}>Clear all</button> : null}</header>
 
       {/* v172.5 — What's next: the ring replaces the three counts and the Include closed tick */}
       <Ring172 s={s} ctx={ctx} n={n} closedN={closedN} total={total} onChange={setSmart172} />

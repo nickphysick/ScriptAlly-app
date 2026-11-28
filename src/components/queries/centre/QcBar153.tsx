@@ -39,6 +39,8 @@ export interface QcBar153Props {
   loading: boolean;
   showing: number;
   total: number;
+  /** v172.5 — the Action needed count, read "41 need you · 88 in all" while nothing narrows the list (none on Birds-eye) */
+  need?: number | null;
   find: string;
   onFind: (v: string) => void;
   findRef?: React.Ref<HTMLInputElement>;
@@ -76,7 +78,7 @@ export const QcBar153: React.FC<QcBar153Props> = (p) => {
          screen reader's (the headings already name it) */
       count={
       <span className={`qc153-cnt qc154-tc${p.stuckOn ? " is-grp" : ""}`} data-qc153="count" data-stuck={p.stuckOn ? "" : undefined}>
-        <span className="qc154-tn" aria-live="polite">{p.loading ? " " : narrowed ? <><b>{p.showing}</b> of <b>{p.total}</b></> : <><b>{p.total}</b> {p.total === 1 ? "query" : "queries"}</>}</span>
+        <span className="qc154-tn" aria-live="polite">{p.loading ? " " : narrowed ? <><b>{p.showing}</b> of <b>{p.total}</b></> : p.need != null ? <><b>{p.need}</b> need you · <b>{p.total}</b> in all</> : <><b>{p.total}</b> {p.total === 1 ? "query" : "queries"}</>}</span>
         <span className="qc154-tg" data-qc154="toolbar-group" aria-hidden="true">{p.stuckGroup ? <>{p.stuckGroup.label}<small>{p.stuckGroup.count}</small></> : null}</span>
       </span>}
       find={{ value: p.find, onChange: p.onFind, placeholder: FIND_PLACEHOLDER, inputRef: p.findRef, disabled: p.loading,
