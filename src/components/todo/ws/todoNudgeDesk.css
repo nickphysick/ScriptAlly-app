@@ -63,7 +63,15 @@
   .tws .twn2-ch[aria-checked="true"] .twn2-ic svg { stroke: #fff; }
   .tws .twn2-ch:disabled { cursor: default; }
   .tws .twn2-stp[data-st="off"] .twn2-ch .twn2-ic svg { stroke: var(--sp-quiet); }
-  .tws .twn2-other { grid-column: 2 / -1; margin-top: 12px; }
+  /* v2 Phase 3 · the calendar popover: anchored above the answers row, right-aligned to it, over the layout (never in
+     it); the app's popover surface; 0.18s fade-and-rise */
+  .tws .twn2-chs { position: relative; }
+  .tws .twn2-cal {
+    position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 8; width: 320px; padding: 12px 14px 10px; border-radius: 14px; background: #fff;
+    box-shadow: inset 0 0 0 1px var(--tw-hair), 0 14px 34px rgba(42, 58, 82, 0.18); animation: twn2-calin 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes twn2-calin { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .tws .twn2-cal { animation: none; } }
 
   /* the footer: Log it on the right (the footer's spacer is hidden and only the progress line pushed right; the nudge
      desk has none, so its primary pushes itself) */

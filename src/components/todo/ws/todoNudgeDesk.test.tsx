@@ -71,7 +71,7 @@ describe("the nudge desk renders: overdue, then the two steps", () => {
     expect(text(desk)).toContain("Send William a nudge From your own email, the way you sent the query: a short note asking if it reached them.");
     expect(desk).toMatch(/class="sp-btn sp-btn--line twn2-sent" data-twn="sent" aria-pressed="false">I’ve sent it</);
     expect(desk).toMatch(/data-st="off" data-twn-step="when" aria-disabled="true"/);
-    const ans = [...desk.matchAll(/data-twn-when="(\w+)" disabled="" tabindex="-1"><span class="twn2-ic">[\s\S]*?<\/span><b>([^<]+)<\/b><small>([^<]+)<\/small>/g)].map((m) => `${m[1]}|${m[2]}`);
+    const ans = [...desk.matchAll(/data-twn-when="(\w+)"[^>]*? disabled="" tabindex="-1"><span class="twn2-ic">[\s\S]*?<\/span><b>([^<]+)<\/b><small>([^<]+)<\/small>/g)].map((m) => `${m[1]}|${m[2]}`);
     expect(ans).toEqual(["today|Today", "yesterday|Yesterday", "other|Another day"]);
     expect(desk, "v1's sentence is gone").not.toContain("I nudged William");
     expect(desk, "v1's quiet line is gone").not.toContain("It goes on");
@@ -205,5 +205,24 @@ describe("Phase 2 — the timeline, there from the start", () => {
     expect(css, "the card has no animation of its own").not.toMatch(/\.twn-tl\s*\{[^}]*animation/);
     const src = readFileSync(join(__dirname, "WsNudgeDesk.tsx"), "utf8");
     expect(src).toContain("<React.Fragment key={day}>");
+  });
+});
+
+describe("Phase 3 — the calendar for Another day (logic)", () => {
+  const src = readFileSync(join(__dirname, "WsNudgeDesk.tsx"), "utf8");
+  it("the calendar is bounded by the send and today", () => {
+    expect(src).toContain("<NudgeCalendar today={today} min={nd.facts.sent ?? addDays(today, -730)}");
+    expect(src).toContain("<MonthGrid month={month} onMonth={setMonth} min={min} max={today}");
+  });
+  it("Esc with the popover open closes only the popover: its own layer, which the page's Esc yields to", () => {
+    expect(src).toContain("useEscapeLayer(true, onClose, ESC_LEVEL.page);");
+    const ws = readFileSync(join(__dirname, "TodoWorkspace.tsx"), "utf8");
+    const guard = ws.indexOf("isEditableTarget(e.target) || escapeDepth() > 0");
+    expect(guard).toBeGreaterThan(0);
+    expect(ws.indexOf("if (escGoesBack({"), "the page's Esc is asked only after the escape stack is empty").toBeGreaterThan(guard);
+  });
+  it("Another day only opens the calendar: nothing changes until a day is picked there; a click outside changes nothing", () => {
+    expect(src).toContain('if (k === "other") { setOtherOpen(true); return; }');
+    expect(src).toContain("onPick={(d) => { setOtherOpen(false); nd.pick(\"other\", d); }} onClose={() => setOtherOpen(false)}");
   });
 });

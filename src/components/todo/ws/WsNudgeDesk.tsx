@@ -8,12 +8,14 @@
  * here: the footer's Log it runs the flow's own commit (`saveNudgeSent`), enabled once both steps are done.
  * The words and shapes are lib/todoNudgeDesk's (pure, locked).
  */
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays } from "../../../lib/queryActions/dates";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
+import { openingMonth } from "../../../lib/monthGrid";
+import { MonthGrid } from "../../shared/MonthGrid";
 import { nudgeAnswers, nudgeDayWord, nudgeTimeline, shortDate, type TimelineShape } from "../../../lib/todoNudgeDesk";
 import { stageVars, type WsTask } from "../../../lib/todoWs";
 import { STAGE_COLOURS, type Stage } from "../../../lib/stageColours";
-import { DatePick, DeskTiles } from "./WsControls";
 import type { NudgeDesk } from "./wsFlows";
 
 const MENTOR = "/images/todo/mentor.webp";
@@ -69,18 +71,16 @@ export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stag
           <div className="twn2-chs" role="radiogroup" aria-label={`When did you send ${first} the nudge?`} data-twn="answers">
             {answers.map((a) => (
               <button key={a.k} type="button" className="twn2-ch" role="radio" aria-checked={nd.when === a.k} data-twn-when={a.k}
+                aria-haspopup={a.k === "other" ? "dialog" : undefined} aria-expanded={a.k === "other" ? otherOpen : undefined}
                 disabled={!nd.sent} tabIndex={nd.sent ? 0 : -1} onClick={() => choose(a.k)}>
                 <span className="twn2-ic">{ICON[a.k]}</span><b>{a.title}</b><small>{a.sub}</small>
               </button>
             ))}
+            {nd.sent && otherOpen ? (
+              <NudgeCalendar today={today} min={nd.facts.sent ?? addDays(today, -730)} value={nd.when === "other" ? nd.picked : null}
+                onPick={(d) => { setOtherOpen(false); nd.pick("other", d); }} onClose={() => setOtherOpen(false)} />
+            ) : null}
           </div>
-          {nd.sent && otherOpen ? (
-            <div className="twn2-other" data-twn="other">
-              <DeskTiles.Provider value={false}>
-                <DatePick value={nd.when === "other" && nd.picked ? nd.picked : addDays(today, -2)} today={today} dir="past" onPick={(d) => { setOtherOpen(false); nd.pick("other", d); }} />
-              </DeskTiles.Provider>
-            </div>
-          ) : null}
         </div>
       </div>
     </div>
@@ -158,6 +158,34 @@ const NudgeTimeline: React.FC<{ first: string; picked: Date | null; shape: Timel
           </React.Fragment>
         ) : null}
       </div>
+    </div>
+  );
+};
+
+/**
+ * v2 Phase 3 — THE CALENDAR FOR "ANOTHER DAY": a popover anchored above the answers row, right-aligned to it (320px, the
+ * app's popover surface), so it never pushes the layout. The month grid is the shared primitive (components/shared/
+ * MonthGrid): the arrows stop at the month the query was sent and at this month; days after today and before the send
+ * are not open. A pick closes it and sets the answer; a click outside, or Esc, closes it and changes nothing — Esc is the
+ * popover's own layer (ESC_LEVEL.page), so it never reaches the page's "Where to start" Esc while the popover is open.
+ */
+const NudgeCalendar: React.FC<{ today: Date; min: Date; value: Date | null; onPick: (d: Date) => void; onClose: () => void }> = ({ today, min, value, onPick, onClose }) => {
+  const [month, setMonth] = useState(() => openingMonth(value, min, today));
+  const ref = useRef<HTMLDivElement>(null);
+  useEscapeLayer(true, onClose, ESC_LEVEL.page);
+  useEffect(() => {
+    const away = (e: PointerEvent) => {
+      const el = e.target as Element | null;
+      if (!el || ref.current?.contains(el) || el.closest('[data-twn-when="other"]')) return;
+      onClose();
+    };
+    document.addEventListener("pointerdown", away, true);
+    return () => document.removeEventListener("pointerdown", away, true);
+  }, [onClose]);
+  return (
+    <div ref={ref} className="twn2-cal" role="dialog" aria-label="The day the nudge went" data-twn="calendar">
+      <MonthGrid month={month} onMonth={setMonth} min={min} max={today} today={today} value={value} onPick={onPick}
+        label="The day the nudge went" footnote="The day the nudge went. Later days aren’t open." />
     </div>
   );
 };
