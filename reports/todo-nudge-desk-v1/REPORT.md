@@ -120,8 +120,14 @@ The harness's first nudge is Tom (Curtis Vane). Queried 1 Sep, eight weeks were 
 
 ## Dev deploy
 
-DEPLOY
+- **Dev's source proven:** dev served `index-CdU0zGaB.js` at Step 0. A clean detached checkout of `886b8ae2f` (`…-ta1-pol1`), built with `npm run build:dev`, gives `index-CdU0zGaB.js`, the same bundle.
+- **Branch:** `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1-pol1-tnd1` = `todo-nudge-desk-v1` @ `0a139e30c` (the dev line plus this work, so no merge was needed).
+- **Build:** `npm run build:dev` from a clean detached checkout of that pushed tip gives `index-D6G10n1T.js`, with no error or warning lines.
+- **Guard:** the deploy ran only because dev still served `index-CdU0zGaB.js` at that moment. The first attempt stopped before building: zsh read `$TIP:r…` as a modifier and mangled the refspec, so the push check failed. Nothing deployed on that attempt.
+- **Dev now serves `index-D6G10n1T.js`** (https://scriptally-dev.web.app), checked after the deploy.
+
+Nothing went to main or prod.
 
 ## Worktree
 
-WORKTREE
+`/Users/nickphysick/ScriptAlly-tnd1` (branch `todo-nudge-desk-v1`) was removed after the push and its claim released, along with the scratchpad checkouts used for the proof and the deploy. Its `node_modules`, `functions/node_modules` and `.env.local` were symlinks to the primary checkout's: never copied, never committed.
