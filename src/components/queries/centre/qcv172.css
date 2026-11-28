@@ -7,15 +7,7 @@
 
 .qs172-h button:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
 
-.qs172-q { display: grid; gap: 8px; padding: 12px 14px; }
-.qs172-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 3px; border-radius: 10px; background: #f4f0eb; }
-.qs172-seg button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 2px; border-radius: 8px; text-align: center; }
 
-.qs172-seg button:hover:not(:disabled) { background: #fff; }
-.qs172-seg button.on, .qs172-seg button.on:hover { background: var(--navy); }
-.qs172-seg button.on b, .qs172-seg button.on span { color: var(--cream); }
-.qs172-seg button:disabled { opacity: .45; cursor: default; }
-.qs172-incs { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .qs172-s { padding: 10px 14px 12px; border-top: 1px solid #f1ebe2; }
 
@@ -114,10 +106,6 @@
 .qs172-sh span { text-align: right; font: italic 400 14px/1.25 var(--sp-serif); color: var(--mut); }
 .qs172 em { font-style: normal; font: 400 12px/1 var(--sp-type) !important; color: var(--q); }
 
-.qs172-seg span { color: var(--mut); font: 400 14px/1.15 var(--sp-serif); }
-.qs172-seg b { font: 400 20px/1 var(--sp-type) !important; }
-.qs172-seg button.on:hover { background: #22304a; }
-.qs172-seg button:hover:not(:disabled):not(.on) { background: #f8f4ed; }
 
 .qs172-stg button span { font: 400 14px/1.1 var(--sp-serif); color: var(--mut); }
 
@@ -186,9 +174,6 @@
 /* v172.3 — more than 18 bars (a long campaign in months or quarters): a 1px gap */
 .qs172-hist.is-dense { gap: 1px; }
 
-/* v172.4 — Include closed is a tick box under the quick picks, the Not dated tick's own look */
-.qs172-incs .qs172-ck { margin-top: 0; }
-
 /* ── v172.4 · the loading shell (QcSk172): the list's card and heading row, the panel's own frame, inert shapes ── */
 @keyframes sk172-sheen { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
 :is(.sk172, .sk172-rail) i:not(.ln) { display: block; height: 12px; border-radius: 6px; background-color: var(--sa-sk-base, #ece6de); background-image: var(--sa-sk-sheen); background-size: 600px 100%; animation: sk172-sheen 1.4s linear infinite; }
@@ -205,12 +190,12 @@
 .sk172-trk i.ln { flex: 1; height: 2px; background: var(--sa-sk-base, #ece6de); }
 .sk172-rail { pointer-events: none; }
 .sk172-rail .qs172-h b { color: rgba(244, 238, 229, 0.85); }
-.sk172-qp { display: grid; justify-items: center; gap: 7px; padding: 9px 2px; }
-.sk172-qp i.big { width: 26px; height: 18px !important; }
-.sk172-qp i.sm { width: 60%; }
-.sk172-ck { display: flex; align-items: center; gap: 8px; padding: 2px 2px 0; }
-.sk172-ck i.box { width: 16px; height: 16px !important; border-radius: 4px !important; }
 .sk172-rail .qs172-s { display: grid; gap: 14px; }
+/* v172.5 — the ring's place while loading: a pale donut the ring's size, centred, and the key's lines under it */
+.sk172-rail .sk172-ring { justify-items: center; padding: 12px 14px 14px; border-top: 0; }
+.sk172-donut { display: block; width: 132px; height: 132px; box-sizing: border-box; border-radius: 50%; border: 18px solid var(--sa-sk-base, #ece6de); }
+.sk172-ring i:not(.sk172-t) { width: 100%; }
+.sk172-ring .sk172-t { justify-self: start; }
 .sk172-t { width: 64px; height: 14px !important; }
 .sk172-stg { display: flex; justify-content: space-around; padding: 4px 0 18px; }
 .sk172-stg i.d { width: 20px; height: 20px !important; }
@@ -239,3 +224,33 @@
   .qc153-railcol[data-en172="stagger"] .qs172-hist > i,
   .qc153-railcol[data-en172="stagger"] .qs172-hist > button > i { transform-origin: bottom; animation: en172-grow 300ms cubic-bezier(.2, .8, .2, 1) 80ms both; }
 }
+
+/* ── v172.5 · What's next: the ring (QcSmart172 Ring172), centred at 132px, its key full width under it ───────── */
+.qs172-ring { padding-top: 12px; padding-bottom: 14px; border-top: 0; }
+.qs172-rg { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 14px; }
+.qs172-rsvg { width: 132px; height: 132px; overflow: visible; }
+.qs172-rsvg .bg { fill: none; stroke: #f4f0eb; stroke-width: 14; }
+.qs172-rsvg .arc { fill: none; stroke-width: 14; cursor: pointer; transform: rotate(-90deg); transform-origin: 50% 50%;
+  transition: stroke-dasharray .7s cubic-bezier(.2,.8,.2,1), opacity .2s ease, stroke-width .15s ease, r .2s cubic-bezier(.2,.8,.2,1); }
+.qs172-rsvg .arc.off { opacity: .2; }
+.qs172-rsvg .arc.hov { stroke-width: 18; }
+.qs172-rsvg .arc:focus { outline: none; }
+.qs172-rsvg .arc:focus-visible { stroke-width: 18; filter: drop-shadow(0 0 0.8px #2a3a52) drop-shadow(0 0 0.8px #2a3a52); }
+.qs172-rsvg .hole { fill: #fbf8f4; }
+.qs172-rsvg text { text-anchor: middle; fill: #1c130f; pointer-events: none; }
+.qs172-rsvg .big { font: 400 22px/1 var(--sp-type); dominant-baseline: middle; }
+.qs172-rsvg .sub { font: italic 400 9.5px/1 var(--sp-serif); fill: #6b6058; }
+.qs172-rk { list-style: none; width: 100%; margin: 0; padding: 0; display: grid; gap: 1px; }
+.qs172-rk li { display: flex; align-items: center; }
+.qs172-rk button { all: unset; box-sizing: border-box; flex: 1 1 auto; min-width: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 7px; font: 400 14px/1.2 var(--sp-serif); color: #1c130f; white-space: nowrap; }
+.qs172-rk li.sub button { padding-left: 22px; }
+.qs172-rk button:disabled { cursor: default; color: #a69c92; }
+.qs172-rk li.hov button, .qs172-rk button:hover:not(:disabled) { background: #f6f2ed; }
+.qs172-rk button:focus-visible { box-shadow: 0 0 0 2px var(--navy); }
+.qs172-rk i { flex: none; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(28,19,15,.14); }
+.qs172-rk .l { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.qs172-rk li:not(.sub) .l { font-weight: 600; }
+.qs172-rk em { margin-left: auto; font: 400 14px/1 var(--sp-type); font-style: normal; color: #5b4f47; }
+.qs172-rk li.off button { color: #8a7f75; }
+.qs172-rk li.off i { opacity: .3; }
+@media (prefers-reduced-motion: reduce) { .qs172-rsvg .arc { transition: none; } }

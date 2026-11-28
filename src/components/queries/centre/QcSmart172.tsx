@@ -7,10 +7,10 @@
  * Queries.tsx page state (`s`, changed through `onChange`), remembered for the visit beside the page's filters; the
  * model is lib/smart172.
  */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
 import { MONTHS_SHORT, dayMonth } from "../../../lib/dates";
-import { stageOn172, stageText172, resetPart172, dueText172, REPLY172, SENDBY172, dueDays172, dueOn172, sideOf172, undated172, method172, pass172, smartOn172, stageIdx172, whoOf172, type Ctx172, type Smart172 } from "../../../lib/smart172";
+import { stageOn172, stageText172, resetPart172, dueText172, REPLY172, SENDBY172, dueDays172, dueOn172, sideOf172, undated172, method172, pass172, smartOn172, stageIdx172, whoOf172, STAND172, ACT172, WAIT172, stand172, standText172, pickPart172, partsOf172, type Ctx172, type Smart172, type Stand172, type Pick172 } from "../../../lib/smart172";
 import { METHOD_ICON } from "./QcRow170";
 import "./qcv172.css";
 
@@ -121,10 +121,8 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
     <aside className="qs172" data-qc172="panel" aria-label="Filter your queries">
       <header className="qs172-h"><b>Filter</b><small>{on ? `${showing} of ${total}` : `All ${total}`}</small>{on ? <button type="button" onClick={reset}>Clear all</button> : null}</header>
 
-      <div className="qs172-q">
-        {/* v172.4 — a tick box like Not dated, ticked by default; the count is the closed queries */}
-        <div className="qs172-incs"><label className="qs172-ck qs172-ck--closed"><input type="checkbox" checked={s.closed} onChange={(e) => setSmart172({ closed: e.target.checked })} />Include closed <em>{closedN}</em></label></div>
-      </div>
+      {/* v172.5 — What's next: the ring replaces the three counts and the Include closed tick */}
+      <Ring172 s={s} ctx={ctx} n={n} closedN={closedN} total={total} onChange={setSmart172} />
 
       <section className="qs172-s">
         <Head172 title="Stage" on={stageOn172(s)} text={stageText172(s.stage)} idle="any" part="stage" onReset={setSmart172} />
@@ -263,6 +261,96 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
 
       <footer className="qs172-f">{on ? `Showing ${showing} of ${total} queries.` : `All ${total} queries.`}</footer>
     </aside>
+  );
+};
+
+/* ── v172.5 · What's next: where every query stands, as one ring ─────────────────────────────────────────────────
+   Parts in order: the five that need you (darkest first), No action needed as one pale part, Closed. Picking a part (its
+   segment, its key row, or a group heading) is lib/smart172 pickPart172. */
+const SW172: Record<string, string> = { offer: "#1c130f", req: "#2a3a52", nudge: "#5c6d88", nodate: "#7d8aa0", close: "#a3adbf", wait: "#dce1e8", closed: "#efeae3" };
+const RING_LABEL: Record<string, string> = { ...Object.fromEntries(STAND172.map((x) => [x.k, x.label])), act: "Action needed", wait: "No action needed", closed: "Closed" };
+const SHORT172: Record<string, string> = { act: "need you", offer: "offers", req: "requested", nudge: "to nudge", nodate: "need a date", close: "to close", wait: "no action", closed: "closed" };
+const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
+/** the ring's keys: ← ↑ the segment before, → ↓ the one after (wrapping), Enter or Space picks */
+export const ringKey172 = (key: string, i: number, n: number): number | "pick" | null =>
+  key === "Enter" || key === " " ? "pick"
+  : key === "ArrowRight" || key === "ArrowDown" ? (i + 1) % n
+  : key === "ArrowLeft" || key === "ArrowUp" ? (i - 1 + n) % n
+  : null;
+
+const Ring172: React.FC<{ s: Smart172; ctx: Ctx172; n: (skip: keyof Smart172, f: (r: QcRow) => boolean) => number; closedN: number; total: number; onChange: (p: Partial<Smart172>) => void }> = ({ s, ctx, n, closedN, total, onChange }) => {
+  const [hov, setHov] = useState<Pick172 | null>(null);
+  /* the draw-in and the count-up run once on mount; with reduced motion (or on the server) neither runs */
+  const [drawn, setDrawn] = useState(() => typeof window === "undefined" || reducedMotion());
+  useEffect(() => { if (drawn) return undefined; const t = window.setTimeout(() => setDrawn(true), 30); return () => window.clearTimeout(t); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const c: Record<string, number> = { ...Object.fromEntries(STAND172.map((x) => [x.k, n("hide", (r) => stand172(r, ctx.nowMs) === x.k)])), closed: closedN };
+  c.act = ACT172.reduce((t, k) => t + c[k], 0);
+  c.wait = WAIT172.reduce((t, k) => t + c[k], 0);
+  const lit1 = (k: Stand172 | "closed") => (k === "closed" ? s.closed : !s.hide.includes(k));
+  const lit = (k: Pick172) => partsOf172(k).some(lit1);
+  const on = s.hide.length > 0 || !s.closed;
+  const pick = (k: Pick172) => onChange(pickPart172(s, k));
+  const shown = [...STAND172.map((x) => x.k), "closed" as const].filter(lit1).reduce((t, k) => t + c[k], 0);
+  /* the geometry: viewBox 100, r 40, stroke 14, a 2.2 gap between parts, from 12 o'clock */
+  const R = 40, C = 2 * Math.PI * R;
+  const ringKeys: Pick172[] = [...ACT172, "wait", "closed"];
+  const sum = ringKeys.reduce((t, k) => t + c[k], 0) || 1;
+  const GAP = ringKeys.filter((k) => c[k]).length > 1 ? 2.2 : 0;
+  let at = 0;
+  const arcs = ringKeys.map((k) => { const len = (c[k] / sum) * C; const o = { k, off: at, len: Math.max(0, len - GAP) }; at += len; return o; }).filter((o) => c[o.k]);
+  const target = hov ? c[hov] : on ? shown : c.act;
+  const [up, setUp] = useState(() => (typeof window === "undefined" || reducedMotion() ? -1 : 0));
+  useEffect(() => {
+    if (up < 0) return undefined;
+    const t0 = performance.now(); let raf = 0;
+    const step = (t: number) => { const k = Math.min(1, (t - t0) / 700); setUp(k >= 1 ? -1 : Math.round(target * (1 - Math.pow(1 - k, 3)))); if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const big = up >= 0 ? up : target;
+  const sub = hov ? SHORT172[hov] : on ? `of ${total}` : "need you";
+  const hovs = (k: Pick172) => hov === k || (hov != null && partsOf172(hov).includes(k as Stand172));
+  const row = (k: Pick172, isSub = false) => (
+    <li key={k} className={`${isSub ? "sub" : ""}${lit(k) ? "" : " off"}${hov === k ? " hov" : ""}${on && lit(k) ? " sel" : ""}`}>
+      <button type="button" className="qs172-rb" data-k={k} disabled={!c[k]} aria-pressed={on && lit(k)}
+        onMouseEnter={() => setHov(k)} onMouseLeave={() => setHov(null)} onFocus={() => setHov(k)} onBlur={() => setHov(null)} onClick={() => pick(k)}>
+        {k === "act" ? null : <i style={{ background: SW172[k] }} />}<span className="l">{RING_LABEL[k]}</span><em>{c[k]}</em>
+      </button>
+    </li>
+  );
+  return (
+    <section className="qs172-s qs172-ring" data-qc1725="ring">
+      <Head172 title="What’s next" on={on} text={standText172(s)} idle="all" part="ws" onReset={onChange} />
+      <div className="qs172-rg">
+        <svg viewBox="0 0 100 100" className="qs172-rsvg" role="group" aria-label="What’s next">
+          <circle cx="50" cy="50" r={R} className="bg" />
+          {arcs.map((o) => (
+            <circle key={o.k} cx="50" cy="50" r={on && lit(o.k) ? R + 3 : R} className={`arc${lit(o.k) ? "" : " off"}${hovs(o.k) ? " hov" : ""}`} data-k={o.k}
+              tabIndex={0} role="button" aria-label={`${RING_LABEL[o.k]}: ${c[o.k]}`} aria-pressed={on && lit(o.k)}
+              style={{ stroke: SW172[o.k], strokeDasharray: `${drawn ? o.len : 0} ${C}`, strokeDashoffset: -o.off }}
+              onFocus={() => setHov(o.k)} onBlur={() => setHov(null)} onMouseEnter={() => setHov(o.k)} onMouseLeave={() => setHov(null)} onClick={() => pick(o.k)}
+              onKeyDown={(e) => {
+                const sibs = [...(e.currentTarget.parentNode?.querySelectorAll("circle.arc") ?? [])] as SVGCircleElement[];
+                const res = ringKey172(e.key, sibs.indexOf(e.currentTarget), sibs.length);
+                if (res == null) return;
+                e.preventDefault();
+                if (res === "pick") pick(o.k); else sibs[res]?.focus();
+              }}>
+              <title>{`${RING_LABEL[o.k]}: ${c[o.k]}`}</title>
+            </circle>
+          ))}
+          <circle cx="50" cy="50" r={R - 9} className="hole" />
+          <text x="50" y="48" className="big">{big}</text>
+          <text x="50" y="62" className="sub">{sub}</text>
+        </svg>
+        <ul className="qs172-rk">
+          {row("act")}
+          {ACT172.filter((k) => c[k] > 0).map((k) => row(k, true))}
+          {c.wait ? row("wait") : null}
+          {c.closed ? row("closed") : null}
+        </ul>
+      </div>
+    </section>
   );
 };
 

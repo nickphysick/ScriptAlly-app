@@ -36,10 +36,7 @@ export const Skeleton172: React.FC = () => (
 export const RailSk172: React.FC = () => (
   <aside className="qs172 sk172-rail" aria-hidden="true">
     <header className="qs172-h"><b>Filter</b></header>
-    <div className="qs172-q">
-      <div className="qs172-seg">{[0, 1, 2].map((k) => <span key={k} className="sk172-qp"><i className="big" /><i className="sm" /></span>)}</div>
-      <span className="sk172-ck"><i className="box" /><i style={{ width: 96 }} /></span>
-    </div>
+    <section className="qs172-s sk172-ring"><i className="sk172-t" style={{ width: 96 }} /><span className="sk172-donut" /><i className="sm" /><i className="sm" /><i className="sm" /></section>
     <section className="qs172-s"><i className="sk172-t" /><span className="sk172-stg">{[0, 1, 2, 3].map((k) => <i key={k} className="d" />)}</span></section>
     <section className="qs172-s"><i className="sk172-t" /><span className="sk172-base" /><i className="sk172-track" /></section>
     <section className="qs172-s"><i className="sk172-t" style={{ width: 132 }} /><span className="sk172-base" /><i className="sk172-track" /></section>
