@@ -2,151 +2,82 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * To-do nudge desk v1 (design-refs/todo-nudge-desk-v1/) — THE DESKTOP NUDGE DESK: one step. The hawk's line, the sentence
- * "I nudged {First} ___." and three clean answers (Today, Yesterday, Another day, each with its day and a number key);
- * "Another day" opens the app's own date picker. Once a day is picked: the day fills the sentence and one quiet line
- * says what happens. Nothing is saved here: the footer's Log it runs the flow's own commit (`saveNudgeSent`).
+ * To-do nudge desk v2 (design-refs/todo-nudge-desk-v2/) — THE DESKTOP NUDGE DESK, round the three things the writer
+ * needs, top to bottom: it's overdue (the hawk beside one headline); you send the nudge yourself and confirm it ("I've
+ * sent it"); tell us when (Today / Yesterday / Another day). Nothing folds, glides or moves position. Nothing is saved
+ * here: the footer's Log it runs the flow's own commit (`saveNudgeSent`), enabled once both steps are done.
  * The words and shapes are lib/todoNudgeDesk's (pure, locked).
  */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React from "react";
 import { addDays } from "../../../lib/queryActions/dates";
-import { nudgeAnswers, nudgeDayWord, nudgeHawkLine, nudgeTimeline, type TimelineShape } from "../../../lib/todoNudgeDesk";
-import { stageVars, type WsTask } from "../../../lib/todoWs";
+import { nudgeAnswers, nudgeDayWord, shortDate } from "../../../lib/todoNudgeDesk";
+import type { WsTask } from "../../../lib/todoWs";
 import type { Stage } from "../../../lib/stageColours";
 import { DatePick, DeskTiles } from "./WsControls";
 import type { NudgeDesk } from "./wsFlows";
 
 const MENTOR = "/images/todo/mentor.webp";
-/** the timeline's arrival, from the pick to the close-it label's fade (1.40s + 0.30s), rounded up */
-const ARRIVAL_MS = 1800;
-const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
-
-export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stage: Stage | null }> = ({ t, nd, today, stage }) => {
-  const first = nd.facts.first;
-  const answers = nudgeAnswers(today, nd.when === "other" ? nd.picked : null);
-  /* Phase 3 — THE HAWK FOLDS AWAY on the first pick (0.34s: it fades and lifts over the first 45%, then its height closes,
-     so the sentence glides up into its place) and stays gone while the task is open. This desk is keyed by the task, so
-     the hawk is back when the task is opened again. Reduced motion: it is simply not drawn once a day is picked. */
-  const [hawk, setHawk] = useState<"shown" | "folding" | "gone">("shown");
-  const hawkRef = useRef<HTMLDivElement>(null);
-  const [hawkH, setHawkH] = useState(0);
-  useLayoutEffect(() => {
-    if (!nd.when || hawk !== "shown") return;
-    if (reducedMotion()) { setHawk("gone"); return; }
-    setHawkH(hawkRef.current?.offsetHeight ?? 0);
-    setHawk("folding");
-  }, [nd.when, hawk]);
-  const stageStyle = stageVars(stage, t.query?.status) as Record<string, string> | undefined;
-  /* Phase 4: the timeline's arrival plays once, the first time a day is picked on this task (this desk is keyed by it).
-     Held as state for the sequence's length (1.6s, rounded up), so a re-render meanwhile never cuts it short, and a
-     later change of day only moves the marker. Before paint (a layout effect), so the card never shows unarrived. */
-  const entered = useRef(false);
-  const [entering, setEntering] = useState(false);
-  const enterTimer = useRef<number | null>(null);
-  useLayoutEffect(() => {
-    if (!nd.picked || entered.current) return;
-    entered.current = true;
-    if (reducedMotion()) return;
-    setEntering(true);
-    enterTimer.current = window.setTimeout(() => setEntering(false), ARRIVAL_MS);
-  }, [nd.picked]);
-  useEffect(() => () => { if (enterTimer.current) window.clearTimeout(enterTimer.current); }, []);
-  return (
-    <div className="twn-desk" data-twn="desk">
-      {hawk === "gone" ? null : (
-        <div ref={hawkRef} className={hawk === "folding" ? "tws-mnote twn-hawk twn-bye" : "tws-mnote twn-hawk"} data-tws="hawk" data-twn="hawk" data-twn-hawk={hawk}
-          data-tws58-stage={stage ?? undefined} style={{ ...(stageStyle ?? {}), ...(hawk === "folding" ? { "--twn-h": `${hawkH}px` } : {}) } as React.CSSProperties}
-          onAnimationEnd={(e) => { if (e.target === e.currentTarget) setHawk("gone"); }}>
-          <img src={MENTOR} alt="" /><p>{nudgeHawkLine(nd.facts)}</p>
-        </div>
-      )}
-      <p className="twn-sent" data-twn="sentence">I nudged {first}{" "}
-        {nd.picked ? <><u data-twn="day">{nudgeDayWord(nd.picked, today)}</u>.</> : <span className="twn-blank" aria-label="a day, not picked yet" />}
-      </p>
-      <div className="twn-chs" role="radiogroup" aria-label={`When did you nudge ${first}?`} data-twn="answers">
-        {answers.map((a) => (
-          <button key={a.k} type="button" className="twn-ch" role="radio" aria-checked={nd.when === a.k} data-twn-when={a.k}
-            onClick={() => nd.pick(a.k)}>
-            <b>{a.title}</b><small>{a.sub}</small><kbd aria-hidden="true">{a.key}</kbd>
-          </button>
-        ))}
-      </div>
-      {nd.when === "other" ? (
-        /* the app's own picker, as the date question uses it (past); outside the desk's tile context, so it is the strip
-           and the month, not a second Today / Yesterday */
-        <div className="twn-other" data-twn="other">
-          <DeskTiles.Provider value={false}>
-            <DatePick value={nd.picked ?? addDays(today, -2)} today={today} dir="past" onPick={(d) => nd.pick("other", d)} />
-          </DeskTiles.Provider>
-        </div>
-      ) : null}
-      {nd.picked ? <p className="twn-quiet" data-twn="quiet">It goes on {first}’s card and this task leaves your list.</p> : null}
-      {/* Phase 4 — nothing until a day is picked; then the updated timeline, centred in the room left above the footer */}
-      <div className="twn-tlwrap" data-twn="tlwrap">
-        {nd.picked ? <NudgeTimeline first={first} shape={nudgeTimeline(nd.facts, nd.picked, nd.then, today)} stageStyle={stageStyle} stage={stage} enter={entering} /> : null}
-      </div>
-    </div>
-  );
+const TICK = <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" /></svg>;
+/** the answers' plain navy outline icons (no tile behind them): sun, history clock, calendar */
+const ICON: Record<"today" | "yesterday" | "other", React.ReactNode> = {
+  today: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" /></svg>,
+  yesterday: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7" /><path d="M4 4v4h4" /><path d="M12 8v4l3 2" /></svg>,
+  other: <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5" /><path d="M4 10h16M9 3v4M15 3v4" /></svg>,
 };
 
-/**
- * Phase 4 — THE UPDATED TIMELINE, ON A BANDED CARD. A white card, its head a band in the query's stage colour (the card
- * head's own, `stageVars`), "{First}'s updated timeline". The line is to scale (lib/todoNudgeDesk `nudgeTimeline`): solid
- * from the send to the expected date, hatched to the nudge, dashed to the close-it date. It arrives once, as one
- * sequence (`twn-enter`, todoNudgeDesk.css); a later change of day moves the marker and the dashed run (0.45s ease).
- */
-const NudgeTimeline: React.FC<{ first: string; shape: TimelineShape; stageStyle: Record<string, string> | undefined; stage: Stage | null; enter: boolean }> = ({ first, shape: s, stageStyle, stage, enter }) => {
-  const pc = (n: number) => `${n}%`;
-  /* measured at 1280 and 1512: when dates sit close, labels in one row collided ("No reply for…" over "If nothing by then",
-     "8 weeks up" over "You nudged"). After each render the labels of each row are read and slid apart along it (8px
-     apart, the rightmost kept on its point, none past the card's padding); their points never move. */
-  const lineRef = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    const line = lineRef.current;
-    if (!line) return;
-    const W = line.clientWidth;
-    const PAD = 18, GAP = 8;
-    for (const row of ["twn-up", "twn-dn"]) {
-      const els = [...line.querySelectorAll<HTMLElement>(`.twn-l.${row}`)];
-      const items = els.map((el) => {
-        el.style.setProperty("--twn-dx", "0px");
-        const x = (parseFloat(el.dataset.twnX ?? "0") / 100) * W, w = el.offsetWidth;
-        const left = el.classList.contains("twn-end") ? x + 8 - w : el.classList.contains("twn-lft") ? x - 8 : x - w / 2;
-        return { el, left, w, dx: 0 };
-      }).sort((a, b) => a.left - b.left);
-      for (let i = items.length - 2; i >= 0; i--) {
-        const a = items[i], b = items[i + 1];
-        const over = a.left + a.dx + a.w + GAP - (b.left + b.dx);
-        if (over > 0) a.dx -= over;
-        const min = -PAD - (a.left);
-        if (a.dx < min) a.dx = min;
-      }
-      for (let i = 1; i < items.length; i++) {
-        const a = items[i - 1], b = items[i];
-        const over = a.left + a.dx + a.w + GAP - (b.left + b.dx);
-        if (over > 0) b.dx += over;
-      }
-      for (const it of items) it.el.style.setProperty("--twn-dx", `${Math.round(it.dx)}px`);
-    }
-  });
+export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stage: Stage | null; otherOpen: boolean; setOtherOpen: (o: boolean) => void }> = ({ nd, today, otherOpen, setOtherOpen }) => {
+  const first = nd.facts.first;
+  const answers = nudgeAnswers(today, nd.when === "other" ? nd.picked : null);
+  /* "Another day" opens the picker (the page holds whether it is open, so key 3 can open it); nothing changes until a
+     day is set there */
+  const choose = (k: "today" | "yesterday" | "other") => {
+    if (!nd.sent) return;
+    if (k === "other") { setOtherOpen(true); return; }
+    setOtherOpen(false);
+    nd.pick(k);
+  };
+  const s1 = nd.sent ? "done" : "on";
+  const s2 = !nd.sent ? "off" : nd.picked ? "done" : "on";
   return (
-    <div className={enter ? "twn-tl twn-enter" : "twn-tl"} data-twn="timeline" data-tws58-stage={stage ?? undefined} style={stageStyle as React.CSSProperties | undefined}>
-      <h5 className="twn-band" data-twn="band">{first}’s updated timeline</h5>
-      <div className="twn-line" data-twn="line" ref={lineRef}>
-        <span className="twn-seg twn-s1" style={{ left: pc(s.solid.from), width: pc(s.solid.to - s.solid.from) }} />
-        {s.hatch ? <span className="twn-seg twn-s2" style={{ left: pc(s.hatch.from), width: pc(s.hatch.to - s.hatch.from) }} /> : null}
-        <span className="twn-seg twn-s3" style={{ left: pc(s.dashed.from), width: pc(s.dashed.to - s.dashed.from) }} />
-        <span className="twn-p twn-p-start" data-twn-pt="start" style={{ left: pc(s.start.x) }} />
-        <span className="twn-l twn-dn twn-lft" data-twn-lab="start" data-twn-x={s.start.x} style={{ left: pc(s.start.x) }}>{s.start.label}<b>{s.start.date}</b></span>
-        {s.due ? <>
-          <span className="twn-p twn-p-due" data-twn-pt="due" style={{ left: pc(s.due.x) }} />
-          <span className="twn-l twn-dn" data-twn-lab="due" data-twn-x={s.due.x} style={{ left: pc(s.due.x) }}>{s.due.label}<b>{s.due.date}</b></span>
-        </> : null}
-        {s.hatch ? <span className="twn-l twn-up twn-ago" data-twn-lab="ago" data-twn-x={(s.hatch.from + s.hatch.to) / 2} style={{ left: pc((s.hatch.from + s.hatch.to) / 2) }}><i>No reply for {s.hatch.ago}</i></span> : null}
-        <span className="twn-p twn-nud" data-twn-pt="nudge" style={{ left: pc(s.nudge.x) }} />
-        <span className="twn-l twn-dn twn-nw" data-twn-lab="nudge" data-twn-x={s.nudge.x} style={{ left: pc(s.nudge.x) }}>You nudged<b>{s.nudge.date}</b></span>
-        <span className="twn-p twn-fut" data-twn-pt="close" style={{ left: pc(s.close.x) }} />
-        <span className="twn-l twn-up twn-end" data-twn-lab="close" data-twn-x={s.close.x} style={{ left: `calc(${pc(s.close.x)} + 8px)` }}>If nothing by then<b>{s.close.date}, close it?</b></span>
+    <div className="twn2" data-twn="desk">
+      {/* 1 · it's overdue: the hawk beside one headline, no speech bubble */}
+      <div className="twn2-ctx" data-twn="context">
+        <img src={MENTOR} alt="" />
+        <div><h2>{first}’s reply is <em>overdue</em>.</h2><p>Send a nudge, then log it below.</p></div>
+      </div>
+
+      {/* 2 and 3 · you send it yourself and confirm it; then tell us when */}
+      <div className="twn2-steps" data-twn="steps">
+        <div className="twn2-stp" data-st={s1} data-twn-step="send">
+          <span className="twn2-num" aria-hidden="true">{nd.sent ? TICK : "1"}</span>
+          <div className="twn2-tx"><b>Send {first} a nudge</b><small>From your own email, the way you sent the query: a short note asking if it reached them.</small></div>
+          <button type="button" className={nd.sent ? "sp-btn sp-btn--fill twn2-sent" : "sp-btn sp-btn--line twn2-sent"} data-twn="sent" aria-pressed={nd.sent} onClick={nd.confirm}>
+            {nd.sent ? <>{TICK}Sent</> : "I’ve sent it"}
+          </button>
+        </div>
+        <div className="twn2-stp" data-st={s2} data-twn-step="when" aria-disabled={!nd.sent || undefined}>
+          <span className="twn2-num" aria-hidden="true">{nd.picked ? TICK : "2"}</span>
+          <div className="twn2-tx">
+            <b>When did you send it?</b>
+            {nd.picked ? <small data-twn="nudged">You nudged {first} <b>{nudgeDayWord(nd.picked, today)}</b>. Next reminder <b>{shortDate(nd.then)}</b>.</small> : null}
+          </div>
+          <span />
+          <div className="twn2-chs" role="radiogroup" aria-label={`When did you send ${first} the nudge?`} data-twn="answers">
+            {answers.map((a) => (
+              <button key={a.k} type="button" className="twn2-ch" role="radio" aria-checked={nd.when === a.k} data-twn-when={a.k}
+                disabled={!nd.sent} tabIndex={nd.sent ? 0 : -1} onClick={() => choose(a.k)}>
+                <span className="twn2-ic">{ICON[a.k]}</span><b>{a.title}</b><small>{a.sub}</small>
+              </button>
+            ))}
+          </div>
+          {nd.sent && otherOpen ? (
+            <div className="twn2-other" data-twn="other">
+              <DeskTiles.Provider value={false}>
+                <DatePick value={nd.when === "other" && nd.picked ? nd.picked : addDays(today, -2)} today={today} dir="past" onPick={(d) => { setOtherOpen(false); nd.pick("other", d); }} />
+              </DeskTiles.Provider>
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );

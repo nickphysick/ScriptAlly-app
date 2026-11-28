@@ -228,8 +228,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* To-do arrival v1: the desk opened from "Where to start" appears with load v1's 220ms fade, and no slide. Held by
      key (never cleared on a timer), so the attribute never changes on a mounted desk and its animation never restarts */
   const [fadeKey, setFadeKey] = useState<string | null>(null);
+  /* To-do nudge desk v2: whether the nudge desk's "Another day" picker is open (closed whenever another task opens) */
+  const [nudgeOther, setNudgeOther] = useState(false);
   const go = useCallback((key: string | null) => {
     setFadeKey(key && !selRef.current ? key : null);
+    setNudgeOther(false);
     setSelKey(key); setA({}); setQi(0); setMile(null); setAdding(false); setPop(null); setLinkPicking(false); batch.resetSkip(); setBatchView(null); setBatchFocus(null);
     /* the row is brought into the tray's own view; never scrollIntoView, which would scroll the page too */
     if (key) requestAnimationFrame(() => {
@@ -468,7 +471,12 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       /* To-do nudge desk v1 · Phase 1 — Esc goes back to "Where to start" from an open task (a text field, a pop, a menu,
          a dialog or a journey keeps its own Esc: the checks above, and modalOpen) */
       /* To-do nudge desk v1 · Phase 2: 1, 2 and 3 pick the nudge desk's answers (no text field has focus: the guard above) */
-      if (nd && tab === "todo" && !held && !adding && !pop && ["1", "2", "3"].includes(e.key)) { e.preventDefault(); nd.pick((["today", "yesterday", "other"] as const)[Number(e.key) - 1]); return; }
+      /* To-do nudge desk v2: only while step 2 is unlocked (step 1 confirmed); 3 opens Another day's picker */
+      if (nd && nd.sent && tab === "todo" && !held && !adding && !pop && ["1", "2", "3"].includes(e.key)) {
+        e.preventDefault();
+        if (e.key === "3") setNudgeOther(true); else { setNudgeOther(false); nd.pick(e.key === "1" ? "today" : "yesterday"); }
+        return;
+      }
       if (escGoesBack({ key: e.key, selected: !!sel, held: !!held, adding, startShown: wayBackShown(all), modal: modalOpen() })) { e.preventDefault(); goBack(); return; }
       if (matchesShortcut(SHORTCUTS.todoDown, e) && tab === "todo") { e.preventDefault(); move(1); }
       else if (matchesShortcut(SHORTCUTS.todoUp, e) && tab === "todo") { e.preventDefault(); move(-1); }
@@ -750,7 +758,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     } else if (flow && nd) {
       /* To-do nudge desk v1 · Phase 2 — a nudge is one step: the sentence and its three clean answers (no rail, no
          numbers, no check step); Log it in the footer runs the flow's own commit */
-      main = <WsNudgeDesk t={t} nd={nd} today={today} stage={deskStage} />;
+      main = <WsNudgeDesk t={t} nd={nd} today={today} stage={deskStage} otherOpen={nudgeOther} setOtherOpen={setNudgeOther} />;
     } else if (flow && ahead) {
       /* To-do arrival v1 · Phase 4 — STEPS AHEAD. A journey task on the desktop (Card journeys v1: a send, an R&R, an
          offer to answer) has nothing to answer on the desk; the desk lists the steps its journey will take, in the
@@ -923,7 +931,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       </>
     );
     const foot = (
-      <div className="tws-wf" data-tws="footer" data-over={over ? "" : undefined}>
+      <div className="tws-wf" data-tws="footer" data-over={over ? "" : undefined} data-twn-foot={nd ? "" : undefined}>
         {footBtns}
         <span className="tws-sp" />
         {progress ? <em className="tws-prog" data-tws="progress">{progress}</em> : null}

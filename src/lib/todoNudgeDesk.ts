@@ -79,27 +79,11 @@ export function nudgeFacts(q: Query, agent: Agent | null | undefined, first: str
   };
 }
 
-const poss = (n: string) => (/s$/i.test(n) ? `${n}’` : `${n}’s`);
-/**
- * The hawk's line. Nick's two templates: with a reply time, "{Agency}'s {n} weeks were up on {expected}, and {First}
- * hasn't replied."; without one, "{First} hasn't replied since you queried on {sent}." A partial or a full reads the
- * house window and says what was sent (REPORT §copy). Both end "Once you've nudged {First}, tell me when and I'll log it."
- */
-export function nudgeHawkLine(f: NudgeFacts): string {
-  const tail = ` Once you’ve nudged ${f.first}, tell me when and I’ll log it.`;
-  if (f.weeks != null && f.expected) {
-    const whose = f.sentWhat === "query" ? `${poss(f.agencyOr)} ${f.weeks} weeks` : `The ${f.weeks} weeks for your ${f.sentWhat}`;
-    return `${whose} were up on ${shortDate(f.expected)}, and ${f.first} hasn’t replied.${tail}`;
-  }
-  const how = f.sentWhat === "query" ? "you queried" : `you sent your ${f.sentWhat}`;
-  return f.sent ? `${f.first} hasn’t replied since ${how} on ${shortDate(f.sent)}.${tail}` : `${f.first} hasn’t replied.${tail}`;
-}
-
 /* ── the answers and the sentence ──────────────────────────────────────────────────────────────────────────────── */
 
 export type NudgeWhen = "today" | "yesterday" | "other";
 export interface NudgeAnswer { k: NudgeWhen; title: string; sub: string; key: string }
-/** the three clean answers: the day under each, a number key */
+/** the three clean answers: the day under each, a number key (v2: "Another day" shows the picked day once chosen) */
 export function nudgeAnswers(today: Date, other: Date | null): NudgeAnswer[] {
   const y = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
   return [

@@ -111,9 +111,15 @@ export interface Flow {
  *  own close-it date for that day, and the pick (it fills the same answers `questions` fills, so the save is unchanged) */
 export interface NudgeDesk {
   facts: NudgeFacts;
+  /** v2: step 1 — the writer has confirmed they sent the nudge ("I've sent it"); step 2 is locked until then */
+  sent: boolean;
   when: NudgeWhen | null;
+  /** the day picked, once step 1 is confirmed and a day is set (null until both are done) */
   picked: Date | null;
   then: Date;
+  /** v2: "I've sent it" / "Sent": confirm, or un-confirm (which clears step 2's answer) */
+  confirm: () => void;
+  /** a no-op while step 1 is not confirmed */
   pick: (when: NudgeWhen, day?: Date) => void;
 }
 
@@ -325,16 +331,21 @@ function nudgeFlow(ctx: FlowCtx): Flow {
   const { t, today, A, set } = ctx;
   const q = t.query!;
   const { qs, sent, then } = nudgeParts(ctx, false);
-  /* To-do nudge desk v1: a day is picked once "Today" or "Yesterday" is, or "Another day" has its day; the answers it
-     fills are the ones the questions fill (`sent`, `date`), so `sent` and `then` above are the save's, unchanged */
-  const when = A.when === "today" || A.when === "yesterday" || A.when === "other" ? A.when as NudgeWhen : null;
-  const picked = when && A.sent === true && typeof A.date === "string" ? sent : null;
+  /* To-do nudge desk v2: two steps on the desktop. Step 1, "I've sent it", is the questions' own `sent` answer; step 2's
+     pick fills their `date`. So `sent` and `then` above are the save's, unchanged. Un-confirming step 1 clears step 2; a
+     pick while step 1 is not confirmed does nothing (the row is locked). */
+  const confirmed = A.sent === true;
+  const when = confirmed && (A.when === "today" || A.when === "yesterday" || A.when === "other") ? A.when as NudgeWhen : null;
+  const picked = confirmed && when && typeof A.date === "string" ? sent : null;
   const nudgeDesk: NudgeDesk = {
-    facts: nudgeFacts(q, t.agent ?? null, t.first), when, picked, then,
+    facts: nudgeFacts(q, t.agent ?? null, t.first), sent: confirmed, when, picked, then,
+    confirm: () => set(confirmed ? { sent: undefined, when: undefined, date: undefined } : { sent: true }),
     pick: (w, day) => {
-      if (w === "other" && !day) { set({ when: "other", sent: undefined, date: undefined }); return; }
+      if (!confirmed) return;
+      /* "Another day" with no day yet only opens the picker (the desk's own state): nothing changes until a day is set */
+      if (w === "other" && !day) return;
       const d = w === "today" ? today : w === "yesterday" ? addDays(today, -1) : day!;
-      set({ when: w, sent: true, date: ymd(d) });
+      set({ when: w, date: ymd(d) });
     },
   };
   const nw = buildNudgeWrites(q, t.agent ?? null, { checkBackDate: dayIso(then), note: "", eventDate: dayIso(sent) } as never, new Date());

@@ -1300,7 +1300,14 @@
     "design-refs/todo-nudge-desk-v1/disc-partial.png": "6b31fced529309292edca599e1b275c6fe234381b9d9a3ed4ce415bc6d40f48d",
     "design-refs/todo-nudge-desk-v1/mentor.png": "50d5b647c28820c31ee0ce2fe92124f00b13ede6a77bdf7657a79043f1cb2aef",
     "design-refs/todo-nudge-desk-v1/page.jpg": "a53c0f56afc0b5bdf98b300ba86078f7311dcaedfaae13d3b72e69cff740ef9b",
-    "design-refs/todo-nudge-desk-v1/todo-nudge-desk-v1.html": "b8f4959b64c57c79f9bf2958451d690df3b4ce019d9cdfecff23eaed3df06c8b"
+    "design-refs/todo-nudge-desk-v1/todo-nudge-desk-v1.html": "b8f4959b64c57c79f9bf2958451d690df3b4ce019d9cdfecff23eaed3df06c8b",
+    "design-refs/todo-nudge-desk-v2/SHA256SUMS": "990e9313a51d3f242d335153dfc29c3d21faa56d08ebc1084b06bca9c7b0ff09",
+    "design-refs/todo-nudge-desk-v2/disc-full.png": "1bf92792e7c2810c3a0328a98f45f3a32668869952437cec79d1d3c05414e592",
+    "design-refs/todo-nudge-desk-v2/disc-nudge.png": "8e11761e7afc56034fc4c3fe699a5774e05a1fe1d314780d3c5a7160265e422c",
+    "design-refs/todo-nudge-desk-v2/disc-partial.png": "6b31fced529309292edca599e1b275c6fe234381b9d9a3ed4ce415bc6d40f48d",
+    "design-refs/todo-nudge-desk-v2/mentor.png": "50d5b647c28820c31ee0ce2fe92124f00b13ede6a77bdf7657a79043f1cb2aef",
+    "design-refs/todo-nudge-desk-v2/page.jpg": "a53c0f56afc0b5bdf98b300ba86078f7311dcaedfaae13d3b72e69cff740ef9b",
+    "design-refs/todo-nudge-desk-v2/todo-nudge-desk-v2.html": "74307e4a04b6dcfe143442c09c160db1fb3a5fd1ad23cb5099f90be88976f47b"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

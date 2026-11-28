@@ -2,9 +2,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * To-do nudge desk v1 (design-refs/todo-nudge-desk-v1/) — the way back to "Where to start", and the desktop nudge desk:
- * one sentence, clean answers, the hawk folding away, the updated timeline on a banded card. Sizes are the ref's, which
- * are the app's; colours are the desk's tokens. Desktop only, like the workspace.
+ * To-do nudge desk v1 (design-refs/todo-nudge-desk-v1/) — the way back to "Where to start" (kept), and
+ * To-do nudge desk v2 (design-refs/todo-nudge-desk-v2/) — the desktop nudge desk: it's overdue (the hawk beside one
+ * headline, the timeline from the start), you send it yourself and confirm it, tell us when (clean answers; Another day
+ * opens a month calendar). v1's sentence, fold and after-pick timeline are gone. Sizes are the ref's, which are the
+ * app's; colours are the desk's tokens and the plumage table. Desktop only, like the workspace.
  */
 @media (min-width: 768px) {
   /* ── Phase 1 · the way back: the tray's own row (`.tws-ti`), so the open look (aria-current) is the rows' own ── */
@@ -18,100 +20,53 @@
   .tws .tws-tl[data-twa-lit] .twn-back { opacity: 1; }
 }
 
-/* ── Phase 2 · the nudge desk: one sentence, clean answers ── */
+/* ── v2 · Phase 1 · what's happened, then what you do: 24px top padding, 18px between blocks; nothing moves ── */
 @media (min-width: 768px) {
-  .tws .twn-desk { display: flex; flex-direction: column; min-height: 100%; }
-  .tws .twn-hawk { margin-bottom: 0; }
-  .tws .twn-sent { margin: 14px 0 24px; font: 400 24px/1.35 var(--tw-type); color: var(--tw-ink); }
-  .tws .twn-sent u { text-decoration: none; color: var(--tw-navy); box-shadow: inset 0 -2px 0 var(--tw-navy); }
-  .tws .twn-blank { display: inline-block; width: 120px; height: 1em; vertical-align: -0.12em; box-shadow: inset 0 -2px 0 #cfc5b6; }
-  .tws .twn-chs { display: flex; flex-wrap: wrap; gap: 12px; }
-  .tws .twn-ch {
-    all: unset; box-sizing: border-box; cursor: pointer; position: relative; min-width: 150px; padding: 11px 40px 11px 16px; border-radius: 12px;
-    background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1.5px var(--tw-hair); transition: box-shadow 0.15s, background 0.15s, color 0.15s;
-  }
-  .tws .twn-ch b { display: block; font: 600 16px/1.3 var(--tw-serif); }
-  .tws .twn-ch small { display: block; font: 14px/1.3 var(--tw-serif); color: var(--sp-quiet); }
-  .tws .twn-ch kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font: 12px var(--tw-serif); color: var(--sp-quiet); padding: 1px 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--tw-hair); }
-  .tws .twn-ch:hover { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
-  .tws .twn-ch:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
-  .tws .twn-ch[aria-checked="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
-  .tws .twn-ch[aria-checked="true"] small, .tws .twn-ch[aria-checked="true"] kbd { color: #d6dbe3; box-shadow: none; }
-  .tws .twn-other { margin-top: 12px; max-width: 520px; }
-  .tws .twn-quiet { margin: 18px 0 0; font: italic 14.5px/1.45 var(--tw-serif); color: var(--sp-quiet); }
-  @media (prefers-reduced-motion: reduce) { .tws .twn-ch { transition: none; } }
-}
+  .tws .tws-wq:has(> .twn2) { padding: 24px 30px 16px; }
+  .tws .twn2 { display: flex; flex-direction: column; gap: 18px; }
+  /* the context line: the hawk at 50px beside the headline; no bubble */
+  .tws .twn2-ctx { display: flex; align-items: center; gap: 16px; }
+  .tws .twn2-ctx img { width: 50px; flex: none; mix-blend-mode: multiply; }
+  .tws .twn2-ctx h2 { margin: 0 0 3px; font: 600 24px/1.25 var(--tw-serif) !important; color: var(--tw-ink); }
+  .tws .twn2-ctx h2 em { font-style: normal; color: var(--sp-rust); }
+  .tws .twn2-ctx p { margin: 0; font: 16px var(--tw-serif); color: var(--sp-quiet); }
 
-/* ── Phase 3 · the hawk folds away: picture and bubble together, 0.34s, cubic-bezier(.4,0,.2,1) — it fades and lifts 6px
-   over the first 45%, then its height (its own, measured: --twn-h) and bottom margin close to 0 ── */
-@media (min-width: 768px) {
-  .tws .twn-hawk.twn-bye { overflow: hidden; animation: twn-bye 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-  @keyframes twn-bye {
-    0% { max-height: var(--twn-h, 90px); opacity: 1; transform: none; }
-    45% { max-height: var(--twn-h, 90px); opacity: 0; transform: translateY(-6px); }
-    100% { max-height: 0; opacity: 0; margin-bottom: 0; transform: translateY(-6px); }
-  }
-  @media (prefers-reduced-motion: reduce) { .tws .twn-hawk.twn-bye { animation: none; display: none; } }
-}
+  /* the steps card: two rows divided by a hairline */
+  .tws .twn2-steps { border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px var(--tw-hair), 0 4px 16px rgba(42, 58, 82, 0.06); }
+  .tws .twn2-stp { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 14px; align-items: center; padding: 18px 20px; transition: opacity 0.25s; }
+  .tws .twn2-stp + .twn2-stp { border-top: 1px solid #efe9e0; }
+  .tws .twn2-num { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--tw-navy); color: #fff; font: 600 15px var(--tw-serif); transition: background 0.25s, color 0.25s; }
+  .tws .twn2-num svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .tws .twn2-stp[data-st="done"] .twn2-num { background: #d7e0e8; color: var(--tw-navy); }
+  .tws .twn2-stp[data-st="off"] .twn2-num { background: #fff; color: var(--sp-quiet); box-shadow: inset 0 0 0 1.5px var(--tw-hair); }
+  .tws .twn2-tx b { display: block; font: 600 17px/1.3 var(--tw-serif); color: var(--tw-ink); }
+  .tws .twn2-tx small { display: block; margin-top: 2px; font: 14.5px/1.4 var(--tw-serif); color: var(--sp-quiet); }
+  .tws .twn2-tx small b { display: inline; font: inherit; font-weight: 600; color: var(--tw-ink); }
+  .tws .twn2-stp[data-st="off"] :is(.twn2-tx, .twn2-chs) { opacity: 0.45; pointer-events: none; }
+  .tws .twn2-sent svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 
-/* ── Phase 4 · the updated timeline, on a banded card, centred in the room left above the footer ── */
-@media (min-width: 768px) {
-  .tws .twn-tlwrap { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; padding: 28px 0 20px; min-height: 0; }
-  .tws .twn-tl {
-    width: 90%; padding: 0 24px 6px; border-radius: 14px; overflow: hidden; background: #fff;
-    box-shadow: inset 0 0 0 1px var(--tw-hair), 0 2px 12px rgba(42, 58, 82, 0.06);
+  /* the three answers: equal, in a row, a plain navy outline icon on the left (no tile) */
+  .tws .twn2-chs { grid-column: 2 / -1; margin-top: 12px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .tws .twn2-ch {
+    all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 26px minmax(0, 1fr); column-gap: 10px; align-items: center;
+    padding: 12px; border-radius: 12px; background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1.5px var(--tw-hair);
+    transition: box-shadow 0.15s, background 0.15s, color 0.15s;
   }
-  .tws .twn-band { margin: 0 -24px 48px; padding: 13px 24px; background: var(--tws58-band, #efe9dd); font: 600 15px var(--tw-serif) !important; color: var(--tws58-ink, var(--tw-ink)); }
-  .tws .twn-line { position: relative; height: 6px; margin: 0 18px 50px; }
-  .tws .twn-seg { position: absolute; top: 0; height: 6px; transition: left 0.45s ease, width 0.45s ease; }
-  .tws .twn-s1 { background: #cdbfa8; border-radius: 3px 0 0 3px; }
-  .tws .twn-s2 { background: repeating-linear-gradient(135deg, #e6d6c0 0 6px, #f1e7d8 6px 12px); }
-  .tws .twn-s3 { height: 0; top: 2px; border-top: 2px dashed #9aa6b6; }
-  .tws .twn-p { position: absolute; top: -5px; width: 16px; height: 16px; border-radius: 50%; transform: translateX(-50%); background: #fff; box-shadow: inset 0 0 0 2px #8e8274; transition: left 0.45s ease; }
-  .tws .twn-nud { background: var(--tw-navy); box-shadow: 0 0 0 3px #fff; }
-  .tws .twn-fut { box-shadow: inset 0 0 0 2px #9aa6b6; }
-  .tws .twn-l { position: absolute; transform: translateX(calc(-50% + var(--twn-dx, 0px))); font: 12.5px/1.25 var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; text-align: center; transition: left 0.45s ease; }
-  .tws .twn-l b { display: block; font-weight: 600; color: var(--tw-ink); }
-  .tws .twn-l.twn-up { bottom: 14px; }
-  .tws .twn-l.twn-dn { top: 14px; }
-  .tws .twn-l.twn-end { transform: translateX(calc(-100% + var(--twn-dx, 0px))); text-align: right; }
-  .tws .twn-l.twn-lft { transform: translateX(calc(-8px + var(--twn-dx, 0px))); text-align: left; }
-  .tws .twn-l.twn-nw, .tws .twn-l.twn-nw b { color: var(--tw-navy); }
-  .tws .twn-ago i { font-style: italic; }
+  .tws .twn2-ch .twn2-ic { grid-row: 1 / span 2; display: grid; place-items: center; width: 26px; height: 26px; }
+  .tws .twn2-ch .twn2-ic svg { width: 21px; height: 21px; fill: none; stroke: var(--tw-navy); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .tws .twn2-ch b { grid-column: 2; font: 600 16px/1.3 var(--tw-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tws .twn2-ch small { grid-column: 2; font: 14px/1.3 var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tws .twn2-ch:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+  .tws .twn2-ch:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+  .tws .twn2-ch[aria-checked="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
+  .tws .twn2-ch[aria-checked="true"] small { color: #d6dbe3; }
+  .tws .twn2-ch[aria-checked="true"] .twn2-ic svg { stroke: #fff; }
+  .tws .twn2-ch:disabled { cursor: default; }
+  .tws .twn2-stp[data-st="off"] .twn2-ch .twn2-ic svg { stroke: var(--sp-quiet); }
+  .tws .twn2-other { grid-column: 2 / -1; margin-top: 12px; }
 
-  /* the arrival, once, the first time a day is picked (all times from the pick) */
-  .tws .twn-tl.twn-enter { animation: twn-tlin 0.42s 0.1s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-  @keyframes twn-tlin { from { opacity: 0; transform: translateY(12px) scale(0.985); } to { opacity: 1; transform: none; } }
-  .tws .twn-enter .twn-seg { animation: twn-draw 0.55s cubic-bezier(0.4, 0, 0.2, 1) both; }
-  .tws .twn-enter .twn-s1 { animation-delay: 0.32s; }
-  .tws .twn-enter .twn-s2 { animation-delay: 0.5s; }
-  .tws .twn-enter .twn-s3 { animation-delay: 1s; }
-  @keyframes twn-draw { from { clip-path: inset(-4px 100% -4px 0); } to { clip-path: inset(-4px 0 -4px 0); } }
-  .tws .twn-enter .twn-p-start, .tws .twn-enter .twn-p-due { animation: twn-popin 0.3s 0.3s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
-  .tws .twn-enter .twn-l { animation: twn-fadein 0.3s 0.55s both; }
-  .tws .twn-enter .twn-nud { animation: twn-drop 0.45s 0.85s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
-  .tws .twn-enter .twn-l.twn-nw { animation-delay: 0.95s; }
-  .tws .twn-enter .twn-fut { animation: twn-popin 0.3s 1.35s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
-  .tws .twn-enter .twn-l.twn-end { animation-delay: 1.4s; }
-  @keyframes twn-popin { from { transform: translateX(-50%) scale(0.3); opacity: 0; } to { transform: translateX(-50%); opacity: 1; } }
-  @keyframes twn-drop { from { transform: translate(-50%, -16px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-  @keyframes twn-fadein { from { opacity: 0; } to { opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) {
-    .tws .twn-enter, .tws .twn-enter * { animation: none !important; }
-    .tws .twn-seg, .tws .twn-p, .tws .twn-l { transition: none; }
-  }
-}
-
-/* ── Phase 5 · measured at 1280×800: the questions column is ~314px wide there, so the three answers take two rows and
-   the column scrolled 52px with the card shown. In a column of 480px or less the desk's own spacing tightens (the card
-   keeps its 28px / 20px room, its band and its line); wider columns keep the ref's spacing. ── */
-@media (min-width: 768px) {
-  @container twscol (max-width: 480px) {
-    .tws .tws-wq:has(> .twn-desk) { padding-top: 10px; padding-bottom: 10px; }
-    .tws .twn-sent { margin: 10px 0 16px; }
-    .tws .twn-chs { gap: 8px; }
-    .tws .twn-ch { padding: 8px 36px 8px 14px; }
-    .tws .twn-quiet { margin-top: 12px; }
-    .tws .twn-band { padding: 11px 24px; margin-bottom: 44px; }
-  }
+  /* the footer: Log it on the right (the footer's spacer is hidden and only the progress line pushed right; the nudge
+     desk has none, so its primary pushes itself) */
+  .tws .tws-wf[data-twn-foot] .tws-go[data-tws="primary"] { margin-left: auto; }
+  @media (prefers-reduced-motion: reduce) { .tws .twn2-ch, .tws .twn2-stp, .tws .twn2-num { transition: none; } }
 }
