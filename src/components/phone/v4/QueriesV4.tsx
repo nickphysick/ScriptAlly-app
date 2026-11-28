@@ -87,7 +87,7 @@ export const QueriesV4: React.FC<{ active?: boolean }> = ({ active = true }) => 
   const [seen, setSeen] = useState(loc.search);
   if (loc.search !== seen) {
     setSeen(loc.search); setChip(null);
-    if (askedView === "birds") setBird(true); else if (asked) setBird(false);
+    if (askedView === "birds") setBird(true); else if (askedView === "list" || asked) setBird(false); /* polish v1.1: ?view=list (My queries) */
   }
   const c = v.counts;
   const groups = useMemo(() => (chip === "all" ? V3_COURTS : [chip]).map((k) => ({ k, rows: courtRows(v.qs, k) })).filter((g) => g.rows.length), [chip, v.qs]);

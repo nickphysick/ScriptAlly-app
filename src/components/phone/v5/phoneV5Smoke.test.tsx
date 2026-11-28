@@ -38,7 +38,7 @@ import { TodoV5 } from "./TodoV5";
 import { MaterialsV5 } from "./MaterialsV5";
 import { V3Provider } from "../v3/V3Provider";
 import { TodayHeaderV5 } from "./TodayHeaderV5";
-import { MyQueriesCard } from "../birds/MyQueriesCard";
+import { MyQueriesCard, furthestStage } from "../birds/MyQueriesCard";
 import { AgentsTabV5 } from "./AgentsTabV5";
 import { GapsSheetV5 } from "./GapsSheetV5";
 import { QueriesV4 } from "../v4/QueriesV4";
@@ -206,16 +206,39 @@ describe("Phone app v5, Phase B — Today's header (and, since first look v1, Bi
      its counts against Birds-eye are BP-6 */
   it("My queries, populated: the sand band, the four groups in Birds-eye's order with counts that add up, bars by count, the foot", () => {
     const html = renderPageSeededWith(P(<MyQueriesCard />), "/dashboard", QS(11));
-    expect(html).toMatch(/<button type="button" class="ps-card bwq" data-bwq="card" aria-label="My queries: open Birds-eye view">/);
-    expect(html).toMatch(/class="bwq-band" style="background:#f7efe3">My queries</);
+    /* polish v1.1: the body (a button) opens the Queries list; the foot's link (its own button) opens Birds-eye */
+    expect(html).toMatch(/<div class="ps-card bwq" data-bwq="card">/);
+    expect(html).toMatch(/<button type="button" class="bwq-body" data-bwq="body" aria-label="11 queries sent: open the Queries list">/);
+    expect(html).toMatch(/class="bwq-band" style="background:#f7efe3"><span class="bwq-tt" data-bwq="total" data-n="11">11 queries sent<\/span>/);
+    /* the track: four StatusDot glyphs joined by three lines */
+    expect(html.match(/data-bwq="track-stage"/g)?.length).toBe(4);
+    expect(html.match(/data-bwq="track-line"/g)?.length).toBe(3);
     const rows = [...html.matchAll(/data-bwq="row" data-g="([^"]+)" data-n="(\d+)"/g)].map((m) => [m[1], Number(m[2])] as const);
     expect(rows.map((r) => r[0])).toEqual(["Needs action", "Within their window", "No reply date yet", "Closed"]);
     expect(rows.reduce((a, r) => a + r[1], 0)).toBe(11);
     const max = Math.max(...rows.map((r) => r[1]));
     for (const [, n] of rows) if (n === max) expect(html).toContain(`data-n="${n}"><span class="bwq-l">`);
+    expect(html).toMatch(/<b class="bwq-n" data-bwq="count">\d+<\/b>/);
     expect(html).toMatch(/data-bwq="bar" style="width:150px;background:/);
-    expect(html).toMatch(/data-bwq="link" data-ps-cap="">[\s\S]*Birds-eye view ›/);
+    expect(html).toMatch(/<button type="button" class="bwq-link" data-bwq="link" data-ps-cap="">[\s\S]*Birds-eye view ›<\/button>/);
     expect(html).not.toMatch(/overdue|\blate\b/i);
+  });
+  /* BP-12: the band's track fills to the furthest stage any query has ever reached — three seeded writers */
+  it("BP-12 · the track: queries only shows one ring; a partial request fills to the partial; any offer fills it", () => {
+    const writer = (statuses: QueryStatus[]) => ({ ...QS(statuses.length), queries: QS(statuses.length).queries.map((q, i) => ({ ...q, status: statuses[i] })) });
+    const far = (d: ReturnType<typeof writer>) => {
+      const html = renderPageSeededWith(P(<MyQueriesCard />), "/dashboard", d);
+      return { far: Number((/data-bwq="track" data-far="(\d)"/.exec(html) ?? [])[1]), reached: html.match(/data-reached="1"/g)?.length ?? 0 };
+    };
+    expect(far(writer([QueryStatus.QUERIED, QueryStatus.QUERIED, QueryStatus.QUERIED]))).toEqual({ far: 0, reached: 1 });
+    expect(far(writer([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.QUERIED]))).toEqual({ far: 1, reached: 2 });
+    expect(far(writer([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.OFFER]))).toEqual({ far: 3, reached: 4 });
+  });
+  it("BP-12 · an offer ever counts, even on a query since closed", () => {
+    const r = (ev: string[], closed = false) => ({ id: "x", name: "x", agency: "", status: ev[ev.length - 1], you: false, sendBy: false, closed, outcome: "", ev: ev.map((status, i) => ({ d: -50 + i * 5, status })), due: null, fromMs: null, toMs: null, pasts: "", dueMs: null }) as never;
+    expect(furthestStage([r([QueryStatus.QUERIED, QueryStatus.OFFER, QueryStatus.REJECTED], true), r([QueryStatus.QUERIED])])).toBe(3);
+    expect(furthestStage([r([QueryStatus.QUERIED, QueryStatus.FULL_SENT, QueryStatus.REJECTED], true)])).toBe(2);
+    expect(furthestStage([])).toBe(0);
   });
   it("My queries keeps a group with nothing in it: 0 and no bar", () => {
     const html = renderPageSeededWith(P(<MyQueriesCard />), "/dashboard", QS(3));

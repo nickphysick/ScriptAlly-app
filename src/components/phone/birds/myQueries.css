@@ -3,9 +3,19 @@
    the sand band and the bars' colours are inline: the brief's values, off the phone sheet's scale), a 1px line as a
    border (the census allows only the shadow tokens). Rows 30 high with hairlines; the foot's 12px words are a caption. */
 @media (max-width: 767.98px) {
-  .bwq { display: block; width: calc(100% - 2 * var(--ps-gutter)); margin-top: 16px; padding: 6px; border: 0; text-align: left; font: inherit; color: var(--ps-ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  /* polish v1.1: 20 clear above it, away from Today's tab strip; the body and the link are two buttons */
+  .bwq { margin-top: 20px; padding: 6px; color: var(--ps-ink); }
+  .bwq-body { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .bwq-frame { display: block; overflow: hidden; padding-bottom: 6px; border: 1px solid rgba(31, 38, 51, 0.16); }
-  .bwq-band { display: flex; align-items: center; height: 40px; padding: 0 12px; border-bottom: 1px solid rgba(31, 38, 51, 0.08); font: 600 14px var(--pa-sans); color: var(--ps-ink); }
+  .bwq-band { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-bottom: 1px solid rgba(31, 38, 51, 0.08); font: 600 14px var(--pa-sans); color: var(--ps-ink); }
+  /* "N queries sent" in Special Elite 16 (the brand fonts name elements as sans: two classes and !important) */
+  .bwq .bwq-tt { flex: 1; min-width: 0; font: 400 16px var(--pa-type) !important; color: var(--ps-ink); white-space: nowrap; }
+  /* the track (ref `.t4`): StatusDot glyphs at 15, joined by short ink lines; stages not reached at 40% */
+  .bwq-t4 { display: inline-flex; align-items: center; flex: none; color: var(--ps-ink); }
+  .bwq-t4n { display: grid; place-items: center; flex: none; }
+  .bwq-t4n.f { opacity: 0.4; }
+  .bwq-t4l { width: 6px; height: 1.6px; margin: 0 -1px; background: var(--ps-ink); }
+  .bwq-t4l.f { opacity: 0.3; }
   .bwq-rows { display: block; margin: 4px 12px 0; }
   .bwq-r { display: flex; align-items: center; gap: 10px; height: 30px; border-top: 1px solid var(--ps-rule); }
   .bwq-r:first-child { border-top: 0; }
@@ -13,7 +23,8 @@
   .bwq-bar { flex: none; height: 12px; border-radius: 999px; }
   .bwq-bar.none { width: 0; }
   /* the count in Special Elite: the app's brand fonts name elements as sans on every route, so two classes and !important */
-  .bwq .bwq-n { margin-left: auto; font: 400 16px var(--pa-type) !important; color: var(--ps-ink); }
-  .bwq-link { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 6px 12px 2px; padding-top: 8px; border-top: 1px solid var(--ps-rule); font: 600 12px var(--pa-sans); color: var(--ps-muted); }
+  .bwq .bwq-n { flex: none; width: 32px; margin-left: auto; text-align: right; font: 400 16px var(--pa-type) !important; color: var(--ps-ink); }
+  /* the link: its own button, 48 high (the phone's tap floor; the brief's 44 at least) */
+  .bwq .bwq-link { display: flex; align-items: center; justify-content: flex-end; gap: 6px; width: calc(100% - 24px); min-height: 48px; margin: 6px 12px 0; padding: 0; border: 0; border-top: 1px solid var(--ps-rule); background: none; font: 600 12px var(--pa-sans); color: var(--ps-muted); cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .bwq-link svg { flex: none; }
 }
