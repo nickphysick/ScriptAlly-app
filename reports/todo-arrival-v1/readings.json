@@ -1,0 +1,2890 @@
+{
+ "arrival-1280": {
+  "openRows": 0,
+  "deskCards": 0,
+  "navyBars": 0,
+  "run": {
+   "top": 192.1,
+   "bottom": 766.1,
+   "left": 466,
+   "right": 1226,
+   "h": 574
+  },
+  "runScrollH": 574,
+  "runClientH": 574,
+  "deskCol": {
+   "top": 178.1,
+   "bottom": 780.1,
+   "left": 452,
+   "right": 1240,
+   "h": 602
+  },
+  "deskPadTop": 14,
+  "head": {
+   "top": 208.7,
+   "bottom": 237.5,
+   "left": 478,
+   "right": 653,
+   "h": 28.8
+  },
+  "headRow": {
+   "top": 192.1,
+   "bottom": 250.1,
+   "left": 478,
+   "right": 1212,
+   "h": 58
+  },
+  "piles": [
+   {
+    "id": "wait",
+    "top": 342.1,
+    "bottom": 566.6,
+    "left": 478,
+    "right": 649.5,
+    "h": 224.4,
+    "count": "16",
+    "discs": 5,
+    "more": "and 11 more"
+   },
+   {
+    "id": "nudge",
+    "top": 342.1,
+    "bottom": 566.6,
+    "left": 665.5,
+    "right": 837,
+    "h": 224.4,
+    "count": "10",
+    "discs": 5,
+    "more": "and 5 more"
+   },
+   {
+    "id": "quiet",
+    "top": 342.1,
+    "bottom": 566.6,
+    "left": 853,
+    "right": 1024.5,
+    "h": 224.4,
+    "count": "20",
+    "discs": 5,
+    "more": "and 15 more"
+   },
+   {
+    "id": "rest",
+    "top": 342.1,
+    "bottom": 566.6,
+    "left": 1040.5,
+    "right": 1212,
+    "h": 224.4,
+    "count": "60",
+    "discs": 5,
+    "more": "and 55 more"
+   }
+  ],
+  "line": {
+   "top": 582.6,
+   "bottom": 710.6,
+   "left": 478,
+   "right": 1212,
+   "h": 128,
+   "visible": true,
+   "dots": 50,
+   "labels": [
+    "33d",
+    "Edda 77d",
+    "Tom 124d",
+    "Elinor 180d",
+    "Mira 263d",
+    "Rosalind 468d"
+   ],
+   "bracket": false
+  },
+  "hawk": "Morning, harness. 16 agents are waiting on you, so they come first. Marcus asked 161 days ago.",
+  "start": "Start with Marcus ",
+  "pageScroll": {
+   "scrollH": 909,
+   "clientH": 686,
+   "top": 223
+  },
+  "workspace": {
+   "top": 178.1,
+   "bottom": 780.1,
+   "left": 112,
+   "right": 1240,
+   "h": 602
+  }
+ },
+ "pile-1280": {
+  "pid": "wait",
+  "lit": 16,
+  "litOpacity": [
+   "1"
+  ],
+  "restOpacity": [
+   "0.45"
+  ],
+  "pileLit": true
+ },
+ "tray-1280": [
+  {
+   "key": "task-full-seed-pkgq-3",
+   "title": "Send Marcus your full",
+   "titleLines": 1,
+   "txRight": 356.5,
+   "duLeft": 367.5,
+   "fig": "161 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-seed-query-9",
+   "title": "Send Ana your full",
+   "titleLines": 1,
+   "txRight": 356.1,
+   "duLeft": 367.1,
+   "fig": "101 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-20",
+   "title": "Send David your partial",
+   "titleLines": 1,
+   "txRight": 356.1,
+   "duLeft": 367.1,
+   "fig": "101 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-offer-cv25-q-08",
+   "title": "Answer Tom’s offer",
+   "titleLines": 1,
+   "txRight": 323.8,
+   "duLeft": 334.8,
+   "fig": "98 days since it came in",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-06",
+   "title": "Send Clara your partial",
+   "titleLines": 1,
+   "txRight": 378,
+   "duLeft": 389,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-dupe",
+   "title": "Send Tobias your full",
+   "titleLines": 1,
+   "txRight": 364.3,
+   "duLeft": 375.3,
+   "fig": "80 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-07",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 378,
+   "duLeft": 389,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-send",
+   "title": "Send Imogen your full",
+   "titleLines": 1,
+   "txRight": 365.8,
+   "duLeft": 376.8,
+   "fig": "77 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-msv12-q-3",
+   "title": "Send Edda your partial",
+   "titleLines": 1,
+   "txRight": 365.8,
+   "duLeft": 376.8,
+   "fig": "77 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-msv12-q-4",
+   "title": "Send Theo your full",
+   "titleLines": 1,
+   "txRight": 364.9,
+   "duLeft": 375.9,
+   "fig": "70 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-cv25-q-09",
+   "title": "Send Jonathan your full",
+   "titleLines": 1,
+   "txRight": 378,
+   "duLeft": 389,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-7",
+   "title": "Send Rachel your partial",
+   "titleLines": 2,
+   "txRight": 336.5,
+   "duLeft": 347.5,
+   "fig": "55 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-offer-seed-query-12",
+   "title": "Answer Noah’s offer",
+   "titleLines": 1,
+   "txRight": 323.8,
+   "duLeft": 334.8,
+   "fig": "101 days since it came in",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-seed-cal-passed865-q",
+   "title": "Send Ottoline your full",
+   "titleLines": 1,
+   "txRight": 378,
+   "duLeft": 389,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cor-move-a",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 364.8,
+   "duLeft": 375.8,
+   "fig": "82 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-rr-seed-query-11",
+   "title": "Send Iris your revision",
+   "titleLines": 1,
+   "txRight": 357.4,
+   "duLeft": 368.4,
+   "fig": "153 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-2",
+   "title": "Nudge Tom",
+   "titleLines": 1,
+   "txRight": 296,
+   "duLeft": 307,
+   "fig": "85 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-3",
+   "title": "Nudge Marcus",
+   "titleLines": 1,
+   "txRight": 296,
+   "duLeft": 307,
+   "fig": "85 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-remind",
+   "title": "Nudge Imogen",
+   "titleLines": 1,
+   "txRight": 296,
+   "duLeft": 307,
+   "fig": "71 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-bang-q",
+   "title": "Nudge Alasdair",
+   "titleLines": 1,
+   "txRight": 296,
+   "duLeft": 307,
+   "fig": "55 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-near-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 336.5,
+   "duLeft": 347.5,
+   "fig": "55 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-soon-q",
+   "title": "Nudge Hester",
+   "titleLines": 1,
+   "txRight": 296,
+   "duLeft": 307,
+   "fig": "47 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-gap-solo",
+   "title": "Nudge Devendra",
+   "titleLines": 1,
+   "txRight": 336.5,
+   "duLeft": 347.5,
+   "fig": "44 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-2",
+   "title": "Nudge Douglas",
+   "titleLines": 1,
+   "txRight": 336.5,
+   "duLeft": 347.5,
+   "fig": "39 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-1",
+   "title": "Nudge Mira",
+   "titleLines": 1,
+   "txRight": 336.5,
+   "duLeft": 347.5,
+   "fig": "28 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-qc150l9-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 336.5,
+   "duLeft": 347.5,
+   "fig": "18 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-close",
+   "title": "Rosalind’s gone quiet",
+   "titleLines": 1,
+   "txRight": 355.4,
+   "duLeft": 366.4,
+   "fig": "468 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-msv12-q-7",
+   "title": "Mira’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.6,
+   "duLeft": 367.6,
+   "fig": "263 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-3",
+   "title": "Imogen’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.6,
+   "duLeft": 367.6,
+   "fig": "250 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-4",
+   "title": "Devendra’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.1,
+   "duLeft": 367.1,
+   "fig": "241 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-a",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 355.7,
+   "duLeft": 366.7,
+   "fig": "180 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-b",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 355.7,
+   "duLeft": 366.7,
+   "fig": "180 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-undo",
+   "title": "Sam’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.7,
+   "duLeft": 367.7,
+   "fig": "147 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-9",
+   "title": "Ana’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.9,
+   "duLeft": 367.9,
+   "fig": "132 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-chase",
+   "title": "Tobias’ gone quiet",
+   "titleLines": 1,
+   "txRight": 356.3,
+   "duLeft": 367.3,
+   "fig": "128 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-10",
+   "title": "Peter’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.9,
+   "duLeft": 367.9,
+   "fig": "127 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-2",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.1,
+   "duLeft": 367.1,
+   "fig": "124 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-5",
+   "title": "Joan’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.6,
+   "duLeft": 367.6,
+   "fig": "122 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-move-b",
+   "title": "Priya’s gone quiet",
+   "titleLines": 1,
+   "txRight": 357.4,
+   "duLeft": 368.4,
+   "fig": "117 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-7",
+   "title": "Rachel’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.5,
+   "duLeft": 367.5,
+   "fig": "116 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-pair",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.7,
+   "duLeft": 367.7,
+   "fig": "112 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-cal-passed20-q",
+   "title": "Cormac’s gone quiet",
+   "titleLines": 1,
+   "txRight": 355.9,
+   "duLeft": 366.9,
+   "fig": "109 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-22",
+   "title": "Bea’s gone quiet",
+   "titleLines": 1,
+   "txRight": 356.1,
+   "duLeft": 367.1,
+   "fig": "101 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-23",
+   "title": "Rufus’ gone quiet",
+   "titleLines": 1,
+   "txRight": 356.1,
+   "duLeft": 367.1,
+   "fig": "101 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-8",
+   "title": "David’s gone quiet",
+   "titleLines": 1,
+   "txRight": 364.7,
+   "duLeft": 375.7,
+   "fig": "98 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-rj-nudge",
+   "title": "Tamsin’s gone quiet",
+   "titleLines": 1,
+   "txRight": 365.3,
+   "duLeft": 376.3,
+   "fig": "67 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "seed-cal-carried",
+   "title": "Chase the Blaine partial",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "66 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "seed-cal-task",
+   "title": "Reread the O'Rourke pages before Thursday",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "59 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t1",
+   "title": "Read chapters 1–3 aloud",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "44 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-n5",
+   "title": "Comp idea: the lighthouse keeper one. Check its publication year",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "43 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvd0hg51",
+   "title": "Zz td51 probe task-zztd51i3mvd0hg51",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "41 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvgv7nze",
+   "title": "Zz td51 probe task-zztd51i3mvgv7nze",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "39 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t2",
+   "title": "Book a one-to-one at the writing festival",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "36 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t3",
+   "title": "Update the bio paragraph",
+   "titleLines": 2,
+   "txRight": 344.6,
+   "duLeft": 355.6,
+   "fig": "33 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  }
+ ],
+ "start-1280": {
+  "start": "Start with Marcus ",
+  "title": "Send Marcus your full",
+  "ahead": true,
+  "steps": [
+   "Marcus Reed · the agent",
+   "2What went",
+   "3When you sent it",
+   "4When Marcus might reply",
+   "5Check it, then log it"
+  ],
+  "doors": 1,
+  "footer": "SnoozeSDismissD",
+  "run": false,
+  "lit": 0
+ },
+ "send-1280": {
+  "steps": [
+   "Marcus Reed · the agent",
+   "2What went",
+   "3When you sent it",
+   "4When Marcus might reply",
+   "5Check it, then log it"
+  ],
+  "doors": 1,
+  "footer": "SnoozeSDismissD"
+ },
+ "nudge-1280": {
+  "title": "Nudge Tom",
+  "footer": "SnoozeSDismissD1 of 3Next →",
+  "ahead": false
+ },
+ "arrival-1512": {
+  "openRows": 0,
+  "deskCards": 0,
+  "navyBars": 0,
+  "run": {
+   "top": 192.1,
+   "bottom": 866.1,
+   "left": 520.4,
+   "right": 1458,
+   "h": 674
+  },
+  "runScrollH": 674,
+  "runClientH": 674,
+  "deskCol": {
+   "top": 178.1,
+   "bottom": 880.1,
+   "left": 506.4,
+   "right": 1472,
+   "h": 702
+  },
+  "deskPadTop": 14,
+  "head": {
+   "top": 208.7,
+   "bottom": 237.5,
+   "left": 532.4,
+   "right": 707.4,
+   "h": 28.8
+  },
+  "headRow": {
+   "top": 192.1,
+   "bottom": 250.1,
+   "left": 532.4,
+   "right": 1444,
+   "h": 58
+  },
+  "piles": [
+   {
+    "id": "wait",
+    "top": 340.1,
+    "bottom": 523.8,
+    "left": 532.4,
+    "right": 748.3,
+    "h": 183.6,
+    "count": "16",
+    "discs": 5,
+    "more": "and 11 more"
+   },
+   {
+    "id": "nudge",
+    "top": 340.1,
+    "bottom": 523.8,
+    "left": 764.3,
+    "right": 980.2,
+    "h": 183.6,
+    "count": "10",
+    "discs": 5,
+    "more": "and 5 more"
+   },
+   {
+    "id": "quiet",
+    "top": 340.1,
+    "bottom": 523.8,
+    "left": 996.2,
+    "right": 1212.1,
+    "h": 183.6,
+    "count": "20",
+    "discs": 5,
+    "more": "and 15 more"
+   },
+   {
+    "id": "rest",
+    "top": 340.1,
+    "bottom": 523.8,
+    "left": 1228.1,
+    "right": 1444,
+    "h": 183.6,
+    "count": "60",
+    "discs": 5,
+    "more": "and 55 more"
+   }
+  ],
+  "line": {
+   "top": 539.8,
+   "bottom": 667.8,
+   "left": 532.4,
+   "right": 1444,
+   "h": 128,
+   "visible": true,
+   "dots": 50,
+   "labels": [
+    "Hester 47d",
+    "Tom 85d",
+    "Ana 132d",
+    "Elinor 180d",
+    "Mira 263d",
+    "Rosalind 468d"
+   ],
+   "bracket": false
+  },
+  "hawk": "Morning, harness. 16 agents are waiting on you, so they come first. Marcus asked 161 days ago.",
+  "start": "Start with Marcus ",
+  "pageScroll": {
+   "scrollH": 1009,
+   "clientH": 786,
+   "top": 223
+  },
+  "workspace": {
+   "top": 178.1,
+   "bottom": 880.1,
+   "left": 112,
+   "right": 1472,
+   "h": 702
+  }
+ },
+ "pile-1512": {
+  "pid": "wait",
+  "lit": 16,
+  "litOpacity": [
+   "1"
+  ],
+  "restOpacity": [
+   "0.45"
+  ],
+  "pileLit": true
+ },
+ "tray-1512": [
+  {
+   "key": "task-full-seed-pkgq-3",
+   "title": "Send Marcus your full",
+   "titleLines": 1,
+   "txRight": 410.9,
+   "duLeft": 421.9,
+   "fig": "161 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-seed-query-9",
+   "title": "Send Ana your full",
+   "titleLines": 1,
+   "txRight": 410.5,
+   "duLeft": 421.5,
+   "fig": "101 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-20",
+   "title": "Send David your partial",
+   "titleLines": 1,
+   "txRight": 410.5,
+   "duLeft": 421.5,
+   "fig": "101 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-offer-cv25-q-08",
+   "title": "Answer Tom’s offer",
+   "titleLines": 1,
+   "txRight": 378.1,
+   "duLeft": 389.1,
+   "fig": "98 days since it came in",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-06",
+   "title": "Send Clara your partial",
+   "titleLines": 1,
+   "txRight": 432.4,
+   "duLeft": 443.4,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-dupe",
+   "title": "Send Tobias your full",
+   "titleLines": 1,
+   "txRight": 418.6,
+   "duLeft": 429.6,
+   "fig": "80 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-07",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 432.4,
+   "duLeft": 443.4,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-send",
+   "title": "Send Imogen your full",
+   "titleLines": 1,
+   "txRight": 420.1,
+   "duLeft": 431.1,
+   "fig": "77 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-msv12-q-3",
+   "title": "Send Edda your partial",
+   "titleLines": 1,
+   "txRight": 420.1,
+   "duLeft": 431.1,
+   "fig": "77 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-msv12-q-4",
+   "title": "Send Theo your full",
+   "titleLines": 1,
+   "txRight": 419.3,
+   "duLeft": 430.3,
+   "fig": "70 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-cv25-q-09",
+   "title": "Send Jonathan your full",
+   "titleLines": 1,
+   "txRight": 432.4,
+   "duLeft": 443.4,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-7",
+   "title": "Send Rachel your partial",
+   "titleLines": 1,
+   "txRight": 390.9,
+   "duLeft": 401.9,
+   "fig": "55 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-offer-seed-query-12",
+   "title": "Answer Noah’s offer",
+   "titleLines": 1,
+   "txRight": 378.1,
+   "duLeft": 389.1,
+   "fig": "101 days since it came in",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-seed-cal-passed865-q",
+   "title": "Send Ottoline your full",
+   "titleLines": 1,
+   "txRight": 432.4,
+   "duLeft": 443.4,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cor-move-a",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 419.2,
+   "duLeft": 430.2,
+   "fig": "82 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-rr-seed-query-11",
+   "title": "Send Iris your revision",
+   "titleLines": 1,
+   "txRight": 411.8,
+   "duLeft": 422.8,
+   "fig": "153 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-2",
+   "title": "Nudge Tom",
+   "titleLines": 1,
+   "txRight": 350.4,
+   "duLeft": 361.4,
+   "fig": "85 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-3",
+   "title": "Nudge Marcus",
+   "titleLines": 1,
+   "txRight": 350.4,
+   "duLeft": 361.4,
+   "fig": "85 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-remind",
+   "title": "Nudge Imogen",
+   "titleLines": 1,
+   "txRight": 350.4,
+   "duLeft": 361.4,
+   "fig": "71 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-bang-q",
+   "title": "Nudge Alasdair",
+   "titleLines": 1,
+   "txRight": 350.4,
+   "duLeft": 361.4,
+   "fig": "55 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-near-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 390.9,
+   "duLeft": 401.9,
+   "fig": "55 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-soon-q",
+   "title": "Nudge Hester",
+   "titleLines": 1,
+   "txRight": 350.4,
+   "duLeft": 361.4,
+   "fig": "47 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-gap-solo",
+   "title": "Nudge Devendra",
+   "titleLines": 1,
+   "txRight": 390.9,
+   "duLeft": 401.9,
+   "fig": "44 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-2",
+   "title": "Nudge Douglas",
+   "titleLines": 1,
+   "txRight": 390.9,
+   "duLeft": 401.9,
+   "fig": "39 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-1",
+   "title": "Nudge Mira",
+   "titleLines": 1,
+   "txRight": 390.9,
+   "duLeft": 401.9,
+   "fig": "28 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-qc150l9-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 390.9,
+   "duLeft": 401.9,
+   "fig": "18 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-close",
+   "title": "Rosalind’s gone quiet",
+   "titleLines": 1,
+   "txRight": 409.8,
+   "duLeft": 420.8,
+   "fig": "468 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-msv12-q-7",
+   "title": "Mira’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411,
+   "duLeft": 422,
+   "fig": "263 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-3",
+   "title": "Imogen’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411,
+   "duLeft": 422,
+   "fig": "250 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-4",
+   "title": "Devendra’s gone quiet",
+   "titleLines": 1,
+   "txRight": 410.5,
+   "duLeft": 421.5,
+   "fig": "241 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-a",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 410.1,
+   "duLeft": 421.1,
+   "fig": "180 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-b",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 410.1,
+   "duLeft": 421.1,
+   "fig": "180 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-undo",
+   "title": "Sam’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411.1,
+   "duLeft": 422.1,
+   "fig": "147 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-9",
+   "title": "Ana’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411.3,
+   "duLeft": 422.3,
+   "fig": "132 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-chase",
+   "title": "Tobias’ gone quiet",
+   "titleLines": 1,
+   "txRight": 410.7,
+   "duLeft": 421.7,
+   "fig": "128 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-10",
+   "title": "Peter’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411.3,
+   "duLeft": 422.3,
+   "fig": "127 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-2",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 410.5,
+   "duLeft": 421.5,
+   "fig": "124 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-5",
+   "title": "Joan’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411,
+   "duLeft": 422,
+   "fig": "122 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-move-b",
+   "title": "Priya’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411.8,
+   "duLeft": 422.8,
+   "fig": "117 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-7",
+   "title": "Rachel’s gone quiet",
+   "titleLines": 1,
+   "txRight": 410.9,
+   "duLeft": 421.9,
+   "fig": "116 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-pair",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 411.1,
+   "duLeft": 422.1,
+   "fig": "112 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-cal-passed20-q",
+   "title": "Cormac’s gone quiet",
+   "titleLines": 1,
+   "txRight": 410.3,
+   "duLeft": 421.3,
+   "fig": "109 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-22",
+   "title": "Bea’s gone quiet",
+   "titleLines": 1,
+   "txRight": 410.5,
+   "duLeft": 421.5,
+   "fig": "101 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-23",
+   "title": "Rufus’ gone quiet",
+   "titleLines": 1,
+   "txRight": 410.5,
+   "duLeft": 421.5,
+   "fig": "101 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-8",
+   "title": "David’s gone quiet",
+   "titleLines": 1,
+   "txRight": 419,
+   "duLeft": 430,
+   "fig": "98 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-rj-nudge",
+   "title": "Tamsin’s gone quiet",
+   "titleLines": 1,
+   "txRight": 419.6,
+   "duLeft": 430.6,
+   "fig": "67 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "seed-cal-carried",
+   "title": "Chase the Blaine partial",
+   "titleLines": 1,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "66 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "seed-cal-task",
+   "title": "Reread the O'Rourke pages before Thursday",
+   "titleLines": 2,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "59 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t1",
+   "title": "Read chapters 1–3 aloud",
+   "titleLines": 1,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "44 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "cbseed-n5",
+   "title": "Comp idea: the lighthouse keeper one. Check its publication year",
+   "titleLines": 2,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "43 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvd0hg51",
+   "title": "Zz td51 probe task-zztd51i3mvd0hg51",
+   "titleLines": 2,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "41 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvgv7nze",
+   "title": "Zz td51 probe task-zztd51i3mvgv7nze",
+   "titleLines": 2,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "39 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t2",
+   "title": "Book a one-to-one at the writing festival",
+   "titleLines": 2,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "36 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t3",
+   "title": "Update the bio paragraph",
+   "titleLines": 1,
+   "txRight": 399,
+   "duLeft": 410,
+   "fig": "33 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  }
+ ],
+ "start-1512": {
+  "start": "Start with Marcus ",
+  "title": "Send Marcus your full",
+  "ahead": true,
+  "steps": [
+   "Marcus Reed · the agent",
+   "2What went",
+   "3When you sent it",
+   "4When Marcus might reply",
+   "5Check it, then log it"
+  ],
+  "doors": 1,
+  "footer": "SnoozeSDismissD",
+  "run": false,
+  "lit": 0
+ },
+ "send-1512": {
+  "steps": [
+   "Marcus Reed · the agent",
+   "2What went",
+   "3When you sent it",
+   "4When Marcus might reply",
+   "5Check it, then log it"
+  ],
+  "doors": 1,
+  "footer": "SnoozeSDismissD"
+ },
+ "nudge-1512": {
+  "title": "Nudge Tom",
+  "footer": "SnoozeSDismissD1 of 3Next →",
+  "ahead": false
+ },
+ "arrival-1920": {
+  "openRows": 0,
+  "deskCards": 0,
+  "navyBars": 0,
+  "run": {
+   "top": 192.1,
+   "bottom": 1046.1,
+   "left": 608,
+   "right": 1780,
+   "h": 854
+  },
+  "runScrollH": 854,
+  "runClientH": 854,
+  "deskCol": {
+   "top": 178.1,
+   "bottom": 1060.1,
+   "left": 594,
+   "right": 1794,
+   "h": 882
+  },
+  "deskPadTop": 14,
+  "head": {
+   "top": 208.7,
+   "bottom": 237.5,
+   "left": 620,
+   "right": 795,
+   "h": 28.8
+  },
+  "headRow": {
+   "top": 192.1,
+   "bottom": 250.1,
+   "left": 620,
+   "right": 1766,
+   "h": 58
+  },
+  "piles": [
+   {
+    "id": "wait",
+    "top": 340.1,
+    "bottom": 482.1,
+    "left": 620,
+    "right": 894.5,
+    "h": 142,
+    "count": "16",
+    "discs": 5,
+    "more": "and 11 more"
+   },
+   {
+    "id": "nudge",
+    "top": 340.1,
+    "bottom": 482.1,
+    "left": 910.5,
+    "right": 1185,
+    "h": 142,
+    "count": "10",
+    "discs": 5,
+    "more": "and 5 more"
+   },
+   {
+    "id": "quiet",
+    "top": 340.1,
+    "bottom": 482.1,
+    "left": 1201,
+    "right": 1475.5,
+    "h": 142,
+    "count": "20",
+    "discs": 5,
+    "more": "and 15 more"
+   },
+   {
+    "id": "rest",
+    "top": 340.1,
+    "bottom": 482.1,
+    "left": 1491.5,
+    "right": 1766,
+    "h": 142,
+    "count": "60",
+    "discs": 5,
+    "more": "and 55 more"
+   }
+  ],
+  "line": {
+   "top": 498.1,
+   "bottom": 626.1,
+   "left": 620,
+   "right": 1766,
+   "h": 128,
+   "visible": true,
+   "dots": 50,
+   "labels": [
+    "44d",
+    "Edda 77d",
+    "Elinor 112d",
+    "Sam 147d",
+    "Elinor 180d",
+    "Mira 263d",
+    "Rosalind 468d"
+   ],
+   "bracket": false
+  },
+  "hawk": "Morning, harness. 16 agents are waiting on you, so they come first. Marcus asked 161 days ago.",
+  "start": "Start with Marcus ",
+  "pageScroll": {
+   "scrollH": 1189,
+   "clientH": 966,
+   "top": 223
+  },
+  "workspace": {
+   "top": 178.1,
+   "bottom": 1060.1,
+   "left": 198,
+   "right": 1794,
+   "h": 882
+  }
+ },
+ "pile-1920": {
+  "pid": "wait",
+  "lit": 16,
+  "litOpacity": [
+   "1"
+  ],
+  "restOpacity": [
+   "0.45"
+  ],
+  "pileLit": true
+ },
+ "tray-1920": [
+  {
+   "key": "task-full-seed-pkgq-3",
+   "title": "Send Marcus your full",
+   "titleLines": 1,
+   "txRight": 498.5,
+   "duLeft": 509.5,
+   "fig": "161 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-seed-query-9",
+   "title": "Send Ana your full",
+   "titleLines": 1,
+   "txRight": 498.1,
+   "duLeft": 509.1,
+   "fig": "101 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-20",
+   "title": "Send David your partial",
+   "titleLines": 1,
+   "txRight": 498.1,
+   "duLeft": 509.1,
+   "fig": "101 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-offer-cv25-q-08",
+   "title": "Answer Tom’s offer",
+   "titleLines": 1,
+   "txRight": 465.8,
+   "duLeft": 476.8,
+   "fig": "98 days since it came in",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-06",
+   "title": "Send Clara your partial",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-dupe",
+   "title": "Send Tobias your full",
+   "titleLines": 1,
+   "txRight": 506.3,
+   "duLeft": 517.3,
+   "fig": "80 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-07",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-send",
+   "title": "Send Imogen your full",
+   "titleLines": 1,
+   "txRight": 507.8,
+   "duLeft": 518.8,
+   "fig": "77 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-msv12-q-3",
+   "title": "Send Edda your partial",
+   "titleLines": 1,
+   "txRight": 507.8,
+   "duLeft": 518.8,
+   "fig": "77 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-msv12-q-4",
+   "title": "Send Theo your full",
+   "titleLines": 1,
+   "txRight": 506.9,
+   "duLeft": 517.9,
+   "fig": "70 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-cv25-q-09",
+   "title": "Send Jonathan your full",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-7",
+   "title": "Send Rachel your partial",
+   "titleLines": 1,
+   "txRight": 478.5,
+   "duLeft": 489.5,
+   "fig": "55 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-offer-seed-query-12",
+   "title": "Answer Noah’s offer",
+   "titleLines": 1,
+   "txRight": 465.8,
+   "duLeft": 476.8,
+   "fig": "101 days since it came in",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-seed-cal-passed865-q",
+   "title": "Send Ottoline your full",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cor-move-a",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 506.8,
+   "duLeft": 517.8,
+   "fig": "82 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-rr-seed-query-11",
+   "title": "Send Iris your revision",
+   "titleLines": 1,
+   "txRight": 499.4,
+   "duLeft": 510.4,
+   "fig": "153 days waiting",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-2",
+   "title": "Nudge Tom",
+   "titleLines": 1,
+   "txRight": 438,
+   "duLeft": 449,
+   "fig": "85 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-3",
+   "title": "Nudge Marcus",
+   "titleLines": 1,
+   "txRight": 438,
+   "duLeft": 449,
+   "fig": "85 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-remind",
+   "title": "Nudge Imogen",
+   "titleLines": 1,
+   "txRight": 438,
+   "duLeft": 449,
+   "fig": "71 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-bang-q",
+   "title": "Nudge Alasdair",
+   "titleLines": 1,
+   "txRight": 438,
+   "duLeft": 449,
+   "fig": "55 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-near-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 478.5,
+   "duLeft": 489.5,
+   "fig": "55 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-soon-q",
+   "title": "Nudge Hester",
+   "titleLines": 1,
+   "txRight": 438,
+   "duLeft": 449,
+   "fig": "47 days since your reminder",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-gap-solo",
+   "title": "Nudge Devendra",
+   "titleLines": 1,
+   "txRight": 478.5,
+   "duLeft": 489.5,
+   "fig": "44 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-2",
+   "title": "Nudge Douglas",
+   "titleLines": 1,
+   "txRight": 478.5,
+   "duLeft": 489.5,
+   "fig": "39 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-1",
+   "title": "Nudge Mira",
+   "titleLines": 1,
+   "txRight": 478.5,
+   "duLeft": 489.5,
+   "fig": "28 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-qc150l9-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 478.5,
+   "duLeft": 489.5,
+   "fig": "18 days past expected",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-close",
+   "title": "Rosalind’s gone quiet",
+   "titleLines": 1,
+   "txRight": 497.4,
+   "duLeft": 508.4,
+   "fig": "468 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-msv12-q-7",
+   "title": "Mira’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.6,
+   "duLeft": 509.6,
+   "fig": "263 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-3",
+   "title": "Imogen’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.6,
+   "duLeft": 509.6,
+   "fig": "250 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-4",
+   "title": "Devendra’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.1,
+   "duLeft": 509.1,
+   "fig": "241 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-a",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 497.7,
+   "duLeft": 508.7,
+   "fig": "180 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-b",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 497.7,
+   "duLeft": 508.7,
+   "fig": "180 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-undo",
+   "title": "Sam’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.7,
+   "duLeft": 509.7,
+   "fig": "147 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-9",
+   "title": "Ana’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.9,
+   "duLeft": 509.9,
+   "fig": "132 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-chase",
+   "title": "Tobias’ gone quiet",
+   "titleLines": 1,
+   "txRight": 498.3,
+   "duLeft": 509.3,
+   "fig": "128 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-10",
+   "title": "Peter’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.9,
+   "duLeft": 509.9,
+   "fig": "127 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-2",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.1,
+   "duLeft": 509.1,
+   "fig": "124 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-5",
+   "title": "Joan’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.6,
+   "duLeft": 509.6,
+   "fig": "122 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-move-b",
+   "title": "Priya’s gone quiet",
+   "titleLines": 1,
+   "txRight": 499.4,
+   "duLeft": 510.4,
+   "fig": "117 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-7",
+   "title": "Rachel’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.5,
+   "duLeft": 509.5,
+   "fig": "116 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-pair",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.7,
+   "duLeft": 509.7,
+   "fig": "112 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-cal-passed20-q",
+   "title": "Cormac’s gone quiet",
+   "titleLines": 1,
+   "txRight": 497.9,
+   "duLeft": 508.9,
+   "fig": "109 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-22",
+   "title": "Bea’s gone quiet",
+   "titleLines": 1,
+   "txRight": 498.1,
+   "duLeft": 509.1,
+   "fig": "101 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-23",
+   "title": "Rufus’ gone quiet",
+   "titleLines": 1,
+   "txRight": 498.1,
+   "duLeft": 509.1,
+   "fig": "101 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-8",
+   "title": "David’s gone quiet",
+   "titleLines": 1,
+   "txRight": 506.7,
+   "duLeft": 517.7,
+   "fig": "98 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-rj-nudge",
+   "title": "Tamsin’s gone quiet",
+   "titleLines": 1,
+   "txRight": 507.3,
+   "duLeft": 518.3,
+   "fig": "67 days quiet",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "seed-cal-carried",
+   "title": "Chase the Blaine partial",
+   "titleLines": 1,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "66 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "seed-cal-task",
+   "title": "Reread the O'Rourke pages before Thursday",
+   "titleLines": 2,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "59 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t1",
+   "title": "Read chapters 1–3 aloud",
+   "titleLines": 1,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "44 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "cbseed-n5",
+   "title": "Comp idea: the lighthouse keeper one. Check its publication year",
+   "titleLines": 2,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "43 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvd0hg51",
+   "title": "Zz td51 probe task-zztd51i3mvd0hg51",
+   "titleLines": 2,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "41 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvgv7nze",
+   "title": "Zz td51 probe task-zztd51i3mvgv7nze",
+   "titleLines": 2,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "39 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t2",
+   "title": "Book a one-to-one at the writing festival",
+   "titleLines": 2,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "36 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t3",
+   "title": "Update the bio paragraph",
+   "titleLines": 1,
+   "txRight": 486.6,
+   "duLeft": 497.6,
+   "fig": "33 days past its date",
+   "figDir": "column",
+   "agencyCut": false,
+   "h": 58
+  }
+ ],
+ "tray-1920-control": [
+  {
+   "key": "task-full-seed-pkgq-3",
+   "title": "Send Marcus your full",
+   "titleLines": 1,
+   "txRight": 444.9,
+   "duLeft": 455.9,
+   "fig": "161 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-seed-query-9",
+   "title": "Send Ana your full",
+   "titleLines": 1,
+   "txRight": 444.6,
+   "duLeft": 455.6,
+   "fig": "101 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-20",
+   "title": "Send David your partial",
+   "titleLines": 1,
+   "txRight": 444.6,
+   "duLeft": 455.6,
+   "fig": "101 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-offer-cv25-q-08",
+   "title": "Answer Tom’s offer",
+   "titleLines": 1,
+   "txRight": 401.2,
+   "duLeft": 412.2,
+   "fig": "98 days since it came in",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-06",
+   "title": "Send Clara your partial",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-dupe",
+   "title": "Send Tobias your full",
+   "titleLines": 1,
+   "txRight": 452.7,
+   "duLeft": 463.7,
+   "fig": "80 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cv25-q-07",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-rj-send",
+   "title": "Send Imogen your full",
+   "titleLines": 1,
+   "txRight": 454.2,
+   "duLeft": 465.2,
+   "fig": "77 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-msv12-q-3",
+   "title": "Send Edda your partial",
+   "titleLines": 1,
+   "txRight": 454.2,
+   "duLeft": 465.2,
+   "fig": "77 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-msv12-q-4",
+   "title": "Send Theo your full",
+   "titleLines": 1,
+   "txRight": 453.3,
+   "duLeft": 464.3,
+   "fig": "70 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-full-cv25-q-09",
+   "title": "Send Jonathan your full",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-seed-query-7",
+   "title": "Send Rachel your partial",
+   "titleLines": 2,
+   "txRight": 415.3,
+   "duLeft": 426.3,
+   "fig": "55 days past expected",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-offer-seed-query-12",
+   "title": "Answer Noah’s offer",
+   "titleLines": 2,
+   "txRight": 392.7,
+   "duLeft": 403.7,
+   "fig": "101 days since it came in",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-full-seed-cal-passed865-q",
+   "title": "Send Ottoline your full",
+   "titleLines": 1,
+   "txRight": 520,
+   "duLeft": 531,
+   "fig": "",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-partial-cor-move-a",
+   "title": "Send Marcus your partial",
+   "titleLines": 1,
+   "txRight": 453.2,
+   "duLeft": 464.2,
+   "fig": "82 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-rr-seed-query-11",
+   "title": "Send Iris your revision",
+   "titleLines": 1,
+   "txRight": 445.9,
+   "duLeft": 456.9,
+   "fig": "153 days waiting",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-2",
+   "title": "Nudge Tom",
+   "titleLines": 1,
+   "txRight": 370.7,
+   "duLeft": 381.7,
+   "fig": "85 days since your reminder",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-query-3",
+   "title": "Nudge Marcus",
+   "titleLines": 1,
+   "txRight": 370.7,
+   "duLeft": 381.7,
+   "fig": "85 days since your reminder",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-remind",
+   "title": "Nudge Imogen",
+   "titleLines": 1,
+   "txRight": 370.9,
+   "duLeft": 381.9,
+   "fig": "71 days since your reminder",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-bang-q",
+   "title": "Nudge Alasdair",
+   "titleLines": 1,
+   "txRight": 371.6,
+   "duLeft": 382.6,
+   "fig": "55 days since your reminder",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-near-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 415.3,
+   "duLeft": 426.3,
+   "fig": "55 days past expected",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-seed-cal-soon-q",
+   "title": "Nudge Hester",
+   "titleLines": 1,
+   "txRight": 370.3,
+   "duLeft": 381.3,
+   "fig": "47 days since your reminder",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-thin-q-gap-solo",
+   "title": "Nudge Devendra",
+   "titleLines": 1,
+   "txRight": 413,
+   "duLeft": 424,
+   "fig": "44 days past expected",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-2",
+   "title": "Nudge Douglas",
+   "titleLines": 1,
+   "txRight": 414.3,
+   "duLeft": 425.3,
+   "fig": "39 days past expected",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-msv12-q-1",
+   "title": "Nudge Mira",
+   "titleLines": 1,
+   "txRight": 413.8,
+   "duLeft": 424.8,
+   "fig": "28 days past expected",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-nudge-qc150l9-q",
+   "title": "Nudge Wren",
+   "titleLines": 1,
+   "txRight": 413.9,
+   "duLeft": 424.9,
+   "fig": "18 days past expected",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-close",
+   "title": "Rosalind’s gone quiet",
+   "titleLines": 1,
+   "txRight": 459.1,
+   "duLeft": 470.1,
+   "fig": "468 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-msv12-q-7",
+   "title": "Mira’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.3,
+   "duLeft": 471.3,
+   "fig": "263 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-3",
+   "title": "Imogen’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.3,
+   "duLeft": 471.3,
+   "fig": "250 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-cohort-4",
+   "title": "Devendra’s gone quiet",
+   "titleLines": 1,
+   "txRight": 459.8,
+   "duLeft": 470.8,
+   "fig": "241 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-a",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 459.4,
+   "duLeft": 470.4,
+   "fig": "180 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-ms2-b",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 459.4,
+   "duLeft": 470.4,
+   "fig": "180 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-undo",
+   "title": "Sam’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.5,
+   "duLeft": 471.5,
+   "fig": "147 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-9",
+   "title": "Ana’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.6,
+   "duLeft": 471.6,
+   "fig": "132 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-thin-q-chase",
+   "title": "Tobias’ gone quiet",
+   "titleLines": 1,
+   "txRight": 460,
+   "duLeft": 471,
+   "fig": "128 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-10",
+   "title": "Peter’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.7,
+   "duLeft": 471.7,
+   "fig": "127 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-2",
+   "title": "Tom’s gone quiet",
+   "titleLines": 1,
+   "txRight": 459.8,
+   "duLeft": 470.8,
+   "fig": "124 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-5",
+   "title": "Joan’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.4,
+   "duLeft": 471.4,
+   "fig": "122 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-move-b",
+   "title": "Priya’s gone quiet",
+   "titleLines": 1,
+   "txRight": 461.1,
+   "duLeft": 472.1,
+   "fig": "117 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-pkgq-7",
+   "title": "Rachel’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.2,
+   "duLeft": 471.2,
+   "fig": "116 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-cor-pair",
+   "title": "Elinor’s gone quiet",
+   "titleLines": 1,
+   "txRight": 460.4,
+   "duLeft": 471.4,
+   "fig": "112 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-cal-passed20-q",
+   "title": "Cormac’s gone quiet",
+   "titleLines": 1,
+   "txRight": 459.7,
+   "duLeft": 470.7,
+   "fig": "109 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-22",
+   "title": "Bea’s gone quiet",
+   "titleLines": 1,
+   "txRight": 459.9,
+   "duLeft": 470.9,
+   "fig": "101 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-23",
+   "title": "Rufus’ gone quiet",
+   "titleLines": 1,
+   "txRight": 459.9,
+   "duLeft": 470.9,
+   "fig": "101 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-seed-query-8",
+   "title": "David’s gone quiet",
+   "titleLines": 1,
+   "txRight": 468.4,
+   "duLeft": 479.4,
+   "fig": "98 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "task-no-res-close-rj-nudge",
+   "title": "Tamsin’s gone quiet",
+   "titleLines": 1,
+   "txRight": 469,
+   "duLeft": 480,
+   "fig": "67 days quiet",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 58
+  },
+  {
+   "key": "seed-cal-carried",
+   "title": "Chase the Blaine partial",
+   "titleLines": 2,
+   "txRight": 425.1,
+   "duLeft": 436.1,
+   "fig": "66 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "seed-cal-task",
+   "title": "Reread the O'Rourke pages before Thursday",
+   "titleLines": 2,
+   "txRight": 425.9,
+   "duLeft": 436.9,
+   "fig": "59 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t1",
+   "title": "Read chapters 1–3 aloud",
+   "titleLines": 2,
+   "txRight": 424.4,
+   "duLeft": 435.4,
+   "fig": "44 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-n5",
+   "title": "Comp idea: the lighthouse keeper one. Check its publication year",
+   "titleLines": 2,
+   "txRight": 425.2,
+   "duLeft": 436.2,
+   "fig": "43 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvd0hg51",
+   "title": "Zz td51 probe task-zztd51i3mvd0hg51",
+   "titleLines": 2,
+   "txRight": 425,
+   "duLeft": 436,
+   "fig": "41 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "task-zztd51i3mvgv7nze",
+   "title": "Zz td51 probe task-zztd51i3mvgv7nze",
+   "titleLines": 2,
+   "txRight": 425.6,
+   "duLeft": 436.6,
+   "fig": "39 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t2",
+   "title": "Book a one-to-one at the writing festival",
+   "titleLines": 2,
+   "txRight": 425.6,
+   "duLeft": 436.6,
+   "fig": "36 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  },
+  {
+   "key": "cbseed-t3",
+   "title": "Update the bio paragraph",
+   "titleLines": 2,
+   "txRight": 426,
+   "duLeft": 437,
+   "fig": "33 days past its date",
+   "figDir": "row",
+   "agencyCut": false,
+   "h": 74
+  }
+ ],
+ "start-1920": {
+  "start": "Start with Marcus ",
+  "title": "Send Marcus your full",
+  "ahead": true,
+  "steps": [
+   "Marcus Reed · the agent",
+   "2What went",
+   "3When you sent it",
+   "4When Marcus might reply",
+   "5Check it, then log it"
+  ],
+  "doors": 1,
+  "footer": "SnoozeSDismissD",
+  "run": false,
+  "lit": 0
+ },
+ "send-1920": {
+  "steps": [
+   "Marcus Reed · the agent",
+   "2What went",
+   "3When you sent it",
+   "4When Marcus might reply",
+   "5Check it, then log it"
+  ],
+  "doors": 1,
+  "footer": "SnoozeSDismissD"
+ },
+ "nudge-1920": {
+  "title": "Nudge Tom",
+  "footer": "SnoozeSDismissD1 of 3Next →",
+  "ahead": false
+ },
+ "title-wraps-new": {
+  "1280": [],
+  "1512": [],
+  "1920": []
+ },
+ "load": {
+  "loading": {
+   "phase": "outline",
+   "outline": "run",
+   "head": 431.72,
+   "headRow": 415.13,
+   "piles": [
+    563.13,
+    563.13,
+    563.13
+   ]
+  },
+  "loaded": {
+   "phase": "loaded",
+   "outline": null,
+   "head": 431.72,
+   "headRow": 415.13,
+   "piles": [
+    563.13,
+    563.13,
+    563.13,
+    563.13
+   ]
+  },
+  "clsAll": [],
+  "clsAfterOutline": []
+ }
+}
