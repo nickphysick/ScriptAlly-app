@@ -21,6 +21,7 @@ import { QueryStatus, SubmissionMethod, type Agent, type Manuscript, type Query 
 import { type WsTask, type QuietAct, andList } from "../../../lib/todoWs";
 import { addDays, dayDiff, dayIso, dm, fmt, offWeekend } from "../../../lib/queryActions/dates";
 import { saveNudgeSent, saveOfferDecision, saveOfferMoreTime, saveSent, sentDefaults, type SentKind } from "../../../lib/queryActions/stepSaves";
+import { nudgeFacts, type NudgeFacts, type NudgeWhen } from "../../../lib/todoNudgeDesk";
 import { sendKindOf } from "../../../lib/queryActions/sendKind";
 import type { useScriptAllyDb } from "../../../lib/db";
 import { saveClose, noreplyAnswers } from "../../../lib/queryActions/closeSave";
@@ -102,6 +103,18 @@ export interface Flow {
   after?: string;
   /** v53 (D7): the final button, where it is not "Log it" */
   verb?: string;
+  /** To-do nudge desk v1: the desktop desk's one step for a nudge (the phone reads `questions`, unchanged) */
+  nudgeDesk?: NudgeDesk;
+}
+
+/** To-do nudge desk v1 — what the desktop nudge desk draws: the facts, the day picked (null until one is), the save's
+ *  own close-it date for that day, and the pick (it fills the same answers `questions` fills, so the save is unchanged) */
+export interface NudgeDesk {
+  facts: NudgeFacts;
+  when: NudgeWhen | null;
+  picked: Date | null;
+  then: Date;
+  pick: (when: NudgeWhen, day?: Date) => void;
 }
 
 const dateOf = (A: Answers, k: string, today: Date): Date => (typeof A[k] === "string" ? dayFromYmd(A[k] as string) : today);
@@ -309,13 +322,25 @@ const nudgePlan = (q: Query, sent: Date, then: Date) => {
 };
 
 function nudgeFlow(ctx: FlowCtx): Flow {
-  const { t, today } = ctx;
+  const { t, today, A, set } = ctx;
   const q = t.query!;
   const { qs, sent, then } = nudgeParts(ctx, false);
+  /* To-do nudge desk v1: a day is picked once "Today" or "Yesterday" is, or "Another day" has its day; the answers it
+     fills are the ones the questions fill (`sent`, `date`), so `sent` and `then` above are the save's, unchanged */
+  const when = A.when === "today" || A.when === "yesterday" || A.when === "other" ? A.when as NudgeWhen : null;
+  const picked = when && A.sent === true && typeof A.date === "string" ? sent : null;
+  const nudgeDesk: NudgeDesk = {
+    facts: nudgeFacts(q, t.agent ?? null, t.first), when, picked, then,
+    pick: (w, day) => {
+      if (w === "other" && !day) { set({ when: "other", sent: undefined, date: undefined }); return; }
+      const d = w === "today" ? today : w === "yesterday" ? addDays(today, -1) : day!;
+      set({ when: w, sent: true, date: ymd(d) });
+    },
+  };
   const nw = buildNudgeWrites(q, t.agent ?? null, { checkBackDate: dayIso(then), note: "", eventDate: dayIso(sent) } as never, new Date());
   const ghost = nw.nested;
   return {
-    questions: qs,
+    questions: qs, nudgeDesk,
     sentence: <>You nudged {t.first} <b>{dayPhrase(sent, today)}</b>.</>,
     timeline: [
       { at: sent, what: <>Your nudge to {t.first} is logged</>, art: "nudge" },

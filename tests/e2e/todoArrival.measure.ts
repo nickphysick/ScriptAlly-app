@@ -204,7 +204,8 @@ for (const vp of SIZES) {
       note(`nudge-${vp.width}`, nf);
       await page.screenshot({ path: `${DIR}/shots/nudge-${vp.width}.png` });
       expect(nf.ahead).toBe(false);
-      expect(nf.footer).toMatch(/Next →/);
+      /* RE-POINTED (To-do nudge desk v1): a nudge is one step; its footer holds Log it where Next was */
+      expect(nf.footer).toMatch(/Log it/);
     }
   });
 }

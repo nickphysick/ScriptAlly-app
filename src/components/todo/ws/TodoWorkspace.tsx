@@ -70,6 +70,7 @@ import { byEventOrder, getActivityTime } from "../../../lib/queryDerivation";
 import { activeManuscriptOf } from "../../../lib/events";
 import { STAGE_REPLAY_EVENT } from "../../shell/BarSwitcher";
 import { WsRunThrough, type RunLight } from "./WsRunThrough";
+import { WsNudgeDesk } from "./WsNudgeDesk";
 import "./todoArrival.css";
 import "./todoNudgeDesk.css";
 
@@ -376,6 +377,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     [sel, deskT, A, today, currentUser?.id, userFirst, queries, agents, manuscripts, activities, taskFlags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const qs = flow?.questions ?? [];
+  /* To-do nudge desk v1: the desktop nudge desk (the phone, which builds the same flow, reads `questions`) */
+  const nd = flow?.nudgeDesk ?? null;
   const cur = Math.min(qi, qs.length);
   const allDone = qs.length > 0 && cur >= qs.length;
   /* v53 (D7): the check step is open once every question is answered, on any flow that logs */
@@ -464,6 +467,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       if (location.pathname !== "/todo" || isEditableTarget(e.target) || escapeDepth() > 0 || e.metaKey || e.ctrlKey || e.altKey) return;
       /* To-do nudge desk v1 · Phase 1 — Esc goes back to "Where to start" from an open task (a text field, a pop, a menu,
          a dialog or a journey keeps its own Esc: the checks above, and modalOpen) */
+      /* To-do nudge desk v1 · Phase 2: 1, 2 and 3 pick the nudge desk's answers (no text field has focus: the guard above) */
+      if (nd && tab === "todo" && !held && !adding && !pop && ["1", "2", "3"].includes(e.key)) { e.preventDefault(); nd.pick((["today", "yesterday", "other"] as const)[Number(e.key) - 1]); return; }
       if (escGoesBack({ key: e.key, selected: !!sel, held: !!held, adding, startShown: wayBackShown(all), modal: modalOpen() })) { e.preventDefault(); goBack(); return; }
       if (matchesShortcut(SHORTCUTS.todoDown, e) && tab === "todo") { e.preventDefault(); move(1); }
       else if (matchesShortcut(SHORTCUTS.todoUp, e) && tab === "todo") { e.preventDefault(); move(-1); }
@@ -742,6 +747,10 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
             w={{ update: (f) => updateUserTask(t.userTask!.id, f), done: () => void ownDone(t), said: (m) => flash(m) }} />
         </>
       );
+    } else if (flow && nd) {
+      /* To-do nudge desk v1 · Phase 2 — a nudge is one step: the sentence and its three clean answers (no rail, no
+         numbers, no check step); Log it in the footer runs the flow's own commit */
+      main = <WsNudgeDesk t={t} nd={nd} today={today} stage={deskStage} />;
     } else if (flow && ahead) {
       /* To-do arrival v1 · Phase 4 — STEPS AHEAD. A journey task on the desktop (Card journeys v1: a send, an R&R, an
          offer to answer) has nothing to answer on the desk; the desk lists the steps its journey will take, in the
@@ -834,6 +843,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const previewDraft = held ? flow?.draft ?? null : flow && Object.values(A).some((v) => v !== undefined) ? flow.draft : flow ? { section: flow.draft.section } : null;
     /* v53 (D8): typing dots while questions are open, the future card on the check step, the stamped card once logged */
     const cardMode: "typing" | "future" | "logged" | "plain" = held?.task.key === t.key ? "logged"
+      /* To-do nudge desk v1: typing until a day is picked, then the future "You nudged" event, dated to that day */
+      : nd ? (nd.picked ? "future" : "typing")
       : onCheck && flow?.draft.ghost ? "future" : flow?.commit && cur < qs.length ? "typing" : "plain";
     const previewFor = () => {
       if (own) {
@@ -879,6 +890,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     if (own) {
       progress = steps.length ? `${steps.filter((x) => x.done).length} of ${steps.length} steps` : null;
       primary = <button type="button" className="tws-go" data-tws="primary" disabled={busy} onClick={() => void ownDone(t)}>{TICK}Mark done</button>;
+    } else if (flow && nd) {
+      /* To-do nudge desk v1: Snooze and Dismiss as now; Log it, disabled until a day is picked; no progress, no Back */
+      primary = <button type="button" className="tws-go" data-tws="primary" data-log="" data-logged={logged ? "" : undefined} disabled={!nd.picked || busy || logged} onClick={() => void logIt()}>{logged ? <>{TICK}Logged</> : flow.verb ?? "Log it"}</button>;
     } else if (flow) {
       const q = cur < qs.length ? qs[cur] : null;
       const last = cur === qs.length - 1;

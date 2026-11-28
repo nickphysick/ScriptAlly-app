@@ -95,7 +95,10 @@ describe("a send task on the desktop: steps ahead, and one button", () => {
   it("every other task's footer is unchanged: a nudge keeps Next in the footer and shows no steps ahead", () => {
     GREG();
     const html = openRow("Nudge William");
-    expect(footer(html)).toContain("Next →");
+    /* RE-POINTED (To-do nudge desk v1): a nudge is one step now — its footer holds Log it (disabled until a day is
+       picked) where Next was; still no steps ahead */
+    expect(footer(html)).toMatch(/data-log="" disabled="">Log it</);
+    expect(footer(html)).not.toContain("Next →");
     expect(html).not.toContain('data-twa="ahead"');
   });
   it("the phone (the journey not hosted) keeps its inline flow", () => {

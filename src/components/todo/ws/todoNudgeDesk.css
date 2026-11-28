@@ -17,3 +17,27 @@
   /* lighting (arrival v1) dims task rows only; the way back is not a task */
   .tws .tws-tl[data-twa-lit] .twn-back { opacity: 1; }
 }
+
+/* ── Phase 2 · the nudge desk: one sentence, clean answers ── */
+@media (min-width: 768px) {
+  .tws .twn-desk { display: flex; flex-direction: column; min-height: 100%; }
+  .tws .twn-hawk { margin-bottom: 0; }
+  .tws .twn-sent { margin: 14px 0 24px; font: 400 24px/1.35 var(--tw-type); color: var(--tw-ink); }
+  .tws .twn-sent u { text-decoration: none; color: var(--tw-navy); box-shadow: inset 0 -2px 0 var(--tw-navy); }
+  .tws .twn-blank { display: inline-block; width: 120px; height: 1em; vertical-align: -0.12em; box-shadow: inset 0 -2px 0 #cfc5b6; }
+  .tws .twn-chs { display: flex; flex-wrap: wrap; gap: 12px; }
+  .tws .twn-ch {
+    all: unset; box-sizing: border-box; cursor: pointer; position: relative; min-width: 150px; padding: 11px 40px 11px 16px; border-radius: 12px;
+    background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1.5px var(--tw-hair); transition: box-shadow 0.15s, background 0.15s, color 0.15s;
+  }
+  .tws .twn-ch b { display: block; font: 600 16px/1.3 var(--tw-serif); }
+  .tws .twn-ch small { display: block; font: 14px/1.3 var(--tw-serif); color: var(--sp-quiet); }
+  .tws .twn-ch kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font: 12px var(--tw-serif); color: var(--sp-quiet); padding: 1px 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--tw-hair); }
+  .tws .twn-ch:hover { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+  .tws .twn-ch:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+  .tws .twn-ch[aria-checked="true"] { background: var(--tw-navy); color: #fff; box-shadow: none; }
+  .tws .twn-ch[aria-checked="true"] small, .tws .twn-ch[aria-checked="true"] kbd { color: #d6dbe3; box-shadow: none; }
+  .tws .twn-other { margin-top: 12px; max-width: 520px; }
+  .tws .twn-quiet { margin: 18px 0 0; font: italic 14.5px/1.45 var(--tw-serif); color: var(--sp-quiet); }
+  @media (prefers-reduced-motion: reduce) { .tws .twn-ch { transition: none; } }
+}
