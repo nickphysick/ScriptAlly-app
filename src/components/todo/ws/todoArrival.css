@@ -89,3 +89,23 @@
     .tws .tws-wsx.tws-in[data-twa-fade] { animation: none; }
   }
 }
+
+/* ── Phase 3 · the load outline in the run-through's shape (To-do load v1's still bars, its timings and its fade) ──
+   The hawk's row holds two lines of bubble in both states, so the piles' top is the same loading and loaded. */
+@media (min-width: 768px) {
+  .tws .twa-top { min-height: 64px; }
+  .tws .twl-run .twa-h { display: flex; align-items: center; min-height: 29px; }
+  .tws .twl-run [data-twl="rhead"] { width: 190px; height: 20px; }
+  .tws .twl-run [data-twl="rdate"] { width: 150px; height: 12px; }
+  .tws .twl-run .twl-mnote { align-items: center; }
+  .tws .twl-run [data-twl="hawk"] { width: 27px; height: 42px; border-radius: 6px; }
+  .tws .twl-run [data-twl="bubble"] { flex: 1; max-width: 640px; height: 46px; border-radius: 8px; }
+  .tws .twl-run [data-twl="rbtn"] { width: 190px; height: 40px; border-radius: 10px; }
+  .tws .twl-run .twl-pile, .tws .twl-run .twl-pile:hover { cursor: default; pointer-events: none; transform: none; box-shadow: inset 0 0 0 1px var(--twl-bar); }
+  .tws .twl-run [data-twl="pbig"] { grid-row: 1 / span 2; width: 34px; height: 34px; border-radius: 6px; }
+  .tws .twl-run [data-twl="ptitle"] { align-self: end; width: 120px; height: 13px; margin-top: 4px; }
+  .tws .twl-run [data-twl="psub"] { width: 80%; height: 10px; margin-top: 8px; }
+  .tws .twl-run .twl-pdisc { width: 30px; height: 30px; border-radius: 50%; margin-right: -7px; background: var(--twl-bar); box-shadow: 0 0 0 2px #fff; }
+  .tws .twl-run [data-twl="lhead"] { width: 260px; height: 13px; margin: 3px 0; }
+  .tws .twl-run .twa-axis { background: var(--twl-bar); }
+}

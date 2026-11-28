@@ -149,3 +149,15 @@ describe("the run-through's parts (pure)", () => {
     expect([...far.labelled].sort()).toEqual(["w1", "w2"]);
   });
 });
+
+describe("Phase 3 — the load outline takes the run-through's shape", () => {
+  const strip = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "");
+  it("the outline is built on the run-through's own classes, so the heading and the piles sit where the loaded ones will", () => {
+    const ld = readFileSync(join(__dirname, "WsLoading.tsx"), "utf8");
+    for (const c of ['className="twa-run twl-run"', 'className="twa-head twl-in"', 'className="twa-top twl-in"', 'className="twa-piles twl-in"', 'className="twa-pile twl-pile"', 'className="twa-line twl-in"']) expect(ld).toContain(c);
+  });
+  it("the hawk's row holds the same height loading and loaded (two lines of bubble)", () => {
+    const css = strip(readFileSync(join(__dirname, "todoArrival.css"), "utf8"));
+    expect(css).toMatch(/\.tws \.twa-top \{ min-height: 64px; \}/);
+  });
+});

@@ -32,9 +32,10 @@ vi.mock("../../../lib/db", () => ({
 }));
 
 import { TodoWorkspace } from "./TodoWorkspace";
+import { forgetTodoTask, rememberTodoTask, todoTaskScope } from "../../../lib/todoArrival";
 
 const render = (path = "/todo") => renderToStaticMarkup(<MemoryRouter initialEntries={[path]}><TodoWorkspace onNavigate={() => {}} /></MemoryRouter>);
-afterEach(() => { store.tasksReady = false; store.tasksReadFailed = false; store.tasks = []; store.queries = []; store.agents = []; });
+afterEach(() => { store.tasksReady = false; store.tasksReadFailed = false; store.tasks = []; store.queries = []; store.agents = []; forgetTodoTask(); });
 const EMPTY = [/all caught up/i, /Nothing yet/, /Nothing to do yet/, /Nothing snoozed/];
 
 describe("while loading, no empty state", () => {
@@ -54,7 +55,16 @@ describe("while loading, no empty state", () => {
     expect(html).toContain("Quick fill");
     expect(html).toMatch(/data-tws55-tab="todo"[^>]*>\s*To do<\/button>/);
     expect(html).not.toContain('data-tws="todo-count"');
+    /* RE-POINTED (To-do arrival v1 · Phase 3): with no task asked for the page will open on "Where to start", so the
+       outline is the run-through's (no navy bar); with a task asked for, the desk's navy bar as before */
+    expect(html).toContain('data-twl-out="run"');
+    expect(html).not.toContain('data-twl-out="desk"');
+  });
+  it("…and with a task asked for (the visit's memory), the desk's outline and its navy bar", () => {
+    rememberTodoTask(todoTaskScope("u1", "m1"), "t1");
+    const html = render();
     expect(html).toMatch(/data-twl-out="desk"[\s\S]*?class="tws-wh" data-band="wait"/);
+    expect(html).not.toContain('data-twl-out="run"');
   });
 });
 

@@ -50,7 +50,7 @@ import TagsPane from "../TagsSheet";
 import "./todoWs.css";
 import "./todoWs54.css";
 import { WsHeader56 } from "./WsHeader56";
-import { useTodoLoad, TrayOutline, TrayStill, TrayFailed, DeskOutline, LOAD_WORDS } from "./WsLoading";
+import { useTodoLoad, TrayOutline, TrayStill, TrayFailed, DeskOutline, RunOutline, LOAD_WORDS } from "./WsLoading";
 import { loadHoldFor } from "../../../lib/todoLoad";
 import { useLoadFailure } from "../../notes/useLoadFailure";
 import { WsSlim56 } from "./WsSlim56";
@@ -258,6 +258,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     if (id) { const t = all.find((x) => x.userTask?.id === id || x.key === id); if (t) go(t.key); }
     if (compose) { setMile(null); setAdding(true); }
   }, [location.pathname, loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* To-do arrival v1 · Phase 3: is a task asked for — chosen already, or an arrival key waiting to be read? */
+  const taskAsked = (): boolean => {
+    if (selKey) return true;
+    try { return !!sessionStorage.getItem(TODO_OPEN_TASK_KEY); } catch { return false; }
+  };
   /* the shell's "+ Task" while already on /todo: an event, not the one-shot key (AppShell, TODO_OPEN_COMPOSER) */
   useEffect(() => {
     const on = () => { setMile(null); setAdding(true); };
@@ -643,7 +648,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const desk = (() => {
     /* B1: nor does the desk — no "Nothing to do yet", no "You're all caught up." before the tasks are in; its navy bar
        at once, the outline from 150ms (R2, R4) */
-    if (!loaded) return <DeskOutline on={load.phase === "outline"} />;
+    /* To-do arrival v1 · Phase 3: with no task asked for (nothing chosen, no arrival key waiting) the page will open on
+       "Where to start", so the outline takes the run-through's shape */
+    if (!loaded) return taskAsked() ? <DeskOutline on={load.phase === "outline"} /> : <RunOutline on={load.phase === "outline"} />;
     if (adding) return <AddTask today={today} onCancel={() => setAdding(false)} onAdd={async (text, due, detail) => {
       /* the desk goes back at once; the new task is opened when it lands, unless another has been picked meanwhile
          (the write resolves when the server answers, which can be after the writer has moved on) */
