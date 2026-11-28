@@ -48,7 +48,8 @@ describe("arrival opens no task (the page)", () => {
     store.userTasks = [own("t1", "Tighten the synopsis"), own("t2", "Print the pages")];
     const html = render();
     expect(html).toContain("Where to start");
-    expect(html, "no row is open").not.toContain('aria-current="true"');
+    /* RE-POINTED (To-do nudge desk v1): the way back row wears the open look while Where to start shows; no TASK row does */
+    expect(html, "no task row is open").not.toMatch(/data-tws-row="[^"]*"[^>]*aria-current="true"/);
     expect(html, "no task's desk").not.toContain('data-tws="desk-title"');
     expect(html).not.toContain("Mark done");
   });
@@ -58,7 +59,8 @@ describe("arrival opens no task (the page)", () => {
     const html = render();
     expect(html).toContain('data-tws="desk-title">Print the pages<');
     expect(html).toContain("Mark done");
-    expect(html).not.toContain("Where to start");
+    /* RE-POINTED (To-do nudge desk v1): "Where to start" is also the tray's way-back row; the desk is what is asserted */
+    expect(html).not.toContain('data-twa="run"');
   });
   it("coming back after that task was finished: Where to start", () => {
     store.userTasks = [own("t1", "Tighten the synopsis")];
@@ -76,6 +78,7 @@ describe("arrival opens no task (the page)", () => {
     const html = render();
     expect(html).toContain("Nothing to do yet");
     expect(html).not.toContain("Where to start");
+    expect(html, "no way-back row with nothing on the list").not.toContain('data-twn="back"');
   });
 });
 

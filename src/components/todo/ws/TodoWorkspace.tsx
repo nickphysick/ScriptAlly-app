@@ -29,7 +29,7 @@ import { openAgentCard } from "../../../lib/agentCardStore";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { heldSendDoor } from "../../../lib/queryActions/journeyCreated";
 import { ESC_LEVEL, escapeDepth, useEscapeLayer } from "../../../lib/escapeStack";
-import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../../lib/shortcuts";
+import { SHORTCUTS, isEditableTarget, matchesShortcut, modalOpen } from "../../../lib/shortcuts";
 import { TODO_OPEN_TASK_KEY } from "../../../lib/corkboard";
 import { TODO_OPEN_COMPOSER } from "../../../lib/todoRoutes";
 import { MON, addDays, dayDiff, fmt } from "../../../lib/queryActions/dates";
@@ -62,6 +62,7 @@ import "./todoWs57.css";
 import "./todoWs58.css";
 import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
 import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
+import { escGoesBack, wayBackShown } from "../../../lib/todoNudgeDesk";
 import { aheadSteps, asksLine, deskMode, tuckFigure, rememberTodoTask, rememberedTodoTask, selectedTask, storedAsks, todoTaskScope } from "../../../lib/todoArrival";
 import { CJ_SPECS } from "../../queries/centre/cardJourneySpecs";
 import { cardJourneyHosted } from "../../../lib/queryPanelStore";
@@ -70,8 +71,11 @@ import { activeManuscriptOf } from "../../../lib/events";
 import { STAGE_REPLAY_EVENT } from "../../shell/BarSwitcher";
 import { WsRunThrough, type RunLight } from "./WsRunThrough";
 import "./todoArrival.css";
+import "./todoNudgeDesk.css";
 
 const MENTOR = "/images/todo/mentor.webp";
+/** To-do nudge desk v1: the way back's overview mark (four squares) */
+const OVERVIEW = <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2.5" y="2.5" width="5.5" height="5.5" rx="1.5" /><rect x="10" y="2.5" width="5.5" height="5.5" rx="1.5" /><rect x="2.5" y="10" width="5.5" height="5.5" rx="1.5" /><rect x="10" y="10" width="5.5" height="5.5" rx="1.5" /></svg>;
 const HOUR = "/images/todo/hour.webp";
 /* v55 (D6): the collapse and the grouping are saved to the writer's prefs (todoPrefs.trayCollapsed / trayGrouping, one
    leaf each, beside v54's batchView); v52's per-device `sa.todoTraySlim` is no longer read */
@@ -458,6 +462,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (location.pathname !== "/todo" || isEditableTarget(e.target) || escapeDepth() > 0 || e.metaKey || e.ctrlKey || e.altKey) return;
+      /* To-do nudge desk v1 · Phase 1 — Esc goes back to "Where to start" from an open task (a text field, a pop, a menu,
+         a dialog or a journey keeps its own Esc: the checks above, and modalOpen) */
+      if (escGoesBack({ key: e.key, selected: !!sel, held: !!held, adding, startShown: wayBackShown(all), modal: modalOpen() })) { e.preventDefault(); goBack(); return; }
       if (matchesShortcut(SHORTCUTS.todoDown, e) && tab === "todo") { e.preventDefault(); move(1); }
       else if (matchesShortcut(SHORTCUTS.todoUp, e) && tab === "todo") { e.preventDefault(); move(-1); }
       else if (matchesShortcut(SHORTCUTS.todoSearch, e)) { e.preventDefault(); openSearch(); }
@@ -478,6 +485,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const bd = useMemo(() => breakdownOf(catSections), [catSections]);
   /* To-do arrival v1: "Where to start" is on the desk (nothing open, something needs the writer); what it lights */
   const running = deskMode({ loaded, all, selected: !!sel }) === "run" && !adding;
+  /* To-do nudge desk v1 · Phase 1: back to "Where to start" — nothing open, the visit's memory follows (its effect) */
+  const goBack = () => { setRunLightState(null); go(null); };
   const [runLight, setRunLightState] = useState<RunLight>(null);
   const setRunLight = (l: RunLight) => setRunLightState(running ? l : null);
   const litNow: RunLight = running ? runLight : null;
@@ -648,7 +657,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
     }
     if (!all.length) return <div className="tws-empty">Nothing to do yet.</div>;
-    return sectionsBody;
+    /* To-do nudge desk v1 · Phase 1 — THE WAY BACK: "Where to start", pinned above the first group, while it exists */
+    return <>{wayBackShown(all) ? (
+      <div className="tws-ti twn-back" role="button" tabIndex={0} data-twn="back" aria-current={running ? "true" : undefined}
+        onClick={goBack} onKeyDown={(e) => { if (e.key === "Enter") goBack(); }} title="Where to start">
+        <span className="tws-av" data-k="overview" aria-hidden="true">{OVERVIEW}</span>
+        <span className="tws-tx"><b>Where to start</b><span>Your day at a glance</span></span>
+        <kbd className="twn-kbd" aria-hidden="true">Esc</kbd>
+      </div>
+    ) : null}{sectionsBody}</>;
   })();
   /* ── render: the desk ── */
   const desk = (() => {

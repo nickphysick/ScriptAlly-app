@@ -60,7 +60,8 @@ describe("the To-do workspace renders", () => {
     rememberTodoTask(todoTaskScope("u1", null), "t1");
     const html = render();
     expect(html).toContain("Mark done");
-    expect(html).not.toContain("Where to start");
+    /* RE-POINTED (To-do nudge desk v1): the tray's way-back row also says "Where to start"; the desk is what is asserted */
+    expect(html).not.toContain('data-twa="run"');
   });
   it("a note to self (no date) never reaches the list", () => {
     seed.userTasks = [{ id: "n1", userId: "u1", text: "A note to self", done: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }];

@@ -1,0 +1,19 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do nudge desk v1 (design-refs/todo-nudge-desk-v1/) — the way back to "Where to start", and the desktop nudge desk:
+ * one sentence, clean answers, the hawk folding away, the updated timeline on a banded card. Sizes are the ref's, which
+ * are the app's; colours are the desk's tokens. Desktop only, like the workspace.
+ */
+@media (min-width: 768px) {
+  /* ── Phase 1 · the way back: the tray's own row (`.tws-ti`), so the open look (aria-current) is the rows' own ── */
+  .tws .twn-back { margin-top: 6px; }
+  .tws .twn-back .tws-av[data-k="overview"] { border-radius: 50%; background: #e9edf2; }
+  .tws .twn-back .tws-av[data-k="overview"] svg { width: 18px; height: 18px; fill: none; stroke: var(--tw-navy); stroke-width: 1.8; }
+  .tws .twn-back .tws-tx b { -webkit-line-clamp: 1; }
+  .tws .twn-kbd { justify-self: end; font: 12px var(--tw-serif); color: var(--sp-quiet); padding: 1px 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--tw-hair); }
+  .tws .twn-back:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+  /* lighting (arrival v1) dims task rows only; the way back is not a task */
+  .tws .tws-tl[data-twa-lit] .twn-back { opacity: 1; }
+}
