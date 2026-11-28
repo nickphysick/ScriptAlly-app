@@ -62,7 +62,10 @@ import "./todoWs57.css";
 import "./todoWs58.css";
 import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
 import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
-import { deskMode, rememberTodoTask, rememberedTodoTask, selectedTask, todoTaskScope } from "../../../lib/todoArrival";
+import { aheadSteps, asksLine, deskMode, rememberTodoTask, rememberedTodoTask, selectedTask, storedAsks, todoTaskScope } from "../../../lib/todoArrival";
+import { CJ_SPECS } from "../../queries/centre/cardJourneySpecs";
+import { cardJourneyHosted } from "../../../lib/queryPanelStore";
+import { byEventOrder, getActivityTime } from "../../../lib/queryDerivation";
 import { activeManuscriptOf } from "../../../lib/events";
 import { STAGE_REPLAY_EVENT } from "../../shell/BarSwitcher";
 import { WsRunThrough, type RunLight } from "./WsRunThrough";
@@ -694,6 +697,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const linkQ = own && t.userTask!.queryId ? queries.find((q) => q.id === t.userTask!.queryId) ?? null : null;
     const linkA = own ? agents.find((a) => a.id === (t.userTask!.agentId ?? linkQ?.agentId)) ?? null : null;
     const steps = t.userTask?.steps ?? [];
+    /* To-do arrival v1 · Phase 4: a door-only journey flow (desktop, the journey hosted) shows its steps ahead */
+    const cjKind = t.query && (t.kind === "send" || t.kind === "rr") ? "send" as const : t.query && t.kind === "offer" ? "offer" as const : null;
+    const ahead = !own && flow?.door && !flow.questions.length && !flow.commit && cjKind && cardJourneyHosted(cjKind)
+      ? aheadSteps(CJ_SPECS[cjKind]?.stages({} as never, { othersN: 0 } as never) ?? [],
+        { name: t.agentName || t.first, first: t.first },
+        cjKind === "send" ? asksLine(t.first, storedAsks(t.query, [...qLog].map((r, i) => ({ r, k: { time: getActivityTime(r.date), id: String(r.id ?? ""), i } })).sort((a, b) => byEventOrder(a.k, b.k)).map((x) => x.r))) : null)
+      : null;
 
     /* the questions column */
     let main: React.ReactNode;
@@ -710,6 +720,26 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           <WsOwnTask task={t.userTask!} today={today} agents={agents} queries={queries} picking={linkPicking} setPicking={setLinkPicking}
             titleOf={(id) => manuscripts.find((m) => m.id === id)?.title?.trim() || null}
             w={{ update: (f) => updateUserTask(t.userTask!.id, f), done: () => void ownDone(t), said: (m) => flash(m) }} />
+        </>
+      );
+    } else if (flow && ahead) {
+      /* To-do arrival v1 · Phase 4 — STEPS AHEAD. A journey task on the desktop (Card journeys v1: a send, an R&R, an
+         offer to answer) has nothing to answer on the desk; the desk lists the steps its journey will take, in the
+         To-do's own rail, none answered here, with the journey's one button under them. The journey opens exactly as
+         before (the same label, the same handler). */
+      main = (
+        <>
+          <div className="tws-mnote" data-tws="hawk" data-tws58-stage={deskStage ?? undefined} style={stageVars(deskStage, t.query?.status) as React.CSSProperties | undefined}><img src={MENTOR} alt="" /><p>{mentorLine(t)}</p></div>
+          <p className="twa-lead" data-twa="lead">{flow.door!.label} takes you through this, one step at a time:</p>
+          <ol className="tws-rail twa-ahead" data-twa="ahead">
+            {ahead.map((st, i) => (
+              <li key={st.key} className="tws-st" data-st={st.done ? "done" : "todo"} data-twa-step={st.key}>
+                <span className="tws-sn" aria-hidden="true">{st.done ? TICK : i + 1}</span>
+                <div className="tws-sx"><span className="tws-sq">{st.strong ? <b>{st.strong}</b> : null}{st.text}</span>{st.sub ? <small className="twa-ssub" data-twa="asks">{st.sub}</small> : null}</div>
+              </li>
+            ))}
+          </ol>
+          <div className="twa-act"><button type="button" className="tws-go" data-tws="primary" data-twa="door" onClick={flow.door!.open}>{flow.door!.label}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg></button></div>
         </>
       );
     } else if (flow) {
@@ -839,7 +869,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         primary = <button type="button" className="tws-go" data-tws="primary" data-next="" disabled={!q.answered} onClick={() => setQi(cur + 1)}>Next →</button>;
       } else if (onCheck) {
         primary = <button type="button" className="tws-go" data-tws="primary" data-log="" data-logged={logged ? "" : undefined} disabled={busy || logged} onClick={() => void logIt()}>{logged ? <>{TICK}Logged</> : flow.verb ?? "Log it"}</button>;
-      } else if (!qs.length && flow.door) {
+      } else if (!qs.length && flow.door && !ahead) {
+        /* (a journey task's button sits under its steps on the desk instead — one button for the one action) */
         primary = <button type="button" className="tws-go" data-tws="primary" onClick={flow.door.open}>{flow.door.label}</button>;
       }
       progress = !total ? null : `${cur + 1} of ${t.kind === "quiet" && !A.act ? "a few" : total}`;

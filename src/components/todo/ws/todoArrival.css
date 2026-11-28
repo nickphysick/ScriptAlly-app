@@ -109,3 +109,12 @@
   .tws .twl-run [data-twl="lhead"] { width: 260px; height: 13px; margin: 3px 0; }
   .tws .twl-run .twa-axis { background: var(--twl-bar); }
 }
+
+/* ── Phase 4 · steps ahead on a journey task's desk: the lead under the hawk's bubble, the To-do's own rail (its
+   styles unchanged), the journey's one button under it, aligned with the rail's text (28px number + 12px gap) ── */
+@media (min-width: 768px) {
+  .tws .twa-lead { margin: -4px 0 12px 46px; font: italic 15px/1.4 var(--tw-serif); color: var(--sp-quiet); }
+  .tws .twa-ahead .tws-sq b { font-weight: 600; color: var(--tw-ink); }
+  .tws .twa-ahead .twa-ssub { display: block; font: italic 14px/1.4 var(--tw-serif); color: var(--sp-quiet); }
+  .tws .twa-act { display: flex; align-items: center; gap: 14px; margin: 4px 0 0 40px; }
+}
