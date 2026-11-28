@@ -117,9 +117,13 @@ All in `lib/todoArrival.ts` (one place to change each). Nick's own templates are
 
 ## Dev deploy
 
-**Not deployed — a STOP.** At Step 0 dev served `index-CTspvepm.js` (`dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1` @ `bf98bf66c`, this branch's base). By the end of Phase 6 it served **`index-GcEjJLQc.js`**, and I could not name the branch that bundle was built from: no pushed report or deploy log on this machine records it. The newest dev branch, `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724` @ `e2e52ed41` (Query Centre v172.4, pushed 11:40), is the likely source, but its commit names its own base bundle (`index-C8iGokPv.js`), not the served one. CLAUDE.md: name the served branch first; a bundle mismatch is a stop. So nothing was deployed.
-
-Ready for it: `todo-arrival-v1` is pushed; `git merge-tree` of `todo-arrival-v1` onto `e2e52ed41` is clean (exit 0, no conflicts; no To-do file differs between `bf98bf66c` and `e2e52ed41`). Once the served branch is confirmed, the deploy is: a new `dev/…-qc1724-ta1` = that branch + `todo-arrival-v1`, built with `npm run build:dev` from a clean detached checkout of its pushed tip, deployed with the guard refusing unless dev still serves the confirmed bundle.
+**Deployed to dev (follow-up, 28 Nov).** The first pass stopped: dev's bundle had changed to `index-GcEjJLQc.js` and no record named its branch. Nick named the likely source; it was proven before deploying:
+- **Proof:** a clean detached checkout of `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724` @ `e2e52ed41`, `npm run build:dev` → **`index-GcEjJLQc.js`**, identical to what dev served.
+- **Branch:** `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1` @ `5cb32ef62` = `e2e52ed41` + `todo-arrival-v1` @ `89f663175` (a `--no-ff` merge; no conflicts).
+- **Gates on the merged tree:** tsc 0 errors (with `functions/node_modules` linked; without it the checkout reports 7 unresolved `functions/` imports), `vite build --mode development` clean, the To-do specs (`src/components/todo/`, `src/lib/todoWs`, `cjSend`) 70 files, 899 passed, 0 failed.
+- **Build:** `npm run build:dev` from a clean detached checkout of the pushed tip `5cb32ef62` → `index-Dyb-9aiS.js`.
+- **Guard:** the deploy ran only because dev still served `index-GcEjJLQc.js` at that moment; it did.
+- **Dev now serves `index-Dyb-9aiS.js`** (https://scriptally-dev.web.app), checked after the deploy.
 
 Nothing went to main or prod.
 
