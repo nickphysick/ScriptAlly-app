@@ -117,8 +117,7 @@ export const QueriesV4: React.FC<{ active?: boolean }> = ({ active = true }) => 
   return (
     <div className="pa4 pa4-queries" data-pa4="queries" data-chip={chip} data-view={bird ? "bird" : "list"}>
       {bird ? (!active ? null :
-        <BirdsWorld court={isBeCourt(chip) ? chip : null} onList={() => pickView(false, "all")}
-          onBack={() => { const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0; if (idx > 0) navigate(-1); else pickView(false, "all"); }} />
+        <BirdsWorld court={isBeCourt(chip) ? chip : null} onList={() => pickView(false, "all")} />
       ) : (<>
         <Hero pa4="queries-hero" kick="Queries"
           head={<>{c.you} need{c.you === 1 ? "s" : ""} you.<br />{c.agent} {c.agent === 1 ? "is" : "are"} with agents.</>}

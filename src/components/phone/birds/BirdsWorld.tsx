@@ -121,13 +121,12 @@ export function actOf(a: BwAct, id: string): void {
 
 export interface BirdsWorldProps {
   court?: string | null;
-  onBack: () => void;
   onList: () => void;
 }
 type SheetState = null | { k: "key" } | { k: "search" } | { k: "nd"; id: string; queue: string[] };
 type TipState = null | { k: "news" } | { k: "line"; i: number };
 
-export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, onList }) => {
+export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onList }) => {
   const v = useV3Data();
   const now = v.now;
   const quietDays = (v.quietWeeks ?? DEFAULT_QUIET_WEEKS) * 7;
@@ -185,6 +184,8 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const [showHint] = useState(() => store.get(BW_HINT_KEY) !== "1");
   /* Birds-eye polish v1 §B: the filter menu (it replaces the pill row) */
   const [fmenu, setFmenu] = useState(false);
+  /* polish v1.1: the ⋯ menu (Replay your campaign, What the colours mean) */
+  const [more, setMore] = useState(false);
 
   /* ── the view state, off React's render ── */
   const root = useRef<HTMLDivElement>(null);
@@ -552,26 +553,34 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
           filters in the menu under the filter button */}
       <div ref={hd} className={`bw-hd col slim${f !== "all" ? " filt" : ""}`} data-bw="head" data-slim="1">
         <div className="bw-t2">
-          <button type="button" className="bw-ib back" aria-label="Back" data-bw="back" onClick={onBack}>{I(BW_IC.back, 2)}</button>
           <button type="button" className="bw-bewrap" data-bw="hawk-btn" aria-label={news.length && !newsSeen ? `${news.length} things changed` : "The hawk"} onClick={onHawk}>
             <img className="bw-behk" data-bw="badge" src={BW_HAWK} alt="" />
             {news.length && !newsSeen && !looking ? <em className="bw-bedot" data-bw="news-count">{news.length}</em> : null}
           </button>
           <h1 className="bw-h">Birds-eye view</h1>
           {f !== "all" ? <button type="button" className="bw-fon" data-bw="fon" data-k={f} aria-label={`${PILL_LABEL[f]}: clear the filter`} onClick={() => pick("all")}><span className="bw-fonl">{PILL_LABEL[f]}</span><span aria-hidden="true">✕</span></button> : null}
-          <button type="button" className="bw-ib" aria-label="List" data-bw="list" onClick={onList}>{I(BW_IC.list, 2)}</button>
           {demo ? null : (
             <button type="button" className={`bw-ib bw-fbtn${fmenu ? " on" : ""}`} aria-label="Filter" aria-haspopup="menu" aria-expanded={fmenu} data-bw="filter" data-f={f}
-              onClick={() => { buzz(8); setFmenu((o) => !o); }}>
+              onClick={() => { buzz(8); setMore(false); setFmenu((o) => !o); }}>
               {I('<path d="M4 6h16M7 12h10M10 18h4"/>')}
               {f !== "all" ? <i className="bw-fdot" data-bw="fdot" aria-hidden="true" style={{ background: "#e8b9a6" }} /> : null}
             </button>
           )}
-          <button type="button" className="bw-ib" aria-label="Replay your campaign" data-bw="replay" onClick={() => { if (!demo) replay(); }}>{I(BW_IC.play)}</button>
-          <button type="button" className="bw-ib" aria-label="What the colours mean" data-bw="key-btn" onClick={() => setSheet({ k: "key" })}>{I(BW_IC.key)}</button>
+          {/* polish v1.1: hawk · title · filter · search · List · ⋯ (Back dropped: the dock leaves Birds-eye); Replay and the
+              colour key moved into the ⋯ menu */}
           <button type="button" className="bw-ib" aria-label="Search" data-bw="search" onClick={() => { if (!demo) setSheet({ k: "search" }); }}>{I(BW_IC.search)}</button>
+          <button type="button" className="bw-ib" aria-label="List" data-bw="list" onClick={onList}>{I(BW_IC.list, 2)}</button>
+          <button type="button" className={`bw-ib bw-mbtn${more ? " on" : ""}`} aria-label="More" aria-haspopup="menu" aria-expanded={more} data-bw="more"
+            onClick={() => { buzz(8); setFmenu(false); setMore((o) => !o); }}>{I('<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>')}</button>
         </div>
       </div>
+      {more ? (<>
+        <div className="bw-mveil bw-fveil" data-bw="more-veil" onClick={() => setMore(false)} />
+        <div className="bw-fmenu" data-bw="more-menu" role="menu" aria-label="More">
+          <button type="button" role="menuitem" data-bw="replay" onClick={() => { setMore(false); buzz(8); if (!demo) replay(); }}><span>Replay your campaign</span></button>
+          <button type="button" role="menuitem" data-bw="key-btn" onClick={() => { setMore(false); buzz(8); setSheet({ k: "key" }); }}><span>What the colours mean</span></button>
+        </div>
+      </>) : null}
       {fmenu ? (<>
         <div className="bw-mveil bw-fveil" data-bw="fmenu-veil" onClick={() => setFmenu(false)} />
         <div className="bw-fmenu" data-bw="fmenu" role="menu" aria-label="Filter">

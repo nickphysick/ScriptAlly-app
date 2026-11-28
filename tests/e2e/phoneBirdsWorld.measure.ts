@@ -705,7 +705,7 @@ for (const mut of runs) {
       await fitted(page);
       const r0 = await root(page);
       if (mut === "replay") await page.evaluate(() => { (window as unknown as { requestAnimationFrame: (f: FrameRequestCallback) => number }).requestAnimationFrame = () => 0; });
-      await page.locator('[data-bw="replay"]').click();
+      await page.locator('[data-bw="more"]').click(); await page.locator('[data-bw="replay"]').click();
       const reads: { lx: number; label: string; replay: string }[] = [];
       for (let i = 0; i < 5; i++) { await page.waitForTimeout(650); const r = await root(page); reads.push({ lx: r.lx, label: (await box(page, '[data-bw="pill"]'))[0]?.text.trim() ?? "", replay: r.replay }); }
       const rising = reads.every((x, i) => !i || x.lx >= reads[i - 1].lx - 0.5) && reads[reads.length - 1].lx > reads[0].lx + 20;
@@ -715,7 +715,7 @@ for (const mut of runs) {
       const after = await root(page);
       L.check("BW-12", "a touch stops it at today (no recap)", after.replay === "done" && Math.abs(after.lx - r0.lx) < 1 && after.recap === "0", JSON.stringify(after.replay));
       if (mut !== "replay") {
-        await page.locator('[data-bw="replay"]').click(); await page.waitForTimeout(6800);
+        await page.locator('[data-bw="more"]').click(); await page.locator('[data-bw="replay"]').click(); await page.waitForTimeout(6800);
         const rc = await page.evaluate(() => ({ card: !!document.querySelector('[data-bw="recap"]'), days: document.querySelector('[data-bw="recap-days"]')?.textContent ?? "", btns: [...document.querySelectorAll('[data-bw="recap"] button')].map((b) => b.textContent) }));
         L.check("BW-12", `played through, it ends on the recap (${rc.days} days)`, rc.card && +rc.days > 0 && rc.btns.join("|") === "Share|Done", JSON.stringify(rc));
         await page.locator('[data-bw="recap-done"]').click().catch(() => {}); await frame(page, 300);
@@ -798,7 +798,7 @@ for (const mut of runs) {
       await page.mouse.move(150, 450); await page.mouse.down(); for (let i = 1; i <= 6; i++) { await page.mouse.move(150 + i * 25, 450 + i * 10); await page.waitForTimeout(8); } await page.mouse.up();
       const r1 = await root(page); await page.waitForTimeout(600); const r2 = await root(page);
       await fitted(page);
-      await page.locator('[data-bw="replay"]').click(); await page.waitForTimeout(400);
+      await page.locator('[data-bw="more"]').click(); await page.locator('[data-bw="replay"]').click(); await page.waitForTimeout(400);
       const rep = (await root(page)).replay;
       L.check("BW-17", "reduced motion: the hawk does not drift", drift === "none", drift);
       L.check("BW-17", "reduced motion: a drag stops where it is let go", Math.hypot(r1.ox - r0.ox, r1.oy - r0.oy) > 20 && Math.hypot(r2.ox - r1.ox, r2.oy - r1.oy) < 0.5, "");
@@ -1003,7 +1003,7 @@ test("Phone Birds-eye world v3 — the shots beside the ref's", async ({ page },
   for (let i = 0; i < 6; i++) { if (!(await page.locator('[data-bw="tip"]').count())) break; await page.locator('[data-bw="hawk-btn"]').click(); await frame(page, 200); }
   const row = await page.evaluate(() => { const h = document.querySelector<HTMLElement>('[data-bw="row"][data-closed="0"][data-nodate="0"]'); const r = h?.getBoundingClientRect(); return r ? { y: r.top + r.height / 2 } : null; });
   if (row) { await offPE(page); await page.mouse.click(200, row.y); await frame(page, 700); await shot("11-timeline-sheet"); await page.locator('[data-bw="sheet-close"]').click().catch(() => {}); await frame(page, 300); }
-  await page.locator('[data-bw="key-btn"]').click(); await frame(page, 500); await shot("12-colour-key"); await page.locator('[data-bw="sheet-close"]').click().catch(() => {}); await frame(page, 300);
+  await page.locator('[data-bw="more"]').click(); await page.locator('[data-bw="key-btn"]').click(); await frame(page, 500); await shot("12-colour-key"); await page.locator('[data-bw="sheet-close"]').click().catch(() => {}); await frame(page, 300);
   await page.locator('[data-bw="search"]').click(); await frame(page, 500); await page.locator('[data-bw="search-input"]').fill("a"); await frame(page, 300); await shot("13-search");
   await page.locator('[data-bw="search-hit"]').nth(2).click().catch(() => {}); await frame(page, 1000); await shot("14-search-flown");
   await openWorld(page);
@@ -1020,7 +1020,7 @@ test("Phone Birds-eye world v3 — the shots beside the ref's", async ({ page },
   await frame(page, 600);
   if (await page.locator('[data-bw="sheet"][data-k="nodate"]').count()) { await shot("18-no-date-sheet"); await page.locator('[data-bw="veil"]').click({ position: { x: 10, y: 10 } }).catch(() => {}); await frame(page, 300); }
   await fitted(page);
-  await page.locator('[data-bw="replay"]').click(); await page.waitForTimeout(3000); await shot("19-replay-midway");
+  await page.locator('[data-bw="more"]').click(); await page.locator('[data-bw="replay"]').click(); await page.waitForTimeout(3000); await shot("19-replay-midway");
   await page.waitForTimeout(3800); await shot("20-recap");
   const names = ["01-overview", "02-folded-groups", "03-pill-needs-chasing", "04-months", "05-weeks", "06-long-press-menu", "07-scrubbing", "08-hawk-things-changed", "09-change-step", "10-hawk-one-liner", "11-timeline-sheet", "12-colour-key", "13-search", "14-search-flown", "15-pull-to-refresh", "16-refreshing", "17-no-date-rows", "18-no-date-sheet", "19-replay-midway", "20-recap"];
   for (const n of names) copyFileSync(`design-refs/phone-birds-eye-world-v3/shots/${n}.png`, `${out}/${n}-ref.png`);

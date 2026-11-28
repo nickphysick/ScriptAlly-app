@@ -148,7 +148,7 @@ const STATES: State[] = [
     return `search ${open ? "opened" : "NOT opened"}, now ${(await p.locator('[data-bw="sheet"]').count()) ? "still open" : "closed"}`;
   } },
   { k: "after the colour key opened and closed", run: async (p) => {
-    await openBirds(p); await tapAt(p, '[data-bw="key-btn"]');
+    await openBirds(p); await tapAt(p, '[data-bw="more"]'); await frame(p, 250); await tapAt(p, '[data-bw="key-btn"]');
     const open = await p.locator('[data-bw="sheet"]').first().waitFor({ timeout: 3000 }).then(() => true).catch(() => false);
     await p.mouse.click(195, 30); await frame(p, 500);
     if (await p.locator('[data-bw="sheet"]').count()) { await p.keyboard.press("Escape"); await frame(p, 400); }
@@ -210,11 +210,7 @@ const DOCK: Target[] = [
   } },
 ];
 const WORLD_ONLY: Target[] = [
-  { k: "back", sel: '[data-bw="back"]', arrive: async (p) => {
-    const gone = (await p.locator('[data-bw="world"]').count()) === 0;
-    const hit = await p.evaluate(() => { const h = document.elementFromPoint(195, 520) as HTMLElement | null; return { inWorld: !!h?.closest('[data-bw="world"]'), where: `${location.pathname}${location.search}` }; });
-    return { ok: gone && !hit.inWorld, why: `${hit.where} · world ${gone ? "gone" : "still mounted"}` };
-  } },
+  /* polish v1.1: Back is gone from Birds-eye's header (the dock leaves it) */
   { k: "List", sel: '[data-bw="list"]', arrive: (p) => onTop(p, '[data-pa4="queries"][data-view="list"]') },
 ];
 
