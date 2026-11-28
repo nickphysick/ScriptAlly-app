@@ -150,7 +150,7 @@
   .pa5 .pa5-hd .pa5-hd-m { width: 76px; }
 
   /* ── the Birds-eye block's label, as the Agents tab's summary wears it (the block itself is retired: Phone Birds-eye
-     first look v1 puts birds/BirdsPreview on Today) ── */
+     first look v1 and polish v1 put Birds-eye's own card on Today: birds/MyQueriesCard) ── */
   .pa5 .pa5-be .pa5-be-l { min-height: 0; color: var(--ps-ink); }
 
   /* ── the page under it: "See all queries" as the sheet's text link, inside the one gutter ── */

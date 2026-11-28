@@ -1,0 +1,86 @@
+[
+ {
+  "lock": "BFL-1",
+  "where": "the day's first open: the bars grow in",
+  "ok": true,
+  "detail": "playing"
+ },
+ {
+  "lock": "BFL-3",
+  "where": "near the start (60ms) every count reads 0 (4 headings)",
+  "ok": true,
+  "detail": "[{\"g\":\"Needs action\",\"n\":61,\"shown\":\"0\"},{\"g\":\"Within their window\",\"n\":3,\"shown\":\"0\"},{\"g\":\"No reply date yet\",\"n\":6,\"shown\":\"0\"},{\"g\":\"Closed\",\"n\":18,\"shown\":\"0\"}]"
+ },
+ {
+  "lock": "BFL-2",
+  "where": "rows of two or more pieces (67 of 88): each piece starts as the one before ends",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BFL-2",
+  "where": "each row's wipe takes 560ms from its first piece to its end",
+  "ok": true,
+  "detail": "[560,560,560,560,560,560]"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "the last row's wipe ends by 2s (2000ms, 88 rows)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BFL-1",
+  "where": "at 432ms some rows are mid-wipe (9; 79 yet to start; 2 pieces growing)",
+  "ok": true,
+  "detail": "step 9.43ms"
+ },
+ {
+  "lock": "BFL-3",
+  "where": "by 900ms every count reads its number",
+  "ok": true,
+  "detail": "[{\"g\":\"Needs action\",\"n\":61,\"shown\":\"61\"},{\"g\":\"Within their window\",\"n\":3,\"shown\":\"3\"},{\"g\":\"No reply date yet\",\"n\":6,\"shown\":\"6\"},{\"g\":\"Closed\",\"n\":18,\"shown\":\"18\"}]"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "at 2.2s everything is in its end state (no animation on the world, every count its number)",
+  "ok": true,
+  "detail": "{\"look\":\"done\",\"n\":0,\"looking\":\"0\",\"badge\":false,\"news\":0}"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "a second open the same day only fades",
+  "ok": true,
+  "detail": "fade, 0 growing"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "a new day plays it again",
+  "ok": true,
+  "detail": "playing"
+ },
+ {
+  "lock": "BFL-4",
+  "where": "a touch at 300ms: within one frame nothing is still growing and every count reads its number",
+  "ok": true,
+  "detail": "{\"look\":\"done\",\"n\":0,\"counts\":true}"
+ },
+ {
+  "lock": "BFL-5",
+  "where": "reduced motion, the day's first open: the fade, and nothing scales",
+  "ok": true,
+  "detail": "fade, 0 animations"
+ },
+ {
+  "lock": "BFL-8",
+  "where": "Birds-eye while the bars grow: no text under 12px, never “overdue” or “late”",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BFL-8",
+  "where": "no page error",
+  "ok": true,
+  "detail": ""
+ }
+]

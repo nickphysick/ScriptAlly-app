@@ -13,7 +13,7 @@
  *   3. a row is ONE linear wipe from its first stage to its end over 560ms: each piece grows in turn, its share of the
  *      560ms its width's share of the row (the ref's 90ms floor is dropped: it let a short piece run on past the start
  *      of the next, which BFL-2 forbids);
- *   4. each "!" pops (0 → 1.35 → 1, 340ms) as its row's wipe reaches it;
+ *   4. each "!", and each mark on a bar (polish v1), pops (0 → 1.35 → 1, 340ms) as its row's wipe reaches it;
  *   5. the headings fade up 6px into place, and their counts tick from 0 to the number over 700ms (smoothstep).
  * `finish()` jumps everything to its end state at once (a touch anywhere) and hands back to the caller, who repaints.
  */
@@ -68,7 +68,8 @@ export function growIn(layer: HTMLElement, top0: number, onEnd: () => void): Loo
   const rows = new Map<string, HTMLElement[]>();
   for (const b of q(".bw-bar, .bw-ndt")) { const k = b.dataset.row ?? `y${Math.round(n(b, "top"))}`; if (!rows.has(k)) rows.set(k, []); rows.get(k)!.push(b); }
   const order = [...rows.entries()].map(([k, els]) => ({ k, els, t: Math.min(...els.map((e) => n(e, "top"))) })).sort((a, b) => a.t - b.t);
-  const marks = q(".bw-ovd");
+  /* the "!"s and (Birds-eye polish v1 §C) the marks on the bars: each pops as its row's wipe reaches it */
+  const marks = q(".bw-ovd, .bw-evmk");
   const step = rowStep(order.length, order.length ? hy.filter((y) => y < order[order.length - 1].t).length : 0);
   if (layer.dataset) layer.dataset.step = step.toFixed(2);
   order.forEach(({ k, els, t }, i) => {

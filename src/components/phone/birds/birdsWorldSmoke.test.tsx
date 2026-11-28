@@ -38,27 +38,31 @@ const ONLY_CLOSED = { agents: [agent(0), agent(1)], queries: [query(0, QueryStat
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
 const W = (court: string | null = null, route = "/queries/all?view=birds", data: Record<string, unknown> = QS(12)) =>
   renderPageSeededWith(P(<BirdsWorld court={court} onBack={() => {}} onList={() => {}} />), route, data);
-const pills = (html: string) => Object.fromEntries([...html.matchAll(/data-bw="chip" data-k="(\w+)" data-n="(\d+)"/g)].map((m) => [m[1], Number(m[2])]));
 
 describe("Phone Birds-eye world v2 renders", () => {
-  it("the header: the hawk badge, Birds-eye view, back, List, replay, search; four pills, counts after the label, adding up", () => {
+  it("polish v1: the slim header — one row: back, the hawk, Birds-eye view, List, filter, replay, the key, search; no pill row", () => {
     const html = W();
     expect(html).toContain('data-bw="world"');
+    expect(html).toMatch(/class="bw-hd col slim" data-bw="head" data-slim="1"/);
     expect(html).toMatch(/data-bw="badge" src="\/images\/qc\/be-hawk-head\.png"/);
     expect(html).toContain(">Birds-eye view</h1>");
-    for (const l of ["Back", "List", "Replay your campaign", "Search"]) expect(html).toContain(`aria-label="${l}"`);
-    expect(text(html)).toMatch(/All \d+ With you \d+ Needs chasing \d+ Waiting \d+/);
-    const p = pills(html);
-    expect(Object.keys(p)).toEqual(["all", "you", "chase", "wait"]);
-    expect(p.you + p.chase + p.wait).toBe(p.all);
-    expect(p.all).toBe(12);
+    const order = ["Back", "List", "Filter", "Replay your campaign", "What the colours mean", "Search"].map((l) => html.indexOf(`aria-label="${l}"`));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(html).toMatch(/aria-haspopup="menu" aria-expanded="false" data-bw="filter" data-f="all"/);
+    expect(html).not.toContain('data-bw="chips"');
+    expect(html).not.toContain('data-bw="chip"');
+    expect(html).not.toContain('data-bw="fmenu"');
+    expect(html).not.toContain('data-bw="fdot"');
     expect(text(html)).not.toMatch(/overdue|\blate\b/i);
   });
   it("&court= maps as v1's: you → With you, quiet → Needs chasing, agent → All; a filter shows its chip and hides the folded title", () => {
-    expect(W("you", "/queries/all?view=birds&court=you")).toMatch(/data-filter="you"[\s\S]*data-bw="fon" data-k="you">With you ✕/);
+    expect(W("you", "/queries/all?view=birds&court=you")).toMatch(/data-filter="you"[\s\S]*data-bw="fon" data-k="you" aria-label="With you: clear the filter"><span class="bw-fonl">With you<\/span><span aria-hidden="true">✕<\/span>/);
     expect(W("quiet")).toContain('data-filter="chase"');
     expect(W("agent")).toContain('data-filter="all"');
-    expect(W("you")).toMatch(/class="bw-hd filt"/);
+    expect(W("you")).toMatch(/class="bw-hd col slim filt"/);
+    /* a filter on: the dot on the filter button (polish v1) */
+    expect(W("you")).toMatch(/data-bw="filter" data-f="you"[\s\S]*?data-bw="fdot"/);
   });
   it("no queries at all: the card over the blurred invented sample; no pills, no hint", () => {
     const html = W(null, "/queries/all?view=birds", { agents: [], queries: [] });

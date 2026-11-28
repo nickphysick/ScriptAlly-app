@@ -74,7 +74,7 @@
   @keyframes pa5-fade { from { opacity: 0; } }
 
   /* ── PHASE B — the Birds-eye block's summary dress (ref `.sm`), kept for the Agents tab's summary (Phase C). The block
-     itself is retired (Phone Birds-eye first look v1: Today shows birds/BirdsPreview) and its rows, ruler and replay with it. ── */
+     itself is retired (Phone Birds-eye first look v1; Today now shows birds/MyQueriesCard, polish v1) and its rows, ruler and replay with it. ── */
   .pa5-be { position: relative; }
   .pa5-be-sm { padding: 4px 8px; }
   .pa5-be-sb { display: flex; gap: 3px; height: 10px; margin-bottom: 10px; }

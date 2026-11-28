@@ -25,9 +25,9 @@ const BIRDS = "/queries/all?view=birds";
 const TODAY = "/dashboard?tab=queries";
 const frame = (page: Page, ms = 450) => page.waitForTimeout(ms);
 
-const MUTS = ["daily", "overlap", "count", "touch", "rm", "order", "fly", "tiny"] as const;
+const MUTS = ["daily", "overlap", "count", "touch", "rm", "tiny"] as const;
 type Mut = (typeof MUTS)[number] | "";
-const MUT_LOCK: Record<Exclude<Mut, "">, string> = { daily: "BFL-1", overlap: "BFL-2", count: "BFL-3", touch: "BFL-4", rm: "BFL-5", order: "BFL-6", fly: "BFL-7", tiny: "BFL-8" };
+const MUT_LOCK: Record<Exclude<Mut, "">, string> = { daily: "BFL-1", overlap: "BFL-2", count: "BFL-3", touch: "BFL-4", rm: "BFL-5", tiny: "BFL-8" };
 /** each breakage, set before the page's own scripts run */
 const INIT_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   /* BFL-1: the day's memory never read, so every open plays it in full */
@@ -38,14 +38,10 @@ const INIT_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   touch: `window.addEventListener("pointerdown", (e) => e.stopPropagation(), true);`,
   /* BFL-5: reduced motion not consulted */
   rm: `{ const m = window.matchMedia.bind(window); window.matchMedia = (q) => (/reduced-motion/.test(q) ? { matches: false, media: q, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {}, onchange: null, dispatchEvent() { return false; } } : m(q)); }`,
-  /* BFL-7: the address's row never read */
-  fly: `{ const g = URLSearchParams.prototype.get; URLSearchParams.prototype.get = function (k) { return k === "fly" ? null : g.call(this, k); }; }`,
 };
 const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
-  /* BFL-6: the preview's rows drawn in reverse */
-  order: '[data-bwp="rows"] { display: flex !important; flex-direction: column-reverse !important; }',
-  /* BFL-8: the axis's dates at 10px */
-  tiny: '[data-bwp="axis"] span { font-size: 10px !important; }',
+  /* BFL-8: the ruler's dates at 10px */
+  tiny: '.bw-rm { font-size: 10px !important; }',
 };
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -110,13 +106,6 @@ const textAudit = (page: Page, sel: string) => page.evaluate((s) => {
   }
   return { small, words };
 }, sel);
-/** the Today preview, on the page */
-async function openToday(page: Page) {
-  await page.goto(TODAY);
-  await page.locator('[data-bwp="card"]:visible').first().waitFor({ timeout: 30_000 });
-  await page.evaluate(() => document.fonts.ready);
-  await frame(page, 600);
-}
 
 test.use({ viewport: PHONE, deviceScaleFactor: 2 });
 const runs: Mut[] = process.env.BFL_MUTATE === "all" ? ["", ...MUTS] : process.env.BFL_MUTATE ? (process.env.BFL_MUTATE.split(",") as Mut[]) : [""];
@@ -221,73 +210,22 @@ for (const mut of runs) {
       await frame(page, 300);
     }
 
-    /* ── BFL-6 · the preview's rows are the first four of Birds-eye's order within the window; "+ N more" adds up ── */
-    let picked: string[] = [];
-    if (on("BFL-6") || on("BFL-7") || on("BFL-8")) {
-      await setDay(page, "2000-1-1");
-      await openBirds(page);
-      await frame(page, 2400);
-      const world = await page.evaluate(() => {
-        const rows = [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((h) => ({ id: h.dataset.id!, top: h.getBoundingClientRect().top, closed: h.dataset.closed === "1", due: h.dataset.dueday === "" ? null : Number(h.dataset.dueday), start: h.dataset.start === "" ? null : Number(h.dataset.start) }));
-        rows.sort((a, b) => a.top - b.top);
-        return { open: rows.filter((r) => !r.closed).length, order: rows.filter((r) => !r.closed).map(({ id, due, start }) => ({ id, due, start })) };
-      });
-      const inWin = (r: { due: number | null; start: number | null }) => (r.due != null && r.due >= -14 && r.due <= 21) || (r.start != null && r.start >= -14);
-      const want = world.order.filter(inWin).slice(0, 4).map((r) => r.id);
-      await openToday(page);
-      await withCss();
-      const pv = await page.evaluate(() => {
-        const c = document.querySelector<HTMLElement>('[data-bwp="card"]')!;
-        const rows = [...c.querySelectorAll<HTMLElement>('[data-bwp="row"]')].map((r) => ({ id: r.dataset.id!, top: r.getBoundingClientRect().top })).sort((a, b) => a.top - b.top).map((r) => r.id);
-        const more = c.querySelector<HTMLElement>('[data-bwp="more"]');
-        return { rows, more: more ? Number(more.dataset.n) : null, moreText: more?.textContent ?? "", none: !!c.querySelector('[data-bwp="none"]') };
-      });
-      picked = pv.rows;
-      L.check("BFL-6", `the preview's rows are Birds-eye's first four in the window (${want.length} expected)`, JSON.stringify(pv.rows) === JSON.stringify(want) && (want.length > 0 || pv.none), `${JSON.stringify(pv.rows)} vs ${JSON.stringify(want)}`);
-      L.check("BFL-6", `"+ N more queries" adds up (${world.open} open − ${pv.rows.length} shown)`, pv.more === world.open - pv.rows.length && pv.moreText.trim() === `+ ${world.open - pv.rows.length} more queries`, `${pv.more} · "${pv.moreText}"`);
-    }
+    /* BFL-6 and BFL-7 (the three-week preview's order and its row's flight) retired with the preview: Birds-eye polish v1
+       puts My queries on Today (BP-6 in phoneBirdsPolish.measure.ts) */
 
-    /* ── BFL-8 · no text under 12px; never "overdue" or "late" (the preview; Birds-eye mid-grow and at its end) ── */
+    /* ── BFL-8 · no text under 12px; never "overdue" or "late" (Birds-eye mid-grow; Today's card is BP-8's) ── */
     if (on("BFL-8")) {
-      if (!(await page.locator('[data-bwp="card"]:visible').count())) { await openToday(page); await withCss(); }
-      const a = await textAudit(page, '[data-bwp="card"]');
-      L.check("BFL-8", "Today's preview: no text under 12px", a.small.length === 0, a.small.slice(0, 6).join(" · "));
-      L.check("BFL-8", "Today's preview: never “overdue” or “late”", a.words.length === 0, a.words.join(" · "));
       await setDay(page, null);
       const how = await openBirds(page);
+      await withCss();
       if (how === "playing") await until(page, 400);
       const b = await textAudit(page, '[data-bw="world"]');
       L.check("BFL-8", "Birds-eye while the bars grow: no text under 12px, never “overdue” or “late”", b.small.length === 0 && b.words.length === 0, [...b.small, ...b.words].slice(0, 6).join(" · "));
       await frame(page, 2300);
     }
 
-    /* ── BFL-7 · a preview row opens Birds-eye with that row on screen and glowing ── */
-    if (on("BFL-7")) {
-      await setDay(page, "2000-1-1");
-      await openToday(page);
-      const ids = picked.length ? picked : await page.locator('[data-bwp="row"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-id") ?? ""));
-      const id = ids[Math.min(1, ids.length - 1)];
-      if (id) {
-        await page.locator(`[data-bwp="row"][data-id="${id}"]`).first().click();
-        await page.locator('[data-bw="world"]').first().waitFor({ timeout: 20_000 });
-        await page.waitForFunction((x) => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.flown === x, id, { timeout: 8000 }).catch(() => {});
-        await frame(page, 900);
-        const r = await page.evaluate((x) => {
-          const w = document.querySelector<HTMLElement>('[data-bw="world"]')!, vp = document.querySelector<HTMLElement>('[data-bw="vp"]')!.getBoundingClientRect();
-          const hit = document.querySelector<HTMLElement>(`[data-bw="row"][data-id="${x}"]`)?.getBoundingClientRect();
-          const glow = document.querySelector<HTMLElement>('[data-bw="glow"]')?.getBoundingClientRect();
-          const foot = Number(w.dataset.top);
-          return { flown: w.dataset.flown ?? "", hit: hit ? { t: hit.top, b: hit.bottom } : null, glow: glow ? { t: glow.top, b: glow.bottom } : null, foot, vb: vp.bottom, url: location.search };
-        }, id);
-        const onScreen = !!r.hit && r.hit.t >= r.foot - 1 && r.hit.b <= r.vb;
-        const glowing = !!r.glow && !!r.hit && Math.abs(r.glow.t - r.hit.t) < 2;
-        L.check("BFL-7", "tapping a preview row: Birds-eye opens with that row on screen and glowing", r.flown === id && onScreen && glowing, JSON.stringify(r));
-        L.check("BFL-7", "the address no longer names the row (a later open does not fly again)", !/fly=/.test(r.url), r.url);
-      } else L.check("BFL-7", "the preview has a row to tap", false, "none");
-    }
-
     L.check("BFL-8", "no page error", errs.length === 0, errs.slice(0, 3).join(" · "));
-    L.done(ONLY.length ? 1 : 14);
+    L.done(ONLY.length ? 1 : 12);
   });
 }
 
@@ -316,11 +254,5 @@ test("Birds-eye first look v1 — the shots beside the ref's", async ({ page }, 
     pairs.push(name);
     if (t != null) await frame(page, 2300);
   }
-  await openToday(page);
-  await page.locator('[data-bwp="card"]').first().evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior }));
-  await frame(page, 400);
-  await page.screenshot({ path: `${DIR}/shots/07-today-preview-build.png` });
-  copyFileSync(`${REF}/07-today-preview.png`, `${DIR}/shots/07-today-preview-ref.png`);
-  pairs.push("07-today-preview");
   writeFileSync(`${DIR}/shots/index.html`, `<!doctype html><meta charset="utf-8"><title>Birds-eye first look v1 — build beside ref</title><style>body{font:14px system-ui;margin:24px;background:#f4f2ee}section{margin:0 0 32px}h2{font-size:16px}div{display:flex;gap:16px}figure{margin:0}img{width:390px;border:1px solid #ccc;background:#fff}figcaption{font-size:12px;color:#555}</style>${pairs.map((p) => `<section><h2>${p}</h2><div><figure><img src="${p}-ref.png"><figcaption>ref</figcaption></figure><figure><img src="${p}-build.png"><figcaption>build</figcaption></figure></div></section>`).join("")}`);
 });

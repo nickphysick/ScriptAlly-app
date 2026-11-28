@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "BW-14",
+  "where": "the hawk's shadow paints above a group heading",
+  "ok": true,
+  "detail": "[\"bw-hsw\",\"bw-gh0 u\",\"bw-gband\",\"bw-w\",\"bw-vp\",\"pa-layer bw\"]"
+ },
+ {
+  "lock": "BW-14",
+  "where": "the line paints above the hawk",
+  "ok": true,
+  "detail": "[\"bw-fline\",\"bw-hs\",\"bw-hsw\",\"bw-hit\",\"bw-gband\",\"bw-pz\"]"
+ },
+ {
+  "lock": "BW-13",
+  "where": "no error from the world in the console (population 0 console errors in all)",
+  "ok": true,
+  "detail": ""
+ }
+]

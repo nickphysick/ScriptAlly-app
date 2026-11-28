@@ -91,7 +91,10 @@ describe("Phone Birds-eye world — the frame", () => {
     const mark = (/<i class="bw-ovd[^"]*" data-bw="mark"[^>]*>/.exec(f.html.slice(f.html.indexOf(q[1]) + q[1].length)) ?? [""])[0];
     expect(Math.abs(num(mark, "left") - num(q[1], "left"))).toBeLessThan(0.02);
     const w = world();
-    expect(drawWorld(w, w.fitView(), O()).html).toMatch(/class="bw-ovd dot" data-bw="mark"[^>]*><\/i>/);
+    /* fitted, the mark is a plain dot only where it is under 11px; polish v1's thicker bars make most fitted marks "!" */
+    const fm = /class="bw-ovd( dot)?" data-bw="mark"[^>]*--s:([\d.]+)px">(!?)<\/i>/.exec(drawWorld(w, w.fitView(), O()).html)!;
+    expect(fm).not.toBeNull();
+    expect([!!fm[1], fm[3]]).toEqual(Number(fm[2]) < 11 ? [true, ""] : [false, "!"]);
   });
   it("v3 calmer: no figure pills at any zoom; edge fades when zoomed in; gridlines only at rows of 44px or more", () => {
     for (const rp of [27, 40, 48]) for (const id of ["past", "closed", "three"]) expect(tags(at(rp, id).f.html, "fig")).toEqual([]);
@@ -159,5 +162,53 @@ describe("Phone Birds-eye world — the frame", () => {
     const s = sampleRows(), sw = makeWorld({ rows: s, filter: "all", vpW: 390, vpH: 784, bot: 88 });
     expect(drawWorld(sw, sw.fitView(), { nowMs: NOW, quietDays: 42, rt: null, rows: s }).html).toContain('data-bw="bar"');
     expect(esc(`<a href="x">'&'</a>`)).toBe("&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;");
+  });
+});
+
+describe("Birds-eye polish v1 §C — marks on the bars", () => {
+  it("each partial or full request and each pass draws its mark at its date, at every zoom; none in the replay", () => {
+    for (const rp of [0, 27, 40, 48]) {
+      const { w, S, f } = rp ? at(rp, "three") : { w: world(), S: world().fitView(), f: drawWorld(world(), world().fitView(), O()) };
+      const named = rp >= 24;
+      const marks = tags(f.html, "evmark");
+      /* "three" asked for a partial 60 days ago; "closed" passed 50 days ago */
+      const p = marks.find((m) => /data-k="partial"/.test(m) && /data-row="three"/.test(m));
+      const x = (d: number) => S.ox + w.wxd(d) * w.SX(S.z);
+      if (p) {
+        expect(num(p, "left")).toBeCloseTo(x(-60), 1);
+        const s = num(p, "--s");
+        expect(named ? s >= 16 && s <= 20 : s >= 11 && s <= 14).toBe(true);
+        expect(p).toContain(named ? 'class="bw-evmk mat"' : 'class="bw-evmk mat sm"');
+      }
+      if (!rp) {
+        expect(marks.some((m) => /data-k="partial"/.test(m))).toBe(true);
+        expect(marks.some((m) => /data-k="pass"/.test(m) && /data-row="closed"/.test(m))).toBe(true);
+        expect(marks.every((m) => { const s = num(m, "--s"); return s >= 11 && s <= 14; })).toBe(true);
+      }
+    }
+    /* sizes: named max(16, min(20, bar + 2)); fitted max(11, min(14, bar + 3)) */
+    const w48 = at(48, "three");
+    for (const m of tags(w48.f.html, "evmark")) { const s = num(m, "--s"); expect(s >= 16 && s <= 20).toBe(true); }
+    /* never during the replay */
+    const w = world();
+    expect(tags(drawWorld(w, w.fitView(), O({ rt: -20 })).html, "evmark")).toEqual([]);
+  });
+  it("materials are navy, a pass grey; the partial is the app's sample-pages icon, the pass a thumbs-down", () => {
+    const html = drawWorld(world(), world().fitView(), O()).html;
+    expect(html).toMatch(/class="bw-evmk mat sm"[^>]*data-k="partial"[^>]*><svg[^>]*><rect x="7\.5" y="5\.5" width="12" height="15\.5" rx="2"\/>/);
+    expect(html).toMatch(/class="bw-evmk pass sm"[^>]*data-k="pass"[^>]*><svg[^>]*><path d="M17 14V2"\/>/);
+  });
+  it("a name never runs under a mark: it stops before the first, or sits after it and stops before the next", () => {
+    let seen = 0;
+    for (const rp of [27, 30, 34, 40, 48]) {
+      const f = at(rp, "three").f.html;
+      const marks = tags(f, "evmark").filter((m) => /data-row="three"/.test(m)).map((m) => ({ x: num(m, "left"), s: num(m, "--s") }));
+      const nm = tags(f, "name").find((t) => /data-row="three"/.test(t) && /left:/.test(t));
+      if (!nm) continue;
+      const l = num(nm, "left"), r = l + num(nm, "max-width");
+      if (marks.length) seen++;
+      for (const m of marks) expect(r <= m.x - m.s / 2 || l >= m.x + m.s / 2).toBe(true);
+    }
+    expect(seen).toBeGreaterThan(0);
   });
 });

@@ -148,7 +148,7 @@ const REPLAY_KEYS = ["pa41.birds-view.replayed", "pa41.birds-card.replayed", "bw
 const clearReplays = (page: Page) => page.evaluate((ks) => { try { for (const k of ks) localStorage.removeItem(k); } catch { /* none */ } }, REPLAY_KEYS);
 const markReplayed = (page: Page) => page.evaluate((ks) => { try { const d = new Date(); const t = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; for (const k of ks) localStorage.setItem(k, t); } catch { /* none */ } }, REPLAY_KEYS);
 const blockIntoView = async (page: Page) => {
-  await page.evaluate(() => document.querySelector('[data-bwp="card"]')?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior })); /* first look v1: Birds-eye's preview */
+  await page.evaluate(() => document.querySelector('[data-bwq="card"]')?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior })); /* polish v1: My queries */
   await page.waitForTimeout(500);
   /* the pinned slim bar and tab strip cover the top: bring the block below them */
   await page.evaluate(() => { const sc = document.getElementById("app-stage-scroll"); if (sc) sc.scrollTop -= 140; });
@@ -294,7 +294,7 @@ const REACH: Reach[] = [
   { page: "To do's tasks (v4's tasks page)", dock: "todo", taps: [], arrive: 'vis:[data-pa5="todo"]' },
   { page: "A task's journey", dock: "todo", taps: ['[data-pa5="todo-verb"]'], arrive: 'vis:[data-tdp="task"]' },
   { page: "Queries list (/queries)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="all-queries"]'], arrive: "path:/queries/all" },
-  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-bwp="all"]'], arrive: 'vis:[data-pa5="birds-view"]' }, /* first look v1: Today's preview */
+  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-bwq="card"]'], arrive: 'vis:[data-pa5="birds-view"]' }, /* polish v1: Today's My queries */
   { page: "A query's page", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-ps="move-row"]'], arrive: 'vis:[data-pqs="sheet"]' }, /* Phone query sheet v1: the one sheet; first look v1: from a Your move row (the preview's rows open Birds-eye) */
   { page: "Agents (/agents)", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]'], arrive: 'vis:[data-pa5="agents-tab"]' },
   { page: "Everyone on your list", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]', '[data-pa5="see-all-agents"]'], arrive: 'vis:[data-pa4="agents-all"]' },
@@ -379,7 +379,7 @@ group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async 
      Retired with BirdsViewV5 (the world's own locks are tests/e2e/phoneBirdsWorld.measure.ts): PA41-8 (groups fold at
      five), PA5-8's 28px rows, 18 in sight and the fixed name column on a drag, PA5-6's notch and deeper segment in the
      view, and the 184px landscape name column. */
-  await press(page, '[data-bwp="all"]');
+  await press(page, '[data-bwq="card"]');
   await page.locator('[data-bw="world"]').first().waitFor();
   await page.waitForTimeout(800);
   await mutate(page);
@@ -629,7 +629,7 @@ const sweep = (page: Page, roots: string): Promise<Sweep> => page.evaluate((rs) 
     }
     if (e.matches("button:not([disabled]), a[href], [role='button'], [role='tab'], input, textarea, select") && !e.closest("[aria-hidden='true']")) {
       out.taps++;
-      const row28 = e.matches('[data-bwp="row"]') || !!e.closest('[data-bw="world"]'); /* the preview's rows are the ref's 32 (first look v1) */
+      const row28 = !!e.closest('[data-bw="world"]');
       if (!row28 && (r.width < 47.5 || r.height < 47.5)) out.smallTap.push(`${String(e.className || e.tagName).slice(0, 30)} "${e.textContent?.trim().slice(0, 20)}" ${Math.round(r.width)}×${Math.round(r.height)}`);
     }
     if (r.right > vw + 1) { let a = e.parentElement, sc = false; while (a) { const ov = getComputedStyle(a).overflowX; if (/auto|scroll|hidden|clip/.test(ov)) { sc = true; break; } a = a.parentElement; } if (!sc) out.wide.push(`${String(e.className).slice(0, 30)} right ${Math.round(r.right)}`); }

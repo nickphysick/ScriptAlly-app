@@ -23,9 +23,20 @@
  */
 import {
   GAP, RULE, WX, aheadTx, bandOf, barBox, clipR, dm, edgeOf, fadedBand, fadedEdge, hatchOf, isNoDate, monthOf, outOn,
-  rowSegs, rulerMarks, scrubLabel, shortName, spaced, stageTx, type BwRow, type BwSeg, type BwView, type World,
+  rowSegs, rulerMarks, scrubLabel, shortName, spaced, stageTx, type BwRow, type BwSeg, type BwView, type World, type MarkKind, markOf, markSize,
 } from "../../../lib/birdsWorld";
+import { MATERIAL_ICON_INNER } from "../../shared/MaterialIcon";
 
+/** the marks' drawings: the app's sample-pages icon for a partial (MATERIAL_ICON_INNER.pages); the app has no
+ *  full-manuscript icon (materialIcon.ts leaves it out on purpose), so the full is the ref's pages mark (EVMAT); the pass
+ *  is the app's icon set's thumbs-down (lucide-react ThumbsDown) */
+const svg = (inner: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+export const MARK_SVG: Record<MarkKind, string> = {
+  partial: svg(MATERIAL_ICON_INNER.pages),
+  full: svg('<path d="M8 3h7l4 4v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/><path d="M9.5 13h6M9.5 16.5h4"/>'),
+  pass: svg('<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/>'),
+};
+const MARK_TITLE: Record<MarkKind, string> = { partial: "Asked for a partial", full: "Asked for the full", pass: "Passed" };
 export const esc = (s: string): string => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const px = (n: number) => `${Math.round(n * 100) / 100}px`;
 const CHEV = '<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -115,23 +126,42 @@ function inRow(W: World, r: BwRow, ry: number, rp: number, X: (x: number) => num
     const rad = `border-radius:${s.first ? `${px(th / 2)} 0 0 ${px(th / 2)}` : "0"}${rr ? `;border-top-right-radius:${px(th / 2)};border-bottom-right-radius:${px(th / 2)}` : ""}`;
     out.push(`<i class="bw-bar${s.first ? "" : " mid"}${rr ? "" : " open"}${cl}" ${data} style="left:${px(a)};width:${px(Math.max(3, b - a - gap))};top:${px(by)};height:${px(th)};${segBg(s)};${rad}">${two ? inBar(s, vis(a, b - gap, vpW), r, o.nowMs) : ""}</i>`);
   }
+  /* Birds-eye polish v1 §C: a mark at each partial or full request and each pass — a white disc on the bar at the
+     event's date, above the bar and below the "!"; never during the replay */
+  const markXs: number[] = [];
+  if (rt == null) {
+    const sz = markSize(named, th), cy = by + th / 2;
+    for (const e of r.ev) {
+      const k = markOf(e.status);
+      if (!k) continue;
+      const ex = X(W.wxd(e.d));
+      if (ex < -20 || ex > vpW + 20) continue;
+      markXs.push(ex);
+      out.push(`<i class="bw-evmk ${k === "pass" ? "pass" : "mat"}${named ? "" : " sm"}" data-bw="evmark" data-k="${k}" data-row="${esc(r.id)}" data-day="${e.d}" title="${MARK_TITLE[k]}" style="left:${px(ex)};top:${px(cy)};--s:${px(sz)}">${MARK_SVG[k]}</i>`);
+    }
+  }
   if (named && rt == null && r.due != null && r.due >= 0) out.push(`<i class="bw-tick" data-bw="tick" style="left:${px(X(W.wxd(r.due)))};top:${px(by - 3)};height:${px(th + 6)}"></i>`);
   if (glow && o.glow!.d != null) out.push(`<i class="bw-chpt" data-bw="change" style="left:${px(X(W.wxd(o.glow!.d!)))};top:${px(by + th / 2)}"></i>`);
   if (o.scrub != null && named && scrubDay != null) out.push(scrubTag(r, o.scrub, by, th, scrubDay, o.quietDays));
   if (!one || x0 == null || x1 == null) return;
   let nx = Math.max(x0, 0) + 12;
   const ny = two ? by + 4 : by + (th - 18) / 2, edgeR = vpW - 12;
-  /* the name never runs under the "!": with no room before it, it sits just after it */
+  /* the name never runs under the "!" or (polish v1) a mark: it stops before the first one, or with no room before it,
+     sits just after it and stops before the next */
   const nameW = r.name.length * 8.1;
-  const before = ovX != null && ovX > nx - 12 ? ovX - 12 - nx : 1e9;
-  if (before < Math.min(nameW, 80) && ovX != null) nx = ovX + 12;
-  const avail = (before >= Math.min(nameW, 80) && ovX != null && ovX > nx ? Math.min(edgeR, ovX - 12) : edgeR) - 8 - nx;
+  const obst = [...(ovX != null ? [ovX] : []), ...markXs].sort((p, q) => p - q);
+  const first = obst.find((x) => x > nx - 12);
+  const before = first != null ? first - 12 - nx : 1e9;
+  let limit = edgeR;
+  if (first != null && before >= Math.min(nameW, 80)) limit = Math.min(edgeR, first - 12);
+  else if (first != null) { nx = first + 12; const next = obst.find((x) => x > first + 0.5); if (next != null) limit = Math.min(edgeR, next - 12); }
+  const avail = limit - 8 - nx;
   const agW = r.agency.length * 6.4 + 8, withAg = two && !!r.agency && nameW + agW <= avail;
   /* a bar too short for its name (a query sent days ago): the name sits just before the bar, on the white */
   const barW = Math.min(x1, edgeR) - Math.max(x0, 0), outR = Math.min(x0 - 10, edgeR - 8);
   const outTop = by + (th - 18) / 2;
-  if (barW < Math.min(nameW, 90) + 24 && outR - nameW - 4 > 8) out.push(`<span class="bw-inm out${two ? "" : " one"}" data-bw="name" style="right:${px(vpW - outR)};top:${px(outTop)}"><span class="in1">${esc(r.name)}</span></span>`);
-  else if (avail >= 48) out.push(`<span class="bw-inm${two ? "" : " one"}" data-bw="name" style="left:${px(nx)};top:${px(ny)};max-width:${px(avail)}"><span class="in1">${esc(r.name)}</span>${withAg ? `<small>${esc(r.agency)}</small>` : ""}</span>`);
+  if (barW < Math.min(nameW, 90) + 24 && outR - nameW - 4 > 8) out.push(`<span class="bw-inm out${two ? "" : " one"}" data-bw="name" data-row="${esc(r.id)}" style="right:${px(vpW - outR)};top:${px(outTop)}"><span class="in1">${esc(r.name)}</span></span>`);
+  else if (avail >= 48) out.push(`<span class="bw-inm${two ? "" : " one"}" data-bw="name" data-row="${esc(r.id)}" style="left:${px(nx)};top:${px(ny)};max-width:${px(avail)}"><span class="in1">${esc(r.name)}</span>${withAg ? `<small>${esc(r.agency)}</small>` : ""}</span>`);
 }
 
 /** a query with no reply date (ref `ndRow`): its bar to today in the Queried colours, then a dashed outline fading out
@@ -149,7 +179,7 @@ function ndRow(W: World, r: BwRow, ry: number, rp: number, X: (x: number) => num
   if (o.scrub != null && named && scrubDay != null) out.push(scrubTag(r, o.scrub, by, th, scrubDay, o.quietDays));
   if (!named) return;
   const nx = Math.max(a, 0) + 12, cx = Math.min(Math.max(b + 10, nx + r.name.length * 8.1 + 16), vpW - 150);
-  if (b - nx > 40) out.push(`<span class="bw-inm one" data-bw="name" style="left:${px(nx)};top:${px(by + (th - 18) / 2)};max-width:${px(Math.max(40, cx - nx - 8))}"><span class="in1">${esc(r.name)}</span></span>`);
+  if (b - nx > 40) out.push(`<span class="bw-inm one" data-bw="name" data-row="${esc(r.id)}" style="left:${px(nx)};top:${px(by + (th - 18) / 2)};max-width:${px(Math.max(40, cx - nx - 8))}"><span class="in1">${esc(r.name)}</span></span>`);
   out.push(`<button type="button" class="bw-ndset" data-bw="ndset" data-a="ndset" data-id="${esc(r.id)}" style="left:${px(cx)};top:${px(by + th / 2)}">+ Add reply date</button>`);
 }
 

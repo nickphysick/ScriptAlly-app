@@ -7,7 +7,7 @@
  * matchMedia, so the routes take their desktop path; the phone pieces are smoked directly. The rendered checks
  * (pinning, sizes, reachability) are Phase H's measurement.
  * Phase B: Today's header (TodayHeaderV5); the Queries tab's Birds-eye block is retired (Phone Birds-eye first look v1:
- * BirdsPreview, the next three weeks, below) — populated, one query, none.
+ * then polish v1's My queries, below) — populated, a group with nothing, none.
  * Phase E: the list's switch into Birds-eye (the view itself is now Phone Birds-eye world v1's, smoked in components/phone/birds).
  * Phase G: Profile (ProfileV5) for a founding writer and for everyone else, and the feedback sheet (FeedbackSheetV5)
  * composing and sent. ⚠️ NOTHING HERE SENDS A NOTE: lib/sendFeedback is mocked, and a static render clicks nothing.
@@ -38,7 +38,7 @@ import { TodoV5 } from "./TodoV5";
 import { MaterialsV5 } from "./MaterialsV5";
 import { V3Provider } from "../v3/V3Provider";
 import { TodayHeaderV5 } from "./TodayHeaderV5";
-import { BirdsPreview } from "../birds/BirdsPreview";
+import { MyQueriesCard } from "../birds/MyQueriesCard";
 import { AgentsTabV5 } from "./AgentsTabV5";
 import { GapsSheetV5 } from "./GapsSheetV5";
 import { QueriesV4 } from "../v4/QueriesV4";
@@ -117,16 +117,18 @@ describe("Phone app v5 renders", () => {
     expect(full).toMatch(/aria-selected="true"[^>]*data-pa5="tab" data-tab="queries"/);
     /* Phase B: v5's header; Birds-eye's preview (first look v1, in place of v5's block); no Up next card on Today */
     expect(full).toContain('data-pa5="today-hd"');
-    expect(full).toContain('data-bwp="card"');
+    expect(full).toContain('data-bwq="card"');
     expect(full).not.toContain('data-pa5="be"');
-    expect(full).not.toContain("Birds-eye view");
+    /* no Birds-eye title on Today (My queries' foot link reads "Birds-eye view ›", polish v1) */
+    expect(full).not.toContain(">Birds-eye view</h1>");
+    expect(full).toContain("Birds-eye view ›");
     expect(full).not.toContain('data-pa4="up-next"');
     expect(full).not.toContain('data-pa4="quiet"');
     expect(full).toContain("See all queries");
     expect(full).toContain("Active queries");
     expect(full).toContain("of your campaign");
     /* day one: no preview, the day-one card */
-    expect(empty).not.toContain('data-bwp="card"');
+    expect(empty).not.toContain('data-bwq="card"');
     expect(empty).toContain('data-pa4="dayone"');
   });
   it("Today's Agents tab is v5's (Phase C); its Activity tab is Lately only", () => {
@@ -200,40 +202,31 @@ describe("Phone app v5, Phase B — Today's header (and, since first look v1, Bi
     expect(one).not.toContain('data-pa5="chart"');
     expect(one).not.toContain('data-pa5="figure"');
   });
-  /* Phone Birds-eye first look v1 retires the block: Today's Queries tab shows Birds-eye's own preview, the next three
-     weeks (birds/BirdsPreview); its order is lib/birdsPreview's unit test, its measurement BFL-6 to BFL-8 */
-  it("the preview, populated: Birds-eye, See it all, the next three weeks, the axis with Today, four rows at most, + N more", () => {
-    const html = renderPageSeededWith(P(<BirdsPreview />), "/dashboard", QS(11));
-    expect(html).toContain('data-bwp="card"');
-    expect(html).toContain(">Birds-eye</div>");
-    expect(html).toContain("See it all ›");
-    expect(html).toContain("The next three weeks");
-    expect(html).toContain('data-bwp="axis"');
-    expect(html).toContain(">Today</b>");
-    const rows = html.match(/data-bwp="row"/g)?.length ?? 0;
-    expect(rows).toBeGreaterThan(0);
-    expect(rows).toBeLessThanOrEqual(4);
-    const more = Number((html.match(/data-bwp="more" data-n="(\d+)"/) ?? [])[1]);
-    expect(more).toBe(11 - rows);
-    expect(html).toContain(`+ ${more} more queries`);
-    /* each row: the name, the bar in its stage's colour, the line at today, the words on the right */
-    expect(html).toMatch(/<b class="bwp-nm">Agent Number\d+<\/b>/);
-    expect(html).toMatch(/class="bwp-b"[^>]*><i style="left:[\d.]+px;width:[\d.]+px;background:/);
-    expect(html).toMatch(/your move|\d+d past|\d{1,2} [A-Z][a-z]{2}/);
+  /* Birds-eye polish v1: Today's Queries tab shows My queries — Birds-eye's four groups and their counts (MyQueriesCard);
+     its counts against Birds-eye are BP-6 */
+  it("My queries, populated: the sand band, the four groups in Birds-eye's order with counts that add up, bars by count, the foot", () => {
+    const html = renderPageSeededWith(P(<MyQueriesCard />), "/dashboard", QS(11));
+    expect(html).toMatch(/<button type="button" class="ps-card bwq" data-bwq="card" aria-label="My queries: open Birds-eye view">/);
+    expect(html).toMatch(/class="bwq-band" style="background:#f7efe3">My queries</);
+    const rows = [...html.matchAll(/data-bwq="row" data-g="([^"]+)" data-n="(\d+)"/g)].map((m) => [m[1], Number(m[2])] as const);
+    expect(rows.map((r) => r[0])).toEqual(["Needs action", "Within their window", "No reply date yet", "Closed"]);
+    expect(rows.reduce((a, r) => a + r[1], 0)).toBe(11);
+    const max = Math.max(...rows.map((r) => r[1]));
+    for (const [, n] of rows) if (n === max) expect(html).toContain(`data-n="${n}"><span class="bwq-l">`);
+    expect(html).toMatch(/data-bwq="bar" style="width:150px;background:/);
+    expect(html).toMatch(/data-bwq="link" data-ps-cap="">[\s\S]*Birds-eye view ›/);
     expect(html).not.toMatch(/overdue|\blate\b/i);
   });
-  it("the preview on the smoke seed: its rows (or the nothing-due line), and + N more as open less shown, only when above 0", () => {
-    const html = renderPageSeeded(P(<BirdsPreview />), "/dashboard");
-    expect(html).toContain('data-bwp="card"');
-    const n = Number((html.match(/data-bwp="card" data-n="(\d+)"/) ?? [])[1]), open = Number((html.match(/data-open="(\d+)"/) ?? [])[1]);
-    expect(n === 0 ? html.includes("Nothing due in the next three weeks") : (html.match(/data-bwp="row"/g)?.length ?? 0) === n).toBe(true);
-    if (open - n > 0) expect(html).toContain(`data-bwp="more" data-n="${open - n}"`); else expect(html).not.toContain('data-bwp="more"');
+  it("My queries keeps a group with nothing in it: 0 and no bar", () => {
+    const html = renderPageSeededWith(P(<MyQueriesCard />), "/dashboard", QS(3));
+    const empty = [...html.matchAll(/data-bwq="row" data-g="([^"]+)" data-n="0"><span class="bwq-l">[^<]+<\/span><i class="bwq-bar none"/g)];
+    expect(empty.length).toBeGreaterThan(0);
   });
-  it("Today mounts the preview with queries, and day one's card with none", () => {
+  it("Today mounts My queries with queries, and day one's card with none", () => {
     const some = renderPageSeededWith(P(<TodayV5 />), "/dashboard", QS(3));
-    expect(some).toContain('data-bwp="card"');
+    expect(some).toContain('data-bwq="card"');
     const none = renderPage(P(<TodayV5 />), "/dashboard");
-    expect(none).not.toContain('data-bwp="card"');
+    expect(none).not.toContain('data-bwq="card"');
     expect(none).not.toContain('data-pa5="be"');
   });
 });
@@ -743,7 +736,7 @@ describe("Phone app v5, Phase G — the sheet sends through the app's one feedba
     expect(rd("../v4/renderV4.tsx")).toContain('if (o.type === "feedback") return <FeedbackSheetV5 about={o.about} kind={o.kind ?? null} />;');
   });
   it("the founding writer's road is on Profile only: not on Today or its tabs", () => {
-    for (const f of ["./TodayV5.tsx", "./AgentsTabV5.tsx", "./TodayHeaderV5.tsx", "../birds/BirdsPreview.tsx", "./TodoV5.tsx", "./MaterialsV5.tsx"]) expect(rd(f), f).not.toContain("FoundingCard");
+    for (const f of ["./TodayV5.tsx", "./AgentsTabV5.tsx", "./TodayHeaderV5.tsx", "../birds/MyQueriesCard.tsx", "./TodoV5.tsx", "./MaterialsV5.tsx"]) expect(rd(f), f).not.toContain("FoundingCard");
     expect(rd("./ProfileV5.tsx")).toContain("<FoundingCardV5 ");
   });
   it("/you is Profile, and YouV4 is gone", () => {

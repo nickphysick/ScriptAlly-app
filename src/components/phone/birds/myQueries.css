@@ -1,0 +1,19 @@
+/* ── BIRDS-EYE POLISH v1 §E — My queries on Today (ref `.mcard`, `.mframe`, `.mband.sand`, `.msp`, `.mr`, `.mlink`) ──
+   Below 768px only. The card is the page's white card (`.ps-card`) with a 6px rim; inside it the frame (its 12px radius,
+   the sand band and the bars' colours are inline: the brief's values, off the phone sheet's scale), a 1px line as a
+   border (the census allows only the shadow tokens). Rows 30 high with hairlines; the foot's 12px words are a caption. */
+@media (max-width: 767.98px) {
+  .bwq { display: block; width: calc(100% - 2 * var(--ps-gutter)); margin-top: 16px; padding: 6px; border: 0; text-align: left; font: inherit; color: var(--ps-ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .bwq-frame { display: block; overflow: hidden; padding-bottom: 6px; border: 1px solid rgba(31, 38, 51, 0.16); }
+  .bwq-band { display: flex; align-items: center; height: 40px; padding: 0 12px; border-bottom: 1px solid rgba(31, 38, 51, 0.08); font: 600 14px var(--pa-sans); color: var(--ps-ink); }
+  .bwq-rows { display: block; margin: 4px 12px 0; }
+  .bwq-r { display: flex; align-items: center; gap: 10px; height: 30px; border-top: 1px solid var(--ps-rule); }
+  .bwq-r:first-child { border-top: 0; }
+  .bwq-l { flex: none; width: 140px; font: 400 14px var(--pa-sans); color: var(--ps-body); }
+  .bwq-bar { flex: none; height: 12px; border-radius: 999px; }
+  .bwq-bar.none { width: 0; }
+  /* the count in Special Elite: the app's brand fonts name elements as sans on every route, so two classes and !important */
+  .bwq .bwq-n { margin-left: auto; font: 400 16px var(--pa-type) !important; color: var(--ps-ink); }
+  .bwq-link { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 6px 12px 2px; padding-top: 8px; border-top: 1px solid var(--ps-rule); font: 600 12px var(--pa-sans); color: var(--ps-muted); }
+  .bwq-link svg { flex: none; }
+}

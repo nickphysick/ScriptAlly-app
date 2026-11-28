@@ -2,7 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phone Birds-eye nav fix v1 — BW-NAV-1, at 390 × 784 (Chromium phone, the harness's account on the emulator).
+ * Phone Birds-eye nav fix v1 — BW-NAV-1 (and Birds-eye polish v1's BP-7, which extends it with the filter menu, a
+ * filter on and the door from Today's My queries), at 390 × 784 (Chromium phone, the harness's account on the emulator).
  *
  * The bug (PA5-2's 28 reds): the Queries slot stays mounted when the writer leaves it, and Birds-eye portals its
  * full-screen layer into `document.body`, so once Birds-eye had been opened (the view is remembered for the session)
@@ -53,7 +54,6 @@ async function tapAt(page: Page, sel: string): Promise<boolean> {
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
   return true;
 }
-const zoom = async (page: Page, dy: number) => { await page.mouse.move(200, 430); await page.keyboard.down("Control"); await page.mouse.wheel(0, dy); await page.keyboard.up("Control"); await frame(page, 700); };
 const levelTo = async (page: Page, t: "All" | "Months" | "Weeks") => {
   await tapAt(page, '[data-bw="level-chip"]'); await frame(page, 300);
   await tapAt(page, `[data-bw="level"][data-t="${t}"]`); await frame(page, 700);
@@ -61,10 +61,34 @@ const levelTo = async (page: Page, t: "All" | "Months" | "Weeks") => {
 /** the middle of a drawn bar, for a tap or a hold */
 const barAt = (page: Page) => page.evaluate(() => {
   const top = Number(document.querySelector<HTMLElement>('[data-bw="world"]')!.dataset.top);
-  const bars = [...document.querySelectorAll<HTMLElement>('[data-bw="bar"]')].map((b) => b.getBoundingClientRect()).filter((r) => r.width > 24 && r.top > top + 30 && r.bottom < 640 && r.left > 20 && r.right < 370);
-  const r = bars[Math.floor(bars.length / 2)];
-  return r ? { x: r.left + Math.min(r.width / 2, 40), y: r.top + r.height / 2 } : null;
+  /* any drawn bar crossing the screen; the point mid-way along its visible part, clear of marks and "!"s (Birds-eye
+     world's own long-press lock finds its bars the same way) */
+  const avoid = [...document.querySelectorAll<HTMLElement>(".bw-evmk, .bw-ovd")].map((m) => m.getBoundingClientRect());
+  const bars = [...document.querySelectorAll<HTMLElement>('[data-bw="bar"][data-k="stage"]')].map((b) => b.getBoundingClientRect())
+    .filter((r) => r.height >= 10 && r.top > top + 30 && r.bottom < 640 && Math.min(r.right, 366) - Math.max(r.left, 24) > 30);
+  for (const r of [...bars.slice(Math.floor(bars.length / 2)), ...bars]) {
+    const l = Math.max(r.left, 24), rr = Math.min(r.right, 366);
+    for (const fx of [0.5, 0.3, 0.7]) {
+      const x = l + (rr - l) * fx, y = r.top + r.height / 2;
+      if (!avoid.some((m) => x > m.left - 4 && x < m.right + 4 && y > m.top - 4 && y < m.bottom + 4)) return { x, y };
+    }
+  }
+  return null;
 });
+/** real touches (the phone projects emulate a touch screen; the world's gestures are a finger's): one or two fingers
+ *  from `from` to `to` in `steps`, holding `holdMs` first; `during` runs before the fingers lift */
+async function touchPath(page: Page, from: [number, number][], to: [number, number][], steps = 10, holdMs = 0, during?: () => Promise<void>) {
+  const cdp = await page.context().newCDPSession(page);
+  const pts = (k: number) => from.map(([x, y], i) => ({ x: x + ((to[i][0] - x) * k) / steps, y: y + ((to[i][1] - y) * k) / steps, id: i }));
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: pts(0) });
+  if (holdMs) await page.waitForTimeout(holdMs);
+  for (let k = 1; k <= steps; k++) { await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: pts(k) }); await page.waitForTimeout(24); }
+  if (during) await during();
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await cdp.detach().catch(() => {});
+}
+/* names, marks and the ruler take no finger while a test holds a bar (as Birds-eye world's own locks do) */
+const offPE = (page: Page) => page.addStyleTag({ content: ".bw-hsw, .bw-hs, .bw-gh0, .bw-fline, .bw-ruler, .bw-inm, .bw-ovd, .bw-evmk { pointer-events: none !important; }" });
 
 /* ── the states, each from a fresh Birds-eye ── */
 type State = { k: string; run: (page: Page) => Promise<string> };
@@ -78,29 +102,41 @@ const STATES: State[] = [
     await frame(p, 200);
     return `look ${await p.evaluate(() => document.querySelector<HTMLElement>('[data-bw="layer"]')?.dataset.look)}`;
   } },
-  { k: "after pinch", run: async (p) => { await openBirds(p); await zoom(p, -400); return `z ${await p.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.z)}`; } },
-  { k: "after pan", run: async (p) => { await openBirds(p); await levelTo(p, "Months"); await p.mouse.move(200, 430); await p.mouse.wheel(160, 0); await frame(p, 500); return "panned"; } },
+  { k: "after pinch", run: async (p) => {
+    await openBirds(p);
+    const z = () => p.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.z ?? "");
+    /* the gesture is retried until it registers (a touch that lands before the world's handlers are wired does nothing) */
+    for (let i = 0; i < 3 && Number(await z()) <= 1.001; i++) { await frame(p, 500); await touchPath(p, [[175, 430], [225, 430]], [[60, 430], [340, 430]], 12); await frame(p, 800); }
+    return `z ${await z()}`;
+  } },
+  { k: "after pan", run: async (p) => {
+    await openBirds(p); await levelTo(p, "Months");
+    const ox = () => p.evaluate(() => Number(document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.ox));
+    const a = await ox(); await touchPath(p, [[200, 430]], [[320, 400]], 10); await frame(p, 700);
+    return `panned ${(await ox() - a).toFixed(0)}px`;
+  } },
   { k: "after scrub", run: async (p) => {
-    await openBirds(p); await p.mouse.move(200, 430); await p.mouse.down(); await frame(p, 600);
-    for (let i = 1; i <= 6; i++) { await p.mouse.move(200 + i * 10, 430); await frame(p, 30); }
-    const s = await p.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.scrub);
-    await p.mouse.up(); await frame(p, 300);
-    return `scrubbed (day ${s})`;
+    await openBirds(p);
+    let day = "";
+    for (let i = 0; i < 3 && !day; i++) { await frame(p, 500); await touchPath(p, [[200, 430]], [[260, 430]], 6, 600, async () => { day = await p.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.scrub ?? ""); }); await frame(p, 300); }
+    return `scrubbed (day ${day})`;
   } },
   { k: "after the query sheet opened and closed", run: async (p) => {
     await openBirds(p); await levelTo(p, "Months");
-    const b = await barAt(p); if (!b) return "no bar";
+    let b = await barAt(p); for (let i = 0; i < 3 && !b; i++) { await frame(p, 600); b = await barAt(p); } if (!b) return "no bar";
     await p.mouse.click(b.x, b.y);
     const open = await p.locator('[data-pqs="sheet"]').first().waitFor({ timeout: 6000 }).then(() => true).catch(() => false);
     await p.mouse.click(195, 20); await frame(p, 700);
     return `sheet ${open ? "opened" : "NOT opened"}, now ${(await p.locator('[data-pqs="sheet"]').count()) ? "still open" : "closed"}`;
   } },
   { k: "after the long-press menu opened and closed", run: async (p) => {
-    await openBirds(p); await levelTo(p, "Weeks");
-    const b = await barAt(p); if (!b) return "no bar";
-    await p.mouse.move(b.x, b.y); await p.mouse.down(); await frame(p, 700); await p.mouse.up();
+    await openBirds(p); await levelTo(p, "Months");
+    let b = await barAt(p); for (let i = 0; i < 3 && !b; i++) { await frame(p, 600); b = await barAt(p); } if (!b) return "no bar";
+    await offPE(p);
+    await p.mouse.move(b.x, b.y); await p.mouse.down(); await frame(p, 600); await p.mouse.up(); await frame(p, 300);
     const open = await p.locator('[data-bw="menu"]').first().waitFor({ timeout: 3000 }).then(() => true).catch(() => false);
-    await p.mouse.click(20, 200); await frame(p, 500);
+    /* closed by its veil — and only if it opened: a tap on the world would open a query instead */
+    if (open) { await p.locator('[data-bw="menu-veil"]').click({ position: { x: 10, y: 10 }, timeout: 3000 }).catch(() => {}); await frame(p, 500); }
     return `menu ${open ? "opened" : "NOT opened"}, now ${(await p.locator('[data-bw="menu"]').count()) ? "still open" : "closed"}`;
   } },
   { k: "after search opened and closed", run: async (p) => {
@@ -123,10 +159,29 @@ const STATES: State[] = [
     await tapAt(p, '[data-bw="level-chip"]'); await frame(p, 300);
     return `levels ${open ? "opened" : "NOT opened"}, now ${(await p.locator('[data-bw="level-list"]').count()) ? "still open" : "closed"}`;
   } },
+  /* Birds-eye polish v1 (BP-7): the filter menu, a filter on, and the door from Today's My queries */
+  { k: "after the filter menu opened and closed", run: async (p) => {
+    await openBirds(p); await tapAt(p, '[data-bw="filter"]'); await frame(p, 300);
+    const open = (await p.locator('[data-bw="fmenu"]').count()) > 0;
+    await p.mouse.click(40, 500); await frame(p, 400);
+    return `menu ${open ? "opened" : "NOT opened"}, now ${(await p.locator('[data-bw="fmenu"]').count()) ? "still open" : "closed"}`;
+  } },
+  { k: "after a filter picked", run: async (p) => {
+    await openBirds(p); await tapAt(p, '[data-bw="filter"]'); await frame(p, 300);
+    await tapAt(p, '[data-bw="fpick"][data-k="chase"]'); await frame(p, 700);
+    return `filter ${await p.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.filter)}`;
+  } },
+  { k: "opened from Today's My queries", run: async (p) => {
+    await setDay(p, today()); await p.goto("/dashboard?tab=queries");
+    await p.locator('[data-bwq="card"]').filter({ visible: true }).first().waitFor({ timeout: 20_000 });
+    await frame(p, 600); await tapAt(p, '[data-bwq="card"]');
+    await p.locator('[data-bw="world"]').first().waitFor({ timeout: 20_000 }); await frame(p, 900);
+    return "opened from My queries";
+  } },
   { k: "after pull to refresh", run: async (p) => {
-    await openBirds(p); await p.mouse.move(200, 300); await p.mouse.down();
-    for (let i = 1; i <= 12; i++) { await p.mouse.move(200, 300 + i * 18); await frame(p, 30); }
-    await p.mouse.up(); await frame(p, 1800);
+    await openBirds(p);
+    const n = () => p.evaluate(() => Number(document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.refreshes ?? 0));
+    for (let i = 0; i < 3 && (await n()) === 0; i++) { await frame(p, 500); await touchPath(p, [[200, 300]], [[200, 520]], 14); await frame(p, 1800); }
     return `refreshes ${await p.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.refreshes)}`;
   } },
 ];
@@ -181,7 +236,9 @@ test("Birds-eye nav fix v1 — BW-NAV-1", async ({ page }, info) => {
       const tapped = await tapAt(page, t.sel);
       await frame(page, 900);
       const r = tapped ? await t.arrive(page) : { ok: false, why: `no ${t.sel}` };
-      check("BW-NAV-1", `Birds-eye ${s.k} → ${t.k}`, r.ok, `${note} · ${r.why}`);
+      /* the state must have happened (not vacuous): its gesture or sheet really ran */
+      const real = !/NOT opened|no bar|still open|^z 1\.000|day \)|refreshes 0/.test(note);
+      check("BW-NAV-1", `Birds-eye ${s.k} → ${t.k}`, r.ok && real, `${note} · ${r.why}`);
     }
   }
 

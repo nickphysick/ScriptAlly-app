@@ -1,0 +1,728 @@
+[
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye straight after opening → Today",
+  "ok": false,
+  "detail": "opened (the grow-in playing) · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye straight after opening → To do",
+  "ok": false,
+  "detail": "opened (the grow-in playing) · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye straight after opening → Materials",
+  "ok": false,
+  "detail": "opened (the grow-in playing) · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye straight after opening → Profile",
+  "ok": false,
+  "detail": "opened (the grow-in playing) · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye straight after opening → +",
+  "ok": true,
+  "detail": "opened (the grow-in playing) · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye straight after opening → back",
+  "ok": true,
+  "detail": "opened (the grow-in playing) · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye straight after opening → List",
+  "ok": true,
+  "detail": "opened (the grow-in playing) · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the grow-in → Today",
+  "ok": false,
+  "detail": "grown in · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the grow-in → To do",
+  "ok": false,
+  "detail": "grown in · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the grow-in → Materials",
+  "ok": false,
+  "detail": "grown in · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the grow-in → Profile",
+  "ok": false,
+  "detail": "grown in · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the grow-in → +",
+  "ok": true,
+  "detail": "grown in · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the grow-in → back",
+  "ok": true,
+  "detail": "grown in · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the grow-in → List",
+  "ok": true,
+  "detail": "grown in · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a touch mid-animation → Today",
+  "ok": false,
+  "detail": "look done · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a touch mid-animation → To do",
+  "ok": false,
+  "detail": "look done · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a touch mid-animation → Materials",
+  "ok": false,
+  "detail": "look done · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a touch mid-animation → Profile",
+  "ok": false,
+  "detail": "look done · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a touch mid-animation → +",
+  "ok": true,
+  "detail": "look done · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a touch mid-animation → back",
+  "ok": true,
+  "detail": "look done · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a touch mid-animation → List",
+  "ok": true,
+  "detail": "look done · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pinch → Today",
+  "ok": false,
+  "detail": "z 5.657 · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pinch → To do",
+  "ok": false,
+  "detail": "z 5.657 · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pinch → Materials",
+  "ok": false,
+  "detail": "z 5.657 · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pinch → Profile",
+  "ok": false,
+  "detail": "z 5.657 · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pinch → +",
+  "ok": true,
+  "detail": "z 5.657 · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pinch → back",
+  "ok": true,
+  "detail": "z 5.657 · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pinch → List",
+  "ok": true,
+  "detail": "z 5.657 · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pan → Today",
+  "ok": false,
+  "detail": "panned 183px · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pan → To do",
+  "ok": false,
+  "detail": "panned 0px · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pan → Materials",
+  "ok": false,
+  "detail": "panned 183px · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pan → Profile",
+  "ok": false,
+  "detail": "panned 183px · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pan → +",
+  "ok": true,
+  "detail": "panned 184px · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pan → back",
+  "ok": true,
+  "detail": "panned 183px · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pan → List",
+  "ok": true,
+  "detail": "panned 185px · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after scrub → Today",
+  "ok": false,
+  "detail": "scrubbed (day -75) · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after scrub → To do",
+  "ok": false,
+  "detail": "scrubbed (day -75) · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after scrub → Materials",
+  "ok": false,
+  "detail": "scrubbed (day -75) · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after scrub → Profile",
+  "ok": false,
+  "detail": "scrubbed (day -75) · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after scrub → +",
+  "ok": true,
+  "detail": "scrubbed (day -75) · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after scrub → back",
+  "ok": true,
+  "detail": "scrubbed (day -75) · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after scrub → List",
+  "ok": true,
+  "detail": "scrubbed (day -75) · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the query sheet opened and closed → Today",
+  "ok": false,
+  "detail": "sheet opened, now closed · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the query sheet opened and closed → To do",
+  "ok": false,
+  "detail": "sheet opened, now closed · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the query sheet opened and closed → Materials",
+  "ok": false,
+  "detail": "sheet opened, now closed · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the query sheet opened and closed → Profile",
+  "ok": false,
+  "detail": "sheet opened, now closed · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the query sheet opened and closed → +",
+  "ok": true,
+  "detail": "sheet opened, now closed · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the query sheet opened and closed → back",
+  "ok": true,
+  "detail": "sheet opened, now closed · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the query sheet opened and closed → List",
+  "ok": true,
+  "detail": "sheet opened, now closed · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the long-press menu opened and closed → Today",
+  "ok": false,
+  "detail": "menu opened, now closed · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the long-press menu opened and closed → To do",
+  "ok": false,
+  "detail": "menu opened, now closed · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the long-press menu opened and closed → Materials",
+  "ok": false,
+  "detail": "menu opened, now closed · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the long-press menu opened and closed → Profile",
+  "ok": false,
+  "detail": "menu opened, now closed · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the long-press menu opened and closed → +",
+  "ok": true,
+  "detail": "menu opened, now closed · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the long-press menu opened and closed → back",
+  "ok": true,
+  "detail": "menu opened, now closed · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the long-press menu opened and closed → List",
+  "ok": true,
+  "detail": "menu opened, now closed · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after search opened and closed → Today",
+  "ok": false,
+  "detail": "search opened, now closed · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after search opened and closed → To do",
+  "ok": false,
+  "detail": "search opened, now closed · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after search opened and closed → Materials",
+  "ok": false,
+  "detail": "search opened, now closed · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after search opened and closed → Profile",
+  "ok": false,
+  "detail": "search opened, now closed · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after search opened and closed → +",
+  "ok": true,
+  "detail": "search opened, now closed · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after search opened and closed → back",
+  "ok": true,
+  "detail": "search opened, now closed · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after search opened and closed → List",
+  "ok": true,
+  "detail": "search opened, now closed · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the colour key opened and closed → Today",
+  "ok": false,
+  "detail": "key opened, now closed · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the colour key opened and closed → To do",
+  "ok": false,
+  "detail": "key opened, now closed · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the colour key opened and closed → Materials",
+  "ok": false,
+  "detail": "key opened, now closed · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the colour key opened and closed → Profile",
+  "ok": false,
+  "detail": "key opened, now closed · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the colour key opened and closed → +",
+  "ok": true,
+  "detail": "key opened, now closed · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the colour key opened and closed → back",
+  "ok": true,
+  "detail": "key opened, now closed · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the colour key opened and closed → List",
+  "ok": true,
+  "detail": "key opened, now closed · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the level chip opened and closed → Today",
+  "ok": false,
+  "detail": "levels opened, now closed · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the level chip opened and closed → To do",
+  "ok": false,
+  "detail": "levels opened, now closed · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the level chip opened and closed → Materials",
+  "ok": false,
+  "detail": "levels opened, now closed · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the level chip opened and closed → Profile",
+  "ok": false,
+  "detail": "levels opened, now closed · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the level chip opened and closed → +",
+  "ok": true,
+  "detail": "levels opened, now closed · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the level chip opened and closed → back",
+  "ok": true,
+  "detail": "levels opened, now closed · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the level chip opened and closed → List",
+  "ok": true,
+  "detail": "levels opened, now closed · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the filter menu opened and closed → Today",
+  "ok": false,
+  "detail": "menu opened, now closed · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the filter menu opened and closed → To do",
+  "ok": false,
+  "detail": "menu opened, now closed · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the filter menu opened and closed → Materials",
+  "ok": false,
+  "detail": "menu opened, now closed · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the filter menu opened and closed → Profile",
+  "ok": false,
+  "detail": "menu opened, now closed · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the filter menu opened and closed → +",
+  "ok": true,
+  "detail": "menu opened, now closed · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the filter menu opened and closed → back",
+  "ok": true,
+  "detail": "menu opened, now closed · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after the filter menu opened and closed → List",
+  "ok": true,
+  "detail": "menu opened, now closed · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a filter picked → Today",
+  "ok": false,
+  "detail": "filter chase · /dashboard · shown true · hit div.bw-w (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a filter picked → To do",
+  "ok": false,
+  "detail": "filter chase · /todo · shown true · hit div.bw-w (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a filter picked → Materials",
+  "ok": false,
+  "detail": "filter chase · /materials · shown true · hit div.bw-w (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a filter picked → Profile",
+  "ok": false,
+  "detail": "filter chase · /you · shown true · hit div.bw-w (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a filter picked → +",
+  "ok": true,
+  "detail": "filter chase · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a filter picked → back",
+  "ok": true,
+  "detail": "filter chase · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after a filter picked → List",
+  "ok": true,
+  "detail": "filter chase · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye opened from Today's My queries → Today",
+  "ok": false,
+  "detail": "opened from My queries · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye opened from Today's My queries → To do",
+  "ok": false,
+  "detail": "opened from My queries · /dashboard · shown false · hit b."
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye opened from Today's My queries → Materials",
+  "ok": false,
+  "detail": "opened from My queries · /dashboard · shown false · hit b."
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye opened from Today's My queries → Profile",
+  "ok": false,
+  "detail": "opened from My queries · /dashboard · shown false · hit b."
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye opened from Today's My queries → +",
+  "ok": false,
+  "detail": "opened from My queries · no sheet"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye opened from Today's My queries → back",
+  "ok": false,
+  "detail": "opened from My queries · /dashboard · world still mounted"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye opened from Today's My queries → List",
+  "ok": false,
+  "detail": "opened from My queries · /dashboard · shown false · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pull to refresh → Today",
+  "ok": false,
+  "detail": "refreshes 1 · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pull to refresh → To do",
+  "ok": false,
+  "detail": "refreshes 1 · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pull to refresh → Materials",
+  "ok": false,
+  "detail": "refreshes 1 · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pull to refresh → Profile",
+  "ok": false,
+  "detail": "refreshes 1 · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pull to refresh → +",
+  "ok": true,
+  "detail": "refreshes 1 · /queries/all?view=birds · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pull to refresh → back",
+  "ok": true,
+  "detail": "refreshes 1 · /queries/all · world gone"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Birds-eye after pull to refresh → List",
+  "ok": true,
+  "detail": "refreshes 1 · /queries/all · shown true · hit span.pa4-pv"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Today, after Birds-eye was opened → Today",
+  "ok": false,
+  "detail": "start: /dashboard · shown true · hit i.bw-gband (Birds-eye) · /dashboard · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Today, after Birds-eye was opened → To do",
+  "ok": false,
+  "detail": "start: /dashboard · shown true · hit i.bw-gband (Birds-eye) · /todo · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Today, after Birds-eye was opened → Materials",
+  "ok": false,
+  "detail": "start: /dashboard · shown true · hit i.bw-gband (Birds-eye) · /materials · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Today, after Birds-eye was opened → Profile",
+  "ok": false,
+  "detail": "start: /dashboard · shown true · hit i.bw-gband (Birds-eye) · /you · shown true · hit i.bw-hit (Birds-eye)"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Today, after Birds-eye was opened → +",
+  "ok": false,
+  "detail": "start: /dashboard · shown true · hit i.bw-gband (Birds-eye) · /dashboard · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "the Queries list, after Birds-eye was opened → Today",
+  "ok": true,
+  "detail": "start: /queries/all · shown true · hit button.pa4-ib2 un · /dashboard · shown true · hit span.bwq-r"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "the Queries list, after Birds-eye was opened → To do",
+  "ok": true,
+  "detail": "start: /queries/all · shown true · hit button.pa4-ib2 un · /todo · shown true · hit div.pa5-td"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "the Queries list, after Birds-eye was opened → Materials",
+  "ok": true,
+  "detail": "start: /queries/all · shown true · hit button.pa4-ib2 un · /materials · shown true · hit span.pa5m-tag"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "the Queries list, after Birds-eye was opened → Profile",
+  "ok": true,
+  "detail": "start: /queries/all · shown true · hit button.pa4-ib2 un · /you · shown true · hit h2.pa4-h"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "the Queries list, after Birds-eye was opened → +",
+  "ok": true,
+  "detail": "start: /queries/all · shown true · hit button.pa4-ib2 un · /queries/all · shown true · hit p.pa4-b pa4-body"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Agents, after Birds-eye was opened → Today",
+  "ok": false,
+  "detail": "start: /dashboard · shown false · hit span.tx · /dashboard · shown true · hit button."
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Agents, after Birds-eye was opened → To do",
+  "ok": false,
+  "detail": "start: /dashboard · shown false · hit span.tx · /dashboard · shown false · hit div.qad-plan qad-wsa"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Agents, after Birds-eye was opened → Materials",
+  "ok": false,
+  "detail": "start: /dashboard · shown false · hit span.tx · /dashboard · shown false · hit button."
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Agents, after Birds-eye was opened → Profile",
+  "ok": false,
+  "detail": "start: /dashboard · shown false · hit span.tx · /dashboard · shown false · hit button."
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "Agents, after Birds-eye was opened → +",
+  "ok": false,
+  "detail": "start: /dashboard · shown false · hit span.tx · no sheet"
+ },
+ {
+  "lock": "BW-NAV-1",
+  "where": "no page error",
+  "ok": true,
+  "detail": ""
+ }
+]

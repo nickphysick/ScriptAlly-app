@@ -213,7 +213,7 @@ async function probe(page: Page, roots: string[], extra: { cardSel?: string } = 
     const texts = all.filter((e) => [...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim()));
     const taps = all.filter((e) => e.matches("button, a[href], [role='button'], [role='tab'], input:not([type='hidden']), select, textarea") && !e.closest("[data-ps-skip]"));
     const isRow = (e: HTMLElement) => e.matches(".ps-row, .pa4-tap, .pa4-ib2, [data-pa4='qrow'], [data-pa4='feed-row'], .pa3-row, .pa-agrow")
-      || (taps.includes(e) && e.getBoundingClientRect().width >= vw * 0.8 && !!e.querySelector("svg, img, .pa-disc, .pa4-seal") && !e.matches(".ps-link, .pa4-link, .pa5-be-f, .ps-cta, .pa4-cta, .ps-tlink, .ps-tile"));
+      || (taps.includes(e) && e.getBoundingClientRect().width >= vw * 0.8 && !!e.querySelector("svg, img, .pa-disc, .pa4-seal") && !e.matches(".ps-link, .pa4-link, .pa5-be-f, .ps-cta, .pa4-cta, .ps-tlink, .ps-tile, .bwq"));
     const rows = all.filter(isRow);
     /* PS1-1 sizes */
     for (const e of texts) { const fs = getComputedStyle(e).fontSize; if (!SIZES.has(fs)) add("PS1-1", e, fs); else if (fs === "12px" && !e.closest("[data-ps-cap]")) add("PS1-1", e, "12px unmarked"); }
@@ -221,7 +221,8 @@ async function probe(page: Page, roots: string[], extra: { cardSel?: string } = 
     for (const e of texts) {
       const cs = getComputedStyle(e); const w = cs.fontWeight === "normal" ? "400" : cs.fontWeight === "bold" ? "700" : cs.fontWeight;
       if (w !== "400" && w !== "600") add("PS1-2", e, `weight ${w}`);
-      if (/Special Elite/.test(cs.fontFamily) && (parseFloat(cs.fontSize) < 20 || w !== "400")) add("PS1-2", e, `typewriter ${cs.fontSize} ${w}`);
+      /* Birds-eye polish v1's brief sets My queries' counts in Special Elite at 16px (the ref's `.mr b`): named, not a breach */
+      if (/Special Elite/.test(cs.fontFamily) && (parseFloat(cs.fontSize) < 20 || w !== "400") && !(e.matches(".bwq-n") && cs.fontSize === "16px" && w === "400")) add("PS1-2", e, `typewriter ${cs.fontSize} ${w}`);
     }
     /* PS1-3 page and cards */
     const ground = document.querySelector<HTMLElement>(".ws-main") ?? document.body;
@@ -236,9 +237,9 @@ async function probe(page: Page, roots: string[], extra: { cardSel?: string } = 
       const b = h.getBoundingClientRect(), cs = getComputedStyle(h);
       if (edge(h, b.left + parseFloat(cs.paddingLeft), b.right - parseFloat(cs.paddingRight))) add("PS1-4", h, `${Math.round(b.left + parseFloat(cs.paddingLeft))} / ${Math.round(vw - b.right + parseFloat(cs.paddingRight))}`);
     }
-    /* PS1-5 targets 48 × 48; a list row 64 (a Birds-eye row is the sheet's own 40; Today's Birds-eye preview rows the ref's 32, first look v1) */
-    for (const t of taps) { if (t.matches(".pa5-be-row, .bwp-r")) continue; const b = t.getBoundingClientRect(); if (b.width < 47.5 || b.height < 47.5) add("PS1-5", t, `${Math.round(b.width)}×${Math.round(b.height)}`); }
-    for (const r of rows) { if (r.matches(".pa5-be-row, .bwp-r")) continue; const b = r.getBoundingClientRect(); if (b.height < 63.5) add("PS1-5", r, `row ${Math.round(b.height)}`); }
+    /* PS1-5 targets 48 × 48; a list row 64 (a Birds-eye row is the sheet's own 40) */
+    for (const t of taps) { if (t.matches(".pa5-be-row")) continue; const b = t.getBoundingClientRect(); if (b.width < 47.5 || b.height < 47.5) add("PS1-5", t, `${Math.round(b.width)}×${Math.round(b.height)}`); }
+    for (const r of rows) { if (r.matches(".pa5-be-row")) continue; const b = r.getBoundingClientRect(); if (b.height < 63.5) add("PS1-5", r, `row ${Math.round(b.height)}`); }
     /* PS1-6 the grey never on the page */
     for (const e of texts) if (getComputedStyle(e).color === MUTED && bgOf(e) === PAGE) add("PS1-6", e, "grey on the page");
     /* PS1-7 one coloured card */
