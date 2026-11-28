@@ -2,6 +2,11 @@
 
 Branch `phone-birds-eye-first-look-v1`, cut from `origin/phone-query-sheet-v1` (41365751a). There is no `phone-query-sheet-v1-1`. Main had not moved (`origin/main` 7f70f99f7 is contained). Pushed, not merged. Below 768px only.
 
+- **Dev:** `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1` (bf98bf66c) is this branch merged onto `dev/bew33-clr13-qc1722-pqs1-qc1723`, which is Query Centre v172.3 over the query sheet, Birds-eye v3.3 and rows v1.3. It now serves **`index-CTspvepm.js`**, whose AppRoot chunk carries the first look and the preview.
+- **What dev served before (`index-Bzv5jGqr.js`):** a rebuild of that branch gave a different name. Byte-comparing the two builds shows the only difference is the app's build-date stamp (`BUILD="2026-11-27"` against "2026-11-28"), with the chunk names following from it. So the served bundle is that branch.
+- **The one merge conflict** was `design-refs/.refhashes.json`; both sides' entries are kept.
+- **On the merged tree:** tsc exits 0; Vitest has 979 files passed, 1 skipped (980), and 13865 tests passed, 4 skipped (13869).
+
 ## False premises
 
 1. **"28ms a row" and "about 2s" cannot both hold for a long campaign.** The harness has 88 rows. At the ref's spacing the last row would start at about 2.97s, after the two-second end. The build keeps 28ms a row whenever the last row's wipe still ends by 2s; otherwise it spaces the rows closer until it does (9.43ms for the harness's 88). See `rowStep` in `firstLook.ts`.
@@ -33,7 +38,7 @@ Branch `phone-birds-eye-first-look-v1`, cut from `origin/phone-query-sheet-v1` (
 |---|---|
 | 9ce9d84c8 | Phase 1: refs, the bars grow in |
 | f13b2980c | Phase 2: Today's preview |
-| PHASE3 | Phase 3: locks, screenshots |
+| c3620db76 | Phase 3: locks, screenshots |
 
 ## A. The first look (`components/phone/birds/firstLook.ts`)
 
