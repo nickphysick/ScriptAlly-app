@@ -509,3 +509,28 @@ test("L14 · the list just ends; Include closed is a tick that adds and removes 
   for (const [i, s] of sl.entries()) L.check(`slider ${i} · thumb centres on the track ends`, Math.abs(s.inL + 7 - s.trL) <= 0.5 && Math.abs(s.inR - 7 - s.trR) <= 0.5, `in ${s.inL.toFixed(1)}–${s.inR.toFixed(1)} · track ${s.trL.toFixed(1)}–${s.trR.toFixed(1)}`);
   L.done(10);
 });
+
+test("L15 · the loading shell: the list's own card and heading row with shapes, the panel's own frame; no figure; aria-busy", async ({ page }) => {
+  const L = new Ledger("L15");
+  /* the review aid holds the loading state (useQcLoad: never read in a production build); openRoute signs in and
+     settles ~3s, well inside the hold */
+  await page.addInitScript(() => { try { localStorage.setItem("sa.qc155.holdMs", "12000"); } catch { /* */ } });
+  await openRoute(page, "/queries", WIDE);
+  const r = await page.evaluate(() => {
+    const vis = (e: Element | null) => !!e && (e as HTMLElement).getBoundingClientRect().height > 0;
+    const list = [...document.querySelectorAll<HTMLElement>("[data-qc151='table']")].find(vis) ?? null;
+    const sk = list?.querySelector<HTMLElement>(".qc169-card [data-qc172='skeleton']") ?? null;
+    const head = list?.querySelector<HTMLElement>(".qc169-card .qc169-th") ?? null;
+    const rail = [...document.querySelectorAll<HTMLElement>(".qc153-railcol")].find(vis) ?? null;
+    const rsk = rail?.querySelector<HTMLElement>(".sk172-rail") ?? null;
+    return { busy: list?.getAttribute("aria-busy") ?? null, sk: !!sk, rows: sk?.querySelectorAll(".sk172-row").length ?? 0, head: !!head && vis(head), skText: sk?.innerText ?? "", rail: !!rsk, railText: rsk?.innerText ?? "", old: !!list?.querySelector(".qc155-sk, [data-qc155='skeleton']") };
+  });
+  L.check("the list is busy", r.busy === "true", `aria-busy=${r.busy}`);
+  L.check("the shell sits in the list card", r.sk && r.rows === 8, `${r.sk} · ${r.rows} rows`);
+  L.check("the real heading row above it", r.head, String(r.head));
+  L.check("no figure in the list's shell", r.sk && !/\d/.test(r.skText), JSON.stringify(r.skText.slice(0, 60)));
+  L.check("the panel's own frame", r.rail, String(r.rail));
+  L.check("no figure in the panel's shell", r.rail && !/\d/.test(r.railText), JSON.stringify(r.railText));
+  L.check("the old card-grid skeleton is gone", !r.old, String(r.old));
+  L.done(7);
+});

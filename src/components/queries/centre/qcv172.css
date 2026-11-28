@@ -188,3 +188,32 @@
 
 /* v172.4 — Include closed is a tick box under the quick picks, the Not dated tick's own look */
 .qs172-incs .qs172-ck { margin-top: 0; }
+
+/* ── v172.4 · the loading shell (QcSk172): the list's card and heading row, the panel's own frame, inert shapes ── */
+@keyframes sk172-sheen { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
+:is(.sk172, .sk172-rail) i:not(.ln) { display: block; height: 12px; border-radius: 6px; background-color: var(--sa-sk-base, #ece6de); background-image: var(--sa-sk-sheen); background-size: 600px 100%; animation: sk172-sheen 1.4s linear infinite; }
+:is(.sk172, .sk172-rail) i.sm { height: 10px; }
+.sk172-sec { display: flex; align-items: center; gap: 10px; padding: 20px 16px 12px; }
+.sk172-sec i { height: 16px !important; }
+.sk172-sec i.n { width: 24px; }
+.sk172-row { display: grid; grid-template-columns: var(--cols); column-gap: 18px; align-items: center; min-height: 94px; padding: 0 18px 0 16px; border-top: 1px solid rgba(28, 19, 15, 0.07); }
+.sk172-seal { width: 34px; height: 34px !important; border-radius: 50% !important; }
+.sk172-who, .sk172-nx { display: grid; gap: 9px; }
+.sk172-nx { justify-items: end; }
+.sk172-trk { display: flex; align-items: center; gap: 6px; padding-right: 18px; }
+.sk172-trk i.d, .sk172-stg i.d { flex: none; width: 16px; height: 16px !important; border-radius: 50% !important; }
+.sk172-trk i.ln { flex: 1; height: 2px; background: var(--sa-sk-base, #ece6de); }
+.sk172-rail { pointer-events: none; }
+.sk172-rail .qs172-h b { color: rgba(244, 238, 229, 0.85); }
+.sk172-qp { display: grid; justify-items: center; gap: 7px; padding: 9px 2px; }
+.sk172-qp i.big { width: 26px; height: 18px !important; }
+.sk172-qp i.sm { width: 60%; }
+.sk172-ck { display: flex; align-items: center; gap: 8px; padding: 2px 2px 0; }
+.sk172-ck i.box { width: 16px; height: 16px !important; border-radius: 4px !important; }
+.sk172-rail .qs172-s { display: grid; gap: 14px; }
+.sk172-t { width: 64px; height: 14px !important; }
+.sk172-stg { display: flex; justify-content: space-around; padding: 4px 0 18px; }
+.sk172-stg i.d { width: 20px; height: 20px !important; }
+.sk172-base { display: block; height: 28px; border-bottom: 2px solid var(--sa-sk-base, #ece6de); }
+.sk172-track { height: 4px !important; border-radius: 2px !important; margin-bottom: 14px; }
+@media (prefers-reduced-motion: reduce) { :is(.sk172, .sk172-rail) i { animation: none !important; } }

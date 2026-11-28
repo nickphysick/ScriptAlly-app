@@ -35,7 +35,8 @@ import { AppliedRow, type AppliedChip } from "../../shell/AppliedRow";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
 import { STAGE_COLOURS } from "../../../lib/stageColours";
-import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
+import { FirstPanel155, QuietPanel155 } from "./QcState155";
+import { RailSk172, Skeleton172 } from "./QcSk172";
 import { LoadFailed } from "../../notes/LoadFailed";
 import { ListCap169 } from "./QcRows169";
 import { QcRow170 } from "./QcRow170";
@@ -294,6 +295,9 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   const error155 = p.state155?.kind === "error" ? p.state155 : null;
   /* v155 §3 — loading: the list is busy and draws nothing until the skeleton is due (200ms), then the placeholders */
   const loading155 = p.state155?.kind === "loading";
+  /* v172.4 — once the skeleton is due (QC155_LOAD: nothing under 200ms), the loading shell on the page's own frames: the
+     list card with its heading row and shapes in its body, and the panel's frame in the rail; no figure until the data */
+  const sk172 = p.state155?.kind === "loading" && p.state155.show;
   const filtersOn = p.filterCount > 0;
 
   const heading = (k: SortKey151, label: string, cls: string) => {
@@ -409,7 +413,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
 
       {/* v153 — two columns: the filter rail (sticky) and the list column */}
       <div className="qc153-cl" data-qc153="columns">
-        <div className="qc153-railcol" data-qc153="rail-column" inert={first155 || !!error155 || undefined} data-qc155-inert={first155 || error155 ? "" : undefined} data-qc155-busy={loading155 ? "" : undefined}>{p.rail ?? null}</div>
+        <div className="qc153-railcol" data-qc153="rail-column" inert={first155 || !!error155 || undefined} data-qc155-inert={first155 || error155 ? "" : undefined} data-qc155-busy={loading155 ? "" : undefined}>{sk172 ? <RailSk172 /> : p.rail}</div>
         <div className="qc153-main" data-qc153="list-column">
           {/* v154 §6 — the slim bar sticks on a strip of the page's own ground that ends in a 22px fade */}
           <div className="qc154-tbw" data-qc154="toolbar" ref={tbRef}>{controlLine}</div>
@@ -432,7 +436,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
               {/* v155 §1 — nothing needs you: the panel above the first group, the list carrying on beneath it */}
               {p.state155?.kind === "quiet" && !empty ? <QuietPanel155 body={p.state155.body} /> : null}
               {error155 ? <LoadFailed words={error155.words} onRetry={error155.retry} busy={error155.busy} probe="queries" />
-                : loading155 ? (p.state155?.kind === "loading" && p.state155.show ? <Skeleton155 /> : null) : first155 ? <FirstPanel155 onImport={p.onImport} /> : empty ? (
+                : loading155 ? (sk172 ? wrap169(<Skeleton172 />) : null) : first155 ? <FirstPanel155 onImport={p.onImport} /> : empty ? (
                 <div className="qc151-emp" data-qc151="no-matches">
                   <b>No queries match</b>
                   <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>

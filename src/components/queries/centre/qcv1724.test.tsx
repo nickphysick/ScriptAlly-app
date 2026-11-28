@@ -59,3 +59,33 @@ describe("v172.4 · 1c Include closed is a tick box, like Not dated", () => {
     expect(css172).not.toMatch(/\.qs172-inc[\s.,:{]/);
   });
 });
+
+describe("v172.4 · 2 the loading shell on the page's own frames", () => {
+  it("Skeleton172: two groups (5 + 3 rows) on the list's grid, inert, no figure", async () => {
+    const m = await load<typeof import("./QcSk172")>("./QcSk172");
+    expect(m).toBeTruthy();
+    const Sk = m!.Skeleton172;
+    const html = renderToStaticMarkup(<Sk />);
+    expect(html).toMatch(/^<div class="sk172" data-qc172="skeleton" aria-hidden="true">/);
+    expect(html.match(/class="sk172-grp"/g)).toHaveLength(2);
+    expect(html.match(/class="sk172-row"/g)).toHaveLength(8);
+    expect(html.replace(/<[^>]*>/g, "")).not.toMatch(/\d/);
+  });
+  it("RailSk172: the panel's frame, a navy header reading Filter and no count, inert, no figure", async () => {
+    const m = await load<typeof import("./QcSk172")>("./QcSk172");
+    const Rail = m!.RailSk172;
+    const html = renderToStaticMarkup(<Rail />);
+    expect(html).toMatch(/^<aside class="qs172 sk172-rail" aria-hidden="true"><header class="qs172-h"><b>Filter<\/b><\/header>/);
+    expect(html.replace(/<[^>]*>/g, "")).toBe("Filter");
+  });
+  it("QcPage151: loading + show draws wrap169(<Skeleton172 />) and <RailSk172 /> — both gated on show — and no Skeleton155", () => {
+    expect(page).toMatch(/import \{ RailSk172, Skeleton172 \} from "\.\/QcSk172";/);
+    expect(page).toMatch(/const sk172 = p\.state155\?\.kind === "loading" && p\.state155\.show;/);
+    expect(page).toMatch(/loading155 \? \(sk172 \? wrap169\(<Skeleton172 \/>\) : null\)/);
+    expect(page).toMatch(/\{sk172 \? <RailSk172 \/> : p\.rail\}/);
+    expect(page).not.toMatch(/Skeleton155/);
+  });
+  it("the shapes' sheen stops under reduced motion", () => {
+    expect(css172).toMatch(/@media \(prefers-reduced-motion: reduce\) \{ :is\(\.sk172, \.sk172-rail\) i \{ animation: none !important; \} \}/);
+  });
+});

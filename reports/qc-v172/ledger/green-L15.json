@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L15",
+  "where": "the list is busy",
+  "ok": true,
+  "detail": "aria-busy=true"
+ },
+ {
+  "lock": "L15",
+  "where": "the shell sits in the list card",
+  "ok": true,
+  "detail": "true · 8 rows"
+ },
+ {
+  "lock": "L15",
+  "where": "the real heading row above it",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L15",
+  "where": "no figure in the list's shell",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "L15",
+  "where": "the panel's own frame",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L15",
+  "where": "no figure in the panel's shell",
+  "ok": true,
+  "detail": "\"Filter\""
+ },
+ {
+  "lock": "L15",
+  "where": "the old card-grid skeleton is gone",
+  "ok": true,
+  "detail": "false"
+ }
+]
