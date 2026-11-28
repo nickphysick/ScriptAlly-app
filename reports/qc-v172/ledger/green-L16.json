@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L16",
+  "where": "set after loading",
+  "ok": true,
+  "detail": "{\"on\":3161.0999999046326,\"off\":3868.2000000476837,\"again\":0}"
+ },
+ {
+  "lock": "L16",
+  "where": "cleared at 700ms (+ the load's main-thread time)",
+  "ok": true,
+  "detail": "707ms"
+ },
+ {
+  "lock": "L16",
+  "where": "a filter change does not replay it",
+  "ok": true,
+  "detail": "0 replays"
+ },
+ {
+  "lock": "L16",
+  "where": "reduced motion: never set",
+  "ok": true,
+  "detail": "0"
+ }
+]

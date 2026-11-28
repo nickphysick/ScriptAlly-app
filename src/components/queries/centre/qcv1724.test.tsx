@@ -9,7 +9,7 @@
 import React from "react";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const DIR = new URL("./", import.meta.url);
 const read = (f: string) => { try { return readFileSync(new URL(f, DIR), "utf8"); } catch { return ""; } };
@@ -87,5 +87,69 @@ describe("v172.4 · 2 the loading shell on the page's own frames", () => {
   });
   it("the shapes' sheen stops under reduced motion", () => {
     expect(css172).toMatch(/@media \(prefers-reduced-motion: reduce\) \{ :is\(\.sk172, \.sk172-rail\) i \{ animation: none !important; \} \}/);
+  });
+});
+
+describe("v172.4 · 3 the arrival: once, after loading, 700ms, never under reduced motion", () => {
+  afterEach(() => { vi.useRealTimers(); });
+  it("arms on loading → content (and on a first mount straight to content), clears at 700ms", async () => {
+    const m = await load<typeof import("../../../lib/arrival172")>("../../../lib/arrival172");
+    expect(m).toBeTruthy();
+    vi.useFakeTimers();
+    const seen: boolean[] = [];
+    const a = m!.arrival172((on) => seen.push(on), () => false);
+    a.update(true);
+    expect(seen).toEqual([]);
+    a.update(false);
+    expect(seen).toEqual([true]);
+    vi.advanceTimersByTime(699);
+    expect(seen).toEqual([true]);
+    vi.advanceTimersByTime(1);
+    expect(seen).toEqual([true, false]);
+    const b = m!.arrival172((on) => seen.push(on), () => false);
+    b.update(false);
+    expect(seen).toEqual([true, false, true]);
+    vi.advanceTimersByTime(700);
+    expect(seen).toEqual([true, false, true, false]);
+  });
+  it("a later change with content already shown (filter, sort, grouping, view, selection) never replays it", async () => {
+    const m = await load<typeof import("../../../lib/arrival172")>("../../../lib/arrival172");
+    vi.useFakeTimers();
+    const seen: boolean[] = [];
+    const a = m!.arrival172((on) => seen.push(on), () => false);
+    a.update(false); vi.advanceTimersByTime(700);
+    a.update(false); a.update(false);
+    vi.advanceTimersByTime(2000);
+    expect(seen).toEqual([true, false]);
+  });
+  it("under reduced motion it is never set", async () => {
+    const m = await load<typeof import("../../../lib/arrival172")>("../../../lib/arrival172");
+    vi.useFakeTimers();
+    const seen: boolean[] = [];
+    const a = m!.arrival172((on) => seen.push(on), () => true);
+    a.update(true); a.update(false);
+    vi.advanceTimersByTime(1000);
+    expect(seen).toEqual([]);
+  });
+  it("QcPage151 drives it from the loading flag and sets data-en172 on the list and the rail column", () => {
+    expect(page).toMatch(/arrival172\(/);
+    expect(page).toMatch(/className="qc153-list qc169"[^>]*data-en172=\{en172 \? "stagger" : undefined\}/);
+    expect(page).toMatch(/className="qc153-railcol"[^>]*data-en172=\{en172 \? "stagger" : undefined\}/);
+  });
+  it("the arrival's CSS sits inside prefers-reduced-motion: no-preference and is done by 700ms", () => {
+    const i = css172.indexOf("@media (prefers-reduced-motion: no-preference) {\n  .qc153-railcol[data-en172]");
+    expect(i).toBeGreaterThan(-1);
+    const block = css172.slice(i, css172.indexOf("\n}", i));
+    /* each piece as written, then its end: the title 200; rows 320 + up to 210 apart; later rows 250 from 200; the
+       panel body 250; the bars 300 from 80 */
+    const parts: [RegExp, number][] = [
+      [/\.qc153-sec \{ animation: en172-fade 200ms ease both; \}/, 200],
+      [/en172-rise 320ms cubic-bezier\(\.2, \.8, \.2, 1\) both; animation-delay: var\(--d, 0ms\)/, 320 + 210],
+      [/:nth-child\(8\) \{ --d: 210ms; \}/, 0],
+      [/:not\(:first-child\) \{ animation: en172-fade 250ms ease 200ms both; \}/, 450],
+      [/\.qs172 > :not\(\.qs172-h\) \{ animation: en172-fade 250ms ease both; \}/, 250],
+      [/en172-grow 300ms cubic-bezier\(\.2, \.8, \.2, 1\) 80ms both/, 380],
+    ];
+    for (const [re, end] of parts) { expect(block).toMatch(re); expect(end).toBeLessThanOrEqual(700); }
   });
 });

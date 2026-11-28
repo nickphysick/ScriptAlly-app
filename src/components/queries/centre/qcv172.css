@@ -217,3 +217,25 @@
 .sk172-base { display: block; height: 28px; border-bottom: 2px solid var(--sa-sk-base, #ece6de); }
 .sk172-track { height: 4px !important; border-radius: 2px !important; margin-bottom: 14px; }
 @media (prefers-reduced-motion: reduce) { :is(.sk172, .sk172-rail) i { animation: none !important; } }
+
+/* ── v172.4 · the arrival (QcPage151 `data-en172`, lib/arrival172): once, after loading, all done inside 700ms. The
+   heading row, the toolbar and the header never move. ── */
+@keyframes en172-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes en172-fade { from { opacity: 0; } }
+@keyframes en172-grow { from { transform: scaleY(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .qc153-railcol[data-en172] .qs172 > :not(.qs172-h) { animation: en172-fade 250ms ease both; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc153-sec { animation: en172-fade 200ms ease both; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(-n+8) { animation: en172-rise 320ms cubic-bezier(.2, .8, .2, 1) both; animation-delay: var(--d, 0ms); }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(2) { --d: 30ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(3) { --d: 60ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(4) { --d: 90ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(5) { --d: 120ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(6) { --d: 150ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(7) { --d: 180ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(8) { --d: 210ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(n+9),
+  .qc153-list[data-en172="stagger"] .qc153-grp:not(:first-child) { animation: en172-fade 250ms ease 200ms both; }
+  .qc153-railcol[data-en172="stagger"] .qs172-hist > i,
+  .qc153-railcol[data-en172="stagger"] .qs172-hist > button > i { transform-origin: bottom; animation: en172-grow 300ms cubic-bezier(.2, .8, .2, 1) 80ms both; }
+}

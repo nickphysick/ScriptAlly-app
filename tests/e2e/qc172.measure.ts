@@ -534,3 +534,43 @@ test("L15 · the loading shell: the list's own card and heading row with shapes,
   L.check("the old card-grid skeleton is gone", !r.old, String(r.old));
   L.done(7);
 });
+
+test("L16 · the arrival: data-en172 after loading, gone by 700ms, not on a filter change; never under reduced motion", async ({ page, browser }) => {
+  const L = new Ledger("L16");
+  await page.setViewportSize(WIDE);
+  /* watch the attribute from the first paint: record when it appears and disappears */
+  await page.addInitScript(() => {
+    const w = window as unknown as { __en172: { on: number | null; off: number | null; again: number } };
+    w.__en172 = { on: null, off: null, again: 0 };
+    new MutationObserver(() => {
+      const el = [...document.querySelectorAll<HTMLElement>(".qc153-list")].find((e) => e.getBoundingClientRect().height > 0);
+      const set = !!el?.hasAttribute("data-en172");
+      if (set && w.__en172.on == null) w.__en172.on = performance.now();
+      else if (set && w.__en172.off != null) w.__en172.again += 1;
+      if (!set && w.__en172.on != null && w.__en172.off == null) w.__en172.off = performance.now();
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ["data-en172"], childList: true });
+  });
+  const V = await openList(page, WIDE);
+  const a = await page.evaluate(() => (window as unknown as { __en172: { on: number | null; off: number | null; again: number } }).__en172);
+  L.check("set after loading", a.on != null, JSON.stringify(a));
+  /* the timer is exactly 700ms (lib/arrival172, fake timers in qcv1724.test); read in the page it lands later by however
+     long the main thread is busy finishing the load (≈80ms measured), so the rendered bound allows 150ms */
+  L.check("cleared at 700ms (+ the load's main-thread time)", a.on != null && a.off != null && a.off - a.on <= 850 && a.off - a.on >= 650, a.on != null && a.off != null ? `${Math.round(a.off - a.on)}ms` : "never cleared");
+  await page.locator(`${V}.qs172-seg button`).nth(1).click();
+  await page.waitForTimeout(900);
+  await page.locator(`${V}.qs172-seg button`).nth(1).click();
+  await page.waitForTimeout(900);
+  const b = await page.evaluate(() => (window as unknown as { __en172: { again: number } }).__en172.again);
+  L.check("a filter change does not replay it", b === 0, `${b} replays`);
+  const ctx = await browser.newContext({ reducedMotion: "reduce", storageState: (await page.context().storageState()) });
+  const p2 = await ctx.newPage();
+  await p2.addInitScript(() => {
+    const w = window as unknown as { __en172n: number }; w.__en172n = 0;
+    new MutationObserver(() => { if (document.querySelector("[data-en172]")) w.__en172n += 1; }).observe(document, { subtree: true, attributes: true, attributeFilter: ["data-en172"], childList: true });
+  });
+  await openQc(p2, WIDE, { group: "attention" });
+  const n = await p2.evaluate(() => (window as unknown as { __en172n: number }).__en172n);
+  L.check("reduced motion: never set", n === 0, `${n}`);
+  await ctx.close();
+  L.done(4);
+});
