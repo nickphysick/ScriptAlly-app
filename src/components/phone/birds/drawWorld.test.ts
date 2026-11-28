@@ -91,7 +91,10 @@ describe("Phone Birds-eye world — the frame", () => {
     const mark = (/<i class="bw-ovd[^"]*" data-bw="mark"[^>]*>/.exec(f.html.slice(f.html.indexOf(q[1]) + q[1].length)) ?? [""])[0];
     expect(Math.abs(num(mark, "left") - num(q[1], "left"))).toBeLessThan(0.02);
     const w = world();
-    expect(drawWorld(w, w.fitView(), O()).html).toMatch(/class="bw-ovd dot" data-bw="mark"[^>]*><\/i>/);
+    /* fitted, the mark is a plain dot only where it is under 11px; polish v1's thicker bars make most fitted marks "!" */
+    const fm = /class="bw-ovd( dot)?" data-bw="mark"[^>]*--s:([\d.]+)px">(!?)<\/i>/.exec(drawWorld(w, w.fitView(), O()).html)!;
+    expect(fm).not.toBeNull();
+    expect([!!fm[1], fm[3]]).toEqual(Number(fm[2]) < 11 ? [true, ""] : [false, "!"]);
   });
   it("v3 calmer: no figure pills at any zoom; edge fades when zoomed in; gridlines only at rows of 44px or more", () => {
     for (const rp of [27, 40, 48]) for (const id of ["past", "closed", "three"]) expect(tags(at(rp, id).f.html, "fig")).toEqual([]);

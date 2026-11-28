@@ -33,7 +33,7 @@ import { DEFAULT_QUIET_WEEKS } from "../../../lib/queryState";
 import { writerExpectedWrite } from "../../../lib/expectedDate";
 import { db } from "../../../lib/firebase";
 import {
-  PILLS, PILL_LABEL, REPLAY_MS, RH, RULE, TOPFIT, TOPFOLD, WX, bandOf, bwCounts, bwGroups, changes, chipForCourt, dateOf, dayFromMs, dm, isDrawn,
+  PILLS, PILL_LABEL, REPLAY_MS, RH, RULE, TOPFOLD, WX, bandOf, bwCounts, bwGroups, changes, chipForCourt, dateOf, dayFromMs, dm, isDrawn,
   isNoDate, keepFolds, makeWorld, menuActions, noDateRows, recapStats, replayAt, replayStart, rowSegs, sampleRows, seenLabel, tips,
   type BwAct, type BwChange, type BwFilter, type BwRow, type BwView, type World,
 } from "../../../lib/birdsWorld";
@@ -182,8 +182,10 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const [recap, setRecap] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [top, setTop] = useState(TOPFIT);
+  const [top, setTop] = useState(TOPFOLD);
   const [showHint] = useState(() => store.get(BW_HINT_KEY) !== "1");
+  /* Birds-eye polish v1 §B: the filter menu (it replaces the pill row) */
+  const [fmenu, setFmenu] = useState(false);
 
   /* ── the view state, off React's render ── */
   const root = useRef<HTMLDivElement>(null);
@@ -191,7 +193,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const layer = useRef<HTMLDivElement>(null);
   const over = useRef<HTMLDivElement>(null);
   const hd = useRef<HTMLDivElement>(null);
-  const chips = useRef<HTMLDivElement>(null);
   const lvl = useRef<HTMLDivElement>(null);
   const hs = useRef<HTMLImageElement>(null);
   const hint = useRef<HTMLDivElement>(null);
@@ -216,7 +217,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     const fr = drawWorld(w, Sv, { nowMs: now, quietDays, rt: rp.current.rt, rows, pady, scrub: L.scrub, glow: L.glow });
     el.innerHTML = fr.html;
     if (fr.scrubDay !== L.scrubDay) { if (L.scrubDay != null && fr.scrubDay != null) buzz(4); L.scrubDay = fr.scrubDay; }
-    hd.current?.classList.toggle("col", fr.zoomed || w.land);
     /* the pull's pill, under the ruler, following the finger */
     if (over.current) {
       const k = Math.min(1, L.pull / PULL_AT);
@@ -265,13 +265,6 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   }, [build]);
   useEffect(() => () => { cancelAnimationFrame(frame.current); cancelAnimationFrame(rp.current.raf); }, []);
   useEffect(() => { document.body.classList.toggle("pa41-land", land); return () => document.body.classList.remove("pa41-land"); }, [land]);
-  useEffect(() => {
-    const c = chips.current;
-    if (!c) return undefined;
-    const more = () => c.classList.toggle("more", c.scrollLeft + c.clientWidth < c.scrollWidth - 2);
-    more(); c.addEventListener("scroll", more, { passive: true }); window.addEventListener("resize", more);
-    return () => { c.removeEventListener("scroll", more); window.removeEventListener("resize", more); };
-  }, [counts, demo]);
   useEffect(() => { if (!toast) return undefined; const t = setTimeout(() => setToast(null), 2200); return () => clearTimeout(t); }, [toast]);
 
   /* ── snapping between the levels (ref `snapTo`) ── */
@@ -563,7 +556,9 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
         {toast ? <div className="bw-tst" data-bw="toast" style={{ bottom: `calc(var(--bw-cb, 96px) + 8px)` }}>{toast}</div> : null}
       </div>
       {hawk ? <div className="bw-hsw" data-bw="hawk" aria-hidden="true"><img ref={hs} className="bw-hs" alt="" src={`${BW_SHADOW.src}?v=${BW_SHADOW.version}`} /></div> : null}
-      <div ref={hd} className={`bw-hd${land ? " col" : ""}${f !== "all" ? " filt" : ""}`} data-bw="head">
+      {/* Birds-eye polish v1 §B: the slim header — one row at every level (ref `S.slim`); the pill row is retired, its
+          filters in the menu under the filter button */}
+      <div ref={hd} className={`bw-hd col slim${f !== "all" ? " filt" : ""}`} data-bw="head" data-slim="1">
         <div className="bw-t2">
           <button type="button" className="bw-ib back" aria-label="Back" data-bw="back" onClick={onBack}>{I(BW_IC.back, 2)}</button>
           <button type="button" className="bw-bewrap" data-bw="hawk-btn" aria-label={news.length && !newsSeen ? `${news.length} things changed` : "The hawk"} onClick={onHawk}>
@@ -571,22 +566,32 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
             {news.length && !newsSeen && !looking ? <em className="bw-bedot" data-bw="news-count">{news.length}</em> : null}
           </button>
           <h1 className="bw-h">Birds-eye view</h1>
-          {f !== "all" ? <button type="button" className="bw-fon" data-bw="fon" data-k={f} onClick={() => pick("all")}>{PILL_LABEL[f]} ✕</button> : null}
+          {f !== "all" ? <button type="button" className="bw-fon" data-bw="fon" data-k={f} aria-label={`${PILL_LABEL[f]}: clear the filter`} onClick={() => pick("all")}><span className="bw-fonl">{PILL_LABEL[f]}</span><span aria-hidden="true">✕</span></button> : null}
           <button type="button" className="bw-ib" aria-label="List" data-bw="list" onClick={onList}>{I(BW_IC.list, 2)}</button>
+          {demo ? null : (
+            <button type="button" className={`bw-ib bw-fbtn${fmenu ? " on" : ""}`} aria-label="Filter" aria-haspopup="menu" aria-expanded={fmenu} data-bw="filter" data-f={f}
+              onClick={() => { buzz(8); setFmenu((o) => !o); }}>
+              {I('<path d="M4 6h16M7 12h10M10 18h4"/>')}
+              {f !== "all" ? <i className="bw-fdot" data-bw="fdot" aria-hidden="true" style={{ background: "#e8b9a6" }} /> : null}
+            </button>
+          )}
           <button type="button" className="bw-ib" aria-label="Replay your campaign" data-bw="replay" onClick={() => { if (!demo) replay(); }}>{I(BW_IC.play)}</button>
           <button type="button" className="bw-ib" aria-label="What the colours mean" data-bw="key-btn" onClick={() => setSheet({ k: "key" })}>{I(BW_IC.key)}</button>
           <button type="button" className="bw-ib" aria-label="Search" data-bw="search" onClick={() => { if (!demo) setSheet({ k: "search" }); }}>{I(BW_IC.search)}</button>
         </div>
-        {demo ? null : (
-          <div ref={chips} className="bw-chips" data-bw="chips">
-            {PILLS.map((k) => (
-              <button key={k} type="button" className={`bw-c2${f === k ? " on" : ""}`} aria-pressed={f === k} data-bw="chip" data-k={k} data-n={counts[k]} onClick={() => pick(k)}>
-                {PILL_LABEL[k]} <b>{counts[k]}</b>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
+      {fmenu ? (<>
+        <div className="bw-mveil bw-fveil" data-bw="fmenu-veil" onClick={() => setFmenu(false)} />
+        <div className="bw-fmenu" data-bw="fmenu" role="menu" aria-label="Filter">
+          {PILLS.map((k) => (
+            <button key={k} type="button" role="menuitemradio" aria-checked={f === k} data-bw="fpick" data-k={k} data-n={counts[k]}
+              onClick={() => { setFmenu(false); buzz(8); touched(); setFilter(k); }}>
+              <span>{PILL_LABEL[k]}</span><b>{counts[k]}</b>
+              {f === k ? <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg> : <i />}
+            </button>
+          ))}
+        </div>
+      </>) : null}
       {/* the hawk's words, under the header: the news (with "Show me"), or a one-liner */}
       {tip?.k === "news" ? (
         <div className="bw-tipb" data-bw="news" style={{ top: tipTop }}>

@@ -354,7 +354,8 @@ export function makeWorld(o: WorldOpts): World {
   const wxd = (d: number) => (Math.max(ext.D0, Math.min(ext.D1, d)) - ext.D0) * PPD;
   /* time always fills the width; rows share the height of the "All" layout, so a pill never changes the scale */
   const fitS = () => (vpW - 32) / WX;
-  const fitSY = () => Math.min(fitS() * 3, (vpH - TOPFIT - RULE - bot) / (HALL + 8));
+  /* Birds-eye polish v1 §B: the slim header is one row at every level, so the world starts 96 down fitted too */
+  const fitSY = () => Math.min(fitS() * 3, (vpH - TOPFOLD - RULE - bot) / (HALL + 8));
   const zT = () => Math.max(1.05, 24 / (RH * fitSY()));
   const SX = (z: number) => fitS() * Math.pow(z, XP) * (1 + (Math.max(0, z - zT()) / zT()) * 3);
   const SY = (z: number) => fitSY() * z;
@@ -392,8 +393,8 @@ export function makeWorld(o: WorldOpts): World {
   const nearestLv = (z: number): number => { let b = 0; levels.forEach((l, i) => { if (Math.abs(Math.log(l.z / z)) < Math.abs(Math.log(levels[b].z / z))) b = i; }); return b; };
   /* v3: a pill stays fitted (v2's closer opening, FZ, is retired) */
   const FZ = 1;
-  const topFor = (z: number) => (land || z > 1.05 ? TOPFOLD : TOPFIT);
-  const top0 = land ? TOPFOLD : TOPFIT;
+  const topFor = (_z: number) => TOPFOLD;
+  const top0 = TOPFOLD;
   const clamp = (v: BwView): BwView => {
     const z = Math.min(maxZ, Math.max(1, v.z)); const ww = WX * SX(z), hh = yOff(H, z), pad = 16;
     const ox = ww + 2 * pad <= vpW ? (vpW - ww) / 2 : Math.min(pad, Math.max(vpW - ww - pad, v.ox));
@@ -415,7 +416,9 @@ export function headingTop(gy: number, gp: number, gEnd: number, top: number, sm
 /** a row's bar (ref `inRow`): fitted, a thin bar; zoomed in, it fills the row (row − 8, at most 40) and carries its
  *  name from 18px, the agency and each stage's words from 34px */
 export function barBox(rp: number, ry: number, zoomed: boolean): { th: number; by: number; named: boolean; one: boolean; two: boolean } {
-  const named = zoomed && rp >= 24, th = !named ? Math.max(3, Math.min(12, rp * 0.45)) : Math.min(40, rp - 8);
+  /* Birds-eye polish v1 §D: on the fitted view (unnamed rows) the bars fill more of each row — 0.66 of it, 4 to 16px
+     (was 0.45, 3 to 12); every row kind, no-date rows too (ndRow reads this). Zoomed in, unchanged. */
+  const named = zoomed && rp >= 24, th = !named ? Math.max(4, Math.min(16, rp * 0.66)) : Math.min(40, rp - 8);
   return { th, by: ry + (rp - th) / 2, named, one: named && th >= 18, two: named && th >= 34 };
 }
 

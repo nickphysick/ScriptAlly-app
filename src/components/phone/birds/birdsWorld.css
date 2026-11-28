@@ -36,17 +36,30 @@
   .bw-ib { flex: none; width: 36px; height: 40px; display: grid; place-items: center; border: 0; background: none; color: #fff; cursor: pointer; border-radius: 999px; padding: 0; }
   .bw-ib svg { width: 24px; height: 24px; }
   .bw-ib.back { margin-left: -12px; }
+  /* Birds-eye polish v1 §B — the slim header (ref `.hd2.slim`, `.fbtn`, `.fdot`, `.fmenu`): one row at every level, 96
+     high; the pill row is retired. Back and List stay, as the app's way out of Birds-eye and into the list (the ref's
+     stand-in dock carries those), so the icon buttons keep v1's 36 (the ref's are 40) and the title gives way. */
+  .bw-hd.slim { height: 96px; padding: 44px 6px 8px 14px; }
+  /* the chip that stands in for the title while a filter is on: its words give way (an ellipsis), never its ✕ — with
+     back and List in the row there is less room than the ref's (polish v1) */
+  .bw-hd.slim .bw-fon { display: inline-flex; align-items: center; gap: 4px; flex: 0 1 auto; min-width: 0; }
+  .bw-hd.slim .bw-fonl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bw-fbtn { position: relative; }
+  .bw-fbtn.on { background: rgba(255, 255, 255, 0.16); border-radius: 50%; }
+  .bw-fdot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; outline: 2px solid var(--pa-navy); pointer-events: none; } /* its pink, #e8b9a6, is the brief's and inline */
+  /* the menu: 230 wide under the header at the right, over a light veil on the world (below the header) */
+  .bw-fveil { top: 96px; }
+  .bw-fmenu { position: absolute; z-index: 17; top: 92px; right: 10px; width: 230px; border-radius: 16px; background: #fff; box-shadow: var(--ps-sh-raised); overflow: hidden; transform-origin: top right; animation: bw-qm 0.16s ease-out; }
+  .bw .bw-fmenu button { display: flex; align-items: center; gap: 10px; width: 100%; height: 48px; padding: 0 14px 0 16px; border: 0; border-top: 1px solid var(--ps-rule); background: none; font: 400 16px var(--pa-sans); color: var(--pa-ink); cursor: pointer; text-align: left; }
+  .bw .bw-fmenu button:first-child { border-top: 0; }
+  .bw-fmenu span { flex: 1; }
+  .bw-fmenu b { font: 400 16px var(--pa-type); color: var(--pa-muted); }
+  .bw-fmenu i { width: 18px; }
+  .bw-fmenu svg { flex: none; color: var(--pa-navy); }
+  .bw-fmenu [aria-checked="true"] span { font-weight: 600; }
   .bw-fon { flex: none; height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: #fff; color: var(--pa-navy) !important; font: 600 14px var(--pa-sans) !important; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; }
   .bw-hd.col .bw-fon { opacity: 1; pointer-events: auto; }
   .bw-hd:not(.col) .bw-fon { display: none; }
-  .bw-chips { display: flex; gap: 5px; margin: 8px -8px 0 0; padding-right: 8px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; max-height: 40px; transition: max-height 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s, margin 0.25s; }
-  .bw-chips::-webkit-scrollbar { display: none; }
-  .bw-hd.col .bw-chips { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
-  .bw-chips.more { -webkit-mask-image: linear-gradient(90deg, black calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, black calc(100% - 36px), transparent); }
-  .bw-c2 { flex: none; height: 32px; padding: 0 9px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.1); color: var(--pa-onnavy) !important; font: 400 14px var(--pa-sans) !important; white-space: nowrap; cursor: pointer; }
-  .bw-c2 b { font-weight: 600; color: #fff; }
-  .bw-c2.on { background: #fff; color: var(--pa-navy) !important; }
-  .bw-c2.on b { color: var(--pa-navy); }
 
   /* the world (ref `.vp`, `.w`) */
   .bw-vp { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; background: #fff; user-select: none; -webkit-user-select: none; }
@@ -136,7 +149,7 @@
 }
 @media (max-width: 767.98px) and (prefers-reduced-motion: reduce) {
   .bw-hsw { animation: none; }
-  .bw-hd, .bw-chips, .bw-fon, .bw-hint { transition: none; }
+  .bw-hd, .bw-fon, .bw-hint { transition: none; }
 }
 
 /* ── PHONE BIRDS-EYE WORLD v3 (design-refs/phone-birds-eye-world-v3, the page's `<style>`): Strava-style headings

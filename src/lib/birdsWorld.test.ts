@@ -161,7 +161,7 @@ describe("Phone Birds-eye world v2 — the engine", () => {
   it("scale: time fills the width; rows share the All layout's height; a pill never changes the scale", () => {
     const w = world();
     expect(w.fitS()).toBeCloseTo((390 - 32) / WX, 9);
-    expect(w.fitSY()).toBeCloseTo(Math.min(w.fitS() * 3, (784 - TOPFIT - RULE - 88) / (allH(rows()) + 8)), 9);
+    expect(w.fitSY()).toBeCloseTo(Math.min(w.fitS() * 3, (784 - TOPFOLD - RULE - 88) / (allH(rows()) + 8)), 9);
     for (const f of ["you", "chase", "wait"] as const) { const p = world(f); expect([p.fitS(), p.fitSY(), p.LINE, p.SX(1)]).toEqual([w.fitS(), w.fitSY(), w.LINE, w.SX(1)]); }
     /* the ceiling is the closest level (pinch stops at Weeks) */
     expect(w.maxZ).toBeCloseTo(w.levels[w.levels.length - 1].z * 1.001, 9);
@@ -184,11 +184,12 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     expect(WX * s.SX(1)).toBeGreaterThanOrEqual(0.9 * 390);
     expect(zoomForRows(s, 48) * RH * s.fitSY()).toBeCloseTo(48, 6);
   });
-  it("v3: a pill stays fitted (FZ retired); the header folds past z 1.05", () => {
+  it("v3: a pill stays fitted (FZ retired); polish v1: the slim header is one row at every level (the world 96 down)", () => {
     const all = world();
-    expect(all.fitView()).toEqual({ z: 1, ox: (390 - WX * all.SX(1)) / 2, oy: TOPFIT + RULE + 8 });
+    expect(all.fitView()).toEqual({ z: 1, ox: (390 - WX * all.SX(1)) / 2, oy: TOPFOLD + RULE + 8 });
     for (const f of ["you", "chase", "wait"] as const) { const p = world(f); expect([p.FZ, p.fitView().z]).toEqual([1, 1]); }
-    expect([all.topFor(1), all.topFor(1.05), all.topFor(1.06)]).toEqual([TOPFIT, TOPFIT, TOPFOLD]);
+    expect([all.topFor(1), all.topFor(1.05), all.topFor(1.06)]).toEqual([TOPFOLD, TOPFOLD, TOPFOLD]);
+    expect(TOPFIT).toBe(140); /* the retired fitted top, kept only as the constant */
     const l = makeWorld({ rows: rows(), filter: "all", vpW: 740, vpH: 360, bot: 16, land: true });
     expect(l.topFor(1)).toBe(TOPFOLD);
   });
@@ -197,7 +198,10 @@ describe("Phone Birds-eye world v2 — the engine", () => {
     expect(w.clamp({ z: 999, ox: 0, oy: 0 }).z).toBe(w.maxZ);
     expect(w.clamp({ z: 0.1, ox: 0, oy: 0 }).z).toBe(1);
     expect(headingTop(50, 44, 600, 96, false)).toEqual({ hy: 96 + RULE, hh: 28, pinned: true });
-    expect(barBox(10, 0, false)).toEqual({ th: 4.5, by: 2.75, named: false, one: false, two: false });
+    /* polish v1 §D: unnamed rows 0.66 of the row, 4 to 16px (was 0.45, 3 to 12) */
+    expect(barBox(10, 0, false)).toEqual({ th: 6.6000000000000005, by: 1.6999999999999997, named: false, one: false, two: false });
+    expect(barBox(4, 0, false).th).toBe(4);
+    expect(barBox(30, 0, false).th).toBe(16);
     expect(barBox(30, 0, false).named).toBe(false);
     expect(barBox(26, 0, true)).toEqual({ th: 18, by: 4, named: true, one: true, two: false });
     expect(barBox(48, 0, true)).toEqual({ th: 40, by: 4, named: true, one: true, two: true });
