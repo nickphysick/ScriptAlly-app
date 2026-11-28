@@ -18,12 +18,17 @@
   "logLeftOfDismiss": 234,
   "footPadRight": 16,
   "column": {
-   "scrollH": 577,
+   "scrollH": 451,
    "clientH": 451
   },
   "colW": 370,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 390,
-  "needH": 578,
+  "needH": 400,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -66,6 +71,11 @@
    "clientH": 551
   },
   "colW": 544,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 394,
   "needH": 495,
   "preview": {
@@ -110,6 +120,11 @@
    "clientH": 731
   },
   "colW": 680,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 492,
   "needH": 540,
   "preview": {
@@ -154,6 +169,11 @@
    "clientH": 731
   },
   "colW": 680,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 492,
   "needH": 540,
   "preview": {
@@ -198,6 +218,11 @@
    "clientH": 731
   },
   "colW": 680,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 492,
   "needH": 553,
   "preview": {
@@ -244,6 +269,11 @@
    "clientH": 731
   },
   "colW": 680,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 492,
   "needH": 553,
   "preview": {
@@ -313,6 +343,11 @@
    "clientH": 731
   },
   "colW": 680,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 492,
   "needH": 553,
   "preview": {
@@ -349,13 +384,13 @@
   ]
  },
  "frame-100": {
-  "tookAt": 165
+  "tookAt": 149
  },
  "frame-500": {
-  "tookAt": 550
+  "tookAt": 578
  },
  "frame-1000": {
-  "tookAt": 1049
+  "tookAt": 1077
  },
  "sent-1512": {
   "title": "Tom’s timeline",
@@ -380,6 +415,11 @@
    "clientH": 551
   },
   "colW": 544,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 394,
   "needH": 474,
   "preview": {
@@ -424,6 +464,11 @@
    "clientH": 551
   },
   "colW": 544,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 394,
   "needH": 487,
   "preview": {
@@ -470,6 +515,11 @@
    "clientH": 551
   },
   "colW": 544,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 394,
   "needH": 487,
   "preview": {
@@ -539,6 +589,11 @@
    "clientH": 551
   },
   "colW": 544,
+  "compact": false,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 394,
   "needH": 487,
   "preview": {
@@ -593,12 +648,17 @@
   "logLeftOfDismiss": 308,
   "footPadRight": 16,
   "column": {
-   "scrollH": 514,
+   "scrollH": 419,
    "clientH": 419
   },
   "colW": 444,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
   "cardColW": 390,
-  "needH": 515,
+  "needH": 396,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -617,5 +677,501 @@
    "today"
   ],
   "overlaps": []
+ },
+ "howto-1366": {
+  "visible": true,
+  "inside": true,
+  "text": "From your own email, the way you sent the query: a short note asking if it reached them."
+ },
+ "sent-1366": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:on"
+  ],
+  "sentBtn": "Sent",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 308,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 419,
+   "clientH": 419
+  },
+  "colW": 444,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 396,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": null,
+  "labels": [
+   "start:532-581",
+   "due:652-717",
+   "ago:662-790",
+   "today:748-786"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
+ },
+ "today-1366": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 308,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 428,
+   "clientH": 419
+  },
+  "colW": 444,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 429,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": null,
+  "labels": [
+   "start:532-581",
+   "due:652-717",
+   "ago:629-757",
+   "nudge:732-803",
+   "next:764-853"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "pixel-diff": {
+  "another-day-1512.png": 0,
+  "another-day-1920.png": 0,
+  "calendar-1512.png": 0,
+  "calendar-1920.png": 0,
+  "open-1512.png": 0,
+  "open-1920.png": 0,
+  "sent-1512.png": 0,
+  "sent-1920.png": 0,
+  "today-1512.png": 0,
+  "today-1920.png": 0
+ },
+ "howto-1280": {
+  "visible": true,
+  "inside": true,
+  "text": "From your own email, the way you sent the query: a short note asking if it reached them."
+ },
+ "sent-1280": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:on"
+  ],
+  "sentBtn": "Sent",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 234,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 451,
+   "clientH": 451
+  },
+  "colW": 370,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 400,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": null,
+  "labels": [
+   "start:520-568",
+   "due:606-672",
+   "ago:607-735",
+   "today:684-721"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
+ },
+ "today-1280": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 234,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 451,
+   "clientH": 451
+  },
+  "colW": 370,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 433,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": null,
+  "labels": [
+   "start:520-568",
+   "due:593-659",
+   "ago:546-674",
+   "nudge:667-738",
+   "next:682-770"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "calendar-1280": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 234,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 451,
+   "clientH": 451
+  },
+  "colW": 370,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 433,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": {
+   "l": 476,
+   "t": 262.640625,
+   "r": 796,
+   "b": 600.640625,
+   "w": 320,
+   "h": 338,
+   "inside": true,
+   "col": {
+    "l": 466,
+    "t": 250.125,
+    "r": 836,
+    "b": 766.125,
+    "w": 370,
+    "h": 516
+   }
+  },
+  "labels": [
+   "start:520-568",
+   "due:593-659",
+   "ago:546-674",
+   "nudge:667-738",
+   "next:682-770"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "esc-1280": {
+  "calendar": false,
+  "desk": [
+   "send:done",
+   "when:done"
+  ]
+ },
+ "another-day-1280": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:true:Wed 25 Nov"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 234,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 451,
+   "clientH": 451
+  },
+  "colW": 370,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 433,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": null,
+  "labels": [
+   "start:520-568",
+   "due:594-660",
+   "ago:542-674",
+   "nudge:668-739",
+   "next:681-770"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "unconfirm-1280": {
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "logDisabled": true,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ]
+ },
+ "calendar-1366": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 308,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 428,
+   "clientH": 419
+  },
+  "colW": 444,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 429,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": {
+   "l": 562,
+   "t": 258.453125,
+   "r": 882,
+   "b": 596.453125,
+   "w": 320,
+   "h": 338,
+   "inside": true,
+   "col": {
+    "l": 478.046875,
+    "t": 250.125,
+    "r": 922,
+    "b": 734.125,
+    "w": 443.953125,
+    "h": 484
+   }
+  },
+  "labels": [
+   "start:532-581",
+   "due:652-717",
+   "ago:629-757",
+   "nudge:732-803",
+   "next:764-853"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "esc-1366": {
+  "calendar": false,
+  "desk": [
+   "send:done",
+   "when:done"
+  ]
+ },
+ "another-day-1366": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:true:Wed 25 Nov"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 308,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 428,
+   "clientH": 419
+  },
+  "colW": 444,
+  "compact": true,
+  "deskMinText": {
+   "px": 12.5,
+   "who": "twn-l twn-dn twn-lft"
+  },
+  "cardColW": 390,
+  "needH": 429,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": null,
+  "labels": [
+   "start:532-581",
+   "due:658-723",
+   "ago:624-756",
+   "nudge:733-804",
+   "next:764-852"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "unconfirm-1366": {
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "logDisabled": true,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ]
  }
 }

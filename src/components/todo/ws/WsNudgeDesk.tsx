@@ -12,6 +12,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays } from "../../../lib/queryActions/dates";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { openingMonth } from "../../../lib/monthGrid";
+import { needsCompact } from "../../../lib/todoNudgeDesk";
 import { MonthGrid } from "../../shared/MonthGrid";
 import { nudgeAnswers, nudgeDayWord, nudgeTimeline, shortDate, type TimelineShape } from "../../../lib/todoNudgeDesk";
 import { stageVars, type WsTask } from "../../../lib/todoWs";
@@ -40,8 +41,13 @@ export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stag
   };
   const s1 = nd.sent ? "done" : "on";
   const s2 = !nd.sent ? "off" : nd.picked ? "done" : "on";
+  /* Compact on short screens: the desk's own height hook (useCompact) sets data-compact when the questions column's
+     height is under the desk's natural height at its current width */
+  const deskRef = useRef<HTMLDivElement>(null);
+  useCompact(deskRef);
+  const howId = `twn2-how-${t.key.replace(/[^\w-]/g, "_")}`;
   return (
-    <div className="twn2" data-twn="desk">
+    <div className="twn2" data-twn="desk" ref={deskRef}>
       {/* 1 · it's overdue: the hawk beside one headline, no speech bubble */}
       <div className="twn2-ctx" data-twn="context">
         <img src={MENTOR} alt="" />
@@ -56,7 +62,10 @@ export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stag
       <div className="twn2-steps" data-twn="steps">
         <div className="twn2-stp" data-st={s1} data-twn-step="send">
           <span className="twn2-num" aria-hidden="true">{nd.sent ? TICK : "1"}</span>
-          <div className="twn2-tx"><b>Send {first} a nudge</b><small>From your own email, the way you sent the query: a short note asking if it reached them.</small></div>
+          <div className="twn2-tx">
+            <b>Send {first} a nudge<button type="button" className="twn2-info" data-twn="info" aria-label="How to send it" aria-describedby={howId}>i</button></b>
+            <small id={howId} className="twn2-how" data-twn="how" role="note">From your own email, the way you sent the query: a short note asking if it reached them.</small>
+          </div>
           <button type="button" className={nd.sent ? "sp-btn sp-btn--fill twn2-sent" : "sp-btn sp-btn--line twn2-sent"} data-twn="sent" aria-pressed={nd.sent} onClick={nd.confirm}>
             {nd.sent ? <>{TICK}Sent</> : "I’ve sent it"}
           </button>
@@ -189,3 +198,34 @@ const NudgeCalendar: React.FC<{ today: Date; min: Date; value: Date | null; onPi
     </div>
   );
 };
+
+/**
+ * COMPACT ON SHORT SCREENS (Nick, 28 Nov): the trigger is the questions column's HEIGHT, never the viewport. The desk's
+ * natural height is read with the flag off; if the column's room (its height less its padding) is under it, the flag is
+ * set. The flag is read and set in the same task, before paint, so the desk never shows a frame in the wrong mode. It is
+ * re-read whenever the column or the desk changes size (a pick adds a line; a resize changes the room).
+ */
+export function useCompact(ref: React.RefObject<HTMLDivElement | null>): void {
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const col = el?.closest<HTMLElement>(".tws-wq");
+    if (!el || !col) return undefined;
+    let busy = false;
+    const fit = () => {
+      if (busy) return;
+      busy = true;
+      const cs = getComputedStyle(col);
+      const room = col.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      el.removeAttribute("data-compact");
+      const natural = el.offsetHeight;
+      if (needsCompact(natural, room)) el.setAttribute("data-compact", "");
+      busy = false;
+    };
+    fit();
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(col);
+    const mo = new MutationObserver(() => fit());
+    mo.observe(el, { childList: true, subtree: true, characterData: true });
+    return () => { ro.disconnect(); mo.disconnect(); };
+  }, [ref]);
+}

@@ -12,7 +12,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
 test.describe.configure({ mode: "default" });
@@ -83,6 +83,19 @@ const read = (page: Page) => page.evaluate(() => {
     column: wq ? { scrollH: wq.scrollHeight, clientH: wq.clientHeight } : null,
     /* the questions column's width, the card column's width, and the desk's natural height (content + padding) */
     colW: col ? Math.round(col.getBoundingClientRect().width) : null,
+    /* compact on short screens: the hook's flag, and the smallest text rendered on the desk (the card preview aside) */
+    compact: q('[data-twn="desk"]')?.hasAttribute("data-compact") ?? null,
+    deskMinText: (() => {
+      let min = Infinity, who = "";
+      for (const el of q('[data-twn="desk"]')?.querySelectorAll<HTMLElement>("*") ?? []) {
+        if (![...el.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) continue;
+        const cs = getComputedStyle(el);
+        if (el.getBoundingClientRect().width === 0 || cs.visibility === "hidden" || cs.opacity === "0") continue;
+        const f = parseFloat(cs.fontSize);
+        if (f < min) { min = f; who = el.className || el.tagName; }
+      }
+      return { px: min, who };
+    })(),
     cardColW: Math.round(root.querySelector<HTMLElement>('[data-tws="side"]')?.getBoundingClientRect().width ?? 0),
     needH: wq && q('[data-twn="desk"]') ? Math.ceil(q('[data-twn="desk"]')!.getBoundingClientRect().height + parseFloat(getComputedStyle(wq).paddingTop) + parseFloat(getComputedStyle(wq).paddingBottom)) : null,
     /* the card preview: its scale and the smallest rendered text inside it (font size × scale) */
@@ -110,7 +123,8 @@ async function check(page: Page, key: string, w: number) {
   const r = await read(page);
   note(`${key}-${w}`, r);
   await page.screenshot({ path: `${DIR}/shots/${key}-${w}.png` });
-  expect(r.column!.scrollH, `${key}: no column scroll`).toBeLessThanOrEqual(r.column!.clientH + 1);
+  /* soft: every state is still measured after one overflows, so a shortfall is reported in full */
+  expect.soft(r.column!.scrollH, `${key}: no column scroll`).toBeLessThanOrEqual(r.column!.clientH + 1);
   expect(r.logRightGap!, `${key}: Log it on the right`).toBeLessThanOrEqual(r.footPadRight! + 1);
   expect(r.overlaps, `${key}: timeline labels clear`).toEqual([]);
   return r;
@@ -128,6 +142,24 @@ for (const vp of SIZES) {
 
     await page.locator(`${PG} [data-twn="sent"]`).click();
     await settle(page, 400);
+    /* compact: the how-to is behind the info mark; hovering it shows the line, inside the column */
+    if (open.compact) {
+      await page.locator(`${PG} [data-twn="info"]`).hover();
+      await page.waitForTimeout(250);
+      const tip = await page.evaluate(() => {
+        const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+        const how = root.querySelector<HTMLElement>('[data-twn="how"]')!, col = root.querySelector<HTMLElement>('[data-tws="qcol"]')!.getBoundingClientRect();
+        const r = how.getBoundingClientRect(), cs = getComputedStyle(how);
+        return { visible: cs.display !== "none" && cs.visibility === "visible", inside: r.left >= col.left - 0.5 && r.right <= col.right + 0.5 && r.bottom <= col.bottom + 0.5, text: how.textContent };
+      });
+      note(`howto-${w}`, tip);
+      await page.screenshot({ path: `${DIR}/shots/howto-${w}.png` });
+      expect(tip.visible).toBe(true);
+      expect(tip.inside).toBe(true);
+      await page.mouse.move(2, 2);
+      await page.waitForTimeout(250);
+    }
+
     const sent = await check(page, "sent", w);
     expect(sent.steps).toEqual(["send:done", "when:on"]);
     expect(sent.sentBtn).toBe("Sent");
@@ -192,4 +224,31 @@ test("frames after a pick at 1512 (0.1s, 0.5s, 1.0s)", async ({ page }) => {
     note(`frame-${at}`, { tookAt: Date.now() - t0 });
   }
   await page.keyboard.press("Escape");
+});
+
+/* 1512 and 1920 fit as they were: every state pixel-identical to the screenshots taken before compact existed
+   (reports/todo-nudge-desk-v2/before/, from 197b4d939). Compared in the browser, pixel by pixel. */
+test("1512 and 1920 are pixel-identical to before compact", async ({ page }) => {
+  const names = readdirSync(`${DIR}/before`).filter((f) => f.endsWith(".png"));
+  expect(names.length).toBe(10);
+  await page.setContent("<canvas id=a></canvas><canvas id=b></canvas>");
+  const diffs: Record<string, number> = {};
+  for (const n of names) {
+    const a = `data:image/png;base64,${readFileSync(`${DIR}/before/${n}`).toString("base64")}`;
+    const b = `data:image/png;base64,${readFileSync(`${DIR}/shots/${n}`).toString("base64")}`;
+    diffs[n] = await page.evaluate(async ([x, y]) => {
+      const load = (src: string) => new Promise<HTMLImageElement>((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+      const [ia, ib] = await Promise.all([load(x), load(y)]);
+      if (ia.width !== ib.width || ia.height !== ib.height) return -1;
+      const px = (i: HTMLImageElement) => { const c = document.createElement("canvas"); c.width = i.width; c.height = i.height; const g = c.getContext("2d")!; g.drawImage(i, 0, 0); return g.getImageData(0, 0, i.width, i.height).data; };
+      const da = px(ia), db = px(ib);
+      let n = 0;
+      /* from y = 42 down: the beta banner's text row above it (y 14–26) varied between runs at 1512 with nothing of this
+         change in it (measured: every differing pixel sat there; 1920 identical) */
+      for (let k = ia.width * 42 * 4; k < da.length; k += 4) if (da[k] !== db[k] || da[k + 1] !== db[k + 1] || da[k + 2] !== db[k + 2] || da[k + 3] !== db[k + 3]) n++;
+      return n;
+    }, [a, b] as const);
+  }
+  note("pixel-diff", diffs);
+  for (const [n, d] of Object.entries(diffs)) expect(d, `${n}: pixels that differ`).toBe(0);
 });

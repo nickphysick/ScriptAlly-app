@@ -1,4 +1,4 @@
-# To-do nudge desk v2 — report (STOPPED at Phase 4: 1280×800 and 1366×768 do not fit; option 1 cannot fix it)
+# To-do nudge desk v2 — report (STOPPED: compact fits 1280×800; 1366×768 is 9px short once a day is picked)
 
 Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1-pol1-tnd1` @ `e8727d3b1`. That is the dev line carrying nudge desk v1, at the same commit as `todo-nudge-desk-v1`'s tip. Dev served `index-D6G10n1T.js` at Step 0. Ref: `design-refs/todo-nudge-desk-v2/` (sha256 verified; `todo-nudge-desk-v2.html` = `74307e4a…f47b`). Desktop only.
 
@@ -11,6 +11,37 @@ Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-n
 3. **A compact 1280 layout:** row 1's how-to line folded behind an info mark, the answers as a one-line segmented control, and a slimmer timeline card.
 
 My pick is **1**: it keeps the ref's design intact and only borrows width from a column that is mostly empty on a nudge. Nothing is deployed and the full suite has not run; both wait on this.
+
+## Follow-up 2 (Nick chose compact on short screens, step 1's how-to folded) — STOPPED: 1366×768 is 9px short
+
+**Built:**
+- A height hook on the desk (`useCompact`) sets `data-compact` when the questions column's room (its height less its padding) is under the desk's natural height at its current width. The natural height is read with the flag off and the flag set in the same task, before paint, so the desk never shows a frame in the wrong mode. Never the viewport. Rule: `needsCompact` in `lib/todoNudgeDesk.ts`.
+- **Compact:**
+  - context: hawk 36px, headline 20px, the quiet line hidden;
+  - timeline band 32px tall, 26px band to line, 28px under the line (labels unchanged);
+  - steps rows 12px 18px;
+  - answers 50px tall, icons 18px;
+  - 12px between blocks;
+  - step 1's how-to behind an "i" mark after the title: keyboard reachable, `aria-describedby` to the how-to line, shown as a tooltip on hover or focus.
+- **A fix the first run found:** a hidden but positioned tooltip still widened the column's scroll area at 1280 (462 against 451). It now stays `display: none` until shown.
+
+**Measured** (`todoNudgeDesk.measure.ts`, every state; the fit check is soft, so a shortfall is measured in full). Figures are column scrollHeight / clientHeight:
+
+| State | 1280×800 | 1366×768 | 1512×900 | 1920×1080 |
+|---|---|---|---|---|
+| On open | 451 / 451 ✓ (compact) | 419 / 419 ✓ (compact) | fits (not compact) | fits (not compact) |
+| Step 1 confirmed | ✓ | ✓ | ✓ | ✓ |
+| Today picked | ✓ | **428 / 419 — 9px over** | ✓ | ✓ |
+| Calendar open (inside the column) | ✓, inside | **9px over**, inside | ✓, inside | ✓, inside |
+| Another day picked | ✓ | **9px over** | ✓ | ✓ |
+| Label overlaps | none | none | none | none |
+
+- **The 9px at 1366** is the line step 2 gains once a day is picked ("You nudged Tom today. Next reminder 28 Dec."). The desk then needs 429px (desk 409 + padding 20) against 419. As instructed, nothing was shrunk further.
+- **The how-to tooltip** shows on hover, wholly inside the column (1366 measured).
+- **The smallest text rendered on the desk** (card preview aside) is **12.5px**, the timeline labels, unchanged as instructed. Every other text is 13px or more. The app's secondary size (`--sp-sec-size`) is 14px, so the timeline labels sit below it, as they did in v1.
+- **1512 and 1920 are pixel-identical to before** (`before/`, from 197b4d939) in all five states at each size, from y = 42 down. The beta banner's line of text above that (y 14–26) differed between runs at 1512, with nothing of this change in it: every differing pixel sat in that row, and 1920 was identical including the banner.
+
+**Follow-up, noted, not fixed:** the card preview's small text is an older problem. It renders at zoom 0.676 at 1512 (its smallest text 8.1px) and 0.857 at 1920 (10.3px), and 0.716 at 1280 and 1366.
 
 ## Follow-up (Nick chose option 1) — STOPPED again, before building: the limit at 1280 and 1366 is height, not width
 

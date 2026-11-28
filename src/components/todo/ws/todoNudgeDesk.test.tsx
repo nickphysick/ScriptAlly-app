@@ -14,7 +14,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { QueryStatus, UserPlan, type Agent, type Query, type Task } from "../../../types";
 import { forgetTodoTask, rememberTodoTask, todoTaskScope } from "../../../lib/todoArrival";
-import { agoWords, nudgeAnswers, nudgeDayWord, nudgeFacts, nudgeTimeline } from "../../../lib/todoNudgeDesk";
+import { agoWords, needsCompact, nudgeAnswers, nudgeDayWord, nudgeFacts, nudgeTimeline } from "../../../lib/todoNudgeDesk";
 import { addDays, offWeekend } from "../../../lib/queryActions/dates";
 
 const DAY = 86400000;
@@ -68,7 +68,9 @@ describe("the nudge desk renders: overdue, then the two steps", () => {
     expect(desk).toMatch(/data-twn="context"><img src="\/images\/todo\/mentor\.webp" alt=""\/><div><h2>William’s reply is <em>overdue<\/em>\.<\/h2><p>Send a nudge, then log it below\.<\/p>/);
     expect(desk, "no speech bubble on the nudge desk").not.toContain("tws-mnote");
     expect(desk).toMatch(/data-st="on" data-twn-step="send"/);
-    expect(text(desk)).toContain("Send William a nudge From your own email, the way you sent the query: a short note asking if it reached them.");
+    expect(desk).toMatch(/<b>Send William a nudge<button type="button" class="twn2-info" data-twn="info" aria-label="How to send it" aria-describedby="(twn2-how-[\w-]+)">i<\/button><\/b>/);
+    const howId = /aria-describedby="(twn2-how-[\w-]+)"/.exec(desk)![1];
+    expect(desk, "the how-to line is the info mark's description").toContain(`<small id="${howId}" class="twn2-how" data-twn="how" role="note">From your own email, the way you sent the query: a short note asking if it reached them.</small>`);
     expect(desk).toMatch(/class="sp-btn sp-btn--line twn2-sent" data-twn="sent" aria-pressed="false">I’ve sent it</);
     expect(desk).toMatch(/data-st="off" data-twn-step="when" aria-disabled="true"/);
     const ans = [...desk.matchAll(/data-twn-when="(\w+)"[^>]*? disabled="" tabindex="-1"><span class="twn2-ic">[\s\S]*?<\/span><b>([^<]+)<\/b><small>([^<]+)<\/small>/g)].map((m) => `${m[1]}|${m[2]}`);
@@ -224,5 +226,41 @@ describe("Phase 3 — the calendar for Another day (logic)", () => {
   it("Another day only opens the calendar: nothing changes until a day is picked there; a click outside changes nothing", () => {
     expect(src).toContain('if (k === "other") { setOtherOpen(true); return; }');
     expect(src).toContain("onPick={(d) => { setOtherOpen(false); nd.pick(\"other\", d); }} onClose={() => setOtherOpen(false)}");
+  });
+});
+
+describe("compact on short screens (logic)", () => {
+  it("compact only when the column's room is under the desk's natural height at this width", () => {
+    expect(needsCompact(515, 419), "1366×768 on open").toBe(true);
+    expect(needsCompact(578, 451), "1280×800 on open").toBe(true);
+    expect(needsCompact(495, 551), "1512×900: fits").toBe(false);
+    expect(needsCompact(553, 731), "1920×1080: fits").toBe(false);
+    expect(needsCompact(551, 551), "exactly fits").toBe(false);
+    expect(needsCompact(500, 0), "no room measured yet").toBe(false);
+  });
+  const src = readFileSync(join(__dirname, "WsNudgeDesk.tsx"), "utf8");
+  it("the trigger is the column's height read with the flag off, set before paint; never the viewport", () => {
+    expect(src).toContain('el.removeAttribute("data-compact");');
+    expect(src).toContain("const natural = el.offsetHeight;");
+    expect(src).toContain('if (needsCompact(natural, room)) el.setAttribute("data-compact", "");');
+    expect(src).toContain("const room = col.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);");
+    expect(src).not.toMatch(/innerHeight|matchMedia\("\(max-height/);
+  });
+  const css = readFileSync(join(__dirname, "todoNudgeDesk.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  it("compact's values; the info mark only in compact", () => {
+    for (const rule of [
+      ".tws .twn2-info { display: none; }",
+      ".tws .twn2[data-compact] { gap: 12px; }",
+      ".tws .twn2[data-compact] .twn2-ctx img { width: 36px; }",
+      ".tws .twn2[data-compact] .twn2-ctx h2 { font-size: 20px !important; margin: 0; }",
+      ".tws .twn2[data-compact] .twn2-ctx p { display: none; }",
+      ".tws .twn2[data-compact] .twn-band { height: 32px; box-sizing: border-box; display: flex; align-items: center; padding: 0 22px; margin-bottom: 26px; }",
+      ".tws .twn2[data-compact] .twn-line { margin-bottom: 28px; }",
+      ".tws .twn2[data-compact] .twn2-stp { padding: 12px 18px; }",
+      ".tws .twn2[data-compact] .twn2-ch { height: 50px; box-sizing: border-box; padding-top: 0; padding-bottom: 0; }",
+      ".tws .twn2[data-compact] .twn2-ch .twn2-ic svg { width: 18px; height: 18px; }",
+      ".tws .twn2[data-compact] .twn2-tx:has(.twn2-info:hover, .twn2-info:focus-visible) .twn2-how { display: block; animation: twn2-tip 0.15s ease-out both; }",
+    ]) expect(css, rule).toContain(rule);
+    expect(css, "the timeline labels keep their size in compact").not.toMatch(/\[data-compact\][^{]*\.twn-l[^{]*\{[^}]*font/);
   });
 });

@@ -152,3 +152,8 @@ export function nudgeTimeline(f: NudgeFacts, nudge: Date | null, then: Date, tod
     dashed: nudge ? { from: xa, to: x(then) } : null,
   };
 }
+
+/* ── compact on short screens (v2 follow-up) ─────────────────────────────────────────────────────────────────────── */
+
+/** compact when the column's room (its height less its padding) is under the desk's natural height at this width */
+export const needsCompact = (natural: number, room: number): boolean => room > 0 && natural > room + 0.5;
