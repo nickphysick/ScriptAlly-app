@@ -7,33 +7,33 @@
  },
  {
   "lock": "L14",
-  "where": "Include closed is a checkbox",
-  "ok": true,
-  "detail": "1 .qs172-ck--closed checkbox"
- },
- {
-  "lock": "L14",
-  "where": "ticked by default",
-  "ok": true,
-  "detail": "true"
- },
- {
-  "lock": "L14",
-  "where": "population · a Closed group with it ticked",
-  "ok": true,
-  "detail": "1"
- },
- {
-  "lock": "L14",
-  "where": "unticked: no Closed group",
+  "where": "no Include closed tick",
   "ok": true,
   "detail": "0"
  },
  {
   "lock": "L14",
-  "where": "ticked again: the Closed group is back",
+  "where": "Closed is a key row",
   "ok": true,
   "detail": "1"
+ },
+ {
+  "lock": "L14",
+  "where": "population · a Closed group at rest",
+  "ok": true,
+  "detail": "[\"action\",\"window\",\"closed\"]"
+ },
+ {
+  "lock": "L14",
+  "where": "Closed picked: only the Closed group",
+  "ok": true,
+  "detail": "[\"closed\"]"
+ },
+ {
+  "lock": "L14",
+  "where": "picked again: everything is back",
+  "ok": true,
+  "detail": "[\"action\",\"window\",\"closed\"]"
  },
  {
   "lock": "L14",

@@ -1,0 +1,12 @@
+× v172.5 · 4a the panel's header > “Filter” and “<showing> showing”; Clear all only when something is set 11ms
+→ expected '<aside class="qs172" data-qc172="pane…' to match /<header class="q…/b><small>88 showing<\
+× v172.5 · 4b the list toolbar's count > unfiltered: “41 need you · 88 in all”, the numbers bold 4ms
+→ expected 'ListBirds-eye88 queries/Sort:Next due…' to match /41 need you · 88 in all/
+✓ v172.5 · 4b the list toolbar's count > filtered: “14 of 88” as before 3ms
+✓ v172.5 · 4b the list toolbar's count > Birds-eye keeps “88 queries” 0ms
+× v172.5 · 4b the list toolbar's count > the page passes the Action needed group's count to the bar, and none on Birds-eye 1ms
+→ expected '/**\n * @license\n * SPDX-License-Ide…' to match /<QcBar153[^>]*need=\{birds \? null : …/
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+? <button type=\"button\" className={`qc151-mv qc1512-mv qc1512-mv--${act.tone}`} data-qc151=\"move\" data-tone={act.tone} onClick={(e) => { e.stopPropagation(); p.onAct(r.id, act.mode); }}>{act.label}<span className=\"qc151-arr\" aria-hidden=\"true\"> →</span></button>
+<button type=\"button\" className=\"qc153-lnk\" data-qc153=\"show-all\" aria-expanded={false} onClick={() => openFold(s.key, true)}>Show all →</button>
+Tests  3 failed | 2 passed (5)

@@ -6,8 +6,25 @@
 
 - **Colours (Plumage colours v3, 23 Nov 2026; branch `plumage-colours-v3`, NOT merged):** one table, `src/lib/stageColours.ts` (packs design-refs/plumage-colours-v1/, -v2/ and -v3/). The band is the STATUS's shade; nothing outlines a band; Full is slate blue (requested `#d3deea`), the offer flat duck egg on every surface; the only stripes are Revise & Resubmit's, on the grid card's band and the slide-in strip; every grid card names its status on a label on its top edge at the right, outside the frame, which clips again; the paperclip is a materials tile in the Sent box. Section "Plumage colours v3" below has the rules; it supersedes v2's stripes, label place and frame.
 - Newest build on this line: Query Centre v157 (18 Nov 2026; ref design-refs/query-centre-v157.html; report reports/query-centre-v157/REPORT.md; branch `query-centre-v157`, NOT merged). The grid card is `QcCard154.tsx`, styled by qcv154 → qcv1541 → qcv156 → qcv1561 → qcv157.
+- **The filter panel (Query Centre v172.5, 28 Nov 2026; branch `query-centre-v172-5`, NOT merged):** the top block is the "What's next" ring (seven parts, `stand172`); every section under it folds; the list's top group is "Action needed" and takes in the waiting with no reply date. Section "Query Centre v172.5" below.
 - Stage colours come from one table, `src/lib/stageColours.ts` (band, tint, mark per stage). The grid card reads `band` only; `tint` and `mark` wait for the next pack.
 - Not yet on the slate ladder (they move in the next pack): the stage ring, Birds-eye, the log-a-query slip preview, the pull-out query card, Dashboard, activity feed, Analytics, Contact list, Responses, To-do, phone pages.
+
+## Query Centre v172.5 — the filter panel's "What's next" ring, folding sections, "Stage reached" (28 Nov 2026)
+
+Pack: design-refs/query-centre-v1725/ (mock v19.16; ref/QcSmart172.tsx, ref/smart172.ts, ref/qcv172.css are the reference code, ref/mock169.ts the chosen switches). Report: reports/qc-v1725/REPORT.md. Branch `query-centre-v172-5` (on v172.4), NOT merged.
+
+The rules (Nick's chosen values; baked, do not reopen):
+1. **Every query is in exactly one of seven parts** (`stand172`, lib/smart172): Offer to answer · Materials requested · Nudge due · Reply date needed · Consider closing (the five that need you) · In their window · Closed. The panel's state is `hide` (open parts left out) beside `closed`; the old `who` filter and the three-count control are gone.
+2. **The list's groups (Group = Action) are Action needed · Within their window · Closed.** Action needed takes in the waiting with no reply date (tier 3.5, between a nudge and consider closing). **Birds-eye's own groups (lib/qc150) are not changed** — the list and Birds-eye no longer share keys (e2e L4 checks the list's Action needed = Birds-eye's Needs action + Waiting, no reply date).
+3. **The ring** (QcSmart172 `Ring172`): viewBox 100, r 40, stroke 14, a 2.2 gap, from 12 o'clock, 132px, centred; the navy family dark to light by urgency (`#1c130f #2a3a52 #5c6d88 #7d8aa0 #a3adbf`), No action needed one pale part `#dce1e8`, Closed `#efeae3` — no stage colours, no green. Centre: the Action needed count over "need you" at rest; "n / of N" once filtered; a part's count and short word on hover or focus. Draw-in and a 700ms count-up on mount, neither under reduced motion. The key sits full width under the ring; a part with 0 drops out.
+4. **Picking** (a segment, a key row, or a group heading) is `pickPart172`: from everything, a pick shows only that; then each pick adds or takes away; taking the last away shows everything. One chip names it (`standText172`).
+5. **Every section under the ring folds** (`Sec172`): Stage reached open, the rest shut, remembered for the visit (sessionStorage `qh.qc.fold172`); a section with a filter set opens itself on arrival; the shut body is inert; 220ms, instant under reduced motion. "Stage reached", not "Status" — it filters on the furthest stage reached.
+6. **The counts:** the panel's header "<n> showing"; the list toolbar "41 need you · 88 in all" unfiltered (the list's Action needed group, whatever the grouping), "14 of 88" filtered; Birds-eye "88 queries".
+
+Not ported (the mock's losing variants): the three-count seg, the Checklist section, the When tabs, quick picks, stage pills, the shrink and tuck positions, the spark preview, the other key layouts, the "all" frame, saved views, the "quiet" range, ref/QcBar153.mock.diff's Birds-eye group line.
+
+Locks: src/lib/smart1725.test.ts, src/components/queries/centre/qcv1725.test.tsx, qcv1725fold.test.tsx, qcv1725counts.test.tsx; tests/e2e/qc172.measure.ts L18–L21 (and L4, L14, L16, L17 rewritten for this round).
 
 ## Plumage colours v3 — the offer solid, Revise & Resubmit striped, the label top right, materials as a tile (23 Nov 2026)
 

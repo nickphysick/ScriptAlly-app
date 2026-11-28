@@ -3,13 +3,13 @@
   "lock": "L16",
   "where": "set after loading",
   "ok": true,
-  "detail": "{\"on\":802.8999998569489,\"off\":1502.5,\"again\":0}"
+  "detail": "{\"on\":958.7999999523163,\"off\":1707.8999998569489,\"again\":0}"
  },
  {
   "lock": "L16",
   "where": "cleared at 700ms (+ the load's main-thread time)",
   "ok": true,
-  "detail": "700ms"
+  "detail": "749ms"
  },
  {
   "lock": "L16",

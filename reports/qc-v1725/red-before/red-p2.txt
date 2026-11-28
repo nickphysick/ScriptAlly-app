@@ -1,0 +1,19 @@
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > “What’s next” is the panel's top block; no three-count control, no Include closed tick 75ms
+→ expected '<aside class="qs172" data-qc172="pane…' to match /<section class="qs172-s qs172-ring"[^…/
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > the key: Action needed (its parts indented), No action needed, Closed — the parts' counts sum to the total 9ms
+→ expected [] to deeply equal [ [ 'act', 7 ], [ 'req', 3 ], …(5) ]
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > a part with 0 is absent from the key and the ring 14ms
+→ expected [] to deeply equal [ 'Materials requested: 3', …(5) ]
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > each ring segment is a focusable button with its name and count 11ms
+→ expected '' to match /tabindex="0"/
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > at rest the centre reads the Action needed count over “need you” 9ms
+→ expected '' to be '7 / need you' // Object.is equality
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > picking “Materials requested” from rest leaves only its rows, the centre reads “3 / of 13”; picking it again shows everything 8ms
+→ expected '' to be '3 / of 13' // Object.is equality
+✓ v172.5 · 2 the ring replaces the three counts and the Include closed tick > after the first pick, each pick adds or takes away; a group heading picks its parts 0ms
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > the arrow keys move between segments (wrapping); Enter and Space pick 1ms
+→ expected 'undefined' to be 'function' // Object.is equality
+× v172.5 · 2 the ring replaces the three counts and the Include closed tick > the ring's geometry and colours: r 40, stroke 14, 132px, navy family light to dark 1ms
+→ expected '/**\n * @license\n * SPDX-License-Ide…' to match /const R = 40/
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+Tests  8 failed | 1 passed (9)

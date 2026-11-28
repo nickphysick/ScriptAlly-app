@@ -3,17 +3,23 @@
   "lock": "L4",
   "where": "population",
   "ok": true,
-  "detail": "list [\"action\",\"window\",\"nodate\",\"closed\"] · birds-eye [\"action\",\"window\",\"nodate\",\"closed\"]"
+  "detail": "list [\"action\",\"window\",\"closed\"] · birds-eye [{\"k\":\"action\",\"n\":63},{\"k\":\"window\",\"n\":3},{\"k\":\"nodate\",\"n\":4},{\"k\":\"closed\",\"n\":18}]"
  },
  {
   "lock": "L4",
-  "where": "same keys, same order",
+  "where": "the list's three groups only, in order",
   "ok": true,
-  "detail": "list [\"action\",\"window\",\"nodate\",\"closed\"] · birds-eye [\"action\",\"window\",\"nodate\",\"closed\"]"
+  "detail": "[\"action\",\"window\",\"closed\"]"
  },
  {
   "lock": "L4",
-  "where": "the four groups only",
+  "where": "Action needed = Birds-eye's Needs action + Waiting, no reply date",
+  "ok": true,
+  "detail": "list 67 · birds-eye 63 + 4"
+ },
+ {
+  "lock": "L4",
+  "where": "Birds-eye keeps its own four",
   "ok": true,
   "detail": "[\"action\",\"window\",\"nodate\",\"closed\"]"
  },
@@ -21,7 +27,7 @@
   "lock": "L4",
   "where": "Closed last (list)",
   "ok": true,
-  "detail": "[\"action\",\"window\",\"nodate\",\"closed\"]"
+  "detail": "[\"action\",\"window\",\"closed\"]"
  },
  {
   "lock": "L4",
@@ -31,7 +37,7 @@
  },
  {
   "lock": "L4",
-  "where": "an offer leads Needs action",
+  "where": "an offer leads Action needed",
   "ok": true,
   "detail": "2 offers; first is Offer"
  }

@@ -227,7 +227,8 @@
   transition: stroke-dasharray .7s cubic-bezier(.2,.8,.2,1), opacity .2s ease, stroke-width .15s ease, r .2s cubic-bezier(.2,.8,.2,1); }
 .qs172-rsvg .arc.off { opacity: .2; }
 .qs172-rsvg .arc.hov { stroke-width: 18; }
-.qs172-rsvg .arc:focus { outline: none; }
+/* the segment shows focus itself (thicker, a navy edge); no box around the ring from any workspace focus rule */
+.qs172-rsvg .arc:focus, .qs172-rsvg .arc:focus-visible { outline: none !important; }
 .qs172-rsvg .arc:focus-visible { stroke-width: 18; filter: drop-shadow(0 0 0.8px #2a3a52) drop-shadow(0 0 0.8px #2a3a52); }
 .qs172-rsvg .hole { fill: #fbf8f4; }
 .qs172-rsvg text { text-anchor: middle; fill: #1c130f; pointer-events: none; }
@@ -267,6 +268,6 @@
 .qs172-fold.is-shut .qs172-fb { grid-template-rows: 0fr; opacity: 0; }
 .qs172-fold.is-shut .qs172-fb > div { padding-top: 0; padding-bottom: 0; }
 /* More filters' own five keep their title lines, without the section frame inside the fold */
-.qs172-fb .qs172-s { padding-left: 0; padding-right: 0; }
+.qs172-fb :is(.qs172-s, .qs172-l) { padding-left: 0; padding-right: 0; }
 .qs172-fb .qs172-s:first-child { border-top: 0; padding-top: 2px; }
 @media (prefers-reduced-motion: reduce) { .qs172-fb, .qs172-cv { transition: none; } }

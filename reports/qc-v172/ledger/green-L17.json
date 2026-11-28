@@ -3,7 +3,7 @@
   "lock": "L17",
   "where": "Group: Action",
   "ok": true,
-  "detail": "Action · bar \"ListBirds-eye88 queries/Sort:Next due↑▤Group:Action↓Export\""
+  "detail": "Action · bar \"ListBirds-eye67 need you · 88 in all/Sort:Next due↑▤Group:Action↓Export\""
  },
  {
   "lock": "L17",
@@ -19,7 +19,7 @@
  },
  {
   "lock": "L17",
-  "where": "Include closed ticked",
+  "where": "Closed shown (its key row lit)",
   "ok": true,
   "detail": "true"
  },
@@ -33,7 +33,7 @@
   "lock": "L17",
   "where": "same visit: the smart filter is back as a chip",
   "ok": true,
-  "detail": "[\"Stage: Partial×\"] · stored \"smart\":{\"who\":null,\"closed\":true,\"stage\":[1],\"sent\":null,\"pkgs\":[],\"methods\":[],\"fit\":0,\"countries\":[],\"date\":{\"lo\":-56,\"hi\":84,\"nd\":true},\"sendby\":{\"lo\":-28,\""
+  "detail": "[\"Stage: Partial×\"] · stored \"smart\":{\"hide\":[],\"closed\":true,\"stage\":[1],\"sent\":null,\"pkgs\":[],\"methods\":[],\"fit\":0,\"countries\":[],\"date\":{\"lo\":-56,\"hi\":84,\"nd\":true},\"sendby\":{\"lo\":-28,\"h"
  },
  {
   "lock": "L17",

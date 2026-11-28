@@ -81,15 +81,15 @@ test("QC172 shots", async ({ page }) => {
   await page.mouse.move(2, 2);
   await page.screenshot({ path: `${DIR}/07-panel-set.png` });
   await clearPanel(page, W);
-  await page.locator(`${W}.qs172-more`).click();
+  await page.locator(`${W}.qs172-fold[data-fold='more'] .qs172-ft`).click();
   await page.waitForTimeout(400);
   await page.evaluate((W) => { const r = document.querySelector<HTMLElement>(`${W}.qc153-railcol`); if (r) r.scrollTop = r.scrollHeight; }, W);
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${DIR}/08-panel-bottom.png` });
 
-  /* nothing matches (ref 09): Needs chasing and Stage Offer */
+  /* nothing matches (ref 09): Consider closing and Stage Offer (v172.5 — the ring's part, where Needs chasing was) */
   await clearPanel(page, W);
-  await page.locator(`${W}.qs172-seg button`).nth(1).click();
+  await page.locator(`${W}.qs172-rb[data-k='close']`).click();
   await page.locator(`${W}.qs172-stg button[title='Offer']`).click();
   await page.waitForTimeout(800);
   await page.evaluate((W) => { const r = document.querySelector<HTMLElement>(`${W}.qc153-railcol`); if (r) r.scrollTop = 0; }, W);

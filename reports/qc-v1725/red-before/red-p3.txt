@@ -1,0 +1,12 @@
+× v172.5 · 3 folding sections > every section under the ring folds, in order: Stage reached, Sent, both dates, More filters 61ms
+→ expected [] to deeply equal [ 'stage', 'sent', 'date', …(2) ]
+× v172.5 · 3 folding sections > a fresh visit: Stage reached open; Sent shut with “any time” in its title 8ms
+→ expected null to match object { shut: false, expanded: 'true', …(3) }
+× v172.5 · 3 folding sections > the shut body is inert 8ms
+→ expected undefined to be true // Object.is equality
+× v172.5 · 3 folding sections > with the Sent range set, a fresh mount opens Sent, its value upright in the title 4ms
+→ expected null to match object { shut: false, expanded: 'true', …(1) }
+× v172.5 · 3 folding sections > open and shut animate 220ms; reduced motion is instant 1ms
+→ expected '/* Query Centre v172 — the smart filt…' to match /\.qs172-fb \{[^}]*grid-template-rows:…/
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+Tests  5 failed (5)
