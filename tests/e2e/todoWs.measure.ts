@@ -11,7 +11,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
-import { openRoute, liftMotionSuppression } from "./measure";
+import { openRoute, liftMotionSuppression, startFirstTodoTask } from "./measure";
 
 const DIR = "reports/todo-list-v52";
 const SIZES = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -19,6 +19,8 @@ mkdirSync(DIR, { recursive: true });
 
 async function open(page: Page, vp: { width: number; height: number }) {
   await openRoute(page, "/todo", vp);
+  /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+  await startFirstTodoTask(page);
   await liftMotionSuppression(page);
   await expect(page.locator('[data-tws="page"]:visible')).toHaveCount(1, { timeout: 30_000 });
   /* v52: wait for the tray's rows, so a `test.skip(no such row)` reads the tray and not the loading frame */

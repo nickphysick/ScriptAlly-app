@@ -6,7 +6,8 @@
  * ITS TASKS ARRIVE. The clock and the phases are lib/todoLoad (pure); this runs the clock and draws:
  *   · the tray's outline — two heading bars and six rows (a 32px disc, two lines, a figure stub);
  *   · the desk's outline — the title in its navy bar, the hawk's bubble, the first question and its tiles, the two later
- *     steps, and the card's frame, band, name and three bubbles;
+ *     steps, and the card's frame, band, name and three bubbles; or, when the page will open on "Where to start" (To-do
+ *     arrival v1), the run-through's outline (`RunOutline`);
  *   · "Still loading your tasks." under the tabs (from 3s), and the failed state in the tray (from 5s, or an error).
  * ⚠️ BUILT FROM THE REAL COMPONENTS' OWN CLASSES (`.tws-ti`, `.tws-av`, `.tws-tx`, `.tws-du`, `.tws-gbw`/`.tws-gb`,
  *    `.tws-wh`, `.tws-wbody`/`.tws-wcol`/`.tws-wq`, `.tws-mnote`, `.tws-rail`/`.tws-st`/`.tws-sn`, `.tws-tiles`,
@@ -97,6 +98,31 @@ export const TrayFailed: React.FC<{ onRetry: () => void; busy?: boolean }> = ({ 
     <h3>{LOAD_WORDS.failed}</h3>
     <p>{LOAD_WORDS.failedSub}</p>
     <button type="button" className="twl-again" data-twl="again" disabled={busy} onClick={onRetry}>{LOAD_WORDS.again}</button>
+  </div>
+);
+
+/**
+ * To-do arrival v1 · Phase 3 — the desk while loading when the page will open on "Where to start" (no task asked for):
+ * the run-through's shape, on the run-through's own classes (`.twa-run`, `.twa-head`, `.twa-top`, `.twa-piles`,
+ * `.twa-pile`, `.twa-line`), so its heading and its piles sit where the loaded ones will: a bar for the heading and the
+ * date, the hawk and its bubble, the button, three piles, the line. Still, like the desk's; the same timings and fade.
+ */
+export const RunOutline: React.FC<{ on: boolean }> = ({ on }) => (
+  <div className="twa-run twl-run" data-twl-out="run" data-on={on ? "" : undefined} aria-hidden="true">
+    <div className="twa-head twl-in"><h2 className="twa-h"><Bar k="rhead" /></h2><Bar k="rdate" /></div>
+    <div className="twa-top twl-in">
+      <div className="tws-mnote twa-mnote twl-mnote"><Bar k="hawk" /><Bar k="bubble" block /></div>
+      <Bar k="rbtn" block />
+    </div>
+    <div className="twa-piles twl-in">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="twa-pile twl-pile" data-twl="pile">
+          <Bar k="pbig" /><Bar k="ptitle" /><Bar k="psub" />
+          <span className="twa-discs"><span className="twl-pdisc" /><span className="twl-pdisc" /><span className="twl-pdisc" /></span>
+        </div>
+      ))}
+    </div>
+    <div className="twa-line twl-in"><Bar k="lhead" /><div className="twa-track"><span className="twa-axis" /></div></div>
   </div>
 );
 

@@ -14,7 +14,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { openRoute } from "./measure";
+import { openRoute, startFirstTodoTask } from "./measure";
 import { openPhone } from "./pa2Lib";
 
 test.describe.configure({ mode: "serial" });
@@ -52,6 +52,8 @@ async function open(page: Page, vp: { width: number; height: number }, fresh = t
   /* every case starts from the defaults: Category, the tray open (a save from the case before can land late) */
   if (fresh) seed("prefs", { trayGrouping: null, trayCollapsed: null });
   await openRoute(page, "/todo", vp);
+  /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+  await startFirstTodoTask(page);
   await expect(page.locator(PG)).toHaveCount(1, { timeout: 30_000 });
   await expect(page.locator(`${PG} [data-tws-row], ${PG} [data-tws55-strip]`).first()).toBeVisible({ timeout: 30_000 });
   /* the board settles over a few seconds as the account's collections arrive: wait until the count holds still */

@@ -15,7 +15,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { openRoute } from "./measure";
+import { openRoute, startFirstTodoTask } from "./measure";
 import { openPhone } from "./pa2Lib";
 
 test.describe.configure({ mode: "serial" });
@@ -60,6 +60,8 @@ async function open(page: Page, vp: { width: number; height: number }, cap?: num
     if (c) (window as unknown as { __SA_TD54_BATCH?: number }).__SA_TD54_BATCH = c;
   }, cap ?? 0);
   await openRoute(page, "/todo", vp);
+  /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+  await startFirstTodoTask(page);
   await expect(page.locator(PG)).toHaveCount(1, { timeout: 30_000 });
   await expect(page.locator(`${PG} [data-tws-row]`).first()).toBeVisible({ timeout: 30_000 });
   await page.waitForTimeout(500);

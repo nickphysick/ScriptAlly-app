@@ -31,11 +31,12 @@ vi.mock("../../../lib/db", () => ({
 }));
 
 import { TodoWorkspace } from "./TodoWorkspace";
+import { forgetTodoTask, rememberTodoTask, todoTaskScope } from "../../../lib/todoArrival";
 
 const render = () => renderToStaticMarkup(<MemoryRouter initialEntries={["/todo"]}><TodoWorkspace onNavigate={() => {}} /></MemoryRouter>);
 const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
 
-afterEach(() => { seed.userTasks = []; });
+afterEach(() => { seed.userTasks = []; forgetTodoTask(); });
 
 describe("the To-do workspace renders", () => {
   it("empty: the header, the tray's tabs and the first-run desk", () => {
@@ -44,13 +45,22 @@ describe("the To-do workspace renders", () => {
     expect(html).toContain("Snoozed");
     expect(html).toContain("Nothing to do yet");
   });
-  it("with a task of your own: the row, the desk and its Mark done", () => {
+  /* RE-POINTED (To-do arrival v1): arriving opens no task — the populated page opens on "Where to start" */
+  it("with a task of your own: the row, and the desk opens on Where to start", () => {
     seed.userTasks = [{ id: "t1", userId: "u1", text: "Tighten the synopsis", done: false, dueDate: today, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }];
     const html = render();
     expect(html).toContain("Tighten the synopsis");
     expect(html).toContain("Your tasks");
-    expect(html).toContain("Mark done");
+    expect(html).toContain("Where to start");
+    expect(html).not.toContain("Mark done");
     expect(html).not.toContain("Nothing to do yet");
+  });
+  it("with that task chosen: the desk and its Mark done", () => {
+    seed.userTasks = [{ id: "t1", userId: "u1", text: "Tighten the synopsis", done: false, dueDate: today, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }];
+    rememberTodoTask(todoTaskScope("u1", null), "t1");
+    const html = render();
+    expect(html).toContain("Mark done");
+    expect(html).not.toContain("Where to start");
   });
   it("a note to self (no date) never reaches the list", () => {
     seed.userTasks = [{ id: "n1", userId: "u1", text: "A note to self", done: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }];

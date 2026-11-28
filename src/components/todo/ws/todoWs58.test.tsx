@@ -61,10 +61,14 @@ vi.mock("../../../lib/db", () => ({
 }));
 
 import { TodoWorkspace } from "./TodoWorkspace";
+import { forgetTodoTask, rememberTodoTask, todoTaskScope } from "../../../lib/todoArrival";
 
 const render = () => renderToStaticMarkup(<MemoryRouter initialEntries={["/todo"]}><TodoWorkspace onNavigate={() => {}} /></MemoryRouter>);
-afterEach(() => { seed.tasks = []; seed.queries = []; seed.agents = []; });
+afterEach(() => { seed.tasks = []; seed.queries = []; seed.agents = []; forgetTodoTask(); });
 const populated = () => { seed.tasks = TASKS; seed.queries = QUERIES; seed.agents = AGENTS; return render(); };
+/* RE-POINTED (To-do arrival v1): nothing opens by itself on arrival, so the desk's checks open the first row as the writer
+   does (the visit's memory, read on mount) */
+const populatedOpen = () => { const first = /data-tws-row="([^"]+)"/.exec(populated())?.[1] ?? null; rememberTodoTask(todoTaskScope("u1", "m1"), first); return render(); };
 
 /** each tray row's opening tag and its title, from the markup */
 interface Row { tag: string; title: string; body: string }
@@ -107,7 +111,7 @@ describe("v58 phase 2 — the glyph's disc is the query's stage", () => {
 
 describe("v58 phase 7 — the hawk's bubble takes the stage colour", () => {
   it("the open task's hawk note carries the same band and edge as its row, for each of the three", () => {
-    const html = populated();
+    const html = populatedOpen();
     const open = rowsOf(html).filter((r) => /aria-current="true"/.test(r.tag));
     expect(open.length).toBe(1);
     const hawk = /<div([^>]*class="tws-mnote"[^>]*data-tws="hawk"[^>]*)>/.exec(html);

@@ -56,10 +56,14 @@ vi.mock("../../../lib/db", () => ({
 }));
 
 import { TodoWorkspace } from "./TodoWorkspace";
+import { forgetTodoTask, rememberTodoTask, todoTaskScope } from "../../../lib/todoArrival";
 
 const render = () => renderToStaticMarkup(<MemoryRouter initialEntries={["/todo"]}><TodoWorkspace onNavigate={() => {}} /></MemoryRouter>);
-afterEach(() => { seed.tasks = []; seed.queries = []; seed.agents = []; seed.userTasks = []; });
-const open = (k: string) => { seed.agents = AGENTS; CASES[k](); return render(); };
+afterEach(() => { seed.tasks = []; seed.queries = []; seed.agents = []; seed.userTasks = []; forgetTodoTask(); });
+/* RE-POINTED (To-do arrival v1): the page no longer opens the first task by itself, so each case opens it as the writer
+   does — the first row chosen (the visit's memory, which the page reads on mount) — then renders the desk */
+const firstRow = (html: string) => /data-tws-row="([^"]+)"/.exec(html)?.[1] ?? null;
+const open = (k: string) => { seed.agents = AGENTS; CASES[k](); rememberTodoTask(todoTaskScope("u1", "m1"), firstRow(render())); return render(); };
 
 /* ── todoWs58.css, read as rules (comments stripped, the @media wrapper's inner rules flattened) ── */
 const RAW = readFileSync("src/components/todo/ws/todoWs58.css", "utf8");

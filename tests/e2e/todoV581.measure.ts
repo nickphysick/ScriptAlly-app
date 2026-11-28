@@ -12,7 +12,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { openRoute } from "./measure";
+import { openRoute, startFirstTodoTask } from "./measure";
 
 test.describe.configure({ mode: "default" });
 test.setTimeout(300_000);
@@ -49,6 +49,8 @@ async function settle(page: Page) {
 async function openTodo(page: Page, vp: { width: number; height: number }) {
   seed("prefs", { trayGrouping: null, trayCollapsed: null });
   await openRoute(page, "/todo", vp);
+  /* RE-POINTED (To-do arrival v1): arrival opens no task; Start opens the one it used to */
+  await startFirstTodoTask(page);
   await expect(page.locator(`${PG} [data-tws-row]`).first()).toBeVisible({ timeout: 60_000 });
   let last = "";
   for (let i = 0; i < 20; i++) {
@@ -182,10 +184,9 @@ for (const vp of SIZES) {
     expect(n.openRow.outline.startsWith("none")).toBe(true);
     /* fix 4 — rows stay 58; at 1280 no more titles wrap than before v58 (14) */
     for (const r of load.rows) if (r.titleLines <= 1 && !r.open) expect(r.h, `${r.key} height`).toBe(58);
-    if (load.trayW <= 360) {
-      expect(wraps).toBeLessThanOrEqual(14);
-      for (const r of load.rows) if (r.fig?.text.includes(" ")) expect(r.fig.dir, `${r.key} stacks`).toBe("column");
-    } else for (const r of load.rows) if (r.fig) expect(r.fig.dir, `${r.key} one line`).toBe("row");
+    /* RE-POINTED (To-do arrival v1 · Phase 5): the figure is tucked at every tray width — no 360px threshold */
+    if (load.trayW <= 360) expect(wraps).toBeLessThanOrEqual(14);
+    for (const r of load.rows) if (r.fig?.text.includes(" ")) expect(r.fig.dir, `${r.key} stacks`).toBe("column");
     /* fix 5 — the rule stops short of Quick fill */
     expect(hk.quickFill).not.toBeNull();
     expect(hk.quickFill!.ruleRight).toBeLessThan(hk.quickFill!.qfbLeft);
