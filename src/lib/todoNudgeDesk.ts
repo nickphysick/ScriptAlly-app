@@ -12,10 +12,12 @@
 import { QueryStatus, type Agent, type Query } from "../types";
 import { expectedFor } from "./qcSummary";
 import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
+import { MONTHS_SHORT } from "./dates";
 
 const DAY = 86_400_000;
 const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/* the one month table (lib/dates; src/lib/dates.test.ts allows no other) */
+const MON = MONTHS_SHORT;
 const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
 const word = (n: number) => WORDS[n] ?? String(n);
 const dayOf = (ms: number) => { const d = new Date(ms); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
