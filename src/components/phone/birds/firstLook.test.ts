@@ -48,6 +48,13 @@ describe("the bars grow in (ref playLoad grow2)", () => {
     expect(LOOK_MS).toBe(2000);
     expect(BW_LOOK_KEY).toBe("bw1.firstLook.day");
   });
+  it("polish v1: the marks on the bars pop with their rows, as the \"!\" does", () => {
+    expect(readFileSync("src/components/phone/birds/firstLook.ts", "utf8")).toContain('const marks = q(".bw-ovd, .bw-evmk");');
+    /* both carry their row's id, which the grow-in times them by */
+    const dw = readFileSync("src/components/phone/birds/drawWorld.ts", "utf8");
+    expect(dw).toMatch(/class="bw-evmk[^`]*data-row="\$\{esc\(r\.id\)\}"/);
+    expect(dw).toMatch(/data-bw="mark" \$\{rowAttr\}/);
+  });
   it("Birds-eye decides once, with reduced motion checked before the day is used up", () => {
     const src = readFileSync("src/components/phone/birds/BirdsWorld.tsx", "utf8");
     expect(src).toMatch(/if \(calm\(\) \|\| !firstTimeToday\(BW_LOOK_KEY, Date\.now\(\)\)\)/);
