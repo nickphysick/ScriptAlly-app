@@ -1,0 +1,489 @@
+{
+ "open-1280": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "sentBtn": "I’ve sent it",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 234,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 577,
+   "clientH": 451
+  },
+  "calendar": null,
+  "labels": [
+   "start:520-568",
+   "due:606-672",
+   "ago:607-735",
+   "today:684-721"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
+ },
+ "open-1512": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "sentBtn": "I’ve sent it",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 408,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 551,
+   "clientH": 551
+  },
+  "calendar": null,
+  "labels": [
+   "start:574-623",
+   "due:739-805",
+   "ago:762-890",
+   "today:862-899"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
+ },
+ "open-1920": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "sentBtn": "I’ve sent it",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 544,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 731,
+   "clientH": 731
+  },
+  "calendar": null,
+  "labels": [
+   "start:670-718",
+   "due:889-955",
+   "ago:928-1055",
+   "today:1042-1080"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
+ },
+ "sent-1920": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:on"
+  ],
+  "sentBtn": "Sent",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 544,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 731,
+   "clientH": 731
+  },
+  "calendar": null,
+  "labels": [
+   "start:670-718",
+   "due:889-955",
+   "ago:928-1055",
+   "today:1042-1080"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
+ },
+ "today-1920": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 544,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 731,
+   "clientH": 731
+  },
+  "calendar": null,
+  "labels": [
+   "start:670-718",
+   "due:889-955",
+   "ago:928-1055",
+   "nudge:1026-1096",
+   "next:1111-1200"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "calendar-1920": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 544,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 731,
+   "clientH": 731
+  },
+  "calendar": {
+   "l": 917.765625,
+   "t": 359.421875,
+   "r": 1237.765625,
+   "b": 697.421875,
+   "w": 320,
+   "h": 338,
+   "inside": true,
+   "col": {
+    "l": 608,
+    "t": 250.125,
+    "r": 1287.765625,
+    "b": 1046.125,
+    "w": 679.765625,
+    "h": 796
+   }
+  },
+  "labels": [
+   "start:670-718",
+   "due:889-955",
+   "ago:928-1055",
+   "nudge:1026-1096",
+   "next:1111-1200"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "esc-1920": {
+  "calendar": false,
+  "desk": [
+   "send:done",
+   "when:done"
+  ]
+ },
+ "another-day-1920": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:true:Wed 25 Nov"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 544,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 731,
+   "clientH": 731
+  },
+  "calendar": null,
+  "labels": [
+   "start:670-718",
+   "due:899-965",
+   "ago:932-1064",
+   "nudge:1028-1099",
+   "next:1110-1199"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "unconfirm-1920": {
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "logDisabled": true,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ]
+ },
+ "frame-100": {
+  "tookAt": 182
+ },
+ "frame-500": {
+  "tookAt": 576
+ },
+ "frame-1000": {
+  "tookAt": 1065
+ },
+ "sent-1512": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:on"
+  ],
+  "sentBtn": "Sent",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 408,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 551,
+   "clientH": 551
+  },
+  "calendar": null,
+  "labels": [
+   "start:574-623",
+   "due:739-805",
+   "ago:762-890",
+   "today:862-899"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
+ },
+ "today-1512": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 408,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 551,
+   "clientH": 551
+  },
+  "calendar": null,
+  "labels": [
+   "start:574-623",
+   "due:739-805",
+   "ago:762-890",
+   "nudge:845-916",
+   "next:902-990"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "calendar-1512": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "answers": [
+   "today:true:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 408,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 551,
+   "clientH": 551
+  },
+  "calendar": {
+   "l": 706.21875,
+   "t": 305.3125,
+   "r": 1026.21875,
+   "b": 643.3125,
+   "w": 320,
+   "h": 338,
+   "inside": true,
+   "col": {
+    "l": 520.390625,
+    "t": 250.125,
+    "r": 1064.21875,
+    "b": 866.125,
+    "w": 543.828125,
+    "h": 616
+   }
+  },
+  "labels": [
+   "start:574-623",
+   "due:739-805",
+   "ago:762-890",
+   "nudge:845-916",
+   "next:902-990"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "esc-1512": {
+  "calendar": false,
+  "desk": [
+   "send:done",
+   "when:done"
+  ]
+ },
+ "another-day-1512": {
+  "title": "Tom’s updated timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:done",
+   "when:done"
+  ],
+  "sentBtn": "Sent",
+  "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:true:Wed 25 Nov"
+  ],
+  "logDisabled": false,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 408,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 551,
+   "clientH": 551
+  },
+  "calendar": null,
+  "labels": [
+   "start:574-623",
+   "due:747-813",
+   "ago:761-893",
+   "nudge:847-918",
+   "next:901-989"
+  ],
+  "points": [
+   "start",
+   "due",
+   "nudge",
+   "next"
+  ],
+  "overlaps": []
+ },
+ "unconfirm-1512": {
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "logDisabled": true,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ]
+ }
+}
