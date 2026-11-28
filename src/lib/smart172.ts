@@ -4,20 +4,30 @@
  *
  * Query Centre v172 — the smart filter panel's model: its choices (`Smart172`, held as Queries.tsx page state and
  * remembered for the visit beside `qcF138`), the test a row must pass (`pass172`), the applied row's chips, the
- * date fields' wording, and the one grouping the list shares with Birds-eye (`group172`, `tier172`).
+ * date fields' wording, and the list's grouping (`group172`, `tier172`). v172.5 — what's next: every query in one of
+ * seven parts (`stand172`), shown or hidden by the panel's ring (`hide` beside `closed`, picked by `pickPart172`).
  */
 import { QueryStatus } from "../types";
 import { whereItStands, type QcRow } from "./qcSummary";
 import { dayMonth } from "./dates";
 
 export type Who172 = "you" | "chase" | "wait";
+/** v172.5 — what's next for an open query: the five action parts, then in their window; Closed is the seventh part */
+export type Stand172 = "offer" | "req" | "nudge" | "nodate" | "close" | "window";
+export const STAND172: readonly { k: Stand172; label: string }[] = [
+  { k: "offer", label: "Offer to answer" }, { k: "req", label: "Materials requested" }, { k: "nudge", label: "Nudge due" },
+  { k: "nodate", label: "Reply date needed" }, { k: "close", label: "Consider closing" }, { k: "window", label: "In their window" },
+];
+/** the parts Action needed is made of, and No action needed */
+export const ACT172: readonly Stand172[] = ["offer", "req", "nudge", "nodate", "close"];
+export const WAIT172: readonly Stand172[] = ["window"];
 /** a due-date range in days from today (the ends are open: "or earlier" / "or later"), and whether undated ones count */
 export interface Due172 { lo: number; hi: number; nd: boolean }
 export const REPLY172 = { min: -56, max: 84 };
 export const SENDBY172 = { min: -28, max: 56 };
 export const dueOn172 = (d: Due172, b: { min: number; max: number }) => d.lo > b.min || d.hi < b.max || !d.nd;
 export interface Smart172 {
-  who: Who172 | null;
+  hide: Stand172[];           // v172.5 — the open parts left out (none = all shown)
   closed: boolean;            // include closed
   stage: number[];            // stages picked (furthest reached): 0 queried · 1 partial · 2 full · 3 offer; none = any
   sent: [number, number] | null;   // ms range
@@ -29,9 +39,9 @@ export interface Smart172 {
   sendby: Due172;    // your send-by date: your move only
   mats: "any" | "yes" | "no";
 }
-export const EMPTY172: Smart172 = { who: null, closed: true, stage: [], sent: null, pkgs: [], methods: [], fit: 0, countries: [], date: { lo: REPLY172.min, hi: REPLY172.max, nd: true }, sendby: { lo: SENDBY172.min, hi: SENDBY172.max, nd: true }, mats: "any" };
+export const EMPTY172: Smart172 = { hide: [], closed: true, stage: [], sent: null, pkgs: [], methods: [], fit: 0, countries: [], date: { lo: REPLY172.min, hi: REPLY172.max, nd: true }, sendby: { lo: SENDBY172.min, hi: SENDBY172.max, nd: true }, mats: "any" };
 export const smartOn172 = (s: Smart172): number =>
-  (s.who ? 1 : 0) + (s.closed ? 0 : 1) + (stageOn172(s) ? 1 : 0) + (s.sent ? 1 : 0) + (s.pkgs.length ? 1 : 0) + (s.methods.length ? 1 : 0)
+  (s.hide.length ? 1 : 0) + (s.closed ? 0 : 1) + (stageOn172(s) ? 1 : 0) + (s.sent ? 1 : 0) + (s.pkgs.length ? 1 : 0) + (s.methods.length ? 1 : 0)
   + (s.fit ? 1 : 0) + (s.countries.length ? 1 : 0) + (dueOn172(s.date, REPLY172) ? 1 : 0) + (dueOn172(s.sendby, SENDBY172) ? 1 : 0) + (s.mats !== "any" ? 1 : 0);
 
 export interface Ctx172 { nowMs: number; pkg: (r: QcRow) => string; stars: (r: QcRow) => number; country: (r: QcRow) => string }
@@ -41,6 +51,16 @@ export const whoOf172 = (r: QcRow, now: number): Who172 | "closed" => {
   if (w === "closed") return "closed";
   if (w === "quiet" || (w === "you" && r.court === "agent")) return "chase";
   return w === "you" ? "you" : "wait";
+};
+/** v172.5 — the part a query is in: closed · gone quiet → consider closing · with you and the agent's court → a nudge
+ *  due · with you on an offer → offer to answer · with you otherwise → materials requested · waiting with no reply
+ *  date → reply date needed · waiting with one → in their window */
+export const stand172 = (r: QcRow, now: number): Stand172 | "closed" => {
+  const w = whereItStands(r, now);
+  if (w === "closed") return "closed";
+  if (w === "quiet") return "close";
+  if (w === "you") return r.court === "agent" ? "nudge" : r.status === QueryStatus.OFFER ? "offer" : "req";
+  return r.expectedMs == null ? "nodate" : "window";
 };
 const IDX: Partial<Record<QueryStatus, number>> = {
   [QueryStatus.PARTIAL_REQUESTED]: 1, [QueryStatus.PARTIAL_SENT]: 1, [QueryStatus.FULL_REQUESTED]: 2, [QueryStatus.FULL_SENT]: 2,
@@ -53,7 +73,7 @@ export const method172 = (r: QcRow): string => String(r.query.sendMethod ?? "").
 export function pass172(r: QcRow, s: Smart172, c: Ctx172, skip?: keyof Smart172): boolean {
   const who = whoOf172(r, c.nowMs);
   if (skip !== "closed" && !s.closed && who === "closed") return false;
-  if (skip !== "who" && s.who && who !== s.who) return false;
+  if (skip !== "hide" && s.hide.length && who !== "closed" && s.hide.includes(stand172(r, c.nowMs) as Stand172)) return false;
   if (skip !== "stage" && stageOn172(s) && !s.stage.includes(stageIdx172(r))) return false;
   if (skip !== "sent" && s.sent && (r.sentMs == null || r.sentMs < s.sent[0] || r.sentMs > s.sent[1])) return false;
   if (skip !== "pkgs" && s.pkgs.length && !s.pkgs.includes(c.pkg(r))) return false;
@@ -104,14 +124,14 @@ export function dueText172(d: Due172, b: { min: number; max: number }): string {
   return d.nd ? `${r} + undated` : r;
 }
 export const resetPart172: Record<string, Partial<Smart172>> = {
-  who: { who: null }, closed: { closed: true }, stage: { stage: [] }, sent: { sent: null }, pkgs: { pkgs: [] }, methods: { methods: [] },
+  closed: { closed: true }, hide: { hide: [] }, ws: { hide: [], closed: true }, stage: { stage: [] }, sent: { sent: null }, pkgs: { pkgs: [] }, methods: { methods: [] },
   fit: { fit: 0 }, countries: { countries: [] }, date: { date: EMPTY172.date }, sendby: { sendby: EMPTY172.sendby }, mats: { mats: "any" },
 };
 export function chips172(s: Smart172, set: (p: Partial<Smart172>) => void): { key: string; label: string; part: Partial<Smart172>; onRemove: () => void }[] {
   const out: { key: string; label: string; part: Partial<Smart172>; onRemove: () => void }[] = [];
   const add = (key: string, label: string, p: Partial<Smart172>) => out.push({ key: `s172:${key}`, label, part: p, onRemove: () => set(p) });
-  if (s.who) add("who", { you: "With you", chase: "Needs chasing", wait: "Waiting" }[s.who], resetPart172.who);
-  if (!s.closed) add("closed", "Closed hidden", resetPart172.closed);
+  if (s.hide.length) add("ws", standText172(s), resetPart172.ws);
+  else if (!s.closed) add("closed", "Closed hidden", resetPart172.closed);
   for (const k of [...s.stage].sort()) add(`stage:${k}`, `Stage: ${["Queried", "Partial", "Full", "Offer"][k]}`, { stage: s.stage.filter((x) => x !== k) });
   if (s.sent) add("sent", `Sent ${day172(s.sent[0])} – ${day172(s.sent[1])}`, resetPart172.sent);
   if (dueOn172(s.date, REPLY172)) add("date", `Reply: ${dueText172(s.date, REPLY172)}`, resetPart172.date);
@@ -124,30 +144,57 @@ export function chips172(s: Smart172, set: (p: Partial<Smart172>) => void): { ke
   return out;
 }
 
+/** v172.5 — what the ring is showing, in words: "Action needed" (exactly the five action parts), "No action needed"
+ *  (exactly In their window), else the shown names joined, Closed last; "Closed hidden" when only Closed is off */
+export function standText172(s: Smart172): string {
+  const shown = STAND172.filter((x) => !s.hide.includes(x.k)).map((x) => x.k);
+  const only = (ks: readonly Stand172[]) => !s.closed && shown.length === ks.length && ks.every((k) => shown.includes(k));
+  if (only(ACT172)) return "Action needed";
+  if (only(WAIT172)) return "No action needed";
+  if (!s.hide.length) return s.closed ? "" : "Closed hidden";
+  const names = [...STAND172.filter((x) => shown.includes(x.k)).map((x) => x.label), ...(s.closed ? ["Closed"] : [])];
+  return names.join(", ") || "Nothing shown";
+}
+
+/** v172.5 — a pick on the ring, its key or a group heading (`act`, `wait`, a part, or `closed`): from everything, the
+ *  pick shows only that; after that each pick adds or takes away; taking the last away shows everything again */
+export type Pick172 = Stand172 | "closed" | "act" | "wait";
+export const partsOf172 = (k: Pick172): readonly (Stand172 | "closed")[] => (k === "act" ? ACT172 : k === "wait" ? WAIT172 : [k]);
+export function pickPart172(s: Smart172, k: Pick172): Pick<Smart172, "hide" | "closed"> {
+  const all = !s.hide.length && s.closed;
+  const isShown = (x: Stand172 | "closed") => (x === "closed" ? s.closed : !s.hide.includes(x));
+  const shown = new Set<Stand172 | "closed">(all ? [] : [...STAND172.map((x) => x.k), "closed" as const].filter(isShown));
+  const ks = partsOf172(k);
+  const takeAway = !all && ks.every((x) => shown.has(x));
+  ks.forEach((x) => (takeAway ? shown.delete(x) : shown.add(x)));
+  if (!shown.size) return { hide: [], closed: true };
+  return { hide: STAND172.map((x) => x.k).filter((x) => !shown.has(x)), closed: shown.has("closed") };
+}
+
 export const stageOn172 = (s: Smart172) => s.stage.length > 0 && s.stage.length < 4;
 export function stageText172(st: number[]): string {
   const L = ["Queried", "Partial", "Full", "Offer"];
   return [...st].sort().map((k) => L[k]).join(", ");
 }
 
-/** 1 · the list grouped as Birds-eye and the phone: Needs action · Within their window · Waiting, no reply date · Closed */
+/** 1 · the list grouped: Action needed (v172.5 — taking in the waiting with no reply date) · Within their window · Closed */
 export function group172(rows: readonly QcRow[], now: number): { key: string; label: string; rows: QcRow[] }[] {
   const w = (r: QcRow) => whoOf172(r, now);
   return [
-    { key: "action", label: "Needs action", rows: rows.filter((r) => w(r) === "you" || w(r) === "chase").map((r, i) => [r, i] as const).sort((a, b) => tier172(a[0], now) - tier172(b[0], now) || a[1] - b[1]).map(([r]) => r) },
+    { key: "action", label: "Action needed", rows: rows.filter((r) => w(r) === "you" || w(r) === "chase" || (w(r) === "wait" && r.expectedMs == null)).map((r, i) => [r, i] as const).sort((a, b) => tier172(a[0], now) - tier172(b[0], now) || a[1] - b[1]).map(([r]) => r) },
     { key: "window", label: "Within their window", rows: rows.filter((r) => w(r) === "wait" && r.expectedMs != null) },
-    { key: "nodate", label: "Waiting, no reply date", rows: rows.filter((r) => w(r) === "wait" && r.expectedMs == null) },
     { key: "closed", label: "Closed", rows: rows.filter((r) => w(r) === "closed") },
   ].filter((g) => g.rows.length > 0);
 }
 
-/** the most urgent first inside Needs action: an offer, then a request you're late with, a request to answer, a nudge
- *  due, and last a query gone quiet (worth closing) */
+/** the most urgent first inside Action needed: an offer, then a request you're late with, a request to answer, a nudge
+ *  due, a reply date needed (3.5), and last a query gone quiet (worth closing) */
 export function tier172(r: QcRow, now: number): number {
   if (r.status === QueryStatus.OFFER) return 0;
   const w = whereItStands(r, now);
   if (w === "you" && r.court !== "agent") return r.expectedMs != null && r.expectedMs < now ? 1 : 2;
   if (w === "you") return 3;
+  if (w !== "quiet" && r.expectedMs == null) return 3.5;
   return 4;
 }
 
@@ -168,7 +215,7 @@ export function sanitiseSmart172(raw: unknown): Smart172 {
   const sent = Array.isArray(r.sent) && r.sent.length === 2 && num(r.sent[0]) != null && num(r.sent[1]) != null && (r.sent[0] as number) <= (r.sent[1] as number)
     ? [r.sent[0] as number, r.sent[1] as number] as [number, number] : null;
   return {
-    who: r.who === "you" || r.who === "chase" || r.who === "wait" ? r.who : null,
+    hide: Array.isArray(r.hide) ? [...new Set(r.hide.filter((x): x is Stand172 => STAND172.some((y) => y.k === x)))] : [],
     closed: r.closed !== false,
     stage: Array.isArray(r.stage) ? [...new Set(r.stage.filter((x): x is number => x === 0 || x === 1 || x === 2 || x === 3))] : [],
     sent,

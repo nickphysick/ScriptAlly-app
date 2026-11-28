@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v172 — lib/smart172's source half: the one grouping the list shares with Birds-eye (group172), the most
- * urgent first inside Needs action (tier172), the date fields' either-side rule, and the remembered panel made safe.
+ * Query Centre v172 — lib/smart172's source half: the list's grouping (group172; v172.5 — Action needed takes in the
+ * undated, smart1725.test.ts), the most urgent first inside it (tier172), the date fields' either-side rule, and the remembered panel made safe.
  * The rendered half (the same keys in the same order on both views) is tests/e2e/qc172.measure.ts L4.
  */
 import { describe, expect, it } from "vitest";
@@ -18,7 +18,7 @@ const at = (id: string, status: QueryStatus, court: string, extra: Record<string
   ({ ...row154(status, court, { stageStartMs: NOW - 5 * DAY, furthest: "queried", ...extra }), id } as QcRow);
 const ctx: Ctx172 = { nowMs: NOW, pkg: () => "Nothing recorded", stars: () => 0, country: () => "" };
 
-describe("v172 · group172: Needs action · Within their window · Waiting, no reply date · Closed", () => {
+describe("v172 · group172: Action needed · Within their window · Closed (v172.5)", () => {
   const rows = [
     at("closed", QueryStatus.REJECTED, "closed", { expectedMs: null }),
     at("window", QueryStatus.QUERIED, "agent", { expectedMs: NOW + 20 * DAY }),
@@ -28,12 +28,12 @@ describe("v172 · group172: Needs action · Within their window · Waiting, no r
     at("offer", QueryStatus.OFFER, "offer", { expectedMs: null }),
   ];
   const g = group172(rows, NOW);
-  it("the four groups, in that order, Closed last", () => {
-    expect(g.map((x) => x.key)).toEqual(["action", "window", "nodate", "closed"]);
-    expect(g.map((x) => x.label)).toEqual(["Needs action", "Within their window", "Waiting, no reply date", "Closed"]);
+  it("the three groups, in that order, Closed last", () => {
+    expect(g.map((x) => x.key)).toEqual(["action", "window", "closed"]);
+    expect(g.map((x) => x.label)).toEqual(["Action needed", "Within their window", "Closed"]);
   });
-  it("inside Needs action: an offer, then a request past its send-by date, then another request", () => {
-    expect(g[0].rows.map((r) => r.id)).toEqual(["offer", "late", "ask"]);
+  it("inside Action needed: an offer, then a request past its send-by date, then another request, then the undated", () => {
+    expect(g[0].rows.map((r) => r.id)).toEqual(["offer", "late", "ask", "nodate"]);
     expect([tier172(rows[5], NOW), tier172(rows[4], NOW), tier172(rows[2], NOW)]).toEqual([0, 1, 2]);
   });
   it("ties keep the order they came in (the chosen sort)", () => {
@@ -61,11 +61,11 @@ describe("v172 · the two date fields", () => {
   });
 });
 
-describe("v172 · the reply date's Not dated is Birds-eye's Waiting, no reply date", () => {
+describe("v172 · the reply date's Not dated is Birds-eye's Waiting, no reply date (in the list's Action needed from v172.5)", () => {
   const waiting = at("w", QueryStatus.QUERIED, "agent", { expectedMs: null, stageStartMs: NOW - 5 * DAY });
   const chase = at("c", QueryStatus.QUERIED, "agent", { expectedMs: null, stageStartMs: NOW - 120 * DAY });
   it("an undated query simply waiting counts; one gone quiet (Needs chasing) does not", () => {
-    expect(group172([waiting], NOW)[0].key).toBe("nodate");
+    expect(group172([waiting], NOW)[0].key).toBe("action");
     expect(undated172(waiting, NOW, "agent")).toBe(true);
     expect(group172([chase], NOW)[0].key).toBe("action");
     expect(undated172(chase, NOW, "agent")).toBe(false);
@@ -83,9 +83,9 @@ describe("v172 · sanitiseSmart172: the remembered panel made safe", () => {
     expect(sanitiseSmart172("x")).toEqual(EMPTY172);
   });
   it("a good value comes back whole; a bad field falls back on its own", () => {
-    const good = { ...EMPTY172, who: "chase", stage: [0, 2], pkgs: ["Spring round"], fit: 3, mats: "no", date: { lo: -28, hi: 14, nd: false } };
+    const good = { ...EMPTY172, hide: ["window", "close"], stage: [0, 2], pkgs: ["Spring round"], fit: 3, mats: "no", date: { lo: -28, hi: 14, nd: false } };
     expect(sanitiseSmart172(JSON.parse(JSON.stringify(good)))).toEqual(good);
-    const bad = sanitiseSmart172({ ...good, who: "boss", stage: [0, 9, "1"], fit: 7, date: { lo: 40, hi: 10, nd: true } });
-    expect(bad).toEqual({ ...good, who: null, stage: [0], fit: 0, date: EMPTY172.date });
+    const bad = sanitiseSmart172({ ...good, hide: ["boss", "close"], stage: [0, 9, "1"], fit: 7, date: { lo: 40, hi: 10, nd: true } });
+    expect(bad).toEqual({ ...good, hide: ["close"], stage: [0], fit: 0, date: EMPTY172.date });
   });
 });

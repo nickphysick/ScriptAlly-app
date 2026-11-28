@@ -122,12 +122,6 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
       <header className="qs172-h"><b>Filter</b><small>{on ? `${showing} of ${total}` : `All ${total}`}</small>{on ? <button type="button" onClick={reset}>Clear all</button> : null}</header>
 
       <div className="qs172-q">
-        <div className="qs172-seg" role="group" aria-label="Where it stands">
-          {([["you", "With you"], ["chase", "Needs chasing"], ["wait", "Waiting"]] as const).map(([k, label]) => {
-            const c = n("who", (r) => whoOf172(r, ctx.nowMs) === k);
-            return <button key={k} type="button" className={s.who === k ? "on" : ""} disabled={!c && s.who !== k} onClick={() => setSmart172({ who: s.who === k ? null : k })}><b>{c}</b><span>{label}</span></button>;
-          })}
-        </div>
         {/* v172.4 — a tick box like Not dated, ticked by default; the count is the closed queries */}
         <div className="qs172-incs"><label className="qs172-ck qs172-ck--closed"><input type="checkbox" checked={s.closed} onChange={(e) => setSmart172({ closed: e.target.checked })} />Include closed <em>{closedN}</em></label></div>
       </div>
