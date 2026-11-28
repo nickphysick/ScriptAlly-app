@@ -220,6 +220,12 @@ const discard = async (page: Page, scope: string) => {
 };
 
 test.use({ viewport: PHONE, deviceScaleFactor: 2 });
+/* Phone Birds-eye first look v1: the day's first open of Birds-eye plays a two-second grow-in that holds the world's
+   frame; these readings are of the world at rest, so today's first look is marked as already seen (the app's own
+   day stamp, lib/phoneV41 `dayStamp`). The grow-in's own locks are phoneBirdsFirstLook.measure.ts. */
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => { try { const d = new Date(); localStorage.setItem("bw1.firstLook.day", `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`); } catch { /* */ } });
+});
 const runs: Mut[] = process.env.PQS_MUTATE === "all" ? ["", ...MUTS] : process.env.PQS_MUTATE ? (process.env.PQS_MUTATE.split(",") as Mut[]) : [""];
 const ONLY = (process.env.PQS_ONLY ?? "").split(",").filter(Boolean);
 const on = (k: string) => !ONLY.length || ONLY.includes(k);

@@ -1,0 +1,662 @@
+[
+ {
+  "id": "PS1",
+  "what": "390x844 · top: population (94 texts, 3 cards, 33 taps, 20 rows)",
+  "ok": true,
+  "got": "{\"texts\":94,\"cards\":3,\"taps\":33,\"rows\":20}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · scrolled: population (95 texts, 3 cards, 36 taps, 20 rows)",
+  "ok": true,
+  "got": "{\"texts\":95,\"cards\":3,\"taps\":36,\"rows\":20}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · offer: population (95 texts, 3 cards, 36 taps, 20 rows)",
+  "ok": true,
+  "got": "{\"texts\":95,\"cards\":3,\"taps\":36,\"rows\":20}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · ordinary: population (89 texts, 3 cards, 34 taps, 18 rows)",
+  "ok": true,
+  "got": "{\"texts\":89,\"cards\":3,\"taps\":34,\"rows\":18}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · one-query: population (34 texts, 2 cards, 13 taps, 0 rows)",
+  "ok": true,
+  "got": "{\"texts\":34,\"cards\":2,\"taps\":13,\"rows\":0}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · top: population (94 texts, 3 cards, 33 taps, 20 rows)",
+  "ok": true,
+  "got": "{\"texts\":94,\"cards\":3,\"taps\":33,\"rows\":20}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · scrolled: population (95 texts, 3 cards, 36 taps, 20 rows)",
+  "ok": true,
+  "got": "{\"texts\":95,\"cards\":3,\"taps\":36,\"rows\":20}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · offer: population (95 texts, 3 cards, 36 taps, 20 rows)",
+  "ok": true,
+  "got": "{\"texts\":95,\"cards\":3,\"taps\":36,\"rows\":20}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · ordinary: population (89 texts, 3 cards, 34 taps, 18 rows)",
+  "ok": true,
+  "got": "{\"texts\":89,\"cards\":3,\"taps\":34,\"rows\":18}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · one-query: population (34 texts, 2 cards, 13 taps, 0 rows)",
+  "ok": true,
+  "got": "{\"texts\":34,\"cards\":2,\"taps\":13,\"rows\":0}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ }
+]

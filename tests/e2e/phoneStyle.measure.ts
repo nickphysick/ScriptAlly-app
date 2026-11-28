@@ -55,7 +55,11 @@ async function signIn(page: Page) {
   catch { await page.locator("#au-pw").press("Enter"); await page.waitForTimeout(4000); await openRoute(page, "/dashboard", { width: 1440, height: 900 }); }
   page.setDefaultTimeout(20_000);
 }
+/* Phone Birds-eye first look v1: the day's first open of Birds-eye plays a two-second grow-in that holds the world's
+   frame; these readings are of the world at rest, so today's first look is marked as already seen (the app's own
+   day stamp, lib/phoneV41 `dayStamp`). The grow-in's own locks are phoneBirdsFirstLook.measure.ts. */
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => { try { const d = new Date(); localStorage.setItem("bw1.firstLook.day", `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`); } catch { /* */ } });
   await page.addInitScript(() => {
     const w = window as unknown as { __v: (s: string, r?: ParentNode) => HTMLElement[] };
     w.__v = (s, r = document) => [...r.querySelectorAll<HTMLElement>(s)].filter((e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== "hidden");
@@ -232,9 +236,9 @@ async function probe(page: Page, roots: string[], extra: { cardSel?: string } = 
       const b = h.getBoundingClientRect(), cs = getComputedStyle(h);
       if (edge(h, b.left + parseFloat(cs.paddingLeft), b.right - parseFloat(cs.paddingRight))) add("PS1-4", h, `${Math.round(b.left + parseFloat(cs.paddingLeft))} / ${Math.round(vw - b.right + parseFloat(cs.paddingRight))}`);
     }
-    /* PS1-5 targets 48 × 48; a list row 64 (a Birds-eye row is the sheet's own 40) */
-    for (const t of taps) { if (t.matches(".pa5-be-row")) continue; const b = t.getBoundingClientRect(); if (b.width < 47.5 || b.height < 47.5) add("PS1-5", t, `${Math.round(b.width)}×${Math.round(b.height)}`); }
-    for (const r of rows) { if (r.matches(".pa5-be-row")) continue; const b = r.getBoundingClientRect(); if (b.height < 63.5) add("PS1-5", r, `row ${Math.round(b.height)}`); }
+    /* PS1-5 targets 48 × 48; a list row 64 (a Birds-eye row is the sheet's own 40; Today's Birds-eye preview rows the ref's 32, first look v1) */
+    for (const t of taps) { if (t.matches(".pa5-be-row, .bwp-r")) continue; const b = t.getBoundingClientRect(); if (b.width < 47.5 || b.height < 47.5) add("PS1-5", t, `${Math.round(b.width)}×${Math.round(b.height)}`); }
+    for (const r of rows) { if (r.matches(".pa5-be-row, .bwp-r")) continue; const b = r.getBoundingClientRect(); if (b.height < 63.5) add("PS1-5", r, `row ${Math.round(b.height)}`); }
     /* PS1-6 the grey never on the page */
     for (const e of texts) if (getComputedStyle(e).color === MUTED && bgOf(e) === PAGE) add("PS1-6", e, "grey on the page");
     /* PS1-7 one coloured card */

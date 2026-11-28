@@ -1,0 +1,374 @@
+[
+ {
+  "id": "PS1R",
+  "what": "Today · Queries (built to the sheet; the calibration): reached (95 texts, 36 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "Today · Agents: reached (44 texts, 18 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "Today · Activity: reached (27 texts, 11 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "To do: reached (221 texts, 108 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "the task screen: reached (22 texts, 13 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1a",
+  "what": "the task screen: fade tdp-foot = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS1R",
+  "what": "Materials · Packages: reached (38 texts, 11 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "Materials · Letters: reached (24 texts, 11 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "Materials · Versions: reached (9 texts, 7 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "Materials · Comps: reached (30 texts, 14 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "Profile: reached (21 texts, 9 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "the full query list: reached (287 texts, 97 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1a",
+  "what": "the full query list: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "the full query list: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "the full query list: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS1R",
+  "what": "one query · Queried: reached (17 texts, 11 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Queried: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Queried: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Queried: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS1R",
+  "what": "one query · Partial: reached (17 texts, 9 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Partial: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Partial: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Partial: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS1R",
+  "what": "one query · Full: reached (15 texts, 8 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Full: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Full: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Full: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS1R",
+  "what": "one query · Offer: reached (15 texts, 8 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Offer: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Offer: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · Offer: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS1R",
+  "what": "one query · closed: reached (19 texts, 10 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · closed: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · closed: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PSR-1a",
+  "what": "one query · closed: seal ring = the page",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS1R",
+  "what": "the agent sheet: reached (17 texts, 3 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "the + sheet: reached (9 texts, 7 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "quick log: reached (9 texts, 7 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "search: reached (15 texts, 15 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "the full Birds-eye view: reached (25 texts, 17 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "the gaps sheet: reached (15 texts, 7 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1b",
+  "what": "the gaps sheet: .pa5-gc-where unchanged inside (pixels)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PS1R",
+  "what": "Settings: reached (21 texts, 12 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1b",
+  "what": "Settings: .pa3 .pa3-row unchanged inside (pixels)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PS1R",
+  "what": "Settings · a section: reached (21 texts, 9 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "set-up · a set-up step: reached (8 texts, 1 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "account · sign-in: reached (7 texts, 1 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "account · sign-up: reached (7 texts, 1 taps)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pf-av.pf-empty: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pf-lctray: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa-addrow: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa-anote: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa-aq: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa-dwish: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa5-gc-where: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa-mtile .pa-mi: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa-set .sc-cf: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa-pg .pa-annote: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa3 .pa3-row: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "id": "PSR-1b",
+  "what": ".pa3 .pa3-opt.on: its background unchanged by the page (class chain)",
+  "ok": true,
+  "got": "rgb(248, 246, 242)"
+ },
+ {
+  "id": "PS1R",
+  "what": "the phone landing: reached (88 texts)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1R",
+  "what": "pricing: reached (69 texts)",
+  "ok": true,
+  "got": ""
+ }
+]

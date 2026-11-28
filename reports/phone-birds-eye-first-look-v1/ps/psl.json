@@ -1,0 +1,52 @@
+{
+ "as built": {
+  "h": {
+   "first": "cv25-q-08",
+   "task": true,
+   "n": 21
+  },
+  "lead": [
+   {
+    "id": "cv25-q-08",
+    "key": "task-offer-cv25-q-08",
+    "verb": "Decide",
+    "head": "Answer Tom’s offer"
+   }
+  ],
+  "rows": 21,
+  "noTask": [
+   "Partial Sent"
+  ]
+ },
+ "first query has no task": {
+  "h": {
+   "first": "seed-pkgq-4",
+   "task": false,
+   "n": 4
+  },
+  "lead": [],
+  "rows": 21,
+  "noTask": [
+   "Partial Sent"
+  ]
+ },
+ "one query": {
+  "h": {
+   "first": "cv25-q-08",
+   "task": true,
+   "n": 1
+  },
+  "lead": [
+   {
+    "id": "cv25-q-08",
+    "key": "task-offer-cv25-q-08",
+    "verb": "Decide",
+    "head": "Answer Tom’s offer"
+   }
+  ],
+  "rows": 21,
+  "noTask": [
+   "Partial Sent"
+  ]
+ }
+}

@@ -1,0 +1,7 @@
+{
+ "mut": "order",
+ "lock": "BFL-6",
+ "own": 1,
+ "other": 0,
+ "readings": 20
+}
