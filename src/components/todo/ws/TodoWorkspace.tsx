@@ -62,6 +62,10 @@ import "./todoWs57.css";
 import "./todoWs58.css";
 import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
 import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
+import { deskMode, rememberTodoTask, rememberedTodoTask, selectedTask, todoTaskScope } from "../../../lib/todoArrival";
+import { activeManuscriptOf } from "../../../lib/events";
+import { STAGE_REPLAY_EVENT } from "../../shell/BarSwitcher";
+import { WsRunThrough } from "./WsRunThrough";
 
 const MENTOR = "/images/todo/mentor.webp";
 const HOUR = "/images/todo/hour.webp";
@@ -186,11 +190,17 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const openSearch = () => { setTab("todo"); setMenuState(false); setSearching(true); };
   const closeSearch = () => { setSearching(false); setFilters((f) => ({ ...f, q: "" })); };
 
-  /* ── selection ── */
-  const [selKey, setSelKey] = useState<string | null>(null);
+  /* ── selection ──
+     To-do arrival v1 (Phase 1) — NO TASK IS OPEN UNTIL THE WRITER CHOOSES. Landing with no task asked for selects nothing
+     and the desk is "Where to start"; an arrival key opens its task (below); coming back in the same visit reopens the
+     task that was open (this page stays mounted, so its state carries it; the visit's memory in lib/todoArrival carries it
+     across a remount). The memory's scope is the account and the active book: a switch of book clears the selection. */
+  const arrScope = todoTaskScope(currentUser?.id, activeManuscriptOf(manuscripts)?.id);
+  const [selKey, setSelKey] = useState<string | null>(() => rememberedTodoTask(arrScope));
   const selRef = useRef<string | null>(null);
   selRef.current = selKey;
-  const sel = order.find((t) => t.key === selKey) ?? all.find((t) => t.key === selKey) ?? order[0] ?? null;
+  const sel = selectedTask(order, all, selKey);
+  useEffect(() => { rememberTodoTask(arrScope, selKey); }, [arrScope, selKey]);
   const [A, setA] = useState<Answers>({});
   const [qi, setQi] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -220,9 +230,18 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   }, []);
   const move = (dir: 1 | -1) => {
     if (!order.length) return;
-    const i = sel ? order.findIndex((t) => t.key === sel.key) : -1;
+    /* from "Where to start" (nothing open): next opens the first task, previous the last */
+    if (!sel) { go((dir === 1 ? order[0] : order[order.length - 1]).key); return; }
+    const i = order.findIndex((t) => t.key === sel.key);
     go(order[(i + dir + order.length) % order.length].key);
   };
+  /* a switch of book (the bar's switcher replays the stage's entrance) closes the open task: the page opens on
+     "Where to start" for the new book */
+  useEffect(() => {
+    const off = () => go(null);
+    window.addEventListener(STAGE_REPLAY_EVENT, off);
+    return () => window.removeEventListener(STAGE_REPLAY_EVENT, off);
+  }, [go]);
 
   /* arrival: the Corkboard's "open this task", and "+ New task" from elsewhere */
   useEffect(() => {
@@ -608,7 +627,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       flash(`Added “${text}”.`);
       if (id && selRef.current === before) go(id);
     }} />;
-    if (!all.length) {
+    const mode = deskMode({ loaded, all, selected: !!sel });
+    if (mode === "empty") {
       return (
         <div className="tws-wsx"><div className="tws-calm">
           <img src={MENTOR} alt="" />
@@ -617,6 +637,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         </div></div>
       );
     }
+    /* To-do arrival v1: nothing open and something needs the writer — "Where to start", on the page (no desk card) */
+    if (mode === "run") return <WsRunThrough key="run" today={today} />;
     if (!sel) {
       return (
         <div className="tws-wsx"><div className="tws-calm">

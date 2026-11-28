@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk To-do list: arriving on the page v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #2a3a52; --navy2: #2d3a50; --ink: #1c130f; --quiet: #6b6058; --mut2: #8a8076; --hair: #e2dbd0; --rail: #e6dfd4;
+    --tray: #fbf9f5; --blush: #eddad0; --blush-edge: #dab29f; --bubble-ink: #3d2a22; --ask: #efe7da;
+    --type: "Special Elite", "Courier New", Courier, monospace; --serif: "Source Serif 4", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #e9e5de; color: var(--ink); font-family: var(--serif); -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; }
+  button:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  /* ── the mock's own controls ── */
+  .ctl { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid var(--hair); padding: 12px 20px; }
+  .ctl-top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .ctl h1 { margin: 0; font: 400 19px var(--type); }
+  .ctl p { margin: 0; font-size: 14px; color: var(--quiet); }
+  .ctl-row { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 10px; align-items: center; }
+  .seg { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--quiet); }
+  .seg > div { display: inline-flex; padding: 2px; border: 1px solid #d4cabd; border-radius: 17px; background: #fff; }
+  .seg button { height: 28px; padding: 0 11px; border: 0; border-radius: 14px; background: none; font-size: 14px; color: var(--ink); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--navy); color: #fff; }
+  #reset { height: 32px; padding: 0 14px; border: 0; border-radius: 9px; background: var(--navy); color: #fff; font-size: 14px; cursor: pointer; }
+
+  /* ── the page: a picture of dev, with the new parts drawn over it in the app's own sizes ── */
+  .stage { padding: 18px 24px 8px; overflow: hidden; }
+  .page { position: relative; width: 1698px; height: 865px; margin: 0 auto; overflow: hidden; border-radius: 12px; }
+  .page > img { display: block; width: 1698px; height: 865px; }
+  .ov { position: absolute; }
+  [hidden] { display: none !important; }
+  .fade { animation: fade .22s ease-out both; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* the app's parts, as todoWs.css draws them */
+  .go { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; min-width: 120px; padding: 0 20px; border: 0; border-radius: 10px; background: var(--navy); color: #fff; font: 600 15px/1 var(--serif); cursor: pointer; white-space: nowrap; }
+  .go:hover { background: #1f2c40; }
+  .sb { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 20px; border: 0; border-radius: 10px; background: transparent; color: var(--navy); font: 600 15px/1 var(--serif); box-shadow: inset 0 0 0 1.5px var(--navy); cursor: pointer; white-space: nowrap; }
+  .sb:hover { background: #f4f1ec; }
+  .go svg, .sb svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .mnote { display: flex; align-items: flex-start; gap: 12px; }
+  .mnote img { width: 38px; flex: none; }
+  .mnote p { margin: 0; padding: 9px 14px; border-radius: 12px; background: var(--blush); box-shadow: inset 0 0 0 1.2px var(--blush-edge); color: var(--bubble-ink); font: 400 16px/1.45 var(--serif); }
+
+  .rail { list-style: none; margin: 0; padding: 0; }
+  .st { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: 12px; padding-bottom: 14px; }
+  .st:not(:last-child)::before { content: ""; position: absolute; left: 13px; top: 28px; bottom: -2px; width: 2px; background: var(--rail); }
+  .sn { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--quiet); box-shadow: inset 0 0 0 1.5px var(--rail); font: 600 14px var(--serif); }
+  .st[data-st="done"] .sn { background: #d7e0e8; color: var(--navy); box-shadow: none; }
+  .sn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .sx { padding-top: 3px; font: 400 16px/1.45 var(--serif); color: var(--quiet); }
+  .sx b { font-weight: 600; color: var(--ink); }
+  .sx small { display: block; font: italic 14px/1.4 var(--serif); color: var(--mut2); }
+
+  /* ── desk option B: what Mark sent will ask ── */
+  #deskB, #deskC { left: 516px; top: 512px; width: 655px; height: 341px; background: #fff; padding: 10px 28px 0 26px; }
+  .lead { margin: 0 0 12px 50px; font: italic 15px/1.4 var(--serif); color: var(--quiet); }
+  .act { display: flex; align-items: center; gap: 14px; margin: 6px 0 0 50px; }
+  .act span { font: italic 14px var(--serif); color: var(--mut2); }
+
+  /* ── desk option C: the journey's first question, on the desk ── */
+  #deskC { padding-left: 76px; }
+  .qh { margin: 4px 0 10px; font: 400 20px/1.25 var(--type); color: var(--ink); }
+  .asks { padding: 12px 14px 14px; border-radius: 14px; background: var(--ask); max-width: 520px; }
+  .ah { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
+  .ah b { font: 600 16px var(--serif); }
+  .ah span { margin-left: auto; font: italic 13px var(--serif); color: #7d7268; }
+  .asks ul { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .asks li { display: flex; align-items: center; gap: 8px; font: 400 16px/1.35 var(--serif); }
+  .asks li i { width: 6px; height: 6px; border-radius: 50%; background: #8e8274; }
+  .asks .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 17px; border-radius: 20px; font: 600 14.5px var(--serif); background: var(--navy); color: #fff; }
+  .pill.o { background: #fff; color: var(--navy); box-shadow: inset 0 0 0 1.5px var(--navy); }
+  .pill:hover { filter: brightness(1.1); }
+  .pill svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .then { margin: 12px 0 0; font: italic 14.5px/1.45 var(--serif); color: var(--quiet); max-width: 520px; }
+
+  /* ── arrival option B: the run-through takes over the whole desk ── */
+  #runBar { left: 516px; top: 369px; width: 1129px; height: 58px; background: var(--navy2); border-radius: 22px 22px 0 0; display: flex; align-items: center; padding: 0 22px; gap: 14px; color: #fff; }
+  #runBar h2 { margin: 0; font: 400 20px var(--type); }
+  #runBar em { font: italic 16px var(--serif); color: #c9ced6; }
+  #run { left: 516px; top: 427px; width: 1129px; height: 426px; background: #fff; padding: 18px 28px 0 26px; display: flex; flex-direction: column; gap: 16px; }
+  .rtop { display: flex; align-items: center; gap: 24px; }
+  .rtop .mnote { flex: 1; }
+  .rtop .mnote p { max-width: 640px; }
+  .rtop .go { flex: none; }
+  .rtop small { flex: none; font: italic 14px var(--serif); color: var(--mut2); }
+  .piles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .pile { all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto 1fr; column-gap: 14px; padding: 14px 16px 14px; border-radius: 14px; background: var(--pf); box-shadow: inset 0 0 0 1px var(--pe); min-height: 142px; transition: transform .15s, box-shadow .15s; }
+  .pile:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px var(--pe), 0 6px 16px rgba(42, 58, 82, .10); }
+  .pile:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .pile .big { grid-row: 1 / span 2; font: 400 40px/1 var(--type); color: var(--ink); align-self: start; }
+  .pile b { font: 600 17px/1.25 var(--serif); align-self: end; }
+  .pile .sub { font: italic 14.5px/1.35 var(--serif); color: var(--quiet); }
+  .pile .discs { grid-column: 1 / -1; align-self: end; display: flex; align-items: center; margin-top: 12px; }
+  .pile .discs img, .pile .discs i { width: 30px; height: 30px; border-radius: 50%; margin-right: -7px; box-shadow: 0 0 0 2px var(--pf); }
+  .pile .discs i { display: block; background: #fff; box-shadow: 0 0 0 2px var(--pf), inset 0 0 0 1.5px #c3c7cf; position: relative; } .pile .discs i::after { content: ""; position: absolute; left: 9px; right: 9px; top: 14px; height: 2px; border-radius: 1px; background: #9aa0aa; }
+  .pile .discs span { margin-left: 16px; font: 14.5px var(--serif); color: var(--quiet); }
+  .pile .go-to { position: absolute; right: 14px; bottom: 16px; font: 600 14.5px var(--serif); color: var(--navy); }
+  .p-wait { --pf: #fbf1ec; --pe: #ecd3c6; }
+  .p-nudge { --pf: #f8f4ec; --pe: #e6dccb; }
+  .p-tidy { --pf: #f3f4f6; --pe: #dfe1e6; }
+  .p-tidy .big, .p-tidy b { color: var(--quiet); }
+
+  .wline { position: relative; height: 150px; margin-top: 6px; }
+  .wline h3 { margin: 0; font: 600 16px var(--serif); }
+  .wline h3 span { margin-left: 8px; font: italic 400 14px var(--serif); color: var(--mut2); }
+  .axis { position: absolute; left: 14px; right: 14px; top: 84px; height: 2px; background: var(--rail); }
+  .tick { position: absolute; top: 108px; font: 13px var(--serif); color: var(--mut2); transform: translateX(-50%); white-space: nowrap; }
+  .dot { all: unset; position: absolute; top: 71px; width: 28px; height: 28px; border-radius: 50%; transform: translateX(-50%); cursor: pointer; box-shadow: 0 0 0 2px #fff; }
+  .dot img { width: 28px; height: 28px; border-radius: 50%; display: block; }
+  .dot:hover { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--navy); }
+  .dot:focus-visible { outline: 2px solid var(--navy); outline-offset: 3px; }
+  .lab { position: absolute; top: 44px; transform: translateX(-50%); font: 13.5px var(--serif); color: var(--ink); white-space: nowrap; pointer-events: none; }
+  .lab i { font-style: italic; color: var(--quiet); }
+  .brk { position: absolute; top: 46px; height: 14px; border: 1.5px solid #dab29f; border-bottom: 0; border-radius: 6px 6px 0 0; }
+  .brk span { position: absolute; bottom: 18px; left: 0; font: 13.5px var(--serif); color: var(--bubble-ink); white-space: nowrap; }
+  .sample { position: absolute; right: 14px; top: 0; font: italic 13px var(--serif); color: var(--mut2); }
+
+  /* the Greg row, not open (the run-through holds no row open) */
+
+
+  /* ── the list on the left, redrawn at the app's sizes so its changes can be switched ── */
+  #tray { left: 113px; top: 416px; width: 389px; height: 436px; background: var(--tray); padding: 6px 23px 0 10px; overflow: hidden; }
+  .gh { display: flex; align-items: center; gap: 8px; height: 40px; margin-top: 6px; }
+  .gh h4 { margin: 0; font: 400 15px var(--type); color: var(--ink); white-space: nowrap; }
+  .gh span { font: 14px var(--serif); color: var(--quiet); }
+  .gh hr { flex: 1; border: 0; height: 1px; background: var(--hair); margin: 0 6px; }
+  .gh svg { width: 14px; height: 14px; fill: none; stroke: var(--quiet); stroke-width: 2; }
+  .tr { all: unset; box-sizing: border-box; position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; column-gap: 15px; align-items: center; width: 100%; padding: 10px 4px 10px 8px; cursor: pointer; border-radius: 10px; transition: background .15s, opacity .15s; }
+  .tr::after { content: ""; position: absolute; left: 59px; right: 4px; bottom: 0; height: 1px; background: var(--hair); }
+  .tr:hover { background: #f4f1ec; }
+  .tr img { width: 36px; height: 36px; border-radius: 50%; }
+  .tr .tt { font: 600 16px/1.3 var(--serif); color: var(--ink); }
+  .tr .ts { display: block; font: italic 15px/1.35 var(--serif); color: var(--quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tr .tf { font: 16px/1.3 var(--serif); color: var(--quiet); text-align: right; }
+  .tr .tf i { font: normal 400 16px var(--type); color: var(--ink); margin-right: 4px; }
+  .tr[data-on] { background: #fff; box-shadow: inset 0 0 0 1px var(--hair), 0 2px 6px rgba(42, 58, 82, .06); }
+  .tr[data-on]::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--navy); }
+  .tr[data-on]::after { display: none; }
+  /* tucked: the figure keeps one short line on the right, its wording joins the sub-line */
+  .tr .tf small { display: block; font: italic 13.5px/1.3 var(--serif); color: var(--quiet); white-space: nowrap; }
+  body[data-late="1"] .tr[data-late] .tf, body[data-late="1"] .tr[data-late] .tf i { color: #a4502f; }
+  /* lit: hovering a pile or a disc on the desk lights its rows */
+  #tray[data-lit] .tr { opacity: .45; }
+  #tray[data-lit] .tr[data-lit] { opacity: 1; background: var(--lf, #fbf1ec); }
+  .pile[data-lit], .dot[data-lit] { box-shadow: inset 0 0 0 1.5px var(--navy) !important; }
+  .dot[data-lit] { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--navy) !important; }
+
+  /* the run-through's head: a navy bar, a heading on the white desk, or the whole run-through on the page itself */
+  body[data-head="page"] #runBar { background: #fff; color: var(--ink); padding-top: 8px; }
+  body[data-head="desk"] #runBar h2 { font-size: 24px; }
+  body[data-head="desk"] #runBar em { color: var(--quiet); }
+  body[data-head="desk"] #run { padding-top: 6px; }
+  body[data-head="page"] #runBar, body[data-head="page"] #run { background: #f2efeb; }
+  #runUnder { left: 505px; top: 363px; width: 1147px; height: 502px; background: #f2efeb; }
+  body[data-head="navy"] #runUnder { display: none; }
+  body[data-head="page"] .mnote img { mix-blend-mode: multiply; }
+  body[data-head="page"] #runBar { color: var(--ink); border-radius: 0; padding-top: 8px; padding-left: 26px; }
+  body[data-head="page"] #runBar h2 { font-size: 26px; }
+  body[data-head="page"] #runBar em { color: var(--quiet); }
+  body[data-head="page"] #run { padding-top: 6px; }
+  body[data-head="page"] .dot { box-shadow: 0 0 0 2px #f2efeb; }
+  body[data-head="page"] .pile { background: #fff; }
+  body[data-head="page"] .pile .discs img, body[data-head="page"] .pile .discs i { box-shadow: 0 0 0 2px #fff; }
+  .note { position: absolute; z-index: 9; left: 50%; bottom: 22px; transform: translateX(-50%); padding: 10px 18px; border-radius: 999px; background: var(--navy); color: #fff; font: 15px var(--serif); white-space: nowrap; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .note[data-on="1"] { opacity: 1; }
+  .cap { max-width: 1698px; margin: 10px auto 18px; font: 15px/1.5 var(--serif); color: var(--quiet); }
+  .cap b { color: var(--ink); }
+  @media (prefers-reduced-motion: reduce) { .fade { animation: none; } .note { transition: none; } }
+</style>
+</head>
+<body data-late="0" data-head="desk">
+
+<div class="ctl">
+  <div class="ctl-top">
+    <h1>To-do list: arriving on the page v1</h1>
+    <p>The page underneath is your screenshot of dev. The new parts are drawn over it at the app's own sizes. Every button in the mock works.</p>
+  </div>
+  <div class="ctl-row">
+    <span class="seg" id="arrSeg">When the page opens
+      <div><button type="button" data-v="dev" aria-pressed="false">As on dev</button><button type="button" data-v="run" aria-pressed="true">Run-through first</button></div>
+    </span>
+    <span class="seg" id="headSeg">Where to start sits
+      <div><button type="button" data-v="navy" aria-pressed="false">In a navy bar</button><button type="button" data-v="desk" aria-pressed="false">On the desk</button><button type="button" data-v="page" aria-pressed="true">On the page</button></div>
+    </span>
+    <span class="seg" id="deskSeg">A send, R&amp;R or offer task on the desk
+      <div><button type="button" data-v="dev" aria-pressed="false">As on dev</button><button type="button" data-v="steps" aria-pressed="true">Steps ahead</button><button type="button" data-v="first" aria-pressed="false">First question on the desk</button></div>
+    </span>
+    <span class="seg" id="lineSeg">Waiting line
+      <div><button type="button" data-v="1" aria-pressed="true">On</button><button type="button" data-v="0" aria-pressed="false">Off</button></div>
+    </span>
+    <span class="seg" id="figSeg">The list's figure
+      <div><button type="button" data-v="dev" aria-pressed="false">As on dev</button><button type="button" data-v="tuck" aria-pressed="true">Tucked</button></div>
+    </span>
+    <span class="seg" id="lateSeg">Past expected in rust
+      <div><button type="button" data-v="0" aria-pressed="true">Off</button><button type="button" data-v="1" aria-pressed="false">On</button></div>
+    </span>
+    <span class="seg" id="litSeg">Lights up with the desk
+      <div><button type="button" data-v="0" aria-pressed="false">Off</button><button type="button" data-v="1" aria-pressed="true">On</button></div>
+    </span>
+    <button type="button" id="reset">Open the page again</button>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="page" id="page">
+    <img src="page.jpg" alt="The To-do page on dev, with Send Greg your partial open">
+
+    <!-- desk B: the steps Mark sent will take, with its button on the desk -->
+    <div class="ov fade" id="deskB" hidden>
+      <p class="lead">Mark sent takes you through this, one step at a time:</p>
+      <ol class="rail">
+        <li class="st" data-st="done"><span class="sn"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span><div class="sx"><b>Greg Panetta</b> · the agent</div></li>
+        <li class="st"><span class="sn">2</span><div class="sx">What went<small>Greg asked for 10 pages and a synopsis</small></div></li>
+        <li class="st"><span class="sn">3</span><div class="sx">When you sent it</div></li>
+        <li class="st"><span class="sn">4</span><div class="sx">When Greg might reply</div></li>
+        <li class="st"><span class="sn">5</span><div class="sx">Check it, then log it</div></li>
+      </ol>
+      <div class="act"><button type="button" class="go" data-say="Opens Mark sent at “What went”">Mark sent <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button></div>
+    </div>
+
+    <!-- desk C: the journey's own first question, asked on the desk -->
+    <div class="ov fade" id="deskC" hidden>
+      <h3 class="qh">What did you send Greg?</h3>
+      <div class="asks">
+        <div class="ah"><b>What Greg asked for</b><span>When he asked, 28 Jun</span></div>
+        <ul><li><i></i>10 pages</li><li><i></i>Synopsis</li></ul>
+        <div class="row">
+          <button type="button" class="pill" data-say="Opens Mark sent at “When did it go to Greg?”, with what went filled in">I sent exactly that <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+          <button type="button" class="pill o" data-say="Opens Mark sent at “What went”">Something different went</button>
+        </div>
+      </div>
+      <p class="then">Next, you’ll say when it went and when Greg might reply. Then it’s logged on his card.</p>
+    </div>
+
+    <!-- arrival B: the run-through -->
+    <div class="ov" id="tray"></div>
+    <div class="ov" id="runUnder" hidden></div>
+    <div class="ov fade" id="runBar" hidden><h2>Where to start</h2><em>Saturday 28 November</em></div>
+    <div class="ov fade" id="run" hidden>
+      <div class="rtop">
+        <div class="mnote"><img src="mentor.png" alt=""><p>Morning, Nick. Three agents are waiting on you for pages, so they come first. Greg asked 10 days ago.</p></div>
+        <small>or choose any task from the list</small>
+        <button type="button" class="go" id="startGo">Start with Greg’s partial <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+      </div>
+      <div class="piles">
+        <button type="button" class="pile p-wait" data-open="greg" data-g="wait"><span class="big">3</span><b>Agents are waiting</b><span class="sub">They asked for pages. Send them, then log it.</span>
+          <span class="discs"><img src="disc-partial.png" alt=""><img src="disc-full.png" alt=""><img src="disc-partial.png" alt=""></span></button>
+        <button type="button" class="pile p-nudge" data-g="nudge" data-say="Opens the first nudge: William at Foxglove"><span class="big">5</span><b>Nudges</b><span class="sub">Replies that are overdue. A short follow-up each.</span>
+          <span class="discs"><img src="disc-nudge.png" alt=""><img src="disc-nudge.png" alt=""><img src="disc-nudge.png" alt=""><img src="disc-nudge.png" alt=""><img src="disc-nudge.png" alt=""></span></button>
+        <button type="button" class="pile p-tidy" data-g="tidy" data-say="Opens the first tidy-up batch"><span class="big">32</span><b>To tidy</b><span class="sub">Gaps in your records. None of it is urgent.</span>
+          <span class="discs"><i></i><i></i><i></i><i></i><i></i><span>and 27 more</span></span></button>
+      </div>
+      <div class="wline" id="wline">
+        <h3>How long each has been on your list<span>Agents waiting and nudges. Further right is older.</span></h3>
+        <span class="sample">Jonathan, Daniel and three of the nudges are sample figures</span>
+        <div class="axis"></div>
+        <div id="wpts"></div>
+      </div>
+    </div>
+
+    <div class="note" id="note"></div>
+  </div>
+  <p class="cap" id="cap"></p>
+</div>
+
+<script>
+  var ROWS = [
+    { g: 'wait', h: 'Agents are waiting', n: 3 },
+    { id: 'greg', g: 'wait', img: 'disc-partial.png', t: 'Send Greg your partial', a: 'Greg Panetta', d: 10, w: 'days waiting' },
+    { id: 'jon', g: 'wait', img: 'disc-full.png', t: 'Send Jonathan your full', a: 'The Marsh Agency', d: 6, w: 'days waiting' },
+    { id: 'dan', g: 'wait', img: 'disc-partial.png', t: 'Send Daniel your partial', a: 'Inkwell & Stone', d: 14, w: 'days waiting' },
+    { g: 'nudge', h: 'Nudges', n: 5 },
+    { id: 'wil', g: 'nudge', img: 'disc-nudge.png', t: 'Nudge William', a: 'Foxglove Literary', d: 122, w: 'days since your reminder', late: 1 },
+    { id: 'dan2', g: 'nudge', img: 'disc-nudge.png', t: 'Nudge Daniel', a: 'Inkwell & Stone', d: 69, w: 'days since your reminder', late: 1 },
+    { id: 'n3', g: 'nudge', img: 'disc-nudge.png', t: 'Nudge Harriet', a: 'Bellweather Agency', d: 51, w: 'days since your reminder', late: 1 },
+    { id: 'n4', g: 'nudge', img: 'disc-nudge.png', t: 'Nudge Tom', a: 'Lark & Pine', d: 38, w: 'days since your reminder', late: 1 }];
+  var fig = 'tuck', lit = true;
+  function short(w) { return w.replace(/^days /, ''); }
+  function drawTray() {
+    var sel = !(arrival === 'run' && !opened) ? 'greg' : null, h = '';
+    ROWS.forEach(function (r) {
+      if (r.h) { h += '<div class="gh"><h4>' + r.h + '</h4><span>' + r.n + '</span><hr><svg viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg></div>'; return; }
+      var f = fig === 'tuck' ? '<i>' + r.d + '</i>days<small>' + short(r.w) + '</small>' : '<i>' + r.d + '</i>' + r.w;
+      var sub = r.a;
+      h += '<button type="button" class="tr" data-id="' + r.id + '" data-g="' + r.g + '"' + (r.id === sel ? ' data-on' : '') + (r.late ? ' data-late' : '') + '>' +
+        '<img src="' + r.img + '" alt=""><span><span class="tt">' + r.t + '</span><span class="ts">' + sub + '</span></span><span class="tf">' + f + '</span></button>';
+    });
+    $('tray').innerHTML = h;
+  }
+  var arrival = 'run', desk = 'steps', opened = false, noteT = 0;
+  var $ = function (id) { return document.getElementById(id); };
+  var CAP = {
+    run: '<b>Where to start</b> sits in a navy bar like a task, as a heading on the white desk, or straight on the page with no desk at all (the desk only appears once a task is open). <b>Run-through first.</b> The whole desk becomes a picture of the day, so no one agent’s card is on show until you choose. The three piles are the list’s groups, in its order (click one to open its first task). The waiting line puts each task that needs you by how long it’s been on your list, in its stage colour; click a disc to open that task. Start, any pile, disc or list row opens the task as now. Coming back to the page later in the same visit reopens the task you were on. The load outline draws this shape too.',
+    dev: '<b>As on dev.</b> The first task opens straight away.',
+    deskdev: ' <b>Desk as on dev:</b> since Card journeys v1 a send, R&amp;R or offer task keeps no questions on the desk. Its only control is Mark sent in the desk footer, which is below the fold here, so the column reads as empty.',
+    steps: ' <b>Steps ahead:</b> the desk lists the steps Mark sent will take, in the To-do’s own step rail, with the button right under them. Nothing is answered here, so there’s still one journey.',
+    first: ' <b>First question on the desk:</b> the desk asks the journey’s own first question with its “What Greg asked for” card. “I sent exactly that” opens Mark sent with that step done; “Something different went” opens it at What went. The journey isn’t copied; the desk just opens it at the right step. Offers and R&amp;R get the same treatment with their own first question.'
+  };
+  function render() {
+    var showRun = arrival === 'run' && !opened;
+    ['runUnder', 'runBar', 'run'].forEach(function (id) { $(id).hidden = !showRun; });
+    drawTray();
+    $('deskB').hidden = showRun || desk !== 'steps';
+    $('deskC').hidden = showRun || desk !== 'first';
+    ['runBar', 'run', 'deskB', 'deskC'].forEach(function (id) { var e = $(id); e.classList.remove('fade'); void e.offsetWidth; e.classList.add('fade'); });
+    var listCap = '<br><b>The list:</b> <b>Tucked</b> keeps the number on the right and moves its wording under it, so titles stay on one line and agency names aren’t cut off. <b>Past expected in rust</b> marks the rows behind the header’s “9 past expected” (shown here on the nudges). <b>Lights up with the desk</b>: hover a pile, a disc or a row and the matching tasks light up on both sides.';
+    $('cap').innerHTML = (showRun ? CAP.run : (arrival === 'run' ? '<b>Opened from the run-through.</b>' : CAP.dev) + (desk === 'dev' ? CAP.deskdev : CAP[desk])) + listCap;
+  }
+  function say(m) { var n = $('note'); n.textContent = m; n.dataset.on = '1'; clearTimeout(noteT); noteT = setTimeout(function () { n.dataset.on = '0'; }, 2600); }
+  function seg(id, fn) {
+    document.querySelectorAll('#' + id + ' button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.querySelectorAll('#' + id + ' button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+        fn(b.dataset.v); render();
+      });
+    });
+  }
+  seg('arrSeg', function (v) { arrival = v; opened = false; });
+  seg('deskSeg', function (v) { desk = v; });
+  $('reset').addEventListener('click', function () { opened = false; render(); });
+  $('startGo').addEventListener('click', function () { opened = true; render(); });
+  document.addEventListener('click', function (e) {
+    var row = e.target.closest('.tr');
+    if (row) { if (row.dataset.id === 'greg') { opened = true; render(); } else say('Opens that task on the desk'); return; }
+    var o = e.target.closest('[data-open]'), m = e.target.closest('[data-say]');
+    if (o) { opened = true; render(); } else if (m) say(m.dataset.say);
+  });
+
+  /* the waiting line: one disc per task that needs you, placed by days on the list */
+  var PTS = [
+    { id: 'jon', d: 6, img: 'disc-full.png', name: 'Jonathan', open: 0 }, { id: 'greg', d: 10, img: 'disc-partial.png', name: 'Greg', open: 1 },
+    { id: 'dan', d: 14, img: 'disc-partial.png', name: 'Daniel', open: 0 }, { id: 'n5', d: 27, img: 'disc-nudge.png', name: '', open: 0 },
+    { id: 'n4', d: 38, img: 'disc-nudge.png', name: '', open: 0 }, { id: 'n3', d: 51, img: 'disc-nudge.png', name: '', open: 0 },
+    { id: 'dan2', d: 69, img: 'disc-nudge.png', name: 'Daniel', open: 0 }, { id: 'wil', d: 122, img: 'disc-nudge.png', name: 'William', open: 0 }];
+  (function () {
+    var W = 1129 - 54 - 28, max = 130, x = function (d) { return 14 + 14 + d / max * (W - 28); }, h = '';
+    [0, 30, 60, 90, 120].forEach(function (d) { h += '<span class="tick" style="left:' + x(d) + 'px">' + (d === 0 ? 'Today' : d + ' days') + '</span>'; });
+    h += '<span class="brk" style="left:' + (x(6) - 16) + 'px;width:' + (x(14) - x(6) + 32) + 'px"><span>Waiting on you for pages</span></span>';
+    PTS.forEach(function (p) {
+      var lab = p.name ? '<b style="font-weight:600">' + p.name + '</b> <i>' + p.d + 'd</i>' : '<i>' + p.d + 'd</i>';
+      if (p.d > 20) h += '<span class="lab" style="left:' + x(p.d) + 'px">' + lab + '</span>';
+      h += '<button type="button" class="dot" data-id="' + p.id + '" data-g="' + (p.d < 20 ? 'wait' : 'nudge') + '" style="left:' + x(p.d) + 'px" title="' + (p.name ? (p.d < 20 ? 'Send ' + p.name + ' your pages' : 'Nudge ' + p.name) : 'A nudge') + ', ' + p.d + ' days" ' + (p.open ? 'data-open="1"' : 'data-say="Opens that task"') + '><img src="' + p.img + '" alt=""></button>';
+    });
+    $('wpts').innerHTML = h;
+  })();
+  var FILL = { wait: '#fbf1ec', nudge: '#f8f4ec', tidy: '#f3f4f6' };
+  function light(g, id) {
+    var t = $('tray'), on = lit && (g || id) && arrival === 'run' && !opened;
+    document.querySelectorAll('[data-lit]').forEach(function (e) { e.removeAttribute('data-lit'); });
+    if (!on) return;
+    t.setAttribute('data-lit', ''); t.style.setProperty('--lf', FILL[g] || '#fbf1ec');
+    document.querySelectorAll('.tr').forEach(function (r) { if (id ? r.dataset.id === id : r.dataset.g === g) r.setAttribute('data-lit', ''); });
+    document.querySelectorAll('.pile, .dot').forEach(function (e) { if (id ? e.dataset.id === id : e.dataset.g === g && e.classList.contains('pile')) e.setAttribute('data-lit', ''); });
+  }
+  document.addEventListener('mouseover', function (e) {
+    var p = e.target.closest('.pile'), d = e.target.closest('.dot'), r = e.target.closest('.tr');
+    if (p) light(p.dataset.g); else if (d) light(d.dataset.g, d.dataset.id); else if (r) light(r.dataset.g, r.dataset.id); else light(null);
+  });
+  seg('headSeg', function (v) { document.body.dataset.head = v; });
+  seg('figSeg', function (v) { fig = v; });
+  seg('lateSeg', function (v) { document.body.dataset.late = v; });
+  seg('litSeg', function (v) { lit = v === '1'; });
+  seg('lineSeg', function (v) { $('wline').hidden = v !== '1'; });
+
+  var page = $('page');
+  function fit() { page.style.zoom = Math.min(1, (document.documentElement.clientWidth - 48) / 1698); }
+  fit(); window.addEventListener('resize', fit);
+  render();
+</script>
+</body>
+</html>
