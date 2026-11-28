@@ -153,3 +153,21 @@ describe("v172.4 · 3 the arrival: once, after loading, 700ms, never under reduc
     for (const [re, end] of parts) { expect(block).toMatch(re); expect(end).toBeLessThanOrEqual(700); }
   });
 });
+
+describe("v172.4 · 4 what the page opens on", () => {
+  it("the list's sort is remembered per device in qh.qc.view (sort151), Next due soonest first by default", async () => {
+    const m = await import("../../../lib/qcViewMemory");
+    const d = m.DEFAULT_QC_VIEW() as { sort151?: { key: string; desc: boolean } };
+    expect(d.sort151).toEqual({ key: "due", desc: false });
+    const v = m.sanitiseQcView({ v: 1, group: "attention", sort: { key: "due", reversed: false }, density: "comfortable", sort151: { key: "agent", desc: true } }) as { sort151?: unknown } | null;
+    expect(v?.sort151).toEqual({ key: "agent", desc: true });
+    expect((m.sanitiseQcView({ v: 1, sort151: { key: "height", desc: 3 } }) as { sort151?: unknown } | null)?.sort151).toEqual({ key: "due", desc: false });
+    expect(queries).toMatch(/useState<Sort151>\(\(\) => qcRemView\.sort151\)/);
+    expect(queries).toMatch(/writeQcView\(\{ sort151: qcSort151 \}\)/);
+  });
+  it("grouping Action by default; the smart panel's choices ride with the visit's filters", async () => {
+    const m = await import("../../../lib/qcViewMemory");
+    expect(m.DEFAULT_QC_VIEW().group).toBe("attention");
+    expect(queries).toMatch(/writeQcVisit\(\{ filters: qcF138, search: qcFind, smart: qcSmart \}\)/);
+  });
+});

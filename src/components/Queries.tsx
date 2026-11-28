@@ -166,7 +166,7 @@ import type { Snapshot } from "../lib/queryActions/snapshot";
 import { inUseId as inUseBookVersion } from "../lib/versionsV2";
 import type { QcCard152Data } from "./queries/centre/QcCard152";
 import { buildCardView, capWord } from "./queries/centre/qcCardView";
-import { DEFAULT_SORT_151, QC_FULL_SCREEN, nextCell, sort151, type Section, type Sort151 } from "../lib/qc151";
+import { QC_FULL_SCREEN, nextCell, sort151, type Section, type Sort151 } from "../lib/qc151";
 import { pillGroups } from "../lib/qc1511";
 import { rowAct, statusKind } from "../lib/qc1512";
 import { pressView, twinTags } from "../lib/qc149";
@@ -2603,11 +2603,13 @@ export const Queries: React.FC<{
   /* v138 §C — the headings' sort (no Sort control), full screen, and the folded bands */
   const [qcSort138, setQcSort138] = useState<Qc138Sort>(() => qcRemView.sort);
   /* v151 §7 — the table's headings sort (Due ascending by default), for the visit */
-  const [qcSort151, setQcSort151] = useState<Sort151>(DEFAULT_SORT_151);
+  const [qcSort151, setQcSort151] = useState<Sort151>(() => qcRemView.sort151);
   /* v140 §F — the list's unpinned scroll position, for the visit (QcList138 reads and writes it) */
   const qcScrollMemory = useMemo(() => ({ read: () => readQcVisit()?.scroll ?? 0, write: (y: number) => writeQcVisit({ scroll: y }) }), []);
   /* v140 §F — written as they change: the sort per device, the filters and the search for the visit */
   useEffect(() => { writeQcView({ sort: qcSort138 }); }, [qcSort138]);
+  /* v172.4 — the list's column sort is remembered per device with the grouping (qh.qc.view) */
+  useEffect(() => { writeQcView({ sort151: qcSort151 }); }, [qcSort151]);
   useEffect(() => { writeQcVisit({ filters: qcF138, search: qcFind, smart: qcSmart }); }, [qcF138, qcFind, qcSmart]);
   /* v138 §G — the rows ticked for a bulk action, and the journeys still to run, in order */
   const [qcPicked, setQcPicked] = useState<ReadonlySet<string>>(() => new Set());

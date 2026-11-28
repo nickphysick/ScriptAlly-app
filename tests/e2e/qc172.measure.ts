@@ -574,3 +574,52 @@ test("L16 · the arrival: data-en172 after loading, gone by 700ms, not on a filt
   await ctx.close();
   L.done(4);
 });
+
+test("L17 · the opening state: defaults on a fresh session; the smart panel kept for the visit only; the sort per device", async ({ page, browser }) => {
+  const L = new Ledger("L17");
+  /* a fresh start once — not on this test's own reload, which must find the visit's filters */
+  await page.addInitScript(() => { try { if (!sessionStorage.getItem("l17.cleared")) { sessionStorage.removeItem("qh.qc.filters"); localStorage.removeItem("qh.qc.view"); sessionStorage.setItem("l17.cleared", "1"); } localStorage.setItem("sa.guide.queries", "1"); sessionStorage.setItem("sa.qc138.folded", "[]"); } catch { /* */ } });
+  await page.setViewportSize(WIDE);
+  await openRoute(page, "/queries", WIDE);
+  await page.locator("[data-qc172='row']").first().waitFor({ timeout: 30_000 });
+  const V = await visiblePage(page);
+  const read = () => page.evaluate((V) => ({
+    group: document.querySelector(`${V}[data-qc151='toolbar']`)?.textContent?.match(/Group:\s*([A-Za-z][A-Za-z ]*)/)?.[1]?.trim() ?? "",
+    sort: document.querySelector(`${V}[data-qc151='toolbar']`)?.textContent?.match(/Sort:\s*([^↑↓]+[↑↓])/)?.[1]?.trim() ?? "",
+    chips: document.querySelectorAll(`${V}.lf-apc`).length,
+    closed: (document.querySelector(`${V}.qs172-ck--closed input`) as HTMLInputElement | null)?.checked ?? null,
+    lastKey: [...document.querySelectorAll<HTMLElement>(`${V}.qc169 [data-qc1511='group'], ${V}.qc169 [data-qc153='fold']`)].map((e) => e.dataset.k).pop(),
+    closedFolded: !!document.querySelector(`${V}.qc169 [data-qc153='fold'][data-k='closed']`),
+    bar: (document.querySelector(`${V}[data-qc151='toolbar']`)?.textContent ?? "").slice(0, 160),
+  }), V);
+  const d = await read();
+  L.check("Group: Action", d.group === "Action", `${d.group} · bar "${d.bar}"`);
+  L.check("Sort: Next due ↑", /^Next due\s*↑$/.test(d.sort), d.sort);
+  L.check("no filters applied", d.chips === 0, `${d.chips} chips`);
+  L.check("Include closed ticked", d.closed === true, String(d.closed));
+  L.check("Closed last, folded to its line", d.lastKey === "closed" && d.closedFolded, `${d.lastKey} · folded ${d.closedFolded}`);
+  /* a smart filter survives a same-session remount, and is shown as a chip */
+  await page.locator(`${V}.qs172-stg button[title='Partial']`).click();
+  await page.waitForTimeout(500);
+  await page.reload();
+  await page.locator("[data-qc172='row'], .qc151-emp").first().waitFor({ timeout: 30_000 });
+  await page.waitForTimeout(800);
+  const W = await visiblePage(page);
+  const chips = await page.evaluate((W) => [...document.querySelectorAll(`${W}.lf-apc`)].map((c) => c.textContent ?? ""), W);
+  const visit = await page.evaluate(() => sessionStorage.getItem("qh.qc.filters") ?? "");
+  L.check("same visit: the smart filter is back as a chip", chips.some((c) => /Stage: Partial/.test(c)), `${JSON.stringify(chips)} · stored ${visit.slice(visit.indexOf("\"smart\""), visit.indexOf("\"smart\"") + 160)}`);
+  /* the sort is kept per device: change it, then a new session keeps it but drops the filter */
+  await page.locator(`${W}.qc169-thc.c-ag button`).click();
+  await page.waitForTimeout(500);
+  const state = await page.context().storageState();
+  const ctx = await browser.newContext({ storageState: state });
+  const p2 = await ctx.newPage();
+  await openRoute(p2, "/queries", WIDE);
+  await p2.locator("[data-qc172='row']").first().waitFor({ timeout: 30_000 });
+  const X = await visiblePage(p2);
+  const n = await p2.evaluate((X) => ({ chips: [...document.querySelectorAll(`${X}.lf-apc`)].map((c) => c.textContent ?? ""), sort: document.querySelector(`${X}[data-qc151='toolbar']`)?.textContent?.match(/Sort:\s*([^↑↓]+[↑↓])/)?.[1]?.trim() ?? "" }), X);
+  L.check("a new session: the smart filter is gone", !n.chips.some((c) => /Stage:/.test(c)), JSON.stringify(n.chips));
+  L.check("a new session: the sort is kept (per device)", /^Agent/.test(n.sort), n.sort);
+  await ctx.close();
+  L.done(8);
+});

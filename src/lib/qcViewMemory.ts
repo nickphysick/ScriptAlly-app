@@ -26,6 +26,7 @@ import type { GroupBy } from "./qcCalView";
 import { DEFAULT_SORT_138, emptyQc138Filters, type Qc138Filters, type Qc138Sort, type Qc138SortKey } from "./qc138";
 import { parseQcListMemory, QC_LIST_MEMORY_KEY, type QcDensity } from "./qcListMemory";
 import { sanitiseSmart172, type Smart172 } from "./smart172";
+import type { Sort151, SortKey151 } from "./qc151";
 
 const GROUPS: readonly GroupBy[] = ["attention", "status", "action", "package", "none"];
 const SORT_KEYS: readonly Qc138SortKey[] = ["agent", "first", "stage", "sent", "next", "due", "changed"];
@@ -37,11 +38,14 @@ export const QC_VIEW_KEY = "qh.qc.view";
 export const QC_VIEW_VERSION = 1;
 /* ⚠️ v149 B5 — THE PAGE IS LIST-ONLY: v142's `view` field ("cards" | "list") is no longer read or written. A record still
    carrying `view: "cards"` keeps its other fields and opens the list. */
-export interface QcView { group: GroupBy; sort: Qc138Sort; density: QcDensity }
+/** v172.4 — `sort151` is the list's column sort (Next due, soonest first, by default), remembered per device with the
+ *  grouping; it was page state that reset every visit */
+export interface QcView { group: GroupBy; sort: Qc138Sort; density: QcDensity; sort151: Sort151 }
+const SORT151_KEYS: readonly SortKey151[] = ["agent", "agency", "stage", "queried", "heard", "next", "due"];
 /** v151 §5 — the list opens grouped by "Who it's with" again (v141 §C had made it Status); Group reads as set (navy)
  *  whenever it is not this default. A saved choice is still honoured. */
 export const DEFAULT_QC_GROUP: GroupBy = "attention";
-export const DEFAULT_QC_VIEW = (): QcView => ({ group: DEFAULT_QC_GROUP, sort: { ...DEFAULT_SORT_138 }, density: "comfortable" });
+export const DEFAULT_QC_VIEW = (): QcView => ({ group: DEFAULT_QC_GROUP, sort: { ...DEFAULT_SORT_138 }, density: "comfortable", sort151: { key: "due", desc: false } });
 
 /** a stored view made safe, field by field — null when it is not this version's shape at all */
 export function sanitiseQcView(raw: unknown): QcView | null {
@@ -55,11 +59,15 @@ export function sanitiseQcView(raw: unknown): QcView | null {
     group: GROUPS.includes(r.group as GroupBy) ? (r.group as GroupBy) : d.group,
     sort: { key, reversed: key === s.key && s.reversed === true },
     density: r.density === "compact" ? "compact" : "comfortable",
+    sort151: (() => {
+      const q = (r.sort151 && typeof r.sort151 === "object" ? r.sort151 : {}) as Record<string, unknown>;
+      return SORT151_KEYS.includes(q.key as SortKey151) && typeof q.desc === "boolean" ? { key: q.key as SortKey151, desc: q.desc } : { ...d.sort151 };
+    })(),
   };
 }
 
 export const serialiseQcView = (m: QcView): string =>
-  JSON.stringify({ v: QC_VIEW_VERSION, group: m.group, sort: { key: m.sort.key, reversed: m.sort.reversed }, density: m.density });
+  JSON.stringify({ v: QC_VIEW_VERSION, group: m.group, sort: { key: m.sort.key, reversed: m.sort.reversed }, density: m.density, sort151: { key: m.sort151.key, desc: m.sort151.desc } });
 
 /** The device's view. Absent reads as the defaults — except that a device still carrying v132's `sa.qcList.v1` keeps
  *  its grouping and density, moved once into `qh.qc.view` (the old key is removed). */
