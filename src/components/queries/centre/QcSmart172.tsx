@@ -38,7 +38,6 @@ export interface QcSmart172Props {
 
 export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, total, s, onChange: setSmart172, onClear }) => {
   const [find, setFind] = useState("");
-  const [moreOpen, setMoreOpen] = useState(false);
   const [locOpen, setLocOpen] = useState(false);
   const on = smartOn172(s);
   const n = (skip: keyof Smart172, extra: (r: QcRow) => boolean) => rows.filter((r) => pass172(r, s, ctx, skip) && extra(r)).length;
@@ -115,6 +114,16 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
   const countries = useMemo(() => [...new Set(rows.map((r) => ctx.country(r)).filter(Boolean))].sort((a, b) => (COUNTRY[a] ?? a).localeCompare(COUNTRY[b] ?? b)), [rows, ctx]);
 
   const reset = () => { setFind(""); onClear(); };
+  /* v172.5 — which sections are open: Stage reached open and the rest shut to start, remembered for the visit; a
+     section with a filter set opens itself on arrival */
+  const moreSet = (s.pkgs.length ? 1 : 0) + (s.methods.length ? 1 : 0) + (s.fit ? 1 : 0) + (s.countries.length ? 1 : 0) + (s.mats !== "any" ? 1 : 0);
+  const isSet: Record<Fold172, boolean> = { stage: stageOn172(s), sent: !!s.sent, date: dueOn172(s.date, REPLY172), sendby: dueOn172(s.sendby, SENDBY172), more: moreSet > 0 };
+  const [fold, setFold] = useState<Record<Fold172, boolean>>(() => {
+    const kept = readFold172();
+    return Object.fromEntries(FOLDS172.map((k) => [k, isSet[k] || (kept[k] ?? FOLD0_172[k])])) as Record<Fold172, boolean>;
+  });
+  const toggle = (k: Fold172) => setFold((f) => { const next = { ...f, [k]: !f[k] }; writeFold172(next); return next; });
+  const sec = (k: Fold172) => ({ open: fold[k], onToggle: () => toggle(k), onReset: setSmart172 });
   const closedN = n("closed", (r) => whoOf172(r, ctx.nowMs) === "closed");
 
   return (
@@ -124,8 +133,7 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
       {/* v172.5 — What's next: the ring replaces the three counts and the Include closed tick */}
       <Ring172 s={s} ctx={ctx} n={n} closedN={closedN} total={total} onChange={setSmart172} />
 
-      <section className="qs172-s">
-        <Head172 title="Stage" on={stageOn172(s)} text={stageText172(s.stage)} idle="any" part="stage" onReset={setSmart172} />
+      <Sec172 id="stage" title="Stage reached" on={stageOn172(s)} text={stageText172(s.stage)} idle="any" part="stage" {...sec("stage")}>
         <div className="qs172-stg" role="group" aria-label="Stage">
           {STAGES.map((st, i) => {
             const isOn = s.stage.includes(st.k);
@@ -141,11 +149,10 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
             );
           })}
         </div>
-      </section>
+      </Sec172>
 
       {W > 0 ? (
-        <section className="qs172-s">
-          <Head172 title="Sent" on={!!s.sent} text={`${fromLabel(lo)} – ${hi >= W ? "now" : toLabel(hi)}`} idle="any time" part="sent" onReset={setSmart172} />
+        <Sec172 id="sent" title="Sent" on={!!s.sent} text={`${fromLabel(lo)} – ${hi >= W ? "now" : toLabel(hi)}`} idle="any time" part="sent" {...sec("sent")}>
           {/* the bars show the spread; they are not buttons (the handles pick the range, one bucket a step) */}
           <div className={`qs172-hist${starts.length > 18 ? " is-dense" : ""}`} aria-hidden="true">
             {hist.map((h, i) => <i key={i} className={i >= lo && i <= hi ? "in" : ""} style={{ height: `${h ? 4 + (h / hmax) * 26 : 0}px` }} />)}
@@ -156,16 +163,18 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
             <input type="range" min={0} max={W} value={hi} aria-label="Sent to" onChange={(e) => setSent(lo, Math.max(+e.target.value, lo))} />
           </div>
           <div className="qs172-scale">{scale.map((m) => <span key={m.i} style={{ left: `${(m.i / W) * 100}%`, ...(m.left ? { transform: "none" } : {}) }}>{m.text}</span>)}</div>
-        </section>
+        </Sec172>
       ) : null}
 
-      <DueRange172 k="date" title="Agent’s reply date" side="agent" b={REPLY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
-      <DueRange172 k="sendby" title="Your send-by date" side="you" b={SENDBY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
+      <Sec172 id="date" title="Agent’s reply date" on={isSet.date} text={dueText172(s.date, REPLY172)} idle="any" part="date" {...sec("date")}>
+        <DueRange172 k="date" title="Agent’s reply date" side="agent" b={REPLY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
+      </Sec172>
+      <Sec172 id="sendby" title="Your send-by date" on={isSet.sendby} text={dueText172(s.sendby, SENDBY172)} idle="any" part="sendby" {...sec("sendby")}>
+        <DueRange172 k="sendby" title="Your send-by date" side="you" b={SENDBY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
+      </Sec172>
 
-      {(() => {
-        /* 2 · the rarer five fold under More filters, open while any of them is set */
-        const set = (s.pkgs.length ? 1 : 0) + (s.methods.length ? 1 : 0) + (s.fit ? 1 : 0) + (s.countries.length ? 1 : 0) + (s.mats !== "any" ? 1 : 0);
-        const body = <>
+      {/* the rarer five: More filters is a folding section like the rest (v172.5) */}
+      <Sec172 id="more" title="More filters" on={moreSet > 0} text={`${moreSet} set`} idle="none set" part="" {...sec("more")}>
       <section className="qs172-s">
         <Head172 title="What you sent" on={s.pkgs.length > 0} text={`${s.pkgs.length} picked`} idle="any" part="pkgs" onReset={setSmart172} />
         <div className="qs172-pills">
@@ -247,17 +256,7 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
         </div>
       ))}
 
-        </>;
-        const open = moreOpen || set > 0;
-        return (
-          <>
-            <button type="button" className={`qs172-more${open ? " open" : ""}`} aria-expanded={open} onClick={() => setMoreOpen(!open)} disabled={set > 0 && open}>
-              <b>More filters</b><span>{set ? `${set} set` : "package, method, fit, location, materials"}</span><i aria-hidden="true">{open ? "▴" : "▾"}</i>
-            </button>
-            {open ? body : null}
-          </>
-        );
-      })()}
+      </Sec172>
 
       <footer className="qs172-f">{on ? `Showing ${showing} of ${total} queries.` : `All ${total} queries.`}</footer>
     </aside>
@@ -354,6 +353,37 @@ const Ring172: React.FC<{ s: Smart172; ctx: Ctx172; n: (skip: keyof Smart172, f:
   );
 };
 
+/* ── v172.5 · folding sections ─────────────────────────────────────────────────────────────────────────────────── */
+type Fold172 = "stage" | "sent" | "date" | "sendby" | "more";
+const FOLDS172: readonly Fold172[] = ["stage", "sent", "date", "sendby", "more"];
+const FOLD0_172: Record<Fold172, boolean> = { stage: true, sent: false, date: false, sendby: false, more: false };
+const FOLD_KEY172 = "qh.qc.fold172";
+function readFold172(): Partial<Record<Fold172, boolean>> {
+  try {
+    const v: unknown = JSON.parse(window.sessionStorage.getItem(FOLD_KEY172) ?? "{}");
+    if (!v || typeof v !== "object") return {};
+    return Object.fromEntries(FOLDS172.filter((k) => typeof (v as Record<string, unknown>)[k] === "boolean").map((k) => [k, (v as Record<string, boolean>)[k]]));
+  } catch { return {}; }
+}
+function writeFold172(f: Record<Fold172, boolean>) { try { window.sessionStorage.setItem(FOLD_KEY172, JSON.stringify(f)); } catch { /* */ } }
+const CHEV172 = <svg className="qs172-cv" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+/** a section whose title row (one button) opens and shuts it: the title, the section's value on the right (upright
+ *  navy when set, the idle word in italic when not), a chevron; Reset after the button when set and open. The shut
+ *  body is inert. */
+const Sec172: React.FC<{ id: Fold172; title: string; on: boolean; text: string; idle: string; part: string; open: boolean; onToggle: () => void; onReset: (p: Partial<Smart172>) => void; children: React.ReactNode }> = ({ id, title, on, text, idle, part, open, onToggle, onReset, children }) => (
+  <section className={`qs172-s qs172-fold${open ? "" : " is-shut"}`} data-fold={id}>
+    <div className={`qs172-fh${on ? " is-on" : ""}`}>
+      <button type="button" className="qs172-ft" aria-expanded={open} onClick={onToggle}>
+        <b>{on ? <i className="qs172-dot" aria-hidden="true" /> : null}{title}</b>
+        <span className="qs172-fv">{on ? text : idle}</span>
+        {CHEV172}
+      </button>
+      {on && open && part ? <button type="button" className="qs172-rs" onClick={() => onReset(resetPart172[part])}>Reset</button> : null}
+    </div>
+    <div className="qs172-fb" inert={!open || undefined}><div>{children}</div></div>
+  </section>
+);
+
 /* a due date as a two-handle range in weeks around today (past it to the left), its spread drawn above it, and a
    "Not dated" tick like the Contact list's include boxes */
 const DueRange172: React.FC<{ k: "date" | "sendby"; title: string; side: "agent" | "you"; b: { min: number; max: number }; rows: readonly QcRow[]; ctx: Ctx172; s: Smart172; onChange: (p: Partial<Smart172>) => void }> = ({ k, title, side, b, rows, ctx, s, onChange: setSmart172 }) => {
@@ -368,8 +398,7 @@ const DueRange172: React.FC<{ k: "date" | "sendby"; title: string; side: "agent"
   const set = (p: Partial<typeof d>) => setSmart172({ [k]: { ...d, ...p } } as Partial<Smart172>);
   const today = pos(0);
   return (
-    <section className="qs172-s">
-      <Head172 title={title} on={dueOn172(d, b)} text={dueText172(d, b)} idle="any" part={k} onReset={setSmart172} />
+    <>
       <div className="qs172-hist qs172-hist--due" aria-hidden="true" style={{ ["--t" as string]: `${today}%` }}>
         {hist.map((h, i) => { const a = b.min + i * 7; const inR = (d.lo <= b.min || a + 7 > d.lo) && (d.hi >= b.max || a <= d.hi);
           return <i key={i} className={`${inR ? "in" : ""}${a < 0 ? " past" : ""}`} style={{ height: `${h ? 4 + (h / hmax) * 22 : 0}px` }} />; })}
@@ -385,7 +414,7 @@ const DueRange172: React.FC<{ k: "date" | "sendby"; title: string; side: "agent"
         <span style={{ left: "100%", transform: "translateX(-100%)" }}>{b.max / 7}w+ ahead</span>
       </div>
       <label className="qs172-ck"><input type="checkbox" checked={d.nd} onChange={(e) => set({ nd: e.target.checked })} />Not dated <em>{undated}</em></label>
-    </section>
+    </>
   );
 };
 
