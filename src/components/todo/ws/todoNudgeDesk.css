@@ -70,12 +70,12 @@
   .tws .twn-p { position: absolute; top: -5px; width: 16px; height: 16px; border-radius: 50%; transform: translateX(-50%); background: #fff; box-shadow: inset 0 0 0 2px #8e8274; transition: left 0.45s ease; }
   .tws .twn-nud { background: var(--tw-navy); box-shadow: 0 0 0 3px #fff; }
   .tws .twn-fut { box-shadow: inset 0 0 0 2px #9aa6b6; }
-  .tws .twn-l { position: absolute; transform: translateX(-50%); font: 12.5px/1.25 var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; text-align: center; transition: left 0.45s ease; }
+  .tws .twn-l { position: absolute; transform: translateX(calc(-50% + var(--twn-dx, 0px))); font: 12.5px/1.25 var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; text-align: center; transition: left 0.45s ease; }
   .tws .twn-l b { display: block; font-weight: 600; color: var(--tw-ink); }
   .tws .twn-l.twn-up { bottom: 14px; }
   .tws .twn-l.twn-dn { top: 14px; }
-  .tws .twn-l.twn-end { transform: translateX(-100%); text-align: right; }
-  .tws .twn-l.twn-lft { transform: translateX(-8px); text-align: left; }
+  .tws .twn-l.twn-end { transform: translateX(calc(-100% + var(--twn-dx, 0px))); text-align: right; }
+  .tws .twn-l.twn-lft { transform: translateX(calc(-8px + var(--twn-dx, 0px))); text-align: left; }
   .tws .twn-l.twn-nw, .tws .twn-l.twn-nw b { color: var(--tw-navy); }
   .tws .twn-ago i { font-style: italic; }
 
@@ -99,5 +99,19 @@
   @media (prefers-reduced-motion: reduce) {
     .tws .twn-enter, .tws .twn-enter * { animation: none !important; }
     .tws .twn-seg, .tws .twn-p, .tws .twn-l { transition: none; }
+  }
+}
+
+/* ── Phase 5 · measured at 1280×800: the questions column is ~314px wide there, so the three answers take two rows and
+   the column scrolled 52px with the card shown. In a column of 480px or less the desk's own spacing tightens (the card
+   keeps its 28px / 20px room, its band and its line); wider columns keep the ref's spacing. ── */
+@media (min-width: 768px) {
+  @container twscol (max-width: 480px) {
+    .tws .tws-wq:has(> .twn-desk) { padding-top: 10px; padding-bottom: 10px; }
+    .tws .twn-sent { margin: 10px 0 16px; }
+    .tws .twn-chs { gap: 8px; }
+    .tws .twn-ch { padding: 8px 36px 8px 14px; }
+    .tws .twn-quiet { margin-top: 12px; }
+    .tws .twn-band { padding: 11px 24px; margin-bottom: 44px; }
   }
 }

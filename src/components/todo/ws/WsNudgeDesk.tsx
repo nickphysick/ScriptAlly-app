@@ -97,24 +97,56 @@ export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stag
  */
 const NudgeTimeline: React.FC<{ first: string; shape: TimelineShape; stageStyle: Record<string, string> | undefined; stage: Stage | null; enter: boolean }> = ({ first, shape: s, stageStyle, stage, enter }) => {
   const pc = (n: number) => `${n}%`;
+  /* measured at 1280 and 1512: when dates sit close, labels in one row collided ("No reply for…" over "If nothing by then",
+     "8 weeks up" over "You nudged"). After each render the labels of each row are read and slid apart along it (8px
+     apart, the rightmost kept on its point, none past the card's padding); their points never move. */
+  const lineRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const line = lineRef.current;
+    if (!line) return;
+    const W = line.clientWidth;
+    const PAD = 18, GAP = 8;
+    for (const row of ["twn-up", "twn-dn"]) {
+      const els = [...line.querySelectorAll<HTMLElement>(`.twn-l.${row}`)];
+      const items = els.map((el) => {
+        el.style.setProperty("--twn-dx", "0px");
+        const x = (parseFloat(el.dataset.twnX ?? "0") / 100) * W, w = el.offsetWidth;
+        const left = el.classList.contains("twn-end") ? x + 8 - w : el.classList.contains("twn-lft") ? x - 8 : x - w / 2;
+        return { el, left, w, dx: 0 };
+      }).sort((a, b) => a.left - b.left);
+      for (let i = items.length - 2; i >= 0; i--) {
+        const a = items[i], b = items[i + 1];
+        const over = a.left + a.dx + a.w + GAP - (b.left + b.dx);
+        if (over > 0) a.dx -= over;
+        const min = -PAD - (a.left);
+        if (a.dx < min) a.dx = min;
+      }
+      for (let i = 1; i < items.length; i++) {
+        const a = items[i - 1], b = items[i];
+        const over = a.left + a.dx + a.w + GAP - (b.left + b.dx);
+        if (over > 0) b.dx += over;
+      }
+      for (const it of items) it.el.style.setProperty("--twn-dx", `${Math.round(it.dx)}px`);
+    }
+  });
   return (
     <div className={enter ? "twn-tl twn-enter" : "twn-tl"} data-twn="timeline" data-tws58-stage={stage ?? undefined} style={stageStyle as React.CSSProperties | undefined}>
       <h5 className="twn-band" data-twn="band">{first}’s updated timeline</h5>
-      <div className="twn-line" data-twn="line">
+      <div className="twn-line" data-twn="line" ref={lineRef}>
         <span className="twn-seg twn-s1" style={{ left: pc(s.solid.from), width: pc(s.solid.to - s.solid.from) }} />
         {s.hatch ? <span className="twn-seg twn-s2" style={{ left: pc(s.hatch.from), width: pc(s.hatch.to - s.hatch.from) }} /> : null}
         <span className="twn-seg twn-s3" style={{ left: pc(s.dashed.from), width: pc(s.dashed.to - s.dashed.from) }} />
         <span className="twn-p twn-p-start" data-twn-pt="start" style={{ left: pc(s.start.x) }} />
-        <span className="twn-l twn-dn twn-lft" data-twn-lab="start" style={{ left: pc(s.start.x) }}>{s.start.label}<b>{s.start.date}</b></span>
+        <span className="twn-l twn-dn twn-lft" data-twn-lab="start" data-twn-x={s.start.x} style={{ left: pc(s.start.x) }}>{s.start.label}<b>{s.start.date}</b></span>
         {s.due ? <>
           <span className="twn-p twn-p-due" data-twn-pt="due" style={{ left: pc(s.due.x) }} />
-          <span className="twn-l twn-dn" data-twn-lab="due" style={{ left: pc(s.due.x) }}>{s.due.label}<b>{s.due.date}</b></span>
+          <span className="twn-l twn-dn" data-twn-lab="due" data-twn-x={s.due.x} style={{ left: pc(s.due.x) }}>{s.due.label}<b>{s.due.date}</b></span>
         </> : null}
-        {s.hatch ? <span className="twn-l twn-up twn-ago" data-twn-lab="ago" style={{ left: pc((s.hatch.from + s.hatch.to) / 2) }}><i>No reply for {s.hatch.ago}</i></span> : null}
+        {s.hatch ? <span className="twn-l twn-up twn-ago" data-twn-lab="ago" data-twn-x={(s.hatch.from + s.hatch.to) / 2} style={{ left: pc((s.hatch.from + s.hatch.to) / 2) }}><i>No reply for {s.hatch.ago}</i></span> : null}
         <span className="twn-p twn-nud" data-twn-pt="nudge" style={{ left: pc(s.nudge.x) }} />
-        <span className="twn-l twn-dn twn-nw" data-twn-lab="nudge" style={{ left: pc(s.nudge.x) }}>You nudged<b>{s.nudge.date}</b></span>
+        <span className="twn-l twn-dn twn-nw" data-twn-lab="nudge" data-twn-x={s.nudge.x} style={{ left: pc(s.nudge.x) }}>You nudged<b>{s.nudge.date}</b></span>
         <span className="twn-p twn-fut" data-twn-pt="close" style={{ left: pc(s.close.x) }} />
-        <span className="twn-l twn-up twn-end" data-twn-lab="close" style={{ left: `calc(${pc(s.close.x)} + 8px)` }}>If nothing by then<b>{s.close.date}, close it?</b></span>
+        <span className="twn-l twn-up twn-end" data-twn-lab="close" data-twn-x={s.close.x} style={{ left: `calc(${pc(s.close.x)} + 8px)` }}>If nothing by then<b>{s.close.date}, close it?</b></span>
       </div>
     </div>
   );
