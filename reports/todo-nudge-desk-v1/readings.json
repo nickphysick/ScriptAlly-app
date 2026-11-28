@@ -1,0 +1,527 @@
+{
+ "start-1280": {
+  "backOpen": "true",
+  "openRows": [],
+  "run": true
+ },
+ "before-1280": {
+  "title": "Nudge Tom",
+  "hawkH": 107.5625,
+  "hawkDrawn": true,
+  "sentence": "I nudged Tom",
+  "quiet": null,
+  "answers": [
+   "today:false",
+   "yesterday:false",
+   "other:false"
+  ],
+  "logDisabled": true,
+  "footer": "SnoozeSDismissDLog it",
+  "column": {
+   "scrollH": 451,
+   "clientH": 451
+  },
+  "card": null,
+  "centre": null,
+  "labels": [],
+  "overlaps": [],
+  "run": false,
+  "backOpen": null,
+  "openRows": [
+   "task-nudge-seed-query-2"
+  ]
+ },
+ "other-1280": {
+  "sentence": "I nudged Tom",
+  "logDisabled": true,
+  "picker": 1
+ },
+ "esc-1280": {
+  "run": true,
+  "backOpen": "true",
+  "openRows": []
+ },
+ "after-1280": {
+  "title": "Nudge Tom",
+  "hawkH": 0,
+  "hawkDrawn": false,
+  "sentence": "I nudged Tom today.",
+  "quiet": "It goes on Tom’s card and this task leaves your list.",
+  "answers": [
+   "today:true",
+   "yesterday:false",
+   "other:false"
+  ],
+  "logDisabled": false,
+  "footer": "SnoozeSDismissDLog it",
+  "column": {
+   "scrollH": 451,
+   "clientH": 451
+  },
+  "card": {
+   "l": 509.703125,
+   "t": 520.3125,
+   "r": 792.296875,
+   "b": 669.3125,
+   "w": 282.59375,
+   "h": 149,
+   "band": "rgb(239, 230, 214)"
+  },
+  "centre": {
+   "dy": 0,
+   "dx": 0,
+   "roomAbove": 30,
+   "roomBelow": 22
+  },
+  "labels": [
+   "start:534-582",
+   "due:590-655",
+   "ago:533-655",
+   "nudge:663-734",
+   "close:664-773"
+  ],
+  "overlaps": [],
+  "run": false,
+  "backOpen": null,
+  "openRows": [
+   "task-nudge-seed-query-2"
+  ],
+  "cls": [
+   {
+    "t": 5952,
+    "v": 0.0005523124694824219,
+    "recent": true,
+    "who": [
+     "twn-chs",
+     "twn-tlwrap",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   },
+   {
+    "t": 5967,
+    "v": 0.0014500672817230225,
+    "recent": true,
+    "who": [
+     "twn-chs",
+     "twn-tlwrap",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   },
+   {
+    "t": 5985,
+    "v": 0.002284712219238281,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   },
+   {
+    "t": 6001,
+    "v": 0.0019797822237014773,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   },
+   {
+    "t": 6018,
+    "v": 0.0013482717275619506,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   },
+   {
+    "t": 6034,
+    "v": 0.0008827297210693358,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   },
+   {
+    "t": 6052,
+    "v": 0.0005892573652788996,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-tl twn-enter",
+     "twn-chs",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   },
+   {
+    "t": 6067,
+    "v": 0.0003554590702056885,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-quiet",
+     "twn-sent"
+    ]
+   }
+  ]
+ },
+ "start-1512": {
+  "backOpen": "true",
+  "openRows": [],
+  "run": true
+ },
+ "before-1512": {
+  "title": "Nudge Tom",
+  "hawkH": 85.171875,
+  "hawkDrawn": true,
+  "sentence": "I nudged Tom",
+  "quiet": null,
+  "answers": [
+   "today:false",
+   "yesterday:false",
+   "other:false"
+  ],
+  "logDisabled": true,
+  "footer": "SnoozeSDismissDLog it",
+  "column": {
+   "scrollH": 551,
+   "clientH": 551
+  },
+  "card": null,
+  "centre": null,
+  "labels": [],
+  "overlaps": [],
+  "run": false,
+  "backOpen": null,
+  "openRows": [
+   "task-nudge-seed-query-2"
+  ]
+ },
+ "other-1512": {
+  "sentence": "I nudged Tom",
+  "logDisabled": true,
+  "picker": 1
+ },
+ "esc-1512": {
+  "run": true,
+  "backOpen": "true",
+  "openRows": []
+ },
+ "after-1512": {
+  "title": "Nudge Tom",
+  "hawkH": 0,
+  "hawkDrawn": false,
+  "sentence": "I nudged Tom today.",
+  "quiet": "It goes on Tom’s card and this task leaves your list.",
+  "answers": [
+   "today:true",
+   "yesterday:false",
+   "other:false"
+  ],
+  "logDisabled": false,
+  "footer": "SnoozeSDismissDLog it",
+  "column": {
+   "scrollH": 551,
+   "clientH": 551
+  },
+  "card": {
+   "l": 572.78125,
+   "t": 535.3125,
+   "r": 1011.8125,
+   "b": 692.3125,
+   "w": 439.03125,
+   "h": 157,
+   "band": "rgb(239, 230, 214)"
+  },
+  "centre": {
+   "dy": 0,
+   "dx": 0,
+   "roomAbove": 99,
+   "roomBelow": 91
+  },
+  "labels": [
+   "start:607-655",
+   "due:742-808",
+   "ago:722-844",
+   "nudge:831-902",
+   "close:852-961"
+  ],
+  "overlaps": [],
+  "run": false,
+  "backOpen": null,
+  "openRows": [
+   "task-nudge-seed-query-2"
+  ],
+  "cls": [
+   {
+    "t": 6306,
+    "v": 0.0005315928990766402,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6322,
+    "v": 0.0013717464866605075,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6339,
+    "v": 0.0021603028214029095,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6355,
+    "v": 0.0018162989003900599,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6372,
+    "v": 0.0012036838983993231,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6388,
+    "v": 0.0007840759010222744,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6406,
+    "v": 0.0005146309924289789,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   }
+  ]
+ },
+ "start-1920": {
+  "backOpen": "true",
+  "openRows": [],
+  "run": true
+ },
+ "before-1920": {
+  "title": "Nudge Tom",
+  "hawkH": 62.78125,
+  "hawkDrawn": true,
+  "sentence": "I nudged Tom",
+  "quiet": null,
+  "answers": [
+   "today:false",
+   "yesterday:false",
+   "other:false"
+  ],
+  "logDisabled": true,
+  "footer": "SnoozeSDismissDLog it",
+  "column": {
+   "scrollH": 731,
+   "clientH": 731
+  },
+  "card": null,
+  "centre": null,
+  "labels": [],
+  "overlaps": [],
+  "run": false,
+  "backOpen": null,
+  "openRows": [
+   "task-nudge-seed-query-2"
+  ]
+ },
+ "other-1920": {
+  "sentence": "I nudged Tom",
+  "logDisabled": true,
+  "picker": 1
+ },
+ "esc-1920": {
+  "run": true,
+  "backOpen": "true",
+  "openRows": []
+ },
+ "after-1920": {
+  "title": "Nudge Tom",
+  "hawkH": 0,
+  "hawkDrawn": false,
+  "sentence": "I nudged Tom today.",
+  "quiet": "It goes on Tom’s card and this task leaves your list.",
+  "answers": [
+   "today:true",
+   "yesterday:false",
+   "other:false"
+  ],
+  "logDisabled": false,
+  "footer": "SnoozeSDismissDLog it",
+  "column": {
+   "scrollH": 731,
+   "clientH": 731
+  },
+  "card": {
+   "l": 667.1875,
+   "t": 625.3125,
+   "r": 1228.5625,
+   "b": 782.3125,
+   "w": 561.375,
+   "h": 157,
+   "band": "rgb(239, 230, 214)"
+  },
+  "centre": {
+   "dy": 0,
+   "dx": 0,
+   "roomAbove": 189,
+   "roomBelow": 181
+  },
+  "labels": [
+   "start:701-750",
+   "due:892-958",
+   "ago:925-1048",
+   "nudge:1013-1083",
+   "close:1063-1171"
+  ],
+  "overlaps": [],
+  "run": false,
+  "backOpen": null,
+  "openRows": [
+   "task-nudge-seed-query-2"
+  ],
+  "cls": [
+   {
+    "t": 6082,
+    "v": 0.0003935522385585455,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6098,
+    "v": 0.0009712771192009066,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6115,
+    "v": 0.0014874282648533951,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6131,
+    "v": 0.0012317293897087193,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6148,
+    "v": 0.0008153701593846451,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6165,
+    "v": 0.0005306635727117091,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   },
+   {
+    "t": 6181,
+    "v": 0.00034750479239004626,
+    "recent": true,
+    "who": [
+     "twn-tlwrap",
+     "twn-chs",
+     "twn-sent",
+     "twn-quiet"
+    ]
+   }
+  ]
+ },
+ "frame-200": {
+  "tookAt": 285
+ },
+ "frame-600": {
+  "tookAt": 693
+ },
+ "frame-1000": {
+  "tookAt": 1081
+ },
+ "frame-1600": {
+  "tookAt": 1680
+ }
+}
