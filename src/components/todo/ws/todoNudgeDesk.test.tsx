@@ -13,7 +13,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { QueryStatus, UserPlan, type Agent, type Query, type Task } from "../../../types";
 import { forgetTodoTask, rememberTodoTask, todoTaskScope } from "../../../lib/todoArrival";
-import { agoWords, nudgeAnswers, nudgeDayWord, nudgeFacts, nudgeHawkLine } from "../../../lib/todoNudgeDesk";
+import { agoWords, nudgeAnswers, nudgeDayWord, nudgeFacts, nudgeHawkLine, nudgeTimeline } from "../../../lib/todoNudgeDesk";
 import { addDays, offWeekend } from "../../../lib/queryActions/dates";
 
 const DAY = 86400000;
@@ -157,5 +157,54 @@ describe("Phase 3 — the hawk folds away", () => {
   it("gone while the task is open; back when it is opened again (the desk is keyed by the task, the hawk is its state)", () => {
     expect(nd).toContain('{hawk === "gone" ? null : (');
     expect(ws).toMatch(/<div key=\{t\.key\} className="tws-wsx tws-in" data-tws="desk"/);
+  });
+});
+
+describe("Phase 4 — the updated timeline", () => {
+  const today = new Date(2026, 10, 28);
+  const f = { first: "William", agencyOr: "Foxglove Literary", sent: new Date(2026, 5, 3), sentWhat: "query" as const, weeks: 8, expected: new Date(2026, 6, 29) };
+  it("to scale from the send to the close-it date (+6 days): solid to the expected date, hatched to the nudge, dashed to the close-it date", () => {
+    const nudge = today, close = new Date(2026, 11, 28);
+    const sh = nudgeTimeline(f, nudge, close, today);
+    expect(sh.start).toMatchObject({ x: 0, label: "Queried", date: "3 Jun" });
+    expect(sh.due).toMatchObject({ label: "8 weeks up", date: "29 Jul" });
+    expect(sh.solid.from).toBe(0);
+    expect(sh.solid.to).toBe(sh.due!.x);
+    expect(sh.hatch).toMatchObject({ from: sh.due!.x, to: sh.nudge.x, ago: "four months" });
+    expect(sh.dashed).toEqual({ from: sh.nudge.x, to: sh.close.x });
+    expect(sh.nudge.date).toBe("Today");
+    expect(sh.close).toMatchObject({ date: "28 Dec" });
+    expect(sh.close.x).toBeLessThan(100);
+    expect(100 - sh.close.x, "the small margin past the close-it date").toBeGreaterThan(0);
+  });
+  it("no reply time stored: no weeks-up point, no hatch; the solid run goes to the nudge", () => {
+    const sh = nudgeTimeline({ ...f, weeks: null, expected: null }, new Date(2026, 10, 27), new Date(2026, 11, 25), today);
+    expect(sh.due).toBeNull();
+    expect(sh.hatch).toBeNull();
+    expect(sh.solid).toEqual({ from: 0, to: sh.nudge.x });
+    expect(sh.nudge.date).toBe("Yesterday");
+  });
+  const css = readFileSync(join(__dirname, "todoNudgeDesk.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  it("the arrival's timings, from the pick", () => {
+    for (const rule of [
+      ".tws .twn-tl.twn-enter { animation: twn-tlin 0.42s 0.1s cubic-bezier(0.2, 0.8, 0.2, 1) both; }",
+      ".tws .twn-enter .twn-s1 { animation-delay: 0.32s; }",
+      ".tws .twn-enter .twn-s2 { animation-delay: 0.5s; }",
+      ".tws .twn-enter .twn-s3 { animation-delay: 1s; }",
+      ".tws .twn-enter .twn-p-start, .tws .twn-enter .twn-p-due { animation: twn-popin 0.3s 0.3s cubic-bezier(0.2, 1.4, 0.4, 1) both; }",
+      ".tws .twn-enter .twn-l { animation: twn-fadein 0.3s 0.55s both; }",
+      ".tws .twn-enter .twn-nud { animation: twn-drop 0.45s 0.85s cubic-bezier(0.2, 1.4, 0.4, 1) both; }",
+      ".tws .twn-enter .twn-l.twn-nw { animation-delay: 0.95s; }",
+      ".tws .twn-enter .twn-fut { animation: twn-popin 0.3s 1.35s cubic-bezier(0.2, 1.4, 0.4, 1) both; }",
+      ".tws .twn-enter .twn-l.twn-end { animation-delay: 1.4s; }",
+    ]) expect(css, rule).toContain(rule);
+    expect(css).toMatch(/@keyframes twn-tlin \{ from \{ opacity: 0; transform: translateY\(12px\) scale\(0\.985\); \}/);
+    expect(css).toMatch(/@keyframes twn-drop \{ from \{ transform: translate\(-50%, -16px\);/);
+    expect(css).toContain(".tws .twn-seg { position: absolute; top: 0; height: 6px; transition: left 0.45s ease, width 0.45s ease; }");
+  });
+  it("it plays once per opening (held as state, a layout effect); nothing is drawn until a day is picked", () => {
+    const src = readFileSync(join(__dirname, "WsNudgeDesk.tsx"), "utf8");
+    expect(src).toContain("if (!nd.picked || entered.current) return;");
+    expect(src).toContain("{nd.picked ? <NudgeTimeline");
   });
 });
