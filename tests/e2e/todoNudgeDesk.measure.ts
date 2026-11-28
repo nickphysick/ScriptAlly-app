@@ -2,13 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * To-do nudge desk v1 (design-refs/todo-nudge-desk-v1/) — read off the rendered page at 1280×800, 1512×900, 1920×1080:
- *   · the way back: the tray with "Where to start" open, with a task open, and Esc going back;
- *   · the nudge desk before a pick, "Another day" open, and after a pick (settled): no column scroll with the timeline
- *     card shown, the card centred in its space within 2px, no label overlapping another label or a point, the hawk's
- *     height 0 after the fold, and the layout shifts after the pick recorded;
- *   · frames at 0.2s / 0.6s / 1.0s / 1.6s after a pick at 1512.
- * ⚠️ NOTHING IS LOGGED: answers are picked, Log it is never pressed. The only write is the tray's prefs, restored.
+ * To-do nudge desk v2 (design-refs/todo-nudge-desk-v2/; replaces v1's measure of the one-sentence desk) — read off the
+ * rendered page at 1280×800, 1512×900, 1920×1080, in every state: on open, step 1 confirmed, Today picked (settled), the
+ * calendar open, Another day picked. In each: no column scroll (nothing hidden), Log it right-aligned in the footer,
+ * no timeline label overlapping another label or a point; with the calendar open, the popover wholly inside the column.
+ * Frames at 0.1s / 0.5s / 1.0s after a pick at 1512.
+ * ⚠️ NOTHING IS LOGGED: steps are answered, Log it is never pressed. The only write is the tray's prefs, restored.
  *   SA_E2E_BASE_URL=http://127.0.0.1:4321 npm run e2e:emu -- tests/e2e/todoNudgeDesk.measure.ts --project=measure --workers=1
  */
 import { expect, test, type Page } from "@playwright/test";
@@ -18,7 +17,7 @@ import { openRoute } from "./measure";
 
 test.describe.configure({ mode: "default" });
 test.setTimeout(240_000);
-const DIR = "reports/todo-nudge-desk-v1";
+const DIR = "reports/todo-nudge-desk-v2";
 mkdirSync(`${DIR}/shots`, { recursive: true });
 const PG = '[data-tws="page"]:visible';
 const SIZES = [{ width: 1280, height: 800 }, { width: 1512, height: 900 }, { width: 1920, height: 1080 }];
@@ -43,141 +42,130 @@ async function settle(page: Page, ms = 600) {
   await page.waitForTimeout(ms);
   await page.mouse.move(2, 2);
 }
-async function pin(page: Page) {
+async function openNudge(page: Page, vp: { width: number; height: number }) {
+  await openRoute(page, "/todo", vp);
+  await expect(page.locator(`${PG} [data-tws-row]`).first()).toBeVisible({ timeout: 60_000 });
   await page.evaluate(() => {
     const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0);
     const sc = root?.closest<HTMLElement>(".wpg-scroll");
     if (sc) sc.scrollTop = sc.scrollHeight;
   });
-  await page.waitForTimeout(400);
-}
-/** open /todo fresh (Where to start), the workspace pinned, the layout-shift log running from the first script */
-async function openTodo(page: Page, vp: { width: number; height: number }) {
-  await openRoute(page, "/dashboard", vp);
-  await page.addInitScript(() => {
-    const w = window as unknown as { __cls: { t: number; v: number; recent: boolean; who: string[] }[] };
-    w.__cls = [];
-    new PerformanceObserver((list) => {
-      for (const e of list.getEntries() as unknown as { startTime: number; value: number; hadRecentInput: boolean; sources?: { node?: Element }[] }[]) {
-        w.__cls.push({ t: Math.round(e.startTime), v: e.value, recent: e.hadRecentInput, who: (e.sources ?? []).map((s) => (s.node as HTMLElement | undefined)?.className?.toString().slice(0, 60) ?? "?") });
-      }
-    }).observe({ type: "layout-shift", buffered: true });
-  });
-  await page.goto("/todo");
-  await expect(page.locator(`${PG} [data-tws-row]`).first()).toBeVisible({ timeout: 60_000 });
-  await expect(page.locator(`${PG} [data-twa="run"]`)).toBeVisible({ timeout: 30_000 });
+  await page.locator(`${PG} [data-tws-row][data-kind="nudge"]`).first().click();
+  await expect(page.locator(`${PG} [data-twn="desk"]`)).toBeVisible({ timeout: 10_000 });
   await settle(page);
-  await pin(page);
 }
 
-const desk = (page: Page) => page.evaluate(() => {
+const read = (page: Page) => page.evaluate(() => {
   const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
   const q = (s: string) => root.querySelector<HTMLElement>(s);
   const R = (e: Element | null) => { const r = e?.getBoundingClientRect(); return r ? { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height } : null; };
-  const wq = q('[data-tws="questions"]');
-  const wrap = q('[data-twn="tlwrap"]'), card = q('[data-twn="timeline"]');
-  const pad = wrap ? getComputedStyle(wrap) : null;
-  const inner = wrap && pad ? { t: wrap.getBoundingClientRect().top + parseFloat(pad.paddingTop), b: wrap.getBoundingClientRect().bottom - parseFloat(pad.paddingBottom), l: wrap.getBoundingClientRect().left, r: wrap.getBoundingClientRect().right } : null;
-  const cr = card?.getBoundingClientRect();
+  const wq = q('[data-tws="questions"]'), foot = q('[data-tws="footer"]'), log = q('[data-tws="footer"] [data-log]') as HTMLButtonElement | null;
+  const col = q('[data-tws="qcol"]');
   const labs = [...root.querySelectorAll<HTMLElement>("[data-twn-lab]")].map((e) => ({ k: e.getAttribute("data-twn-lab"), ...R(e)! }));
   const pts = [...root.querySelectorAll<HTMLElement>("[data-twn-pt]")].map((e) => ({ k: e.getAttribute("data-twn-pt"), ...R(e)! }));
   const hit = (a: { l: number; t: number; r: number; b: number }, b: { l: number; t: number; r: number; b: number }) => a.l < b.r - 0.5 && b.l < a.r - 0.5 && a.t < b.b - 0.5 && b.t < a.b - 0.5;
   const overlaps: string[] = [];
   for (let i = 0; i < labs.length; i++) for (let j = i + 1; j < labs.length; j++) if (hit(labs[i], labs[j])) overlaps.push(`${labs[i].k}×${labs[j].k}`);
   for (const l of labs) for (const p of pts) if (hit(l, p)) overlaps.push(`${l.k}×pt:${p.k}`);
-  const hawk = q('[data-twn="hawk"]');
+  const cal = R(q('[data-twn="calendar"]')), c = R(col);
+  const fr = R(foot), lr = R(log);
   return {
-    title: q('[data-tws="desk-title"]')?.textContent ?? null,
-    hawkH: hawk ? hawk.getBoundingClientRect().height : 0, hawkDrawn: !!hawk,
-    sentence: (q('[data-twn="sentence"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
-    quiet: q('[data-twn="quiet"]')?.textContent ?? null,
-    answers: [...root.querySelectorAll('[data-twn-when]')].map((b) => `${b.getAttribute("data-twn-when")}:${b.getAttribute("aria-checked")}`),
-    logDisabled: (q('[data-tws="footer"] [data-log]') as HTMLButtonElement | null)?.disabled ?? null,
-    footer: (q('[data-tws="footer"]')?.textContent ?? "").replace(/\s+/g, " ").trim(),
+    title: (q('[data-twn="band"]')?.textContent ?? "").trim(),
+    headline: (q('[data-twn="context"] h2')?.textContent ?? "").trim(),
+    steps: [...root.querySelectorAll('[data-twn-step]')].map((s) => `${s.getAttribute("data-twn-step")}:${s.getAttribute("data-st")}`),
+    sentBtn: (q('[data-twn="sent"]')?.textContent ?? "").trim(),
+    nudged: q('[data-twn="nudged"]')?.textContent ?? null,
+    answers: [...root.querySelectorAll('[data-twn-when]')].map((b) => `${b.getAttribute("data-twn-when")}:${b.getAttribute("aria-checked")}:${(b.querySelector("small")?.textContent ?? "")}`),
+    logDisabled: log?.disabled ?? null,
+    logRightGap: fr && lr ? Math.round((fr.r - lr.r) * 10) / 10 : null,
+    logLeftOfDismiss: lr && fr ? Math.round(lr.l - fr.l) : null,
+    footPadRight: foot ? parseFloat(getComputedStyle(foot).paddingRight) : null,
     column: wq ? { scrollH: wq.scrollHeight, clientH: wq.clientHeight } : null,
-    card: cr ? { ...R(card)!, band: getComputedStyle(q('[data-twn="band"]')!).backgroundColor } : null,
-    centre: inner && cr ? { dy: Math.round(((cr.top + cr.bottom) / 2 - (inner.t + inner.b) / 2) * 10) / 10, dx: Math.round(((cr.left + cr.right) / 2 - (inner.l + inner.r) / 2) * 10) / 10, roomAbove: Math.round(cr.top - wrap!.getBoundingClientRect().top), roomBelow: Math.round(wrap!.getBoundingClientRect().bottom - cr.bottom) } : null,
-    labels: labs.map((l) => `${l.k}:${Math.round(l.l)}-${Math.round(l.r)}`), overlaps,
-    run: !!q('[data-twa="run"]'), backOpen: q('[data-twn="back"]')?.getAttribute("aria-current") ?? null,
-    openRows: [...root.querySelectorAll('[data-tws-row][aria-current="true"]')].map((r) => r.getAttribute("data-tws-row")),
+    calendar: cal && c ? { ...cal, inside: cal.l >= c.l - 0.5 && cal.r <= c.r + 0.5 && cal.t >= c.t - 0.5 && cal.b <= c.b + 0.5, col: c } : null,
+    labels: labs.map((l) => `${l.k}:${Math.round(l.l)}-${Math.round(l.r)}`), points: pts.map((p) => p.k), overlaps,
   };
 });
-const clsSince = (page: Page, t0: number) => page.evaluate((t) => (window as unknown as { __cls: { t: number; v: number; recent: boolean; who: string[] }[] }).__cls.filter((e) => e.t >= t), t0);
+
+async function check(page: Page, key: string, w: number) {
+  const r = await read(page);
+  note(`${key}-${w}`, r);
+  await page.screenshot({ path: `${DIR}/shots/${key}-${w}.png` });
+  expect(r.column!.scrollH, `${key}: no column scroll`).toBeLessThanOrEqual(r.column!.clientH + 1);
+  expect(r.logRightGap!, `${key}: Log it on the right`).toBeLessThanOrEqual(r.footPadRight! + 1);
+  expect(r.overlaps, `${key}: timeline labels clear`).toEqual([]);
+  return r;
+}
 
 for (const vp of SIZES) {
-  test(`the way back and the nudge desk at ${vp.width}`, async ({ page }) => {
-    await openTodo(page, vp);
+  test(`the nudge desk in every state at ${vp.width}`, async ({ page }) => {
     const w = vp.width;
-    /* the tray with Where to start open */
-    await page.locator(`${PG} [data-tws="tray"]`).screenshot({ path: `${DIR}/shots/tray-start-${w}.png` });
-    const start = await desk(page);
-    note(`start-${w}`, { backOpen: start.backOpen, openRows: start.openRows, run: start.run });
-    expect(start.backOpen).toBe("true");
-    expect(start.openRows).toEqual([]);
+    await openNudge(page, vp);
+    const open = await check(page, "open", w);
+    expect(open.steps).toEqual(["send:on", "when:off"]);
+    expect(open.title).toMatch(/’s timeline$/);
+    expect(open.points).toContain("today");
+    expect(open.logDisabled).toBe(true);
 
-    /* a nudge, before a pick */
-    const nudge = page.locator(`${PG} [data-tws-row][data-kind="nudge"]`).first();
-    await nudge.click();
-    await expect(page.locator(`${PG} [data-twn="desk"]`)).toBeVisible({ timeout: 10_000 });
-    await settle(page);
-    const before = await desk(page);
-    note(`before-${w}`, before);
-    await page.screenshot({ path: `${DIR}/shots/desk-before-${w}.png` });
-    await page.locator(`${PG} [data-tws="tray"]`).screenshot({ path: `${DIR}/shots/tray-task-${w}.png` });
-    expect(before.backOpen).toBeNull();
-    expect(before.openRows.length).toBe(1);
-    expect(before.hawkDrawn).toBe(true);
-    expect(before.logDisabled).toBe(true);
-    expect(before.card).toBeNull();
+    await page.locator(`${PG} [data-twn="sent"]`).click();
+    await settle(page, 400);
+    const sent = await check(page, "sent", w);
+    expect(sent.steps).toEqual(["send:done", "when:on"]);
+    expect(sent.sentBtn).toBe("Sent");
+    expect(sent.logDisabled).toBe(true);
 
-    /* "Another day" opens the app's picker (nothing logged; the sentence stays blank) */
-    await page.locator(`${PG} [data-twn-when="other"]`).click();
-    await settle(page, 900);
-    const other = await desk(page);
-    note(`other-${w}`, { sentence: other.sentence, logDisabled: other.logDisabled, picker: await page.locator(`${PG} [data-twn="other"] [data-tws="date"]`).count() });
-    await page.screenshot({ path: `${DIR}/shots/another-day-${w}.png` });
-    expect(other.logDisabled).toBe(true);
-
-    /* a fresh opening of the same task, then Today: the fold, the sentence, the card's arrival, settled */
-    await page.keyboard.press("Escape");
-    await settle(page, 300);
-    const back = await desk(page);
-    note(`esc-${w}`, { run: back.run, backOpen: back.backOpen, openRows: back.openRows });
-    expect(back.run).toBe(true);
-    expect(back.backOpen).toBe("true");
-    await nudge.click();
-    await settle(page);
-    const t0 = await page.evaluate(() => performance.now());
     await page.keyboard.press("1");
-    await page.waitForTimeout(2200);
-    await settle(page, 200);
-    const after = await desk(page);
-    const cls = await clsSince(page, t0);
-    note(`after-${w}`, { ...after, cls });
-    await page.screenshot({ path: `${DIR}/shots/desk-after-${w}.png` });
-    expect(after.hawkH).toBe(0);
-    expect(after.answers).toEqual(["today:true", "yesterday:false", "other:false"]);
-    expect(after.logDisabled).toBe(false);
-    expect(after.card).not.toBeNull();
-    expect(after.column!.scrollH, "no column scroll with the card shown").toBeLessThanOrEqual(after.column!.clientH + 1);
-    expect(Math.abs(after.centre!.dy), "card centred vertically in its room").toBeLessThanOrEqual(2);
-    expect(Math.abs(after.centre!.dx), "card centred horizontally").toBeLessThanOrEqual(2);
-    expect(after.overlaps).toEqual([]);
+    await settle(page, 1400);
+    const today = await check(page, "today", w);
+    expect(today.steps).toEqual(["send:done", "when:done"]);
+    expect(today.title).toMatch(/’s updated timeline$/);
+    expect(today.points).toEqual(expect.arrayContaining(["nudge", "next"]));
+    expect(today.logDisabled).toBe(false);
 
-    /* Esc from the open nudge goes back; nothing was logged */
+    await page.locator(`${PG} [data-twn-when="other"]`).click();
+    await settle(page, 400);
+    const cal = await check(page, "calendar", w);
+    expect(cal.calendar, "the calendar is open").not.toBeNull();
+    expect(cal.calendar!.inside, "the popover sits wholly inside the column").toBe(true);
+    expect(cal.logDisabled, "opening the calendar changes nothing").toBe(false);
+
+    /* Esc closes only the popover */
     await page.keyboard.press("Escape");
     await settle(page, 300);
-    expect((await desk(page)).run).toBe(true);
+    const esc = await read(page);
+    note(`esc-${w}`, { calendar: !!esc.calendar, desk: esc.steps });
+    expect(esc.calendar).toBeNull();
+    expect(esc.steps, "still on the task").toEqual(["send:done", "when:done"]);
+
+    /* Another day: a day three back, or the first open day of the month */
+    await page.locator(`${PG} [data-twn-when="other"]`).click();
+    await settle(page, 300);
+    const d = new Date(); d.setDate(d.getDate() - 3);
+    const want = page.locator(`${PG} [data-twn="calendar"] [data-mg-day="${d.getDate()}"]:not([disabled])`);
+    await (await want.count() ? want : page.locator(`${PG} [data-twn="calendar"] [data-mg-day]:not([disabled])`).first()).click();
+    await settle(page, 1400);
+    const other = await check(page, "another-day", w);
+    expect(other.calendar).toBeNull();
+    expect(other.answers.find((a) => a.startsWith("other:true:"))).toBeTruthy();
+    expect(other.nudged).toMatch(/^You nudged \S+ on \w{3} \d{1,2} \w{3}\. Next reminder \d{1,2} \w{3}\.$/);
+
+    /* un-confirming step 1 clears step 2 and disables Log it */
+    await page.locator(`${PG} [data-twn="sent"]`).click();
+    await settle(page, 400);
+    const undone = await read(page);
+    note(`unconfirm-${w}`, { steps: undone.steps, logDisabled: undone.logDisabled, answers: undone.answers });
+    expect(undone.steps).toEqual(["send:on", "when:off"]);
+    expect(undone.logDisabled).toBe(true);
+    await page.keyboard.press("Escape");
   });
 }
 
-test("frames after a pick at 1512 (0.2s, 0.6s, 1.0s, 1.6s)", async ({ page }) => {
-  await openTodo(page, SIZES[1]);
-  await page.locator(`${PG} [data-tws-row][data-kind="nudge"]`).first().click();
-  await settle(page);
+test("frames after a pick at 1512 (0.1s, 0.5s, 1.0s)", async ({ page }) => {
+  await openNudge(page, SIZES[1]);
+  await page.locator(`${PG} [data-twn="sent"]`).click();
+  await settle(page, 400);
   const t0 = Date.now();
   await page.locator(`${PG} [data-twn-when="today"]`).click();
-  for (const at of [200, 600, 1000, 1600]) {
+  for (const at of [100, 500, 1000]) {
     const wait = at - (Date.now() - t0);
     if (wait > 0) await page.waitForTimeout(wait);
     await page.screenshot({ path: `${DIR}/shots/frame-${String(at).padStart(4, "0")}ms-1512.png` });

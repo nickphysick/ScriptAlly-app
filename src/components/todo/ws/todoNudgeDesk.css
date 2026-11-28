@@ -118,3 +118,21 @@
     .tws .twn-seg, .tws .twn-p, .tws .twn-l { transition: none; }
   }
 }
+
+/* ── v2 · Phase 4 · measured at 1512×900: the questions column is ~545px wide there (the ref draws 655), so the answers
+   were truncated ("Yester…", "Anoth…") and the column ran ~30px over once a day was picked. In a column of 600px or less
+   the desk tightens: smaller gaps and paddings, and the answers run the full width of the steps card (under the disc).
+   Wider columns keep the ref's spacing. ── */
+@media (min-width: 768px) {
+  @container twscol (max-width: 600px) {
+    .tws .tws-wq:has(> .twn2) { padding: 18px 22px 12px; }
+    .tws .twn2 { gap: 12px; }
+    .tws .twn2-ctx img { width: 44px; }
+    .tws .twn2-ctx h2 { font-size: 22px !important; }
+    .tws .twn-band { margin-bottom: 32px; padding: 10px 22px; }
+    .tws .twn-line { margin-bottom: 36px; }
+    .tws .twn2-stp { padding: 14px 16px; }
+    .tws .twn2-chs { grid-column: 1 / -1; gap: 8px; }
+    .tws .twn2-ch { padding: 10px; column-gap: 8px; }
+  }
+}
