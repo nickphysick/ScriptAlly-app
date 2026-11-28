@@ -159,3 +159,51 @@ describe("the words (pure)", () => {
     expect([14, 35, 7, 49, 62, 122].map(agoWords)).toEqual(["two weeks", "five weeks", "a week", "seven weeks", "two months", "four months"]);
   });
 });
+
+describe("Phase 2 — the timeline, there from the start", () => {
+  const today = new Date(2026, 10, 28);
+  const f = { first: "William", agencyOr: "Foxglove Literary", sent: new Date(2026, 5, 3), sentWhat: "query" as const, weeks: 8, expected: new Date(2026, 6, 29) };
+  const then = new Date(2026, 11, 28);
+  it("before a pick: queried, weeks up, the overdue hatch to today, today ringed; no nudge, no next reminder; same scale as after", () => {
+    const before = nudgeTimeline(f, null, then, today), after = nudgeTimeline(f, today, then, today);
+    expect(before.start).toMatchObject({ x: 0, label: "Queried", date: "3 Jun" });
+    expect(before.due).toMatchObject({ label: "8 weeks up", date: "29 Jul" });
+    expect(before.hatch).toMatchObject({ from: before.due!.x, to: before.today!.x, ago: "four months" });
+    expect(before.nudge).toBeNull();
+    expect(before.next).toBeNull();
+    expect(before.dashed).toBeNull();
+    expect(after.today).toBeNull();
+    expect(after.nudge).toMatchObject({ x: before.today!.x, date: "Today" });
+    expect(after.next).toMatchObject({ date: "28 Dec" });
+    expect(after.dashed).toEqual({ from: after.nudge!.x, to: after.next!.x });
+    expect(after.due!.x, "nothing jumps on a pick").toBe(before.due!.x);
+  });
+  it("no reply time stored: no weeks-up point and no hatch; the solid run goes to today / the nudge", () => {
+    const sh = nudgeTimeline({ ...f, weeks: null, expected: null }, null, then, today);
+    expect(sh.due).toBeNull();
+    expect(sh.hatch).toBeNull();
+    expect(sh.solid).toEqual({ from: 0, to: sh.today!.x });
+  });
+  it("shown from the moment the task opens: '{First}'s timeline', Today ringed", () => {
+    WILL();
+    const desk = openNudge().slice(0);
+    expect(text(desk)).toContain("William’s timeline");
+    expect(desk).toContain('data-twn-pt="today"');
+    expect(desk).not.toContain('data-twn-pt="nudge"');
+    expect(desk.indexOf('data-twn="context"')).toBeLessThan(desk.indexOf('data-twn="timeline"'));
+    expect(desk.indexOf('data-twn="timeline"')).toBeLessThan(desk.indexOf('data-twn="steps"'));
+  });
+  it("only the new parts animate on a pick, keyed by the day; reduced motion: none", () => {
+    const css = readFileSync(join(__dirname, "todoNudgeDesk.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const rule of [
+      ".tws .twn-nud { animation: twn-drop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both; }",
+      ".tws .twn-s3 { animation: twn-draw 0.5s 0.3s cubic-bezier(0.4, 0, 0.2, 1) both; }",
+      ".tws .twn-next { animation: twn-popin 0.3s 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both; }",
+      ".tws .twn-l.twn-end { animation: twn-fadein 0.3s 0.75s both; }",
+      ".tws .twn-tl *, .tws .twn-ttl { animation: none !important; }",
+    ]) expect(css, rule).toContain(rule);
+    expect(css, "the card has no animation of its own").not.toMatch(/\.twn-tl\s*\{[^}]*animation/);
+    const src = readFileSync(join(__dirname, "WsNudgeDesk.tsx"), "utf8");
+    expect(src).toContain("<React.Fragment key={day}>");
+  });
+});

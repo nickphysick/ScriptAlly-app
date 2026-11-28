@@ -110,38 +110,45 @@ export function agoWords(n: number): string {
   return `${word(m)} months`;
 }
 
-/* ── the updated timeline ─────────────────────────────────────────────────────────────────────────────────────── */
+/* ── the timeline (v2: there from the start) ───────────────────────────────────────────────────────────────── */
 
 export const TIMELINE_MARGIN_DAYS = 6;
 export interface TimelineShape {
   /** every x is a percentage of the line's width */
   start: { x: number; label: string; date: string };
   due: { x: number; label: string; date: string } | null;
-  nudge: { x: number; date: string };
-  close: { x: number; date: string };
+  /** before a pick: today, ringed in rust */
+  today: { x: number } | null;
+  /** after a pick: the nudge, and the next reminder (the save's own `then`) */
+  nudge: { x: number; date: string } | null;
+  next: { x: number; date: string } | null;
   solid: { from: number; to: number };
   hatch: { from: number; to: number; ago: string } | null;
-  dashed: { from: number; to: number };
+  dashed: { from: number; to: number } | null;
 }
 /**
- * To scale from the last send to the close-it date (plus a small margin): solid from the send to the expected date,
- * hatched from there to the nudge (the overdue stretch), dashed from the nudge to the close-it date. With no expected
- * date (no reply time stored), or one not yet passed by the nudge, there is no "weeks up" point and no hatch.
+ * To scale from the last send to the next-reminder date (plus a small margin). Before a pick the scale runs to the
+ * reminder a nudge today would set (`then`, passed in as the flow computes it), so nothing jumps when a day is picked.
+ * Solid from the send to the expected date; hatched from there to today (or the nudge day): the overdue stretch; after a
+ * pick, dashed from the nudge to the next reminder. With no expected date (no reply time stored), or one not yet passed,
+ * there is no "weeks up" point and no hatch: the solid run goes to today / the nudge.
  */
-export function nudgeTimeline(f: NudgeFacts, nudge: Date, close: Date, today: Date): TimelineShape {
-  const start = f.sent ?? nudge;
-  const span = Math.max(1, days(start, close) + TIMELINE_MARGIN_DAYS);
+export function nudgeTimeline(f: NudgeFacts, nudge: Date | null, then: Date, today: Date): TimelineShape {
+  const at = nudge ?? today;
+  const start = f.sent ?? at;
+  const span = Math.max(1, days(start, then) + TIMELINE_MARGIN_DAYS);
   const x = (d: Date) => Math.round((days(start, d) / span) * 10000) / 100;
-  const overdue = f.expected && f.weeks != null && days(f.expected, nudge) > 0 && days(start, f.expected) > 0 ? f.expected : null;
-  const xs = x(start), xn = x(nudge), xc = x(close);
+  const overdue = f.expected && f.weeks != null && days(f.expected, at) > 0 && days(start, f.expected) > 0 ? f.expected : null;
+  const xs = x(start), xa = x(at);
   const startLabel = f.sentWhat === "query" ? "Queried" : f.sentWhat === "partial" ? "Partial sent" : "Full sent";
   return {
     start: { x: xs, label: startLabel, date: shortDate(start) },
     due: overdue ? { x: x(overdue), label: `${f.weeks} weeks up`, date: shortDate(overdue) } : null,
-    nudge: { x: xn, date: nudgeMarkWord(nudge, today) },
-    close: { x: xc, date: shortDate(close) },
-    solid: { from: xs, to: overdue ? x(overdue) : xn },
-    hatch: overdue ? { from: x(overdue), to: xn, ago: agoWords(days(overdue, nudge)) } : null,
-    dashed: { from: xn, to: xc },
+    today: nudge ? null : { x: xa },
+    nudge: nudge ? { x: xa, date: nudgeMarkWord(nudge, today) } : null,
+    next: nudge ? { x: x(then), date: shortDate(then) } : null,
+    solid: { from: xs, to: overdue ? x(overdue) : xa },
+    hatch: overdue ? { from: x(overdue), to: xa, ago: agoWords(days(overdue, at)) } : null,
+    dashed: nudge ? { from: xa, to: x(then) } : null,
   };
 }

@@ -8,11 +8,11 @@
  * here: the footer's Log it runs the flow's own commit (`saveNudgeSent`), enabled once both steps are done.
  * The words and shapes are lib/todoNudgeDesk's (pure, locked).
  */
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { addDays } from "../../../lib/queryActions/dates";
-import { nudgeAnswers, nudgeDayWord, shortDate } from "../../../lib/todoNudgeDesk";
-import type { WsTask } from "../../../lib/todoWs";
-import type { Stage } from "../../../lib/stageColours";
+import { nudgeAnswers, nudgeDayWord, nudgeTimeline, shortDate, type TimelineShape } from "../../../lib/todoNudgeDesk";
+import { stageVars, type WsTask } from "../../../lib/todoWs";
+import { STAGE_COLOURS, type Stage } from "../../../lib/stageColours";
 import { DatePick, DeskTiles } from "./WsControls";
 import type { NudgeDesk } from "./wsFlows";
 
@@ -25,7 +25,7 @@ const ICON: Record<"today" | "yesterday" | "other", React.ReactNode> = {
   other: <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5" /><path d="M4 10h16M9 3v4M15 3v4" /></svg>,
 };
 
-export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stage: Stage | null; otherOpen: boolean; setOtherOpen: (o: boolean) => void }> = ({ nd, today, otherOpen, setOtherOpen }) => {
+export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stage: Stage | null; otherOpen: boolean; setOtherOpen: (o: boolean) => void }> = ({ t, nd, today, stage, otherOpen, setOtherOpen }) => {
   const first = nd.facts.first;
   const answers = nudgeAnswers(today, nd.when === "other" ? nd.picked : null);
   /* "Another day" opens the picker (the page holds whether it is open, so key 3 can open it); nothing changes until a
@@ -45,6 +45,10 @@ export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stag
         <img src={MENTOR} alt="" />
         <div><h2>{first}’s reply is <em>overdue</em>.</h2><p>Send a nudge, then log it below.</p></div>
       </div>
+
+      {/* the timeline, there from the start; a pick adds the nudge and the next reminder */}
+      <NudgeTimeline first={first} picked={nd.picked} shape={nudgeTimeline(nd.facts, nd.picked, nd.then, today)}
+        style={stageVars(stage, t.query?.status) as Record<string, string> | undefined} stage={stage} />
 
       {/* 2 and 3 · you send it yourself and confirm it; then tell us when */}
       <div className="twn2-steps" data-twn="steps">
@@ -78,6 +82,81 @@ export const WsNudgeDesk: React.FC<{ t: WsTask; nd: NudgeDesk; today: Date; stag
             </div>
           ) : null}
         </div>
+      </div>
+    </div>
+  );
+};
+
+/** the plumage colours the line reads (lib/stageColours): slate for the wait, blush and rust for the overdue stretch */
+const PLUMAGE = {
+  "--twn-slate": STAGE_COLOURS.full.rim, "--twn-slate-l": STAGE_COLOURS.full.edge,
+  "--twn-hatch-a": STAGE_COLOURS.partial.edge, "--twn-hatch-b": STAGE_COLOURS.partial.bandRequested, "--twn-rust": STAGE_COLOURS.partial.rim,
+};
+const ymd = (d: Date) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+
+/**
+ * v2 Phase 2 — THE TIMELINE, THERE FROM THE START. The banded card (white, the hairline, a soft shadow, radius 14, the
+ * band in the query card head's stage colour), full width. "{First}'s timeline" until a day is picked, then "{First}'s
+ * updated timeline". On a pick (or a changed day) only the new parts animate: the title cross-fades, "You nudged" drops
+ * in, the dashed run draws, the next reminder pops in. They are keyed by the day, so a changed day replays them; the card
+ * itself never replays or moves.
+ */
+const NudgeTimeline: React.FC<{ first: string; picked: Date | null; shape: TimelineShape; style: Record<string, string> | undefined; stage: Stage | null }> = ({ first, picked, shape: s, style, stage }) => {
+  const pc = (n: number) => `${n}%`;
+  const day = picked ? ymd(picked) : "none";
+  /* labels in one row slide apart when dates sit close (nudge desk v1's pass, measured: they collided at 1280 and 1512) */
+  const lineRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const line = lineRef.current;
+    if (!line) return;
+    const W = line.clientWidth, PAD = 18, GAP = 8;
+    for (const row of ["twn-up", "twn-dn"]) {
+      const items = [...line.querySelectorAll<HTMLElement>(`.twn-l.${row}`)].map((el) => {
+        el.style.setProperty("--twn-dx", "0px");
+        const x = (parseFloat(el.dataset.twnX ?? "0") / 100) * W, w = el.offsetWidth;
+        const left = el.classList.contains("twn-end") ? x + 8 - w : el.classList.contains("twn-lft") ? x - 8 : x - w / 2;
+        return { el, left, w, dx: 0 };
+      }).sort((a, b) => a.left - b.left);
+      for (let i = items.length - 2; i >= 0; i--) {
+        const a = items[i], b = items[i + 1];
+        const over = a.left + a.dx + a.w + GAP - (b.left + b.dx);
+        if (over > 0) a.dx -= over;
+        if (a.left + a.dx < -PAD) a.dx = -PAD - a.left;
+      }
+      for (let i = 1; i < items.length; i++) {
+        const a = items[i - 1], b = items[i];
+        const over = a.left + a.dx + a.w + GAP - (b.left + b.dx);
+        if (over > 0) b.dx += over;
+      }
+      for (const it of items) it.el.style.setProperty("--twn-dx", `${Math.round(it.dx)}px`);
+    }
+  });
+  return (
+    <div className="twn-tl" data-twn="timeline" data-twn-picked={picked ? "" : undefined} data-tws58-stage={stage ?? undefined} style={{ ...(style ?? {}), ...PLUMAGE } as React.CSSProperties}>
+      <h5 className="twn-band" data-twn="band"><span key={picked ? "upd" : "now"} className="twn-ttl">{first}’s {picked ? "updated timeline" : "timeline"}</span></h5>
+      <div className="twn-line" data-twn="line" ref={lineRef}>
+        <span className="twn-seg twn-s1" style={{ left: pc(s.solid.from), width: pc(s.solid.to - s.solid.from) }} />
+        {s.hatch ? <span className="twn-seg twn-s2" style={{ left: pc(s.hatch.from), width: pc(s.hatch.to - s.hatch.from) }} /> : null}
+        <span className="twn-p" data-twn-pt="start" style={{ left: pc(s.start.x) }} />
+        <span className="twn-l twn-dn twn-lft" data-twn-lab="start" data-twn-x={s.start.x} style={{ left: pc(s.start.x) }}>{s.start.label}<b>{s.start.date}</b></span>
+        {s.due ? <>
+          <span className="twn-p" data-twn-pt="due" style={{ left: pc(s.due.x) }} />
+          <span className="twn-l twn-dn" data-twn-lab="due" data-twn-x={s.due.x} style={{ left: pc(s.due.x) }}>{s.due.label}<b>{s.due.date}</b></span>
+        </> : null}
+        {s.hatch ? <span className="twn-l twn-up twn-ago" data-twn-lab="ago" data-twn-x={(s.hatch.from + s.hatch.to) / 2} style={{ left: pc((s.hatch.from + s.hatch.to) / 2) }}><i>No reply for {s.hatch.ago}</i></span> : null}
+        {s.today ? <>
+          <span className="twn-p twn-now" data-twn-pt="today" style={{ left: pc(s.today.x) }} />
+          <span className="twn-l twn-dn" data-twn-lab="today" data-twn-x={s.today.x} style={{ left: pc(s.today.x) }}><b>Today</b></span>
+        </> : null}
+        {s.nudge && s.next && s.dashed ? (
+          <React.Fragment key={day}>
+            <span className="twn-seg twn-s3" style={{ left: pc(s.dashed.from), width: pc(s.dashed.to - s.dashed.from) }} />
+            <span className="twn-p twn-nud" data-twn-pt="nudge" style={{ left: pc(s.nudge.x) }} />
+            <span className="twn-l twn-dn twn-nw" data-twn-lab="nudge" data-twn-x={s.nudge.x} style={{ left: pc(s.nudge.x) }}>You nudged<b>{s.nudge.date}</b></span>
+            <span className="twn-p twn-next" data-twn-pt="next" style={{ left: pc(s.next.x) }} />
+            <span className="twn-l twn-up twn-end" data-twn-lab="next" data-twn-x={s.next.x} style={{ left: `calc(${pc(s.next.x)} + 8px)` }}>Next reminder<b>{s.next.date}</b></span>
+          </React.Fragment>
+        ) : null}
       </div>
     </div>
   );
