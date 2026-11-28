@@ -73,7 +73,8 @@
   @keyframes pa5-line { from { stroke-dashoffset: 1; } }
   @keyframes pa5-fade { from { opacity: 0; } }
 
-  /* ── PHASE B — THE BIRDS-EYE BLOCK (ref `.sm`, `.bed-*` light, `.tk`, `.mt`): straight on the page ── */
+  /* ── PHASE B — the Birds-eye block's summary dress (ref `.sm`), kept for the Agents tab's summary (Phase C). The block
+     itself is retired (Phone Birds-eye first look v1: Today shows birds/BirdsPreview) and its rows, ruler and replay with it. ── */
   .pa5-be { position: relative; }
   .pa5-be-sm { padding: 4px 8px; }
   .pa5-be-sb { display: flex; gap: 3px; height: 10px; margin-bottom: 10px; }
@@ -90,47 +91,9 @@
   .pa5-be-sn button:disabled span i { opacity: 0.4; }
   .pa5-be-l { display: flex; align-items: center; min-height: 32px; padding: 0 8px; font-size: 0.875rem; line-height: 1.43; color: var(--pa-ink); font-weight: 600; }
   .pa5-be-l > span { flex: 1; min-width: 0; }
-  .pa5 .pa5-be-x { min-height: 48px; margin: -8px 0; padding: 0 4px; font-weight: 600; color: var(--pa-navy); }
-  .pa5-be-b { position: relative; padding: 0 0 4px; border-top: 1px solid var(--pa-rule); }
-  /* the ruler: the Today pill on top, the months under it */
-  .pa5-be-r { display: flex; height: 2.75rem; }
-  .pa5-be-r > span { flex: none; width: 116px; }
-  .pa5-be-m { flex: 1; position: relative; }
-  .pa5 .pa5-be-m em { position: absolute; top: 1.375rem; font: 400 0.875rem/1.43 var(--pa-type) !important; font-style: normal; color: var(--pa-muted); white-space: nowrap; }
-  .pa5 .pa5-be-m strong { position: absolute; top: 0; z-index: 2; transform: translateX(-50%); padding: 0 6px; border-radius: 0.625rem; background: var(--pa-navy); color: #fff; font: 400 0.875rem/1.3 var(--pa-type) !important; white-space: nowrap; }
-  /* a row: 28px edge to edge (the one exception to 48), the 116px name column, then the 12px track */
-  .pa5 .pa5-be-row { display: flex; align-items: center; width: 100%; height: 28px; color: var(--pa-ink); border-bottom: 1px solid var(--pa-fill); text-align: left; }
-  .pa5-be-row.op { background: #fff; border-bottom-color: transparent; }
-  .pa5-be-nm { flex: none; width: 116px; display: flex; align-items: center; gap: 6px; padding-left: 6px; overflow: hidden; white-space: nowrap; font-size: 0.875rem; }
-  .pa5-be-nm b { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
-  .pa5-mt { flex: none; width: 37px; height: 14px; }
-  .pa5-be-tk { flex: 1; position: relative; height: 12px; }
-  .pa5-be-tk i { position: absolute; top: 0; height: 12px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(31, 38, 51, 0.12); }
-  .pa5-be-tk .pa5-be-p { opacity: 0.45; }
-  .pa5-be-tk .pa5-be-rm { opacity: 0.4; min-width: 4px; }
-  .pa5-be-tk .pa5-be-rm.off { border-radius: 4px 0 0 4px; -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); }
-  .pa5-be-tk .pa5-be-s { min-width: 4px; }
-  /* past its date: the bar carries on from the notch to today, a deeper tone of the same fill */
-  .pa5-be-tk .pa5-be-dp { filter: brightness(0.8) saturate(1.5); border-radius: 0 4px 4px 0; box-shadow: none; }
-  .pa5-be-tk s { position: absolute; top: -2px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: rgba(31, 38, 51, 0.55); }
-  /* the today line: from the pill to the last row, above the bars, below an opened row's detail */
-  .pa5-be-now { position: absolute; top: 1.3rem; bottom: 4px; width: 1.5px; margin-left: -0.75px; background: var(--pa-navy); opacity: 0.6; z-index: 1; pointer-events: none; }
-  .pa5-be-d { display: flex; align-items: center; gap: 8px; position: relative; z-index: 3; background: #fff; padding: 4px 4px 8px 8px; border-bottom: 1px solid var(--pa-rule); border-radius: 0 0 12px 12px; animation: pa5-bedd 0.18s ease-out; }
-  .pa5-be-who b { font-weight: 600; overflow-wrap: anywhere; }
-  .pa5-be-d .pa5-be-say { color: var(--pa-ink); overflow-wrap: anywhere; }
-  .pa5 .pa5-be-o { flex: none; min-height: 48px; min-width: 48px; padding: 0 12px; font-weight: 600; color: var(--pa-navy); }
-  @keyframes pa5-bedd { from { opacity: 0; transform: translateY(-4px); } }
-  .pa5-be-few { padding: 12px 8px 0; }
-  .pa5 .pa5-be-f { display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 8px; font-weight: 600; color: var(--pa-navy); text-align: left; }
-  /* the once-a-day replay (v4.1's): the bars draw in and the line slides from the name column */
-  .pa5-be.play .pa5-be-tk { animation: pa5-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
-  .pa5-be.play .pa5-be-now { animation: pa5-now 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
-  .pa5-be.play .pa5-be-m strong { animation: pa5-fade 0.4s 1.4s both; }
-  @keyframes pa5-draw { from { clip-path: inset(-4px 100% -4px 0); } to { clip-path: inset(-4px 0 -4px 0); } }
-  @keyframes pa5-now { from { left: 116px; } }
 
   @media (prefers-reduced-motion: reduce) {
-    .pa5-ch-l, .pa5-ch-a, .pa5-ch-d, .pa5-ch-tag, .pa5-hd-m, .pa5-be-d, .pa5-be-tk, .pa5-be-now, .pa5-be-m strong, .pa5-be-sb i { animation: none !important; transition: none !important; }
+    .pa5-ch-l, .pa5-ch-a, .pa5-ch-d, .pa5-ch-tag, .pa5-hd-m, .pa5-be-sb i { animation: none !important; transition: none !important; }
   }
 }
 

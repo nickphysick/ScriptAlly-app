@@ -1,0 +1,26 @@
+/* ── PHONE BIRDS-EYE FIRST LOOK v1 §B — Today's preview, the next three weeks (ref `.pvc`, `.pvh`, `.sv-*`) ──
+   Below 768px only. A white card in the page's gutter (`.ps-card`); inside it 14px each side, so at 390 the row is
+   330 wide: the name (102 at most), 8, the 180 bar, 8, and the words on the right. The words never run out of the
+   card (the ref's "your move" does at 390): the name gives way first. The rows are the ref's 32 (the one exception to
+   48, as the block's rows were); "See it all" is a 48 target; the 12px type is marked as captions (`data-ps-cap`);
+   the "!" is 600, not the ref's 700 (the phone's two weights). */
+@media (max-width: 767.98px) {
+  .bwp { margin-top: 16px; padding: 12px 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .bwp-hd { display: flex; align-items: center; justify-content: space-between; min-height: 48px; margin-top: -12px; padding: 0 14px 0; }
+  .bwp .bwp-h { margin: 0; font: 400 20px/1.2 var(--pa-type) !important; color: var(--ps-ink); letter-spacing: 0; }
+  .bwp .bwp-all { display: inline-flex; align-items: center; min-height: 48px; margin: 0 -14px 0 0; padding: 0 14px; border: 0; background: transparent; font: 600 14px var(--pa-sans); color: var(--ps-navy); cursor: pointer; }
+  .bwp-t { padding: 0 14px; font: 600 14px var(--pa-sans); color: var(--ps-muted); }
+  .bwp-w { margin: 8px 14px 0; }
+  .bwp-ax { position: relative; display: flex; justify-content: space-between; width: 180px; height: 18px; margin-left: 110px; font: 400 12px var(--pa-sans); color: var(--ps-muted); }
+  .bwp-ax b { position: absolute; top: 0; transform: translateX(-50%); padding: 0 6px; border-radius: 999px; background: var(--ps-navy); color: #fff; font: 600 12px var(--pa-sans); white-space: nowrap; }
+  .bwp-rows { display: block; }
+  .bwp .bwp-r { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; margin: 0; padding: 0; border: 0; background: transparent; color: var(--ps-ink); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .bwp .bwp-nm { flex: 0 1 102px; min-width: 0; font: 600 14px var(--pa-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bwp-b { position: relative; flex: none; width: 180px; height: 14px; }
+  .bwp-b i { position: absolute; top: 2px; height: 10px; border-radius: 999px; }
+  .bwp-b u { position: absolute; top: -8px; bottom: -8px; width: 2px; margin-left: -1px; background: var(--ps-navy); text-decoration: none; }
+  .bwp-b em { position: absolute; top: -1px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--ps-navy); color: #fff; font: 600 12px/16px var(--pa-sans); font-style: normal; text-align: center; outline: 2px solid #fff; }
+  .bwp .bwp-say { flex: 1 0 auto; text-align: right; font: 400 12px var(--pa-sans); color: var(--ps-muted); white-space: nowrap; }
+  .bwp-none { margin: 8px 14px 0; font: 400 14px var(--pa-sans); color: var(--ps-muted); }
+  .bwp-more { margin: 10px 14px 0; font: 400 14px var(--pa-sans); color: var(--ps-muted); }
+}

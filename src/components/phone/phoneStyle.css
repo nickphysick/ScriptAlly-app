@@ -149,25 +149,9 @@
   .pa5 .pa5-hd .pa5-ch-x span { font: var(--ps-caption) !important; color: var(--ps-on-navy); }
   .pa5 .pa5-hd .pa5-hd-m { width: 76px; }
 
-  /* ── the Birds-eye block (ref `.tls`, `.hdg`, `.card`, `.ber`): tiles, the heading on the page, the rows in a card.
-     The engine, the window, the order and the past-date drawing are untouched; the track still starts 116 in
-     (the name column 104 and the 12 between, ref `.ber`), so every inline position is the same arithmetic. ── */
+  /* ── the Birds-eye block's label, as the Agents tab's summary wears it (the block itself is retired: Phone Birds-eye
+     first look v1 puts birds/BirdsPreview on Today) ── */
   .pa5 .pa5-be .pa5-be-l { min-height: 0; color: var(--ps-ink); }
-  .pa5 .pa5-be .pa5-be-x { min-height: var(--ps-tap); margin: -12px 0; font: var(--ps-label); color: var(--ps-navy); }
-  .pa5 .pa5-be-card .pa5-be-b { margin: 0 var(--ps-gutter); padding: 0 0 var(--ps-s1); border-top: 0; }
-  .pa5 .pa5-be-card .pa5-be-row { height: 40px; border-bottom: 0; border-top: 1px solid var(--ps-rule); }
-  .pa5 .pa5-be-card .pa5-be-row.op { background: transparent; }
-  .pa5 .pa5-be-card .pa5-be-nm { width: 104px; margin-right: var(--ps-s3); padding-left: 0; gap: var(--ps-s2); font: 400 14px/1 var(--pa-sans); }
-  .pa5 .pa5-be-card .pa5-be-tk { height: 10px; }
-  .pa5 .pa5-be-card .pa5-be-tk i { height: 10px; border-radius: 999px; box-shadow: none; }
-  .pa5 .pa5-be-card .pa5-be-tk .pa5-be-rm.off { border-radius: 999px 0 0 999px; }
-  .pa5 .pa5-be-card .pa5-be-tk .pa5-be-dp { border-radius: 0 999px 999px 0; }
-  .pa5 .pa5-be-card .pa5-be-tk s { top: -3px; }
-  .pa5 .pa5-be-card .pa5-be-m em { font: var(--ps-caption) !important; top: 1.5rem; }
-  .pa5 .pa5-be-card .pa5-be-m strong { font: 600 12px/1.5 var(--pa-sans) !important; border-radius: 999px; }
-  .pa5 .pa5-be-card .pa5-be-d { border-radius: 0; border-bottom: 0; border-top: 1px solid var(--ps-rule); }
-  .pa5 .pa5-be-card .pa5-be-few { margin: 0; padding: var(--ps-s3) var(--ps-gutter); }
-  .pa5 .pa5-be .pa5-be-f { min-height: var(--ps-tap); padding: 0 var(--ps-gutter); font: var(--ps-label); color: var(--ps-navy); }
 
   /* ── the page under it: "See all queries" as the sheet's text link, inside the one gutter ── */
   .pa5 .ps-today { padding-bottom: var(--ps-s5); }

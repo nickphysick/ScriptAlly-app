@@ -28,13 +28,12 @@ import { doc, getDocFromServer } from "firebase/firestore";
 import { useV3Data } from "../v3/V3Provider";
 import { openV3, openV3Query } from "../v3/v3Store";
 import { runAct } from "../v4/acts";
-import { eyeRows, type EyeRow } from "../../../lib/qcBirdsEye";
 import type { QcRow } from "../../../lib/qcSummary";
 import { DEFAULT_QUIET_WEEKS } from "../../../lib/queryState";
 import { writerExpectedWrite } from "../../../lib/expectedDate";
 import { db } from "../../../lib/firebase";
 import {
-  PILLS, PILL_LABEL, REPLAY_MS, RH, RULE, TOPFIT, TOPFOLD, WX, bandOf, bwCounts, bwGroups, bwRow, changes, chipForCourt, dateOf, dayFromMs, dm, isDrawn,
+  PILLS, PILL_LABEL, REPLAY_MS, RH, RULE, TOPFIT, TOPFOLD, WX, bandOf, bwCounts, bwGroups, changes, chipForCourt, dateOf, dayFromMs, dm, isDrawn,
   isNoDate, keepFolds, makeWorld, menuActions, noDateRows, recapStats, replayAt, replayStart, rowSegs, sampleRows, seenLabel, tips,
   type BwAct, type BwChange, type BwFilter, type BwRow, type BwView, type World,
 } from "../../../lib/birdsWorld";
@@ -42,6 +41,7 @@ import { drawWorld } from "./drawWorld";
 import { buzz, shadowStyle, wireMotion, type Motion } from "./worldMotion";
 import { BW_LOOK_KEY, fadeWorld, growIn, type LookHandle } from "./firstLook";
 import { firstTimeToday } from "../../../lib/phoneV41";
+import { bwRowsOf } from "./bwRows";
 import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet } from "./BirdsSheets";
 import "./birdsWorld.css";
 
@@ -137,12 +137,7 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
   const land = useLandscape();
 
   /* ── the engine ── */
-  const real = useMemo(() => {
-    const open = v.qs.filter((x) => x.court !== "closed"), closed = v.qs.filter((x) => x.court === "closed");
-    const live = eyeRows(open.map((x) => x.row as QcRow), now).map((e) => bwRow(e, now));
-    const shut = closed.map((x) => bwRow({ id: x.id, row: x.row as QcRow, court: "agent" } as unknown as EyeRow, now, true));
-    return [...live, ...shut];
-  }, [v.qs, now]);
+  const real = useMemo(() => bwRowsOf(v.qs, now), [v.qs, now]);
   const demo = real.length === 0;
   const rows: BwRow[] = useMemo(() => (demo ? sampleRows() : real), [demo, real]);
   const byId = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
