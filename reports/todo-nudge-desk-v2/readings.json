@@ -21,6 +21,14 @@
    "scrollH": 577,
    "clientH": 451
   },
+  "colW": 370,
+  "cardColW": 390,
+  "needH": 578,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
   "calendar": null,
   "labels": [
    "start:520-568",
@@ -56,6 +64,14 @@
   "column": {
    "scrollH": 551,
    "clientH": 551
+  },
+  "colW": 544,
+  "cardColW": 394,
+  "needH": 495,
+  "preview": {
+   "scale": 0.676,
+   "minText": 8.1,
+   "minBodyText": 8.1
   },
   "calendar": null,
   "labels": [
@@ -93,6 +109,14 @@
    "scrollH": 731,
    "clientH": 731
   },
+  "colW": 680,
+  "cardColW": 492,
+  "needH": 540,
+  "preview": {
+   "scale": 0.857,
+   "minText": 10.3,
+   "minBodyText": 10.3
+  },
   "calendar": null,
   "labels": [
    "start:670-718",
@@ -129,6 +153,14 @@
    "scrollH": 731,
    "clientH": 731
   },
+  "colW": 680,
+  "cardColW": 492,
+  "needH": 540,
+  "preview": {
+   "scale": 0.857,
+   "minText": 10.3,
+   "minBodyText": 10.3
+  },
   "calendar": null,
   "labels": [
    "start:670-718",
@@ -164,6 +196,14 @@
   "column": {
    "scrollH": 731,
    "clientH": 731
+  },
+  "colW": 680,
+  "cardColW": 492,
+  "needH": 553,
+  "preview": {
+   "scale": 0.857,
+   "minText": 10.3,
+   "minBodyText": 10.3
   },
   "calendar": null,
   "labels": [
@@ -202,6 +242,14 @@
   "column": {
    "scrollH": 731,
    "clientH": 731
+  },
+  "colW": 680,
+  "cardColW": 492,
+  "needH": 553,
+  "preview": {
+   "scale": 0.857,
+   "minText": 10.3,
+   "minBodyText": 10.3
   },
   "calendar": {
    "l": 917.765625,
@@ -264,6 +312,14 @@
    "scrollH": 731,
    "clientH": 731
   },
+  "colW": 680,
+  "cardColW": 492,
+  "needH": 553,
+  "preview": {
+   "scale": 0.857,
+   "minText": 10.3,
+   "minBodyText": 10.3
+  },
   "calendar": null,
   "labels": [
    "start:670-718",
@@ -293,13 +349,13 @@
   ]
  },
  "frame-100": {
-  "tookAt": 182
+  "tookAt": 165
  },
  "frame-500": {
-  "tookAt": 576
+  "tookAt": 550
  },
  "frame-1000": {
-  "tookAt": 1065
+  "tookAt": 1049
  },
  "sent-1512": {
   "title": "Tom’s timeline",
@@ -322,6 +378,14 @@
   "column": {
    "scrollH": 551,
    "clientH": 551
+  },
+  "colW": 544,
+  "cardColW": 394,
+  "needH": 474,
+  "preview": {
+   "scale": 0.676,
+   "minText": 8.1,
+   "minBodyText": 8.1
   },
   "calendar": null,
   "labels": [
@@ -358,6 +422,14 @@
   "column": {
    "scrollH": 551,
    "clientH": 551
+  },
+  "colW": 544,
+  "cardColW": 394,
+  "needH": 487,
+  "preview": {
+   "scale": 0.676,
+   "minText": 8.1,
+   "minBodyText": 8.1
   },
   "calendar": null,
   "labels": [
@@ -396,6 +468,14 @@
   "column": {
    "scrollH": 551,
    "clientH": 551
+  },
+  "colW": 544,
+  "cardColW": 394,
+  "needH": 487,
+  "preview": {
+   "scale": 0.676,
+   "minText": 8.1,
+   "minBodyText": 8.1
   },
   "calendar": {
    "l": 706.21875,
@@ -458,6 +538,14 @@
    "scrollH": 551,
    "clientH": 551
   },
+  "colW": 544,
+  "cardColW": 394,
+  "needH": 487,
+  "preview": {
+   "scale": 0.676,
+   "minText": 8.1,
+   "minBodyText": 8.1
+  },
   "calendar": null,
   "labels": [
    "start:574-623",
@@ -485,5 +573,49 @@
    "yesterday:false:Fri 27 Nov",
    "other:false:Pick the day"
   ]
+ },
+ "open-1366": {
+  "title": "Tom’s timeline",
+  "headline": "Tom’s reply is overdue.",
+  "steps": [
+   "send:on",
+   "when:off"
+  ],
+  "sentBtn": "I’ve sent it",
+  "nudged": null,
+  "answers": [
+   "today:false:Sat 28 Nov",
+   "yesterday:false:Fri 27 Nov",
+   "other:false:Pick the day"
+  ],
+  "logDisabled": true,
+  "logRightGap": 16,
+  "logLeftOfDismiss": 308,
+  "footPadRight": 16,
+  "column": {
+   "scrollH": 514,
+   "clientH": 419
+  },
+  "colW": 444,
+  "cardColW": 390,
+  "needH": 515,
+  "preview": {
+   "scale": 0.716,
+   "minText": 8.6,
+   "minBodyText": 8.6
+  },
+  "calendar": null,
+  "labels": [
+   "start:532-581",
+   "due:652-717",
+   "ago:662-790",
+   "today:748-786"
+  ],
+  "points": [
+   "start",
+   "due",
+   "today"
+  ],
+  "overlaps": []
  }
 }

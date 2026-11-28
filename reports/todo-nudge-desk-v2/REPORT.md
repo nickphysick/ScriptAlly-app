@@ -1,4 +1,4 @@
-# To-do nudge desk v2 — report (STOPPED at Phase 4: 1280×800 does not fit)
+# To-do nudge desk v2 — report (STOPPED at Phase 4: 1280×800 and 1366×768 do not fit; option 1 cannot fix it)
 
 Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1-pol1-tnd1` @ `e8727d3b1`. That is the dev line carrying nudge desk v1, at the same commit as `todo-nudge-desk-v1`'s tip. Dev served `index-D6G10n1T.js` at Step 0. Ref: `design-refs/todo-nudge-desk-v2/` (sha256 verified; `todo-nudge-desk-v2.html` = `74307e4a…f47b`). Desktop only.
 
@@ -11,6 +11,24 @@ Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-n
 3. **A compact 1280 layout:** row 1's how-to line folded behind an info mark, the answers as a one-line segmented control, and a slimmer timeline card.
 
 My pick is **1**: it keeps the ref's design intact and only borrows width from a column that is mostly empty on a nudge. Nothing is deployed and the full suite has not run; both wait on this.
+
+## Follow-up (Nick chose option 1) — STOPPED again, before building: the limit at 1280 and 1366 is height, not width
+
+Measured with the measure spec extended (the questions column's width, the card column's width, the desk's natural
+height in each state, and the preview's scale), on the tree as committed:
+
+| Size | Questions column width | Column height available | Desk's natural height |
+|---|---|---|---|
+| 1920×1080 | 680 | 731 | 540–553 |
+| 1512×900 | **544** (the width that passes) | 551 | 474–495 |
+| 1366×768 | 444 | **419** | 515 on open |
+| 1280×800 | 370 | **451** | 578 on open |
+
+- **1280×800:** at 1512's width (544px), more than the card column can give up at 1280 (390 → 300 makes the column about 460px), the desk already needs 474–495px of height. 1280×800 has 451. Narrowing the card column can't make it fit without shrinking something else.
+- **1366×768:** 419px of height against at least 474px at the widest possible column. As instructed, I stopped rather than shrink further.
+- **The card preview's legibility is already below the app's smallest size, and was before this work.** At 1512 it renders at zoom 0.676, its smallest text 8.1px; at 1920, 0.857 and 10.3px. A 300px card column would take it to about 0.52 and about 6px.
+
+Nothing was built for option 1, and nothing deployed.
 
 ## False premises (named before anything else)
 

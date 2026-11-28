@@ -20,7 +20,7 @@ test.setTimeout(240_000);
 const DIR = "reports/todo-nudge-desk-v2";
 mkdirSync(`${DIR}/shots`, { recursive: true });
 const PG = '[data-tws="page"]:visible';
-const SIZES = [{ width: 1280, height: 800 }, { width: 1512, height: 900 }, { width: 1920, height: 1080 }];
+const SIZES = [{ width: 1280, height: 800 }, { width: 1366, height: 768 }, { width: 1512, height: 900 }, { width: 1920, height: 1080 }];
 
 const readings: Record<string, unknown> = {};
 const note = (k: string, v: unknown) => { readings[k] = v; };
@@ -81,6 +81,26 @@ const read = (page: Page) => page.evaluate(() => {
     logLeftOfDismiss: lr && fr ? Math.round(lr.l - fr.l) : null,
     footPadRight: foot ? parseFloat(getComputedStyle(foot).paddingRight) : null,
     column: wq ? { scrollH: wq.scrollHeight, clientH: wq.clientHeight } : null,
+    /* the questions column's width, the card column's width, and the desk's natural height (content + padding) */
+    colW: col ? Math.round(col.getBoundingClientRect().width) : null,
+    cardColW: Math.round(root.querySelector<HTMLElement>('[data-tws="side"]')?.getBoundingClientRect().width ?? 0),
+    needH: wq && q('[data-twn="desk"]') ? Math.ceil(q('[data-twn="desk"]')!.getBoundingClientRect().height + parseFloat(getComputedStyle(wq).paddingTop) + parseFloat(getComputedStyle(wq).paddingBottom)) : null,
+    /* the card preview: its scale and the smallest rendered text inside it (font size × scale) */
+    preview: (() => {
+      const pv = root.querySelector<HTMLElement>('[data-tws="preview-card"]');
+      if (!pv) return null;
+      /* ScaledCard scales with CSS zoom (WsPreview): the zoom is the scale */
+      const scale = parseFloat(pv.style.zoom || "1") || 1;
+      let min = Infinity, minBody = Infinity;
+      for (const el of pv.querySelectorAll<HTMLElement>("*")) {
+        if (!el.childNodes.length || ![...el.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) continue;
+        if (el.getBoundingClientRect().width === 0) continue;
+        const f = parseFloat(getComputedStyle(el).fontSize) * scale;
+        min = Math.min(min, f);
+        if (!/^(SMALL|SUP|SUB)$/.test(el.tagName)) minBody = Math.min(minBody, f);
+      }
+      return { scale: Math.round(scale * 1000) / 1000, minText: Math.round(min * 10) / 10, minBodyText: Math.round(minBody * 10) / 10 };
+    })(),
     calendar: cal && c ? { ...cal, inside: cal.l >= c.l - 0.5 && cal.r <= c.r + 0.5 && cal.t >= c.t - 0.5 && cal.b <= c.b + 0.5, col: c } : null,
     labels: labs.map((l) => `${l.k}:${Math.round(l.l)}-${Math.round(l.r)}`), points: pts.map((p) => p.k), overlaps,
   };
