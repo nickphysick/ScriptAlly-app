@@ -152,6 +152,9 @@
   .tws .twn2[data-compact] .twn2-stp { padding: 12px 18px; }
   .tws .twn2[data-compact] .twn2-ch { height: 50px; box-sizing: border-box; padding-top: 0; padding-bottom: 0; }
   .tws .twn2[data-compact] .twn2-ch .twn2-ic svg { width: 18px; height: 18px; }
+  /* step 2's "You nudged {First} … Next reminder …" line folds in compact (Nick, 28 Nov): the ticked disc, the highlighted
+     answer and the timeline already carry it. Measured: it was the 9px over at 1366×768 once a day was picked. */
+  .tws .twn2[data-compact] [data-twn="nudged"] { display: none; }
 
   /* the info mark after step 1's title: keyboard reachable, its tooltip the how-to line itself (aria-describedby) */
   .tws .twn2[data-compact] .twn2-info {

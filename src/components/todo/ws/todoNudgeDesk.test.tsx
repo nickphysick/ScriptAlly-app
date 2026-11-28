@@ -14,7 +14,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { QueryStatus, UserPlan, type Agent, type Query, type Task } from "../../../types";
 import { forgetTodoTask, rememberTodoTask, todoTaskScope } from "../../../lib/todoArrival";
-import { agoWords, needsCompact, nudgeAnswers, nudgeDayWord, nudgeFacts, nudgeTimeline } from "../../../lib/todoNudgeDesk";
+import { agoWords, calendarShift, needsCompact, nudgeAnswers, nudgeDayWord, nudgeFacts, nudgeTimeline } from "../../../lib/todoNudgeDesk";
 import { addDays, offWeekend } from "../../../lib/queryActions/dates";
 
 const DAY = 86400000;
@@ -261,6 +261,19 @@ describe("compact on short screens (logic)", () => {
       ".tws .twn2[data-compact] .twn2-ch .twn2-ic svg { width: 18px; height: 18px; }",
       ".tws .twn2[data-compact] .twn2-tx:has(.twn2-info:hover, .twn2-info:focus-visible) .twn2-how { display: block; animation: twn2-tip 0.15s ease-out both; }",
     ]) expect(css, rule).toContain(rule);
+    expect(css, "compact: the picked-day line is folded").toContain('.tws .twn2[data-compact] [data-twn="nudged"] { display: none; }');
+    expect(css, "not compact: nothing else hides it").not.toMatch(/(^|[^\]])\s\[data-twn="nudged"\]\s*\{[^}]*display:\s*none/m);
     expect(css, "the timeline labels keep their size in compact").not.toMatch(/\[data-compact\][^{]*\.twn-l[^{]*\{[^}]*font/);
+  });
+});
+
+describe("the calendar stays wholly inside the column", () => {
+  it("it comes down only by what would cross the column's top; where it fits, nothing moves", () => {
+    expect(calendarShift(23.4)).toBe(24);
+    expect(calendarShift(0)).toBe(0);
+    expect(calendarShift(-55)).toBe(0);
+    const src = readFileSync(join(__dirname, "WsNudgeDesk.tsx"), "utf8");
+    expect(src).toContain("const over = col.getBoundingClientRect().top + 8 - el.getBoundingClientRect().top;");
+    expect(src).toContain('el.style.bottom = "";');
   });
 });

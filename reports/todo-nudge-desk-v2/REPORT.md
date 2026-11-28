@@ -1,4 +1,4 @@
-# To-do nudge desk v2 — report (STOPPED: compact fits 1280×800; 1366×768 is 9px short once a day is picked)
+# To-do nudge desk v2 — report (STOPPED: every state fits, but compact clips timeline labels and cuts the answers short)
 
 Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1-pol1-tnd1` @ `e8727d3b1`. That is the dev line carrying nudge desk v1, at the same commit as `todo-nudge-desk-v1`'s tip. Dev served `index-D6G10n1T.js` at Step 0. Ref: `design-refs/todo-nudge-desk-v2/` (sha256 verified; `todo-nudge-desk-v2.html` = `74307e4a…f47b`). Desktop only.
 
@@ -11,6 +11,26 @@ Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-n
 3. **A compact 1280 layout:** row 1's how-to line folded behind an info mark, the answers as a one-line segmented control, and a slimmer timeline card.
 
 My pick is **1**: it keeps the ref's design intact and only borrows width from a column that is mostly empty on a nudge. Nothing is deployed and the full suite has not run; both wait on this.
+
+## Follow-up 3 (fold the picked-day line in compact) — STOPPED: compact hides more than the how-to
+
+**Built:**
+- Compact folds step 2's "You nudged {First} … Next reminder …" line; outside compact it shows. Locked by CSS (`[data-compact] [data-twn="nudged"] { display: none }`, nothing else hides it) and on the page (`nudgedShown` is false in compact, true otherwise, at every size).
+- **The calendar stays wholly inside the column.** Folding the line raised the answers, and the calendar (338px, opening above them) then crossed the column's top by 20–24px at 1280 and 1366, onto the desk's navy bar. It now comes down just enough to sit 8px inside (`calendarShift`); where it fits, nothing moves. Measured: top 259 against the column's 250 in compact; 1512 and 1920 unmoved.
+
+**Measured, every state, all four sizes.** Column scroll is 0 everywhere (1280: 451/451; 1366: 419/419); the calendar is inside the column; no label overlaps another label or a point. **1512 and 1920 are pixel-identical to before** in all ten shots, from y = 42 down.
+
+**But two new checks found hidden text, which my earlier measure did not test for:**
+
+| | Compact (1280, 1366) | 1512 (not compact) | 1920 |
+|---|---|---|---|
+| Timeline labels inside the card | the lower labels' second line cut by **5px** at the card's bottom; "Next reminder" **13px** into the band | "Next reminder" **7px** into the band (since Phase 2's narrow rule, 32px band to line; present in the before shots) | clean |
+| Answers' text | every answer cut: at 1366 "Yesterday", "Another day" and all dates except Today's title; at 1280 all six | clean | clean |
+
+- **Why the labels clip:** a label is two lines and sits 14px off the line. It needs about 39px above the line and 45px below; compact gives 26px and 28px (Nick's values), and 1512's narrow rule 32px above.
+- **Why the answers are cut:** each answer is about 117px wide at 1366 and 92px at 1280 (three in a row under the disc); "Another day" at 16px semibold needs about 108px with its icon and padding.
+
+Not committed past this point, and not deployed.
 
 ## Follow-up 2 (Nick chose compact on short screens, step 1's how-to folded) — STOPPED: 1366×768 is 9px short
 

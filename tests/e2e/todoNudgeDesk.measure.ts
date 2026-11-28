@@ -75,6 +75,7 @@ const read = (page: Page) => page.evaluate(() => {
     steps: [...root.querySelectorAll('[data-twn-step]')].map((s) => `${s.getAttribute("data-twn-step")}:${s.getAttribute("data-st")}`),
     sentBtn: (q('[data-twn="sent"]')?.textContent ?? "").trim(),
     nudged: q('[data-twn="nudged"]')?.textContent ?? null,
+    nudgedShown: (() => { const n = q('[data-twn="nudged"]'); return n ? getComputedStyle(n).display !== "none" && n.getBoundingClientRect().height > 0 : null; })(),
     answers: [...root.querySelectorAll('[data-twn-when]')].map((b) => `${b.getAttribute("data-twn-when")}:${b.getAttribute("aria-checked")}:${(b.querySelector("small")?.textContent ?? "")}`),
     logDisabled: log?.disabled ?? null,
     logRightGap: fr && lr ? Math.round((fr.r - lr.r) * 10) / 10 : null,
@@ -116,6 +117,14 @@ const read = (page: Page) => page.evaluate(() => {
     })(),
     calendar: cal && c ? { ...cal, inside: cal.l >= c.l - 0.5 && cal.r <= c.r + 0.5 && cal.t >= c.t - 0.5 && cal.b <= c.b + 0.5, col: c } : null,
     labels: labs.map((l) => `${l.k}:${Math.round(l.l)}-${Math.round(l.r)}`), points: pts.map((p) => p.k), overlaps,
+    /* nothing hidden: a timeline label outside the card's body (into the band, or past the card's clipped bottom), and any
+       answer title or date cut short (its text wider than its box) */
+    labelsClipped: (() => {
+      const card = q('[data-twn="timeline"]')?.getBoundingClientRect(), band = q('[data-twn="band"]')?.getBoundingClientRect();
+      if (!card || !band) return [];
+      return labs.filter((l) => l.t < band.bottom - 0.5 || l.b > card.bottom + 0.5).map((l) => `${l.k}:${l.t < band.bottom - 0.5 ? `into the band by ${Math.round(band.bottom - l.t)}px` : `cut at the bottom by ${Math.round(l.b - card.bottom)}px`}`);
+    })(),
+    truncated: [...root.querySelectorAll<HTMLElement>("[data-twn-when] b, [data-twn-when] small")].filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => `${e.closest("[data-twn-when]")!.getAttribute("data-twn-when")}:${e.tagName === "B" ? "title" : "date"} ${e.textContent}`),
   };
 });
 
@@ -127,6 +136,8 @@ async function check(page: Page, key: string, w: number) {
   expect.soft(r.column!.scrollH, `${key}: no column scroll`).toBeLessThanOrEqual(r.column!.clientH + 1);
   expect(r.logRightGap!, `${key}: Log it on the right`).toBeLessThanOrEqual(r.footPadRight! + 1);
   expect(r.overlaps, `${key}: timeline labels clear`).toEqual([]);
+  expect.soft(r.labelsClipped, `${key}: no timeline label clipped`).toEqual([]);
+  expect.soft(r.truncated, `${key}: no answer cut short`).toEqual([]);
   return r;
 }
 
@@ -172,6 +183,8 @@ for (const vp of SIZES) {
     expect(today.title).toMatch(/’s updated timeline$/);
     expect(today.points).toEqual(expect.arrayContaining(["nudge", "next"]));
     expect(today.logDisabled).toBe(false);
+    /* the picked-day line: folded in compact, shown everywhere else */
+    expect(today.nudgedShown, `today: the "You nudged" line ${today.compact ? "folded (compact)" : "shown"}`).toBe(!today.compact);
 
     await page.locator(`${PG} [data-twn-when="other"]`).click();
     await settle(page, 400);
@@ -198,6 +211,7 @@ for (const vp of SIZES) {
     const other = await check(page, "another-day", w);
     expect(other.calendar).toBeNull();
     expect(other.answers.find((a) => a.startsWith("other:true:"))).toBeTruthy();
+    expect(other.nudgedShown).toBe(!other.compact);
     expect(other.nudged).toMatch(/^You nudged \S+ on \w{3} \d{1,2} \w{3}\. Next reminder \d{1,2} \w{3}\.$/);
 
     /* un-confirming step 1 clears step 2 and disables Log it */

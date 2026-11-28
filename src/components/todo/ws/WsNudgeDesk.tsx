@@ -12,7 +12,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays } from "../../../lib/queryActions/dates";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { openingMonth } from "../../../lib/monthGrid";
-import { needsCompact } from "../../../lib/todoNudgeDesk";
+import { calendarShift, needsCompact } from "../../../lib/todoNudgeDesk";
 import { MonthGrid } from "../../shared/MonthGrid";
 import { nudgeAnswers, nudgeDayWord, nudgeTimeline, shortDate, type TimelineShape } from "../../../lib/todoNudgeDesk";
 import { stageVars, type WsTask } from "../../../lib/todoWs";
@@ -182,6 +182,17 @@ const NudgeCalendar: React.FC<{ today: Date; min: Date; value: Date | null; onPi
   const [month, setMonth] = useState(() => openingMonth(value, min, today));
   const ref = useRef<HTMLDivElement>(null);
   useEscapeLayer(true, onClose, ESC_LEVEL.page);
+  /* wholly inside the column: anchored above the answers, but where its top would cross the column's top (measured in
+     compact at 1280 and 1366: 20–24px over, onto the desk's navy bar) it comes down just enough to sit 8px inside it.
+     Where it fits (1512, 1920) nothing moves. Re-read on each month (a six-week month is a row taller). */
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const col = el?.closest<HTMLElement>('[data-tws="qcol"]');
+    if (!el || !col) return;
+    el.style.bottom = "";
+    const over = col.getBoundingClientRect().top + 8 - el.getBoundingClientRect().top;
+    if (calendarShift(over) > 0) el.style.bottom = `calc(100% + 8px - ${calendarShift(over)}px)`;
+  }, [month]);
   useEffect(() => {
     const away = (e: PointerEvent) => {
       const el = e.target as Element | null;

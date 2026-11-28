@@ -8,6 +8,7 @@
   ],
   "sentBtn": "I’ve sent it",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -46,7 +47,19 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px"
+  ],
+  "truncated": [
+   "today:title Today",
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "open-1512": {
   "title": "Tom’s timeline",
@@ -57,6 +70,7 @@
   ],
   "sentBtn": "I’ve sent it",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -95,7 +109,9 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [],
+  "truncated": []
  },
  "open-1920": {
   "title": "Tom’s timeline",
@@ -106,6 +122,7 @@
   ],
   "sentBtn": "I’ve sent it",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -144,7 +161,9 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [],
+  "truncated": []
  },
  "sent-1920": {
   "title": "Tom’s timeline",
@@ -155,6 +174,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -193,7 +213,9 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [],
+  "truncated": []
  },
  "today-1920": {
   "title": "Tom’s updated timeline",
@@ -204,6 +226,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": true,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -244,7 +267,9 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [],
+  "truncated": []
  },
  "calendar-1920": {
   "title": "Tom’s updated timeline",
@@ -255,6 +280,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": true,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -311,7 +337,9 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [],
+  "truncated": []
  },
  "esc-1920": {
   "calendar": false,
@@ -329,6 +357,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "nudgedShown": true,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -369,7 +398,9 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [],
+  "truncated": []
  },
  "unconfirm-1920": {
   "steps": [
@@ -384,13 +415,13 @@
   ]
  },
  "frame-100": {
-  "tookAt": 149
+  "tookAt": 150
  },
  "frame-500": {
-  "tookAt": 578
+  "tookAt": 576
  },
  "frame-1000": {
-  "tookAt": 1077
+  "tookAt": 1069
  },
  "sent-1512": {
   "title": "Tom’s timeline",
@@ -401,6 +432,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -439,7 +471,9 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [],
+  "truncated": []
  },
  "today-1512": {
   "title": "Tom’s updated timeline",
@@ -450,6 +484,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": true,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -490,7 +525,11 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "next:into the band by 7px"
+  ],
+  "truncated": []
  },
  "calendar-1512": {
   "title": "Tom’s updated timeline",
@@ -501,6 +540,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": true,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -557,7 +597,11 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "next:into the band by 7px"
+  ],
+  "truncated": []
  },
  "esc-1512": {
   "calendar": false,
@@ -575,6 +619,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "nudgedShown": true,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -615,7 +660,11 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "next:into the band by 7px"
+  ],
+  "truncated": []
  },
  "unconfirm-1512": {
   "steps": [
@@ -638,6 +687,7 @@
   ],
   "sentBtn": "I’ve sent it",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -676,7 +726,18 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px"
+  ],
+  "truncated": [
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "howto-1366": {
   "visible": true,
@@ -692,6 +753,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -730,7 +792,18 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px"
+  ],
+  "truncated": [
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "today-1366": {
   "title": "Tom’s updated timeline",
@@ -741,6 +814,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": false,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -751,7 +825,7 @@
   "logLeftOfDismiss": 308,
   "footPadRight": 16,
   "column": {
-   "scrollH": 428,
+   "scrollH": 419,
    "clientH": 419
   },
   "colW": 444,
@@ -761,7 +835,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 390,
-  "needH": 429,
+  "needH": 396,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -781,7 +855,20 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px",
+   "nudge:cut at the bottom by 5px",
+   "next:into the band by 13px"
+  ],
+  "truncated": [
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "pixel-diff": {
   "another-day-1512.png": 0,
@@ -809,6 +896,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": null,
+  "nudgedShown": null,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -847,7 +935,19 @@
    "due",
    "today"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px"
+  ],
+  "truncated": [
+   "today:title Today",
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "today-1280": {
   "title": "Tom’s updated timeline",
@@ -858,6 +958,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": false,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -878,7 +979,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 390,
-  "needH": 433,
+  "needH": 400,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -898,7 +999,21 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px",
+   "nudge:cut at the bottom by 5px",
+   "next:into the band by 13px"
+  ],
+  "truncated": [
+   "today:title Today",
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "calendar-1280": {
   "title": "Tom’s updated timeline",
@@ -909,6 +1024,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": false,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -929,7 +1045,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 390,
-  "needH": 433,
+  "needH": 400,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -937,9 +1053,9 @@
   },
   "calendar": {
    "l": 476,
-   "t": 262.640625,
+   "t": 258.953125,
    "r": 796,
-   "b": 600.640625,
+   "b": 596.953125,
    "w": 320,
    "h": 338,
    "inside": true,
@@ -965,7 +1081,21 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px",
+   "nudge:cut at the bottom by 5px",
+   "next:into the band by 13px"
+  ],
+  "truncated": [
+   "today:title Today",
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "esc-1280": {
   "calendar": false,
@@ -983,6 +1113,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "nudgedShown": false,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -1003,7 +1134,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 390,
-  "needH": 433,
+  "needH": 400,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -1023,7 +1154,21 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px",
+   "nudge:cut at the bottom by 5px",
+   "next:into the band by 13px"
+  ],
+  "truncated": [
+   "today:title Today",
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Wed 25 Nov"
+  ]
  },
  "unconfirm-1280": {
   "steps": [
@@ -1046,6 +1191,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom today. Next reminder 28 Dec.",
+  "nudgedShown": false,
   "answers": [
    "today:true:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -1056,7 +1202,7 @@
   "logLeftOfDismiss": 308,
   "footPadRight": 16,
   "column": {
-   "scrollH": 428,
+   "scrollH": 419,
    "clientH": 419
   },
   "colW": 444,
@@ -1066,7 +1212,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 390,
-  "needH": 429,
+  "needH": 396,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -1074,9 +1220,9 @@
   },
   "calendar": {
    "l": 562,
-   "t": 258.453125,
+   "t": 258.765625,
    "r": 882,
-   "b": 596.453125,
+   "b": 596.765625,
    "w": 320,
    "h": 338,
    "inside": true,
@@ -1102,7 +1248,20 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px",
+   "nudge:cut at the bottom by 5px",
+   "next:into the band by 13px"
+  ],
+  "truncated": [
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Pick the day"
+  ]
  },
  "esc-1366": {
   "calendar": false,
@@ -1120,6 +1279,7 @@
   ],
   "sentBtn": "Sent",
   "nudged": "You nudged Tom on Wed 25 Nov. Next reminder 23 Dec.",
+  "nudgedShown": false,
   "answers": [
    "today:false:Sat 28 Nov",
    "yesterday:false:Fri 27 Nov",
@@ -1130,7 +1290,7 @@
   "logLeftOfDismiss": 308,
   "footPadRight": 16,
   "column": {
-   "scrollH": 428,
+   "scrollH": 419,
    "clientH": 419
   },
   "colW": 444,
@@ -1140,7 +1300,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 390,
-  "needH": 429,
+  "needH": 396,
   "preview": {
    "scale": 0.716,
    "minText": 8.6,
@@ -1160,7 +1320,20 @@
    "nudge",
    "next"
   ],
-  "overlaps": []
+  "overlaps": [],
+  "labelsClipped": [
+   "start:cut at the bottom by 5px",
+   "due:cut at the bottom by 5px",
+   "nudge:cut at the bottom by 5px",
+   "next:into the band by 13px"
+  ],
+  "truncated": [
+   "today:date Sat 28 Nov",
+   "yesterday:title Yesterday",
+   "yesterday:date Fri 27 Nov",
+   "other:title Another day",
+   "other:date Wed 25 Nov"
+  ]
  },
  "unconfirm-1366": {
   "steps": [
