@@ -37,7 +37,7 @@ test("QC172.1 recording", async ({ page }) => {
   }
   await page.screenshot({ path: `${DIR}/hover-settled.png` });
   /* the panel: open More filters and scroll it — the navy header stays */
-  await page.locator(`${V}.qs172-more`).click();
+  await page.locator(`${V}.qs172-fold[data-fold='more'] .qs172-ft`).click();
   await page.waitForTimeout(500);
   const col = (await page.locator(`${V}.qc153-railcol`).boundingBox())!;
   await page.mouse.move(col.x + col.width / 2, col.y + 300, { steps: 10 });

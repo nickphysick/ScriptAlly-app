@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L21",
+  "where": "population · five folding sections",
+  "ok": true,
+  "detail": "[\"stage\",\"sent\",\"date\",\"sendby\",\"more\"]"
+ },
+ {
+  "lock": "L21",
+  "where": "Stage reached, open",
+  "ok": true,
+  "detail": "{\"id\":\"stage\",\"exp\":\"true\",\"title\":\"Stage reached\",\"value\":\"any\",\"inert\":false,\"h\":81.390625,\"dur\":\"0.22s, 0.18s\"}"
+ },
+ {
+  "lock": "L21",
+  "where": "Sent shut, “any time”, inert, no height",
+  "ok": true,
+  "detail": "{\"id\":\"sent\",\"exp\":\"false\",\"title\":\"Sent\",\"value\":\"any time\",\"inert\":true,\"h\":0,\"dur\":\"0.22s, 0.18s\"}"
+ },
+ {
+  "lock": "L21",
+  "where": "the others shut",
+  "ok": true,
+  "detail": "[\"stage:true\",\"sent:false\",\"date:false\",\"sendby:false\",\"more:false\"]"
+ },
+ {
+  "lock": "L21",
+  "where": "open and shut take 220ms",
+  "ok": true,
+  "detail": "0.22s, 0.18s"
+ },
+ {
+  "lock": "L21",
+  "where": "Sent opens: not inert, its body has height",
+  "ok": true,
+  "detail": "{\"id\":\"sent\",\"exp\":\"true\",\"title\":\"Sent\",\"value\":\"any time\",\"inert\":false,\"h\":88,\"dur\":\"0.22s, 0.18s\"}"
+ },
+ {
+  "lock": "L21",
+  "where": "remembered for the visit: Sent still open after a reload",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L21",
+  "where": "reduced motion: instant",
+  "ok": true,
+  "detail": "0s"
+ }
+]

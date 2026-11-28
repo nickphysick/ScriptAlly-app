@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L19",
+  "where": "population · Materials requested has rows",
+  "ok": true,
+  "detail": "{\"k\":\"req\",\"n\":14,\"off\":false}"
+ },
+ {
+  "lock": "L19",
+  "where": "hovering a key row: its count and short word in the centre",
+  "ok": true,
+  "detail": "14 / requested"
+ },
+ {
+  "lock": "L19",
+  "where": "only its rows: the list shows the part's count",
+  "ok": true,
+  "detail": "14 rows · part 14"
+ },
+ {
+  "lock": "L19",
+  "where": "only its rows: all in Action needed",
+  "ok": true,
+  "detail": "[\"action\"]"
+ },
+ {
+  "lock": "L19",
+  "where": "the centre reads “n / of N”",
+  "ok": true,
+  "detail": "14 / of 88"
+ },
+ {
+  "lock": "L19",
+  "where": "the toolbar reads “n of N”",
+  "ok": true,
+  "detail": "14 of 88"
+ },
+ {
+  "lock": "L19",
+  "where": "the picked segment sits out at r 43, pressed",
+  "ok": true,
+  "detail": "{\"k\":\"req\",\"r\":43,\"op\":\"1\",\"pressed\":\"true\"}"
+ },
+ {
+  "lock": "L19",
+  "where": "the others fade to .2",
+  "ok": true,
+  "detail": "{\"k\":\"offer\",\"r\":40,\"op\":\"0.2\",\"pressed\":\"false\"}"
+ },
+ {
+  "lock": "L19",
+  "where": "the chip reads the part",
+  "ok": true,
+  "detail": "Materials requested×"
+ },
+ {
+  "lock": "L19",
+  "where": "picked again: everything shows",
+  "ok": true,
+  "detail": "70 rows (was 70) · 67 / need you"
+ }
+]

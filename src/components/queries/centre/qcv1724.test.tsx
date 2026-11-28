@@ -46,16 +46,16 @@ describe("v172.4 · 1b slider handles 14px, their centres on the track's ends", 
   });
 });
 
-describe("v172.4 · 1c Include closed is a tick box, like Not dated", () => {
-  it("the panel draws a checkbox in .qs172-ck--closed, ticked by default, with the closed count; no pill", async () => {
+describe("v172.4 · 1c Include closed (superseded in v172.5: Closed is the ring's seventh part)", () => {
+  it("no Include closed tick and no pill; Closed is a key row of What's next, shown by default", async () => {
     const m = await load<typeof import("./QcSmart172")>("./QcSmart172");
     const s = await load<typeof import("../../../lib/smart172")>("../../../lib/smart172");
     expect(m && s).toBeTruthy();
     const Panel = m!.QcSmart172;
     const html = renderToStaticMarkup(<Panel rows={[]} ctx={{ nowMs: 0, pkg: () => "", stars: () => 0, country: () => "" }} showing={0} total={0} s={s!.EMPTY172} onChange={() => {}} onClear={() => {}} />);
-    expect(html).toMatch(/<div class="qs172-incs"><label class="qs172-ck qs172-ck--closed"><input type="checkbox" checked=""\/>Include closed <em>0<\/em><\/label><\/div>/);
+    expect(html).not.toMatch(/Include closed|qs172-ck--closed/);
     expect(html).not.toMatch(/class="qs172-inc[ "]/);
-    expect(rule(css172, ".qs172-incs .qs172-ck")).toMatch(/margin-top:\s*0/);
+    expect(s!.EMPTY172.closed).toBe(true);
     expect(css172).not.toMatch(/\.qs172-inc[\s.,:{]/);
   });
 });

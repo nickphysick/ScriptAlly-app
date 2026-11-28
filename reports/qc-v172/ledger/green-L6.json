@@ -3,19 +3,19 @@
   "lock": "L6",
   "where": "folded · population",
   "ok": true,
-  "detail": "33 text nodes"
+  "detail": "74 text nodes"
  },
  {
   "lock": "L6",
   "where": "folded · sizes",
   "ok": true,
-  "detail": "33 nodes, all in the set"
+  "detail": "74 nodes, all in the set"
  },
  {
   "lock": "L6",
   "where": "More filters open · population",
   "ok": true,
-  "detail": "67 text nodes"
+  "detail": "77 text nodes"
  },
  {
   "lock": "L6",
@@ -27,6 +27,6 @@
   "lock": "L6",
   "where": "More filters open · sizes",
   "ok": true,
-  "detail": "67 nodes, all in the set"
+  "detail": "77 nodes, all in the set"
  }
 ]

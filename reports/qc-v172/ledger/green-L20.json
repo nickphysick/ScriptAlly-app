@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L20",
+  "where": "population · two or more segments",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "lock": "L20",
+  "where": "ArrowRight moves focus to the next segment",
+  "ok": true,
+  "detail": "offer → req"
+ },
+ {
+  "lock": "L20",
+  "where": "a focused segment draws no box, only its own focus (stroke 18)",
+  "ok": true,
+  "detail": "none 18px"
+ },
+ {
+  "lock": "L20",
+  "where": "focus shows that part's count in the centre",
+  "ok": true,
+  "detail": "14 / requested"
+ },
+ {
+  "lock": "L20",
+  "where": "ArrowLeft moves back",
+  "ok": true,
+  "detail": "offer"
+ },
+ {
+  "lock": "L20",
+  "where": "ArrowLeft from the first wraps to the last",
+  "ok": true,
+  "detail": "closed"
+ },
+ {
+  "lock": "L20",
+  "where": "Enter picks the focused segment",
+  "ok": true,
+  "detail": "[\"offer:true\",\"req:false\",\"nudge:false\",\"nodate:false\",\"close:false\",\"wait:false\",\"closed:false\"]"
+ },
+ {
+  "lock": "L20",
+  "where": "Space picks it away again: everything shows",
+  "ok": true,
+  "detail": "[\"offer:false\",\"req:false\",\"nudge:false\",\"nodate:false\",\"close:false\",\"wait:false\",\"closed:false\"]"
+ }
+]

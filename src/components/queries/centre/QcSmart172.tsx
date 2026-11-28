@@ -7,10 +7,10 @@
  * Queries.tsx page state (`s`, changed through `onChange`), remembered for the visit beside the page's filters; the
  * model is lib/smart172.
  */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
 import { MONTHS_SHORT, dayMonth } from "../../../lib/dates";
-import { stageOn172, stageText172, resetPart172, dueText172, REPLY172, SENDBY172, dueDays172, dueOn172, sideOf172, undated172, method172, pass172, smartOn172, stageIdx172, whoOf172, type Ctx172, type Smart172 } from "../../../lib/smart172";
+import { stageOn172, stageText172, resetPart172, dueText172, REPLY172, SENDBY172, dueDays172, dueOn172, sideOf172, undated172, method172, pass172, smartOn172, stageIdx172, whoOf172, STAND172, ACT172, WAIT172, stand172, standText172, pickPart172, partsOf172, type Ctx172, type Smart172, type Stand172, type Pick172 } from "../../../lib/smart172";
 import { METHOD_ICON } from "./QcRow170";
 import "./qcv172.css";
 
@@ -38,7 +38,6 @@ export interface QcSmart172Props {
 
 export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, total, s, onChange: setSmart172, onClear }) => {
   const [find, setFind] = useState("");
-  const [moreOpen, setMoreOpen] = useState(false);
   const [locOpen, setLocOpen] = useState(false);
   const on = smartOn172(s);
   const n = (skip: keyof Smart172, extra: (r: QcRow) => boolean) => rows.filter((r) => pass172(r, s, ctx, skip) && extra(r)).length;
@@ -115,25 +114,26 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
   const countries = useMemo(() => [...new Set(rows.map((r) => ctx.country(r)).filter(Boolean))].sort((a, b) => (COUNTRY[a] ?? a).localeCompare(COUNTRY[b] ?? b)), [rows, ctx]);
 
   const reset = () => { setFind(""); onClear(); };
+  /* v172.5 — which sections are open: Stage reached open and the rest shut to start, remembered for the visit; a
+     section with a filter set opens itself on arrival */
+  const moreSet = (s.pkgs.length ? 1 : 0) + (s.methods.length ? 1 : 0) + (s.fit ? 1 : 0) + (s.countries.length ? 1 : 0) + (s.mats !== "any" ? 1 : 0);
+  const isSet: Record<Fold172, boolean> = { stage: stageOn172(s), sent: !!s.sent, date: dueOn172(s.date, REPLY172), sendby: dueOn172(s.sendby, SENDBY172), more: moreSet > 0 };
+  const [fold, setFold] = useState<Record<Fold172, boolean>>(() => {
+    const kept = readFold172();
+    return Object.fromEntries(FOLDS172.map((k) => [k, isSet[k] || (kept[k] ?? FOLD0_172[k])])) as Record<Fold172, boolean>;
+  });
+  const toggle = (k: Fold172) => setFold((f) => { const next = { ...f, [k]: !f[k] }; writeFold172(next); return next; });
+  const sec = (k: Fold172) => ({ open: fold[k], onToggle: () => toggle(k), onReset: setSmart172 });
   const closedN = n("closed", (r) => whoOf172(r, ctx.nowMs) === "closed");
 
   return (
     <aside className="qs172" data-qc172="panel" aria-label="Filter your queries">
-      <header className="qs172-h"><b>Filter</b><small>{on ? `${showing} of ${total}` : `All ${total}`}</small>{on ? <button type="button" onClick={reset}>Clear all</button> : null}</header>
+      <header className="qs172-h"><b>Filter</b><small>{`${showing} showing`}</small>{on ? <button type="button" onClick={reset}>Clear all</button> : null}</header>
 
-      <div className="qs172-q">
-        <div className="qs172-seg" role="group" aria-label="Where it stands">
-          {([["you", "With you"], ["chase", "Needs chasing"], ["wait", "Waiting"]] as const).map(([k, label]) => {
-            const c = n("who", (r) => whoOf172(r, ctx.nowMs) === k);
-            return <button key={k} type="button" className={s.who === k ? "on" : ""} disabled={!c && s.who !== k} onClick={() => setSmart172({ who: s.who === k ? null : k })}><b>{c}</b><span>{label}</span></button>;
-          })}
-        </div>
-        {/* v172.4 — a tick box like Not dated, ticked by default; the count is the closed queries */}
-        <div className="qs172-incs"><label className="qs172-ck qs172-ck--closed"><input type="checkbox" checked={s.closed} onChange={(e) => setSmart172({ closed: e.target.checked })} />Include closed <em>{closedN}</em></label></div>
-      </div>
+      {/* v172.5 — What's next: the ring replaces the three counts and the Include closed tick */}
+      <Ring172 s={s} ctx={ctx} n={n} closedN={closedN} total={total} onChange={setSmart172} />
 
-      <section className="qs172-s">
-        <Head172 title="Stage" on={stageOn172(s)} text={stageText172(s.stage)} idle="any" part="stage" onReset={setSmart172} />
+      <Sec172 id="stage" title="Stage reached" on={stageOn172(s)} text={stageText172(s.stage)} idle="any" part="stage" {...sec("stage")}>
         <div className="qs172-stg" role="group" aria-label="Stage">
           {STAGES.map((st, i) => {
             const isOn = s.stage.includes(st.k);
@@ -149,11 +149,10 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
             );
           })}
         </div>
-      </section>
+      </Sec172>
 
       {W > 0 ? (
-        <section className="qs172-s">
-          <Head172 title="Sent" on={!!s.sent} text={`${fromLabel(lo)} – ${hi >= W ? "now" : toLabel(hi)}`} idle="any time" part="sent" onReset={setSmart172} />
+        <Sec172 id="sent" title="Sent" on={!!s.sent} text={`${fromLabel(lo)} – ${hi >= W ? "now" : toLabel(hi)}`} idle="any time" part="sent" {...sec("sent")}>
           {/* the bars show the spread; they are not buttons (the handles pick the range, one bucket a step) */}
           <div className={`qs172-hist${starts.length > 18 ? " is-dense" : ""}`} aria-hidden="true">
             {hist.map((h, i) => <i key={i} className={i >= lo && i <= hi ? "in" : ""} style={{ height: `${h ? 4 + (h / hmax) * 26 : 0}px` }} />)}
@@ -164,16 +163,18 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
             <input type="range" min={0} max={W} value={hi} aria-label="Sent to" onChange={(e) => setSent(lo, Math.max(+e.target.value, lo))} />
           </div>
           <div className="qs172-scale">{scale.map((m) => <span key={m.i} style={{ left: `${(m.i / W) * 100}%`, ...(m.left ? { transform: "none" } : {}) }}>{m.text}</span>)}</div>
-        </section>
+        </Sec172>
       ) : null}
 
-      <DueRange172 k="date" title="Agent’s reply date" side="agent" b={REPLY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
-      <DueRange172 k="sendby" title="Your send-by date" side="you" b={SENDBY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
+      <Sec172 id="date" title="Agent’s reply date" on={isSet.date} text={dueText172(s.date, REPLY172)} idle="any" part="date" {...sec("date")}>
+        <DueRange172 k="date" title="Agent’s reply date" side="agent" b={REPLY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
+      </Sec172>
+      <Sec172 id="sendby" title="Your send-by date" on={isSet.sendby} text={dueText172(s.sendby, SENDBY172)} idle="any" part="sendby" {...sec("sendby")}>
+        <DueRange172 k="sendby" title="Your send-by date" side="you" b={SENDBY172} rows={rows} ctx={ctx} s={s} onChange={setSmart172} />
+      </Sec172>
 
-      {(() => {
-        /* 2 · the rarer five fold under More filters, open while any of them is set */
-        const set = (s.pkgs.length ? 1 : 0) + (s.methods.length ? 1 : 0) + (s.fit ? 1 : 0) + (s.countries.length ? 1 : 0) + (s.mats !== "any" ? 1 : 0);
-        const body = <>
+      {/* the rarer five: More filters is a folding section like the rest (v172.5) */}
+      <Sec172 id="more" title="More filters" on={moreSet > 0} text={`${moreSet} set`} idle="none set" part="" {...sec("more")}>
       <section className="qs172-s">
         <Head172 title="What you sent" on={s.pkgs.length > 0} text={`${s.pkgs.length} picked`} idle="any" part="pkgs" onReset={setSmart172} />
         <div className="qs172-pills">
@@ -255,22 +256,133 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
         </div>
       ))}
 
-        </>;
-        const open = moreOpen || set > 0;
-        return (
-          <>
-            <button type="button" className={`qs172-more${open ? " open" : ""}`} aria-expanded={open} onClick={() => setMoreOpen(!open)} disabled={set > 0 && open}>
-              <b>More filters</b><span>{set ? `${set} set` : "package, method, fit, location, materials"}</span><i aria-hidden="true">{open ? "▴" : "▾"}</i>
-            </button>
-            {open ? body : null}
-          </>
-        );
-      })()}
+      </Sec172>
 
       <footer className="qs172-f">{on ? `Showing ${showing} of ${total} queries.` : `All ${total} queries.`}</footer>
     </aside>
   );
 };
+
+/* ── v172.5 · What's next: where every query stands, as one ring ─────────────────────────────────────────────────
+   Parts in order: the five that need you (darkest first), No action needed as one pale part, Closed. Picking a part (its
+   segment, its key row, or a group heading) is lib/smart172 pickPart172. */
+const SW172: Record<string, string> = { offer: "#1c130f", req: "#2a3a52", nudge: "#5c6d88", nodate: "#7d8aa0", close: "#a3adbf", wait: "#dce1e8", closed: "#efeae3" };
+const RING_LABEL: Record<string, string> = { ...Object.fromEntries(STAND172.map((x) => [x.k, x.label])), act: "Action needed", wait: "No action needed", closed: "Closed" };
+const SHORT172: Record<string, string> = { act: "need you", offer: "offers", req: "requested", nudge: "to nudge", nodate: "need a date", close: "to close", wait: "no action", closed: "closed" };
+const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
+/** the ring's keys: ← ↑ the segment before, → ↓ the one after (wrapping), Enter or Space picks */
+export const ringKey172 = (key: string, i: number, n: number): number | "pick" | null =>
+  key === "Enter" || key === " " ? "pick"
+  : key === "ArrowRight" || key === "ArrowDown" ? (i + 1) % n
+  : key === "ArrowLeft" || key === "ArrowUp" ? (i - 1 + n) % n
+  : null;
+
+const Ring172: React.FC<{ s: Smart172; ctx: Ctx172; n: (skip: keyof Smart172, f: (r: QcRow) => boolean) => number; closedN: number; total: number; onChange: (p: Partial<Smart172>) => void }> = ({ s, ctx, n, closedN, total, onChange }) => {
+  const [hov, setHov] = useState<Pick172 | null>(null);
+  /* the draw-in and the count-up run once on mount; with reduced motion (or on the server) neither runs */
+  const [drawn, setDrawn] = useState(() => typeof window === "undefined" || reducedMotion());
+  useEffect(() => { if (drawn) return undefined; const t = window.setTimeout(() => setDrawn(true), 30); return () => window.clearTimeout(t); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const c: Record<string, number> = { ...Object.fromEntries(STAND172.map((x) => [x.k, n("hide", (r) => stand172(r, ctx.nowMs) === x.k)])), closed: closedN };
+  c.act = ACT172.reduce((t, k) => t + c[k], 0);
+  c.wait = WAIT172.reduce((t, k) => t + c[k], 0);
+  const lit1 = (k: Stand172 | "closed") => (k === "closed" ? s.closed : !s.hide.includes(k));
+  const lit = (k: Pick172) => partsOf172(k).some(lit1);
+  const on = s.hide.length > 0 || !s.closed;
+  const pick = (k: Pick172) => onChange(pickPart172(s, k));
+  const shown = [...STAND172.map((x) => x.k), "closed" as const].filter(lit1).reduce((t, k) => t + c[k], 0);
+  /* the geometry: viewBox 100, r 40, stroke 14, a 2.2 gap between parts, from 12 o'clock */
+  const R = 40, C = 2 * Math.PI * R;
+  const ringKeys: Pick172[] = [...ACT172, "wait", "closed"];
+  const sum = ringKeys.reduce((t, k) => t + c[k], 0) || 1;
+  const GAP = ringKeys.filter((k) => c[k]).length > 1 ? 2.2 : 0;
+  let at = 0;
+  const arcs = ringKeys.map((k) => { const len = (c[k] / sum) * C; const o = { k, off: at, len: Math.max(0, len - GAP) }; at += len; return o; }).filter((o) => c[o.k]);
+  const target = hov ? c[hov] : on ? shown : c.act;
+  const [up, setUp] = useState(() => (typeof window === "undefined" || reducedMotion() ? -1 : 0));
+  useEffect(() => {
+    if (up < 0) return undefined;
+    const t0 = performance.now(); let raf = 0;
+    const step = (t: number) => { const k = Math.min(1, (t - t0) / 700); setUp(k >= 1 ? -1 : Math.round(target * (1 - Math.pow(1 - k, 3)))); if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const big = up >= 0 ? up : target;
+  const sub = hov ? SHORT172[hov] : on ? `of ${total}` : "need you";
+  const hovs = (k: Pick172) => hov === k || (hov != null && partsOf172(hov).includes(k as Stand172));
+  const row = (k: Pick172, isSub = false) => (
+    <li key={k} className={`${isSub ? "sub" : ""}${lit(k) ? "" : " off"}${hov === k ? " hov" : ""}${on && lit(k) ? " sel" : ""}`}>
+      <button type="button" className="qs172-rb" data-k={k} disabled={!c[k]} aria-pressed={on && lit(k)}
+        onMouseEnter={() => setHov(k)} onMouseLeave={() => setHov(null)} onFocus={() => setHov(k)} onBlur={() => setHov(null)} onClick={() => pick(k)}>
+        {k === "act" ? null : <i style={{ background: SW172[k] }} />}<span className="l">{RING_LABEL[k]}</span><em>{c[k]}</em>
+      </button>
+    </li>
+  );
+  return (
+    <section className="qs172-s qs172-ring" data-qc1725="ring">
+      <Head172 title="What’s next" on={on} text={standText172(s)} idle="all" part="ws" onReset={onChange} />
+      <div className="qs172-rg">
+        <svg viewBox="0 0 100 100" className="qs172-rsvg" role="group" aria-label="What’s next">
+          <circle cx="50" cy="50" r={R} className="bg" />
+          {arcs.map((o) => (
+            <circle key={o.k} cx="50" cy="50" r={on && lit(o.k) ? R + 3 : R} className={`arc${lit(o.k) ? "" : " off"}${hovs(o.k) ? " hov" : ""}`} data-k={o.k}
+              tabIndex={0} role="button" aria-label={`${RING_LABEL[o.k]}: ${c[o.k]}`} aria-pressed={on && lit(o.k)}
+              style={{ stroke: SW172[o.k], strokeDasharray: `${drawn ? o.len : 0} ${C}`, strokeDashoffset: -o.off }}
+              onFocus={() => setHov(o.k)} onBlur={() => setHov(null)} onMouseEnter={() => setHov(o.k)} onMouseLeave={() => setHov(null)} onClick={() => pick(o.k)}
+              onKeyDown={(e) => {
+                const sibs = [...(e.currentTarget.parentNode?.querySelectorAll("circle.arc") ?? [])] as SVGCircleElement[];
+                const res = ringKey172(e.key, sibs.indexOf(e.currentTarget), sibs.length);
+                if (res == null) return;
+                e.preventDefault();
+                if (res === "pick") pick(o.k); else sibs[res]?.focus();
+              }}>
+              <title>{`${RING_LABEL[o.k]}: ${c[o.k]}`}</title>
+            </circle>
+          ))}
+          <circle cx="50" cy="50" r={R - 9} className="hole" />
+          <text x="50" y="48" className="big">{big}</text>
+          <text x="50" y="62" className="sub">{sub}</text>
+        </svg>
+        <ul className="qs172-rk">
+          {row("act")}
+          {ACT172.filter((k) => c[k] > 0).map((k) => row(k, true))}
+          {c.wait ? row("wait") : null}
+          {c.closed ? row("closed") : null}
+        </ul>
+      </div>
+    </section>
+  );
+};
+
+/* ── v172.5 · folding sections ─────────────────────────────────────────────────────────────────────────────────── */
+type Fold172 = "stage" | "sent" | "date" | "sendby" | "more";
+const FOLDS172: readonly Fold172[] = ["stage", "sent", "date", "sendby", "more"];
+const FOLD0_172: Record<Fold172, boolean> = { stage: true, sent: false, date: false, sendby: false, more: false };
+const FOLD_KEY172 = "qh.qc.fold172";
+function readFold172(): Partial<Record<Fold172, boolean>> {
+  try {
+    const v: unknown = JSON.parse(window.sessionStorage.getItem(FOLD_KEY172) ?? "{}");
+    if (!v || typeof v !== "object") return {};
+    return Object.fromEntries(FOLDS172.filter((k) => typeof (v as Record<string, unknown>)[k] === "boolean").map((k) => [k, (v as Record<string, boolean>)[k]]));
+  } catch { return {}; }
+}
+function writeFold172(f: Record<Fold172, boolean>) { try { window.sessionStorage.setItem(FOLD_KEY172, JSON.stringify(f)); } catch { /* */ } }
+const CHEV172 = <svg className="qs172-cv" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+/** a section whose title row (one button) opens and shuts it: the title, the section's value on the right (upright
+ *  navy when set, the idle word in italic when not), a chevron; Reset after the button when set and open. The shut
+ *  body is inert. */
+const Sec172: React.FC<{ id: Fold172; title: string; on: boolean; text: string; idle: string; part: string; open: boolean; onToggle: () => void; onReset: (p: Partial<Smart172>) => void; children: React.ReactNode }> = ({ id, title, on, text, idle, part, open, onToggle, onReset, children }) => (
+  <section className={`qs172-s qs172-fold${open ? "" : " is-shut"}`} data-fold={id}>
+    <div className={`qs172-fh${on ? " is-on" : ""}`}>
+      <button type="button" className="qs172-ft" aria-expanded={open} onClick={onToggle}>
+        <b>{on ? <i className="qs172-dot" aria-hidden="true" /> : null}{title}</b>
+        <span className="qs172-fv">{on ? text : idle}</span>
+        {CHEV172}
+      </button>
+      {on && open && part ? <button type="button" className="qs172-rs" onClick={() => onReset(resetPart172[part])}>Reset</button> : null}
+    </div>
+    <div className="qs172-fb" inert={!open || undefined}><div>{children}</div></div>
+  </section>
+);
 
 /* a due date as a two-handle range in weeks around today (past it to the left), its spread drawn above it, and a
    "Not dated" tick like the Contact list's include boxes */
@@ -286,8 +398,7 @@ const DueRange172: React.FC<{ k: "date" | "sendby"; title: string; side: "agent"
   const set = (p: Partial<typeof d>) => setSmart172({ [k]: { ...d, ...p } } as Partial<Smart172>);
   const today = pos(0);
   return (
-    <section className="qs172-s">
-      <Head172 title={title} on={dueOn172(d, b)} text={dueText172(d, b)} idle="any" part={k} onReset={setSmart172} />
+    <>
       <div className="qs172-hist qs172-hist--due" aria-hidden="true" style={{ ["--t" as string]: `${today}%` }}>
         {hist.map((h, i) => { const a = b.min + i * 7; const inR = (d.lo <= b.min || a + 7 > d.lo) && (d.hi >= b.max || a <= d.hi);
           return <i key={i} className={`${inR ? "in" : ""}${a < 0 ? " past" : ""}`} style={{ height: `${h ? 4 + (h / hmax) * 22 : 0}px` }} />; })}
@@ -303,7 +414,7 @@ const DueRange172: React.FC<{ k: "date" | "sendby"; title: string; side: "agent"
         <span style={{ left: "100%", transform: "translateX(-100%)" }}>{b.max / 7}w+ ahead</span>
       </div>
       <label className="qs172-ck"><input type="checkbox" checked={d.nd} onChange={(e) => set({ nd: e.target.checked })} />Not dated <em>{undated}</em></label>
-    </section>
+    </>
   );
 };
 

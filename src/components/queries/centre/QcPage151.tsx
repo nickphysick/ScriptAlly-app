@@ -130,6 +130,8 @@ export interface QcPage151Props {
   sort: Sort151;
   onSort: (s: Sort151) => void;
   sections: Section<QcRow>[];
+  /** v172.5 — the Action needed group's count, for the list toolbar's "41 need you · 88 in all" */
+  need?: number | null;
   phraseOf: (r: QcRow) => string;
   nowMs: number;
   selectedId: string | null;
@@ -403,7 +405,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   );
   /* v153 — the slim bar at the top of the list column: the switch, the count, search, Sort and Group */
   const controlLine = (
-    <QcBar153 view={p.view} onView={p.onView} loading={p.loading} showing={p.showing} total={p.total}
+    <QcBar153 view={p.view} onView={p.onView} loading={p.loading} showing={p.showing} total={p.total} need={birds ? null : p.need}
       find={p.find} onFind={p.onFind} findRef={p.findRef} sort={p.sort} onSort={p.onSort}
       group={p.group} onGroup={p.onGroup} packageOk={p.packageOk}
       beGroup={p.beGroup} onBeGroup={p.onBeGroup} beSort={p.beSort} onBeSort={p.onBeSort}

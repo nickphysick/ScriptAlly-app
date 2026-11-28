@@ -8295,8 +8295,8 @@ export const Queries: React.FC<{
                 const shut = sorted151.filter((r) => CLOSED_SET.includes(r.status));
                 return shut.length ? [...live, { key: "closed", label: "Closed", rows: shut }] : live;
               };
-              /* v172 — Group = Action is Birds-eye's "Where it stands" (group172): Needs action (the most urgent first,
-                 tier172), Within their window, Waiting with no reply date, Closed last */
+              /* v172 — Group = Action (group172): Action needed (the most urgent first, tier172; v172.5 — taking in the
+                 waiting with no reply date), Within their window, Closed last */
               const sections151: Section<QcRow>[] = group1522 === "attention" ? group172(sorted151, now151)
                 : group1522 === "none" ? (sorted151.length ? [{ key: "all", label: "", rows: sorted151 }] : [])
                 : group1522 === "status" ? statusGroups()
@@ -8360,6 +8360,8 @@ export const Queries: React.FC<{
                   group={group1522} onGroup={setQcGroup1522} packageOk={pkgOk1522}
                   sort={qcSort151} onSort={setQcSort151}
                   sections={showGridSkeleton ? [] : sections151}
+                  /* v172.5 — the toolbar's "41 need you · 88 in all": the list's Action needed group, whatever the grouping */
+                  need={showGridSkeleton ? null : group172(sorted151, now151).find((g) => g.key === "action")?.rows.length ?? 0}
                   phraseOf={phrase151}
                   nowMs={now151}
                   selectedId={pipOpen ? PIP_ID : selectedQueryId}

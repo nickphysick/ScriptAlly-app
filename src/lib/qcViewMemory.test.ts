@@ -104,7 +104,7 @@ describe("v172 · the visit remembers the smart panel", () => {
     const { EMPTY172 } = await import("./smart172");
     const base = { v: 1, filters: {}, search: "", scroll: 0 };
     expect(sanitiseQcVisit(base)?.smart).toBeUndefined();
-    const smart = { ...EMPTY172, who: "wait", stage: [1], countries: ["GB"] };
+    const smart = { ...EMPTY172, hide: ["window"], stage: [1], countries: ["GB"] };
     expect(sanitiseQcVisit({ ...base, smart })?.smart).toEqual(smart);
     expect(sanitiseQcVisit({ ...base, smart: { ...smart, mats: "maybe" } })?.smart).toEqual({ ...smart, mats: "any" });
   });

@@ -1,0 +1,20 @@
+× v172.5 · 1a every query lands in exactly one part > stand172 names each fixture row's part; the seven counts sum to the total 3ms
+→ stand172 is not a function
+× v172.5 · 1a every query lands in exactly one part > the labels, in order: the five action parts, then In their window 0ms
+→ Cannot read properties of undefined (reading 'map')
+× v172.5 · 1b picking parts filters the list > “Nudge due” alone passes only nudge rows 0ms
+→ Cannot read properties of undefined (reading 'map')
+× v172.5 · 1b picking parts filters the list > the old `who` filter is gone from the panel's state 2ms
+→ expected true to be false // Object.is equality
+× v172.5 · 1c the part's chip > exactly the five action parts: “Action needed” 0ms
+→ standText172 is not a function
+× v172.5 · 1c the part's chip > exactly In their window: “No action needed”; otherwise the shown names joined 0ms
+→ standText172 is not a function
+× v172.5 · 1c the part's chip > its ✕ resets hide and closed; “Closed hidden” only when nothing else is hidden 1ms
+→ expected { closed: true } to deeply equal { hide: [], closed: true }
+× v172.5 · 1d Action needed takes in the undated > the list's groups: Action needed · Within their window · Closed (no separate no-date group) 1ms
+→ expected [ 'action', 'window', 'nodate', …(1) ] to deeply equal [ 'action', 'window', 'closed' ]
+× v172.5 · 1d Action needed takes in the undated > a waiting query with no reply date is in Action needed with tier 3.5, between a nudge and consider closing 1ms
+→ expected 'nodate' to be 'action' // Object.is equality
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+Tests  9 failed (9)

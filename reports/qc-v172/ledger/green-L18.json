@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L18",
+  "where": "population · segments and key rows",
+  "ok": true,
+  "detail": "7 segments · 7 parts"
+ },
+ {
+  "lock": "L18",
+  "where": "the parts' counts sum to the total",
+  "ok": true,
+  "detail": "offer 2, req 14, nudge 6, nodate 4, close 41, wait 3, closed 18 · total 88"
+ },
+ {
+  "lock": "L18",
+  "where": "a part with 0 has no segment and no key row",
+  "ok": true,
+  "detail": "[{\"k\":\"offer\",\"n\":2,\"off\":false},{\"k\":\"req\",\"n\":14,\"off\":false},{\"k\":\"nudge\",\"n\":6,\"off\":false},{\"k\":\"nodate\",\"n\":4,\"off\":false},{\"k\":\"close\",\"n\":41,\"off\":false},{\"k\":\"wait\",\"n\":3,\"off\":false},{\"k\":\"closed\",\"n\":18,\"off\":false}]"
+ },
+ {
+  "lock": "L18",
+  "where": "the centre: the Action needed count, need you",
+  "ok": true,
+  "detail": "67 / need you"
+ },
+ {
+  "lock": "L18",
+  "where": "the toolbar: “n need you · N in all”",
+  "ok": true,
+  "detail": "67 need you · 88 in all"
+ },
+ {
+  "lock": "L18",
+  "where": "the toolbar's need is the list's Action needed group",
+  "ok": true,
+  "detail": "key 67 · group 67"
+ },
+ {
+  "lock": "L18",
+  "where": "the header: “N showing”",
+  "ok": true,
+  "detail": "88 showing"
+ },
+ {
+  "lock": "L18",
+  "where": "every segment unpicked at rest",
+  "ok": true,
+  "detail": "[{\"k\":\"offer\",\"r\":40,\"op\":\"1\",\"pressed\":\"false\"},{\"k\":\"req\",\"r\":40,\"op\":\"1\",\"pressed\":\"false\"},{\"k\":\"nudge\",\"r\":40,\"op\":\"1\",\"pressed\":\"false\"},{\"k\":\"nodate\",\"r\":40,\"op\":\"1\",\"pressed\":\"false\"},{\"k\":\"close\",\"r\":40,\"op\":\"1\",\"pressed\":\"false\"},{\"k\":\"wait\",\"r\":40,\"op\":\"1\",\"pressed\":\"false\"},{\"k\":\"closed\",\"r\":40,\"op\":\"1\",\"pressed\":\"false\"}]"
+ }
+]
