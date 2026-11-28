@@ -17,7 +17,6 @@ import { openRoute } from "./measure";
 const DIR = "reports/phone-birds-eye-polish-v1";
 const REF = "design-refs/phone-birds-eye-polish-v1/shots";
 const PHONE = { width: 390, height: 784 } as const;
-const KEY = "bw1.firstLook.day";
 const BIRDS = "/queries/all?view=birds";
 const frame = (page: Page, ms = 450) => page.waitForTimeout(ms);
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
@@ -27,7 +26,9 @@ async function signIn(page: Page) {
   await page.evaluate(() => { try { localStorage.setItem("bw1.hint.seen", "1"); localStorage.setItem("bw3.folded", "[]"); } catch { /* */ } });
   await page.setViewportSize(PHONE);
 }
-const setDay = (page: Page, v: string | null) => page.evaluate(([k, x]) => { try { if (x == null) localStorage.removeItem(k!); else localStorage.setItem(k!, x); } catch { /* */ } }, [KEY, v] as const);
+/* polish v1.1: the grow-in plays on every arrival; `null` lets it play, anything else sets the app's DEV-ONLY switch
+   (sa.e2e.bw-nolook) so the arrival only fades */
+const setDay = (page: Page, v: string | null) => page.evaluate((x) => { try { if (x == null) localStorage.removeItem("sa.e2e.bw-nolook"); else localStorage.setItem("sa.e2e.bw-nolook", "1"); } catch { /* */ } }, v);
 async function openBirds(page: Page, first = false) {
   await setDay(page, first ? null : today());
   await page.goto(BIRDS);
@@ -287,12 +288,12 @@ for (const mut of runs) {
       L.check("BP-4", `and no-date rows' (${r.nd} bars)`, r.nd > 0 && r.bad.length === 0, r.bad.slice(0, 2).join(" | "));
     }
 
-    /* ── BP-5 · the grow-in: the day's first open plays in full, then only fades; within a row each piece waits for the one
+    /* ── BP-5 · the grow-in: an arrival plays in full; within a row each piece waits for the one
           to its left; marks pop with their rows; a touch at 300ms finishes it within a frame; reduced motion fades ── */
     if (on("BP-5")) {
       await openBirds(page, true);
       const how = await page.evaluate(() => document.querySelector<HTMLElement>('[data-bw="layer"]')!.dataset.look);
-      L.check("BP-5", "the day's first open plays in full", how === "playing", String(how));
+      L.check("BP-5", "an arrival plays in full", how === "playing", String(how));
       if (how === "playing") {
         await until(page, 60);
         const a = await worldAnims(page);
@@ -310,9 +311,7 @@ for (const mut of runs) {
         await page.mouse.up();
         L.check("BP-5", "a touch at 300ms finishes it within one frame", fin.look === "done" && fin.n === 0, JSON.stringify(fin));
       }
-      await openBirds(page); await frame(page, 120);
-      const again = await page.evaluate(() => document.querySelector<HTMLElement>('[data-bw="layer"]')!.dataset.look);
-      L.check("BP-5", "the same day's next open only fades", again === "fade" && (await worldAnims(page)).every((x) => x.scale === "null"), String(again));
+      /* polish v1.1: every arrival plays; the arrival rule is BP-9 */
       await page.emulateMedia({ reducedMotion: "reduce" });
       await openBirds(page, true); await frame(page, 100);
       const rm = await page.evaluate(() => document.querySelector<HTMLElement>('[data-bw="layer"]')!.dataset.look);

@@ -39,8 +39,7 @@ import {
 } from "../../../lib/birdsWorld";
 import { drawWorld } from "./drawWorld";
 import { buzz, shadowStyle, wireMotion, type Motion } from "./worldMotion";
-import { BW_LOOK_KEY, fadeWorld, growIn, type LookHandle } from "./firstLook";
-import { firstTimeToday } from "../../../lib/phoneV41";
+import { BW_E2E_NOLOOK_KEY, BW_LOOK_RETIRED_KEY, fadeWorld, growIn, type LookHandle } from "./firstLook";
 import { bwRowsOf } from "./bwRows";
 import { KeySheet, NoDateSheet, QuickMenu, RecapCard, SearchSheet } from "./BirdsSheets";
 import "./birdsWorld.css";
@@ -402,9 +401,11 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     return () => { m.dispose(); motion.current = null; };
   }, [draw, touched, demo, byId, rows, refresh, snapTo]);
 
-  /* ── the first look (Phone Birds-eye first look v1 §A) ──
-     The day's first open with something to show plays the bars growing in, from the fitted view the page opens at;
-     every other open, and every open with reduced motion, fades the world in. The latest paint is read through a ref: the
+  /* ── the first look (Phone Birds-eye first look v1 §A; polish v1.1: on every arrival) ──
+     Every arrival at Birds-eye with something to show plays the bars growing in, from the fitted view the page opens at
+     — from another tab, Today's link, the List/Birds-eye switch, or the app opening straight into it (each is a new mount:
+     the nav fix mounts Birds-eye only while its page is on screen). A filter, a level, a fold, a sheet or menu closing,
+     pull to refresh or a re-render is not an arrival: it is decided once per mount. Reduced motion fades it in. The latest paint is read through a ref: the
      end comes two seconds after this effect's render. (First look's `?fly=<id>` went with its three-week preview, its
      only door: Birds-eye polish v1.) */
   const paintRef = useRef(paint); paintRef.current = paint;
@@ -414,7 +415,11 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
     const el = layer.current, box = vp.current, r = root.current;
     if (!el || !box || !r || !W.current) return;
     lookDecided.current = true;
-    if (calm() || !firstTimeToday(BW_LOOK_KEY, Date.now())) { el.dataset.look = "fade"; fadeWorld(box); return; }
+    /* the once-a-day memory is retired (polish v1.1): its key goes */
+    try { window.localStorage.removeItem(BW_LOOK_RETIRED_KEY); } catch { /* storage refused */ }
+    /* DEV-ONLY (the MODE test folds it away): the measurements that read the world at rest set it */
+    const e2eNoLook = import.meta.env.MODE !== "production" && store.get(BW_E2E_NOLOOK_KEY) === "1";
+    if (calm() || e2eNoLook) { el.dataset.look = "fade"; fadeWorld(box); return; }
     setLooking(true);
     look.current = growIn(el, Number(r.dataset.top) || 0, () => { look.current = null; setLooking(false); paintRef.current(); });
   }, [demo]); // eslint-disable-line react-hooks/exhaustive-deps

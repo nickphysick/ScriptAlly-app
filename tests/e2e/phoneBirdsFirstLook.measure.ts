@@ -20,18 +20,15 @@ const DIR = "reports/phone-birds-eye-first-look-v1";
 const REF = "design-refs/phone-birds-eye-first-look-v1/shots";
 const PHONE = { width: 390, height: 784 } as const;
 const DESK = { width: 1440, height: 900 } as const;
-const KEY = "bw1.firstLook.day";
 const BIRDS = "/queries/all?view=birds";
 const TODAY = "/dashboard?tab=queries";
 const frame = (page: Page, ms = 450) => page.waitForTimeout(ms);
 
-const MUTS = ["daily", "overlap", "count", "touch", "rm", "tiny"] as const;
+const MUTS = ["overlap", "count", "touch", "rm", "tiny"] as const;
 type Mut = (typeof MUTS)[number] | "";
-const MUT_LOCK: Record<Exclude<Mut, "">, string> = { daily: "BFL-1", overlap: "BFL-2", count: "BFL-3", touch: "BFL-4", rm: "BFL-5", tiny: "BFL-8" };
+const MUT_LOCK: Record<Exclude<Mut, "">, string> = { overlap: "BFL-2", count: "BFL-3", touch: "BFL-4", rm: "BFL-5", tiny: "BFL-8" };
 /** each breakage, set before the page's own scripts run */
 const INIT_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
-  /* BFL-1: the day's memory never read, so every open plays it in full */
-  daily: `{ const g = Storage.prototype.getItem; Storage.prototype.getItem = function (k) { return k === ${JSON.stringify(KEY)} ? null : g.call(this, k); }; }`,
   /* BFL-2: the ref's 90ms floor and more: each piece's grow 120ms longer, so it runs on into the next */
   overlap: `{ const a = Element.prototype.animate; Element.prototype.animate = function (kf, o) { if (Array.isArray(kf) && kf[0] && kf[0].scale === "0 1" && o && typeof o === "object") o = { ...o, duration: (o.duration || 0) + 120 }; return a.call(this, kf, o); }; }`,
   /* BFL-4: a touch the page never hears (taken at the window, before Birds-eye) */
@@ -74,7 +71,9 @@ async function signIn(page: Page) {
   await page.setViewportSize(PHONE);
 }
 /** the day's memory: cleared (the next open is the day's first), or set to a stamp */
-const setDay = (page: Page, v: string | null) => page.evaluate(([k, x]) => { try { if (x == null) localStorage.removeItem(k!); else localStorage.setItem(k!, x); } catch { /* */ } }, [KEY, v] as const);
+/* polish v1.1: the grow-in plays on every arrival; `null` lets it play, anything else sets the app's DEV-ONLY switch
+   (sa.e2e.bw-nolook) so the arrival only fades */
+const setDay = (page: Page, v: string | null) => page.evaluate((x) => { try { if (x == null) localStorage.removeItem("sa.e2e.bw-nolook"); else localStorage.setItem("sa.e2e.bw-nolook", "1"); } catch { /* */ } }, v);
 /** opens Birds-eye and waits for the world's layer to say how it arrived ("playing" or "fade") */
 async function openBirds(page: Page, path = BIRDS): Promise<string> {
   await page.goto(path);
@@ -126,13 +125,13 @@ for (const mut of runs) {
     const css = mut ? CSS_MUT[mut] : undefined;
     const withCss = async () => { if (css) { await page.addStyleTag({ content: css }); await frame(page, 150); } };
 
-    /* ── BFL-1 · the day's first open plays in full; the next fades; a new day plays again ──
+    /* ── BFL-1 · an arrival plays in full (polish v1.1: every arrival; its once-a-day checks went to BP-9) ──
        ── BFL-2 · within a row, no piece starts before the one to its left has finished ──
        ── BFL-3 · a heading's count reads 0 near the start and its number by 900ms ── */
     if (on("BFL-1") || on("BFL-2") || on("BFL-3")) {
       await setDay(page, null);
       const how = await openBirds(page);
-      L.check("BFL-1", "the day's first open: the bars grow in", how === "playing", how);
+      L.check("BFL-1", "an arrival: the bars grow in", how === "playing", how);
       if (how === "playing") {
         if (mut === "count") await page.evaluate(() => { const t = setInterval(() => { for (const e of document.querySelectorAll<HTMLElement>('[data-bw="group"] em')) e.textContent = "0"; }, 8); setTimeout(() => clearInterval(t), 1400); });
         await until(page, 60);
@@ -169,14 +168,7 @@ for (const mut of runs) {
         const ce = await counts(page);
         L.check("BFL-1", "at 2.2s everything is in its end state (no animation on the world, every count its number)", end.look === "done" && end.n === 0 && end.looking === "0" && ce.every((c) => c.shown === String(c.n)), JSON.stringify(end));
       }
-      const again = await openBirds(page);
-      await frame(page, 120);
-      const scaled = (await anims(page)).filter((x) => x.scale !== "null").length;
-      L.check("BFL-1", "a second open the same day only fades", again === "fade" && scaled === 0, `${again}, ${scaled} growing`);
-      await setDay(page, "2000-1-1");
-      const nd = await openBirds(page);
-      L.check("BFL-1", "a new day plays it again", nd === "playing", nd);
-      await frame(page, 2300);
+      /* polish v1.1: the once-a-day rule is retired; every arrival plays (BP-9 in phoneBirdsPolish.measure.ts) */
     }
 
     /* ── BFL-4 · a touch at 300ms ends it within one frame ── */
@@ -225,7 +217,7 @@ for (const mut of runs) {
     }
 
     L.check("BFL-8", "no page error", errs.length === 0, errs.slice(0, 3).join(" · "));
-    L.done(ONLY.length ? 1 : 12);
+    L.done(ONLY.length ? 1 : 10);
   });
 }
 

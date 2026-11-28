@@ -217,10 +217,10 @@ const lvlZ = (r: Root, t: string) => Number((r.levels.split(",").find((x) => x.s
 
 test.use({ viewport: PHONE, deviceScaleFactor: 2 });
 /* Phone Birds-eye first look v1: the day's first open of Birds-eye plays a two-second grow-in that holds the world's
-   frame; these readings are of the world at rest, so today's first look is marked as already seen (the app's own
-   day stamp, lib/phoneV41 `dayStamp`). The grow-in's own locks are phoneBirdsFirstLook.measure.ts. */
+   frame; these readings are of the world at rest, so the app's DEV-ONLY switch makes each arrival fade (polish v1.1:
+   the grow-in plays on every arrival). The grow-in's own locks are phoneBirdsFirstLook.measure.ts. */
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => { try { const d = new Date(); localStorage.setItem("bw1.firstLook.day", `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`); } catch { /* */ } });
+  await page.addInitScript(() => { try { localStorage.setItem("sa.e2e.bw-nolook", "1"); } catch { /* */ } });
 });
 /** BW_ONLY=BW-23,BW-24 runs just those sections (debugging only; the floor then fails by design) */
 const ONLY = (process.env.BW_ONLY ?? "").split(",").map((s) => s.trim()).filter(Boolean);

@@ -25,7 +25,6 @@ import { openRoute } from "./measure";
 const DIR = process.env.NAV_OUT ?? "reports/phone-birds-eye-nav-fix-v1";
 const PHONE = { width: 390, height: 784 } as const;
 const BIRDS = "/queries/all?view=birds";
-const KEY = "bw1.firstLook.day";
 const frame = (page: Page, ms = 450) => page.waitForTimeout(ms);
 
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -38,7 +37,9 @@ async function signIn(page: Page) {
   await page.setViewportSize(PHONE);
 }
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
-const setDay = (page: Page, v: string | null) => page.evaluate(([k, x]) => { try { if (x == null) localStorage.removeItem(k!); else localStorage.setItem(k!, x); } catch { /* */ } }, [KEY, v] as const);
+/* polish v1.1: the grow-in plays on every arrival; `null` lets it play, anything else sets the app's DEV-ONLY switch
+   (sa.e2e.bw-nolook) so the arrival only fades */
+const setDay = (page: Page, v: string | null) => page.evaluate((x) => { try { if (x == null) localStorage.removeItem("sa.e2e.bw-nolook"); else localStorage.setItem("sa.e2e.bw-nolook", "1"); } catch { /* */ } }, v);
 /** Birds-eye, opened by its address; `first`: as the day's first open (the grow-in plays) */
 async function openBirds(page: Page, first = false) {
   await setDay(page, first ? null : today());

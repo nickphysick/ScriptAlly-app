@@ -4,8 +4,8 @@
  *
  * Phone Birds-eye first look v1 §A — THE BARS GROW IN (ref `playLoad("grow2")`), on the world's own drawn frame.
  *
- * The first open of each calendar day plays it in full (about 2s); every other open, and every open with reduced
- * motion, fades the world in over 200ms. It runs on the frame `drawWorld` has just painted, fitted (All):
+ * Every arrival at Birds-eye plays it in full (about 2s; polish v1.1 — it was once a day); every open with reduced
+ * motion fades the world in over 200ms instead. It runs on the frame `drawWorld` has just painted, fitted (All):
  *   1. the today line draws top to bottom (420ms, ease-out, from faint); the ruler's dates fade down one after
  *      another (260ms each, 40ms apart);
  *   2. each row starts at 260ms + 28ms a row + 90ms for each group heading above it (a campaign too long for 28ms a
@@ -18,8 +18,11 @@
  * `finish()` jumps everything to its end state at once (a touch anywhere) and hands back to the caller, who repaints.
  */
 
-/** the day the full first look last played on this device (a local date stamp; `firstTimeToday`'s format) */
-export const BW_LOOK_KEY = "bw1.firstLook.day";
+/** polish v1.1: the once-a-day memory is retired (the grow-in plays on every arrival); its key is cleared on sight */
+export const BW_LOOK_RETIRED_KEY = "bw1.firstLook.day";
+/** a DEV-ONLY switch for the measurements that read the world at rest: with it set, an arrival fades instead (the
+ *  call site's MODE test folds it out of a production build) */
+export const BW_E2E_NOLOOK_KEY = "sa.e2e.bw-nolook";
 /** the full first look's length (ref `dur` for grow2) */
 export const LOOK_MS = 2000;
 /** every other open: the world fades in */

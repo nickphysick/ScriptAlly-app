@@ -144,9 +144,9 @@ async function press(page: Page, sel: string, timeout = 15_000) {
 }
 const stageTo = (page: Page, y: number) => page.evaluate((yy) => { document.getElementById("app-stage-scroll")?.scrollTo({ top: yy, behavior: "instant" as ScrollBehavior }); }, y);
 const stageTop = (page: Page) => page.evaluate(() => document.getElementById("app-stage-scroll")?.scrollTop ?? -1);
-const REPLAY_KEYS = ["pa41.birds-view.replayed", "pa41.birds-card.replayed", "bw1.firstLook.day"]; /* + Birds-eye first look v1 */
-const clearReplays = (page: Page) => page.evaluate((ks) => { try { for (const k of ks) localStorage.removeItem(k); } catch { /* none */ } }, REPLAY_KEYS);
-const markReplayed = (page: Page) => page.evaluate((ks) => { try { const d = new Date(); const t = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; for (const k of ks) localStorage.setItem(k, t); } catch { /* none */ } }, REPLAY_KEYS);
+const REPLAY_KEYS = ["pa41.birds-view.replayed", "pa41.birds-card.replayed"];
+const clearReplays = (page: Page) => page.evaluate((ks) => { try { for (const k of ks) localStorage.removeItem(k); localStorage.removeItem("sa.e2e.bw-nolook"); } catch { /* none */ } }, REPLAY_KEYS);
+const markReplayed = (page: Page) => page.evaluate((ks) => { try { const d = new Date(); const t = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; for (const k of ks) localStorage.setItem(k, t); localStorage.setItem("sa.e2e.bw-nolook", "1"); /* polish v1.1: Birds-eye arrivals fade */ } catch { /* none */ } }, REPLAY_KEYS);
 const blockIntoView = async (page: Page) => {
   await page.evaluate(() => document.querySelector('[data-bwq="card"]')?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior })); /* polish v1: My queries */
   await page.waitForTimeout(500);
