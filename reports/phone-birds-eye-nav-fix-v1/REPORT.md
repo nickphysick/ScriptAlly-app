@@ -54,5 +54,6 @@ That is 100 readings.
 
 ## Commit, dev
 
-- Commit: COMMIT
-- Dev: DEV
+- **Commit:** e87a1cc85 on `phone-birds-eye-nav-fix-v1`.
+- **Dev:** `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1` (ee23a2732) is the fix merged onto `…-qc1723-bfl1`, which is what dev served (`index-CTspvepm.js`: first look v1 over Query Centre v172.3, the query sheet, Birds-eye v3.3 and rows v1.3). It now serves **`index-C8iGokPv.js`**.
+- **On the merged tree:** tsc exits 0. Vitest's first run timed out two source-scanning tests (`statusMarksV3Sources`, `accountFollowUps`, 5s each, under load); both pass re-run on their own (12 of 12).
