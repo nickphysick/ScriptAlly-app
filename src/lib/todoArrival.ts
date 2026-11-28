@@ -273,3 +273,15 @@ export function aheadSteps(stages: readonly string[], who: { name: string; first
     }
   });
 }
+
+/* ── the list's figure, tucked (Phase 5) ─────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The tray figure in two lines at every width: the number and its "day"/"days" on the first, the rest of the approved
+ * wording ("waiting", "since your reminder", "since it came in", "past its date", "past expected", "left", "quiet")
+ * under it. The words are trayFigure's, unchanged — only the leading "days" moves up.
+ */
+export function tuckFigure(f: { n: string; words: string }): { n: string; unit: string; rest: string } {
+  const m = /^(days?)(?:\s+(.*))?$/.exec(f.words.trim());
+  return m ? { n: f.n, unit: m[1], rest: (m[2] ?? "").trim() } : { n: f.n, unit: "", rest: f.words.trim() };
+}

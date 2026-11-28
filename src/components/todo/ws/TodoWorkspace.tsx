@@ -62,7 +62,7 @@ import "./todoWs57.css";
 import "./todoWs58.css";
 import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
 import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
-import { aheadSteps, asksLine, deskMode, rememberTodoTask, rememberedTodoTask, selectedTask, storedAsks, todoTaskScope } from "../../../lib/todoArrival";
+import { aheadSteps, asksLine, deskMode, tuckFigure, rememberTodoTask, rememberedTodoTask, selectedTask, storedAsks, todoTaskScope } from "../../../lib/todoArrival";
 import { CJ_SPECS } from "../../queries/centre/cardJourneySpecs";
 import { cardJourneyHosted } from "../../../lib/queryPanelStore";
 import { byEventOrder, getActivityTime } from "../../../lib/queryDerivation";
@@ -550,7 +550,10 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         {avatar(t)}
         <span className="tws-tx"><b>{t.title}</b><span>{t.kind === "own" ? "Your task" : t.agency || t.agentName || ""}</span></span>
         {house ? <span className="tws-qf" data-tws="quick-fill">Quick fill</span>
-          : <span className="tws-du" data-tws="figure" data-late={fig?.late ? "" : undefined}>{fig ? <><b>{fig.n}</b>{fig.words ? <small>{fig.words}</small> : null}</> : null}</span>}
+          /* To-do arrival v1 · Phase 5 — tucked at every width: "{n} days" on the first line, the rest of the words under it */
+          : <span className="tws-du" data-tws="figure" data-late={fig?.late ? "" : undefined}>{fig ? (() => { const f = tuckFigure(fig); return (
+              <><span className="tws-du1"><b>{f.n}</b>{f.unit ? <> <span>{f.unit}</span></> : null}</span>{f.rest ? <small>{f.rest}</small> : null}</>
+            ); })() : null}</span>}
         <span className="tws-qact">
           <span role="button" tabIndex={0} aria-label={t.kind === "own" ? "Move it" : "Snooze"} title={t.kind === "own" ? "Move it" : "Snooze"}
             onClick={(e) => { e.stopPropagation(); go(t.key); setPop({ kind: "snooze", opener: e.currentTarget as HTMLElement }); }}>{ZZ}</span>

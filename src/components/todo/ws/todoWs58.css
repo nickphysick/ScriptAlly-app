@@ -102,15 +102,18 @@
      (todoWs.css still draws a terracotta edge on [data-late]; this takes it away). ── */
   .tws .tws-dchip, .tws .tws-dchip[data-late] { box-shadow: none; }
 
-  /* ── v58.1 · 4 · on a narrow tray (360px or less) the figure's words drop under its number, right-aligned, so the
-     title keeps its line; wider, the figure stays on one line as v58 built it. The tray is a NAMED size container (its
+  /* ── v58.1 · 4 · (superseded by To-do arrival v1 · Phase 5, below: tucked at every width) the figure's words drop
+     under its number, right-aligned, so the title keeps its line. The tray is a NAMED size container (its
      width is its grid column's clamp, never its content), so no unnamed @container query inside it changes target;
      the collapsed strip is left out. ── */
   .tws .tws-tray:not([data-slim]) { container: tws581tray / inline-size; }
-  @container tws581tray (max-width: 360px) {
-    .tws .tws-ti .tws-du { flex-direction: column; align-items: flex-end; gap: 1px; }
-    .tws .tws-ti .tws-du small { font-size: 13px; }
-  }
+  /* To-do arrival v1 · Phase 5 — TUCKED AT EVERY WIDTH (the 360px threshold is gone): the number and "days" on the first
+     line, on the right; the rest of the wording under it, right-aligned, italic, at the secondary size. The collapsed
+     strip, the phone and the desk chip are untouched. */
+  .tws .tws-ti .tws-du { flex-direction: column; align-items: flex-end; gap: 1px; }
+  .tws .tws-ti .tws-du .tws-du1 { display: block; white-space: nowrap; font: 15px/1.2 var(--tw-serif); color: var(--sp-quiet); }
+  .tws .tws-ti .tws-du .tws-du1 b { display: inline; }
+  .tws .tws-ti .tws-du small { font: italic var(--sp-sec-size)/1.2 var(--tw-serif); color: var(--sp-quiet); }
 
   /* ── v58.1 · 5 · Housekeeping's ruled line stops short of Quick fill instead of running under it; the button and the
      chevron do not move. The ref's 96px leaves the rule 1px under the button on the app (measured: rule end 414, button
