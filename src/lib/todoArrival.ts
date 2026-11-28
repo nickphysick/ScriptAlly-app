@@ -158,7 +158,7 @@ export function hawkLine(piles: readonly Pile[], userFirst: string, now: Date): 
       return `${hi} ${N} ${s(n, "nudge is", "nudges are")} due.${who ? ` ${who} has waited longest.` : ""}`;
     }
     case "quiet": return `${hi} ${N} ${s(n, "query has", "queries have")} gone quiet. Each one needs a decision from you: a nudge, or closing it.`;
-    case "yours": return `${hi} ${N} of your own ${s(n, "task is", "tasks are")} on the list, so start there.`;
+    case "yours": return `${hi} ${N} of your own tasks ${s(n, "is", "are")} on the list, so start there.`;
     case "house": return `${hi} Only housekeeping is left, and none of it is urgent.`;
     case "rest": return hi;
     default: { const unhandled: never = p.id; return unhandled; }

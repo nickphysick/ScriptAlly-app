@@ -1,0 +1,91 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do arrival v1 (design-refs/todo-arrival-v1/) — "WHERE TO START", ON THE PAGE. The run-through sits on the desk
+ * column's own ground (`.tws-desk`, --tw-deskbg): no white desk card, no navy bar. Sizes are the ref's, which are the
+ * app's (the button is `.tws-go`, the hawk is `.tws-mnote`, the discs are the tray's glyphs); colours are the desk's
+ * tokens. Desktop only, like the workspace.
+ */
+@media (min-width: 768px) {
+  /* the run-through fills the desk column; it is a size container, so the waiting line can step aside on a short screen */
+  .tws .twa-run {
+    flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding: 0 14px 0 12px; overflow: hidden;
+    container: twarun / size;
+  }
+  /* the heading row: the height and top of the desk's own bar, so the run-through starts where the desk does */
+  .tws .twa-head { flex: none; min-height: 58px; display: flex; align-items: center; gap: 14px; padding-top: 4px; }
+  .tws .twa-head h2.twa-h { margin: 0; font: var(--sp-h-section) !important; color: var(--tw-ink); white-space: nowrap; }
+  .tws .twa-head em { font: italic 16px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
+
+  /* the hawk, its line, and Start */
+  .tws .twa-top { flex: none; display: flex; align-items: center; gap: 24px; margin-top: -6px; }
+  .tws .twa-top .twa-mnote { flex: 1; min-width: 0; margin: 0; }
+  .tws .twa-top .twa-mnote img { mix-blend-mode: multiply; }
+  .tws .twa-top .twa-mnote p { max-width: 640px; }
+  .tws .twa-or { flex: none; font: italic 14px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
+  .tws .twa-top .tws-go { flex: none; }
+
+  /* the piles: one row, one white card per group, its fill and edge the group's own */
+  .tws .twa-piles { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 16px; }
+  .tws .twa-pile {
+    all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr; column-gap: 14px; padding: 14px 16px; border-radius: 14px; background: #fff;
+    box-shadow: inset 0 0 0 1px var(--twa-pe); min-height: 142px; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .tws .twa-pile:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 1px var(--twa-pe), 0 6px 16px rgba(42, 58, 82, 0.1); }
+  .tws .twa-pile:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+  .tws .twa-pile[data-lit] { box-shadow: inset 0 0 0 1.5px var(--tw-navy), 0 6px 16px rgba(42, 58, 82, 0.1); }
+  .tws .twa-big { grid-row: 1 / span 2; align-self: start; font: 400 40px/1 var(--tw-type); color: var(--tw-ink); }
+  .tws .twa-pt { align-self: end; font: 600 17px/1.25 var(--tw-serif); color: var(--tw-ink); }
+  .tws .twa-sub { font: italic 14.5px/1.35 var(--tw-serif); color: var(--sp-quiet); }
+  .tws .twa-pile[data-quiet] :is(.twa-big, .twa-pt) { color: var(--sp-quiet); }
+  .tws .twa-discs { grid-column: 1 / -1; align-self: end; display: flex; align-items: center; margin-top: 12px; }
+  .tws .twa-more { margin-left: 16px; font: 14.5px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
+
+  /* a disc: the tray row's glyph, round, in its stage colour, ringed in the ground it sits on */
+  .tws .tws-av.twa-av { width: 30px; height: 30px; border-radius: 50%; margin-right: -7px; background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1px var(--tw-hair), 0 0 0 2px #fff; }
+  .tws .tws-av.twa-av[data-tws58-stage] { background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge), 0 0 0 2px #fff; }
+  .tws .tws-av.twa-av[data-k="own"] { color: #b9ae9f; box-shadow: inset 0 0 0 1.6px #b9ae9f, 0 0 0 2px #fff; }
+  .tws .tws-av.twa-av svg { width: 17px; height: 17px; }
+  .tws .tws-av.twa-av[data-k="own"] svg { width: 13px; height: 13px; }
+
+  /* each group's fill (lit rows sit on it) and edge (its pile's line) */
+  .tws :is(.twa-pile[data-twa-pile="wait"], .tws-tl[data-twa-lit="wait"]) { --twa-pf: #fbf1ec; --twa-pe: #ecd3c6; }
+  .tws :is(.twa-pile[data-twa-pile="nudge"], .tws-tl[data-twa-lit="nudge"]) { --twa-pf: #f8f4ec; --twa-pe: #e6dccb; }
+  .tws :is(.twa-pile[data-twa-pile="quiet"], .tws-tl[data-twa-lit="quiet"]) { --twa-pf: #f3efe9; --twa-pe: var(--tw-hair); }
+  .tws :is(.twa-pile[data-twa-pile="yours"], .tws-tl[data-twa-lit="yours"]) { --twa-pf: #f6efe0; --twa-pe: #e6dcc4; }
+  .tws :is(.twa-pile[data-twa-pile="house"], .tws-tl[data-twa-lit="house"]) { --twa-pf: #f3f4f6; --twa-pe: #dfe1e6; }
+  .tws :is(.twa-pile[data-twa-pile="rest"], .tws-tl[data-twa-lit="rest"]) { --twa-pf: #f3efe9; --twa-pe: var(--tw-hair); }
+
+  /* the waiting line */
+  .tws .twa-line { flex: none; min-width: 0; }
+  .tws .twa-lh { margin: 0; font: 600 16px var(--tw-serif); color: var(--tw-ink); }
+  .tws .twa-lh span { margin-left: 8px; font: italic 400 14px var(--tw-serif); color: var(--sp-quiet); }
+  .tws .twa-track { position: relative; height: 106px; }
+  .tws .twa-axis { position: absolute; left: 14px; right: 14px; top: 62px; height: 2px; background: #e6dfd4; }
+  .tws .twa-tick { position: absolute; top: 86px; transform: translateX(-50%); font: 13px var(--tw-serif); color: var(--sp-quiet); white-space: nowrap; }
+  .tws .twa-dot { all: unset; position: absolute; top: 49px; width: 28px; height: 28px; border-radius: 50%; transform: translateX(-50%); cursor: pointer; box-shadow: 0 0 0 2px var(--tw-deskbg); }
+  .tws .twa-dot .tws-av.twa-av { width: 28px; height: 28px; margin: 0; }
+  .tws .twa-dot:hover, .tws .twa-dot[data-lit] { box-shadow: 0 0 0 2px var(--tw-deskbg), 0 0 0 4px var(--tw-navy); }
+  .tws .twa-dot:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 3px; }
+  .tws .twa-lab { position: absolute; top: 22px; transform: translateX(-50%); font: 13.5px var(--tw-serif); color: var(--tw-ink); white-space: nowrap; pointer-events: none; }
+  .tws .twa-lab b { font-weight: 600; }
+  .tws .twa-lab i { font-style: italic; color: var(--sp-quiet); }
+  .tws .twa-brk { position: absolute; top: 24px; height: 14px; border: 1.5px solid #dab29f; border-bottom: 0; border-radius: 6px 6px 0 0; pointer-events: none; }
+  .tws .twa-brk span { position: absolute; bottom: 16px; left: 0; font: 13.5px var(--tw-serif); color: var(--tw-bubble-ink); white-space: nowrap; }
+
+  /* lights up with the desk: the lit rows at full strength on their pile's fill, every other row at 45% */
+  .tws .tws-tl[data-twa-lit] .tws-ti { opacity: 0.45; transition: opacity 0.15s, background 0.15s; }
+  .tws .tws-tl[data-twa-lit] .tws-ti[data-twa-lit] { opacity: 1; background: var(--twa-pf); }
+
+  /* the desk opened from "Where to start": load v1's 220ms fade, no slide */
+  .tws .tws-wsx.tws-in[data-twa-fade] { animation: twa-fade 0.22s ease-out both; }
+  @keyframes twa-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tws .twa-pile, .tws .tws-tl[data-twa-lit] .tws-ti { transition: none; }
+    .tws .twa-pile:hover { transform: none; }
+    .tws .tws-wsx.tws-in[data-twa-fade] { animation: none; }
+  }
+}

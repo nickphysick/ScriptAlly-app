@@ -65,7 +65,8 @@ import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
 import { deskMode, rememberTodoTask, rememberedTodoTask, selectedTask, todoTaskScope } from "../../../lib/todoArrival";
 import { activeManuscriptOf } from "../../../lib/events";
 import { STAGE_REPLAY_EVENT } from "../../shell/BarSwitcher";
-import { WsRunThrough } from "./WsRunThrough";
+import { WsRunThrough, type RunLight } from "./WsRunThrough";
+import "./todoArrival.css";
 
 const MENTOR = "/images/todo/mentor.webp";
 const HOUR = "/images/todo/hour.webp";
@@ -216,7 +217,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* ⚠️ DECLARED ABOVE `go`, which resets its skips (moved to useWsBatch, unchanged) */
   const batch = useWsBatch(sel, selKey, setSelKey, all);
   const { bRemaining, bCur, deskT } = batch;
+  /* To-do arrival v1: the desk opened from "Where to start" appears with load v1's 220ms fade, and no slide. Held by
+     key (never cleared on a timer), so the attribute never changes on a mounted desk and its animation never restarts */
+  const [fadeKey, setFadeKey] = useState<string | null>(null);
   const go = useCallback((key: string | null) => {
+    setFadeKey(key && !selRef.current ? key : null);
     setSelKey(key); setA({}); setQi(0); setMile(null); setAdding(false); setPop(null); setLinkPicking(false); batch.resetSkip(); setBatchView(null); setBatchFocus(null);
     /* the row is brought into the tray's own view; never scrollIntoView, which would scroll the page too */
     if (key) requestAnimationFrame(() => {
@@ -461,7 +466,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const statBook = manuscripts.length === 1 ? (manuscripts[0].title ?? "").trim() || null : null;
   /* ── v53 (D3): the breakdown bar reads the category groups the tray draws, so its counts are the groups' counts ── */
   /* v55 (D4): read off EVERY task, never the filtered view — a search or a filter narrows the list, never the counts */
-  const bd = useMemo(() => breakdownOf(wsSections(all, "category")), [all]);
+  const catSections = useMemo(() => wsSections(all, "category"), [all]);
+  const bd = useMemo(() => breakdownOf(catSections), [catSections]);
+  /* To-do arrival v1: "Where to start" is on the desk (nothing open, something needs the writer); what it lights */
+  const running = deskMode({ loaded, all, selected: !!sel }) === "run" && !adding;
+  const [runLight, setRunLightState] = useState<RunLight>(null);
+  const setRunLight = (l: RunLight) => setRunLightState(running ? l : null);
+  const litNow: RunLight = running ? runLight : null;
   const jump = (id: string) => {
     setShut((x) => { const n = new Set(x); n.delete(id); return n; });
     /* the TRAY scrolls, never the page: its own scrollTop, never scrollIntoView */
@@ -495,25 +506,40 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const clearFilters = () => setFilters((f) => ({ ...f, types: new Set(), whens: new Set() }));
   const fLine = filterLine(filters, visible.length, all.length);
 
+  /**
+   * v53 (D4): every row leads with its glyph — the query's status (StatusDot), a nudge's "!" ring, Gone quiet's dotted
+   * ring, a form for housekeeping, a real tick for the writer's own task. To-do arrival v1: one drawing for the row and
+   * the run-through's discs; a disc (`cls` given) carries its own stage colours, as the row carries them for its glyph.
+   */
+  const avatar = (t: WsTask, cls?: string) => {
+    const glyph = t.kind === "nudge" ? NUDGE_MARK : t.kind === "quiet" ? QUIET_MARK
+      : t.query ? <StatusDot status={t.query.status as QueryStatus} overrideSize={20} decorative /> : null;
+    const k = t.kind === "own" ? "own" : t.group === "house" ? "form" : glyph ? "glyph" : undefined;
+    const stage = cls ? wsStage(t) : null;
+    return (
+      <span className={cls ? `tws-av ${cls}` : "tws-av"} data-k={k} data-tws={cls ? undefined : "glyph"} aria-hidden="true"
+        data-tws58-stage={stage ?? undefined} style={cls ? stageVars(stage, t.query?.status) as React.CSSProperties | undefined : undefined}>
+        {k === "own" ? TICK : k === "form" ? FORM : glyph ?? initialsOf(t.agentName || t.title)}
+      </span>
+    );
+  };
   const row = (t: WsTask) => {
     const fig = trayFigure(t, now);
     const on = !!sel && sel.key === t.key && !adding;
     const house = t.group === "house";
     /* v58: the query's stage, as custom properties the glyph's disc reads (none for an own task or housekeeping) */
     const stage = wsStage(t);
-    /* v53 (D4): every row leads with its glyph — the query's status (StatusDot), a nudge's "!" ring, Gone quiet's dotted
-       ring, a form for housekeeping, a real tick for the writer's own task */
-    const glyph = t.kind === "nudge" ? NUDGE_MARK : t.kind === "quiet" ? QUIET_MARK
-      : t.query ? <StatusDot status={t.query.status as QueryStatus} overrideSize={20} decorative /> : null;
+    /* To-do arrival v1: while "Where to start" shows, a row lights with its pile or its disc, and lights its disc */
+    const runLit = litNow ? litNow.keys.has(t.key) : false;
     return (
       <div key={t.key} className="tws-ti" role="button" tabIndex={0} data-tws-row={t.key} data-kind={t.kind} aria-current={on ? "true" : undefined}
         data-tws58-stage={stage ?? undefined} style={stageVars(stage, t.query?.status) as React.CSSProperties | undefined}
         data-ticked={held?.task.key === t.key ? "" : undefined} data-leaving={held?.task.key === t.key && held.phase === "leave" ? "" : undefined}
+        data-twa-lit={runLit ? "" : undefined}
+        onMouseEnter={running ? () => setRunLight({ src: "task", key: t.key, group: t.group, keys: new Set([t.key]) }) : undefined}
+        onMouseLeave={running ? () => setRunLight(null) : undefined}
         onClick={() => go(t.key)} onKeyDown={(e) => { if (e.key === "Enter") go(t.key); }} title={t.title}>
-        {t.kind === "own" ? <span className="tws-av" data-k="own" data-tws="glyph" aria-hidden="true">{TICK}</span>
-          : house ? <span className="tws-av" data-k="form" data-tws="glyph" aria-hidden="true">{FORM}</span>
-          : glyph ? <span className="tws-av" data-k="glyph" data-tws="glyph" aria-hidden="true">{glyph}</span>
-          : <span className="tws-av" data-tws="glyph" aria-hidden="true">{initialsOf(t.agentName || t.title)}</span>}
+        {avatar(t)}
         <span className="tws-tx"><b>{t.title}</b><span>{t.kind === "own" ? "Your task" : t.agency || t.agentName || ""}</span></span>
         {house ? <span className="tws-qf" data-tws="quick-fill">Quick fill</span>
           : <span className="tws-du" data-tws="figure" data-late={fig?.late ? "" : undefined}>{fig ? <><b>{fig.n}</b>{fig.words ? <small>{fig.words}</small> : null}</> : null}</span>}
@@ -638,7 +664,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
     }
     /* To-do arrival v1: nothing open and something needs the writer — "Where to start", on the page (no desk card) */
-    if (mode === "run") return <WsRunThrough key="run" today={today} />;
+    if (mode === "run") return <WsRunThrough key="run" now={new Date(now)} userFirst={userFirst} all={all} sections={catSections} first={order[0] ?? null}
+      glyph={avatar} onOpen={(k) => { setRunLightState(null); go(k); }} lit={litNow} onLight={setRunLight} />;
     if (!sel) {
       return (
         <div className="tws-wsx"><div className="tws-calm">
@@ -834,7 +861,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     );
 
     return (
-      <div key={t.key} className="tws-wsx tws-in" data-tws="desk" data-phase={held?.task.key === t.key ? held.phase : undefined} style={{ containerType: "inline-size" } as React.CSSProperties}>
+      <div key={t.key} className="tws-wsx tws-in" data-tws="desk" data-twa-fade={fadeKey === sel.key ? "" : undefined} data-phase={held?.task.key === t.key ? held.phase : undefined} style={{ containerType: "inline-size" } as React.CSSProperties}>
         {isBatch ? (
           <WsBatch54 key={`${sel.key}|${bQueue.length}`} queue={bQueue} queries={queries} agents={agents} wordCount={ms?.wordCount ?? null}
             view={batchViewNow} onView={pickBatchView} updateQuery={(id, patch) => db.updateQuery(id, patch)} flash={flash}
@@ -920,7 +947,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                   <p className="tws55-fline" data-tws55="fline">{fLine} · <button type="button" data-tws55="fline-clear" onClick={clearFilters}>Clear</button></p>
                 ) : null}
               </div>
-              <div className="tws-tl" data-tws="list">{trayBody}</div>
+              <div className="tws-tl" data-tws="list" data-twa-lit={litNow ? (litNow.src === "pile" ? litNow.id : litNow.group) : undefined}>{trayBody}</div>
             </aside>
             )}
             <section className="tws-desk" data-tws="desk-col">{desk}
