@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "L14",
+  "where": "no “That’s all” under the list",
+  "ok": false,
+  "detail": "That’s all 88"
+ },
+ {
+  "lock": "L14",
+  "where": "Include closed is a checkbox",
+  "ok": false,
+  "detail": "0 .qs172-ck--closed checkbox"
+ },
+ {
+  "lock": "L14",
+  "where": "population · three sliders",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "L14",
+  "where": "slider 0 · thumb centres on the track ends",
+  "ok": false,
+  "detail": "in 125.0–367.0 · track 134.0–358.0"
+ },
+ {
+  "lock": "L14",
+  "where": "slider 1 · thumb centres on the track ends",
+  "ok": false,
+  "detail": "in 125.0–367.0 · track 134.0–358.0"
+ },
+ {
+  "lock": "L14",
+  "where": "slider 2 · thumb centres on the track ends",
+  "ok": false,
+  "detail": "in 125.0–367.0 · track 134.0–358.0"
+ }
+]

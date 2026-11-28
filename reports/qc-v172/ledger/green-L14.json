@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "L14",
+  "where": "no “That’s all” under the list",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "lock": "L14",
+  "where": "Include closed is a checkbox",
+  "ok": true,
+  "detail": "1 .qs172-ck--closed checkbox"
+ },
+ {
+  "lock": "L14",
+  "where": "ticked by default",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L14",
+  "where": "population · a Closed group with it ticked",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L14",
+  "where": "unticked: no Closed group",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "L14",
+  "where": "ticked again: the Closed group is back",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "L14",
+  "where": "population · three sliders",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "L14",
+  "where": "slider 0 · thumb centres on the track ends",
+  "ok": true,
+  "detail": "in 127.0–365.0 · track 134.0–358.0"
+ },
+ {
+  "lock": "L14",
+  "where": "slider 1 · thumb centres on the track ends",
+  "ok": true,
+  "detail": "in 127.0–365.0 · track 134.0–358.0"
+ },
+ {
+  "lock": "L14",
+  "where": "slider 2 · thumb centres on the track ends",
+  "ok": true,
+  "detail": "in 127.0–365.0 · track 134.0–358.0"
+ }
+]

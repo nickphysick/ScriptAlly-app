@@ -7,12 +7,6 @@
  },
  {
   "lock": "L6",
-  "where": "folded · pills read the shell token",
-  "ok": true,
-  "detail": "1 pill words"
- },
- {
-  "lock": "L6",
   "where": "folded · sizes",
   "ok": true,
   "detail": "33 nodes, all in the set"
@@ -27,7 +21,7 @@
   "lock": "L6",
   "where": "More filters open · pills read the shell token",
   "ok": true,
-  "detail": "8 pill words"
+  "detail": "7 pill words"
  },
  {
   "lock": "L6",

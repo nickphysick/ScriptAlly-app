@@ -23,7 +23,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openQc } from "./nb1Lib";
-import { liftMotionSuppression, visiblePage } from "./measure";
+import { liftMotionSuppression, openRoute, visiblePage } from "./measure";
 
 test.setTimeout(300_000);
 const DIR = "reports/qc-v172";
@@ -277,7 +277,8 @@ test("L6 · the panel's type sizes: 12, 14, 16, 18 or 20px only", async ({ page 
     }, V);
     L.check(`${where} · population`, r.length > 20, `${r.length} text nodes`);
     const bad = r.filter((x) => (x.pill != null ? x.px !== x.pill : ![12, 14, 16, 18, 20].includes(x.px)));
-    L.check(`${where} · pills read the shell token`, r.some((x) => x.pill != null && x.pill > 0), `${r.filter((x) => x.pill != null).length} pill words`);
+    /* v172.4 — Include closed is a tick now, so the folded panel has no pill; the pills are checked with More filters open */
+    if (where !== "folded") L.check(`${where} · pills read the shell token`, r.some((x) => x.pill != null && x.pill > 0), `${r.filter((x) => x.pill != null).length} pill words`);
     L.check(`${where} · sizes`, bad.length === 0, bad.slice(0, 6).map((x) => `"${x.t}" ${x.px}px`).join("; ") || `${r.length} nodes, all in the set`);
   };
   await read("folded");
@@ -286,7 +287,7 @@ test("L6 · the panel's type sizes: 12, 14, 16, 18 or 20px only", async ({ page 
   await page.locator(`${V}.qs172-dd`).click();
   await page.waitForTimeout(400);
   await read("More filters open");
-  L.done(6);
+  L.done(5);
 });
 
 /* ── v172.1 ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -476,4 +477,35 @@ test("L13 · every reached step has a date line (a dash when none); future steps
   const filled = fut.filter((x) => x.em);
   L.check("future steps have none", filled.length === 0, filled.slice(0, 5).map((x) => `${x.name}: "${x.em}"`).join("; ") || "none");
   L.done(3);
+});
+
+/* ── v172.4 · the list just ends, the handles, the closed tick, the loading shell, the arrival, the opening state ─── */
+
+test("L14 · the list just ends; Include closed is a tick that adds and removes the Closed group; handles centred on the track's ends", async ({ page }) => {
+  const L = new Ledger("L14");
+  const V = await openList(page, WIDE);
+  const txt = await page.locator(`${V}.qc151`).first().innerText();
+  L.check("no “That’s all” under the list", !/That’s all/.test(txt), /That’s all \d+/.exec(txt)?.[0] ?? "none");
+  const closedKeys = () => page.evaluate((V) => document.querySelectorAll(`${V}.qc169 [data-qc1511='group'][data-k='closed'], ${V}.qc169 [data-qc153='fold'][data-k='closed']`).length, V);
+  const box = page.locator(`${V}.qs172-ck--closed input[type='checkbox']`);
+  L.check("Include closed is a checkbox", (await box.count()) === 1, `${await box.count()} .qs172-ck--closed checkbox`);
+  if (await box.count()) {
+    L.check("ticked by default", await box.isChecked(), String(await box.isChecked()));
+    const on = await closedKeys();
+    await box.uncheck(); await page.waitForTimeout(600);
+    const off = await closedKeys();
+    await box.check(); await page.waitForTimeout(600);
+    const back = await closedKeys();
+    L.check("population · a Closed group with it ticked", on === 1, `${on}`);
+    L.check("unticked: no Closed group", off === 0, `${off}`);
+    L.check("ticked again: the Closed group is back", back === 1, `${back}`);
+  }
+  const sl = await page.evaluate((V) => [...document.querySelectorAll<HTMLElement>(`${V}.qs172-dual`)].map((d) => {
+    const tr = d.querySelector<HTMLElement>(".tr")!.getBoundingClientRect(); const inp = d.querySelector<HTMLInputElement>("input")!.getBoundingClientRect();
+    return { trL: tr.left, trR: tr.right, inL: inp.left, inR: inp.right };
+  }), V);
+  L.check("population · three sliders", sl.length === 3, `${sl.length}`);
+  /* a 14px thumb's centre sits 7px in from each end of its input: on the track's ends when the input overhangs 7px */
+  for (const [i, s] of sl.entries()) L.check(`slider ${i} · thumb centres on the track ends`, Math.abs(s.inL + 7 - s.trL) <= 0.5 && Math.abs(s.inR - 7 - s.trR) <= 0.5, `in ${s.inL.toFixed(1)}–${s.inR.toFixed(1)} · track ${s.trL.toFixed(1)}–${s.trR.toFixed(1)}`);
+  L.done(10);
 });

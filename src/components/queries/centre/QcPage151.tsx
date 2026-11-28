@@ -134,7 +134,6 @@ export interface QcPage151Props {
   onOpen: (id: string) => void;
   /** v151.2 — the row's one action (lib/qc1512 `rowAct`): its journey's mode */
   onAct: (id: string, mode?: DrawerMode) => void;
-  signoff: { total: number } | null;
   /** v153 — the slip's "Sent with": the package's name, or null when none is recorded */
   packageNameOf: (r: QcRow) => string | null;
   /** v153.1 — the query's agent, for the slip's "Their policy" box */
@@ -478,20 +477,6 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
             </div>
           )}
 
-          {/* the sign-off: All, nothing narrowing, List only */}
-          {!birds && p.signoff ? (
-            <section className="qc151-end" data-qc151="signoff">
-              <img src="/images/query-centre/quill-ink.webp" alt="" />
-              <div>
-                <h2>That’s all {p.signoff.total}.</h2>
-                <p>When you send the next one, log it here and QueryHawk will keep count of the days.</p>
-              </div>
-              <div className="qc151-end-b">
-                <button type="button" className="qc151-btn qc151-btn--g" data-qc151="import" onClick={p.onImport}>Import from a spreadsheet</button>
-                <button type="button" className="qc151-btn qc151-btn--g" data-qc151="signoff-log" onClick={p.onLog}>+ Log a query</button>
-              </div>
-            </section>
-          ) : null}
         </div>
       </div>
     </div>

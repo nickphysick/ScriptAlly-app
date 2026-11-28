@@ -8376,7 +8376,6 @@ export const Queries: React.FC<{
                     const req = r ? trayOpen(qcComing.get(id)?.bucket ?? null, r) : null;
                     if (req) stepRow(req); else onOpenQuery?.(id);
                   }}
-                  signoff={!showGridSkeleton && qcScoped.length > 0 && qcF138.where === null && qc140Chips.length === 0 ? { total: qcScoped.length } : null}
                   onImport={() => onNavigate?.("import")}
                   packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
                   agentOf={(r) => qcLivingAgents.get(r.query.agentId) ?? null}
