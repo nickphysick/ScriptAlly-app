@@ -2,7 +2,9 @@
 
 Branch `phone-birds-eye-polish-v1-1`, cut from `origin/phone-birds-eye-polish-v1` (fbb71691f). Main had not moved. Pushed, not merged. Below 768px only.
 
-DEPLOY
+- **Dev:** `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1-pol1-tnd1-qc1725-pol11` (3969b67a2) is this branch merged onto `…-pol1-tnd1-qc1725`, which is what dev served (`index-BvCUmG2F.js`: Query Centre v172.5 over To-do nudge desk v1 over polish v1). A rebuild of that branch gave exactly `index-BvCUmG2F.js`. It now serves **`index-BVKPIF2R.js`**.
+- **The merge:** its one conflict was `design-refs/.refhashes.json`; both sides' entries are kept. The other side carried polish v1's entry a second time, so one copy was dropped, with the same hash (a commit of its own).
+- **On the merged tree:** tsc exits 0; Vitest has 989 files passed, 1 skipped (990), and 13963 tests passed, 4 skipped (13967).
 
 ## Why the animation didn't play for Nick
 
@@ -28,7 +30,7 @@ The baseline was recorded at fbb71691f (the same source as polish v1's final).
 | 683147474 | Part 1: the grow-in plays on every arrival (and the refs) |
 | 2d16ad6d0 | Part 2: the slim header, tidied |
 | d21a743f6 | Part 3: My queries reworked |
-| PART4 | Locks, screenshots, report; with two fixes BP-13 and BP-14 found in part 3 (the card's top margin, the bars' room) |
+| bf5e03b9e | Locks, screenshots, report; with two fixes BP-13 and BP-14 found in part 3 (the card's top margin, the bars' room) |
 
 ## 1. The grow-in on every arrival
 
@@ -98,4 +100,4 @@ The green pass reads 55 readings, 0 red.
 - **The card beside this pack's refs:** `ref-01-today-my-queries.png` and `ref-02-my-queries-card.png`, against `after-11-today.png` and `after-12-my-queries-card.png`.
 - **Differences other than data:** the ref's Today around the card is a stand-in. Its "11" and "6" are not right-aligned, and the build's are, as asked.
 
-Worktree: WT
+Worktree: `/Users/nickphysick/ScriptAlly-pol11` and the deploy checkout are removed at the end of the session (the closing message confirms it).
