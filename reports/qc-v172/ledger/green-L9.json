@@ -21,13 +21,13 @@
   "lock": "L9",
   "where": "d-out · population",
   "ok": true,
-  "detail": "11 badges"
+  "detail": "10 badges"
  },
  {
   "lock": "L9",
   "where": "d-out · at rest",
   "ok": true,
-  "detail": "11 white on navy"
+  "detail": "10 white on navy"
  },
  {
   "lock": "L9",
@@ -57,12 +57,12 @@
   "lock": "L9",
   "where": "d-quiet · population",
   "ok": true,
-  "detail": "43 badges"
+  "detail": "44 badges"
  },
  {
   "lock": "L9",
   "where": "d-quiet · navy z z z on white",
   "ok": true,
-  "detail": "43 navy on white"
+  "detail": "44 navy on white"
  }
 ]

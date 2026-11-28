@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "L16",
+  "where": "set after loading",
+  "ok": false,
+  "detail": "{\"on\":null,\"off\":null,\"again\":0}"
+ },
+ {
+  "lock": "L16",
+  "where": "cleared by 700ms (+ a frame)",
+  "ok": false,
+  "detail": "never cleared"
+ },
+ {
+  "lock": "L16",
+  "where": "a filter change does not replay it",
+  "ok": true,
+  "detail": "0 replays"
+ },
+ {
+  "lock": "L16",
+  "where": "reduced motion: never set",
+  "ok": true,
+  "detail": "0"
+ }
+]

@@ -23,7 +23,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openQc } from "./nb1Lib";
-import { liftMotionSuppression, visiblePage } from "./measure";
+import { liftMotionSuppression, openRoute, visiblePage } from "./measure";
 
 test.setTimeout(300_000);
 const DIR = "reports/qc-v172";
@@ -277,7 +277,8 @@ test("L6 · the panel's type sizes: 12, 14, 16, 18 or 20px only", async ({ page 
     }, V);
     L.check(`${where} · population`, r.length > 20, `${r.length} text nodes`);
     const bad = r.filter((x) => (x.pill != null ? x.px !== x.pill : ![12, 14, 16, 18, 20].includes(x.px)));
-    L.check(`${where} · pills read the shell token`, r.some((x) => x.pill != null && x.pill > 0), `${r.filter((x) => x.pill != null).length} pill words`);
+    /* v172.4 — Include closed is a tick now, so the folded panel has no pill; the pills are checked with More filters open */
+    if (where !== "folded") L.check(`${where} · pills read the shell token`, r.some((x) => x.pill != null && x.pill > 0), `${r.filter((x) => x.pill != null).length} pill words`);
     L.check(`${where} · sizes`, bad.length === 0, bad.slice(0, 6).map((x) => `"${x.t}" ${x.px}px`).join("; ") || `${r.length} nodes, all in the set`);
   };
   await read("folded");
@@ -286,7 +287,7 @@ test("L6 · the panel's type sizes: 12, 14, 16, 18 or 20px only", async ({ page 
   await page.locator(`${V}.qs172-dd`).click();
   await page.waitForTimeout(400);
   await read("More filters open");
-  L.done(6);
+  L.done(5);
 });
 
 /* ── v172.1 ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -476,4 +477,149 @@ test("L13 · every reached step has a date line (a dash when none); future steps
   const filled = fut.filter((x) => x.em);
   L.check("future steps have none", filled.length === 0, filled.slice(0, 5).map((x) => `${x.name}: "${x.em}"`).join("; ") || "none");
   L.done(3);
+});
+
+/* ── v172.4 · the list just ends, the handles, the closed tick, the loading shell, the arrival, the opening state ─── */
+
+test("L14 · the list just ends; Include closed is a tick that adds and removes the Closed group; handles centred on the track's ends", async ({ page }) => {
+  const L = new Ledger("L14");
+  const V = await openList(page, WIDE);
+  const txt = await page.locator(`${V}.qc151`).first().innerText();
+  L.check("no “That’s all” under the list", !/That’s all/.test(txt), /That’s all \d+/.exec(txt)?.[0] ?? "none");
+  const closedKeys = () => page.evaluate((V) => document.querySelectorAll(`${V}.qc169 [data-qc1511='group'][data-k='closed'], ${V}.qc169 [data-qc153='fold'][data-k='closed']`).length, V);
+  const box = page.locator(`${V}.qs172-ck--closed input[type='checkbox']`);
+  L.check("Include closed is a checkbox", (await box.count()) === 1, `${await box.count()} .qs172-ck--closed checkbox`);
+  if (await box.count()) {
+    L.check("ticked by default", await box.isChecked(), String(await box.isChecked()));
+    const on = await closedKeys();
+    await box.uncheck(); await page.waitForTimeout(600);
+    const off = await closedKeys();
+    await box.check(); await page.waitForTimeout(600);
+    const back = await closedKeys();
+    L.check("population · a Closed group with it ticked", on === 1, `${on}`);
+    L.check("unticked: no Closed group", off === 0, `${off}`);
+    L.check("ticked again: the Closed group is back", back === 1, `${back}`);
+  }
+  const sl = await page.evaluate((V) => [...document.querySelectorAll<HTMLElement>(`${V}.qs172-dual`)].map((d) => {
+    const tr = d.querySelector<HTMLElement>(".tr")!.getBoundingClientRect(); const inp = d.querySelector<HTMLInputElement>("input")!.getBoundingClientRect();
+    return { trL: tr.left, trR: tr.right, inL: inp.left, inR: inp.right };
+  }), V);
+  L.check("population · three sliders", sl.length === 3, `${sl.length}`);
+  /* a 14px thumb's centre sits 7px in from each end of its input: on the track's ends when the input overhangs 7px */
+  for (const [i, s] of sl.entries()) L.check(`slider ${i} · thumb centres on the track ends`, Math.abs(s.inL + 7 - s.trL) <= 0.5 && Math.abs(s.inR - 7 - s.trR) <= 0.5, `in ${s.inL.toFixed(1)}–${s.inR.toFixed(1)} · track ${s.trL.toFixed(1)}–${s.trR.toFixed(1)}`);
+  L.done(10);
+});
+
+test("L15 · the loading shell: the list's own card and heading row with shapes, the panel's own frame; no figure; aria-busy", async ({ page }) => {
+  const L = new Ledger("L15");
+  /* the review aid holds the loading state (useQcLoad: never read in a production build); openRoute signs in and
+     settles ~3s, well inside the hold */
+  await page.addInitScript(() => { try { localStorage.setItem("sa.qc155.holdMs", "12000"); } catch { /* */ } });
+  await openRoute(page, "/queries", WIDE);
+  const r = await page.evaluate(() => {
+    const vis = (e: Element | null) => !!e && (e as HTMLElement).getBoundingClientRect().height > 0;
+    const list = [...document.querySelectorAll<HTMLElement>("[data-qc151='table']")].find(vis) ?? null;
+    const sk = list?.querySelector<HTMLElement>(".qc169-card [data-qc172='skeleton']") ?? null;
+    const head = list?.querySelector<HTMLElement>(".qc169-card .qc169-th") ?? null;
+    const rail = [...document.querySelectorAll<HTMLElement>(".qc153-railcol")].find(vis) ?? null;
+    const rsk = rail?.querySelector<HTMLElement>(".sk172-rail") ?? null;
+    return { busy: list?.getAttribute("aria-busy") ?? null, sk: !!sk, rows: sk?.querySelectorAll(".sk172-row").length ?? 0, head: !!head && vis(head), skText: sk?.innerText ?? "", rail: !!rsk, railText: rsk?.innerText ?? "", old: !!list?.querySelector(".qc155-sk, [data-qc155='skeleton']") };
+  });
+  L.check("the list is busy", r.busy === "true", `aria-busy=${r.busy}`);
+  L.check("the shell sits in the list card", r.sk && r.rows === 8, `${r.sk} · ${r.rows} rows`);
+  L.check("the real heading row above it", r.head, String(r.head));
+  L.check("no figure in the list's shell", r.sk && !/\d/.test(r.skText), JSON.stringify(r.skText.slice(0, 60)));
+  L.check("the panel's own frame", r.rail, String(r.rail));
+  L.check("no figure in the panel's shell", r.rail && !/\d/.test(r.railText), JSON.stringify(r.railText));
+  L.check("the old card-grid skeleton is gone", !r.old, String(r.old));
+  L.done(7);
+});
+
+test("L16 · the arrival: data-en172 after loading, gone by 700ms, not on a filter change; never under reduced motion", async ({ page, browser }) => {
+  const L = new Ledger("L16");
+  await page.setViewportSize(WIDE);
+  /* watch the attribute from the first paint: record when it appears and disappears */
+  await page.addInitScript(() => {
+    const w = window as unknown as { __en172: { on: number | null; off: number | null; again: number } };
+    w.__en172 = { on: null, off: null, again: 0 };
+    new MutationObserver(() => {
+      const el = [...document.querySelectorAll<HTMLElement>(".qc153-list")].find((e) => e.getBoundingClientRect().height > 0);
+      const set = !!el?.hasAttribute("data-en172");
+      if (set && w.__en172.on == null) w.__en172.on = performance.now();
+      else if (set && w.__en172.off != null) w.__en172.again += 1;
+      if (!set && w.__en172.on != null && w.__en172.off == null) w.__en172.off = performance.now();
+    }).observe(document, { subtree: true, attributes: true, attributeFilter: ["data-en172"], childList: true });
+  });
+  const V = await openList(page, WIDE);
+  const a = await page.evaluate(() => (window as unknown as { __en172: { on: number | null; off: number | null; again: number } }).__en172);
+  L.check("set after loading", a.on != null, JSON.stringify(a));
+  /* the timer is exactly 700ms (lib/arrival172, fake timers in qcv1724.test); read in the page it lands later by however
+     long the main thread is busy finishing the load (≈80ms measured), so the rendered bound allows 150ms */
+  L.check("cleared at 700ms (+ the load's main-thread time)", a.on != null && a.off != null && a.off - a.on <= 850 && a.off - a.on >= 650, a.on != null && a.off != null ? `${Math.round(a.off - a.on)}ms` : "never cleared");
+  await page.locator(`${V}.qs172-seg button`).nth(1).click();
+  await page.waitForTimeout(900);
+  await page.locator(`${V}.qs172-seg button`).nth(1).click();
+  await page.waitForTimeout(900);
+  const b = await page.evaluate(() => (window as unknown as { __en172: { again: number } }).__en172.again);
+  L.check("a filter change does not replay it", b === 0, `${b} replays`);
+  const ctx = await browser.newContext({ reducedMotion: "reduce", storageState: (await page.context().storageState()) });
+  const p2 = await ctx.newPage();
+  await p2.addInitScript(() => {
+    const w = window as unknown as { __en172n: number }; w.__en172n = 0;
+    new MutationObserver(() => { if (document.querySelector("[data-en172]")) w.__en172n += 1; }).observe(document, { subtree: true, attributes: true, attributeFilter: ["data-en172"], childList: true });
+  });
+  await openQc(p2, WIDE, { group: "attention" });
+  const n = await p2.evaluate(() => (window as unknown as { __en172n: number }).__en172n);
+  L.check("reduced motion: never set", n === 0, `${n}`);
+  await ctx.close();
+  L.done(4);
+});
+
+test("L17 · the opening state: defaults on a fresh session; the smart panel kept for the visit only; the sort per device", async ({ page, browser }) => {
+  const L = new Ledger("L17");
+  /* a fresh start once — not on this test's own reload, which must find the visit's filters */
+  await page.addInitScript(() => { try { if (!sessionStorage.getItem("l17.cleared")) { sessionStorage.removeItem("qh.qc.filters"); localStorage.removeItem("qh.qc.view"); sessionStorage.setItem("l17.cleared", "1"); } localStorage.setItem("sa.guide.queries", "1"); sessionStorage.setItem("sa.qc138.folded", "[]"); } catch { /* */ } });
+  await page.setViewportSize(WIDE);
+  await openRoute(page, "/queries", WIDE);
+  await page.locator("[data-qc172='row']").first().waitFor({ timeout: 30_000 });
+  const V = await visiblePage(page);
+  const read = () => page.evaluate((V) => ({
+    group: document.querySelector(`${V}[data-qc151='toolbar']`)?.textContent?.match(/Group:\s*([A-Za-z][A-Za-z ]*)/)?.[1]?.trim() ?? "",
+    sort: document.querySelector(`${V}[data-qc151='toolbar']`)?.textContent?.match(/Sort:\s*([^↑↓]+[↑↓])/)?.[1]?.trim() ?? "",
+    chips: document.querySelectorAll(`${V}.lf-apc`).length,
+    closed: (document.querySelector(`${V}.qs172-ck--closed input`) as HTMLInputElement | null)?.checked ?? null,
+    lastKey: [...document.querySelectorAll<HTMLElement>(`${V}.qc169 [data-qc1511='group'], ${V}.qc169 [data-qc153='fold']`)].map((e) => e.dataset.k).pop(),
+    closedFolded: !!document.querySelector(`${V}.qc169 [data-qc153='fold'][data-k='closed']`),
+    bar: (document.querySelector(`${V}[data-qc151='toolbar']`)?.textContent ?? "").slice(0, 160),
+  }), V);
+  const d = await read();
+  L.check("Group: Action", d.group === "Action", `${d.group} · bar "${d.bar}"`);
+  L.check("Sort: Next due ↑", /^Next due\s*↑$/.test(d.sort), d.sort);
+  L.check("no filters applied", d.chips === 0, `${d.chips} chips`);
+  L.check("Include closed ticked", d.closed === true, String(d.closed));
+  L.check("Closed last, folded to its line", d.lastKey === "closed" && d.closedFolded, `${d.lastKey} · folded ${d.closedFolded}`);
+  /* a smart filter survives a same-session remount, and is shown as a chip */
+  await page.locator(`${V}.qs172-stg button[title='Partial']`).click();
+  await page.waitForTimeout(500);
+  await page.reload();
+  await page.locator("[data-qc172='row'], .qc151-emp").first().waitFor({ timeout: 30_000 });
+  await page.waitForTimeout(800);
+  const W = await visiblePage(page);
+  const chips = await page.evaluate((W) => [...document.querySelectorAll(`${W}.lf-apc`)].map((c) => c.textContent ?? ""), W);
+  const visit = await page.evaluate(() => sessionStorage.getItem("qh.qc.filters") ?? "");
+  L.check("same visit: the smart filter is back as a chip", chips.some((c) => /Stage: Partial/.test(c)), `${JSON.stringify(chips)} · stored ${visit.slice(visit.indexOf("\"smart\""), visit.indexOf("\"smart\"") + 160)}`);
+  /* the sort is kept per device: change it, then a new session keeps it but drops the filter */
+  await page.locator(`${W}.qc169-thc.c-ag button`).click();
+  await page.waitForTimeout(500);
+  const state = await page.context().storageState();
+  const ctx = await browser.newContext({ storageState: state });
+  const p2 = await ctx.newPage();
+  await openRoute(p2, "/queries", WIDE);
+  await p2.locator("[data-qc172='row']").first().waitFor({ timeout: 30_000 });
+  const X = await visiblePage(p2);
+  const n = await p2.evaluate((X) => ({ chips: [...document.querySelectorAll(`${X}.lf-apc`)].map((c) => c.textContent ?? ""), sort: document.querySelector(`${X}[data-qc151='toolbar']`)?.textContent?.match(/Sort:\s*([^↑↓]+[↑↓])/)?.[1]?.trim() ?? "" }), X);
+  L.check("a new session: the smart filter is gone", !n.chips.some((c) => /Stage:/.test(c)), JSON.stringify(n.chips));
+  L.check("a new session: the sort is kept (per device)", /^Agent/.test(n.sort), n.sort);
+  await ctx.close();
+  L.done(8);
 });

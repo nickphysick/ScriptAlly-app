@@ -17,11 +17,6 @@
 .qs172-seg button:disabled { opacity: .45; cursor: default; }
 .qs172-incs { display: flex; flex-wrap: wrap; gap: 6px; }
 
-.qs172-inc i { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #f4f0eb; font-style: normal; font-size: 11px; color: var(--navy); }
-.qs172-inc em, .qs172 em { font: 400 13px/1 var(--sp-type); font-style: normal; color: var(--q); }
-.qs172-inc.on { background: #e3e8ef; box-shadow: inset 0 0 0 1px #b9c9da; color: #1f2c40; }
-.qs172-inc.on i { background: var(--navy); color: #fff; }
-
 .qs172-s { padding: 10px 14px 12px; border-top: 1px solid #f1ebe2; }
 
 .qs172-sh b { font: 400 18px/1.2 var(--sp-type) !important; }
@@ -43,9 +38,9 @@
 .qs172-dual { position: relative; height: 26px; margin: 0 8px; }
 .qs172-dual .tr { position: absolute; left: 0; right: 0; top: 11px; height: 4px; border-radius: 2px; background: #e6ded3; }
 .qs172-dual .fl { position: absolute; top: 11px; height: 4px; border-radius: 2px; background: var(--navy); left: var(--lo); right: calc(100% - var(--hi)); }
-.qs172-dual input { position: absolute; left: -9px; width: calc(100% + 18px); top: 0; height: 26px; margin: 0; background: none; -webkit-appearance: none; appearance: none; pointer-events: none; }
-.qs172-dual input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--navy), 0 2px 4px rgba(28,19,15,.25); cursor: grab; }
-.qs172-dual input::-moz-range-thumb { pointer-events: auto; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--navy); cursor: grab; }
+.qs172-dual input { position: absolute; left: -7px; width: calc(100% + 14px); top: 0; height: 26px; margin: 0; background: none; -webkit-appearance: none; appearance: none; pointer-events: none; }
+.qs172-dual input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 14px !important; height: 14px !important; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--navy), 0 1px 3px rgba(28,19,15,.25) !important; cursor: grab; }
+.qs172-dual input::-moz-range-thumb { pointer-events: auto; width: 11px !important; height: 11px !important; border-radius: 50%; background: #fff; border: 2px solid var(--navy); cursor: grab; }
 .qs172-dual input::-webkit-slider-runnable-track { background: none; }
 .qs172-scale { position: relative; height: 14px; margin: 2px 8px 0; }
 .qs172-scale span { position: absolute; white-space: nowrap; transform: translateX(-50%); font: 400 12px/1 var(--sp-type); color: var(--q); }
@@ -117,15 +112,12 @@
 .qs172-sh { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 8px; align-items: baseline; }
 .qs172-sh b, .qs172-l b { font: 600 16px/1.25 var(--sp-serif) !important; color: #1c130f; white-space: normal; }
 .qs172-sh span { text-align: right; font: italic 400 14px/1.25 var(--sp-serif); color: var(--mut); }
-.qs172 em, .qs172-inc em { font: 400 12px/1 var(--sp-type) !important; color: var(--q); }
+.qs172 em { font-style: normal; font: 400 12px/1 var(--sp-type) !important; color: var(--q); }
 
 .qs172-seg span { color: var(--mut); font: 400 14px/1.15 var(--sp-serif); }
 .qs172-seg b { font: 400 20px/1 var(--sp-type) !important; }
 .qs172-seg button.on:hover { background: #22304a; }
 .qs172-seg button:hover:not(:disabled):not(.on) { background: #f8f4ed; }
-
-.qs172-inc { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d6cabb; background: #fff; color: var(--mut); white-space: nowrap; height: 32px; padding: 0 12px 0 9px; font: 400 14px/1 var(--sp-serif); }
-.qs172-inc:hover { background: rgba(42,58,82,.06); }
 
 .qs172-stg button span { font: 400 14px/1.1 var(--sp-serif); color: var(--mut); }
 
@@ -165,18 +157,17 @@
 
 /* v17.10 — one pill: the app's standard filter pill (shell tokens --sp-fpill-h / --sp-fpill-size, as the Corkboard's):
    white with a hairline edge, Source Serif, count in the typewriter; selected = navy, white, 600, no edge */
-.qs172 .qs172-inc, .qs172 .qs172-chip {
+.qs172 .qs172-chip {
   all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
   height: var(--sp-fpill-h, 32px); padding: 0 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #e3ddd3;
   font: 400 var(--sp-fpill-size, 14.5px)/1 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   transition: box-shadow .15s, background .15s;
 }
-.qs172 .qs172-inc em, .qs172 .qs172-chip em { font: 400 12px/1 var(--sp-type) !important; color: var(--q); }
-.qs172 .qs172-inc:hover, .qs172 .qs172-chip:hover { background: rgba(42,58,82,.06); box-shadow: inset 0 0 0 1px #cfc5b6; }
-.qs172 .qs172-inc.on, .qs172 .qs172-chip.on { background: var(--navy); color: #fff; font-weight: 600 !important; box-shadow: none; }
-.qs172 .qs172-inc.on:hover, .qs172 .qs172-chip.on:hover { background: #22304a; }
-.qs172 .qs172-inc.on em, .qs172 .qs172-chip.on em { color: #f4eee5; }
-.qs172 .qs172-inc i { display: none; }
+.qs172 .qs172-chip em { font: 400 12px/1 var(--sp-type) !important; color: var(--q); }
+.qs172 .qs172-chip:hover { background: rgba(42,58,82,.06); box-shadow: inset 0 0 0 1px #cfc5b6; }
+.qs172 .qs172-chip.on { background: var(--navy); color: #fff; font-weight: 600 !important; box-shadow: none; }
+.qs172 .qs172-chip.on:hover { background: #22304a; }
+.qs172 .qs172-chip.on em { color: #f4eee5; }
 
 /* v18 · 2 More filters */
 .qs172-more { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; width: 100%; padding: 12px 14px; border-top: 1px solid #f1ebe2; }
@@ -194,3 +185,57 @@
 
 /* v172.3 — more than 18 bars (a long campaign in months or quarters): a 1px gap */
 .qs172-hist.is-dense { gap: 1px; }
+
+/* v172.4 — Include closed is a tick box under the quick picks, the Not dated tick's own look */
+.qs172-incs .qs172-ck { margin-top: 0; }
+
+/* ── v172.4 · the loading shell (QcSk172): the list's card and heading row, the panel's own frame, inert shapes ── */
+@keyframes sk172-sheen { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
+:is(.sk172, .sk172-rail) i:not(.ln) { display: block; height: 12px; border-radius: 6px; background-color: var(--sa-sk-base, #ece6de); background-image: var(--sa-sk-sheen); background-size: 600px 100%; animation: sk172-sheen 1.4s linear infinite; }
+:is(.sk172, .sk172-rail) i.sm { height: 10px; }
+.sk172-sec { display: flex; align-items: center; gap: 10px; padding: 20px 16px 12px; }
+.sk172-sec i { height: 16px !important; }
+.sk172-sec i.n { width: 24px; }
+.sk172-row { display: grid; grid-template-columns: var(--cols); column-gap: 18px; align-items: center; min-height: 94px; padding: 0 18px 0 16px; border-top: 1px solid rgba(28, 19, 15, 0.07); }
+.sk172-seal { width: 34px; height: 34px !important; border-radius: 50% !important; }
+.sk172-who, .sk172-nx { display: grid; gap: 9px; }
+.sk172-nx { justify-items: end; }
+.sk172-trk { display: flex; align-items: center; gap: 6px; padding-right: 18px; }
+.sk172-trk i.d, .sk172-stg i.d { flex: none; width: 16px; height: 16px !important; border-radius: 50% !important; }
+.sk172-trk i.ln { flex: 1; height: 2px; background: var(--sa-sk-base, #ece6de); }
+.sk172-rail { pointer-events: none; }
+.sk172-rail .qs172-h b { color: rgba(244, 238, 229, 0.85); }
+.sk172-qp { display: grid; justify-items: center; gap: 7px; padding: 9px 2px; }
+.sk172-qp i.big { width: 26px; height: 18px !important; }
+.sk172-qp i.sm { width: 60%; }
+.sk172-ck { display: flex; align-items: center; gap: 8px; padding: 2px 2px 0; }
+.sk172-ck i.box { width: 16px; height: 16px !important; border-radius: 4px !important; }
+.sk172-rail .qs172-s { display: grid; gap: 14px; }
+.sk172-t { width: 64px; height: 14px !important; }
+.sk172-stg { display: flex; justify-content: space-around; padding: 4px 0 18px; }
+.sk172-stg i.d { width: 20px; height: 20px !important; }
+.sk172-base { display: block; height: 28px; border-bottom: 2px solid var(--sa-sk-base, #ece6de); }
+.sk172-track { height: 4px !important; border-radius: 2px !important; margin-bottom: 14px; }
+@media (prefers-reduced-motion: reduce) { :is(.sk172, .sk172-rail) i { animation: none !important; } }
+
+/* ── v172.4 · the arrival (QcPage151 `data-en172`, lib/arrival172): once, after loading, all done inside 700ms. The
+   heading row, the toolbar and the header never move. ── */
+@keyframes en172-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes en172-fade { from { opacity: 0; } }
+@keyframes en172-grow { from { transform: scaleY(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .qc153-railcol[data-en172] .qs172 > :not(.qs172-h) { animation: en172-fade 250ms ease both; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc153-sec { animation: en172-fade 200ms ease both; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(-n+8) { animation: en172-rise 320ms cubic-bezier(.2, .8, .2, 1) both; animation-delay: var(--d, 0ms); }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(2) { --d: 30ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(3) { --d: 60ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(4) { --d: 90ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(5) { --d: 120ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(6) { --d: 150ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(7) { --d: 180ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(8) { --d: 210ms; }
+  .qc153-list[data-en172="stagger"] .qc153-grp:first-child .qc154-grid > :nth-child(n+9),
+  .qc153-list[data-en172="stagger"] .qc153-grp:not(:first-child) { animation: en172-fade 250ms ease 200ms both; }
+  .qc153-railcol[data-en172="stagger"] .qs172-hist > i,
+  .qc153-railcol[data-en172="stagger"] .qs172-hist > button > i { transform-origin: bottom; animation: en172-grow 300ms cubic-bezier(.2, .8, .2, 1) 80ms both; }
+}

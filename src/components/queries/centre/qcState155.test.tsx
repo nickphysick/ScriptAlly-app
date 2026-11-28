@@ -6,7 +6,7 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
+import { FirstPanel155, QuietPanel155 } from "./QcState155";
 import { QC155_LOAD, qcLoadPhase } from "./useQcLoad";
 import { QcHeader1531 } from "./QcHeader1531";
 
@@ -125,29 +125,14 @@ describe("v155 §3 · the loading skeleton", () => {
     expect(queries).toContain("useQcLoad(collectionsReady && activitiesReady, qcDesk ? QC155_LOAD : undefined)");
     expect(qcLoadPhase({ ready: false, sinceMountMs: 150, skeletonForMs: null })).toBe("skeleton");
   });
-  const sk = renderToStaticMarkup(<Skeleton155 />);
-  it("two groups of placeholders, 2 cards then 6, hidden from screen readers", () => {
-    expect(sk).toMatch(/^<div[^>]*data-qc155="skeleton"[^>]*aria-hidden="true"/);
-    const grids = sk.split('data-qc155="sk-grid"').slice(1).map((g) => (g.split('data-qc155="sk-grid"')[0].match(/data-qc155="sk-card"/g) ?? []).length);
-    expect(grids).toEqual([2, 6]);
-    expect((sk.match(/data-qc155="sk-head"/g) ?? []).length).toBe(2);
-    expect(sk.replace(/<[^>]+>/g, "")).toBe("");
-  });
+  /* RE-POINTED (v172.4): the card-grid skeleton (Skeleton155) is retired; the loading shell is QcSk172 on the list's own
+     card and the panel's frame — its shape, inertness and "no figure" are qcv1724.test.tsx and tests/e2e L15 */
   it("the list is aria-busy while loading, and draws the skeleton only once it is due", () => {
     expect(page).toMatch(/data-qc151="table" data-qcv="list" aria-busy=\{loading155 \|\| undefined\}/);
     expect(page).toContain('const loading155 = p.state155?.kind === "loading";');
     /* RE-POINTED (overnight fixes v1, Part 2): the error is drawn first, then loading, then day one */
-    expect(page).toMatch(/\{error155 \? <LoadFailed [^}]*\}[^\n]*\n\s+: loading155 \? \(p\.state155\?\.kind === "loading" && p\.state155\.show \? <Skeleton155 \/> : null\) : first155/);
+    expect(page).toMatch(/\{error155 \? <LoadFailed [^}]*\}[^\n]*\n\s+: loading155 \? \(sk172 \? wrap169\(<Skeleton172 \/>\) : null\) : first155/);
     expect(queries).toContain('showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }');
-  });
-  it("is the ref's shape: heading bar, 3-across grid, 168px cards, one 1.3s sweep, none under reduced motion", () => {
-    const h = rule(".qc151.qc153 .qc155-skh");
-    expect(h).toMatch(/height:\s*22px/); expect(h).toMatch(/width:\s*220px/); expect(h).toMatch(/border-radius:\s*6px/);
-    expect(h).toMatch(/background:\s*#ebe5db/); expect(h).toMatch(/margin:\s*26px 0 14px/);
-    const c = rule(".qc151.qc153 .qc155-skc");
-    expect(c).toMatch(/height:\s*168px/); expect(c).toMatch(/border-radius:\s*16px/); expect(c).toMatch(/box-shadow:\s*0 0 0 1px #ebe5db/);
-    expect(rule(".qc151.qc153 .qc155-skc::after")).toMatch(/animation:\s*qc155-sweep 1\.3s/);
-    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.qc151\.qc153 \.qc155-skc::after\s*\{\s*animation:\s*none;\s*display:\s*none;/);
   });
   it("no spinner on the page", () => {
     const code = (page + read("QcState155.tsx")).replace(/\/\*[\s\S]*?\*\//g, "");

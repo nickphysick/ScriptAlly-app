@@ -39,11 +39,11 @@ describe("the view — per device (qh.qc.view)", () => {
   /* v141 §C — the default grouping moved from "Who it's with" (attention) to Status */
   /* v151 §5 — the first visit groups by "Who it's with" again (the Group button is navy only when it is not) */
   it("a first visit: Who it's with, due first, comfortable, List (v151 §5; was Status from v142 §A)", () => {
-    expect(readQcView()).toEqual({ group: "attention", sort: { key: "due", reversed: false }, density: "comfortable" });
+    expect(readQcView()).toEqual({ group: "attention", sort: { key: "due", reversed: false }, density: "comfortable", sort151: { key: "due", desc: false } });
   });
   it("v149 B5 — list only: a record still carrying v142's view keeps its other fields and is never written back", () => {
     g.window!.localStorage.setItem(QC_VIEW_KEY, JSON.stringify({ v: 1, group: "action", sort: { key: "due", reversed: false }, density: "compact", view: "cards" }));
-    expect(readQcView()).toEqual({ group: "action", sort: { key: "due", reversed: false }, density: "compact" });
+    expect(readQcView()).toEqual({ group: "action", sort: { key: "due", reversed: false }, density: "compact", sort151: { key: "due", desc: false } });
     writeQcView({ density: "comfortable" });
     expect(JSON.parse(g.window!.localStorage.getItem(QC_VIEW_KEY)!)).not.toHaveProperty("view");
   });
@@ -52,7 +52,7 @@ describe("the view — per device (qh.qc.view)", () => {
     writeQcView({ group: "action" });
     writeQcView({ sort: { key: "agent", reversed: true } });
     writeQcView({ density: "compact" });
-    expect(readQcView()).toEqual({ group: "action", sort: { key: "agent", reversed: true }, density: "compact" });
+    expect(readQcView()).toEqual({ group: "action", sort: { key: "agent", reversed: true }, density: "compact", sort151: { key: "due", desc: false } });
   });
   it("migrates sa.qcList.v1 once: its grouping and density move in, the old key goes", () => {
     g.window!.localStorage.setItem(QC_LIST_MEMORY_KEY, serialiseQcListMemory({ density: "compact", group: "package" }));

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "L17",
+  "where": "Group: Action",
+  "ok": true,
+  "detail": "Action · bar \"ListBirds-eye88 queries/Sort:Next due↑▤Group:Action↓Export\""
+ },
+ {
+  "lock": "L17",
+  "where": "Sort: Next due ↑",
+  "ok": true,
+  "detail": "Next due↑"
+ },
+ {
+  "lock": "L17",
+  "where": "no filters applied",
+  "ok": true,
+  "detail": "0 chips"
+ },
+ {
+  "lock": "L17",
+  "where": "Include closed ticked",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "L17",
+  "where": "Closed last, folded to its line",
+  "ok": true,
+  "detail": "closed · folded true"
+ },
+ {
+  "lock": "L17",
+  "where": "same visit: the smart filter is back as a chip",
+  "ok": true,
+  "detail": "[\"Stage: Partial×\"] · stored \"smart\":{\"who\":null,\"closed\":true,\"stage\":[1],\"sent\":null,\"pkgs\":[],\"methods\":[],\"fit\":0,\"countries\":[],\"date\":{\"lo\":-56,\"hi\":84,\"nd\":true},\"sendby\":{\"lo\":-28,\""
+ },
+ {
+  "lock": "L17",
+  "where": "a new session: the smart filter is gone",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L17",
+  "where": "a new session: the sort is kept (per device)",
+  "ok": true,
+  "detail": "Agent↑"
+ }
+]

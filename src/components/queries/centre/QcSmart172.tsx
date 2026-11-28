@@ -128,9 +128,8 @@ export const QcSmart172: React.FC<QcSmart172Props> = ({ rows, ctx, showing, tota
             return <button key={k} type="button" className={s.who === k ? "on" : ""} disabled={!c && s.who !== k} onClick={() => setSmart172({ who: s.who === k ? null : k })}><b>{c}</b><span>{label}</span></button>;
           })}
         </div>
-        <div className="qs172-incs">
-          <button type="button" className={`qs172-inc${s.closed ? " on" : ""}`} aria-pressed={s.closed} onClick={() => setSmart172({ closed: !s.closed })}>Include closed <em>{closedN}</em></button>
-        </div>
+        {/* v172.4 — a tick box like Not dated, ticked by default; the count is the closed queries */}
+        <div className="qs172-incs"><label className="qs172-ck qs172-ck--closed"><input type="checkbox" checked={s.closed} onChange={(e) => setSmart172({ closed: e.target.checked })} />Include closed <em>{closedN}</em></label></div>
       </div>
 
       <section className="qs172-s">
