@@ -415,6 +415,13 @@ export function headingTop(gy: number, gp: number, gEnd: number, top: number, sm
 }
 /** a row's bar (ref `inRow`): fitted, a thin bar; zoomed in, it fills the row (row − 8, at most 40) and carries its
  *  name from 18px, the agency and each stage's words from 34px */
+/* ── Birds-eye polish v1 §C — marks on the bars: where the agent asked for materials, and where a pass came in ── */
+export type MarkKind = "partial" | "full" | "pass";
+/** an event's mark: a partial or full request, or a pass; nothing for any other stage */
+export const markOf = (status: string): MarkKind | null =>
+  status === QueryStatus.PARTIAL_REQUESTED ? "partial" : status === QueryStatus.FULL_REQUESTED ? "full" : status === QueryStatus.REJECTED ? "pass" : null;
+/** a mark's size: named rows max(16, min(20, bar + 2)); fitted max(11, min(14, bar + 3)) */
+export const markSize = (named: boolean, th: number): number => (named ? Math.max(16, Math.min(20, th + 2)) : Math.max(11, Math.min(14, th + 3)));
 export function barBox(rp: number, ry: number, zoomed: boolean): { th: number; by: number; named: boolean; one: boolean; two: boolean } {
   /* Birds-eye polish v1 §D: on the fitted view (unnamed rows) the bars fill more of each row — 0.66 of it, 4 to 16px
      (was 0.45, 3 to 12); every row kind, no-date rows too (ndRow reads this). Zoomed in, unchanged. */
