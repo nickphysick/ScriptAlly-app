@@ -257,8 +257,9 @@ describe("compact on short screens (logic)", () => {
       ".tws .twn2[data-compact] .twn-band { height: 32px; box-sizing: border-box; display: flex; align-items: center; padding: 0 22px; margin-bottom: 26px; }",
       ".tws .twn2[data-compact] .twn-line { margin-bottom: 28px; }",
       ".tws .twn2[data-compact] .twn2-stp { padding: 12px 18px; }",
-      ".tws .twn2[data-compact] .twn2-ch { height: 50px; box-sizing: border-box; padding-top: 0; padding-bottom: 0; }",
-      ".tws .twn2[data-compact] .twn2-ch .twn2-ic svg { width: 18px; height: 18px; }",
+      ".tws .twn2[data-compact] .twn2-ch { height: 50px; box-sizing: border-box; padding: 0 6px; grid-template-columns: minmax(0, 1fr); text-align: center; }",
+      ".tws .twn2[data-compact] .twn2-ch .twn2-ic { display: none; }",
+      ".tws .twn2[data-compact] .twn-l b { display: inline; margin-left: 4px; }",
       ".tws .twn2[data-compact] .twn2-tx:has(.twn2-info:hover, .twn2-info:focus-visible) .twn2-how { display: block; animation: twn2-tip 0.15s ease-out both; }",
     ]) expect(css, rule).toContain(rule);
     expect(css, "compact: the picked-day line is folded").toContain('.tws .twn2[data-compact] [data-twn="nudged"] { display: none; }');

@@ -1,4 +1,4 @@
-# To-do nudge desk v2 — report (STOPPED: every state fits, but compact clips timeline labels and cuts the answers short)
+# To-do nudge desk v2 — report (STOPPED: everything fits at all four sizes except the third answer's words at 1280)
 
 Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-nav1-qc1724-ta1-pol1-tnd1` @ `e8727d3b1`. That is the dev line carrying nudge desk v1, at the same commit as `todo-nudge-desk-v1`'s tip. Dev served `index-D6G10n1T.js` at Step 0. Ref: `design-refs/todo-nudge-desk-v2/` (sha256 verified; `todo-nudge-desk-v2.html` = `74307e4a…f47b`). Desktop only.
 
@@ -11,6 +11,24 @@ Branch `todo-nudge-desk-v2`, cut from `dev/bew33-clr13-qc1722-pqs1-qc1723-bfl1-n
 3. **A compact 1280 layout:** row 1's how-to line folded behind an info mark, the answers as a one-line segmented control, and a slimmer timeline card.
 
 My pick is **1**: it keeps the ref's design intact and only borrows width from a column that is mostly empty on a nudge. Nothing is deployed and the full suite has not run; both wait on this.
+
+## Follow-up 4 (one-line labels and no icons in compact) — STOPPED: one answer at 1280 needs shorter copy
+
+**Built:**
+- Compact timeline labels sit on one line ("Queried 1 Sep"), same size. Your 26px / 28px spacing is kept.
+- Compact answers have no icons, side padding 6px, and centred text.
+- 1512's narrow rule has the ref's 40px between band and line (was 32: "Next reminder" sat 7px into the band). This changes 1512's pixels by design. The pixel diff now covers 1920 only: all five states identical to before.
+
+**Measured (every state):**
+
+| | 1280×800 | 1366×768 | 1512×900 | 1920×1080 |
+|---|---|---|---|---|
+| Column scroll | none (451 / 451) | none (419 / 419) | none | none |
+| Calendar inside the column | yes | yes | yes | yes |
+| Label overlaps / clipped labels | none / none | none / none | none / none | none / none |
+| Answers cut short | **"Another day", and its date "Pick the day"** (also "Wed 25 Nov" once picked, in an earlier run) | none | none | none |
+
+At 1280 each answer is about 92px wide, and "Another day" at 16px semibold does not fit even with 6px padding. Nothing more is shrunk; the title is a copy decision.
 
 ## Follow-up 3 (fold the picked-day line in compact) — STOPPED: compact hides more than the how-to
 

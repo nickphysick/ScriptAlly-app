@@ -242,9 +242,11 @@ test("frames after a pick at 1512 (0.1s, 0.5s, 1.0s)", async ({ page }) => {
 
 /* 1512 and 1920 fit as they were: every state pixel-identical to the screenshots taken before compact existed
    (reports/todo-nudge-desk-v2/before/, from 197b4d939). Compared in the browser, pixel by pixel. */
-test("1512 and 1920 are pixel-identical to before compact", async ({ page }) => {
-  const names = readdirSync(`${DIR}/before`).filter((f) => f.endsWith(".png"));
-  expect(names.length).toBe(10);
+test("1920 is pixel-identical to before compact", async ({ page }) => {
+  /* 1920 only now: 1512's band-to-line gap went from 32 to 40 on purpose (Nick, 28 Nov: "Next reminder" sat 7px into the
+     band), so its shots change by design */
+  const names = readdirSync(`${DIR}/before`).filter((f) => f.endsWith("-1920.png"));
+  expect(names.length).toBe(5);
   await page.setContent("<canvas id=a></canvas><canvas id=b></canvas>");
   const diffs: Record<string, number> = {};
   for (const n of names) {

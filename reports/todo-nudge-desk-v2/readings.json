@@ -37,10 +37,10 @@
   },
   "calendar": null,
   "labels": [
-   "start:520-568",
-   "due:606-672",
+   "start:510-594",
+   "due:602-709",
    "ago:607-735",
-   "today:684-721"
+   "today:717-758"
   ],
   "points": [
    "start",
@@ -48,15 +48,8 @@
    "today"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px"
-  ],
+  "labelsClipped": [],
   "truncated": [
-   "today:title Today",
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
    "other:title Another day",
    "other:date Pick the day"
   ]
@@ -91,7 +84,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 394,
-  "needH": 495,
+  "needH": 503,
   "preview": {
    "scale": 0.676,
    "minText": 8.1,
@@ -415,13 +408,13 @@
   ]
  },
  "frame-100": {
-  "tookAt": 150
+  "tookAt": 198
  },
  "frame-500": {
-  "tookAt": 576
+  "tookAt": 570
  },
  "frame-1000": {
-  "tookAt": 1069
+  "tookAt": 1084
  },
  "sent-1512": {
   "title": "Tom’s timeline",
@@ -453,7 +446,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 394,
-  "needH": 474,
+  "needH": 482,
   "preview": {
    "scale": 0.676,
    "minText": 8.1,
@@ -505,7 +498,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 394,
-  "needH": 487,
+  "needH": 495,
   "preview": {
    "scale": 0.676,
    "minText": 8.1,
@@ -526,9 +519,7 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "next:into the band by 7px"
-  ],
+  "labelsClipped": [],
   "truncated": []
  },
  "calendar-1512": {
@@ -561,7 +552,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 394,
-  "needH": 487,
+  "needH": 495,
   "preview": {
    "scale": 0.676,
    "minText": 8.1,
@@ -569,9 +560,9 @@
   },
   "calendar": {
    "l": 706.21875,
-   "t": 305.3125,
+   "t": 313.3125,
    "r": 1026.21875,
-   "b": 643.3125,
+   "b": 651.3125,
    "w": 320,
    "h": 338,
    "inside": true,
@@ -598,9 +589,7 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "next:into the band by 7px"
-  ],
+  "labelsClipped": [],
   "truncated": []
  },
  "esc-1512": {
@@ -640,7 +629,7 @@
    "who": "twn-l twn-dn twn-lft"
   },
   "cardColW": 394,
-  "needH": 487,
+  "needH": 495,
   "preview": {
    "scale": 0.676,
    "minText": 8.1,
@@ -661,9 +650,7 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "next:into the band by 7px"
-  ],
+  "labelsClipped": [],
   "truncated": []
  },
  "unconfirm-1512": {
@@ -716,10 +703,10 @@
   },
   "calendar": null,
   "labels": [
-   "start:532-581",
-   "due:652-717",
+   "start:532-616",
+   "due:631-738",
    "ago:662-790",
-   "today:748-786"
+   "today:746-788"
   ],
   "points": [
    "start",
@@ -727,17 +714,8 @@
    "today"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px"
-  ],
-  "truncated": [
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
-   "other:title Another day",
-   "other:date Pick the day"
-  ]
+  "labelsClipped": [],
+  "truncated": []
  },
  "howto-1366": {
   "visible": true,
@@ -782,10 +760,10 @@
   },
   "calendar": null,
   "labels": [
-   "start:532-581",
-   "due:652-717",
+   "start:532-616",
+   "due:631-738",
    "ago:662-790",
-   "today:748-786"
+   "today:746-788"
   ],
   "points": [
    "start",
@@ -793,17 +771,8 @@
    "today"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px"
-  ],
-  "truncated": [
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
-   "other:title Another day",
-   "other:date Pick the day"
-  ]
+  "labelsClipped": [],
+  "truncated": []
  },
  "today-1366": {
   "title": "Tom’s updated timeline",
@@ -843,11 +812,11 @@
   },
   "calendar": null,
   "labels": [
-   "start:532-581",
-   "due:652-717",
-   "ago:629-757",
-   "nudge:732-803",
-   "next:764-853"
+   "start:522-606",
+   "due:614-721",
+   "ago:585-713",
+   "nudge:729-841",
+   "next:721-853"
   ],
   "points": [
    "start",
@@ -856,30 +825,14 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px",
-   "nudge:cut at the bottom by 5px",
-   "next:into the band by 13px"
-  ],
-  "truncated": [
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
-   "other:title Another day",
-   "other:date Pick the day"
-  ]
+  "labelsClipped": [],
+  "truncated": []
  },
  "pixel-diff": {
-  "another-day-1512.png": 0,
   "another-day-1920.png": 0,
-  "calendar-1512.png": 0,
   "calendar-1920.png": 0,
-  "open-1512.png": 0,
   "open-1920.png": 0,
-  "sent-1512.png": 0,
   "sent-1920.png": 0,
-  "today-1512.png": 0,
   "today-1920.png": 0
  },
  "howto-1280": {
@@ -925,10 +878,10 @@
   },
   "calendar": null,
   "labels": [
-   "start:520-568",
-   "due:606-672",
+   "start:510-594",
+   "due:602-709",
    "ago:607-735",
-   "today:684-721"
+   "today:717-758"
   ],
   "points": [
    "start",
@@ -936,15 +889,8 @@
    "today"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px"
-  ],
+  "labelsClipped": [],
   "truncated": [
-   "today:title Today",
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
    "other:title Another day",
    "other:date Pick the day"
   ]
@@ -987,11 +933,11 @@
   },
   "calendar": null,
   "labels": [
-   "start:520-568",
-   "due:593-659",
-   "ago:546-674",
-   "nudge:667-738",
-   "next:682-770"
+   "start:510-594",
+   "due:602-709",
+   "ago:510-638",
+   "nudge:717-829",
+   "next:646-778"
   ],
   "points": [
    "start",
@@ -1000,17 +946,8 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px",
-   "nudge:cut at the bottom by 5px",
-   "next:into the band by 13px"
-  ],
+  "labelsClipped": [],
   "truncated": [
-   "today:title Today",
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
    "other:title Another day",
    "other:date Pick the day"
   ]
@@ -1069,11 +1006,11 @@
    }
   },
   "labels": [
-   "start:520-568",
-   "due:593-659",
-   "ago:546-674",
-   "nudge:667-738",
-   "next:682-770"
+   "start:510-594",
+   "due:602-709",
+   "ago:510-638",
+   "nudge:717-829",
+   "next:646-778"
   ],
   "points": [
    "start",
@@ -1082,17 +1019,8 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px",
-   "nudge:cut at the bottom by 5px",
-   "next:into the band by 13px"
-  ],
+  "labelsClipped": [],
   "truncated": [
-   "today:title Today",
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
    "other:title Another day",
    "other:date Pick the day"
   ]
@@ -1142,11 +1070,11 @@
   },
   "calendar": null,
   "labels": [
-   "start:520-568",
-   "due:594-660",
-   "ago:542-674",
-   "nudge:668-739",
-   "next:681-770"
+   "start:510-594",
+   "due:602-709",
+   "ago:510-642",
+   "nudge:717-833",
+   "next:650-782"
   ],
   "points": [
    "start",
@@ -1155,19 +1083,9 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px",
-   "nudge:cut at the bottom by 5px",
-   "next:into the band by 13px"
-  ],
+  "labelsClipped": [],
   "truncated": [
-   "today:title Today",
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
-   "other:title Another day",
-   "other:date Wed 25 Nov"
+   "other:title Another day"
   ]
  },
  "unconfirm-1280": {
@@ -1236,11 +1154,11 @@
    }
   },
   "labels": [
-   "start:532-581",
-   "due:652-717",
-   "ago:629-757",
-   "nudge:732-803",
-   "next:764-853"
+   "start:522-606",
+   "due:614-721",
+   "ago:585-713",
+   "nudge:729-841",
+   "next:721-853"
   ],
   "points": [
    "start",
@@ -1249,19 +1167,8 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px",
-   "nudge:cut at the bottom by 5px",
-   "next:into the band by 13px"
-  ],
-  "truncated": [
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
-   "other:title Another day",
-   "other:date Pick the day"
-  ]
+  "labelsClipped": [],
+  "truncated": []
  },
  "esc-1366": {
   "calendar": false,
@@ -1308,11 +1215,11 @@
   },
   "calendar": null,
   "labels": [
-   "start:532-581",
-   "due:658-723",
-   "ago:624-756",
-   "nudge:733-804",
-   "next:764-852"
+   "start:522-606",
+   "due:614-721",
+   "ago:580-712",
+   "nudge:729-844",
+   "next:720-852"
   ],
   "points": [
    "start",
@@ -1321,19 +1228,8 @@
    "next"
   ],
   "overlaps": [],
-  "labelsClipped": [
-   "start:cut at the bottom by 5px",
-   "due:cut at the bottom by 5px",
-   "nudge:cut at the bottom by 5px",
-   "next:into the band by 13px"
-  ],
-  "truncated": [
-   "today:date Sat 28 Nov",
-   "yesterday:title Yesterday",
-   "yesterday:date Fri 27 Nov",
-   "other:title Another day",
-   "other:date Wed 25 Nov"
-  ]
+  "labelsClipped": [],
+  "truncated": []
  },
  "unconfirm-1366": {
   "steps": [

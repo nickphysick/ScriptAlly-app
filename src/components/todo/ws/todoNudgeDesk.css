@@ -129,7 +129,8 @@
     .tws .twn2 { gap: 12px; }
     .tws .twn2-ctx img { width: 44px; }
     .tws .twn2-ctx h2 { font-size: 22px !important; }
-    .tws .twn-band { margin-bottom: 32px; padding: 10px 22px; }
+    /* 40px band to line, the ref's: at 32 "Next reminder" sat 7px into the band (measured at 1512) */
+    .tws .twn-band { margin-bottom: 40px; padding: 10px 22px; }
     .tws .twn-line { margin-bottom: 36px; }
     .tws .twn2-stp { padding: 14px 16px; }
     .tws .twn2-chs { grid-column: 1 / -1; gap: 8px; }
@@ -150,8 +151,13 @@
   .tws .twn2[data-compact] .twn-band { height: 32px; box-sizing: border-box; display: flex; align-items: center; padding: 0 22px; margin-bottom: 26px; }
   .tws .twn2[data-compact] .twn-line { margin-bottom: 28px; }
   .tws .twn2[data-compact] .twn2-stp { padding: 12px 18px; }
-  .tws .twn2[data-compact] .twn2-ch { height: 50px; box-sizing: border-box; padding-top: 0; padding-bottom: 0; }
-  .tws .twn2[data-compact] .twn2-ch .twn2-ic svg { width: 18px; height: 18px; }
+  .tws .twn2[data-compact] .twn2-ch { height: 50px; box-sizing: border-box; padding: 0 6px; grid-template-columns: minmax(0, 1fr); text-align: center; }
+  /* no icons in compact (Nick, 28 Nov): measured with them, every answer's title or date was cut short at 1280 and 1366 */
+  .tws .twn2[data-compact] .twn2-ch .twn2-ic { display: none; }
+  .tws .twn2[data-compact] .twn2-ch :is(b, small) { grid-column: 1; }
+  /* one-line timeline labels in compact (Nick, 28 Nov), same size: two lines did not fit 26px above and 28px below the
+     line (measured: the lower labels cut by 5px, "Next reminder" 13px into the band) */
+  .tws .twn2[data-compact] .twn-l b { display: inline; margin-left: 4px; }
   /* step 2's "You nudged {First} … Next reminder …" line folds in compact (Nick, 28 Nov): the ticked disc, the highlighted
      answer and the timeline already carry it. Measured: it was the 9px over at 1366×768 once a day was picked. */
   .tws .twn2[data-compact] [data-twn="nudged"] { display: none; }
