@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "BFL-1",
+  "where": "the day's first open: the bars grow in",
+  "ok": true,
+  "detail": "playing"
+ },
+ {
+  "lock": "BFL-3",
+  "where": "near the start (60ms) every count reads 0 (4 headings)",
+  "ok": true,
+  "detail": "[{\"g\":\"Needs action\",\"n\":61,\"shown\":\"0\"},{\"g\":\"Within their window\",\"n\":3,\"shown\":\"0\"},{\"g\":\"No reply date yet\",\"n\":6,\"shown\":\"0\"},{\"g\":\"Closed\",\"n\":18,\"shown\":\"0\"}]"
+ },
+ {
+  "lock": "BFL-2",
+  "where": "rows of two or more pieces (67 of 88): each piece starts as the one before ends",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BFL-2",
+  "where": "each row's wipe takes 560ms from its first piece to its end",
+  "ok": true,
+  "detail": "[560,560,560,560,560,560]"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "the last row's wipe ends by 2s (2000ms, 88 rows)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BFL-1",
+  "where": "at 407ms some rows are mid-wipe (7; 81 yet to start; 2 pieces growing)",
+  "ok": true,
+  "detail": "step 9.43ms"
+ },
+ {
+  "lock": "BFL-3",
+  "where": "by 900ms every count reads its number",
+  "ok": true,
+  "detail": "[{\"g\":\"Needs action\",\"n\":61,\"shown\":\"61\"},{\"g\":\"Within their window\",\"n\":3,\"shown\":\"3\"},{\"g\":\"No reply date yet\",\"n\":6,\"shown\":\"6\"},{\"g\":\"Closed\",\"n\":18,\"shown\":\"18\"}]"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "at 2.2s everything is in its end state (no animation on the world, every count its number)",
+  "ok": true,
+  "detail": "{\"look\":\"done\",\"n\":0,\"looking\":\"0\",\"badge\":false,\"news\":0}"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "a second open the same day only fades",
+  "ok": true,
+  "detail": "fade, 0 growing"
+ },
+ {
+  "lock": "BFL-1",
+  "where": "a new day plays it again",
+  "ok": true,
+  "detail": "playing"
+ },
+ {
+  "lock": "BFL-4",
+  "where": "a touch at 300ms: within one frame nothing is still growing and every count reads its number",
+  "ok": true,
+  "detail": "{\"look\":\"done\",\"n\":0,\"counts\":true}"
+ },
+ {
+  "lock": "BFL-5",
+  "where": "reduced motion, the day's first open: the fade, and nothing scales",
+  "ok": true,
+  "detail": "fade, 0 animations"
+ },
+ {
+  "lock": "BFL-6",
+  "where": "the preview's rows are Birds-eye's first four in the window (4 expected)",
+  "ok": true,
+  "detail": "[\"probe-dangling-pkg\",\"probe-un-noms\",\"probe-goalstress-today\",\"seed-query-8\"] vs [\"probe-dangling-pkg\",\"probe-un-noms\",\"probe-goalstress-today\",\"seed-query-8\"]"
+ },
+ {
+  "lock": "BFL-6",
+  "where": "\"+ N more queries\" adds up (70 open − 4 shown)",
+  "ok": true,
+  "detail": "66 · \"+ 66 more queries\""
+ },
+ {
+  "lock": "BFL-8",
+  "where": "Today's preview: no text under 12px",
+  "ok": false,
+  "detail": "14 Nov 10px · 19 Dec 10px"
+ },
+ {
+  "lock": "BFL-8",
+  "where": "Today's preview: never “overdue” or “late”",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BFL-8",
+  "where": "Birds-eye while the bars grow: no text under 12px, never “overdue” or “late”",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BFL-7",
+  "where": "tapping a preview row: Birds-eye opens with that row on screen and glowing",
+  "ok": true,
+  "detail": "{\"flown\":\"probe-un-noms\",\"hit\":{\"t\":329.265625,\"b\":377.265625},\"glow\":{\"t\":329.265625,\"b\":377.265625},\"foot\":124,\"vb\":784,\"url\":\"?view=birds\"}"
+ },
+ {
+  "lock": "BFL-7",
+  "where": "the address no longer names the row (a later open does not fly again)",
+  "ok": true,
+  "detail": "?view=birds"
+ },
+ {
+  "lock": "BFL-8",
+  "where": "no page error",
+  "ok": true,
+  "detail": ""
+ }
+]

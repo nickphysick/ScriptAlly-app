@@ -17,10 +17,8 @@
  * ⚠️ TWO LOCKS WRITE, AND EACH UNDOES IN THE SAME RUN THROUGH THE APP'S OWN UNDO (PA5-10: a task marked done; PA5-11: one
  *    gap filled). Nothing navigates between a commit and its Undo; each checks the emulator document is back as it was.
  * ⚠️ READINGS ARE ON THE VISIBLE PAGE: every workspace page stays mounted, so each probe scopes to what is visible.
- * ⚠️ Data states (six queries all sent this week, one query, the campaign states) come from the DEV-ONLY review aid
- *    `window.__SA_PA5_BE = { now, ids }` in TodayV5, which feeds the block's own derivations a subset of the harness's
- *    queries at an earlier "now" — chosen here, from tests/emulator-seed/harness.json, among queries with nothing
- *    recorded after that "now". Nothing is faked in the DOM.
+ * (v5's Birds-eye block, its review aid `window.__SA_PA5_BE` and PA5-4 to PA5-7 are retired by Phone Birds-eye first
+ *  look v1: Today shows Birds-eye's own preview, measured in phoneBirdsFirstLook.measure.ts.)
  */
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
@@ -42,7 +40,6 @@ const tag = (v: { width: number; height: number }) => `${v.width}x${v.height}`;
 const OTHER = !!process.env.PA5_DESKTOP || !!process.env.PA5_PAIRS;
 const skipGroup = (g: string) => OTHER || (!!process.env.PA5_ONLY && !process.env.PA5_ONLY.split(",").includes(g));
 const DAY = 86_400_000;
-const BE_FEW_LINE = "Each query you log gets a line here. The bar fills as the days pass.";
 
 /* ── the harness on the emulator (Firestore REST, owner token: emulator only) ── */
 const HARNESS = JSON.parse(readFileSync("tests/emulator-seed/harness.json", "utf8")) as { uid: string; docs: Record<string, Record<string, unknown>> };
@@ -85,36 +82,6 @@ async function fsPatch(path: string, fields: Record<string, number | null>): Pro
   await fetch(`${FS}/users/${UID}/${path}?${mask}`, { method: "PATCH", headers: { Authorization: "Bearer owner", "Content-Type": "application/json" }, body: JSON.stringify(body) });
 }
 
-/* ── the data states, picked from the harness: queries with nothing recorded after the chosen "now" ── */
-const tsMs = (x: unknown): number => {
-  if (!x) return 0;
-  if (typeof x === "object" && x && "__ts" in x) return ((x as { __ts: number[] }).__ts[0]) * 1000;
-  if (typeof x === "string") { const t = Date.parse(/T/.test(x) ? x : `${x}T12:00:00Z`); return Number.isFinite(t) ? t : 0; }
-  return 0;
-};
-const H_QUERIES = Object.entries(HARNESS.docs).filter(([k]) => /^users\/[^/]+\/queries\/[^/]+$/.test(k)).map(([k, v]) => ({ id: k.split("/").pop()!, ...v } as Record<string, unknown> & { id: string }));
-const LAST_EVENT = (() => {
-  const m = new Map<string, number>();
-  const bump = (q: string, t: number) => m.set(q, Math.max(m.get(q) ?? 0, t));
-  for (const [k, v] of Object.entries(HARNESS.docs)) {
-    if (/\/activities\//.test(k) && typeof v.queryId === "string") bump(v.queryId, tsMs(v.date));
-    const sub = /^users\/[^/]+\/queries\/([^/]+)\/activity\//.exec(k);
-    if (sub) bump(sub[1], Math.max(tsMs(v.createdAt), tsMs(v.date)));
-  }
-  for (const q of H_QUERIES) bump(q.id, Math.max(tsMs(q.lastStatusChange), tsMs(q.dateSent)));
-  return m;
-})();
-const CLOSED = new Set(["Rejected", "Withdrawn", "No Response", "Signed", "Closed"]);
-/** queries sent in [now − days, now] with nothing recorded after `now`, still open */
-function sentWithin(nowMs: number, days: number): string[] {
-  return H_QUERIES.filter((q) => { const s = tsMs(q.dateSent); return s >= nowMs - days * DAY && s <= nowMs && (LAST_EVENT.get(q.id) ?? 0) <= nowMs && !CLOSED.has(String(q.status)); }).map((q) => q.id);
-}
-const WEEK_NOW = Date.UTC(2026, 8, 26, 12);
-const SIX = sentWithin(WEEK_NOW, 7);
-const ONE_NOW = Date.UTC(2026, 8, 25, 12);
-const ONE = ["probe-goalstress-today"];
-const NEW_NOW = Date.UTC(2026, 8, 22, 12);
-const BRAND_NEW = sentWithin(NEW_NOW, 7);
 
 /* ── the ledger ── */
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -177,18 +144,11 @@ async function press(page: Page, sel: string, timeout = 15_000) {
 }
 const stageTo = (page: Page, y: number) => page.evaluate((yy) => { document.getElementById("app-stage-scroll")?.scrollTo({ top: yy, behavior: "instant" as ScrollBehavior }); }, y);
 const stageTop = (page: Page) => page.evaluate(() => document.getElementById("app-stage-scroll")?.scrollTop ?? -1);
-const REPLAY_KEYS = ["pa41.birds-view.replayed", "pa41.birds-card.replayed"];
+const REPLAY_KEYS = ["pa41.birds-view.replayed", "pa41.birds-card.replayed", "bw1.firstLook.day"]; /* + Birds-eye first look v1 */
 const clearReplays = (page: Page) => page.evaluate((ks) => { try { for (const k of ks) localStorage.removeItem(k); } catch { /* none */ } }, REPLAY_KEYS);
 const markReplayed = (page: Page) => page.evaluate((ks) => { try { const d = new Date(); const t = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; for (const k of ks) localStorage.setItem(k, t); } catch { /* none */ } }, REPLAY_KEYS);
-/** the review aid, then a re-render of Today (a tab switch away and back) */
-async function beAid(page: Page, aid: { now?: number; ids?: string[] } | null) {
-  await page.evaluate((a) => { (window as unknown as { __SA_PA5_BE?: unknown }).__SA_PA5_BE = a ?? undefined; }, aid);
-  await press(page, '[data-pa5="tab"][data-tab="activity"]');
-  await press(page, '[data-pa5="tab"][data-tab="queries"]');
-  await blockIntoView(page);
-}
 const blockIntoView = async (page: Page) => {
-  await page.evaluate(() => document.querySelector('[data-pa5="be"]')?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior }));
+  await page.evaluate(() => document.querySelector('[data-bwp="card"]')?.scrollIntoView({ block: "start", behavior: "instant" as ScrollBehavior })); /* first look v1: Birds-eye's preview */
   await page.waitForTimeout(500);
   /* the pinned slim bar and tab strip cover the top: bring the block below them */
   await page.evaluate(() => { const sc = document.getElementById("app-stage-scroll"); if (sc) sc.scrollTop -= 140; });
@@ -207,14 +167,12 @@ async function touchDrag(page: Page, x0: number, y0: number, x1: number, y1: num
 
 /* ══ the mutations: each the smallest change on the rendered page that should turn exactly its own lock red ══ */
 const MUT_LOCK: Record<string, [string, string]> = {
-  badge: ["today", "PA5-1"], nodiscover: ["reach", "PA5-2"], tabsaway: ["today", "PA5-3"], nofilter: ["today", "PA5-4"],
-  window12: ["today", "PA5-5"], ring: ["today", "PA5-6"], lineabove: ["today", "PA5-7"],
+  badge: ["today", "PA5-1"], nodiscover: ["reach", "PA5-2"], tabsaway: ["today", "PA5-3"],
   recompute: ["view", "PA5-9"], swipedone: ["todo", "PA5-10"], direct: ["gaps", "PA5-11"], phoneresults: ["materials", "PA5-12"],
   shrinktabs: ["sizes", "PA5-13"], overdue: ["words", "PA5-14"], shared: ["desktop", "PA5-15"],
 };
 const CSS_MUT: Record<string, string> = {
   tabsaway: ".pa5-tabs { position: static !important; }",
-  lineabove: ".pa5-be-now { z-index: 60 !important; }",
   nodiscover: "[data-pa5='discover-row'] { display: none !important; }",
   shrinktabs: ".pa5-tabs [data-pa5='tab'] { font-size: 12px !important; min-height: 36px !important; height: 36px !important; padding-top: 0 !important; padding-bottom: 0 !important; }",
   shared: "body { letter-spacing: 0.4px !important; }",
@@ -226,29 +184,8 @@ async function mutate(page: Page) {
     const w = window as unknown as { __pa5mut?: boolean; __v: (s: string) => HTMLElement[] };
     /* PA5-1: the badge on Today instead of To do */
     if (m === "badge") { const b = document.querySelector('[data-pa5="badge"]'); const t = document.querySelector('[data-pa5="dock-tab"][data-tab="today"] .pa5-dic'); if (b && t) t.appendChild(b); }
-    /* PA5-4: a tap on a count does not reach the block */
-    if (m === "nofilter" && !w.__pa5mut) { w.__pa5mut = true; window.addEventListener("click", (e) => { if ((e.target as HTMLElement).closest?.('[data-pa5="be-count"]')) { e.stopPropagation(); e.preventDefault(); } }, true); }
-    /* PA5-5: the window fixed at 12 weeks with today at 60% (v4.1's card) — every positioned piece re-placed */
-    if (m === "window12") for (const be of w.__v('[data-pa5="be"]')) {
-      const f0 = Number(be.dataset.from), t0 = Number(be.dataset.to), now = f0 + ((t0 - f0) * Number((be.querySelector<HTMLElement>('[data-pa5="be-pill"]')?.style.left ?? "0").replace("%", ""))) / 100;
-      const f1 = now - 0.6 * 84 * 86400000, t1 = now + 0.4 * 84 * 86400000;
-      const re = (pct: number) => (((f0 + ((t0 - f0) * pct) / 100) - f1) / (t1 - f1)) * 100;
-      for (const e of be.querySelectorAll<HTMLElement>(".pa5-be-tk > *")) {
-        const l = parseFloat(e.style.left), wd = parseFloat(e.style.width);
-        if (Number.isFinite(wd)) { const nl = re(l), nr = re(l + wd); e.style.left = `${nl}%`; e.style.width = `${Math.max(0, nr - nl)}%`; } else if (Number.isFinite(l)) e.style.left = `${re(l)}%`;
-      }
-      const pill = be.querySelector<HTMLElement>('[data-pa5="be-pill"]'); if (pill) pill.style.left = "60%";
-      const line = be.querySelector<HTMLElement>('[data-pa5="be-now"]'); if (line) line.style.left = "calc(116px + (100% - 116px) * 0.6)";
-    }
-    /* PA5-6: a ring back on each past-date bar, at its notch */
-    if (m === "ring") for (const n of w.__v('[data-pa5="be-notch"]')) {
-      if (n.nextElementSibling?.classList.contains("pa5x-ring")) continue;
-      const r = document.createElement("span"); r.className = "pa5x-ring";
-      r.setAttribute("style", `position:absolute;left:${n.style.left || "0"};top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #2a3a52;border-radius:50%;box-sizing:border-box`);
-      n.after(r);
-    }
     /* PA5-9: the phone dates its own bars (each current stage three days later) */
-    if (m === "recompute") for (const r of document.querySelectorAll<HTMLElement>('[data-pa5="be-row"], [data-bw="row"]')) if (r.dataset.from) r.dataset.from = String(Number(r.dataset.from) + 3 * 86400000);
+    if (m === "recompute") for (const r of document.querySelectorAll<HTMLElement>('[data-bw="row"]')) if (r.dataset.from) r.dataset.from = String(Number(r.dataset.from) + 3 * 86400000);
     /* PA5-12: the phone counts its own result (every query sent with the package counted as asking for more) */
     if (m === "phoneresults") for (const c of document.querySelectorAll<HTMLElement>('[data-pa5="pkg-card"], [data-pa5="mat-header-pkg"]')) if (c.dataset.sent) c.dataset.requests = c.dataset.sent;
     /* PA5-14: a group labelled "Overdue" */
@@ -286,8 +223,8 @@ function group(name: string, title: string, fn: (page: Page, info: { project: { 
   });
 }
 
-/* ══ PA5-1 dock · PA5-3 tabs · PA5-4 filter · PA5-5 window · PA5-6 past date · PA5-7 line (the block) ══ */
-group("today", "PA5-1 · 3 · 4 · 5 · 6 · 7", async (page, info) => {
+/* ══ PA5-1 dock · PA5-3 tabs (PA5-4 to PA5-7, the block, retired with it) ══ */
+group("today", "PA5-1 · 3", async (page, info) => {
   const L = new Ledger(`today-${info.project.name}`);
   const vps = isWebKit(page) ? [WK_PHONE] : PHONES;
   for (const vp of vps) {
@@ -343,147 +280,11 @@ group("today", "PA5-1 · 3 · 4 · 5 · 6 · 7", async (page, info) => {
       }
     }
 
-    /* PA5-4: a count filters the rows to its group; again restores; a zero count is disabled */
-    await go(page, "/dashboard");
-    await press(page, '[data-pa5="tab"][data-tab="queries"]');
-    await blockIntoView(page);
-    await mutate(page);
-    const blockRows = () => page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-row"]').map((r) => ({ id: r.dataset.id!, court: r.dataset.court! })));
-    const counts = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-count"]').map((b) => ({ k: b.dataset.k!, n: Number(b.dataset.n), dis: (b as HTMLButtonElement).disabled, tile: b.classList.contains("ps-tile"), navy: b.classList.contains("navy") })));
-    /* Phone style v1: re-pointed at the tiles — the three counts ARE the three tiles, with you the navy one */
-    L.check("PA5-4", `${at} · the counts are the three tiles (with you navy)`, counts.length === 3 && counts.every((c) => c.tile) && counts.every((c) => c.navy === (c.k === "you")), JSON.stringify(counts));
-    const all0 = await blockRows();
-    L.check("PA5-4", `${at} · counts and rows (population ${counts.map((c) => `${c.k} ${c.n}`).join(", ")}; ${all0.length} rows)`, counts.length === 3 && counts.some((c) => c.n > 0) && all0.length > 0, "");
-    const fig = await page.evaluate(() => Number((window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="figure"]')[0]?.dataset.n ?? -1));
-    L.check("PA41-2", `${at} · (kept) the three counts add up to the header's active figure`, counts.reduce((a, c) => a + c.n, 0) === fig, `${counts.map((c) => c.n).join("+")} vs ${fig}`);
-    const dues = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-row"]').map((r) => (r.dataset.due ? Number(r.dataset.due) : Infinity)));
-    L.check("PA5-4", `${at} · the rows, nearest their date first (${dues.length})`, dues.every((d, i) => i === 0 || d >= dues[i - 1]), dues.map((d) => (d === Infinity ? "∞" : new Date(d).toISOString().slice(0, 10))).join(" "));
-    for (const c of counts.filter((x) => x.n > 0)) {
-      await press(page, `[data-pa5="be-count"][data-k="${c.k}"]`);
-      const f = await blockRows();
-      const lab = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-label"]')[0]?.textContent ?? "");
-      L.check("PA5-4", `${at} · ${c.k}: only that group's rows (${Math.min(8, c.n)} of ${c.n})`, f.length === Math.min(8, c.n) && f.every((r) => r.court === c.k), `${f.length} rows · ${[...new Set(f.map((r) => r.court))].join(",")} · "${lab}"`);
-      await press(page, `[data-pa5="be-count"][data-k="${c.k}"]`);
-      const back = await blockRows();
-      L.check("PA5-4", `${at} · ${c.k} again: every row back`, JSON.stringify(back) === JSON.stringify(all0), `${back.length} vs ${all0.length}`);
-    }
-    /* zero: the harness has no zero count, so the one-query state (the aid) gives two */
-    await beAid(page, { now: ONE_NOW, ids: ONE });
-    await mutate(page);
-    const zero = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-count"]').map((b) => ({ k: b.dataset.k!, n: Number(b.dataset.n), dis: (b as HTMLButtonElement).disabled })));
-    const zs = zero.filter((z) => z.n === 0);
-    L.check("PA5-4", `${at} · zero counts (population ${zs.length})`, zs.length > 0, JSON.stringify(zero));
-    for (const z of zs) {
-      await page.locator(`[data-pa5="be-count"][data-k="${z.k}"]`).filter({ visible: true }).first().click({ force: true }).catch(() => {});
-      await page.waitForTimeout(400);
-      const flt = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be"]')[0]?.dataset.filter ?? "?");
-      L.check("PA5-4", `${at} · ${z.k} 0: disabled, and a tap filters nothing`, z.dis && flt === "", `disabled ${z.dis} · filter "${flt}"`);
-    }
-
-    /* PA5-5: six queries all sent this week — every bar ≥ 4px, today in the left half; one query — the explainer */
-    await beAid(page, { now: WEEK_NOW, ids: SIX });
-    await mutate(page);
-    const six = await page.evaluate(() => {
-      const be = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be"]')[0];
-      const rows = [...(be?.querySelectorAll<HTMLElement>('[data-pa5="be-row"]') ?? [])];
-      const line = be?.querySelector<HTMLElement>('[data-pa5="be-now"]')?.getBoundingClientRect();
-      const tk = rows[0]?.querySelector<HTMLElement>(".pa5-be-tk")?.getBoundingClientRect();
-      return { n: rows.length, bars: rows.map((r) => Math.round((r.querySelector<HTMLElement>('[data-pa5="be-solid"]')?.getBoundingClientRect().width ?? 0) * 10) / 10), lineX: line ? line.left + line.width / 2 : null, tk: tk ? { l: tk.left, w: tk.width } : null, few: !!be?.querySelector('[data-pa5="be-few"]') };
-    });
-    L.check("PA5-5", `${at} · six sent this week (population ${six.n}; picked ${SIX.length})`, SIX.length === 6 && six.n === 6, JSON.stringify(SIX));
-    L.check("PA5-5", `${at} · every bar ≥ 4px`, six.bars.length === 6 && six.bars.every((b) => b >= 4), six.bars.join(", "));
-    L.check("PA5-5", `${at} · today in the left half of the track`, !!six.tk && six.lineX != null && six.lineX < six.tk.l + six.tk.w / 2, JSON.stringify({ lineX: six.lineX, tk: six.tk }));
-    L.check("PA5-5", `${at} · six: no explainer`, !six.few, String(six.few));
-    await beAid(page, { now: ONE_NOW, ids: ONE });
-    await mutate(page);
-    const one = await page.evaluate(() => { const be = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be"]')[0]; return { n: be?.querySelectorAll('[data-pa5="be-row"]').length ?? -1, few: be?.querySelector('[data-pa5="be-few"]')?.textContent ?? null }; });
-    L.check("PA5-5", `${at} · one query: one row and the explainer`, one.n === 1 && one.few === BE_FEW_LINE, JSON.stringify(one));
-    await beAid(page, null);
-
-    /* PA5-6: past its date — the notch at its date and a deeper segment from it to today; no ring anywhere */
-    await mutate(page);
-    const readPast = () => page.evaluate(() => {
-      const be = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be"]')[0];
-      const line = be?.querySelector<HTMLElement>('[data-pa5="be-now"]')?.getBoundingClientRect();
-      const lx = line ? line.left + line.width / 2 : NaN;
-      const f0 = Number(be?.dataset.from), t0 = Number(be?.dataset.to);
-      const out = [...(be?.querySelectorAll<HTMLElement>('[data-pa5="be-row"][data-past="1"]') ?? [])].map((r) => {
-        const tk = r.querySelector<HTMLElement>(".pa5-be-tk")!.getBoundingClientRect();
-        const n = r.querySelector<HTMLElement>('[data-pa5="be-notch"]')?.getBoundingClientRect();
-        const d = r.querySelector<HTMLElement>('[data-pa5="be-deep"]')?.getBoundingClientRect();
-        const dueX = tk.left + tk.width * ((Number(r.dataset.due) - f0) / (t0 - f0));
-        return { id: r.dataset.id, notch: n ? n.left + n.width / 2 : null, dueX, tkL: tk.left, before: Number(r.dataset.due) < f0, deepL: d?.left ?? null, deepR: d?.right ?? null, lx };
-      });
-      const rings = [...(be?.querySelectorAll<HTMLElement>(".pa5-be-tk *") ?? [])].filter((e) => { const cs = getComputedStyle(e); return parseFloat(cs.borderRadius) >= e.getBoundingClientRect().width / 2 - 0.5 && parseFloat(cs.borderTopWidth) > 0; }).length;
-      const beacons = document.querySelectorAll('[data-pa41="beacon"], .pa41-bc, .pa41v-bc').length;
-      return { out, rings, beacons };
-    });
-    /* the harness's block shows the eight nearest their date, all dated before the 9-week window; the open queries whose
-       date passed in the last eight weeks (the aid, at today's date: the same rows, nothing else) fall inside it */
-    /* (Phone Birds-eye world v1: the second population — the open queries past their date in the last eight weeks — was
-       read off BirdsViewV5's unfolded rows; the world draws only the rows on screen, so that population is retired and
-       the harness's own rows carry these checks) */
-    const recent: string[] = [];
-    await go(page, "/dashboard");
-    await press(page, '[data-pa5="tab"][data-tab="queries"]');
-    for (const [st, aid] of ([["the harness", null]] as const).concat(recent.length ? [[`the ${recent.length} past their date in the last eight weeks`, { ids: recent }] as never] : [])) {
-      await beAid(page, aid as { ids: string[] } | null);
-      await mutate(page);
-      const past = await readPast();
-      const inWin = past.out.filter((p) => !p.before), before = past.out.filter((p) => p.before);
-      L.check("PA5-6", `${at} · ${st} · rows past their date (population ${inWin.length} dated in the window, ${before.length} before it)`, past.out.length > 0, "");
-      const badIn = inWin.filter((p) => !(p.notch != null && Math.abs(p.notch - p.dueX) <= 1.5 && p.deepL != null && p.deepR != null && Math.abs(p.deepL - p.notch) <= 1.5 && Math.abs(p.deepR - p.lx) <= 2));
-      L.check("PA5-6", `${at} · ${st} · the notch at the date, the deeper segment from it to today`, badIn.length === 0, JSON.stringify(badIn.slice(0, 3)));
-      const badBefore = before.filter((p) => !(p.notch == null && p.deepL != null && p.deepR != null && Math.abs(p.deepL - p.tkL) <= 1.5 && Math.abs(p.deepR - p.lx) <= 2));
-      L.check("PA5-6", `${at} · ${st} · a date before the window: no notch, the deeper segment in from the edge to today`, badBefore.length === 0, JSON.stringify(badBefore.slice(0, 3)));
-      L.check("PA5-6", `${at} · ${st} · no ring on a bar, no beacon anywhere`, past.rings === 0 && past.beacons === 0, JSON.stringify({ rings: past.rings, beacons: past.beacons }));
-      if (aid) L.check("PA5-6", `${at} · ${st} · dated inside the window (population ${past.out.filter((p) => !p.before).length})`, past.out.some((p) => !p.before), "");
-    }
-    await beAid(page, null);
-
-    /* PA5-7: the today line crosses no text; an opened row's detail covers it */
-    const lineText = () => page.evaluate(() => {
-      const be = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be"]')[0];
-      const ln = be?.querySelector<HTMLElement>('[data-pa5="be-now"]')?.getBoundingClientRect();
-      if (!be || !ln) return { texts: 0, hits: ["no line"] };
-      const hits: string[] = []; let texts = 0;
-      const tw = document.createTreeWalker(be, NodeFilter.SHOW_TEXT);
-      for (let n = tw.nextNode(); n; n = tw.nextNode()) {
-        if (!(n.textContent ?? "").trim()) continue;
-        const el = n.parentElement!; const cs = getComputedStyle(el);
-        if (cs.visibility === "hidden" || el.closest('[data-pa5="be-detail"]')) continue;
-        texts++;
-        const rg = document.createRange(); rg.selectNodeContents(n);
-        for (const r of rg.getClientRects()) if (r.right > ln.left && r.left < ln.right && r.bottom > ln.top && r.top < ln.bottom && !el.closest('[data-pa5="be-pill"]')) hits.push(`"${(n.textContent ?? "").trim().slice(0, 20)}"`);
-      }
-      return { texts, hits };
-    });
-    const lt = await lineText();
-    L.check("PA5-7", `${at} · text in the block (population ${lt.texts})`, lt.texts > 10, "");
-    L.check("PA5-7", `${at} · the today line crosses no text`, lt.hits.length === 0, lt.hits.slice(0, 5).join(" "));
-    /* open the row whose detail spans the line; read what is on top at the line (the line made hit-testable to ask) */
-    const n0 = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-row"]').length);
-    let covered = 0, tried = 0;
-    for (let i = 0; i < Math.min(n0, 3); i++) {
-      await press(page, `[data-pa5="be"] [data-pa5="be-row"] >> nth=${i}`);
-      await mutate(page);
-      const c = await page.evaluate(() => {
-        const s = document.createElement("style"); s.textContent = ".pa5-be-now { pointer-events: auto !important; }"; document.head.appendChild(s);
-        const be = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be"]')[0];
-        const ln = be?.querySelector<HTMLElement>('[data-pa5="be-now"]')?.getBoundingClientRect();
-        const d = be?.querySelector<HTMLElement>('[data-pa5="be-detail"]')?.getBoundingClientRect();
-        let top = "";
-        if (ln && d) { const e = document.elementFromPoint(ln.left + ln.width / 2, d.top + d.height / 2) as HTMLElement | null; top = e?.closest('[data-pa5="be-detail"]') ? "detail" : e?.matches('[data-pa5="be-now"]') ? "line" : `${e?.tagName}.${e?.className}`; }
-        s.remove();
-        return { top, d: !!d, spans: !!(ln && d && ln.left > d.left && ln.right < d.right && ln.bottom > d.bottom) };
-      });
-      if (c.d && c.spans) { tried++; if (c.top === "detail") covered++; else L.check("PA5-7", `${at} · row ${i}: the detail covers the line`, false, c.top); }
-      await press(page, `[data-pa5="be"] [data-pa5="be-row"] >> nth=${i}`);
-    }
-    L.check("PA5-7", `${at} · opened details over the line (population ${tried})`, tried > 0 && covered === tried, `${covered} of ${tried}`);
+    /* PA5-4 to PA5-7 measured v5's Birds-eye block, retired by Phone Birds-eye first look v1 (Today shows Birds-eye's
+       own preview: BFL-6 to BFL-8 in phoneBirdsFirstLook.measure.ts) */
     if (isWebKit(page)) break;
   }
-  L.done(isWebKit(page) ? 24 : 50, MUT_LOCK[MUT]?.[1]);
+  L.done(isWebKit(page) ? 4 : 8, MUT_LOCK[MUT]?.[1]);
 });
 
 /* ══ PA5-2 reachable: every phone page the base reached is reached in v5 within three taps of a dock tab ══ */
@@ -493,8 +294,8 @@ const REACH: Reach[] = [
   { page: "To do's tasks (v4's tasks page)", dock: "todo", taps: [], arrive: 'vis:[data-pa5="todo"]' },
   { page: "A task's journey", dock: "todo", taps: ['[data-pa5="todo-verb"]'], arrive: 'vis:[data-tdp="task"]' },
   { page: "Queries list (/queries)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="all-queries"]'], arrive: "path:/queries/all" },
-  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="be-foot"]'], arrive: 'vis:[data-pa5="birds-view"]' },
-  { page: "A query's page", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="be-row"]', '[data-pa5="be-open"]'], arrive: 'vis:[data-pqs="sheet"]' }, /* Phone query sheet v1: the query opens as the one sheet */
+  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-bwp="all"]'], arrive: 'vis:[data-pa5="birds-view"]' }, /* first look v1: Today's preview */
+  { page: "A query's page", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-ps="move-row"]'], arrive: 'vis:[data-pqs="sheet"]' }, /* Phone query sheet v1: the one sheet; first look v1: from a Your move row (the preview's rows open Birds-eye) */
   { page: "Agents (/agents)", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]'], arrive: 'vis:[data-pa5="agents-tab"]' },
   { page: "Everyone on your list", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]', '[data-pa5="see-all-agents"]'], arrive: 'vis:[data-pa4="agents-all"]' },
   { page: "An agent's card", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]', '[data-pa4="fit-card"]'], arrive: 'vis:[data-pa4="asheet"]' },
@@ -572,36 +373,13 @@ group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async 
   await press(page, '[data-pa5="tab"][data-tab="queries"]');
   await blockIntoView(page);
   await mutate(page);
-  /* PA5-9 (block half): every row the block shows, unfiltered and in each group */
-  const blockDates: Record<string, { from: number; to: number; pasts: string }> = {};
-  const readBlock = async () => Object.assign(blockDates, await page.evaluate(() => Object.fromEntries((window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-row"]').map((r) => [r.dataset.id!, { from: Number(r.dataset.from || NaN), to: Number(r.dataset.to || NaN), pasts: r.dataset.pasts ?? "" }]))));
-  await readBlock();
-  for (const k of ["you", "agent", "quiet"]) {
-    const dis = await page.locator(`[data-pa5="be-count"][data-k="${k}"]`).filter({ visible: true }).first().isDisabled().catch(() => true);
-    if (dis) continue;
-    await press(page, `[data-pa5="be-count"][data-k="${k}"]`); await mutate(page); await readBlock();
-    await press(page, `[data-pa5="be-count"][data-k="${k}"]`);
-  }
-  /* the block's drawn notch and solid start sit at the dates its row states (the bars are drawn from those dates) */
-  const drawn = await page.evaluate(() => {
-    const be = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be"]')[0];
-    const f0 = Number(be?.dataset.from), t0 = Number(be?.dataset.to);
-    const off: string[] = []; let n = 0;
-    for (const r of be?.querySelectorAll<HTMLElement>('[data-pa5="be-row"]') ?? []) {
-      const tk = r.querySelector<HTMLElement>(".pa5-be-tk")!.getBoundingClientRect();
-      const x = (ms: number) => tk.left + tk.width * Math.max(0, Math.min(1, (ms - f0) / (t0 - f0)));
-      const s = r.querySelector<HTMLElement>('[data-pa5="be-solid"]')?.getBoundingClientRect();
-      if (s && r.dataset.from) { n++; if (Math.abs(s.left - x(Number(r.dataset.from))) > 1.5) off.push(`${r.dataset.id} start ${s.left.toFixed(1)} vs ${x(Number(r.dataset.from)).toFixed(1)}`); }
-    }
-    return { n, off };
-  });
-  L.check("PA5-9", `block: each bar drawn from its row's date (population ${drawn.n})`, drawn.n > 0 && drawn.off.length === 0, drawn.off.slice(0, 4).join(" | "));
+  /* PA5-9's block half went with v5's Birds-eye block (Phone Birds-eye first look v1); the view half stays */
 
   /* the full view: Phone Birds-eye world v1. Its fitted overview has every live query on screen, so every row is drawn.
      Retired with BirdsViewV5 (the world's own locks are tests/e2e/phoneBirdsWorld.measure.ts): PA41-8 (groups fold at
      five), PA5-8's 28px rows, 18 in sight and the fixed name column on a drag, PA5-6's notch and deeper segment in the
      view, and the 184px landscape name column. */
-  await press(page, '[data-pa5="be-foot"]');
+  await press(page, '[data-bwp="all"]');
   await page.locator('[data-bw="world"]').first().waitFor();
   await page.waitForTimeout(800);
   await mutate(page);
@@ -618,7 +396,7 @@ group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async 
       return [r.dataset.id!, { from: Number(c?.dataset.from ?? NaN), title: c?.getAttribute("title") ?? "", pasts: [...r.querySelectorAll<HTMLElement>('[data-qc150="be-past"]')].map((p) => `${p.dataset.from}-${p.dataset.to}`).join(",") }];
     })));
     const dm = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-    for (const [where, set] of [["view", phone], ["block", blockDates]] as const) {
+    for (const [where, set] of [["view", phone]] as const) {
       const ids = Object.keys(set); let same = 0; const off: string[] = [];
       for (const id of ids) {
         const p = set[id], d = desk[id];
@@ -627,7 +405,7 @@ group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async 
         const ok = (Number.isNaN(p.from) && Number.isNaN(d.from)) || (p.from === d.from && dm(p.to) === endWords && p.pasts === d.pasts);
         if (ok) same++; else off.push(`${id}: ${p.from}/${dm(p.to)}/${p.pasts} vs ${d.from}/${endWords}/${d.pasts}`);
       }
-      L.check("PA5-9", `${where}: open queries (population ${ids.length} phone, ${Object.keys(desk).length} desktop)`, ids.length > 0 && (where === "block" || ids.length === Object.keys(desk).length), "");
+      L.check("PA5-9", `${where}: open queries (population ${ids.length} phone, ${Object.keys(desk).length} desktop)`, ids.length > 0 && ids.length === Object.keys(desk).length, "");
       L.check("PA5-9", `${where}: every current bar's start and end, and every earlier stage, equal the desktop's`, off.length === 0 && same === ids.length, off.slice(0, 4).join(" | "));
     }
     /* 844 × 390 is the desktop (false premise) */
@@ -636,7 +414,7 @@ group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async 
     const wide = await page.evaluate(() => ({ dock: !!document.querySelector('[data-pa5="dock"]'), today: !!(window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="today"]').length, mobile: matchMedia("(max-width: 767.98px)").matches }));
     L.check("PA5-8", "844x390 is the desktop layout (no dock, no phone Today)", !wide.dock && !wide.today && !wide.mobile, JSON.stringify(wide));
   }
-  L.done(isWebKit(page) ? 1 : 6, MUT_LOCK[MUT]?.[1]);
+  L.done(isWebKit(page) ? 0 : 3, MUT_LOCK[MUT]?.[1]);
 });
 
 /* ══ PA5-10 the card: the verb and a right swipe open the same journey; cancel records nothing; save; Undo ══ */
@@ -851,7 +629,7 @@ const sweep = (page: Page, roots: string): Promise<Sweep> => page.evaluate((rs) 
     }
     if (e.matches("button:not([disabled]), a[href], [role='button'], [role='tab'], input, textarea, select") && !e.closest("[aria-hidden='true']")) {
       out.taps++;
-      const row28 = e.matches('[data-pa5="be-row"]') || !!e.closest('[data-bw="world"]');
+      const row28 = e.matches('[data-bwp="row"]') || !!e.closest('[data-bw="world"]'); /* the preview's rows are the ref's 32 (first look v1) */
       if (!row28 && (r.width < 47.5 || r.height < 47.5)) out.smallTap.push(`${String(e.className || e.tagName).slice(0, 30)} "${e.textContent?.trim().slice(0, 20)}" ${Math.round(r.width)}×${Math.round(r.height)}`);
     }
     if (r.right > vw + 1) { let a = e.parentElement, sc = false; while (a) { const ov = getComputedStyle(a).overflowX; if (/auto|scroll|hidden|clip/.test(ov)) { sc = true; break; } a = a.parentElement; } if (!sc) out.wide.push(`${String(e.className).slice(0, 30)} right ${Math.round(r.right)}`); }
@@ -958,8 +736,7 @@ group("words", "PA5-14", async (page, info) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await clearReplays(page);
   const motionScreens: [string, () => Promise<void>][] = [
-    ["Today (header, chart, block)", async () => { await go(page, "/dashboard"); await lift(); await press(page, '[data-pa5="tab"][data-tab="queries"]'); await blockIntoView(page); }],
-    ["a block row opened", async () => { await press(page, '[data-pa5="be-row"]'); }],
+    ["Today (header, chart, Birds-eye's preview)", async () => { await go(page, "/dashboard"); await lift(); await press(page, '[data-pa5="tab"][data-tab="queries"]'); await blockIntoView(page); }],
     ["To do", async () => { await go(page, "/todo"); await lift(); }],
     ["Not now", async () => { await press(page, '[data-pa5="todo-later"]'); }],
     ["the full Birds-eye view", async () => { await go(page, "/queries/all?view=birds"); await lift(); }],
@@ -967,7 +744,8 @@ group("words", "PA5-14", async (page, info) => {
     ["Profile", async () => { await go(page, "/you"); await lift(); }],
   ];
   for (const [name, open] of motionScreens) {
-    await open(); await page.waitForTimeout(150);
+    /* Birds-eye fades in over 200ms on every open, reduced motion included (first look v1, the brief's ruling): read after it */
+    await open(); await page.waitForTimeout(name === "the full Birds-eye view" ? 300 : 150);
     const r = await running();
     L.check("PA5-14", `reduced motion · ${name}: nothing running`, r.length === 0, r.slice(0, 6).join(", "));
   }
@@ -1079,24 +857,5 @@ test.describe("PA5 pairs", () => {
     await page.keyboard.press("Escape");
     await go(page, "/queries/all?view=birds"); await page.waitForTimeout(800);
     await page.screenshot(shot("13-birds-dense-built"));
-    /* the five campaign states of the Birds-eye block (the review aid; the harness is Everyday) */
-    await go(page, "/queries/all?view=birds");
-    const open = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-bw="row"]')].map((r) => ({ id: r.dataset.id!, past: r.dataset.past === "1" })));
-    const sent = new Map(H_QUERIES.map((q) => [q.id, tsMs(q.dateSent)]));
-    const now = Date.now();
-    const states: [string, { now?: number; ids?: string[] } | null][] = [
-      ["everyday", null],
-      ["brand-new", { now: NEW_NOW, ids: BRAND_NEW }],
-      ["just-one", { now: ONE_NOW, ids: ONE }],
-      ["all-past-date", { ids: open.filter((r) => r.past).map((r) => r.id) }],
-      ["long-waits", { ids: open.filter((r) => (sent.get(r.id) ?? now) < now - 70 * DAY).map((r) => r.id) }],
-    ];
-    writeFileSync(`${out}/campaign-states.json`, JSON.stringify(states, null, 1));
-    for (const [n, aid] of states) {
-      await go(page, "/dashboard");
-      await beAid(page, aid);
-      await page.locator('[data-pa5="be"]').filter({ visible: true }).first().screenshot(shot(`20-block-${n}`)).catch(() => {});
-    }
-    await beAid(page, null);
   });
 });

@@ -1,0 +1,218 @@
+[
+ {
+  "lock": "PA5-2",
+  "where": "Today (/dashboard): 0 taps from today",
+  "ok": true,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "To do's tasks (v4's tasks page): 0 taps from todo",
+  "ok": true,
+  "detail": "/todo"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "A task's journey: 1 tap from todo",
+  "ok": true,
+  "detail": "/todo"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Queries list (/queries): 2 taps from today",
+  "ok": true,
+  "detail": "/queries/all"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "The Birds-eye view (/queries?view=birds): 2 taps from today",
+  "ok": true,
+  "detail": "/queries/all?view=birds"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "A query's page: 2 taps from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"queries\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Agents (/agents): 1 tap from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"agents\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Everyone on your list: 2 taps from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"agents\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "An agent's card: 2 taps from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"agents\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Log a query to an agent: 2 taps from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"agents\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Add an agent: 3 taps from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"agents\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Discover (/agents/discover): 2 taps from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"agents\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Search: 1 tap from today",
+  "ok": false,
+  "detail": "no [data-pa5=\"today-hd\"] [data-pa4=\"search\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Packages (/queries/packages): 1 tap from materials",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"packages\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "A package (?pkg=): 2 taps from materials",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"packages\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "The package builder (?build=new): 2 taps from materials",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"packages\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Query letters (/manuscripts#materials): 1 tap from materials",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"letters\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "A letter (?mat=): 2 taps from materials",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"letters\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Versions (/manuscripts#versions): 1 tap from materials",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"versions\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Comps (/manuscripts#comps): 1 tap from materials",
+  "ok": false,
+  "detail": "no [data-pa5=\"tab\"][data-tab=\"comps\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Profile (v4's You, /you): 0 taps from profile",
+  "ok": true,
+  "detail": "/you"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Responses: 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/queries/responses\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "The wall of no (#wall): 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa4=\"open-wall\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Analytics: 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa4=\"full-picture\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Goals: 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa4=\"streak-card\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Your book (/manuscripts): 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/manuscripts\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Corkboard: 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/todo/corkboard\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Your notes: 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"your-notes-row\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Settings (/account): 1 tap from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/account\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "An account section (/account/…): 2 taps from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/account\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Plans (/plans): 2 taps from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/account\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Help centre (/help): 2 taps from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/account\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "A help article (/help/…): 3 taps from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/account\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Import (/import): 2 taps from profile",
+  "ok": false,
+  "detail": "no [data-pa5=\"profile-row\"][data-path=\"/account\"]"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "Quick log (+): 1 tap from today",
+  "ok": true,
+  "detail": "/dashboard"
+ },
+ {
+  "lock": "PA5-2",
+  "where": "the base's phone pages (population 35)",
+  "ok": true,
+  "detail": ""
+ }
+]

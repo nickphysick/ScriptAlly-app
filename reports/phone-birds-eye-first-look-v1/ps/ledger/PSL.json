@@ -1,0 +1,68 @@
+[
+ {
+  "id": "PSL",
+  "what": "as built: one lead card, for the first query",
+  "ok": true,
+  "got": "[{\"id\":\"cv25-q-08\",\"key\":\"task-offer-cv25-q-08\",\"verb\":\"Decide\",\"head\":\"Answer Tom’s offer\"}]"
+ },
+ {
+  "id": "PSL",
+  "what": "as built: the lead button opens the task's screen at that task",
+  "ok": true,
+  "got": "task-offer-cv25-q-08 vs task-offer-cv25-q-08"
+ },
+ {
+  "id": "PSL",
+  "what": "as built: To do shows the same task",
+  "ok": true,
+  "got": "task-offer-cv25-q-08 vs task-offer-cv25-q-08"
+ },
+ {
+  "id": "PSL",
+  "what": "as built: the button's words are To do's (\"Decide\")",
+  "ok": true,
+  "got": "Today \"Decide\" · To do \"Decide\""
+ },
+ {
+  "id": "PSL",
+  "what": "as built: To do's button opens the same screen at the same task",
+  "ok": true,
+  "got": "task-offer-cv25-q-08 vs task-offer-cv25-q-08"
+ },
+ {
+  "id": "PSL",
+  "what": "first query has no task: the first query has no task → no lead card",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "id": "PSL",
+  "what": "one query: one lead card, for the first query",
+  "ok": true,
+  "got": "[{\"id\":\"cv25-q-08\",\"key\":\"task-offer-cv25-q-08\",\"verb\":\"Decide\",\"head\":\"Answer Tom’s offer\"}]"
+ },
+ {
+  "id": "PSL",
+  "what": "one query: the lead button opens the task's screen at that task",
+  "ok": true,
+  "got": "task-offer-cv25-q-08 vs task-offer-cv25-q-08"
+ },
+ {
+  "id": "PSL",
+  "what": "one query: To do shows the same task",
+  "ok": true,
+  "got": "task-offer-cv25-q-08 vs task-offer-cv25-q-08"
+ },
+ {
+  "id": "PSL",
+  "what": "one query: the button's words are To do's (\"Decide\")",
+  "ok": true,
+  "got": "Today \"Decide\" · To do \"Decide\""
+ },
+ {
+  "id": "PSL",
+  "what": "one query: To do's button opens the same screen at the same task",
+  "ok": true,
+  "got": "task-offer-cv25-q-08 vs task-offer-cv25-q-08"
+ }
+]

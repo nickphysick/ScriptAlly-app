@@ -1,0 +1,20 @@
+[
+ {
+  "lock": "PA5-9",
+  "where": "view: open queries (population 88 phone, 70 desktop)",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-9",
+  "where": "view: every current bar's start and end, and every earlier stage, equal the desktop's",
+  "ok": false,
+  "detail": "seed-query-1: not on the desktop | cor-move-c: not on the desktop | cor-closed: not on the desktop | rej-query-1: not on the desktop"
+ },
+ {
+  "lock": "PA5-8",
+  "where": "844x390 is the desktop layout (no dock, no phone Today)",
+  "ok": true,
+  "detail": "{\"dock\":false,\"today\":false,\"mobile\":false}"
+ }
+]

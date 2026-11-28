@@ -10,7 +10,8 @@
  *     Next to query, "See all N agents" and Discover;
  *   - Activity: v4's Lately feed only (the founding writer card is on Profile).
  * Phase B: the header is v5's (TodayHeaderV5: "Today", the day of the campaign, the need pill that opens To do, the
- * active figure, the chart with the Mentor), and the Queries tab's Birds-eye block is v5's (BirdsBlockV5, on the page).
+ * active figure, the chart with the Mentor). The Queries tab's Birds-eye block (v5's BirdsBlockV5) is retired: Phone
+ * Birds-eye first look v1 puts Birds-eye's own preview there, the next three weeks (birds/BirdsPreview).
  * Up next's lead card has left Today: its tasks are To do's (the need pill and the dock badge open them there). Only
  * day one keeps a card above the tabs. v4's "straight after a task" and "quiet day" cards existed only as the lead
  * card's states, so they are retired with it.
@@ -28,9 +29,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useV3Data } from "../v3/V3Provider";
 import { V3Glyph } from "../v3/V3Parts";
 import { openV3, openV3Query } from "../v3/v3Store";
-import { courtRows, v3Counts, v3Queries } from "../../../lib/phoneV3";
-import { buildQcRows } from "../../../lib/qcSummary";
-import { anyToMs } from "../../../lib/qcStages";
+import { courtRows } from "../../../lib/phoneV3";
 import { buildRows } from "../../../lib/analytics";
 import { dayN, firstSentMs, streakLine } from "../../../lib/phoneV4";
 import { activeSeries, weekChange } from "../../../lib/phoneV41";
@@ -43,7 +42,7 @@ import { V5TabStrip } from "./V5Tabs";
 import { AgentsTabV5 } from "./AgentsTabV5";
 import { openFeedbackSheet } from "./FeedbackSheetV5";
 import { TodayHeaderV5 } from "./TodayHeaderV5";
-import { BirdsBlockV5 } from "./BirdsBlockV5";
+import { BirdsPreview } from "../birds/BirdsPreview";
 import { QUERIES_ALL_PATH } from "../../../lib/phoneV3Nav";
 import { TODAY_TAB_KEY, TODAY_TABS, feedbackAbout, isTodayTab, readTab, saveTab, type TodayTab } from "../../../lib/phoneV5";
 
@@ -120,23 +119,6 @@ export const TodayV5: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
     );
   }
 
-  /* a DEV-ONLY review aid (Phone app v5, PA5-5 and the campaign states): `window.__SA_PA5_BE = { now?, ids? }` feeds the
-     Birds-eye block the SAME derivations (buildQcRows → v3Queries → v3Counts) over a subset of the writer's own queries
-     (`ids`) and their activities up to `now` — the measurement picks queries with nothing recorded after `now`, so their
-     stored fields are what they were then. The MODE test is at the call site, so a production build folds it away. */
-  const beAid: { now?: number; ids?: string[] } | null = import.meta.env.MODE !== "production" && typeof window !== "undefined"
-    ? ((window as unknown as { __SA_PA5_BE?: { now?: number; ids?: string[] } }).__SA_PA5_BE ?? null) : null;
-  const be = (() => {
-    if (!beAid) return { qs: v.qs, c, now };
-    const at = beAid.now ?? now;
-    const keep = beAid.ids ? new Set(beAid.ids) : null;
-    const qq = queries.filter((q) => !keep || keep.has(q.id));
-    const ids = new Set(qq.map((q) => q.id));
-    const acts = (activities as Activity[]).filter((a) => !!a.queryId && ids.has(a.queryId) && (anyToMs(a.date) ?? 0) <= at);
-    const fq = v3Queries({ rows: buildQcRows(qq, agents, acts, at), agents, tasks: [], quietWeeks: v.quietWeeks, nowMs: at });
-    return { qs: fq, c: v3Counts(fq), now: at };
-  })();
-
   /* ── the three tabs ── */
   const mine = useMemo(() => courtRows(v.qs, "you"), [v.qs]);
   const hasQueries = aid?.queries === 0 ? false : v.qs.length > 0;
@@ -145,8 +127,9 @@ export const TodayV5: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
     /* Phone style v1, Phase 3 (phone-today-v6.html): the tiles, "Nearest their date" with its rows in a card, then
        "Your move" — the lead card and the rest of its rows in a card (YourMoveV5) */
     panel = (<div className="ps-today" data-ps="today-queries">
-      {/* v5: the Birds-eye block; absent with nothing open (day one shows above the tabs) */}
-      {hasQueries && be.c.active > 0 ? <BirdsBlockV5 qs={be.qs} c={be.c} nowMs={be.now} /> : null}
+      {/* Phone Birds-eye first look v1 §B: the next three weeks (BirdsPreview), in place of v5's Birds-eye block; with
+          no queries at all, day one's card shows above the tabs instead */}
+      {hasQueries ? <BirdsPreview /> : null}
       <YourMoveV5 mine={mine} now={now} />
       <div className="ps-today-all">
         <button type="button" className="ps-tlink" data-pa4="all-queries" data-pa5="all-queries" onClick={() => navigate(QUERIES_ALL_PATH)}>See all queries</button>
