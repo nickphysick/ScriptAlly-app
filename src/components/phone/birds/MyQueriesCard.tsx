@@ -33,13 +33,12 @@ export const MQ_FILL: Record<BwGroupName, string> = {
   "No reply date yet": "#2a3a52",
   Closed: "#d6d1c9",
 };
-export const MQ_MAX = 150;
 /** the counts, in Birds-eye's group order, every group present (0 where empty) */
 export function myQueriesCounts(groups: { t: BwGroupName; rows: unknown[] }[]): { t: BwGroupName; n: number }[] {
   return BW_GROUPS.map((t) => ({ t, n: groups.find((g) => g.t === t)?.rows.length ?? 0 }));
 }
-/** a bar's length: in proportion to the largest count, 150px at most; none at 0 */
-export const mqWidth = (n: number, max: number): number => (n > 0 && max > 0 ? (n / max) * MQ_MAX : 0);
+/** its share of the row's room (polish v1.1: the room is under 150 at 390), as a percentage */
+export const mqShare = (n: number, max: number): number => (n > 0 && max > 0 ? Math.round((n / max) * 10000) / 100 : 0);
 /** polish v1.1 — the band's track (ref `trk4`): how far any of the writer's queries has ever got. Queried 0, a partial
  *  asked or sent 1, a full asked, sent or resubmitted (or revise & resubmit) 2, an offer or a signing 3. */
 const STAGE_OF: Partial<Record<string, number>> = {
@@ -92,7 +91,7 @@ export const MyQueriesCard: React.FC = () => {
             {counts.map(({ t, n }) => (
               <span key={t} className="bwq-r" data-bwq="row" data-g={t} data-n={n}>
                 <span className="bwq-l">{t}</span>
-                {n > 0 ? <i className="bwq-bar" data-bwq="bar" style={{ width: mqWidth(n, max), background: MQ_FILL[t] }} /> : <i className="bwq-bar none" aria-hidden="true" />}
+                <span className="bwq-span">{n > 0 ? <i className="bwq-bar" data-bwq="bar" style={{ width: `${mqShare(n, max)}%`, background: MQ_FILL[t] }} /> : <i className="bwq-bar none" aria-hidden="true" />}</span>
                 <b className="bwq-n" data-bwq="count">{n}</b>
               </span>
             ))}

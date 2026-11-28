@@ -14,7 +14,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
-const DIR = "reports/phone-birds-eye-polish-v1";
+const DIR = process.env.BP_OUT ?? "reports/phone-birds-eye-polish-v1";
 const REF = "design-refs/phone-birds-eye-polish-v1/shots";
 const PHONE = { width: 390, height: 784 } as const;
 const BIRDS = "/queries/all?view=birds";
@@ -100,9 +100,9 @@ test("Birds-eye polish v1 — the shots beside the ref's", async ({ page }, info
 });
 
 /* ── the locks ── */
-const MUTS = ["head140", "dot", "markshift", "thin", "overlap", "colour", "tiny"] as const;
+const MUTS = ["head140", "dot", "markshift", "thin", "overlap", "colour", "tiny", "oncemem", "title", "total", "linkpe", "leftalign"] as const;
 type Mut = (typeof MUTS)[number] | "";
-const MUT_LOCK: Record<Exclude<Mut, "">, string> = { head140: "BP-1", dot: "BP-2", markshift: "BP-3", thin: "BP-4", overlap: "BP-5", colour: "BP-6", tiny: "BP-8" };
+const MUT_LOCK: Record<Exclude<Mut, "">, string> = { head140: "BP-1", dot: "BP-2", markshift: "BP-3", thin: "BP-4", overlap: "BP-5", colour: "BP-6", tiny: "BP-8", oncemem: "BP-9", title: "BP-10", total: "BP-11", linkpe: "BP-13", leftalign: "BP-14" };
 const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   /* BP-1: the header back to two rows' height */
   head140: ".bw-hd.slim { height: 140px !important; }",
@@ -116,9 +116,17 @@ const CSS_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   colour: '[data-bwq="bar"] { background: #c00 !important; }',
   /* BP-8: My queries' foot at 10px */
   tiny: ".bwq-link { font-size: 10px !important; }",
+  /* BP-10: the title squeezed (cut short) */
+  title: ".bw .bw-t2 .bw-h { flex: none !important; width: 60px !important; }",
+  /* BP-13: the link takes no finger (a tap on it reaches the body) */
+  linkpe: ".bwq .bwq-link { pointer-events: none !important; }",
+  /* BP-14: the counts left-aligned in their column */
+  leftalign: ".bwq .bwq-n { text-align: left !important; }",
 };
 const INIT_MUT: Partial<Record<Exclude<Mut, "">, string>> = {
   /* BP-5: each piece's grow 120ms longer, so it runs on into the next */
+  /* BP-9: the once-a-day memory back (after the first grow-in, every later arrival only fades) */
+  oncemem: `new MutationObserver(() => { if (document.querySelector('[data-bw="layer"][data-look="playing"]')) try { localStorage.setItem("sa.e2e.bw-nolook", "1"); } catch { /* */ } }).observe(document, { subtree: true, attributes: true, attributeFilter: ["data-look"] });`,
   overlap: `{ const a = Element.prototype.animate; Element.prototype.animate = function (kf, o) { if (Array.isArray(kf) && kf[0] && kf[0].scale === "0 1" && o && typeof o === "object") o = { ...o, duration: (o.duration || 0) + 120 }; return a.call(this, kf, o); }; }`,
 };
 type Row = { lock: string; where: string; ok: boolean; detail: string };
@@ -334,14 +342,116 @@ for (const mut of runs) {
       const ORDER = ["Needs action", "Within their window", "No reply date yet", "Closed"];
       L.check("BP-6", `My queries' four rows, in Birds-eye's order, count exactly Birds-eye's groups (${JSON.stringify(groups)})`, JSON.stringify(card.map((c) => c.g)) === JSON.stringify(ORDER) && card.every((c) => c.n === (groups[c.g] ?? 0) && c.shown === String(c.n)), JSON.stringify(card.map((c) => [c.g, c.n])));
       const max = Math.max(...card.map((c) => c.n));
-      L.check("BP-6", "bars in proportion to the largest (150px at most); a 0 row has no bar", card.every((c) => (c.n === 0 ? !c.bar : c.bar && Math.abs(c.w - (c.n / max) * 150) < 0.6)), JSON.stringify(card.map((c) => [c.g, c.w])));
+      /* polish v1.1: the largest fills the row's room (150px at most; at 390 the room is less), the rest their share of it */
+      const full = Math.max(...card.map((c) => c.w));
+      L.check("BP-6", `bars in proportion to the largest (it ${full.toFixed(1)}px, 150 at most); a 0 row has no bar`, full <= 150.5 && card.every((c) => (c.n === 0 ? !c.bar : c.bar && Math.abs(c.w - (c.n / max) * full) < 0.8)), JSON.stringify(card.map((c) => [c.g, c.w])));
       const fill = (g: string) => card.find((c) => c.g === g)!;
       const colOk = /repeating-linear-gradient/.test(fill("Needs action").img) && /232, 200, 188/.test(fill("Needs action").img)
         && ["Within their window", "No reply date yet"].every((g) => !fill(g).bar || fill(g).col === "rgb(42, 58, 82)") && (!fill("Closed").bar || fill("Closed").col === "rgb(214, 209, 201)");
       L.check("BP-6", "colours: Needs action striped soft pink, the waiting rows navy, Closed grey", colOk, JSON.stringify(card.map((c) => [c.g, c.img.slice(0, 50), c.col])));
-      await tapAt(page, '[data-bwq="card"]');
+      await tapAt(page, '[data-bwq="link"]'); /* polish v1.1: the link opens Birds-eye; the body opens the list (BP-13) */
       const opened = await page.locator('[data-bw="world"]').first().waitFor({ timeout: 15_000 }).then(() => true).catch(() => false);
-      L.check("BP-6", "a tap on the card opens Birds-eye", opened && /view=birds/.test(page.url()), page.url());
+      L.check("BP-6", "a tap on its link opens Birds-eye", opened && /view=birds/.test(page.url()), page.url());
+    }
+
+
+    /* ── BP-9 · the grow-in plays on every arrival (polish v1.1), not on a filter or level change ── */
+    if (on("BP-9")) {
+      await setDay(page, null);
+      const look = () => page.evaluate(() => { const l = document.querySelector<HTMLElement>('[data-bw="layer"]'); return { look: l?.dataset.look ?? "", t0: l?.dataset.t0 ?? "" }; });
+      const waitLook = () => page.waitForFunction(() => !!document.querySelector<HTMLElement>('[data-bw="layer"]')?.dataset.look, null, { timeout: 30_000, polling: "raf" });
+      const toToday = async () => { await page.goto("/dashboard?tab=queries"); await page.locator('[data-bwq="link"]').filter({ visible: true }).first().waitFor({ timeout: 20_000 }); await frame(page, 500); };
+      /* 1 · from Today's link */
+      await toToday(); await tapAt(page, '[data-bwq="link"]'); await waitLook();
+      const a = await look();
+      L.check("BP-9", "arrival from Today's “Birds-eye view” link: the bars grow in", a.look === "playing", JSON.stringify(a));
+      await frame(page, 2400);
+      /* a filter and a level between arrivals: no replay */
+      await tapAt(page, '[data-bw="filter"]'); await frame(page, 300); await tapAt(page, '[data-bw="fpick"][data-k="chase"]'); await frame(page, 700);
+      const f = await look(); const fa = (await worldAnims(page)).filter((x) => x.scale !== "null").length;
+      L.check("BP-9", "a filter change does not replay it", f.look === "done" && f.t0 === a.t0 && fa === 0, JSON.stringify({ ...f, growing: fa }));
+      await tapAt(page, '[data-bw="fpick"][data-k="chase"]').catch(() => {});
+      await tapAt(page, '[data-bw="fon"]'); await frame(page, 500);
+      await levelTo(page, "Months");
+      const lv = await look(); const la = (await worldAnims(page)).filter((x) => x.scale !== "null").length;
+      L.check("BP-9", "a level change does not replay it", lv.look === "done" && lv.t0 === a.t0 && la === 0, JSON.stringify({ ...lv, growing: la }));
+      /* 2 · a second arrival the same day, from another tab and Today's link again */
+      await tapAt(page, '[data-pa5="dock-tab"][data-tab="today"]'); await frame(page, 900);
+      await tapAt(page, '[data-bwq="link"]'); await waitLook();
+      const b = await look();
+      L.check("BP-9", "a second arrival the same day (another tab, then the link): it plays again", b.look === "playing" && b.t0 !== a.t0, JSON.stringify(b));
+      await frame(page, 2400);
+      /* 3 · from the List/Birds-eye switch */
+      await tapAt(page, '[data-bw="list"]'); await frame(page, 900);
+      await tapAt(page, '[data-pa4="view"][data-k="bird"]'); await waitLook();
+      const c = await look();
+      L.check("BP-9", "arrival from the List/Birds-eye switch: it plays", c.look === "playing", JSON.stringify(c));
+      await frame(page, 2400);
+      /* 4 · the app opening straight into it */
+      await page.goto(BIRDS); await waitLook();
+      const d = await look();
+      L.check("BP-9", "the app opening straight into Birds-eye: it plays", d.look === "playing", JSON.stringify(d));
+      await frame(page, 2400);
+      const left = await page.evaluate(() => localStorage.getItem("bw1.firstLook.day"));
+      L.check("BP-9", "the once-a-day key is cleared", left == null, String(left));
+    }
+
+    /* ── BP-10 · the header: no Back; ⋯ opens Replay and the colour key; the full title fits; a whole filter chip ── */
+    if (on("BP-10")) {
+      await openBirds(page); await frame(page, 700); await withCss();
+      const hd = await page.evaluate(() => {
+        const h = document.querySelector<HTMLElement>('[data-bw="head"] .bw-h')!;
+        const items = [...document.querySelectorAll<HTMLElement>('[data-bw="head"] .bw-t2 > *')].filter((e) => e.getClientRects().length).map((e) => e.getAttribute("aria-label") ?? e.textContent?.trim() ?? "");
+        const btns = [...document.querySelectorAll<HTMLElement>('[data-bw="head"] .bw-t2 > .bw-ib')].map((b) => Math.round(b.getBoundingClientRect().width));
+        return { back: !!document.querySelector('[data-bw="back"]'), text: h.textContent, fits: h.scrollWidth <= h.clientWidth + 0.5, w: h.clientWidth, sw: h.scrollWidth, items, btns };
+      });
+      L.check("BP-10", `the row: ${hd.items.join(" · ")}; no Back; 40px buttons`, !hd.back && JSON.stringify(hd.items.slice(-4)) === JSON.stringify(["Filter", "Search", "List", "More"]) && hd.btns.every((w) => w === 40), JSON.stringify(hd));
+      L.check("BP-10", `the full title fits ("${hd.text}", ${hd.sw} in ${hd.w})`, hd.text === "Birds-eye view" && hd.fits, JSON.stringify(hd));
+      await tapAt(page, '[data-bw="more"]'); await frame(page, 300);
+      const menu = await page.evaluate(() => ({ items: [...document.querySelectorAll<HTMLElement>('[data-bw="more-menu"] button')].map((b) => ({ t: b.textContent?.trim(), h: Math.round(b.getBoundingClientRect().height) })), w: Math.round(document.querySelector<HTMLElement>('[data-bw="more-menu"]')?.getBoundingClientRect().width ?? 0) }));
+      L.check("BP-10", "⋯ opens a 230px menu: Replay your campaign, What the colours mean (48px rows)", menu.w === 230 && JSON.stringify(menu.items.map((i) => i.t)) === '["Replay your campaign","What the colours mean"]' && menu.items.every((i) => i.h === 48), JSON.stringify(menu));
+      await tapAt(page, '[data-bw="key-btn"]'); await frame(page, 500);
+      const key = (await page.locator('[data-bw="sheet"][data-k="key"], [data-bw="sheet"]').count()) > 0;
+      L.check("BP-10", "its “What the colours mean” opens the colour key", key, "");
+      await page.keyboard.press("Escape"); await page.mouse.click(195, 30); await frame(page, 500);
+      await tapAt(page, '[data-bw="more"]'); await frame(page, 300); await tapAt(page, '[data-bw="replay"]'); await frame(page, 600);
+      const rp = await page.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')!.dataset.replay);
+      L.check("BP-10", "its “Replay your campaign” starts the replay", rp === "running" || rp === "done", String(rp));
+      await openBirds(page); await frame(page, 700); await withCss();
+      await tapAt(page, '[data-bw="filter"]'); await frame(page, 300); await tapAt(page, '[data-bw="fpick"][data-k="chase"]'); await frame(page, 700);
+      const chip = await page.evaluate(() => { const l = document.querySelector<HTMLElement>('[data-bw="fon"] .bw-fonl'); const b = document.querySelector<HTMLElement>('[data-bw="fon"]')?.getBoundingClientRect(); return { text: l?.textContent, whole: !!l && l.scrollWidth <= l.clientWidth + 0.5, x: document.querySelector('[data-bw="fon"]')?.textContent, inRow: !!b && b.right <= innerWidth }; });
+      L.check("BP-10", `a filter chip shows its whole label ("${chip.x}")`, chip.text === "Needs chasing" && chip.whole && /✕/.test(chip.x ?? "") && chip.inRow, JSON.stringify(chip));
+    }
+
+    /* ── BP-11 to BP-14 · My queries on Today ── */
+    if (on("BP-11") || on("BP-12") || on("BP-13") || on("BP-14")) {
+      await page.goto("/dashboard?tab=queries");
+      await page.locator('[data-bwq="card"]').filter({ visible: true }).first().waitFor({ timeout: 20_000 });
+      await frame(page, 600); await withCss();
+      if (mut === "total") await page.evaluate(() => { const t = document.querySelector<HTMLElement>('[data-bwq="total"]')!; t.textContent = `${Number(t.dataset.n) + 1} queries sent`; });
+      const m = await page.evaluate(() => {
+        const card = document.querySelector<HTMLElement>('[data-bwq="card"]')!;
+        const rows = [...card.querySelectorAll<HTMLElement>('[data-bwq="row"]')].map((r) => Number(r.dataset.n));
+        /* the numbers' own right edges (the text, not the fixed column's box) */
+        const counts = [...card.querySelectorAll<HTMLElement>('[data-bwq="count"]')].map((c) => { const r = document.createRange(); r.selectNodeContents(c); return r.getBoundingClientRect().right; });
+        const tr = card.querySelector<HTMLElement>('[data-bwq="track"]')!;
+        const tabs = document.querySelector<HTMLElement>('[data-pa5="tabs"]')?.getBoundingClientRect();
+        const link = card.querySelector<HTMLElement>('[data-bwq="link"]')!.getBoundingClientRect();
+        return { total: card.querySelector('[data-bwq="total"]')?.textContent ?? "", sum: rows.reduce((a, n) => a + n, 0), far: Number(tr.dataset.far), reached: tr.querySelectorAll('[data-reached="1"]').length, stages: tr.querySelectorAll('[data-bwq="track-stage"]').length, counts, gap: tabs ? card.getBoundingClientRect().top - tabs.bottom : null, linkH: link.height };
+      });
+      L.check("BP-11", `the band reads "${m.total}"; the four rows add up to ${m.sum}`, m.total === `${m.sum} ${m.sum === 1 ? "query" : "queries"} sent`, m.total);
+      L.check("BP-12", `the harness's track (it has offers) is full: furthest ${m.far}, ${m.reached} of ${m.stages} reached (the three seeded writers are the Today smoke test's BP-12)`, m.far === 3 && m.reached === 4 && m.stages === 4, JSON.stringify(m));
+      const spread = Math.max(...m.counts) - Math.min(...m.counts);
+      L.check("BP-14", `the counts' right edges line up (spread ${spread.toFixed(2)}px)`, m.counts.length === 4 && spread <= 1, JSON.stringify(m.counts));
+      L.check("BP-13", `the link is its own target, ${Math.round(m.linkH)}px tall (44 at least); 20px clear above the card (${m.gap?.toFixed(1)})`, m.linkH >= 44 && m.gap != null && m.gap >= 19.5, JSON.stringify({ h: m.linkH, gap: m.gap }));
+      /* taps: the body opens the Queries list, the link Birds-eye */
+      await tapAt(page, '[data-bwq="row"][data-g="Closed"]');
+      const list = await page.locator('[data-pa4="queries"][data-view="list"]').filter({ visible: true }).first().waitFor({ timeout: 10_000 }).then(() => true).catch(() => false);
+      L.check("BP-13", "a tap on the card's body opens the Queries list, unfiltered", list && /\/queries\/all/.test(page.url()) && (await page.locator('[data-bw="world"]').count()) === 0 && (await page.locator('[data-pa4="queries"]').filter({ visible: true }).first().getAttribute("data-chip")) === "all", page.url());
+      await page.goto("/dashboard?tab=queries"); await page.locator('[data-bwq="link"]').filter({ visible: true }).first().waitFor({ timeout: 20_000 }); await frame(page, 500); await withCss();
+      await tapAt(page, '[data-bwq="link"]');
+      const be = await page.locator('[data-bw="world"]').first().waitFor({ timeout: 10_000 }).then(() => true).catch(() => false);
+      L.check("BP-13", "a tap on “Birds-eye view ›” opens Birds-eye", be && /view=birds/.test(page.url()), page.url());
     }
 
     /* ── BP-8 · no text under 12px; never "overdue" or "late" (Birds-eye with its menu open; Today's My queries) ── */
@@ -361,6 +471,6 @@ for (const mut of runs) {
       L.check("BP-8", "My queries: no text under 12px, never “overdue” or “late”", c.small.length === 0 && c.words.length === 0, [...c.small, ...c.words].slice(0, 6).join(" · "));
     }
     L.check("BP-8", "no page error", errs.length === 0, errs.slice(0, 3).join(" · "));
-    L.done(LONLY.length ? 1 : 24);
+    L.done(LONLY.length ? 1 : 40);
   });
 }

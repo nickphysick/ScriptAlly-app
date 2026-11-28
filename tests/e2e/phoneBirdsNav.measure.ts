@@ -55,9 +55,14 @@ async function tapAt(page: Page, sel: string): Promise<boolean> {
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
   return true;
 }
+/* the level by its chip, retried until the world says it is there (a tap during the arrival's fade can miss) */
 const levelTo = async (page: Page, t: "All" | "Months" | "Weeks") => {
-  await tapAt(page, '[data-bw="level-chip"]'); await frame(page, 300);
-  await tapAt(page, `[data-bw="level"][data-t="${t}"]`); await frame(page, 700);
+  for (let i = 0; i < 4; i++) {
+    if ((await page.evaluate(() => document.querySelector<HTMLElement>('[data-bw="world"]')?.dataset.level)) === t) return;
+    await frame(page, 300);
+    await tapAt(page, '[data-bw="level-chip"]'); await frame(page, 300);
+    await tapAt(page, `[data-bw="level"][data-t="${t}"]`); await frame(page, 700);
+  }
 };
 /** the middle of a drawn bar, for a tap or a hold */
 const barAt = (page: Page) => page.evaluate(() => {
@@ -65,7 +70,7 @@ const barAt = (page: Page) => page.evaluate(() => {
   /* any drawn bar crossing the screen; the point mid-way along its visible part, clear of marks and "!"s (Birds-eye
      world's own long-press lock finds its bars the same way) */
   const avoid = [...document.querySelectorAll<HTMLElement>(".bw-evmk, .bw-ovd")].map((m) => m.getBoundingClientRect());
-  const bars = [...document.querySelectorAll<HTMLElement>('[data-bw="bar"][data-k="stage"]')].map((b) => b.getBoundingClientRect())
+  const bars = [...document.querySelectorAll<HTMLElement>('[data-bw="bar"]')].map((b) => b.getBoundingClientRect())
     .filter((r) => r.height >= 10 && r.top > top + 30 && r.bottom < 640 && Math.min(r.right, 366) - Math.max(r.left, 24) > 30);
   for (const r of [...bars.slice(Math.floor(bars.length / 2)), ...bars]) {
     const l = Math.max(r.left, 24), rr = Math.min(r.right, 366);
@@ -175,7 +180,7 @@ const STATES: State[] = [
   { k: "opened from Today's My queries", run: async (p) => {
     await setDay(p, today()); await p.goto("/dashboard?tab=queries");
     await p.locator('[data-bwq="card"]').filter({ visible: true }).first().waitFor({ timeout: 20_000 });
-    await frame(p, 600); await tapAt(p, '[data-bwq="card"]');
+    await frame(p, 600); await tapAt(p, '[data-bwq="link"]'); /* polish v1.1: only the link opens Birds-eye */
     await p.locator('[data-bw="world"]').first().waitFor({ timeout: 20_000 }); await frame(p, 900);
     return "opened from My queries";
   } },
@@ -267,6 +272,6 @@ test("Birds-eye nav fix v1 — BW-NAV-1", async ({ page }, info) => {
   const red = rows.filter((r) => !r.ok);
   for (const r of red.slice(0, 60)) console.log(`  ✗ ${r.where} — ${r.detail.slice(0, 220)}`);
   console.log(`  BW-NAV-1: ${rows.length} readings, ${red.length} red`);
-  if (!ONLY.length) expect(rows.length).toBeGreaterThanOrEqual(STATES.length * 7 + 15 + 1);
+  if (!ONLY.length) expect(rows.length).toBeGreaterThanOrEqual(STATES.length * 6 + 15 + 1); /* six targets a state: polish v1.1 drops Back */
   expect(red.map((r) => `${r.where} — ${r.detail.slice(0, 200)}`)).toEqual([]);
 });

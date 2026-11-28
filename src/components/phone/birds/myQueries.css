@@ -4,7 +4,9 @@
    border (the census allows only the shadow tokens). Rows 30 high with hairlines; the foot's 12px words are a caption. */
 @media (max-width: 767.98px) {
   /* polish v1.1: 20 clear above it, away from Today's tab strip; the body and the link are two buttons */
-  .bwq { margin-top: 20px; padding: 6px; color: var(--ps-ink); }
+  /* (the phone sheet's `.ps-card` margin outranks a single class, which had taken the space away) */
+  :is(.sa-shellframe, .pa-layer) .ps-card.bwq { margin-top: 22px; } /* 20 clear: the tab strip's box reaches 2px into the panel */
+  .bwq { padding: 6px; color: var(--ps-ink); }
   .bwq-body { display: block; width: 100%; margin: 0; padding: 0; border: 0; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .bwq-frame { display: block; overflow: hidden; padding-bottom: 6px; border: 1px solid rgba(31, 38, 51, 0.16); }
   .bwq-band { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-bottom: 1px solid rgba(31, 38, 51, 0.08); font: 600 14px var(--pa-sans); color: var(--ps-ink); }
@@ -20,6 +22,9 @@
   .bwq-r { display: flex; align-items: center; gap: 10px; height: 30px; border-top: 1px solid var(--ps-rule); }
   .bwq-r:first-child { border-top: 0; }
   .bwq-l { flex: none; width: 140px; font: 400 14px var(--pa-sans); color: var(--ps-body); }
+  /* the bar sits in the room the row has (at 390 that is under the ref's 150): its length is its share of the largest
+     count, the largest filling the room up to 150 (polish v1.1: at 150 the widest row ran out of the card) */
+  .bwq-span { flex: 1; min-width: 0; max-width: 150px; display: flex; }
   .bwq-bar { flex: none; height: 12px; border-radius: 999px; }
   .bwq-bar.none { width: 0; }
   /* the count in Special Elite: the app's brand fonts name elements as sans on every route, so two classes and !important */

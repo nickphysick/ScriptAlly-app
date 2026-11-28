@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "BP-11",
+  "where": "the band reads \"88 queries sent\"; the four rows add up to 88",
+  "ok": true,
+  "detail": "88 queries sent"
+ },
+ {
+  "lock": "BP-12",
+  "where": "the harness's track (it has offers) is full: furthest 3, 4 of 4 reached (the three seeded writers are the Today smoke test's BP-12)",
+  "ok": true,
+  "detail": "{\"total\":\"88 queries sent\",\"sum\":88,\"far\":3,\"reached\":4,\"stages\":4,\"counts\":[341.53125,331.921875,332.421875,341.703125],\"gap\":19.984375,\"linkH\":48}"
+ },
+ {
+  "lock": "BP-14",
+  "where": "the counts' right edges line up (spread 9.78px)",
+  "ok": false,
+  "detail": "[341.53125,331.921875,332.421875,341.703125]"
+ },
+ {
+  "lock": "BP-13",
+  "where": "the link is its own target, 48px tall (44 at least); 20px clear above the card (20.0)",
+  "ok": true,
+  "detail": "{\"h\":48,\"gap\":19.984375}"
+ },
+ {
+  "lock": "BP-13",
+  "where": "a tap on the card's body opens the Queries list, unfiltered",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/all?view=list"
+ },
+ {
+  "lock": "BP-13",
+  "where": "a tap on “Birds-eye view ›” opens Birds-eye",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/all?view=birds"
+ },
+ {
+  "lock": "BP-8",
+  "where": "no page error",
+  "ok": true,
+  "detail": ""
+ }
+]

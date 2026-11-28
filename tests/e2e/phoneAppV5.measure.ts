@@ -294,7 +294,7 @@ const REACH: Reach[] = [
   { page: "To do's tasks (v4's tasks page)", dock: "todo", taps: [], arrive: 'vis:[data-pa5="todo"]' },
   { page: "A task's journey", dock: "todo", taps: ['[data-pa5="todo-verb"]'], arrive: 'vis:[data-tdp="task"]' },
   { page: "Queries list (/queries)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-pa5="all-queries"]'], arrive: "path:/queries/all" },
-  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-bwq="card"]'], arrive: 'vis:[data-pa5="birds-view"]' }, /* polish v1: Today's My queries */
+  { page: "The Birds-eye view (/queries?view=birds)", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-bwq="link"]'], arrive: 'vis:[data-pa5="birds-view"]' }, /* polish v1: Today's My queries */
   { page: "A query's page", dock: "today", taps: ['[data-pa5="tab"][data-tab="queries"]', '[data-ps="move-row"]'], arrive: 'vis:[data-pqs="sheet"]' }, /* Phone query sheet v1: the one sheet; first look v1: from a Your move row (the preview's rows open Birds-eye) */
   { page: "Agents (/agents)", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]'], arrive: 'vis:[data-pa5="agents-tab"]' },
   { page: "Everyone on your list", dock: "today", taps: ['[data-pa5="tab"][data-tab="agents"]', '[data-pa5="see-all-agents"]'], arrive: 'vis:[data-pa4="agents-all"]' },
@@ -379,7 +379,7 @@ group("view", "PA5-9 (view: the world's rows) · 844x390 is the desktop", async 
      Retired with BirdsViewV5 (the world's own locks are tests/e2e/phoneBirdsWorld.measure.ts): PA41-8 (groups fold at
      five), PA5-8's 28px rows, 18 in sight and the fixed name column on a drag, PA5-6's notch and deeper segment in the
      view, and the 184px landscape name column. */
-  await press(page, '[data-bwq="card"]');
+  await press(page, '[data-bwq="link"]');
   await page.locator('[data-bw="world"]').first().waitFor();
   await page.waitForTimeout(800);
   await mutate(page);

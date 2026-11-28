@@ -219,7 +219,8 @@ describe("Phone app v5, Phase B — Today's header (and, since first look v1, Bi
     const max = Math.max(...rows.map((r) => r[1]));
     for (const [, n] of rows) if (n === max) expect(html).toContain(`data-n="${n}"><span class="bwq-l">`);
     expect(html).toMatch(/<b class="bwq-n" data-bwq="count">\d+<\/b>/);
-    expect(html).toMatch(/data-bwq="bar" style="width:150px;background:/);
+    /* the largest count fills the row's room (up to 150px); the rest are their share of it */
+    expect(html).toMatch(/data-bwq="bar" style="width:100%;background:/);
     expect(html).toMatch(/<button type="button" class="bwq-link" data-bwq="link" data-ps-cap="">[\s\S]*Birds-eye view ›<\/button>/);
     expect(html).not.toMatch(/overdue|\blate\b/i);
   });
@@ -242,7 +243,7 @@ describe("Phone app v5, Phase B — Today's header (and, since first look v1, Bi
   });
   it("My queries keeps a group with nothing in it: 0 and no bar", () => {
     const html = renderPageSeededWith(P(<MyQueriesCard />), "/dashboard", QS(3));
-    const empty = [...html.matchAll(/data-bwq="row" data-g="([^"]+)" data-n="0"><span class="bwq-l">[^<]+<\/span><i class="bwq-bar none"/g)];
+    const empty = [...html.matchAll(/data-bwq="row" data-g="([^"]+)" data-n="0"><span class="bwq-l">[^<]+<\/span><span class="bwq-span"><i class="bwq-bar none"/g)];
     expect(empty.length).toBeGreaterThan(0);
   });
   it("Today mounts My queries with queries, and day one's card with none", () => {
