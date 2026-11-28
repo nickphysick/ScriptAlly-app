@@ -150,7 +150,20 @@ async function pan(page: Page, dx: number, dy: number, x = 200, y = 430) {
   await frame(page);
 }
 async function lineTo(page: Page, frac: number) { const r = await root(page); await pan(page, PHONE.width * frac - r.lx, 0); }
-async function pill(page: Page, k: string) { await page.locator(`[data-bw="chip"][data-k="${k}"]`).click({ timeout: 3000 }); await frame(page, 700); }
+/* Birds-eye polish v1: the pill row is retired. A "pill" is the filter menu's pick; picking the filter that is on shows
+   All again, as a second tap on its pill did. The counts are the menu's rows, read with it open, then closed by its veil. */
+async function pill(page: Page, k: string) {
+  const cur = await page.locator('[data-bw="filter"]').getAttribute("data-f").catch(() => "all");
+  await page.locator('[data-bw="filter"]').click({ timeout: 3000 }); await frame(page, 250);
+  await page.locator(`[data-bw="fpick"][data-k="${cur === k ? "all" : k}"]`).click({ timeout: 3000 }); await frame(page, 700);
+}
+async function chipBoxes(page: Page, before?: (p: Page) => Promise<void>): Promise<Box[]> {
+  await page.locator('[data-bw="filter"]').click({ timeout: 3000 }); await frame(page, 250);
+  if (before) await before(page);
+  const b = await box(page, '[data-bw="fpick"]');
+  await page.locator('[data-bw="fmenu-veil"]').click({ position: { x: 20, y: 400 }, timeout: 3000 }).catch(() => {}); await frame(page, 250);
+  return b;
+}
 async function openWorld(page: Page, path = WORLD, vp: { width: number; height: number } = PHONE) {
   await page.setViewportSize(vp);
   await page.goto(path);
@@ -239,7 +252,7 @@ for (const mut of runs) {
       const [names, figs, grids, bars] = await Promise.all([n('[data-bw="name"]'), n('[data-bw="fig"]'), n('[data-bw="grid"]'), n('[data-bw="bar"]')]);
       L.check("BW-1", `fitted (z ${r.z}, rows ${r.rp.toFixed(1)}px): bars drawn (population ${bars})`, !r.zoomed && bars > 0, "");
       L.check("BW-1", "fitted: no names, no figures, no gridlines", names + figs + grids === 0, JSON.stringify({ names, figs, grids }));
-      L.check("BW-1", "fitted: the pill reads Today, the header is unfolded (140px)", (await box(page, '[data-bw="pill"]'))[0]?.text.trim() === "Today" && (await box(page, '[data-bw="head"]'))[0]?.h === 140, "");
+      L.check("BW-1", "fitted: the pill reads Today, the header is the slim one row (96px, polish v1)", (await box(page, '[data-bw="pill"]'))[0]?.text.trim() === "Today" && (await box(page, '[data-bw="head"]'))[0]?.h === 96, "");
     }
 
     /* ── BW-32 · under All the headings are exactly Needs action, Within their window, No reply date yet, Closed (those
@@ -265,7 +278,7 @@ for (const mut of runs) {
       }
       L.check("BW-33", "under With you the one group is headed \"With you\"", got.you.join("|") === "With you", JSON.stringify(got.you));
       L.check("BW-33", "under Needs chasing the one group is headed \"Needs chasing\"", got.chase.join("|") === "Needs chasing", JSON.stringify(got.chase));
-      const chips = await box(page, '[data-bw="chip"]');
+      const chips = await chipBoxes(page);
       const n = Object.fromEntries(chips.map((c) => [c.d.k, Number(c.d.n)]));
       L.check("BW-33", `the pills: All ${n.all} = With you ${n.you} + Needs chasing ${n.chase} + Waiting ${n.wait}`, n.all > 0 && n.all === n.you + n.chase + n.wait && chips.map((c) => c.text.replace(/\s*\d+\s*$/, "").trim()).join("|") === "All|With you|Needs chasing|Waiting", JSON.stringify(n));
     }
@@ -284,7 +297,7 @@ for (const mut of runs) {
           .filter((x) => x.top > lo && x.top < hi).sort((a, b) => a.top - b.top);
         return { n: heads[i]?.n ?? 0, rows };
       });
-      const chips = Object.fromEntries((await box(page, '[data-bw="chip"]')).map((c) => [c.d.k, Number(c.d.n)]));
+      const chips = Object.fromEntries((await chipBoxes(page)).map((c) => [c.d.k, Number(c.d.n)]));
       const share = (x: { start: number; due: number | null }) => (x.due == null ? -x.start / 60 : -x.start / Math.max(7, x.due - x.start));
       /* v3.3: gone-quiet rows last; within each part, most of the window used first */
       const bad = r.rows.slice(1).map((x, i) => ({ a: r.rows[i], b: x })).filter(({ a, b }) => a.quiet === b.quiet && share(b) > share(a) + 1e-9);
@@ -397,8 +410,7 @@ for (const mut of runs) {
 
     /* ── BW-9 · the pills add up ── */
     if (on("BW-9")) { stamp("BW-9");
-      if (mut === "counts") await page.evaluate(() => { const c = document.querySelector<HTMLElement>('[data-bw="chip"][data-k="wait"]')!; c.dataset.n = String(+c.dataset.n! + 1); c.querySelector("b")!.textContent = c.dataset.n!; });
-      const chips = await box(page, '[data-bw="chip"]');
+      const chips = await chipBoxes(page, mut === "counts" ? (p) => p.evaluate(() => { const c = document.querySelector<HTMLElement>('[data-bw="fpick"][data-k="wait"]')!; c.dataset.n = String(+c.dataset.n! + 1); c.querySelector("b")!.textContent = c.dataset.n!; }).then(() => {}) : undefined);
       const n = Object.fromEntries(chips.map((c) => [c.d.k, Number(/(\d+)\s*$/.exec(c.text.trim())?.[1])]));
       L.check("BW-9", `All ${n.all} = With you ${n.you} + Needs chasing ${n.chase} + Waiting ${n.wait}`, n.all > 0 && n.all === n.you + n.chase + n.wait, JSON.stringify(n));
     }
@@ -407,7 +419,7 @@ for (const mut of runs) {
     if (on("BW-10")) { stamp("BW-10");
       if (mut === "seventy") { await mutate(page, "seventy"); await page.setViewportSize({ width: PHONE.width, height: PHONE.height - 1 }); await frame(page, 500); await page.setViewportSize(PHONE); await frame(page, 700); }
       const r = await root(page);
-      const all = Number((await box(page, '[data-bw="chip"][data-k="all"]'))[0]?.d.n);
+      const all = Number((await chipBoxes(page)).find((c) => c.d.k === "all")?.d.n);
       L.check("BW-10", `fitted with ${all} open queries: time spans at least 90% of the width`, all >= 60 && 600 * r.sx >= 0.9 * PHONE.width, `${(600 * r.sx).toFixed(1)}px`);
       await level(page, "Weeks");
       const r2 = await root(page);
@@ -737,7 +749,10 @@ for (const mut of runs) {
         if (hs) for (const h of heads) { const l = Math.max(h.left + 4, hs.left + hs.width * 0.25), r = Math.min(h.right, hs.right - hs.width * 0.25), t = Math.max(h.top + 2, hs.top + hs.height * 0.25), b = Math.min(h.bottom - 2, hs.bottom - hs.height * 0.25); if (r > l && b > t) { headPt = [(l + r) / 2, (t + b) / 2]; break; } }
         const A = headPt ? at(...headPt) : [];
         const B = hs && line ? at(line.left + line.width / 2, Math.max(hs.top + 10, line.top + 10)) : [];
-        return { hawkOverHead: headPt ? rank(A, "bw-hs") >= 0 && rank(A, "bw-hs") < rank(A, "bw-gh0") : null, A: A.slice(0, 6), lineOverHawk: rank(B, "bw-fline") >= 0 && (rank(B, "bw-hs") < 0 || rank(B, "bw-fline") < rank(B, "bw-hs")), B: B.slice(0, 6) };
+        /* the hawk's layer is its wrapper (z 8) or its image inside it: the image moves with the view (shadowStyle), so at a
+           point inside the wrapper the topmost hawk element may be the wrapper (polish v1's 96 top put the headings there) */
+        const hawk = (list: string[]) => { const r = [rank(list, "bw-hs"), rank(list, "bw-hsw")].filter((i) => i >= 0); return r.length ? Math.min(...r) : -1; };
+        return { hawkOverHead: headPt ? hawk(A) >= 0 && hawk(A) < rank(A, "bw-gh0") : null, A: A.slice(0, 6), lineOverHawk: rank(B, "bw-fline") >= 0 && (rank(B, "bw-hs") < 0 || rank(B, "bw-fline") < rank(B, "bw-hs")), B: B.slice(0, 6) };
       });
       L.check("BW-14", "the hawk's shadow paints above a group heading", layers.hawkOverHead === true, JSON.stringify(layers.A));
       L.check("BW-14", "the line paints above the hawk", layers.lineOverHawk === true, JSON.stringify(layers.B));
@@ -1045,9 +1060,9 @@ for (const mut of emptyRuns) {
     await openWorld(page);
     await mutate(page, mut);
     const none = await card("none");
-    const look = await page.evaluate(() => { const l = document.querySelector<HTMLElement>('[data-bw="layer"]')!; const cs = getComputedStyle(l); return { filter: cs.filter, opacity: cs.opacity, chips: document.querySelectorAll('[data-bw="chip"]').length, levels: getComputedStyle(document.querySelector('[data-bw="levels"]')!).display, bars: l.querySelectorAll('[data-bw="bar"]').length }; });
+    const look = await page.evaluate(() => { const l = document.querySelector<HTMLElement>('[data-bw="layer"]')!; const cs = getComputedStyle(l); return { filter: cs.filter, opacity: cs.opacity, chips: document.querySelectorAll('[data-bw="chip"], [data-bw="filter"]').length, /* polish v1: nor the filter button */ levels: getComputedStyle(document.querySelector('[data-bw="levels"]')!).display, bars: l.querySelectorAll('[data-bw="bar"]').length }; });
     L.check("BW-11", "no queries: \"No queries out yet\" over the sample, blurred 3px at 55%", none.shown && /No queries out yet/.test(none.text) && look.filter === "blur(3px)" && look.opacity === "0.55" && look.bars > 0, JSON.stringify({ text: none.text, ...look }));
-    L.check("BW-11", "no queries: no pills and no level control", look.chips === 0 && look.levels === "none", JSON.stringify(look));
+    L.check("BW-11", "no queries: no pills or filter, and no level control", look.chips === 0 && look.levels === "none", JSON.stringify(look));
     L.done(5);
   });
 }

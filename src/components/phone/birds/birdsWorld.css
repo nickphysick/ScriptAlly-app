@@ -108,7 +108,8 @@
   .bw-inm small { font: 400 12px/18px var(--pa-sans); color: var(--pa-body); }
   .bw-fig.sm { height: 24px; padding: 0 8px; font-size: 12px; line-height: 24px; }
   .bw-fig.sm b { font-size: 16px; line-height: 24px; }
-  .bw-ovd { position: absolute; z-index: 2; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); border-radius: 50%; background: var(--pa-navy); color: #fff; font: 700 12px/var(--s) var(--pa-sans); font-size: calc(var(--s) * 0.72); text-align: center; font-style: normal; outline: 2px solid #fff; pointer-events: none; }
+  .bw-ovd { position: absolute; z-index: 2; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); border-radius: 50%; background: var(--pa-navy); color: #fff; font: 700 12px/var(--s) var(--pa-sans); font-size: max(12px, calc(var(--s) * 0.72)); text-align: center; font-style: normal; outline: 2px solid #fff; pointer-events: none; }
+  /* polish v1 (BP-8): the "!" never under 12px (0.72 of a 16px disc was 11.52) */
   .bw-ovd.dot { outline-width: 1.5px; }
   /* Birds-eye polish v1 §C — marks on the bars (ref `.evmk`): a white disc on the bar at the event's date, above the bar
      and below the "!" (z 2); navy for materials, grey for a pass (never red). The ref's ring and soft shadow are an outline

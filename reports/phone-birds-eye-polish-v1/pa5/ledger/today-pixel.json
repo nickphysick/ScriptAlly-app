@@ -1,0 +1,158 @@
+[
+ {
+  "lock": "PA5-1",
+  "where": "390x844 · the dock reads Today, To do, +, Materials, Profile",
+  "ok": true,
+  "detail": "{\"words\":[\"Today\",\"To do\",\"\",\"Materials\",\"Profile\"],\"plus\":\"Log a query\",\"badges\":[{\"tab\":\"todo\",\"n\":106}],\"need\":106}"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "390x844 · tasks (population)",
+  "ok": true,
+  "detail": "106"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "390x844 · one badge, on To do = To do's tasks = the need pill",
+  "ok": true,
+  "detail": "[{\"tab\":\"todo\",\"n\":106}] · todo 106 · need 106"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "390x844 · (kept) the change = last week − the one before (series of 137)",
+  "ok": true,
+  "detail": "{\"len\":137,\"change\":null,\"d\":0,\"fig\":70}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard past the header: bar and tabs pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":624}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard → agents: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":336}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard → activity: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":336}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard → queries: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":336}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials past the header: bar and tabs pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64,\"scroll\":540}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → letters: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → versions: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → comps: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → packages: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "360x740 · the dock reads Today, To do, +, Materials, Profile",
+  "ok": true,
+  "detail": "{\"words\":[\"Today\",\"To do\",\"\",\"Materials\",\"Profile\"],\"plus\":\"Log a query\",\"badges\":[{\"tab\":\"todo\",\"n\":106}],\"need\":106}"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "360x740 · tasks (population)",
+  "ok": true,
+  "detail": "106"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "360x740 · one badge, on To do = To do's tasks = the need pill",
+  "ok": true,
+  "detail": "[{\"tab\":\"todo\",\"n\":106}] · todo 106 · need 106"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "360x740 · (kept) the change = last week − the one before (series of 137)",
+  "ok": true,
+  "detail": "{\"len\":137,\"change\":null,\"d\":0,\"fig\":70}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard past the header: bar and tabs pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":624}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard → agents: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":336}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard → activity: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":336}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard → queries: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":48,\"stripTop\":48,\"scroll\":336}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials past the header: bar and tabs pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64,\"scroll\":540}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → letters: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → versions: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → comps: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → packages: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.4,\"scroll\":236}"
+ }
+]

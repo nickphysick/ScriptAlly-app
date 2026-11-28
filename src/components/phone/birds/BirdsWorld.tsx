@@ -23,7 +23,7 @@
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { doc, getDocFromServer } from "firebase/firestore";
 import { useV3Data } from "../v3/V3Provider";
 import { openV3, openV3Query } from "../v3/v3Store";
@@ -404,34 +404,21 @@ export const BirdsWorld: React.FC<BirdsWorldProps> = ({ court = null, onBack, on
 
   /* ── the first look (Phone Birds-eye first look v1 §A) ──
      The day's first open with something to show plays the bars growing in, from the fitted view the page opens at;
-     every other open, and every open with reduced motion, fades the world in. A row asked for by the address
-     (`?fly=<id>`, Today's preview) is flown to once the world is in. The latest paint and flight are read through refs:
-     the end comes two seconds after this effect's render. */
-  const navigate = useNavigate();
+     every other open, and every open with reduced motion, fades the world in. The latest paint is read through a ref: the
+     end comes two seconds after this effect's render. (First look's `?fly=<id>` went with its three-week preview, its
+     only door: Birds-eye polish v1.) */
   const paintRef = useRef(paint); paintRef.current = paint;
-  const flyRef = useRef(flyTo); flyRef.current = flyTo;
-  const flyAsk = useRef<string | null>(new URLSearchParams(loc.search).get("fly"));
   const lookDecided = useRef(false);
   useLayoutEffect(() => {
     if (lookDecided.current || demo) return;
     const el = layer.current, box = vp.current, r = root.current;
     if (!el || !box || !r || !W.current) return;
     lookDecided.current = true;
-    const fly = () => {
-      const id = flyAsk.current;
-      if (!id) return;
-      flyAsk.current = null;
-      const p = new URLSearchParams(loc.search); p.delete("fly");
-      navigate({ pathname: loc.pathname, search: p.toString() ? `?${p}` : "" }, { replace: true });
-      let n = 0;
-      const go = () => { if (motion.current) flyRef.current(id); else if (n++ < 60) requestAnimationFrame(go); };
-      requestAnimationFrame(go);
-    };
-    if (calm() || !firstTimeToday(BW_LOOK_KEY, Date.now())) { el.dataset.look = "fade"; fadeWorld(box); fly(); return; }
+    if (calm() || !firstTimeToday(BW_LOOK_KEY, Date.now())) { el.dataset.look = "fade"; fadeWorld(box); return; }
     setLooking(true);
-    look.current = growIn(el, Number(r.dataset.top) || 0, () => { look.current = null; setLooking(false); paintRef.current(); fly(); });
+    look.current = growIn(el, Number(r.dataset.top) || 0, () => { look.current = null; setLooking(false); paintRef.current(); });
   }, [demo]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => { flyAsk.current = null; look.current?.finish(); }, []);
+  useEffect(() => () => { look.current?.finish(); }, []);
   /* a touch anywhere finishes it at once, and the gestures have it from there */
   const finishLook = () => { look.current?.finish(); };
 

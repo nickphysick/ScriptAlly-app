@@ -1,0 +1,224 @@
+[
+ {
+  "lock": "BP-1",
+  "where": "All: the header is one row, 96 high (8 items within 0.0px of one line); no pill row",
+  "ok": true,
+  "detail": "{\"h\":96,\"spread\":0,\"kids\":8,\"top\":124,\"level\":\"All\",\"chips\":0}"
+ },
+ {
+  "lock": "BP-1",
+  "where": "Months: the header is one row, 96 high (8 items within 0.0px of one line); no pill row",
+  "ok": true,
+  "detail": "{\"h\":96,\"spread\":0,\"kids\":8,\"top\":124,\"level\":\"Months\",\"chips\":0}"
+ },
+ {
+  "lock": "BP-1",
+  "where": "Weeks: the header is one row, 96 high (8 items within 0.0px of one line); no pill row",
+  "ok": true,
+  "detail": "{\"h\":96,\"spread\":0,\"kids\":8,\"top\":124,\"level\":\"Weeks\",\"chips\":0}"
+ },
+ {
+  "lock": "BP-1",
+  "where": "the world's top is the same at All, Months and Weeks ({\"All\":124,\"Months\":124,\"Weeks\":124})",
+  "ok": true,
+  "detail": "{\"All\":124,\"Months\":124,\"Weeks\":124}"
+ },
+ {
+  "lock": "BP-2",
+  "where": "the menu's counts are the old pills' (All 70 = With you 16 + Needs chasing 45 + Waiting 9)",
+  "ok": true,
+  "detail": "{\"got\":{\"all\":70,\"you\":16,\"chase\":45,\"wait\":9},\"want\":{\"all\":70,\"you\":16,\"chase\":45,\"wait\":9}}"
+ },
+ {
+  "lock": "BP-2",
+  "where": "open: 230 wide, four 48px rows, All ticked, the button lit and aria-expanded",
+  "ok": true,
+  "detail": "{\"exp\":\"true\",\"on\":true,\"items\":[{\"k\":\"all\",\"n\":70,\"h\":48,\"checked\":\"true\"},{\"k\":\"you\",\"n\":16,\"h\":48,\"checked\":\"false\"},{\"k\":\"chase\",\"n\":45,\"h\":48,\"checked\":\"false\"},{\"k\":\"wait\",\"n\":9,\"h\":48,\"checked\":\"false\"}],\"w\":230}"
+ },
+ {
+  "lock": "BP-2",
+  "where": "a pick filters (Needs chasing), stays fitted and closes the menu",
+  "ok": true,
+  "detail": "{\"f\":\"chase\",\"z\":1,\"menu\":false,\"dot\":false,\"chip\":\"Needs chasing✕\",\"exp\":\"false\"}"
+ },
+ {
+  "lock": "BP-2",
+  "where": "filtered: the dot on the filter button and the chip “Needs chasing ✕”",
+  "ok": false,
+  "detail": "{\"f\":\"chase\",\"z\":1,\"menu\":false,\"dot\":false,\"chip\":\"Needs chasing✕\",\"exp\":\"false\"}"
+ },
+ {
+  "lock": "BP-2",
+  "where": "a tap outside closes it, changing nothing (still Needs chasing, no sheet opened)",
+  "ok": true,
+  "detail": "{\"f\":\"chase\",\"menu\":false,\"sheet\":false}"
+ },
+ {
+  "lock": "BP-2",
+  "where": "the chip's ✕ clears it: All, no dot, no chip",
+  "ok": true,
+  "detail": "{\"f\":\"all\",\"dot\":false,\"chip\":false}"
+ },
+ {
+  "lock": "BP-3",
+  "where": "All: every mark at its event's date on its bar (42 checked against their bars of 42)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "All: every partial, full and pass on screen has its mark (kinds full, partial, pass)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "All: materials navy, a pass grey; above the bar, below the “!”",
+  "ok": true,
+  "detail": "{\"full\":\"rgb(42, 58, 82)\",\"partial\":\"rgb(42, 58, 82)\",\"pass\":\"rgb(107, 111, 120)\"}"
+ },
+ {
+  "lock": "BP-3",
+  "where": "Months: every mark at its event's date on its bar (4 checked against their bars of 4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "Months: every partial, full and pass on screen has its mark (kinds partial, full)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "Months: no name's box overlaps a mark's box (22 names)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "Months: materials navy, a pass grey; above the bar, below the “!”",
+  "ok": true,
+  "detail": "{\"partial\":\"rgb(42, 58, 82)\",\"full\":\"rgb(42, 58, 82)\"}"
+ },
+ {
+  "lock": "BP-3",
+  "where": "Weeks: every mark at its event's date on its bar (4 checked against their bars of 4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "Weeks: every partial, full and pass on screen has its mark (kinds full, pass)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "Weeks: no name's box overlaps a mark's box (16 names)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-3",
+  "where": "Weeks: materials navy, a pass grey; above the bar, below the “!”",
+  "ok": true,
+  "detail": "{\"full\":\"rgb(42, 58, 82)\",\"pass\":\"rgb(107, 111, 120)\"}"
+ },
+ {
+  "lock": "BP-4",
+  "where": "fitted open rows' bars are 0.66 of the row, 4–16px (183 bars, rows 6.1px)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-4",
+  "where": "and no-date rows' (6 bars)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-5",
+  "where": "the day's first open plays in full",
+  "ok": true,
+  "detail": "playing"
+ },
+ {
+  "lock": "BP-5",
+  "where": "within each row no piece starts before the one to its left ends (88 rows)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-5",
+  "where": "every mark pops with its row (40 of 40)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-5",
+  "where": "a touch at 300ms finishes it within one frame",
+  "ok": true,
+  "detail": "{\"look\":\"done\",\"n\":0}"
+ },
+ {
+  "lock": "BP-5",
+  "where": "the same day's next open only fades",
+  "ok": true,
+  "detail": "fade"
+ },
+ {
+  "lock": "BP-5",
+  "where": "reduced motion: the fade only, nothing scales",
+  "ok": true,
+  "detail": "fade"
+ },
+ {
+  "lock": "BP-6",
+  "where": "My queries' four rows, in Birds-eye's order, count exactly Birds-eye's groups ({\"Needs action\":61,\"Within their window\":3,\"No reply date yet\":6,\"Closed\":18})",
+  "ok": true,
+  "detail": "[[\"Needs action\",61],[\"Within their window\",3],[\"No reply date yet\",6],[\"Closed\",18]]"
+ },
+ {
+  "lock": "BP-6",
+  "where": "bars in proportion to the largest (150px at most); a 0 row has no bar",
+  "ok": true,
+  "detail": "[[\"Needs action\",150],[\"Within their window\",7.375],[\"No reply date yet\",14.75],[\"Closed\",44.25]]"
+ },
+ {
+  "lock": "BP-6",
+  "where": "colours: Needs action striped soft pink, the waiting rows navy, Closed grey",
+  "ok": true,
+  "detail": "[[\"Needs action\",\"repeating-linear-gradient(135deg, rgb(232, 200, 18\",\"rgba(0, 0, 0, 0)\"],[\"Within their window\",\"none\",\"rgb(42, 58, 82)\"],[\"No reply date yet\",\"none\",\"rgb(42, 58, 82)\"],[\"Closed\",\"none\",\"rgb(214, 209, 201)\"]]"
+ },
+ {
+  "lock": "BP-6",
+  "where": "a tap on the card opens Birds-eye",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/all?view=birds"
+ },
+ {
+  "lock": "BP-8",
+  "where": "Birds-eye with the filter menu open: no text under 12px, never “overdue” or “late”",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-8",
+  "where": "Birds-eye at Weeks (names and marks): no text under 12px, never “overdue” or “late”",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-8",
+  "where": "My queries: no text under 12px, never “overdue” or “late”",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "BP-8",
+  "where": "no page error",
+  "ok": true,
+  "detail": ""
+ }
+]
