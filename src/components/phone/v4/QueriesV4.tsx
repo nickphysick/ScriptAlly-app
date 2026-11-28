@@ -59,7 +59,14 @@ export const ViewSwitch: React.FC<{ bird: boolean; onPick: (b: boolean) => void 
   </div>
 );
 
-export const QueriesV4: React.FC = () => {
+/**
+ * `active`: whether the Queries page is the page on screen. Phone Birds-eye nav fix v1: the Queries slot stays mounted
+ * when the writer leaves it (StagePage toggles visibility only), and Birds-eye portals its full-screen layer into
+ * `document.body`, outside the hidden slot — so a Birds-eye left open sat over Today, To do, Materials and Profile and
+ * swallowed every tap. Birds-eye now mounts only while the page is on screen; leaving unmounts it, and with it every
+ * overlay it draws. Coming back is a new open (the first look fades in, or plays if it is the day's first).
+ */
+export const QueriesV4: React.FC<{ active?: boolean }> = ({ active = true }) => {
   const v = useV3Data();
   const loc = useLocation();
   const navigate = useNavigate();
@@ -109,7 +116,7 @@ export const QueriesV4: React.FC = () => {
 
   return (
     <div className="pa4 pa4-queries" data-pa4="queries" data-chip={chip} data-view={bird ? "bird" : "list"}>
-      {bird ? (
+      {bird ? (!active ? null :
         <BirdsWorld court={isBeCourt(chip) ? chip : null} onList={() => pickView(false, "all")}
           onBack={() => { const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0; if (idx > 0) navigate(-1); else pickView(false, "all"); }} />
       ) : (<>

@@ -7023,7 +7023,7 @@ export const Queries: React.FC<{
   if (qmPhone) {
     return (
       <>
-      <QueriesV4 />
+      <QueriesV4 active={routeActive} />
       {/* ⚠️ THE QUERY PANEL STILL OPENS FROM OTHER PAGES ON A PHONE: `openQueryPanel` (the phone dashboard's View task,
           the agent panel, search) is drawn by this page's ONE host whichever route is on screen. Found by the dashboard's
           C1 lock, after the phone return first left the host out. */}
