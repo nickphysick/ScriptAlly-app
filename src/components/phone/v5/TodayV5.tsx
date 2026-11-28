@@ -11,7 +11,8 @@
  *   - Activity: v4's Lately feed only (the founding writer card is on Profile).
  * Phase B: the header is v5's (TodayHeaderV5: "Today", the day of the campaign, the need pill that opens To do, the
  * active figure, the chart with the Mentor). The Queries tab's Birds-eye block (v5's BirdsBlockV5) is retired: Phone
- * Birds-eye first look v1 puts Birds-eye's own preview there, the next three weeks (birds/BirdsPreview).
+ * Birds-eye first look v1 put Birds-eye's preview there; Birds-eye polish v1 replaces it with My queries
+ * (birds/MyQueriesCard: Birds-eye's four groups and their counts).
  * Up next's lead card has left Today: its tasks are To do's (the need pill and the dock badge open them there). Only
  * day one keeps a card above the tabs. v4's "straight after a task" and "quiet day" cards existed only as the lead
  * card's states, so they are retired with it.
@@ -42,7 +43,7 @@ import { V5TabStrip } from "./V5Tabs";
 import { AgentsTabV5 } from "./AgentsTabV5";
 import { openFeedbackSheet } from "./FeedbackSheetV5";
 import { TodayHeaderV5 } from "./TodayHeaderV5";
-import { BirdsPreview } from "../birds/BirdsPreview";
+import { MyQueriesCard } from "../birds/MyQueriesCard";
 import { QUERIES_ALL_PATH } from "../../../lib/phoneV3Nav";
 import { TODAY_TAB_KEY, TODAY_TABS, feedbackAbout, isTodayTab, readTab, saveTab, type TodayTab } from "../../../lib/phoneV5";
 
@@ -127,9 +128,9 @@ export const TodayV5: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
     /* Phone style v1, Phase 3 (phone-today-v6.html): the tiles, "Nearest their date" with its rows in a card, then
        "Your move" — the lead card and the rest of its rows in a card (YourMoveV5) */
     panel = (<div className="ps-today" data-ps="today-queries">
-      {/* Phone Birds-eye first look v1 §B: the next three weeks (BirdsPreview), in place of v5's Birds-eye block; with
+      {/* Birds-eye polish v1 §E: My queries (MyQueriesCard), in place of first look's three-week preview; with
           no queries at all, day one's card shows above the tabs instead */}
-      {hasQueries ? <BirdsPreview /> : null}
+      {hasQueries ? <MyQueriesCard /> : null}
       <YourMoveV5 mine={mine} now={now} />
       <div className="ps-today-all">
         <button type="button" className="ps-tlink" data-pa4="all-queries" data-pa5="all-queries" onClick={() => navigate(QUERIES_ALL_PATH)}>See all queries</button>

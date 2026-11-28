@@ -255,9 +255,8 @@ describe("Plumage colours v1 · the phone", () => {
     const q = readFileSync("src/components/phone/qsheet/QuerySheet.tsx", "utf8");
     expect(q).toContain("style={{ background: statusBand(status), color: bandInk(status) }}");
     expect(q).toContain("background: t.status ? statusBand(t.status) : undefined, color: bandInk(t.status)");
-    /* Phone Birds-eye first look v1 retires v5's Birds-eye block; Today's preview draws each piece in its stage's band */
-    const f = "src/components/phone/birds/BirdsPreview.tsx";
-    expect(readFileSync(f, "utf8")).toContain("background: bandOf(p.st)");
+    /* Birds-eye polish v1: Today's My queries draws groups, not stages (no stage colour there); the marks on the bars
+       are drawn on the world's own bars, each in its stage's band (above) */
     /* Phone Birds-eye world v1 (BirdsViewV5's successor): each stage's bar is its status band, read through the engine */
     expect(readFileSync("src/lib/birdsWorld.ts", "utf8")).toContain("export const bandOf = (status: string): string => statusBand(status);");
     expect(readFileSync("src/components/phone/birds/drawWorld.ts", "utf8")).toContain("background:${bandOf(s.st)}");
