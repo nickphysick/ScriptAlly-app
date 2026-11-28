@@ -76,6 +76,13 @@ describe("Phone Birds-eye world v2 renders", () => {
     expect(list).toContain("Nothing sent yet.");
     expect(list).not.toContain('data-bw="world"');
   });
+  it("nav fix v1: Birds-eye mounts only while the Queries page is on screen (its portal never outlives the page)", () => {
+    /* the Queries slot stays mounted when the writer leaves; a Birds-eye left mounted sat over every page and took its taps */
+    expect(renderPageSeededWith(P(<QueriesV4 active />), "/queries/all?view=birds", QS(3))).toContain('data-bw="world"');
+    expect(renderPageSeededWith(P(<QueriesV4 active={false} />), "/queries/all?view=birds", QS(3))).not.toContain('data-bw="world"');
+    /* and the page passes its own route state through */
+    expect(readFileSync("src/components/Queries.tsx", "utf8")).toContain("<QueriesV4 active={routeActive} />");
+  });
   it("only closed queries: the card at the top, Closed below it; a pill with nothing: its own card with See all queries", () => {
     const closed = W(null, "/queries/all?view=birds", ONLY_CLOSED);
     expect(closed).toMatch(/data-bw="card" data-k="closed"[\s\S]*No open queries[\s\S]*Your closed queries are below\./);
